@@ -9,7 +9,7 @@ void MantidLog::connect(MantidUI* mui)
     {
         qRegisterMetaType<Poco::Message>();
         s_Instance.reset(new MantidLog);
-        QObject::connect(s_Instance.get(),SIGNAL(messageReceived(const Poco::Message&)),mui,SLOT(logMessage(const Poco::Message&)));
+        QObject::connect(s_Instance.get(),SIGNAL(messageReceived(const Poco::Message&)),mui,SLOT(logMessage(const Poco::Message&)), Qt::QueuedConnection);
         s_Instance->AbstractMantidLog::connect();
     }
 }

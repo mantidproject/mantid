@@ -81,17 +81,17 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
   connect(m_mantidUI, SIGNAL(workspace_added(const QString &, Mantid::API::Workspace_sptr)),
-          this, SLOT(addTreeEntry(const QString &, Mantid::API::Workspace_sptr)));
+    this, SLOT(addTreeEntry(const QString &, Mantid::API::Workspace_sptr)), Qt::QueuedConnection);
   connect(m_mantidUI, SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr)),
-          this, SLOT(replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr)));
+          this, SLOT(replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr)),Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspace_ungrouped(const QString &, Mantid::API::Workspace_sptr)),
-          this, SLOT(unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr)));
+          this, SLOT(unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr)),Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspace_removed(const QString &)),
-          this, SLOT(removeWorkspaceEntry(const QString &)));
+          this, SLOT(removeWorkspaceEntry(const QString &)),Qt::QueuedConnection);
 
-  connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()));
+  connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),Qt::QueuedConnection);
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
 
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
@@ -170,8 +170,9 @@ bool MantidDockWidget::processGroup(const QString & ws_name, Mantid::API::Worksp
     // Could add them to the tree and search but for a large tree that will be slower
    
     const std::vector<std::string>& names = ws_group->getNames();
+    if( names.size() < 1 ) return false;
     std::vector<std::string>::const_iterator sitr = names.begin();
-    ++sitr;//?
+    ++sitr;
     std::vector<std::string>::const_iterator send = names.end();
     for( ; sitr != send; ++sitr )
     {
@@ -182,8 +183,8 @@ bool MantidDockWidget::processGroup(const QString & ws_name, Mantid::API::Worksp
       QList<QTreeWidgetItem *> matches = m_tree->findItems(member_name, Qt::MatchFixedString, 0);
       if( !matches.empty() )
       {
-	int index = m_tree->indexOfTopLevelItem(matches[0]);
-	m_tree->takeTopLevelItem(index);
+      	int index = m_tree->indexOfTopLevelItem(matches[0]);
+	      m_tree->takeTopLevelItem(index);
       }
     }
   }  

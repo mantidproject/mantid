@@ -17,15 +17,13 @@
 */
 class AbstractMantidLog : public QObject
 {
-	//Q_OBJECT
-
 public:
 
     /// Makes connection to SignalChannel.
     /// Channel's name must be signalChannel
 	void connect();
 
-protected:// Q_SLOTS:
+protected:
 
     /// Receives message from SignalChannel.
     /// Does nothing, must be overriden in a child class
@@ -34,8 +32,6 @@ protected:// Q_SLOTS:
 
 #ifdef DEFINE_SLOTS_AGAIN
 #undef QT_NO_KEYWORDS
-//#define slots //  this is not very nice, a Qt's include file should do it
-//#include <qobjectdefs.h>
 #undef DEFINE_SLOTS_AGAIN
 #endif
 

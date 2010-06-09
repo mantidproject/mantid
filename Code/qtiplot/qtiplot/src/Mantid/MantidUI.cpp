@@ -65,6 +65,17 @@ m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
 m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
 m_appWindow(aw)
 {
+    // To be able to use them in queued signals they need to be registered
+    static bool registered_addtional_types = false;
+    if( !registered_addtional_types )
+    {
+        registered_addtional_types = true;
+        qRegisterMetaType<Mantid::API::Workspace_sptr>();
+        qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
+	      //Register std::string as well as we use it alot
+	      qRegisterMetaType<std::string>();
+    }
+
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
     m_fitFunction = new FitPropertyBrowser(aw);
@@ -126,19 +137,6 @@ m_appWindow(aw)
 
     menuMantidMatrix = new QMenu(m_appWindow);
 	connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
-
-    // To be able to use them in queued signals they need to be registered
-    static bool registered_addtional_types = false;
-    if( !registered_addtional_types )
-    {
-        registered_addtional_types = true;
-        qRegisterMetaType<Mantid::API::Workspace_sptr>();
-        qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
-	//Register std::string as well as we use it alot
-	qRegisterMetaType<std::string>();
-	
-    }
-
 }
 
 // Should it be moved to the constructor?

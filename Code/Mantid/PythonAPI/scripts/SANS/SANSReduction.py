@@ -23,6 +23,22 @@ import SANSUtility
 import math
 from mantidsimple import *
 
+try:
+    from mantidplot import plotSpectrum, mergePlots
+except ImportError:
+    def plotSpectrum(a,b):
+        pass
+    def mergePlots(a,b):
+        pass
+
+try:
+    from PyQt4.QtGui import qApp
+    def appwidgets():
+        return qApp.allWidgets()
+except ImportError:
+    def appwidgets():
+        return []
+
 # ---------------------------- CORRECTION INPUT -----------------------------------------
 # The information between this line and the other '-----' delimiter needs to be provided
 # for the script to function. From the GUI, the tags will be replaced by the appropriate
@@ -155,6 +171,7 @@ TRANS_FIT_OPTIONS = {
 # Add Mantid ones as well
 'LOG' : 'Log',
 'LINEAR' : 'Linear',
+'LIN' : 'Linear',
 'OFF' : 'Off'
 }
 TRANS_WAV1 = None
@@ -535,7 +552,7 @@ def __clearPrevious(inWS, others = []):
 ##########################
 # Loader function
 ##########################
-def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period = -1):
+def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period=1):
     if ext.lower().startswith('n'):
         alg = LoadNexus(filename + '.' + ext, wsName,SpectrumMin=spec_min,SpectrumMax=spec_max)
     else:
@@ -556,12 +573,12 @@ def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period
     if numPeriods > 1 :
         if not pWorksp.isGroup() : raise Exception('_loadRawData: A period number can only be specified for a group and workspace '+ pWorksp.getName() + ' is not a group')
         wsName = _leaveSinglePeriod(pWorksp, period)
-	pWorksp = mtd[wsName]
+        pWorksp = mtd[wsName]
     else :
         #if it is a group but they hadn't specified the period it means load the first spectrum
         if pWorksp.isGroup() :
             wsName = _leaveSinglePeriod(pWorksp, 1)
-	    pWorksp = mtd[wsName]
+            pWorksp = mtd[wsName]
     
     sample_details = pWorksp.getSampleDetails()
     SampleGeometry(sample_details.getGeometryFlag())
@@ -1658,11 +1675,10 @@ def CalculateResidue():
         residueY += pow(yvalsA[indexA] - yvalsB[indexB], 2)
         indexB += 1
                         
-    if RESIDUE_GRAPH == None:
+    if RESIDUE_GRAPH is None or (not RESIDUE_GRAPH in appwidgets()):
         RESIDUE_GRAPH = plotSpectrum('Left', 0)
-        mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
-        mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
-        mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
+        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
+        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
     RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
 
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
@@ -1670,7 +1686,7 @@ def CalculateResidue():
 	
 def RunReduction(coords):
     '''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants'''
-    global XVAR_PREV, YVAR_PREV, RESIDUE_GRAPH
+    global XVAR_PREV, YVAR_PREV
     xcentre = coords[0]
     ycentre= coords[1]
     
@@ -1698,7 +1714,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     global XVAR_PREV, YVAR_PREV, ITER_NUM, RMIN, RMAX, XBEAM_CENTRE, YBEAM_CENTRE
     RMIN = float(rlow)/1000.
     RMAX = float(rupp)/1000.
-	
+
     if xstart == None or ystart == None:
         XVAR_PREV = XBEAM_CENTRE
         YVAR_PREV = YBEAM_CENTRE
@@ -1710,6 +1726,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     _printMessage("Starting centre finding routine ...")
     # Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
     _initReduction(XVAR_PREV, YVAR_PREV)
+
     ITER_NUM = 0
     # Run reduction, returning the X and Y sum-squared difference values 
     _printMessage("Running initial reduction: " + str(XVAR_PREV*1000.)+ "  "+ str(YVAR_PREV*1000.))
@@ -1847,11 +1864,3 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 ############################################################################################
-
-# These are to work around for the moment
-def plotSpectrum(name, spec):
-    return qti.app.mantidUI.pyPlotSpectraList([name],[spec])
-
-def mergePlots(g1, g2):
-    return qti.app.mantidUI.mergePlots(g1,g2)
-
