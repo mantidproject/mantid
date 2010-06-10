@@ -36,8 +36,13 @@ void BackToBackExponential::function(double* out, const double* xValues, const i
     double s2 = s*s;
     for (int i = 0; i < nData; i++) {
       double diff=xValues[i]-x0;
-      out[i] = I*(exp(a/2*(a*s2+2*diff))*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2))
+      if ( fabs(diff) < 10*s )
+      {
+        out[i] = I*(exp(a/2*(a*s2+2*diff))*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2))
                     + exp(b/2*(b*s2-2*diff))*gsl_sf_erfc((b*s2-diff)/sqrt(2*s2)));
+      }
+      else
+        out[i] = 0.0;
     }
 }
 
@@ -51,7 +56,10 @@ void BackToBackExponential::functionDeriv(Jacobian* out, const double* xValues, 
 
     double s2 = s*s;
     for (int i = 0; i < nData; i++) {
-        double diff = xValues[i]-x0;
+      double diff = xValues[i]-x0;
+
+      if ( fabs(diff) < 10*s )
+      {
 
         double e_a = exp(0.5*a*(a*s2+2*diff));
         double e_b = exp(0.5*b*(b*s2-2*diff));
@@ -68,6 +76,15 @@ void BackToBackExponential::functionDeriv(Jacobian* out, const double* xValues, 
         out->set(i,3, I*( (-div_erfc_a+div_erfc_b)/s + b*e_b*erfc_b - a*e_a*erfc_a ));
         out->set(i,4, I*( div_erfc_b*(b+diff/s2)+div_erfc_a*(a-diff/s2)
               + b*b*e_b*s*erfc_b + a*a*e_a*s*erfc_a ));
+      }
+      else
+      {
+        out->set(i,0, 0.0);
+        out->set(i,1, 0.0);
+        out->set(i,2, 0.0);
+        out->set(i,3, 0.0);
+        out->set(i,4, 0.0);
+      }
     }
 }
 
