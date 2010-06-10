@@ -1283,6 +1283,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
         else:
             mantid.deleteWorkspace(tmp_smp)
             mantid.deleteWorkspace(tmp_can)
+            mantid.deleteWorkspace(final_workspace)
                 
     # Crop Workspace to remove leading and trailing zeroes
     if finding_centre == False:
@@ -1626,7 +1627,6 @@ def GroupIntoQuadrants(reduced_ws, final_result, xcentre, ycentre, q_bins):
         CreateQuadrant(reduced_ws, final_result, q, xcentre, ycentre, q_bins, final_result + '_' + str(counter))
 
     # We don't need these now
-    mantid.deleteWorkspace(final_result)                    
     mantid.deleteWorkspace(reduced_ws)
 
 # Calcluate the sum squared difference of the given workspaces. This assumes that a workspace with
