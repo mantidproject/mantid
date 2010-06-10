@@ -381,10 +381,8 @@ public:
 
     Parameter_sptr param = paramMap.getRecursive(&(*comp), "S", "fitting");
     const FitParameter& fitParam4 = param->value<FitParameter>();
-    TS_ASSERT_DELTA( fitParam4.getValue(1.0), 65.7593, 0.01);
     TS_ASSERT( fitParam4.getTie().compare("") == 0 );
     TS_ASSERT( fitParam4.getFunction().compare("BackToBackExponential") == 0 );
-    TS_ASSERT( fitParam4.getFormula().compare("sqrt(158.011*centre^4+4166.279*centre^2)") == 0 );
 
     AnalysisDataService::Instance().remove(wsName);
   }

@@ -246,7 +246,6 @@ public:
   }
 
 
-
 };
 
 #endif /*BACKTOBACKEXPONENTIALTEST_H_*/
