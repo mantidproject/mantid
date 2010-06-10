@@ -261,8 +261,7 @@ public:
     }
     reader.close();
 
-    //Saved file gets an extra new line
-    TS_ASSERT_EQUALS(prop_lines.size(), 6);
+    TS_ASSERT_EQUALS(prop_lines.size(), 5);
     TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=10");
     TS_ASSERT_EQUALS(prop_lines[1], "");
     TS_ASSERT_EQUALS(prop_lines[2], "search.directories=/test1;\\");
