@@ -101,15 +101,15 @@ public:
     //std::cout << "status " << status << std::endl;
 
     double dummy = alg.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 9.15,0.1);
+    TS_ASSERT_DELTA( dummy, 10.2,0.2);
 
-    TS_ASSERT_DELTA( fn->getParameter("I"), 294.37 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("A"), 2.38 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("I"), 294.5 ,0.2);
+    TS_ASSERT_DELTA( fn->getParameter("A"), 3.31 ,0.2);
     TS_ASSERT_DELTA( fn->getParameter("B"), 0.03 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("X0"), 79400.02 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("S"), 8.15 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("X0"), 79400.49 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("S"), 8.87 ,0.2);
 
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 7.88 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 8.145 ,0.2);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -168,13 +168,13 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 1.523,0.1);
 
-    TS_ASSERT_DELTA( fn->getParameter("I"), 291.481 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("A"), 1.5856 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("I"), 290.66 ,0.2);
+    TS_ASSERT_DELTA( fn->getParameter("A"), 0.8726 ,0.2);
     TS_ASSERT_DELTA( fn->getParameter("B"), 0.03 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("X0"), 79404.77 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("X0"), 79405 ,1);
     TS_ASSERT_DELTA( fn->getParameter("S"), 17.4257 ,0.1);
 
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 6.08 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 5 ,1);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -236,13 +236,13 @@ public:
                                           // whereas on 32 machine gives 1.523 although the fit
                                           // appear identical???
 
-    TS_ASSERT_DELTA( fn->getParameter("I"), 291.481 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("A"), 1.5856 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("I"), 290.66 ,1);
+    TS_ASSERT_DELTA( fn->getParameter("A"), 0.87 ,0.3);
     TS_ASSERT_DELTA( fn->getParameter("B"), 0.03 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("X0"), 79404.77 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("X0"), 79405 ,1);
     TS_ASSERT_DELTA( fn->getParameter("S"), 17.4257 ,0.1);
 
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 6.08 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 5 ,2);
   }
 
 
