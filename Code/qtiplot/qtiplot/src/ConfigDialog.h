@@ -115,17 +115,23 @@ private slots:
 
 private:
 	void initPlotsPage();
-        void initOptionsPage();
-        void initAxesPage();
+  void initOptionsPage();
+  void initAxesPage();
 	void initAppPage();
-        // Mantid
-        void initMantidPage();
-	void initCurvesPage();
+  // Mantid
+  void initMantidPage();
+  void initDirSearchTab();
+  void initCurveFittingTab();
+	
+  void initCurvesPage();
 	void initPlots3DPage();
 	void initTablesPage();
 	void initConfirmationsPage();
 	void initFileLocationsPage();
 	void initFittingPage();
+
+  void updateDirSearchSettings();
+  void updateCurveFitSettings();
 
 	QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
 	QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
@@ -154,6 +160,10 @@ private:
   QLineEdit* lePythonAlgorithmsDirs;///< pythonalgorithms.directories
   QLineEdit* leInstrumentDir;///< instrumentDefinition.directory
   QLineEdit* leParameterDir;///< parameterDefinition.directory
+  // Mantid curve fitting page
+  QWidget *curveFittingPage;
+  QComboBox *backgroundFunctions;
+  QLineEdit *functionArguments;
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;

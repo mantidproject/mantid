@@ -602,15 +602,22 @@ namespace Kernel
     }
 
     // Any remaining keys within the changed key store weren't present in the current user properties so append them
-    updated_file += "\n";
-    std::set<std::string>::iterator key_end = m_changed_keys.end();
-    for( std::set<std::string>::iterator key_itr = m_changed_keys.begin(); 
-      key_itr != key_end; ++key_itr )
+    if( !m_changed_keys.empty() )
     {
-      updated_file += *key_itr + "=";
-      updated_file += getString(*key_itr, false) + "\n";
+      updated_file += "\n";
+      std::set<std::string>::iterator key_end = m_changed_keys.end();
+      for( std::set<std::string>::iterator key_itr = m_changed_keys.begin(); 
+        key_itr != key_end;)
+      {
+        updated_file += *key_itr + "=";
+        updated_file += getString(*key_itr, false);
+        if( ++key_itr != key_end )
+        {
+          updated_file += "\n";
+        }
+      }
+      m_changed_keys.clear();
     }
-    m_changed_keys.clear();
 
     // Write out the new file
     std::ofstream writer(filename.c_str(), std::ios_base::trunc);

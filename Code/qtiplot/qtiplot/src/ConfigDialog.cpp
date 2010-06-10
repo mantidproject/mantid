@@ -66,7 +66,8 @@
 #include <QMouseEvent>
 
 #include "MantidKernel/ConfigService.h"
-
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IBackgroundFunction.h"
 
 static const char* choose_folder_xpm[]={
     "16 16 11 1",
@@ -670,13 +671,18 @@ void ConfigDialog::initMantidPage()
   }
   instrPrefix->setCurrentIndex(index);    
   
-  ///  Init Directories tab
+  initDirSearchTab();
+  initCurveFittingTab();
 
+}
+
+void ConfigDialog::initDirSearchTab()
+{
   directoriesPage = new QWidget();
   QVBoxLayout *dirTabLayout = new QVBoxLayout(directoriesPage);
-  frame = new QGroupBox();
+  QGroupBox *frame = new QGroupBox();
   dirTabLayout->addWidget(frame);
-  grid = new QGridLayout(frame);
+  QGridLayout *grid = new QGridLayout(frame);
   mtdTabWidget->addTab(directoriesPage, "Directories");
 
   /// datasearch.directories
@@ -769,13 +775,75 @@ void ConfigDialog::initMantidPage()
 	button = new QPushButton();
 	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
 	grid->addWidget(button, 5, 2);
-	button->setEnabled(false);
-  leParameterDir->setEnabled(false);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
-
   grid->setRowStretch(6,1);
 }
+
+void ConfigDialog::initCurveFittingTab()
+{
+  curveFittingPage = new QWidget();
+  QVBoxLayout *curveTabLayout = new QVBoxLayout(curveFittingPage);
+  QGroupBox *frame = new QGroupBox();
+  curveTabLayout->addWidget(frame);
+  QGridLayout *grid = new QGridLayout(frame);
+  mtdTabWidget->addTab(curveFittingPage, "Curve Fitting");
+
+  // Background functions list
+  grid->addWidget(new QLabel(tr("Auto background")),0,0);
+  backgroundFunctions = new QComboBox();
+  grid->addWidget(backgroundFunctions, 0, 1);
+
+  grid->addWidget(new QLabel(tr("Background arguments")),1,0);
+  functionArguments = new QLineEdit();
+  grid->addWidget(functionArguments, 1,1);
+
+  grid->setRowStretch(2,1);
+
+  // Find list of background functions
+  // Add none option
+  backgroundFunctions->addItem("None");
+  Mantid::API::FunctionFactoryImpl & function_creator = Mantid::API::FunctionFactory::Instance();
+  std::vector<std::string> allfunctions = function_creator.getKeys();
+  size_t nfuncs = allfunctions.size(); 
+  for( size_t i = 0; i < nfuncs; ++i )
+  {
+    std::string name = allfunctions[i];
+    Mantid::API::IFunction* function = function_creator.createUnwrapped(name);
+    if( dynamic_cast<Mantid::API::IBackgroundFunction*>(function) )
+    {
+      backgroundFunctions->addItem(QString::fromStdString(name));
+    }
+  }
+  
+  // Set the correct default property
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground"));
+  QStringList value = setting.split(' ');
+  int index(-1);
+  if( value.isEmpty() )
+  {
+    index = 0;
+  }
+  else
+  {
+    index = backgroundFunctions->findText(value[0], Qt::MatchFixedString);// Case insensitive
+    if( value.size() > 1 )
+    {
+      value.removeFirst();
+      QString args = value.join(" ");
+      functionArguments->setText(args);
+    }
+  }
+  if( index < 0 )
+  {
+    backgroundFunctions->setCurrentIndex(0);
+  }
+  else
+  {
+    backgroundFunctions->setCurrentIndex(index);
+  }
+}
+
 
 void ConfigDialog::initOptionsPage()
 {
@@ -1590,7 +1658,26 @@ void ConfigDialog::apply()
   setting.replace(QRegExp("\\W+"), QString(";"));
   mantid_config.setString("instrument.prefixes." + cur_facility, setting.toStdString());
 
-  setting = leDataSearchDirs->text();
+  updateDirSearchSettings();
+  updateCurveFitSettings();
+
+	try
+	{
+	  mantid_config.saveConfig(mantid_config.getUserFilename());
+	}
+	catch(std::runtime_error&)
+	{
+	  QMessageBox::warning(this, "MantidPlot", 
+			       "Unable to update Mantid user properties file.\n"
+             "Configuration will not be saved.");
+	}
+}
+
+void ConfigDialog::updateDirSearchSettings()
+{
+  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+
+  QString setting = leDataSearchDirs->text();
   setting.replace('\\','/');
   mantid_config.setString("datasearch.directories",setting.toStdString());
 
@@ -1614,17 +1701,25 @@ void ConfigDialog::apply()
   setting.replace('\\','/');
   mantid_config.setString("parameterDefinition.directory",setting.toStdString());
 
-	try
-	{
-	  mantid_config.saveConfig(mantid_config.getUserFilename());
-	}
-	catch(std::runtime_error&)
-	{
-	  QMessageBox::warning(this, "MantidPlot", 
-			       "Unable to update Mantid user properties file.\n"
-             "Configuration will not be saved.");
-	}
 }
+
+void ConfigDialog::updateCurveFitSettings()
+{
+  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+
+  // Form setting string from function name and parameters
+  QString fname = backgroundFunctions->currentText();
+  std::string setting = fname.toStdString();
+  //Ignore parameters for none
+  if( fname != "None" )
+  {
+    QString args = functionArguments->text();
+    setting += std::string(" ") + args.toStdString();
+  }
+
+  mantid_config.setString("CurveFitting.AutoBackground", setting);
+}
+
 
 int ConfigDialog::curveStyle()
 {
