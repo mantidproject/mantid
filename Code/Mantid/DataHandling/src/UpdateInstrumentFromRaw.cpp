@@ -42,10 +42,7 @@ void UpdateInstrumentFromRaw::init()
   exts.push_back("s*");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
 		  "The filename (including its full or relative path) of an ISIS RAW file.\n"
-		  "The file extension must either be .raw or .s??" );
-  declareProperty(new ArrayProperty<int>("MonitorList"),
-      "List of detector ids of monitors loaded int to the workspace");
- 
+		  "The file extension must either be .raw or .s??" ); 
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
