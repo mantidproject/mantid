@@ -115,7 +115,7 @@ void Q1D::exec()
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError) {
+    } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
       continue;
     }
@@ -125,9 +125,20 @@ void Q1D::exec()
     // Map all the detectors onto the spectrum of the output
     if (spectraAxis->isSpectra()) 
     {
-      if (newSpectrumNo == -1) newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(i);
-      PARALLEL_CRITICAL(q1d_a)    /* Write to shared memory - must protect */
-      specMap.addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(i)));
+      if (newSpectrumNo == -1) 
+      {
+       PARALLEL_CRITICAL(q1d_a)
+       {
+        if( newSpectrumNo == -1 )
+        {
+          newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(i);
+        }
+       }
+      }
+      PARALLEL_CRITICAL(q1d_b)
+      {/* Write to shared memory - must protect */
+        specMap.addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(i)));
+      }
     }
 
     // Get the current spectrum for both input workspaces - not references, have to reverse below
@@ -182,7 +193,7 @@ void Q1D::exec()
     std::reverse(errYIn.begin(),errYIn.end());
     std::reverse(errEIn.begin(),errEIn.end());
     // Pass to rebin, flagging as a distribution. Need to protect from writing by more that one thread at once.
-    PARALLEL_CRITICAL(q1d_b)
+    PARALLEL_CRITICAL(q1d_c)
     {
       VectorHelper::rebin(Qx,YIn,EIn,*XOut,YOut,EOutDummy,true,true);
       VectorHelper::rebin(Qx,errYIn,errEIn,*XOut,errY,errE,true,true);
@@ -222,9 +233,11 @@ void Q1D::exec()
       
       // Create a zero vector for the errors because we don't care about them here
       const MantidVec zeroes(solidAngleVec.size(),0.0);
-      // Rebin the solid angles - note that this is a distribution
-      VectorHelper::rebin(included_bins,solidAngleVec,zeroes,*XOut,anglesSum,EOutDummy,true,true);
-
+      PARALLEL_CRITICAL(q1d_d)
+      {
+        // Rebin the solid angles - note that this is a distribution
+        VectorHelper::rebin(included_bins,solidAngleVec,zeroes,*XOut,anglesSum,EOutDummy,true,true);
+      }
     }
     else // No masked bins
     {
@@ -234,10 +247,11 @@ void Q1D::exec()
       xRange[1] = Qx.back();
       // Single element vector containing the solid angle
       MantidVec solidAngleVec(1, solidAngle);
-
-      // Rebin the solid angles - note that this is a distribution
-      VectorHelper::rebin(xRange,solidAngleVec,emptyVec,*XOut,anglesSum,EOutDummy,true,true);
-
+      PARALLEL_CRITICAL(q1d_e)
+     {
+        // Rebin the solid angles - note that this is a distribution
+        VectorHelper::rebin(xRange,solidAngleVec,emptyVec,*XOut,anglesSum,EOutDummy,true,true);
+      }
     }
 
     progress.report();
