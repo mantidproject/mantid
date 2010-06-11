@@ -36,26 +36,6 @@ namespace Mantid
     vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename)
     {
       mFileName=filename;
-      //Make sure the directory exists
-      std::string cacheDir = Poco::Path(mFileName).parent().toString();
-      Poco::Path systempDir = Poco::Path(Kernel::ConfigService::Instance().getTempDir());
-      if( cacheDir.empty() )
-      {
-        cacheDir = systempDir.toString();
-        mFileName = systempDir.resolve(Poco::Path(mFileName).getFileName()).toString();
-      }
-      try
-      {
-        if( !Poco::File(cacheDir).exists() )
-        {
-          Poco::File(cacheDir).createDirectory();
-        }
-      }
-      catch(Poco::Exception&)
-      {
-        PLog.warning("Cannot create instrument cache directory, using system temporary directory.");
-        mFileName = systempDir.resolve(Poco::Path(mFileName).getFileName()).toString();
-      }
 
       mDoc=new Document();
       Init();

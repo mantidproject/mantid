@@ -254,7 +254,7 @@ void LoadInstrument::exec()
           NodeList* pNLexclude = pLocElem->getElementsByTagName("exclude");
           unsigned int numberExcludeEle = pNLexclude->length();
           std::vector<std::string> newExcludeList;
-          for (int i = 0; i < numberExcludeEle; i++)
+          for (unsigned int i = 0; i < numberExcludeEle; i++)
           {
             Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
             if ( pExElem->hasAttribute("sub-part") )
@@ -299,31 +299,47 @@ void LoadInstrument::exec()
   m_tempPosHolder.clear();
 
   // Get cached file name
-  // File should be written to a temp directory so we'll use the same one as the managed 
-  // workspaces
+  // If the instrument directory is writable, put them there else use temporary directory
   std::string cacheFilename(m_filename.begin(),m_filename.end()-3);
+    
   cacheFilename += "vtp";
-  cacheFilename =  Poco::Path(cacheFilename).getFileName();
-  
-  std::string tempDir = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
-  if( tempDir.empty() )
-  {
-    // Use system temporary directory
-    tempDir = Kernel::ConfigService::Instance().getTempDir();
-  }
   // check for the geometry cache
   Poco::File defFile(m_filename);
-  Poco::File vtkFile(Poco::Path(tempDir).resolve(cacheFilename));
+  Poco::File vtkFile(cacheFilename);
+  Poco::File instrDir(Poco::Path(defFile.path()).parent());
+
   bool cacheAvailable = true;
   if ((!vtkFile.exists()) || defFile.getLastModified() > vtkFile.getLastModified())
+  {
+    g_log.information() << "Cache not available at " << cacheFilename << "\n";
+
     cacheAvailable = false;
+  }
+
+  std::string filestem = Poco::Path(cacheFilename).getFileName();
+  Poco::Path fallback_dir(Kernel::ConfigService::Instance().getTempDir());
+  Poco::File fallbackFile = Poco::File(fallback_dir.resolve(filestem));
+  if( cacheAvailable == false )
+  { 
+    g_log.warning() << "Trying fallback " << fallbackFile.path() << "\n";
+    if ((!fallbackFile.exists()) || defFile.getLastModified() > fallbackFile.getLastModified())
+    {
+      cacheAvailable = false;
+    }
+    else
+    {
+      cacheAvailable = true;
+      cacheFilename = fallbackFile.path();
+    }
+  }
+  
   if (cacheAvailable)
   {
     g_log.information("Loading geometry cache from " + cacheFilename);
     // create a vtk reader
     std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
     boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> 
-      reader(new Mantid::Geometry::vtkGeometryCacheReader(vtkFile.path()));
+      reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
     for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
     {
       ((*objItr).second)->setVtkGeometryCacheReader(reader);
@@ -332,10 +348,24 @@ void LoadInstrument::exec()
   else
   {
     g_log.information("Geometry cache is not available");
+    try
+    {
+      if( !instrDir.canWrite() )
+      {
+	cacheFilename = fallbackFile.path();
+	g_log.warning() << "Instrument directory is read only, writing cache to system temp.\n";
+      }
+    }
+    catch(Poco::FileNotFoundException &)
+    {
+      g_log.error() << "Unable to find instrument definition while attempting to write cache.\n";
+      throw std::runtime_error("Unable to find instrument definition while attempting to write cache.\n");
+    }
+    g_log.information() << "Creating cache in " << cacheFilename << "\n";
     // create a vtk writer
     std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
     boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> 
-      writer(new Mantid::Geometry::vtkGeometryCacheWriter(vtkFile.path()));
+      writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
     for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
     {
       ((*objItr).second)->setVtkGeometryCacheWriter(writer);
@@ -445,7 +475,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
           NodeList* pNLexclude = pElem->getElementsByTagName("exclude");
           unsigned int numberExcludeEle = pNLexclude->length();
           std::vector<std::string> newExcludeList;
-          for (int i = 0; i < numberExcludeEle; i++)
+          for (unsigned int i = 0; i < numberExcludeEle; i++)
           {
             Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
             if ( pExElem->hasAttribute("sub-part") )

@@ -134,7 +134,7 @@ sed -i -e "s!plugins\.directory.*!plugins.directory = %{mantidpluginsdir}!" $RPM
 sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscriptsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!instrumentDefinition\.directory.*!instrumentDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!parameterDefinition\.directory.*!parameterDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
-sed -i -e "s!ManagedWorkspace\.FilePath.*!ManagedWorkspace.FilePath = !" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s!ManagedWorkspace\.FilePath.*!ManagedWorkspace.FilePath = /tmp!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!logging\.channels\.fileChannel\.path.*!logging.channels.fileChannel.path = !" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!\.\./\.\./PythonAPI!%{mantiddir}!g" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 
