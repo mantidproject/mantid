@@ -794,8 +794,13 @@ void ConfigDialog::initCurveFittingTab()
   backgroundFunctions = new QComboBox();
   grid->addWidget(backgroundFunctions, 0, 1);
 
-  grid->addWidget(new QLabel(tr("Background arguments")),1,0);
+  QLabel *label = new QLabel(tr("Background arguments"));
+  QString tip = tr("A space-separated list of name=value arguments, \n"
+		   "i.e. a=1 b=2");
+  label->setToolTip(tip);
+  grid->addWidget(label,1,0);
   functionArguments = new QLineEdit();
+  functionArguments->setToolTip(tip);
   grid->addWidget(functionArguments, 1,1);
 
   grid->setRowStretch(2,1);
