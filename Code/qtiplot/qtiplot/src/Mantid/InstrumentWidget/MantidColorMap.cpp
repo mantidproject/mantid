@@ -178,8 +178,8 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
   {
     return 0.0;
   }
-
-  if ( value >= interval.maxValue() )
+  // nan numbers have the property that nan != nan, treat nan as being the maximum
+  if ( value >= interval.maxValue() || value != value )
   {
     return 1.0;
   }
