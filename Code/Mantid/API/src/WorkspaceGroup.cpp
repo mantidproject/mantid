@@ -27,6 +27,17 @@ void WorkspaceGroup::add(const std::string& name)
   g_log.debug() << "workspacename added to group vector =  " << name <<std::endl;
 }
 
+/**
+ * Does this group contain the named workspace?
+ * @param wsName A string to compare
+ * @returns True if the name is part of this group, false otherwise
+ */
+bool WorkspaceGroup::contains(const std::string & wsName) const
+{
+  std::vector<std::string>::const_iterator itr = std::find(m_wsNames.begin(), m_wsNames.end(), wsName);
+  return (itr != m_wsNames.end());
+}
+
 /// Empty all the entries out of the workspace group. Does not remove the workspaces from the ADS.
 void WorkspaceGroup::removeAll()
 {

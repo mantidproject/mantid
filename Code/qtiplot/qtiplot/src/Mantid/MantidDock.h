@@ -45,7 +45,7 @@ private slots:
   void plotSpectra();
 
 private:
-  bool processGroup(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
+  bool inLastGroup(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace_sptr workspace);
   QTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
@@ -64,8 +64,7 @@ private:
   QPushButton *m_groupButton;
 
   static Mantid::Kernel::Logger& logObject;
-/// A list of workspace group members that will be added in subsequent add notifications
-  QHash<QString, char> m_wsgroup_members;
+  std::string m_last_group;
 };
 
 

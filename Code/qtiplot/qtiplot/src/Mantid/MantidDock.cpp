@@ -28,7 +28,7 @@ Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get(
 Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
-  QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_wsgroup_members()
+  QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_last_group("")
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -133,7 +133,7 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
  */
 void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
-  if( processGroup(ws_name, workspace) ) return;
+  if( inLastGroup(ws_name, workspace) ) return;
 
   QTreeWidgetItem *ws_item = createEntry(ws_name, workspace);
   setItemIcon(ws_item, workspace);
@@ -147,55 +147,62 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
  */
 void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
-  processGroup(ws_name, workspace);
+  bool in_group = inLastGroup(ws_name, workspace);
 
-  QList<QTreeWidgetItem *> matches = m_tree->findItems(ws_name, Qt::MatchFixedString | Qt::MatchRecursive, 0);
+  QList<QTreeWidgetItem *> matches = m_tree->findItems(ws_name, Qt::MatchFixedString, 0);
   if( matches.empty() ) return;
   QTreeWidgetItem * item = matches[0];
-  setItemIcon(item, workspace);
+
+  if( in_group )
+  {
+    m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(item));
+  }
+  else
+  {
+    setItemIcon(item, workspace);
+  }
   if( item->isExpanded() )
   {
     populateChildData(item);
   }
 }
 
-bool MantidDockWidget::processGroup(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
+/**
+ * Check if the given workspace is part of the last group that was added
+ */
+bool MantidDockWidget::inLastGroup(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   if(Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace) )
   {
-    // MG: This doesn't seem ideal but I don't see another way of doing it given that a workspace has no
-    // knowledge that it is part of a group
-
-    // Its members need to be saved for later additions as the individual workspaces don't exist in the ADS yet
-    // Could add them to the tree and search but for a large tree that will be slower
-   
-    const std::vector<std::string>& names = ws_group->getNames();
-    if( names.size() < 1 ) return false;
-    std::vector<std::string>::const_iterator sitr = names.begin();
-    ++sitr;
-    std::vector<std::string>::const_iterator send = names.end();
-    for( ; sitr != send; ++sitr )
-    {
-      QString member_name = QString::fromStdString(*sitr);
-      m_wsgroup_members.insert(member_name, 0);
-      // If they exist in the tree as separate workspaces, which is the case if GroupWorkspaces has been used,
-      // then find them and remove them. Again this seems slow but it isn't searching recursively so 
-      QList<QTreeWidgetItem *> matches = m_tree->findItems(member_name, Qt::MatchFixedString, 0);
-      if( !matches.empty() )
-      {
-      	int index = m_tree->indexOfTopLevelItem(matches[0]);
-	      m_tree->takeTopLevelItem(index);
-      }
-    }
-  }  
-  if( m_wsgroup_members.contains(ws_name) )
-  {
-    m_wsgroup_members.remove(ws_name);    
-    return true;
+    m_last_group = workspace->getName();
+    return false;
   }
   else
   {
-    return false;
+    Mantid::API::Workspace *worksp = NULL;
+    try
+    {
+      worksp = Mantid::API::AnalysisDataService::Instance().retrieve(m_last_group).get();
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+      return false;
+    }
+    if( Mantid::API::WorkspaceGroup *grouped = dynamic_cast<Mantid::API::WorkspaceGroup *>(worksp) )
+    {
+      if( grouped->contains(ws_name.toStdString()) )
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    else
+    {
+      return false;
+    }
   }
 }
 
