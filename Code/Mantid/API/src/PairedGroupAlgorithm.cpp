@@ -66,6 +66,10 @@ namespace Mantid
               ++nPeriod;
               setProperties(alg,prop,(*lhsItr),(*rhsItr),nPeriod,outWSGrp);
               bStatus=alg->execute();
+			  if(!bStatus)
+			  {
+				  throw std::runtime_error("Execution failed for the algorithm "+this->name());
+			  }
               bgroupExecStatus=bgroupExecStatus&bStatus;
               bgroupFailed=bgroupFailed || bStatus;
             }
@@ -77,6 +81,10 @@ namespace Mantid
           {	++nPeriod;
           setProperties(alg,prop,(*lhsItr),(*rhsItr),nPeriod,outWSGrp);
           bStatus=alg->execute();
+		  if(!bStatus)
+		  {
+			  throw std::runtime_error("Execution failed for the algorithm "+this->name());
+		  }
           bgroupExecStatus=bgroupExecStatus&bStatus;
           bgroupFailed=bgroupFailed || bStatus;
           }
@@ -87,14 +95,15 @@ namespace Mantid
           {	++nPeriod;
           setProperties(alg,prop,(*lhsItr),(*rhsItr),nPeriod,outWSGrp);
           bStatus=alg->execute();
+		  if(!bStatus)
+		  {
+		    throw std::runtime_error("Execution failed for the algorithm "+this->name());
+		  }
           bgroupExecStatus=bgroupExecStatus && bStatus;
           bgroupFailed=bgroupFailed || bStatus;
           }
         }
-		if(!bStatus)
-		{
-			throw std::runtime_error("Execution failed for the algorithm "+this->name());
-		}
+		
         if(bgroupExecStatus)
           setExecuted(true);
         if(!bgroupFailed)

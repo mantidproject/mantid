@@ -124,6 +124,7 @@ bool Algorithm::execute()
 
   std::vector<Property*> Prop=getProperties();
   std::vector<Property*>::const_iterator itr;
+  bool bStatus=false;
   for (itr=Prop.begin();itr!=Prop.end();itr++)
   {
 	  const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);
@@ -147,7 +148,11 @@ bool Algorithm::execute()
 						  if(wsGrpSptr)
 						  {	 //this must be a group - test for that
 							  g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
-							  return(processGroups(wsGrpSptr,Prop));
+
+							  //return(processGroups(wsGrpSptr,Prop));
+							  return processGroups(wsGrpSptr,Prop);
+							 
+
 						  }
 					  }
 
@@ -158,6 +163,7 @@ bool Algorithm::execute()
 					  g_log.error()<<ex.what()<<std::endl;
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
+					  return false;
 					  if (m_isChildAlgorithm || m_runningAsync) 
 					  {
 						  m_runningAsync = false;
@@ -172,6 +178,7 @@ bool Algorithm::execute()
 					  g_log.error()<<ex.what()<<std::endl;
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
+					  return false;
 					  if (m_isChildAlgorithm || m_runningAsync) 
 					  {
 						  m_runningAsync = false;
@@ -186,6 +193,7 @@ bool Algorithm::execute()
 					  g_log.error()<<ex.what()<<std::endl;
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
+					  return false;
 					  if (m_isChildAlgorithm || m_runningAsync) 
 					  {
 						  m_runningAsync = false;
@@ -199,6 +207,7 @@ bool Algorithm::execute()
 					  g_log.error()<<ex.what()<<std::endl;
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
+					  return false;
 					  if (m_isChildAlgorithm || m_runningAsync) 
 					  {
 						  m_runningAsync = false;
@@ -213,14 +222,15 @@ bool Algorithm::execute()
 					 g_log.error()<<ex.what()<<std::endl;
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
+					  return false;
 					  if (m_isChildAlgorithm || m_runningAsync) 
 					  {
 						  m_runningAsync = false;
 						  throw;
 					  }					
-					  
-					  
+				
 				  }
+				  
 			  //}
 			  
 		  }//end of if loop checking the direction
