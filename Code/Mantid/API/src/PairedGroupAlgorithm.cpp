@@ -27,16 +27,14 @@ namespace Mantid
      */
     bool PairedGroupAlgorithm::processGroups(WorkspaceGroup_sptr inputWSGrp,const std::vector<Mantid::Kernel::Property*>&prop)
     {
-      try
-      {	
+     	
         //getting the input workspace group names
         const std::vector<std::string>& inputWSNames=inputWSGrp->getNames();
         int nSize=inputWSNames.size();
         //return if atleast one member is not there in the group to process
         if(nSize<2)
         {
-          g_log.error()<<"Input WorkspaceGroup has no members to process  "<<std::endl;
-          return false;
+         throw std::runtime_error("Input WorkspaceGroup has no members to process");
         }
         std::vector<std::string> lhsWSGrp;
         std::vector<std::string> rhsWSGrp;
@@ -51,7 +49,8 @@ namespace Mantid
         if(!alg)
         {
           g_log.error()<<"createAlgorithm failed for  "<<this->name()<<"("<<this->version()<<")"<<std::endl;
-          return false;
+		  throw std::runtime_error("algorithm execution failed ");
+         // return false;
         }
         std::vector<std::string>::const_iterator lhsItr=lhsWSGrp.begin(); 
         std::vector<std::string>::const_iterator rhsItr=rhsWSGrp.begin(); 
@@ -92,28 +91,22 @@ namespace Mantid
           bgroupFailed=bgroupFailed || bStatus;
           }
         }
+		if(!bStatus)
+		{
+			throw std::runtime_error("Execution failed for the algorithm "+this->name());
+		}
         if(bgroupExecStatus)
           setExecuted(true);
         if(!bgroupFailed)
         {
-          std::vector<std::string> names=outWSGrp->getNames();
+         std::vector<std::string> names=outWSGrp->getNames();
           if(!names.empty())
             AnalysisDataService::Instance().remove(names[0]);
+			
         }
 
         m_notificationCenter.postNotification(new FinishedNotification(this,this->isExecuted()));
         return bStatus;
-
-      }
-      catch(Exception::NotFoundError& )
-      {
-        return false;
-      }
-      catch(std::exception&)
-      {
-        return false;
-      }
-      return true;
     }
 
     /** This method sets properties for the algorithm

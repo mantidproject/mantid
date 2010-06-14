@@ -134,8 +134,8 @@ bool Algorithm::execute()
 		  if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
 		  { 
 			  std::string wsName=wsPropProp->value();
-			  try
-			  {					
+			 // try
+			  //{					
 				  //checking the input is a group
 				  try
 				  {	  //check if the pointer is valid, it won't be if it is a group
@@ -152,15 +152,77 @@ bool Algorithm::execute()
 					  }
 
 				  }
-				  catch (std::exception &ex)
-				  {					 
-					  g_log.error()<<ex.what()<<std::endl; 
+				  catch (std::invalid_argument&ex)
+				  {
+					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+					  g_log.error()<<ex.what()<<std::endl;
+					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+					  m_running = false;
+					  if (m_isChildAlgorithm || m_runningAsync) 
+					  {
+						  m_runningAsync = false;
+						  throw;
+					  }					
+					 
+					 
 				  }
-			  }
-			  catch(Exception::NotFoundError&e)//if not a valid object in analysis data service
-			  {
-				  g_log.error()<<e.what()<<std::endl;
-			  }
+				  catch(Exception::NotFoundError&ex )
+				  {
+					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+					  g_log.error()<<ex.what()<<std::endl;
+					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+					  m_running = false;
+					  if (m_isChildAlgorithm || m_runningAsync) 
+					  {
+						  m_runningAsync = false;
+						  throw;
+					  }					
+					  
+					 
+				  }
+				  catch (std::runtime_error &ex)
+				  {	
+					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+					  g_log.error()<<ex.what()<<std::endl;
+					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+					  m_running = false;
+					  if (m_isChildAlgorithm || m_runningAsync) 
+					  {
+						  m_runningAsync = false;
+						  throw;
+					  }					
+					  
+				  }
+				  catch(CancelException& ex)
+				  {
+					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+					  g_log.error()<<ex.what()<<std::endl;
+					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+					  m_running = false;
+					  if (m_isChildAlgorithm || m_runningAsync) 
+					  {
+						  m_runningAsync = false;
+						  throw;
+					  }					
+					  
+					 
+				  }
+				  catch(std::exception&ex)
+				  {
+					 g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+					 g_log.error()<<ex.what()<<std::endl;
+					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+					  m_running = false;
+					  if (m_isChildAlgorithm || m_runningAsync) 
+					  {
+						  m_runningAsync = false;
+						  throw;
+					  }					
+					  
+					  
+				  }
+			  //}
+			  
 		  }//end of if loop checking the direction
 	  }//end of if loop for checking workspace properties
 
@@ -546,8 +608,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
   //size is one if only group header.
   //return if atleast one meber is not there in group to process
   if(nSize<2)
-  {	g_log.error()<<"Input WorkspaceGroup has no members to process  "<<std::endl;
-  return false;
+  {	throw std::runtime_error("Input WorkspaceGroup has no members to process");
   }
   std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
   int execTotal=0;
@@ -570,16 +631,10 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
         {
           //setInputWSProperties(alg,*itr,*wsItr);
           bool b = true;
-          try {
-            b = setInputWSProperties(alg,prevPropName,*itr,*wsItr);
-          } catch (std::invalid_argument& ex) {
-            g_log.warning(ex.what());
-          }
-          if(!b)
+		  b = setInputWSProperties(alg,prevPropName,*itr,*wsItr);
+		  if(!b)
           {
-            g_log.error()<<"Giving two workspace groups as input is not permitted for the algorithm  "<<this->name()<<std::endl;
-            return false;
-
+           	throw std::runtime_error("Giving two workspace groups as input is not permitted for the algorithm"+this->name());
           }
         }
         if(isOutputWorkspaceProperty(*itr))
@@ -626,7 +681,8 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
     progress(double((execPercentage)/execTotal));
     //if a workspace execution fails
     if(!bStatus)
-    {  	g_log.error()<<" execution failed for the input workspace "<<(*wsItr)<<std::endl;
+    {  
+	   throw std::runtime_error("execution failed for the input workspace "+(*wsItr));
     }
     //increment count for outworkpsace name
     nPeriod++;
@@ -638,8 +694,8 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
   }
   //if all failed
   //if(!bgroupFailed)
-  //{	// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
-  //  AnalysisDataService::Instance().remove(outWSParentName);
+ // {	// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
+ //   AnalysisDataService::Instance().remove(outWSParentName);
   //}
   m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   return bgroupPassed;
