@@ -24,19 +24,29 @@ function error_found() {
     exit $exit_status
 }
 
+current_rev=""
+function current_revision() {
+    current_rev=`svnversion -n`
+    current_rev=`expr match $current_rev '\([0-9]*\).*'`
+}
+
 build_base=$HOME/mybuilds
 find $build_base -type f -name 'Mantid-*' -exec rm -f {} \;
 cd ../..
 svn update
 svn update # do twice in case of network issue
+current_revision
 log_file="$2"
-if ! test -z "$1"; then
-    rev="$1"
-    revfile="_$1"
+if test "$3" = "release"; then
+    if test -z "$1"; then
+	rev=$current_rev
+    else
+	rev="$1"
+    fi
+    revfile="_$rev"
     yum_base=/isis/yum/rhel/5   # official build
 else
-    rev=`svnversion -n`
-    rev=`expr match $rev '\([0-9]*\).*'`   # remove trailing M if any
+    rev=$current_rev
     revfile=""
     yum_base=/isis/yum/rhel/testing/5   # test build
 fi
