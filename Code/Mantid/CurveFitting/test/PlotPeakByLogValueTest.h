@@ -131,11 +131,8 @@ private:
 
   void deleteData()
   {
-    const std::vector<std::string>& wsNames = m_wsg->getNames();
-    for(int iWS=0;iWS<wsNames.size();++iWS)
-    {
-      AnalysisDataService::Instance().remove(wsNames[iWS]);
-    }
+    // Remove the group
+    FrameworkManager::Instance().deleteWorkspace(m_wsg->getName());
     m_wsg.reset();
   }
 
