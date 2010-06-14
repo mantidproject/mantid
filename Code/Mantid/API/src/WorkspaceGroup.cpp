@@ -12,11 +12,22 @@ namespace API
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
-WorkspaceGroup::WorkspaceGroup() : Workspace()
-{}
+WorkspaceGroup::WorkspaceGroup() : 
+  Workspace(), m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
+  m_renameObserver(*this, &WorkspaceGroup::workspaceRenameHandle)
+				     
+{
+  // Listen for delete and rename notifications to update the group
+  // accordingly
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+}
 
 WorkspaceGroup::~WorkspaceGroup()
-{}
+{
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+}
 
 /** Add the named workspace to the group
  *  @param name The name of the workspace (in the AnalysisDataService) to add
@@ -49,32 +60,27 @@ void WorkspaceGroup::removeAll()
  */
 void WorkspaceGroup::remove(const std::string& name)
 {
-  std::vector<std::string>::iterator itr;
-  for (itr = m_wsNames.begin(); itr != m_wsNames.end(); itr++)
+  std::vector<std::string>::iterator itr = std::find(m_wsNames.begin(), m_wsNames.end(), name);
+  if( itr != m_wsNames.end() )
   {
-    if ((*itr) == name)
-    {
-      m_wsNames.erase(itr);
-      return;
-    }
+    m_wsNames.erase(itr);
   }
-  // Getting to here means we have gone through the entire loop and not
-  // found a match
-  g_log.warning("Workspace  " + name + "not found in workspacegroup");
 }
 
 /// Removes all members of the group from the group AND from the AnalysisDataService
 void WorkspaceGroup::deepRemoveAll()
 {
-  // Go through the workspace entries
-  std::vector<std::string>::const_iterator itr;
-  for (itr = m_wsNames.begin(); itr != m_wsNames.end(); itr++)
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+  // First member of the group is itself so skip it through and delete
+  // but skipping itself
+  size_t nentries = m_wsNames.size();
+  for( size_t i = nentries - 1; i > 0; --i)
   {
-    // Remove from the ADS. Doesn't throw if the workspace isn't there.
-    AnalysisDataService::Instance().remove(*itr);
+    AnalysisDataService::Instance().remove(m_wsNames[i]);
+    remove(m_wsNames[i]);
   }
-  // Now empty out the list of members
-  removeAll();
+  m_wsNames.clear();
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 }
 
 /// Print the names of all the workspaces in this group to the logger (at debug level)
@@ -83,9 +89,36 @@ void WorkspaceGroup::print() const
   std::vector<std::string>::const_iterator itr;
   for (itr = m_wsNames.begin(); itr != m_wsNames.end(); itr++)
   {
-    g_log.debug() << "workspacename in group vector=  " << *itr << std::endl;
+    g_log.debug() << "Workspace name in group vector =  " << *itr << std::endl;
   }
 }
+
+/**M
+ * Callback for a workspace delete notification
+ * @param notice A pointer to a workspace delete notificiation object
+ */
+void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice)
+{
+  if( notice->object_name() != this->getName() )
+  {
+    remove(notice->object_name());
+  }
+}
+
+/**
+ * Callback for a workspace rename notification
+ * @param notice A pointer to a workspace rename notfication object
+ */
+void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice)
+{
+  std::vector<std::string>::iterator itr = 
+    std::find(m_wsNames.begin(), m_wsNames.end(), notice->object_name());
+  if( itr != m_wsNames.end() )
+  {
+    (*itr) = notice->new_objectname();
+  }
+}
+ 
 
 } // namespace API
 } // namespace Mantid

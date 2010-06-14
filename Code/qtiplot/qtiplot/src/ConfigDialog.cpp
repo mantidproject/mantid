@@ -802,8 +802,10 @@ void ConfigDialog::initCurveFittingTab()
   functionArguments = new QLineEdit();
   functionArguments->setToolTip(tip);
   grid->addWidget(functionArguments, 1,1);
-
   grid->setRowStretch(2,1);
+  
+  label = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until MantidPlot has been restarted.</span>");
+  curveTabLayout->addWidget(label);
 
   // Find list of background functions
   // Add none option

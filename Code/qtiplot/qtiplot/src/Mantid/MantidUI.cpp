@@ -127,7 +127,6 @@ m_appWindow(aw)
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
 
-
     mantidMenu = new QMenu(m_appWindow);
     mantidMenu->setObjectName("mantidMenu");
 	// for activating the keyboard shortcut for Clear All Memory even if no clciking on Mantid Menu

@@ -411,7 +411,6 @@ private:
   void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupingNotification> m_ungroupworkspaceObserver;
 
- 
 	//#678
     //for savenexus algorithm
 	void executeSaveNexus(QString algName,int version);

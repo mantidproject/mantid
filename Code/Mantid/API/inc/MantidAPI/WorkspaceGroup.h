@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include <Poco/NObserver.h>
 
 namespace Mantid
 {
@@ -19,6 +21,7 @@ namespace Kernel
 
 namespace API
 {
+
 /** Class to hold a set of workspaces.
     The workspace group can be an entry in the AnalysisDataService. 
     Its constituent workspaces should also have individual ADS entries.
@@ -72,8 +75,16 @@ private:
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
-
   std::vector<std::string> m_wsNames; ///< The list of workspace names in the group
+  /// Callback when a delete notification is received
+  void workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice);
+  /// Observer for workspace delete notfications
+  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
+  /// Callback when a rename notification is received
+  void workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice);
+  /// Observer for renaming of workspaces
+  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
+
   static Kernel::Logger& g_log;       ///< Static reference to the logger
 };
 

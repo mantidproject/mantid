@@ -109,8 +109,8 @@ public:
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
     m_proxy->connect(m_proxy, 
 		     SIGNAL(deleteRequested(const std::string &,Mantid::API::Workspace_sptr)),
-		     SLOT(handleDelete(const std::string &, Mantid::API::Workspace_sptr))
-		     );
+		     SLOT(handleDelete(const std::string &, Mantid::API::Workspace_sptr)),
+		     Qt::QueuedConnection);
   }
 
   void observeAfterReplace()
@@ -118,17 +118,15 @@ public:
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_afterReplaceObserver);
     m_proxy->connect(m_proxy, 
 		     SIGNAL(afterReplaced(const std::string &,Mantid::API::Workspace_sptr)),
-		     SLOT(handleAfterReplace(const std::string &, Mantid::API::Workspace_sptr))
+		     SLOT(handleAfterReplace(const std::string &, Mantid::API::Workspace_sptr)),
+		     Qt::QueuedConnection
 		     );
   }
 
   void observeADSClear()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
-    m_proxy->connect(m_proxy, 
-		     SIGNAL(adsCleared()),
-		     SLOT(handleClearADS())
-		     );
+    m_proxy->connect(m_proxy,SIGNAL(adsCleared()), SLOT(handleClearADS()), Qt::QueuedConnection);
   }
 
 protected:

@@ -44,6 +44,7 @@ void RenameWorkspace::exec()
   std::string inputwsName=localworkspace->getName();
   // get the output workspace name
   std::string outputwsName=getPropertyValue("OutputWorkspace");
+  AnalysisDataServiceImpl& data_store = AnalysisDataService::Instance();
   if(!ingrp_sptr)
   {
     // Assign it to the output workspace property
@@ -74,7 +75,7 @@ void RenameWorkspace::exec()
 	std::string wsName= outputwsName+"_"+suffix.str();
 	
 	//retrieving the workspace pointer
-	Workspace_sptr ws_sptr=AnalysisDataService::Instance().retrieve((*citr));
+	Workspace_sptr ws_sptr = data_store.retrieve((*citr));
 	
 	//changing the name to new name
 	//ws_sptr->setName(wsName);
@@ -97,12 +98,10 @@ void RenameWorkspace::exec()
     }
     
   }
-  // send this notification to mantidplot to place the member workspces underneath the groupworkspace
-  //send this before removing the inputworkspace from ADS
-  Mantid::API::AnalysisDataService::Instance().
-    notificationCenter.postNotification(new Kernel::DataService<Workspace>::RenameNotification(inputwsName,outputwsName));	
+  // Post notice that a workspace has been renamed
+  data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,outputwsName));	
   //remove the input workspace from the analysis data service
-  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace"));
+  data_store.remove(getPropertyValue("InputWorkspace"));
 
 }
 

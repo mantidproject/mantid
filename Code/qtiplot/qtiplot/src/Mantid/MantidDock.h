@@ -45,7 +45,7 @@ private slots:
   void plotSpectra();
 
 private:
-  bool inLastGroup(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
+  QString findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace_sptr workspace);
   QTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
@@ -64,7 +64,7 @@ private:
   QPushButton *m_groupButton;
 
   static Mantid::Kernel::Logger& logObject;
-  std::string m_last_group;
+  QSet<QString> m_known_groups;
 };
 
 

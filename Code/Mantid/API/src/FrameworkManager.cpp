@@ -175,41 +175,36 @@ Workspace* FrameworkManagerImpl::getWorkspace(const std::string& wsName)
  */
 bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
 {
-	bool retVal = false;
-	boost::shared_ptr<Workspace> ws_sptr;
-	try
-	{
-		ws_sptr=AnalysisDataService::Instance().retrieve(wsName);
-	}
-	catch(Kernel::Exception::NotFoundError&ex)
-	{
-		g_log.error()<<ex.what()<<std::endl;
-	}
-	boost::shared_ptr<WorkspaceGroup> ws_grpsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
-	if(ws_grpsptr)
-	{
-		//selected workspace is a group workspace
-		ws_grpsptr->deepRemoveAll();
-		retVal = true;
+  bool retVal = false;
+  boost::shared_ptr<Workspace> ws_sptr;
+  try
+  {
+    ws_sptr = AnalysisDataService::Instance().retrieve(wsName);
+  }
+  catch(Kernel::Exception::NotFoundError&ex)
+  {
+    g_log.error() << ex.what() << std::endl;
+    return false;
+  }
 
-	}
-	else
-	{
-		//delete from the ADS
-		try
-		{
-			AnalysisDataService::Instance().remove(wsName);
-			retVal = true;
-		}
-		catch (Kernel::Exception::NotFoundError&)
-		{
-			//workspace was not found
-			g_log.error()<<"Workspace "<<wsName<<" could not be found."<<std::endl;
-			retVal = false;
-		}
-	}
- 
-   return retVal;
+  boost::shared_ptr<WorkspaceGroup> ws_grpsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
+  if(ws_grpsptr)
+  {
+    //  selected workspace is a group workspace
+    ws_grpsptr->deepRemoveAll();
+  }
+  try
+  {
+    AnalysisDataService::Instance().remove(wsName);
+    retVal = true;
+  }
+  catch (Kernel::Exception::NotFoundError&)
+  {
+    //workspace was not found
+    g_log.error()<<"Workspace "<< wsName << " could not be found."<<std::endl;
+    retVal = false;
+  }
+  return retVal;
 }
 
 } // namespace API
