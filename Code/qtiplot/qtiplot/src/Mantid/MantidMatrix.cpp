@@ -364,16 +364,18 @@ void MantidMatrix::copySelection()
      If setRange(...) has not been called it returns the true smalles ang largest Y-values in the matrix,
      otherwise the values set with setRange(...) are returned. These are needed in plotGraph2D to set
      the range of the third, colour axis.
+     @param[out] min is set to the minumium value
+     @param[out] max is set to the maximum value
 */
 void MantidMatrix::range(double *min, double *max)
 {
   if (!m_are_min_max_set)
   {
-    m_min = cell(0, 0);
-    m_max = m_min;
+    //this is here to fill m_min and m_max with numbers that aren't nan
+    initialMaxMin();
+
     int rows = numRows();
     int cols = numCols();
-
     for(int i=0; i<rows; i++){
       for(int j=0; j<cols; j++){
         double aux = cell(i, j);
@@ -393,6 +395,26 @@ void MantidMatrix::range(double *min, double *max)
 
   *min = m_min;
   *max = m_max;
+}
+//these values will be overwritten below, unless the whole matrix contains only infinites and nan
+void MantidMatrix::initialMaxMin()
+{
+  int rows = numRows();
+  int cols = numCols();
+  for(int i=0; i<rows; i++){
+    for(int j=0; j<cols; j++){
+      double aux = cell(i, j);
+      if (isANumber(aux))
+      {
+        m_min = aux;
+        m_max = m_min;
+        return;
+      }
+    }
+  }
+  //all the data is nan, which is really an error. Return a default, largish range
+  m_min = 0;
+  m_max = 1e6;
 }
 
 /**  Sets new minimum and maximum Y-values which can be displayed in a 2D graph
