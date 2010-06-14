@@ -77,7 +77,7 @@ namespace Mantid
 
       int wi = getProperty("WorkspaceIndex");
       std::string logName = getProperty("LogValue");
-      const std::vector<std::string>& wsNames = wsg->getNames();
+      const std::vector<std::string> wsNames = wsg->getNames();
       double dProg = 1./wsNames.size();
       for(int i=0;i<wsNames.size();++i)
       {

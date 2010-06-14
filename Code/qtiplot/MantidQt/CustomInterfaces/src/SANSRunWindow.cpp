@@ -2165,7 +2165,7 @@ Mantid::API::MatrixWorkspace_sptr SANSRunWindow::getGroupMember(Mantid::API::Wor
     throw Mantid::Kernel::Exception::NotFoundError("Problem retrieving workspace ", in->getName());
   }
   
-  const std::vector<std::string> &gNames = group->getNames();
+  const std::vector<std::string> gNames = group->getNames();
   //currently the names array starts with the name of the group
   if ( gNames.size() < member + 1 )
   {

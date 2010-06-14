@@ -365,7 +365,7 @@ namespace Mantid
       WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(localWorkspace);
       if (wsGroup)
       {
-        const std::vector<std::string>& wsNames = wsGroup->getNames();
+        const std::vector<std::string> wsNames = wsGroup->getNames();
         for(size_t i=0;i<wsNames.size();i++)
         {
           std::stringstream suffix;

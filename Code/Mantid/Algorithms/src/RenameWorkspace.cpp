@@ -60,8 +60,8 @@ void RenameWorkspace::exec()
     //counter used to name the group members
     int count=0;
     std::string outputWorkspace = "OutputWorkspace";
-    //get members of the inpot group workspace
-    const std::vector<std::string>& names = ingrp_sptr->getNames();
+    // Get members of the inpot group workspace
+    const std::vector<std::string> names = ingrp_sptr->getNames();
     std::vector<std::string>::const_iterator citr=names.begin();
     //loop thorugh input ws group members
     for(++citr;citr!=names.end();++citr)
@@ -76,10 +76,6 @@ void RenameWorkspace::exec()
 	
 	//retrieving the workspace pointer
 	Workspace_sptr ws_sptr = data_store.retrieve((*citr));
-	
-	//changing the name to new name
-	//ws_sptr->setName(wsName);
-	
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> (outws, wsName, Direction::Output));
 	setProperty(outws, boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_sptr));
 	

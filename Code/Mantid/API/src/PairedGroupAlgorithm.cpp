@@ -29,7 +29,7 @@ namespace Mantid
     {
      	
         //getting the input workspace group names
-        const std::vector<std::string>& inputWSNames=inputWSGrp->getNames();
+        const std::vector<std::string> inputWSNames=inputWSGrp->getNames();
         int nSize=inputWSNames.size();
         //return if atleast one member is not there in the group to process
         if(nSize<2)

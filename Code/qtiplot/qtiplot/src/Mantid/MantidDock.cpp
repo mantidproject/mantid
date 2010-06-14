@@ -304,7 +304,7 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
   m_tree->removeItemWidget(matches[0],0);
   if(Mantid::API::WorkspaceGroup_sptr group_ptr = boost::dynamic_pointer_cast<WorkspaceGroup>(ws_group) )
   {
-    const std::vector<std::string>& group_names = group_ptr->getNames();
+    const std::vector<std::string> group_names = group_ptr->getNames();
     std::vector<std::string>::const_iterator sitr = group_names.begin();
     // The first entry is the group's name
     ++sitr;//? 
@@ -380,11 +380,11 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
  */
 void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  const std::vector<std::string>& group_names = workspace->getNames();
-  if (group_names.empty()) return;
+  const std::vector<std::string> group_names = workspace->getNames();
+  if (group_names.size() < 1) return;
   std::vector<std::string>::const_iterator sitr = group_names.begin();
   // The first entry is the group's name
-  ++sitr; //?
+  ++sitr;
   std::vector<std::string>::const_iterator send = group_names.end();
   for( ; sitr != send; ++sitr )
   {
