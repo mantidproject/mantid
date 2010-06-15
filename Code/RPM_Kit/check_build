@@ -22,11 +22,19 @@ MBUILD=/tmp/mantid_build
 n=`ls $MBUILD | wc -l`
 if [ $n -gt 0 ]; then
     rev=`( cd $MBUILD; ls ) | head -1`
+    if test "$rev" = "release"; then
+	rev=`svn info http://svn.mantidproject.org/mantid/tags/systemtested  |  grep "Last Changed Rev:"  |  awk '{print $4}'`
+	repo="release"
+	log_file=/var/www/html/buildlog/build_${rev}_release.log
+	echo "Building $rev for release" > $log_file
+    else
+	repo=""
+	log_file=/var/www/html/buildlog/build_$rev.log
+	echo "Building $rev for testing" > $log_file
+    fi
     rm -f $MBUILD/$rev
-    log_file=/var/www/html/buildlog/build_$rev.log
-    echo "Building $rev"
     echo "Building $rev" > $log_file
-    sh nightly_build "$rev" $log_file >> $log_file 2>&1
+    sh nightly_build "$rev" $log_file $repo >> $log_file 2>&1
 fi
 if test "$1" = "HEAD" -o "`date +%H%M`" = "0227"; then
     log_file=/var/www/html/buildlog/build.log
