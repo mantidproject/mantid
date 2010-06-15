@@ -75,7 +75,7 @@ namespace Mantid
       if (eventW != NULL)
 
       { //------- EventWorkspace ---------------------------
-        std::cout << "EVENT!\n";
+        //std::cout << "EVENT!\n";
         //TODO: Everything.
         //return;
       } // END ---- EventWorkspace
