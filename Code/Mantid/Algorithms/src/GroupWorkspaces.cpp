@@ -66,6 +66,9 @@ namespace Mantid
             //add to output group
             addworkspacetoGroup(outgrp_sptr,(*itr));
           }
+	  inws_sptr.reset();
+	  ingrp_sptr.reset();
+	  AnalysisDataService::Instance().remove(*citr);
         }
         else
         {	
