@@ -69,7 +69,22 @@ namespace DataObjects
 
   const int EventWorkspace::getNumberHistograms() const
   {
-    return m_noVectors;
+    return this->data.size();
+  }
+
+  size_t EventWorkspace::getNumberEvents() const
+  {
+    size_t total = 0;
+    for (EventListMap::const_iterator it = this->data.begin();
+        it != this->data.end(); it++) {
+      total += it->second.getNumberEvents();
+    }
+    return total;
+  }
+
+  const bool EventWorkspace::isHistogramData() const
+  {
+    return true;
   }
 
 
@@ -86,59 +101,65 @@ namespace DataObjects
   // Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataX(const int index)
   {
-    if (index<0 || index>=m_noVectors)
+    EventListMap::iterator iter = this->data.find(index);
+    if (iter==this->data.end())
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    return this->data[index].dataX();
+    return iter->second.dataX();
   }
 
   MantidVec& EventWorkspace::dataY(const int index)
   {
-    if (index<0 || index>=m_noVectors)
+    EventListMap::iterator iter = this->data.find(index);
+    if (iter==this->data.end())
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
-    return this->data[index].dataY();
+    return iter->second.dataY();
   }
 
   MantidVec& EventWorkspace::dataE(const int index)
   {
-    if (index<0 || index>=m_noVectors)
+    EventListMap::iterator iter = this->data.find(index);
+    if (iter==this->data.end())
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    return this->data[index].dataE();
+    return iter->second.dataE();
   }
 
 
   //-----------------------------------------------------------------------------
   // --- Const Data Access ----
   //-----------------------------------------------------------------------------
+  //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
+
   const MantidVec& EventWorkspace::dataX(const int index) const
   {
-    if (index<0 || index>=m_noVectors)
+    EventListMap::iterator iter = this->data.find(index);
+    if (iter==this->data.end())
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
-    return this->data.find(index)->second.dataX();
+    return iter->second.dataX();
   }
 
   const MantidVec& EventWorkspace::dataY(const int index) const
   {
-    if (index<0 || index>=m_noVectors)
+    EventListMap::iterator iter = this->data.find(index);
+    if (iter==this->data.end())
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
-    //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
-    return this->data.find(index)->second.dataY();
+    return iter->second.dataY();
   }
 
   const MantidVec& EventWorkspace::dataE(const int index) const
   {
-    if (index<0 || index>=m_noVectors)
+    EventListMap::iterator iter = this->data.find(index);
+    if (iter==this->data.end())
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
-    return this->data.find(index)->second.dataE();
+    return iter->second.dataE();
   }
-
 
   Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
   {
-    if (index<0 || index>=m_noVectors)
+    EventListMap::iterator iter = this->data.find(index);
+    if (iter==this->data.end())
       throw std::range_error("EventWorkspace::refX, histogram number out of range");
-    return this->data[index].getRefX();
+    return iter->second.getRefX();
+
   }
 
   //-----------------------------------------------------------------------------

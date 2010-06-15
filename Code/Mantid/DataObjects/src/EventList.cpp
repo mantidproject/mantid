@@ -2,6 +2,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Exception.h"
 
+using std::ostream;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
@@ -51,6 +52,11 @@ namespace DataObjects
   size_t TofEvent::frame()
   {
 	  return this->frame_index;
+  }
+
+  ostream& operator<<(ostream &os, const TofEvent &event)
+  {
+    os << event.time_of_flight << "," << event.frame_index;
   }
 
   /// --------------------- TofEvent Comparators ----------------------------------
@@ -193,6 +199,11 @@ namespace DataObjects
     this->order = FRAME_SORT;
   }
 
+
+  size_t EventList::getNumberEvents() const
+  {
+    return this->events.size();
+  }
 
   // --- Setting the Histrogram X axis, without recalculating the cache -------------------------
   void EventList::setX(const RCtype::ptr_type& X, Unit* set_xUnit)

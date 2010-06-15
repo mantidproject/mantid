@@ -51,11 +51,14 @@ public:
    * 500 pixels
    * 1000 histogrammed bins.
    */
-  EventWorkspace_sptr createEventWorkspace()
+  EventWorkspace_sptr createEventWorkspace(int initialize_pixels)
   {
 
     EventWorkspace_sptr retVal(new EventWorkspace);
+    if (initialize_pixels)
     retVal->initialize(NUMPIXELS,1,1);
+    else
+      retVal->initialize(1,1,1);
 
     //Make fake events
     for (int pix=0; pix<NUMPIXELS; pix++)
@@ -84,7 +87,7 @@ public:
 
   void setUp()
   {
-    ew = createEventWorkspace();
+    ew = createEventWorkspace(1);
   }
 
   void test_constructor()
@@ -117,8 +120,25 @@ public:
     //Out of range
     TS_ASSERT_THROWS( ew->dataX(-123), std::range_error );
     TS_ASSERT_THROWS( ew->dataX(5123), std::range_error );
+    TS_ASSERT_THROWS( ew->dataE(5123), std::range_error );
+    TS_ASSERT_THROWS( ew->dataY(5123), std::range_error );
 
     //Can't try the const access; copy constructors are not allowed.
+  }
+
+  void test_data_access_not_setting_num_vectors()
+  {
+    ew = createEventWorkspace(0);
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
+    TS_ASSERT_EQUALS( ew->blocksize(), NUMBINS);
+    TS_ASSERT_EQUALS( ew->size(), NUMBINS*NUMPIXELS);
+    TS_ASSERT_THROWS( ew->dataX(-123), std::range_error );
+    TS_ASSERT_THROWS( ew->dataX(5123), std::range_error );
+    //Non-const access throws errors, but not RANGE errors!
+    TS_ASSERT_THROWS( ew->dataX(1), NotImplementedError );
+    TS_ASSERT_THROWS( ew->dataY(2), NotImplementedError );
+    TS_ASSERT_THROWS( ew->dataE(3), NotImplementedError );
+    TS_ASSERT_THROWS( ew->dataX(3), NotImplementedError );
   }
 
   void test_setX_individually()
@@ -163,6 +183,13 @@ public:
     //Invalid addition - doesn't work because -100 gets wrapped back to positive because of size_t
     //TS_ASSERT_THROWS( ew->addTime(-100, t - minutes(5) ), std::range_error);
   }
+
+  void test_histogram_cache()
+  {
+	  //Try caching and most-recently-used MRU list.
+  }
+
+
 
 };
 

@@ -90,7 +90,7 @@ public:
     *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
     */
     template <typename T>
-    void setProperty(const std::string &name, const T value)
+    void setProperty(const std::string &name, const T & value)
     {
         PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
         if (prop)

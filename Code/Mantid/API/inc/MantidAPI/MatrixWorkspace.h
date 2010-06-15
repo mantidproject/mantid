@@ -138,7 +138,7 @@ public:
   void replaceAxis(const int& axisIndex, Axis* const newAxis);
 
   /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
-  const bool isHistogramData() const;
+  virtual const bool isHistogramData() const;
 
   std::string YUnit() const;
   void setYUnit(const std::string& newUnit);

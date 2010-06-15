@@ -4,9 +4,12 @@
 #include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
+//#include <boost/cast.hpp>
+
 
 namespace Mantid
 {
@@ -20,6 +23,9 @@ namespace Mantid
     using namespace API;
     using DataObjects::Workspace2D;
     using DataObjects::Workspace2D_sptr;
+    using DataObjects::EventWorkspace;
+    using DataObjects::EventWorkspace_sptr;
+    using DataObjects::EventWorkspace_const_sptr;
 
     /** Initialisation method. Declares properties to be used in algorithm.
     *
@@ -45,11 +51,11 @@ namespace Mantid
     */
     void SimpleRebin::exec()
     {
-      // retrieve the properties
-      std::vector<double> rb_params=getProperty("Params");
-
       // Get the input workspace
       MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
+
+      // retrieve the properties
+      std::vector<double> rb_params=getProperty("Params");
 
       bool dist = inputW->isDistribution();
 
@@ -61,6 +67,23 @@ namespace Mantid
 
       // make output Workspace the same type is the input, but with new length of signal array
       API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+
+
+      //---------------------------------------------------------------------------------
+      //Now, determine if the input workspace is actually an EventWorkspace
+      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      if (eventW != NULL)
+
+      { //------- EventWorkspace ---------------------------
+        std::cout << "EVENT!\n";
+        //TODO: Everything.
+        //return;
+      } // END ---- EventWorkspace
+
+      else
+
+      { //------- Workspace2D or other MatrixWorkspace ---------------------------
+
       // Copy over the 'vertical' axis
       if (inputW->axes() > 1) outputW->replaceAxis( 1, inputW->getAxis(1)->clone(outputW.get()) );
 
@@ -114,6 +137,10 @@ namespace Mantid
         }
       }
 
+      } // END ---- Workspace2D
+
+
+      //Copy the units over too.
       for (int i=0; i < outputW->axes(); ++i)
       {
         outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();        
@@ -124,6 +151,15 @@ namespace Mantid
 
       return;
     }
+
+//
+//    /** Continue execution for EventWorkspace scenario */
+//    void SimpleRebin::execEvent()
+//    {
+//      // retrieve the properties
+//      std::vector<double> rb_params=getProperty("Params");
+//
+//    }
 
     /** Takes the masks in the input workspace and apportions the weights into the new bins that overlap
      *  with a masked bin. These bins are then masked with the calculated weight.

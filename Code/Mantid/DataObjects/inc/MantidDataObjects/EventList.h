@@ -8,6 +8,7 @@ typedef unsigned uint32_t;
 #include <stdint.h> //MG 15/09/09: Required for gcc4.4
 #endif
 #include <cstddef>
+#include <iostream>
 #include <vector>
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"
@@ -57,9 +58,8 @@ private:
   /*! Return the frame id */
   std::size_t frame();
 
+  friend std::ostream& operator<<(std::ostream &, const TofEvent &);
 };
-
-
 
 //==========================================================================================
 /** A list of TofEvent objects, corresponding to all the events that were measured on a pixel.
@@ -143,7 +143,7 @@ public:
   /** This throws an exception since non-const access is not allowed. */
   virtual StorageType& dataE();
 
-
+  virtual std::size_t getNumberEvents() const;
 
   /** Delete the cached version of the histogram data. */
   void emptyCache() const;

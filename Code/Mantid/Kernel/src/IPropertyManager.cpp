@@ -130,7 +130,7 @@ namespace Kernel
 
     // If a string is given in the argument, we can be more flexible
     template <>
-    void IPropertyManager::setProperty<std::string>(const std::string &name, const std::string value)
+    void IPropertyManager::setProperty<std::string>(const std::string &name, const std::string &value)
     {
         this->setPropertyValue(name, value);
     }
