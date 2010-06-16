@@ -57,6 +57,7 @@ namespace DataObjects
   ostream& operator<<(ostream &os, const TofEvent &event)
   {
     os << event.time_of_flight << "," << event.frame_index;
+    return os;
   }
 
   /// --------------------- TofEvent Comparators ----------------------------------
