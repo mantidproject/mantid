@@ -63,7 +63,7 @@ public:
     TS_ASSERT_EQUALS( ws2d->getNumberHistograms(), 36864 );
 
     //Test the size of the data vectors
-    TS_ASSERT_EQUALS( (ws2d->dataX(0).size()), 1);
+    TS_ASSERT_EQUALS( (ws2d->dataX(0).size()), 2);
     TS_ASSERT_EQUALS( (ws2d->dataY(0).size()), 1);
     TS_ASSERT_EQUALS( (ws2d->dataE(0).size()), 1);
 

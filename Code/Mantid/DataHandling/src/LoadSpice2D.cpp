@@ -16,6 +16,9 @@
 #include "Poco/DOM/NodeList.h"
 #include "Poco/DOM/Node.h"
 #include "Poco/DOM/Text.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include <boost/shared_array.hpp>
+#include <iostream>
 //-----------------------------------------------------------------------
 
 using Poco::XML::DOMParser;
@@ -119,13 +122,12 @@ namespace Mantid
       int nBins = 1;
       // Number of detectors: should be pulled from the geometry description. Use detector pixels for now.
       int numSpectra = numberXPixels*numberYPixels;
-      //const int numSpectra = 1;
 
       DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, nBins, nBins));
+          API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, nBins+1, nBins));
       ws->setTitle(wsTitle);
       ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-      ws->setYUnit("Count");
+      ws->setYUnit("Counts");
       API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(ws);
       setProperty("OutputWorkspace", workspace);
 
@@ -136,10 +138,14 @@ namespace Mantid
       int ipixel = 0;
       // Check that we don't keep within the size of the workspace
       int pixelcount = pixels.count();
-      if( pixelcount > numSpectra )
+      if( pixelcount != numSpectra )
       {
         throw Kernel::Exception::FileError("Inconsitent data set: "
             "There were more data pixels found than declared in the Spice XML meta-data.", fileName);
+      }
+      if( numSpectra == 0 )
+      {
+        throw Kernel::Exception::FileError("Empty data set: the data file has no pixel data.", fileName);
       }
 
       while (pixel != pixels.end())
@@ -157,18 +163,25 @@ namespace Mantid
         MantidVec& E = ws->dataE(ipixel);
 
         X[0] = 0.0;
+        X[1] = 1.0;
         Y[0] = count;
         // Data uncertainties, computed according to the HFIR/IGOR reduction code
         E[0] = sqrt( 0.5 + fabs( count - 0.5 ));
         // The following is what I would suggest instead...
         // E[0] = count > 0 ? sqrt((double)count) : 0.0;
 
+        // Set the spectrum number
+        ws->getAxis(1)->spectraNo(ipixel) = ipixel;
+
         ++pixel;
         ipixel++;
       }
 
+      // TODO: Need to load monitors here
+
       // run load instrument
       runLoadInstrument(instrument, ws);
+      runLoadMappingTable(ws, numberXPixels, numberYPixels);
     }
 
     /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
@@ -212,6 +225,57 @@ namespace Mantid
       }
 
     }
+
+    /**
+     * Populate spectra mapping to detector IDs
+     *
+     * TODO: Get the detector size information from the workspace directly
+     *
+     * @param localWorkspace: Workspace2D object
+     * @param nxbins: number of bins in X
+     * @param nybins: number of bins in Y
+     */
+    void LoadSpice2D::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins)
+    {
+      // Get the number of monitor channels
+      int nMonitors = 0;
+      boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
+      std::vector<int> monitors = instrument->getMonitors();
+      nMonitors = monitors.size();
+
+      int ndet = nxbins*nybins + nMonitors;
+      boost::shared_array<int> udet(new int[ndet]);
+      boost::shared_array<int> spec(new int[ndet]);
+
+      // Generate mapping of detector/channel IDs to spectrum ID
+
+      // Detector/channel counter
+      int icount = 0;
+
+      // Monitor: IDs start at 1 and increment by 1
+      for(int i=0; i<nMonitors; i++)
+      {
+        spec[icount] = 0;
+        udet[icount] = icount+1;
+        icount++;
+      }
+
+      // Detector pixels
+      for(int ix=0; ix<nxbins; ix++)
+      {
+        for(int iy=0; iy<nybins; iy++)
+        {
+          spec[icount] = icount;
+          udet[icount] = 1000000 + ix*1000 + iy;
+          icount++;
+        }
+      }
+
+      // Populate the Spectra Map with parameters
+      localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
+
+    }
+
 
     /* This method throws not found error if a element is not found in the xml file
      * @param elem pointer to  element

@@ -72,6 +72,8 @@ namespace Mantid
       void throwException(Poco::XML::Element* elem,const std::string & name,const std::string& fileName);
       /// Run LoadInstrument sub algorithm
       void runLoadInstrument(const std::string & inst_name,DataObjects::Workspace2D_sptr localWorkspace);
+      /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
+      void runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins);
 
     };
     
