@@ -38,7 +38,7 @@ namespace Mantid
 			void downloadFileOverInternet(ICATPortBindingProxy &icat,const std::vector<std::string>& fileList,API::ITableWorkspace_sptr ws_ptr);
 			///
 			boost::shared_ptr<std::string> m_sessionId_sptr;
-			boost::shared_ptr<long long >m_fileId_sptr;
+			boost::shared_ptr<LONG64> m_fileId_sptr;
 
 		};
 

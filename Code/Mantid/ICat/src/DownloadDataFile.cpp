@@ -31,13 +31,13 @@ namespace Mantid
 		using namespace API;
 
         DECLARE_ALGORITHM(CDownloadDataFile)
-		
+
 		void CDownloadDataFile::init()
 		{
 			declareProperty("Filename","","Name of the file to download");
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("InputWorkspace","",Direction::Input),
 				"The name of the workspace which stored the last icat file search result");
-			
+
 		}
 		void CDownloadDataFile::exec()
 		{
@@ -45,19 +45,19 @@ namespace Mantid
 			int ret=doDownload(icat);
 		}
 		int CDownloadDataFile::doDownload(ICATPortBindingProxy &icat)
-		{			
+		{
 			if (soap_ssl_client_context(&icat,
 				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-				NULL,       /* keyfile: required only when client must authenticate to 
+				NULL,       /* keyfile: required only when client must authenticate to
 							server (see SSL docs on how to obtain this file) */
 							NULL,       /* password to read the keyfile */
 							NULL,      /* optional cacert file to store trusted certificates */
 							NULL,      /* optional capath to directory with trusted certificates */
-							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
 							))
-			{ 
+			{
 				icat.soap_stream_fault(std::cerr);
-				
+
 			}
 			//get file name
 			std::string inputfile=getPropertyValue("Filename");
@@ -103,7 +103,7 @@ namespace Mantid
 			}
 			if(!isis_archive)
 			{
-				
+
 				std::string filepath="C:\\Mantid\\Code\\Mantid\\ICat\\test\\";
 				std::vector<std::string> fileList;
 				fileList.push_back(inputfile);
@@ -170,7 +170,7 @@ namespace Mantid
 			                    API::ITableWorkspace_sptr ws_sptr)
 		{
 			    std::string filepath="C:\\Mantid\\Code\\Mantid\\ICat\\test\\";
-			
+
 				std::vector<std::string>::const_iterator citr;
 				for(citr=fileList.begin();citr!=fileList.end();++citr)
 				{
@@ -232,7 +232,7 @@ namespace Mantid
 		   *@param fileName name of teh file to download
 		   *@param ws_sptr shared workspace pointer
 		   *@param request input request object
-		    
+
 		*/
 		void CDownloadDataFile::setRequestParameters(const std::string fileName,API::ITableWorkspace_sptr ws_sptr,ns1__getDatafile& request)
 		{
@@ -254,19 +254,19 @@ namespace Mantid
 			{
 				throw;
 			}
-	
+
 			//get the sessionid which is cached in session class during login
 			m_sessionId_sptr=boost::shared_ptr<std::string >(new std::string);
 			*m_sessionId_sptr=Session::Instance().getSessionId();
 			request.sessionId=m_sessionId_sptr.get();
-			m_fileId_sptr=boost::shared_ptr<long long >(new long long );
+			//m_fileId_sptr=boost::shared_ptr<LONG64>(new LONG64);
 			*m_fileId_sptr=fileId;
 			request.datafileId=m_fileId_sptr.get();
 
 		}
 		void CDownloadDataFile::setRequestParameters(const std::string fileName,API::ITableWorkspace_sptr ws_sptr,ns1__downloadDatafile& request)
 		{
-			
+
 			//look up this filename in the table workspace
 			int row=0;const int col=1;long long fileId=0;
 			ws_sptr->find(fileName,row,col);
@@ -282,12 +282,12 @@ namespace Mantid
 			{
 				throw;
 			}
-	
+
 			//get the sessionid which is cached in session class during login
 			m_sessionId_sptr=boost::shared_ptr<std::string >(new std::string);
 			*m_sessionId_sptr=Session::Instance().getSessionId();
 			request.sessionId=m_sessionId_sptr.get();
-			m_fileId_sptr=boost::shared_ptr<long long >(new long long );
+			//m_fileId_sptr=boost::shared_ptr<long long >(new long long );
 			*m_fileId_sptr=fileId;
 			request.datafileId=m_fileId_sptr.get();
 
@@ -306,7 +306,7 @@ namespace Mantid
 			//find the position of . in row file
 			indexDot = fileName.find_last_of ( "." );
 			if(indexDot!= npos)
-			{	
+			{
 				for (int i=0;i<=indexDot-1;++i)
 				{
 				int inteqv=(int)fileName.at(i);

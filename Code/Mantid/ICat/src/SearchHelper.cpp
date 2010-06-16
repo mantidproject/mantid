@@ -11,26 +11,26 @@ namespace Mantid
 	{
 		using namespace Kernel;
 		using namespace API;
-		
+
 		/* This method calls ICat API searchbydavanced and do the basic search
 		 * @param icat Proxy object for ICat
 		 * @param request request object
 		 * @param response response object
 		 */
-		
+
 		int CSearchHelper::doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response)
 		{
 			// Define ssl authentication scheme
 			if (soap_ssl_client_context(&icat,
 				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-				NULL,       /* keyfile: required only when client must authenticate to 
+				NULL,       /* keyfile: required only when client must authenticate to
 							server (see SSL docs on how to obtain this file) */
 							NULL,       /* password to read the keyfile */
 							NULL,      /* optional cacert file to store trusted certificates */
 							NULL,      /* optional capath to directory with trusted certificates */
-							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
 							))
-			{ 
+			{
 				icat.soap_stream_fault(std::cerr);
 				return -1;
 			}
@@ -52,14 +52,14 @@ namespace Mantid
 		{
 			if (soap_ssl_client_context(&icat,
 				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-				NULL,       /* keyfile: required only when client must authenticate to 
+				NULL,       /* keyfile: required only when client must authenticate to
 							server (see SSL docs on how to obtain this file) */
 							NULL,       /* password to read the keyfile */
 							NULL,      /* optional cacert file to store trusted certificates */
 							NULL,      /* optional capath to directory with trusted certificates */
-							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
 							))
-			{ 
+			{
 				icat.soap_stream_fault(std::cerr);
 				return -1;
 			}
@@ -84,7 +84,7 @@ namespace Mantid
 		 * @param einclude enum to filter the search response
 		 * @param responsews_sptr output table workspace
 		 */
-		
+
 		int CSearchHelper::doSearchByRunNumber(const double& dstartRun,const double& dendRun,ns1__investigationInclude einclude,
 			               API::ITableWorkspace_sptr& responsews_sptr)
 		{
@@ -107,15 +107,15 @@ namespace Mantid
 			boost::shared_ptr<std::string> dataFilename_sptr(new std::string);
 			req_sptr->advancedSearchDetails->datafileName=dataFilename_sptr.get();
 
-		
+
 			// investigation include
             boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
 			req_sptr->advancedSearchDetails->investigationInclude=invstInculde_sptr.get();
-			
+
 			//setting the input parameters
 			//setRequestParameters(dstartRun,dendRun,einclude,request);
 			setReqParamforSearchByRunNumber(dstartRun,dendRun,einclude,req_sptr);
-			
+
 			//response object
 			ns1__searchByAdvancedResponse response;
 			// do  search
@@ -132,7 +132,7 @@ namespace Mantid
 			}
 			return ret_search;
 		}
-		/* This method sets the input request parameters for search 
+		/* This method sets the input request parameters for search
 		* @param dstart start run number
 		* @param dend end run number
 		* @param einclude enum paramter to specify the response records
@@ -151,7 +151,7 @@ namespace Mantid
 			*request->advancedSearchDetails->investigationInclude=einclude;
 			}
 
-		/* This method sets the input request parameters for search 
+		/* This method sets the input request parameters for search
 		 * @param dstart start run number
 		 * @param dend end run number
 		 * @param einclude enum paramter to specify the response records
@@ -160,8 +160,8 @@ namespace Mantid
 
 		void CSearchHelper::setRequestParameters(const double& dstart,const double& dend,ns1__investigationInclude einclude,
 			                ns1__searchByAdvanced& request)
-		{		
-						
+		{
+
 			//get the sessionid which is cached in session class during login
 			m_sessionId_sptr=boost::shared_ptr<std::string >(new std::string);
 			*m_sessionId_sptr=Session::Instance().getSessionId();
@@ -179,10 +179,10 @@ namespace Mantid
 			m_runEnd_sptr=boost::shared_ptr<double>(new double);
 			*m_runEnd_sptr=dend;
 			m_advanceDetails_sptr->runEnd=m_runEnd_sptr.get();
-            
-			// enum include 
+
+			// enum include
 			m_invstInculde_sptr=boost::shared_ptr<ns1__investigationInclude>(new ns1__investigationInclude);
-			*m_invstInculde_sptr=einclude; 
+			*m_invstInculde_sptr=einclude;
 
 			m_advanceDetails_sptr->investigationInclude=m_invstInculde_sptr.get();
 			request.advancedSearchDetails=m_advanceDetails_sptr.get();
@@ -243,15 +243,15 @@ namespace Mantid
 					savetoTableWorkspace((*citr)->id,t);
 					//rb number
 					savetoTableWorkspace((*citr)->invNumber,t);
-					
+
 					//std::cout<<"search by run number: rb number is : "<<*(*citr)->invNumber<<std::endl;
-					
+
 					//title
 					savetoTableWorkspace((*citr)->title,t);
-					
+
 					//std::cout<<"search by runnumber: title is : "<<*(*citr)->title<<std::endl;
-					
-					//type 
+
+					//type
 					savetoTableWorkspace((*citr)->invType,t);
 					savetoTableWorkspace((*citr)->instrument,t);
 					//investigator
@@ -304,7 +304,7 @@ namespace Mantid
 
 			std::vector<ns1__investigation*> investVec;
 			investVec.assign(response.return_.begin(),response.return_.end());
-		
+
 			try
 			{
 				std::vector<ns1__investigation*>::const_iterator inv_citr;
@@ -389,9 +389,9 @@ namespace Mantid
 			// m_sessionId_sptr=boost::shared_ptr<std::string >(new std::string);
 			//*m_sessionId_sptr=Session::Instance().getSessionId();
 			*request.sessionId=Session::Instance().getSessionId();;
-			
-			// enum include 
-			//*m_invstInculde_sptr=include; 
+
+			// enum include
+			//*m_invstInculde_sptr=include;
 			*request.investigationInclude=include;
 
 			// m_invstId=boost::shared_ptr<long long>(new long long);
@@ -409,14 +409,14 @@ namespace Mantid
 			// Define ssl authentication scheme
 			if (soap_ssl_client_context(&icat,
 				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-				NULL,       /* keyfile: required only when client must authenticate to 
+				NULL,       /* keyfile: required only when client must authenticate to
 							server (see SSL docs on how to obtain this file) */
 							NULL,       /* password to read the keyfile */
 							NULL,      /* optional cacert file to store trusted certificates */
 							NULL,      /* optional capath to directory with trusted certificates */
-							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
 							))
-			{ 
+			{
 				icat.soap_stream_fault(std::cerr);
 				return -1;
 			}
@@ -426,12 +426,12 @@ namespace Mantid
 			boost::shared_ptr<std::string >sessionId_sptr(new std::string);
 			request.sessionId=sessionId_sptr.get();
 
-			// enum include 
+			// enum include
 			boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
 			request.investigationInclude=invstInculde_sptr.get();
 
-			boost::shared_ptr<long long>invstId_sptr(new long long);
-		    request.investigationId=invstId_sptr.get();
+			//boost::shared_ptr<LONG64>invstId_sptr(new LONG64);
+		  //  request.investigationId=invstId_sptr.get();
 			setReqParamforInvestigationIncludes(invstId,include,request);
 
 			ns1__getInvestigationIncludesResponse response;
@@ -439,7 +439,7 @@ namespace Mantid
 			if(ret_advsearch!=0)
 			{
 				icat.soap_stream_fault(std::cerr);
-				return 0;// handle error 
+				return 0;// handle error
 			}
 			responsews_sptr=saveInvestigationIncludesResponse(response);
 
@@ -471,7 +471,7 @@ namespace Mantid
 			outputws->addColumn("str","Create Time");
 			try
 			{
-				
+
 					std::vector<ns1__dataset*> datasetVec;
 					datasetVec.assign((response.return_)->datasetCollection.begin(),(response.return_)->datasetCollection.end());
 
@@ -533,7 +533,7 @@ namespace Mantid
 								savetoTableWorkspace(creationtime,t);
 								std::cout<<"File creation time  is "<<*creationtime<<std::endl;
 							}
-							
+
 						}
 
 					}

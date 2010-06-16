@@ -10,7 +10,7 @@
 #pragma option push -w-8004
 #endif
 
-#include "MantidIcat/GSoapGenerated/soapH.h"
+#include "MantidICat/GSoapGenerated/soapH.h"
 
 SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.16 2010-05-04 14:40:10 GMT")
 

@@ -5,7 +5,7 @@
    GPL, the gSOAP public license, or Genivia's license for commercial use.
 */
 
-#include "MantidIcat/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 
 ICATPortBindingProxy::ICATPortBindingProxy()
 {	ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
