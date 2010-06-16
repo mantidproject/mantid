@@ -20,8 +20,6 @@ namespace DataObjects
   //---- Constructors -------------------------------------------------------------------
   EventWorkspace::EventWorkspace()
   {
-    //Initialize the  frame time.
-    this->frameTime = std::vector<ptime>();
   }
   EventWorkspace::~EventWorkspace()
   {}
@@ -31,18 +29,14 @@ namespace DataObjects
           const int &YLength)
   {
     // Check validity of arguments
-    if (NVectors < 0)
+    if (NVectors <= 0)
     {
-      g_log.error("Negative Number of Pixels specified to EventWorkspace::init");
-      throw std::out_of_range("Negative Number of Pixels specified to EventWorkspace::init");
-    }
-    m_noVectors = NVectors;
-    //Create all the event list objects from 0 to m_noVectors;
-    for (int i=0; i < m_noVectors; i++)
-    {
-      data[i] = EventList();
+      g_log.error("Negative or 0 Number of Pixels specified to EventWorkspace::init");
+      throw std::out_of_range("Negative or 0 Number of Pixels specified to EventWorkspace::init");
     }
 
+    m_noVectors = NVectors;
+    data.resize(m_noVectors, NULL);
   }
 
 
@@ -53,35 +47,39 @@ namespace DataObjects
     return this->data.size() * this->blocksize();
   }
 
+  //-----------------------------------------------------------------------------
   int EventWorkspace::blocksize() const
   {
     // Pick the first pixel to find the blocksize.
-    EventListMap::iterator it = data.begin();
+    EventListVector::iterator it = data.begin();
     if (it == data.end())
     {
       throw std::range_error("EventWorkspace::blocksize, no pixels in workspace, therefore cannot determine blocksize (# of bins).");
     }
     else
     {
-      return it->second.getRefX()->size();
+      return (*it)->getRefX()->size();
     }
   }
 
+  //-----------------------------------------------------------------------------
   const int EventWorkspace::getNumberHistograms() const
   {
     return this->data.size();
   }
 
+  //-----------------------------------------------------------------------------
   size_t EventWorkspace::getNumberEvents() const
   {
     size_t total = 0;
-    for (EventListMap::const_iterator it = this->data.begin();
+    for (EventListVector::const_iterator it = this->data.begin();
         it != this->data.end(); it++) {
-      total += it->second.getNumberEvents();
+      total += (*it)->getNumberEvents();
     }
     return total;
   }
 
+  //-----------------------------------------------------------------------------
   const bool EventWorkspace::isHistogramData() const
   {
     return true;
@@ -92,35 +90,102 @@ namespace DataObjects
   // --- Data Access ----
   //-----------------------------------------------------------------------------
 
-  EventList& EventWorkspace::getEventList(const int index)
+  EventList& EventWorkspace::getEventList(const int pixelid)
   {
-    return this->data[index];
+    //An empty entry will be made if needed
+    EventListMap::iterator it = this->data_map.find(pixelid);
+    if (it == this->data_map.end())
+    {
+      //Need to make a new one!
+      EventList * newel = new EventList();
+      //Save it in the map
+      this->data_map[pixelid] = newel;
+      return (*newel);
+    }
+    else
+    {
+      //Already exists; return it
+      return *this->data_map[pixelid];
+    }
+  }
+
+  EventList& EventWorkspace::getEventListAtSpectrumNumber(const int spectrum_number)
+  {
+    //An empty entry will be made if needed
+    return *this->data[spectrum_number];
   }
 
 
+
+  //-----------------------------------------------------------------------------
+  void EventWorkspace::doneLoadingData()
+  {
+    //Ok, we need to take the data_map, and turn it into a data[] vector.
+
+    //Let's make the vector big enough.
+    if (this->data_map.size() > m_noVectors)
+    {
+      //Too many vectors! Why did you initialize it bigger than you needed too, silly?
+      for (int i=this->data_map.size(); i<m_noVectors; i++)
+        //Delete the offending EventList so as to avoid memory leaks.
+        delete this->data[i];
+    }
+    //Now resize
+    m_noVectors = this->data_map.size();
+    this->data.resize(m_noVectors, NULL);
+
+    //For the spectramap
+    int* spec_table = new int [m_noVectors];
+    int* pixelid_table = new int [m_noVectors];
+
+    int counter = 0;
+    EventListMap::iterator it;
+    for (it = this->data_map.begin(); it != this->data_map.end(); it++)
+    {
+      //Iterate through the map
+      spec_table[counter] = counter;
+      pixelid_table[counter] = it->first; //The key = the pixelid
+
+      //Copy the pointer to the event list in there.
+      this->data[counter] = it->second;
+
+      //std::cout << "added" << std::endl;
+      counter++;
+    }
+
+    //Save the mapping
+    mutableSpectraMap().populate(spec_table, pixelid_table, m_noVectors);
+
+    //Now clear the data_map
+    this->data_map.clear();
+
+    //Get your memory back :)
+    delete [] spec_table;
+    delete [] pixelid_table;
+  }
+
+
+  //-----------------------------------------------------------------------------
   // Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataX(const int index)
   {
-    EventListMap::iterator iter = this->data.find(index);
-    if (iter==this->data.end())
+    if ((index >= this->m_noVectors) or (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    return iter->second.dataX();
+    return this->data[index]->dataX();
   }
 
   MantidVec& EventWorkspace::dataY(const int index)
   {
-    EventListMap::iterator iter = this->data.find(index);
-    if (iter==this->data.end())
+    if ((index >= this->m_noVectors) or (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
-    return iter->second.dataY();
+    return this->data[index]->dataY();
   }
 
   MantidVec& EventWorkspace::dataE(const int index)
   {
-    EventListMap::iterator iter = this->data.find(index);
-    if (iter==this->data.end())
+    if ((index >= this->m_noVectors) or (index < 0))
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    return iter->second.dataE();
+    return this->data[index]->dataE();
   }
 
 
@@ -131,34 +196,31 @@ namespace DataObjects
 
   const MantidVec& EventWorkspace::dataX(const int index) const
   {
-    EventListMap::iterator iter = this->data.find(index);
-    if (iter==this->data.end())
+    if ((index >= this->m_noVectors) or (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    return iter->second.dataX();
+    return this->data[index]->dataX();
+
   }
 
   const MantidVec& EventWorkspace::dataY(const int index) const
   {
-    EventListMap::iterator iter = this->data.find(index);
-    if (iter==this->data.end())
+    if ((index >= this->m_noVectors) or (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
-    return iter->second.dataY();
+    return this->data[index]->dataY();
   }
 
   const MantidVec& EventWorkspace::dataE(const int index) const
   {
-    EventListMap::iterator iter = this->data.find(index);
-    if (iter==this->data.end())
+    if ((index >= this->m_noVectors) or (index < 0))
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    return iter->second.dataE();
+    return this->data[index]->dataE();
   }
 
   Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
   {
-    EventListMap::iterator iter = this->data.find(index);
-    if (iter==this->data.end())
+    if ((index >= this->m_noVectors) or (index < 0))
       throw std::range_error("EventWorkspace::refX, histogram number out of range");
-    return iter->second.getRefX();
+    return this->data[index]->getRefX();
 
   }
 
@@ -168,17 +230,17 @@ namespace DataObjects
   void EventWorkspace::setX(const int index,
       const Kernel::cow_ptr<MantidVec> &x)
   {
-    this->data[index].setX(x);
+    if ((index >= this->m_noVectors) or (index < 0))
+      throw std::range_error("EventWorkspace::setX, histogram number out of range");
+    this->data[index]->setX(x);
   }
 
   void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x)
   {
-    EventListMap::iterator i = this->data.begin();
+    EventListVector::iterator i = this->data.begin();
     for( ; i != this->data.end(); ++i )
     {
-      // i->first is your key
-      //Set the x now.
-      i->second.setX(x);
+      (*i)->setX(x);
     }
   }
 

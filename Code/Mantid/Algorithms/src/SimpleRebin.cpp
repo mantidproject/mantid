@@ -84,58 +84,58 @@ namespace Mantid
 
       { //------- Workspace2D or other MatrixWorkspace ---------------------------
 
-      // Copy over the 'vertical' axis
-      if (inputW->axes() > 1) outputW->replaceAxis( 1, inputW->getAxis(1)->clone(outputW.get()) );
+        // Copy over the 'vertical' axis
+        if (inputW->axes() > 1) outputW->replaceAxis( 1, inputW->getAxis(1)->clone(outputW.get()) );
 
-      Progress prog(this,0.0,1.0,histnumber);
-      PARALLEL_FOR2(inputW,outputW)
-      for (int hist=0; hist <  histnumber;++hist)
-      {
-        PARALLEL_START_INTERUPT_REGION
-        // get const references to input Workspace arrays (no copying)
-        const MantidVec& XValues = inputW->readX(hist);
-        const MantidVec& YValues = inputW->readY(hist);
-        const MantidVec& YErrors = inputW->readE(hist);
-
-        //get references to output workspace data (no copying)
-        MantidVec& YValues_new=outputW->dataY(hist);
-        MantidVec& YErrors_new=outputW->dataE(hist);
-
-        // output data arrays are implicitly filled by function
-        try {
-          VectorHelper::rebin(XValues,YValues,YErrors,*XValues_new,YValues_new,YErrors_new, dist);
-        } catch (std::exception& ex)
+        Progress prog(this,0.0,1.0,histnumber);
+        PARALLEL_FOR2(inputW,outputW)
+        for (int hist=0; hist <  histnumber;++hist)
         {
-          g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
-          throw ex;
-        }
-        
-        // Populate the output workspace X values
-        outputW->setX(hist,XValues_new);
-        ////copy oer the spectrum No and ErrorHelper
-        //try {
-        //  outputW->getAxis(1)->setValue(hist,(*(inputW->getAxis(1)))(hist));
-        //  //outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
-        //} catch (Exception::IndexError) {
-        //  // OK, so this isn't a Workspace2D
-        //}
-        
-        prog.report();
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-      outputW->isDistribution(dist);
+          PARALLEL_START_INTERUPT_REGION
+          // get const references to input Workspace arrays (no copying)
+          const MantidVec& XValues = inputW->readX(hist);
+          const MantidVec& YValues = inputW->readY(hist);
+          const MantidVec& YErrors = inputW->readE(hist);
 
-      // Now propagate any masking correctly to the output workspace
-      // More efficient to have this in a separate loop because 
-      // MatrixWorkspace::maskBins blocks multi-threading
-      for (int i=0; i <  histnumber; ++i)
-      {
-        if ( inputW->hasMaskedBins(i) )  // Does the current spectrum have any masked bins?
-        {
-          this->propagateMasks(inputW,outputW,i);
+          //get references to output workspace data (no copying)
+          MantidVec& YValues_new=outputW->dataY(hist);
+          MantidVec& YErrors_new=outputW->dataE(hist);
+
+          // output data arrays are implicitly filled by function
+          try {
+            VectorHelper::rebin(XValues,YValues,YErrors,*XValues_new,YValues_new,YErrors_new, dist);
+          } catch (std::exception& ex)
+          {
+            g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+            throw ex;
+          }
+
+          // Populate the output workspace X values
+          outputW->setX(hist,XValues_new);
+          ////copy oer the spectrum No and ErrorHelper
+          //try {
+          //  outputW->getAxis(1)->setValue(hist,(*(inputW->getAxis(1)))(hist));
+          //  //outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
+          //} catch (Exception::IndexError) {
+          //  // OK, so this isn't a Workspace2D
+          //}
+
+          prog.report();
+          PARALLEL_END_INTERUPT_REGION
         }
-      }
+        PARALLEL_CHECK_INTERUPT_REGION
+        outputW->isDistribution(dist);
+
+        // Now propagate any masking correctly to the output workspace
+        // More efficient to have this in a separate loop because
+        // MatrixWorkspace::maskBins blocks multi-threading
+        for (int i=0; i <  histnumber; ++i)
+        {
+          if ( inputW->hasMaskedBins(i) )  // Does the current spectrum have any masked bins?
+          {
+            this->propagateMasks(inputW,outputW,i);
+          }
+        }
 
       } // END ---- Workspace2D
 

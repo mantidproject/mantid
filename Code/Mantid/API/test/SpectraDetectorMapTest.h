@@ -40,6 +40,11 @@ public:
     TS_ASSERT_EQUALS(detsOut.size(),2);
     TS_ASSERT_EQUALS(detsOut[0],10);
     TS_ASSERT_EQUALS(detsOut[1],20);
+//    //Overloaded to add a single detector for a single pixel
+//    TS_ASSERT_THROWS_NOTHING(sdMapLocal.addSpectrumEntries(3, 12));
+//    std::vector<int> detsOut3 = sdMapLocal.getDetectors(3);
+//    TS_ASSERT_EQUALS(detsOut3.size(),1);
+//    TS_ASSERT_EQUALS(detsOut3[0],12);
   }
   
   void testClear()

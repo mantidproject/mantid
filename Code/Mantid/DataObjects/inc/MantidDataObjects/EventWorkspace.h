@@ -10,6 +10,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 using boost::posix_time::ptime;
@@ -30,7 +31,8 @@ namespace DataObjects
 
 
 ///Map to EventList objects, with an int as the index.
-typedef std::map<const int, EventList> EventListMap;
+typedef std::map<const int, EventList*> EventListMap;
+typedef std::vector<EventList*> EventListVector;
 
 
 /** \class EventWorkspace
@@ -68,23 +70,23 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   //------------------------------------------------------------
 
-  /** Return the data X vector at a given pixel. */
+  /** Return the data X vector at a given spectrum number. */
   MantidVec& dataX(const int);
 
-  /** Return the data Y vector at a given pixel. */
+  /** Return the data Y vector at a given spectrum number. */
   MantidVec& dataY(const int);
 
-  /** Return the data E vector at a given pixel. */
+  /** Return the data E vector at a given spectrum number. */
   MantidVec& dataE(const int);
 
 
-  /** Return the const data X vector at a given pixel. */
+  /** Return the const data X vector at a given spectrum number. */
   const MantidVec& dataX(const int) const;
 
-  /** Return the const data Y vector at a given pixel. */
+  /** Return the const data Y vector at a given spectrum number. */
   const MantidVec& dataY(const int) const;
 
-  /** Return the const data E vector at a given pixel. */
+  /** Return the const data E vector at a given spectrum number. */
   const MantidVec& dataE(const int) const;
 
 
@@ -99,8 +101,17 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Set the x-axis data (histogram bins) for all pixels */
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
-  /** Get an EventList object at the given pixel number */
-  EventList& getEventList(const int index);
+  /** Get an EventList object at the given pixelid number */
+  EventList& getEventList(const int pixelid);
+
+  /** Get an EventList object at the given spectrum number */
+  EventList& getEventListAtSpectrumNumber(const int spectrum_number);
+
+  /** Call this method when loading event data is complete.
+   * The map of pixelid to spectrum # is generated.
+   * */
+  void doneLoadingData();
+
 
   //------------------------------------------------------------
   /** Set the size of the MRU (most recently used) histogram cache **/
@@ -110,7 +121,7 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Get the absolute time corresponding to the give frame ID */
   ptime getTime(const size_t frameId);
 
-  /** Add ahe absolute time corresponding to the give frame ID */
+  /** Add the absolute time corresponding to the give frame ID */
   void addTime(const size_t frameId, ptime absoluteTime);
 
   /** The total number of events across all of the spectra. */
@@ -125,9 +136,13 @@ private:
   /// NO ASSIGNMENT ALLOWED
   EventWorkspace& operator=(const EventWorkspace&);
 
-  /// A vector that holds the event list for each pixel.
-  mutable EventListMap data;
-  //std::vector<EventList> data;
+  /// A map that holds the event list for each pixel; the key is the pixelid.
+  mutable EventListMap data_map;
+
+  /** A vector that holds the event list for each pixel; the key is
+   * the spectrum #, which is not necessarily the pixelid.
+   */
+  mutable EventListVector data;
 
   /// Static reference to the logger class
   static Kernel::Logger & g_log;

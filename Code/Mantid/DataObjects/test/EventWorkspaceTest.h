@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -56,7 +57,7 @@ public:
 
     EventWorkspace_sptr retVal(new EventWorkspace);
     if (initialize_pixels)
-    retVal->initialize(NUMPIXELS,1,1);
+      retVal->initialize(NUMPIXELS,1,1);
     else
       retVal->initialize(1,1,1);
 
@@ -68,6 +69,7 @@ public:
         retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
       }
     }
+    retVal->doneLoadingData();
 
     //Create the x-axis for histogramming.
     Kernel::cow_ptr<MantidVec> axis;
@@ -90,6 +92,8 @@ public:
     ew = createEventWorkspace(1);
   }
 
+
+  //------------------------------------------------------------------------------
   void test_constructor()
   {
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
@@ -97,10 +101,58 @@ public:
     TS_ASSERT_EQUALS( ew->size(), NUMBINS*NUMPIXELS);
   }
 
+
+  //------------------------------------------------------------------------------
+  void test_uneven_pixel_ids()
+  {
+    EventWorkspace_sptr uneven(new EventWorkspace);
+    uneven->initialize(1,1,1);
+
+    //Make fake events. Spectrum IDs start at 5 increment by 10
+    for (int pix=5; pix<NUMPIXELS; pix += 10)
+    {
+      for (int i=0; i<pix; i++)
+      {
+        uneven->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+      }
+    }
+    uneven->doneLoadingData();
+
+    //Create the x-axis for histogramming.
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.resize(NUMBINS);
+    for (int i = 0; i < NUMBINS; ++i)
+      xRef[i] = i*BIN_DELTA;
+    //Set all the histograms at once.
+    uneven->setAllX(axis);
+
+    TS_ASSERT_EQUALS( uneven->getNumberHistograms(), NUMPIXELS/10);
+    TS_ASSERT_EQUALS( uneven->blocksize(), NUMBINS);
+    TS_ASSERT_EQUALS( uneven->size(), NUMBINS*NUMPIXELS/10);
+
+    //Does the spectra map make sense
+    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(0)[0], 5);
+    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(5)[0], 55);
+
+    //Spectrum 0 is at pixelid 5 and has 5 events
+    const EventList el0(uneven->getEventListAtSpectrumNumber(0));
+    TS_ASSERT_EQUALS( el0.getNumberEvents(), 5);
+    const EventList el1(uneven->getEventListAtSpectrumNumber(1));
+    TS_ASSERT_EQUALS( el1.getNumberEvents(), 15);
+    const EventList el5(uneven->getEventListAtSpectrumNumber(5));
+    TS_ASSERT_EQUALS( el5.getNumberEvents(), 55);
+
+    //Out of range
+    TS_ASSERT_THROWS( uneven->dataX(-3), std::range_error );
+    TS_ASSERT_THROWS( uneven->dataX(NUMPIXELS/10), std::range_error );
+  }
+
+  //------------------------------------------------------------------------------
   void test_getEventList()
   {
     //Get pixel 1
-    const EventList el(ew->getEventList(1));
+    const EventList el(ew->getEventListAtSpectrumNumber(1));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
@@ -111,6 +163,7 @@ public:
     TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS+1], 0);
   }
 
+  //------------------------------------------------------------------------------
   void test_data_access()
   {
     //Non-const access throws errors
@@ -126,6 +179,7 @@ public:
     //Can't try the const access; copy constructors are not allowed.
   }
 
+  //------------------------------------------------------------------------------
   void test_data_access_not_setting_num_vectors()
   {
     ew = createEventWorkspace(0);
@@ -141,6 +195,7 @@ public:
     TS_ASSERT_THROWS( ew->dataX(3), NotImplementedError );
   }
 
+  //------------------------------------------------------------------------------
   void test_setX_individually()
   {
     //Create A DIFFERENT x-axis for histogramming.
@@ -151,7 +206,7 @@ public:
       xRef[i] = i*BIN_DELTA*2;
 
     ew->setX(0, axis);
-    const EventList el(ew->getEventList(0));
+    const EventList el(ew->getEventListAtSpectrumNumber(0));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA*2);
     //Now there are 2 events in each bin
@@ -160,11 +215,12 @@ public:
     TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS/2], 0);
 
     //But pixel 1 is the same
-    const EventList el1(ew->getEventList(1));
+    const EventList el1(ew->getEventListAtSpectrumNumber(1));
     TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
     TS_ASSERT_EQUALS( el1.dataY()[1], 1);
   }
 
+  //------------------------------------------------------------------------------
   void test_frameTime()
   {
     //Nothing yet
@@ -184,6 +240,7 @@ public:
     //TS_ASSERT_THROWS( ew->addTime(-100, t - minutes(5) ), std::range_error);
   }
 
+  //------------------------------------------------------------------------------
   void test_histogram_cache()
   {
 	  //Try caching and most-recently-used MRU list.
