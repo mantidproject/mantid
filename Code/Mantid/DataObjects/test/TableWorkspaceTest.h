@@ -212,12 +212,13 @@ public:
 
 	  }
 	  std::string searchstr="Name3";
-	  int row=0,col=0;
+	  int row=0;const int col=0;
 	  tw.find(searchstr,row,col);
 	  TS_ASSERT_EQUALS(row,2);
 
+	  const int formatcol=2;
 	  searchstr="Format Version8";
-	  tw.find(searchstr,row,col);
+	  tw.find(searchstr,row,formatcol);
 	  TS_ASSERT_EQUALS(row,7);
 
 

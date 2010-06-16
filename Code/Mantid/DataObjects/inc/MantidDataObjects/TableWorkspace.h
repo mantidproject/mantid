@@ -116,7 +116,98 @@ namespace DataObjects
     int insertRow(int index);
     /// Delets a row if it exists.
     void removeRow(int index);
-
+     
+	 /* This method finds the row and column index of an integer cell value in a table workspace
+	 * @param value -value to search
+	 * @param  row  row number of the value  searched
+	 * @param  col  column number of the value searched
+	*/
+	virtual void find(int value,int& row,const int & col)
+	{		
+		findValue(value,row,col);
+	}
+	/* This method finds the row and column index of an string cell value in a table workspace
+	* @param value -value to search
+	* @param  row  row number of the value  searched
+	* @param  col  column number of the value searched
+	*/
+	virtual void find(std::string value,int& row,const int & col)
+	{
+		findValue(value,row,col);
+	}
+	/* This method finds the row and column index of an float value in a table workspace
+	* @param value -value to search
+	* @param  row  row number of the value  searched
+	* @param  col  column number of the value searched
+	*/
+	virtual void find(float value,int& row,const int & col)
+	{
+		findValue(value,row,col);
+	}
+	/* This method finds the row and column index of an API::Bollean value in a table workspace
+	* @param value -value to search
+	* @param  row  row number of the value  searched
+	* @param  col  column number of the value searched
+	*/
+	virtual void find(API::Boolean value,int& row,const int & col)
+	{
+		findValue(value,row,col);
+	}
+	/* This method finds the row and column index of an double cell value in a table workspace
+	* @param value -value to search
+	* @param  row  row number of the value  searched
+	* @param  col  column number of the value searched
+	*/
+	virtual void find(double value,int& row,const int & col)
+	{
+		findValue(value,row,col);
+	}
+	/* This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
+	* @param value -value to search
+	* @param  row  row number of the value  searched
+	* @param  col  column number of the value searched
+	*/
+	void find(Mantid::Geometry::V3D value,int& row,const int & col)
+	{
+		findValue(value,row,col);
+	}
+			
+private:
+	
+	/// template method to find a given value in a table.
+	template<typename  Type>
+	void findValue(const Type value,int& row,const int & colIndex)
+	{
+		
+		try
+		{
+			TableColumn_ptr<Type> tc_sptr= getColumn(colIndex);
+			std::vector<Type> dataVec=tc_sptr->data();
+			typename std::vector<Type>::iterator itr;
+			itr=std::find(dataVec.begin(),dataVec.end(),value);
+			if(itr!=dataVec.end())
+			{
+				std::vector<int>::difference_type pos;
+				pos=std::distance(dataVec.begin(),itr);
+				//int pos=static_cast<int>itr-dataVec.begin();
+				row=static_cast<int>(pos);
+				
+			}
+			else
+			{
+				row=-1;
+			 }
+		}
+		catch(std::range_error&)
+		{
+			throw;
+		}
+		catch(std::runtime_error&)
+		{
+			throw;
+		}
+	}
+	
     /* This method finds the row and column index of an integer cell value in a table workspace
     * @param value -value to search
     * @param  row  row number of the value  searched
@@ -172,36 +263,35 @@ namespace DataObjects
       findValue(value,row,col);
     }
 
-  private:
 
     /// template method to find a given value in a table.
-    template<typename  Type>
-    void findValue(const Type value,int& row,int & col)
-    {
-      int total_columns=columnCount();
-      for (int count=0;count<total_columns;++count)
-      {
-        TableColumn_ptr<Type> tc_sptr= getColumn(count);
-        std::vector<Type> dataVec=tc_sptr->data();
-        typename std::vector<Type>::iterator itr;
-        itr=std::find(dataVec.begin(),dataVec.end(),value);
-        if(itr!=dataVec.end())
-        {
-          std::vector<int>::difference_type pos;
-          pos=std::distance(dataVec.begin(),itr);
-          //int pos=static_cast<int>itr-dataVec.begin();
-          row=static_cast<int>(pos);
-          col=count;
-          break;
-        }
-        else
-        {
-          row=-1;
-          col=-1;
-        }
-      }
+    //template<typename  Type>
+    //void findValue(const Type value,int& row,int & col)
+    //{
+    //  int total_columns=columnCount();
+    //  for (int count=0;count<total_columns;++count)
+    //  {
+    //    TableColumn_ptr<Type> tc_sptr= getColumn(count);
+    //    std::vector<Type> dataVec=tc_sptr->data();
+    //    typename std::vector<Type>::iterator itr;
+    //    itr=std::find(dataVec.begin(),dataVec.end(),value);
+    //    if(itr!=dataVec.end())
+    //    {
+    //      std::vector<int>::difference_type pos;
+    //      pos=std::distance(dataVec.begin(),itr);
+    //      //int pos=static_cast<int>itr-dataVec.begin();
+    //      row=static_cast<int>(pos);
+    //      col=count;
+    //      break;
+    //    }
+    //    else
+    //    {
+    //      row=-1;
+    //      col=-1;
+    //    }
+    //  }
 
-    }
+    //}
 
 private:
     /// Used in std::find_if algorithm to find a Column with name \a name.
