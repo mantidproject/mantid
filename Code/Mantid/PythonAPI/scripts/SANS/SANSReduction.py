@@ -1584,6 +1584,8 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
             Q1D(tmpWS,final_result,final_result,Q_REBIN, AccountForGravity=GRAVITY)
     # 2D    
     else:
+        if finding_centre == True:
+            raise Exception('Running center finding in 2D analysis is not possible, set1D() first.') 
         # Run 2D algorithm
         Qxy(tmpWS, final_result, QXY2, DQXY)
 
@@ -1675,12 +1677,16 @@ def CalculateResidue():
         residueY += pow(yvalsA[indexA] - yvalsB[indexB], 2)
         indexB += 1
                         
-    if RESIDUE_GRAPH is None or (not RESIDUE_GRAPH in appwidgets()):
-        RESIDUE_GRAPH = plotSpectrum('Left', 0)
-        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
-        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
-    RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
-
+    try :
+        if RESIDUE_GRAPH is None or (not RESIDUE_GRAPH in appwidgets()):
+            RESIDUE_GRAPH = plotSpectrum('Left', 0)
+            mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
+            mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
+        RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
+    except :
+        #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
+        pass
+        
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
     return residueX, residueY
 	
@@ -1700,7 +1706,7 @@ def RunReduction(coords):
         MoveInstrumentComponent(SCATTER_SAMPLE.getName(), ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
         if SCATTER_CAN.getName() != '':
             MoveInstrumentComponent(SCATTER_CAN.getName(), ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
-			
+
     _SAMPLE_SETUP.setMaskPtMin([0.0,0.0])
     _SAMPLE_SETUP.setMaskPtMax([xcentre, ycentre])
     if _CAN_SETUP != None:
@@ -1864,3 +1870,6 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 ############################################################################################
+#AssignSample('5508.nxs', 2)
+#_assignHelper('5508.nxs', False, True, period = 2)
+#_loadRawData('SANS2D00005508', '5508_sans', 'nxs', period=2)
