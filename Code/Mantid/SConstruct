@@ -299,6 +299,7 @@ subProjs.append('Algorithms')
 subProjs.append('DataHandling')
 subProjs.append('Nexus')
 subProjs.append('Crystal')
+subProjs.append('ICat')
 
 for subproj in subProjs:
     ret = SConscript(subproj+'/SConscript')
