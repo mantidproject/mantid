@@ -31,7 +31,7 @@ cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
 
 for fname in dirList:
   if os.path.isdir(path + fname):
-    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
+    if fname != '.svn' and fname != 'Build' and fname != 'ICat':
       #does folder contain /test?
       fullpath=path + fname + testfolder
       if os.path.exists(fullpath) and len(os.listdir(fullpath)) > 0:
