@@ -3,7 +3,7 @@
 
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidICat/ICatExport.h"
-#include "MantidIcat/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 namespace Mantid
 {
 	namespace ICat
@@ -14,7 +14,7 @@ namespace Mantid
 
 			const std::string& getSessionId()const{return m_sessionId;}
 			void setSessionId(const std::string& sessionId){m_sessionId=sessionId;}
-			
+
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<SessionImpl>;
 			SessionImpl(){}
@@ -23,7 +23,7 @@ namespace Mantid
 			SessionImpl(const SessionImpl&);
 			/// private assignment
 			SessionImpl operator = (const SessionImpl&);
-			/// string to cache session id 
+			/// string to cache session id
 			std::string m_sessionId;
 
 			///

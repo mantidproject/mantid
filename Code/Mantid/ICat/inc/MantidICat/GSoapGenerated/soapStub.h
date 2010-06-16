@@ -12,7 +12,7 @@
 #define SOAP_NAMESPACE_OF_ns2	""
 #define SOAP_NAMESPACE_OF_ns1	"client.icat3.uk"
 #define SOAP_NAMESPACE_OF_ns3	"admin.client.icat3.uk"
-#include "MantidIcat/GSoap/stdsoap2.h"
+#include "MantidICat/GSoap/stdsoap2.h"
 
 /******************************************************************************\
  *                                                                            *

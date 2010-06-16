@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidIcat/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 
 namespace Mantid
 {
