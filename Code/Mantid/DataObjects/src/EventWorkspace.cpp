@@ -125,7 +125,7 @@ namespace DataObjects
     //Let's make the vector big enough.
     if (this->data_map.size() > m_noVectors)
     {
-      //Too many vectors! Why did you initialize it bigger than you needed too, silly?
+      //Too many vectors! Why did you initialize it bigger than you needed to, silly?
       for (int i=this->data_map.size(); i<m_noVectors; i++)
         //Delete the offending EventList so as to avoid memory leaks.
         delete this->data[i];
@@ -169,21 +169,21 @@ namespace DataObjects
   // Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataX(const int index)
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
     return this->data[index]->dataX();
   }
 
   MantidVec& EventWorkspace::dataY(const int index)
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
     return this->data[index]->dataY();
   }
 
   MantidVec& EventWorkspace::dataE(const int index)
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
     return this->data[index]->dataE();
   }
@@ -196,7 +196,7 @@ namespace DataObjects
 
   const MantidVec& EventWorkspace::dataX(const int index) const
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
     return this->data[index]->dataX();
 
@@ -204,21 +204,21 @@ namespace DataObjects
 
   const MantidVec& EventWorkspace::dataY(const int index) const
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
     return this->data[index]->dataY();
   }
 
   const MantidVec& EventWorkspace::dataE(const int index) const
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
     return this->data[index]->dataE();
   }
 
   Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::refX, histogram number out of range");
     return this->data[index]->getRefX();
 
@@ -230,7 +230,7 @@ namespace DataObjects
   void EventWorkspace::setX(const int index,
       const Kernel::cow_ptr<MantidVec> &x)
   {
-    if ((index >= this->m_noVectors) or (index < 0))
+    if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::setX, histogram number out of range");
     this->data[index]->setX(x);
   }
