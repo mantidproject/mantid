@@ -1,16 +1,42 @@
 """Access the Mantid Framework.
 """
 import os
+import platform
 import sys
 import types
 import copy
 import __builtin__
 import __main__
-# Finally the Mantid API
+
+# --- Import the Mantid API ---
 if os.name == 'nt':
     from MantidPythonAPI import *
 else:
+    # 
+    # To enable symbol sharing across extension modules (i.e. loaded dynamic libraries)
+    # calls to dlopen by Python must also use the RTLD_GLOBAL flag. If the default
+    # dlopen flags are used then the Singleton instance symbols will be multiply 
+    # defined across libraries and multiple intances Singleton instances can be created
+    #
+    saved_dlopenflags = sys.getdlopenflags()
+    if platform.system() == "Linux":
+        try:
+            import DLFCN as dynload
+        except:
+            # Try older module
+            try:
+                import dl as dynload
+            except:
+                # If neither is available then this platform is unsupported
+                print "Both the DLFCN and dl modules are unavailable."
+                print "Cannot run Mantid from stand-alone Python on this platform."
+                sys.exit(1)
+
+        sys.setdlopenflags(dynload.RTLD_NOW | dynload.RTLD_GLOBAL)
+
     from libMantidPythonAPI import *
+    sys.setdlopenflags(saved_dlopenflags)
+# --- End of library load ---
 
 #-------------------------------------------------------------------------------
 def makeString(value):
