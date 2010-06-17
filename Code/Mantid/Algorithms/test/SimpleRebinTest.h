@@ -139,7 +139,7 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
-  void testEventWorkspace()
+  void xtestEventWorkspace()
   {
     EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("test_inEvent", test_in);
