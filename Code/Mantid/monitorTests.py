@@ -189,6 +189,7 @@ if __name__ == "__main__":
                     line = line[:-1] #Remove trailing /n
                 if ("Error:" in line) or ("error:" in line) \
                     or ("terminate called after throwing an instance" in line) \
+                    or ("Segmentation fault" in line) \
                     or ("  what(): " in line) \
                     or ("Assertion" in line and " failed." in line) \
                     :

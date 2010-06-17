@@ -4,9 +4,13 @@ others that may be user-modified.
 Un-checked-in files are listed.
 Prompts the user for the checkin message."""
 
-import os
+import os, sys
 
-def getSVNRevision():
+def do_checkin(only_this):
+    """Parameters:
+        only_this: a list of strings. The string must be in the filename
+            for the file to be checked in. Leave None to check in
+            all matching files."""
     import subprocess
     p = subprocess.Popen("svn status", shell=True, bufsize=10000,
           stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
@@ -29,7 +33,15 @@ def getSVNRevision():
                 ("test/runTests.sh" in filename) :
                     print "NOT CHECKING IN:", filename
             else:
-                good_files.append(filename)
+                if only_this is None:
+                    good_files.append(filename)
+                else:
+                    #Check for any entry in the list only_this
+                    for only_this_one in only_this:
+                        if only_this_one in filename:
+                            good_files.append(filename)
+                            break
+                        
         line=get.readline()
 
     print ""
@@ -54,5 +66,9 @@ def getSVNRevision():
 
 #end def
 
-
-getSVNRevision()
+if __name__=="__main__":
+    if len(sys.argv)>1:
+        only_this = sys.argv[1:]
+    else:
+        only_this = None
+    do_checkin(only_this)
