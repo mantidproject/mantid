@@ -68,6 +68,8 @@ public:
   virtual ~SpectraDetectorMap();
   /// Populate the Map with _spec and _udet C array
   void populate(const int* _spec, const int* _udet, int nentries);
+  /// Populate with a simple 1-1 correspondance between spec and udet; from start (inclusive) to end (exclusive).
+  void populateSimple(const int start, const int end);
   /// Link a list of UDETs to the given spectrum
   void addSpectrumEntries(const int spectrum, const std::vector<int>& udetList);
   /// Move a detector from one spectrum to another

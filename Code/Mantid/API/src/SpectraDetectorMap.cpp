@@ -38,6 +38,23 @@ namespace Mantid
       return;
     }
 
+    void SpectraDetectorMap::populateSimple(const int start, const int end)
+    {
+      m_s2dmap.clear();
+      if (end<=start)
+      {
+        g_log.error("populateSimple : end should be > start");
+        throw std::invalid_argument("populateSimple : end should be > start");
+      }
+      for (int i=start; i<end; ++i)
+      {
+        // Uncomment the line below to get a print out of the mapping as it's loaded
+        m_s2dmap.insert(std::pair<int,int>(i,i)); // Insert current detector with Spectra number as key
+      }
+      return;
+    }
+
+
     /** Links a list of UDETs to the given spectrum.
      *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
      *  @param spectrum The spectrum number to which detectors should be added

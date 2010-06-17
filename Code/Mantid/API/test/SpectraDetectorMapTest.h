@@ -25,6 +25,17 @@ public:
     TS_ASSERT_EQUALS(sdMap.nElements(),length);
   }
 
+  void testpopulateSimple()
+  {
+    SpectraDetectorMap sdMapLocal;
+    sdMapLocal.populateSimple(10, 200);
+    TS_ASSERT_EQUALS(sdMapLocal.nElements(),200-10);
+    std::vector<int> detsOut = sdMapLocal.getDetectors(10);
+    TS_ASSERT_EQUALS(detsOut[0], 10);
+    detsOut = sdMapLocal.getDetectors(199);
+    TS_ASSERT_EQUALS(detsOut[0], 199);
+  }
+
   void testAddSpectrumEntries()
   {
     //use my own local sdmap as I will be altering it
