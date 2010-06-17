@@ -139,60 +139,68 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
-  void xtestEventWorkspace()
+  void testEventWorkspace_SameOutputWorkspace()
   {
     EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("test_inEvent", test_in);
 
-    const EventList el(test_in->getEventList(1));
+    const EventList el(test_in->getEventListAtSpectrumNumber(1));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
     TS_ASSERT_EQUALS( el.dataY()[0], 1);
     TS_ASSERT_EQUALS( el.dataY()[1], 1);
     TS_ASSERT_EQUALS( el.dataY()[NUMBINS-2], 1); //The last bin
-    
 
-//    // Mask a couple of bins for a test
-//    test_in2D->maskBin(10,4);
-//    test_in2D->maskBin(10,5);
-//
     SimpleRebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_inEvent");
-    rebin.setPropertyValue("OutputWorkspace","test_out");
-    rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
+    rebin.setPropertyValue("OutputWorkspace","test_inEvent");
+    rebin.setPropertyValue("Params", "0.0,4.0,100");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-//    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
-//    const Mantid::MantidVec& outX=rebindata->dataX(5);
-//    const Mantid::MantidVec& outY=rebindata->dataY(5);
-//    const Mantid::MantidVec& outE=rebindata->dataE(5);
-//    TS_ASSERT_DELTA(outX[7],15.5  ,0.000001);
-//    TS_ASSERT_DELTA(outY[7],8.0 ,0.000001);
-//    TS_ASSERT_DELTA(outE[7],sqrt(8.0)  ,0.000001);
-//    TS_ASSERT_DELTA(outX[12],24.2  ,0.000001);
-//    TS_ASSERT_DELTA(outY[12],9.68 ,0.000001);
-//    TS_ASSERT_DELTA(outE[12],sqrt(9.68)  ,0.000001);
-//    TS_ASSERT_DELTA(outX[17],32  ,0.000001);
-//    TS_ASSERT_DELTA(outY[17],4.0 ,0.000001);
-//    TS_ASSERT_DELTA(outE[17],sqrt(4.0)  ,0.000001);
-//    bool dist=rebindata->isDistribution();
-//    TS_ASSERT(!dist);
-//
-//    // Test that the masking was propagated correctly
-//    TS_ASSERT( test_in2D->hasMaskedBins(10) );
-//    TS_ASSERT( rebindata->hasMaskedBins(10) );
-//    TS_ASSERT_THROWS_NOTHING (
-//      const MatrixWorkspace::MaskList& masks = rebindata->maskedBins(10);
-//      TS_ASSERT_EQUALS( masks.size(),1 )
-//      TS_ASSERT_EQUALS( masks.begin()->first, 1 )
-//      TS_ASSERT_EQUALS( masks.begin()->second, 0.75 )
-//    );
-//
-//    AnalysisDataService::Instance().remove("test_in2D");
-//    AnalysisDataService::Instance().remove("test_out");
+    const EventList el2(test_in->getEventListAtSpectrumNumber(2));
+    TS_ASSERT_EQUALS( el2.dataX()[0], 0.0);
+    TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
+    //# of events per bin was doubled
+    TS_ASSERT_EQUALS( el2.dataY()[0], 2);
+    TS_ASSERT_EQUALS( el2.dataY()[1], 2);
+    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-2], 2); //The last bin
+    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2], 0); //The last bin
+  }
+
+
+  void xtestEventWorkspace_DifferentOutputWorkspace()
+  {
+    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
+    AnalysisDataService::Instance().add("test_inEvent2", test_in);
+
+    const EventList el(test_in->getEventListAtSpectrumNumber(1));
+    TS_ASSERT_EQUALS( el.dataX()[0], 0);
+    TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
+    //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
+    TS_ASSERT_EQUALS( el.dataY()[0], 1);
+    TS_ASSERT_EQUALS( el.dataY()[1], 1);
+    TS_ASSERT_EQUALS( el.dataY()[NUMBINS-2], 1); //The last bin
+
+    SimpleRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace","test_inEvent2");
+    rebin.setPropertyValue("OutputWorkspace","test_outEvent");
+    rebin.setPropertyValue("Params", "0.0,4.0,100");
+    TS_ASSERT(rebin.execute());
+//    TS_ASSERT(rebin.isExecuted());
+
+//    EventWorkspace_sptr test_outEvent = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("test_outEvent"));
+//    const EventList el2(test_outEvent->getEventListAtSpectrumNumber(2));
+//    TS_ASSERT_EQUALS( el2.dataX()[0], 0.0);
+//    TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
+//    //# of events per bin was doubled
+//    TS_ASSERT_EQUALS( el2.dataY()[0], 2);
+//    TS_ASSERT_EQUALS( el2.dataY()[1], 2);
+//    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-2], 2); //The last bin
+//    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2], 0); //The last bin
   }
     
 
@@ -222,9 +230,11 @@ private:
       {
         //Create a list of events in order, one per bin.
         events += TofEvent((ie*BIN_DELTA)+0.5, 1);
-  }
-    	retVal->setX(i,axis);
-    }
+      }
+   }
+    retVal->doneLoadingData();
+    retVal->setAllX(axis);
+
 
     return retVal;
   }

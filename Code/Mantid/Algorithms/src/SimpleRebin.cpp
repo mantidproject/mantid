@@ -33,7 +33,7 @@ namespace Mantid
     void SimpleRebin::init()
     {
       declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),
+        new WorkspaceProperty<>("InputWorkspace", "",Direction::InOut,new HistogramValidator<>),
         "Workspace containing the input data");
       declareProperty(
         new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
@@ -52,7 +52,7 @@ namespace Mantid
     void SimpleRebin::exec()
     {
       // Get the input workspace
-      MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
+      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
       // retrieve the properties
       std::vector<double> rb_params=getProperty("Params");
@@ -60,29 +60,56 @@ namespace Mantid
       bool dist = inputW->isDistribution();
 
       // workspace independent determination of length
-      const int histnumber = inputW->size()/inputW->blocksize();
+      const int histnumber = inputW->getNumberHistograms();
       DataObjects::Histogram1D::RCtype XValues_new;
       // create new output X axis
       const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params,XValues_new.access());
 
-      // make output Workspace the same type is the input, but with new length of signal array
-      API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
-
-
       //---------------------------------------------------------------------------------
       //Now, determine if the input workspace is actually an EventWorkspace
-      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
-      if (eventW != NULL)
+      EventWorkspace_sptr eventW = boost::dynamic_pointer_cast<EventWorkspace>(inputW);
 
-      { //------- EventWorkspace ---------------------------
-        //std::cout << "EVENT!\n";
-        //TODO: Everything.
-        //return;
+      if (eventW != NULL)
+      {
+        //------- EventWorkspace ---------------------------
+        EventWorkspace_sptr eventOutW;
+        if (getPropertyValue("OutputWorkspace") == getPropertyValue("InputWorkspace"))
+        {
+          //Same output as input; don't copy data for no reason.
+          eventOutW = eventW;
+        }
+        else
+        {
+          //Need to copy over a new workspace
+          //std::cout << "Creating copy \n";
+          eventOutW = eventW;
+          //eventOutW =  boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create(eventW,histnumber,ntcnew,ntcnew-1) );
+        }
+        //This only sets the X axis. Actual rebinning will be done upon data access.
+        //std::cout << "setAllX\n";
+        eventOutW->setAllX(XValues_new);
+
+        //Copy the units over too.
+        //std::cout << "getAxis\n";
+        for (int i=0; i < eventOutW->axes(); ++i)
+        {
+          eventOutW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
+        }
+
+        //std::cout << "setProperty(OutputWorkspace\n";
+        // Assign it to the output workspace property; recasting to matrixworkspace
+        setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutW) );
+
+        //std::cout << "done\n";
       } // END ---- EventWorkspace
 
       else
 
       { //------- Workspace2D or other MatrixWorkspace ---------------------------
+
+        // make output Workspace the same type is the input, but with new length of signal array
+        API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+
 
         // Copy over the 'vertical' axis
         if (inputW->axes() > 1) outputW->replaceAxis( 1, inputW->getAxis(1)->clone(outputW.get()) );
@@ -136,18 +163,17 @@ namespace Mantid
             this->propagateMasks(inputW,outputW,i);
           }
         }
+        //Copy the units over too.
+        for (int i=0; i < outputW->axes(); ++i)
+        {
+          outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
+        }
+
+        // Assign it to the output workspace property
+        setProperty("OutputWorkspace",outputW);
+
 
       } // END ---- Workspace2D
-
-
-      //Copy the units over too.
-      for (int i=0; i < outputW->axes(); ++i)
-      {
-        outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();        
-      }
-      
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace",outputW);
 
       return;
     }
