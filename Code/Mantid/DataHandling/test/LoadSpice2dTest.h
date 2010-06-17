@@ -16,6 +16,10 @@
 #include "Poco/Path.h"
 #include <vector>
 
+/**
+ * Test HFIR SANS Spice loader
+ * TODO: check that an exception is thrown when the geometry file doesn't define all monitors
+ */
 class LoadSpice2DTest : public CxxTest::TestSuite
 {
 public:
@@ -59,8 +63,9 @@ public:
     Mantid::API::Workspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace) );
     Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
-    //Single histogram
-    TS_ASSERT_EQUALS( ws2d->getNumberHistograms(), 36864 );
+
+    // We have 192*192 + 2 channels, for the PSD + timer + monitor
+    TS_ASSERT_EQUALS( ws2d->getNumberHistograms(), 36864 + Mantid::DataHandling::LoadSpice2D::nMonitors );
 
     //Test the size of the data vectors
     TS_ASSERT_EQUALS( (ws2d->dataX(0).size()), 2);
@@ -69,17 +74,29 @@ public:
 
 
     double tolerance(1e-04);
-    TS_ASSERT_DELTA( ws2d->dataX(0)[0], 0.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataX(2)[0], 0.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataX(192)[0], 0.0, tolerance );
+    int nmon = Mantid::DataHandling::LoadSpice2D::nMonitors;
+    TS_ASSERT_DELTA( ws2d->dataX(0+nmon)[0], 0.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataX(2+nmon)[0], 0.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataX(192+nmon)[0], 0.0, tolerance );
 
-    TS_ASSERT_DELTA( ws2d->dataY(0)[0], 318.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataY(2)[0], 109.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataY(192)[0], 390.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataY(0+nmon)[0], 318.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataY(2+nmon)[0], 109.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataY(192+nmon)[0], 390.0, tolerance );
 
-    TS_ASSERT_DELTA( ws2d->dataE(0)[0], 17.8325, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataE(2)[0], 10.4403, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataE(192)[0], 19.7484, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataE(0+nmon)[0], 17.8325, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataE(2+nmon)[0], 10.4403, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataE(192+nmon)[0], 19.7484, tolerance );
+
+    // check monitor
+    TS_ASSERT_DELTA( ws2d->dataY(0)[0], 29205906.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataE(0)[0], 5404.2488, tolerance );
+
+    // check timer
+    TS_ASSERT_DELTA( ws2d->dataY(1)[0], 3600.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataE(1)[0], 0.0, tolerance );
+
+
+
 
     // Check instrument
     //----------------------------------------------------------------------

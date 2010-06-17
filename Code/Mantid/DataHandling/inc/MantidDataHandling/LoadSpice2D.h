@@ -61,6 +61,8 @@ namespace Mantid
       virtual const int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
+      // Number of monitors
+      static const int nMonitors = 2;
 
     private:
       /// Overwrites Algorithm method.
@@ -74,7 +76,6 @@ namespace Mantid
       void runLoadInstrument(const std::string & inst_name,DataObjects::Workspace2D_sptr localWorkspace);
       /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
       void runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins);
-
     };
     
   }

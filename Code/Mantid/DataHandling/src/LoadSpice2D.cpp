@@ -41,6 +41,43 @@ namespace Mantid
       return !(iss >> f >> t).fail();
     }
 
+    /**
+     *  Convenience function to read in from an XML element
+     *  @param t: variable to feed the data in
+     *  @param pRootElem: element to read from
+     *  @param element: name of the element to read
+     *  @param fileName: file path
+     */
+    template <class T>
+    bool from_element(T& t, Element* pRootElem,  const std::string& element, const std::string& fileName)
+    {
+      Element* sasEntryElem = pRootElem->getChildElement(element);
+      if (!sasEntryElem) throw Kernel::Exception::NotFoundError(element + " element not found in Spice XML file", fileName);
+      std::stringstream value_str(sasEntryElem->innerText());
+      return !(value_str >> t).fail();
+    }
+
+    /**
+     * Convenience function to store a detector value into a given spectrum.
+     * Note that this type of data doesn't use TOD, so that we use a single dummy
+     * bin in X. Each detector is defined as a spectrum of length 1.
+     * @param ws: workspace
+     * @param specID: ID of the spectrum to store the value in
+     * @param value: value to store
+     */
+    void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value, double error)
+    {
+      MantidVec& X = ws->dataX(specID);
+      MantidVec& Y = ws->dataY(specID);
+      MantidVec& E = ws->dataE(specID);
+      X[0] = 0.0;
+      X[1] = 1.0;
+      Y[0] = value;
+      E[0] = error;
+      ws->getAxis(1)->spectraNo(specID) = specID;
+    }
+
+
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(LoadSpice2D)
 
@@ -95,17 +132,20 @@ namespace Mantid
       std::string instrument = element->innerText();
 
       // Read in the detector dimensions
-      int numberXPixels;
-      element = sasEntryElem->getChildElement("Number_of_X_Pixels");
-      throwException(sasEntryElem, "Number_of_X_Pixels", fileName);
-      std::stringstream x(element->innerText());
-      x >> numberXPixels;
+      int numberXPixels = 0;
+      from_element<int>(numberXPixels, sasEntryElem, "Number_of_X_Pixels", fileName);
 
-      int numberYPixels;
-      element = sasEntryElem->getChildElement("Number_of_Y_Pixels");
-      throwException(sasEntryElem, "Number_of_Y_Pixels", fileName);
-      std::stringstream y(element->innerText());
-      y >> numberYPixels;
+      int numberYPixels = 0;
+      from_element<int>(numberYPixels, sasEntryElem, "Number_of_Y_Pixels", fileName);
+
+      // Read in counters
+      sasEntryElem = pRootElem->getChildElement("Counters");
+      throwException(sasEntryElem, "Counters", fileName);
+
+      double countingTime = 0;
+      from_element<double>(countingTime, sasEntryElem, "time", fileName);
+      double monitorCounts = 0;
+      from_element<double>(monitorCounts, sasEntryElem, "monitor", fileName);
 
       // Read in the data image
       Element* sasDataElem = pRootElem->getChildElement("Data");
@@ -118,10 +158,11 @@ namespace Mantid
 
       // Create the output workspace
 
-      // Number of bins: we use a single TOF bin
+      // Number of bins: we use a single dummy TOF bin
       int nBins = 1;
       // Number of detectors: should be pulled from the geometry description. Use detector pixels for now.
-      int numSpectra = numberXPixels*numberYPixels;
+      // The number of spectram also includes the monitor and the timer.
+      int numSpectra = numberXPixels*numberYPixels + LoadSpice2D::nMonitors;
 
       DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, nBins+1, nBins));
@@ -135,10 +176,9 @@ namespace Mantid
       Poco::StringTokenizer pixels(data_str, " \n\t", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
       Poco::StringTokenizer::Iterator pixel = pixels.begin();
 
-      int ipixel = 0;
       // Check that we don't keep within the size of the workspace
       int pixelcount = pixels.count();
-      if( pixelcount != numSpectra )
+      if( pixelcount != numberXPixels*numberYPixels )
       {
         throw Kernel::Exception::FileError("Inconsitent data set: "
             "There were more data pixels found than declared in the Spice XML meta-data.", fileName);
@@ -148,27 +188,31 @@ namespace Mantid
         throw Kernel::Exception::FileError("Empty data set: the data file has no pixel data.", fileName);
       }
 
+      // Go through all detectors/channels
+      int ipixel = 0;
+
+      // Store monitor count
+      store_value(ws, ipixel++, monitorCounts, monitorCounts>0 ? sqrt(monitorCounts) : 0.0);
+
+      // Store counting time
+      store_value(ws, ipixel++, countingTime, 0.0);
+
+      // Store detector pixels
       while (pixel != pixels.end())
       {
         //int ix = ipixel%npixelsx;
         //int iy = (int)ipixel/npixelsx;
 
         // Get the count value and assign it to the right bin
-        double count;
+        double count = 0.0;
         from_string<double>(count, *pixel, std::dec);
 
-        // Load workspace data
-        MantidVec& X = ws->dataX(ipixel);
-        MantidVec& Y = ws->dataY(ipixel);
-        MantidVec& E = ws->dataE(ipixel);
-
-        X[0] = 0.0;
-        X[1] = 1.0;
-        Y[0] = count;
         // Data uncertainties, computed according to the HFIR/IGOR reduction code
-        E[0] = sqrt( 0.5 + fabs( count - 0.5 ));
         // The following is what I would suggest instead...
-        // E[0] = count > 0 ? sqrt((double)count) : 0.0;
+        // error = count > 0 ? sqrt((double)count) : 0.0;
+        double error = sqrt( 0.5 + fabs( count - 0.5 ));
+
+        store_value(ws, ipixel, count, error);
 
         // Set the spectrum number
         ws->getAxis(1)->spectraNo(ipixel) = ipixel;
@@ -176,8 +220,6 @@ namespace Mantid
         ++pixel;
         ipixel++;
       }
-
-      // TODO: Need to load monitors here
 
       // run load instrument
       runLoadInstrument(instrument, ws);
@@ -243,6 +285,14 @@ namespace Mantid
       std::vector<int> monitors = instrument->getMonitors();
       nMonitors = monitors.size();
 
+      // Number of monitors should be consistent with data file format
+      if( nMonitors != LoadSpice2D::nMonitors ) {
+        std::stringstream error;
+        error << "Geometry error for " << instrument->getName() <<
+            ": Spice data format defines " << LoadSpice2D::nMonitors << " monitors, " << nMonitors << " were/was found";
+        throw std::runtime_error(error.str());
+      }
+
       int ndet = nxbins*nybins + nMonitors;
       boost::shared_array<int> udet(new int[ndet]);
       boost::shared_array<int> spec(new int[ndet]);
@@ -255,7 +305,7 @@ namespace Mantid
       // Monitor: IDs start at 1 and increment by 1
       for(int i=0; i<nMonitors; i++)
       {
-        spec[icount] = 0;
+        spec[icount] = icount;
         udet[icount] = icount+1;
         icount++;
       }
@@ -273,7 +323,6 @@ namespace Mantid
 
       // Populate the Spectra Map with parameters
       localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
-
     }
 
 
@@ -290,6 +339,5 @@ namespace Mantid
         throw Kernel::Exception::NotFoundError(name + " element not found in Spice XML file", fileName);
       }
     }
-
 }
 }
