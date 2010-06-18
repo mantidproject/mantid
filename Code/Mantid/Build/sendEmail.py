@@ -148,7 +148,8 @@ def CreateTREntry():
     url += "&fw=" + str(FrameWorkBuild)
     url += "&tb=" + str(TestsBuild)
     url += "&ut=" + str(UnitTests)
-    url += "&dx=" + str(DocumentationBuild)
+    if os.name != 'posix':
+        url += "&dx=" + str(DocumentationBuild)
     url += "&success=" + str(OverAllSuccess)
     url += "&cw=" + str(compilerWarnCount)
     url += "&t=" + str(testCount)
