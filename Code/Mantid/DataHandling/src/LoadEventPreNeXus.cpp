@@ -48,14 +48,6 @@ static const PixelType ERROR_PID = 0x80000000;
 /// Determine the size of the buffer for reading in binary files.
 static size_t get_buffer_size(const size_t num_items);
 
-static Property * createLoadProperty(const string name, const FileProperty::FileAction action,
-                                     const string ext)
-{
-  vector<string> exts;
-  exts.push_back(ext);
-  return new FileProperty(name, "", action, exts);
-}
-
 LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::Algorithm()
 {
   this->eventfile = NULL;
@@ -76,11 +68,11 @@ void LoadEventPreNeXus::init()
   this->g_log.setName("LoadEventPreNeXus");
 
   // which files to use
-  this->declareProperty(createLoadProperty(EVENT_PARAM, FileProperty::Load, "dat"), // SHOULD BE "event.dat"),
+  this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, "dat"), // SHOULD BE "event.dat"),
                         "A preNeXus neutron event file");
-  this->declareProperty(createLoadProperty(PULSEID_PARAM, FileProperty::OptionalLoad, "dat"), // SHOULD BE "pulseid.dat"),
+  this->declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, "dat"), // SHOULD BE "pulseid.dat"),
                         "A preNeXus pulseid file. Used only if specified.");
-  this->declareProperty(createLoadProperty(MAP_PARAM, FileProperty::OptionalLoad, "dat"),
+  this->declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, "dat"),
                         "TS mapping file converting detector id to pixel id. Used only if specified.");
 
   // which pixels to load
