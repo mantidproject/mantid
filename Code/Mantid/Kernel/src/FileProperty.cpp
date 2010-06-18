@@ -28,6 +28,21 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
 }
 
 /**
+ * Constructor
+ * @param name          The name of the property
+ * @param default_value A default value for the property
+ * @param ext           The allowed extension
+ * @param action        An enum indicating whether this should be a load/save property
+ * @param direction     An optional direction (default=Input)
+ */
+FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
+         const std::string & ext, unsigned int direction)
+  : PropertyWithValue<std::string>(name, default_value, new FileValidator(ext, (action == FileProperty::Load) ), direction),
+    m_action(action)
+{
+}
+
+/**
  * Check if this is a load property
  * @returns True if the property is a Load property and false if a Save type
  */

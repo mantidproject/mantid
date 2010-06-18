@@ -40,7 +40,17 @@ FileValidator::FileValidator(const std::vector<std::string>& extensions, bool te
 {
   for_each(m_extensions.begin(), m_extensions.end(), lowercase());
 }
-
+/** Constructor
+ *  @param extension The permitted file extensions (e.g. .RAW)
+ *  @param testFileExists Flag indicating whether to test for existence of file (default: yes)
+ */
+FileValidator::FileValidator(const std::string& extension, bool testFileExists) :
+  IValidator<std::string>(),
+  m_fullTest(testFileExists)
+{
+  m_extensions.insert(extension);
+  for_each(m_extensions.begin(), m_extensions.end(), lowercase());
+}
 /// Destructor
 FileValidator::~FileValidator() {}
 

@@ -36,6 +36,8 @@ public:
   FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
       const std::vector<std::string> & exts = std::vector<std::string>(), 
       unsigned int direction = Direction::Input);
+  FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
+      const std::string & ext, unsigned int direction = Direction::Input);
 
   /// 'Virtual copy constructor
   Property* clone() { return new FileProperty(*this); }
