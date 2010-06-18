@@ -43,9 +43,9 @@ void LoadDetectorInfo::init()
     "The name of the workspace to that the detector information will be loaded into" );
   std::vector<std::string> exts;
   // each of these allowed extensions must be dealt with in exec() below
-  exts.push_back("dat");
-  exts.push_back("raw");
-  exts.push_back("sca");
+  exts.push_back(".dat");
+  exts.push_back(".raw");
+  exts.push_back(".sca");
   declareProperty(new FileProperty("DataFilename","", FileProperty::Load, exts),
     "A .DAT or .raw file that contains information about the detectors in the\n"
     "workspace. Partial pressures of 3He will be loaded assuming units of\n"

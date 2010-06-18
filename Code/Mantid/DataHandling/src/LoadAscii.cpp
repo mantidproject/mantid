@@ -26,9 +26,9 @@ namespace Mantid
     void LoadAscii::init()
     {
       std::vector<std::string> exts;
-      exts.push_back("dat");
-      exts.push_back("txt");
-      exts.push_back("csv");
+      exts.push_back(".dat");
+      exts.push_back(".txt");
+      exts.push_back(".csv");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "A comma separated Ascii file");

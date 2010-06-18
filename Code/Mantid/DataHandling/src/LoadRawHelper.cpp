@@ -45,9 +45,9 @@ LoadRawHelper::~LoadRawHelper()
 void LoadRawHelper::init()
 {
   std::vector<std::string> exts;
-  exts.push_back("raw");
-  exts.push_back("s*");
-  exts.push_back("add");
+  exts.push_back(".raw");
+  exts.push_back(".s*");
+  exts.push_back(".add");
  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
       "The name of the RAW file to read, including its full or relative\n"
       "path. (N.B. case sensitive if running on Linux).");

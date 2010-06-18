@@ -48,10 +48,10 @@ void LoadLog::init()
                       "The name of the workspace to which the log data will be added");
 
   std::vector<std::string> exts(4, "");
-  exts[0] = "txt";
-  exts[1] = "raw";
-  exts[2] = "s*";
-  exts[3] = "add";
+  exts[0] = ".txt";
+  exts[1] = ".raw";
+  exts[2] = ".s*";
+  exts[3] = ".add";
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
     "The filename (including its full or relative path) of either an ISIS log file\n"
     "or an ISIS raw file. If a raw file is specified all log files associated with\n"

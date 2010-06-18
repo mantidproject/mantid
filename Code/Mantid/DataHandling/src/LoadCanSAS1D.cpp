@@ -43,9 +43,7 @@ LoadCanSAS1D::~LoadCanSAS1D()
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init()
 {
-  std::vector<std::string> exts;
-  exts.push_back("xml");
-  declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Load, exts),
+  declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Load, ".xml"),
       "The name of the input  xml file to load");
   declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
       Kernel::Direction::Output), "The name of the Output workspace");

@@ -28,9 +28,9 @@ namespace Mantid
     void SaveAscii::init()
     {
       std::vector<std::string> exts;
-      exts.push_back("dat");
-      exts.push_back("txt");
-      exts.push_back("csv");
+      exts.push_back(".dat");
+      exts.push_back(".txt");
+      exts.push_back(".csv");
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
 		      "A comma separated Ascii file that will be created");
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("Workspace",

@@ -36,9 +36,7 @@ namespace Mantid
       declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
         new API::WorkspaceUnitValidator<>("MomentumTransfer")),
         "The input workspace, which must be in units of Q");
-      std::vector<std::string> exts;
-      exts.push_back("xml");
-      declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save, exts),
+      declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save, ".xml"),
         "The name of the xml file to save");
 
       std::vector<std::string> radiation_source;

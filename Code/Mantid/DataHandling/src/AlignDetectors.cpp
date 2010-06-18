@@ -40,8 +40,7 @@ void AlignDetectors::init()
   declareProperty(
     new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
-  declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, 
-     std::vector<std::string>(1,"cal")),
+  declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, ".cal"),
      "The CalFile containing the position correction factors");
 }
 

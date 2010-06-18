@@ -60,10 +60,7 @@ void LoadInstrument::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace to load the instrument definition into" );
-  std::vector<std::string> exts;
-  exts.push_back("XML");
-  exts.push_back("xml");
-  declareProperty(new FileProperty("Filename","", FileProperty::Load, exts),
+  declareProperty(new FileProperty("Filename","", FileProperty::Load, ".xml"),
       "The filename (including its full or relative path) of an instrument\n"
       "definition file");
   declareProperty("MonitorList", std::vector<int>(), new NullValidator< std::vector<int> >,

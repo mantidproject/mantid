@@ -38,8 +38,8 @@ void UpdateInstrumentFromRaw::init()
     "The name of the workspace in which to store the imported instrument" );
   
   std::vector<std::string> exts;
-  exts.push_back("raw");
-  exts.push_back("s*");
+  exts.push_back(".raw");
+  exts.push_back(".s*");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
 		  "The filename (including its full or relative path) of an ISIS RAW file.\n"
 		  "The file extension must either be .raw or .s??" ); 

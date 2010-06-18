@@ -29,9 +29,10 @@ void LoadSampleDetailsFromRaw::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
 		  "The workspace to which the information should be added");
-  std::vector<std::string> exts(2, "raw");
-  exts[1] = "s*";
   
+  std::vector<std::string> exts;
+  exts.push_back("raw");
+  exts.push_back(".s*");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
 		  "The file from which to extract the information");
 }

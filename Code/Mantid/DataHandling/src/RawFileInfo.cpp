@@ -22,9 +22,9 @@ using namespace Mantid::DataHandling;
 
 void RawFileInfo::init()
 {
-  
-  std::vector<std::string> exts(2, "raw");
-  exts[1] = "s*";
+  std::vector<std::string> exts;
+  exts.push_back(".raw");
+  exts.push_back(".s*");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
 		  "The RAW file from which to extract the information");
   declareProperty("RunTitle", std::string(""), "The title of the run", Direction::Output);

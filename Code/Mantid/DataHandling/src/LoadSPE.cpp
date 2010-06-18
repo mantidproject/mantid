@@ -44,8 +44,8 @@ DECLARE_ALGORITHM(LoadSPE)
  */
 void LoadSPE::init()
 {
-  declareProperty(new FileProperty("Filename","", FileProperty::Load,
-    std::vector<std::string>(1,"spe")),"Name of the SPE file to load" );
+  declareProperty(new FileProperty("Filename","", FileProperty::Load, ".spe"),
+                  "Name of the SPE file to load" );
   declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::Output),
     "The name to use for the output workspace" );
 }
