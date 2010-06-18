@@ -290,12 +290,18 @@ bool PythonScript::exec()
 
   // Redirect the output
   beginStdoutRedirect();
-  // This stores the address of the main file that is being executed so that
-  // we can track line numbers from the main code only
-  ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
+
   if( isInteractive && env()->reportProgress() )
   {
+    // This stores the address of the main file that is being executed so that
+    // we can track line numbers from the main code only
+    ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
     PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
+  }
+  else
+  {
+    ROOT_CODE_OBJECT = NULL;
+    PyEval_SetTrace(NULL, NULL);
   }
 
   PyObject *pyret(NULL), *empty_tuple(NULL);
@@ -338,7 +344,8 @@ PyObject* PythonScript::executeScript(PyObject* return_tuple)
 {
   // Before requested code is executed we want to "uninstall" the modules 
   // containing Python algorithms so that a fresh import reloads them
-  env()->refreshAlgorithms();
+  //
+  env()->refreshAlgorithms(true);
 
   PyObject* pyret(NULL);
   //If an exception is thrown the thread state needs resetting so we need to save it

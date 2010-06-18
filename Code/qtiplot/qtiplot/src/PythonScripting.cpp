@@ -315,9 +315,9 @@ const QStringList PythonScripting::fileExtensions() const
   return extensions;
 }
 
-void PythonScripting::refreshAlgorithms()
+void PythonScripting::refreshAlgorithms(bool force)
 {
-  if( !isRunning() )
+  if( force || !isRunning() )
   {
     PyRun_SimpleString("mtd._refreshPyAlgorithms()");
   }

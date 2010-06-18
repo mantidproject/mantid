@@ -86,7 +86,7 @@ public:
 				     
 public slots:
   /// Refresh Python algorithms state
-  virtual void refreshAlgorithms();
+  virtual void refreshAlgorithms(bool force = false);
 
 private:
   /// Constructor

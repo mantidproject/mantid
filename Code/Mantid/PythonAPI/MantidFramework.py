@@ -5,6 +5,7 @@ import platform
 import sys
 import types
 import copy
+import sets
 import __builtin__
 import __main__
 
@@ -338,9 +339,9 @@ class MantidPyFramework(FrameworkManager):
         super(MantidPyFramework, self).__init__()
         self._garbage_collector = WorkspaceGarbageCollector()
         self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector, self)
-        self._algs = {}
-        self._reloader = None
- 
+        self._pyalg_loader = PyAlgLoader(self)
+        self._pyalg_objs = {}
+        
     def list(self):
         '''
         Print a list of the workspaces stored in Mantid along with their type
@@ -378,8 +379,8 @@ class MantidPyFramework(FrameworkManager):
         '''
         Register an algorithm into the framework
         '''
-        # This keeps the original object alive
-        self._algs[algorithm.name()] = algorithm
+        # Keep the original object alive
+        self._pyalg_objs[algorithm.name()] = algorithm
         super(MantidPyFramework, self).registerPyAlgorithm(algorithm)
 
 ##                     ##
@@ -389,61 +390,9 @@ class MantidPyFramework(FrameworkManager):
         """
         Initialise the framework
         """
-        self._initPythonAlgorithms()
+        #self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToGlobal()
-
-
-    def _initPythonAlgorithms(self, reload = False):
-        # Disable factory updates while everything is reimported
-        self._observeAlgFactoryUpdates(False,False)
-        
-        if self._reloader == None:
-            self._reloader = RollbackImporter()
-
-        # Check defined Python algorithm directories and load any modules
-        dir_list = self.getConfigProperty('pythonalgorithms.directories').split(';')
-        if len(dir_list) > 0:
-            changes = False
-            for d in dir_list:
-                if d != '':
-                    if self._importPyAlgorithms(d, reload) == True:
-                        changes = True
-
-        # Now connect the relevant signals to monitor for algorithm factory updates
-        self._observeAlgFactoryUpdates(True, reload and changes)
-
-    def _importPyAlgorithms(self, dir, reload):
-        # Make sure the directory doesn't contain a trailing slash
-        dir = dir.rstrip("/").rstrip("\\")
-        try:
-            files = os.listdir(dir)
-        except(OSError):
-            return
-        # Temporarily insert into path
-        sys.path.insert(0, dir)
-        changes = False
-        for modname in files:
-            if not modname.endswith('.py'):
-                continue
-            original = os.path.join(dir, modname)
-            modname = modname.rstrip('.py')
-            compiled = os.path.join(dir, modname + '.pyc')
-            if modname in sys.modules and \
-               os.path.exists(compiled) and \
-               os.path.getmtime(compiled) >= os.path.getmtime(original):
-                continue
-            try:
-                __import__(modname)
-            except (ImportError,SyntaxError,RuntimeError), details:
-                print "\tWarning: Cannot import",modname,'module - ',details
-            except:
-                continue
-            changes = True
-
-        # Cleanup system path
-        del sys.path[0]
-        return changes
 
     def _importSimpleAPIToGlobal(self):
         simpleapi = 'mantidsimple'
@@ -457,11 +406,9 @@ class MantidPyFramework(FrameworkManager):
             setattr(__main__, name, getattr(mod, name))
             
     def _refreshPyAlgorithms(self):
-        # Pass to the loader proxy
-        if self._reloader != None:
-            self._reloader.uninstall()        
-            # Now reload the modules that were loaded at startup
-            self._initPythonAlgorithms(reload = True)
+        # Reload the modules that have been loaded
+        #self._pyalg_loader.load_modules(refresh=True)
+        pass
         
     def _retrieveWorkspace(self, name):
         '''
@@ -533,57 +480,97 @@ class MantidPyFramework(FrameworkManager):
         names = wksp_grp.getNames()
         return [ self.getMatrixWorkspace(w) for w in names[1:] ]
 
-#------------------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------------------
 ##
-# Inspired by PyUnit, a class that handles reloading modules cleanly 
-# See http://pyunit.sourceforge.net/notes/reloading.html
+# Loader object for Python algorithms
 ##
-class RollbackImporter:
-  
-    def __init__(self):
-        "Creates an instance and installs as the global importer"
-        self.realImport = __builtin__.__import__
-        __builtin__.__import__ = self._import
-        self.pyalg_modules = {}
+
+class PyAlgLoader(object):
+
+    __CHECKLINES__ = 100
+    
+    def __init__(self, framework):
+        self.framework = framework
+
+
+    def load_modules(self, refresh=False):
+        '''
+        Import Python modules containing Python algorithms
+        '''
+        dir_list = mtd.getConfigProperty("pythonalgorithms.directories").split(';')
+        if len(dir_list) == 0: 
+            return
+
+        # Disable factory updates while everything is (re)imported
+        self.framework._observeAlgFactoryUpdates(False,False)
         
-    def _import(self, name, globals=None, locals=None, fromlist=[], level=-1):
-        # __import__ takes a different number of arguments in different Python versions
-        if sys.version_info[1] == 4:
-            result = apply(self.realImport, (name, globals, locals, fromlist))
-        else:
-            result = apply(self.realImport, (name, globals, locals, fromlist, level))
+        # Check defined Python algorithm directories and load any modules
+        changes = False
+        for path in dir_list:
+            if path == '':
+                continue
+            if self._importAlgorithms(path, refresh):
+                changes = True
 
-        if self._containsPyAlgorithm(result):
-            self.pyalg_modules[name] = self._findPathToModule(name)
-        return result
+        # Now connect the relevant signals to monitor for algorithm factory updates
+        self.framework._observeAlgFactoryUpdates(True, (refresh and changes))
 
-    def _findPathToModule(self, name):
-        for p in sys.path:
-            filename = os.path.join(p,name + '.py')
-            if os.path.exists(filename):
-                return p
-            
-        return ''
+#
+# ------- Private methods --------------
+#
+    def _importAlgorithms(self, path, refresh):
+        # Make sure the directory doesn't contain a trailing slash
+        path = path.rstrip("/").rstrip("\\")
+        try:
+            files = os.listdir(path)
+        except(OSError):
+            return False
+        # Temporarily insert into path
+        sys.path.insert(0, path)
+        changes = False
+        for modname in files:
+            pyext = '.py'
+            if not modname.endswith(pyext):
+                continue
+            original = os.path.join(path, modname)
+            modname = modname[:-len(pyext)]
+            compiled = os.path.join(path, modname + '.pyc')
+            if modname in sys.modules and \
+               os.path.exists(compiled) and \
+               os.path.getmtime(compiled) >= os.path.getmtime(original):
+                continue
+            try:               
+                if self._containsPyAlgorithm(original):
+                    if modname in sys.modules:
+                        reload(sys.modules[modname])
+                    else:
+                        __import__(modname)
+                    changes = True
+            except(StandardError), exp:
+                self.framework.sendLogMessage('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
+                continue
+            except:
+                self.framework.sendLogMessage('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
+                continue
 
-    def _containsPyAlgorithm(self, module):
-        # Check attributes and check if there are any Python algorithms
-        attrs = dir(module)
-        for attname in attrs:
-            att = getattr(module, attname)
-            if type(att) == type(PythonAlgorithm) and issubclass(att, PythonAlgorithm) and att.__name__ != 'PythonAlgorithm':
-                return True
-        return False
-        
-    def uninstall(self):
-        for modname in self.pyalg_modules.keys():
-            if modname in sys.modules:
-                mpath = self.pyalg_modules[modname]
-                compiled = os.path.join(mpath, modname + '.pyc')
-                original = os.path.join(mpath, modname + '.py')
-                if os.path.getmtime(original) > os.path.getmtime(compiled):
-                    del( sys.modules[modname] )
+        # Cleanup system path
+        del sys.path[0]
+        return changes
 
+    def _containsPyAlgorithm(self, modfilename):
+        file = open(modfilename,'r')
+        line_count = 0
+        alg_found = False
+        while line_count < self.__CHECKLINES__:
+            line = file.readline()
+            if line.rfind('PythonAlgorithm') >= 0:
+                alg_found = True
+                break
+            line_count += 1
+        file.close()
+        return alg_found
+    
 #-------------------------------------------------------------------------------------------
 ##
 # PyAlgorithm class
