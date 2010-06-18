@@ -3,8 +3,8 @@ import os
 import subprocess as sp
 import platform
 import buildNotification
+import time
 
-buildNotification.sendBuildStarted("Mantid")
 
 retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True)
 if retcode != 0:
@@ -21,6 +21,7 @@ doxylog = open("../../../../logs/Mantid/doxy.log","w")
 sp.call("doxygen Mantid.doxyfile",stderr=doxylog,shell=True,cwd="Build")
 doxylog.close()
 
+timeStart = time.time()
 sconslog = open("../../../../logs/Mantid/scons.log","w")
 sconserr = open("../../../../logs/Mantid/sconsErr.log","w")
 buildargs = ["-j2","skiptest=1"]
@@ -35,5 +36,10 @@ elif platform.system() == 'Linux':
 sp.call("python build.py "+' '.join(buildargs),stdout=sconslog,stderr=sconserr,shell=True)
 sconslog.close()
 sconserr.close()
+timeFinish = time.time()
 
-buildNotification.sendBuildCompleted("Mantid")
+timeBuild = timeFinish - timeStart
+BuildTimeLog = open("../../../../logs/Mantid/timebuild.log", "w")
+BuildTimeLog.write(str(timeBuild))
+BuildTimeLog.close()
+
