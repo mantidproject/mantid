@@ -12,6 +12,7 @@ import sys
 
 SendEmail = bool(False)
 OverAllSuccess = bool(False)
+DocumentationBuild = bool(True)
 
 base_url = "http://mantidlx1/~tzh47418/"
 trac_link = 'http://trac.mantidproject.org/mantid/'
@@ -148,8 +149,7 @@ def CreateTREntry():
     url += "&fw=" + str(FrameWorkBuild)
     url += "&tb=" + str(TestsBuild)
     url += "&ut=" + str(UnitTests)
-    if os.name != 'posix':
-        url += "&dx=" + str(DocumentationBuild)
+    url += "&dx=" + str(DocumentationBuild)
     url += "&success=" + str(OverAllSuccess)
     url += "&cw=" + str(compilerWarnCount)
     url += "&t=" + str(testCount)
