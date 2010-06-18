@@ -37,7 +37,8 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
          const std::string & ext, unsigned int direction)
-  : PropertyWithValue<std::string>(name, default_value, new FileValidator(ext, (action == FileProperty::Load) ), direction),
+  : PropertyWithValue<std::string>(name, default_value,
+           new FileValidator(std::vector<std::string>(1,ext), (action == FileProperty::Load) ), direction),
     m_action(action)
 {
 }

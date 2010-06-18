@@ -40,17 +40,7 @@ FileValidator::FileValidator(const std::vector<std::string>& extensions, bool te
 {
   for_each(m_extensions.begin(), m_extensions.end(), lowercase());
 }
-/** Constructor
- *  @param extension The permitted file extensions (e.g. .RAW)
- *  @param testFileExists Flag indicating whether to test for existence of file (default: yes)
- */
-FileValidator::FileValidator(const std::string& extension, bool testFileExists) :
-  IValidator<std::string>(),
-  m_fullTest(testFileExists)
-{
-  m_extensions.insert(extension);
-  for_each(m_extensions.begin(), m_extensions.end(), lowercase());
-}
+
 /// Destructor
 FileValidator::~FileValidator() {}
 
@@ -82,15 +72,9 @@ std::string FileValidator::checkValidity(const std::string &value) const
   }
   
   //Check the extension but just issue a warning if it is not one of the suggested values
-  std::string::size_type idx = value.rfind(".");
-  if( idx != std::string::npos )
+  if (!(this->endswith(value)))
   {
-    std::string ext = value.substr(idx + 1);
-    std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
-    if( !m_extensions.empty() && m_extensions.find(ext) == m_extensions.end() )
-    {
-      g_log.warning() << "Unrecognised extension in file \"" << value  << "\"."  << std::endl;
-    }
+    g_log.warning() << "Unrecognised extension in file \"" << value  << "\"."  << std::endl;
   }
 
   //If the file is required to exist check it is there
@@ -103,6 +87,38 @@ std::string FileValidator::checkValidity(const std::string &value) const
   return "";
 }
 
+/**
+ * Confirm that the value string ends with then ending string.
+ * @param value The string to check the ending for.
+ * @param ending The ending the string should have.
+ */
+static bool has_ending(const std::string &value, const std::string & ending)
+{
+  if (ending.empty()) // always match against an empty extension
+    return true;
+  if (value.length() < ending.length()) // filename is not long enough
+    return false;
+  int result = value.compare(value.length() - ending.length(), ending.length(), ending);
+  return (result == 0); // only care if it matches
+}
+
+bool FileValidator::endswith(const std::string &value) const
+{
+  if (m_extensions.empty()) // automatically match a lack of extensions
+    return true;
+
+  // create a lowercase copy of the filename
+  std::string value_copy(value);
+  std::transform(value_copy.begin(), value_copy.end(), value_copy.begin(), tolower);
+
+  // check for the ending
+  for (std::set<std::string>::const_iterator it = m_extensions.begin();
+       it != m_extensions.end(); it++) {
+    if (has_ending(value_copy, *it))
+      return true;
+  }
+  return false;
+}
 
 } // namespace Kernel
 } // namespace Mantid

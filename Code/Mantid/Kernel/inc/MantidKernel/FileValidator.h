@@ -41,18 +41,18 @@ class DLLExport FileValidator : public IValidator<std::string>
 public:
   FileValidator();
   explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true);
-  FileValidator(const std::string& extension, bool testFileExists = true);
   virtual ~FileValidator();
   std::set<std::string> allowedValues() const;
   IValidator<std::string>* clone();
   
 private:
   /// The list of permitted extensions
-  std::set<std::string> m_extensions;
+  const std::set<std::string> m_extensions;
   /// Flag indicating whether to test for existence of filename
   const bool m_fullTest;
   
   std::string checkValidity(const std::string &value) const;
+  bool endswith(const std::string &value) const;
 
   /// A reference to the logger
   static Logger & g_log;
