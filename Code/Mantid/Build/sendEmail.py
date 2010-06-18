@@ -13,6 +13,7 @@ import sys
 SendEmail = bool(False)
 OverAllSuccess = bool(False)
 DocumentationBuild = bool(True)
+warnCount = 0
 
 base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
 trac_link = 'http://trac.mantidproject.org/mantid/'
