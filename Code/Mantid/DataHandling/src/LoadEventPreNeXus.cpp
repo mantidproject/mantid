@@ -68,9 +68,9 @@ void LoadEventPreNeXus::init()
   this->g_log.setName("LoadEventPreNeXus");
 
   // which files to use
-  this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, "dat"), // SHOULD BE "event.dat"),
+  this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, "event.dat"),
                         "A preNeXus neutron event file");
-  this->declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, "dat"), // SHOULD BE "pulseid.dat"),
+  this->declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, "pulseid.dat"),
                         "A preNeXus pulseid file. Used only if specified.");
   this->declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, "dat"),
                         "TS mapping file converting detector id to pixel id. Used only if specified.");
