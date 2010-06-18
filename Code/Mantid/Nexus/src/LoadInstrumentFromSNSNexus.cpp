@@ -38,7 +38,7 @@ void LoadInstrumentFromSNSNexus::init()
     new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace in which to attach the imported instrument" );
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, std::vector<std::string>(1, "nxs")),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
 		  "The name (including its full or relative path) of the Nexus file to\n"
 		  "attempt to load the instrument from. The file extension must either be\n"
 		  ".nxs or .NXS" );

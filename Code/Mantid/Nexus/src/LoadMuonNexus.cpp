@@ -40,9 +40,7 @@ namespace Mantid
     /// Initialisation method.
     void LoadMuonNexus::init()
     {
-      std::vector<std::string> exts;
-      exts.push_back("nxs");
-      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+      declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
         "The name of the Nexus file to load" );      
 
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),

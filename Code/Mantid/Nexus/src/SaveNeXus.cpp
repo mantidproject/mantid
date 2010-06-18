@@ -37,9 +37,9 @@ void SaveNexus::init()
 {
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspac
   std::vector<std::string> exts;
-  exts.push_back("nxs");
-  exts.push_back("nx5");
-  exts.push_back("xml");
+  exts.push_back(".nxs");
+  exts.push_back(".nx5");
+  exts.push_back(".xml");
   declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
 		    "The name of the Nexus file to write, as a full or relative\n"
 		    "path");

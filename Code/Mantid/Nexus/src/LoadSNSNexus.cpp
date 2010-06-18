@@ -38,10 +38,7 @@ LoadSNSNexus::LoadSNSNexus():m_L1(0) {}
 void LoadSNSNexus::init()
 {
     std::cerr << "00:" << std::endl; // REMOVE
-    std::vector<std::string> exts;
-    exts.push_back("NXS");
-    exts.push_back("nxs");
-    declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+    declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
 		    "The name of the SNS Nexus file to load" );      
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
