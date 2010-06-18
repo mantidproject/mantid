@@ -14,7 +14,7 @@ SendEmail = bool(False)
 OverAllSuccess = bool(False)
 DocumentationBuild = bool(True)
 
-base_url = "http://mantidlx1/~tzh47418/"
+base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
 trac_link = 'http://trac.mantidproject.org/mantid/'
 
 project = 'Mantid'
