@@ -106,6 +106,11 @@ bool FileValidator::endswith(const std::string &value) const
 {
   if (m_extensions.empty()) // automatically match a lack of extensions
     return true;
+  if (m_extensions.size() == 1)
+  {
+    if (m_extensions.begin()->empty())
+      return true;
+  }
 
   // create a lowercase copy of the filename
   std::string value_copy(value);
