@@ -52,9 +52,9 @@ void MaskDetectorsIf::init()
 	  declareProperty("Operator", "Equal", new Kernel::ListValidator(select_operator),
 	  	    "Unary operator to compare to given values" );
 	  declareProperty("Value",0.0);
-	  declareProperty(new FileProperty("InputCalFile","", FileProperty::Load, std::vector<std::string>(1,"cal")),
+	  declareProperty(new FileProperty("InputCalFile","", FileProperty::Load, ".cal"),
 			  "The name of the CalFile with grouping data" );
-	  declareProperty(new FileProperty("OutputCalFile","", FileProperty::Save, std::vector<std::string>(1,"cal")),
+	  declareProperty(new FileProperty("OutputCalFile","", FileProperty::Save, ".cal"),
 			  "The name of the CalFile with grouping data" );
 }
 

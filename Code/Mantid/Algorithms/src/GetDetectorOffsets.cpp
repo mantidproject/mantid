@@ -42,7 +42,7 @@ void GetDetectorOffsets::init()
   declareProperty("DReference",2.0);
   declareProperty("XMin",0.0);
   declareProperty("XMax",0.0);
-  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Save, std::vector<std::string>(1,"cal")),
+  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Save, ".cal"),
 		  "The name of the output CalFile" );
 }
 

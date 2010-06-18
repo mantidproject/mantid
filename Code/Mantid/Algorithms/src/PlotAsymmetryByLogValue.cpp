@@ -31,9 +31,9 @@ namespace Mantid
     */
     void PlotAsymmetryByLogValue::init()
     {
-      std::vector<std::string> exts(1, "nxs");
-      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, exts));
-      declareProperty(new FileProperty("LastRun","", FileProperty::Load, exts));
+      std::string ext(".nxs");
+      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext));
+      declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext));
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
       declareProperty("LogValue","",new MandatoryValidator<std::string>());
       declareProperty("Red", 1, Direction::Input);

@@ -32,7 +32,7 @@ void DiffractionFocussing::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
-  declareProperty(new FileProperty("GroupingFileName", "", FileProperty::Load, std::vector<std::string>(1,"cal")),
+  declareProperty(new FileProperty("GroupingFileName", "", FileProperty::Load, ".cal"),
 		  "The name of the CalFile with grouping data" );
 }
 
