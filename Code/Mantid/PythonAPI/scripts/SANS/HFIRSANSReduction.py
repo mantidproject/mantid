@@ -92,6 +92,8 @@ class SANSReductionMethod:
         """
         ## Dark current
         self.dark_current_filepath = None
+        ## Normalization detector for dark current (should always be time)
+        self.dark_normalization = SANSReductionMethod.NORMALIZATION_TIME
         
         ## Background data
         self.background_filepath = None
@@ -113,8 +115,6 @@ class SANSReductionMethod:
 
         # Sensitivity correction parameters ###################################
         
-        ## Sensitivity correction flag (True to apply)
-        self.apply_sensitivity = False
         ## Flood data for sensitivity correction
         self.sensitivity_flood_filepath = None
         ## Dark current file for sensitivity correction
@@ -199,37 +199,46 @@ class SANSReduction:
             
             TODO: since the input files will be the same, read them only once
         """
+        # Get counting time
+        timer_ws = self.workspace+"_timer"
+        CropWorkspace(self.workspace, timer_ws,
+                      StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                      EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))        
+
+        # Get monitor counts
+        monitor_ws = self.workspace+"_monitor"
+        CropWorkspace(self.workspace, monitor_ws,
+                      StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_MONITOR), 
+                      EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_MONITOR))
+
 
         # Subtract dark current ###############################################
         if self.method.dark_current_filepath is not None:
             dark_ws = _extract_workspace_name(self.method.dark_current_filepath)
             LoadSpice2D(self.method.dark_current_filepath, dark_ws)
         
+            # Normalize the dark current data to counting time
+            if self.method.dark_normalization == SANSReductionMethod.NORMALIZATION_TIME:
+                darktimer_ws = dark_ws+"_timer"
+                CropWorkspace(dark_ws, darktimer_ws,
+                              StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                              EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))        
+                
+                Multiply(dark_ws, timer_ws, dark_ws)
+                Divide(dark_ws, darktimer_ws, dark_ws)      
+        
             # Perform subtraction
             Minus(ws, dark_ws, ws)
             
         # Normalize data ######################################################
         if self.method.normalization == SANSReductionMethod.NORMALIZATION_MONITOR:
-            # Get monitor counts
-            monitor_ws = self.workspace+"_monitor"
-            CropWorkspace(self.workspace, monitor_ws,
-                          StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_MONITOR), 
-                          EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_MONITOR))
-            
             # Normalize by monitor counts
             Divide(ws, monitor_ws, ws)
             
             # Result needs to be multiplied by 1e8
             Scale(ws, ws, 1.0e8, 'Multiply')
             
-            
         elif self.method.normalization == SANSReductionMethod.NORMALIZATION_TIME:
-            # Get counting time
-            timer_ws = self.workspace+"_timer"
-            CropWorkspace(self.workspace, timer_ws,
-                          StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
-                          EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))
-
             # Normalize by counting time
             Divide(ws, timer_ws, ws)
         
@@ -255,6 +264,30 @@ class SANSReduction:
         # Set up the detector efficiency by reading in file and using 
         # "Method" parameters (Note: SASDetEffMaskMenu)
         
+        # Load Flood data
+        if self.method.sensitivity_flood_filepath is not None:
+            flood_ws = _extract_workspace_name(self.method.sensitivity_flood_filepath)
+            LoadSpice2D(self.method.sensitivity_flood_filepath, flood_ws)
+
+        # Subtract dark current
+        if self.method.sensitivity_dark_filepath is not None:
+            sensdark_ws = _extract_workspace_name(self.method.sensitivity_dark_filepath)
+            LoadSpice2D(self.method.sensitivity_dark_filepath, sensdark_ws)
+            
+            # Normalize the dark current data to counting time
+            sensdarktimer_ws = sensdark_ws+"_timer"
+            CropWorkspace(sensdark_ws, sensdarktimer_ws,
+                          StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                          EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
+            
+            floodtimer_ws = flood_ws+"_timer"     
+            CropWorkspace(flood_ws, floodtimer_ws,
+                          StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                          EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
+            
+            Multiply(sensdark_ws, floodtimer_ws, sensdark_ws)
+            Divide(sensdark_ws, sensdarktimer_ws, sensdark_ws)      
+            Minus(flood_ws, sensdark_ws, flood_ws)
         
         # Divide by detector efficiency, if provided
         
