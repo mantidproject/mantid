@@ -2,10 +2,9 @@ import subprocess as sp
 import buildNotification
 import os
 import platform
-import time
-
+ 
 # First build the tests
-timeBuildStart = time.time()
+buildNotification.sendTestBuildStarted("Mantid")
 
 buildlog = open("../../../../logs/Mantid/testsBuild.log","w")
 builderr = open("../../../../logs/Mantid/testsBuildErr.log","w")
@@ -19,15 +18,10 @@ sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,s
 buildlog.close()
 builderr.close()
 
-timeBuildDone = time.time()
-
-timeTestsBuild = timeBuildDone - timeBuildStart
-BuildTimeLog = open("../../../../logs/Mantid/timetestbuild.log", "w")
-BuildTimeLog.write(str(timeTestsBuild))
-BuildTimeLog.close()
+buildNotification.sendTestBuildCompleted("Mantid")
 
 # Then run them
-timeStart = time.time()
+buildNotification.sendTestStarted("Mantid")
 
 # On the Mac, need to set the path to the shared libraries
 # Hopefully can remove this when paths are correctly embedded by build
@@ -61,12 +55,6 @@ for test in testsToRun:
 
 open("../../../../logs/Mantid/testResults.log","w").write(runlog)
 runerr.close()
-
-timeFinish = time.time()
-timeRun = timeFinish - timeStart
-RunTimeLog = open("../../../../logs/Mantid/timetestrun.log", "w")
-RunTimeLog.write(str(timeRun))
-RunTimeLog.close()
 
 if platform.system() == 'Darwin':
     os.unsetenv('DYLD_LIBRARY_PATH')
