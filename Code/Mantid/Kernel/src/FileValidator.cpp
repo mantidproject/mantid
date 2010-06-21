@@ -72,9 +72,12 @@ std::string FileValidator::checkValidity(const std::string &value) const
   }
   
   //Check the extension but just issue a warning if it is not one of the suggested values
-  if (!(this->endswith(value)))
+  if (!(value.empty()))
   {
-    g_log.warning() << "Unrecognised extension in file \"" << value  << "\"."  << std::endl;
+    if (!(this->endswith(value)))
+    {
+      g_log.warning() << "Unrecognised extension in file \"" << value  << "\"."  << std::endl;
+    }
   }
 
   //If the file is required to exist check it is there
@@ -106,11 +109,8 @@ bool FileValidator::endswith(const std::string &value) const
 {
   if (m_extensions.empty()) // automatically match a lack of extensions
     return true;
-  if (m_extensions.size() == 1)
-  {
-    if (m_extensions.begin()->empty())
-      return true;
-  }
+  if ((m_extensions.size() == 1) && (m_extensions.begin()->empty()))
+    return true;
 
   // create a lowercase copy of the filename
   std::string value_copy(value);
