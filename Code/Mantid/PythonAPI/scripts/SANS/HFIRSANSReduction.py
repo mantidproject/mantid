@@ -43,6 +43,17 @@ class InstrumentConfiguration:
         self.nx_pixels = 192
         ## Number of detector pixels in Y
         self.ny_pixels = 192
+        ## Number of counters. This is the number of detector channels (spectra) before the
+        # data channels start
+        self.nMonitors = 2
+        ## Pixel size in mm
+        self.pixel_size_x = 5.1522
+        self.pixel_size_y = 5.1462
+        ## Beam center [either set by hand or find]
+        self.beam_center_x = 19.0031
+        self.beam_center_y = 100.983
+        ## Sample-to-detector distance in mm
+        self.sample_detector_distance = 6000
     
     def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high):
         """
@@ -169,6 +180,7 @@ class SANSReduction:
         """
         # Load data
         LoadSpice2D(self.data_filepath, self.workspace)
+        ConvertUnits(self.workspace, self.workspace, "Wavelength")
         
         # Make a copy that will be our reduced data
         CloneWorkspace(self.workspace, self.reduced_ws)
@@ -269,35 +281,71 @@ class SANSReduction:
             flood_ws = _extract_workspace_name(self.method.sensitivity_flood_filepath)
             LoadSpice2D(self.method.sensitivity_flood_filepath, flood_ws)
 
-        # Subtract dark current
-        if self.method.sensitivity_dark_filepath is not None:
-            sensdark_ws = _extract_workspace_name(self.method.sensitivity_dark_filepath)
-            LoadSpice2D(self.method.sensitivity_dark_filepath, sensdark_ws)
+            # Subtract dark current
+            if self.method.sensitivity_dark_filepath is not None:
+                sensdark_ws = _extract_workspace_name(self.method.sensitivity_dark_filepath)
+                LoadSpice2D(self.method.sensitivity_dark_filepath, sensdark_ws)
+                
+                # Normalize the dark current data to counting time
+                sensdarktimer_ws = sensdark_ws+"_timer"
+                CropWorkspace(sensdark_ws, sensdarktimer_ws,
+                              StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                              EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
+                
+                floodtimer_ws = flood_ws+"_timer"     
+                CropWorkspace(flood_ws, floodtimer_ws,
+                              StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                              EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
+                
+                Multiply(sensdark_ws, floodtimer_ws, sensdark_ws)
+                Divide(sensdark_ws, sensdarktimer_ws, sensdark_ws)      
+                Minus(flood_ws, sensdark_ws, flood_ws)
             
-            # Normalize the dark current data to counting time
-            sensdarktimer_ws = sensdark_ws+"_timer"
-            CropWorkspace(sensdark_ws, sensdarktimer_ws,
-                          StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
-                          EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
+            # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
+        
+            # Find beam center for flood data
+        
+        
+            # TODO: Need an Algo that will produce a workspace with the following spectra values
+            # solid_angle_corr[x][y] = (sqrt(1+(pixel_size_x*(x-beam_center_x)/sample_detector_distance)^2
+            #                           +(pixel_size_y*(y-beam_center_y)/sample_detector_distance)^2))^3
             
-            floodtimer_ws = flood_ws+"_timer"     
-            CropWorkspace(flood_ws, floodtimer_ws,
-                          StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
-                          EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
+            #Multiply(flood_ws, solid_angle_corr, flood_ws)
+        
+            # Create efficiency profile: 
+            # Divide each pixel by average signal, and mask high and low pixels.
+            SumSpectra(flood_ws, "flood_total_signal", self.configuration.nMonitors)
+            Divide(flood_ws, "flood_total_signal", flood_ws)
             
-            Multiply(sensdark_ws, floodtimer_ws, sensdark_ws)
-            Divide(sensdark_ws, sensdarktimer_ws, sensdark_ws)      
-            Minus(flood_ws, sensdark_ws, flood_ws)
+            # Mask pixels with signal above and below cut
+            if self.method.sensitivity_mask_high_low:
+                pass
+                # Need to use an Algorithm that will mask pixels below
+                # self.method.sensitivity_low and above self.method.sensitivity_high
+            
+                # Once we have masked the pixels, we need to recalculate the average signal
+                # so that the efficiency profile isn't biased by the pixels we rejected.
         
-        # Divide by detector efficiency, if provided
+            # Divide by detector efficiency, if provided (how about offset in beam center?)
+            Divide(flood_ws, "flood_total_signal", flood_ws)
+            
+            
+        # Correct data for solid angle effects (Note: SA_Corr_2DSAS)
+        # TODO: Need an Algo that will produce a workspace with the following spectra values
+        # solid_angle_corr[x][y] = (sqrt(1+(pixel_size_x*(x-beam_center_x)/sample_detector_distance)^2
+        #                           +(pixel_size_y*(y-beam_center_y)/sample_detector_distance)^2))^3
         
-        # Correct for solid angle effect at large angle (Note: SA_Corr_2DSAS)
-        
-        
-        
-        
-        
+          
         # Apply transmission correction #######################################
+        # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
+        
+        # 2- Apply correction (Note: Apply2DTransCorr)
+        # TODO: Need an Algo that will produce a workspace with the following spectra values
+        # sec[x][y] = sqrt(1+(pixel_size_x*(x-beam_center_x)/sample_detector_distance)^2
+        #                     +(pixel_size_y*(y-beam_center_y)/sample_detector_distance)^2)
+        # ws[x][y] = ws[x][y]/transmission^((sec[x][y]+1)/2)
+        # err[x][y] = sqrt( ws[x][y] / (transmission^((sec[x][y]+1)/2))^2 
+        #                    + ((d_transmission*ws[x][y]*((sec[x][y]+1)/2))/(transmission^((sec[x][y]+1)/2+1)))^2
         
         
         
