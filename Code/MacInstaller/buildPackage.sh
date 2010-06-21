@@ -16,5 +16,8 @@ echo Done.
 echo Building package...
 /Developer/usr/bin/packagemaker --doc Mantid.pmdoc -i org.mantidproject.mantid.mantidplot.pkg
 echo Done.
+echo Creating disk image...
+./dmgpack.sh Mantid mantid.pkg
+echo Done.
 
 echo Success!
