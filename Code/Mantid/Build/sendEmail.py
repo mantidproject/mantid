@@ -1,256 +1,355 @@
-import re
-import smtplib
-import os
 import platform
 import socket
-import sys
-from shutil import move
-sys.path.append('Build')
-import buildNotification as notifier
+import os
+import re
+import urllib2
+import smtplib
 from time import strftime
- 
-SENDER = platform.system() 
-#Create Subject
-subject = 'Subject: ' + platform.system() 
-if platform.architecture()[0] == '64bit':
-    SENDER += '64'
-    subject += '64'
-SENDER += 'BuildServer1@mantidproject.org'
-subject += ' Build Report: '
+import subprocess as sp
+import shutil
+import buildNotification
+import sys
+import time
 
-tracLink = 'http://trac.mantidproject.org/mantid/'
-#Set up email content 
-buildSuccess = False
-testsBuildSuccess = False
-sconsResult = ''
-testsResult = ''
-testsPass = True
-doxyWarnings = True
-
-mssgSconsWarn = ''
-mssgTestsBuild = ''
-mssgTestsErr = ''
-mssgTestsResults = ''
-mssgSvn  = ''
-mssgDoxy = ''
-ticketList = []
-svnRevision = ''
-
-testCount = 0
-failCount = 0
+SendEmail = bool(False)
+OverAllSuccess = bool(False)
+DocumentationBuild = bool(True)
 warnCount = 0
 
+base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
+trac_link = 'http://trac.mantidproject.org/mantid/'
+
 project = 'Mantid'
-remoteArchivePath, relativeLogDir = notifier.getArchiveDir(project)
 localLogDir = '../../../../logs/' + project + '/'
+#localLogDir = ''
 
-#Get scons result and errors
-fileScons = localLogDir + 'scons.log'
-f = open(fileScons,'r')
+def ParseSubversionLog():
+    ticketList = []
+    SvnID = -1
+    mssgSvn = ''
+    filesvn = localLogDir + 'svn.log'
+    try:
+        mssgSvn = open(filesvn,'r').read()
+        buildNotification.moveToArchive(filesvn,remoteArchivePath)
+        #attempt to parse out the svn revision and ticket number
+        reSvnRevision = re.compile("r(\\d+)\\s\\|", re.IGNORECASE)
+        m=reSvnRevision.search(mssgSvn)
+        if m:
+            SvnID = m.group(1)
+        reTicket = re.compile("#(\\d+)", re.IGNORECASE)
+        mList=reTicket.findall(mssgSvn)
+        for m in mList:
+            ticketList.append(m)
+    except IOError:
+        pass
+    return ticketList, SvnID, mssgSvn
+#end of ParseSubversionLog
 
-for line in f.readlines():
-     sconsResult = line
-     if os.name == 'nt':
-          mssgSconsWarn = mssgSconsWarn + line
-     
-f.close()
-notifier.moveToArchive(fileScons,remoteArchivePath)
+def ParseSconsLog():
+    mssgSconsWarn = ''
+    compilerWarnCount = 0
+    FrameWorkBuild = bool(False)
+    fileScons = localLogDir + 'scons.log'
+    try:
+        f = open(fileScons, 'r')
+        for line in f.readlines():
+            sconsResult = line
+            if os.name == 'nt':
+                mssgSconsWarn = mssgSconsWarn + line
+        f.close()
+        buildNotification.moveToArchive(fileScons, remoteArchivePath)
+        if sconsResult.startswith('scons: done building targets.'):
+            FrameWorkBuild = True
+        # error file for Windows/Mac
+        fileSconsErr = localLogDir + 'sconsErr.log'
+        if os.name == 'posix':
+            mssgSconsWarn = open(fileSconsErr, 'r').read()
+        buildNotification.moveToArchive(fileSconsErr, remoteArchivePath)
+	    #count compilation warnings
+        reWarnCount = re.compile(": warning")
+        wc = reWarnCount.findall(mssgSconsWarn)
+        compilerWarnCount = len(wc)
+        return mssgSconsWarn, compilerWarnCount, FrameWorkBuild
+    except IOError:
+        return mssgSconsWarn, compilerWarnCount, FrameWorkBuild
+#end of ParseSconsLog
 
-if sconsResult.startswith('scons: done building targets.'):
-	buildSuccess = True	
+def ParseTestBuildLog():
+    TestsBuild = bool(False)
+    mssgTestsBuild = ''
+    mssgTestsErr = ''
+    fileTestsBuild = localLogDir + 'testsBuild.log'
+    try:
+        f = open(fileTestsBuild, 'r')
+        for line in f.readlines():
+            testsResult = line
+            mssgTestsBuild = mssgTestsBuild + line
+        f.close()
+        buildNotification.moveToArchive(fileTestsBuild, remoteArchivePath)
+        if testsResult.startswith('scons: done building targets.'):
+            TestsBuild = True
+        fileTestsBuildErr = localLogDir + 'testsBuildErr.log'
+        mssgTestsErr = open(fileTestsBuildErr, 'r').read()
+        buildNotification.moveToArchive(fileTestsBuildErr, remoteArchivePath)
+        fileTestsRunErr = localLogDir + 'testsRunErr.log'
+        buildNotification.moveToArchive(fileTestsRunErr, remoteArchivePath)
+        return TestsBuild, mssgTestsBuild, mssgTestsErr
+    except IOError:
+        return TestsBuild, mssgTestsBuild, mssgTestsErr
+#end of ParseTestBuildLog
 
-# On Linux/Mac, compilation warning are in stderr file.
-# On Windows they're in stdout (read above)
-fileSconsErr =  localLogDir + 'sconsErr.log'
-if os.name == 'posix':
-     mssgSconsWarn = open(fileSconsErr,'r').read()
-notifier.moveToArchive(fileSconsErr,remoteArchivePath)
-
-# Count compilation warnings
-reWarnCount = re.compile(": warning")
-wc = reWarnCount.findall(mssgSconsWarn)
-compilerWarnCount = len(wc)
-
-#Get tests scons result and errors
-filetestsBuild =  localLogDir + 'testsBuild.log'
-f = open(filetestsBuild,'r')
-
-for line in f.readlines():
-     testsResult = line
-     mssgTestsBuild = mssgTestsBuild + line
-     
-f.close()
-notifier.moveToArchive(filetestsBuild,remoteArchivePath)
-
-if testsResult.startswith('scons: done building targets.'):
-	testsBuildSuccess = True	
-	
-filetestsBuildErr =  localLogDir + "testsBuildErr.log"
-mssgTestsErr = open(filetestsBuildErr,'r').read()
-notifier.moveToArchive(filetestsBuildErr,remoteArchivePath)
-
-filetestsRunErr =  localLogDir + 'testsRunErr.log'
-notifier.moveToArchive(filetestsRunErr,remoteArchivePath)
-
-#Get tests result
-filetestsRun = localLogDir + 'testResults.log'
-f = open(filetestsRun,'r')
-
-reTestCount = re.compile("Running\\s*(\\d+)\\s*test", re.IGNORECASE)
-reCrashCount = re.compile("OK!")
-reFailCount = re.compile("Failed\\s*(\\d+)\\s*of\\s*(\\d+)\\s*tests", re.IGNORECASE)
-reFailSuite = re.compile("A fatal error occurred", re.IGNORECASE)
-for line in f.readlines():
-        m=reTestCount.search(line)
+def ParseTestResultsLog():
+    testCount = 0
+    failCount = 0
+    UnitTests = bool(True)
+    mssgTestsResults = ''
+    fileTestsRun = localLogDir + 'testResults.log'
+    f = open(fileTestsRun, 'r')
+    reTestCount = re.compile("Running\\s*(\\d+)\\s*test", re.IGNORECASE)
+    reCrashCount = re.compile("OK!")
+    reFailCount = re.compile("Failed\\s*(\\d+)\\s*of\\s*(\\d+)\\s*tests", re.IGNORECASE)
+    reFailSuite = re.compile("A fatal error occurred", re.IGNORECASE)
+    for line in f.readlines():
+        m = reTestCount.search(line)
         if m:
             testCount += int(m.group(1))
-            m=reCrashCount.search(line)
+            m = reCrashCount.search(line)
             if not m:
                 failCount += 1
-                testsPass = False
-        m=reFailCount.match(line)
+                UnitTests = False
+        m = reFailCount.match(line)
         if m:
-            # Need to decrement failCount because crashCount will have incremented it above
             failCount -= 1
             failCount += int(m.group(1))
-            testsPass = False
-        m=reFailSuite.match(line)
+            UnitTests = False
+        m = reFailSuite.match(line)
         if m:
-            testsPass = False
+            UnitTests = False
             failCount += 1
         mssgTestsResults = mssgTestsResults + line
-     
-f.close()
-notifier.moveToArchive(filetestsRun,remoteArchivePath)
+    f.close()
+    buildNotification.moveToArchive(fileTestsRun, remoteArchivePath)
+    return testCount, failCount, UnitTests, mssgTestsResults
+#end of ParseTestResultsLog
 
-#Read svn log
-filesvn = localLogDir + 'svn.log'
-mssgSvn = open(filesvn,'r').read()
-notifier.moveToArchive(filesvn,remoteArchivePath)
-#attempt to parse out the svn revision and ticket number
-reSvnRevision = re.compile("r(\\d+)\\s\\|", re.IGNORECASE)
-m=reSvnRevision.search(mssgSvn)
-if m:
-  svnRevision = m.group(1)
-  
-reTicket = re.compile("#(\\d+)", re.IGNORECASE)
-mList=reTicket.findall(mssgSvn)
-for m in mList:
-  ticketList.append(m)
-  
-#Read doxygen log - skip on Mac
+def RecordExists():
+    url = base_url + "rec_exists.psp?id=" + str(SvnID)
+    try:
+        f = urllib2.urlopen(url)
+        page = f.read()
+        if re.search("Success", page):
+            r = True
+        elif re.search("Failure", page):
+            r = False
+        else:
+            r = False #needs something better here, but it *should* be controlled by the db
+    except urllib2.HTTPError:
+        r = False
+    return r
+#end of RecordExists
+
+def CreateRecord():
+    url = base_url + "rec_create.psp?id=" + str(SvnID)
+    try:
+        f = urllib2.urlopen(url)
+        return True
+    except urllib2.HTTPError:
+        return False
+#end of CreateRecord()
+
+def GetPlatformID():
+    r = os.name + platform.system() + platform.architecture()[0]
+    return r
+#end of GetPlatformID()
+
+def CreateTREntry():
+    url = base_url + "tr.psp?id=" + str(SvnID)
+    url += "&plat=" + GetPlatformID()
+    url += "&fw=" + str(FrameWorkBuild)
+    url += "&tb=" + str(TestsBuild)
+    url += "&ut=" + str(UnitTests)
+    url += "&dx=" + str(DocumentationBuild)
+    url += "&success=" + str(OverAllSuccess)
+    url += "&cw=" + str(compilerWarnCount)
+    url += "&t=" + str(testCount)
+    url += "&tf=" + str(failCount)
+    url += "&dw=" + str(warnCount)
+    url += "&utt=" + str(UnitTestsTime)
+    url += "&btt=" + str(TestBuildTime)
+    url += "&bdt=" + str(SconBuildTime)
+    try:
+        f = urllib2.urlopen(url)
+        time.sleep(0.1)
+        return True
+    except urllib2.HTTPError:
+        return False
+
+#end of CreateTREntry(SvnID)
+
+def CreateTRACRecord():
+    global ticketList
+    url = base_url + "trac.psp?id=" + str(SvnID) + "&trac="
+    for i in ticketList:
+        try:
+            f = urllib2.urlopen(url + str(i))
+        except urllib2.HTTPError:
+            continue
+# end CreateTRACRecord
+
+def GetTimes():
+    SconBuildTime = 0.0
+    TestBuildTime = 0.0
+    UnitTestsTime = 0.0
+    fileBuildTime = localLogDir + 'timebuild.log'
+    fileBuildTest = localLogDir + 'timetestbuild.log'
+    fileRunTests = localLogDir + 'timetestrun.log'
+    try:
+        f = open(fileBuildTime, 'r')
+        SconBuildTime = float(f.read())
+        f.close()
+        buildNotification.moveToArchive(fileBuildTime, remoteArchivePath)
+    except IOError:
+        SconsBuildTime = -1.0
+    try:
+        f = open(fileBuildTest, 'r')
+        TestBuildTime = float(f.read())
+        f.close()
+        buildNotification.moveToArchive(fileBuildTest, remoteArchivePath)
+    except IOError:
+        TestBuildTime = -1.0
+    try:
+        f = open(fileRunTests, 'r')
+        UnitTestsTime = float(f.read())
+        f.close()
+        buildNotification.moveToArchive(fileRunTests, remoteArchivePath)
+    except IOError:
+        UnitTestsTime = -1.0
+    return SconBuildTime, TestBuildTime, UnitTestsTime
+#end of GetTimes()
+
+def ParseDoxygenLog():
+    warnCount = 0
+    DocumentationBuild = bool(True)
+    mssgDoxy = 0
+    lastDoxy = 0
+    filedoxy = localLogDir + 'doxy.log'
+    mssgDoxy = open(filedoxy, 'r').read()
+    reWarnCount = re.compile("Warning: ")
+    m = reWarnCount.findall(mssgDoxy)
+    if m:
+        warnCount = len(m)
+        if warnCount > 0:
+            DocumentationBuild = False
+    buildNotification.moveToArchive(filedoxy, remoteArchivePath)
+    try:
+        lastDoxy = int(open('prevDoxy', 'r').read())
+    except IOError:
+        lastDoxy = 0
+    currentDoxy = open('prevDoxy', 'w')
+    currentDoxy.write(str(warnCount))
+    return warnCount, DocumentationBuild, mssgDoxy, lastDoxy
+#end of ParseDoxygenLog
+
+# The program logic starts here.
+
+remoteArchivePath, relativeLogDir = buildNotification.getArchiveDir(project)
+
+ticketList, SvnID, mssgSvn = ParseSubversionLog()
+
+if not RecordExists():
+    SendEmail = True
+    CreateRecord()
+    CreateTRACRecord()
+
+mssgSconsWarn, compilerWarnCount, FrameWorkBuild = ParseSconsLog()
+TestsBuild, mssgTestsBuild, mssgTestsErr = ParseTestBuildLog()
+testCount, failCount, UnitTests, mssgTestsResults = ParseTestResultsLog()
+SconBuildTime, TestBuildTime, UnitTestsTime = GetTimes()
+
 if os.name != 'posix':
-     filedoxy = localLogDir + 'doxy.log'
-     mssgDoxy = open(filedoxy,'r').read()
-     reWarnCount = re.compile("Warning:")
-     m=reWarnCount.findall(mssgDoxy)
-     if m:
-          warnCount = len(m)
-          if warnCount >0:
-               doxyWarnings = False
-     notifier.moveToArchive(filedoxy,remoteArchivePath)
+    warnCount, DocumentationBuild, mssgDoxy, lastDoxy = ParseDoxygenLog()
 
-     try:
-          lastDoxy = int(open('prevDoxy','r').read())
-     except IOError:
-          lastDoxy = 0
-     currentDoxy = open('prevDoxy','w')
-     currentDoxy.write(str(warnCount))
-
-#Notify build completion
-buildErrors=1
-testBuildErrors=1
-if buildSuccess:
-     buildErrors=0
-if testsBuildSuccess:
-     testBuildErrors=0
-notifier.sendTestCompleted(project,testCount=testCount,testFail=failCount, \
-                           compWarn=compilerWarnCount,docuWarn=warnCount, \
-                           buildErrors=buildErrors,testBuildErrors=testBuildErrors)
-
-#Construct Message
-httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
-
-message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
-message += 'Framework Build Passed: ' + str(buildSuccess)
-if compilerWarnCount>0:
-  message += " (" + str(compilerWarnCount) + " compiler warnings)"
-message += '\n'
-message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
-message += 'Units Tests Passed: ' + str(testsPass) 
-message += ' (' 
-if failCount>0:
-    message += str(failCount) + " failed out of "
-message += str(testCount) + " tests)\n"
-# Not doing doxygen on the Mac
-if os.name != 'posix':
-     message += "Code Documentation Passed: " + str(doxyWarnings)
-     if warnCount>0:
-          message += " ("+str(warnCount) +" doxygen warnings"
-          if (warnCount > lastDoxy):
-               message += " - " + str(warnCount-lastDoxy) + " MORE FROM THIS CHECK-IN"
-          if (lastDoxy > warnCount):
-               message += " - " + str(lastDoxy-warnCount) + " fewer due to this check-in"  
-          message += ")\n"
-     else:
-          message += "\n"
-message += "\n"
-if len(svnRevision) > 0:
-  message += "SVN Revision: " + svnRevision
-  message += " " + tracLink + "changeset/" + svnRevision + "\n"
-for ticket in ticketList:
-  message += "TRAC ticket: " + ticket 
-  message += " " + tracLink + "ticket/" + ticket + "\n"
-message += mssgSvn + "\n"
-message += 'FRAMEWORK BUILD LOG\n\n'
-message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'
-message += 'Build stderr <' + httpLinkToArchive + 'sconsErr.log>\n'
-message += '------------------------------------------------------------------------\n'
-message += 'TESTS BUILD LOG\n\n'
-message += 'Test Build stdout <' + httpLinkToArchive + 'testsBuild.log>\n'
-message += 'Test Build stderr <' + httpLinkToArchive + 'testsBuildErr.log>\n'
-message += '------------------------------------------------------------------------\n'
-message += 'UNIT TEST LOG\n\n'
-message += 'Test Run stdout <' + httpLinkToArchive + 'testResults.log>\n'
-message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
-message += '------------------------------------------------------------------------\n'
-# Not doing doxygen on the Mac
-if os.name != 'posix':
-     message += 'DOXYGEN LOG\n\n'
-     message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
-
-if buildSuccess:
-	subject += '[Framework Build Successful, '
+if FrameWorkBuild and TestsBuild and UnitTests:
+    OverAllSuccess = True
 else:
-	subject += '[Framework Build Failed, '
-	
-if testsBuildSuccess:
-	subject += 'Tests Build Successful, '
-else:
-	subject += 'Tests Build Failed, '
-	
-if testsPass:
-	subject += 'Tests Successful]\n'
-else:
-	subject += 'Tests Failed]\n'	
+    SendEmail = True
 
-# Send mail
-logfile = notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
-notifier.moveToArchive(logfile,remoteArchivePath)
+if not CreateTREntry():
+    CreateTREntry()
 
-# Write out what happened with the tests. 
-# This is for deciding whether to build installer - only do so if tests both built and passed
-mantidtests = localLogDir + 'MantidTests.txt'
-f = open(mantidtests,'w')
-testsPass = testsBuildSuccess and testsPass
-f.write('Tests ' + str(testsPass))
-f.close()
 
-if not buildSuccess:
+if SendEmail:
+    SENDER = platform.system() 
+    #Create Subject
+    subject = 'Subject: ' + platform.system() 
+    if platform.architecture()[0] == '64bit':
+        SENDER += '64'
+        subject += '64'
+    SENDER += 'BuildServer1@mantidproject.org'
+    subject += ' Build Report: '
+
+    httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
+
+    #compose message
+    message = "Build Completed at: " + strftime("%H:%M:%S %d-%m-%Y") + "\n"
+    message += "Framework Build Passed: " + str(FrameWorkBuild) + " (" + str(compilerWarnCount) + " compiler warnings)" + "\n"
+    message += "Tests Build Passed: " + str(TestsBuild) + "\n"
+    message += "Unit Tests Passed: " + str(UnitTests) + " ( " + str(failCount) + " failed out of " + str(testCount) + " tests.)" + "\n"
+    if os.name != 'posix': # doxy stuff here
+        message += "Code Documentation Passed: " + str(DocumentationBuild)
+        if warnCount > 0:
+            message += " ("+str(warnCount) +" doxygen warnings"
+            if (warnCount > lastDoxy):
+                message += " - " + str(warnCount-lastDoxy) + " MORE FROM THIS CHECK-IN"
+            if (lastDoxy > warnCount):
+                message += " - " + str(lastDoxy-warnCount) + " fewer due to this check-in"  
+            message += ")\n"
+        else:
+            message += "\n"
+    message += "\n"
+
+    message += "SVN Revision: " + str(SvnID)
+    message += " " + trac_link + "changeset/" + str(SvnID) + "\n"
+    for ticket in ticketList:
+        message += "TRAC Ticket: " + ticket
+        message += " " + trac_link + "ticket/"  + ticket + "\n"
+
+    message += mssgSvn + "\n"
+    message += 'FRAMEWORK BUILD LOG\n\n'
+    message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'
+    message += 'Build stderr <' + httpLinkToArchive + 'sconsErr.log>\n'
+    message += '------------------------------------------------------------------------\n'
+    message += 'TESTS BUILD LOG\n\n'
+    message += 'Test Build stdout <' + httpLinkToArchive + 'testsBuild.log>\n'
+    message += 'Test Build stderr <' + httpLinkToArchive + 'testsBuildErr.log>\n'
+    message += '------------------------------------------------------------------------\n'
+    message += 'UNIT TEST LOG\n\n'
+    message += 'Test Run stdout <' + httpLinkToArchive + 'testResults.log>\n'
+    message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
+    message += '------------------------------------------------------------------------\n'
+    # Not doing doxygen on the Mac
+    if os.name != 'posix':
+        message += 'DOXYGEN LOG\n\n'
+        message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
+    if FrameWorkBuild:
+	    subject += '[Framework Build Successful, '
+    else:
+	    subject += '[Framework Build Failed, '
+    if TestsBuild:
+	    subject += 'Tests Build Successful, '
+    else:
+	    subject += 'Tests Build Failed, '
+    if UnitTests:
+	    subject += 'Tests Successful]\n'
+    else:
+	    subject += 'Tests Failed]\n'
+    logfile = buildNotification.sendResultMail(subject+message,localLogDir,sender=SENDER)
+    buildNotification.moveToArchive(logfile, remoteArchivePath)
+
+if not OverAllSuccess:
      # On Redhat we have python 2.4 and that doesn't seem to have the global exit command
      sys.exit(1)
 else:
      fileLaunchQTIPlot = localLogDir+'LaunchQTIPlot.txt'
      f = open(fileLaunchQTIPlot,'w')
      f.write('launch')
-
