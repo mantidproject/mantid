@@ -105,7 +105,7 @@ public:
 
 
     //Are the returned arrays the right size?
-    const EventList el(ew->getEventListAtSpectrumNumber(1));
+    const EventList el(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
     TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS);
     TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS);
@@ -123,7 +123,7 @@ public:
     TS_ASSERT_EQUALS( ew->size(), 1*NUMPIXELS);
 
     //Didn't set X? well the default bin = everything
-    const EventList el(ew->getEventListAtSpectrumNumber(1));
+    const EventList el(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el.dataX().size(), 0);
     TS_ASSERT_EQUALS( el.dataY().size(), 1);
     TS_ASSERT_EQUALS( el.dataE().size(), 1);
@@ -166,11 +166,11 @@ public:
     TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(5)[0], 55);
 
     //Spectrum 0 is at pixelid 5 and has 5 events
-    const EventList el0(uneven->getEventListAtSpectrumNumber(0));
+    const EventList el0(uneven->getEventListAtWorkspaceIndex(0));
     TS_ASSERT_EQUALS( el0.getNumberEvents(), 5);
-    const EventList el1(uneven->getEventListAtSpectrumNumber(1));
+    const EventList el1(uneven->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el1.getNumberEvents(), 15);
-    const EventList el5(uneven->getEventListAtSpectrumNumber(5));
+    const EventList el5(uneven->getEventListAtWorkspaceIndex(5));
     TS_ASSERT_EQUALS( el5.getNumberEvents(), 55);
 
     //Out of range
@@ -182,7 +182,7 @@ public:
   void test_getEventList()
   {
     //Get pixel 1
-    const EventList el(ew->getEventListAtSpectrumNumber(1));
+    const EventList el(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
@@ -236,7 +236,7 @@ public:
       xRef[i] = i*BIN_DELTA*2;
 
     ew->setX(0, axis);
-    const EventList el(ew->getEventListAtSpectrumNumber(0));
+    const EventList el(ew->getEventListAtWorkspaceIndex(0));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA*2);
 
@@ -251,7 +251,7 @@ public:
     TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS/2], 0);
 
     //But pixel 1 is the same
-    const EventList el1(ew->getEventListAtSpectrumNumber(1));
+    const EventList el1(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
     TS_ASSERT_EQUALS( el1.dataY()[1], 1);
   }

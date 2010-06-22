@@ -105,7 +105,7 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   EventList& getEventList(const int pixelid);
 
   /** Get an EventList object at the given spectrum number */
-  EventList& getEventListAtSpectrumNumber(const int spectrum_number);
+  EventList& getEventListAtWorkspaceIndex(const int spectrum_number);
 
   /** Call this method when loading event data is complete.
    * The map of pixelid to spectrum # is generated.

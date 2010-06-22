@@ -109,10 +109,10 @@ namespace DataObjects
     }
   }
 
-  EventList& EventWorkspace::getEventListAtSpectrumNumber(const int spectrum_number)
+  EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index)
   {
     //An empty entry will be made if needed
-    return *this->data[spectrum_number];
+    return *this->data[workspace_index];
   }
 
 
@@ -134,8 +134,8 @@ namespace DataObjects
     m_noVectors = this->data_map.size();
     this->data.resize(m_noVectors, NULL);
 
-    //For the spectramap
-    int* spec_table = new int [m_noVectors];
+    //For the mapping workspace
+    int* index_table = new int [m_noVectors];
     int* pixelid_table = new int [m_noVectors];
 
     int counter = 0;
@@ -143,7 +143,7 @@ namespace DataObjects
     for (it = this->data_map.begin(); it != this->data_map.end(); it++)
     {
       //Iterate through the map
-      spec_table[counter] = counter;
+      index_table[counter] = counter;
       pixelid_table[counter] = it->first; //The key = the pixelid
 
       //Copy the pointer to the event list in there.
@@ -154,13 +154,13 @@ namespace DataObjects
     }
 
     //Save the mapping
-    mutableSpectraMap().populate(spec_table, pixelid_table, m_noVectors);
+    mutableSpectraMap().populate(index_table, pixelid_table, m_noVectors);
 
     //Now clear the data_map
     this->data_map.clear();
 
     //Get your memory back :)
-    delete [] spec_table;
+    delete [] index_table;
     delete [] pixelid_table;
   }
 

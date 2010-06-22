@@ -108,7 +108,7 @@ namespace Mantid
             outputW->setX(i, XValues_new);
             //Copy over the Y data from the on-the-fly-generated histogram
             //Get a const event list reference. eventW->dataY() doesn't work.
-            const EventList el = eventW->getEventListAtSpectrumNumber(i);
+            const EventList el = eventW->getEventListAtWorkspaceIndex(i);
             MantidVec y_data = el.dataY();
             //std::cout << "y data size is " << y_data.size() << " for " << i << "\n";
             outputW->dataY(i).assign(y_data.begin(), y_data.end());

@@ -144,7 +144,7 @@ public:
     EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("test_inEvent", test_in);
 
-    const EventList el(test_in->getEventListAtSpectrumNumber(1));
+    const EventList el(test_in->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
@@ -160,7 +160,7 @@ public:
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    const EventList el2(test_in->getEventListAtSpectrumNumber(2));
+    const EventList el2(test_in->getEventListAtWorkspaceIndex(2));
     TS_ASSERT_EQUALS( el2.dataX()[0], 0.0);
     TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
 
@@ -183,7 +183,7 @@ public:
     EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("test_inEvent2", test_in);
 
-    const EventList el(test_in->getEventListAtSpectrumNumber(1));
+    const EventList el(test_in->getEventListAtWorkspaceIndex(1));
     //Correct # of bins?
     TS_ASSERT_EQUALS(test_in->blocksize(), NUMBINS);
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
