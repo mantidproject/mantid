@@ -34,9 +34,18 @@ namespace DataObjects
       g_log.error("Negative or 0 Number of Pixels specified to EventWorkspace::init");
       throw std::out_of_range("Negative or 0 Number of Pixels specified to EventWorkspace::init");
     }
-
+    //Initialize the data
     m_noVectors = NVectors;
     data.resize(m_noVectors, NULL);
+
+    //Create axes.
+    m_axes.resize(2);
+    //I'm not sure what the heck this first axis is supposed to be; copying from Workspace2D
+    m_axes[0] = new API::RefAxis(XLength, this);
+    // Ok, looks like the second axis is supposed to be the spectrum # for each entry in the workspace index
+    //  I have no idea why it is such a convoluted way of doing it.
+    m_axes[1] = new API::Axis(API::AxisType::Spectra,m_noVectors);
+
   }
 
 
@@ -137,6 +146,7 @@ namespace DataObjects
     //For the mapping workspace
     int* index_table = new int [m_noVectors];
     int* pixelid_table = new int [m_noVectors];
+    int max_pixel_id = 0;
 
     int counter = 0;
     EventListMap::iterator it;
@@ -145,6 +155,9 @@ namespace DataObjects
       //Iterate through the map
       index_table[counter] = counter;
       pixelid_table[counter] = it->first; //The key = the pixelid
+      //Find the maximum pixel id #
+      if (it->first > max_pixel_id)
+        max_pixel_id = it->first;
 
       //Copy the pointer to the event list in there.
       this->data[counter] = it->second;
@@ -153,8 +166,17 @@ namespace DataObjects
       counter++;
     }
 
-    //Save the mapping
-    mutableSpectraMap().populate(index_table, pixelid_table, m_noVectors);
+    //We create a spectra-type axis that holds the spectrum # at each workspace index, in a convoluted and annoying way.
+    delete m_axes[1];
+    m_axes[1] = new API::Axis(API::AxisType::Spectra, m_noVectors);
+    //Fill it with the pixel id / spectrum # at workspace index i.
+    for (int i=0; i < m_noVectors; i++)
+      m_axes[1]->setValue(i, pixelid_table[i]);
+
+    //Make the mapping between spectrum # and pixel id (aka detector id)
+    //  In this case, it is a simple 1-1 map.
+    mutableSpectraMap().populateSimple(0, max_pixel_id);
+
 
     //Now clear the data_map
     this->data_map.clear();

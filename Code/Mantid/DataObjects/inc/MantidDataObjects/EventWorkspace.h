@@ -101,10 +101,10 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Set the x-axis data (histogram bins) for all pixels */
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
-  /** Get an EventList object at the given pixelid number */
+  /** Get an EventList object at the given pixelid/spectrum number */
   EventList& getEventList(const int pixelid);
 
-  /** Get an EventList object at the given spectrum number */
+  /** Get an EventList object at the given workspace index number */
   EventList& getEventListAtWorkspaceIndex(const int spectrum_number);
 
   /** Call this method when loading event data is complete.

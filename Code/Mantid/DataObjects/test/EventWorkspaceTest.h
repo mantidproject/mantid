@@ -161,9 +161,13 @@ public:
     TS_ASSERT_EQUALS( uneven->blocksize(), NUMBINS);
     TS_ASSERT_EQUALS( uneven->size(), NUMBINS*NUMPIXELS/10);
 
-    //Does the spectra map make sense
-    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(0)[0], 5);
-    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(5)[0], 55);
+    //The spectra map should be a dumb 1-1 map
+    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(0)[0], 0);
+    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(5)[0], 5);
+
+    //But axis 1 is the map between spectrum # and the workspace index
+    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(0), 5 );
+    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(5), 55 );
 
     //Spectrum 0 is at pixelid 5 and has 5 events
     const EventList el0(uneven->getEventListAtWorkspaceIndex(0));
