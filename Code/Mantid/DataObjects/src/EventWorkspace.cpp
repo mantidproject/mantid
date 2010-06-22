@@ -58,7 +58,7 @@ namespace DataObjects
     }
     else
     {
-      return (*it)->getRefX()->size();
+      return (*it)->histogram_size();
     }
   }
 

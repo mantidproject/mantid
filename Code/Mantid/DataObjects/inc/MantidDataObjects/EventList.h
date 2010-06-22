@@ -143,7 +143,11 @@ public:
   /** This throws an exception since non-const access is not allowed. */
   virtual StorageType& dataE();
 
+  /** Return the number of events in the list. */
   virtual std::size_t getNumberEvents() const;
+
+  /** Return the size of the histogram representation of the data (size of Y) **/
+  virtual size_t histogram_size() const;
 
   /** Delete the cached version of the histogram data. */
   void emptyCache() const;

@@ -52,7 +52,7 @@ public:
    * 500 pixels
    * 1000 histogrammed bins.
    */
-  EventWorkspace_sptr createEventWorkspace(int initialize_pixels)
+  EventWorkspace_sptr createEventWorkspace(int initialize_pixels, int setX)
   {
 
     EventWorkspace_sptr retVal(new EventWorkspace);
@@ -71,25 +71,28 @@ public:
     }
     retVal->doneLoadingData();
 
-    //Create the x-axis for histogramming.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec& xRef = axis.access();
-    xRef.resize(NUMBINS);
-    for (int i = 0; i < NUMBINS; ++i)
-      xRef[i] = i*BIN_DELTA;
+    if (setX)
+      {
+        //Create the x-axis for histogramming.
+        Kernel::cow_ptr<MantidVec> axis;
+        MantidVec& xRef = axis.access();
+        xRef.resize(NUMBINS);
+        for (int i = 0; i < NUMBINS; ++i)
+          xRef[i] = i*BIN_DELTA;
 
-    //Try setting a single axis
-    retVal->setX(2, axis);
+        //Try setting a single axis
+        retVal->setX(2, axis);
 
-    //Set all the histograms at once.
-    retVal->setAllX(axis);
+        //Set all the histograms at once.
+        retVal->setAllX(axis);
+      }
 
     return retVal;
   }
 
   void setUp()
   {
-    ew = createEventWorkspace(1);
+    ew = createEventWorkspace(1, 1);
   }
 
 
@@ -99,6 +102,33 @@ public:
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS( ew->blocksize(), NUMBINS);
     TS_ASSERT_EQUALS( ew->size(), NUMBINS*NUMPIXELS);
+
+
+    //Are the returned arrays the right size?
+    const EventList el(ew->getEventListAtSpectrumNumber(1));
+    TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
+    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS);
+    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS);
+
+  }
+
+
+  //------------------------------------------------------------------------------
+  void test_constructor_not_settingx()
+  {
+    //Do the workspace, but don't set x
+    ew = createEventWorkspace(1, 0);
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
+    TS_ASSERT_EQUALS( ew->blocksize(), 1);
+    TS_ASSERT_EQUALS( ew->size(), 1*NUMPIXELS);
+
+    //Didn't set X? well the default bin = everything
+    const EventList el(ew->getEventListAtSpectrumNumber(1));
+    TS_ASSERT_EQUALS( el.dataX().size(), 0);
+    TS_ASSERT_EQUALS( el.dataY().size(), 1);
+    TS_ASSERT_EQUALS( el.dataE().size(), 1);
+    TS_ASSERT_EQUALS( el.dataY()[0], NUMEVENTS);
+
   }
 
 
@@ -182,7 +212,7 @@ public:
   //------------------------------------------------------------------------------
   void test_data_access_not_setting_num_vectors()
   {
-    ew = createEventWorkspace(0);
+    ew = createEventWorkspace(0, 1);
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS( ew->blocksize(), NUMBINS);
     TS_ASSERT_EQUALS( ew->size(), NUMBINS*NUMPIXELS);
@@ -201,7 +231,7 @@ public:
     //Create A DIFFERENT x-axis for histogramming.
     Kernel::cow_ptr<MantidVec> axis;
     MantidVec& xRef = axis.access();
-    xRef.resize(NUMBINS);
+    xRef.resize(NUMBINS/2);
     for (int i = 0; i < NUMBINS/2; ++i)
       xRef[i] = i*BIN_DELTA*2;
 
@@ -209,6 +239,12 @@ public:
     const EventList el(ew->getEventListAtSpectrumNumber(0));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA*2);
+
+    //Are the returned arrays the right size?
+    TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS/2);
+    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS/2);
+    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS/2);
+
     //Now there are 2 events in each bin
     TS_ASSERT_EQUALS( el.dataY()[0], 2);
     TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS/2-1], 2);

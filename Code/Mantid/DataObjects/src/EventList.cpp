@@ -206,6 +206,11 @@ namespace DataObjects
     return this->events.size();
   }
 
+  size_t EventList::histogram_size() const
+  {
+    return dataY().size();
+  }
+
   // --- Setting the Histrogram X axis, without recalculating the cache -------------------------
   void EventList::setX(const RCtype::ptr_type& X, Unit* set_xUnit)
   {
@@ -266,6 +271,7 @@ namespace DataObjects
     return refX;
   }
 
+
   // --- Non-const return Data Vectors throw exceptions! -------------------------------------------------------------
   EventList::StorageType& EventList::dataX()
   {
@@ -285,9 +291,12 @@ namespace DataObjects
   // --- Histogram functions -------------------------------------------------
   void EventList::emptyCache() const
   {
-    this->refX.access().clear();
-    this->refY.access().clear();
-    this->refE.access().clear();
+    if (refX->size() > 0)
+      this->refX.access().clear();
+    if (refY->size() > 0)
+      this->refY.access().clear();
+    if (refE->size() > 0)
+      this->refE.access().clear();
   }
 
   void EventList::emptyCacheData()
@@ -300,6 +309,7 @@ namespace DataObjects
   void EventList::generateHistogram() const
   {
     StorageType &Y = refY.access();
+    StorageType &E = refE.access();
     StorageType &X = refX.access();
 
     //For slight speed=up.
@@ -314,6 +324,9 @@ namespace DataObjects
       Y.resize(1, 0);
       //Set the single bin to the total # of events.
       Y[0] = this->events.size();
+      //Do the E array too.
+      E.resize(1, 0);
+      E[0] = 0;
       //And we're done! That was easy.
       return;
     }
@@ -326,6 +339,7 @@ namespace DataObjects
       this->sortTof();
       //Clear the Y data, assign all to 0.
       Y.resize(x_size, 0);
+      E.resize(x_size, 0);
 
       //Do we even have any events to do?
       if (this->events.size() > 0)

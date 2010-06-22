@@ -58,6 +58,7 @@ public:
   }
 
 
+
 //  void testBadInputs()
 //  {
 //    e = TofEvent(-100,1);
@@ -214,6 +215,25 @@ public:
     const EventList el2(el);
     TS_ASSERT(el2.dataX()==shared_x);
   }
+
+
+  void test_setX_empty_constructor()
+  {
+    el = EventList();
+    //Generate the histrogram bins
+    EventList::StorageType shared_x;
+    double tof; //in ns
+    for (tof=0; tof<16e3*1e3; tof += 1e4)
+    {
+      //bins of 10 microsec
+      shared_x.push_back(tof);
+    }
+    el.setX(shared_x);
+    //Do we have the same data in X?
+    const EventList el2(el);
+    TS_ASSERT(el2.dataX()==shared_x);
+  }
+
 
   void test_non_const_access()
   {

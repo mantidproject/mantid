@@ -190,6 +190,9 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
     // adjust the record of the location in the file
     event_offset += event_buffer_size;
   }
+  //finalize loading; this condenses the pixels into a 0-based, dense vector.
+  workspace->doneLoadingData();
+
   delete event_buffer;
   stringstream msg;
   msg << "Read " << this->num_good_events << " events + "
