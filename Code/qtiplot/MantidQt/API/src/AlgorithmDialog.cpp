@@ -266,9 +266,10 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
       filter = "Files (";
       
       std::set<std::string>::const_iterator iend = exts.end();
+      // Push a wild-card onto the front of each file suffix
       for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
       {
-  	  filter.append("*." + QString::fromStdString(*itr) + " ");
+        filter.append("*" + QString::fromStdString(*itr) + " ");
       }
       
       filter.trimmed();
@@ -285,7 +286,7 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
     std::set<std::string>::const_iterator iend = exts.end();
     for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
     {
-      filter.append("." + QString::fromStdString(*itr) + ";;");
+      filter.append(QString::fromStdString(*itr) + ";;");
     }
     //Remove last two semi-colons or else we get an extra empty option in the box
     filter.chop(2);
