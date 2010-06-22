@@ -175,6 +175,9 @@ if __name__ == "__main__":
             print COLOR["blue"] + '-'*80 + COLOR["reset"]
             print ""
 
+            #Delete the mantid log file to clear its contents
+            os.system("rm ~/.mantid/mantid.log")
+
             #Start the subprocess (runTests.sh)
             p = subprocess.Popen(runtests_cmd, shell=True, bufsize=10000,
                                  cwd=subproj,
