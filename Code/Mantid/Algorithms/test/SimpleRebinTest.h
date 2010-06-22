@@ -163,6 +163,13 @@ public:
     const EventList el2(test_in->getEventListAtSpectrumNumber(2));
     TS_ASSERT_EQUALS( el2.dataX()[0], 0.0);
     TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
+
+    //Correct # of bins?
+    TS_ASSERT_EQUALS(test_in->blocksize(), 26);
+    TS_ASSERT_EQUALS(el2.dataX().size(), 26);
+    TS_ASSERT_EQUALS(el2.dataY().size(), 26);
+    TS_ASSERT_EQUALS(el2.dataE().size(), 26);
+
     //# of events per bin was doubled
     TS_ASSERT_EQUALS( el2.dataY()[0], 2);
     TS_ASSERT_EQUALS( el2.dataY()[1], 2);
@@ -171,12 +178,18 @@ public:
   }
 
 
-  void xtestEventWorkspace_DifferentOutputWorkspace()
+  void testEventWorkspace_DifferentOutputWorkspace()
   {
     EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("test_inEvent2", test_in);
 
     const EventList el(test_in->getEventListAtSpectrumNumber(1));
+    //Correct # of bins?
+    TS_ASSERT_EQUALS(test_in->blocksize(), NUMBINS);
+    TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
+    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS);
+    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS);
+    //Good histogram
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
@@ -187,20 +200,27 @@ public:
     SimpleRebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_inEvent2");
-    rebin.setPropertyValue("OutputWorkspace","test_outEvent");
+    rebin.setPropertyValue("OutputWorkspace","test_out2");
     rebin.setPropertyValue("Params", "0.0,4.0,100");
+    //TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.execute());
-//    TS_ASSERT(rebin.isExecuted());
+    TS_ASSERT(rebin.isExecuted());
 
-//    EventWorkspace_sptr test_outEvent = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("test_outEvent"));
-//    const EventList el2(test_outEvent->getEventListAtSpectrumNumber(2));
-//    TS_ASSERT_EQUALS( el2.dataX()[0], 0.0);
-//    TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
-//    //# of events per bin was doubled
-//    TS_ASSERT_EQUALS( el2.dataY()[0], 2);
-//    TS_ASSERT_EQUALS( el2.dataY()[1], 2);
-//    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-2], 2); //The last bin
-//    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2], 0); //The last bin
+    Workspace2D_sptr test_out = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("test_out2"));
+    TS_ASSERT_EQUALS(test_out->getNumberHistograms(), NUMPIXELS);
+    TS_ASSERT_EQUALS(test_out->dataX(0)[0], 0.0);
+    TS_ASSERT_EQUALS(test_out->dataX(0)[1], 4.0);
+    TS_ASSERT_EQUALS(test_out->dataX(0)[25], 100.0);
+    //Correct # of bins?
+    TS_ASSERT_EQUALS(test_out->blocksize(), 26);
+    TS_ASSERT_EQUALS(test_out->dataX(0).size(), 26);
+    TS_ASSERT_EQUALS(test_out->dataY(0).size(), 26);
+    TS_ASSERT_EQUALS(test_out->dataE(0).size(), 26);
+    //Number of events was doubled
+    TS_ASSERT_EQUALS(test_out->dataY(0)[0], 2);
+    TS_ASSERT_EQUALS(test_out->dataY(0)[1], 2);
+    //E is still
+    TS_ASSERT_EQUALS(test_out->dataE(0)[0], 0);
   }
     
 

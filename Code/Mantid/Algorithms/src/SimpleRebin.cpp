@@ -23,6 +23,7 @@ namespace Mantid
     using namespace API;
     using DataObjects::Workspace2D;
     using DataObjects::Workspace2D_sptr;
+    using DataObjects::EventList;
     using DataObjects::EventWorkspace;
     using DataObjects::EventWorkspace_sptr;
     using DataObjects::EventWorkspace_const_sptr;
@@ -63,7 +64,8 @@ namespace Mantid
       const int histnumber = inputW->getNumberHistograms();
       DataObjects::Histogram1D::RCtype XValues_new;
       // create new output X axis
-      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params,XValues_new.access());
+      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
+      //std::cout <<"ntcnew" << ntcnew << "\n";
 
       //---------------------------------------------------------------------------------
       //Now, determine if the input workspace is actually an EventWorkspace
@@ -75,40 +77,62 @@ namespace Mantid
         EventWorkspace_sptr eventOutW;
         if (getPropertyValue("OutputWorkspace") == getPropertyValue("InputWorkspace"))
         {
-          //Same output as input; don't copy data for no reason.
+          //---- Same output as input; don't copy data for no reason. ---
           eventOutW = eventW;
+          //This only sets the X axis. Actual rebinning will be done upon data access.
+          eventOutW->setAllX(XValues_new);
+          //Copy the units over too.
+          for (int i=0; i < eventOutW->axes(); ++i)
+          {
+            eventOutW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
+          }
+          // Assign it to the output workspace property; recasting to matrixworkspace
+          setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutW) );
         }
         else
         {
-          //Need to copy over a new workspace
-          //std::cout << "Creating copy \n";
-          eventOutW = eventW;
-          //eventOutW =  boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create(eventW,histnumber,ntcnew,ntcnew-1) );
+          //--- Different output - create a Workspace2D ----
+          //Create a Workspace2D
+          // This creates a new Workspace2D through a torturous route using the WorkspaceFactory.
+          // The Workspace2D is created with an EMPTY CONSTRUCTOR
+          DataObjects::Workspace2D_sptr outputW;
+          outputW = boost::dynamic_pointer_cast<Workspace2D>( API::WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1) );
+
+          //Go through all the histograms and set the data
+          for (int i=0; i <  histnumber; ++i)
+          {
+            //std::cout << "histogram " << i << "\n";
+            //Set it in the input workspace so as to let it generate the right histogram
+            eventW->setX(i, XValues_new);
+            //And set it in the output histogram.
+            outputW->setX(i, XValues_new);
+            //Copy over the Y data from the on-the-fly-generated histogram
+            //Get a const event list reference. eventW->dataY() doesn't work.
+            const EventList el = eventW->getEventListAtSpectrumNumber(i);
+            MantidVec y_data = el.dataY();
+            //std::cout << "y data size is " << y_data.size() << " for " << i << "\n";
+            outputW->dataY(i).assign(y_data.begin(), y_data.end());
+            MantidVec e_data = el.dataE();
+            outputW->dataE(i).assign(e_data.begin(), e_data.end());
+          }
+
+          // Assign it to the output workspace property
+          //std::cout << "setProperty OutputWorkspace" << "\n";
+          setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputW));
+
         }
-        //This only sets the X axis. Actual rebinning will be done upon data access.
-        //std::cout << "setAllX\n";
-        eventOutW->setAllX(XValues_new);
 
-        //Copy the units over too.
-        //std::cout << "getAxis\n";
-        for (int i=0; i < eventOutW->axes(); ++i)
-        {
-          eventOutW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
-        }
-
-        //std::cout << "setProperty(OutputWorkspace\n";
-        // Assign it to the output workspace property; recasting to matrixworkspace
-        setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutW) );
-
-        //std::cout << "done\n";
+        //std::cout << "done eventWorkspace rebin\n";
       } // END ---- EventWorkspace
 
       else
 
       { //------- Workspace2D or other MatrixWorkspace ---------------------------
+        // This will be the output workspace (exact type may vary)
+        API::MatrixWorkspace_sptr outputW;
 
         // make output Workspace the same type is the input, but with new length of signal array
-        API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+        outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
 
 
         // Copy over the 'vertical' axis
