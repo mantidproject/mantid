@@ -212,7 +212,7 @@ namespace Mantid
         }
         else
         {
-          throw std::invalid_argument("Problem with the requested x-values to intepolate to: There must be at\nleast two input data points below the range of intepolation points and\ntwo higher. Also the intepolation points must have monatomically increasing x-values.");
+          throw std::invalid_argument("Problem with the requested x-values to intepolate to: There must be at\nleast two input data points below the range of intepolation points and\ntwo higher. Also the intepolation points must have monatonically increasing x-values.");
         }
       }
       //bring one point before and one point after into the inpolation to reduce any possible errors from running out of data

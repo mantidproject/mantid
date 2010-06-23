@@ -120,7 +120,6 @@ public:
         alg->cancel();
         res.wait();
         TS_ASSERT( !alg->isExecuted() )
-        TS_ASSERT( !res.data() )
         int out = alg->getProperty("out");
         TS_ASSERT_EQUALS(out,8)
     }

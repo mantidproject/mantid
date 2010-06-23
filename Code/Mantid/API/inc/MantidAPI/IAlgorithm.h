@@ -1,32 +1,29 @@
-#ifndef MANTID_KERNEL_IALGORITHM_H_
-#define MANTID_KERNEL_IALGORITHM_H_
+#ifndef MANTID_API_IALGORITHM_H_
+#define MANTID_API_IALGORITHM_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <string>
-#include <vector>
-#include "MantidKernel/INamedInterface.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/IPropertyManager.h"
-
 #include <Poco/ActiveResult.h>
+#include <string>
 
 namespace Poco
 {
-    class AbstractObserver;
+  class AbstractObserver;
 }
 
 namespace Mantid
 {
 namespace API
 {
-// Declaration of the interface ID ( interface id, major version, minor version)
-// RJT: Have not yet imported the code for this (in IInterface.h in Gaudi)
-//static const InterfaceID IID_IAlgorithm("IAlgorithm", 3 , 0); 
 
-/** @class IAlgorithm IAlgorithm.h Kernel/IAlgorithm.h
+/** As we have multiple interfaces to the same logical algorithm (Algorithm & AlgorithmProxy)
+ *  we need a way of uniquely identifying managed algorithms. It can be AlgorithmID.
+ */
+typedef void* AlgorithmID;
 
+/**
  IAlgorithm is the interface implemented by the Algorithm base class.
  Concrete algorithms, derived from the Algorithm base class are controlled 
  via this interface.
@@ -35,7 +32,7 @@ namespace API
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 11/09/2007
  
- Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
 
@@ -55,14 +52,7 @@ namespace API
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.    
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-
-/**
-     As we have multiple interfaces to the same logical algorithm (Algorithm & AlgorithmProxy)
-     we need a way of uniquely identifying managed algorithms. It can be AlgorithmID.
- */
-typedef void* AlgorithmID;
-
-class DLLExport IAlgorithm : virtual public Kernel::INamedInterface, virtual public Kernel::IPropertyManager
+class DLLExport IAlgorithm : virtual public Kernel::IPropertyManager
 {
 public:
 
@@ -91,7 +81,7 @@ public:
   /// System execution. This method invokes the exec() method of a concrete algorithm.
   virtual bool execute() = 0;
 
-  /// Asynchronous execution.
+  /// Asynchronous execution of the algorithm.
   virtual Poco::ActiveResult<bool> executeAsync() = 0;
 
   /// Check whether the algorithm is initialized properly
@@ -123,11 +113,10 @@ public:
   /// Remove an observer
   virtual void removeObserver(const Poco::AbstractObserver& observer)const = 0;
 
-	///Logging can be disabled by passing a value of false
-	virtual void setLogging(const bool value) = 0;
-	///returns the status of logging, True = enabled
-	virtual bool isLogging() const = 0;
-
+  ///Logging can be disabled by passing a value of false
+  virtual void setLogging(const bool value) = 0;
+  ///returns the status of logging, True = enabled
+  virtual bool isLogging() const = 0;
 };
 
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
