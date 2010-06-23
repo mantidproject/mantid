@@ -54,7 +54,8 @@ namespace Mantid
     public:
       /// Default constructor
       XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation,
-        const std::string& formula, const std::string& formulaUnit, const std::string& paramName, const std::string& type, const std::string& tie, 
+        const std::string& formula, const std::string& formulaUnit, const std::string& resultUnit, const std::string& paramName, 
+        const std::string& type, const std::string& tie, 
         const std::vector<std::string>& constraint, std::string& penaltyFactor, 
         const std::string& fitFunc, const std::string& extractSingleValueAs, 
         const std::string& eq, const Geometry::IComponent* comp);
@@ -69,13 +70,12 @@ namespace Mantid
       const std::string m_paramName;  ///< parameter name
       const std::string m_type;       ///< type of the data
       const std::string m_tie;                /// specific to fitting parameter specify any tie
-      //const std::string m_constraintMin;             /// specific to fitting parameter specify lower boundary constraint
-      //const std::string m_constraintMax;             /// specific to fitting parameter specify upper boundary constraint
       const std::vector<std::string> m_constraint;  /// specific to fitting parameter specify lower and upper bound in that order
       std::string m_penaltyFactor;                  /// specific to fitting parameter specify penalty factor
       const std::string m_fittingFunction;    /// specific to fitting parameter specify fitting function
       const std::string m_formula;            /// specific to fitting parameter. Specify formula to use for setting this parameter
-      const std::string m_formulaUnit;       /// unit for formula
+      const std::string m_formulaUnit;       /// unit for formula (i.e. for Centre in formula)
+      const std::string m_resultUnit;       /// expected result (output) unit from evaluating the formula
       boost::shared_ptr<Kernel::Interpolation> m_interpolation; // specific to fitting parameter 
       const std::string m_extractSingleValueAs;  ///< describes the way to extract a single value from the log file( average, first number, etc)
       const std::string m_eq;         ///< muParser equation to calculate the parameter value from the log value

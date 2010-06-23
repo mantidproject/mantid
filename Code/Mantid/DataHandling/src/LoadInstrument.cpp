@@ -1325,6 +1325,7 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
 
       std::string formula = "";
       std::string formulaUnit = "TOF";
+      std::string resultUnit = "TOF";
 
       if ( numberFormula >= 1 )
       {
@@ -1332,12 +1333,14 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
         formula = pFormula->getAttribute("eq");   
         if ( pFormula->hasAttribute("unit") )
           formulaUnit = pFormula->getAttribute("unit");
+        if ( pFormula->hasAttribute("result-unit") )
+          resultUnit = pFormula->getAttribute("result-unit");
       }
       pNLFormula->release();
 
 
-      boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, paramName, type, tie, 
-        constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp));
+      boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit, 
+        paramName, type, tie, constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp));
       logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
     } // end of if statement
   }
