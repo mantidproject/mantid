@@ -123,7 +123,6 @@ namespace DataObjects
 
   EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index)
   {
-    //An empty entry will be made if needed
     return *this->data[workspace_index];
   }
 
