@@ -110,6 +110,9 @@ public:
     TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS);
     TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS);
 
+    //Don't access data after doneLoadingData
+    TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error);
+
   }
 
 

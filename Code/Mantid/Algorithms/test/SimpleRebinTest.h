@@ -221,6 +221,12 @@ public:
     TS_ASSERT_EQUALS(test_out->dataY(0)[1], 2);
     //E is still
     TS_ASSERT_EQUALS(test_out->dataE(0)[0], 0);
+
+    //Axes?
+    TS_ASSERT_EQUALS(test_in->axes(), test_out->axes());
+    //Match the workspace index->spectraNo map.
+    for (int i=0; i<NUMPIXELS; i++)
+      TS_ASSERT_EQUALS(test_in->getAxis(1)->spectraNo(i), test_out->getAxis(1)->spectraNo(i));
   }
     
 

@@ -37,6 +37,7 @@ namespace DataObjects
     //Initialize the data
     m_noVectors = NVectors;
     data.resize(m_noVectors, NULL);
+    this->done_loading_data = false;
 
     //Create axes.
     m_axes.resize(2);
@@ -101,6 +102,8 @@ namespace DataObjects
 
   EventList& EventWorkspace::getEventList(const int pixelid)
   {
+    if (this->done_loading_data)
+      throw std::runtime_error("EventWorkspace::getEventList called after doneLoadingData(). Try getEventListAtWorkspaceIndex() instead.");
     //An empty entry will be made if needed
     EventListMap::iterator it = this->data_map.find(pixelid);
     if (it == this->data_map.end())
@@ -125,14 +128,13 @@ namespace DataObjects
   }
 
 
-
   //-----------------------------------------------------------------------------
   void EventWorkspace::doneLoadingData()
   {
     //Ok, we need to take the data_map, and turn it into a data[] vector.
 
     //Let's make the vector big enough.
-    if (this->data_map.size() > m_noVectors)
+    if (static_cast<int>(this->data_map.size()) > m_noVectors)
     {
       //Too many vectors! Why did you initialize it bigger than you needed to, silly?
       for (int i=this->data_map.size(); i<m_noVectors; i++)
@@ -184,6 +186,9 @@ namespace DataObjects
     //Get your memory back :)
     delete [] index_table;
     delete [] pixelid_table;
+
+    //Set the flag for raising errors later
+    this->done_loading_data = true;
   }
 
 

@@ -252,7 +252,10 @@ void MatrixWorkspace::replaceAxis(const int& axisIndex, Axis* const newAxis)
   // Later, may want to allow axis to be one longer than number of vectors, to allow bins.
   if ( std::abs(newAxis->length() - m_axes[axisIndex]->length()) > 1 )
   {
-    g_log.error("replaceAxis: The new axis is not a valid length");
+    std::stringstream msg;
+    msg << "replaceAxis: The new axis is not a valid length (original axis: "
+        << m_axes[axisIndex]->length() << "; new axis: " << newAxis->length() << ")." << std::endl;
+    g_log.error(msg.str());
     throw std::runtime_error("replaceAxis: The new axis is not a valid length");
   }
 

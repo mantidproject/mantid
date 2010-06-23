@@ -96,7 +96,8 @@ namespace Mantid
           // This creates a new Workspace2D through a torturous route using the WorkspaceFactory.
           // The Workspace2D is created with an EMPTY CONSTRUCTOR
           DataObjects::Workspace2D_sptr outputW;
-          outputW = boost::dynamic_pointer_cast<Workspace2D>( API::WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1) );
+          outputW = boost::dynamic_pointer_cast<Workspace2D>(
+              API::WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1) );
 
           //Go through all the histograms and set the data
           for (int i=0; i <  histnumber; ++i)
@@ -115,6 +116,10 @@ namespace Mantid
             MantidVec e_data = el.dataE();
             outputW->dataE(i).assign(e_data.begin(), e_data.end());
           }
+
+          //Copy all the axes
+          for (int i=1; i<inputW->axes(); i++)
+            outputW->replaceAxis( i, inputW->getAxis(i)->clone(outputW.get()) );
 
           // Assign it to the output workspace property
           //std::cout << "setProperty OutputWorkspace" << "\n";

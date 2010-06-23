@@ -139,6 +139,9 @@ private:
   /// A map that holds the event list for each pixel; the key is the pixelid.
   mutable EventListMap data_map;
 
+  /// Set to true when loading data is finished.
+  bool done_loading_data;
+
   /** A vector that holds the event list for each pixel; the key is
    * the spectrum #, which is not necessarily the pixelid.
    */
