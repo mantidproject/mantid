@@ -138,7 +138,6 @@ bool PythonScripting::start()
     shutdown();
     return false;
   }
-  Py_INCREF(m_globals);
 
   //Create a new dictionary for the math functions
   m_math = PyDict_New();
@@ -150,8 +149,6 @@ bool PythonScripting::start()
     shutdown();
     return false;
   }
-  Py_INCREF(m_sys);
-
 
   //Embedded qti module needs sip definitions initializing before it can be used
   initqti();
@@ -191,21 +188,10 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
-  if( m_globals )
-  {
-    Py_XDECREF(m_globals);
-    m_globals = NULL;
-  }
   if( m_math )
   {
-    Py_XDECREF(m_math);
+    Py_DECREF(m_math);
     m_math = NULL;
-  }
-  if( m_sys )
-  {
-    Py_XDECREF(m_sys);
-
-    m_sys = NULL;
   }
   Py_Finalize();
 }

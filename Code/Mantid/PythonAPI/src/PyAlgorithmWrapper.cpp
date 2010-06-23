@@ -23,7 +23,7 @@ PyAlgorithmBase::PyAlgorithmBase() : CloneableAlgorithm()
  * Constructor for callback
  * @param self The python object to use to perform the callback
  */
-PyAlgorithmCallback::PyAlgorithmCallback(PyObject *self) : PyAlgorithmBase(), m_self(self)
+PyAlgorithmCallback::PyAlgorithmCallback(PyObject *self) : PyAlgorithmBase(), m_self(self), m_ref_killed(false)
 {
   Py_INCREF(m_self);
 }
@@ -33,7 +33,10 @@ PyAlgorithmCallback::PyAlgorithmCallback(PyObject *self) : PyAlgorithmBase(), m_
  */
 PyAlgorithmCallback::~PyAlgorithmCallback()
 {
-  Py_DECREF(m_self);
+  if( !m_ref_killed )
+  {
+    Py_XDECREF(m_self);
+  }
 }
 
 /**

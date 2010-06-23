@@ -252,7 +252,11 @@ public:
     {
       gil.lock();
     }
-    
+    // !-----
+    // This order is very important as the decref causes Python to call the destructor on this object
+    // and the destructor checks the value of the killed flag
+    // !-----
+    m_ref_killed = true;
     Py_DECREF(m_self);
   }
 
@@ -271,10 +275,12 @@ private:
   /// Overridden algorithm exec method
   virtual void exec();
 
-public:
   /// A pointer referring to the Python object 
   PyObject *m_self;
-
+  /// A boolean flagging whether Py_DECREF has been called yet.
+  /// A shared pointer can't use 'delete' here so it uses kill() instead. If that is the
+  /// case then the destructor shouldn't decref the reference count as well
+  bool m_ref_killed;
 };
 
 

@@ -77,7 +77,6 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, bool inter
 
   PyObject *pymodule = PyImport_AddModule("__main__");
   localDict = PyDict_Copy(PyModule_GetDict(pymodule));
-  Py_INCREF(localDict);
   setQObject(Context, "self");
 }
 
@@ -431,7 +430,7 @@ QString PythonScript::constructErrorMsg()
       filename = PyString_AsString(frame->f_code->co_filename);
       excit = excit->tb_next;
     }
-    Py_DECREF(traceback);
+    //Py_DECREF(traceback);
   }
 
 
@@ -444,7 +443,7 @@ QString PythonScript::constructErrorMsg()
   QString exception_details("");
   if( PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) )
   {
-    msg_lineno = env()->toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
+    msg_lineno = env()->toString(PyObject_GetAttrString(value, "lineno"),true).toInt();
     if( traceback )
     {
       marker_lineno = endtrace_line;
@@ -456,7 +455,7 @@ QString PythonScript::constructErrorMsg()
     }
 
     message = "SyntaxError";
-    QString except_value(env()->toString(value,true));
+    QString except_value(env()->toString(value));
     exception_details = except_value.section('(',0,0);
     filename = except_value.section('(',1).section(',',0,0);
   }
@@ -466,8 +465,7 @@ QString PythonScript::constructErrorMsg()
     {
       excit = (PyTracebackObject*)traceback;
       marker_lineno = excit->tb_lineno;
-      Py_DECREF(traceback);
-    }
+     }
     else
     {
       marker_lineno = -10000;
@@ -481,8 +479,8 @@ QString PythonScript::constructErrorMsg()
     {
       msg_lineno = endtrace_line;
     }
-    message = env()->toString(exception,true).section('.',1).remove("'>");
-    exception_details = env()->toString(value,true) + QString(' ');
+    message = env()->toString(exception).section('.',1).remove("'>");
+    exception_details = env()->toString(value) + QString(' ');
   }
   if( filename.isEmpty() && getLineOffset() >= 0 ) 
   {
@@ -510,6 +508,12 @@ QString PythonScript::constructErrorMsg()
   {
     emit currentLineChanged(marker_lineno, false);
   }
+
+  // We're responsible for the reference count of these objects
+  Py_XDECREF(traceback);
+  Py_XDECREF(value);
+  Py_XDECREF(exception);
+
   return message + QString("\n");
 }
 
@@ -548,9 +552,15 @@ QStringList PythonScript::createAutoCompleteList() const
 {
   PyObject *main_module = PyImport_AddModule("__main__");
   PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
-  Py_INCREF(method);
-  PyObject *keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
-  
+  PyObject *keywords(NULL);
+  if( method && main_module )
+  {
+    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
+  }
+  else
+  {
+    return QStringList();
+  }
   QStringList keyword_list;
   if( PyErr_Occurred() || !keywords )
   {
@@ -558,7 +568,6 @@ QStringList PythonScript::createAutoCompleteList() const
     return keyword_list;
   }
 
-  Py_INCREF(keywords);
   keyword_list = env()->toStringList(keywords);
   Py_DECREF(keywords);
   Py_DECREF(method);

@@ -390,7 +390,7 @@ class MantidPyFramework(FrameworkManager):
         """
         Initialise the framework
         """
-        #self._pyalg_loader.load_modules(refresh=False)
+        self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToGlobal()
 
@@ -407,8 +407,7 @@ class MantidPyFramework(FrameworkManager):
             
     def _refreshPyAlgorithms(self):
         # Reload the modules that have been loaded
-        #self._pyalg_loader.load_modules(refresh=True)
-        pass
+        self._pyalg_loader.load_modules(refresh=True)
         
     def _retrieveWorkspace(self, name):
         '''
@@ -564,6 +563,10 @@ class PyAlgLoader(object):
         alg_found = False
         while line_count < self.__CHECKLINES__:
             line = file.readline()
+            # EOF
+            if line == '':
+                alg_found = False
+                break
             if line.rfind('PythonAlgorithm') >= 0:
                 alg_found = True
                 break
