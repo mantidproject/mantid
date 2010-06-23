@@ -72,6 +72,10 @@ namespace Mantid
       std::string getFormulaUnit() const { return m_formulaUnit; }
       /// set formula unit
       std::string& setFormulaUnit() { return m_formulaUnit; }
+      /// get result formula unit
+      std::string getResultUnit() const { return m_resultUnit; }
+      /// set result formula unit
+      std::string& setResultUnit() { return m_resultUnit; }
       /// get function
       std::string getFunction() const { return m_function; }
       /// set function
@@ -106,6 +110,7 @@ namespace Mantid
       /// formula
       std::string m_formula;
       std::string m_formulaUnit;
+      std::string m_resultUnit;
 
 	    /// Static reference to the logger class
 	    static Kernel::Logger& g_log;

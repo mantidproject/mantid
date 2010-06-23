@@ -133,7 +133,7 @@ namespace Geometry
   {
     os << m_value  << " , " << m_function << " , " << m_name << " , " << m_constraintMin << " , " 
       << m_constraintMax << " , " << m_constraintPenaltyFactor << " , " << m_tie << " , " 
-      << m_formula << " , " << m_formulaUnit << " , " << m_lookUpTable;
+      << m_formula << " , " << m_formulaUnit << " , " << m_resultUnit << " , " << m_lookUpTable;
     return;
   }
 
@@ -244,9 +244,18 @@ namespace Geometry
       f.setFormulaUnit() = "";
     }
 
-    if ( values.count() > 9 )
+    try
     {
-      std::stringstream str(values[9]);
+      f.setResultUnit() = values[9];
+    }
+    catch (...)
+    {
+      f.setResultUnit() = "";
+    }
+
+    if ( values.count() > 10 )
+    {
+      std::stringstream str(values[10]);
       str >> f.setLookUpTable();
     }
 

@@ -31,7 +31,7 @@ public:
 	{
     FitParameter fitP1;
 
-    std::istringstream input("9.1 , fido , , , , 8.2 , tie , formula, TOF ,");
+    std::istringstream input("9.1 , fido , , , , 8.2 , tie , formula, TOF , dSpacing,");
     input >> fitP1;
     std::stringstream inout;
     inout << fitP1;
@@ -47,13 +47,14 @@ public:
     TS_ASSERT( fitP.getTie().compare("tie")==0 );
     TS_ASSERT( fitP.getFormula().compare("formula")==0 );
     TS_ASSERT( fitP.getFormulaUnit().compare("TOF")==0 );
+    TS_ASSERT( fitP.getResultUnit().compare("dSpacing")==0 );
 	}
 	
 	void test2()
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , fido , , , , , tie , formula, TOF ,");
+    std::istringstream input("9.1 , fido , , , , , tie , formula, TOF, dSpacing ,");
 
     input >> fitP;
 
@@ -68,7 +69,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , , , , , , , ");
+    std::istringstream input("9.1 , , , , , , , , ");
 
     input >> fitP;
 
@@ -80,7 +81,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("bob , , , , , ,   ");
+    std::istringstream input("bob , , , , , , ,  ");
 
     input >> fitP;
 
@@ -92,7 +93,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , , , , , , ");
+    std::istringstream input("9.1 , , , , , , , ");
 
     input >> fitP;
 
@@ -104,7 +105,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , , ,  , , ,    ");
+    std::istringstream input("9.1 , , ,  , , , ,   ");
 
     input >> fitP;
 
@@ -116,7 +117,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , function , name , 3, 8 , , , ,     ");
+    std::istringstream input("9.1 , function , name , 3, 8 , , , , ,    ");
 
     input >> fitP;
 
