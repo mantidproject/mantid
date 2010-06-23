@@ -71,7 +71,7 @@ except IOError:
 SvnID = notifier.getSVNRevision()
 
 #build url for use in query
-url = base_url + 'nfwd?id=' + str(SvnID) + '&project=' + project
+url = base_url + 'nfwd.psp?id=' + str(SvnID) + '&project=' + project
 url += '&platform=' + platform.system() + platform.architecture()[0][:2]
 url += '&result=' + str(buildSuccess) + '&time=' + str(buildTime)
 # open url
