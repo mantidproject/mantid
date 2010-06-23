@@ -54,6 +54,8 @@ class InstrumentConfiguration:
         self.beam_center_y = 100.983
         ## Sample-to-detector distance in mm
         self.sample_detector_distance = 6000
+        ## Detector name
+        self.detector_ID = 'detector1'
     
     def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high):
         """
@@ -180,7 +182,6 @@ class SANSReduction:
         """
         # Load data
         LoadSpice2D(self.data_filepath, self.workspace)
-        ConvertUnits(self.workspace, self.workspace, "Wavelength")
         
         # Make a copy that will be our reduced data
         CloneWorkspace(self.workspace, self.reduced_ws)
@@ -347,6 +348,15 @@ class SANSReduction:
         # err[x][y] = sqrt( ws[x][y] / (transmission^((sec[x][y]+1)/2))^2 
         #                    + ((d_transmission*ws[x][y]*((sec[x][y]+1)/2))/(transmission^((sec[x][y]+1)/2+1)))^2
         
+        # Move detector array to correct position
+        # TODO: This might be done earlier
+        MoveInstrumentComponent(ws, self.configuration.detector_ID, 
+                                X = self.configuration.beam_center_x * self.configuration.pixel_size_x/1000.0, 
+                                Y = self.configuration.beam_center_y * self.configuration.pixel_size_y/1000.0, 
+                                Z = self.configuration.sample_detector_distance/1000.0,
+                                RelativePosition="1")
+        
+        # TODO: set the X bins as wavelength with the correct value
         
         
     def _extract_workspace_name(self, suffix=''):

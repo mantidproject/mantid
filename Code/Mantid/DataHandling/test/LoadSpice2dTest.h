@@ -75,9 +75,9 @@ public:
 
     double tolerance(1e-04);
     int nmon = Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA( ws2d->dataX(0+nmon)[0], 0.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataX(2+nmon)[0], 0.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataX(192+nmon)[0], 0.0, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataX(0+nmon)[0], 5.93, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataX(2+nmon)[0], 5.93, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataX(192+nmon)[0], 5.93, tolerance );
 
     TS_ASSERT_DELTA( ws2d->dataY(0+nmon)[0], 318.0, tolerance );
     TS_ASSERT_DELTA( ws2d->dataY(2+nmon)[0], 109.0, tolerance );

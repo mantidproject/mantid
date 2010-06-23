@@ -65,13 +65,16 @@ namespace Mantid
      * @param specID: ID of the spectrum to store the value in
      * @param value: value to store
      */
-    void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value, double error)
+    void store_value(DataObjects::Workspace2D_sptr ws, int specID,
+        double value, double error, double wavelength, double dwavelength)
     {
       MantidVec& X = ws->dataX(specID);
       MantidVec& Y = ws->dataY(specID);
       MantidVec& E = ws->dataE(specID);
-      X[0] = 0.0;
-      X[1] = 1.0;
+      // The following is mostly to make Mantid happy by defining a histogram with
+      // a single bin around the neutron wavelength
+      X[0] = wavelength-dwavelength/2.0;
+      X[1] = wavelength+dwavelength/2.0;
       Y[0] = value;
       E[0] = error;
       ws->getAxis(1)->spectraNo(specID) = specID;
@@ -136,6 +139,12 @@ namespace Mantid
       int numberYPixels = 0;
       from_element<int>(numberYPixels, sasEntryElem, "Number_of_Y_Pixels", fileName);
 
+      // Read in wavelength and wavelength spread
+      double wavelength = 0;
+      from_element<double>(wavelength, sasEntryElem, "wavelength", fileName);
+      double dwavelength = 0;
+      from_element<double>(dwavelength, sasEntryElem, "wavelength_spread", fileName);
+
       // Read in counters
       sasEntryElem = pRootElem->getChildElement("Counters");
       throwException(sasEntryElem, "Counters", fileName);
@@ -165,7 +174,7 @@ namespace Mantid
       DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, nBins+1, nBins));
       ws->setTitle(wsTitle);
-      ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+      ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Wavelength");
       ws->setYUnit("Counts");
       API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(ws);
       setProperty("OutputWorkspace", workspace);
@@ -190,10 +199,11 @@ namespace Mantid
       int ipixel = 0;
 
       // Store monitor count
-      store_value(ws, ipixel++, monitorCounts, monitorCounts>0 ? sqrt(monitorCounts) : 0.0);
+      store_value(ws, ipixel++, monitorCounts, monitorCounts>0 ? sqrt(monitorCounts) : 0.0,
+          wavelength, dwavelength);
 
       // Store counting time
-      store_value(ws, ipixel++, countingTime, 0.0);
+      store_value(ws, ipixel++, countingTime, 0.0, wavelength, dwavelength);
 
       // Store detector pixels
       while (pixel != pixels.end())
@@ -210,7 +220,7 @@ namespace Mantid
         // error = count > 0 ? sqrt((double)count) : 0.0;
         double error = sqrt( 0.5 + fabs( count - 0.5 ));
 
-        store_value(ws, ipixel, count, error);
+        store_value(ws, ipixel, count, error, wavelength, dwavelength);
 
         // Set the spectrum number
         ws->getAxis(1)->spectraNo(ipixel) = ipixel;
