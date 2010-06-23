@@ -9,6 +9,10 @@ from shutil import move
 sys.path.insert(0,'../Mantid/Build')
 import buildNotification as notifier
 from time import strftime
+import urllib2
+
+project = 'qtiplot'
+base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
 
 #Email settings
 SENDER = platform.system() 
@@ -23,7 +27,6 @@ subject += ' Build Report: '
 #Set up email content 
 buildSuccess = True
 
-project = 'qtiplot'
 remoteArchiveDir, relativeLogDir = notifier.getArchiveDir(project)
 localBaseLog = '../../../../logs/' 
 localLogDir = localBaseLog + project + '/'
@@ -65,6 +68,31 @@ try:
 except IOError:
      lastBuild = 'False'
 open(last,'w').write(str(buildSuccess))
+
+#get time taken to build
+fileBuildTime = localLogDir + 'timebuild.log'
+try:
+    f = open(fileBuildTime, 'r')
+    buildTime = float(f.read())
+    f.close()
+    buildNotification.moveToArchive(fileBuildTime, remoteArchivePath)
+except IOError:
+    buildTime = -1.0
+
+# get SvnID
+SvnID = notifier.getSVNRevision()
+
+#build url for use in query
+url = base_url + 'nfwd?id=' + str(SvnID) + '&project=' + project
+url += '&platform=' + platform.system() + platform.architecture()[0][:2]
+url += '&result=' + str(buildSuccess) + '&time=' + str(buildTime)
+# open url
+try:
+    f = urllib2.urlopen(url)
+    time.sleep(0.1)
+except urllib2.HTTPError:
+    pass
+
 
 # We want to skip sending email if this AND previous build succeeded
 if buildSuccess and lastBuild=='True':

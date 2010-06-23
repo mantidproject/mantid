@@ -7,6 +7,11 @@ from time import strftime
 import sys
 sys.path.append('../Mantid/Build')
 import buildNotification as notifier
+import urllib2
+import time
+
+project = 'Installer'
+base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
@@ -24,7 +29,7 @@ mssgBuildErr = ''
 localLogDir = '../../../../logs/Installer/'
 
 #create archive directory
-remoteArchiveDir,relativeLogDir = notifier.getArchiveDir('Installer')
+remoteArchiveDir,relativeLogDir = notifier.getArchiveDir(project)
 
 #Get build result and errors
 fileBuild = localLogDir+'build.log'
@@ -50,6 +55,31 @@ try:
 except IOError:
      lastBuild = 'False'
 open(last,'w').write(str(buildSuccess))
+
+
+#get time taken to build
+fileBuildTime = localLogDir + 'timebuild.log'
+try:
+    f = open(fileBuildTime, 'r')
+    buildTime = float(f.read())
+    f.close()
+    buildNotification.moveToArchive(fileBuildTime, remoteArchivePath)
+except IOError:
+    buildTime = -1.0
+
+# get SvnID
+SvnID = notifier.getSVNRevision()
+
+#build url for use in query
+url = base_url + 'nfwd?id=' + str(SvnID) + '&project=' + project
+url += '&platform=' + platform.system() + platform.architecture()[0][:2]
+url += '&result=' + str(buildSuccess) + '&time=' + str(buildTime)
+# open url
+try:
+    f = urllib2.urlopen(url)
+    time.sleep(0.1)
+except urllib2.HTTPError:
+    pass
 
 # We want to skip sending email if this AND previous build succeeded
 if buildSuccess and lastBuild =='True':

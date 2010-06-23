@@ -3,6 +3,7 @@ import platform
 import subprocess as sp
 import sys
 import platform
+import time
 
 # Set the make command for this system
 buildargs = []
@@ -50,6 +51,7 @@ sp.call("python release_date.py",shell=True)
 buildlog = open("../../../../logs/qtiplot/build.log","w") 
 errorlog = open("../../../../logs/qtiplot/error.log","w")
 
+buildStart = time.time()
 # Build MantidQt
 # Updates to UI files alone don't always seem to get picked up without a clean first, so do that until we can figure out why
 sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
@@ -74,6 +76,13 @@ ret = sp.call(make + ' ' + ''.join(buildargs),stdout=buildlog,stderr=errorlog,sh
 if ret != 0:
     outcome = "MantidPlot build failed"
     buildlog.write(outcome)
+
+buildFinish = time.time()
+buildTime = buildFinish - buildStart
+
+BuildTimeLog = open("../../../../logs/qtiplot/timebuild.log", "w")
+BuildTimeLog.write(str(buildTime))
+BuildTimeLog.close()
 
 buildlog.close()
 errorlog.close()
