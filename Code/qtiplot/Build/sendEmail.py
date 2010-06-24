@@ -10,6 +10,7 @@ sys.path.insert(0,'../Mantid/Build')
 import buildNotification as notifier
 from time import strftime
 import urllib2
+import time
 
 project = 'qtiplot'
 base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
