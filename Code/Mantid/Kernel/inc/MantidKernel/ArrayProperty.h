@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "PropertyWithValue.h"
+#include <iostream> // REMOVE
 
 namespace Mantid
 {
@@ -81,9 +82,10 @@ public:
                 const unsigned int direction = Direction::Input) :
     PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator, direction)
   {
-    if ( !setValue( values ).empty() )
+    std::string result = this->setValue(values);
+    if ( !result.empty() )
     {
-      throw std::invalid_argument("Invalid values string passed to constructor.");
+      throw std::invalid_argument("Invalid values string passed to constructor: " + result);
     }
   }
 
