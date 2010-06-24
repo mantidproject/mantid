@@ -66,6 +66,46 @@ public:
 
   }
 
+//  void test_LoadPreNeXus()
+//  {
+//    std::string eventfile( "../../../../Test/Data/event_data/TOPAZ_1249_neutron_event.dat" );
+//    eventLoader->setPropertyValue("EventFilename", eventfile);
+//    eventLoader->setPropertyValue("MappingFilename",
+//          "../../../../Test/Data/event_data/TOPAZ_TS_2010_04_16.dat");
+//    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
+//
+//    //Get the event file size
+//    struct stat filestatus;
+//    stat(eventfile.c_str(), &filestatus);
+//
+//    //std::cout << "***** executing *****" << std::endl;
+//    TS_ASSERT( eventLoader->execute() );
+//
+//    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
+//
+//    //Matching class name
+//    TS_ASSERT_EQUALS(ew->id(), "EventWorkspace");
+//    //Can't call getEventList cause you finished loading data
+//    TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error );
+//
+//    //The # of events = size of the file / 8 bytes (per event)
+//    TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
+//
+//    //TOPAZ has 14*256*256 pixels; but the mapping file goes up to
+//    //  15**256*256 because there is no detector 0.
+//    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 15*256*256);
+//
+//    //Pick some pixel, how many events in there?
+//    TS_ASSERT_EQUALS( ew->getEventListAtWorkspaceIndex(100000).getNumberEvents(), 1);
+//
+//    //TOPAZ mapping between workspace index and spectrum number is simple 1:1
+//    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 0);
+//    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(10), 10);
+//    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(100), 100);
+//
+//  }
+
+
   void xtest_LoadPreNeXus()
   {
     std::string eventfile( "../../../../Test/Data/event_data/TOPAZ_1249_neutron_event.dat" );
@@ -83,27 +123,25 @@ public:
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
 
-    //Matching class name
-    TS_ASSERT_EQUALS(ew->id(), "EventWorkspace");
-    //Can't call getEventList cause you finished loading data
-    TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error );
-
     //The # of events = size of the file / 8 bytes (per event)
     TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
 
-    //TOPAZ has 14*256*256 pixels; but the mapping file goes up to
-    //  15**256*256 because there is no detector 0.
-    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 15*256*256);
+    //Only some of the pixels were loaded, because of lot of them are empty
+    int numpixels_with_events = 199824;
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
-    //TS_ASSERT_EQUALS( ew->getEventListAtWorkspaceIndex(111).getNumberEvents(), 1)
-
-//    std::cout << "name:" << ew->id() << std::endl;
-//    std::cout << "num histo:" << ew->getNumberHistograms() << std::endl;
-//    std::cout << "num events:" << ew->getNumberEvents() << std::endl;
-//    std::cout << "**********" << std::endl;
-
-    // end of LoadEventPreNeXus test
+    //TOPAZ mapping between workspace index and spectrum number
+    //Is the length good?
+    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
+    //Depends on which was the first pixel with events. BUT it has to be
+    // more than 65536, because the 0th detector has no events (does not exist).
+    TS_ASSERT( ew->getAxis(1)->spectraNo(0) >= 65536);
+    //And the spectra # grow monotonically
+    TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
+    TS_ASSERT( ew->getAxis(1)->spectraNo(numpixels_with_events-1) < 15*256*256);
   }
+
+
 
 };
 

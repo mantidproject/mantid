@@ -159,32 +159,42 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
 
   size_t event_offset = 0;
   size_t event_buffer_size = get_buffer_size(this->num_events);
-  DasEvent * event_buffer = new DasEvent[event_buffer_size];
 
-  DasEvent temp;
-  TofEvent event;
-  uint32_t period;
-  while (event_offset  < this->num_events)
+  //uint32_t period;
+  //Initialize progress reporting.
+  Progress prog(this,0.0,1.0, this->num_events/event_buffer_size);
+
+  //Try to parallelize the code - commented out because it actually makes the code slower!
+  //PARALLEL_FOR1(workspace)
+  for (event_offset = 0; event_offset  < this->num_events; event_offset += event_buffer_size)
   {
-    if (event_offset >= this->num_events) {
-      break;
-    }
+    //PARALLEL_START_INTERUPT_REGION
+    //Variables are defined
+    DasEvent * event_buffer = new DasEvent[event_buffer_size];
+    DasEvent temp;
+    TofEvent event;
+    size_t current_event_buffer_size;
+    //Local incremented variables
+    size_t my_errors = 0;
+    size_t my_events = 0;
 
     // adjust the buffer size
-    if (event_offset + event_buffer_size > this->num_events)
-      event_buffer_size = this->num_events - event_offset;
+    current_event_buffer_size = event_buffer_size;
+    if (event_offset + current_event_buffer_size > this->num_events)
+      current_event_buffer_size = this->num_events - event_offset;
     
     // read in the data
+    //PARALLEL_CRITICAL(eventfile_read)
     this->eventfile->read(reinterpret_cast<char *>(event_buffer),
-			  event_buffer_size * sizeof(DasEvent));
+        current_event_buffer_size * sizeof(DasEvent));
 
     // process the individual events
-    for (size_t i = 0; i < event_buffer_size; i++) {
+    for (size_t i = 0; i < current_event_buffer_size; i++) {
       temp = *(event_buffer + i);
 
       if ((temp.pid & ERROR_PID) == ERROR_PID) // marked as bad
       {
-        this->num_error_events += 1;
+        my_errors++;
         continue;
       }
 
@@ -194,15 +204,29 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
       //TODO: Fix this function; doesn't work because numpixel is not set
       //this->fix_pixel_id(temp.pid, period);
 
+      //Parallel: this critical block is almost certainly killing parallel efficiency.
       workspace->getEventList(temp.pid) += event; // TODO work with period
-                                                  // TODO filter based on pixel ids
-      this->num_good_events += 1;
+                              // TODO filter based on pixel ids
+      my_events++;
     }
 
-    // adjust the record of the location in the file
-    event_offset += event_buffer_size;
-  }
+    //Fold back the counters into the main one
+    //PARALLEL_CRITICAL(num_error_events)
+    {
+      this->num_error_events += my_errors;
+      this->num_good_events += my_events;
+    }
 
+    delete event_buffer;
+
+    //Report progress
+    prog.report();
+    //PARALLEL_END_INTERUPT_REGION
+  }
+  //PARALLEL_CHECK_INTERUPT_REGION
+
+
+  /*
   //OK, you've done all the events; but if some pixels got no events, their
   //  EventList wasn't initialized.
   std::vector<PixelType>::iterator pix;
@@ -212,11 +236,11 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
     // and simply get the event list. It will be created if empty.
     workspace->getEventList(*pix);
   }
+   */
 
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
   workspace->doneLoadingData();
 
-  delete event_buffer;
   stringstream msg;
   msg << "Read " << this->num_good_events << " events + "
       << this->num_error_events << " errors";
