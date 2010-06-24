@@ -62,6 +62,7 @@ LoadEventPreNeXus::~LoadEventPreNeXus()
     delete this->pulsefile;
 }
 
+//-----------------------------------------------------------------------------
 void LoadEventPreNeXus::init()
 {
   // reset the logger's name
@@ -94,6 +95,7 @@ void LoadEventPreNeXus::init()
 
 }
 
+//-----------------------------------------------------------------------------
 void LoadEventPreNeXus::exec()
 {
   // what to load
@@ -128,11 +130,14 @@ void LoadEventPreNeXus::exec()
   //   We can use dummy numbers for arguments, for event workspace it doesn't matter
   localWorkspace->initialize(1,1,1);
   
+  //Process the events into pixels
   this->proc_events(localWorkspace);
   
+  //Save output
   this->setProperty(OUT_PARAM, localWorkspace);
 }
 
+//-----------------------------------------------------------------------------
 void LoadEventPreNeXus::fix_pixel_id(PixelType &pixel, uint32_t &period) const
 {
   if (this->pixelmap.empty()) { // nothing to do here
@@ -145,6 +150,7 @@ void LoadEventPreNeXus::fix_pixel_id(PixelType &pixel, uint32_t &period) const
   pixel = this->pixelmap[unmapped_pid];
 }
 
+//-----------------------------------------------------------------------------
 void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
 {
   // do the actual loading
@@ -196,6 +202,17 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
     // adjust the record of the location in the file
     event_offset += event_buffer_size;
   }
+
+  //OK, you've done all the events; but if some pixels got no events, their
+  //  EventList wasn't initialized.
+  std::vector<PixelType>::iterator pix;
+  for (pix = this->pixelmap.begin(); pix < this->pixelmap.end(); pix++)
+  {
+    //Go through each pixel in the map
+    // and simply get the event list. It will be created if empty.
+    workspace->getEventList(*pix);
+  }
+
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
   workspace->doneLoadingData();
 
@@ -206,6 +223,7 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
   this->g_log.information(msg.str());
 }
 
+//-----------------------------------------------------------------------------
 template<typename T>
 static size_t get_file_size(ifstream * handle)
 {
@@ -230,6 +248,8 @@ static size_t get_file_size(ifstream * handle)
   return filesize / sizeof(T);
 }
 
+
+//-----------------------------------------------------------------------------
 static size_t get_buffer_size(const size_t num_items)
 {
   if (num_items < DEFAULT_BLOCK_SIZE)
@@ -238,6 +258,7 @@ static size_t get_buffer_size(const size_t num_items)
     return DEFAULT_BLOCK_SIZE;
 }
 
+//-----------------------------------------------------------------------------
 void LoadEventPreNeXus::load_pixel_map(const string &filename)
 {
   this->pixelmap.clear();
@@ -277,6 +298,7 @@ void LoadEventPreNeXus::load_pixel_map(const string &filename)
   delete handle;
 }
 
+//-----------------------------------------------------------------------------
 void LoadEventPreNeXus::open_event_file(const string &filename)
 {
   this->eventfile = new ifstream(filename.c_str(), std::ios::binary);
@@ -286,6 +308,7 @@ void LoadEventPreNeXus::open_event_file(const string &filename)
   this->g_log.information(msg.str());
 }
 
+//-----------------------------------------------------------------------------
 void LoadEventPreNeXus::open_pulseid_file(const string &filename)
 {
   if (filename.empty()) {

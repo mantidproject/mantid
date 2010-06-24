@@ -18,6 +18,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include <boost/timer.hpp>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -53,7 +56,7 @@ public:
     eventLoader->initialize();
   }
 
-  void test_file_not_found()
+  void xtest_file_not_found()
   {
     TS_ASSERT_THROWS(
         eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data") ,
@@ -65,24 +68,40 @@ public:
 
   void xtest_LoadPreNeXus()
   {
-    // start of LoadEventPreNeXus test
-    eventLoader->setPropertyValue("EventFilename",
-         "../../../../Test/Data/event_data/TOPAZ_1249_neutron_event.dat");
+    std::string eventfile( "../../../../Test/Data/event_data/TOPAZ_1249_neutron_event.dat" );
+    eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename",
           "../../../../Test/Data/event_data/TOPAZ_TS_2010_04_16.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
-    std::cout << "***** executing *****" << std::endl;
+
+    //Get the event file size
+    struct stat filestatus;
+    stat(eventfile.c_str(), &filestatus);
+
+    //std::cout << "***** executing *****" << std::endl;
     TS_ASSERT( eventLoader->execute() );
 
-    EventWorkspace_sptr eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
+    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
 
     //Matching class name
-    TS_ASSERT_EQUALS(eventWksp->id(), "EventWorkspace");
+    TS_ASSERT_EQUALS(ew->id(), "EventWorkspace");
+    //Can't call getEventList cause you finished loading data
+    TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error );
 
-    std::cout << "name:" << eventWksp->id() << std::endl;
-    std::cout << "num histo:" << eventWksp->getNumberHistograms() << std::endl;
-    std::cout << "num events:" << eventWksp->getNumberEvents() << std::endl;
-    std::cout << "**********" << std::endl;
+    //The # of events = size of the file / 8 bytes (per event)
+    TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
+
+    //TOPAZ has 14*256*256 pixels; but the mapping file goes up to
+    //  15**256*256 because there is no detector 0.
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 15*256*256);
+
+    //TS_ASSERT_EQUALS( ew->getEventListAtWorkspaceIndex(111).getNumberEvents(), 1)
+
+//    std::cout << "name:" << ew->id() << std::endl;
+//    std::cout << "num histo:" << ew->getNumberHistograms() << std::endl;
+//    std::cout << "num events:" << ew->getNumberEvents() << std::endl;
+//    std::cout << "**********" << std::endl;
+
     // end of LoadEventPreNeXus test
   }
 
