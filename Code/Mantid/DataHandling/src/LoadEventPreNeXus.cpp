@@ -124,6 +124,9 @@ void LoadEventPreNeXus::exec()
 
   // prep the output workspace
   EventWorkspace_sptr localWorkspace = EventWorkspace_sptr(new EventWorkspace());
+  //Make sure to initialize.
+  //   We can use dummy numbers for arguments, for event workspace it doesn't matter
+  localWorkspace->initialize(1,1,1);
   
   this->proc_events(localWorkspace);
   
@@ -175,13 +178,16 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
 
       if ((temp.pid & ERROR_PID) == ERROR_PID) // marked as bad
       {
-	this->num_error_events += 1;
-	continue;
+        this->num_error_events += 1;
+        continue;
       }
 
       // work with the good guys
       event = TofEvent(static_cast<double>(temp.tof)/.1, 0); // convert to microsecond
-      this->fix_pixel_id(temp.pid, period);
+
+      //TODO: Fix this function; doesn't work because numpixel is not set
+      //this->fix_pixel_id(temp.pid, period);
+
       workspace->getEventList(temp.pid) += event; // TODO work with period
                                                   // TODO filter based on pixel ids
       this->num_good_events += 1;

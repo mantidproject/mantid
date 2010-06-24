@@ -40,28 +40,45 @@ using namespace boost::posix_time;
 class LoadEventPreNeXusTest : public CxxTest::TestSuite
 {
 public:
-  LoadEventPreNeXusTest()
-  {    }
+  LoadEventPreNeXus * eventLoader;
 
-//  void setUp()
-//  {
-//    //Pass
-//  }
+  LoadEventPreNeXusTest()
+  {
+
+  }
+
+  void setUp()
+  {
+    eventLoader = new LoadEventPreNeXus();
+    eventLoader->initialize();
+  }
+
+  void test_file_not_found()
+  {
+    TS_ASSERT_THROWS(
+        eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data") ,
+        std::invalid_argument );
+    //Execut fails since the properties aren't set correctly.
+    TS_ASSERT_THROWS( eventLoader->execute() , std::runtime_error);
+
+  }
 
   void xtest_LoadPreNeXus()
   {
     // start of LoadEventPreNeXus test
-    const clock_t start = clock();
-    LoadEventPreNeXus eventLoader;
-    eventLoader.setPropertyValue("EventFilename",
-         "/SNS/REF_L/IPTS-2574/45/32035/preNeXus/REF_L_32035_neutron_event.dat");
-    eventLoader.setPropertyValue("MappingFilename",
-          "/SNS/REF_L/2009_3_4B_CAL/calibrations/REF_L_TS_2010_02_19.dat");
-    eventLoader.setPropertyValue("OutputWorkspace", "bobby");
-    std::cout << "**********" << std::endl;
-    eventLoader.execute();
+    eventLoader->setPropertyValue("EventFilename",
+         "../../../../Test/Data/event_data/TOPAZ_1249_neutron_event.dat");
+    eventLoader->setPropertyValue("MappingFilename",
+          "../../../../Test/Data/event_data/TOPAZ_TS_2010_04_16.dat");
+    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
+    std::cout << "***** executing *****" << std::endl;
+    TS_ASSERT( eventLoader->execute() );
 
-    EventWorkspace_sptr eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("bobby"));
+    EventWorkspace_sptr eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
+
+    //Matching class name
+    TS_ASSERT_EQUALS(eventWksp->id(), "EventWorkspace");
+
     std::cout << "name:" << eventWksp->id() << std::endl;
     std::cout << "num histo:" << eventWksp->getNumberHistograms() << std::endl;
     std::cout << "num events:" << eventWksp->getNumberEvents() << std::endl;
@@ -72,3 +89,4 @@ public:
 };
 
 #endif /* LOADEVENTPRENEXUSTEST_H_ */
+
