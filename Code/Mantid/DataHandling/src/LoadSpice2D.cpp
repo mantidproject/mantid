@@ -324,7 +324,7 @@ namespace Mantid
         for(int iy=0; iy<nybins; iy++)
         {
           spec[icount] = icount;
-          udet[icount] = 1000000 + ix*1000 + iy;
+          udet[icount] = 1000000 + iy*1000 + ix;
           icount++;
         }
       }
