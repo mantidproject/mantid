@@ -63,7 +63,7 @@ try:
     f = open(fileBuildTime, 'r')
     buildTime = float(f.read())
     f.close()
-    notifier.moveToArchive(fileBuildTime, remoteArchivePath)
+    notifier.moveToArchive(fileBuildTime, remoteArchiveDir)
 except IOError:
     buildTime = -1.0
 
