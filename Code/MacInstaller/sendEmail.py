@@ -5,6 +5,7 @@ from shutil import move
 from time import strftime
 import sys
 sys.path.append('../Mantid/Build')
+import platform
 import buildNotification as notifier
 import urllib2
 import time

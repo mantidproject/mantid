@@ -1,5 +1,10 @@
+import sys
 import subprocess as sp
 import time
+
+retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True)
+if retcode != 0:
+    sys.exit(1)
 
 stdlog = open("../../../../logs/Installer/build.log","w")
 stderr = open("../../../../logs/Installer/error.log","w")
