@@ -171,7 +171,9 @@ if __name__ == "__main__":
 
         if runTests:
             print COLOR["blue"] + '-'*80 + COLOR["reset"]
-            print COLOR["blue"] + '='*80 + COLOR["reset"]
+            now = '='*20 + time.asctime()
+            now += '='*(80-len(now))
+            print COLOR["blue"] + now + COLOR["reset"]
             print COLOR["blue"] + '-'*80 + COLOR["reset"]
             print ""
 
