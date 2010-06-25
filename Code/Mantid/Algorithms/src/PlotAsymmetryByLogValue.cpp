@@ -126,7 +126,6 @@ namespace Mantid
         loadNexus->execute();
 
         std::string wsProp = "OutputWorkspace";
-        //std::string wsName = "tmp"+fnn.str();
 
         DataObjects::Workspace2D_sptr ws_red;
         DataObjects::Workspace2D_sptr ws_green;
@@ -138,7 +137,6 @@ namespace Mantid
         {
           ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
           TimeSeriesProperty<double>* logp = 
-            //dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
 			      dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
           double Y,E; 
           calcIntAsymmetry(ws_red,Y,E);
@@ -154,14 +152,11 @@ namespace Mantid
             std::stringstream suffix;
             suffix << period;
             wsProp = "OutputWorkspace_" + suffix.str();// form the property name for higher periods
-            //wsName = "tmp"+fnn.str() + "_" + suffix.str();
             // Do only one period
             if (green == EMPTY_INT() && period == red)
             {
               ws_red = loadNexus->getProperty(wsProp);
-              //AnalysisDataService::Instance().add(wsName,ws);
               TimeSeriesProperty<double>* logp = 
-                //dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
                 dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
@@ -188,7 +183,6 @@ namespace Mantid
             if (!ws_red || !ws_green)
               throw std::invalid_argument("Red or green period is out of range");
             TimeSeriesProperty<double>* logp = 
-              //dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
 			        dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
             double Y,E; 
             calcIntAsymmetry(ws_red,ws_green,Y,E);
@@ -210,6 +204,11 @@ namespace Mantid
             outWS->dataY(3)[i-is] = Y + Y1;
             outWS->dataX(3)[i-is] = logp->lastValue();
             outWS->dataE(3)[i-is] = E + E1;
+
+            outWS->getAxis(1)->spectraNo(0) = 1;
+            outWS->getAxis(1)->spectraNo(1) = 2;
+            outWS->getAxis(1)->spectraNo(2) = 3;
+            outWS->getAxis(1)->spectraNo(3) = 4;
           }
           else
             if (!ws_red)
@@ -408,7 +407,7 @@ namespace Mantid
      *  @param ws A local workspace
      *  @param spectraList A list of spectra to group.
      */
-    void PlotAsymmetryByLogValue::groupDetectors(boost::shared_ptr<DataObjects::Workspace2D> ws,const std::vector<int>& spectraList)
+    void PlotAsymmetryByLogValue::groupDetectors(boost::shared_ptr<DataObjects::Workspace2D>& ws,const std::vector<int>& spectraList)
     {
       API::IAlgorithm_sptr group = createSubAlgorithm("GroupDetectors");
       group->setProperty("InputWorkspace",ws);

@@ -59,6 +59,9 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   connect( m_uiForm.browseFirstButton, SIGNAL(clicked()), this, SLOT(browseFirstClicked()) );
   connect( m_uiForm.browseLastButton, SIGNAL(clicked()), this, SLOT(browseLastClicked()) );
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
+  connect( m_uiForm.btnOK,SIGNAL(clicked()),this,SLOT(accept()));
+  connect( m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
+  connect( m_uiForm.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
 
   fillLineEdit("FirstRun", m_uiForm.firstRunBox);
   fillLineEdit("LastRun", m_uiForm.lastRunBox);
@@ -172,7 +175,18 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
         );
       }
       const std::vector< Mantid::Kernel::Property* >& props = mws->sample().getLogData();
-      Mantid::API::AnalysisDataService::Instance().remove("PlotAsymmetryByLogValueDialog_tmp");
+      if (gws)
+      {
+        std::vector<std::string> wsNames = gws->getNames();
+        for(std::vector<std::string>::iterator it=wsNames.begin();it!=wsNames.end();++it)
+        {
+          Mantid::API::AnalysisDataService::Instance().remove(*it);
+        }
+      }
+      else
+      {
+        Mantid::API::AnalysisDataService::Instance().remove("PlotAsymmetryByLogValueDialog_tmp");
+      }
       for(size_t i=0;i<props.size();i++)
       {
         m_uiForm.logBox->addItem(QString::fromStdString(props[i]->name()));

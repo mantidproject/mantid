@@ -85,7 +85,7 @@ namespace Mantid
       void calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
                             boost::shared_ptr<DataObjects::Workspace2D> ws_geen,double& Y, double& E);
       /// Group detectors
-      void groupDetectors(boost::shared_ptr<DataObjects::Workspace2D> ws,const std::vector<int>& spectraList);
+      void groupDetectors(boost::shared_ptr<DataObjects::Workspace2D>& ws,const std::vector<int>& spectraList);
 
       /// Stores property "Int"
       bool m_int;
