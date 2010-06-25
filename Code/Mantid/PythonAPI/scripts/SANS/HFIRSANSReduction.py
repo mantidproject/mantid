@@ -50,8 +50,8 @@ class InstrumentConfiguration:
         self.pixel_size_x = 5.1522
         self.pixel_size_y = 5.1462
         ## Beam center [either set by hand or find]
-        self.beam_center_x = 19.0031
-        self.beam_center_y = 100.983
+        self.beam_center_x = 16
+        self.beam_center_y = 95
         ## Sample-to-detector distance in mm
         self.sample_detector_distance = 6000
         ## Detector name
@@ -212,6 +212,12 @@ class SANSReduction:
             
             TODO: since the input files will be the same, read them only once
         """
+        # Move detector array to correct position
+        MoveInstrumentComponent(ws, self.configuration.detector_ID, 
+                                X = -(self.configuration.beam_center_x-96.0) * self.configuration.pixel_size_x/1000.0, 
+                                Y = -(self.configuration.beam_center_y-96.0) * self.configuration.pixel_size_y/1000.0, 
+                                Z = self.configuration.sample_detector_distance/1000.0,
+                                RelativePosition="1")
         # Get counting time
         timer_ws = self.workspace+"_timer"
         CropWorkspace(self.workspace, timer_ws,
@@ -332,10 +338,9 @@ class SANSReduction:
             
             
         # Correct data for solid angle effects (Note: SA_Corr_2DSAS)
-        # TODO: Need an Algo that will produce a workspace with the following spectra values
         # solid_angle_corr[x][y] = (sqrt(1+(pixel_size_x*(x-beam_center_x)/sample_detector_distance)^2
         #                           +(pixel_size_y*(y-beam_center_y)/sample_detector_distance)^2))^3
-        
+        SolidAngleCorrection(ws, ws)
           
         # Apply transmission correction #######################################
         # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
@@ -348,13 +353,6 @@ class SANSReduction:
         # err[x][y] = sqrt( ws[x][y] / (transmission^((sec[x][y]+1)/2))^2 
         #                    + ((d_transmission*ws[x][y]*((sec[x][y]+1)/2))/(transmission^((sec[x][y]+1)/2+1)))^2
         
-        # Move detector array to correct position
-        # TODO: This might be done earlier
-        MoveInstrumentComponent(ws, self.configuration.detector_ID, 
-                                X = self.configuration.beam_center_x * self.configuration.pixel_size_x/1000.0, 
-                                Y = self.configuration.beam_center_y * self.configuration.pixel_size_y/1000.0, 
-                                Z = self.configuration.sample_detector_distance/1000.0,
-                                RelativePosition="1")
         
         # TODO: set the X bins as wavelength with the correct value
         
@@ -371,7 +369,7 @@ class SANSReduction:
 
 if __name__ == "__main__":
     # Data file to reduce
-    datafile = "/home/m2d/workspace/mantid/Test/Data/SANS2D/BioSANS_exp61_scan0004_0001.xml"
+    datafile = "/home/mantid/workspace/Mantid/Test/Data/SANS2D/BioSANS_exp61_scan0004_0001.xml"
     # Reduction parameters
     method = SANSReductionMethod()
     # Instrument parameters
