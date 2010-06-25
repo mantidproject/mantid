@@ -14,13 +14,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
-#include <boost/timer.hpp>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
