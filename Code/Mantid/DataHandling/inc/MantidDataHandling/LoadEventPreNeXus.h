@@ -9,7 +9,6 @@
 #endif
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <cxxtest/TestSuite.h>
 
 namespace Mantid
 {
