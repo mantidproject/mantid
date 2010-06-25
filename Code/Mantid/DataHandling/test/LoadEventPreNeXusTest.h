@@ -52,7 +52,7 @@ public:
     eventLoader->initialize();
   }
 
-  void test_file_not_found()
+  void xtest_file_not_found()
   {
     TS_ASSERT_THROWS(
         eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data") ,
@@ -99,7 +99,7 @@ public:
   }
 
 
-  void test_LoadPreNeXus_REFL()
+  void xtest_LoadPreNeXus_REFL()
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
