@@ -9,6 +9,7 @@
 #endif
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 namespace Mantid
 {
@@ -41,6 +42,9 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
 
+  /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
+  std::vector<PixelType> pixelmap;
+
 private:
   /// Initialisation code
   void init();
@@ -54,7 +58,6 @@ private:
   std::size_t num_events;
   std::ifstream * pulsefile;
   std::size_t num_pulses;
-  std::vector<PixelType> pixelmap;
   uint32_t numpixel;
 
   std::size_t num_good_events;

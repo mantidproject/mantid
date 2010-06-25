@@ -173,6 +173,7 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
     DasEvent * event_buffer = new DasEvent[event_buffer_size];
     DasEvent temp;
     TofEvent event;
+    uint32_t period;
     size_t current_event_buffer_size;
     //Local incremented variables
     size_t my_errors = 0;
@@ -201,8 +202,8 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
       // work with the good guys
       event = TofEvent(static_cast<double>(temp.tof)/.1, 0); // convert to microsecond
 
-      //TODO: Fix this function; doesn't work because numpixel is not set
-      //this->fix_pixel_id(temp.pid, period);
+      //Covert the pixel ID from DAS pixel to our pixel ID
+      this->fix_pixel_id(temp.pid, period);
 
       //Parallel: this critical block is almost certainly killing parallel efficiency.
       workspace->getEventList(temp.pid) += event; // TODO work with period
@@ -298,6 +299,7 @@ void LoadEventPreNeXus::load_pixel_map(const string &filename)
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
 
   size_t file_size = get_file_size<PixelType>(handle);
+  //std::cout << "file is " << file_size << std::endl;
   size_t offset = 0;
   size_t buffer_size = get_buffer_size(file_size);
   PixelType * buffer = new PixelType[buffer_size];
@@ -315,6 +317,9 @@ void LoadEventPreNeXus::load_pixel_map(const string &filename)
       buffer_size = file_size - offset;
     }
   }
+
+  //Let's assume that the # of pixels in the instrument matches the mapping file length.
+  this->numpixel = file_size;
 
   // cleanup
   delete buffer;
