@@ -202,7 +202,7 @@ void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
   // set header properties
   QHeaderView* hHeader = (QHeaderView*)view->horizontalHeader();
   hHeader->setMovable(false);
-  hHeader->setResizeMode(QHeaderView::Fixed);
+  hHeader->setResizeMode(QHeaderView::Interactive);
   hHeader->setDefaultSectionSize(m_column_width);
 
   view->resizeRowToContents(0);
@@ -212,7 +212,6 @@ void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
   vHeader->setDefaultSectionSize(row_height);
   vHeader->setResizeMode(QHeaderView::Fixed);
   vHeader->setMovable(false);
-
 }
 
 double MantidMatrix::cell(int row, int col)
