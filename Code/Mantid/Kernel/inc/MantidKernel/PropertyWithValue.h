@@ -48,101 +48,128 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE>
-class PropertyWithValue : public Property
+
+// --------------------- convert values to strings
+
+/// Convert values to strings.
+template <typename T>
+std::string toString(const T& value)
 {
-private:
+  return boost::lexical_cast<std::string>(value);
+}
 
-  /** Private helper class for the PropertyWithValue::setValue & value methods.
-      Avoids construction of lexical_cast for types with which it isn't compatible.
-   */
-  template <class T>
-  struct PropertyUtility
+/// Throw an exception if a shared pointer is converted to a string.
+template <typename T>
+std::string toString(const boost::shared_ptr<T>& value)
+{
+  throw boost::bad_lexical_cast();
+}
+
+/// Specialisation for a property of type std::vector.
+template <typename T>
+std::string toString(const std::vector<T>& value)
+{
+  std::stringstream result;
+  std::size_t vsize = value.size();
+  for (std::size_t i = 0; i < vsize; ++i)
   {
-    /** Performs the lexical_cast for the PropertyWithValue::value method
-     *  @param value The value of the property to be converted to a string
-     */
-    std::string value(const T& value) const
-    {
-      return boost::lexical_cast<std::string>( value );
-    }
+    result << value[i];
+    if (i + 1 != vsize)
+      result << ",";
+  }
+  return result.str();
+}
 
-    /** Performs the lexical_cast for the PropertyWithValue::setValue method
-     *  @param value The value to assign to the property
-     *  @param result The result of the lexical_cast
-     */
-    void setValue(const std::string& value, T& result)
-    {
-      result = boost::lexical_cast<T>( value );
-    }
-  };
-
-  /// Specialisation for WorkspaceProperty.
-  template <class T>
-  struct PropertyUtility<boost::shared_ptr<T> >
+// ------------- Convert strings to values
+template <typename T>
+inline void appendValue(const std::string& strvalue, std::vector<T>& value)
+{
+  // try to split the string
+  std::size_t pos = strvalue.find(':');
+  if (pos == std::string::npos)
   {
-    /// Should never get called. Just throws.
-    std::string value(const boost::shared_ptr<T>& value) const
-    {
-      throw boost::bad_lexical_cast();
-    }
+    pos = strvalue.find('-', 1);
+  }
 
-    /// Should never get called. Just throws.
-    void setValue(const std::string& value, boost::shared_ptr<T>& result)
-    {
-      throw boost::bad_lexical_cast();
-    }
-  };
+  // just convert the whole thing into a value
+  if (pos == std::string::npos){
+      value.push_back(boost::lexical_cast<T>(strvalue));
+      return;
+  }
 
-  /// Specialisation for a property of type std::vector (as in an ArrayProperty)
-  template <class T>
-  struct PropertyUtility<std::vector<T> >
+  // convert the input string into boundaries and run through a list
+  T start = boost::lexical_cast<T>(strvalue.substr(0, pos));
+  T stop  = boost::lexical_cast<T>(strvalue.substr(pos + 1));
+  for (T i = start; i <= stop; i++)
+    value.push_back(i);
+}
+
+template <typename T>
+void toValue(const std::string& strvalue, T& value)
+{
+  value = boost::lexical_cast<T>( strvalue );
+}
+
+template <typename T>
+void toValue(const std::string& strvalue, boost::shared_ptr<T>& value)
+{
+  throw boost::bad_lexical_cast();
+}
+
+template <typename T>
+void toValue(const std::string& strvalue, std::vector<T>& value)
+{
+  // Split up comma-separated properties
+  typedef Poco::StringTokenizer tokenizer;
+  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+
+  value.clear();
+  value.reserve(values.count());
+
+  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
   {
-    /// Converts the vector of values to a comma-separated string representation
-    std::string value(const std::vector<T>& value) const
-    {
-      std::stringstream s;
-      for (unsigned int i = 0; i < value.size(); ++i)
-      {
-        s << value[i];
-        if (i != (value.size()-1) ) s << ',';
-      }
-      return s.str();
-    }
+    value.push_back(boost::lexical_cast<T>(*it));
+  }
+}
 
-    /// Takes a comma-separated string of values and stores them as the vector of values
-    void setValue(const std::string& value, std::vector<T>& result)
-    {
-      // Split up comma-separated properties
-      typedef Poco::StringTokenizer tokenizer;
-      tokenizer values(value, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+template <>
+inline void toValue<int>(const std::string& strvalue, std::vector<int>& value)
+{
+  // Split up comma-separated properties
+  typedef Poco::StringTokenizer tokenizer;
+  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
-      std::vector<T> vec;
-      vec.reserve(values.count());
-      
-      for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
-      {
-        try
-        {
-          vec.push_back( boost::lexical_cast<T>( *it ) );
-        }
-        catch (boost::bad_lexical_cast e)
-        {
-          g_log.error("Attempt to set value with mis-formed string for this property type");
-          throw;
-        }
-      }
-      if (vec.size() != result.size())
-      {
-        g_log.information("New property value has different number of elements");
-      }
-      result = vec;
-    }
-  };
+  value.clear();
+  value.reserve(values.count());
 
+  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
+  {
+    appendValue(*it, value);
+  }
+}
+
+template <>
+inline void toValue<unsigned int>(const std::string& strvalue, std::vector<unsigned int>& value)
+{
+  // Split up comma-separated properties
+  typedef Poco::StringTokenizer tokenizer;
+  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+
+  value.clear();
+  value.reserve(values.count());
+
+  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
+  {
+    appendValue(*it, value);
+  }
+}
 //----------------------------------------------------------------------
 // Now the PropertyWithValue class itself
 //----------------------------------------------------------------------
+
+template <typename TYPE>
+class PropertyWithValue : public Property
+{
 public:
   /** Constructor
    *  @param name The name to assign to the property
@@ -196,8 +223,7 @@ public:
    */
   virtual std::string value() const
   {
-    PropertyUtility<TYPE> helper;
-    return helper.value(m_value);
+    return toString(m_value);
   }
 
   /** Get the value the property was initialised with -its default value
@@ -205,8 +231,7 @@ public:
    */
   virtual std::string getDefault() const
   {
-    PropertyUtility<TYPE> helper;
-    return helper.value(m_initialValue);
+    return toString(m_initialValue);
   }
 
   /** Set the value of the property from a string representation.
@@ -214,13 +239,12 @@ public:
    *  @param value The value to assign to the property
    *  @return Returns "" if the assignment was successful or a user level description of the problem
    */
-  virtual std::string setValue( const std::string& value )
+  virtual std::string setValue(const std::string& value )
   {
     try
     {
-      PropertyUtility<TYPE> helper;
       TYPE result = m_value;
-      helper.setValue(value, result);
+      toValue(value, result);
       //Uses the assignment operator defined below which runs isValid() and throws based on the result
       *this = result;
       return "";
@@ -336,60 +360,6 @@ private:
 
 template <typename TYPE>
 Logger& PropertyWithValue<TYPE>::g_log = Logger::get("PropertyWithValue");
-
-/** Takes a comma-separated string of values and stores them as the vector of values.
- *  @param value The new value. Allows ranges of integers, e.g. "1-5,7,9-12"
- */
-template <>
-inline std::string PropertyWithValue<std::vector<int> >::setValue(const std::string& value)
-{
-  try{
-    // Split up comma-separated properties
-    typedef Poco::StringTokenizer tokenizer;
-    tokenizer values(value, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-
-    std::vector<int> vec;
-    vec.reserve(values.count());
-
-    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
-    {
-      if (it->find('-'))
-      {
-        tokenizer range(*it, "-", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-        if (range.count() == 1)
-          vec.push_back( boost::lexical_cast<int>( *it ) );
-        else
-        {
-          int iStart = boost::lexical_cast<int>( *range.begin() );
-          int iEnd = boost::lexical_cast<int>( *(range.begin()+1) );
-          for(int i=iStart;i<=iEnd;i++)
-            vec.push_back(i);
-        }
-      }
-      else
-        vec.push_back( boost::lexical_cast<int>( *it ) );
-    }
-    if (vec.size() != m_value.size())
-    {
-      g_log.information("New property value has different number of elements");
-    }
-    m_value = vec;
-    return "";
-  }
-  catch ( boost::bad_lexical_cast )
-  {
-    std::string error = "Could not set property " + name() +
-      ". Can not convert \"" + value + "\" to " + type();
-    g_log.debug() << error;
-    return error;
-  }
-  catch ( std::invalid_argument& except)
-  {
-    g_log.debug() << "Could not set property " << name() << ": " << except.what();
-    return except.what();
-  }
-}
-
 
 } // namespace Kernel
 } // namespace Mantid

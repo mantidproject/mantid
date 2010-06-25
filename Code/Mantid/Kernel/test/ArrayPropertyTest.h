@@ -66,7 +66,18 @@ public:
 	  TS_ASSERT_EQUALS( i.operator()()[0], 1 )
     TS_ASSERT_EQUALS( i.operator()()[1], 2 )
     TS_ASSERT_EQUALS( i.operator()()[2], 3 )
-    
+
+    ArrayProperty<int> i2("i", "-1-1");
+	  TS_ASSERT_EQUALS( i2.operator()()[0], -1);
+	  TS_ASSERT_EQUALS( i2.operator()()[1], 0);
+	  TS_ASSERT_EQUALS( i2.operator()()[2], 1);
+
+	  ArrayProperty<unsigned int> i3("i", "0:2,5");
+	  TS_ASSERT_EQUALS( i3.operator()()[0], 0);
+	  TS_ASSERT_EQUALS( i3.operator()()[1], 1);
+	  TS_ASSERT_EQUALS( i3.operator()()[2], 2);
+    TS_ASSERT_EQUALS( i3.operator()()[3], 5);
+
     ArrayProperty<double> d("d","7.77,8.88,9.99");
     TS_ASSERT_EQUALS( d.operator()()[0], 7.77 )
     TS_ASSERT_EQUALS( d.operator()()[1], 8.88 )
@@ -76,7 +87,7 @@ public:
     TS_ASSERT( ! s.operator()()[0].compare("a") )
     TS_ASSERT( ! s.operator()()[1].compare("b") )
     TS_ASSERT( ! s.operator()()[2].compare("c") )
-    
+
     TS_ASSERT_THROWS( ArrayProperty<int> ii("ii","aa,bb"), std::invalid_argument )
     TS_ASSERT_THROWS( ArrayProperty<int> ii("ii","5.5,6.6"), std::invalid_argument )
     TS_ASSERT_THROWS( ArrayProperty<double> dd("dd","aa,bb"), std::invalid_argument )
