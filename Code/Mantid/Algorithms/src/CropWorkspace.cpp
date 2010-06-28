@@ -4,6 +4,12 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
+namespace 
+{
+  /// The percentage 'fuzziness' to use when comparing to bin boundaries
+  const double xBoundaryTolerance = 1.0e-15;
+}
+
 namespace Mantid
 {
 namespace Algorithms
@@ -184,13 +190,16 @@ int CropWorkspace::getXMin(const int wsIndex)
   int xIndex = -1;
   if ( !def )
   {//A value has been passed to the algorithm, check it and maybe store it
-    const double minX_val = getProperty("XMin");
+    double minX_val = getProperty("XMin");
     const MantidVec& X = m_inputWorkspace->readX(wsIndex);
     if ( m_commonBoundaries && minX_val > X.back() )
     {
       g_log.error("XMin is greater than the largest X value");
       throw std::out_of_range("XMin is greater than the largest X value");
     }
+    // Reduce cut-off value slightly to allow for rounding errors
+    // when trying to exactly hit a bin boundary.
+    minX_val -= minX_val*xBoundaryTolerance;
     xIndex = std::lower_bound(X.begin(),X.end(),minX_val) - X.begin();
   }
   return xIndex;
@@ -206,7 +215,7 @@ int CropWorkspace::getXMax(const int wsIndex)
   const MantidVec& X = m_inputWorkspace->readX(wsIndex);
   int xIndex = X.size();
   //get the value that the user entered if they entered one at all
-  const double maxX_val = getProperty("XMax");
+  double maxX_val = getProperty("XMax");
   if ( ! isEmpty(maxX_val) )
   {//we have a user value, check it and maybe store it
     if ( m_commonBoundaries && maxX_val < X.front() )
@@ -214,6 +223,9 @@ int CropWorkspace::getXMax(const int wsIndex)
       g_log.error("XMax is less than the smallest X value");
       throw std::out_of_range("XMax is less than the smallest X value");
     }
+    // Increase cut-off value slightly to allow for rounding errors
+    // when trying to exactly hit a bin boundary.
+    maxX_val += maxX_val*xBoundaryTolerance;
     xIndex = std::upper_bound(X.begin(),X.end(),maxX_val) - X.begin();
   }
   return xIndex;
