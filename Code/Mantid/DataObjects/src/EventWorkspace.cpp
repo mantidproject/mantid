@@ -6,6 +6,8 @@
 
 DECLARE_WORKSPACE(EventWorkspace)
 
+using namespace boost::posix_time;
+
 namespace Mantid
 {
 

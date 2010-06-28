@@ -13,8 +13,6 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-using boost::posix_time::ptime;
-
 namespace Mantid
 {
 //----------------------------------------------------------------------
@@ -119,10 +117,10 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   //------------------------------------------------------------
   /** Get the absolute time corresponding to the give frame ID */
-  ptime getTime(const size_t frameId);
+  boost::posix_time::ptime getTime(const size_t frameId);
 
   /** Add the absolute time corresponding to the give frame ID */
-  void addTime(const size_t frameId, ptime absoluteTime);
+  void addTime(const size_t frameId, boost::posix_time::ptime absoluteTime);
 
   /** The total number of events across all of the spectra. */
   std::size_t getNumberEvents() const;
@@ -154,7 +152,7 @@ private:
   int m_noVectors;
 
   /// Vector where the index is the frameId and the value is the corresponding time, in Posix timing.
-  std::vector<ptime> frameTime;
+  std::vector<boost::posix_time::ptime> frameTime;
 };
 
 ///shared pointer to the EventWorkspace class
