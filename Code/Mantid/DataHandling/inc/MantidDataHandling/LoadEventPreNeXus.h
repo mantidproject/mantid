@@ -27,7 +27,7 @@ struct DasEvent
   PixelType pid;
 };
 
-class LoadEventPreNeXus : public Mantid::API::Algorithm
+class DLLExport LoadEventPreNeXus : public Mantid::API::Algorithm
 {
 public:
   /// Constructor

@@ -99,6 +99,9 @@ namespace Mantid
           outputW = boost::dynamic_pointer_cast<Workspace2D>(
               API::WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1) );
 
+          //Initialize progress reporting.
+          Progress prog(this,0.0,1.0, histnumber);
+
           //Go through all the histograms and set the data
           for (int i=0; i <  histnumber; ++i)
           {
@@ -115,6 +118,9 @@ namespace Mantid
             outputW->dataY(i).assign(y_data.begin(), y_data.end());
             MantidVec e_data = el.dataE();
             outputW->dataE(i).assign(e_data.begin(), e_data.end());
+
+            //Report progress
+            prog.report();
           }
 
           //Copy all the axes
