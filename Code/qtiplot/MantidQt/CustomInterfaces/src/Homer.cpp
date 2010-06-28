@@ -1,6 +1,5 @@
 #include "MantidQtCustomInterfaces/Homer.h"
 #include "MantidQtCustomInterfaces/Background.h"
-#include "MantidQtMantidWidgets/MantidWidget.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -156,11 +155,6 @@ void Homer::page1FileWidgs()
 
   m_runFilesWid = new MWRunFiles(this, m_prev.group()+"/runs", false,
 	m_uiForm.loadRun_cbInst, "Run Files", "List of runs to load");
-  //??STEVES?? code for if the selected files will be listed in a table
-//  m_uiForm.loadRun_tvRuns->setColumnCount(3);
-//  m_uiForm.loadRun_tvRuns->setRowCount(1);
-//  m_uiForm.loadRun_tvRuns->horizontalHeader()->hide();
-//  m_uiForm.loadRun_tvRuns->verticalHeader()->hide();
   mapLay->addWidget(m_runFilesWid, 0, 0, 1, 7);
   connect(m_runFilesWid, SIGNAL(fileChanged()), this, SLOT(runFilesChanged()));
 

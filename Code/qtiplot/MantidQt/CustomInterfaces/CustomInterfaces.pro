@@ -26,6 +26,7 @@ SRCDIR = src
 SOURCES = \
   $$SRCDIR/SANSRunWindow.cpp \
   $$SRCDIR/SANSUtilityDialogs.cpp \
+  $$SRCDIR/SANSAddFiles.cpp \
   $$SRCDIR/Homer.cpp \
   $$SRCDIR/deltaECalc.cpp \
   $$SRCDIR/Background.cpp
@@ -33,6 +34,7 @@ SOURCES = \
 HEADERS = \
   $$HEADERDIR/SANSRunWindow.h \
   $$HEADERDIR/SANSUtilityDialogs.h \
+  $$HEADERDIR/SANSAddFiles.h \
   $$HEADERDIR/Homer.h \
   $$HEADERDIR/deltaECalc.h \
   $$HEADERDIR/Background.h 

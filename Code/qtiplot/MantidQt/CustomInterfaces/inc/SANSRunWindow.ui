@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>728</width>
+    <width>713</width>
     <height>415</height>
    </rect>
   </property>
@@ -3464,6 +3464,202 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="AddRuns" >
+      <attribute name="title" >
+       <string>Add Runs</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_18" >
+       <item row="0" column="3" >
+        <spacer name="verticalSpacer_9" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0" >
+        <spacer name="horizontalSpacer_11" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1" colspan="2" >
+        <widget class="QLabel" name="label_40" >
+         <property name="text" >
+          <string>Output File Path</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3" >
+        <widget class="QLineEdit" name="summedPath_edit" />
+       </item>
+       <item row="1" column="4" >
+        <widget class="QPushButton" name="summedPath_Btn" >
+         <property name="text" >
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3" >
+        <spacer name="verticalSpacer_10" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="1" >
+        <widget class="QLabel" name="label_42" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text" >
+          <string>File</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2" colspan="2" >
+        <widget class="QLineEdit" name="new2Add_edit" />
+       </item>
+       <item row="3" column="4" >
+        <widget class="QPushButton" name="add_Btn" >
+         <property name="text" >
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5" >
+        <widget class="QPushButton" name="browse_to_add_Btn" >
+         <property name="text" >
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="6" >
+        <spacer name="horizontalSpacer_18" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="4" >
+        <spacer name="verticalSpacer_7" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="7" column="4" >
+        <widget class="QPushButton" name="sum_Btn" >
+         <property name="text" >
+          <string>Sum</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="4" >
+        <spacer name="verticalSpacer_8" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item rowspan="3" row="4" column="2" colspan="2" >
+        <widget class="QListWidget" name="toAdd_List" >
+         <property name="editTriggers" >
+          <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+         </property>
+         <property name="selectionMode" >
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="selectionBehavior" >
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="resizeMode" >
+          <enum>QListView::Fixed</enum>
+         </property>
+         <property name="currentRow" >
+          <number>-1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="4" >
+        <widget class="QPushButton" name="remove_Btn" >
+         <property name="text" >
+          <string>Remove</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="4" >
+        <widget class="QPushButton" name="clear_Btn" >
+         <property name="text" >
+          <string>Remove all</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+      <zorder>label_40</zorder>
+      <zorder>summedPath_edit</zorder>
+      <zorder>summedPath_Btn</zorder>
+      <zorder>label_42</zorder>
+      <zorder>new2Add_edit</zorder>
+      <zorder>add_Btn</zorder>
+      <zorder>browse_to_add_Btn</zorder>
+      <zorder>sum_Btn</zorder>
+      <zorder>toAdd_Tbl</zorder>
+      <zorder>toAdd_List</zorder>
+      <zorder>clear_Btn</zorder>
+      <zorder>remove_Btn</zorder>
      </widget>
     </widget>
    </item>

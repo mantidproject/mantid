@@ -1868,8 +1868,3 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath + '\n'
         
     return script
-
-############################################################################################
-#AssignSample('5508.nxs', 2)
-#_assignHelper('5508.nxs', False, True, period = 2)
-#_loadRawData('SANS2D00005508', '5508_sans', 'nxs', period=2)

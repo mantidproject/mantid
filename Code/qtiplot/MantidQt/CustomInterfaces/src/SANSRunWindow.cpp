@@ -3,6 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 #include "MantidQtCustomInterfaces/SANSUtilityDialogs.h"
+#include "MantidQtCustomInterfaces/SANSAddFiles.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -16,6 +17,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidKernel/Exception.h"
 
 #include <QLineEdit>
 #include <QFileDialog>
@@ -44,25 +46,28 @@ namespace CustomInterfaces
 }
 
 using namespace MantidQt::CustomInterfaces;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 // Initialize the logger
-Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANSRunWindow");
+Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
 
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true),
-  m_sample_no(), m_run_no_boxes(),  m_period_lbls(), m_warnings_issued(false),
-  m_force_reload(false), m_log_warnings(false), m_delete_observer(*this,
-  &SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(),
-  m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
+  UserSubWindow(parent), m_addFilesTab(NULL), m_data_dir(""), m_ins_defdir(""),
+  m_last_dir(""), m_cfg_loaded(true), m_sample_no(), m_run_no_boxes(),
+  m_period_lbls(), m_warnings_issued(false), m_force_reload(false),
+  m_log_warnings(false),
+  m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
+  m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
   m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
 {
   m_reducemapper = new QSignalMapper(this);
   m_mode_mapper = new QSignalMapper(this);
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
   
   m_allowed_batchtags.insert("sample_sans",0);
   m_allowed_batchtags.insert("sample_trans",1);
@@ -74,15 +79,15 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_allowed_batchtags.insert("background_trans",-1);
   m_allowed_batchtags.insert("background_direct_beam",-1);
   m_allowed_batchtags.insert("output_as",6);
-
 }
 
 ///Destructor
 SANSRunWindow::~SANSRunWindow()
 {
   // Seems to crash on destruction of if I don't do this 
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+  AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
   saveSettings();
+  delete m_addFilesTab;
 }
 
 //--------------------------------------------
@@ -100,15 +105,7 @@ void SANSRunWindow::initLayout()
     m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
 
     //Button connections
-    connect(m_uiForm.data_dirBtn, SIGNAL(clicked()), this, SLOT(selectDataDir()));
-    connect(m_uiForm.userfileBtn, SIGNAL(clicked()), this, SLOT(selectUserFile()));
-    connect(m_uiForm.csv_browse_btn,SIGNAL(clicked()), this, SLOT(selectCSVFile()));
-
-    connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
-    //connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
-    connect(m_uiForm.runcentreBtn, SIGNAL(clicked()), this, SLOT(handleRunFindCentre()));
-    connect(m_uiForm.saveBtn, SIGNAL(clicked()), this, SLOT(handleSaveButtonClick()));
-
+    connectButtonSignals();
 
     // Disable most things so that load is the only thing that can be done
     m_uiForm.oneDBtn->setEnabled(false);
@@ -118,16 +115,6 @@ void SANSRunWindow::initLayout()
       m_uiForm.tabWidget->setTabEnabled(i, false);
     }
 
-    // Reduction buttons
-    connect(m_uiForm.oneDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
-    m_reducemapper->setMapping(m_uiForm.oneDBtn, "1D");
-    connect(m_uiForm.twoDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
-    m_reducemapper->setMapping(m_uiForm.twoDBtn, "2D");
-    connect(m_reducemapper, SIGNAL(mapped(const QString &)), this, SLOT(handleReduceButtonClick(const QString &)));
-    
-    connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
-    connect(m_uiForm.clear_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
-
     //Mode switches
     connect(m_uiForm.single_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
     m_mode_mapper->setMapping(m_uiForm.single_mode_btn, SANSRunWindow::SingleMode);
@@ -135,7 +122,7 @@ void SANSRunWindow::initLayout()
     m_mode_mapper->setMapping(m_uiForm.batch_mode_btn, SANSRunWindow::BatchMode);
     connect(m_mode_mapper, SIGNAL(mapped(int)), this, SLOT(switchMode(int)));
 
-    //Set a custom context for the batch table
+    //Set a custom context menu for the batch table
     m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
     m_batch_paste = new QAction(tr("&Paste"),m_uiForm.batch_table);
     m_batch_paste->setShortcut(tr("Ctrl+P"));
@@ -191,7 +178,12 @@ void SANSRunWindow::initLayout()
     m_uiForm.trans_opt->setItemData(0,"Log");
     m_uiForm.trans_opt->setItemData(1,"Linear");
     m_uiForm.trans_opt->setItemData(2,"Off");
-
+    
+    if( ! m_addFilesTab )
+    {//sets up the AddFiles tab which must be deleted in the destructor
+      m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
+    }
+    
     readSettings();
 }
 
@@ -213,7 +205,28 @@ void SANSRunWindow::initLocalPython()
     setProcessingState(true, -1);    
   }
 }
+/** Connection the buttons to their signals
+*/
+void SANSRunWindow::connectButtonSignals()
+{
+  connect(m_uiForm.data_dirBtn, SIGNAL(clicked()), this, SLOT(selectDataDir()));
+  connect(m_uiForm.userfileBtn, SIGNAL(clicked()), this, SLOT(selectUserFile()));
+  connect(m_uiForm.csv_browse_btn,SIGNAL(clicked()), this, SLOT(selectCSVFile()));
 
+  connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
+  connect(m_uiForm.runcentreBtn, SIGNAL(clicked()), this, SLOT(handleRunFindCentre()));
+  connect(m_uiForm.saveBtn, SIGNAL(clicked()), this, SLOT(handleSaveButtonClick()));
+
+  // Reduction buttons
+  connect(m_uiForm.oneDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
+  m_reducemapper->setMapping(m_uiForm.oneDBtn, "1D");
+  connect(m_uiForm.twoDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
+  m_reducemapper->setMapping(m_uiForm.twoDBtn, "2D");
+  connect(m_reducemapper, SIGNAL(mapped(const QString &)), this, SLOT(handleReduceButtonClick(const QString &)));
+    
+  connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
+  connect(m_uiForm.clear_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
+}
 /**
  * Initialize the widget maps
  */
@@ -315,12 +328,13 @@ void SANSRunWindow::readSettings()
   }
 
   //The instrument definition directory
-  m_ins_defdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory"));
+  m_ins_defdir = QString::fromStdString(ConfigService::Instance().getString("instrumentDefinition.directory"));
 
   // Setup for instrument
   handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
   //Set old file extension
   m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
+
   value_store.endGroup();
 
   g_log.debug() << "Found previous data directory " << m_uiForm.datadir_edit->text().toStdString()
@@ -702,8 +716,8 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
  */
 void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr workspace, double & lms, double & lsda, double & lsdb)
 {
-  Mantid::API::IInstrument_sptr instr = workspace->getInstrument();
-  if( instr == boost::shared_ptr<Mantid::API::IInstrument>() ) return;
+  IInstrument_sptr instr = workspace->getInstrument();
+  if( instr == boost::shared_ptr<IInstrument>() ) return;
 
   Mantid::Geometry::IObjComponent_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
@@ -785,7 +799,7 @@ void SANSRunWindow::setProcessingState(bool running, int type)
  */
 bool SANSRunWindow::workspaceExists(const QString & ws_name) const
 {
-  return Mantid::API::AnalysisDataService::Instance().doesExist(ws_name.toStdString());
+  return AnalysisDataService::Instance().doesExist(ws_name.toStdString());
 }
 
 /**
@@ -793,7 +807,7 @@ bool SANSRunWindow::workspaceExists(const QString & ws_name) const
  */
 QStringList SANSRunWindow::currentWorkspaceList() const
 {
-  std::set<std::string> ws_list = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  std::set<std::string> ws_list = AnalysisDataService::Instance().getObjectNames();
   std::set<std::string>::const_iterator iend = ws_list.end();
   QStringList current_list;
   for( std::set<std::string>::const_iterator itr = ws_list.begin(); itr != iend; ++itr )
@@ -917,15 +931,15 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   
   QString workspace_name = getWorkspaceName(0);
   if( workspace_name.isEmpty() ) return;
-  Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
-  Mantid::API::MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
+  MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
   if ( !sample_workspace )
   {//assume all geometry information is in the first member of the group and it is constant for all group members
     //function throws if a fisrt member can't be retrieved
     sample_workspace = getGroupMember(workspace_ptr, 1);
   }
 
-  Mantid::API::IInstrument_sptr instr = sample_workspace->getInstrument();
+  IInstrument_sptr instr = sample_workspace->getInstrument();
   boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
 
   // Moderator-monitor distance is common to LOQ and S2D
@@ -959,8 +973,8 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     QString can = getWorkspaceName(1);
     if( !can.isEmpty() )
     {
-      Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
-      Mantid::API::MatrixWorkspace_sptr can_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+      Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
+      MatrixWorkspace_sptr can_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
       
       if ( ! can_workspace )
       {//assume all geometry information is in the first member of the group and it is constant for all group members
@@ -989,10 +1003,10 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     {
       return;
     }
-    Mantid::API::Workspace_sptr workspace_ptr;
+    Workspace_sptr workspace_ptr;
     try 
     { 
-      workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
+      workspace_ptr = AnalysisDataService::Instance().retrieve(can.toStdString());
     }
     catch(std::runtime_error&)
     {
@@ -1974,7 +1988,6 @@ void SANSRunWindow::updateTransInfo(int state)
     m_uiForm.trans_max->setText(runReduceScriptFunction("printParameter('TRANS_WAV2_FULL'),"));
   }
 }
-
 /** 
  * Run a SANS assign command
  * @param key The key of the edit box to assign from
