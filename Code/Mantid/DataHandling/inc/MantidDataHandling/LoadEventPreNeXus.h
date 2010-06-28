@@ -10,6 +10,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
+
 namespace Mantid
 {
   namespace DataHandling
@@ -26,6 +27,24 @@ struct DasEvent
   /// Pixel identifier as published by the DAS/DAE/DAQ.
   PixelType pid;
 };
+
+/// Structure that matches the form in the new pulseid files.
+struct Pulse
+{
+  /// The number of nanoseconds since the seconds field. This is not
+  /// necessarily less than one second.
+  uint32_t nanoseconds;
+
+  /// The number of seconds since January 1, 1990.
+  uint32_t seconds;
+
+  /// The index of the first event for this pulse.
+  uint64_t event_index;
+
+  /// The proton charge for the pulse.
+  double pCurrent;
+};
+
 
 class DLLExport LoadEventPreNeXus : public Mantid::API::Algorithm
 {
@@ -52,10 +71,11 @@ private:
 
   std::vector<int> spectra_list;
   std::vector<int> period_list;
+  std::vector<boost::posix_time::ptime> pulsetimes;
+  std::vector<uint64_t> event_indices;
 
   std::ifstream * eventfile;
   std::size_t num_events;
-  std::ifstream * pulsefile;
   std::size_t num_pulses;
   uint32_t numpixel;
 
@@ -64,7 +84,7 @@ private:
 
   void load_pixel_map(const std::string & );
   void open_event_file(const std::string &);
-  void open_pulseid_file(const std::string &);
+  void read_pulseid_file(const std::string &);
 
   /// Turn a pixel id into a "corrected" pixelid and period.
   void fix_pixel_id(PixelType &, uint32_t &) const;
@@ -72,6 +92,14 @@ private:
   /// Process the event file properly.
   void proc_events(DataObjects::EventWorkspace_sptr &);
 
+  /**
+   * Determine the frame index from the event index.
+   * @param event_index The index of the event.
+   * @param last_frame_index Last frame found. This parameter reduces the
+   * search to be from the current point forward.
+   */
+  std::size_t get_frame_index(const std::size_t event_index,
+                              const std::size_t last_frame_index);
 };
 
   }

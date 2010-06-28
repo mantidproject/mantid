@@ -19,6 +19,7 @@ DECLARE_ALGORITHM(LoadEventPreNeXus)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using boost::posix_time::ptime;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
@@ -35,15 +36,20 @@ using std::vector;
 static const string EVENT_PARAM("EventFilename");
 static const string PULSEID_PARAM("PulseidFilename");
 static const string MAP_PARAM("MappingFilename");
-static const string PID_MIN_PARAM("Spectrum Min");
-static const string PID_MAX_PARAM("Spectrum Max");
-static const string PID_PARAM("Spectrum List");
-static const string PERIOD_PARAM("Period List");
+static const string PID_PARAM("SpectrumList");
+static const string PERIOD_PARAM("PeriodList");
 static const string OUT_PARAM("OutputWorkspace");
 
 /// Default number of items to read in from any of the files.
 static const size_t DEFAULT_BLOCK_SIZE = 100000; // 100,000
 static const PixelType ERROR_PID = 0x80000000;
+
+/// The difference in seconds between standard unix and gps epochs.
+static const uint32_t EPOCH_DIFF = 631152000;
+/// The EPOCH for GPS times.
+static const ptime EPOCH(boost::gregorian::from_simple_string("1990-1-1"));
+/// The number of nanoseconds in a second.
+static const uint32_t NANO_TO_SEC = 1000000000;
 
 /// Determine the size of the buffer for reading in binary files.
 static size_t get_buffer_size(const size_t num_items);
@@ -51,15 +57,12 @@ static size_t get_buffer_size(const size_t num_items);
 LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::Algorithm()
 {
   this->eventfile = NULL;
-  this->pulsefile = NULL;
 }
 
 LoadEventPreNeXus::~LoadEventPreNeXus()
 {
   if (this->eventfile != NULL)
     delete this->eventfile;
-  if (this->pulsefile != NULL)
-    delete this->pulsefile;
 }
 
 //-----------------------------------------------------------------------------
@@ -77,18 +80,11 @@ void LoadEventPreNeXus::init()
                         "TS mapping file converting detector id to pixel id. Used only if specified.");
 
   // which pixels to load
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
-  mustBePositive->setLower(1);
-  this->declareProperty(PID_MIN_PARAM, 1, mustBePositive,
-      "The index number of the first spectrum to read. Only used if the spectrum max is set.");
-  this->declareProperty(PID_MAX_PARAM, Mantid::EMPTY_INT(), mustBePositive->clone(),
-      "The index number of the last spectrum to read. Used only if specifed");
   this->declareProperty(new ArrayProperty<int>(PID_PARAM),
-      "A comma separated list of individual spectra to read. Only used if set.");
-
+                        "A list of individual spectra to read. Only used if set.");
   // which states to load
   this->declareProperty(new ArrayProperty<int>(PERIOD_PARAM),
-      "A comma separated list of periods to read. Only used if set.");
+                        "A list of periods to read. Only used if set.");
 
   // the output workspace name
   this->declareProperty(new WorkspaceProperty<EventWorkspace>(OUT_PARAM,"",Direction::Output));
@@ -99,16 +95,7 @@ void LoadEventPreNeXus::init()
 void LoadEventPreNeXus::exec()
 {
   // what to load
-  int spectra_min = this->getProperty(PID_MIN_PARAM);
-  int spectra_max = this->getProperty(PID_MAX_PARAM);
-  if (spectra_max != Mantid::EMPTY_INT())
-  {
-    // TODO something useful here
-  }
-  else
-  {
-    this->spectra_list = this->getProperty(PID_PARAM);
-  }
+  this->spectra_list = this->getProperty(PID_PARAM);
   this->period_list = this->getProperty(PERIOD_PARAM);
 
   // load the mapping file
@@ -117,8 +104,7 @@ void LoadEventPreNeXus::exec()
 
   // open the pulseid file
   string pulseid_filename = this->getPropertyValue(PULSEID_PARAM);
-  this->open_pulseid_file(pulseid_filename);
-  size_t pulse_buffer_size = get_buffer_size(this->num_pulses);
+  this->read_pulseid_file(pulseid_filename);
 
   // open the event file
   string event_filename = this->getPropertyValue(EVENT_PARAM);
@@ -166,6 +152,7 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
 
   //Try to parallelize the code - commented out because it actually makes the code slower!
   //PARALLEL_FOR1(workspace)
+  size_t frame_index = 0;
   for (event_offset = 0; event_offset  < this->num_events; event_offset += event_buffer_size)
   {
     //PARALLEL_START_INTERUPT_REGION
@@ -200,7 +187,8 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
       }
 
       // work with the good guys
-      event = TofEvent(static_cast<double>(temp.tof)/.1, 0); // convert to microsecond
+      frame_index = this->get_frame_index(event_offset + i, frame_index);
+      event = TofEvent(static_cast<double>(temp.tof)/.1, frame_index);// convert to microsecond
 
       //Covert the pixel ID from DAS pixel to our pixel ID
       this->fix_pixel_id(temp.pid, period);
@@ -239,6 +227,10 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
   }
    */
 
+  // add the frame information to the event workspace
+  for (size_t i = 0; i < this->num_pulses; i++)
+    workspace->addTime(i, this->pulsetimes[i]);
+
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
   workspace->doneLoadingData();
 
@@ -246,6 +238,27 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
   msg << "Read " << this->num_good_events << " events + "
       << this->num_error_events << " errors";
   this->g_log.information(msg.str());
+}
+
+size_t LoadEventPreNeXus::get_frame_index(const size_t event_index, const size_t last_frame_index)
+{
+  // if at the end of the file return the last frame_index
+  if (last_frame_index + 1 >= this->num_pulses)
+    return last_frame_index;
+
+  // search for the next frame that increases the event index
+  size_t next_frame_index = last_frame_index + 1;
+  for ( ; next_frame_index < this->num_pulses; next_frame_index++)
+  {
+    if (this->event_indices[next_frame_index] > this->event_indices[last_frame_index])
+      break;
+  }
+
+  // determine the frame index
+  if (this->event_indices[next_frame_index] <= event_index)
+    return next_frame_index;
+  else
+    return last_frame_index;
 }
 
 //-----------------------------------------------------------------------------
@@ -295,7 +308,7 @@ void LoadEventPreNeXus::load_pixel_map(const string &filename)
   }
 
   // actually deal with the file
-  this->g_log.information("Using mapping file \"" + filename + "\""); // TODO change to debug
+  this->g_log.debug("Using mapping file \"" + filename + "\"");
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
 
   size_t file_size = get_file_size<PixelType>(handle);
@@ -338,16 +351,60 @@ void LoadEventPreNeXus::open_event_file(const string &filename)
 }
 
 //-----------------------------------------------------------------------------
-void LoadEventPreNeXus::open_pulseid_file(const string &filename)
+static ptime getTime(uint32_t sec, uint32_t nano)
 {
+  // push the nanoseconds to be less than one second
+
+  if (nano / NANO_TO_SEC > 0)
+  {
+    sec = nano / NANO_TO_SEC;
+    nano = nano % NANO_TO_SEC;
+  }
+
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  return EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nano);
+#else
+  return EPOCH + boost::posix_time::seconds(sec);
+#endif
+}
+
+void LoadEventPreNeXus::read_pulseid_file(const string &filename)
+{
+  // jump out early if there isn't a filename
   if (filename.empty()) {
     this->g_log.information("NOT using a pulseid file");
-    this->pulsefile = NULL;
     this->num_pulses = 0;
     return;
   }
 
-  // TODO something
+  // set up for reading
+  this->g_log.debug("Using pulseid file \"" + filename + "\"");
+  ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
+  this->num_pulses = get_file_size<Pulse>(handle);
+  size_t buffer_size = get_buffer_size(this->num_pulses);
+  size_t offset = 0;
+  Pulse* buffer = new Pulse[buffer_size];
+  size_t obj_size = sizeof(Pulse);
+
+  // go through the file
+  while (offset < this->num_pulses)
+  {
+    handle->read(reinterpret_cast<char *>(buffer), buffer_size * obj_size);
+    for (size_t i = 0; i < buffer_size; i++)
+    {
+      this->pulsetimes.push_back(getTime(buffer[i].seconds, buffer[i].nanoseconds));
+      this->event_indices.push_back(buffer[i].event_index);
+    }
+    offset += buffer_size;
+
+    // make sure not to read past EOF
+    if (offset + buffer_size > this->num_pulses)
+      buffer_size = this->num_pulses - offset;
+  }
+
+  delete buffer;
+  handle->close();
+  delete handle;
 }
 
 
