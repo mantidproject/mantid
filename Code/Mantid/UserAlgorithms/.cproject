@@ -21,7 +21,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactExtension="so" artifactName="UserAlgorithms" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.371530106" name="Release" parent="cdt.managedbuild.config.gnu.so.release" postannouncebuildStep="Move generated library" postbuildStep="cp libUserAlgorithms.so ../../Bin/Plugins">
+<configuration artifactExtension="so" artifactName="UserAlgorithms" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.371530106" name="Release" parent="cdt.managedbuild.config.gnu.so.release" postannouncebuildStep="Move generated library" postbuildStep="cp libUserAlgorithms.so ../../Build/Plugins">
 <folderInfo id="cdt.managedbuild.config.gnu.so.release.371530106." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.so.release.1453267227" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.release">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.so.release.1609588861" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.release"/>
