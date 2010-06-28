@@ -4,9 +4,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#ifndef _WIN32
-#include <stdint.h>
-#endif
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
