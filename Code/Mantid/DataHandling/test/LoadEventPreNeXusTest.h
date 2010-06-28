@@ -102,7 +102,9 @@ public:
   void xtest_LoadPreNeXus_REFL()
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setProperty("PulseidFilename", pulsefile);
     eventLoader->setPropertyValue("MappingFilename",
           "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
