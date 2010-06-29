@@ -277,7 +277,7 @@ namespace DataObjects
    * @param X :: The vector of doubles to set as the histogram limits.
    * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void EventList::setX(const RCtype::ptr_type& X, Unit* set_xUnit = NULL)
+  void EventList::setX(const RCtype::ptr_type& X, Unit* set_xUnit)
   {
     this->emptyCache();
     this->refX = X;
@@ -289,7 +289,7 @@ namespace DataObjects
    * @param X :: The vector of doubles to set as the histogram limits.
    * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void EventList::setX(const RCtype& X, Unit* set_xUnit = NULL)
+  void EventList::setX(const RCtype& X, Unit* set_xUnit)
   {
     this->emptyCache();
     this->refX = X;
@@ -301,7 +301,7 @@ namespace DataObjects
    * @param X :: The vector of doubles to set as the histogram limits.
    * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void EventList::setX(const StorageType& X, Unit* set_xUnit = NULL)
+  void EventList::setX(const StorageType& X, Unit* set_xUnit)
   {
     this->emptyCache();
     this->refX.access()=X;
