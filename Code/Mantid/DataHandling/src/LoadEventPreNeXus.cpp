@@ -260,7 +260,7 @@ void LoadEventPreNeXus::procEvents(EventWorkspace_sptr & workspace)
  * @param last_frame_index Last frame found. This parameter reduces the
  * search to be from the current point forward.
  */
-size_t LoadEventPreNeXus::getFrameIndex(const size_t event_index, const size_t last_frame_index)
+size_t LoadEventPreNeXus::getFrameIndex(const std::size_t event_index, const std::size_t last_frame_index)
 {
   // if at the end of the file return the last frame_index
   if (last_frame_index + 1 >= this->num_pulses)
@@ -283,11 +283,11 @@ size_t LoadEventPreNeXus::getFrameIndex(const size_t event_index, const size_t l
 
 //-----------------------------------------------------------------------------
 /** Get the size of a file as a multiple of a particular data type
- * @param T type to load in the file
+ * @tparam T type to load in the file
  * @param handle Handle to the file stream
  * */
 template<typename T>
-static size_t get_file_size(ifstream * handle)
+static size_t getFileSize(ifstream * handle)
 {
   if (!handle) {
     throw runtime_error("Cannot find the size of a file from a null handle");
@@ -327,7 +327,7 @@ static size_t getBufferSize(const size_t num_items)
 /** Load a pixel mapping file
  * @filename Path to file.
  */
-void LoadEventPreNeXus::loadPixelMap(const string &filename)
+void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
 {
   this->pixelmap.clear();
 
@@ -341,7 +341,7 @@ void LoadEventPreNeXus::loadPixelMap(const string &filename)
   this->g_log.debug("Using mapping file \"" + filename + "\"");
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
 
-  size_t file_size = get_file_size<PixelType>(handle);
+  size_t file_size = getFileSize<PixelType>(handle);
   //std::cout << "file is " << file_size << std::endl;
   size_t offset = 0;
   size_t buffer_size = getBufferSize(file_size);
@@ -374,10 +374,10 @@ void LoadEventPreNeXus::loadPixelMap(const string &filename)
 /** Open an event file
  * @param filename file to open.
  */
-void LoadEventPreNeXus::openEventFile(const string &filename)
+void LoadEventPreNeXus::openEventFile(const std::string &filename)
 {
   this->eventfile = new ifstream(filename.c_str(), std::ios::binary);
-  this->num_events = get_file_size<DasEvent>(this->eventfile);
+  this->num_events = getFileSize<DasEvent>(this->eventfile);
   stringstream msg;
   msg << "Reading " <<  this->num_events << " event records";
   this->g_log.information(msg.str());
@@ -409,7 +409,7 @@ static ptime getTime(uint32_t sec, uint32_t nano)
 /** Read a pulse ID file
  * @filename file to load.
  */
-void LoadEventPreNeXus::readPulseidFile(const string &filename)
+void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
 {
   // jump out early if there isn't a filename
   if (filename.empty()) {
@@ -421,7 +421,7 @@ void LoadEventPreNeXus::readPulseidFile(const string &filename)
   // set up for reading
   this->g_log.debug("Using pulseid file \"" + filename + "\"");
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
-  this->num_pulses = get_file_size<Pulse>(handle);
+  this->num_pulses = getFileSize<Pulse>(handle);
   size_t buffer_size = getBufferSize(this->num_pulses);
   size_t offset = 0;
   Pulse* buffer = new Pulse[buffer_size];

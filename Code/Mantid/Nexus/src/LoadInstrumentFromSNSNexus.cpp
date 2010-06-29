@@ -51,8 +51,6 @@ void LoadInstrumentFromSNSNexus::init()
 /** Loads the instrument from the SNS file
  *  @param localWS The workspace
  *  @param entry The entry in the Nexus file
- *  @param banks A sorted set of bank names
- *  @param monitors A set of monitor names
  */
 void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
                             NXEntry entry)

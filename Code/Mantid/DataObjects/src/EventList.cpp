@@ -174,7 +174,8 @@ namespace DataObjects
   }
 
   /** Append a list of events to the histogram.
-   * @more_events Another EventList. */
+   * @param more_events Another EventList.
+   * */
   EventList& EventList::operator+=(EventList& more_events)
   {
     vector<TofEvent> rel = more_events.getEvents();
