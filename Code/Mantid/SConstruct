@@ -138,14 +138,19 @@ print "NEXUS ROOT:", nexus_path
 if os.name == 'nt':
 	if int(debug) :
 		cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP',  ]
-		cflags.extend(['/D_DEBUG', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL', '/DWINVER=0x0500'])
-		cflags.extend(['/DBOOST_ALL_DYN_LINK','/DNOMINMAX','/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
-		cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
+                env.Append(CPPDEFINES = ['_DEBUG', 'WIN32', '_WINDOWS', 'POCO_DLL', 'GSL_DLL'])
+                env.Append(CPPDEFINES = {'MS_VISUAL_STUDIO':'1', 'WINVER':'0x0500'})
+		env.Append(CPPDEFINES = ['BOOST_ALL_DYN_LINK','NOMINMAX','_USE_MATH_DEFINES', 'WNT'])
+                cflags.extend([ '/wd4275', '/wd4996'])
+		env.Append(CPPDEFINES = ['_SCL_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_DEPRECATE', '_CRT_NONSTDC_NO_DEPRECATE', '_SCL_SECURE_NO_DEPRECATE'])
 	else :
-		cflags = ['/Ox','/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL']
-		cflags.extend(['/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500'])
-		cflags.extend(['/DBOOST_ALL_DYN_LINK','/DNOMINMAX','/D_USE_MATH_DEFINES', '/DWNT', '/wd4251', '/wd4275', '/wd4996'])
-		cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
+		cflags = ['/Ox','/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP']
+                env.Append(CPPDEFINES = ['WIN32', '_WINDOWS', 'POCO_DLL', 'GSL_DLL'])
+                env.Append(CPPDEFINES = {'MS_VISUAL_STUDIO':'1', 'WINVER':'0x0500'})
+		env.Append(CPPDEFINES = ['WIN32', '_WINDOWS', 'POCO_DLL'])
+		env.Append(CPPDEFINES = ['BOOST_ALL_DYN_LINK','NOMINMAX','_USE_MATH_DEFINES', 'WNT'])
+		cflags.extend(['/wd4251', '/wd4275', '/wd4996'])
+		env.Append(CPPDEFINES = ['_SCL_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_DEPRECATE', '_CRT_NONSTDC_NO_DEPRECATE', '_SCL_SECURE_NO_DEPRECATE'])
 		env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
 elif platform.system() == 'Linux':
 	if not rpmBuild:
@@ -224,7 +229,7 @@ print "CFLAGS: ",cflags
 #check existence of Header files
 conf = Configure(env)
 if conf.CheckCXXHeader('unordered_map.h'):
-	conf.env.Append('-DHAS_UNORDERED_MAP_H')
+	conf.env.Append(CPPDEFINES = ['HAS_UNORDERED_MAP_H'])
 env = conf.Finish()
 
 #Collect the includes into a single directory 
@@ -252,7 +257,7 @@ elif os.name == 'nt':
 
 #Disable assert macro.
 if int(debug) == 0:
-  env.Append(CPPDEFINES='NDEBUG')
+  env.Append(CPPDEFINES=['NDEBUG'])
 
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
