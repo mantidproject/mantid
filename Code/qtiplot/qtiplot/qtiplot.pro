@@ -858,16 +858,7 @@ contains(SCRIPTING_LANGS, Python) {
              $${SIP_DIR}/sipqtiMantidMatrix.cpp\
              $${SIP_DIR}/sipqtiMantidUI.cpp \
              $${SIP_DIR}/sipqtiInstrumentWindow.cpp
-             
-exists(../../$${SIP_DIR}/sipqtiQList.cpp) {
- # SIP < 4.9 
-SOURCES += $${SIP_DIR}/sipqtiQList.cpp 
-} else { 
-SOURCES += \ 
-$${SIP_DIR}/sipqtiQList0101Folder.cpp\ 
-$${SIP_DIR}/sipqtiQList0101MdiSubWindow.cpp\
-$${SIP_DIR}/sipqtiQList0100QString.cpp
-}              
+
 }
 ###############################################################
 
