@@ -10,6 +10,31 @@ import buildNotification as notifier
 import urllib2
 import time
 
+def RecordExists():
+    url = base_url + "rec_exists.psp?id=" + str(SvnID)
+    try:
+        f = urllib2.urlopen(url)
+        page = f.read()
+        if re.search("Success", page):
+            r = True
+        elif re.search("Failure", page):
+            r = False
+        else:
+            r = False #needs something better here, but it *should* be controlled by the db
+    except urllib2.HTTPError:
+        r = False
+    return r
+#end of RecordExists
+
+def CreateRecord():
+    url = base_url + "rec_create.psp?id=" + str(SvnID)
+    try:
+        f = urllib2.urlopen(url)
+        return True
+    except urllib2.HTTPError:
+        return False
+#end of CreateRecord()
+
 base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
 project = 'Installer'
 
@@ -60,6 +85,8 @@ except IOError:
 
 # get SvnID
 SvnID = notifier.getSVNRevision()
+if not RecordExists():
+    CreateRecord()
 
 #build url for use in query
 url = base_url + 'nfwd.psp?id=' + str(SvnID) + '&project=' + project
