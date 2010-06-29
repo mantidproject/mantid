@@ -9,20 +9,15 @@
 # $../../monitorTests.py QuatTest.h
 #
 
-
 import os
 import time
 import sys
 import glob
 import subprocess
 import select
+import MantidBuild
+from MantidBuild import COLOR
 
-COLOR = {"green":'\x1b[32m',
-         "blue":'\x1b[34m',
-         "red":'\x1b[31m',
-         "reset":'\x1b[0m',
-         "boldred":'\x1b[91m'
-         }
 
 def get_all_times(filelist):
     """Return list of all file modified times."""
@@ -180,45 +175,9 @@ if __name__ == "__main__":
             #Delete the mantid log file to clear its contents
             os.system("rm ~/.mantid/mantid.log")
 
-            #Start the subprocess (runTests.sh)
-            p = subprocess.Popen(runtests_cmd, shell=True, bufsize=10000,
-                                 cwd=subproj,
-                                 stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 stdout=subprocess.PIPE, close_fds=True)
-            (put, get) = (p.stdin, p.stdout)
+            #Start runTests.sh and colorize output
+            MantidBuild.color_output(cmdline=runtests_cmd, workingdir=subproj)
 
-
-            line=get.readline()
-            while line != "":
-                if len(line)>1:
-                    line = line[:-1] #Remove trailing /n
-                if ("Error:" in line) or ("error:" in line) \
-                    or ("terminate called after throwing an instance" in line) \
-                    or ("Segmentation fault" in line) \
-                    or ("  what(): " in line) \
-                    or ("Assertion" in line and " failed." in line) \
-                    :
-                    #An error line!
-                    #Print in red
-                    print COLOR["red"] + line  + COLOR["reset"]
-                elif line.endswith("OK!"):
-                    #Test was successful
-                    print COLOR["green"] + line + COLOR["reset"]
-                else:
-                    #Print normally
-                    print line
-
-#                #Any stderr?
-#                err = p.stderr.readline()
-#                while err != "":
-#                    if len(err)>1: err = err[:-1] #Remove trailing /n
-#                    print '\033[1;35m' + err + '\033[1;m'
-#                    err = p.stderr.readline()
-
-                #Keep reading output.
-                line=get.readline()
-
-            #os.system(commandline)
             last_modified = current_times;
             print "\n\n--- continuing to monitor changes to file; or press return to test now ---"
 
