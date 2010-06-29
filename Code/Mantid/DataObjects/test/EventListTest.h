@@ -130,6 +130,10 @@ public:
     el += el;
     rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 18);
+
+    el.addEventQuickly( TofEvent(333, 444));
+    rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 19);
   }
 
   void testPlusOperator2()

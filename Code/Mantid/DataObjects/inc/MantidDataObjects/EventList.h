@@ -30,36 +30,39 @@ namespace DataObjects
  */
 class DLLExport TofEvent {
 private:
-  /*! The units of the time of flight index in nanoseconds. */
+  /** The units of the time of flight index in nanoseconds. */
   double time_of_flight;
 
-  /*!
+  /**
    * The frame vector is not a member of this object, but it is necessary in
    * order to have the actual time for the data.
    */
   std::size_t frame_index;
 
  public:
-  /*! Constructor, specifying the time of flight and the frame id */
+  /// Constructor, specifying the time of flight and the frame id
   TofEvent(double time_of_flight, const std::size_t frameid);
 
-  /*! Constructor, copy from another TofEvent object */
+  /// Constructor, copy from another TofEvent object
   TofEvent(const TofEvent&);
 
-  /*! Empty constructor, copy from another TofEvent object */
+  /// Empty constructor
   TofEvent();
 
-  /*! Copy into this object from another */
-  TofEvent& operator=(const TofEvent&);
+  /// Destructor
   virtual ~TofEvent();
 
-  /*! Return the time of flight, as a double, in nanoseconds.*/
+  /// Copy from another TofEvent object
+  TofEvent& operator=(const TofEvent&rhs);
+
+  /// Return the time of flight, as a double, in nanoseconds.
   double tof();
 
-  /*! Return the frame id */
+  /// Return the frame id
   std::size_t frame();
 
-  friend std::ostream& operator<<(std::ostream &, const TofEvent &);
+  /// Output a string representation of the event to a stream
+  friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
 };
 
 //==========================================================================================
@@ -76,26 +79,31 @@ public:
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
   typedef Kernel::cow_ptr<StorageType > RCtype;
 
-  /** Constructor (empty) */
+  /// Constructor (empty)
   EventList();
   /** Constructor copying from an existing event list */
-  EventList(const EventList&);
+  EventList(const EventList&rhs);
 
   /** Constructor, taking a vector of events */
-  EventList(const std::vector<TofEvent> &);
+  EventList(const std::vector<TofEvent> &events);
 
-  /** Copy into this event list frogreenm another */
-  EventList& operator=(const EventList&);
+  /// Destructor
   virtual ~EventList();
 
+  /** Copy into this event list from another */
+  EventList& operator=(const EventList&);
+
   /** Append an event to the histogram. */
-  EventList& operator+=(const TofEvent&);
+  EventList& operator+=(const TofEvent& event);
 
   /** Append a list of events to the histogram. */
-  EventList& operator+=(const std::vector<TofEvent>&);
+  EventList& operator+=(const std::vector<TofEvent>& more_events);
 
   /** Append a list of events to the histogram. */
-  EventList& operator+=(EventList&);
+  EventList& operator+=(EventList& more_events);
+
+  /** Append an event to the histogram, without clearing the cache, to make it faster. */
+  void addEventQuickly(const TofEvent &event);
 
   /** Return the list of TofEvents contained. */
   std::vector<TofEvent>& getEvents();
@@ -104,22 +112,19 @@ public:
   void clear();
 
   /** Sort events by TOF or Frame */
-  void sort(const EventSortType) const;
+  void sort(const EventSortType order) const;
   /** Sort events by TOF */
   void sortTof() const;
   /** Sort events by Frame */
   void sortFrame() const;
 
-  /**
-   * Set the x-component for the histogram view. This will cause the
-   *  histogram to be calculated.
-   * @param X :: The vector of doubles to set as the histogram limits.
-   * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
-   */
+  /** Set the x-component for the histogram view. */
   void setX(const RCtype::ptr_type& X, Unit* set_xUnit = NULL);
 
+  /** Set the x-component for the histogram view. */
   void setX(const RCtype& X, Unit* set_xUnit = NULL);
 
+  /** Set the x-component for the histogram view. */
   void setX(const StorageType& X, Unit* set_xUnit = NULL);
 
 
@@ -129,7 +134,7 @@ public:
   /** Returns the y data. */
   virtual const StorageType& dataY() const;
 
-  /** Returns the error data const. */
+  /** Returns the e data. */
   virtual const StorageType& dataE() const;
 
   /** Returns a reference to the X data */
@@ -170,9 +175,7 @@ private:
   /** Cached version of the uncertainties. */
   mutable RCtype refE;
 
-  /** Delete the cached version of the CALCULATED histogram data.
-   * Necessary when modifying the event list.
-   * */
+  /** Delete the cached version of the CALCULATED histogram data. */
   void emptyCacheData();
 
   /// Make the histogram; ironically declared as const to allow data access.

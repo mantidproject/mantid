@@ -13,7 +13,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "boost/date_time/gregorian/gregorian.hpp"
+//#include "boost/date_time/gregorian/gregorian.hpp"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include <sys/stat.h>
@@ -31,7 +31,7 @@ using std::size_t;
 using std::vector;
 using std::cout;
 using std::endl;
-using namespace boost::posix_time;
+//using namespace boost::posix_time;
 
 
 
@@ -52,7 +52,7 @@ public:
     eventLoader->initialize();
   }
 
-  void xtest_file_not_found()
+  void test_file_not_found()
   {
     TS_ASSERT_THROWS(
         eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data") ,
@@ -63,7 +63,7 @@ public:
   }
 
 
-  void xtest_LoadPreNeXus_TOPAZ()
+  void test_LoadPreNeXus_TOPAZ()
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
@@ -99,7 +99,7 @@ public:
   }
 
 
-  void xtest_LoadPreNeXus_REFL()
+  void test_LoadPreNeXus_REFL()
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat" );
     std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat" );

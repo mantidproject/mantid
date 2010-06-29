@@ -194,8 +194,13 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
       this->fix_pixel_id(temp.pid, period);
 
       //Parallel: this critical block is almost certainly killing parallel efficiency.
-      workspace->getEventList(temp.pid) += event; // TODO work with period
-                              // TODO filter based on pixel ids
+      //workspace->getEventList(temp.pid) += event;
+
+      //The addEventQuickly method does not clear the cache, making things slightly faster.
+      workspace->getEventList(temp.pid).addEventQuickly(event);
+
+            // TODO work with period
+            // TODO filter based on pixel ids
       my_events++;
     }
 
