@@ -46,6 +46,7 @@ namespace Mantid
         "this can be folowed by a comma and more widths and last boundary pairs");
     }
 
+
     /** Executes the rebin algorithm
     *
     *  @throw runtime_error Thrown if the bin range does not intersect the range of the input workspace

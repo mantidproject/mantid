@@ -42,8 +42,7 @@ typedef std::vector<EventList*> EventListVector;
 class DLLExport EventWorkspace : public API::MatrixWorkspace
 {
  public:
-  /** The name of the workspace type.
-      \return Standard name. */
+  /// The name of the workspace type.
   virtual const std::string id() const {return "EventWorkspace";}
 
   /// Constructor
@@ -52,7 +51,7 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /// Destructor
   virtual ~EventWorkspace();
 
-  /** Initialize the pixels */
+  /// Initialize the pixels */
   void init(const int&, const int&, const int&);
 
   //------------------------------------------------------------
@@ -60,72 +59,69 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /// Returns the number of single indexable items in the workspace
   int size() const;
 
-  /** Get the blocksize, aka the number of bins in the histogram */
+  /// Get the blocksize, aka the number of bins in the histogram
   int blocksize() const;
 
-  /** Get the number of histograms. aka the number of pixels or detectors. */
+  /// Get the number of histograms. aka the number of pixels or detectors.
   const int getNumberHistograms() const;
 
   //------------------------------------------------------------
 
-  /** Return the data X vector at a given spectrum number. */
+  /// Return the data X vector at a given workspace index
   MantidVec& dataX(const int);
 
-  /** Return the data Y vector at a given spectrum number. */
+  /// Return the data Y vector at a given workspace index
   MantidVec& dataY(const int);
 
-  /** Return the data E vector at a given spectrum number. */
+  /// Return the data E vector at a given workspace index
   MantidVec& dataE(const int);
 
 
-  /** Return the const data X vector at a given spectrum number. */
+  /// Return the const data X vector at a given workspace index
   const MantidVec& dataX(const int) const;
 
-  /** Return the const data Y vector at a given spectrum number. */
+  /// Return the const data Y vector at a given workspace index
   const MantidVec& dataY(const int) const;
 
-  /** Return the const data E vector at a given spectrum number. */
+  /// Return the const data E vector at a given workspace index
   const MantidVec& dataE(const int) const;
 
-
-  /** Get a pointer to the x data */
+  /// Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> refX(const int) const;
 
   //------------------------------------------------------------
 
-  /** Set the x-axis data for the given pixel. */
+  /// Set the x-axis data for the given pixel.
   void setX(const int, const  Kernel::cow_ptr<MantidVec> &);
 
-  /** Set the x-axis data (histogram bins) for all pixels */
+  /// Set the x-axis data (histogram bins) for all pixels
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
-  /** Get an EventList object at the given pixelid/spectrum number */
+  /// Get an EventList object at the given pixelid/spectrum number
   EventList& getEventList(const int pixelid);
 
-  /** Get an EventList object at the given workspace index number */
+  /// Get an EventList object at the given workspace index number
   EventList& getEventListAtWorkspaceIndex(const int spectrum_number);
 
-  /** Call this method when loading event data is complete.
-   * The map of pixelid to spectrum # is generated.
-   * */
+  /// Call this method when loading event data is complete.
   void doneLoadingData();
 
 
   //------------------------------------------------------------
-  /** Set the size of the MRU (most recently used) histogram cache **/
+  /// Set the size of the MRU (most recently used) histogram cache
   //void setMRUSize(const int size) const;
 
   //------------------------------------------------------------
-  /** Get the absolute time corresponding to the give frame ID */
+  /// Get the absolute time corresponding to the give frame ID
   boost::posix_time::ptime getTime(const size_t frameId);
 
-  /** Add the absolute time corresponding to the give frame ID */
+  /// Add the absolute time corresponding to the give frame ID
   void addTime(const size_t frameId, boost::posix_time::ptime absoluteTime);
 
-  /** The total number of events across all of the spectra. */
+  /// The total number of events across all of the spectra.
   std::size_t getNumberEvents() const;
 
-  /** Returns true always - an EventWorkspace always represents histogramm-able data */
+  /// Returns true always - an EventWorkspace always represents histogramm-able data
   virtual const bool isHistogramData() const;
 
 private:

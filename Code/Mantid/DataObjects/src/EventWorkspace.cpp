@@ -26,7 +26,12 @@ namespace DataObjects
   EventWorkspace::~EventWorkspace()
   {}
 
-
+  /** Initialize the pixels
+    *  @param NVectors The number of vectors/histograms/detectors in the workspace. Does not need
+    *         to be set, but needs to be > 0
+    *  @param XLength The number of X data points/bin boundaries in each vector (ignored)
+    *  @param YLength The number of data/error points in each vector (ignored)
+   */
   void EventWorkspace::init(const int &NVectors, const int &XLength,
           const int &YLength)
   {
@@ -52,14 +57,15 @@ namespace DataObjects
   }
 
 
-
   //-----------------------------------------------------------------------------
+  /// Returns the number of single indexable items in the workspace
   int EventWorkspace::size() const
   {
     return this->data.size() * this->blocksize();
   }
 
   //-----------------------------------------------------------------------------
+  /// Get the blocksize, aka the number of bins in the histogram
   int EventWorkspace::blocksize() const
   {
     // Pick the first pixel to find the blocksize.
@@ -75,12 +81,14 @@ namespace DataObjects
   }
 
   //-----------------------------------------------------------------------------
+  /** Get the number of histograms, usually the same as the number of pixels or detectors. */
   const int EventWorkspace::getNumberHistograms() const
   {
     return this->data.size();
   }
 
   //-----------------------------------------------------------------------------
+  /// The total number of events across all of the spectra.
   size_t EventWorkspace::getNumberEvents() const
   {
     size_t total = 0;
@@ -92,6 +100,7 @@ namespace DataObjects
   }
 
   //-----------------------------------------------------------------------------
+  /// Returns true always - an EventWorkspace always represents histogramm-able data
   const bool EventWorkspace::isHistogramData() const
   {
     return true;
@@ -102,6 +111,9 @@ namespace DataObjects
   // --- Data Access ----
   //-----------------------------------------------------------------------------
 
+  /** Get an EventList object at the given pixelid/spectrum number
+   * @param pixelid Pixel ID (aka spectrum number)
+   */
   EventList& EventWorkspace::getEventList(const int pixelid)
   {
     if (this->done_loading_data)
@@ -123,6 +135,9 @@ namespace DataObjects
     }
   }
 
+  /** Get an EventList object at the given workspace index number
+   * @param workspace_index The histogram workspace index number.
+   */
   EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index)
   {
     return *this->data[workspace_index];
@@ -130,6 +145,9 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
+  /** Call this method when loading event data is complete.
+   * The map of pixelid to spectrum # is generated.
+   * */
   void EventWorkspace::doneLoadingData()
   {
     //Ok, we need to take the data_map, and turn it into a data[] vector.
@@ -194,7 +212,8 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
-  // Note: these non-const access methods will throw NotImplementedError
+  /// Return the data X vector at a given workspace index
+  /// Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataX(const int index)
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -202,6 +221,8 @@ namespace DataObjects
     return this->data[index]->dataX();
   }
 
+  /// Return the data Y vector at a given workspace index
+  /// Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataY(const int index)
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -209,6 +230,8 @@ namespace DataObjects
     return this->data[index]->dataY();
   }
 
+  /// Return the data E vector at a given workspace index
+  /// Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataE(const int index)
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -220,8 +243,8 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   // --- Const Data Access ----
   //-----------------------------------------------------------------------------
-  //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
 
+  /// Return the const data X vector at a given workspace index
   const MantidVec& EventWorkspace::dataX(const int index) const
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -230,6 +253,7 @@ namespace DataObjects
 
   }
 
+  /// Return the const data Y vector at a given workspace index
   const MantidVec& EventWorkspace::dataY(const int index) const
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -237,6 +261,7 @@ namespace DataObjects
     return this->data[index]->dataY();
   }
 
+  /// Return the const data E vector at a given workspace index
   const MantidVec& EventWorkspace::dataE(const int index) const
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -244,6 +269,7 @@ namespace DataObjects
     return this->data[index]->dataE();
   }
 
+  /// Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -255,6 +281,10 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   // --- Histogramming ----
   //-----------------------------------------------------------------------------
+  /*** Set a histogram X vector.
+   * @param index Workspace histogram index to set.
+   * @param x The X vector of histogram bins to use.
+   */
   void EventWorkspace::setX(const int index,
       const Kernel::cow_ptr<MantidVec> &x)
   {
@@ -263,6 +293,10 @@ namespace DataObjects
     this->data[index]->setX(x);
   }
 
+  //-----------------------------------------------------------------------------
+  /*** Set all histogram X vectors.
+   * @param x The X vector of histogram bins to use.
+   */
   void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x)
   {
     EventListVector::iterator i = this->data.begin();
@@ -276,8 +310,9 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   // --- Frame Times ----
   //-----------------------------------------------------------------------------
-
-  /** Get the absolute time corresponding to the give frame ID */
+  /** Get the absolute time corresponding to the give frame ID
+   * @param frameId The id of the frame
+   * */
   ptime EventWorkspace::getTime(const size_t frameId)
   {
     if ((frameId < 0) || (frameId >= this->frameTime.size()))
@@ -287,7 +322,10 @@ namespace DataObjects
     return this->frameTime.at(frameId);
   }
 
-  /** Add ahe absolute time corresponding to the give frame ID */
+  /** Add the absolute time corresponding to the give frame ID
+   * @param frameId The id of the frame to add
+   * @param absoluteTime The time to which to set the frame ID
+   * */
   void EventWorkspace::addTime(const size_t frameId, ptime absoluteTime)
   {
     if (frameId < 0)
