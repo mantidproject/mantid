@@ -326,7 +326,7 @@ namespace DataObjects
    * @param frameId The id of the frame to add
    * @param absoluteTime The time to which to set the frame ID
    * */
-  void EventWorkspace::addTime(const size_t frameId, ptime absoluteTime)
+  void EventWorkspace::addTime(const size_t frameId, boost::posix_time::ptime absoluteTime)
   {
     if (frameId < 0)
       throw std::range_error("EventWorkspace::addTime called with a frameId below 0.");

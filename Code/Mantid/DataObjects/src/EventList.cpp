@@ -20,7 +20,7 @@ namespace DataObjects
    * @param time_of_flight time of flight, in nanoseconds
    * @param frameid frame id, integer
    */
-  TofEvent::TofEvent(const double time_of_flight, const size_t frameid)
+  TofEvent::TofEvent(const double time_of_flight, const std::size_t frameid)
   {
 	  this->time_of_flight = time_of_flight;
 	  this->frame_index = frameid;
@@ -126,7 +126,7 @@ namespace DataObjects
 
   /** Constructor, taking a vector of events.
    * @param events Vector of TofEvent's */
-  EventList::EventList(const vector<TofEvent> &events)
+  EventList::EventList(const std::vector<TofEvent> &events)
   {
     this->events.assign(events.begin(), events.end());
     this->order = UNSORTED;
