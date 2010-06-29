@@ -54,6 +54,7 @@ libDirList = []
 cflags = []
 dirList = []
 cppPaths = []
+cppdefines = []
 lpts = []
 
 boost_path = ''
@@ -217,7 +218,7 @@ if os.name == 'posix':
 
 	cflags.append(MantidBuild.getConfigFlags('gsl-config --cflags'))
 	lpts.append(MantidBuild.getConfigFlags('gsl-config --libs'))
-			
+
 print "CPPPATHS: ",cppPaths
 print "CFLAGS: ",cflags
 #check existence of Header files
@@ -259,6 +260,9 @@ cppPaths.append('inc')
 env.Append(CPPPATH=cppPaths)
 env.Replace(MYLIBLIST=libList)
 env.Replace(MYLIBDIRLIST=libDirList)
+
+# Add defines for CPP
+env.Append(CPPDEFINES=["BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"])
 
 Export('env')
 
