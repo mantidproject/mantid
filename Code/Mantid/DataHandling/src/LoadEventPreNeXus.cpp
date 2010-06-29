@@ -145,7 +145,7 @@ void LoadEventPreNeXus::fixPixelId(PixelType &pixel, uint32_t &period) const
 /** Process the event file properly.
  * @param workspace EventWorkspace to write to.
  */
-void LoadEventPreNeXus::procEvents(EventWorkspace_sptr & workspace)
+void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 {
   // do the actual loading
   this->num_error_events = 0;
@@ -325,7 +325,7 @@ static size_t getBufferSize(const size_t num_items)
 
 //-----------------------------------------------------------------------------
 /** Load a pixel mapping file
- * @filename Path to file.
+ * @param filename Path to file.
  */
 void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
 {
@@ -407,7 +407,7 @@ static ptime getTime(uint32_t sec, uint32_t nano)
 
 //-----------------------------------------------------------------------------
 /** Read a pulse ID file
- * @filename file to load.
+ * @param filename file to load.
  */
 void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
 {
