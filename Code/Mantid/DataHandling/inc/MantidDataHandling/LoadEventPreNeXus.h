@@ -79,23 +79,17 @@ private:
   std::size_t num_good_events;
   std::size_t num_error_events;
 
-  void load_pixel_map(const std::string & );
-  void open_event_file(const std::string &);
-  void read_pulseid_file(const std::string &);
+  void loadPixelMap(const std::string &filename);
 
-  /// Turn a pixel id into a "corrected" pixelid and period.
-  void fix_pixel_id(PixelType &, uint32_t &) const;
+  void openEventFile(const std::string &filename);
 
-  /// Process the event file properly.
-  void proc_events(DataObjects::EventWorkspace_sptr &);
+  void readPulseidFile(const std::string &filename);
 
-  /**
-   * Determine the frame index from the event index.
-   * @param event_index The index of the event.
-   * @param last_frame_index Last frame found. This parameter reduces the
-   * search to be from the current point forward.
-   */
-  std::size_t get_frame_index(const std::size_t event_index,
+  void fixPixelId(PixelType &pixel, uint32_t &period) const;
+
+  void procEvents(DataObjects::EventWorkspace_sptr & workspace);
+
+  std::size_t getFrameIndex(const std::size_t event_index,
                               const std::size_t last_frame_index);
 };
 

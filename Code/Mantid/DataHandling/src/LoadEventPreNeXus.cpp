@@ -52,7 +52,7 @@ static const ptime EPOCH(boost::gregorian::from_simple_string("1990-1-1"));
 static const uint32_t NANO_TO_SEC = 1000000000;
 
 /// Determine the size of the buffer for reading in binary files.
-static size_t get_buffer_size(const size_t num_items);
+static size_t getBufferSize(const size_t num_items);
 
 LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::Algorithm()
 {
@@ -66,6 +66,7 @@ LoadEventPreNeXus::~LoadEventPreNeXus()
 }
 
 //-----------------------------------------------------------------------------
+/** Initialize the algorithm */
 void LoadEventPreNeXus::init()
 {
   // reset the logger's name
@@ -92,6 +93,7 @@ void LoadEventPreNeXus::init()
 }
 
 //-----------------------------------------------------------------------------
+/** Execute the algorithm */
 void LoadEventPreNeXus::exec()
 {
   // what to load
@@ -100,15 +102,15 @@ void LoadEventPreNeXus::exec()
 
   // load the mapping file
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
-  this->load_pixel_map(mapping_filename);
+  this->loadPixelMap(mapping_filename);
 
   // open the pulseid file
   string pulseid_filename = this->getPropertyValue(PULSEID_PARAM);
-  this->read_pulseid_file(pulseid_filename);
+  this->readPulseidFile(pulseid_filename);
 
   // open the event file
   string event_filename = this->getPropertyValue(EVENT_PARAM);
-  this->open_event_file(event_filename);
+  this->openEventFile(event_filename);
 
   // prep the output workspace
   EventWorkspace_sptr localWorkspace = EventWorkspace_sptr(new EventWorkspace());
@@ -117,14 +119,17 @@ void LoadEventPreNeXus::exec()
   localWorkspace->initialize(1,1,1);
   
   //Process the events into pixels
-  this->proc_events(localWorkspace);
+  this->procEvents(localWorkspace);
   
   //Save output
   this->setProperty(OUT_PARAM, localWorkspace);
 }
 
 //-----------------------------------------------------------------------------
-void LoadEventPreNeXus::fix_pixel_id(PixelType &pixel, uint32_t &period) const
+/** Turn a pixel id into a "corrected" pixelid and period.
+ *
+ */
+void LoadEventPreNeXus::fixPixelId(PixelType &pixel, uint32_t &period) const
 {
   if (this->pixelmap.empty()) { // nothing to do here
     period = 0;
@@ -137,14 +142,17 @@ void LoadEventPreNeXus::fix_pixel_id(PixelType &pixel, uint32_t &period) const
 }
 
 //-----------------------------------------------------------------------------
-void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
+/** Process the event file properly.
+ * @param workspace EventWorkspace to write to.
+ */
+void LoadEventPreNeXus::procEvents(EventWorkspace_sptr & workspace)
 {
   // do the actual loading
   this->num_error_events = 0;
   this->num_good_events = 0;
 
   size_t event_offset = 0;
-  size_t event_buffer_size = get_buffer_size(this->num_events);
+  size_t event_buffer_size = getBufferSize(this->num_events);
 
   //uint32_t period;
   //Initialize progress reporting.
@@ -187,11 +195,11 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
       }
 
       // work with the good guys
-      frame_index = this->get_frame_index(event_offset + i, frame_index);
+      frame_index = this->getFrameIndex(event_offset + i, frame_index);
       event = TofEvent(static_cast<double>(temp.tof)/.1, frame_index);// convert to microsecond
 
       //Covert the pixel ID from DAS pixel to our pixel ID
-      this->fix_pixel_id(temp.pid, period);
+      this->fixPixelId(temp.pid, period);
 
       //Parallel: this critical block is almost certainly killing parallel efficiency.
       //workspace->getEventList(temp.pid) += event;
@@ -245,7 +253,14 @@ void LoadEventPreNeXus::proc_events(EventWorkspace_sptr & workspace)
   this->g_log.information(msg.str());
 }
 
-size_t LoadEventPreNeXus::get_frame_index(const size_t event_index, const size_t last_frame_index)
+//-----------------------------------------------------------------------------
+/**
+ * Determine the frame index from the event index.
+ * @param event_index The index of the event.
+ * @param last_frame_index Last frame found. This parameter reduces the
+ * search to be from the current point forward.
+ */
+size_t LoadEventPreNeXus::getFrameIndex(const size_t event_index, const size_t last_frame_index)
 {
   // if at the end of the file return the last frame_index
   if (last_frame_index + 1 >= this->num_pulses)
@@ -267,6 +282,10 @@ size_t LoadEventPreNeXus::get_frame_index(const size_t event_index, const size_t
 }
 
 //-----------------------------------------------------------------------------
+/** Get the size of a file as a multiple of a particular data type
+ * @param T type to load in the file
+ * @param handle Handle to the file stream
+ * */
 template<typename T>
 static size_t get_file_size(ifstream * handle)
 {
@@ -293,7 +312,10 @@ static size_t get_file_size(ifstream * handle)
 
 
 //-----------------------------------------------------------------------------
-static size_t get_buffer_size(const size_t num_items)
+/** Get a buffer size for loading blocks of data.
+ * @param num_items
+ */
+static size_t getBufferSize(const size_t num_items)
 {
   if (num_items < DEFAULT_BLOCK_SIZE)
     return num_items;
@@ -302,7 +324,10 @@ static size_t get_buffer_size(const size_t num_items)
 }
 
 //-----------------------------------------------------------------------------
-void LoadEventPreNeXus::load_pixel_map(const string &filename)
+/** Load a pixel mapping file
+ * @filename Path to file.
+ */
+void LoadEventPreNeXus::loadPixelMap(const string &filename)
 {
   this->pixelmap.clear();
 
@@ -319,7 +344,7 @@ void LoadEventPreNeXus::load_pixel_map(const string &filename)
   size_t file_size = get_file_size<PixelType>(handle);
   //std::cout << "file is " << file_size << std::endl;
   size_t offset = 0;
-  size_t buffer_size = get_buffer_size(file_size);
+  size_t buffer_size = getBufferSize(file_size);
   PixelType * buffer = new PixelType[buffer_size];
 
   size_t obj_size = sizeof(PixelType);
@@ -346,7 +371,10 @@ void LoadEventPreNeXus::load_pixel_map(const string &filename)
 }
 
 //-----------------------------------------------------------------------------
-void LoadEventPreNeXus::open_event_file(const string &filename)
+/** Open an event file
+ * @param filename file to open.
+ */
+void LoadEventPreNeXus::openEventFile(const string &filename)
 {
   this->eventfile = new ifstream(filename.c_str(), std::ios::binary);
   this->num_events = get_file_size<DasEvent>(this->eventfile);
@@ -356,6 +384,10 @@ void LoadEventPreNeXus::open_event_file(const string &filename)
 }
 
 //-----------------------------------------------------------------------------
+/** Get time with nanosecond resolution.
+ * @param sec seconds
+ * @param nano nanoseconds
+ */
 static ptime getTime(uint32_t sec, uint32_t nano)
 {
   // push the nanoseconds to be less than one second
@@ -373,7 +405,11 @@ static ptime getTime(uint32_t sec, uint32_t nano)
 #endif
 }
 
-void LoadEventPreNeXus::read_pulseid_file(const string &filename)
+//-----------------------------------------------------------------------------
+/** Read a pulse ID file
+ * @filename file to load.
+ */
+void LoadEventPreNeXus::readPulseidFile(const string &filename)
 {
   // jump out early if there isn't a filename
   if (filename.empty()) {
@@ -386,7 +422,7 @@ void LoadEventPreNeXus::read_pulseid_file(const string &filename)
   this->g_log.debug("Using pulseid file \"" + filename + "\"");
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
   this->num_pulses = get_file_size<Pulse>(handle);
-  size_t buffer_size = get_buffer_size(this->num_pulses);
+  size_t buffer_size = getBufferSize(this->num_pulses);
   size_t offset = 0;
   Pulse* buffer = new Pulse[buffer_size];
   size_t obj_size = sizeof(Pulse);
