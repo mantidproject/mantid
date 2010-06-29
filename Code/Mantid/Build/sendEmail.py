@@ -241,7 +241,7 @@ def ParseDoxygenLog():
     lastDoxy = 0
     filedoxy = localLogDir + 'doxy.log'
     mssgDoxy = open(filedoxy, 'r').read()
-    reWarnCount = re.compile("Warning: ")
+    reWarnCount = re.compile("Warning: ", re.IGNORECASE)
     m = reWarnCount.findall(mssgDoxy)
     if m:
         warnCount = len(m)
