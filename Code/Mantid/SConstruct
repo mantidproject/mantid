@@ -136,22 +136,18 @@ print "PYTHON_ROOT: ",python_path
 print "NEXUS ROOT:", nexus_path
 
 if os.name == 'nt':
-	if int(debug) :
-		cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP',  ]
-                env.Append(CPPDEFINES = ['_DEBUG', 'WIN32', '_WINDOWS', 'POCO_DLL', 'GSL_DLL'])
-                env.Append(CPPDEFINES = {'MS_VISUAL_STUDIO':'1', 'WINVER':'0x0500'})
-		env.Append(CPPDEFINES = ['BOOST_ALL_DYN_LINK','NOMINMAX','_USE_MATH_DEFINES', 'WNT'])
-                cflags.extend([ '/wd4275', '/wd4996'])
-		env.Append(CPPDEFINES = ['_SCL_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_DEPRECATE', '_CRT_NONSTDC_NO_DEPRECATE', '_SCL_SECURE_NO_DEPRECATE'])
-	else :
-		cflags = ['/Ox','/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP']
-                env.Append(CPPDEFINES = ['WIN32', '_WINDOWS', 'POCO_DLL', 'GSL_DLL'])
-                env.Append(CPPDEFINES = {'MS_VISUAL_STUDIO':'1', 'WINVER':'0x0500'})
-		env.Append(CPPDEFINES = ['WIN32', '_WINDOWS', 'POCO_DLL'])
-		env.Append(CPPDEFINES = ['BOOST_ALL_DYN_LINK','NOMINMAX','_USE_MATH_DEFINES', 'WNT'])
-		cflags.extend(['/wd4251', '/wd4275', '/wd4996'])
-		env.Append(CPPDEFINES = ['_SCL_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_DEPRECATE', '_CRT_NONSTDC_NO_DEPRECATE', '_SCL_SECURE_NO_DEPRECATE'])
-		env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
+    env.Append(CPPDEFINES = ['_SCL_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_DEPRECATE', '_CRT_NONSTDC_NO_DEPRECATE', '_SCL_SECURE_NO_DEPRECATE'])
+    env.Append(CPPDEFINES = {'MS_VISUAL_STUDIO':'1', 'WINVER':'0x0500'})
+    env.Append(CPPDEFINES = ['BOOST_ALL_DYN_LINK','NOMINMAX','_USE_MATH_DEFINES', 'WNT'])
+    env.Append(CPPDEFINES = ['WIN32', '_WINDOWS', 'POCO_DLL', 'GSL_DLL'])
+    if int(debug) :
+        cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP',  ]
+        cflags.extend([ '/wd4275', '/wd4996'])
+        env.Append(CPPDEFINES = ['_DEBUG'])
+    else :
+        cflags = ['/Ox','/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP']
+        cflags.extend(['/wd4251', '/wd4275', '/wd4996'])
+        env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
 elif platform.system() == 'Linux':
 	if not rpmBuild:
 		cppPaths.append(poco_path)
