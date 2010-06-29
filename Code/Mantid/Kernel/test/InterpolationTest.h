@@ -30,14 +30,17 @@ public:
 
 
     interpolation.setXUnit("Wavelength");
+    interpolation.setYUnit("dSpacing");
     std::stringstream str;
     str << interpolation;
-    TS_ASSERT( str.str().compare("linear ; Wavelength ; 200 50 ; 201 60 ; 202 100 ; 203 300 ; 204 400") == 0 );
+    TS_ASSERT( str.str().compare("linear ; Wavelength ; dSpacing ; 200 50 ; 201 60 ; 202 100 ; 203 300 ; 204 400") == 0 );
 
     Interpolation readIn;
     TS_ASSERT( readIn.getXUnit()->unitID() == "TOF" );
+    TS_ASSERT( readIn.getYUnit()->unitID() == "TOF" );
     str >> readIn;
     TS_ASSERT( readIn.getXUnit()->unitID() == "Wavelength" );
+    TS_ASSERT( readIn.getYUnit()->unitID() == "dSpacing" );
 
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT_DELTA( readIn.value(100), -950.0 ,0.000000001); 
@@ -53,7 +56,7 @@ public:
 
     std::stringstream str;
     str << interpolation;
-    TS_ASSERT( str.str().compare("linear ; TOF") == 0 );
+    TS_ASSERT( str.str().compare("linear ; TOF ; TOF") == 0 );
 
     Interpolation readIn;
     str >> readIn;

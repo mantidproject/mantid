@@ -17,6 +17,7 @@
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -1297,14 +1298,40 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
 
       // Check if look up table is specified
 
+      std::vector<std::string> allowedUnits = UnitFactory::Instance().getKeys();
+
       boost::shared_ptr<Interpolation> interpolation(new Interpolation);
 
       if ( numberLookUp >= 1 )
       {
         Element* pLookUp = static_cast<Element*>(pNLLookUp->item(0));
 
-        interpolation->setMethod(pLookUp->getAttribute("interpolation"));
-        interpolation->setXUnit(pLookUp->getAttribute("x-unit"));    
+        if ( pLookUp->hasAttribute("interpolation") )
+          interpolation->setMethod(pLookUp->getAttribute("interpolation"));
+        if ( pLookUp->hasAttribute("x-unit") )
+        {
+          std::vector<std::string>::iterator it;
+          it = find(allowedUnits.begin(), allowedUnits.end(), pLookUp->getAttribute("x-unit"));
+          if ( it == allowedUnits.end() )
+          {
+            g_log.warning() << "x-unit used with interpolation table must be one of the recognised units " <<
+              " see http://www.mantidproject.org/Unit_Factory"; 
+          }
+          else
+            interpolation->setXUnit(pLookUp->getAttribute("x-unit"));    
+        }
+        if ( pLookUp->hasAttribute("y-unit") )
+        {
+          std::vector<std::string>::iterator it;
+          it = find(allowedUnits.begin(), allowedUnits.end(), pLookUp->getAttribute("y-unit"));
+          if ( it == allowedUnits.end() )
+          {
+            g_log.warning() << "y-unit used with interpolation table must be one of the recognised units " <<
+              " see http://www.mantidproject.org/Unit_Factory"; 
+          }
+          else
+            interpolation->setYUnit(pLookUp->getAttribute("y-unit"));  
+        }
 
         NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
         unsigned int numberPoint = pNLpoint->length();
@@ -1332,7 +1359,17 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
         Element* pFormula = static_cast<Element*>(pNLFormula->item(0));
         formula = pFormula->getAttribute("eq");   
         if ( pFormula->hasAttribute("unit") )
-          formulaUnit = pFormula->getAttribute("unit");
+        {
+          std::vector<std::string>::iterator it;
+          it = find(allowedUnits.begin(), allowedUnits.end(), pFormula->getAttribute("unit"));
+          if ( it == allowedUnits.end() )
+          {
+            g_log.warning() << "unit attribute used with formula must be one of the recognised units " <<
+              " see http://www.mantidproject.org/Unit_Factory"; 
+          }
+          else
+            formulaUnit = pFormula->getAttribute("unit");  
+        }
         if ( pFormula->hasAttribute("result-unit") )
           resultUnit = pFormula->getAttribute("result-unit");
       }

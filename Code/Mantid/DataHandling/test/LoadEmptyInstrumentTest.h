@@ -160,6 +160,7 @@ public:
     TS_ASSERT( fitParam2.getLookUpTable().containData() );
     TS_ASSERT( fitParam2.getLookUpTable().getMethod().compare("linear") == 0 );
     TS_ASSERT( fitParam2.getLookUpTable().getXUnit()->unitID().compare("TOF") == 0 );
+    TS_ASSERT( fitParam2.getLookUpTable().getYUnit()->unitID().compare("dSpacing") == 0 );
 
     param = paramMap.getRecursive(&(*det), "formula", "fitting");
     const FitParameter& fitParam3 = param->value<FitParameter>();

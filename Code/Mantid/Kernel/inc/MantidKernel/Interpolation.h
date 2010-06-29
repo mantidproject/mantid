@@ -56,11 +56,11 @@ private:
   /// method used for doing the interpolation
   std::string m_name; 
 
-  /// unit of x
-  std::string m_xUnit;
+  /// unit of x-axis
+  Unit_sptr m_xUnit;
 
-  // unit of x-axis
-  Unit_sptr m_unit;
+  /// unit of y-axis
+  Unit_sptr m_yUnit;
 
 public:
 
@@ -82,8 +82,14 @@ public:
   /// set x-axis unit
   void setXUnit(const std::string& unit);
 
+  /// set y-axis unit
+  void setYUnit(const std::string& unit);
+
   /// get x-axis unit
-  Unit_sptr getXUnit() const { return m_unit; };
+  Unit_sptr getXUnit() const { return m_xUnit; };
+
+  /// get y-axis unit
+  Unit_sptr getYUnit() const { return m_yUnit; };
 
   /// return false if no data has been added
   bool containData() const { return m_x.size() ? true : false;}

@@ -11,14 +11,20 @@ namespace Kernel
 
   /** Constructor default to linear interpolation and x-unit set to TOF
    */
-  Interpolation::Interpolation() : m_name("linear"), m_xUnit("TOF")
+  Interpolation::Interpolation() : m_name("linear")
   {
-    m_unit = UnitFactory::Instance().create("TOF");
+    m_xUnit = UnitFactory::Instance().create("TOF");
+    m_yUnit = UnitFactory::Instance().create("TOF");
   }
 
   void Interpolation::setXUnit(const std::string& unit) 
   { 
-    m_unit = UnitFactory::Instance().create(unit);
+    m_xUnit = UnitFactory::Instance().create(unit);
+  }
+
+  void Interpolation::setYUnit(const std::string& unit) 
+  { 
+    m_yUnit = UnitFactory::Instance().create(unit);
   }
 
 
@@ -113,7 +119,7 @@ namespace Kernel
   */
   void Interpolation::printSelf(std::ostream& os) const
   {
-    os << m_name << " ; " << m_unit->unitID();
+    os << m_name << " ; " << m_xUnit->unitID() << " ; " << m_yUnit->unitID();
 
     for ( int i = 0; i < m_x.size(); i++)
     {
@@ -149,8 +155,9 @@ namespace Kernel
 
     f.setMethod(values[0]);
     f.setXUnit(values[1]);
+    f.setYUnit(values[2]);
 
-    for ( int i = 2; i < values.count(); i++)
+    for ( int i = 3; i < values.count(); i++)
     {
       std::stringstream str(values[i]);
       double x, y;
