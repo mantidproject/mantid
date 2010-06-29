@@ -1070,27 +1070,28 @@ def _readLimitValues(limit_line):
         pass
 
 def _readMONValues(line):
-    details = line[4:].upper()
+    details = line[4:]
 
     #MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
     interpolate = False
-    if details.endswith('/INTERPOLATE') :
+    interPlace = details.upper().find('/INTERPOLATE')
+    if interPlace != -1 :
         interpolate = True
-        details = details.split('/INTERPOLATE')[0]
+        details = details[0:interPlace]
 
-    if details.startswith('LENGTH'):
+    if details.upper().startswith('LENGTH'):
         SuggestMonitorSpectrum(int(details.split()[1]), interpolate)
     
-    elif details.startswith('SPECTRUM'):
+    elif details.upper().startswith('SPECTRUM'):
         SetMonitorSpectrum(int(details.split('=')[1]), interpolate)
     
-    elif details.startswith('TRANS'):
+    elif details.upper().startswith('TRANS'):
         parts = details.split('=')
-        if len(parts) < 2 or parts[0] != 'TRANS/SPECTRUM' :
+        if len(parts) < 2 or parts[0].upper() != 'TRANS/SPECTRUM' :
             _issueWarning('Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=')
         SetTransSpectrum(int(parts[1]), interpolate)
 
-    elif 'DIRECT' in details:
+    elif 'DIRECT' in details.upper():
         parts = details.split("=")
         if len(parts) == 2:
             filepath = parts[1].rstrip()
@@ -1102,18 +1103,18 @@ def _readMONValues(line):
             type = parts[0]
             parts = type.split("/")
             if len(parts) == 1:
-                if parts[0] == 'DIRECT':
+                if parts[0].upper() == 'DIRECT':
                     SetRearEfficiencyFile(filepath)
                     SetFrontEfficiencyFile(filepath)
-                elif parts[0] == 'HAB':
+                elif parts[0].upper() == 'HAB':
                     SetFrontEfficiencyFile(filepath)
                 else:
                     pass
             elif len(parts) == 2:
                 detname = parts[1]
-                if detname == 'REAR':
+                if detname.upper() == 'REAR':
                     SetRearEfficiencyFile(filepath)
-                elif detname == 'FRONT' or detname == 'HAB':
+                elif detname.upper() == 'FRONT' or detname.upper() == 'HAB':
                     SetFrontEfficiencyFile(filepath)
                 else:
                     _issueWarning('Incorrect detector specified for efficiency file "' + line + '"')
@@ -1162,7 +1163,8 @@ def SetMonitorSpectrum(specNum, interp=False):
     MONITORSPECTRUM = int(specNum)
     
     global SAMP_INTERPOLATE
-    SAMP_INTERPOLATE = bool(interp)
+    if not SAMP_INTERPOLATE :                  #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
+        SAMP_INTERPOLATE = bool(interp)
 
     global MONITORSPECLOCKED
     MONITORSPECLOCKED = True
@@ -1173,8 +1175,9 @@ def SuggestMonitorSpectrum(specNum, interp=False):
         return
 
     global SAMP_INTERPOLATE
-    SAMP_INTERPOLATE = bool(interp)
-        
+    if not SAMP_INTERPOLATE :                  #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
+        SAMP_INTERPOLATE = bool(interp)
+
     global MONITORSPECTRUM
     MONITORSPECTRUM = int(specNum)
 
@@ -1183,7 +1186,8 @@ def SetTransSpectrum(specNum, interp=False):
     TRANS_UDET_MON = int(specNum)
 
     global TRANS_INTERPOLATE
-    TRANS_INTERPOLATE = bool(interp)
+    if not TRANS_INTERPOLATE :                 #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
+        TRANS_INTERPOLATE = bool(interp)
 
 def SetRearEfficiencyFile(filename):
     global DIRECT_BEAM_FILE_R
