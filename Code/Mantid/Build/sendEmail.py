@@ -272,9 +272,7 @@ mssgSconsWarn, compilerWarnCount, FrameWorkBuild = ParseSconsLog()
 TestsBuild, mssgTestsBuild, mssgTestsErr = ParseTestBuildLog()
 testCount, failCount, UnitTests, mssgTestsResults = ParseTestResultsLog()
 SconBuildTime, TestBuildTime, UnitTestsTime = GetTimes()
-
-if os.name != 'posix':
-    warnCount, DocumentationBuild, mssgDoxy, lastDoxy = ParseDoxygenLog()
+warnCount, DocumentationBuild, mssgDoxy, lastDoxy = ParseDoxygenLog()
 
 if FrameWorkBuild and TestsBuild and UnitTests:
     OverAllSuccess = True
@@ -302,17 +300,16 @@ if SendEmail:
     message += "Framework Build Passed: " + str(FrameWorkBuild) + " (" + str(compilerWarnCount) + " compiler warnings)" + "\n"
     message += "Tests Build Passed: " + str(TestsBuild) + "\n"
     message += "Unit Tests Passed: " + str(UnitTests) + " ( " + str(failCount) + " failed out of " + str(testCount) + " tests.)" + "\n"
-    if os.name != 'posix': # doxy stuff here
-        message += "Code Documentation Passed: " + str(DocumentationBuild)
-        if warnCount > 0:
-            message += " ("+str(warnCount) +" doxygen warnings"
-            if (warnCount > lastDoxy):
-                message += " - " + str(warnCount-lastDoxy) + " MORE FROM THIS CHECK-IN"
-            if (lastDoxy > warnCount):
-                message += " - " + str(lastDoxy-warnCount) + " fewer due to this check-in"  
-            message += ")\n"
-        else:
-            message += "\n"
+    message += "Code Documentation Passed: " + str(DocumentationBuild)
+    if warnCount > 0:
+        message += " ("+str(warnCount) +" doxygen warnings"
+        if (warnCount > lastDoxy):
+            message += " - " + str(warnCount-lastDoxy) + " MORE FROM THIS CHECK-IN"
+        if (lastDoxy > warnCount):
+            message += " - " + str(lastDoxy-warnCount) + " fewer due to this check-in"  
+        message += ")\n"
+    else:
+        message += "\n"
     message += "\n"
 
     message += "SVN Revision: " + str(SvnID)
@@ -334,10 +331,8 @@ if SendEmail:
     message += 'Test Run stdout <' + httpLinkToArchive + 'testResults.log>\n'
     message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
     message += '------------------------------------------------------------------------\n'
-    # Not doing doxygen on the Mac
-    if os.name != 'posix':
-        message += 'DOXYGEN LOG\n\n'
-        message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
+    message += 'DOXYGEN LOG\n\n'
+    message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
     if FrameWorkBuild:
 	    subject += '[Framework Build Successful, '
     else:
