@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
 {
@@ -118,6 +119,11 @@ void LoadEventPreNeXus::exec()
   //   We can use dummy numbers for arguments, for event workspace it doesn't matter
   localWorkspace->initialize(1,1,1);
   
+  // Set the units
+  localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  localWorkspace->setYUnit("Counts");
+  // TODO localWorkspace->setTitle(title);
+
   //Process the events into pixels
   this->procEvents(localWorkspace);
   
