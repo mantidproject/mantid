@@ -157,6 +157,7 @@ public:
 
 public slots:
   void fit();
+  void sequentialFit();
   void undoFit();
   void clear();
   void clearBrowser();
@@ -168,7 +169,7 @@ signals:
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
-  void functionChanged(int);
+  void functionChanged();
   void startXChanged(double);
   void endXChanged(double);
   void parameterChanged(const Mantid::API::IFunction*);
@@ -348,6 +349,7 @@ private:
   friend class CreateAttributeProperty;
   friend class SetAttribute;
   friend class SetAttributeProperty;
+  friend class SequentialFitDialog;
 
 };
 

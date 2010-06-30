@@ -49,13 +49,13 @@ public:
     FrameworkManager::Instance();
   }
 
-  void testExec()
+  void testWorkspaceGroup()
   {
     createData();
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace","PlotPeakGroup");
+    alg.setPropertyValue("Input","PlotPeakGroup");
     alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
     alg.setPropertyValue("WorkspaceIndex","1");
     alg.setPropertyValue("LogValue","var");
@@ -67,7 +67,7 @@ public:
 
     std::vector<std::string> tnames = result->getColumnNames();
     TS_ASSERT_EQUALS(tnames.size(),11);
-    TS_ASSERT_EQUALS(tnames[0],"LogValue");
+    TS_ASSERT_EQUALS(tnames[0],"var");
     TS_ASSERT_EQUALS(tnames[1],"f0.A0");
     TS_ASSERT_EQUALS(tnames[2],"f0.A0_Err");
     TS_ASSERT_EQUALS(tnames[3],"f0.A1");
@@ -86,24 +86,106 @@ public:
     TS_ASSERT_DELTA(result->Double(0,7),5,1e-12);
     TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-12);
 
-    //TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-12);
-    //TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-12);
-    //TS_ASSERT_DELTA(result->Double(1,2),0.28,1e-12);
-    //TS_ASSERT_DELTA(result->Double(1,3),1.8,1e-12);
-    //TS_ASSERT_DELTA(result->Double(1,4),5.03,1e-12);
-    //TS_ASSERT_DELTA(result->Double(1,5),0.11,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,5),1.8,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,7),5.03,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,9),0.11,1e-12);
 
-    //TS_ASSERT_DELTA(result->Double(2,0),1.6,1e-12);
-    //TS_ASSERT_DELTA(result->Double(2,1),1.2,1e-12);
-    //TS_ASSERT_DELTA(result->Double(2,2),0.26,1e-12);
-    //TS_ASSERT_DELTA(result->Double(2,3),1.6,1e-12);
-    //TS_ASSERT_DELTA(result->Double(2,4),5.06,1e-12);
-    //TS_ASSERT_DELTA(result->Double(2,5),0.12,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,0),1.6,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,1),1.2,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,3),0.26,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-12);
 
     deleteData();
     AnalysisDataService::Instance().remove("PlotPeakResult");
 
   }
+
+  void testWorkspaceList()
+  {
+    createData();
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setPropertyValue("WorkspaceIndex","1");
+    alg.setPropertyValue("LogValue","var");
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    alg.execute();
+
+    TWS_type result = getTWS("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(),11);
+
+    std::vector<std::string> tnames = result->getColumnNames();
+    TS_ASSERT_EQUALS(tnames.size(),11);
+    TS_ASSERT_EQUALS(tnames[0],"var");
+    TS_ASSERT_EQUALS(tnames[1],"f0.A0");
+    TS_ASSERT_EQUALS(tnames[2],"f0.A0_Err");
+    TS_ASSERT_EQUALS(tnames[3],"f0.A1");
+    TS_ASSERT_EQUALS(tnames[4],"f0.A1_Err");
+    TS_ASSERT_EQUALS(tnames[5],"f1.Height");
+    TS_ASSERT_EQUALS(tnames[6],"f1.Height_Err");
+    TS_ASSERT_EQUALS(tnames[7],"f1.PeakCentre");
+    TS_ASSERT_EQUALS(tnames[8],"f1.PeakCentre_Err");
+    TS_ASSERT_EQUALS(tnames[9],"f1.Sigma");
+    TS_ASSERT_EQUALS(tnames[10],"f1.Sigma_Err");
+
+    TS_ASSERT_DELTA(result->Double(0,0),1,1e-12);
+    TS_ASSERT_DELTA(result->Double(0,1),1,1e-12);
+    TS_ASSERT_DELTA(result->Double(0,3),0.3,1e-12);
+    TS_ASSERT_DELTA(result->Double(0,5),2,1e-12);
+    TS_ASSERT_DELTA(result->Double(0,7),5,1e-12);
+    TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-12);
+
+    TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,5),1.8,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,7),5.03,1e-12);
+    TS_ASSERT_DELTA(result->Double(1,9),0.11,1e-12);
+
+    TS_ASSERT_DELTA(result->Double(2,0),1.6,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,1),1.2,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,3),0.26,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-12);
+    TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-12);
+
+    deleteData();
+    AnalysisDataService::Instance().remove("PlotPeakResult");
+
+  }
+
+  // LoadNexus doesn't exist
+  void t1estNexusFiles()
+  {
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","../../../../Test/Nexus/MUSR00015189.nxs,sp3;"
+      "../../../../Test/Nexus/MUSR00015190.nxs,sp3;"
+      "../../../../Test/Nexus/MUSR00015191.nxs,sp3");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    //alg.setPropertyValue("WorkspaceIndex","1");
+    alg.setPropertyValue("StartX","0");
+    alg.setPropertyValue("EndX","8");
+    alg.setPropertyValue("LogValue","Field_Danfysik");
+    alg.setPropertyValue("Function","name=UserFunction,Formula=h*exp(-a*x)");
+    alg.execute();
+
+    TWS_type result = getTWS("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(),5);
+    TS_ASSERT_EQUALS(result->rowCount(),3);
+
+    AnalysisDataService::Instance().remove("PlotPeakResult");
+  }
+
+  
 
 private:
 
@@ -122,7 +204,7 @@ private:
       logd->addValue("2007-11-01T18:18:53",1+iWS*0.3);
       ws->mutableSample().addLogData(logd);
       std::ostringstream wsName;
-      wsName << "PlotPeakGroup_" << iWS << '\n';
+      wsName << "PlotPeakGroup_" << iWS ;
       AnalysisDataService::Instance().add(wsName.str(),ws);
       m_wsg->add(wsName.str());
     }

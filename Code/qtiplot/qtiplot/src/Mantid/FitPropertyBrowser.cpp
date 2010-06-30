@@ -1,5 +1,6 @@
 #include "FitPropertyBrowser.h"
 #include "PropertyHandler.h"
+#include "SequentialFitDialog.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -25,6 +26,7 @@
 #include "MantidUI.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QPushButton>
 #include <QMenu>
 #include <QMessageBox>
@@ -153,7 +155,7 @@ m_logValue(NULL)
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   QVBoxLayout* layout = new QVBoxLayout(w);
-  QHBoxLayout* buttonsLayout = new QHBoxLayout();
+  QGridLayout* buttonsLayout = new QGridLayout();
 
   m_btnFit = new QPushButton("Fit");
   connect(m_btnFit,SIGNAL(clicked()),this,SLOT(fit()));
@@ -164,12 +166,15 @@ m_logValue(NULL)
   QPushButton* btnClear = new QPushButton("Clear all");
   connect(btnClear,SIGNAL(clicked()),this,SLOT(clear()));
 
+  QPushButton* btnSeqFit = new QPushButton("Sequential fit");
+  connect(btnSeqFit,SIGNAL(clicked()),this,SLOT(sequentialFit()));
+
   m_tip = new QLabel("",w);
 
-  buttonsLayout->addWidget(m_btnFit);
-  buttonsLayout->addWidget(m_btnUnFit);
-  buttonsLayout->addWidget(btnClear);
-  buttonsLayout->addStretch();
+  buttonsLayout->addWidget(m_btnFit,0,0);
+  buttonsLayout->addWidget(m_btnUnFit,0,1);
+  buttonsLayout->addWidget(btnClear,0,2);
+  buttonsLayout->addWidget(btnSeqFit,1,0);
 
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -201,7 +206,9 @@ PropertyHandler* FitPropertyBrowser::getHandler()const
 
 PropertyHandler* FitPropertyBrowser::addFunction(const std::string& fnName)
 {
-  return getHandler()->addFunction(fnName);
+  PropertyHandler* h = getHandler()->addFunction(fnName);
+  emit functionChanged();
+  return h;
 }
 
 /** Slot. Called to add a new function
@@ -221,6 +228,7 @@ void FitPropertyBrowser::addFunction()
     PropertyHandler* h = getHandler()->findHandler(cf);
     h->addFunction(fnName.toStdString());
   }
+  emit functionChanged();
 }
 
 /// Create CompositeFunction
@@ -267,6 +275,7 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
 
   disableUndo();
   setFitEnabled(false);
+  emit functionChanged();
 }
 
 void FitPropertyBrowser::popupMenu(const QPoint &)
@@ -517,6 +526,7 @@ void FitPropertyBrowser::deleteFunction()
     getHandler()->removePlot();
     h->removeFunction();
     emit functionRemoved();
+    emit functionChanged();
   }
 }
 
@@ -638,6 +648,7 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       if (!h->parentHandler()) return;
       Mantid::API::IFunction* f = h->changeType(prop);
       if (f) setCurrentFunction(f);
+      emit functionChanged();
   }
 }
 
@@ -786,7 +797,8 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
     delete tie;
   }
   else if (getHandler()->setAttribute(prop))
-  {
+  {// setting an attribute may change function parameters
+    emit functionChanged();
     return;
   }
 }
@@ -1857,4 +1869,19 @@ void FitPropertyBrowser::validateGroupMember()
   {
     m_groupMember = names[0];
   }
+}
+
+void FitPropertyBrowser::sequentialFit()
+{
+  if (workspaceName() == outputName())
+  {
+    setOutputName(outputName() + "_res");
+  }
+  SequentialFitDialog* dlg = new SequentialFitDialog(this);
+  std::string wsName = workspaceName();
+  if (!wsName.empty())
+  {
+    dlg->addWorkspaces(QStringList(QString::fromStdString(wsName)));
+  }
+  dlg->show();
 }

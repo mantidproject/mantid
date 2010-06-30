@@ -9,6 +9,11 @@
 namespace Mantid
 {
 
+  namespace DataObjects
+  {
+    class Workspace2D;
+  }
+
   namespace CurveFitting
   {
     /**
@@ -55,6 +60,20 @@ namespace Mantid
     */
     class DLLExport PlotPeakByLogValue : public API::Algorithm
     {
+      /** Structure to identify data for fitting
+        */
+      struct InputData
+      {
+        /// Constructor
+        InputData(const std::string& nam,int ix,int s,int p):name(nam),i(ix),spec(s),period(p){}
+        /// Copy constructor
+        InputData(const InputData& data):name(data.name),i(data.i),spec(data.spec),period(data.period),ws(data.ws){}
+        std::string name; ///< Name of a workspace or file
+        int i;            ///< Workspace index of the spectra to fit
+        int spec;         ///< Spectrum number to fit
+        int period;       ///< Period, needed if a file contains several periods
+        boost::shared_ptr<DataObjects::Workspace2D> ws; ///< shared pointer to the workspace
+      };
     public:
       /// Default constructor
       PlotPeakByLogValue() : API::Algorithm() {};
@@ -71,6 +90,11 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+
+      /// Get a workspace
+      InputData getWorkspace(const InputData& data);
+      /// Create a list of input workspace names
+      std::vector<InputData> makeNames()const;
     };
 
   } // namespace CurveFitting

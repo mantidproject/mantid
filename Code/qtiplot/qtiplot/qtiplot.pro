@@ -476,6 +476,8 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/IFunctionWrapper.h \
 	    src/Mantid/FitParameterTie.h \
 	    src/Mantid/RemoveErrorsDialog.h \
+	    src/Mantid/SequentialFitDialog.h \
+	    src/Mantid/SelectWorkspacesDialog.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
 	    src/Mantid/InstrumentWidget/GLTrackball.h \
@@ -501,6 +503,7 @@ HEADERS  += src/ApplicationWindow.h \
 FORMS += src/Mantid/UserFitFunctionDialog.ui
 FORMS += src/Mantid/MantidAbout.ui
 FORMS += src/Mantid/RemoveErrorsDialog.ui
+FORMS += src/Mantid/SequentialFitDialog.ui
 
 ###################### SOURCES ##############################################
 
@@ -654,6 +657,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/IFunctionWrapper.cpp \
 	    src/Mantid/FitParameterTie.cpp \
 	    src/Mantid/RemoveErrorsDialog.cpp \
+	    src/Mantid/SequentialFitDialog.cpp \
+	    src/Mantid/SelectWorkspacesDialog.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \
 	    src/Mantid/InstrumentWidget/GLTrackball.cpp \

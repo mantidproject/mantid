@@ -1,0 +1,372 @@
+<ui version="4.0" >
+ <class>SequentialFitDialog</class>
+ <widget class="QDialog" name="SequentialFitDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>693</width>
+    <height>447</height>
+   </rect>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>693</width>
+    <height>447</height>
+   </size>
+  </property>
+  <property name="maximumSize" >
+   <size>
+    <width>693</width>
+    <height>10000000</height>
+   </size>
+  </property>
+  <property name="windowTitle" >
+   <string>SequentialFit</string>
+  </property>
+  <widget class="QLabel" name="label" >
+   <property name="geometry" >
+    <rect>
+     <x>13</x>
+     <y>49</y>
+     <width>45</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Log Value</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cbLogValue" >
+   <property name="geometry" >
+    <rect>
+     <x>80</x>
+     <y>49</y>
+     <width>186</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="minimumSize" >
+    <size>
+     <width>186</width>
+     <height>0</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>671</width>
+     <height>321</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Input</string>
+   </property>
+   <widget class="QTableWidget" name="tWorkspaces" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>551</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <column>
+     <property name="text" >
+      <string>Workspace/File</string>
+     </property>
+    </column>
+    <column>
+     <property name="text" >
+      <string>Period</string>
+     </property>
+    </column>
+    <column>
+     <property name="text" >
+      <string>Spectrum</string>
+     </property>
+    </column>
+    <column>
+     <property name="text" >
+      <string>WS Index</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="btnAddWorkspace" >
+    <property name="geometry" >
+     <rect>
+      <x>570</x>
+      <y>30</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Add workspaces</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnAddFile" >
+    <property name="geometry" >
+     <rect>
+      <x>570</x>
+      <y>60</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Add files</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnDelete" >
+    <property name="geometry" >
+     <rect>
+      <x>570</x>
+      <y>90</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Delete</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5" >
+    <property name="geometry" >
+     <rect>
+      <x>169</x>
+      <y>291</y>
+      <width>45</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Spectrum</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="sbSpectrum" >
+    <property name="geometry" >
+     <rect>
+      <x>220</x>
+      <y>291</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="minimumSize" >
+     <size>
+      <width>101</width>
+      <height>0</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="sbPeriod" >
+    <property name="geometry" >
+     <rect>
+      <x>48</x>
+      <y>291</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="minimumSize" >
+     <size>
+      <width>71</width>
+      <height>0</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6" >
+    <property name="geometry" >
+     <rect>
+      <x>12</x>
+      <y>291</y>
+      <width>30</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Period</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="rbSequential" >
+    <property name="geometry" >
+     <rect>
+      <x>350</x>
+      <y>290</y>
+      <width>82</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Sequential</string>
+    </property>
+    <property name="checked" >
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="rbIndividual" >
+    <property name="geometry" >
+     <rect>
+      <x>450</x>
+      <y>290</y>
+      <width>82</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Individual</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QComboBox" name="cbParameter" >
+   <property name="geometry" >
+    <rect>
+     <x>80</x>
+     <y>21</y>
+     <width>186</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="minimumSize" >
+    <size>
+     <width>186</width>
+     <height>0</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3" >
+   <property name="geometry" >
+    <rect>
+     <x>14</x>
+     <y>21</y>
+     <width>50</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Parameter</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cbCurveType" >
+   <property name="geometry" >
+    <rect>
+     <x>370</x>
+     <y>21</y>
+     <width>186</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="minimumSize" >
+    <size>
+     <width>186</width>
+     <height>0</height>
+    </size>
+   </property>
+   <item>
+    <property name="text" >
+     <string>Line</string>
+    </property>
+   </item>
+   <item>
+    <property name="text" >
+     <string>Scatter</string>
+    </property>
+   </item>
+   <item>
+    <property name="text" >
+     <string>Line+Symbols</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_4" >
+   <property name="geometry" >
+    <rect>
+     <x>309</x>
+     <y>21</y>
+     <width>55</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Curve Type</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>8</x>
+     <y>410</y>
+     <width>671</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout" >
+    <item>
+     <widget class="QPushButton" name="btnHelp" >
+      <property name="maximumSize" >
+       <size>
+        <width>31</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text" >
+       <string>?</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer" >
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0" >
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnFit" >
+      <property name="text" >
+       <string>Fit</string>
+      </property>
+      <property name="default" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnCancel" >
+      <property name="text" >
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>cbParameter</tabstop>
+  <tabstop>cbLogValue</tabstop>
+  <tabstop>cbCurveType</tabstop>
+  <tabstop>sbPeriod</tabstop>
+  <tabstop>sbSpectrum</tabstop>
+  <tabstop>rbSequential</tabstop>
+  <tabstop>rbIndividual</tabstop>
+  <tabstop>btnAddWorkspace</tabstop>
+  <tabstop>btnAddFile</tabstop>
+  <tabstop>btnDelete</tabstop>
+  <tabstop>tWorkspaces</tabstop>
+  <tabstop>btnFit</tabstop>
+  <tabstop>btnCancel</tabstop>
+  <tabstop>btnHelp</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
