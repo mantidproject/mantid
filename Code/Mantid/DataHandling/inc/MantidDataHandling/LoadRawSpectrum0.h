@@ -19,7 +19,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    /** @class LoadRaw3 LoadRaw3.h DataHandling/LoadRawSpectrum0.h
+    /**
 
     Loads zeroth spectrum from ISIS RAW format file and stores it in a 2D workspace
     (Workspace2D class). LoadRawSpectrum0 is an algorithm and  inherits

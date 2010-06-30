@@ -711,7 +711,7 @@ SurfPoint::SurfPoint(const SurfPoint& A) : Rule(),
   key(A.key->clone()),keyN(A.keyN),sign(A.sign)
   /*!
     Copy constructor
-    \param A ::SurfPoint to copy
+    \param A SurfPoint to copy
   */
 {}
 

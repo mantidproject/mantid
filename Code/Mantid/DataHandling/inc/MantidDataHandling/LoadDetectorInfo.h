@@ -115,7 +115,7 @@ private:
   enum {
     USED = 1000-INT_MAX,                                 ///< goes in the unGrouped spectra list to say that a spectrum will be included in a group, any other value and it isn't. Spectra numbers should always be positive so we shouldn't accidientally set a spectrum number to the this
     EMPTY_LINE = 1001-INT_MAX,                           ///< when reading from the input file this value means that we found any empty line
-    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM      ///< =Poco::StringTokenizer::TOK_TRIM but saves some typing
+    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM      ///< equals Poco::StringTokenizer::TOK_TRIM but saves some typing
   };
 
   /// special numbers in DAT files from "DETECTOR.DAT format" referenced above

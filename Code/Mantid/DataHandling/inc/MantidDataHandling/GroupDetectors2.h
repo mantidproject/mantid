@@ -123,7 +123,7 @@ private:
     RangeHelper() {};
     /// give an enum from poco a better name here
     enum { 
-      IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM     ///< =Poco::StringTokenizer::TOK_TRIM but saves some typing
+      IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM     ///< equal to Poco::StringTokenizer::TOK_TRIM but saves some typing
     };
   };
 
@@ -171,7 +171,7 @@ private:
   enum {
     USED = 1000-INT_MAX,                                 ///< goes in the unGrouped spectra list to say that a spectrum will be included in a group, any other value and it isn't. Spectra numbers should always be positive so we shouldn't accidientally set a spectrum number to the this
     EMPTY_LINE = 1001-INT_MAX,                           ///< when reading from the input file this value means that we found any empty line
-    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM      ///< =Poco::StringTokenizer::TOK_TRIM but saves some typing
+    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM      ///< equal to Poco::StringTokenizer::TOK_TRIM but saves some typing
   };
   
   static const double CHECKBINS;                         ///< a (worse case) estimate of the time required to check that the X bin boundaries are the same as a percentage of total algorithm run time

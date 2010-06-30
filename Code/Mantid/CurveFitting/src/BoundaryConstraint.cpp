@@ -22,7 +22,7 @@ using namespace API;
 Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstraint");
 
 /** Constructor with boundary arguments
- * @param The function
+ * @param fun The function
  * @param paramName The parameter name
  * @param lowerBound The lower bound
  * @param upperBound The upper bound
@@ -165,7 +165,7 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
   }
 }
 
-/** determine which is the active parameter. If constraint name is not amoung
+/* determine which is the active parameter. If constraint name is not amoung
  *  the active parameter of function then return -1
  *
  *  @param fn fitting function

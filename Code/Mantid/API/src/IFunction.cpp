@@ -506,7 +506,7 @@ class SetValue: public IFunction::AttributeVisitor<>
 public:
   /**
    * Constructor
-   * @param str The value to set
+   * @param value The value to set
    */
   SetValue(const std::string& value):m_value(value){}
 protected:
