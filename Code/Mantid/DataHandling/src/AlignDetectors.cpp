@@ -140,11 +140,9 @@ void AlignDetectors::exec()
       }
       // Now average the factor and multiplies by the prefactor.
       factor*= constant/ndets;
-      // Get a reference to the x data
-      MantidVec& xOut = outputWS->dataX(i);
-      // Make sure reference to input X vector is obtained after output one because in the case
-      // where the input & output workspaces are the same, it might move if the vectors were shared.
+      // Get references to the x data
       const MantidVec& xIn = inputWS->readX(i);
+      MantidVec& xOut = outputWS->dataX(i);
       std::transform( xIn.begin(), xIn.end(), xOut.begin(), std::bind2nd(std::multiplies<double>(), factor) );
       // Copy the Y&E data
       outputWS->dataY(i) = inputWS->dataY(i);

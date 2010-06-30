@@ -549,7 +549,7 @@
 									<listOptionValue builtIn="false" value="MantidKernel"/>
 									<listOptionValue builtIn="false" value="MantidGeometry"/>
 									<listOptionValue builtIn="false" value="MantidAPI"/>
-									<listOptionValue builtIn="false" value="python2.3"/>
+									<listOptionValue builtIn="false" value="python2.4"/>
 									<listOptionValue builtIn="false" value="boost_python"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1098827174" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">

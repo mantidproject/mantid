@@ -5,6 +5,7 @@
 	<projects>
 		<project>API</project>
 		<project>DataObjects</project>
+		<project>Geometry</project>
 		<project>Kernel</project>
 	</projects>
 	<buildSpec>

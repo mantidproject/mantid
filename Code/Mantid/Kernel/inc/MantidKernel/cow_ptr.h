@@ -1,24 +1,23 @@
 #ifndef MANTIDKERNEL_COW_PTR_H
 #define MANTIDKERNEL_COW_PTR_H
 
-#include "boost/shared_ptr.hpp"
 #include "MultiThreaded.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
 namespace Kernel
 {
-
 /*!
   \class cow_ptr
-  \brief Impliments a copy on write data template 
+  \brief Implements a copy on write data template
   \version 1.0
   \date February 2006
   \author S.Ansell
   
   This version works only on data that is created via new().
   It is thread safe and works in the Standard template 
-  libraries (but appropiate functionals are needed for 
+  libraries (but appropriate functionals are needed for
   sorting etc.).
 
   Renamed from RefControl on the 11/12/2007, 
@@ -29,7 +28,7 @@ namespace Kernel
   semantics but call the access function if the data is required
   to be modified.
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
   This file is part of Mantid.
  	
@@ -49,7 +48,6 @@ namespace Kernel
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 
 */
-
 template<typename DataType>
 class cow_ptr
 {
@@ -77,84 +75,90 @@ class cow_ptr
 
 };
 
+/*!
+  Constructor : creates new data() object
+*/
 template<typename DataType>
 cow_ptr<DataType>::cow_ptr() :
   Data(new DataType())
-  /*!
-    Constructor : creates new data() object
-  */
 { }
 
 
+/*!
+  Copy constructor : double references the data object
+  \param A :: object to copy
+*/
 template<typename DataType>
 cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType>& A) :
   Data(A.Data)
-  /*!
-    Copy constructor : double references the data object
-    \param A :: object to copy
-  */
 { }
 
+/*!
+  Assignment operator : double references the data object
+  maybe drops the old reference.
+  \param A :: object to copy
+  \return *this
+*/
 template<typename DataType>
-cow_ptr<DataType>&
-cow_ptr<DataType>::operator=(const cow_ptr<DataType>& A) 
-  /*!
-    Assignment operator : double references the data object
-    maybe drops the old reference.
-    \param A :: object to copy
-    \return *this
-  */
+cow_ptr<DataType>& cow_ptr<DataType>::operator=(const cow_ptr<DataType>& A)
 {
   if (this!=&A)
-    {
-      Data=A.Data;
-    }
+  {
+    Data=A.Data;
+  }
   return *this;
 }
 
+/*!
+  Assignment operator : double references the data object
+  maybe drops the old reference.
+  \param A :: object to copy
+  \return *this
+*/
 template<typename DataType>
-cow_ptr<DataType>&
-cow_ptr<DataType>::operator=(const ptr_type& A) 
-  /*!
-    Assignment operator : double references the data object
-    maybe drops the old reference.
-    \param A :: object to copy
-    \return *this
-  */
+cow_ptr<DataType>& cow_ptr<DataType>::operator=(const ptr_type& A)
 {
   if (this->Data != A)
-    {
-      Data=A;
-    }
+  {
+    Data=A;
+  }
   return *this;
 }
 
 
+/*!
+  Destructor : No work is required since Data is
+  a shared_ptr.
+*/
 template<typename DataType>
 cow_ptr<DataType>::~cow_ptr()
-  /*!
-    Destructor : No work is required since Data is
-    a shared_ptr.
-  */
 {}
 
-template<typename DataType>
-DataType&
-cow_ptr<DataType>::access()
-  /*!
-    Access function 
-    Creates a copy of Data so that it can be modified.
-    Believed to be thread safe sicne
-    creates an extra reference before deleteing.
-    \return new copy of *this
-  */
-{
-  if (Data.unique())
-    return *Data;
+/*!
+  Access function.
+  If data is shared, creates a copy of Data so that it can be modified.
 
-  ptr_type oldData=Data; 
-  Data.reset();
-  Data=ptr_type(new DataType(*oldData));
+  \return new copy of *this, if required
+*/
+template<typename DataType>
+DataType& cow_ptr<DataType>::access()
+{
+  // Use a double-check for sharing so that we only
+  // enter the critical region if absolutely necessary
+  if (!Data.unique())
+  {
+    PARALLEL_CRITICAL(cow_ptr_access)
+    {
+      // Check again because another thread may have taken copy
+      // and dropped reference count since previous check
+      if (!Data.unique())
+      {
+        ptr_type oldData=Data;
+        Data.reset();
+        Data=ptr_type(new DataType(*oldData));
+      }
+    }
+  }
 
   return *Data;
 }
