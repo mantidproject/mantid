@@ -929,18 +929,6 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_10" >
-         <property name="leftMargin" >
-          <number>9</number>
-         </property>
-         <property name="topMargin" >
-          <number>9</number>
-         </property>
-         <property name="rightMargin" >
-          <number>9</number>
-         </property>
-         <property name="bottomMargin" >
-          <number>8</number>
-         </property>
          <item>
           <widget class="QGroupBox" name="groupBox_4" >
            <property name="title" >
@@ -986,34 +974,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBox" >
-           <property name="text" >
-            <string>CanSAS1D</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBox_2" >
-           <property name="text" >
-            <string>RKH</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBox_3" >
-           <property name="text" >
-            <string>CSV</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="saveBtn" >
-           <property name="text" >
-            <string>Save</string>
-           </property>
-          </widget>
          </item>
         </layout>
        </item>
@@ -1068,6 +1028,13 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="4" >
+             <widget class="QPushButton" name="saveBtn" >
+              <property name="text" >
+               <string>Save</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -1093,9 +1060,6 @@
             <bool>false</bool>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_16" >
-            <property name="bottomMargin" >
-             <number>8</number>
-            </property>
             <item>
              <widget class="QLabel" name="label_34" >
               <property name="text" >
@@ -3535,61 +3499,6 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="2" column="3" >
-        <spacer name="verticalSpacer_10" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="3" column="6" >
-        <spacer name="horizontalSpacer_18" >
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType" >
-          <enum>QSizePolicy::Maximum</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="6" column="4" >
-        <spacer name="verticalSpacer_7" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="8" column="4" >
-        <spacer name="verticalSpacer_8" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item row="1" column="1" colspan="2" >
         <widget class="QLabel" name="label_40" >
          <property name="text" >
@@ -3606,6 +3515,19 @@ p, li { white-space: pre-wrap; }
           <string>Browse</string>
          </property>
         </widget>
+       </item>
+       <item row="2" column="3" >
+        <spacer name="verticalSpacer_10" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item row="3" column="1" >
         <widget class="QLabel" name="label_42" >
@@ -3643,12 +3565,54 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
+       <item row="3" column="6" >
+        <spacer name="horizontalSpacer_18" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="4" >
+        <spacer name="verticalSpacer_7" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item row="7" column="4" >
         <widget class="QPushButton" name="sum_Btn" >
          <property name="text" >
           <string>Sum</string>
          </property>
         </widget>
+       </item>
+       <item row="8" column="4" >
+        <spacer name="verticalSpacer_8" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item rowspan="3" row="4" column="2" colspan="2" >
         <widget class="QListWidget" name="toAdd_List" >
@@ -3669,17 +3633,17 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="4" column="4" >
-        <widget class="QPushButton" name="clear_Btn" >
-         <property name="text" >
-          <string>Remove all</string>
-         </property>
-        </widget>
-       </item>
        <item row="5" column="4" >
         <widget class="QPushButton" name="remove_Btn" >
          <property name="text" >
           <string>Remove</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="4" >
+        <widget class="QPushButton" name="clear_Btn" >
+         <property name="text" >
+          <string>Remove all</string>
          </property>
         </widget>
        </item>
@@ -3692,6 +3656,7 @@ p, li { white-space: pre-wrap; }
       <zorder>add_Btn</zorder>
       <zorder>browse_to_add_Btn</zorder>
       <zorder>sum_Btn</zorder>
+      <zorder>toAdd_Tbl</zorder>
       <zorder>toAdd_List</zorder>
       <zorder>clear_Btn</zorder>
       <zorder>remove_Btn</zorder>
