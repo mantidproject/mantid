@@ -218,7 +218,7 @@ namespace DataObjects
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    return this->data[index]->dataX();
+    throw NotImplementedError("EventWorkspace::dataX cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
   }
 
   /// Return the data Y vector at a given workspace index
@@ -227,7 +227,7 @@ namespace DataObjects
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
-    return this->data[index]->dataY();
+    throw NotImplementedError("EventWorkspace::dataY cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
   }
 
   /// Return the data E vector at a given workspace index
@@ -236,7 +236,7 @@ namespace DataObjects
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    return this->data[index]->dataE();
+    throw NotImplementedError("EventWorkspace::dataE cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
   }
 
 

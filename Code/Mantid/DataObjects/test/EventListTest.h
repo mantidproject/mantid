@@ -238,16 +238,6 @@ public:
     TS_ASSERT(el2.dataX()==shared_x);
   }
 
-
-  void test_non_const_access()
-  {
-    this->test_setX();
-    TS_ASSERT_THROWS(el.dataX(), Exception::NotImplementedError);
-    TS_ASSERT_THROWS(el.dataY(), Exception::NotImplementedError);
-    TS_ASSERT_THROWS(el.dataE(), Exception::NotImplementedError);
-  }
-
-
   void test_empty_histogram()
   {
     //Make sure there's no data

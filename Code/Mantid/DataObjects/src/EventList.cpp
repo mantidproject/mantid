@@ -58,13 +58,13 @@ namespace DataObjects
   }
 
   /// Return the time of flight, as a double, in nanoseconds.
-  double TofEvent::tof()
+  double TofEvent::tof() const
   {
 	  return this->time_of_flight;
   }
 
   /// Return the frame id
-  size_t TofEvent::frame()
+  size_t TofEvent::frame() const
   {
 	  return this->frame_index;
   }
@@ -347,27 +347,6 @@ namespace DataObjects
   {
     return refX;
   }
-
-
-  /** This throws an exception since non-const access is not allowed. */
-  EventList::StorageType& EventList::dataX()
-  {
-    //return *(this->refX);
-    throw NotImplementedError("EventList::dataX cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
-  }
-
-  /** This throws an exception since non-const access is not allowed. */
-  EventList::StorageType& EventList::dataY()
-  {
-    throw NotImplementedError("EventList::dataY cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
-  }
-
-  /** This throws an exception since non-const access is not allowed. */
-  EventList::StorageType& EventList::dataE()
-  {
-    throw NotImplementedError("EventList::dataE cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
-  }
-
 
   // --- Histogram functions -------------------------------------------------
   void EventList::emptyCache() const

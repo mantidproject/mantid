@@ -56,10 +56,10 @@ private:
   TofEvent& operator=(const TofEvent&rhs);
 
   /// Return the time of flight, as a double, in nanoseconds.
-  double tof();
+  double tof() const;
 
   /// Return the frame id
-  std::size_t frame();
+  std::size_t frame() const;
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
@@ -139,15 +139,6 @@ public:
 
   /** Returns a reference to the X data */
   Kernel::cow_ptr<MantidVec> getRefX() const;
-
-  /** This throws an exception since non-const access is not allowed. */
-  virtual StorageType& dataX();
-
-  /** This throws an exception since non-const access is not allowed. */
-  virtual StorageType& dataY();
-
-  /** This throws an exception since non-const access is not allowed. */
-  virtual StorageType& dataE();
 
   /** Return the number of events in the list. */
   virtual std::size_t getNumberEvents() const;
