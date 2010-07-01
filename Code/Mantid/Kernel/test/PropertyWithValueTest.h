@@ -94,7 +94,7 @@ public:
     TS_ASSERT_EQUALS( l.setValue("10"), "" );
     TS_ASSERT_EQUALS( l, 10 );
     TS_ASSERT_EQUALS( l.setValue("1234567890123456"), "" );
-    TS_ASSERT_EQUALS( l, 1234567890123456 );
+    TS_ASSERT_EQUALS( l, 1234567890123456LL );
     TS_ASSERT_EQUALS( l.setValue("9.99"),
       "Could not set property test. Can not convert \"9.99\" to " + l.type() );
     TS_ASSERT_EQUALS( l.setValue("garbage"),
@@ -116,7 +116,7 @@ public:
       "Could not set property defau1. Can not convert \"garbage\" to " + i.type() );
     TS_ASSERT_EQUALS( i.getDefault(), "3" );
 
-    PropertyWithValue<long long> l("defau1", 987987987987);
+    PropertyWithValue<long long> l("defau1", 987987987987LL);
     TS_ASSERT_EQUALS( l.getDefault(), "987987987987" );
     TS_ASSERT_EQUALS( l.setValue("5"), "" );
     TS_ASSERT_EQUALS( l.getDefault(), "987987987987" );
@@ -164,7 +164,7 @@ public:
     TS_ASSERT( ! lProp->documentation().compare("") );
     TS_ASSERT( typeid( long long ) == *lProp->type_info()  );
     TS_ASSERT( lProp->isDefault() );
-    TS_ASSERT_EQUALS( l, -9876543210987654 );
+    TS_ASSERT_EQUALS( l, -9876543210987654LL );
 
   }
 
@@ -196,7 +196,7 @@ public:
     TS_ASSERT( ! l.name().compare("Prop4") );
     TS_ASSERT( ! l.documentation().compare("") );
     TS_ASSERT( ! l.isDefault() );
-    TS_ASSERT_EQUALS( l, -9876543210987654 );
+    TS_ASSERT_EQUALS( l, -9876543210987654LL );
 
   }
 
@@ -221,10 +221,10 @@ public:
     s = "testing";
     TS_ASSERT( i.isDefault() );
 
-    PropertyWithValue<long long> l("Prop4",987987987987);
+    PropertyWithValue<long long> l("Prop4",987987987987LL);
     TS_ASSERT_EQUALS( l = 2, 2 );
     TS_ASSERT( !l.isDefault() );
-    l = 987987987987;
+    l = 987987987987LL;
     TS_ASSERT( l.isDefault() );
 
     PropertyWithValue<int> ii("Prop1.1",6);
@@ -243,9 +243,9 @@ public:
     TS_ASSERT_EQUALS( s.operator()(), "tested" );
 
     PropertyWithValue<long long> ll("Prop4.4",6);
-    l = ll = 789789789789;
-    TS_ASSERT_EQUALS( ll, 789789789789 );
-    TS_ASSERT_EQUALS( l, 789789789789 );
+    l = ll = 789789789789LL;
+    TS_ASSERT_EQUALS( ll, 789789789789LL );
+    TS_ASSERT_EQUALS( l, 789789789789LL );
   }
 
   void testOperatorBrackets()
@@ -253,7 +253,7 @@ public:
     TS_ASSERT_EQUALS( iProp->operator()(), 1 );
     TS_ASSERT_EQUALS( dProp->operator()(), 9.99 );
     TS_ASSERT_EQUALS( sProp->operator()(), "theValue" );
-    TS_ASSERT_EQUALS( lProp->operator()(), -9876543210987654 );
+    TS_ASSERT_EQUALS( lProp->operator()(), -9876543210987654LL );
   }
 
   void testOperatorNothing()
@@ -265,7 +265,7 @@ public:
     std::string str(*sProp);
     TS_ASSERT( ! str.compare("theValue") );
     long long l = *lProp;
-    TS_ASSERT_EQUALS( l, -9876543210987654 );
+    TS_ASSERT_EQUALS( l, -9876543210987654LL );
   }
 
   void testAllowedValues()
@@ -310,7 +310,7 @@ public:
     TS_ASSERT_EQUALS( s.operator()(), "newValue" );
 
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(lProp), static_cast<Property*>(0) );
-    PropertyWithValue<long long> l("Prop4",789789789789);
+    PropertyWithValue<long long> l("Prop4",789789789789LL);
     Property *pppp = dynamic_cast<Property*>(&l);
     TS_ASSERT( ! pppp->name().compare("Prop4") );
     TS_ASSERT( ! pppp->value().compare("789789789789") );
@@ -381,7 +381,7 @@ public:
     TS_ASSERT_EQUALS(ps.isValid(), "");
 
     //int64 tests
-    PropertyWithValue<long long> pl("test", 987987987987, new BoundedValidator<long long>(0,789789789789));
+    PropertyWithValue<long long> pl("test", 987987987987LL, new BoundedValidator<long long>(0,789789789789LL));
     TS_ASSERT_EQUALS( pl.isValid(), start + "987987987987" + greaterThan + "789789789789" + end);
     TS_ASSERT_EQUALS( pl.setValue("-1"), start + "-1" + lessThan + "0" + end );
     TS_ASSERT_EQUALS( pl.value(),"987987987987");
