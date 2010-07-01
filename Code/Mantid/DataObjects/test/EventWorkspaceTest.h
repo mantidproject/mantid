@@ -100,15 +100,15 @@ public:
   void test_constructor()
   {
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
-    TS_ASSERT_EQUALS( ew->blocksize(), NUMBINS);
-    TS_ASSERT_EQUALS( ew->size(), NUMBINS*NUMPIXELS);
+    TS_ASSERT_EQUALS( ew->blocksize(), NUMBINS-1);
+    TS_ASSERT_EQUALS( ew->size(), (NUMBINS-1)*NUMPIXELS);
 
 
     //Are the returned arrays the right size?
     const EventList el(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS);
+    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS-1);
 
     //Don't access data after doneLoadingData
     TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error);
@@ -161,8 +161,8 @@ public:
     uneven->setAllX(axis);
 
     TS_ASSERT_EQUALS( uneven->getNumberHistograms(), NUMPIXELS/10);
-    TS_ASSERT_EQUALS( uneven->blocksize(), NUMBINS);
-    TS_ASSERT_EQUALS( uneven->size(), NUMBINS*NUMPIXELS/10);
+    TS_ASSERT_EQUALS( uneven->blocksize(), (NUMBINS-1));
+    TS_ASSERT_EQUALS( uneven->size(), (NUMBINS-1)*NUMPIXELS/10);
 
     //The spectra map should be a dumb 1-1 map
     TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(0)[0], 0);
@@ -221,8 +221,8 @@ public:
   {
     ew = createEventWorkspace(0, 1);
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
-    TS_ASSERT_EQUALS( ew->blocksize(), NUMBINS);
-    TS_ASSERT_EQUALS( ew->size(), NUMBINS*NUMPIXELS);
+    TS_ASSERT_EQUALS( ew->blocksize(), (NUMBINS-1));
+    TS_ASSERT_EQUALS( ew->size(), (NUMBINS-1)*NUMPIXELS);
     TS_ASSERT_THROWS( ew->dataX(-123), std::range_error );
     TS_ASSERT_THROWS( ew->dataX(5123), std::range_error );
     //Non-const access throws errors, but not RANGE errors!
@@ -249,8 +249,8 @@ public:
 
     //Are the returned arrays the right size?
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS/2);
-    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS/2);
-    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS/2);
+    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS/2-1);
+    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS/2-1);
 
     //Now there are 2 events in each bin
     TS_ASSERT_EQUALS( el.dataY()[0], 2);

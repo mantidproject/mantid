@@ -417,14 +417,14 @@ namespace DataObjects
     }
 
     //TODO: Should we have a smarter check for this?
-    if (Y.size() != x_size)
+    if (Y.size() != x_size-1)
     {
       //Need to redo the histogram.
       //Sort the events by tof
       this->sortTof();
       //Clear the Y data, assign all to 0.
-      Y.resize(x_size, 0);
-      E.resize(x_size, 0);
+      Y.resize(x_size-1, 0);
+      E.resize(x_size-1, 0);
 
       //Do we even have any events to do?
       if (this->events.size() > 0)

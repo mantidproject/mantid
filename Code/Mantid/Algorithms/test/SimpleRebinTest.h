@@ -165,16 +165,16 @@ public:
     TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
 
     //Correct # of bins?
-    TS_ASSERT_EQUALS(test_in->blocksize(), 26);
+    TS_ASSERT_EQUALS(test_in->blocksize(), 25);
     TS_ASSERT_EQUALS(el2.dataX().size(), 26);
-    TS_ASSERT_EQUALS(el2.dataY().size(), 26);
-    TS_ASSERT_EQUALS(el2.dataE().size(), 26);
+    TS_ASSERT_EQUALS(el2.dataY().size(), 25);
+    TS_ASSERT_EQUALS(el2.dataE().size(), 25);
 
     //# of events per bin was doubled
     TS_ASSERT_EQUALS( el2.dataY()[0], 2);
     TS_ASSERT_EQUALS( el2.dataY()[1], 2);
     TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-2], 2); //The last bin
-    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2], 0); //The last bin
+    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-1], 2); //The last bin
   }
 
 
@@ -185,10 +185,10 @@ public:
 
     const EventList el(test_in->getEventListAtWorkspaceIndex(1));
     //Correct # of bins?
-    TS_ASSERT_EQUALS(test_in->blocksize(), NUMBINS);
+    TS_ASSERT_EQUALS(test_in->blocksize(), NUMBINS-1);
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS);
+    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS-1);
     //Good histogram
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
@@ -212,15 +212,19 @@ public:
     TS_ASSERT_EQUALS(test_out->dataX(0)[1], 4.0);
     TS_ASSERT_EQUALS(test_out->dataX(0)[25], 100.0);
     //Correct # of bins?
-    TS_ASSERT_EQUALS(test_out->blocksize(), 26);
+    TS_ASSERT_EQUALS(test_out->blocksize(), 25);
     TS_ASSERT_EQUALS(test_out->dataX(0).size(), 26);
-    TS_ASSERT_EQUALS(test_out->dataY(0).size(), 26);
-    TS_ASSERT_EQUALS(test_out->dataE(0).size(), 26);
+    TS_ASSERT_EQUALS(test_out->dataY(0).size(), 25);
+    TS_ASSERT_EQUALS(test_out->dataE(0).size(), 25);
     //Number of events was doubled
     TS_ASSERT_EQUALS(test_out->dataY(0)[0], 2);
     TS_ASSERT_EQUALS(test_out->dataY(0)[1], 2);
+    TS_ASSERT_EQUALS(test_out->dataY(0)[24], 2);
     //E is still
     TS_ASSERT_EQUALS(test_out->dataE(0)[0], 0);
+    //Should say it is histogram data
+    TS_ASSERT(test_out->isHistogramData());
+
 
     //Axes?
     TS_ASSERT_EQUALS(test_in->axes(), test_out->axes());
@@ -252,7 +256,7 @@ private:
     {
       //Create one event for each bin
       EventList& events = retVal->getEventList(i);
-      for (double ie=0; ie<numbins-1; ie++)
+      for (double ie=0; ie<numbins; ie++)
       {
         //Create a list of events in order, one per bin.
         events += TofEvent((ie*BIN_DELTA)+0.5, 1);

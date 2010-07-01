@@ -265,7 +265,7 @@ public:
     X = el3.dataX();
     Y = el3.dataY();
     //Histogram is 0, since I cleared all the events
-    for (int i=0; i<X.size(); i++)
+    for (int i=0; i<X.size()-1; i++)
     {
       TS_ASSERT_EQUALS(Y[i], 0);
     }
@@ -303,9 +303,10 @@ public:
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
     X = el3.dataX();
     Y = el3.dataY();
+    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     //The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
-    for (int i=0; i<Y.size()-1; i++)
+    for (int i=0; i<Y.size(); i++)
     {
       if (Y[i] != 2) std::cout << "Different at i=" << i << "\n";
       TS_ASSERT_EQUALS(Y[i], 2.0);
@@ -320,6 +321,7 @@ public:
     const EventList el3(el);
     X = el3.dataX();
     Y = el3.dataY();
+    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     for (int i=0; i<X.size()-1; i++)
     {
       //No data was generated above 10 ms.
