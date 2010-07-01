@@ -128,7 +128,9 @@ namespace Mantid
           for (int i=1; i<inputW->axes(); i++)
             outputW->replaceAxis( i, inputW->getAxis(i)->clone(outputW.get()) );
 
-          //Copy the units too
+	  //Copy the units over too.
+	  for (int i=0; i < outputW->axes(); ++i)
+	    outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
           outputW->setYUnit(eventW->YUnit());
           outputW->setYUnitLabel(eventW->YUnitLabel());
 
