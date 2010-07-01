@@ -186,6 +186,7 @@ std::string  Mantid::Kernel::getUnmangledTypeName(const std::type_info& type)
   {
     typestrings.insert(std::make_pair(typeid(char).name(), std::string("letter")));
     typestrings.insert(std::make_pair(typeid(int).name(), std::string("number")));
+    typestrings.insert(std::make_pair(typeid(long long).name(), std::string("number")));
     typestrings.insert(std::make_pair(typeid(double).name(), std::string("number")));
     typestrings.insert(std::make_pair(typeid(bool).name(), std::string("boolean")));
     typestrings.insert(std::make_pair(typeid(std::string).name(), std::string("string")));
