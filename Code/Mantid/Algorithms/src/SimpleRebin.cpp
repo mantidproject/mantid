@@ -128,6 +128,10 @@ namespace Mantid
           for (int i=1; i<inputW->axes(); i++)
             outputW->replaceAxis( i, inputW->getAxis(i)->clone(outputW.get()) );
 
+          //Copy the units too
+          outputW->setYUnit(eventW->YUnit());
+          outputW->setYUnitLabel(eventW->YUnitLabel());
+
           // Assign it to the output workspace property
           //std::cout << "setProperty OutputWorkspace" << "\n";
           setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputW));

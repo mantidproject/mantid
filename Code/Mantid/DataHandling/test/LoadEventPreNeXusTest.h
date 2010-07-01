@@ -122,7 +122,7 @@ public:
     //The # of events = size of the file / 8 bytes (per event)
     TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
 
-    //Only some of the pixels were loaded, because of lot of them are empty
+    //Only some of the pixels weretof loaded, because of lot of them are empty
     int numpixels_with_events = 4753;
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 

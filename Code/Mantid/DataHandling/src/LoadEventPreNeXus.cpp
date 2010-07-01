@@ -160,6 +160,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   size_t event_offset = 0;
   size_t event_buffer_size = getBufferSize(this->num_events);
 
+  double shortest_tof = std::numeric_limits<double>::max();
+  double longest_tof = -std::numeric_limits<double>::max();
+
   //uint32_t period;
   //Initialize progress reporting.
   Progress prog(this,0.0,1.0, this->num_events/event_buffer_size);
@@ -202,7 +205,14 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
       // work with the good guys
       frame_index = this->getFrameIndex(event_offset + i, frame_index);
-      event = TofEvent(static_cast<double>(temp.tof)/.1, frame_index);// convert to microsecond
+      double tof = static_cast<double>(temp.tof) * 0.1; // convert units of 100 ns to microsecond
+      event = TofEvent(tof, frame_index);
+
+      //Find the overall max/min tof
+      if (tof < shortest_tof)
+        shortest_tof = tof;
+      if (tof > longest_tof)
+        longest_tof = tof;
 
       //Covert the pixel ID from DAS pixel to our pixel ID
       this->fixPixelId(temp.pid, period);
@@ -253,10 +263,23 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
   workspace->doneLoadingData();
 
+  //std::cout << "Shortest tof " << shortest_tof << " longest was " << longest_tof << "\n";
+
+  //Now, create a default X-vector for histogramming, with just 2 bins.
+  Kernel::cow_ptr<MantidVec> axis;
+  MantidVec& xRef = axis.access();
+  xRef.resize(2);
+  xRef[0] = shortest_tof - 1; //Just to make sure the bins hold it all
+  xRef[1] = longest_tof + 1;
+  workspace->setAllX(axis);
+
+
   stringstream msg;
   msg << "Read " << this->num_good_events << " events + "
       << this->num_error_events << " errors";
+  msg << ". Shortest tof: " << shortest_tof << " microsec; longest tof: " << longest_tof << " microsec.";
   this->g_log.information(msg.str());
+
 }
 
 //-----------------------------------------------------------------------------
