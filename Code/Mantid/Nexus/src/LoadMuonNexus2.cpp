@@ -127,14 +127,17 @@ namespace Mantid
         if (m_interval)
         {
           total_specs += (m_spec_max-m_spec_min+1);
-          m_spec_max += 1;
+        }
+        else
+        {
+          m_spec_max = -1; // to stop entering the min - max loop
         }
       }
       else
       {
         total_specs = m_numberOfSpectra;
         // for nexus return all spectra
-        m_spec_min = 0; // changed to 0 for NeXus, was 1 for Raw
+        m_spec_min = 1;
         m_spec_max = m_numberOfSpectra;  // was +1?
       }
 
@@ -188,10 +191,17 @@ namespace Mantid
           if(wsGrpSptr)wsGrpSptr->add(WSName);
         }
 
+        // create spectrum -> index correspondence
+        std::map<int,int> index_spectrum;
+        for (int i = 0; i < m_numberOfSpectra; ++i)
+        {
+          index_spectrum[spectrum_index[i]] = i;
+        }
 
         int counter = 0;
-        for (int i = m_spec_min; i < m_spec_max; ++i)
+        for (int spec = m_spec_min; spec <= m_spec_max; ++spec)
         {
+          int i = index_spectrum[spec]; // if spec not found i is 0
           loadData(counts,timeBins,counter,period,i,localWorkspace);
           localWorkspace->getAxis(1)->spectraNo(counter) = spectrum_index[i];
           counter++;
@@ -202,7 +212,8 @@ namespace Mantid
         {
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
-            int k = m_spec_list[i];
+            int spec = m_spec_list[i];
+            int k = index_spectrum[spec]; // if spec not found k is 0
             loadData(counts,timeBins,counter,period,k,localWorkspace);
             localWorkspace->getAxis(1)->spectraNo(counter) = spectrum_index[k];
             counter++;
