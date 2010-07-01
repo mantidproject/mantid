@@ -17,7 +17,7 @@ using namespace Mantid::Kernel;
 Logger& SANSAddFiles::g_log = Logger::get("SANSAddFiles");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
-  parForm(parent), m_SANSForm(ParWidgets)
+  parForm(parent), m_SANSForm(ParWidgets), m_pythonRunning(false)
 {
   initLayout();
 }
@@ -80,7 +80,7 @@ void SANSAddFiles::saveSettings()
 {
   QSettings value_store;
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
-  value_store.setValue("AddRun/OutPath", m_SANSForm->summedPath_edit->text());
+  value_store.setValue("AddRuns/OutPath", m_SANSForm->summedPath_edit->text());
 }
 /** Creates a QListWidgetItem with the given text and inserts it
 *  into the list box
@@ -142,34 +142,49 @@ void SANSAddFiles::add2Runs2Add()
 */
 void SANSAddFiles::runPythonAddFiles()
 {
-  //QString del = m_SANSForm->tbRunsToAdd->item(0, 0)->text();
+  if (m_pythonRunning)
+  {//it is only possible to run one python script at a time
+    return;
+  }
+
   QString code_torun = "import SANSadd2\n";
-  code_torun += "SANSadd2.add_runs('";
-  code_torun += m_SANSForm->summedPath_edit->text()+"', ";
-  code_torun += "SANSadd2.readCommasAndDashes('";
+  code_torun += "print SANSadd2.add_runs('";
+  code_torun += m_SANSForm->summedPath_edit->text()+"', (";
   //there are multiple file list inputs that can be filled in loop through them
   for(int i = 0; i < m_SANSForm->toAdd_List->count(); ++i )
   {
     const QString filename = m_SANSForm->toAdd_List->item(i)->text();
     if ( ! filename.isEmpty() )
     {//allow but do nothing with empty entries
-      code_torun += filename + ",";
+      code_torun += "'"+filename+"',";
     }
   }
   if ( code_torun.endsWith(',') )
   {//we've made a comma separated list, there can be no comma at the end
     code_torun.truncate(code_torun.size()-1);
   }
-  code_torun += "'),'";
-  code_torun += m_SANSForm->inst_opt->currentText()+"', '";
+  code_torun += "),'"+m_SANSForm->inst_opt->currentText()+"', '";
   code_torun += m_SANSForm->file_opt->currentText()+"')\n";
 
   g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << std::endl;
 
-  QString status = runPythonCode(code_torun, true);
-  if(status.startsWith("Error "))
+  m_SANSForm->sum_Btn->setEnabled(false);
+  m_pythonRunning = true;
+  QString status = runPythonCode(code_torun, false);
+  m_SANSForm->sum_Btn->setEnabled(true);
+  m_pythonRunning = false;
+
+  if( ! status.startsWith("The following file has been created:") )
   {
+    if (status.isEmpty())
+    {
+      status = "Could not sum files, there may be more\ninformation in the Results Log window";
+    }
     QMessageBox::critical(this, "Error adding files", status);
+  }
+  else
+  {
+    QMessageBox::information(this, "Files summed", status);
   }
 }
 /** This slot opens a file browser allowing a user select a path, which
@@ -182,10 +197,10 @@ void SANSAddFiles::summedPathBrowse()
   QString oPath = QFileDialog::getExistingDirectory(parForm, "Output path", dir);
   if( ! oPath.trimmed().isEmpty() )
   {
-    m_SANSForm->summedPath_edit->setText(dir);
+    m_SANSForm->summedPath_edit->setText(oPath);
     QSettings prevVals;
-    prevVals.beginGroup("CustomInterfaces/SANSRunWindow/AddRun");
-    prevVals.setValue("OutPath", dir);
+    prevVals.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns");
+    prevVals.setValue("OutPath", oPath);
   }
 }
 /** This slot opens a file browser allowing a user select files, which is
@@ -194,7 +209,7 @@ void SANSAddFiles::summedPathBrowse()
 void SANSAddFiles::new2AddBrowse()
 {
   QSettings prevVals;
-  prevVals.beginGroup("CustomInterfaces/SANSRunWindow/AddRun");
+  prevVals.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns");
   //get the previous data input directory or, if there wasn't one, use the directory entered on the main form
   QString dir =
     prevVals.value("InPath", m_SANSForm->datadir_edit->text()).toString();

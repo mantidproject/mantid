@@ -24,6 +24,8 @@ private:
   Ui::SANSRunWindow *m_SANSForm;
   //set to a pointer to the parent form
   QWidget *parForm;
+  //set to true when execution of the python scripts starts and false on completion
+  bool m_pythonRunning;
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 
