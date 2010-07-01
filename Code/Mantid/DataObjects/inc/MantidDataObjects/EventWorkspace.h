@@ -131,7 +131,7 @@ private:
   EventWorkspace& operator=(const EventWorkspace&);
 
   /// A map that holds the event list for each pixel; the key is the pixelid.
-  mutable EventListMap data_map;
+  EventListMap data_map;
 
   /// Set to true when loading data is finished.
   bool done_loading_data;
