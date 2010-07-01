@@ -33,6 +33,21 @@ namespace Kernel
     }
 
     template<> DLLExport
+    long long IPropertyManager::getValue<long long>(const std::string &name) const
+    {
+        PropertyWithValue<long long> *prop = dynamic_cast<PropertyWithValue<long long>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type (long long)";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
     bool IPropertyManager::getValue<bool>(const std::string &name) const
     {
         PropertyWithValue<bool> *prop = dynamic_cast<PropertyWithValue<bool>*>(getPointerToProperty(name));

@@ -217,6 +217,18 @@ public:
     TS_ASSERT( ! p->value().compare("1") )
   }
 
+  void testLongLongProperty()
+  {
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("llprop",0LL) );
+    TS_ASSERT_THROWS_NOTHING( mgr.setProperty("llprop",52147900000LL) );
+    TS_ASSERT_EQUALS( mgr.getPropertyValue("llprop"), "52147900000" );
+    TS_ASSERT_THROWS_NOTHING( mgr.setPropertyValue("llprop","1234567890123456789") );
+    long long retrieved;
+    TS_ASSERT_THROWS_NOTHING( retrieved = mgr.getProperty("llprop") );
+    TS_ASSERT_EQUALS( retrieved, 1234567890123456789LL );
+  }
+
 private:
   PropertyManagerHelper manager;
 
