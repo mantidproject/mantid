@@ -96,6 +96,7 @@ public:
     //And the spectra # grow monotonically
     TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
     TS_ASSERT( ew->getAxis(1)->spectraNo(numpixels_with_events-1) < 15*256*256);
+
   }
 
 
@@ -148,10 +149,11 @@ public:
     int max_pixel_id = ew->getAxis(1)->spectraNo(numpixels_with_events-1);
 
     //Now the mapping of spectrum # to detector #; is a simple 1-1 map.
-    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), max_pixel_id);
+    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), max_pixel_id+1);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(0)[0], 0);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(2)[0], 2);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(256)[0], 256);
+    TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(61661)[0], 61661);
   }
 
 

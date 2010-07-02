@@ -205,7 +205,7 @@ namespace DataObjects
 
     //Make the mapping between spectrum # and pixel id (aka detector id)
     //  In this case, it is a simple 1-1 map.
-    mutableSpectraMap().populateSimple(0, max_pixel_id);
+    mutableSpectraMap().populateSimple(0, max_pixel_id+1); //Go to max_pixel_id+1 to make sure you catch that one too
 
 
     //Now clear the data_map
