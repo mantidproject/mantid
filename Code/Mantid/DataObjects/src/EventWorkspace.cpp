@@ -26,6 +26,7 @@ namespace DataObjects
   EventWorkspace::~EventWorkspace()
   {}
 
+  //-----------------------------------------------------------------------------
   /** Initialize the pixels
     *  @param NVectors The number of vectors/histograms/detectors in the workspace. Does not need
     *         to be set, but needs to be > 0
@@ -139,6 +140,14 @@ namespace DataObjects
    * @param workspace_index The histogram workspace index number.
    */
   EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index)
+  {
+    return *this->data[workspace_index];
+  }
+
+  /** Get a const EventList object at the given workspace index number
+   * @param workspace_index The histogram workspace index number.
+   */
+  const EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index) const
   {
     return *this->data[workspace_index];
   }

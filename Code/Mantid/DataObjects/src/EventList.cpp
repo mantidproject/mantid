@@ -176,7 +176,7 @@ namespace DataObjects
   /** Append a list of events to the histogram.
    * @param more_events Another EventList.
    * */
-  EventList& EventList::operator+=(EventList& more_events)
+  EventList& EventList::operator+=(const EventList& more_events)
   {
     vector<TofEvent> rel = more_events.getEvents();
     this->events.insert(this->events.end(), rel.begin(), rel.end());
@@ -196,6 +196,12 @@ namespace DataObjects
 
 
   // --- Handling the event list -------------------------------------------------------------------
+  /** Return the const list of TofEvents contained. */
+  const std::vector<TofEvent>& EventList::getEvents() const
+  {
+    return this->events;
+  }
+
   /** Return the list of TofEvents contained. */
   std::vector<TofEvent>& EventList::getEvents()
   {

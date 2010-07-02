@@ -100,13 +100,14 @@ public:
   EventList& operator+=(const std::vector<TofEvent>& more_events);
 
   /** Append a list of events to the histogram. */
-  EventList& operator+=(EventList& more_events);
+  EventList& operator+=(const EventList& more_events);
 
   /** Append an event to the histogram, without clearing the cache, to make it faster. */
   void addEventQuickly(const TofEvent &event);
 
   /** Return the list of TofEvents contained. */
   std::vector<TofEvent>& getEvents();
+  const std::vector<TofEvent>& getEvents() const;
 
   /** Clear the list of events */
   void clear();

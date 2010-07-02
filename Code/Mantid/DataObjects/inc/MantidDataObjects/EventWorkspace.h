@@ -103,6 +103,9 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /// Get an EventList object at the given workspace index number
   EventList& getEventListAtWorkspaceIndex(const int spectrum_number);
 
+  /// Get a const EventList object at the given workspace index number
+  const EventList& getEventListAtWorkspaceIndex(const int spectrum_number) const;
+
   /// Call this method when loading event data is complete.
   void doneLoadingData();
 
