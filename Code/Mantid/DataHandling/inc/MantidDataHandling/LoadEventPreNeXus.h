@@ -68,8 +68,15 @@ private:
 
   std::vector<int> spectra_list;
   std::vector<int> period_list;
+
+  /// The times for each pulse.
   std::vector<boost::posix_time::ptime> pulsetimes;
+  /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
+  /// The proton charge on a pulse by pulse basis.
+  std::vector<double> proton_charge;
+  /// The total proton charge for the run.
+  double proton_charge_tot;
 
   std::ifstream * eventfile;
   std::size_t num_events;
@@ -88,6 +95,8 @@ private:
   void fixPixelId(PixelType &pixel, uint32_t &period) const;
 
   void procEvents(DataObjects::EventWorkspace_sptr & workspace);
+
+  void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
 
   std::size_t getFrameIndex(const std::size_t event_index,
                               const std::size_t last_frame_index);

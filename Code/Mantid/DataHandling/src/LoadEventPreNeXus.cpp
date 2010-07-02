@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
@@ -21,6 +22,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using boost::posix_time::ptime;
+using boost::posix_time::time_duration;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
@@ -50,11 +52,17 @@ static const uint32_t MAX_TOF_UINT32 = std::numeric_limits<uint32_t>::max();
 
 /// The difference in seconds between standard unix and gps epochs.
 static const uint32_t EPOCH_DIFF = 631152000;
-/// The EPOCH for GPS times.
-static const ptime EPOCH(boost::gregorian::from_simple_string("1990-1-1"));
+/// The epoch for GPS times.
+static const ptime GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
+/// The epoch for Unix times.
+static const ptime UNIX_EPOCH(boost::gregorian::date(1970, 1, 1));
 /// The number of nanoseconds in a second.
 static const uint32_t NANO_TO_SEC = 1000000000;
 
+/// Conversion factor between 100 nanoseconds and 1 microsecond.
+static const double TOF_CONVERSION = .1;
+/// Conversion factor between picoColumbs and microAmp*hours
+static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 /// Determine the size of the buffer for reading in binary files.
 static size_t getBufferSize(const size_t num_items);
 
@@ -163,7 +171,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   size_t event_offset = 0;
   size_t event_buffer_size = getBufferSize(this->num_events);
 
-  double shortest_tof = static_cast<double>(MAX_TOF_UINT32) * .1;
+  double shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
   double longest_tof = 0.;
 
   //uint32_t period;
@@ -208,7 +216,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
       // work with the good guys
       frame_index = this->getFrameIndex(event_offset + i, frame_index);
-      double tof = static_cast<double>(temp.tof) * 0.1; // convert units of 100 ns to microsecond
+      double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
       event = TofEvent(tof, frame_index);
 
       //Find the overall max/min tof
@@ -262,6 +270,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   for (size_t i = 0; i < this->num_pulses; i++)
     workspace->addTime(i, this->pulsetimes[i]);
 
+  this->setProtonCharge(workspace);
+
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
   workspace->doneLoadingData();
 
@@ -282,6 +292,35 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   msg << ". Shortest tof: " << shortest_tof << " microsec; longest tof: " << longest_tof << " microsec.";
   this->g_log.information(msg.str());
 
+}
+
+static std::time_t to_time_t(ptime t)
+{
+  if (t.is_special())
+  {
+    // TODO throw an exception
+  }
+  time_duration duration = t - UNIX_EPOCH;
+  return static_cast<std::time_t>(duration.total_seconds());
+}
+
+/**
+ * Add a sample environment log for the proton chage and set the scalar 
+ * value on the sample.
+ */
+void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & workspace)
+{
+  if (this->proton_charge.empty()) // nothing to do
+    return; 
+  Sample& sample = workspace->mutableSample();
+  sample.setProtonCharge(this->proton_charge_tot);
+
+  TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("ProtonCharge");
+  size_t num = this->proton_charge.size();
+  for (size_t i = 0; i < num; i++)
+    log->addValue(to_time_t(this->pulsetimes[i]), this->proton_charge[i]);
+  /// TODO set the units for the log
+  sample.addLogData(log);
 }
 
 //-----------------------------------------------------------------------------
@@ -430,9 +469,9 @@ static ptime getTime(uint32_t sec, uint32_t nano)
   }
 
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
-  return EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nano);
+  return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nano);
 #else
-  return EPOCH + boost::posix_time::seconds(sec);
+  return GPS_EPOCH + boost::posix_time::seconds(sec);
 #endif
 }
 
@@ -457,6 +496,8 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
   size_t offset = 0;
   Pulse* buffer = new Pulse[buffer_size];
   size_t obj_size = sizeof(Pulse);
+  double proton_charge_total = 0.;
+  double temp;
 
   // go through the file
   while (offset < this->num_pulses)
@@ -466,6 +507,12 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
     {
       this->pulsetimes.push_back(getTime(buffer[i].seconds, buffer[i].nanoseconds));
       this->event_indices.push_back(buffer[i].event_index);
+      temp = buffer[i].pCurrent * CURRENT_CONVERSION;
+      this->proton_charge.push_back(temp);
+      if (temp < 0.)
+	this->g_log.warning("Individiual proton charge < 0 being ignored");
+      else
+	proton_charge_total += temp;
     }
     offset += buffer_size;
 
