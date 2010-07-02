@@ -2,6 +2,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <QStringList>
 #include <QFileDialog>
@@ -163,8 +164,31 @@ void SANSAddFiles::runPythonAddFiles()
   {//we've made a comma separated list, there can be no comma at the end
     code_torun.truncate(code_torun.size()-1);
   }
+  //pass the current instrument
   code_torun += "),'"+m_SANSForm->inst_opt->currentText()+"', '";
-  code_torun += m_SANSForm->file_opt->currentText()+"')\n";
+  QString ext = m_SANSForm->file_opt->itemData(
+    m_SANSForm->file_opt->currentIndex()).toString();
+  code_torun += ext+"'";
+  
+  //pass the list of extensions that are supported by our two load algorithms
+  QStringList loads;
+  loads << "nexusTypes" << "rawTypes";
+  for(int i = 0; i < 2; ++i)
+  {
+    const std::set<std::string> &exts = loads[i] == "rawTypes" ? m_rExts : m_nExts;
+    code_torun += ","+loads[i]+"=(";
+    for(std::set<std::string>::const_iterator j=exts.begin();j!=exts.end();++j)
+    {
+      code_torun += "'"+QString::fromStdString(*j)+"',";
+    }
+    //the list may be an empty
+    if (code_torun.endsWith(","))
+    {
+      code_torun.truncate(code_torun.length()-1);
+    }
+    code_torun += ")";
+  }
+  code_torun += ")\n";
 
   g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << std::endl;
 
@@ -214,8 +238,26 @@ void SANSAddFiles::new2AddBrowse()
   QString dir =
     prevVals.value("InPath", m_SANSForm->datadir_edit->text()).toString();
   
-  QString fileFilter = "Files (*."+m_SANSForm->file_opt->currentText().toLower();
-  fileFilter += " *."+m_SANSForm->file_opt->currentText().toUpper()+")";
+	QString fileFilter = "Files (";
+  //get the file extensions supported by load algorithms, first LoadRaw and then LoadNexus
+  QStringList loadAlgs;
+  loadAlgs << "LoadRaw" << "LoadNexus";
+  for(int j = 0; j < loadAlgs.count(); ++j )
+  {
+    using namespace Mantid::API;
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
+      loadAlgs[j].toStdString());
+    Property *prop = alg->getProperty("Filename");
+    std::set<std::string> &exts = loadAlgs[j] == "LoadRaw" ? m_rExts : m_nExts;
+    exts = prop->allowedValues();
+    std::set<std::string>::const_iterator i = exts.begin();
+    for( ; i != exts.end(); ++i)
+    {
+      fileFilter += " *"+QString::fromStdString(*i);
+    }
+  }
+
+  fileFilter += ")";
   const QStringList files =
     QFileDialog::getOpenFileNames(parForm, "Select files", dir, fileFilter);
 

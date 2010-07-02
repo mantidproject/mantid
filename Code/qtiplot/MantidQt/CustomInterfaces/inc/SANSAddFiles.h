@@ -5,6 +5,8 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include <QString>
 
+#include <set>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -26,6 +28,10 @@ private:
   QWidget *parForm;
   //set to true when execution of the python scripts starts and false on completion
   bool m_pythonRunning;
+  //this is set to the extensions supported by LoadRaw, happens after the user selects
+  std::set<std::string> m_rExts;
+  //this is set to the extensions supported by LoadNexus, happens after the user selects
+  std::set<std::string> m_nExts;
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 

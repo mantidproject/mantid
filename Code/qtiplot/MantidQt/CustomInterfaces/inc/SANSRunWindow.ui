@@ -3499,23 +3499,6 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="1" column="1" colspan="2" >
-        <widget class="QLabel" name="label_40" >
-         <property name="text" >
-          <string>Output File Path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3" >
-        <widget class="QLineEdit" name="summedPath_edit" />
-       </item>
-       <item row="1" column="4" >
-        <widget class="QPushButton" name="summedPath_Btn" >
-         <property name="text" >
-          <string>Browse</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="3" >
         <spacer name="verticalSpacer_10" >
          <property name="orientation" >
@@ -3528,42 +3511,6 @@ p, li { white-space: pre-wrap; }
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="3" column="1" >
-        <widget class="QLabel" name="label_42" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize" >
-          <size>
-           <width>100</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text" >
-          <string>File</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2" colspan="2" >
-        <widget class="QLineEdit" name="new2Add_edit" />
-       </item>
-       <item row="3" column="4" >
-        <widget class="QPushButton" name="add_Btn" >
-         <property name="text" >
-          <string>Add</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="5" >
-        <widget class="QPushButton" name="browse_to_add_Btn" >
-         <property name="text" >
-          <string>Browse</string>
-         </property>
-        </widget>
        </item>
        <item row="3" column="6" >
         <spacer name="horizontalSpacer_18" >
@@ -3594,13 +3541,6 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="7" column="4" >
-        <widget class="QPushButton" name="sum_Btn" >
-         <property name="text" >
-          <string>Sum</string>
-         </property>
-        </widget>
-       </item>
        <item row="8" column="4" >
         <spacer name="verticalSpacer_8" >
          <property name="orientation" >
@@ -3614,8 +3554,80 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
+       <item row="1" column="1" colspan="2" >
+        <widget class="QLabel" name="label_40" >
+         <property name="text" >
+          <string>Output File Path</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3" >
+        <widget class="QLineEdit" name="summedPath_edit" />
+       </item>
+       <item row="1" column="4" >
+        <widget class="QPushButton" name="summedPath_Btn" >
+         <property name="text" >
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" >
+        <widget class="QLabel" name="label_42" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text" >
+          <string>File</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2" colspan="2" >
+        <widget class="QLineEdit" name="new2Add_edit" />
+       </item>
+       <item row="3" column="4" >
+        <widget class="QPushButton" name="add_Btn" >
+         <property name="toolTip" >
+          <string>Adds entries to the big table, use before clicking "Sum".</string>
+         </property>
+         <property name="text" >
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5" >
+        <widget class="QPushButton" name="browse_to_add_Btn" >
+         <property name="toolTip" >
+          <string>Find a file on your system</string>
+         </property>
+         <property name="text" >
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="4" >
+        <widget class="QPushButton" name="sum_Btn" >
+         <property name="toolTip" >
+          <string>Load the files in the table above and save them to one file</string>
+         </property>
+         <property name="text" >
+          <string>Sum</string>
+         </property>
+        </widget>
+       </item>
        <item rowspan="3" row="4" column="2" colspan="2" >
         <widget class="QListWidget" name="toAdd_List" >
+         <property name="toolTip" >
+          <string>Files to be summed, click at the top of this box or use the "Add" button</string>
+         </property>
          <property name="editTriggers" >
           <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
          </property>
@@ -3633,17 +3645,17 @@ p, li { white-space: pre-wrap; }
          </property>
         </widget>
        </item>
-       <item row="5" column="4" >
-        <widget class="QPushButton" name="remove_Btn" >
-         <property name="text" >
-          <string>Remove</string>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="4" >
         <widget class="QPushButton" name="clear_Btn" >
          <property name="text" >
           <string>Remove all</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="4" >
+        <widget class="QPushButton" name="remove_Btn" >
+         <property name="text" >
+          <string>Remove</string>
          </property>
         </widget>
        </item>
@@ -3656,7 +3668,6 @@ p, li { white-space: pre-wrap; }
       <zorder>add_Btn</zorder>
       <zorder>browse_to_add_Btn</zorder>
       <zorder>sum_Btn</zorder>
-      <zorder>toAdd_Tbl</zorder>
       <zorder>toAdd_List</zorder>
       <zorder>clear_Btn</zorder>
       <zorder>remove_Btn</zorder>
