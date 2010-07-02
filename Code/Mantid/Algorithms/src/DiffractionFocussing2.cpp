@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cfloat>
@@ -14,6 +15,7 @@
 
 namespace Mantid
 {
+
 namespace Algorithms
 {
 
@@ -21,7 +23,14 @@ namespace Algorithms
 DECLARE_ALGORITHM(DiffractionFocussing2)
 
 using namespace Kernel;
+using namespace API;
 using DataObjects::Workspace2D;
+using DataObjects::Workspace2D;
+using DataObjects::Workspace2D_sptr;
+using DataObjects::EventList;
+using DataObjects::EventWorkspace;
+using DataObjects::EventWorkspace_sptr;
+using DataObjects::EventWorkspace_const_sptr;
 
 /// Constructor
 DiffractionFocussing2::DiffractionFocussing2() : 
@@ -38,11 +47,11 @@ DiffractionFocussing2::~DiffractionFocussing2()
  */
 void DiffractionFocussing2::init()
 {
-  API::CompositeValidator<Workspace2D> *wsValidator = new API::CompositeValidator<Workspace2D>;
-  wsValidator->add(new API::WorkspaceUnitValidator<Workspace2D>("dSpacing"));
-  wsValidator->add(new API::RawCountValidator<Workspace2D>);
+  API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
+  wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
+  wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
   declareProperty(
-    new API::WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,wsValidator),
+    new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A 2D workspace with X values of d-spacing" );
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
@@ -51,6 +60,7 @@ void DiffractionFocussing2::init()
 		  "The name of the CalFile with grouping data" );
 }
 
+//=============================================================================
 /** Executes the algorithm
  *
  *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
@@ -61,16 +71,32 @@ void DiffractionFocussing2::exec()
   // retrieve the properties
   std::string groupingFileName=getProperty("GroupingFileName");
 
-  // Get the input workspace
-  inputW = getProperty("InputWorkspace");
-  nPoints = inputW->blocksize();
-  nHist = inputW->getNumberHistograms();
-
   readGroupingFile(groupingFileName);
 
+  // Get the input workspace
+  MatrixWorkspace_sptr matrixW = getProperty("InputWorkspace");
+  nPoints = matrixW->blocksize();
+  nHist = matrixW->getNumberHistograms();
+
+  eventW = boost::dynamic_pointer_cast<const EventWorkspace>( matrixW );
+  if (eventW != NULL)
+  {
+    //Input workspace is an event workspace. Use the other exec method
+    this->execEvent();
+    return;
+  }
+
+  // Get the input workspace
+  inputW = boost::dynamic_pointer_cast<const Workspace2D>( matrixW );
+  if (inputW == NULL)
+  {
+    throw std::runtime_error("Input workspace is not of type EventWorkspace nor Workspace2D.");
+  }
+  //No problem? Then it is a normal Workspace2D
   determineRebinParameters();
 
   API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(inputW,nGroups,nPoints+1,nPoints);
+
   // The spectaDetectorMap will have been copied from the input, but we don't want it
   out->mutableSpectraMap().clear();
 
@@ -219,6 +245,127 @@ void DiffractionFocussing2::exec()
   return;
 }
 
+
+//=============================================================================
+/** Executes the algorithm in the case of an Event input workspace
+ *
+ *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
+ *  @throw std::runtime_error If the rebinning process fails
+ */
+void DiffractionFocussing2::execEvent()
+{
+  inputW = eventW;
+
+  //Create a new outputworkspace with not much in it
+  DataObjects::EventWorkspace_sptr out;
+  out = boost::dynamic_pointer_cast<EventWorkspace>(
+      API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1) );
+  //Make sure the output spectra map is clear (it should be anyway).
+  out->mutableSpectraMap().clear();
+
+  // Make sure the group list is initialized
+  this->initializeGroups();
+
+  // Now the real work
+  const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
+  const API::Axis* const inSpecAxis = inputW->getAxis(1);
+
+  API::Progress progress(this,0.0,1.0,nHist+nGroups);
+  for (int i=0;i<nHist;i++)
+  {
+    progress.report();
+    //i is the workspace index (of the input)
+    //and spectrum_no is the corresponding spectrum #
+    int spectrum_no = inSpecAxis->spectraNo(i);
+    //And these are the detectors at that spectrum
+    std::vector<int> detlist = inSpecMap.getDetectors(spectrum_no);
+
+    //Check whether this spectra is in a valid group
+    const int group=spectra_group[i];
+    /*std::cout << "Workspace index " << i << ", which is spectrum # " <<
+        spectrum_no << ", goes to group " << group <<
+        "; this spectrum has " << detlist.size() << " detectors" <<
+          "\n";*/
+    if (group==-1) // Not in a group
+      continue;
+
+    // Get the group
+    //group2vectormap::iterator it=group2xvector.find(group);
+    //group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
+    // Add the detectors for this spectrum to the output workspace's spectra-detector map
+    out->mutableSpectraMap().addSpectrumEntries(group, detlist);
+    //std::cout << "Group has " << out->mutableSpectraMap().getDetectors(group).size() << " detectors now.\n";
+
+    //In workspace index Group, but what was in the OLD workspace index i
+    out->getEventList(group) += eventW->getEventListAtWorkspaceIndex(i);
+
+  }
+  //Clean up the workspace index but don't change the spectraMap
+  out->doneLoadingData(0);
+
+  //std::cout << "Setting the output workspace\n";
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out));
+  return;
+}
+
+
+//=============================================================================
+/** Initialize the groups for an event workspace
+ *
+ */
+void DiffractionFocussing2::initializeGroups()
+{
+  spectra_group.resize(nHist);
+  const API::Axis* const spectra_Axis = inputW->getAxis(1);
+  int maxGroup = 0;
+
+  for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
+  {
+    const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
+    spectra_group[i] = group;
+    if (group > maxGroup)
+      maxGroup = group;
+  }
+  //Save the # of groups
+  nGroups = maxGroup+1;
+}
+
+//=============================================================================
+/** Verify that all the contributing detectors to a spectrum belongs to the same group
+ *  @param spectrum_number The spectrum number in the workspace
+ *  @return Group number if successful otherwise return -1
+ */
+int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
+{
+  // Get the spectra to detector map
+  const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
+  const std::vector<int> dets = spectramap.getDetectors(spectrum_number);
+  if (dets.empty()) // Not in group
+  {
+    std::cout << spectrum_number << " <- this spectrum is empty!\n";
+    return -1;
+  }
+
+  std::vector<int>::const_iterator it = dets.begin();
+  udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
+  if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
+    return -1;
+  const int group = (*mapit).second;
+  int new_group;
+  for (it + 1; it != dets.end(); it++) // Loop other all other udets
+  {
+    mapit = udet2group.find((*it));
+    if (mapit == udet2group.end()) // Group not assigned
+      return -1;
+    new_group = (*mapit).second;
+    if (new_group != group) // At least one udet does not belong to the same group
+      return -1;
+  }
+
+  return group;
+}
+
+//=============================================================================
 /// Reads in the file with the grouping information
 /// @param groupingFileName The file that contains the group information
 ///
@@ -251,6 +398,7 @@ void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName
   return;
 }
 
+//=============================================================================
 /// Determine the rebinning parameters, i.e Xmin, Xmax and logarithmic step for each group
 void DiffractionFocussing2::determineRebinParameters()
 {
@@ -321,35 +469,6 @@ void DiffractionFocussing2::determineRebinParameters()
   return;
 }
 
-///Verify that all the contributing detectors to a spectrum belongs to the same group
-/// @param spectrum_number The spectrum number in the workspace
-/// @return Group number if successful otherwise return -1
-int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
-{
-  // Get the spectra to detector map
-  const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
-  const std::vector<int> dets = spectramap.getDetectors(spectrum_number);
-  if (dets.empty()) // Not in group
-    return -1;
-
-  std::vector<int>::const_iterator it = dets.begin();
-  udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
-  if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
-    return -1;
-  const int group = (*mapit).second;
-  int new_group;
-  for (it + 1; it != dets.end(); it++) // Loop other all other udets
-  {
-    mapit = udet2group.find((*it));
-    if (mapit == udet2group.end()) // Group not assigned
-      return -1;
-    new_group = (*mapit).second;
-    if (new_group != group) // At least one udet does not belong to the same group
-      return -1;
-  }
-  
-  return group;
-}
 
 } // namespace Algorithm
 } // namespace Mantid

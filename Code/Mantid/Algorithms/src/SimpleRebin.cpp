@@ -126,7 +126,10 @@ namespace Mantid
 
           //Copy all the axes
           for (int i=1; i<inputW->axes(); i++)
+          {
             outputW->replaceAxis( i, inputW->getAxis(i)->clone(outputW.get()) );
+            outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
+          }
 
 	  //Copy the units over too.
 	  for (int i=0; i < outputW->axes(); ++i)

@@ -156,8 +156,9 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /** Call this method when loading event data is complete.
    * The map of pixelid to spectrum # is generated.
+   * Also, a simple 1:1 map of spectrum # to pixel id (detector #) is generated
    * */
-  void EventWorkspace::doneLoadingData()
+  void EventWorkspace::doneLoadingData(int makeSpectraMap)
   {
     //Ok, we need to take the data_map, and turn it into a data[] vector.
 
@@ -203,10 +204,12 @@ namespace DataObjects
     for (int i=0; i < m_noVectors; i++)
       m_axes[1]->setValue(i, pixelid_table[i]);
 
-    //Make the mapping between spectrum # and pixel id (aka detector id)
-    //  In this case, it is a simple 1-1 map.
-    mutableSpectraMap().populateSimple(0, max_pixel_id+1); //Go to max_pixel_id+1 to make sure you catch that one too
-
+    if (makeSpectraMap)
+    {
+      //Make the mapping between spectrum # and pixel id (aka detector id)
+      //  In this case, it is a simple 1-1 map.
+      mutableSpectraMap().populateSimple(0, max_pixel_id+1); //Go to max_pixel_id+1 to make sure you catch that one too
+    }
 
     //Now clear the data_map
     this->data_map.clear();

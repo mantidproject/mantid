@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 // To be compatible with VSC Express edition that does not have tr1
 #ifndef HAS_UNORDERED_MAP_H
@@ -94,6 +95,10 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+
+  // For events
+  void execEvent();
+  void initializeGroups();
   
   /// Read the calibration file and construct the udet2group map
   void readGroupingFile(const std::string& groupingFileName);
@@ -103,7 +108,9 @@ private:
   int validateSpectrumInGroup(int spectrum_number);
   
   /// Shared pointer to the input workspace
-  DataObjects::Workspace2D_const_sptr inputW;
+  API::MatrixWorkspace_const_sptr inputW;
+  DataObjects::EventWorkspace_const_sptr eventW;
+
   // This map does not need to be ordered, just a lookup for udet
 #ifndef HAS_UNORDERED_MAP_H
   /// typedef for the storage of the UDET-group mapping

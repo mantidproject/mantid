@@ -108,6 +108,9 @@ namespace Mantid
       return m_s2dmap.count(spectrum_number);
     }
 
+    /** Get a vector of detectors ids contributing to a spectrum
+     * @param spectrum_number The # of the spectrum you are looking for.
+     */
     std::vector<int> SpectraDetectorMap::getDetectors(const int spectrum_number) const
     {
       std::vector<int> detectors;
@@ -127,7 +130,7 @@ namespace Mantid
 
     /** Gets a list of spectra corresponding to a list of detector numbers.
     *  @param detectorList A list of detector Ids
-    *  @return A vexctor where matching indices correspond to the relevant spectra id
+    *  @return A vector where matching indices correspond to the relevant spectra id
     */
     std::vector<int> SpectraDetectorMap::getSpectra(const std::vector<int>& detectorList) const
     {
