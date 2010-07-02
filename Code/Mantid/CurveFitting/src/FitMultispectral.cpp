@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMultispectral.h"
 #include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FuncMinimizerFactory.h"
+#include "MantidCurveFitting/CostFunctionFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/TableRow.h"
 
@@ -36,16 +38,15 @@ namespace CurveFitting
     declareProperty("MaxIterations", 500, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );
 
-    std::vector<std::string> minimizerOptions;
-    minimizerOptions.push_back("Levenberg-Marquardt");
-    minimizerOptions.push_back("Simplex");
-    minimizerOptions.push_back("Conjugate gradient (Fletcher-Reeves imp.)");
-    minimizerOptions.push_back("Conjugate gradient (Polak-Ribiere imp.)");
-    minimizerOptions.push_back("BFGS");
+    declareProperty("Output","","Base name for the output workspaces.");
+
+    std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
     declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
-    declareProperty("Output","","Base name for the output workspaces.");
+    std::vector<std::string> costFuncOptions = CostFunctionFactory::Instance().getKeys();;
+    declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
+      "The cost function to be used for the fit, default is Least squares", Direction::InOut);
 
   }
 
@@ -59,14 +60,10 @@ namespace CurveFitting
     // Get the input workspace
     DataObjects::Workspace2D_sptr ws = getProperty("InputWorkspace");
 
-    double startX = getProperty("StartX");
-    double endX = getProperty("EndX");
-
     double startY = getProperty("StartY");
     double endY = getProperty("EndY");
 
     std::string functionStr = getPropertyValue("Function");
-    std::string minimizer = getPropertyValue("Minimizer");
     std::string output = getPropertyValue("Output");
 
     // Find starting and ending spectra indeces istart and iend
@@ -160,15 +157,12 @@ namespace CurveFitting
 
       fit->setProperty("InputWorkspace",ws);
       fit->setProperty("WorkspaceIndex",i);
-
       fit->setProperty("Function",functionStr);
-
-      fit->setProperty("StartX",startX);
-      fit->setProperty("EndX",startX);
-
-      fit->setProperty("Minimizer",minimizer);
-
+      fit->setPropertyValue("StartX",getPropertyValue("StartX"));
+      fit->setPropertyValue("EndX",getPropertyValue("EndX"));
       fit->setPropertyValue("Output",output);
+      fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
+      fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
 
       int io = i-istart;
       std::ostringstream ostr;
@@ -208,14 +202,29 @@ namespace CurveFitting
           for(int i=0;i<names.size();i++)
           {
             params->addColumn("double",names[i]);
+            params->addColumn("double",names[i]+"_Err");
           }
         }
         API::TableRow row = params->appendRow();
         row <<  (*outputWS->getAxis(1))(io);
         API::ColumnVector<double> values = out_p->getVector("Value");
+        std::vector<double> errors;
+        if (out_p->columnCount() == 3)
+        {// Errors were calculated
+          API::ColumnVector<double> tmp = out_p->getVector("Error");
+          for(size_t i=0;i<tmp.size();++i)
+          {
+            errors.push_back(tmp[i]);
+          }
+        }
+        else
+        {
+          errors.assign(values.size(),0);
+        }
+
         for(int i=0;i<values.size();i++)
         {
-          row << values[i];
+          row << values[i] << errors[i];
         }
       }
     }

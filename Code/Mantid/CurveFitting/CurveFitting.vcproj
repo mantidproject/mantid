@@ -405,6 +405,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\FitMultispectralTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\FitTest.h"
 				>
 			</File>
