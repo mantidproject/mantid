@@ -106,7 +106,7 @@ public:
 private:
   /// Init the curve
   void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
-              const QString& type,int index);
+              int index);
 
   /// Handles delete notification
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
@@ -131,66 +131,37 @@ private slots:
 
   void dataReset(const QString&);
 
+  void axisScaleChanged(int axis, bool toLog);
+
 private:
 
   /// Make the curve name
   static QString createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
-                                 const QString& wsName,const QString& type,int index);
+                                 const QString& wsName,int index);
   /// Make a name for a copied curve
   static QString createCopyName(const QString& curveName);
   bool m_drawErrorBars;///< True for drawing error bars
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
-  /// spectra string
-  QString m_type;
   /// workspace index
   int  m_index;
   /// The bounding rect used by qwt to set the axes
   mutable QwtDoubleRect m_boundingRect;
 };
 
-/**  This class implements QwtData with direct access to a MatrixWorkspace.
- */
-class MantidQwtData: public QwtData
-{
-public:
-  /// Constructor
-  MantidQwtData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)
-    :m_workspace(workspace){}
-
-  /// Copy constructor
-  MantidQwtData(const MantidQwtData& data)
-    :m_workspace(data.m_workspace){}
-
-  virtual ~MantidQwtData();
-
-  bool sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const;
-
-  /// Return a new data object of the same type but with a new workspace
-  virtual MantidQwtData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const = 0;
-  /// Returns the error of the i-th data point
-  virtual double e(size_t i)const = 0;
-  /// Returns the x position of the error bar for the i-th data point (bin)
-  virtual double ex(size_t i)const = 0;
-  /// Number of error bars to plot
-  virtual int esize()const = 0;
-protected:
-  /// Pointer to the Mantid workspace
-  boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
-};
-
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
-class MantidQwtDataSpectra: public MantidQwtData
+class MantidQwtData: public QObject, public QwtData
 {
+  Q_OBJECT
 public:
   /// Constructor
-  MantidQwtDataSpectra(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,int specIndex);
+  MantidQwtData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,int specIndex);
 
   /// Copy constructor
-  MantidQwtDataSpectra(const MantidQwtDataSpectra& data);
+  MantidQwtData(const MantidQwtData& data);
 
     //! \return Pointer to a copy (virtual copy constructor)
-  virtual QwtData *copy() const {return new MantidQwtDataSpectra(*this);}
+  virtual QwtData *copy() const {return new MantidQwtData(*this);}
 
   //! \return Size of the data set
   virtual size_t size() const;
@@ -211,7 +182,7 @@ public:
   /// Return a new data object of the same type but with a new workspace
   virtual MantidQwtData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
   {
-    return new MantidQwtDataSpectra(workspace,m_spec);
+    return new MantidQwtData(workspace,m_spec);
   }
   /// Returns the error of the i-th data point
   double e(size_t i)const;
@@ -222,10 +193,18 @@ public:
 
   bool isHistogram()const{return m_isHistogram;}
 
+  bool sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const;
+
+  /// Inform the data that it is to be plotted on a log y scale
+  void setLogScale(bool on){m_logScale = on;}
+  bool logScale()const{return m_logScale;}
+
 private:
 
   friend class MantidCurve;
 
+  /// Pointer to the Mantid workspace
+  boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   /// Spectrum index in the workspace
   int m_spec;
   /// Reference to the X vector
@@ -238,6 +217,10 @@ private:
   bool m_isHistogram;
   /// This field can be set true for a histogram worspace. If it's true x(i) returns (X[i]+X[i+1])/2
   bool m_binCentres;
+  /// Indicates that the data is plotted on a log y scale
+  bool m_logScale;
+  /// temporary storage for a y value
+  mutable double m_tmp;
 
 };
 

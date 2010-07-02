@@ -1415,14 +1415,39 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);*/
 	if( !sc_engine ) return;
 
+  QwtScaleTransformation::Type old_type = sc_engine->type();
+
   // If not specified, keep the same as now
 	if( type < 0 ) type = axisType(axis);
+
+  if (type != old_type)
+  {
+    // recalculate boundingRect of MantidCurves
+    emit axisScaleChanged(axis,type == QwtScaleTransformation::Log10);
+  }
 
 	if (type == GraphOptions::Log10)
 	{
 		sc_engine->setType(QwtScaleTransformation::Log10);
+    if (start <= 0)
+    {
+      double y_min = DBL_MAX;
+      for(int i=0;i<curves();++i)
+      {
+        QwtPlotCurve* c = curve(i);
+        if (c)
+        {
+          double y = c->boundingRect().y();
+          if (y > 0 && y < y_min)
+          {
+            y_min = y;
+          }
+        }
+      }
+      start = y_min;
+    }
     // log scales can't represent zero or negative values, 1e-10 is a low number that I hope will be lower than most of the data but is still sensible for many color plots
-		start = start < 1e-90 ? 1e-10 : start;
+		//start = start < 1e-90 ? 1e-10 : start;
 	} 
 	else
 	{
@@ -1475,6 +1500,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   updateMarkersBoundingRect();
   d_plot->replot();
   d_plot->axisWidget(axis)->repaint();
+
 }
 
 

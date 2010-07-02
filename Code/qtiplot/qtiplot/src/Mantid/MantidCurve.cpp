@@ -17,17 +17,13 @@ using namespace Mantid::API;
  *  @param name The curve's name - shown in the legend
  *  @param wsName The workspace name.
  *  @param g The Graph widget which will display the curve
- *  @param type The type of the QwtData: "spectra" for MantidQwtDataSpectra or
- *              "bin" for MantidQwtDataBin (N.B. "bin" is not yet implemented)
  *  @param index The index of the spectrum or bin in the workspace
  *  @param err True if the errors are to be plotted
- *..@throw std::runtime_error if an invalid string is given in the type argument
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
-                         const QString& type,int index,bool err)
-  :PlotCurve(name), WorkspaceObserver(),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
+MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,const QString& type,int index,bool err)
+  :PlotCurve(name), WorkspaceObserver(),m_drawErrorBars(err),m_wsName(wsName),m_index(index)
 {
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
@@ -39,7 +35,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
        << " - not plotted";
     throw std::invalid_argument(ss.str());
   }
-  init(ws,g,type,index);
+  init(ws,g,index);
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
@@ -49,16 +45,12 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
 /**
  *  @param wsName The workspace name.
  *  @param g The Graph widget which will display the curve
- *  @param type The type of the QwtData: "spectra" for MantidQwtDataSpectra or
- *              "bin" for MantidQwtDataBin (N.B. "bin" is not yet implemented)
  *  @param index The index of the spectrum or bin in the workspace
  *  @param err True if the errors are to be plotted
- *..@throw std::runtime_error if an invalid string is given in the type argument
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidCurve::MantidCurve(const QString& wsName,Graph* g,
-                         const QString& type,int index,bool err)
-  :PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
+MantidCurve::MantidCurve(const QString& wsName,Graph* g,const QString& type,int index,bool err)
+  :PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err),m_wsName(wsName),m_index(index)
 {
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
@@ -72,8 +64,8 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
   }
   // If there's only one spectrum in the workspace, title is simply workspace name
   if (ws->getNumberHistograms() == 1) this->setTitle(wsName);
-  else this->setTitle(createCurveName(ws,wsName,type,index));
-  init(ws,g,type,index);
+  else this->setTitle(createCurveName(ws,wsName,index));
+  init(ws,g,index);
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
@@ -81,7 +73,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
 }
 
 MantidCurve::MantidCurve(const MantidCurve& c)
-  :PlotCurve(createCopyName(c.title().text())), WorkspaceObserver(), m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName),m_type(c.m_type),m_index(c.m_index)
+  :PlotCurve(createCopyName(c.title().text())), WorkspaceObserver(), m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName),m_index(c.m_index)
 {
   setData(c.data());
   observeDelete();
@@ -93,21 +85,12 @@ MantidCurve::MantidCurve(const MantidCurve& c)
 /**
  *  @param workspace The source workspace for the curve's data
  *  @param g The Graph widget which will display the curve
- *  @param type The type of the QwtData: "spectra" for MantidQwtDataSpectra or
- *              "bin" for MantidQwtDataBin (N.B. "bin" is not yet implemented)
  *  @param index The index of the spectrum or bin in the workspace
- *..@throw std::runtime_error if an invalid string is given in the type argument
  */
-void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
-                         const QString& type,int index)
+void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index)
 {
-  if (type == "spectra")
-  {
-    MantidQwtDataSpectra data(workspace,index);
-    setData(data);
-  }
-  else
-    throw std::runtime_error("Unrecognized MantidCurve type " + type.toStdString());
+  MantidQwtData data(workspace,index);
+  setData(data);
 
   int lineWidth = 1;
   MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
@@ -135,6 +118,8 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   {
     g->insertCurve(this,lineWidth);
   }
+
+  connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
 }
 
 
@@ -161,7 +146,7 @@ QwtDoubleRect MantidCurve::boundingRect() const
     {
       double y = data->y(i);
       if (y == std::numeric_limits<double>::infinity() || y != y) continue;
-      if (y < y_min) y_min = y;
+      if (y < y_min && (!mantidData()->logScale() || y > 0.)) y_min = y;
       if (y > y_max) y_max = y;
     }
     double x_min = data->x(0);
@@ -212,7 +197,7 @@ void MantidCurve::draw(QPainter *p,
 
 void MantidCurve::itemChanged()
 {
-  MantidQwtDataSpectra* d = dynamic_cast<MantidQwtDataSpectra*>(&data());
+  MantidQwtData* d = dynamic_cast<MantidQwtData*>(&data());
   if (d && d->m_isHistogram)
   {
     if (style() == Steps) d->m_binCentres = false;
@@ -224,24 +209,20 @@ void MantidCurve::itemChanged()
 
 /** Create the name for a curve from the following input:
  *  @param wsName The workspace name
- *  @param type   The data type ("spectra", "bin",...)
  *  @param index  The spectra (bin) index
  */
 QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
-                                     const QString& wsName,const QString& type,int index)
+                                     const QString& wsName,int index)
 {
   QString name = wsName + "-";
-  if (type == "spectra")
+  if (ws->getAxis(1)->isSpectra())
   {
-    if (ws->getAxis(1)->isSpectra())
-    {
-      int spec = ws->getAxis(1)->spectraNo(index);
-      name += "sp-"+QString::number(spec);
-    }
-    else
-    {
-      name += "wi-"+QString::number(index);
-    }
+    int spec = ws->getAxis(1)->spectraNo(index);
+    name += "sp-"+QString::number(spec);
+  }
+  else
+  {
+    name += "wi-"+QString::number(index);
   }
   return name;
 }
@@ -314,25 +295,20 @@ void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shar
 QString MantidCurve::saveToString()
 {
 	QString s;
-	s="MantidCurve\t"+m_wsName+"\t"+m_type+"\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
+	s="MantidCurve\t"+m_wsName+"\tsp\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
 	return s;
 }
 
 /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
 int MantidCurve::workspaceIndex()const
 {
-  if (dynamic_cast<const MantidQwtDataSpectra*>(mantidData()) != 0)
+  if (dynamic_cast<const MantidQwtData*>(mantidData()) != 0)
   {
     return m_index;
   }
   return -1;
 }
 
-//==========================================
-//
-//  MantdQwtData methods
-//
-//==========================================
 MantidQwtData* MantidCurve::mantidData()
 {
   MantidQwtData* d = dynamic_cast<MantidQwtData*>(&data());
@@ -345,39 +321,52 @@ const MantidQwtData* MantidCurve::mantidData()const
   return d;
 }
 
-bool MantidQwtData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
+void MantidCurve::axisScaleChanged(int axis, bool toLog)
 {
-  return workspace.get() == m_workspace.get();
+  if (axis == QwtPlot::yLeft || axis == QwtPlot::yRight)
+  {
+    mantidData()->setLogScale(toLog);
+    // force boundingRect calculation at this moment
+    invalidateBoundingRect();
+    boundingRect();
+  }
 }
 
+//==========================================
+//
+//  MantdQwtData methods
+//
+//==========================================
+
 /// Constructor
-MantidQwtDataSpectra::MantidQwtDataSpectra(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,int specIndex)
-:MantidQwtData(workspace),m_spec(specIndex),
+MantidQwtData::MantidQwtData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,int specIndex)
+:m_workspace(workspace),
+m_spec(specIndex),
 m_X(workspace->readX(specIndex)),
 m_Y(workspace->readY(specIndex)),
 m_E(workspace->readE(specIndex)),
 m_isHistogram(workspace->isHistogramData()),
-m_binCentres(false)
+m_binCentres(false),
+m_logScale(false),
+m_tmp(0)
 {}
 
 /// Copy constructor
-MantidQwtDataSpectra::MantidQwtDataSpectra(const MantidQwtDataSpectra& data)
-:MantidQwtData(data),m_spec(data.m_spec),
+MantidQwtData::MantidQwtData(const MantidQwtData& data)
+:m_workspace(data.m_workspace),
+m_spec(data.m_spec),
 m_X(data.m_workspace->readX(data.m_spec)),
 m_Y(data.m_workspace->readY(data.m_spec)),
 m_E(data.m_workspace->readE(data.m_spec)),
 m_isHistogram(m_workspace->isHistogramData()),
-m_binCentres(false)
+m_binCentres(data.m_binCentres),
+m_logScale(data.m_logScale),
+m_tmp(0)
 {}
-
-MantidQwtData::~MantidQwtData()
-{
-}
-
 
 /** Size of the data set
  */
-size_t MantidQwtDataSpectra::size() const
+size_t MantidQwtData::size() const
 {
   if (m_binCentres || !m_isHistogram)
   {
@@ -392,7 +381,7 @@ Return the x value of data point i
 \param i Index
 \return x X value of data point i
 */
-double MantidQwtDataSpectra::x(size_t i) const
+double MantidQwtData::x(size_t i) const
 {
   return m_binCentres ? (m_X[i] + m_X[i+1])/2 : m_X[i];
 }
@@ -402,23 +391,38 @@ Return the y value of data point i
 \param i Index
 \return y Y value of data point i
 */
-double MantidQwtDataSpectra::y(size_t i) const
+double MantidQwtData::y(size_t i) const
 {
-  return i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size()-1];
+  double tmp = i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size()-1];
+  if (m_logScale && tmp <= 0.)
+  {
+    tmp = m_tmp;
+  }
+  else
+  {
+    m_tmp = tmp;
+  }
+
+  return tmp;
 }
 
-double MantidQwtDataSpectra::ex(size_t i) const
+double MantidQwtData::ex(size_t i) const
 {
   return m_isHistogram ? (m_X[i] + m_X[i+1])/2 : m_X[i];
 }
 
-double MantidQwtDataSpectra::e(size_t i) const
+double MantidQwtData::e(size_t i) const
 {
   return m_E[i];
 }
 
-int MantidQwtDataSpectra::esize() const
+int MantidQwtData::esize() const
 {
   return m_E.size();
+}
+
+bool MantidQwtData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
+{
+  return workspace.get() == m_workspace.get();
 }
 
