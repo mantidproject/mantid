@@ -43,7 +43,10 @@ static const string OUT_PARAM("OutputWorkspace");
 
 /// Default number of items to read in from any of the files.
 static const size_t DEFAULT_BLOCK_SIZE = 100000; // 100,000
+/// All pixel ids with matching this mask are errors.
 static const PixelType ERROR_PID = 0x80000000;
+/// The maximum possible tof as native type
+static const uint32_t MAX_TOF_UINT32 = std::numeric_limits<uint32_t>::max();
 
 /// The difference in seconds between standard unix and gps epochs.
 static const uint32_t EPOCH_DIFF = 631152000;
@@ -160,8 +163,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   size_t event_offset = 0;
   size_t event_buffer_size = getBufferSize(this->num_events);
 
-  double shortest_tof = std::numeric_limits<double>::max();
-  double longest_tof = -std::numeric_limits<double>::max();
+  double shortest_tof = static_cast<double>(MAX_TOF_UINT32) * .1;
+  double longest_tof = 0.;
 
   //uint32_t period;
   //Initialize progress reporting.
@@ -242,7 +245,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     //PARALLEL_END_INTERUPT_REGION
   }
   //PARALLEL_CHECK_INTERUPT_REGION
-
 
   /*
   //OK, you've done all the events; but if some pixels got no events, their
