@@ -30,7 +30,7 @@ def color_output(cmdline, workingdir):
     while line != "":
         if len(line)>1:
             line = line[:-1] #Remove trailing /n
-        if ("Error:" in line) or ("error:" in line) \
+        if ("Error" in line) or ("error:" in line) \
             or ("terminate called after throwing an instance" in line) \
             or ("Segmentation fault" in line) \
             or ("  what(): " in line) \

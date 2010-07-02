@@ -178,6 +178,12 @@ if __name__ == "__main__":
             #Start runTests.sh and colorize output
             MantidBuild.color_output(cmdline=runtests_cmd, workingdir=subproj)
 
+            #Now show the log
+            print
+            print "-------------- mantid.log output (ERRORS only) ------------------------------"
+            print
+            MantidBuild.color_output(cmdline="grep Error ~/.mantid/mantid.log", workingdir=subproj)
+
             last_modified = current_times;
             print "\n\n--- continuing to monitor changes to file; or press return to test now ---"
 
