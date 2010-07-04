@@ -3,6 +3,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include <QMessageBox>
 #include <QHash>
 #include <QTextStream>
 #include <QFile>
@@ -49,11 +50,6 @@ QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &
   if ( m_fails.size() > 0 )
   {// some errors were displayed in the loop above
 	  return "One or more settings are invalid. The invalid settings are\nmarked with a *, hold your mouse over the * for more information";
-  }
-  // catches other errors that didn't show up when checking individual controls, shouldn't happen really
-  if ( m_pyScript.count('\n') == 0 )
-  {// this means that a script wasn't produced, only a one line error message
-    return "Problem reading user settings: \""+m_pyScript+"\"";
   }
   return "";
 }

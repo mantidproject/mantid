@@ -1,135 +1,145 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>ConvertToEnergy</class>
- <widget class="QWidget" name="ConvertToEnergy" >
-  <property name="geometry" >
+ <widget class="QWidget" name="ConvertToEnergy">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>442</width>
-    <height>600</height>
+    <width>553</width>
+    <height>682</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Convert To Energy</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_10" >
+  <layout class="QVBoxLayout" name="verticalLayout_10">
    <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="currentIndex" >
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tabEnergyTransfer" >
-      <attribute name="title" >
+     <property name="iconSize">
+      <size>
+       <width>14</width>
+       <height>14</height>
+      </size>
+     </property>
+     <widget class="QWidget" name="tabEnergyTransfer">
+      <attribute name="title">
        <string>Energy Transfer</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QStackedWidget" name="swIntrument" >
-         <property name="lineWidth" >
+        <widget class="QStackedWidget" name="swIntrument">
+         <property name="lineWidth">
           <number>0</number>
          </property>
-         <property name="currentIndex" >
+         <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="QWidget" name="page" >
-          <widget class="QLabel" name="lbPrefix" >
-           <property name="enabled" >
-            <bool>true</bool>
-           </property>
-           <property name="geometry" >
-            <rect>
-             <x>9</x>
-             <y>9</y>
-             <width>103</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text" >
-            <string>Instrument File Prefix</string>
-           </property>
-          </widget>
-          <widget class="QComboBox" name="loadRun_cbInst" >
-           <property name="enabled" >
-            <bool>true</bool>
-           </property>
-           <property name="geometry" >
-            <rect>
-             <x>118</x>
-             <y>9</y>
-             <width>69</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize" >
-            <size>
-             <width>100</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="editable" >
-            <bool>true</bool>
-           </property>
+         <widget class="QWidget" name="page">
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
            <item>
-            <property name="text" >
-             <string>MAR</string>
-            </property>
+            <widget class="QLabel" name="lbPrefix">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Instrument File Prefix</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <property name="text" >
-             <string>MAP</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>IRIS</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>OSIRIS</string>
-            </property>
-           </item>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="page_2" >
-          <layout class="QHBoxLayout" name="horizontalLayout" >
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_2" >
+            <widget class="QComboBox" name="loadRun_cbInst">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="editable">
+              <bool>true</bool>
+             </property>
              <item>
-              <widget class="QLabel" name="lbInst" >
-               <property name="text" >
+              <property name="text">
+               <string>MAR</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>MAP</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>IRIS</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>OSIRIS</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_2">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="lbInst">
+               <property name="text">
                 <string>Instrument</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cbInst" />
+              <widget class="QComboBox" name="cbInst"/>
              </item>
              <item>
-              <widget class="QLabel" name="lbAnalyser" >
-               <property name="text" >
+              <widget class="QLabel" name="lbAnalyser">
+               <property name="text">
                 <string>Analyser</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cbAnalyser" />
+              <widget class="QComboBox" name="cbAnalyser"/>
              </item>
              <item>
-              <widget class="QLabel" name="label" >
-               <property name="text" >
+              <widget class="QLabel" name="label">
+               <property name="text">
                 <string>Reflection</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cbReflection" />
+              <widget class="QComboBox" name="cbReflection"/>
              </item>
             </layout>
            </item>
@@ -138,131 +148,103 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbExperiment" >
-         <property name="title" >
+        <widget class="QGroupBox" name="gbExperiment">
+         <property name="title">
           <string>Input Files</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout" >
-          <property name="spacing" >
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
            <number>0</number>
           </property>
-          <property name="margin" >
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QStackedWidget" name="swInputFiles" >
-            <property name="lineWidth" >
+           <widget class="QStackedWidget" name="swInputFiles">
+            <property name="lineWidth">
              <number>0</number>
             </property>
-            <property name="currentIndex" >
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_3" >
-             <layout class="QGridLayout" name="gridLayout" >
-              <item row="1" column="0" >
-               <layout class="QHBoxLayout" name="horizontalLayout_5" >
+            <widget class="QWidget" name="page_3">
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="1" column="0">
+               <layout class="QHBoxLayout" name="runFilesLay">
                 <item>
-                 <widget class="QLabel" name="label_2" >
-                  <property name="text" >
-                   <string>Run Files</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit" />
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton" >
-                  <property name="text" >
-                   <string>Browse</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="ckSumSpecs" >
-                  <property name="text" >
+                 <widget class="QCheckBox" name="ckSumSpecs">
+                  <property name="text">
                    <string>Sum Files</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item row="2" column="0" >
-               <layout class="QHBoxLayout" name="horizontalLayout_6" >
+              <item row="2" column="0">
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
                 <item>
-                 <widget class="QLabel" name="label_3" >
-                  <property name="text" >
-                   <string>Map Files</string>
+                 <widget class="QLabel" name="label_3">
+                  <property name="text">
+                   <string>Map File</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="map_fileInput_leName" />
+                 <widget class="QLineEdit" name="map_fileInput_leName"/>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="map_fileInput_pbBrowse" >
-                  <property name="text" >
+                 <widget class="QLabel" name="valMap">
+                  <property name="text">
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="map_fileInput_pbBrowse">
+                  <property name="text">
                    <string>Browse</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item row="4" column="0" >
-               <layout class="QHBoxLayout" name="horizontalLayout_7" >
-                <item>
-                 <widget class="QLabel" name="label_4" >
-                  <property name="text" >
-                   <string>White Beam Van</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_3" />
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_3" >
-                  <property name="text" >
-                   <string>Browse</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+              <item row="4" column="0">
+               <layout class="QHBoxLayout" name="whiteFileLay"/>
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_4" >
-             <layout class="QVBoxLayout" name="verticalLayout_9" >
+            <widget class="QWidget" name="page_4">
+             <layout class="QVBoxLayout" name="verticalLayout_9">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_15" >
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
                 <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_6" >
+                 <layout class="QVBoxLayout" name="verticalLayout_6">
                   <item>
-                   <widget class="QLabel" name="lbRunFiles" >
-                    <property name="text" >
+                   <widget class="QLabel" name="lbRunFiles">
+                    <property name="text">
                      <string>Run Files</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="lbCalibration" >
-                    <property name="text" >
+                   <widget class="QLabel" name="lbCalibration">
+                    <property name="text">
                      <string>Calibration</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="lbMapping" >
-                    <property name="sizePolicy" >
-                     <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                   <widget class="QLabel" name="lbMapping">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
-                    <property name="layoutDirection" >
+                    <property name="layoutDirection">
                      <enum>Qt::LeftToRight</enum>
                     </property>
-                    <property name="text" >
+                    <property name="text">
                      <string>Mapping</string>
                     </property>
                    </widget>
@@ -270,81 +252,81 @@
                  </layout>
                 </item>
                 <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_5" >
+                 <layout class="QVBoxLayout" name="verticalLayout_5">
                   <item>
-                   <widget class="QLineEdit" name="leRunFiles" />
+                   <widget class="QLineEdit" name="leRunFiles"/>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="leCalibrationFile" />
+                   <widget class="QLineEdit" name="leCalibrationFile"/>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="leMappingFile" />
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_7" >
-                  <item>
-                   <widget class="QPushButton" name="pbRunFilesBrowse" >
-                    <property name="text" >
-                     <string>Browse</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pbCalibrationFilesBrowse" >
-                    <property name="text" >
-                     <string>Browse</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pbMappingFileBrowse" >
-                    <property name="text" >
-                     <string>Browse</string>
-                    </property>
-                   </widget>
+                   <widget class="QLineEdit" name="leMappingFile"/>
                   </item>
                  </layout>
                 </item>
                 <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_8" >
+                 <layout class="QVBoxLayout" name="verticalLayout_7">
                   <item>
-                   <widget class="QCheckBox" name="ckSumFiles" >
-                    <property name="text" >
+                   <widget class="QPushButton" name="pbRunFilesBrowse">
+                    <property name="text">
+                     <string>Browse</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pbCalibrationFilesBrowse">
+                    <property name="text">
+                     <string>Browse</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pbMappingFileBrowse">
+                    <property name="text">
+                     <string>Browse</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_8">
+                  <item>
+                   <widget class="QCheckBox" name="ckSumFiles">
+                    <property name="text">
                      <string>Sum Files</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="ckUseCalib" >
-                    <property name="text" >
+                   <widget class="QCheckBox" name="ckUseCalib">
+                    <property name="text">
                      <string>Use Calib File</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QComboBox" name="cbMappingOptions" />
+                   <widget class="QComboBox" name="cbMappingOptions"/>
                   </item>
                  </layout>
                 </item>
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_11" >
+               <layout class="QHBoxLayout" name="horizontalLayout_11">
                 <item>
-                 <widget class="QPushButton" name="pbBack_2" >
-                  <property name="text" >
+                 <widget class="QPushButton" name="pbBack_2">
+                  <property name="text">
                    <string>Background Removal</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_11" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_11">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -353,8 +335,8 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pbPlotRaw" >
-                  <property name="text" >
+                 <widget class="QPushButton" name="pbPlotRaw">
+                  <property name="text">
                    <string>Plot Time</string>
                   </property>
                  </widget>
@@ -369,67 +351,72 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbAnalysis" >
-         <property name="title" >
+        <widget class="QGroupBox" name="gbAnalysis">
+         <property name="title">
           <string>Analysis</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3" >
-          <property name="sizeConstraint" >
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
-          <property name="margin" >
+          <property name="margin">
            <number>0</number>
           </property>
-          <property name="spacing" >
+          <property name="spacing">
            <number>0</number>
           </property>
-          <item row="0" column="0" >
-           <widget class="QStackedWidget" name="swAnalysis" >
-            <property name="lineWidth" >
+          <item row="0" column="0">
+           <widget class="QStackedWidget" name="swAnalysis">
+            <property name="lineWidth">
              <number>0</number>
             </property>
-            <property name="currentIndex" >
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_5" >
-             <layout class="QGridLayout" name="gridLayout_4" >
-              <item row="1" column="2" >
-               <widget class="QSplitter" name="splitter" >
-                <property name="orientation" >
+            <widget class="QWidget" name="page_5">
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="1" column="3">
+               <widget class="QSplitter" name="splitter">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <widget class="QLabel" name="label_8" >
-                 <property name="text" >
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
                   <string>Normalise By</string>
                  </property>
                 </widget>
-                <widget class="QComboBox" name="cbNormal" >
+                <widget class="QComboBox" name="cbNormal">
                  <item>
-                  <property name="text" >
-                   <string>Monitor-1</string>
+                  <property name="text">
+                   <string>monitor-1</string>
                   </property>
                  </item>
                  <item>
-                  <property name="text" >
-                   <string>Monitor-2</string>
+                  <property name="text">
+                   <string>current</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>none</string>
                   </property>
                  </item>
                 </widget>
                </widget>
               </item>
-              <item row="1" column="0" >
-               <widget class="QPushButton" name="pbBack" >
-                <property name="text" >
+              <item row="1" column="0">
+               <widget class="QPushButton" name="pbBack">
+                <property name="text">
                  <string>Background Removal</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1" >
-               <spacer name="horizontalSpacer_9" >
-                <property name="orientation" >
+              <item row="1" column="2">
+               <spacer name="horizontalSpacer_9">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -437,47 +424,50 @@
                 </property>
                </spacer>
               </item>
-              <item row="1" column="3" >
-               <spacer name="horizontalSpacer_10" >
-                <property name="orientation" >
+              <item row="1" column="4">
+               <spacer name="horizontalSpacer_10">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLabel" name="valBg">
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
               </item>
              </layout>
-             <zorder>splitter</zorder>
-             <zorder>pbBack</zorder>
-             <zorder>horizontalSpacer_9</zorder>
-             <zorder>horizontalSpacer_10</zorder>
             </widget>
-            <widget class="QWidget" name="page_6" >
-             <layout class="QGridLayout" name="gridLayout_10" >
-              <item row="0" column="0" >
-               <widget class="QCheckBox" name="ckDetailedBalance" >
-                <property name="text" >
+            <widget class="QWidget" name="page_6">
+             <layout class="QGridLayout" name="gridLayout_10">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="ckDetailedBalance">
+                <property name="text">
                  <string>Detailed Balance</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" >
-               <widget class="QCheckBox" name="ckNormalise" >
-                <property name="text" >
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="ckNormalise">
+                <property name="text">
                  <string>Normalise by Monitor</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2" >
-               <spacer name="horizontalSpacer" >
-                <property name="orientation" >
+              <item row="0" column="2">
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -493,47 +483,54 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
           <string>Conversion to Energy Transfer</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_6" >
-          <property name="margin" >
+         <layout class="QGridLayout" name="gridLayout_6">
+          <property name="margin">
            <number>0</number>
           </property>
-          <property name="spacing" >
+          <property name="spacing">
            <number>0</number>
           </property>
-          <item row="0" column="0" >
-           <widget class="QStackedWidget" name="swConvertToEnergy" >
-            <property name="currentIndex" >
+          <item row="0" column="0">
+           <widget class="QStackedWidget" name="swConvertToEnergy">
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_7" >
-             <layout class="QHBoxLayout" name="horizontalLayout_3" >
+            <widget class="QWidget" name="page_7">
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <widget class="QLabel" name="label_9" >
-                <property name="text" >
+               <widget class="QLabel" name="label_9">
+                <property name="text">
                  <string>Incident Energy</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leEGuess" />
+               <widget class="QLineEdit" name="leEGuess"/>
               </item>
               <item>
-               <widget class="QLabel" name="label_10" >
-                <property name="text" >
+               <widget class="QLabel" name="valGuess">
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_10">
+                <property name="text">
                  <string>meV</string>
                 </property>
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_8" >
-                <property name="orientation" >
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>10</width>
                   <height>20</height>
@@ -542,18 +539,18 @@
                </spacer>
               </item>
               <item>
-               <widget class="QCheckBox" name="ckFixEi" >
-                <property name="text" >
+               <widget class="QCheckBox" name="ckFixEi">
+                <property name="text">
                  <string>Fix Ei</string>
                 </property>
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_7" >
-                <property name="orientation" >
+               <spacer name="horizontalSpacer_7">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -563,26 +560,26 @@
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_8" >
-             <layout class="QHBoxLayout" name="horizontalLayout_4" >
+            <widget class="QWidget" name="page_8">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
-               <widget class="QLabel" name="lbEFixed" >
-                <property name="text" >
-                 <string>Efixed value: &lt;value></string>
+               <widget class="QLabel" name="lbEFixed">
+                <property name="text">
+                 <string>Efixed value: &lt;value&gt;</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="lbSpectraMin" >
-                <property name="text" >
-                 <string>Spectra Min: &lt;value></string>
+               <widget class="QLabel" name="lbSpectraMin">
+                <property name="text">
+                 <string>Spectra Min: &lt;value&gt;</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="lbSpectraMax" >
-                <property name="text" >
-                 <string>Spectra Max: &lt;value></string>
+               <widget class="QLabel" name="lbSpectraMax">
+                <property name="text">
+                 <string>Spectra Max: &lt;value&gt;</string>
                 </property>
                </widget>
               </item>
@@ -594,77 +591,77 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
           <string>Rebin</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3" >
-          <property name="spacing" >
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
            <number>0</number>
           </property>
-          <property name="margin" >
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QStackedWidget" name="swRebin" >
-            <property name="currentIndex" >
+           <widget class="QStackedWidget" name="swRebin">
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_9" >
-             <layout class="QGridLayout" name="gridLayout_9" >
-              <item row="1" column="1" >
-               <layout class="QHBoxLayout" name="horizontalLayout_14" >
+            <widget class="QWidget" name="page_9">
+             <layout class="QGridLayout" name="gridLayout_9">
+              <item row="1" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_14">
                 <item>
-                 <widget class="QLabel" name="label_19" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_19">
+                  <property name="text">
                    <string>Low</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="leELow" />
+                 <widget class="QLineEdit" name="leELow"/>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_20" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_20">
+                  <property name="text">
                    <string>Width</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="leEWidth" />
+                 <widget class="QLineEdit" name="leEWidth"/>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_21" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_21">
+                  <property name="text">
                    <string>High</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="leEHigh" />
+                 <widget class="QLineEdit" name="leEHigh"/>
                 </item>
                </layout>
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_10" >
-             <layout class="QGridLayout" name="gridLayout_7" >
-              <item row="3" column="1" >
-               <layout class="QHBoxLayout" name="horizontalLayout_12" >
+            <widget class="QWidget" name="page_10">
+             <layout class="QGridLayout" name="gridLayout_7">
+              <item row="3" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_12">
                 <item>
-                 <widget class="QCheckBox" name="rebin_ckAutoRebin" >
-                  <property name="text" >
+                 <widget class="QCheckBox" name="rebin_ckAutoRebin">
+                  <property name="text">
                    <string>Auto Rebin</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_12" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_12">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -673,27 +670,27 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="rebin_pbRebin" >
-                  <property name="text" >
+                 <widget class="QPushButton" name="rebin_pbRebin">
+                  <property name="text">
                    <string>Rebin</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item row="0" column="1" >
-               <layout class="QHBoxLayout" name="horizontalLayout_13" >
+              <item row="0" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <item>
-                 <widget class="QLabel" name="label_14" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_14">
+                  <property name="text">
                    <string>Low</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leELow" >
-                  <property name="sizePolicy" >
-                   <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+                 <widget class="QLineEdit" name="rebin_leELow">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -701,11 +698,11 @@
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_13" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_13">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -714,21 +711,21 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_15" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_15">
+                  <property name="text">
                    <string>Width</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leEWidth" />
+                 <widget class="QLineEdit" name="rebin_leEWidth"/>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_14" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_14">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -737,14 +734,14 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_16" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_16">
+                  <property name="text">
                    <string>High</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leEHigh" />
+                 <widget class="QLineEdit" name="rebin_leEHigh"/>
                 </item>
                </layout>
               </item>
@@ -756,40 +753,40 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
           <string>Save</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_8" >
-          <item row="2" column="0" >
-           <layout class="QHBoxLayout" name="horizontalLayout_8" >
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
-             <widget class="QLabel" name="save_lbFormats" >
-              <property name="text" >
+             <widget class="QLabel" name="save_lbFormats">
+              <property name="text">
                <string>Select Desired Formats:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="save_ckSPE" >
-              <property name="text" >
+             <widget class="QCheckBox" name="save_ckSPE">
+              <property name="text">
                <string>SPE</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="save_ckNexus" >
-              <property name="text" >
+             <widget class="QCheckBox" name="save_ckNexus">
+              <property name="text">
                <string>Nexus</string>
               </property>
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_15" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_15">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -799,24 +796,24 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0" >
-           <layout class="QHBoxLayout" name="horizontalLayout_9" >
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
-             <widget class="QLabel" name="save_lbFile" >
-              <property name="text" >
-               <string>File Stem</string>
+             <widget class="QLabel" name="save_lbFile">
+              <property name="text">
+               <string>Filename</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="save_leFileStem" />
+             <widget class="QLineEdit" name="leNameSPE"/>
             </item>
             <item>
-             <spacer name="horizontalSpacer_2" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -825,8 +822,8 @@
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pbBrowse_Save" >
-              <property name="text" >
+             <widget class="QPushButton" name="pbBrowseSPE">
+              <property name="text">
                <string>Browse</string>
               </property>
              </widget>
@@ -838,60 +835,359 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabCalibration" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabCalibration">
+      <attribute name="title">
        <string>Calibration</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_11" />
+      <layout class="QGridLayout" name="gridLayout_11"/>
      </widget>
-     <widget class="QWidget" name="tabDiagnoseDetectors" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabDiagnoseDetectors">
+      <attribute name="title">
        <string>Diagnose Detectors</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4" >
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QCheckBox" name="ckRunDiag" >
-         <property name="enabled" >
+        <widget class="QCheckBox" name="ckRunDiag">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>Find Bad Detectors</string>
          </property>
-         <property name="checked" >
+         <property name="checked">
           <bool>true</bool>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabAbsoluteUnits" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabAbsoluteUnits">
+      <attribute name="title">
        <string>Absolute Units</string>
       </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QCheckBox" name="ckRunAbsol">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Absolute Units</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="gbCalRuns">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="title">
+          <string>Run Files</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_16">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="leVanMap"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="pbAbsMapFileBrowse">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="leAbsWhiteFile"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="leAbsMonoFiles"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_28">
+            <property name="text">
+             <string>Map File</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_17">
+         <item>
+          <widget class="QGroupBox" name="gbInteg">
+           <property name="title">
+            <string>Integration</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_17">
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_29">
+              <property name="text">
+               <string>E Min</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="leVanELow">
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLabel" name="label_30">
+              <property name="text">
+               <string>E Max</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QLineEdit" name="leVanEHigh">
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_31">
+              <property name="text">
+               <string>Incident Energy</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="leVanEi">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <spacer name="horizontalSpacer_24">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="0">
+             <spacer name="horizontalSpacer_25">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="gbMasses">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Masses</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_18">
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_32">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Vanadium mass</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_33">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Sample mass</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_34">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Sample RMM</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="leRMMMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="leSamMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLineEdit" name="leVanMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <spacer name="horizontalSpacer_26">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_27">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_10" >
+    <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
-      <widget class="QPushButton" name="pbHelp" >
-       <property name="maximumSize" >
+      <widget class="QPushButton" name="pbHelp">
+       <property name="maximumSize">
         <size>
          <width>25</width>
          <height>25</height>
         </size>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>?</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_5" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -900,24 +1196,24 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pbRun" >
-       <property name="maximumSize" >
+      <widget class="QPushButton" name="pbRun">
+       <property name="maximumSize">
         <size>
          <width>91</width>
          <height>16777215</height>
         </size>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Run</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_6" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>

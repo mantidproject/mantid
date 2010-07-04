@@ -1,27 +1,28 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>Homer</class>
- <widget class="QWidget" name="Homer" >
-  <property name="windowModality" >
+ <widget class="QWidget" name="Homer">
+  <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>
-  <property name="geometry" >
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>386</width>
-    <height>465</height>
+    <width>432</width>
+    <height>571</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Homer</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_6" >
-   <item row="1" column="1" >
-    <spacer name="horizontalSpacer_10" >
-     <property name="orientation" >
+  <layout class="QGridLayout" name="gridLayout_6">
+   <item row="1" column="1">
+    <spacer name="horizontalSpacer_10">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="sizeHint" stdset="0" >
+     <property name="sizeHint" stdset="0">
       <size>
        <width>100</width>
        <height>20</height>
@@ -29,56 +30,56 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="0" >
-    <widget class="QPushButton" name="pbHelp" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+   <item row="1" column="0">
+    <widget class="QPushButton" name="pbHelp">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
        <horstretch>25</horstretch>
        <verstretch>25</verstretch>
       </sizepolicy>
      </property>
-     <property name="minimumSize" >
+     <property name="minimumSize">
       <size>
        <width>25</width>
        <height>25</height>
       </size>
      </property>
-     <property name="maximumSize" >
+     <property name="maximumSize">
       <size>
        <width>25</width>
        <height>25</height>
       </size>
      </property>
-     <property name="sizeIncrement" >
+     <property name="sizeIncrement">
       <size>
        <width>200</width>
        <height>200</height>
       </size>
      </property>
-     <property name="baseSize" >
+     <property name="baseSize">
       <size>
        <width>25</width>
        <height>25</height>
       </size>
      </property>
-     <property name="text" >
+     <property name="text">
       <string>?</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="2" >
-    <widget class="QPushButton" name="pbRun" >
-     <property name="text" >
+   <item row="1" column="2">
+    <widget class="QPushButton" name="pbRun">
+     <property name="text">
       <string>Run</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="3" >
-    <spacer name="horizontalSpacer_11" >
-     <property name="orientation" >
+   <item row="1" column="3">
+    <spacer name="horizontalSpacer_11">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="sizeHint" stdset="0" >
+     <property name="sizeHint" stdset="0">
       <size>
        <width>100</width>
        <height>20</height>
@@ -86,54 +87,91 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="0" colspan="4" >
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="currentIndex" >
+   <item row="0" column="0" colspan="4">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="AlternateBase">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>255</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="AlternateBase">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>255</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="AlternateBase">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>255</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="conv" >
-      <attribute name="title" >
+     <widget class="QWidget" name="conv">
+      <attribute name="title">
        <string>Energy Transfer</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2" >
-       <item row="0" column="0" colspan="2" >
-        <widget class="QLabel" name="lbPrefix" >
-         <property name="enabled" >
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="lbPrefix">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>Instrument File Prefix</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="2" >
-        <widget class="QComboBox" name="loadRun_cbInst" >
-         <property name="enabled" >
+       <item row="0" column="2">
+        <widget class="QComboBox" name="loadRun_cbInst">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="maximumSize" >
+         <property name="maximumSize">
           <size>
            <width>100</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="editable" >
+         <property name="editable">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="0" column="3" colspan="3" >
-        <spacer name="horizontalSpacer_22" >
-         <property name="orientation" >
+       <item row="0" column="3" colspan="3">
+        <spacer name="horizontalSpacer_22">
+         <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>40</width>
            <height>20</height>
@@ -141,24 +179,24 @@
          </property>
         </spacer>
        </item>
-       <item row="1" column="0" colspan="6" >
-        <widget class="QGroupBox" name="gbExperiment" >
-         <property name="title" >
+       <item row="1" column="0" colspan="6">
+        <widget class="QGroupBox" name="gbExperiment">
+         <property name="title">
           <string>Input Files</string>
          </property>
-         <property name="flat" >
+         <property name="flat">
           <bool>false</bool>
          </property>
-         <property name="checkable" >
+         <property name="checkable">
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3" >
-          <item row="0" column="1" >
-           <spacer name="verticalSpacer_4" >
-            <property name="orientation" >
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="1">
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
               <height>10</height>
@@ -166,138 +204,138 @@
             </property>
            </spacer>
           </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="lbNorm" >
-            <property name="toolTip" >
-             <string comment="Select the type of normalization for the runs" >Select the type of normalization for the runs</string>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbNorm">
+            <property name="toolTip">
+             <string comment="Select the type of normalization for the runs">Select the type of normalization for the runs</string>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Normalise by</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2" >
-           <widget class="QComboBox" name="cbNormal" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+          <item row="1" column="1" colspan="2">
+           <widget class="QComboBox" name="cbNormal">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>80</width>
               <height>0</height>
              </size>
             </property>
-            <property name="toolTip" >
-             <string comment="Select the type of normalization for the runs" >Select the type of normalization for the runs</string>
+            <property name="toolTip">
+             <string comment="Select the type of normalization for the runs">Select the type of normalization for the runs</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="3" colspan="2" >
-           <widget class="QComboBox" name="cbMonitors" >
-            <property name="toolTip" >
-             <string comment="Select the type of normalization for the runs" >Select the type of normalization for the runs</string>
+          <item row="1" column="3" colspan="2">
+           <widget class="QComboBox" name="cbMonitors">
+            <property name="toolTip">
+             <string comment="Select the type of normalization for the runs">Select the type of normalization for the runs</string>
             </property>
-            <property name="sizeAdjustPolicy" >
+            <property name="sizeAdjustPolicy">
              <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" >
-           <widget class="QPushButton" name="pbBack" >
-            <property name="text" >
+          <item row="2" column="0">
+           <widget class="QPushButton" name="pbBack">
+            <property name="text">
              <string>bg removal:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1" >
-           <widget class="QLabel" name="valBg" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+          <item row="2" column="1">
+           <widget class="QLabel" name="valBg">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>20</width>
               <height>20</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="2" >
-           <widget class="QCheckBox" name="ckSumSpecs" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+          <item row="2" column="2">
+           <widget class="QCheckBox" name="ckSumSpecs">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>64</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>64</width>
               <height>0</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Sum Files</string>
             </property>
-            <property name="tristate" >
+            <property name="tristate">
              <bool>false</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="3" colspan="2" >
-           <widget class="QCheckBox" name="ckFixEi" >
-            <property name="text" >
+          <item row="2" column="3" colspan="2">
+           <widget class="QCheckBox" name="ckFixEi">
+            <property name="text">
              <string>Fix Ei</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0" >
-           <widget class="QLabel" name="map_fileInput_lbName" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <item row="3" column="0">
+           <widget class="QLabel" name="map_fileInput_lbName">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Map File</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1" colspan="2" >
-           <widget class="QLineEdit" name="map_fileInput_leName" />
+          <item row="3" column="1" colspan="2">
+           <widget class="QLineEdit" name="map_fileInput_leName"/>
           </item>
-          <item row="3" column="3" >
-           <widget class="QLabel" name="valMap" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+          <item row="3" column="3">
+           <widget class="QLabel" name="valMap">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>20</width>
               <height>20</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="4" >
-           <widget class="QPushButton" name="map_fileInput_pbBrowse" >
-            <property name="text" >
+          <item row="3" column="4">
+           <widget class="QPushButton" name="map_fileInput_pbBrowse">
+            <property name="text">
              <string>Browse</string>
             </property>
            </widget>
@@ -305,95 +343,95 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0" colspan="6" >
-        <widget class="QGroupBox" name="gbConvUnits" >
-         <property name="title" >
+       <item row="2" column="0" colspan="6">
+        <widget class="QGroupBox" name="gbConvUnits">
+         <property name="title">
           <string>Conversion to Energy Transfer</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_4" >
-          <item row="0" column="2" colspan="2" >
-           <widget class="QLabel" name="lbEGuess1" >
-            <property name="text" >
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="2" colspan="2">
+           <widget class="QLabel" name="lbEGuess1">
+            <property name="text">
              <string>Incident Energy</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="4" colspan="2" >
-           <widget class="QLineEdit" name="leEGuess" />
+          <item row="0" column="4" colspan="2">
+           <widget class="QLineEdit" name="leEGuess"/>
           </item>
-          <item row="0" column="6" >
-           <widget class="QLabel" name="lbEGuess2" >
-            <property name="text" >
+          <item row="0" column="6">
+           <widget class="QLabel" name="lbEGuess2">
+            <property name="text">
              <string>meV</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="7" >
-           <widget class="QLabel" name="valGuess" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+          <item row="0" column="7">
+           <widget class="QLabel" name="valGuess">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>20</width>
               <height>20</height>
              </size>
             </property>
-            <property name="maximumSize" >
+            <property name="maximumSize">
              <size>
               <width>20</width>
               <height>20</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="3" >
-           <widget class="QLabel" name="lbEBins" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <item row="1" column="0" colspan="3">
+           <widget class="QLabel" name="lbEBins">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Energy bins (meV)</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" >
-           <widget class="QLabel" name="lbELow" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <item row="2" column="0">
+           <widget class="QLabel" name="lbELow">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Low</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::AutoText</enum>
             </property>
-            <property name="wordWrap" >
+            <property name="wordWrap">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="1" >
-           <widget class="QLineEdit" name="leELow" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="leELow">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximumSize" >
+            <property name="maximumSize">
              <size>
               <width>40</width>
               <height>16777215</height>
@@ -401,15 +439,15 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2" >
-           <spacer name="horizontalSpacer_13" >
-            <property name="orientation" >
+          <item row="2" column="2">
+           <spacer name="horizontalSpacer_13">
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeType" >
+            <property name="sizeType">
              <enum>QSizePolicy::Fixed</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
               <height>20</height>
@@ -417,34 +455,34 @@
             </property>
            </spacer>
           </item>
-          <item row="2" column="3" >
-           <widget class="QLabel" name="lbEWidth" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <item row="2" column="3">
+           <widget class="QLabel" name="lbEWidth">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Width</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::AutoText</enum>
             </property>
-            <property name="wordWrap" >
+            <property name="wordWrap">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="4" >
-           <widget class="QLineEdit" name="leEWidth" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+          <item row="2" column="4">
+           <widget class="QLineEdit" name="leEWidth">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximumSize" >
+            <property name="maximumSize">
              <size>
               <width>40</width>
               <height>16777215</height>
@@ -452,15 +490,15 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="5" >
-           <spacer name="horizontalSpacer_25" >
-            <property name="orientation" >
+          <item row="2" column="5">
+           <spacer name="horizontalSpacer_25">
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeType" >
+            <property name="sizeType">
              <enum>QSizePolicy::Fixed</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
               <height>20</height>
@@ -468,34 +506,34 @@
             </property>
            </spacer>
           </item>
-          <item row="2" column="6" >
-           <widget class="QLabel" name="lbEHigh" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <item row="2" column="6">
+           <widget class="QLabel" name="lbEHigh">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>High</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::AutoText</enum>
             </property>
-            <property name="wordWrap" >
+            <property name="wordWrap">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="7" >
-           <widget class="QLineEdit" name="leEHigh" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+          <item row="2" column="7">
+           <widget class="QLineEdit" name="leEHigh">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximumSize" >
+            <property name="maximumSize">
              <size>
               <width>40</width>
               <height>16777215</height>
@@ -503,15 +541,15 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="8" >
-           <spacer name="horizontalSpacer_12" >
-            <property name="orientation" >
+          <item row="2" column="8">
+           <spacer name="horizontalSpacer_12">
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeType" >
+            <property name="sizeType">
              <enum>QSizePolicy::Fixed</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
               <height>20</height>
@@ -522,617 +560,381 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0" >
-        <widget class="QLabel" name="lbSPE" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+       <item row="3" column="0">
+        <widget class="QLabel" name="lbSPE">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>SPE filename</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1" colspan="3" >
-        <widget class="QLineEdit" name="leNameSPE" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <item row="3" column="1" colspan="3">
+        <widget class="QLineEdit" name="leNameSPE">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
         </widget>
        </item>
-       <item row="3" column="4" >
-        <widget class="QLabel" name="valSPE" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+       <item row="3" column="4">
+        <widget class="QLabel" name="valSPE">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="minimumSize" >
+         <property name="minimumSize">
           <size>
            <width>20</width>
            <height>20</height>
           </size>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>*</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="5" >
-        <widget class="QPushButton" name="pbBrowseSPE" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+       <item row="3" column="5">
+        <widget class="QPushButton" name="pbBrowseSPE">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="maximumSize" >
+         <property name="maximumSize">
           <size>
            <width>75</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>Browse</string>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="diag" >
-      <attribute name="title" >
+     <widget class="QWidget" name="diag">
+      <attribute name="title">
        <string>Diagnose Detectors</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout" >
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QCheckBox" name="ckRunDiag" >
-         <property name="enabled" >
+        <widget class="QCheckBox" name="ckRunDiag">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>Find Bad Detectors</string>
          </property>
-         <property name="checked" >
+         <property name="checked">
           <bool>true</bool>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
        <string>Absolute Units</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_13" >
-       <item row="0" column="0" >
-        <widget class="QCheckBox" name="ckRunAbsol" >
-         <property name="enabled" >
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QCheckBox" name="ckRunAbsol">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Absolute Units</string>
+         </property>
+         <property name="checked">
           <bool>false</bool>
          </property>
-         <property name="text" >
-          <string>NOT YET IMPLEMTED Absolute Units</string>
-         </property>
-         <property name="checked" >
-          <bool>false</bool>
-         </property>
         </widget>
        </item>
-       <item row="3" column="0" >
-        <widget class="QGroupBox" name="gbMasses" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item>
+        <widget class="QGroupBox" name="gbCalRuns">
+         <property name="title">
+          <string>Run Files</string>
          </property>
-         <property name="title" >
-          <string>Masses</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_11" >
-          <item row="0" column="0" colspan="3" >
-           <widget class="QLabel" name="leVanMass1" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text" >
-             <string>Vanadium Mass</string>
-            </property>
-           </widget>
+         <layout class="QGridLayout" name="gridLayout_12">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="leVanMap"/>
           </item>
-          <item row="0" column="3" colspan="4" >
-           <widget class="QLabel" name="lbSamMass1" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="pbAbsMapFileBrowse">
+            <property name="enabled">
+             <bool>true</bool>
             </property>
-            <property name="text" >
-             <string>Sample Mass</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="7" colspan="4" >
-           <widget class="QLabel" name="lbRMMMass1" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text" >
-             <string>RMM Sample Mass</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" >
-           <widget class="QLineEdit" name="leVanMass" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2" >
-           <spacer name="horizontalSpacer_43" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>72</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="3" >
-           <widget class="QLineEdit" name="leSamMass" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="6" >
-           <spacer name="horizontalSpacer_42" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>71</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="7" >
-           <widget class="QLineEdit" name="leRMMMass" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="10" >
-           <spacer name="horizontalSpacer_41" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>72</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="1" >
-           <widget class="QLabel" name="leVanMass2" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text" >
-             <string>g</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="5" >
-           <widget class="QLabel" name="lbSamMass2" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text" >
-             <string>g</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="9" >
-           <widget class="QLabel" name="lbRMMMass2" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text" >
-             <string>g</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="4" column="0" >
-        <widget class="QGroupBox" name="gbInteg" >
-         <property name="title" >
-          <string>Mono Integration Range</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_10" >
-          <item rowspan="2" row="0" column="0" >
-           <spacer name="horizontalSpacer_40" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>14</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item rowspan="2" row="0" column="1" colspan="2" >
-           <widget class="QLabel" name="label_13" >
-            <property name="text" >
-             <string>Initial Neutron Energy </string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="0" column="6" >
-           <spacer name="horizontalSpacer_38" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>14</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item rowspan="2" row="0" column="7" colspan="2" >
-           <widget class="QLabel" name="lbVanEHigh1" >
-            <property name="text" >
-             <string>Range High</string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="0" column="9" >
-           <spacer name="horizontalSpacer_35" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>14</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="4" colspan="2" >
-           <widget class="QLabel" name="lbVanELow1" >
-            <property name="text" >
-             <string>Range Low</string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="2" column="2" >
-           <widget class="QLabel" name="label_5" >
-            <property name="text" >
-             <string>meV</string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="2" column="3" >
-           <spacer name="horizontalSpacer_36" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item rowspan="2" row="2" column="5" >
-           <widget class="QLabel" name="lbVanELow2" >
-            <property name="text" >
-             <string>meV</string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="2" column="6" colspan="2" >
-           <spacer name="horizontalSpacer_23" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>14</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item rowspan="2" row="2" column="8" >
-           <widget class="QLabel" name="lbVanEHigh2" >
-            <property name="text" >
-             <string>meV</string>
-            </property>
-           </widget>
-          </item>
-          <item rowspan="2" row="2" column="9" >
-           <spacer name="horizontalSpacer_34" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="3" column="0" >
-           <spacer name="horizontalSpacer_39" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="3" column="1" >
-           <widget class="QLineEdit" name="leVanEi" />
-          </item>
-          <item row="3" column="4" >
-           <widget class="QLineEdit" name="leVanELow" />
-          </item>
-          <item row="3" column="7" >
-           <widget class="QLineEdit" name="leVanEHigh" />
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0" >
-        <widget class="QGroupBox" name="gbCalRuns" >
-         <property name="title" >
-          <string>Vanadium Runs</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_12" >
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label" >
-            <property name="text" >
-             <string>Mono van</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" >
-           <widget class="QLineEdit" name="leMonoVan" />
-          </item>
-          <item row="1" column="3" >
-           <widget class="QPushButton" name="pbAddMono" >
-            <property name="text" >
+            <property name="text">
              <string>Browse</string>
             </property>
            </widget>
           </item>
-          <item rowspan="3" row="2" column="1" >
-           <widget class="QLineEdit" name="leVanMap" />
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="leAbsWhiteFile"/>
           </item>
-          <item row="5" column="1" >
-           <widget class="QLineEdit" name="leVanMap_2" />
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="leAbsMonoFiles"/>
           </item>
-          <item rowspan="2" row="4" column="0" >
-           <widget class="QLabel" name="label_14" >
-            <property name="text" >
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
              <string>Map File</string>
             </property>
            </widget>
           </item>
-          <item row="7" column="0" >
-           <widget class="QLabel" name="label_8" >
-            <property name="text" >
-             <string>White Beam Van</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1" >
-           <widget class="QLineEdit" name="leWhiteVan" />
-          </item>
-          <item row="7" column="3" >
-           <widget class="QPushButton" name="pbAddWhite" >
-            <property name="text" >
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3" >
-           <widget class="QPushButton" name="pbAddMap" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="3" >
-           <widget class="QPushButton" name="pbAddMap_2" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" >
-           <widget class="QLabel" name="label_9" >
-            <property name="text" >
-             <string>Mask File</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2" >
-           <spacer name="horizontalSpacer" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType" >
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="3" column="2" >
-           <spacer name="horizontalSpacer_2" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType" >
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="5" column="2" >
-           <spacer name="horizontalSpacer_4" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType" >
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="7" column="2" >
-           <spacer name="horizontalSpacer_5" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType" >
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="1" >
-           <spacer name="verticalSpacer" >
-            <property name="orientation" >
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="8" column="1" >
-           <spacer name="verticalSpacer_2" >
-            <property name="orientation" >
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
        </item>
-       <item row="1" column="0" >
-        <spacer name="verticalSpacer_3" >
-         <property name="orientation" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QGroupBox" name="gbInteg">
+           <property name="title">
+            <string>Integration</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_5">
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>E Min</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="leVanELow">
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>E Max</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QLineEdit" name="leVanEHigh">
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Incident Energy</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="leVanEi">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="0">
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="gbMasses">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Masses</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_2">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Vanadium mass</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_3">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Sample mass</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_4">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Sample RMM</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="leRMMMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="leSamMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLineEdit" name="leVanMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -1145,44 +947,37 @@
     </widget>
    </item>
   </layout>
-  <zorder>pbHelp</zorder>
-  <zorder>pbRun</zorder>
-  <zorder>horizontalSpacer_11</zorder>
-  <zorder>tabWidget</zorder>
  </widget>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>loadRun_cbInst</tabstop>
-  <tabstop>cbNormal</tabstop>
-  <tabstop>cbMonitors</tabstop>
-  <tabstop>pbBack</tabstop>
-  <tabstop>ckSumSpecs</tabstop>
-  <tabstop>ckFixEi</tabstop>
-  <tabstop>map_fileInput_leName</tabstop>
-  <tabstop>map_fileInput_pbBrowse</tabstop>
-  <tabstop>leEGuess</tabstop>
-  <tabstop>leELow</tabstop>
+  <tabstop>ckRunAbsol</tabstop>
+  <tabstop>leAbsMonoFiles</tabstop>
+  <tabstop>leVanMap</tabstop>
+  <tabstop>leAbsWhiteFile</tabstop>
+  <tabstop>leVanEi</tabstop>
+  <tabstop>leVanELow</tabstop>
+  <tabstop>leVanEHigh</tabstop>
+  <tabstop>leVanMass</tabstop>
+  <tabstop>leSamMass</tabstop>
+  <tabstop>leRMMMass</tabstop>
+  <tabstop>pbRun</tabstop>
   <tabstop>leEWidth</tabstop>
   <tabstop>leEHigh</tabstop>
   <tabstop>leNameSPE</tabstop>
   <tabstop>pbBrowseSPE</tabstop>
   <tabstop>pbHelp</tabstop>
-  <tabstop>pbRun</tabstop>
-  <tabstop>ckRunAbsol</tabstop>
-  <tabstop>leVanMass</tabstop>
-  <tabstop>leSamMass</tabstop>
-  <tabstop>leRMMMass</tabstop>
-  <tabstop>leVanEi</tabstop>
-  <tabstop>leVanELow</tabstop>
-  <tabstop>leVanEHigh</tabstop>
-  <tabstop>leMonoVan</tabstop>
-  <tabstop>pbAddMono</tabstop>
-  <tabstop>leVanMap</tabstop>
-  <tabstop>leVanMap_2</tabstop>
-  <tabstop>leWhiteVan</tabstop>
-  <tabstop>pbAddWhite</tabstop>
-  <tabstop>pbAddMap</tabstop>
-  <tabstop>pbAddMap_2</tabstop>
+  <tabstop>leELow</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>cbNormal</tabstop>
+  <tabstop>pbAbsMapFileBrowse</tabstop>
+  <tabstop>ckRunDiag</tabstop>
+  <tabstop>cbMonitors</tabstop>
+  <tabstop>loadRun_cbInst</tabstop>
+  <tabstop>ckSumSpecs</tabstop>
+  <tabstop>ckFixEi</tabstop>
+  <tabstop>pbBack</tabstop>
+  <tabstop>leEGuess</tabstop>
+  <tabstop>map_fileInput_pbBrowse</tabstop>
+  <tabstop>map_fileInput_leName</tabstop>
  </tabstops>
  <resources/>
  <connections/>

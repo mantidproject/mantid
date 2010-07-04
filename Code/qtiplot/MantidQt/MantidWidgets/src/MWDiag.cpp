@@ -44,31 +44,21 @@ MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const 
   loadDefaults();
   setupToolTips();
   connectSignals(parent);
-  setUpValidators();
 }
 
 void MWDiag::insertFileWidgs()
 {
-  // we create and place some new widgets on the form using it's grid layout
-  QLayout *mapLayout = m_designWidg.gbVariation->layout();
-  QGridLayout *varLay = qobject_cast<QGridLayout*>(mapLayout); 
-  mapLayout = m_designWidg.gbIndividual->layout();
-  QGridLayout *indLay = qobject_cast<QGridLayout*>(mapLayout); 
-  // this requires that the form was setup with a grid layout
-  if ( ! ( varLay && indLay ) )
-  { // if you see the following exception check that the group box gbExperiment has a grid layout
-    throw Exception::NullPointerException("Problem with the layout in MWDiag", "m_designWidg");
-  }
-  
-  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", true, m_instru,
-    "White Beam Van 2",
-	"Another white beam vanadium run from the same instrument as the first");
-  varLay->addWidget(m_WBV2, 0, 0, 1, 4);
   m_WBV1 = new MWRunFile(this, m_prevSets.group()+"/WBV1", false, m_instru,
-    "White Beam Van 1",
-	"Name of a white beam vanadium run from the instrument of interest");
-  indLay->addWidget(m_WBV1, 0, 0, 1, 4);
+  			 "White Beam Van 1",
+  			 "Name of a white beam vanadium run from the instrument of interest");
+  m_designWidg.indivTestWhiteLay->addWidget(m_WBV1);
+
+  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", true, m_instru,
+  			 "White Beam Van 2",
+  			 "Another white beam vanadium run from the same instrument as the first");
+  m_designWidg.effVarTestWhiteLay->addWidget(m_WBV2);
 }
+
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control
 void MWDiag::loadDefaults()
 {  

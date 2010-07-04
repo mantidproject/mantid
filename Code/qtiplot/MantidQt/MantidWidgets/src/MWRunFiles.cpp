@@ -16,7 +16,7 @@ static const QString TIP_SEC_1 = "\n(selected intrument = ", TIP_SEC_2 = ")";
 const QString MWRunFiles::DEFAULT_FILTER = "Files (*.RAW *.raw *.NXS *.nxs);;All Files (*.*)";
 
 MWRunFiles::MWRunFiles(QWidget *parent, QString prevSettingsGr, bool allowEmpty, const QComboBox * const instrum, QString label, QString toolTip, QString exts) :
-  MantidWidget(parent), m_allowEmpty(allowEmpty), m_toolTipOrig(toolTip), m_filter(exts)
+  MantidWidget(parent), m_filter(exts),  m_toolTipOrig(toolTip), m_allowEmpty(allowEmpty)
 {
   // allows saving and loading the values the user entered on to the form
   m_prevSets.beginGroup(prevSettingsGr);

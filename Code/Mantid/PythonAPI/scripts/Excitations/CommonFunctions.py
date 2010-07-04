@@ -1,4 +1,47 @@
 from mantidsimple import *
+import os
+
+def create_filename(prefix, run_number, ext, padding=5):
+    return prefix + str(run_number).zfill(padding) + ext
+    
+def create_outputname(prefix, run_number, suffix=''):
+    if type(run_number) == int:
+        name = prefix + str(run_number) + '.spe' + suffix
+    else:
+        name = os.path.basename(run_number)
+        name = os.path.splitext(name)[0] + '.spe' + suffix
+    return name
+
+def load_run(prefix, run_number, output_name, ext='', name_suffix=''):
+    '''
+    Load a single run into the given workspace
+    '''
+    if type(run_number) == int: 
+        filename = create_filename(prefix, run_number, ext)
+    else:
+        filename = run_number
+    if output_name is None:
+        output_name = create_outputname(prefix, run_number,name_suffix)
+    else:
+        # strip any possible file paths
+        output_name = os.path.basename(output_name)
+    if ext.startswith(".n"):
+        loader = LoadNexus(filename, output_name)
+    else:
+        loader = LoadRaw(filename, output_name)
+    
+    return loader.workspace(), loader.getPropertyValue("Filename")
+
+#Sum a current workspace and a list of files
+def sum_files(accumulator, files, prefix):
+    if type(files) == list:
+        tmp_suffix = '_plus_tmp'
+        for file in files:
+            temp = load_run(prefix, file, tmp_suffix)[0]
+            Plus(accumulator, temp, accumulator)
+            mantid.deleteWorkspace(temp.getName())
+    else:
+        pass
 
 # returns a string with is comma separated list of the elements in the tuple, array or comma separated string!
 def listToString(list):
@@ -30,14 +73,7 @@ def stringToList(commaSeparated):
       theList.append(quoted)                       
   return theList
     
-#sum all the workspaces, when the workspaces are not summed single input files are specified in this file and the final Python script is made of many copies of this file
-def sumWorkspaces(total, prefix, runNumbers):
-  if len(runNumbers) > 1:
-    tempWS = 'CommonFuncs_sumWorkspaces_tempory'
-    for toAdd in runNumbers[1:]:
-      loadRun(prefix, toAdd, tempWS)
-      Plus(total, tempWS, total)
-    mantid.deleteWorkspace(tempWS)
+
   
 #-- Functions to do with input files
 # uses the extension to decide whether use LoadNexus or LoadRaw

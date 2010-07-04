@@ -29,7 +29,8 @@ SOURCES = \
   $$SRCDIR/SANSAddFiles.cpp \
   $$SRCDIR/Homer.cpp \
   $$SRCDIR/deltaECalc.cpp \
-  $$SRCDIR/Background.cpp
+  $$SRCDIR/Background.cpp \
+  $$SRCDIR/ConvertToEnergy.cpp
 
 HEADERS = \
   $$HEADERDIR/SANSRunWindow.h \
@@ -37,13 +38,15 @@ HEADERS = \
   $$HEADERDIR/SANSAddFiles.h \
   $$HEADERDIR/Homer.h \
   $$HEADERDIR/deltaECalc.h \
-  $$HEADERDIR/Background.h 
+  $$HEADERDIR/Background.h \
+  $$HEADERDIR/ConvertToEnergy.h
   
 UI_DIR = $$HEADERDIR
 
 FORMS = \
   $$HEADERDIR/SANSRunWindow.ui \
   $$HEADERDIR/Homer.ui \
+  $$HEADERDIR/ConvertToEnergy.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"
 

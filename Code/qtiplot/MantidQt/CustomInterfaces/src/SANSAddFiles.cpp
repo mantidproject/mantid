@@ -18,7 +18,7 @@ using namespace Mantid::Kernel;
 Logger& SANSAddFiles::g_log = Logger::get("SANSAddFiles");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
-  parForm(parent), m_SANSForm(ParWidgets), m_pythonRunning(false)
+  m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false)
 {
   initLayout();
 }
