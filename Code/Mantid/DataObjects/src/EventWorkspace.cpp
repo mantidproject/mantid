@@ -70,7 +70,7 @@ namespace DataObjects
   int EventWorkspace::blocksize() const
   {
     // Pick the first pixel to find the blocksize.
-    EventListVector::iterator it = data.begin();
+    EventListVector::const_iterator it = data.begin();
     if (it == data.end())
     {
       throw std::range_error("EventWorkspace::blocksize, no pixels in workspace, therefore cannot determine blocksize (# of bins).");
@@ -351,3 +351,50 @@ namespace DataObjects
 
 } // namespace DataObjects
 } // namespace Mantid
+
+
+///\cond TEMPLATE
+template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::EventWorkspace>;
+template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::EventWorkspace>;
+
+template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
+
+namespace Mantid
+{
+  namespace Kernel
+  {
+    template<> DLLExport
+    Mantid::DataObjects::EventWorkspace_sptr IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return *prop;
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type (EventWorkspace_sptr)";
+        throw std::runtime_error(message);
+      }
+    }
+
+    template<> DLLExport
+    Mantid::DataObjects::EventWorkspace_const_sptr IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type (EventWorkspace_sptr)";
+        throw std::runtime_error(message);
+      }
+    }
+  } // namespace Kernel
+} // namespace Mantid
+
+///\endcond TEMPLATE

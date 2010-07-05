@@ -34,7 +34,7 @@ namespace Mantid
     void SimpleRebin::init()
     {
       declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "",Direction::InOut,new HistogramValidator<>),
+        new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),
         "Workspace containing the input data");
       declareProperty(
         new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
@@ -54,12 +54,12 @@ namespace Mantid
     void SimpleRebin::exec()
     {
       // Get the input workspace
-      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
+      MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
       // retrieve the properties
-      std::vector<double> rb_params=getProperty("Params");
+      const std::vector<double> rb_params=getProperty("Params");
 
-      bool dist = inputW->isDistribution();
+      const bool dist = inputW->isDistribution();
 
       // workspace independent determination of length
       const int histnumber = inputW->getNumberHistograms();
@@ -70,25 +70,17 @@ namespace Mantid
 
       //---------------------------------------------------------------------------------
       //Now, determine if the input workspace is actually an EventWorkspace
-      EventWorkspace_sptr eventW = boost::dynamic_pointer_cast<EventWorkspace>(inputW);
+      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
 
       if (eventW != NULL)
       {
         //------- EventWorkspace ---------------------------
-        EventWorkspace_sptr eventOutW;
-        if (getPropertyValue("OutputWorkspace") == getPropertyValue("InputWorkspace"))
+        MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
+        EventWorkspace_sptr eventOutW = boost::dynamic_pointer_cast<EventWorkspace>(outputW);
+        if (eventOutW == eventW)
         {
-          //---- Same output as input; don't copy data for no reason. ---
-          eventOutW = eventW;
-          //This only sets the X axis. Actual rebinning will be done upon data access.
+          // This only sets the X axis. Actual rebinning will be done upon data access.
           eventOutW->setAllX(XValues_new);
-          //Copy the units over too.
-          for (int i=0; i < eventOutW->axes(); ++i)
-          {
-            eventOutW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
-          }
-          // Assign it to the output workspace property; recasting to matrixworkspace
-          setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutW) );
         }
         else
         {
@@ -108,12 +100,12 @@ namespace Mantid
           {
             //std::cout << "histogram " << i << "\n";
             //Set it in the input workspace so as to let it generate the right histogram
-            eventW->setX(i, XValues_new);
+            boost::const_pointer_cast<EventWorkspace>(eventW)->setX(i, XValues_new);
             //And set it in the output histogram.
             outputW->setX(i, XValues_new);
             //Copy over the Y data from the on-the-fly-generated histogram
             //Get a const event list reference. eventW->dataY() doesn't work.
-            const EventList el = eventW->getEventListAtWorkspaceIndex(i);
+            const EventList& el = boost::const_pointer_cast<EventWorkspace>(eventW)->getEventListAtWorkspaceIndex(i);
             MantidVec y_data = el.dataY();
             //std::cout << "y data size is " << y_data.size() << " for " << i << "\n";
             outputW->dataY(i).assign(y_data.begin(), y_data.end());
@@ -184,13 +176,6 @@ namespace Mantid
 
           // Populate the output workspace X values
           outputW->setX(hist,XValues_new);
-          ////copy oer the spectrum No and ErrorHelper
-          //try {
-          //  outputW->getAxis(1)->setValue(hist,(*(inputW->getAxis(1)))(hist));
-          //  //outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
-          //} catch (Exception::IndexError) {
-          //  // OK, so this isn't a Workspace2D
-          //}
 
           prog.report();
           PARALLEL_END_INTERUPT_REGION

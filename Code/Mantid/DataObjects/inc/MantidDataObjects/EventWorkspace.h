@@ -142,7 +142,7 @@ private:
   /** A vector that holds the event list for each pixel; the key is
    * the spectrum #, which is not necessarily the pixelid.
    */
-  mutable EventListVector data;
+  EventListVector data;
 
   /// Static reference to the logger class
   static Kernel::Logger & g_log;
