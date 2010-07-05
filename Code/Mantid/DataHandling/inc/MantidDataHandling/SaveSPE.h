@@ -54,6 +54,9 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
 
+  /// the mask flag (=-1e30) from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
+  static const double MASK_FLAG;
+
 private:
   /// Initialisation code
   void init();
@@ -72,8 +75,6 @@ private:
   ///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
   int m_nBins;
 
-  /// the mask flag (=-1e30) from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
-  static const double MASK_FLAG;
   /// the error value (=0.0) for spectra whose detectors are all masked, from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
   static const double MASK_ERROR;
 };

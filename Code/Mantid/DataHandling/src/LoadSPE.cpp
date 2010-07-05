@@ -2,10 +2,12 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadSPE.h"
+#include "MantidDataHandling/SaveSPE.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include <cstdio>
+#include <limits>
 
 /// @cond
 // Don't document this very long winded way of getting "degrees" to print on the axis.
@@ -179,6 +181,12 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
       ss << "Reading data value" << i << " of histogram " << index;
       reportFormatError(ss.str());
     }
+    // -10^30 is the flag for not a number used in SPE files (from www.mantidproject.org/images/3/3d/Spe_file_format.pdf)
+    if ( Y[i] == SaveSPE::MASK_FLAG )
+    {
+      Y[i] = std::numeric_limits<double>::quiet_NaN();
+    }
+
   }
   // Read to EOL
   fgets(comment,100,speFile);

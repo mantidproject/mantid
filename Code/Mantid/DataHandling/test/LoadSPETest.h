@@ -62,7 +62,7 @@ public:
     TS_ASSERT_EQUALS( ws->readX(22)[86], -2.8 )
     TS_ASSERT_EQUALS( ws->readX(31)[195], 19.0 )
 
-    TS_ASSERT_EQUALS( ws->readY(4)[99], -1.0E+30 )
+    TS_ASSERT_DIFFERS( ws->readY(4)[99], ws->readY(4)[99] )
     TS_ASSERT_EQUALS( ws->readY(5)[0], 0.0 )
     TS_ASSERT_EQUALS( ws->readY(9)[48], -3.911 )
     TS_ASSERT_EQUALS( ws->readY(13)[137], 4.313 )
