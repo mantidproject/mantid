@@ -44,7 +44,7 @@ public:
     NUMPIXELS = 500;
     NUMBINS = 1001;
     NUMEVENTS = 100;
-    BIN_DELTA = 1e3;
+    BIN_DELTA = 1000;
   }
 
 

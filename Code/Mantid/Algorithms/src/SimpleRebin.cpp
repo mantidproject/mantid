@@ -100,16 +100,25 @@ namespace Mantid
           {
             //std::cout << "histogram " << i << "\n";
             //Set it in the input workspace so as to let it generate the right histogram
-            boost::const_pointer_cast<EventWorkspace>(eventW)->setX(i, XValues_new);
+            //boost::const_pointer_cast<EventWorkspace>(eventW)->setX(i, XValues_new);
+
             //And set it in the output histogram.
             outputW->setX(i, XValues_new);
-            //Copy over the Y data from the on-the-fly-generated histogram
+
             //Get a const event list reference. eventW->dataY() doesn't work.
             const EventList& el = boost::const_pointer_cast<EventWorkspace>(eventW)->getEventListAtWorkspaceIndex(i);
-            MantidVec y_data = el.dataY();
-            //std::cout << "y data size is " << y_data.size() << " for " << i << "\n";
+            //const EventList& el = eventW->getEventListAtWorkspaceIndex(i);
+
+            //Now use this const method to generate a histogram without changing the event list or requiring const casts
+            MantidVec y_data, e_data;
+            el.generateHistogramForX(XValues_new.access(), y_data, e_data);
+
+            //The following direct access fails because somewhere in there,
+            // the dataY() vector is copied instead of returned.
+            //el.generateHistogramForX(XValues_new.access(), outputW->dataY(i), outputW->dataE(i));
+
+            //Copy the data over.
             outputW->dataY(i).assign(y_data.begin(), y_data.end());
-            MantidVec e_data = el.dataE();
             outputW->dataE(i).assign(e_data.begin(), e_data.end());
 
             //Report progress

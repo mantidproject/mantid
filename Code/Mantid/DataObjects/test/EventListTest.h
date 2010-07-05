@@ -79,12 +79,13 @@ private:
   EventList el;
   static const int NUMEVENTS = 100;
   static const int NUMBINS = 1600;
-  static const float BIN_DELTA = 1e4;
+  int BIN_DELTA;
 
 
 public:
   EventListTest()
   {
+    BIN_DELTA = 1e4;
   }
 
   void setUp()
