@@ -375,15 +375,17 @@ namespace DataObjects
   }
 
 
-  /// Make the histogram; ironically declared as const to allow data access.
-  void EventList::generateHistogram() const
+  /** Fill a histogram given specified histogram bounds. Does not modify
+   * the eventlist (const method).
+   *
+   * @param X Histogram bins to use
+   * @param Y vector of Y data that will be set
+   * @param E vector of E data that will be set
+   */
+  void EventList::generateHistogramForX(const StorageType& X, StorageType& Y, StorageType& E) const
   {
-    StorageType &Y = refY.access();
-    StorageType &E = refE.access();
-    StorageType &X = refX.access();
-
     //For slight speed=up.
-    size_t x_size = refX->size();
+    size_t x_size = X.size();
 
     if (x_size <= 1)
     {
@@ -452,7 +454,17 @@ namespace DataObjects
       } // end if (there are any events to histogram)
     }// end if (we need to re-histogram)
 
+  }
 
+
+  /// Make the histogram; ironically declared as const to allow data access.
+  void EventList::generateHistogram() const
+  {
+    StorageType &X = refX.access();
+    StorageType &Y = refY.access();
+    StorageType &E = refE.access();
+
+    this->generateHistogramForX(X, Y, E);
   }
 
 } /// namespace DataObjects

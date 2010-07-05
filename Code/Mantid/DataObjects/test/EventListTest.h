@@ -78,6 +78,8 @@ class EventListTest : public CxxTest::TestSuite
 private:
   EventList el;
   static const int NUMEVENTS = 100;
+  static const int NUMBINS = 1600;
+  static const float BIN_DELTA = 1e4;
 
 
 public:
@@ -209,7 +211,7 @@ public:
     //Generate the histrogram bins
     EventList::StorageType shared_x;
     double tof; //in ns
-    for (tof=0; tof<16e3*1e3; tof += 1e4)
+    for (tof=0; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
     {
       //bins of 10 microsec
       shared_x.push_back(tof);
@@ -318,6 +320,34 @@ public:
       if (X[i] > 10e6)
         TS_ASSERT_EQUALS(Y[i], 0.0);
     }
+  }
+
+
+  void test_histogram_const_call()
+  {
+    this->fake_uniform_data();
+    this->test_setX(); //Set it up WITH THE default binning
+    //Ok, we have this many bins
+    TS_ASSERT_EQUALS(this->el.getRefX()->size(), NUMBINS+1);
+
+    //Make one with half the bins
+    EventList::StorageType some_other_x;
+    double tof; //in ns
+    for (tof=0; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA*2)
+      some_other_x.push_back(tof);
+
+    const EventList el3(el); //need to copy to a const method in order to access the data directly.
+    EventList::StorageType Y, E;
+    el3.generateHistogramForX(some_other_x, Y, E);
+    TS_ASSERT_EQUALS(Y.size(), some_other_x.size()-1);
+    TS_ASSERT_EQUALS(E.size(), some_other_x.size()-1);
+    //Now there are 4 events per bin
+    for (int i=0; i<Y.size(); i++)
+      TS_ASSERT_EQUALS(Y[i], 4.0);
+
+    //With all this jazz, the original element is unchanged
+    TS_ASSERT_EQUALS(this->el.getRefX()->size(), NUMBINS+1);
+
   }
 
 

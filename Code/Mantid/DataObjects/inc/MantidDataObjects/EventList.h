@@ -150,6 +150,8 @@ public:
   /** Delete the cached version of the histogram data. */
   void emptyCache() const;
 
+  void generateHistogramForX(const StorageType& X, StorageType& Y, StorageType& E) const;
+
 
 private:
   ///List of events.
