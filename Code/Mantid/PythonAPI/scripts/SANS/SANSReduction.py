@@ -179,8 +179,8 @@ TRANS_WAV2 = None
 TRANS_WAV1_FULL = None
 TRANS_WAV2_FULL = None
 # Mon/Det for SANS2D
-TRANS_UDET_MON = 2
-TRANS_UDET_DET = 3
+TRANS_INCID_MON = 2
+TRANS_TRANS_MON = 3
 # this is if to use InterpolatingRebin on the monitor spectrum used to normalise the transmission
 TRANS_INTERPOLATE = False
 
@@ -833,13 +833,13 @@ def clearCurrentMaskDefaults():
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
     
-    global MONITORSPECTRUM, MONITORSPECLOCKED, SAMP_INTERPOLATE, TRANS_UDET_MON, TRANS_UDET_DET, TRANS_INTERPOLATE
+    global MONITORSPECTRUM, MONITORSPECLOCKED, SAMP_INTERPOLATE, TRANS_INCID_MON, TRANS_TRANS_MON, TRANS_INTERPOLATE
     MONITORSPECTRUM = 2
     MONITORSPECLOCKED = False
     SAMP_INTERPOLATE = False
     
-    TRANS_UDET_MON = 2
-    TRANS_UDET_DET = 3
+    TRANS_INCID_MON = 2
+    TRANS_TRANS_MON = 3
     TRANS_INTERPOLATE = False
 
 ####################################
@@ -1182,8 +1182,8 @@ def SuggestMonitorSpectrum(specNum, interp=False):
     MONITORSPECTRUM = int(specNum)
 
 def SetTransSpectrum(specNum, interp=False):
-    global TRANS_UDET_MON
-    TRANS_UDET_MON = int(specNum)
+    global TRANS_INCID_MON
+    TRANS_INCID_MON = int(specNum)
 
     global TRANS_INTERPOLATE
     if not TRANS_INTERPOLATE :                 #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
@@ -1297,6 +1297,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
             SANSUtility.StripEndZeroes(final_workspace)
         # Store the mask file within the final workspace so that it is saved to the CanSAS file
         AddSampleLog(final_workspace, "UserFile", MASKFILE)
+        AddSampleLog(final_workspace, "RunNumber", _SAMPLE_RUN.split('.')[0])
     else:
         quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
         for key, value in quadrants.iteritems():
@@ -1384,7 +1385,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         else:
             trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, False)
             direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, False)
-            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, TRANS_UDET_MON, TRANS_UDET_DET, MinWavelength = translambda_min, \
+            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, TRANS_INCID_MON, TRANS_TRANS_MON, MinWavelength = translambda_min, \
                                   MaxWavelength = translambda_max, FitMethod = fit_type, OutputUnfittedData=True)
         # Remove temporaries
         mantid.deleteWorkspace(trans_tmp_out)

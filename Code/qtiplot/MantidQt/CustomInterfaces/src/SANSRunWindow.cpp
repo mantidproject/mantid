@@ -471,7 +471,7 @@ bool SANSRunWindow::loadUserFile()
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction("printParameter('MONITORSPECTRUM'),"));
-  m_uiForm.trans_monitor->setText(runReduceScriptFunction("printParameter('TRANS_UDET_MON'),"));
+  m_uiForm.trans_monitor->setText(runReduceScriptFunction("printParameter('TRANS_INCID_MON'),"));
   m_uiForm.monitor_interp->setChecked(
     runReduceScriptFunction("printParameter('SAMP_INTERPOLATE'),") == "True");
   m_uiForm.trans_interp->setChecked(

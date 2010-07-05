@@ -1661,13 +1661,13 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QGroupBox" name="groupBox_14" >
            <property name="title" >
-            <string>Bank Selection</string>
+            <string>Incident Monitors</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_9" >
             <item row="0" column="0" >
              <widget class="QLabel" name="label_41" >
               <property name="text" >
-               <string>Monitor Spectrum</string>
+               <string>For scattering</string>
               </property>
              </widget>
             </item>
@@ -1685,33 +1685,6 @@ p, li { white-space: pre-wrap; }
                 <height>16777215</height>
                </size>
               </property>
-             </widget>
-            </item>
-            <item row="2" column="0" >
-             <widget class="QLabel" name="label_43" >
-              <property name="text" >
-               <string>Detector</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1" colspan="3" >
-             <widget class="QComboBox" name="detbank_sel" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <item>
-               <property name="text" >
-                <string>main-detector-bank</string>
-               </property>
-              </item>
-              <item>
-               <property name="text" >
-                <string>HAB</string>
-               </property>
-              </item>
              </widget>
             </item>
             <item row="0" column="3" >
@@ -1737,7 +1710,7 @@ p, li { white-space: pre-wrap; }
             <item row="1" column="0" >
              <widget class="QLabel" name="label_39" >
               <property name="text" >
-               <string>Transmission monitor</string>
+               <string>For transmissions</string>
               </property>
              </widget>
             </item>
@@ -1770,10 +1743,44 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QGroupBox" name="groupBox_15" >
            <property name="title" >
-            <string>Phi range</string>
+            <string>Detector</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_17" >
-            <item row="0" column="2" >
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label_43" >
+              <property name="text" >
+               <string>Detector bank</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="3" >
+             <widget class="QComboBox" name="detbank_sel" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <item>
+               <property name="text" >
+                <string>main-detector-bank</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>HAB</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_45" >
+              <property name="text" >
+               <string>Limit Phi (degrees)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" >
              <widget class="QLineEdit" name="phi_min" >
               <property name="enabled" >
                <bool>true</bool>
@@ -1792,14 +1799,14 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="0" column="3" >
+            <item row="1" column="2" >
              <widget class="QLabel" name="label_33" >
               <property name="text" >
                <string>to</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="4" >
+            <item row="1" column="3" >
              <widget class="QLineEdit" name="phi_max" >
               <property name="enabled" >
                <bool>true</bool>
@@ -1818,20 +1825,13 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="1" column="2" colspan="3" >
+            <item row="2" column="1" colspan="3" >
              <widget class="QCheckBox" name="mirror_phi" >
               <property name="text" >
                <string>Use mirror sector</string>
               </property>
               <property name="checked" >
                <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" >
-             <widget class="QLabel" name="label_45" >
-              <property name="text" >
-               <string>Limit Phi (degrees)</string>
               </property>
              </widget>
             </item>
@@ -3556,22 +3556,32 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="1" column="1" colspan="2" >
         <widget class="QLabel" name="label_40" >
+         <property name="toolTip" >
+          <string>The directory to created the summed run file in</string>
+         </property>
          <property name="text" >
           <string>Output File Path</string>
          </property>
         </widget>
        </item>
        <item row="1" column="3" >
-        <widget class="QLineEdit" name="summedPath_edit" />
+        <widget class="QLineEdit" name="summedPath_edit" >
+         <property name="toolTip" >
+          <string>The directory to created the summed run file in</string>
+         </property>
+        </widget>
        </item>
        <item row="1" column="4" >
         <widget class="QPushButton" name="summedPath_Btn" >
+         <property name="toolTip" >
+          <string>The directory to created the summed run file in</string>
+         </property>
          <property name="text" >
           <string>Browse</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1" >
+       <item row="3" column="0" colspan="2" >
         <widget class="QLabel" name="label_42" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
@@ -3585,13 +3595,20 @@ p, li { white-space: pre-wrap; }
            <height>16777215</height>
           </size>
          </property>
+         <property name="toolTip" >
+          <string>Type , separated lists of run numbers or ranges of numbers with a : </string>
+         </property>
          <property name="text" >
-          <string>File</string>
+          <string/>
          </property>
         </widget>
        </item>
        <item row="3" column="2" colspan="2" >
-        <widget class="QLineEdit" name="new2Add_edit" />
+        <widget class="QLineEdit" name="new2Add_edit" >
+         <property name="toolTip" >
+          <string>Type , separated lists of run numbers or ranges of numbers with a : </string>
+         </property>
+        </widget>
        </item>
        <item row="3" column="4" >
         <widget class="QPushButton" name="add_Btn" >
@@ -3647,6 +3664,9 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="4" column="4" >
         <widget class="QPushButton" name="clear_Btn" >
+         <property name="toolTip" >
+          <string>Clear the table</string>
+         </property>
          <property name="text" >
           <string>Remove all</string>
          </property>
@@ -3654,23 +3674,25 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="5" column="4" >
         <widget class="QPushButton" name="remove_Btn" >
+         <property name="toolTip" >
+          <string>Select rows by clicking on the table and remove then with this button</string>
+         </property>
          <property name="text" >
           <string>Remove</string>
          </property>
         </widget>
        </item>
+       <item row="4" column="0" colspan="2" >
+        <widget class="QLabel" name="label_46" >
+         <property name="toolTip" >
+          <string>Files to be summed, click at the top of this box or use the "Add" button</string>
+         </property>
+         <property name="text" >
+          <string>Run files to sum</string>
+         </property>
+        </widget>
+       </item>
       </layout>
-      <zorder>label_40</zorder>
-      <zorder>summedPath_edit</zorder>
-      <zorder>summedPath_Btn</zorder>
-      <zorder>label_42</zorder>
-      <zorder>new2Add_edit</zorder>
-      <zorder>add_Btn</zorder>
-      <zorder>browse_to_add_Btn</zorder>
-      <zorder>sum_Btn</zorder>
-      <zorder>toAdd_List</zorder>
-      <zorder>clear_Btn</zorder>
-      <zorder>remove_Btn</zorder>
      </widget>
     </widget>
    </item>
