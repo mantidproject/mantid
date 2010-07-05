@@ -1,4 +1,7 @@
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/LocatedDataRef.h"
+#include "MantidAPI/WorkspaceIterator.h"
+#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
