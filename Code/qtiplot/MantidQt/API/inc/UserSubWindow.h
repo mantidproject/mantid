@@ -11,7 +11,7 @@
   namespace { \
     Mantid::Kernel::RegistrationHelper \
     register_subwindow_##classname \
-    (((MantidQt::API::InterfaceFactory::Instance().subscribe<classname>(#classname)), 0)); \
+    (((MantidQt::API::UserSubWindowFactory::Instance().subscribe<classname>()), 0)); \
   }
 
 //----------------------------------
@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QStringList>
 #include <QLabel>
+#include <QSet>
 
 #include <Poco/Message.h>
 
@@ -79,13 +80,14 @@ class EXPORT_OPT_MANTIDQT_API UserSubWindow : public QWidget
   Q_OBJECT
 
 public:
-
   /// DefaultConstructor
   UserSubWindow(QWidget* parent = 0);
   /// Destructor
   virtual ~UserSubWindow();
-
-public:
+  /// Return the name of the interface
+  virtual QString name() const = 0;
+  /// Return a list of alias names for the interface. Default returns an empty list
+  virtual QSet<QString> aliases() const { return QSet<QString>(); }
   /// Create the layout of the widget. Can only be called once.
   void initializeLayout();
   /// Run local Python init code. Calls overridable function in specialized interface

@@ -20,6 +20,8 @@ public:
   SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets);
   /// Destructor
   virtual ~SANSAddFiles();
+  /// Name of the interface
+  QString name() const { return QString("SANSAddFiles"); }
 
 private:
   ///set to point to the object that has the Add Files controls

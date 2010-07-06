@@ -13,7 +13,6 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   class Homer;
-  
 
 class ConvertToEnergy : public MantidQt::API::UserSubWindow
 {
@@ -22,6 +21,15 @@ class ConvertToEnergy : public MantidQt::API::UserSubWindow
 public:
   /// Default Constructor
   ConvertToEnergy(QWidget *parent = 0);
+  /// Interface name
+  QString name() const { return QString("ConvertToEnergy"); }
+  /// Aliases for this interface
+  QSet<QString> aliases() const
+  { 
+    QSet<QString> aliasList;
+    aliasList.insert("Homer");
+    return aliasList;
+  }
 
 private:
   /// Initialize the layout

@@ -11,7 +11,7 @@
   namespace { \
     Mantid::Kernel::RegistrationHelper \
     register_dialog_##classname \
-    (((MantidQt::API::InterfaceFactory::Instance().subscribe<classname>(#classname)), 0)); \
+    (((MantidQt::API::AlgorithmDialogFactory::Instance().subscribe<classname>(#classname)), 0)); \
   }
 
 //----------------------------------

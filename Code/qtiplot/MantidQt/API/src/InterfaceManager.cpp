@@ -37,10 +37,10 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
 						    const QString & optional_msg,  const QString & enabled_names)
 {
   AlgorithmDialog* dlg = NULL;
-  if( InterfaceFactory::Instance().exists(alg->name() + "Dialog") )
+  if( AlgorithmDialogFactory::Instance().exists(alg->name() + "Dialog") )
   {
     g_log.debug() << "Creating a specialised dialog for " << alg->name() << std::endl;
-    dlg = qobject_cast<AlgorithmDialog*>(InterfaceFactory::Instance().createUnwrapped(alg->name() + "Dialog"));
+    dlg = AlgorithmDialogFactory::Instance().createUnwrapped(alg->name() + "Dialog");
     }
   else
   {
@@ -84,9 +84,13 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
 {
   UserSubWindow *user_win = NULL;
   std::string iname = interface_name.toStdString();
-  if( InterfaceFactory::Instance().exists(iname) )
+  try
   {
-    user_win = qobject_cast<UserSubWindow*>(InterfaceFactory::Instance().createUnwrapped(iname));
+    user_win = UserSubWindowFactory::Instance().createUnwrapped(iname);
+  }
+  catch(Mantid::Kernel::Exception::NotFoundError &)
+  {
+    user_win = NULL;
   }
   if( user_win )
   {
@@ -95,9 +99,9 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
     user_win->setInterfaceName(interface_name);
     user_win->initializeLayout();    
   }
-  else 
+  else
   {
-    g_log.debug() << "No specialised interface exists for " << iname << std::endl;
+    g_log.error() << "Error creating interface " << iname << " \n";
   }
   return user_win;
 }
@@ -108,15 +112,14 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
  */
 QStringList InterfaceManagerImpl::getUserSubWindowKeys() const
 {
-  QStringList m_key_list;
-  std::vector<std::string> keys = InterfaceFactory::Instance().getKeys();
+  QStringList key_list;
+  std::vector<std::string> keys = UserSubWindowFactory::Instance().getKeys();
   std::vector<std::string>::const_iterator iend = keys.end();
   for( std::vector<std::string>::const_iterator itr = keys.begin(); itr != iend; ++itr )
   {
-    QString key = QString::fromStdString(*itr);
-    if( !key.endsWith("Dialog") ) m_key_list.append(key);
+    key_list.append(QString::fromStdString(*itr));
   }
-  return m_key_list;
+  return key_list;
 }
 
 //----------------------------------

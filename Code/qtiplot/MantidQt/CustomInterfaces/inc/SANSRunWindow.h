@@ -52,7 +52,8 @@ public:
   SANSRunWindow(QWidget *parent = 0);
   /// Destructor
   ~SANSRunWindow();
-
+  /// Interface name
+  QString name() const { return QString("SANSRunWindow"); }
 signals:
   ///Indicate the state of the loaded data.
   void dataReadyToProcess(bool state);
