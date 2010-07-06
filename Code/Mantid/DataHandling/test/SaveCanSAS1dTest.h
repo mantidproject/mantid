@@ -39,8 +39,6 @@ public:
       (AnalysisDataService::Instance().retrieve(m_rawoutws));
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
-	std::string s;
-	std::getline(std::cin,s);
     //add the run number whose saving will be tested
     Sample &theSample = ws->mutableSample();
     theSample.addLogData(new PropertyWithValue<std::string>("run_number", m_runNum));
