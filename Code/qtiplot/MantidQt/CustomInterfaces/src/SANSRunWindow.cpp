@@ -63,31 +63,20 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_log_warnings(false),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""), m_layoutInitialized(false)
 {
-  m_reducemapper = new QSignalMapper(this);
-  m_mode_mapper = new QSignalMapper(this);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
-  
-  m_allowed_batchtags.insert("sample_sans",0);
-  m_allowed_batchtags.insert("sample_trans",1);
-  m_allowed_batchtags.insert("sample_direct_beam",2);
-  m_allowed_batchtags.insert("can_sans",3);
-  m_allowed_batchtags.insert("can_trans",4);
-  m_allowed_batchtags.insert("can_direct_beam",5);
-  m_allowed_batchtags.insert("background_sans",-1);
-  m_allowed_batchtags.insert("background_trans",-1);
-  m_allowed_batchtags.insert("background_direct_beam",-1);
-  m_allowed_batchtags.insert("output_as",6);
 }
 
 ///Destructor
 SANSRunWindow::~SANSRunWindow()
 {
-  // Seems to crash on destruction of if I don't do this 
-  AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
-  saveSettings();
-  delete m_addFilesTab;
+  if( m_layoutInitialized )
+  {
+    // Seems to crash on destruction of if I don't do this 
+    AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+    saveSettings();
+    delete m_addFilesTab;
+  }
 }
 
 //--------------------------------------------
@@ -98,93 +87,115 @@ SANSRunWindow::~SANSRunWindow()
  */
 void SANSRunWindow::initLayout()
 {
-    g_log.debug("Initializing interface layout");
-    m_uiForm.setupUi(this);
+  if( m_layoutInitialized )
+  {
+    return;
+  }
+  g_log.debug("Initializing interface layout");
+  m_uiForm.setupUi(this);
 
-    //Set column stretch on the mask table
-    m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
+  m_reducemapper = new QSignalMapper(this);
+  m_mode_mapper = new QSignalMapper(this);
 
-    //Button connections
-    connectButtonSignals();
+  m_allowed_batchtags.insert("sample_sans",0);
+  m_allowed_batchtags.insert("sample_trans",1);
+  m_allowed_batchtags.insert("sample_direct_beam",2);
+  m_allowed_batchtags.insert("can_sans",3);
+  m_allowed_batchtags.insert("can_trans",4);
+  m_allowed_batchtags.insert("can_direct_beam",5);
+  m_allowed_batchtags.insert("background_sans",-1);
+  m_allowed_batchtags.insert("background_trans",-1);
+  m_allowed_batchtags.insert("background_direct_beam",-1);
+  m_allowed_batchtags.insert("output_as",6);
 
-    // Disable most things so that load is the only thing that can be done
-    m_uiForm.oneDBtn->setEnabled(false);
-    m_uiForm.twoDBtn->setEnabled(false);
-    for( int i = 1; i < 4; ++i)
-    {
-      m_uiForm.tabWidget->setTabEnabled(i, false);
-    }
 
-    //Mode switches
-    connect(m_uiForm.single_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
-    m_mode_mapper->setMapping(m_uiForm.single_mode_btn, SANSRunWindow::SingleMode);
-    connect(m_uiForm.batch_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
-    m_mode_mapper->setMapping(m_uiForm.batch_mode_btn, SANSRunWindow::BatchMode);
-    connect(m_mode_mapper, SIGNAL(mapped(int)), this, SLOT(switchMode(int)));
+  //Set column stretch on the mask table
+  m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
 
-    //Set a custom context menu for the batch table
-    m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
-    m_batch_paste = new QAction(tr("&Paste"),m_uiForm.batch_table);
-    m_batch_paste->setShortcut(tr("Ctrl+P"));
-    connect(m_batch_paste, SIGNAL(activated()), this, SLOT(pasteToBatchTable()));
-    m_uiForm.batch_table->addAction(m_batch_paste);
+  //Button connections
+  connectButtonSignals();
 
-    m_batch_clear = new QAction(tr("&Clear"),m_uiForm.batch_table);    
-    m_uiForm.batch_table->addAction(m_batch_clear);
-    connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
+  // Disable most things so that load is the only thing that can be done
+  m_uiForm.oneDBtn->setEnabled(false);
+  m_uiForm.twoDBtn->setEnabled(false);
+  for( int i = 1; i < 4; ++i)
+  {
+    m_uiForm.tabWidget->setTabEnabled(i, false);
+  }
 
-    //Logging
-    connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
-    connect(m_uiForm.logger_clear, SIGNAL(clicked()), this, SLOT(clearLogger()));
-    m_uiForm.logging_field->ensureCursorVisible();
+  //Mode switches
+  connect(m_uiForm.single_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
+  m_mode_mapper->setMapping(m_uiForm.single_mode_btn, SANSRunWindow::SingleMode);
+  connect(m_uiForm.batch_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
+  m_mode_mapper->setMapping(m_uiForm.batch_mode_btn, SANSRunWindow::BatchMode);
+  connect(m_mode_mapper, SIGNAL(mapped(int)), this, SLOT(switchMode(int)));
 
-    connect(m_uiForm.verbose_check, SIGNAL(stateChanged(int)), this, SLOT(verboseMode(int)));
+  //Set a custom context menu for the batch table
+  m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
+  m_batch_paste = new QAction(tr("&Paste"),m_uiForm.batch_table);
+  m_batch_paste->setShortcut(tr("Ctrl+P"));
+  connect(m_batch_paste, SIGNAL(activated()), this, SLOT(pasteToBatchTable()));
+  m_uiForm.batch_table->addAction(m_batch_paste);
 
-    //Create the widget hash maps
-    initWidgetMaps();
+  m_batch_clear = new QAction(tr("&Clear"),m_uiForm.batch_table);    
+  m_uiForm.batch_table->addAction(m_batch_clear);
+  connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
 
-    //Connect each box's edited signal to flag if the box's text has changed
-    for( int idx = 0; idx < 9; ++idx )
-    {
-      connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
-    }
-    
-    connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
+  //Logging
+  connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
+  connect(m_uiForm.logger_clear, SIGNAL(clicked()), this, SLOT(clearLogger()));
+  m_uiForm.logging_field->ensureCursorVisible();
 
-    // Combo boxes
-    connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
-	    SLOT(handleStepComboChange(int)));
-    connect(m_uiForm.q_dq_opt, SIGNAL(currentIndexChanged(int)), this, 
-	    SLOT(handleStepComboChange(int)));
-    connect(m_uiForm.qy_dqy_opt, SIGNAL(currentIndexChanged(int)), this, 
-	    SLOT(handleStepComboChange(int)));
+  connect(m_uiForm.verbose_check, SIGNAL(stateChanged(int)), this, SLOT(verboseMode(int)));
 
-    connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
-	    SLOT(handleInstrumentChange(int)));
+  //Create the widget hash maps
+  initWidgetMaps();
 
-    // Default transmission switch
-    connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+  //Connect each box's edited signal to flag if the box's text has changed
+  for( int idx = 0; idx < 9; ++idx )
+  {
+    connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
+  }
 
-    // Add Python set functions as underlying data 
-    m_uiForm.inst_opt->setItemData(0, "LOQ()");
-    m_uiForm.inst_opt->setItemData(1, "SANS2D()");
+  connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
 
-    //Add shortened forms of step types to step boxes
-    m_uiForm.wav_dw_opt->setItemData(0, "LIN");
-    m_uiForm.wav_dw_opt->setItemData(1, "LOG");
-    m_uiForm.q_dq_opt->setItemData(0, "LIN");
-    m_uiForm.q_dq_opt->setItemData(1, "LOG");
-    m_uiForm.qy_dqy_opt->setItemData(0, "LIN");
-    m_uiForm.trans_opt->setItemData(0,"Log");
-    m_uiForm.trans_opt->setItemData(1,"Linear");
-    m_uiForm.trans_opt->setItemData(2,"Off");
-    
-    if( ! m_addFilesTab )
-    {//sets up the AddFiles tab which must be deleted in the destructor
-      m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
-    }
-    
-    readSettings();
+  // Combo boxes
+  connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleStepComboChange(int)));
+  connect(m_uiForm.q_dq_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleStepComboChange(int)));
+  connect(m_uiForm.qy_dqy_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleStepComboChange(int)));
+
+  connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleInstrumentChange(int)));
+
+  // Default transmission switch
+  connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+
+  // Add Python set functions as underlying data 
+  m_uiForm.inst_opt->setItemData(0, "LOQ()");
+  m_uiForm.inst_opt->setItemData(1, "SANS2D()");
+
+  //Add shortened forms of step types to step boxes
+  m_uiForm.wav_dw_opt->setItemData(0, "LIN");
+  m_uiForm.wav_dw_opt->setItemData(1, "LOG");
+  m_uiForm.q_dq_opt->setItemData(0, "LIN");
+  m_uiForm.q_dq_opt->setItemData(1, "LOG");
+  m_uiForm.qy_dqy_opt->setItemData(0, "LIN");
+  m_uiForm.trans_opt->setItemData(0,"Log");
+  m_uiForm.trans_opt->setItemData(1,"Linear");
+  m_uiForm.trans_opt->setItemData(2,"Off");
+
+  if( ! m_addFilesTab )
+  {//sets up the AddFiles tab which must be deleted in the destructor
+    m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
+  }
+  //List for Workspace delete signals
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+
+  readSettings();
+  m_layoutInitialized = true;
 }
 
 /**

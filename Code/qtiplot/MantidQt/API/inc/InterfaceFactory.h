@@ -10,6 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include <QHash>
 #include <QStringList>
+#include <QSetIterator>
 
 namespace MantidQt
 {
@@ -115,41 +116,17 @@ public:
   void subscribe()
   {
     Mantid::Kernel::Instantiator<TYPE, UserSubWindow> * allocator = new Mantid::Kernel::Instantiator<TYPE, UserSubWindow>();
-    MantidQt::API::UserSubWindow *userInterface = allocator->createUnwrappedInstance();
+    UserSubWindow *userInterface = allocator->createUnwrappedInstance();
     delete allocator;
     if( userInterface )
     {
-      std::string realName = userInterface->name().toStdString();
+      //MG: 06/07/2010 - Using "UserSubWindow::name()" directly would require including the UserSubWindow header file and creating a
+      //a circular dependency with the InterfaceFactory header. The UserSubWindow header includes the InterfaceFactory so that
+      //the DECLARE_INTERFACE macro can be used by only including UserSubWindow.h.
+      std::string realName = getInterfaceName(userInterface);
+      saveAliasNames(userInterface);
       Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
-      // Save alias names
-      QSet<QString> aliases = userInterface->aliases();
-      QSetIterator<QString> itr(aliases);
-      while( itr.hasNext() )
-      {
-        QString alias = itr.next();
-        if( m_aliasLookup.contains(alias) )
-        {
-          if( m_badAliases.contains(alias) )
-          {
-            QList<std::string> names = m_badAliases.value(alias);
-            names.append(realName);
-            m_badAliases[alias] = names;
-          }
-          else
-          {
-            QList<std::string> names;
-            names.append(m_aliasLookup.value(alias));
-            names.append(realName);            
-            m_badAliases.insert(alias, names);
-          }
-          continue;
-        }
-        m_aliasLookup.insert(alias, realName);
-      }
-    }
-    else
-    {
-      throw Mantid::Kernel::Exception::NullPointerException("UserSubWindowFactoryImpl::subscribe", typeid(TYPE).name());
+      deleteTemporaryInterface(userInterface);
     }
   }
 public:
@@ -171,6 +148,12 @@ private:
   UserSubWindowFactoryImpl& operator = (const UserSubWindowFactoryImpl&);
   ///Private Destructor
   virtual ~UserSubWindowFactoryImpl() {}
+  /// Get the name of the interface.
+  std::string getInterfaceName(UserSubWindow *window) const;
+  /// Save the list of aliases
+  void saveAliasNames(UserSubWindow *window);
+  /// Delete the user interface object given
+  void deleteTemporaryInterface(UserSubWindow *userInterface) const;
   /// Try to create a sub window from the list of aliases for an interface
   UserSubWindow * createFromAlias(const std::string & name) const;
 
