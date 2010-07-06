@@ -235,8 +235,6 @@ private:
   QAction *m_batch_paste;
   ///A clear action for the batch table
   QAction *m_batch_clear;
-  /// Is the form initialized
-  bool m_layoutInitialized;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

@@ -63,14 +63,14 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_log_warnings(false),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""), m_layoutInitialized(false)
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
 {
 }
 
 ///Destructor
 SANSRunWindow::~SANSRunWindow()
 {
-  if( m_layoutInitialized )
+  if( isInitialized() )
   {
     // Seems to crash on destruction of if I don't do this 
     AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
@@ -87,10 +87,6 @@ SANSRunWindow::~SANSRunWindow()
  */
 void SANSRunWindow::initLayout()
 {
-  if( m_layoutInitialized )
-  {
-    return;
-  }
   g_log.debug("Initializing interface layout");
   m_uiForm.setupUi(this);
 
@@ -195,7 +191,6 @@ void SANSRunWindow::initLayout()
   AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 
   readSettings();
-  m_layoutInitialized = true;
 }
 
 /**
