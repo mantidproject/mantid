@@ -36,7 +36,7 @@ def CreateRecord():
 #end of CreateRecord()
 
 project = 'Installer'
-base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
+base_url = notifier.base_url
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'

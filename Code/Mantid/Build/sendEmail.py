@@ -16,7 +16,8 @@ OverAllSuccess = bool(False)
 DocumentationBuild = bool(True)
 warnCount = 0
 
-base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
+base_url = buildNotification.base_url
+
 trac_link = 'http://trac.mantidproject.org/mantid/'
 
 project = 'Mantid'

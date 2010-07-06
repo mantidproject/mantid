@@ -8,6 +8,8 @@ from time import strftime
 import subprocess as sp
 import shutil
 
+base_url = "http://download.mantidproject.org/build_metrics/"
+
 def buildURL(messageDictionary):
   url= "http://ndlt343/build.psp?"
   for arg in messageDictionary:

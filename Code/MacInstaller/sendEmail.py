@@ -35,7 +35,7 @@ def CreateRecord():
         return False
 #end of CreateRecord()
 
-base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
+base_url = notifier.base_url
 project = 'Installer'
 
 #Email settings

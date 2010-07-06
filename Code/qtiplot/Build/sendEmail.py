@@ -38,7 +38,7 @@ def CreateRecord():
 #end of CreateRecord()
 
 project = 'qtiplot'
-base_url = "http://mantidlx1.isis.cclrc.ac.uk/~tzh47418/"
+base_url = notifier.base_url
 
 #Email settings
 SENDER = platform.system() 
