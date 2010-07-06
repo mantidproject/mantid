@@ -283,6 +283,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\NumericAxis.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PairedGroupAlgorithm.cpp"
 				>
 			</File>
@@ -308,6 +312,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Sample.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SpectraAxis.cpp"
 				>
 			</File>
 			<File
@@ -563,6 +571,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\NumericAxis.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\PairedGroupAlgorithm.h"
 				>
 			</File>
@@ -604,6 +616,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SampleTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\SpectraAxis.h"
 				>
 			</File>
 			<File

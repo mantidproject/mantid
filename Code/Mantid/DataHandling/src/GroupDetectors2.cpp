@@ -4,6 +4,7 @@
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileProperty.h"
@@ -234,7 +235,11 @@ void GroupDetectors2::processFile(std::string fname,
 
   // allow spectra number to spectra index look ups
   std::map<int,int> specs2index;
-  workspace->getAxis(1)->getSpectraIndexMap(specs2index);
+  const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(workspace->getAxis(1));
+  if (axis)
+  {
+    axis->getSpectraIndexMap(specs2index);
+  }
 
   try
   {

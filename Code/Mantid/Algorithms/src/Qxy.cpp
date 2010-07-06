@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -149,7 +150,7 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",bins-1,bins,bins-1);
 
   // Create a numeric axis to replace the vertical one
-  Axis* verticalAxis = new Axis(AxisType::Numeric,bins);
+  Axis* verticalAxis = new NumericAxis(bins);
   outputWorkspace->replaceAxis(1,verticalAxis);
 
   // Build up the X values

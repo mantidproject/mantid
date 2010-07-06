@@ -1,6 +1,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
@@ -37,7 +38,7 @@ namespace Mantid
       m_axes.resize(2);
       m_axes[0] = new API::RefAxis(XLength, this);
       // This axis is always a spectra one for now
-      m_axes[1] = new API::Axis(API::AxisType::Spectra,m_noVectors);
+      m_axes[1] = new API::SpectraAxis(m_noVectors);
 
       Histogram1D::RCtype t1,t2;
       t1.access().resize(XLength); //this call initializes array to zero

@@ -5,12 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
+#include "MantidAPI/SpectraAxis.h"
 
 namespace Mantid
 {
@@ -57,12 +52,6 @@ namespace Algorithms
 class DLLExport CrossCorrelate : public API::Algorithm
 {
 public:
-	#ifndef HAS_UNORDERED_MAP_H
-  /// typedef for the storage of the spectrum number to worspace index map
-	typedef std::map<int,int> spec2index_map;
-	#else
-	typedef std::tr1::unordered_map<int,int> spec2index_map;
-	#endif
   /// (Empty) Constructor
   CrossCorrelate() : API::Algorithm(),m_progress(NULL) {}
   /// Virtual destructor
@@ -80,9 +69,9 @@ private:
   ///Execution code
   void exec();
   /// Spectra to index map
-  spec2index_map index_map;
+  API::SpectraAxis::spec2index_map index_map;
   /// Iterator for the spectra to index map
-  spec2index_map::iterator index_map_it;
+  API::SpectraAxis::spec2index_map::iterator index_map_it;
 
   /// Progress reporting
   API::Progress* m_progress;

@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include <cstdio>
 #include <limits>
@@ -79,7 +80,7 @@ void LoadSPE::exec()
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Create the axis that will hold the phi values
-  Axis* phiAxis = new Axis(AxisType::Numeric,nhist+1);
+  Axis* phiAxis = new NumericAxis(nhist+1);
   // Look at previously read comment field to see what unit vertical axis should have
   if ( comment[4] == 'Q' || comment[4] == 'q') 
   {

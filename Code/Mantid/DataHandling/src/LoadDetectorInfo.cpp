@@ -3,6 +3,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectraAxis.h"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -482,7 +483,11 @@ void LoadDetectorInfo::adjustXs(const std::vector<int> &detIDs, const std::vecto
 
   // allow spectra number to spectra index look ups
   std::map<int,int> specs2index;
-  m_workspace->getAxis(1)->getSpectraIndexMap(specs2index);
+  const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(m_workspace->getAxis(1));
+  if (axis)
+  {
+    axis->getSpectraIndexMap(specs2index);
+  }
 
   if ( spectraList.size() != detIDs.size() )
   {// this shouldn't really happen but would cause a crash if it weren't handled ...

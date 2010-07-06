@@ -6,6 +6,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -25,7 +27,7 @@ public:
     vec.resize(j,1.0);
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(1);
-    m_axes[0] = new Axis(AxisType::Numeric,1);
+    m_axes[0] = new NumericAxis(1);
   }
   int size() const {return vec.size();}
   int blocksize() const {return vec.size();}
@@ -121,10 +123,10 @@ public:
 
   void testReplaceAxis()
   {
-    Axis* axBad = new Axis(AxisType::Spectra,5);
+    Axis* axBad = new SpectraAxis(5);
     TS_ASSERT_THROWS( ws->replaceAxis(0,axBad), std::runtime_error );
     delete axBad;
-    Axis* ax = new Axis(AxisType::Spectra,1);
+    Axis* ax = new SpectraAxis(1);
     TS_ASSERT_THROWS( ws->replaceAxis(1,ax), Exception::IndexError );
     TS_ASSERT_THROWS_NOTHING( ws->replaceAxis(0,ax) );
     TS_ASSERT( ws->getAxis(0)->isSpectra() );

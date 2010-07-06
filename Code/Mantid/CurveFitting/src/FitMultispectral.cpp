@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/FuncMinimizerFactory.h"
 #include "MantidCurveFitting/CostFunctionFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
 
 namespace Mantid
@@ -138,7 +139,7 @@ namespace CurveFitting
       outputWS->getAxis(0)->unit() = ws->getAxis(0)->unit();
       if (!yaxis->isSpectra())
       {
-        outputWS->replaceAxis(1,new Axis(false,nout));
+        outputWS->replaceAxis(1,new NumericAxis(nout));
       }
       outputWS->getAxis(1)->unit() = yaxis->unit();
 

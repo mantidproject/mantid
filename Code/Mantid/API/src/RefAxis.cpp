@@ -14,8 +14,7 @@ namespace API
  *  @param parentWorkspace A pointer to the workspace that holds this axis
  */
 RefAxis::RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace) : 
-  Axis(AxisType::Numeric, 0),
-  m_parentWS(parentWorkspace)
+  Axis(),  m_parentWS(parentWorkspace)
 {
   m_size = length;
 }
@@ -27,7 +26,7 @@ RefAxis::RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace
  *  @param parentWorkspace A pointer to the parent workspace of the new axis
  */
 RefAxis::RefAxis(const RefAxis& right, const MatrixWorkspace* const parentWorkspace) :
-  Axis(right), m_parentWS(parentWorkspace)
+Axis(right), m_parentWS(parentWorkspace), m_size(right.m_size)
 {}
 
 RefAxis::~RefAxis()
@@ -64,6 +63,23 @@ double RefAxis::operator()(const int& index, const int& verticalIndex) const
 void RefAxis::setValue(const int& index, const double& value)
 {
   throw std::domain_error("This method cannot be used on a RefAxis.");
+}
+
+/** Check if two axis defined as spectra or numeric axis are equivalent
+ *  @param axis2 Reference to the axis to compare to
+ */
+bool RefAxis::operator==(const Axis& axis2) const
+{
+	if (length()!=axis2.length())
+  {
+		return false;
+  }
+  const RefAxis* ra2 = dynamic_cast<const RefAxis*>(&axis2);
+  if (!ra2)
+  {
+    return false;
+  }
+	return true;
 }
 
 } // namespace API

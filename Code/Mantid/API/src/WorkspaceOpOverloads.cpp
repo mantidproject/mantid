@@ -8,6 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectraAxis.h"
 #include <numeric>
 
 namespace Mantid
@@ -392,19 +393,21 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
 void WorkspaceHelpers::getIndicesFromSpectra(const MatrixWorkspace_const_sptr WS, const std::vector<int>& spectraList,
                                   std::vector<int>& indexList)
 {
-  // Convert the vector of properties into a set for easy searching
-  std::set<int> spectraSet(spectraList.begin(),spectraList.end());
   // Clear the output index list
   indexList.clear();
   indexList.reserve(WS->getNumberHistograms());
   // get the spectra axis
-  Axis *spectraAxis;
+  SpectraAxis *spectraAxis;
   if (WS->axes() == 2)
   {
-    spectraAxis = WS->getAxis(1);
+    spectraAxis = dynamic_cast<SpectraAxis*>(WS->getAxis(1));
+    if (!spectraAxis) return;
   }
   // Just return an empty list if this isn't a Workspace2D
   else return;
+
+  // Convert the vector of properties into a set for easy searching
+  std::set<int> spectraSet(spectraList.begin(),spectraList.end());
 
   for (int i = 0; i < WS->getNumberHistograms(); ++i)
   {

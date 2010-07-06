@@ -18,6 +18,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/tokenizer.hpp>
@@ -1538,7 +1539,7 @@ namespace Mantid
       Axis* axis2 = localWorkspace->getAxis(1);
       if (axis2->unit())
       {
-        Axis* const newAxis = new Axis(AxisType::Numeric,dim[0]);
+        Axis* const newAxis = new NumericAxis(dim[0]);
         // Copy over the unit (set in LoadNexusProcessed)
         newAxis->unit() = axis2->unit();
         localWorkspace->replaceAxis(1,newAxis);

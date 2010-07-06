@@ -1,4 +1,5 @@
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
@@ -56,7 +57,7 @@ namespace DataObjects
     m_axes[0] = new API::RefAxis(XLength, this);
     // Ok, looks like the second axis is supposed to be the spectrum # for each entry in the workspace index
     //  I have no idea why it is such a convoluted way of doing it.
-    m_axes[1] = new API::Axis(API::AxisType::Spectra,m_noVectors);
+    m_axes[1] = new API::SpectraAxis(m_noVectors);
 
   }
 
@@ -202,7 +203,7 @@ namespace DataObjects
 
     //We create a spectra-type axis that holds the spectrum # at each workspace index, in a convoluted and annoying way.
     delete m_axes[1];
-    m_axes[1] = new API::Axis(API::AxisType::Spectra, m_noVectors);
+    m_axes[1] = new API::SpectraAxis(m_noVectors);
     //Fill it with the pixel id / spectrum # at workspace index i.
     for (int i=0; i < m_noVectors; i++)
       m_axes[1]->setValue(i, pixelid_table[i]);

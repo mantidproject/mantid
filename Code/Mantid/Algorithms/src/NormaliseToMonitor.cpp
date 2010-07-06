@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cfloat>
@@ -131,10 +132,14 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
     {
       g_log.error("MonitorSpectrum must be at least 1");
     }
-    Axis::spec2index_map specs;
-    inputWorkspace->getAxis(1)->getSpectraIndexMap(specs);
-    const int monitorIndex = specs[monitorSpec];
-    m_monitor = this->extractMonitorSpectrum(inputWorkspace,monitorIndex);
+    SpectraAxis::spec2index_map specs;
+    const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(inputWorkspace->getAxis(1));
+    if (axis)
+    {
+      axis->getSpectraIndexMap(specs);
+      const int monitorIndex = specs[monitorSpec];
+      m_monitor = this->extractMonitorSpectrum(inputWorkspace,monitorIndex);
+    }
   }
   else
   { 

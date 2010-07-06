@@ -92,7 +92,10 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
     // Just copy the unit and title
     for (unsigned int i = 0; i < ws->m_axes.size(); ++i)
     {
-      ws->getAxis(i)->unit() = parent->getAxis(i)->unit();
+      if (parent->getAxis(i)->isNumeric())
+      {
+        ws->getAxis(i)->unit() = parent->getAxis(i)->unit();
+      }
       ws->getAxis(i)->title() = parent->getAxis(i)->title();
     }
   }

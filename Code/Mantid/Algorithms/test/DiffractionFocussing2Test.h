@@ -8,6 +8,7 @@
 #include "MantidDataHandling/AlignDetectors.h"
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidAPI/SpectraAxis.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -146,8 +147,10 @@ public:
       TS_ASSERT_LESS_THAN(35, mylist.size());
       int numevents = 0;
       //This is to find the workspace index for a given original spectrum #
-      Mantid::API::Axis::spec2index_map mymap;
-      inputW->getAxis(1)->getSpectraIndexMap(mymap);
+      Mantid::API::SpectraAxis::spec2index_map mymap;
+      Mantid::API::SpectraAxis* axis = dynamic_cast<Mantid::API::SpectraAxis*>(inputW->getAxis(1));
+      TS_ASSERT(axis);
+      axis->getSpectraIndexMap(mymap);
 
       for (int i=0; i<mylist.size(); i++)
       {

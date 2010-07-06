@@ -8,6 +8,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -634,7 +635,8 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
       if (isMonitor(monitorSpecList, i + 1))
       {
         std::map<int, int> wsIndexmap;
-        localWorkspace->getAxis(1)->getSpectraIndexMap(wsIndexmap);
+        SpectraAxis* axis = dynamic_cast<SpectraAxis*>(localWorkspace->getAxis(1));
+        axis->getSpectraIndexMap(wsIndexmap);
         std::map<int, int>::const_iterator wsItr;
         wsItr = wsIndexmap.find(i + 1);
         if (wsItr != wsIndexmap.end())

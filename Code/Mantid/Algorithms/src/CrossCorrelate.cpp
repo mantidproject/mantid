@@ -48,7 +48,12 @@ void CrossCorrelate::exec()
 
   	//Get the map between spectra number and index
   	try{
-   	inputWS->getAxis(1)->getSpectraIndexMap(index_map);
+      const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(inputWS->getAxis(1));
+      if (!axis)
+      {
+        throw std::runtime_error("Input workspace has non-spectra axis.");
+      }
+      axis->getSpectraIndexMap(index_map);
   	}catch(std::runtime_error& error)
   	{
   		g_log.error(error.what());

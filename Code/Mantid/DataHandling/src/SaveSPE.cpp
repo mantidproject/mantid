@@ -88,9 +88,9 @@ void SaveSPE::exec()
   fprintf(outSPE_File,"%8u%8u\n",nHist, m_nBins);
 
   // Write the angle grid (dummy if no 'vertical' axis)
-  if ( inputWS->axes() > 1 && inputWS->getAxis(1)->unit() )
+  if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )
   {
-    const Axis& axis = *(inputWS->getAxis(1));
+    const Axis& axis = *inputWS->getAxis(1);
     const std::string commentLine = "### " + axis.unit()->caption() + " Grid\n";
     fprintf(outSPE_File,commentLine.c_str());
     const int axisLength = axis.length();

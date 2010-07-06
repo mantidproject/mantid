@@ -46,9 +46,11 @@ public:
 	virtual ~RefAxis();
 
 	Axis* clone(const MatrixWorkspace* const parentWorkspace);
-	
+	virtual const bool isNumeric() const{return true;}
+  virtual int length() const{return m_size;}
   virtual double operator()(const int& index, const int& verticalIndex) const;
   virtual void setValue(const int& index, const double& value);
+  virtual bool operator==(const Axis&) const;
 
 private:
   RefAxis(const RefAxis& right, const MatrixWorkspace* const parentWorkspace);
@@ -59,6 +61,8 @@ private:
 
   /// A pointer to the workspace holding the axis
   const MatrixWorkspace* const m_parentWS;
+  /// Length of the axis
+  int m_size;
 };
 
 } // namespace API

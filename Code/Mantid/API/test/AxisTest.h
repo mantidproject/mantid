@@ -3,7 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
@@ -12,11 +13,18 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 // Small class for testing the protected copy constructor
-class AxisTester : public Axis
+class SpectraAxisTester : public SpectraAxis
 {
 public:
-  AxisTester() : Axis(AxisType::Numeric,1) {}
-  AxisTester(const AxisTester& right) : Axis(right) {}
+  SpectraAxisTester() : SpectraAxis(1) {}
+  SpectraAxisTester(const SpectraAxisTester& right) : SpectraAxis(right) {}
+};
+
+class NumericAxisTester : public NumericAxis
+{
+public:
+  NumericAxisTester() : NumericAxis(1) {}
+  NumericAxisTester(const NumericAxisTester& right) : NumericAxis(right) {}
 };
 
 // Now the unit test class itself
@@ -25,8 +33,8 @@ class AxisTest : public CxxTest::TestSuite
 public:
   AxisTest()
   {
-    spectraAxis = new Axis(AxisType::Spectra,5);
-    numericAxis = new Axis(AxisType::Numeric,5);
+    spectraAxis = new SpectraAxis(5);
+    numericAxis = new NumericAxis(5);
   }
   
   ~AxisTest()
@@ -49,17 +57,27 @@ public:
 
   void testCopyConstructor()
   {
-    AxisTester axistester;
+    NumericAxisTester axistester;
     axistester.title() = "tester";
     axistester.unit() = UnitFactory::Instance().create("Wavelength");
     axistester.setValue(0,5.5);
     
-    AxisTester copiedAxis = axistester;
+    NumericAxisTester copiedAxis = axistester;
     TS_ASSERT_EQUALS( copiedAxis.title(), "tester" )
     TS_ASSERT_EQUALS( copiedAxis.unit()->unitID(), "Wavelength" )
     TS_ASSERT( copiedAxis.isNumeric() )
     TS_ASSERT_EQUALS( copiedAxis(0), 5.5 )
     TS_ASSERT_THROWS( copiedAxis(1), Exception::IndexError )
+
+    SpectraAxisTester axistester1;
+    axistester1.title() = "tester1";
+    axistester1.setValue(0,5);
+    
+    SpectraAxisTester copiedAxis1 = axistester1;
+    TS_ASSERT_EQUALS( copiedAxis1.title(), "tester1" )
+    TS_ASSERT( copiedAxis1.isSpectra() )
+    TS_ASSERT_EQUALS( copiedAxis1(0), 5 )
+    TS_ASSERT_THROWS( copiedAxis1(1), Exception::IndexError )
   }
   
   void testClone()
@@ -132,7 +150,7 @@ public:
     TS_ASSERT_THROWS( numericAxis->spectraNo(-1), std::domain_error )
     TS_ASSERT_THROWS( numericAxis->spectraNo(5), std::domain_error )
     
-    Axis nAxis(AxisType::Numeric,5);
+    NumericAxis nAxis(5);
     for (int i=0; i<5; ++i)
     {
       TS_ASSERT_THROWS_NOTHING( spectraAxis->spectraNo(i) = 2*i )

@@ -4,6 +4,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/ManagedDataBlock2D.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <fstream>
@@ -201,7 +202,7 @@ void AbsManagedWorkspace2D<NBlocks>::init(const int &NVectors, const int &XLengt
   m_noVectors = NVectors;
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(XLength, this);
-  m_axes[1] = new API::Axis(API::AxisType::Spectra,NVectors);
+  m_axes[1] = new API::SpectraAxis(NVectors);
   m_XLength = XLength;
   m_YLength = YLength;
 

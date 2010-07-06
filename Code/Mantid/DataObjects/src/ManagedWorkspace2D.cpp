@@ -4,6 +4,7 @@
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <limits>
 #include "Poco/File.h"
@@ -48,7 +49,7 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   m_noVectors = NVectors;
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(XLength, this);
-  m_axes[1] = new API::Axis(API::AxisType::Spectra,NVectors);
+  m_axes[1] = new API::SpectraAxis(NVectors);
   m_XLength = XLength;
   m_YLength = YLength;
 

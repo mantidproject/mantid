@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 
 class CheckWorkspacesMatchTest : public CxxTest::TestSuite
@@ -102,7 +103,7 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
-    Mantid::API::Axis* const newAxis = new Mantid::API::Axis(Mantid::API::AxisType::Numeric,2);
+    Mantid::API::Axis* const newAxis = new Mantid::API::NumericAxis(2);
     ws2->replaceAxis(1,newAxis);
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )

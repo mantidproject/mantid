@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -163,7 +164,7 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,yLength-1,xLength,xLength-1);
   // Create a numeric axis to replace the default vertical one
-  Axis* const verticalAxis = new Axis(AxisType::Numeric,yLength);
+  Axis* const verticalAxis = new NumericAxis(yLength);
   outputWorkspace->replaceAxis(1,verticalAxis);
   
   // Now set the axis values

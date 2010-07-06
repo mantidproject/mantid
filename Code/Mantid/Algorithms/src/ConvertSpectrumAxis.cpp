@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/NumericAxis.h"
 
 /// @cond
 // Don't document this very long winded way of getting "radians" to print on the axis.
@@ -81,7 +82,7 @@ void ConvertSpectrumAxis::exec()
   setProperty("OutputWorkspace",outputWS);
 
   // Now set up a new, numeric axis holding the theta values corresponding to each spectrum
-  Axis* const newAxis = new Axis(AxisType::Numeric,theta2indexMap.size());
+  NumericAxis* const newAxis = new NumericAxis(theta2indexMap.size());
   outputWS->replaceAxis(1,newAxis);
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   newAxis->unit() = boost::shared_ptr<Unit>(new Degrees);

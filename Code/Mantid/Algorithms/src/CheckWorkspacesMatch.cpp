@@ -139,7 +139,7 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
     const Axis * const ax1 = ws1->getAxis(i);
     const Axis * const ax2 = ws2->getAxis(i);
     
-    if ( ax1->isNumeric() != ax2->isNumeric() )
+    if ( ax1->isSpectra() != ax2->isSpectra() )
     {
       result = "Axis type mismatch";
       return false;
