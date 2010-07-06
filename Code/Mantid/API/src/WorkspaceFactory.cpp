@@ -61,7 +61,11 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
     NVectors = parent->size() / YLength;
   }
 
-  MatrixWorkspace_sptr ws = create(parent->id(),NVectors,XLength,YLength);
+  // If the parent is an EventWorkspace, we want it to spawn a Workspace2D (or managed variant) as a child
+  std::string id (parent->id());
+  if ( id == "EventWorkspace" ) id = "Workspace2D";
+
+  MatrixWorkspace_sptr ws = create(id,NVectors,XLength,YLength);
 
   // Copy over certain parent data members
   ws->setTitle(parent->getTitle());
