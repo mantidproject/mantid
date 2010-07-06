@@ -7,13 +7,13 @@ import sys
 sys.path.append('../Mantid/Build')
 import platform
 import buildNotification as notifier
-import urllib2
+import urllib
 import time
 
 def RecordExists():
     url = base_url + "rec_exists.psp?id=" + str(SvnID)
     try:
-        f = urllib2.urlopen(url)
+        f = urllib.urlopen(url)
         page = f.read()
         if re.search("Success", page):
             r = True
@@ -21,7 +21,7 @@ def RecordExists():
             r = False
         else:
             r = False #needs something better here, but it *should* be controlled by the db
-    except urllib2.HTTPError:
+    except urllib.HTTPError:
         r = False
     return r
 #end of RecordExists
@@ -29,9 +29,9 @@ def RecordExists():
 def CreateRecord():
     url = base_url + "rec_create.psp?id=" + str(SvnID)
     try:
-        f = urllib2.urlopen(url)
+        f = urllib.urlopen(url)
         return True
-    except urllib2.HTTPError:
+    except urllib.HTTPError:
         return False
 #end of CreateRecord()
 
@@ -94,9 +94,9 @@ url += '&platform=' + platform.system() + platform.architecture()[0][:2]
 url += '&result=' + str(buildSuccess) + '&time=' + str(buildTime)
 # open url
 try:
-    f = urllib2.urlopen(url)
+    f = urllib.urlopen(url)
     time.sleep(0.1)
-except urllib2.HTTPError:
+except urllib.HTTPError:
     pass
 
 

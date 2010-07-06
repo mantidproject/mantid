@@ -2,7 +2,7 @@ import platform
 import socket
 import os
 import re
-import urllib2
+import urllib
 import smtplib
 from time import strftime
 import subprocess as sp
@@ -143,7 +143,7 @@ def ParseTestResultsLog():
 def RecordExists():
     url = base_url + "rec_exists.psp?id=" + str(SvnID)
     try:
-        f = urllib2.urlopen(url)
+        f = urllib.urlopen(url)
         page = f.read()
         if re.search("Success", page):
             r = True
@@ -151,7 +151,7 @@ def RecordExists():
             r = False
         else:
             r = False #needs something better here, but it *should* be controlled by the db
-    except urllib2.HTTPError:
+    except urllib.HTTPError:
         r = False
     return r
 #end of RecordExists
@@ -159,9 +159,9 @@ def RecordExists():
 def CreateRecord():
     url = base_url + "rec_create.psp?id=" + str(SvnID)
     try:
-        f = urllib2.urlopen(url)
+        f = urllib.urlopen(url)
         return True
-    except urllib2.HTTPError:
+    except urllib.HTTPError:
         return False
 #end of CreateRecord()
 
@@ -186,10 +186,10 @@ def CreateTREntry():
     url += "&btt=" + str(TestBuildTime)
     url += "&bdt=" + str(SconBuildTime)
     try:
-        f = urllib2.urlopen(url)
+        f = urllib.urlopen(url)
         time.sleep(0.1)
         return True
-    except urllib2.HTTPError:
+    except urllib.HTTPError:
         return False
 
 #end of CreateTREntry(SvnID)
@@ -199,8 +199,8 @@ def CreateTRACRecord():
     url = base_url + "trac.psp?id=" + str(SvnID) + "&trac="
     for i in ticketList:
         try:
-            f = urllib2.urlopen(url + str(i))
-        except urllib2.HTTPError:
+            f = urllib.urlopen(url + str(i))
+        except urllib.HTTPError:
             continue
 # end CreateTRACRecord
 
