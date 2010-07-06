@@ -22,21 +22,20 @@ namespace Mantid
   {
     /** @class SaveCanSAS1D  DataHandling/SaveCanSAS1D.h
 
-    This algorithm saves  workspace into CanSAS1d format.
+    @verbatim
+
+    This algorithm saves  workspace into CanSAS1d format. This is an xml format except
+    the <Idata>, </Idata> tags and all data in between must be one line, which necesitates
+    the files be written iostream functions outside xml libraries.
+
     The structure of CanSAS1d xml is:
     
-    @verbatim
     <SASroot version="1.0" xmlns="" xmlns:xsi="" xsi:schemaLocation="">
     <SASentry>
       <Title></Title>
       <Run></Run>
       <SASdata>
-        <Idata>
-          <Q unit="1/A"></Q>
-          <I unit="a.u."></I>
-          <Idev unit="a.u."></Idev>
-          <Qdev unit="1/A"></Qdev>
-        </Idata>
+        <Idata><Q unit="1/A"></Q><I unit="a.u."></I><Idev unit="a.u."></Idev><Qdev unit="1/A"></Qdev></Idata>
       </SASdata>
       <SASsample>
         <ID></ID>

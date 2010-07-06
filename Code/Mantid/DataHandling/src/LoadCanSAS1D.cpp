@@ -8,13 +8,15 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmFactory.h"
+
 #include "Poco/Path.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
 #include "Poco/DOM/NodeList.h"
 #include "Poco/DOM/Node.h"
 #include "Poco/DOM/Text.h"
+
+#include <boost/lexical_cast.hpp>
 //-----------------------------------------------------------------------
 
 using Poco::XML::DOMParser;
@@ -23,6 +25,8 @@ using Poco::XML::Element;
 using Poco::XML::NodeList;
 using Poco::XML::Node;
 using Poco::XML::Text;
+
+using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -75,6 +79,7 @@ void LoadCanSAS1D::exec()
   Element*titleElem = sasEntryElem->getChildElement("Title");
   throwException(titleElem, "Title", fileName);
   std::string wsTitle = titleElem->innerText();
+
   Element* sasDataElem = sasEntryElem->getChildElement("SASdata");
   throwException(sasDataElem, "SASdata", fileName);
   // getting number of Idata elements in the xml file
@@ -91,6 +96,8 @@ void LoadCanSAS1D::exec()
   ws->setYUnit("");
   API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(ws);
   setProperty("OutputWorkspace", workspace);
+
+  createRunNumLog(sasEntryElem, "Run", ws, fileName);
 
   //load workspace data
   MantidVec& X = ws->dataX(0);
@@ -201,6 +208,23 @@ void LoadCanSAS1D::throwException(Poco::XML::Element* elem, const std::string & 
   {
     throw Kernel::Exception::NotFoundError(name + " element not found in CanSAS1D XML file", fileName);
   }
+}
+/** Reads in an element from the xml file and stores it in the samples log
+*  @param[in] sasEntry the data in loaded from the SASentry element
+*  @param[in] elemName the name of the element that holds the run number, normally "Run"
+*  @param[out] wSpace the log will be created in this workspace
+*  @param[in] fileName name of the file from which the run number was read, only used for error reporting
+*  @throw NotFoundError if there is no xml element with the name eleName
+*/
+void LoadCanSAS1D::createRunNumLog(const Poco::XML::Element * const sasEntry, const std::string& elemName, DataObjects::Workspace2D_sptr wSpace, const std::string& fileName)
+{
+  Element * runText = sasEntry->getChildElement(elemName);
+
+  throwException(runText, elemName, fileName);
+
+  API::Sample &sam = wSpace->mutableSample();
+  sam.addLogData(
+    new PropertyWithValue<std::string>("run_number", runText->innerText()));
 }
 
 }

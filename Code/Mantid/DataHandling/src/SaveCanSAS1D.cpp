@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCanSAS1D.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/MantidVersion.h"
@@ -11,8 +12,9 @@
 #include <fstream>  
 
 //-----------------------------------------------------------------------------
-using namespace Mantid::Geometry;
 using namespace Poco::XML;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -74,7 +76,8 @@ namespace Mantid
         throw Kernel::Exception::FileError("Unable to open file:", fileName);
       }
 
-      // Just write out header manually, because I can't see a way to do stylesheet part in Poco
+      // Just write out header manually the user require as specific format were the placement of new line characters is controled
+      //and this can't be done in using the stylesheet part in Poco or libXML 
       outFile << "<?xml version=\"1.0\"?>\n"
         << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>\n";
 
@@ -83,8 +86,7 @@ namespace Mantid
       createSASRootElement(sasroot);
       outFile<<sasroot;
 
-      std::string sasEntry="\n\t<SASentry name=\"workspace\">";
-      outFile<<sasEntry;
+      outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
 
       std::string sasTitle;
       createSASTitleElement(sasTitle);
@@ -153,8 +155,7 @@ namespace Mantid
       sasNote+="\n\t\t</SASnote>";
       outFile<<sasNote;
 
-      sasEntry="\n\t</SASentry>";
-      outFile<<sasEntry;
+      outFile << "\n\t</SASentry>";
       sasroot="\n</SASroot>";
       outFile<<sasroot;
       outFile.close();
@@ -250,10 +251,20 @@ namespace Mantid
     */
     void SaveCanSAS1D::createSASRunElement(std::string& sasRun)
     {
-      sasRun="\n\t\t<Run>";
-      std::string run=m_workspace->getName();
-      //look for xml special characters and replace with entity refrence
+      //initialise the run number to an empty string, this may or may not be changed later
+      std::string run;
+      try {
+        Kernel::Property *logP=m_workspace->sample().getLogData("run_number");
+        run = logP->value();
+      }
+      catch(Exception::NotFoundError)
+      {
+        g_log.debug() << "Didn't find RunNumber log in workspace. Writing <Run></Run> to the CANSAS file\n";
+      }
+
       searchandreplaceSpecialChars(run);
+
+      sasRun="\n\t\t<Run>";
       sasRun+=run;
       sasRun+="</Run>";
     }

@@ -55,7 +55,11 @@ public:
 	Mantid::API::Workspace_sptr ws;
 	TS_ASSERT_THROWS_NOTHING( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace) );
 	Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
-	  //Single histogram
+
+  Mantid::Kernel::Property *logP = ws2d->sample().getLogData("run_number");
+  TS_ASSERT_EQUALS( logP->value(), "LOQ48097")
+
+  //Single histogram
    TS_ASSERT_EQUALS( ws2d->getNumberHistograms(), 1 );
 
    //Test the size of the data vectors (there should be 102 data points so x have 103)

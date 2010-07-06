@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "Poco/DOM/Element.h"
 //----------------------------------------------------------------------
 
 namespace Poco {
@@ -75,8 +76,7 @@ namespace Mantid
       void throwException(Poco::XML::Element* elem,const std::string & name,const std::string& fileName);
       /// Run LoadInstrument sub algorithm
       void runLoadInstrument(const std::string & inst_name,DataObjects::Workspace2D_sptr localWorkspace);
-
-
+      void createRunNumLog(const Poco::XML::Element * const sasEntry, const std::string& elemName, DataObjects::Workspace2D_sptr wSpace, const std::string& fileName);
     };
     
   }
