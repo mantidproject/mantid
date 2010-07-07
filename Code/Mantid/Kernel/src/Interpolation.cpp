@@ -121,7 +121,7 @@ namespace Kernel
   {
     os << m_name << " ; " << m_xUnit->unitID() << " ; " << m_yUnit->unitID();
 
-    for ( int i = 0; i < m_x.size(); i++)
+    for ( unsigned int i = 0; i < m_x.size(); i++)
     {
       os << " ; " << m_x[i] << " " << m_y[i];
     }
@@ -157,7 +157,7 @@ namespace Kernel
     f.setXUnit(values[1]);
     f.setYUnit(values[2]);
 
-    for ( int i = 3; i < values.count(); i++)
+    for ( unsigned int i = 3; i < values.count(); i++)
     {
       std::stringstream str(values[i]);
       double x, y;

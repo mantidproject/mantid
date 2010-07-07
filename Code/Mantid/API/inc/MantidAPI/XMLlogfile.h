@@ -68,7 +68,7 @@ namespace Mantid
       const std::string m_logfileID;  ///< logfile id
       const std::string m_value;  ///< rather then extracting value from logfile, specify a value directly
       const std::string m_paramName;  ///< parameter name
-      const std::string m_type;       ///< type of the data
+      const std::string m_type;       ///< type of the data, e.g. int, double or string
       const std::string m_tie;                /// specific to fitting parameter specify any tie
       const std::vector<std::string> m_constraint;  /// specific to fitting parameter specify lower and upper bound in that order
       std::string m_penaltyFactor;                  /// specific to fitting parameter specify penalty factor

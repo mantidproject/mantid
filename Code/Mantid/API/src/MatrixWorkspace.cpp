@@ -449,12 +449,14 @@ void MatrixWorkspace::populateInstrumentParameters()
     Kernel::TimeSeriesProperty<double>* dummy = NULL;
     for (it = ret.first; it != ret.second; ++it)
     {
-      double value = ((*it).second)->createParamValue(dummy);
-
-      // special case of parameter names
-
       std::string paramN = ((*it).second)->m_paramName;
-      std::string category = ((*it).second)->m_type;
+      std::string category = ((*it).second)->m_type;  
+
+      // if category is sting no point in trying to generate a double from parameter
+      double value = 0.0;
+      if ( category.compare("string") != 0 )
+        value = ((*it).second)->createParamValue(dummy);
+
       if ( category.compare("fitting") == 0 )
       {
         std::ostringstream str;
@@ -464,14 +466,18 @@ void MatrixWorkspace::populateInstrumentParameters()
           << ((*it).second)->m_formulaUnit << " , " << ((*it).second)->m_resultUnit << " , " << (*(((*it).second)->m_interpolation));
         paramMap.add("FitParameter",((*it).second)->m_component, paramN, str.str());
       }
+      else if ( category.compare("string") == 0 )
+      {
+        paramMap.addString(((*it).second)->m_component, paramN, ((*it).second)->m_value);
+      }
       else
       {
-      if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-        paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-      else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )        
-        paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-      else
-        paramMap.addDouble(((*it).second)->m_component, paramN, value);
+        if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
+          paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
+        else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )        
+          paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
+        else
+          paramMap.addDouble(((*it).second)->m_component, paramN, value);
       }
     }
 }

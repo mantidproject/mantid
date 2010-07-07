@@ -238,8 +238,17 @@ public:
       clearCache();
     }
 
-    /// Return the value of a parameter as a string.
+    /**  Return the value of a parameter as a string
+         @param comp Component to which parameter is related
+         @param name Parameter name
+     */
     std::string getString(const IComponent* comp,const std::string& name);
+
+    /**  Returns a string parameter as vector's first element if exists and an empty vector if it doesn't
+         @param compName Component name
+         @param name Parameter name
+     */
+    std::vector<std::string> getString(const std::string& compName,const std::string& name)const {return getType<std::string>(compName,name);}
 
     /**  Get the shared pointer to the parameter with name \a name belonging to component \a comp.
          @param comp Component

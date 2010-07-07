@@ -209,6 +209,15 @@ public:
     param = paramMap.get(&(*ptrDet), "nedtur");
     TS_ASSERT_DELTA( param->value<double>(), 77.0, 0.0001);
 
+    // test that can hold of "string" parameter in two ways
+    boost::shared_ptr<IComponent> ptrNickelHolder = i->getComponentByName("nickel-holder");
+    std::string dummyString = paramMap.getString(&(*ptrNickelHolder), "fjols-string");
+    //std::cout << "\n\n size " << dummyStringff << "\n\n";
+    TS_ASSERT( dummyString.compare("boevs") == 0 );
+    std::vector<std::string> dummyStringVec = paramMap.getString("nickel-holder", "fjols-string");
+    TS_ASSERT( dummyStringVec[0].compare("boevs") == 0 );
+
+
     // check if combined translation works
     ptrDet = i->getDetector(1003);
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation");
