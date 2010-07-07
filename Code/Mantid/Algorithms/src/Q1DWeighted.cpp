@@ -144,7 +144,7 @@ void Q1DWeighted::exec()
   //PARALLEL_CHECK_INTERUPT_REGION
 
   // Normalize according to the chosen weighting scheme
-  for ( int i = 0; i<sizeOut; i++ )
+  for ( int i = 0; i<sizeOut-1; i++ )
   {
     YOut[i] /= XNorm[i];
     EOut[i] = sqrt(EOut[i])/XNorm[i];
