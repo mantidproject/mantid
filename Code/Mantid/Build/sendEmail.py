@@ -151,7 +151,7 @@ def RecordExists():
             r = False
         else:
             r = False #needs something better here, but it *should* be controlled by the db
-    except urllib.HTTPError:
+    except IOError:
         r = False
     return r
 #end of RecordExists
@@ -161,7 +161,7 @@ def CreateRecord():
     try:
         f = urllib.urlopen(url)
         return True
-    except urllib.HTTPError:
+    except IOError:
         return False
 #end of CreateRecord()
 
@@ -189,7 +189,7 @@ def CreateTREntry():
         f = urllib.urlopen(url)
         time.sleep(0.1)
         return True
-    except urllib.HTTPError:
+    except IOError:
         return False
 
 #end of CreateTREntry(SvnID)
@@ -200,7 +200,7 @@ def CreateTRACRecord():
     for i in ticketList:
         try:
             f = urllib.urlopen(url + str(i))
-        except urllib.HTTPError:
+        except IOError:
             continue
 # end CreateTRACRecord
 
