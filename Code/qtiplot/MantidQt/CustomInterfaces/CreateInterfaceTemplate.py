@@ -48,6 +48,9 @@ headerfile.write("#include \"MantidQtAPI/UserSubWindow.h\"\n\n"
                  "{\n"
                  "  Q_OBJECT\n\n"
                  "public:\n"
+                 "  /// The name of the interface as registered into the factory\n"
+                 "  static std::string name() { return \"" + ifacename + "\"; }\n\n" 
+                 "public:\n"
                  "  /// Default Constructor\n"
                  + "  " + ifacename + "(QWidget *parent = 0);\n\n"
                  "private:\n"
@@ -95,6 +98,3 @@ if designer == True:
     sourcefile.write("  m_uiForm.setupUi(this);\n");
 
 sourcefile.write("}\n\n")
-
-
-

@@ -5,16 +5,9 @@
 #include "MantidQtCustomInterfaces/Homer.h"
 
 //Add this class to the list of specialised dialogs in this namespace
-namespace MantidQt
-{
-namespace CustomInterfaces
-
-{
-  DECLARE_SUBWINDOW(ConvertToEnergy);
-}
-}
-
 using namespace MantidQt::CustomInterfaces;
+
+DECLARE_SUBWINDOW(ConvertToEnergy);
 
 //----------------------
 // Public member functions

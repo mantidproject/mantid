@@ -15,6 +15,12 @@
 #include <QHash>
 #include <QSettings>
 
+//-----------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------
+class QButtonGroup;
+class QAbstractButton;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -26,7 +32,6 @@ class Homer : public MantidQt::API::UserSubWindow
 
 public:
   Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm);
-  QString name() const { return QString("Homer"); }
 
   /// Initialize the layout
   virtual void initLayout();
@@ -54,6 +59,8 @@ private:
   QHash<const QWidget * const, QLabel *> m_validators;
   /// the values on the form the last time it was SUCCESSFULLY run accessed through this object
   QSettings m_prev;
+  /// Button group for the save check boxes
+  QButtonGroup * m_saveChecksGroup;
 
   /// enable the run button if the results dialog has been closed and the python has stopped
   void pythonIsRunning(bool running = true);
@@ -64,14 +71,12 @@ private:
   QString setUpInstru();
   void setUpPage1();
   void page1FileWidgs();
-  void page1setUpNormCom();
   void page1Defaults();
   void page1Validators();
   void page1Tooltips();
   void setupValidator(QLabel *star);
   QLabel* newStar(const QGroupBox * const UI, int valRow, int valCol);
   void hideValidators();
-  
   void setUpPage2();
   void setUpPage3();
   
@@ -82,9 +87,10 @@ private:
   QString openFileDia(const bool save, const QStringList &exts);
   signals:
     // these signals send data to the find bad detectors (diag) widget
-    void MWDiag_updateWBV(const QString &);
+  void MWDiag_updateWBV(const QString &);
 	void MWDiag_updateTOFs(const double &, const double &);
 	void MWDiag_sendRuns(const std::vector<std::string> &);
+
   private slots:
     ///run the algorithms that can be run with the data that users supplied
     void runClicked();
@@ -102,6 +108,7 @@ private:
     void bgRemoveReadSets();
     void instrSelectionChanged(const QString& prefix);
     void setIDFValues(const QString & prefix);  
+    void saveFormatOptionClicked(QAbstractButton*);
 };
 }
 }

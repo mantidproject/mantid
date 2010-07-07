@@ -1,17 +1,17 @@
 #ifndef MANTIDQT_API_USERSUBWINDOW_H_
 #define MANTIDQT_API_USERSUBWINDOW_H_
 
-/* Used to register classes into the factory. creates a global object in an
+
+/* Used to register classes into the factory. Creates a global object in an
 * anonymous namespace. The object itself does nothing, but the comma operator
 * is used in the call to its constructor to effect a call to the factory's
 * subscribe method.
 */
-
 #define DECLARE_SUBWINDOW(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper \
     register_subwindow_##classname \
-    (((MantidQt::API::UserSubWindowFactory::Instance().subscribe<classname>(#classname)), 0)); \
+    (((MantidQt::API::UserSubWindowFactory::Instance().subscribe<classname>()), 0)); \
   }
 
 //----------------------------------
@@ -23,7 +23,7 @@
 #include <QWidget>
 #include <QStringList>
 #include <QLabel>
-#include <QSet>
+#include <set>
 
 #include <Poco/Message.h>
 
@@ -76,18 +76,19 @@ class InterfaceManagerImpl;
 */
 class EXPORT_OPT_MANTIDQT_API UserSubWindow : public QWidget
 {
-  
   Q_OBJECT
+
+public:
+  /// Name of the interface
+  static std::string name() { return "UnnamedInterface"; }
+  /// A list of aliases
+  static std::set<std::string> aliases() { return std::set<std::string>(); }
 
 public:
   /// DefaultConstructor
   UserSubWindow(QWidget* parent = 0);
   /// Destructor
   virtual ~UserSubWindow();
-  /// Return the name of the interface
-  virtual QString name() const = 0;
-  /// Return a list of alias names for the interface. Default returns an empty list
-  virtual QSet<QString> aliases() const { return QSet<QString>(); }
   /// Create the layout of the widget. Can only be called once.
   void initializeLayout();
   /// Run local Python init code. Calls overridable function in specialized interface

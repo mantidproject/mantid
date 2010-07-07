@@ -48,12 +48,14 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow
   Q_OBJECT
 
 public:
+  /// Name of the interface
+  static std::string name() { return "SANSRunWindow"; }
+
+public:
   /// Default Constructor
   SANSRunWindow(QWidget *parent = 0);
   /// Destructor
   ~SANSRunWindow();
-  /// Interface name
-  QString name() const { return QString("SANSRunWindow"); }
 signals:
   ///Indicate the state of the loaded data.
   void dataReadyToProcess(bool state);

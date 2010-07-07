@@ -110,25 +110,16 @@ private:
 */
 class EXPORT_OPT_MANTIDQT_API UserSubWindowFactoryImpl : public Mantid::Kernel::DynamicFactory<UserSubWindow>
 {
-//public:
-//  // Register an interface
-//  template<class TYPE>
-//  void subscribe()
-//  {
-//    Mantid::Kernel::Instantiator<TYPE, UserSubWindow> * allocator = new Mantid::Kernel::Instantiator<TYPE, UserSubWindow>();
-//    UserSubWindow *userInterface = allocator->createUnwrappedInstance();
-//    delete allocator;
-//    if( userInterface )
-//    {
-//      //MG: 06/07/2010 - Using "UserSubWindow::name()" directly would require including the UserSubWindow header file and creating a
-//      //a circular dependency with the InterfaceFactory header. The UserSubWindow header includes the InterfaceFactory so that
-//      //the DECLARE_INTERFACE macro can be used by only including UserSubWindow.h.
-//      std::string realName = getInterfaceName(userInterface);
-//      saveAliasNames(userInterface);
-//      Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
-//      deleteTemporaryInterface(userInterface);
-//    }
-//  }
+public:
+
+  template<typename TYPE>
+  void subscribe()
+  {
+    std::string realName = TYPE::name();
+    Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
+    saveAliasNames<TYPE>(realName);
+  }
+
 public:
   // Override createUnwrapped to search through the alias list
   UserSubWindow * createUnwrapped(const std::string & name) const;
@@ -148,14 +139,12 @@ private:
   UserSubWindowFactoryImpl& operator = (const UserSubWindowFactoryImpl&);
   ///Private Destructor
   virtual ~UserSubWindowFactoryImpl() {}
-  /// Get the name of the interface.
-  std::string getInterfaceName(UserSubWindow *window) const;
-  /// Save the list of aliases
-  void saveAliasNames(UserSubWindow *window);
-  /// Delete the user interface object given
-  void deleteTemporaryInterface(UserSubWindow *userInterface) const;
   /// Try to create a sub window from the list of aliases for an interface
   UserSubWindow * createFromAlias(const std::string & name) const;
+
+  /// Save the list of aliases
+  template<typename TYPE>
+  void saveAliasNames(const std::string & realName);
 
 private:
   /// A map of alias names to "real" names
@@ -164,6 +153,40 @@ private:
   QHash<QString, QList<std::string> > m_badAliases; 
   Mantid::Kernel::Logger & g_log;
 };
+
+/**
+ * Save the alias names of an interface
+ * @param realName The real name of the interface
+ */
+template<typename TYPE>
+void UserSubWindowFactoryImpl::saveAliasNames(const std::string & realName)
+{
+  std::set<std::string> aliases = TYPE::aliases();
+  std::set<std::string>::const_iterator iend = aliases.end();
+  for( std::set<std::string>::const_iterator itr = aliases.begin(); itr != iend;
+       ++itr )
+  {
+    QString alias = QString::fromStdString(*itr);
+    if( m_aliasLookup.contains(alias) )
+    {
+      if( m_badAliases.contains(alias) )
+      {
+        QList<std::string> names = m_badAliases.value(alias);
+        names.append(realName);
+        m_badAliases[alias] = names;
+      }
+      else
+      {
+        QList<std::string> names;
+        names.append(m_aliasLookup.value(alias));
+        names.append(realName);            
+        m_badAliases.insert(alias, names);
+      }
+      continue;
+    }
+    m_aliasLookup.insert(alias, realName);
+  }
+}
 
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix

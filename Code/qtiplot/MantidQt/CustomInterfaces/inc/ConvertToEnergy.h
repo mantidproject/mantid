@@ -21,12 +21,12 @@ class ConvertToEnergy : public MantidQt::API::UserSubWindow
 public:
   /// Default Constructor
   ConvertToEnergy(QWidget *parent = 0);
-  /// Interface name
-  QString name() const { return QString("ConvertToEnergy"); }
+  ///Interface name
+  static std::string name() { return "ConvertToEnergy"; }
   /// Aliases for this interface
-  QSet<QString> aliases() const
+  static std::set<std::string> aliases()
   { 
-    QSet<QString> aliasList;
+    std::set<std::string> aliasList;
     aliasList.insert("Homer");
     return aliasList;
   }

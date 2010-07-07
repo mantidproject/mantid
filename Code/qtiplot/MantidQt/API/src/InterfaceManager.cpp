@@ -101,7 +101,7 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
   }
   else
   {
-    g_log.error() << "Error creating interface " << iname << " \n";
+    g_log.error() << "Error creating interface " << iname << "\n";
   }
   return user_win;
 }

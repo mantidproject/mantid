@@ -6,12 +6,18 @@
 
 using namespace MantidQt::API;
 
-//----------------- UserSubWindow --------------------------
+//*********************************************************
+//                 UserSubWindow 
+//*********************************************************
 
-//----------------------------------------------------------
+//----------------------------------------
 // Public member functions
-//----------------------------------------------------------
+//----------------------------------------
 
+/**
+ * Create a raw pointer to the interface with the given name
+ * @param name The name of the interface that should have been registered into the factory
+ */
 UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & name) const
 {
   // Try primary name as a start
@@ -22,6 +28,7 @@ UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & na
   }
   catch(Mantid::Kernel::Exception::NotFoundError&)
   {
+    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n"; 
     window = NULL;
   }
   if( !window )
@@ -30,70 +37,19 @@ UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & na
   }
   if( !window ) 
   {
+    g_log.error() << "UserSubWindowFactory: \""+ name + "\" is not registered as an interface name.\n";
     throw Mantid::Kernel::Exception::NotFoundError("UserSubWindowFactory:"+ name + " is not registered or recognised as an alias of a known interface.\n", name);
   }
   return window;   
 }
 
-//----------------------------------------------------------
-// Private member functions
-//----------------------------------------------------------
+//----------------------------------------
+// Public member functions
+//----------------------------------------
 
 /// Default constructor
 UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAliases(), g_log(Mantid::Kernel::Logger::get("UserSubWindowFactory"))
 {
-}
-
-/**
- * Returns the name of the interface
- * @param window A pointer (not NULL) to a UserSubWindow class
- * @returns A string containing the interface name
- */
-std::string UserSubWindowFactoryImpl::getInterfaceName(UserSubWindow *window) const
-{
-  return window->name().toStdString();
-}
-
-/**
- * Save the alias names of the interface
- * @param userInterface A pointer (not NULL) to a UserSubWindow class
- */
-void UserSubWindowFactoryImpl::saveAliasNames(UserSubWindow *userInterface)
-{
-  std::string realName = userInterface->name().toStdString();
-  QSet<QString> aliases = userInterface->aliases();
-  QSetIterator<QString> itr(aliases);
-  while( itr.hasNext() )
-  {
-    QString alias = itr.next();
-    if( m_aliasLookup.contains(alias) )
-    {
-      if( m_badAliases.contains(alias) )
-      {
-        QList<std::string> names = m_badAliases.value(alias);
-        names.append(realName);
-        m_badAliases[alias] = names;
-      }
-      else
-      {
-        QList<std::string> names;
-        names.append(m_aliasLookup.value(alias));
-        names.append(realName);            
-        m_badAliases.insert(alias, names);
-      }
-      continue;
-    }
-    m_aliasLookup.insert(alias, realName);
-  }
-}
-
-/**
- * Delete the user interface object given
- * @param userInterface A pointer to the user interface
- */
-void UserSubWindowFactoryImpl::deleteTemporaryInterface(UserSubWindow *userInterface) const
-{
-  userInterface->deleteLater();
 }
 
 /**
