@@ -110,25 +110,25 @@ private:
 */
 class EXPORT_OPT_MANTIDQT_API UserSubWindowFactoryImpl : public Mantid::Kernel::DynamicFactory<UserSubWindow>
 {
-public:
-  // Register an interface
-  template<class TYPE>
-  void subscribe()
-  {
-    Mantid::Kernel::Instantiator<TYPE, UserSubWindow> * allocator = new Mantid::Kernel::Instantiator<TYPE, UserSubWindow>();
-    UserSubWindow *userInterface = allocator->createUnwrappedInstance();
-    delete allocator;
-    if( userInterface )
-    {
-      //MG: 06/07/2010 - Using "UserSubWindow::name()" directly would require including the UserSubWindow header file and creating a
-      //a circular dependency with the InterfaceFactory header. The UserSubWindow header includes the InterfaceFactory so that
-      //the DECLARE_INTERFACE macro can be used by only including UserSubWindow.h.
-      std::string realName = getInterfaceName(userInterface);
-      saveAliasNames(userInterface);
-      Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
-      deleteTemporaryInterface(userInterface);
-    }
-  }
+//public:
+//  // Register an interface
+//  template<class TYPE>
+//  void subscribe()
+//  {
+//    Mantid::Kernel::Instantiator<TYPE, UserSubWindow> * allocator = new Mantid::Kernel::Instantiator<TYPE, UserSubWindow>();
+//    UserSubWindow *userInterface = allocator->createUnwrappedInstance();
+//    delete allocator;
+//    if( userInterface )
+//    {
+//      //MG: 06/07/2010 - Using "UserSubWindow::name()" directly would require including the UserSubWindow header file and creating a
+//      //a circular dependency with the InterfaceFactory header. The UserSubWindow header includes the InterfaceFactory so that
+//      //the DECLARE_INTERFACE macro can be used by only including UserSubWindow.h.
+//      std::string realName = getInterfaceName(userInterface);
+//      saveAliasNames(userInterface);
+//      Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
+//      deleteTemporaryInterface(userInterface);
+//    }
+//  }
 public:
   // Override createUnwrapped to search through the alias list
   UserSubWindow * createUnwrapped(const std::string & name) const;

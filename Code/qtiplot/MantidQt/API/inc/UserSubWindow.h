@@ -11,7 +11,7 @@
   namespace { \
     Mantid::Kernel::RegistrationHelper \
     register_subwindow_##classname \
-    (((MantidQt::API::UserSubWindowFactory::Instance().subscribe<classname>()), 0)); \
+    (((MantidQt::API::UserSubWindowFactory::Instance().subscribe<classname>(#classname)), 0)); \
   }
 
 //----------------------------------
