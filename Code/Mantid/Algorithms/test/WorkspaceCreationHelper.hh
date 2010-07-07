@@ -8,11 +8,15 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
+using namespace Mantid;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 class WorkspaceCreationHelper
 {
@@ -122,6 +126,58 @@ public:
   static WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
   {
     WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value,sqrt(value)));
+    return retVal;
+  }
+
+  /** Create event workspace with:
+   * 500 pixels
+   * 1000 histogrammed bins.
+   */
+  static EventWorkspace_sptr CreateEventWorkspace()
+  {
+    return CreateEventWorkspace(500,1001,100,1000);
+  }
+
+  /** Create event workspace
+   */
+  static EventWorkspace_sptr CreateEventWorkspace(int numPixels,
+    int numBins, int numEvents = 100, int binDelta=1000, int initialize_pixels=1, int setX=1)
+  {
+    //add one to the number of bins as this is histogram
+    numBins++;
+
+    EventWorkspace_sptr retVal(new EventWorkspace);
+    if (initialize_pixels)
+      retVal->initialize(numPixels,1,1);
+    else
+      retVal->initialize(1,1,1);
+
+    //Make fake events
+    for (int pix=0; pix<numPixels; pix++)
+    {
+      for (int i=0; i<numEvents; i++)
+      {
+        retVal->getEventList(pix) += TofEvent((pix+i+0.5)*binDelta, 1);
+      }
+    }
+    retVal->doneLoadingData();
+
+    if (setX)
+      {
+        //Create the x-axis for histogramming.
+        cow_ptr<MantidVec> axis;
+        MantidVec& xRef = axis.access();
+        xRef.resize(numBins);
+        for (int i = 0; i < numBins; ++i)
+          xRef[i] = i*binDelta;
+
+        //Try setting a single axis
+//        retVal->setX(2, axis);
+
+        //Set all the histograms at once.
+        retVal->setAllX(axis);
+      }
+
     return retVal;
   }
 
