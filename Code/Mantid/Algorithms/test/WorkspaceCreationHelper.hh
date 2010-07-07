@@ -181,6 +181,20 @@ public:
     return retVal;
   }
 
+  //not strictly creating a workspace, but really helpfull to see what one contains
+  static void DisplayData(const MatrixWorkspace_sptr ws)
+  {
+      const int numHists = ws->getNumberHistograms();
+      for (int i = 0; i < numHists; ++i)
+      {
+        for (int j = 0; j < ws->blocksize(); ++j)
+        {  
+          std::cout <<ws->readY(i)[j];
+        }
+        std::cout<<std::endl;
+      }
+  }
+
 };
 
 #endif /*WORKSPACECREATIONHELPER_H_*/
