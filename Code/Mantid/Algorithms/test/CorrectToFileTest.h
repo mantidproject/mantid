@@ -6,6 +6,7 @@
 //--------------------
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CorrectToFile.h"
+#include "MantidDataHandling/LoadRKH.h"
 #include "MantidKernel/UnitFactory.h"
 #include "WorkspaceCreationHelper.hh"
 #include "Poco/Path.h"
@@ -64,20 +65,20 @@ public:
     TS_ASSERT( result == outputSpace );
 
     //Should now not throw anything
-    // TS_ASSERT_THROWS_NOTHING( correctToFile.execute() );
-    // TS_ASSERT( correctToFile.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( correctToFile.execute() );
+    TS_ASSERT( correctToFile.isExecuted() );
     
-    // //Now need to test the resultant workspace, first retrieve it
-    // Workspace_sptr wkspOut;
-    // TS_ASSERT_THROWS_NOTHING( wkspOut = AnalysisDataService::Instance().retrieve(outputSpace) );
-    // Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(wkspOut);
+    //Now need to test the resultant workspace, first retrieve it
+    Workspace_sptr wkspOut;
+    TS_ASSERT_THROWS_NOTHING( wkspOut = AnalysisDataService::Instance().retrieve(outputSpace) );
+    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(wkspOut);
 
-    // TS_ASSERT_EQUALS( data->getNumberHistograms(), 10 );
+    TS_ASSERT_EQUALS( data->getNumberHistograms(), 10 );
 
-    // //Sizes are correct
-    // TS_ASSERT_EQUALS( static_cast<int>(data->dataX(0).size()), 103);
-    // TS_ASSERT_EQUALS( static_cast<int>(data->dataY(0).size()), 102);
-    // TS_ASSERT_EQUALS( static_cast<int>(data->dataE(0).size()), 102);
+    //Sizes are correct
+     TS_ASSERT_EQUALS( static_cast<int>(data->dataX(0).size()), 103);
+     TS_ASSERT_EQUALS( static_cast<int>(data->dataY(0).size()), 102);
+     TS_ASSERT_EQUALS( static_cast<int>(data->dataE(0).size()), 102);
   }
   
 private:
