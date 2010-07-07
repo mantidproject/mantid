@@ -141,6 +141,14 @@ void  LoadRawHelper::setProtonCharge(API::Sample& sample)
 	//isisRaw->rpb.r_gd_prtn_chrg;
 	sample.setProtonCharge(getProtonCharge());
 }
+/** Stores the run number in the sample's logs
+*  @param sample the workspace's sample
+*/
+void LoadRawHelper::setRunNumber(API::Sample& sample)
+{
+  std::string run = boost::lexical_cast<std::string>(isisRaw->r_number);
+	sample.addLogData( new PropertyWithValue<std::string>("run_number", run) );
+}
 /**reads workspace dimensions,number of periods etc from raw data
   *@param numberOfSpectra number of spectrums
   *@param numberOfPeriods number of periods

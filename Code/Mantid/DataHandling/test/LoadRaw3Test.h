@@ -110,6 +110,9 @@ public:
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
+    l_property = output2D->sample().getLogData( "run_number" );
+    TS_ASSERT_EQUALS( l_property->value(), "15869" );
+
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------

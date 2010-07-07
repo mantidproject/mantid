@@ -142,6 +142,12 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
     DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins+1,nBins));
     ws->setTitle(entry.name());
+    
+    std::string runDet = entry.getString("run_number");
+    //The sample is left to delete the property
+    ws->mutableSample().addLogData(
+      new PropertyWithValue<std::string>("run_number", runDet));
+
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     ws->setYUnit("Counts");
 

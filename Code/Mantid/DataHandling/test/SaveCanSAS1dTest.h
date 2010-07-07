@@ -19,14 +19,17 @@ class SaveCAnSAS1DTest : public CxxTest::TestSuite
 public:
 
   //set up the workspace that will be loaded
-  SaveCAnSAS1DTest() : m_rawoutws("SaveCAnSAS1DTest_inWS"), m_runNum("12345"),
+  SaveCAnSAS1DTest() : m_rawoutws("SaveCAnSAS1DTest_inWS"),
     m_filename("../../../../Test/Data/savecansas1d.xml")
 
   {
     LoadRaw3 loader;
     if ( !loader.isInitialized() ) loader.initialize();
     std::string inputFile; // Path to test input file assumes Test directory checked out from SVN
+    
+    //the file's run number needs to be stored in m_runNum for later tests
     inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
+    m_runNum = "15869";
 
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("OutputWorkspace", m_rawoutws);
@@ -39,9 +42,6 @@ public:
       (AnalysisDataService::Instance().retrieve(m_rawoutws));
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
-    //add the run number whose saving will be tested
-    Sample &theSample = ws->mutableSample();
-    theSample.addLogData(new PropertyWithValue<std::string>("run_number", m_runNum));
   }
   //saving is required by all the following test so, if this test fails so will all the others!
   void testExecute()
@@ -127,7 +127,8 @@ public:
 	  savealg.searchandreplaceSpecialChars(input);
   }*/
   private :
-  const std::string m_rawoutws, m_runNum, m_filename;
+  const std::string m_rawoutws, m_filename;
+  std::string m_runNum;
   MatrixWorkspace_sptr ws;
 };
 

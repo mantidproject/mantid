@@ -148,6 +148,8 @@ void LoadRaw3::exec()
   // Set the total proton charge for this run
   setProtonCharge(sample);
 
+  setRunNumber(sample);
+
   // populate instrument parameters
   g_log.debug("Populating the instrument parameters...");
   progress(m_prog, "Populating the instrument parameters...");

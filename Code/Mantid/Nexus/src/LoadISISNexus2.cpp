@@ -14,6 +14,7 @@
 
 #include "Poco/Path.h"
 
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <sstream>
 #include <cctype>
@@ -368,7 +369,10 @@ namespace Mantid
     {
       int hist_index = m_monitors.size();
       int period_index(period - 1);
-
+      
+      //here the title will be loaded into each member workspace but not the group workspace
+      local_workspace->setTitle(entry.getString("title"));
+      
       if( m_have_detector )
       {
         NXData nxdata = entry.openNXData("detector_1");
@@ -552,9 +556,14 @@ namespace Mantid
     */
     void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
-      /// The proton charge
-      // boost::shared_ptr<API::Sample> sample_details = local_workspace->getSample();
-      local_workspace->mutableSample().setProtonCharge(entry.getFloat("proton_charge"));
+      Sample &sampleDets = local_workspace->mutableSample();
+      sampleDets.setProtonCharge(entry.getFloat("proton_charge"));
+
+      std::string runDet =
+        boost::lexical_cast<std::string>(entry.getInt("run_number"));
+      //The sample is left to delete the property
+      sampleDets.addLogData(
+        new PropertyWithValue<std::string>("run_number", runDet));
 
       /// Sample geometry
       NXInt spb = entry.openNXInt("isis_vms_compat/SPB");

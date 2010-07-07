@@ -127,6 +127,8 @@ namespace Mantid
 	   float getProtonCharge()const ;
 	   /// set proton charge
 	   void setProtonCharge(API::Sample& sample);
+     /// Stores the run number in the sample's logs
+     void setRunNumber(API::Sample& sample);
 
 	   /// number of time regimes
 	   int getNumberofTimeRegimes();

@@ -568,6 +568,14 @@ namespace Mantid
         localWorkspace->mutableSample().addLogData(p);
       }
 
+      NXEntry run = root.openEntry("run");
+      localWorkspace->setTitle(run.getString("title"));
+
+      std::string runDet =
+        boost::lexical_cast<std::string>(run.getInt("number"));
+      //The sample is left to delete the property
+      localWorkspace->mutableSample().addLogData(
+        new PropertyWithValue<std::string>("run_number", runDet));
 
     }
 

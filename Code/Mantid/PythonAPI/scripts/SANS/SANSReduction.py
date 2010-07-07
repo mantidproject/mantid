@@ -1297,7 +1297,6 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
             SANSUtility.StripEndZeroes(final_workspace)
         # Store the mask file within the final workspace so that it is saved to the CanSAS file
         AddSampleLog(final_workspace, "UserFile", MASKFILE)
-        AddSampleLog(final_workspace, "run_number", _SAMPLE_RUN.split('.')[0])
     else:
         quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
         for key, value in quadrants.iteritems():

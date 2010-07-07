@@ -59,7 +59,7 @@ public:
         TS_ASSERT_EQUALS(ws->spectraMap().nElements(),77824);
 
         const std::vector< Property* >& logs = ws->sample().getLogData();
-        TS_ASSERT_EQUALS(logs.size(),0);
+        TS_ASSERT_EQUALS(logs.size(),1);
 
         //------------ Instrument Loading Sub-Test -----------------------
         IInstrument_sptr inst = ws->getInstrument();

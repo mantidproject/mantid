@@ -44,7 +44,7 @@ public:
         TS_ASSERT_EQUALS(ws->spectraMap().nElements(),17792);
 
         const std::vector< Property* >& logs = ws->sample().getLogData();
-        TS_ASSERT_EQUALS(logs.size(),25);
+        TS_ASSERT_EQUALS(logs.size(),26);
 
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_event"));
         TS_ASSERT(slog);
@@ -69,6 +69,9 @@ public:
         TS_ASSERT_EQUALS(blog->size(),1);
 
         TS_ASSERT_EQUALS(ws->sample().getName(),"");
+        
+        Property *l_property = ws->sample().getLogData( "run_number" );
+        TS_ASSERT_EQUALS( l_property->value(), "49886" );
     }
     void testExec2()
     {
@@ -150,6 +153,7 @@ public:
         MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
         TS_ASSERT_EQUALS(ws->blocksize(),995);
      //   TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
+        TS_ASSERT_EQUALS(ws->getTitle(), "hello\\0");
 
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
         TS_ASSERT_EQUALS(ws->readX(0)[1],6.);

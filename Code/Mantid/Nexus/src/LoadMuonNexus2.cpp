@@ -14,6 +14,7 @@
 #include "MantidNexus/NexusClasses.h"
 
 #include "Poco/Path.h"
+#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <cmath>
@@ -207,6 +208,7 @@ namespace Mantid
           counter++;
           progress.report();
         }
+        
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
         {
@@ -284,8 +286,16 @@ namespace Mantid
         ws->mutableSample().addLogData(logv);
       }
 
+      ws->setTitle(entry.getString("title"));
+
+      std::string runDet =
+        boost::lexical_cast<std::string>(entry.getInt("run_number"));
+      //The sample is left to delete the property
+      ws->mutableSample().addLogData(
+        new PropertyWithValue<std::string>("run_number", runDet));
+    
       ws->populateInstrumentParameters();
     }
-    
+
   } // namespace DataHandling
 } // namespace Mantid
