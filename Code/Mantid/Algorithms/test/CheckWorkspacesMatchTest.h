@@ -14,7 +14,7 @@
 class CheckWorkspacesMatchTest : public CxxTest::TestSuite
 {
 public:
-  CheckWorkspacesMatchTest() : loq("LOQ48127"), ws1(WorkspaceCreationHelper::Create2DWorkspace(2,2))
+  CheckWorkspacesMatchTest() : loq("LOQ48127"), ws1(WorkspaceCreationHelper::Create2DWorkspace123(2,2))
   {
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
@@ -88,7 +88,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->isDistribution(true);
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -102,7 +102,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     Mantid::API::Axis* const newAxis = new Mantid::API::NumericAxis(2);
     ws2->replaceAxis(1,newAxis);
     
@@ -117,7 +117,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->getAxis(0)->title() = "blah";
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -131,7 +131,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -145,7 +145,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->getAxis(1)->setValue(1,99);
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -159,7 +159,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->setYUnit("blah");
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -173,7 +173,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     Mantid::API::SpectraDetectorMap& map = ws2->mutableSpectraMap();
     int spec[2] = {1,2};
     int det[2] = {99,98};
@@ -190,7 +190,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->getInstrument()->setName("different");
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -204,7 +204,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->instrumentParameters().addBool(new Mantid::Geometry::Component, "myParam", true);
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -218,7 +218,7 @@ public:
   {
     if ( !checker.isInitialized() ) checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->maskBin(0,0);
     ws2->dataY(0)[0] = 2;
     ws2->dataE(0)[0] = 3;
@@ -229,7 +229,7 @@ public:
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Masking mismatch" )
     
-    Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws3->maskBin(0,1);
     ws3->dataY(0)[1] = 2;
     ws3->dataE(0)[1] = 3;
@@ -246,7 +246,7 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
     checker.setProperty("CheckSample",true);
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->mutableSample().setName("different");
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -261,7 +261,7 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
     checker.setProperty("CheckSample",true);
 
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->mutableSample().setProtonCharge(99.99);
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -276,7 +276,7 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
     checker.setProperty("CheckSample",true);
     
-    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws2->mutableSample().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",99));
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
@@ -285,7 +285,7 @@ public:
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Different numbers of logs" )
     
-    Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws3->mutableSample().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop2",99));
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws2) )
@@ -294,7 +294,7 @@ public:
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log name mismatch" )
     
-    Mantid::API::MatrixWorkspace_sptr ws4 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    Mantid::API::MatrixWorkspace_sptr ws4 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws4->mutableSample().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",100));
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws2) )

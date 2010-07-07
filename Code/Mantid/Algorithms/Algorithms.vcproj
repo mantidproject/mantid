@@ -435,6 +435,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Q1DWeighted.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Qxy.cpp"
 				>
 			</File>
@@ -541,7 +545,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\AddSampleLogTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\AnyShapeAbsorption.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\AnyShapeAbsorptionTest.h"
 				>
 			</File>
 			<File
@@ -934,6 +946,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\Q1D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Q1DWeighted.h"
 				>
 			</File>
 			<File

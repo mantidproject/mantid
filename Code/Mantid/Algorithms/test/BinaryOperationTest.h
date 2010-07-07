@@ -62,7 +62,7 @@ public:
   void testcheckSizeCompatibility2D1D()
   {
     // Register the workspace in the data service
-    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
     Workspace1D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
     Workspace1D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
     Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);

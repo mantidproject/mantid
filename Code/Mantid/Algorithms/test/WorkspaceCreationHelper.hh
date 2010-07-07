@@ -65,7 +65,7 @@ public:
   }
   static Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
   {
-    return Create2DWorkspace123(xlen, ylen);
+    return Create2DWorkspaceBinned(xlen, ylen);
   }
 
   static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist=0)
@@ -102,7 +102,7 @@ public:
     return retVal;
   }
 
-  static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0, double deltax = 1.0)
+  static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0=0.0, double deltax = 1.0)
   {
     Histogram1D::RCtype x,y,e;
     x.access().resize(nbins+1);
