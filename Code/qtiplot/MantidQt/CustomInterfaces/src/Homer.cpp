@@ -17,6 +17,8 @@
 #include <QDesktopServices>
 #include <QHeaderView>
 #include <QFileDialog>
+#include <QButtonGroup>
+#include <QAbstractButton>
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
@@ -129,7 +131,6 @@ QString Homer::setUpInstru()
 void Homer::setUpPage1()
 {
   page1FileWidgs();
-  page1setUpNormCom();
   page1Defaults();
   page1Validators();
   page1Tooltips();
@@ -159,50 +160,20 @@ void Homer::page1FileWidgs()
   	"in Diagnose Detectors and Absolute Units");
   m_uiForm.whiteFileLay->insertWidget(0, m_WBVWid);
   connect(m_WBVWid, SIGNAL(fileChanged()), this, SLOT(updateWBV()));
-}
 
-/// put default values into the controls in the first tab
-void Homer::page1setUpNormCom()
-{
-  // m_uiForm.cbNormal->addItem("monitor");
-  // for ( int i = 0; i < G_NUM_NORM_SCHEMES; ++i )
-  // {
-  //   QString displayName = removeStrMonitor(G_NORM_SCHEMES[i]);
-  // 	  if (displayName == G_NORM_SCHEMES[i])
-  // 	  {// these means that the normalisation scheme doesn't include the word monitor and so we don't need the second combobox
-  // 	    m_uiForm.cbNormal->addItem(G_NORM_SCHEMES[i]);
-  // 	  }
-  // 	  else // this is a monitor based normalisation scheme add the name to the second combobox
-  // 	  {
-  // 	    m_uiForm.cbMonitors->addItem(displayName);
-  // 	  }
-  // }
-  
-  // connect(m_uiForm.cbNormal, SIGNAL(currentIndexChanged(const QString &)),
-  //         this, SLOT(setupNormBoxes(const QString &)));
+  // Add the save buttons to a button group
+  m_saveChecksGroup = new QButtonGroup();
+  m_saveChecksGroup->addButton(m_uiForm.save_ckSPE);
+  m_saveChecksGroup->addButton(m_uiForm.save_ckNexus);
+  m_saveChecksGroup->setExclusive(false);
+
+  connect(m_saveChecksGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(saveFormatOptionClicked(QAbstractButton*)));
 }
 
 /// put default values into the controls in the first tab
 void Homer::page1Defaults()
 {
-  // QString normalise = m_prev.value("normalise", G_DEFAULT_NORM).toString();
-  // // if the normalisation scheme is monitor based then it will contain the name monitor
-  // QString displayName = removeStrMonitor(normalise);  
-  // if ( displayName == normalise )
-  // {// this is not a monitor based normalisation scheme, the simple case
-  //   enableSecondBox(false);
-  //   int blankInd = m_uiForm.cbNormal->findText(displayName);
-  // 	m_uiForm.cbNormal->setCurrentIndex(blankInd);
-  // }
-  // else
-  // {// the normalisation scheme requires the second comobox box
-  //   enableSecondBox(true);
-  //   int blankInd = m_uiForm.cbNormal->findText("monitor");
-  // 	m_uiForm.cbNormal->setCurrentIndex(blankInd);
-  //   blankInd = m_uiForm.cbMonitors->findText(displayName);
-  // 	m_uiForm.cbMonitors->setCurrentIndex(blankInd);
-  // }
- 
+
   // the value that is used when the form is loaded for the first time is included below on later loadings a saved setting is used
   m_uiForm.ckFixEi->setChecked(m_prev.value("fixei", G_USE_FIXED_EI).toBool());
   m_uiForm.ckSumSpecs->setChecked(m_prev.value("sumsps", G_SUM_SPECS).toBool());
@@ -752,5 +723,16 @@ void Homer::setIDFValues(const QString & prefix)
   m_uiForm.leVanMass->setText(values[2]);
   m_uiForm.leSamMass->setText("1");
   m_uiForm.leRMMMass->setText("1");
-  
+ 
+}
+
+void Homer::saveFormatOptionClicked(QAbstractButton*)
+{
+  bool enabled(false);
+  if( m_saveChecksGroup->checkedButton() )
+  {
+    enabled = true;
+  }
+  m_uiForm.leNameSPE->setEnabled(enabled);
+  m_uiForm.pbBrowseSPE->setEnabled(enabled);
 }
