@@ -552,8 +552,8 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   graph()->removeCurve(curveFitName);
   graph()->removeCurve(curveResName);
 
-  new MantidCurve(curveFitName,out,graph(),"spectra",1,false);
-  new MantidCurve(curveResName,out,graph(),"spectra",2,false);
+  new MantidCurve(out,graph(),"spectra",1,false);
+  new MantidCurve(out,graph(),"spectra",2,false);
 
   graph()->replot();
 }

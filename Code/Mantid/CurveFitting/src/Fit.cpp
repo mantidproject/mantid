@@ -2,19 +2,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Exception.h"
+
 #include <sstream>
 #include <numeric>
 #include <cmath>
 #include <iomanip>
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidKernel/ArrayProperty.h"
-
 
 namespace Mantid
 {
@@ -490,7 +491,14 @@ namespace CurveFitting
         nData)
         );
       ws->setTitle("");
-      ws->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();//    UnitFactory::Instance().create("TOF");
+      ws->setYUnitLabel(inputWorkspace->YUnitLabel());
+      ws->setYUnit(inputWorkspace->YUnit());
+      ws->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();
+      API::TextAxis* tAxis = new API::TextAxis(3);
+      tAxis->setLabel(0,"Data");
+      tAxis->setLabel(1,"Calc");
+      tAxis->setLabel(2,"Diff");
+      ws->replaceAxis(1,tAxis);
 
       for(int i=0;i<3;i++)
         ws->dataX(i).assign(inputX.begin()+m_minX,inputX.begin()+m_maxX+histN);
