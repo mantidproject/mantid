@@ -141,55 +141,88 @@ public:
   /** Create event workspace
    */
   static EventWorkspace_sptr CreateEventWorkspace(int numPixels,
-    int numBins, int numEvents = 100, int binDelta=1000, int initialize_pixels=1, int setX=1)
+    int numBins, int numEvents = 100, double x0=0.0, double binDelta=1.0,
+    int eventPattern = 1)
   {
     //add one to the number of bins as this is histogram
     numBins++;
 
     EventWorkspace_sptr retVal(new EventWorkspace);
-    if (initialize_pixels)
-      retVal->initialize(numPixels,1,1);
-    else
-      retVal->initialize(1,1,1);
-
+    retVal->initialize(numPixels,1,1);
+    
     //Make fake events
-    for (int pix=0; pix<numPixels; pix++)
+    if (eventPattern) // 0 == no events
     {
-      for (int i=0; i<numEvents; i++)
+      for (int pix=0; pix<numPixels; pix++)
       {
-        retVal->getEventList(pix) += TofEvent((pix+i+0.5)*binDelta, 1);
+        for (int i=0; i<numEvents; i++)
+        {
+          if (eventPattern == 1) // 0, 1 diagonal pattern
+            retVal->getEventList(pix) += TofEvent((pix+i+0.5)*binDelta, 1); 
+          else if (eventPattern == 2) // solid 2
+          {
+            retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1); 
+            retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1); 
+          }
+        }
       }
     }
     retVal->doneLoadingData();
 
-    if (setX)
-      {
-        //Create the x-axis for histogramming.
-        cow_ptr<MantidVec> axis;
-        MantidVec& xRef = axis.access();
-        xRef.resize(numBins);
-        for (int i = 0; i < numBins; ++i)
-          xRef[i] = i*binDelta;
+   //Create the x-axis for histogramming.
+    Histogram1D::RCtype x1;
+    MantidVec& xRef = x1.access();
+    xRef.resize(numBins);
+    for (int i = 0; i < numBins; ++i)
+    {
+      xRef[i] = x0+i*binDelta;
+    }
 
-        //Try setting a single axis
-//        retVal->setX(2, axis);
-
-        //Set all the histograms at once.
-        retVal->setAllX(axis);
-      }
+    //Set all the histograms at once.
+    retVal->setAllX(x1);
 
     return retVal;
   }
 
   //not strictly creating a workspace, but really helpfull to see what one contains
-  static void DisplayData(const MatrixWorkspace_sptr ws)
+  static void DisplayDataY(const MatrixWorkspace_sptr ws)
   {
       const int numHists = ws->getNumberHistograms();
       for (int i = 0; i < numHists; ++i)
       {
         for (int j = 0; j < ws->blocksize(); ++j)
         {  
-          std::cout <<ws->readY(i)[j];
+          std::cout <<ws->readY(i)[j]<<" ";
+        }
+        std::cout<<std::endl;
+      }
+  }
+  static void DisplayData(const MatrixWorkspace_sptr ws)
+  {
+    DisplayDataX(ws);
+  }
+  //not strictly creating a workspace, but really helpfull to see what one contains
+  static void DisplayDataX(const MatrixWorkspace_sptr ws)
+  {
+      const int numHists = ws->getNumberHistograms();
+      for (int i = 0; i < numHists; ++i)
+      {
+        for (int j = 0; j < ws->blocksize(); ++j)
+        {  
+          std::cout <<ws->readX(i)[j]<<" ";
+        }
+        std::cout<<std::endl;
+      }
+  }
+  //not strictly creating a workspace, but really helpfull to see what one contains
+  static void DisplayDataE(const MatrixWorkspace_sptr ws)
+  {
+      const int numHists = ws->getNumberHistograms();
+      for (int i = 0; i < numHists; ++i)
+      {
+        for (int j = 0; j < ws->blocksize(); ++j)
+        {  
+          std::cout <<ws->readE(i)[j]<<" ";
         }
         std::cout<<std::endl;
       }

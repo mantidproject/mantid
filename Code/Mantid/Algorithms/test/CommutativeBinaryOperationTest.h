@@ -95,8 +95,7 @@ public:
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event1));
-    //bin boundaries will not match
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_event2));
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event2));
   }
 
 

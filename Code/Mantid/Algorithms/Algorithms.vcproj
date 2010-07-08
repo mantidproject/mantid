@@ -589,7 +589,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CheckWorkspacesMatchTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CloneWorkspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CloneWorkspaceTest.h"
 				>
 			</File>
 			<File
@@ -618,6 +626,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\ConvertSpectrumAxis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ConvertSpectrumAxisTest.h"
 				>
 			</File>
 			<File
@@ -698,6 +710,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\DiffractionFocussing2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DiffractionFocussing2Test.h"
 				>
 			</File>
 			<File

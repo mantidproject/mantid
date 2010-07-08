@@ -85,7 +85,7 @@ private:
 public:
   EventListTest()
   {
-    BIN_DELTA = 1e4;
+    BIN_DELTA = 10000;
   }
 
   void setUp()
@@ -301,9 +301,9 @@ public:
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
     for (int i=0; i<Y.size(); i++)
     {
-      if (Y[i] != 2) std::cout << "Different at i=" << i << "\n";
       TS_ASSERT_EQUALS(Y[i], 2.0);
     }
+
   }
 
   void test_random_histogram()
@@ -339,7 +339,8 @@ public:
 
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
     EventList::StorageType Y, E;
-    el3.generateHistogramForX(some_other_x, Y, E);
+    el3.generateCountsHistogram(some_other_x, Y);
+    el3.generateErrorsHistogram(Y, E);
     TS_ASSERT_EQUALS(Y.size(), some_other_x.size()-1);
     TS_ASSERT_EQUALS(E.size(), some_other_x.size()-1);
     //Now there are 4 events per bin

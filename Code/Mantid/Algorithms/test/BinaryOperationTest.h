@@ -69,7 +69,7 @@ public:
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     MatrixWorkspace_sptr work_inEvent1 = WorkspaceCreationHelper::CreateEventWorkspace(10,1);
-    //will not pass x arrary do not match
+    //will not pass x array does not match
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(1,10);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
@@ -91,7 +91,6 @@ public:
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
     Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
     MatrixWorkspace_sptr work_inEvent1 = WorkspaceCreationHelper::CreateEventWorkspace(5,5);
-    //note this still won't match as the x arrays do not match
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
@@ -100,7 +99,7 @@ public:
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent1));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent2));
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent2));
   }
 
 };

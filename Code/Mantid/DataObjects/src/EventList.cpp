@@ -113,7 +113,7 @@ namespace DataObjects
   EventList::EventList()
   {
     this->order = UNSORTED;
-    this->emptyCache();
+    this->isCacheDirty = true;
   }
 
   /** Constructor copying from an existing event list
@@ -130,7 +130,7 @@ namespace DataObjects
   {
     this->events.assign(events.begin(), events.end());
     this->order = UNSORTED;
-    this->emptyCache();
+    this->isCacheDirty = true;
   }
 
   /// Destructor
@@ -150,6 +150,8 @@ namespace DataObjects
     this->refY = rhs.refY;
     this->refE = rhs.refE;
     this->order = rhs.order;
+    this->isCacheDirty = rhs.isCacheDirty;
+    this->isErrorCacheDirty = rhs.isErrorCacheDirty;
     return *this;
   }
 
@@ -158,8 +160,8 @@ namespace DataObjects
   EventList& EventList::operator+=(const TofEvent &event)
   {
     this->events.push_back(event);
-    this->order = UNSORTED;
-    this->emptyCacheData();
+    this->order = UNSORTED;    
+    this->isCacheDirty = true;
     return *this;
   }
 
@@ -168,8 +170,8 @@ namespace DataObjects
   EventList& EventList::operator+=(const std::vector<TofEvent> & more_events)
   {
     this->events.insert(this->events.end(), more_events.begin(), more_events.end());
-    this->order = UNSORTED;
-    this->emptyCacheData();
+    this->order = UNSORTED;    
+    this->isCacheDirty = true;
     return *this;
   }
 
@@ -180,8 +182,8 @@ namespace DataObjects
   {
     vector<TofEvent> rel = more_events.getEvents();
     this->events.insert(this->events.end(), rel.begin(), rel.end());
-    this->order = UNSORTED;
-    this->emptyCacheData();
+    this->order = UNSORTED;    
+    this->isCacheDirty = true;
     return *this;
   }
 
@@ -211,8 +213,8 @@ namespace DataObjects
   /** Clear the list of events */
   void EventList::clear()
   {
-    this->events.clear();
-    this->emptyCacheData();
+    this->events.clear();    
+    this->isCacheDirty = true;
   }
 
   // --- Sorting functions -------------------------------------------------------------------
@@ -332,25 +334,25 @@ namespace DataObjects
   /** Returns the Y data. */
   const EventList::StorageType& EventList::dataY() const
   {
-//    if (refX->size() <= 0)
-//      throw std::runtime_error("Histogram X not set!");
-    //this->refY.access().push_back(1234.5678);
-    this->generateHistogram();
+    if (isCacheDirty)
+      this->generateCountsHistogram();
     return *(this->refY);
   }
 
   /** Returns the E data. */
   const EventList::StorageType& EventList::dataE() const
   {
-//    if (refX->size() <= 0)
-//      throw std::runtime_error("Histogram X not set!");
-    //this->generateHistogram();
+    if (isCacheDirty)
+      this->generateCountsHistogram();
+    if (isErrorCacheDirty)
+      this->generateErrorsHistogram();
     return *(this->refE);
   }
 
   /** Returns a reference to the X data */
   Kernel::cow_ptr<MantidVec> EventList::getRefX() const
   {
+    this->isCacheDirty = true;
     return refX;
   }
 
@@ -358,11 +360,20 @@ namespace DataObjects
   void EventList::emptyCache() const
   {
     if (refX->size() > 0)
+    {
+      this->isCacheDirty = true;
       this->refX.access().clear();
-    if (refY->size() > 0)
+    }
+    if (refY->size() > 0)    
+    {
+      this->isCacheDirty = true;
       this->refY.access().clear();
+    }
     if (refE->size() > 0)
+    {
+      this->isErrorCacheDirty = true;
       this->refE.access().clear();
+    }
   }
 
   /** Delete the cached version of the CALCULATED histogram data.
@@ -370,36 +381,41 @@ namespace DataObjects
    * */
   void EventList::emptyCacheData()
   {
+    this->isCacheDirty = true;
     this->refY.access().clear();
     this->refE.access().clear();
   }
 
+  /** Fill a histogram given specified histogram bounds. Does not modify
+   * the eventlist (const method).
+   */
+  void EventList::generateCountsHistogram() const
+  {
+      const StorageType& X = *refX;
+      StorageType& Y = refY.access();
+      generateCountsHistogram(X,Y);
+  }
 
   /** Fill a histogram given specified histogram bounds. Does not modify
    * the eventlist (const method).
-   *
-   * @param X Histogram bins to use
-   * @param Y vector of Y data that will be set
-   * @param E vector of E data that will be set
    */
-  void EventList::generateHistogramForX(const StorageType& X, StorageType& Y, StorageType& E) const
+  void EventList::generateCountsHistogram(const StorageType& X, StorageType& Y) const
   {
+    //We are recalculating then the errors cache is dirty
+    this->isErrorCacheDirty = true;
+
     //For slight speed=up.
     size_t x_size = X.size();
 
     if (x_size <= 1)
     {
-      //throw runtime_error("EventList::generateHistogram() called without the X axis set previously.");
-
       //By default, if no histogram bins are set, simply sum up all events!
       // This is equivalent to a single bin from -inf to +inf.
       Y.resize(1, 0);
       //Set the single bin to the total # of events.
       Y[0] = this->events.size();
-      //Do the E array too.
-      E.resize(1, 0);
-      E[0] = 0;
       //And we're done! That was easy.
+      this->isCacheDirty = false;
       return;
     }
 
@@ -411,7 +427,6 @@ namespace DataObjects
       this->sortTof();
       //Clear the Y data, assign all to 0.
       Y.resize(x_size-1, 0);
-      E.resize(x_size-1, 0);
 
       //Do we even have any events to do?
       if (this->events.size() > 0)
@@ -453,18 +468,27 @@ namespace DataObjects
         }
       } // end if (there are any events to histogram)
     }// end if (we need to re-histogram)
-
+    this->isCacheDirty = false;
   }
 
-
-  /// Make the histogram; ironically declared as const to allow data access.
-  void EventList::generateHistogram() const
+  void EventList::generateErrorsHistogram() const
   {
-    StorageType &X = refX.access();
-    StorageType &Y = refY.access();
-    StorageType &E = refE.access();
+      const StorageType& Y = *refY;
+      StorageType& E = refE.access();
+      generateErrorsHistogram(Y,E);
+  }
 
-    this->generateHistogramForX(X, Y, E);
+  void EventList::generateErrorsHistogram(const StorageType& Y, StorageType& E) const
+  {
+      // Fill the vector for the errors, containing sqrt(count)
+      E.resize(Y.size(), 0);    
+
+      // windows can get confused about std::sqrt
+      typedef double (*uf)(double);
+      uf dblSqrt = std::sqrt;
+      std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt); 
+ 
+      this->isErrorCacheDirty = false;
   }
 
 } /// namespace DataObjects

@@ -49,9 +49,9 @@ public:
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
-    const Mantid::MantidVec outX=rebindata->dataX(0);
-    const Mantid::MantidVec outY=rebindata->dataY(0);
-    const Mantid::MantidVec outE=rebindata->dataE(0);
+    const Mantid::MantidVec outX=rebindata->readX(0);
+    const Mantid::MantidVec outY=rebindata->readY(0);
+    const Mantid::MantidVec outE=rebindata->readE(0);
 
     TS_ASSERT_DELTA(outX[7],15.5  ,0.000001);
     TS_ASSERT_DELTA(outY[7],3.0 ,0.000001);
@@ -84,9 +84,9 @@ public:
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
-    const Mantid::MantidVec outX=rebindata->dataX(0);
-    const Mantid::MantidVec outY=rebindata->dataY(0);
-    const Mantid::MantidVec outE=rebindata->dataE(0);
+    const Mantid::MantidVec outX=rebindata->readX(0);
+    const Mantid::MantidVec outY=rebindata->readY(0);
+    const Mantid::MantidVec outE=rebindata->readE(0);
 
     TS_ASSERT_DELTA(outX[7],15.5  ,0.000001);
     TS_ASSERT_DELTA(outY[7],8.0 ,0.000001);
@@ -118,9 +118,9 @@ public:
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
-    const Mantid::MantidVec outX=rebindata->dataX(5);
-    const Mantid::MantidVec outY=rebindata->dataY(5);
-    const Mantid::MantidVec outE=rebindata->dataE(5);
+    const Mantid::MantidVec outX=rebindata->readX(5);
+    const Mantid::MantidVec outY=rebindata->readY(5);
+    const Mantid::MantidVec outE=rebindata->readE(5);
     TS_ASSERT_DELTA(outX[7],15.5  ,0.000001);
     TS_ASSERT_DELTA(outY[7],3.0 ,0.000001);
     TS_ASSERT_DELTA(outE[7],sqrt(4.5)/2.0  ,0.000001);
@@ -202,26 +202,26 @@ public:
     rebin.setPropertyValue("InputWorkspace","test_inEvent2");
     rebin.setPropertyValue("OutputWorkspace","test_out2");
     rebin.setPropertyValue("Params", "0.0,4.0,100");
-    //TS_ASSERT_THROWS_NOTHING(rebin.execute());
+       
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    Workspace2D_sptr test_out = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("test_out2"));
+    MatrixWorkspace_sptr test_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out2"));
     TS_ASSERT_EQUALS(test_out->getNumberHistograms(), NUMPIXELS);
-    TS_ASSERT_EQUALS(test_out->dataX(0)[0], 0.0);
-    TS_ASSERT_EQUALS(test_out->dataX(0)[1], 4.0);
-    TS_ASSERT_EQUALS(test_out->dataX(0)[25], 100.0);
+    TS_ASSERT_EQUALS(test_out->readX(0)[0], 0.0);
+    TS_ASSERT_EQUALS(test_out->readX(0)[1], 4.0);
+    TS_ASSERT_EQUALS(test_out->readX(0)[25], 100.0);
     //Correct # of bins?
     TS_ASSERT_EQUALS(test_out->blocksize(), 25);
-    TS_ASSERT_EQUALS(test_out->dataX(0).size(), 26);
-    TS_ASSERT_EQUALS(test_out->dataY(0).size(), 25);
-    TS_ASSERT_EQUALS(test_out->dataE(0).size(), 25);
+    TS_ASSERT_EQUALS(test_out->readX(0).size(), 26);
+    TS_ASSERT_EQUALS(test_out->readY(0).size(), 25);
+    TS_ASSERT_EQUALS(test_out->readE(0).size(), 25);
     //Number of events was doubled
-    TS_ASSERT_EQUALS(test_out->dataY(0)[0], 2);
-    TS_ASSERT_EQUALS(test_out->dataY(0)[1], 2);
-    TS_ASSERT_EQUALS(test_out->dataY(0)[24], 2);
-    //E is still
-    TS_ASSERT_EQUALS(test_out->dataE(0)[0], 0);
+    TS_ASSERT_EQUALS(test_out->readY(0)[0], 2);
+    TS_ASSERT_EQUALS(test_out->readY(0)[1], 2);
+    TS_ASSERT_EQUALS(test_out->readY(0)[24], 2);
+    //E is sqrt(2)
+    TS_ASSERT_DELTA(test_out->readE(0)[0],std::sqrt(test_out->readY(0)[0]), 0.0001);
     //Should say it is histogram data
     TS_ASSERT(test_out->isHistogramData());
 

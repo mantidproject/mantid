@@ -150,8 +150,8 @@ public:
   /** Delete the cached version of the histogram data. */
   void emptyCache() const;
 
-  void generateHistogramForX(const StorageType& X, StorageType& Y, StorageType& E) const;
-
+  void generateCountsHistogram(const StorageType& X, StorageType& Y) const;
+  void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
 
 private:
   ///List of events.
@@ -169,11 +169,16 @@ private:
   /** Cached version of the uncertainties. */
   mutable RCtype refE;
 
+  mutable bool isCacheDirty;
+  mutable bool isErrorCacheDirty;
+
+  
+  void generateCountsHistogram() const;
+  void generateErrorsHistogram() const;
+
   /** Delete the cached version of the CALCULATED histogram data. */
   void emptyCacheData();
 
-  /// Make the histogram; ironically declared as const to allow data access.
-  void generateHistogram() const;
 };
 
 } // DataObjects
