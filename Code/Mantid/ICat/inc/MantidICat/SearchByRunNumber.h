@@ -2,7 +2,7 @@
 #define MANTID_ICAT_CSEARCHBYRUNNUMBER_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 
 /** CSearchByRunNumber is a class responsible for SearchByRunNumber algorithm.

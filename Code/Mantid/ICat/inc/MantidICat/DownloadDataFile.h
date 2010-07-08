@@ -2,7 +2,6 @@
 #define DOWNLAODDATAFILE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 
 /** CDownloadDataFile class is responsible for GetDataFile algorithms.

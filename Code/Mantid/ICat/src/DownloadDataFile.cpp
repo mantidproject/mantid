@@ -80,7 +80,7 @@ namespace Mantid
 			boost::shared_ptr<std::string >sessionId_sptr(new std::string);
 			request.sessionId=sessionId_sptr.get();
 
-			boost::shared_ptr<long long >fileId_sptr(new long long );
+			boost::shared_ptr<LONG64>fileId_sptr(new LONG64 );
 			request.datafileId=fileId_sptr.get();
 
 			setRequestParameters(inputfile,ws_sptr,request);
@@ -165,7 +165,7 @@ namespace Mantid
 				boost::shared_ptr<std::string >sessionId_sptr(new std::string);
 				request.sessionId=sessionId_sptr.get();
 
-				boost::shared_ptr<long long >fileId_sptr(new long long );
+				boost::shared_ptr<LONG64>fileId_sptr(new LONG64 );
 				request.datafileId=fileId_sptr.get();
 
 				//set request parameters

@@ -1,9 +1,7 @@
 #include "MantidICat/SearchHelper.h"
-#include"MantidICat/Session.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidICat/Session.h"
 #include "MantidICat/ErrorHandling.h" 
+#include "MantidAPI/WorkspaceFactory.h"
 #include <iomanip>
 
 namespace Mantid
@@ -332,7 +330,7 @@ namespace Mantid
 
 			//boost::shared_ptr<long long>invstId_sptr(new long long);
 		   // request.investigationId=invstId_sptr.get();
-			request.investigationId=new long long;
+			request.investigationId=new LONG64;
 			setReqParamforInvestigationIncludes(invstId,include,request);
 
 			ns1__getInvestigationIncludesResponse response;
@@ -486,7 +484,7 @@ namespace Mantid
 			boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
 			request.investigationInclude=invstInculde_sptr.get();
 
-			request.investigationId=new long long;
+			request.investigationId=new LONG64;
 			setReqParamforInvestigationIncludes(invstId,include,request);
 
 			ns1__getInvestigationIncludesResponse response;

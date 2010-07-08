@@ -2,7 +2,7 @@
 #define MANTID_ICAT_GETDATASETS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 /** CGetDataSets is a class responsible for GetDataSets algorithm.
   * This algorithm  gives the datsets for a given investigations record

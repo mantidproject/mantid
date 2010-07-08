@@ -1,9 +1,8 @@
 #ifndef MANTID_ICAT_SEARCHHELPER_H_
 #define MANTID_ICAT_SEARCHHELPER_H_
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
 /**  CSearchHelper is a utility class used in Mantid-ICat algorithms to do ICat searching.

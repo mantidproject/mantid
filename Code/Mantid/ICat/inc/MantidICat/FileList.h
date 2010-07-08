@@ -3,7 +3,8 @@
 
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+
 namespace Mantid
 {
 	namespace ICat

@@ -752,7 +752,7 @@ extern "C" {
 #  elif defined(__GLIBC__)
 #   include <bits/wordsize.h>
 #   if (__WORDSIZE == 64)
-#    define LONG64 int64_t
+#    define LONG64 long long
 #    define ULONG64 uint64_t
 #    ifndef SOAP_LONG_FORMAT
 #     define SOAP_LONG_FORMAT "%ld"

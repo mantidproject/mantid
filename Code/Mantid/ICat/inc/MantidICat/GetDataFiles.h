@@ -2,7 +2,7 @@
 #define MANTID_ICAT_GETINVESTIGATION_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 /** CGetDataFiles is a class responsible for GetInvestigation algorithm.
   * This algorithm does the basic search and returns the investigations record
