@@ -58,6 +58,7 @@ public:
   }
 
   // IValidator methods
+  ///Gets the type of the validator
   std::string getType() const { return "composite"; }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone()
@@ -122,6 +123,7 @@ public:
 
   virtual ~WorkspaceUnitValidator() {}
 
+  ///Gets the type of the validator
   std::string getType() const { return "workspaceunit"; }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new WorkspaceUnitValidator(*this); }
@@ -175,6 +177,7 @@ public:
 
   virtual ~HistogramValidator() {}
 
+  ///Gets the type of the validator
   std::string getType() const { return "histogram"; }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new HistogramValidator(*this); }
@@ -220,6 +223,7 @@ public:
 
   virtual ~RawCountValidator() {}
 
+  ///Gets the type of the validator
   std::string getType() const { return "rawcount"; }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new RawCountValidator(*this); }
@@ -263,6 +267,7 @@ public:
   CommonBinsValidator() {}
   virtual ~CommonBinsValidator() {}
 
+  ///Gets the type of the validator
   std::string getType() const { return "commonbins"; }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new CommonBinsValidator(*this); }

@@ -18,9 +18,10 @@ NumericAxis::NumericAxis(const int& length): Axis()
 }
 
 /** Virtual constructor
- *  @return A pointer to a copy of the NumericAxis on which the method is called
+ *  @param parentWorkspace The workspace is not used in this implementation
+ *  @returns A pointer to a copy of the NumericAxis on which the method is called
  */
-Axis* NumericAxis::clone(const MatrixWorkspace* const)
+Axis* NumericAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
   return new NumericAxis(*this);
 }

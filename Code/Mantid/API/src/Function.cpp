@@ -305,7 +305,6 @@ class ReferenceEqual
   const int m_i;///< index to find
 public:
   /** Constructor
-   * @param par A pointer to the parameter you want to search for
    */
   ReferenceEqual(int i):m_i(i){}
   /**
@@ -514,6 +513,8 @@ void Function::clearAllParameters()
 }
 
 /// Get the address of the parameter
+/// @param i the index of the parameter required
+/// @returns the address of the parameter
 double* Function::getParameterAddress(int i)
 {
   if (i >= nParams() || i < 0)

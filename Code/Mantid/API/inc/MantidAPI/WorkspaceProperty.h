@@ -88,7 +88,8 @@ namespace Mantid
         return *this;
       }
 
-      // Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
+      /// Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
+      /// @param value The value to set to
       virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
       {
         return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );

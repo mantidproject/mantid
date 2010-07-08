@@ -50,6 +50,7 @@ void CheckWorkspacesMatch::exec()
   return;
 }
 
+///Perform the comparison
 void CheckWorkspacesMatch::doComparison()
 {
   MatrixWorkspace_const_sptr ws1 = getProperty("Workspace1");
@@ -68,6 +69,11 @@ void CheckWorkspacesMatch::doComparison()
   return;
 }
 
+/// Checks that the data matches
+/// @param ws1 the first workspace
+/// @param ws2 the second workspace
+/// @retval true The data matches
+/// @retval false The data does not matches
 bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
   // Cache a few things for later use
@@ -124,6 +130,11 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   return true;
 }
 
+/// Checks that the axes matches
+/// @param ws1 the first workspace
+/// @param ws2 the second workspace
+/// @retval true The axes match
+/// @retval false The axes do not match
 bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
   const int numAxes = ws1->axes();
@@ -191,6 +202,11 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
   return true;
 }
 
+/// Checks that the spectra maps match
+/// @param ws1 the first sp det map
+/// @param ws2 the second sp det map
+/// @retval true The maps match
+/// @retval false The maps do not match
 bool CheckWorkspacesMatch::checkSpectraMap(const API::SpectraDetectorMap& map1, const API::SpectraDetectorMap& map2)
 {
   // Use the SpectraDetectorMap::operator!= to check the maps
@@ -204,6 +220,11 @@ bool CheckWorkspacesMatch::checkSpectraMap(const API::SpectraDetectorMap& map1, 
   return true;
 }
 
+/// Checks that the instruments match
+/// @param ws1 the first workspace
+/// @param ws2 the second workspace
+/// @retval true The instruments match
+/// @retval false The instruments do not match
 bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
   // First check the name matches
@@ -231,6 +252,11 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
   return true;
 }
 
+/// Checks that the masking matches
+/// @param ws1 the first workspace
+/// @param ws2 the second workspace
+/// @retval true The masking matches
+/// @retval false The masking does not match
 bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
   const int numHists = ws1->getNumberHistograms();
@@ -258,6 +284,11 @@ bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API
   return true;
 }
 
+/// Checks that the sample matches
+/// @param ws1 the first sample
+/// @param ws2 the second sample
+/// @retval true The sample matches
+/// @retval false The samples does not match
 bool CheckWorkspacesMatch::checkSample(const API::Sample& sample1, const API::Sample& sample2)
 {
   if ( sample1.getName() != sample2.getName() )

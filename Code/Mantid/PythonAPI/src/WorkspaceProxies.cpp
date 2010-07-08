@@ -11,7 +11,13 @@ using namespace Mantid::PythonAPI;
 // WorkspaceAlgebraProxy
 //
 //****************************************
-// Binary operation for two workspaces
+
+/// Binary operation for two workspaces
+/// @param lhs the left hand side workspace of the operation
+/// @param rhs the right hand side workspace of the operation
+/// @param op The operation
+/// @param inplace is this is an inplace operation (i.e. does the output overwrite the lhs
+/// @returns The resulting workspace
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op, bool inplace)
 {
   wraptype_ptr result;
@@ -57,7 +63,12 @@ WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const
 }
 
 
-// Binary operation for workspace and double
+/// Binary operation for workspace and double
+/// @param lhs the left hand side workspace of the operation
+/// @param rhs the right hand side double of the operation
+/// @param op The operation
+/// @param inplace is this is an inplace operation (i.e. does the output overwrite the lhs
+/// @returns The resulting workspace
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace)
 {
   wraptype_ptr result;
@@ -106,6 +117,10 @@ WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const
 }
 
 /// Binary operation on double and workspace
+/// @param lhs the right hand side double of the operation
+/// @param rhs the left hand side workspace of the operation
+/// @param op The operation
+/// @returns The resulting workspace
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(double lhs, const wraptype_ptr rhs, char op)
 {
   wraptype_ptr result;

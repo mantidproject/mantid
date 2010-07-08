@@ -528,6 +528,8 @@ std::vector<boost::shared_ptr<MantidVec> > LoadRawHelper::getTimeChannels(const 
 }
 
 /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+/// @param fileName the raw file filename
+/// @param localWorkspace The workspace to load the instrument for
 void LoadRawHelper::runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace)
 {
   g_log.debug("Loading the instrument definition...");
@@ -591,6 +593,8 @@ void LoadRawHelper::runLoadInstrument(const std::string& fileName,DataObjects::W
 }
 
 /// Run LoadInstrumentFromRaw as a sub-algorithm (only if loading from instrument definition file fails)
+/// @param fileName the raw file filename
+/// @param localWorkspace The workspace to load the instrument for
 void LoadRawHelper::runLoadInstrumentFromRaw(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace)
 {
   IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
@@ -620,6 +624,8 @@ void LoadRawHelper::runLoadInstrumentFromRaw(const std::string& fileName,DataObj
 }
 
 /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
+/// @param fileName the raw file filename
+/// @param localWorkspace The workspace to load the mapping table for
 void LoadRawHelper::runLoadMappingTable(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace)
 {
  g_log.debug("Loading the spectra-detector mapping...");
@@ -645,6 +651,9 @@ void LoadRawHelper::runLoadMappingTable(const std::string& fileName,DataObjects:
 }
 
 /// Run the LoadLog sub-algorithm
+/// @param fileName the raw file filename
+/// @param localWorkspace The workspace to load the logs for
+/// @param The period number that the workspace holds
 void LoadRawHelper::runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace, int period)
 {
  g_log.debug("Loading the log files...");
@@ -672,7 +681,10 @@ void LoadRawHelper::runLoadLog(const std::string& fileName,DataObjects::Workspac
   if(plog) m_perioids=plog->getPeriodsProperty();
 }
 
-///sets optional properties for the laoraw algorithm
+///sets optional properties for the loadraw algorithm
+/// @param spec_min The minimum spectra number
+/// @param spec_max The maximum spectra number
+/// @param spec_list The list of Spectra to be included
 void LoadRawHelper::setOptionalProperties(const int& spec_min,const int& spec_max,const std::vector<int>& spec_list)
 {
 	m_spec_min=spec_min;
@@ -775,6 +787,9 @@ int LoadRawHelper::calculateWorkspaceSize()
 }
 
 /// calculate workspace sizes.
+/// @param monitorSpecList the vector of the monitor spectra
+/// @param normalwsSpecs the spectra for the detector workspace
+/// @param monitorwsSpecs the spectra for the monitor workspace
 void LoadRawHelper::calculateWorkspacesizes(const std::vector<int>& monitorSpecList, 
                                             int& normalwsSpecs, int & monitorwsSpecs)
 {

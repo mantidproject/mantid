@@ -141,6 +141,11 @@ bool Quat::isNull(const double tolerance) const
 	return (std::fabs(pw)<tolerance);
 }
 
+///Extracts the angle of roatation and axis
+/// @param _deg the angle of rotation
+/// @param _ax0 The first component of the axis
+/// @param _ax1 The second component of the axis
+/// @param _ax2 The third component of the axis
 void Quat::getAngleAxis(double& _deg,double& _ax0, double& _ax1, double& _ax2) const
 {
 	// If it represents a rotation of 0(2\pi), get an angle of 0 and axis (0,0,1)
@@ -191,6 +196,9 @@ void Quat::operator()(const double angle, const V3D& axis)
 	this->setAngleAxis(angle,axis);
 }
 
+/** Sets the quat values from another Quat
+ * @param q the quat to copy
+ */
 void Quat::operator()(const Quat& q)
 {
 	w=q.w;

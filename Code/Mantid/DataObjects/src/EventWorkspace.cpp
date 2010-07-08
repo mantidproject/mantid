@@ -63,7 +63,8 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
-  /// Returns the number of single indexable items in the workspace
+  /// The total size of the workspace
+  /// @returns the number of single indexable items in the workspace
   int EventWorkspace::size() const
   {
     return this->data.size() * this->blocksize();
@@ -71,6 +72,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /// Get the blocksize, aka the number of bins in the histogram
+  /// @returns the number of bins in the Y data
   int EventWorkspace::blocksize() const
   {
     // Pick the first pixel to find the blocksize.
@@ -86,7 +88,9 @@ namespace DataObjects
   }
 
   //-----------------------------------------------------------------------------
-  /** Get the number of histograms, usually the same as the number of pixels or detectors. */
+  /** Get the number of histograms, usually the same as the number of pixels or detectors. 
+  @returns the number of histograms / event lists
+  */
   const int EventWorkspace::getNumberHistograms() const
   {
     return this->data.size();
@@ -94,6 +98,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /// The total number of events across all of the spectra.
+  /// @returns The total number of events
   size_t EventWorkspace::getNumberEvents() const
   {
     size_t total = 0;
@@ -106,6 +111,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /// Returns true always - an EventWorkspace always represents histogramm-able data
+  /// @returns If the data is a histogtram - always true for an eventWorkspace
   const bool EventWorkspace::isHistogramData() const
   {
     return true;
@@ -118,6 +124,7 @@ namespace DataObjects
 
   /** Get an EventList object at the given pixelid/spectrum number
    * @param pixelid Pixel ID (aka spectrum number)
+   * @returns A reference to the eventlist
    */
   EventList& EventWorkspace::getEventList(const int pixelid)
   {
@@ -142,6 +149,7 @@ namespace DataObjects
 
   /** Get an EventList object at the given workspace index number
    * @param workspace_index The histogram workspace index number.
+   * @returns A reference to the eventlist
    */
   EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index)
   {
@@ -150,6 +158,7 @@ namespace DataObjects
 
   /** Get a const EventList object at the given workspace index number
    * @param workspace_index The histogram workspace index number.
+   * @returns A const reference to the eventlist
    */
   const EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index) const
   {
@@ -161,6 +170,7 @@ namespace DataObjects
   /** Call this method when loading event data is complete.
    * The map of pixelid to spectrum # is generated.
    * Also, a simple 1:1 map of spectrum # to pixel id (detector #) is generated
+   * @param makeSpectraMap Generate a spectramap (0=No, otherwise yes)
    * */
   void EventWorkspace::doneLoadingData(int makeSpectraMap)
   {
@@ -230,6 +240,8 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /// Return the data X vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
+  /// @param index the workspace index to return
+  /// @returns A reference to the vector of binned error values
   MantidVec& EventWorkspace::dataX(const int index)
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -239,6 +251,8 @@ namespace DataObjects
 
   /// Return the data Y vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
+  /// @param index the workspace index to return
+  /// @returns A reference to the vector of binned error values
   MantidVec& EventWorkspace::dataY(const int index)
   {
     if ((index >= this->m_noVectors) || (index < 0))
@@ -248,6 +262,8 @@ namespace DataObjects
 
   /// Return the data E vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
+  /// @param index the workspace index to return
+  /// @returns A reference to the vector of binned error values
   MantidVec& EventWorkspace::dataE(const int index)
   {
     if ((index >= this->m_noVectors) || (index < 0))

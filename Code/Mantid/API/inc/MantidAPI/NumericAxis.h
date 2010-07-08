@@ -52,6 +52,7 @@ public:
   NumericAxis(const int& length);
   virtual ~NumericAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
+  ///Is the axis numeric - always true for this class
   virtual const bool isNumeric() const{return true;}
   virtual int length() const{return static_cast<int>(m_values.size());}
   virtual double operator()(const int& index, const int& verticalIndex = 0) const;

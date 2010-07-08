@@ -117,6 +117,7 @@ public:
     {
         alg->addObserver(m_errorObserver);
     }
+/// @cond Doxygen cannot handle the macro around the argument name
 
     /** Handler of the progress notifications. Must be overriden in inherited classes.
         The default handler is provided (doing nothing).
@@ -144,7 +145,7 @@ public:
     {
         std::cerr<<"Started "<<'\n';
     }
-    /** Handler of the finish notifications. Must be overriden in inherited classes.
+   /** Handler of the finish notifications. Must be overriden in inherited classes.
         The default handler is provided (doing nothing).
         @param alg Pointer to the algorithm sending the notification. Note that this can
         point to a different object than the argument of a observeZZZ(...) method, e.g. 
@@ -167,6 +168,7 @@ public:
     {
         std::cerr<<"Error "<<what<<'\n';
     }
+/// @endcond
 private:
 
     /** Poco notification handler for Algorithm::ProgressNotification.

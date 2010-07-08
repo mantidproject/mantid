@@ -16,9 +16,10 @@ TextAxis::TextAxis(const int& length): Axis()
 }
 
 /** Virtual constructor
+ *  @param parentWorkspace The workspace is not used in this implementation
  *  @return A pointer to a copy of the TextAxis on which the method is called
  */
-Axis* TextAxis::clone(const MatrixWorkspace* const)
+Axis* TextAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
   return new TextAxis(*this);
 }
@@ -79,6 +80,7 @@ std::string TextAxis::label(const int& index)const
 /**
   * Set the label for value at index
   * @param index Index
+  * @param lbl The text label
   */
 void TextAxis::setLabel(const int& index, const std::string& lbl)
 {

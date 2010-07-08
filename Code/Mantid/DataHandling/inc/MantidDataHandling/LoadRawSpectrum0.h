@@ -92,7 +92,7 @@ namespace Mantid
       std::map<int,int> m_specTimeRegimes;
       /// The current value of the progress counter
       double m_prog;
-      // Read in the time bin boundaries
+      /// Read in the time bin boundaries
       int m_lengthIn;
 	  /// number of time regime
 	  int m_noTimeRegimes;

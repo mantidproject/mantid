@@ -123,6 +123,7 @@ void SaveRKH::writeHeader()
   }
 }
 
+///Writes out the 1D data
 void SaveRKH::write1D()
 {
   const int noDataPoints = m_workspace->size();
@@ -157,7 +158,7 @@ void SaveRKH::write1D()
     prg.report();
   }
 }
-
+///Writes out the 2D data
 void SaveRKH::write2D()
 {
   // First the axis values
