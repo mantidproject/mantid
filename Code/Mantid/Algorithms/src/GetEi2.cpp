@@ -177,6 +177,10 @@ double GetEi2::getDistanceFromSource(int ws_index) const
 
 /**
  * Calculate the peak position of a given TOF range within the chosen spectrum
+ * @param ws_index the wokspace index 
+ * @param t_min the min time to consider
+ * @param t_max the max time to consider
+ * @return the peak position
  */
 double GetEi2::calculatePeakPosition(int ws_index, double t_min, double t_max)
 {

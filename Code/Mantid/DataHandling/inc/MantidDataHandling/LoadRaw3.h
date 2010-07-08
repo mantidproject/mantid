@@ -140,7 +140,7 @@ namespace Mantid
       static const int unSetInt = INT_MAX-15;
       /// a vector holding the indexes of monitors
       std::vector<int> m_monitordetectorList;
-      // Read in the time bin boundaries
+      /// Read in the time bin boundaries
       int m_lengthIn;
       /// boolean for list spectra options
       bool m_bmspeclist;

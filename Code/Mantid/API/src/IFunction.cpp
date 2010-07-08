@@ -529,7 +529,7 @@ protected:
       "from string "+m_value);
   }
 private:
-  std::string m_value;
+  std::string m_value; ///<the value as a string
 };
 
 /** Set value from a string. Throws exception if the string has wrong format

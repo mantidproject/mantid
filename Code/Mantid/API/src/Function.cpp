@@ -307,7 +307,8 @@ public:
   /** Constructor
    */
   ReferenceEqual(int i):m_i(i){}
-  /**
+  /**Bracket operator
+   * @param p the parameter you are looking for
    * @return True if found
    */
   bool operator()(ParameterReference* p)

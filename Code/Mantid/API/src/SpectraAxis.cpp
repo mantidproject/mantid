@@ -18,9 +18,10 @@ SpectraAxis::SpectraAxis(const int& length): Axis()
 }
 
 /** Virtual constructor
+ *  @param parentWorkspace not used in this implementation
  *  @return A pointer to a copy of the SpectraAxis on which the method is called
  */
-Axis* SpectraAxis::clone(const MatrixWorkspace* const)
+Axis* SpectraAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
   return new SpectraAxis(*this);
 }

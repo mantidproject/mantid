@@ -65,6 +65,7 @@ namespace Mantid
       virtual void function(double* out, const double* xValues, const int& nData)const;
       virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
+      ///calculate the const function
       void constFunction(double* out, const double* xValues, const int& nData) const;
 
     protected:

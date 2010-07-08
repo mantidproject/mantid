@@ -65,7 +65,7 @@ public:
   /// Get value of cost function 
   virtual double costFunctionVal() = 0;
 
-  /* Calculates covariance matrix
+  /** Calculates covariance matrix
    *
    * @param epsrel Is used to remove linear-dependent columns
    * @param covar Returned covariance matrix, here as 

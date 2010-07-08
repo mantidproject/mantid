@@ -92,6 +92,7 @@ void NormaliseToMonitor::exec()
 }
 
 /** Makes sure that the input properties are set correctly
+ *  @param inputWorkspace the input workspace
  *  @throw std::runtime_error If a property is invalid
  */
 void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspace)

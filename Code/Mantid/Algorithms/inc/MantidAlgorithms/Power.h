@@ -76,6 +76,7 @@ private:
   void retrieveProperties();
   void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut,
       double& EOut);
+  ///calculate the power
   inline double calculatePower(const double base, const double exponent);
   ///Exponent to raise the base workspace to
   double m_exponent;

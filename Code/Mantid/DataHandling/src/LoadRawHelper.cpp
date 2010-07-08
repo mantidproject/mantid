@@ -108,6 +108,8 @@ void LoadRawHelper::skipData(FILE* file,int hist)
 	isisRaw->skipData(file, hist);
 }
 /// calls isisRaw ioRaw.
+/// @param file the file pointer
+/// @param from_file unknown
 void LoadRawHelper::ioRaw(FILE* file,bool from_file )
 {
 	isisRaw->ioRAW(file, from_file);
@@ -653,7 +655,7 @@ void LoadRawHelper::runLoadMappingTable(const std::string& fileName,DataObjects:
 /// Run the LoadLog sub-algorithm
 /// @param fileName the raw file filename
 /// @param localWorkspace The workspace to load the logs for
-/// @param The period number that the workspace holds
+/// @param period The period number that the workspace holds
 void LoadRawHelper::runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace, int period)
 {
  g_log.debug("Loading the log files...");

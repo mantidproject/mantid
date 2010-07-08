@@ -538,7 +538,12 @@ bool LoadRaw3::isMonitor(const std::vector<int>& monitorIndexes, int spectrumNum
   (itr != monitorIndexes.end()) ? (bMonitor = true) : (bMonitor = false);
   return bMonitor;
 }
+
 /// Creates a ManagedRawFileWorkspace2D
+/// @param bincludeMonitors Include monitors or not
+/// @param bexcludeMonitors Exclude monitors or not
+/// @param bseparateMonitors Separate monitors or not
+/// @param fileName the filename
 void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool bseparateMonitors,
 							const std::string& fileName)
 {

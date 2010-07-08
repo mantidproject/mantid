@@ -48,6 +48,7 @@ public:
   /// overwrite IFunction base class methods
   std::string name()const{return "Resolution";}
   void function(double* out, const double* xValues, const int& nData)const;
+  ///  function derivatives
   void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData)const{}
 
   /// Returns the number of attributes associated with the function

@@ -76,6 +76,7 @@ private:
   /// Execution code
   void exec();
 
+  ///runs the flat plate absorption
   API::MatrixWorkspace_sptr runFlatPlateAbsorption();
 };
 

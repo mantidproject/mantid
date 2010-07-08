@@ -238,6 +238,11 @@ const Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index) const
   return m_data[index-m_minIndex].dataE();
 }
 
+/**
+  Gets reference to the X vector of the specified histogram
+  @param index The number of the histogram
+  @return A reference to the X vector of the specified histogram
+*/
 Histogram1D::RCtype ManagedDataBlock2D::refX(const int index) const
 {
   if ( ( index < m_minIndex ) 

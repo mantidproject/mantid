@@ -421,6 +421,7 @@ void LoadInstrument::readDefaults(Poco::XML::Element* defaults)
  *  @param parent CompAssembly to append new component to
  *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
  *  @param idList The current IDList
+ *  @param excludeList The exclude List
  */
 void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList, 
                                     const std::vector<std::string> excludeList)

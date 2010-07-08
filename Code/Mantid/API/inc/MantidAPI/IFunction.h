@@ -377,14 +377,15 @@ public:
   */
   virtual void set(int iY, int iP, double value) = 0;
 
+  ///@cond do not document
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
   *   @param value Value to add
-  *   @param iActiveP The index of an active parameter.
   */
   virtual void addNumberToColumn(const double& IGNORE_IFUNCTION_ARGUMENT(value), const int& IGNORE_IFUNCTION_ARGUMENT(iActiveP)) 
   {
     throw Kernel::Exception::NotImplementedError("No addNumberToColumn() method of Jacobian provided");
   }
+  ///@endcond
 
   /// Virtual destructor
   virtual ~Jacobian() {};

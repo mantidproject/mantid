@@ -81,6 +81,11 @@ double PRConjugateGradientMinimizer::costFunctionVal()
   return m_gslSolver->f;
 }
 
+/* Calculates covariance matrix
+ *
+ * @param epsrel Is used to remove linear-dependent columns
+ * @param covar Returned covariance matrix, here as 
+ */
 void PRConjugateGradientMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
 {
   gsl_matrix * holdCalculatedJacobian;

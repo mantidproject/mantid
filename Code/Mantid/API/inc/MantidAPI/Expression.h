@@ -156,7 +156,7 @@ namespace Mantid
         std::set<std::string> unary;           ///< Unary operators
         std::map<std::string, size_t> precedence; ///< Map of the operator precedence order
         std::set<char> symbols;                   ///< All the symbols that are used in the binary operators
-        std::map<std::string, char> op_number;    ///< 
+        std::map<std::string, char> op_number;    ///< map of operators
       };
 
       /**
@@ -188,7 +188,7 @@ namespace Mantid
        */
       bool is_op_symbol(const char c)const;
 
-      boost::shared_ptr<Operators> m_operators;
+      boost::shared_ptr<Operators> m_operators; ///< pointer ot the operators
 
     };
 

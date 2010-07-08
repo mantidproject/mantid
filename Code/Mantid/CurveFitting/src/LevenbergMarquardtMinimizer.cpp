@@ -101,6 +101,11 @@ double LevenbergMarquardtMinimizer::costFunctionVal()
   return chi*chi;
 }
 
+/* Calculates covariance matrix
+ *
+ * @param epsrel Is used to remove linear-dependent columns
+ * @param covar Returned covariance matrix, here as 
+ */
 void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
 {
   gsl_multifit_covar (m_gslSolver->J, epsrel, covar);

@@ -66,7 +66,7 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
     const std::vector<std::string>& inputworkspacenames()const { return m_wsnames; }
   
   private:
-      std::vector<std::string> m_wsnames;
+      std::vector<std::string> m_wsnames; ///< cache of ws names
     };
 
     /// UnGroupingWorkspace notification is sent from UnGroupWorkspace algorithm before the WorkspaceGroup is removed from the

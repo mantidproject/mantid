@@ -132,7 +132,7 @@ namespace Mantid
 
       double m_penaltyFactor;
 
-      // name of parameter you want to constraint
+      /// name of parameter you want to constraint
       std::string m_parameterName;
 
       /// has a lower bound set true/false

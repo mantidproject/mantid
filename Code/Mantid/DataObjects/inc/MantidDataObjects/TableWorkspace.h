@@ -117,7 +117,7 @@ namespace DataObjects
     /// Delets a row if it exists.
     void removeRow(int index);
      
-	 /* This method finds the row and column index of an integer cell value in a table workspace
+	 /** This method finds the row and column index of an integer cell value in a table workspace
 	 * @param value -value to search
 	 * @param  row  row number of the value  searched
 	 * @param  col  column number of the value searched
@@ -126,7 +126,7 @@ namespace DataObjects
 	{		
 		findValue(value,row,col);
 	}
-	/* This method finds the row and column index of an string cell value in a table workspace
+	/** This method finds the row and column index of an string cell value in a table workspace
 	* @param value -value to search
 	* @param  row  row number of the value  searched
 	* @param  col  column number of the value searched
@@ -135,7 +135,7 @@ namespace DataObjects
 	{
 		findValue(value,row,col);
 	}
-	/* This method finds the row and column index of an float value in a table workspace
+	/** This method finds the row and column index of an float value in a table workspace
 	* @param value -value to search
 	* @param  row  row number of the value  searched
 	* @param  col  column number of the value searched
@@ -144,7 +144,7 @@ namespace DataObjects
 	{
 		findValue(value,row,col);
 	}
-	/* This method finds the row and column index of an API::Bollean value in a table workspace
+	/** This method finds the row and column index of an API::Bollean value in a table workspace
 	* @param value -value to search
 	* @param  row  row number of the value  searched
 	* @param  col  column number of the value searched
@@ -153,7 +153,7 @@ namespace DataObjects
 	{
 		findValue(value,row,col);
 	}
-	/* This method finds the row and column index of an double cell value in a table workspace
+	/** This method finds the row and column index of an double cell value in a table workspace
 	* @param value -value to search
 	* @param  row  row number of the value  searched
 	* @param  col  column number of the value searched
@@ -162,7 +162,7 @@ namespace DataObjects
 	{
 		findValue(value,row,col);
 	}
-	/* This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
+	/** This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
 	* @param value -value to search
 	* @param  row  row number of the value  searched
 	* @param  col  column number of the value searched
@@ -208,7 +208,7 @@ private:
 		}
 	}
 	
-    /* This method finds the row and column index of an integer cell value in a table workspace
+    /** This method finds the row and column index of an integer cell value in a table workspace
     * @param value -value to search
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
@@ -217,7 +217,7 @@ private:
     {		
       findValue(value,row,col);
     }
-    /* This method finds the row and column index of an string cell value in a table workspace
+    /** This method finds the row and column index of an string cell value in a table workspace
     * @param value -value to search
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
@@ -226,7 +226,7 @@ private:
     {
       findValue(value,row,col);
     }
-    /* This method finds the row and column index of an float value in a table workspace
+    /** This method finds the row and column index of an float value in a table workspace
     * @param value -value to search
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
@@ -235,7 +235,7 @@ private:
     {
       findValue(value,row,col);
     }
-    /* This method finds the row and column index of an API::Bollean value in a table workspace
+    /** This method finds the row and column index of an API::Bollean value in a table workspace
     * @param value -value to search
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
@@ -244,7 +244,7 @@ private:
     {
       findValue(value,row,col);
     }
-    /* This method finds the row and column index of an double cell value in a table workspace
+    /** This method finds the row and column index of an double cell value in a table workspace
     * @param value -value to search
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
@@ -253,7 +253,7 @@ private:
     {
       findValue(value,row,col);
     }
-    /* This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
+    /** This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
     * @param value -value to search
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched

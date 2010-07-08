@@ -46,6 +46,7 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
   gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, startGuess, m_simplexStepSize);
 }
 
+///resets the size
 void SimplexMinimizer::resetSize(double* X, const double* Y, double *sqrtWeight, 
                                    const int& nData, const int& nParam, 
                                    gsl_vector* startGuess, const double& size,
@@ -94,6 +95,7 @@ double SimplexMinimizer::costFunctionVal()
   return m_gslSolver->fval;
 }
 
+///Calculates covariance matrix - not implemented
 void SimplexMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
 {
   Kernel::Exception::NotImplementedError("Covariance matrix calculation for Simplex not implemented.");

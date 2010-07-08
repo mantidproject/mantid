@@ -186,7 +186,7 @@ namespace Mantid
 	   /// boolean for list spectra options
       bool m_bmspeclist;
 
-	  ///
+	  ///the total nuumber of spectra
 	  int m_total_specs;
 	
     };
