@@ -5,7 +5,7 @@
 #include "MantidICat/DownloadDataFile.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
-#include "MantidICat/GetInvestigation.h"
+#include "MantidICat/GetDataFiles.h"
 #include "MantidICat/SearchByRunNumber.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ConfigService.h"

@@ -2,7 +2,7 @@
 #define GETINVESTIGATION_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/GetInvestigation.h"
+#include "MantidICat/GetDataFiles.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
 #include "MantidICat/SearchByRunNumber.h"

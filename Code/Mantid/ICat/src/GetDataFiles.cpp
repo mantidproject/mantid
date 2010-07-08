@@ -1,4 +1,4 @@
-#include "MantidICat/GetInvestigation.h"
+#include "MantidICat/GetDataFiles.h"
 #include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"

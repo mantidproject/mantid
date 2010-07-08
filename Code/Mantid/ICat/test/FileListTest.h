@@ -1,11 +1,11 @@
-#ifndef FILELISTTEST_H
-#define FILELISTTEST_H
+#ifndef FILELISTTEST_H_
+#define FILELISTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/FileList.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
-#include "MantidICat/GetInvestigation.h"
+#include "MantidICat/GetDataFiles.h"
 #include "MantidICat/SearchByRunNumber.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
