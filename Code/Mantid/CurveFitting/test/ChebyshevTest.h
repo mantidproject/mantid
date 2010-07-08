@@ -41,8 +41,7 @@ public:
 
   void testFit()
   {
-    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-      (WorkspaceFactory::Instance().create("Workspace2D",1,11,11));
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,11,11);
 
     Mantid::MantidVec& X = ws->dataX(0);
     Mantid::MantidVec& Y = ws->dataY(0);

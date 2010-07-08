@@ -24,7 +24,7 @@ namespace CurveFitting
   */
   void FitMultispectral::init()
   {
-    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
 
     declareProperty("StartX",EMPTY_DBL(),"The lowest value on the x axis to include in the fit");
     declareProperty("EndX",EMPTY_DBL(),"The highest value on the x axis to include in the fit");
@@ -59,7 +59,7 @@ namespace CurveFitting
   void FitMultispectral::exec()
   {
     // Get the input workspace
-    DataObjects::Workspace2D_sptr ws = getProperty("InputWorkspace");
+    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
 
     double startY = getProperty("StartY");
     double endY = getProperty("EndY");
@@ -184,7 +184,7 @@ namespace CurveFitting
 
       if (!output.empty())
       {
-        DataObjects::Workspace2D_sptr out = fit->getProperty("OutputWorkspace");
+        MatrixWorkspace_const_sptr out = fit->getProperty("OutputWorkspace");
         outputWS->dataX(io) = out->readX(0);
         outputWS->dataY(io) = out->readY(1);
         outputWS->dataE(io) = out->readE(1);
@@ -213,7 +213,7 @@ namespace CurveFitting
         if (out_p->columnCount() == 3)
         {// Errors were calculated
           API::ColumnVector<double> tmp = out_p->getVector("Error");
-          for(size_t i=0;i<tmp.size();++i)
+          for(int i=0;i<tmp.size();++i)
           {
             errors.push_back(tmp[i]);
           }

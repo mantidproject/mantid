@@ -8,12 +8,6 @@
 
 namespace Mantid
 {
-
-  namespace DataObjects
-  {
-    class Workspace2D;
-  }
-
   namespace CurveFitting
   {
     /**
@@ -72,7 +66,7 @@ namespace Mantid
         int i;            ///< Workspace index of the spectra to fit
         int spec;         ///< Spectrum number to fit
         int period;       ///< Period, needed if a file contains several periods
-        boost::shared_ptr<DataObjects::Workspace2D> ws; ///< shared pointer to the workspace
+        API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
       };
     public:
       /// Default constructor

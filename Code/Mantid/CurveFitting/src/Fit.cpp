@@ -4,7 +4,6 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/TextAxis.h"
@@ -32,7 +31,6 @@ namespace CurveFitting
   using API::Algorithm;
   using API::Progress;
   using API::Jacobian;
-  using DataObjects::Workspace2D_const_sptr;
 
 
   ///Destructor
@@ -45,7 +43,7 @@ namespace CurveFitting
   */
   void Fit::init()
   {
-    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
@@ -97,7 +95,7 @@ namespace CurveFitting
     const int maxInterations = getProperty("MaxIterations");
 
     // Get the input workspace
-    DataObjects::Workspace2D_const_sptr localworkspace = getProperty("InputWorkspace");
+    API::MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
     // number of histogram is equal to the number of spectra
     const int numberOfSpectra = localworkspace->getNumberHistograms();
@@ -452,7 +450,7 @@ namespace CurveFitting
       declareProperty(
         new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
         "The name of the TableWorkspace in which to store the final fit parameters" );
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output), 
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "Name of the output Workspace holding resulting simlated spectrum");
 
       setPropertyValue("OutputParameters",output+"_Parameters");
@@ -476,20 +474,18 @@ namespace CurveFitting
       setProperty("OutputParameters",m_result);
 
       // Save the fitted and simulated spectra in the output workspace
-      Workspace2D_const_sptr inputWorkspace = getProperty("InputWorkspace");
+      API::MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
       int iSpec = getProperty("WorkspaceIndex");
       const MantidVec& inputX = inputWorkspace->readX(iSpec);
       const MantidVec& inputY = inputWorkspace->readY(iSpec);
 
       int histN = isHistogram ? 1 : 0;
-      Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-        (
+      API::MatrixWorkspace_sptr ws =
         Mantid::API::WorkspaceFactory::Instance().create(
-        "Workspace2D",
-        3,
-        nData + histN,
-        nData)
-        );
+            "Workspace2D",
+            3,
+            nData + histN,
+            nData);
       ws->setTitle("");
       ws->setYUnitLabel(inputWorkspace->YUnitLabel());
       ws->setYUnit(inputWorkspace->YUnit());
