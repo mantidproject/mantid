@@ -5,6 +5,9 @@
 #include "../Spectrogram.h"
 #include "MantidMatrixDialog.h"
 #include "Preferences.h"
+
+#include "MantidAPI/TextAxis.h"
+
 #include <QtGlobal>
 #include <QTextStream>
 #include <QList>
@@ -1399,6 +1402,14 @@ double MantidMatrixModel::data(int row, int col) const
 QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation, int role ) const
 {
   if (role != Qt::DisplayRole) return QVariant();
+  if (orientation == Qt::Vertical)
+  {
+    Mantid::API::TextAxis* xAxis = dynamic_cast<Mantid::API::TextAxis*>(m_workspace->getAxis(1));
+    if (xAxis)
+    {
+      return QString::fromStdString(xAxis->label(section));
+    }
+  }
   return section;
 }
 

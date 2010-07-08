@@ -2048,9 +2048,13 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
     Mantid::API::Axis* ax;
     ax = workspace->getAxis(0);
     std::string s;
-    if (ax->unit().get())
+    if (ax->unit() && ax->unit()->unitID() != "Empty" )
     {
-      s = ax->unit()->caption() + " / " + ax->unit()->label();
+      s = ax->unit()->caption();
+      if ( !ax->unit()->label().empty() )
+      {
+        s += " / " + ax->unit()->label();
+      }
     }
     else if (!ax->title().empty())
     {
