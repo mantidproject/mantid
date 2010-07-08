@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/NumericAxis.h"
 
 /// @cond
@@ -33,12 +32,10 @@ DECLARE_ALGORITHM(ConvertSpectrumAxis)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_const_sptr;
 
 void ConvertSpectrumAxis::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty("Target","",new ListValidator(std::vector<std::string>(1,"theta")),
@@ -48,7 +45,7 @@ void ConvertSpectrumAxis::init()
 void ConvertSpectrumAxis::exec()
 {
   // Get the input workspace
-  Workspace2D_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Check that the input workspace has a spectrum axis for axis 1
   // Could put this in a validator later

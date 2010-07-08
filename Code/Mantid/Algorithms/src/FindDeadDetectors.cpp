@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <fstream>
 
@@ -16,14 +15,13 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-    using DataObjects::Workspace2D;
 
     /// Initialisation method.
     void FindDeadDetectors::init()
     {
       declareProperty(
-        new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input),
-        "Name of the input workspace2D" );
+        new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+        "Name of the input workspace" );
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "Each histogram from the input workspace maps to a histogram in this\n"

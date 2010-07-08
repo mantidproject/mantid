@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
@@ -25,7 +24,7 @@ void Qxy::init()
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(1.0e-12);
@@ -46,10 +45,9 @@ void Qxy::exec()
   // Will also need an identically-sized workspace to hold the solid angles
   MatrixWorkspace_sptr solidAngles = WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
-  DataObjects::Histogram1D::RCtype axis;
+  cow_ptr<MantidVec> axis;
   axis.access() = outputWorkspace->readX(0);
-  DataObjects::Workspace2D_sptr solidAngles2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(solidAngles);
-  for ( int i = 0; i < solidAngles->getNumberHistograms(); ++i ) solidAngles2D->setX(i,axis);
+  for ( int i = 0; i < solidAngles->getNumberHistograms(); ++i ) solidAngles->setX(i,axis);
   
   const int numSpec = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
@@ -167,10 +165,9 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   }
   
   // Fill the X vectors in the output workspace
-  DataObjects::Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWorkspace);
   for (int i=0; i < bins-1; ++i)
   {
-    ws2D->setX(i,axis);
+    outputWorkspace->setX(i,axis);
   }
 
   // Set the axis units
@@ -178,7 +175,7 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   // Set the 'Y' unit (gets confusing here...this is probably a Z axis in this case)
   outputWorkspace->setYUnitLabel("Cross Section (1/cm)");
 
-  setProperty("OutputWorkspace",ws2D);
+  setProperty("OutputWorkspace",outputWorkspace);
   return outputWorkspace;
 }
 

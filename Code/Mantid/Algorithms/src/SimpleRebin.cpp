@@ -88,8 +88,8 @@ namespace Mantid
           //Create a Workspace2D
           // This creates a new Workspace2D through a torturous route using the WorkspaceFactory.
           // The Workspace2D is created with an EMPTY CONSTRUCTOR
-          DataObjects::Workspace2D_sptr outputW;
-          outputW = boost::dynamic_pointer_cast<Workspace2D>(
+          //DataObjects::Workspace2D_sptr outputW;
+          outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(
               API::WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1) );
 
           //Initialize progress reporting.
@@ -110,16 +110,17 @@ namespace Mantid
             //const EventList& el = eventW->getEventListAtWorkspaceIndex(i);
 
             //Now use this const method to generate a histogram without changing the event list or requiring const casts
-            MantidVec y_data, e_data;
-            el.generateHistogramForX(XValues_new.access(), y_data, e_data);
+            //MantidVec& y_data = outputW->dataY(i);
+            //MantidVec& e_data = outputW->dataE(i);
+            //el.generateHistogramForX(XValues_new.access(), y_data, e_data);
 
             //The following direct access fails because somewhere in there,
             // the dataY() vector is copied instead of returned.
-            //el.generateHistogramForX(XValues_new.access(), outputW->dataY(i), outputW->dataE(i));
+            el.generateHistogramForX(*XValues_new, outputW->dataY(i), outputW->dataE(i));
 
             //Copy the data over.
-            outputW->dataY(i).assign(y_data.begin(), y_data.end());
-            outputW->dataE(i).assign(e_data.begin(), e_data.end());
+            //outputW->dataY(i).assign(y_data.begin(), y_data.end());
+            //outputW->dataE(i).assign(e_data.begin(), e_data.end());
 
             //Report progress
             prog.report();
@@ -132,15 +133,15 @@ namespace Mantid
             outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
           }
 
-	  //Copy the units over too.
-	  for (int i=0; i < outputW->axes(); ++i)
-	    outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
+          //Copy the units over too.
+          for (int i=0; i < outputW->axes(); ++i)
+            outputW->getAxis(i)->unit() = inputW->getAxis(i)->unit();
           outputW->setYUnit(eventW->YUnit());
           outputW->setYUnitLabel(eventW->YUnitLabel());
 
           // Assign it to the output workspace property
           //std::cout << "setProperty OutputWorkspace" << "\n";
-          setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputW));
+          setProperty("OutputWorkspace", outputW);
 
         }
 

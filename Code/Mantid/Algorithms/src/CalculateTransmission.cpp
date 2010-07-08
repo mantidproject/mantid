@@ -16,7 +16,6 @@ DECLARE_ALGORITHM(CalculateTransmission)
 
 using namespace Kernel;
 using namespace API;
-using namespace DataObjects;
 
 CalculateTransmission::CalculateTransmission() : API::Algorithm(), logFit(false)
 {}
@@ -26,13 +25,13 @@ CalculateTransmission::~CalculateTransmission()
 
 void CalculateTransmission::init()
 {
-  CompositeValidator<Workspace2D> *wsValidator = new CompositeValidator<Workspace2D>;
-  wsValidator->add(new WorkspaceUnitValidator<Workspace2D>("Wavelength"));
-  wsValidator->add(new CommonBinsValidator<Workspace2D>);
-  wsValidator->add(new HistogramValidator<Workspace2D>);
+  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
+  wsValidator->add(new CommonBinsValidator<>);
+  wsValidator->add(new HistogramValidator<>);
   
-  declareProperty(new WorkspaceProperty<Workspace2D>("SampleRunWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<Workspace2D>("DirectRunWorkspace","",Direction::Input,wsValidator->clone()));
+  declareProperty(new WorkspaceProperty<>("SampleRunWorkspace","",Direction::Input,wsValidator));
+  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace","",Direction::Input,wsValidator->clone()));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   BoundedValidator<int> *oneOrMore = new BoundedValidator<int>();
@@ -57,8 +56,8 @@ void CalculateTransmission::init()
 
 void CalculateTransmission::exec()
 {
-  Workspace2D_sptr sampleWS = getProperty("SampleRunWorkspace");
-  Workspace2D_sptr directWS = getProperty("DirectRunWorkspace");
+  MatrixWorkspace_sptr sampleWS = getProperty("SampleRunWorkspace");
+  MatrixWorkspace_sptr directWS = getProperty("DirectRunWorkspace");
 
   // Check that the two input workspaces are from the same instrument
   if ( sampleWS->getBaseInstrument() != directWS->getBaseInstrument() )
@@ -136,7 +135,7 @@ void CalculateTransmission::exec()
   {
     g_log.debug("Fitting to the logarithm of the transmission");
     // Take a copy of this workspace for the fitting
-    MatrixWorkspace_sptr logTransmission = this->extractSpectrum(boost::dynamic_pointer_cast<DataObjects::Workspace2D>(transmission),0);
+    MatrixWorkspace_sptr logTransmission = this->extractSpectrum(transmission,0);
   
     // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
     MantidVec & Y = logTransmission->dataY(0);
@@ -166,10 +165,10 @@ void CalculateTransmission::exec()
  *  @param index The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
-API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index)
+API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWorkspace_sptr WS, const int index)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
-  childAlg->setProperty<Workspace2D_sptr>("InputWorkspace", WS);
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", index);
   // Now execute the sub-algorithm. Catch and log any error
   try

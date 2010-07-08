@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include <climits>
 
 namespace Mantid
@@ -85,7 +84,7 @@ private:
   void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex);
 
   /// The input workspace
-  DataObjects::Workspace2D_const_sptr m_inputWorkspace;
+  API::MatrixWorkspace_const_sptr m_inputWorkspace;
   /// The bin index to start the cropped workspace from
   int m_minX;
   /// The bin index to end the cropped workspace at

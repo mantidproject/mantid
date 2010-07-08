@@ -5,9 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <vector>
-#include <boost/shared_ptr.hpp>
 #include <climits>
 #include <map>
 #ifdef HAS_UNORDERED_MAP_H
@@ -145,9 +142,9 @@ private:
   void exec();
   
   /// read in the input parameters and see what findout what will be to grouped
-  void getGroups(DataObjects::Workspace2D_const_sptr workspace, std::vector<int> &unUsedSpec);
+  void getGroups(API::MatrixWorkspace_const_sptr workspace, std::vector<int> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_ _numbers_ 
-  void processFile(std::string fname,  DataObjects::Workspace2D_const_sptr workspace,
+  void processFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
                                                 std::vector<int> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
@@ -161,11 +158,11 @@ private:
   double fileReadProg(int numGroupsRead, int numInHists);
 
   /// Copy the and combine the histograms that the user requested from the input into the output workspace
-  int formGroups(DataObjects::Workspace2D_const_sptr inputWS,
-                 DataObjects::Workspace2D_sptr outputWS, const double prog4Copy);
+  int formGroups(API::MatrixWorkspace_const_sptr inputWS,
+                 API::MatrixWorkspace_sptr outputWS, const double prog4Copy);
   /// Copy the data data in ungrouped histograms from the input workspace to the output
   void moveOthers(const std::set<int> &unGroupedSet,
-    DataObjects::Workspace2D_const_sptr inputWS, DataObjects::Workspace2D_sptr outputWS,int outIndex);
+    API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS,int outIndex);
 
   /// flag values
   enum {

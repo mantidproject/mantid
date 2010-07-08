@@ -5,11 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include <vector>
-#include <string>
 
 namespace Mantid
 {
@@ -30,7 +25,7 @@ namespace Algorithms
     @author Steve Williams STFC Rutherford Appleton Laboratory
     @date 27/07/2009
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -77,10 +72,10 @@ private:
   void init();
   void exec();
   
-  void getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
-  std::vector<int> getMonitorSpecIndexs(DataObjects::Workspace2D_const_sptr WS, int specNum1, int specNum2) const;
+  void getGeometry(API::MatrixWorkspace_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
+  std::vector<int> getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int specNum1, int specNum2) const;
   double timeToFly(double s, double E_KE) const;
-  double getPeakCentre(DataObjects::Workspace2D_const_sptr WS, const int monitIn, const double peakTime);
+  double getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime);
   void extractSpec(int specInd, double start, double end);
   void getPeakEstimates(double &height, int &centreInd, double &background) const;
   double findHalfLoc(MantidVec::size_type startInd, const double height, const double noise, const direction go) const;

@@ -15,10 +15,6 @@ namespace Mantid
   {
     class MatrixWorkspace;
   }
-  namespace DataObjects
-  {
-      class Workspace2D;
-  }
 
   namespace Algorithms
   {
@@ -79,13 +75,13 @@ namespace Mantid
       void exec();
 
       /// Calculate the integral asymmetry for a workspace (single period)
-      void calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws, double& Y, double& E);
+      void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double& Y, double& E);
 
       /// Calculate the integral asymmetry for a workspace (red & green)
-      void calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
-                            boost::shared_ptr<DataObjects::Workspace2D> ws_geen,double& Y, double& E);
+      void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
+          API::MatrixWorkspace_sptr ws_geen,double& Y, double& E);
       /// Group detectors
-      void groupDetectors(boost::shared_ptr<DataObjects::Workspace2D>& ws,const std::vector<int>& spectraList);
+      void groupDetectors(API::MatrixWorkspace_sptr ws,const std::vector<int>& spectraList);
 
       /// Stores property "Int"
       bool m_int;

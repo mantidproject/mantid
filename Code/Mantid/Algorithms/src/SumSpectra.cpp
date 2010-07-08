@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumSpectra.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
@@ -16,9 +15,6 @@ DECLARE_ALGORITHM(SumSpectra)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_const_sptr;
-
 
 /** Initialisation method.
  *
@@ -26,9 +22,8 @@ using DataObjects::Workspace2D_const_sptr;
 void SumSpectra::init()
 {
   declareProperty(
-    new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,
-                                       new CommonBinsValidator<Workspace2D>),
-                                       "The workspace containing the spectra to be summed" );
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new CommonBinsValidator<>),
+                            "The workspace containing the spectra to be summed" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
@@ -54,7 +49,7 @@ void SumSpectra::exec()
   m_MaxSpec = getProperty("EndWorkspaceIndex");
 
   // Get the input workspace
-  Workspace2D_const_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
   const int YLength = localworkspace->blocksize();

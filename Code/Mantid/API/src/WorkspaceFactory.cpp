@@ -65,46 +65,55 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   std::string id (parent->id());
   if ( id == "EventWorkspace" ) id = "Workspace2D";
 
+  // Create an 'empty' workspace of the appropriate type and size
   MatrixWorkspace_sptr ws = create(id,NVectors,XLength,YLength);
 
   // Copy over certain parent data members
-  ws->setTitle(parent->getTitle());
-  ws->setComment(parent->getComment());
-  ws->setInstrument(parent->getInstrument());  // This call also copies the parameter map
-  ws->m_spectramap = parent->m_spectramap;
-  ws->m_sample = parent->m_sample;
-  ws->setYUnit(parent->m_YUnit);
-  ws->setYUnitLabel(parent->m_YUnitLabel);
-  ws->isDistribution(parent->isDistribution());
+  initializeFromParent(parent,ws,differentSize);
+
+  return ws;
+}
+
+void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr parent,
+                                                const MatrixWorkspace_sptr child, const bool differentSize) const
+{
+  child->setTitle(parent->getTitle());
+  child->setComment(parent->getComment());
+  child->setInstrument(parent->getInstrument());  // This call also copies the parameter map
+  child->m_spectramap = parent->m_spectramap;
+  child->m_sample = parent->m_sample;
+  child->setYUnit(parent->m_YUnit);
+  child->setYUnitLabel(parent->m_YUnitLabel);
+  child->isDistribution(parent->isDistribution());
 
   // Only copy the axes over if new sizes are not given
   if ( !differentSize )
   {
     // Only copy mask map if same size for now. Later will need to check continued validity.
-    ws->m_masks = parent->m_masks;
+    child->m_masks = parent->m_masks;
     
     for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
     {
       // Need to delete the existing axis created in init above
-      delete ws->m_axes[i];
+      delete child->m_axes[i];
       // Now set to a copy of the parent workspace's axis
-      ws->m_axes[i] = parent->m_axes[i]->clone(ws.get());
+      child->m_axes[i] = parent->m_axes[i]->clone(child.get());
     }
   }
   else
   {
     // Just copy the unit and title
-    for (unsigned int i = 0; i < ws->m_axes.size(); ++i)
+    for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
     {
       if (parent->getAxis(i)->isNumeric())
       {
-        ws->getAxis(i)->unit() = parent->getAxis(i)->unit();
+        child->getAxis(i)->unit() = parent->getAxis(i)->unit();
       }
-      ws->getAxis(i)->title() = parent->getAxis(i)->title();
+      child->getAxis(i)->title() = parent->getAxis(i)->title();
     }
   }
 
-  return ws;
+  return;
 }
 
 /** Creates a new instance of the class with the given name, and allocates memory for the arrays

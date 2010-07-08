@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include <set>
 #include <numeric>
 
@@ -18,8 +17,6 @@ DECLARE_ALGORITHM(GroupDetectors)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_sptr;
 
 /// (Empty) Constructor
 GroupDetectors::GroupDetectors() {}
@@ -29,8 +26,8 @@ GroupDetectors::~GroupDetectors() {}
 
 void GroupDetectors::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut,
-    new CommonBinsValidator<Workspace2D>),
+  declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut,
+    new CommonBinsValidator<>),
     "The name of the workspace2D on which to perform the algorithm");
   declareProperty(new ArrayProperty<int>("SpectraList"),
     "An array containing a list of the indexes of the spectra to combine\n"
@@ -48,7 +45,7 @@ void GroupDetectors::init()
 void GroupDetectors::exec()
 {
   // Get the input workspace
-  const Workspace2D_sptr WS = getProperty("Workspace");
+  const MatrixWorkspace_sptr WS = getProperty("Workspace");
 
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
   std::vector<int> spectraList = getProperty("SpectraList");

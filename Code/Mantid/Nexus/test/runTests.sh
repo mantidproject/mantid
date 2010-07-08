@@ -11,6 +11,7 @@
 
 # Clean up any old executable
 rm -rf runner.*
+rm -f *.properties
 
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
@@ -41,6 +42,5 @@ echo
 # Remove the generated files to ensure that they're not inadvertently run
 #   when something in the chain has failed.
 echo "Cleaning up..."
-#rm -f *.properties
 #rm -f *Test.log
 echo "Done."

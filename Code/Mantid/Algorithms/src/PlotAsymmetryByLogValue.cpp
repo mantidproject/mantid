@@ -35,7 +35,7 @@ namespace Mantid
       std::string ext(".nxs");
       declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext));
       declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext));
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
       declareProperty("LogValue","",new MandatoryValidator<std::string>());
       declareProperty("Red", 1, Direction::Input);
       declareProperty("Green", EMPTY_INT(), Direction::Input);
@@ -61,7 +61,7 @@ namespace Mantid
     void PlotAsymmetryByLogValue::exec()
     {
       m_forward_list = getProperty("ForwardSpectra");		
-	    m_backward_list = getProperty("BackwardSpectra");   
+      m_backward_list = getProperty("BackwardSpectra");
       m_autogroup = ( m_forward_list.size() == 0 && m_backward_list.size() == 0);
 
       //double alpha = getProperty("Alpha");
@@ -104,12 +104,11 @@ namespace Mantid
 
       // Create the 2D workspace for the output
       int nplots = green != EMPTY_INT() ? 4 : 1;
-      DataObjects::Workspace2D_sptr outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D",
+      MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("Workspace2D",
         nplots,          //  the number of plots
         npoints,    //  the number of data points on a plot
         npoints     //  it's not a histogram
-        ));
+        );
       TextAxis* tAxis = new TextAxis(nplots);
       if (nplots == 1)
       {
@@ -144,14 +143,14 @@ namespace Mantid
         DataObjects::Workspace2D_sptr ws_red;
         DataObjects::Workspace2D_sptr ws_green;
 
-        // Run through the periods of the loaded file and do calculatons on the selected ones
+        // Run through the periods of the loaded file and do calculations on the selected ones
         Workspace_sptr tmp = loadNexus->getProperty(wsProp);
         WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(tmp);
         if (!wsGroup)
         {
           ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
           TimeSeriesProperty<double>* logp = 
-			      dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+              dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
           double Y,E; 
           calcIntAsymmetry(ws_red,Y,E);
           outWS->dataY(0)[i-is] = Y;
@@ -197,7 +196,7 @@ namespace Mantid
             if (!ws_red || !ws_green)
               throw std::invalid_argument("Red or green period is out of range");
             TimeSeriesProperty<double>* logp = 
-			        dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
             double Y,E; 
             calcIntAsymmetry(ws_red,ws_green,Y,E);
             outWS->dataY(0)[i-is] = Y;
@@ -231,7 +230,7 @@ namespace Mantid
       outWS->setYUnitLabel("Asymmetry");
       
       // Assign the result to the output workspace property
-      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outWS));
+      setProperty("OutputWorkspace", outWS);
 
     }
 
@@ -241,7 +240,7 @@ namespace Mantid
     *   @param Y Reference to a variable receiving the value of asymmetry
     *   @param E Reference to a variable receiving the value of the error
     */
-    void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws, double& Y, double& E)
+    void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double& Y, double& E)
     {
       Property* startXprop = getProperty("TimeMin");
       Property* endXprop = getProperty("TimeMax");
@@ -264,10 +263,10 @@ namespace Mantid
           asym->setProperty("BackwardSpectra",m_backward_list);
         }
         asym->execute();
-        DataObjects::Workspace2D_sptr asymWS = asym->getProperty("OutputWorkspace");
+        MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr integr = createSubAlgorithm("Integration");
-        integr->setProperty("InputWorkspace",boost::dynamic_pointer_cast<API::MatrixWorkspace>(asymWS));
+        integr->setProperty("InputWorkspace",asymWS);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
         {
@@ -284,7 +283,7 @@ namespace Mantid
       {   
         //  "Integral asymmetry"
         IAlgorithm_sptr integr = createSubAlgorithm("Integration");
-        integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+        integr->setProperty("InputWorkspace", ws);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
         {
@@ -296,7 +295,7 @@ namespace Mantid
 
         IAlgorithm_sptr asym = createSubAlgorithm("AsymmetryCalc");
         asym->initialize();
-        asym->setProperty("InputWorkspace",boost::dynamic_pointer_cast<DataObjects::Workspace2D>(intWS));
+        asym->setProperty("InputWorkspace",intWS);
         asym->setPropertyValue("OutputWorkspace","tmp");
         if ( !m_autogroup )
         {
@@ -304,7 +303,7 @@ namespace Mantid
           asym->setProperty("BackwardSpectra",m_backward_list);
         }
         asym->execute();
-        DataObjects::Workspace2D_sptr out = asym->getProperty("OutputWorkspace");
+        MatrixWorkspace_sptr out = asym->getProperty("OutputWorkspace");
 
         Y = out->readY(0)[0];
         E = out->readE(0)[0];
@@ -321,8 +320,8 @@ namespace Mantid
     *   @param Y Reference to a variable receiving the value of asymmetry
     *   @param E Reference to a variable receiving the value of the error
     */
-    void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
-      boost::shared_ptr<DataObjects::Workspace2D> ws_green,double& Y, double& E)
+    void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
+      API::MatrixWorkspace_sptr ws_green,double& Y, double& E)
     {
       if ( !m_autogroup )
       {
@@ -344,9 +343,8 @@ namespace Mantid
       if (!m_int)
       {   //  "Differential asymmetry"
 
-        API::MatrixWorkspace_sptr tmpWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create(ws_red,1,ws_red->readX(0).size(),ws_red->readY(0).size())
-          );
+        API::MatrixWorkspace_sptr tmpWS = API::WorkspaceFactory::Instance().create(
+                                            ws_red,1,ws_red->readX(0).size(),ws_red->readY(0).size());
 
         for(size_t i=0;i<tmpWS->dataY(0).size();i++)
         {
@@ -378,7 +376,7 @@ namespace Mantid
       {   
         //  "Integral asymmetry"
         IAlgorithm_sptr integr = createSubAlgorithm("Integration");
-        integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws_red));
+        integr->setProperty("InputWorkspace", ws_red);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
         {
@@ -389,7 +387,7 @@ namespace Mantid
         API::MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
 
         integr = createSubAlgorithm("Integration");
-        integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws_green));
+        integr->setProperty("InputWorkspace", ws_green);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
         {
@@ -416,7 +414,7 @@ namespace Mantid
      *  @param ws A local workspace
      *  @param spectraList A list of spectra to group.
      */
-    void PlotAsymmetryByLogValue::groupDetectors(boost::shared_ptr<DataObjects::Workspace2D>& ws,const std::vector<int>& spectraList)
+    void PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr ws,const std::vector<int>& spectraList)
     {
       API::IAlgorithm_sptr group = createSubAlgorithm("GroupDetectors");
       group->setProperty("InputWorkspace",ws);

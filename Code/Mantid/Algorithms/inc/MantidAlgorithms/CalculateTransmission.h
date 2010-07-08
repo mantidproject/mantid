@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -37,7 +36,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2009
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -78,7 +77,7 @@ private:
   void exec();
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index);
+  API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS, const int index);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
 

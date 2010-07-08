@@ -125,7 +125,6 @@ bool Algorithm::execute()
 
   std::vector<Property*> Prop=getProperties();
   std::vector<Property*>::const_iterator itr;
-  bool bStatus=false;
   for (itr=Prop.begin();itr!=Prop.end();itr++)
   {
 	  const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);

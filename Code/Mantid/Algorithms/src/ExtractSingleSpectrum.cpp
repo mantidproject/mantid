@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -14,12 +13,10 @@ DECLARE_ALGORITHM(ExtractSingleSpectrum)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_const_sptr;
 
 void ExtractSingleSpectrum::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -30,7 +27,7 @@ void ExtractSingleSpectrum::init()
 void ExtractSingleSpectrum::exec()
 {
   // Get hold of the input workspace
-  Workspace2D_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Get the desired spectrum number and check it's in range
   const int desiredSpectrum = getProperty("WorkspaceIndex");
   if ( desiredSpectrum >= inputWorkspace->getNumberHistograms() )

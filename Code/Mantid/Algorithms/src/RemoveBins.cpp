@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/RemoveBins.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
@@ -201,8 +200,7 @@ void RemoveBins::checkProperties()
 void RemoveBins::crop(const double& start, const double& end)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
-  DataObjects::Workspace2D_const_sptr input2D = boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_inputWorkspace);
-  childAlg->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", boost::const_pointer_cast<DataObjects::Workspace2D>(input2D));
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
   childAlg->setProperty<double>("XMin", start);
   childAlg->setProperty<double>("XMax", end);
 

@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cfloat>
 #include <iomanip>
@@ -19,9 +18,6 @@ DECLARE_ALGORITHM(NormaliseToMonitor)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D_const_sptr;
 
 /// Default constructor
 NormaliseToMonitor::NormaliseToMonitor() :
@@ -35,13 +31,13 @@ NormaliseToMonitor::~NormaliseToMonitor() {}
 
 void NormaliseToMonitor::init()
 {
-  CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
-  val->add(new HistogramValidator<Workspace2D>);
-  val->add(new RawCountValidator<Workspace2D>);
+  CompositeValidator<> *val = new CompositeValidator<>;
+  val->add(new HistogramValidator<>);
+  val->add(new RawCountValidator<>);
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val),
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,val),
     "Name of the input workspace2D");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name to use for the output workspace");
 
   // Can either set a spectrum within the workspace to be the monitor spectrum.....
@@ -74,7 +70,7 @@ void NormaliseToMonitor::init()
 void NormaliseToMonitor::exec()
 {
   // Get the input workspace
-  const Workspace2D_sptr inputWS = getProperty("InputWorkspace");
+  const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // First check the inputs, throws std::runtime_error if a property is invalid
   this->checkProperties(inputWS);
   // See if the normalisation with integration properties are set,
@@ -212,8 +208,7 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
 API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const int index)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum");
-  DataObjects::Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(WS);
-  childAlg->setProperty<Workspace2D_sptr>("InputWorkspace", input2D);
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", index);
 
   // Now execute the sub-algorithm. Catch and log any error

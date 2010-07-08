@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/shared_array.hpp>
@@ -32,7 +31,7 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init()
 {
-  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace",
+  declareProperty(new WorkspaceProperty<>("InputWorkspace",
                   "",Direction::Input), "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace",
                   "",Direction::Output), "The name of the output workspace.");
@@ -55,7 +54,7 @@ void FFT::init()
  */
 void FFT::exec()
 {
-  DataObjects::Workspace2D_const_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
 
   const int iReal = getProperty("Real");
   const int iImag = getProperty("Imaginary");

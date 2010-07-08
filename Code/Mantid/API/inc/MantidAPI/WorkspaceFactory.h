@@ -63,6 +63,9 @@ public:
   MatrixWorkspace_sptr create(const std::string& className, const int& NVectors,
                                    const int& XLength, const int& YLength) const;
 
+  void initializeFromParent(const MatrixWorkspace_const_sptr parent,
+                            const MatrixWorkspace_sptr child, const bool differentSize) const;
+
   /// Create a ITableWorkspace
   ITableWorkspace_sptr createTable(const std::string& className = "TableWorkspace") const;
 

@@ -20,7 +20,6 @@ DECLARE_ALGORITHM(CropWorkspace)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 
 /// Default constructor
 CropWorkspace::CropWorkspace() : 
@@ -33,7 +32,7 @@ CropWorkspace::~CropWorkspace() {}
 
 void CropWorkspace::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input),
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "The input Workspace2D" );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace2D" );
@@ -81,7 +80,7 @@ void CropWorkspace::exec()
     outAxis = outputWorkspace->getAxis(1);
   }
 
-  DataObjects::Histogram1D::RCtype newX;
+  cow_ptr<MantidVec> newX;
   if ( m_commonBoundaries )
   {
     const MantidVec& oldX = m_inputWorkspace->readX(m_minSpec);

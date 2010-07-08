@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -12,9 +11,6 @@ namespace Algorithms
 {
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D_const_sptr;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConjoinWorkspaces)
@@ -33,11 +29,11 @@ ConjoinWorkspaces::~ConjoinWorkspaces()
 
 void ConjoinWorkspaces::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace1",
-    "", Direction::Input, new CommonBinsValidator<Workspace2D>),
+  declareProperty(new WorkspaceProperty<>("InputWorkspace1",
+    "", Direction::Input, new CommonBinsValidator<>),
     "The name of the first input workspace");
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace2",
-    "", Direction::Input, new CommonBinsValidator<Workspace2D>),
+  declareProperty(new WorkspaceProperty<>("InputWorkspace2",
+    "", Direction::Input, new CommonBinsValidator<>),
     "The name of the second input workspace");
 }
 
@@ -47,36 +43,37 @@ void ConjoinWorkspaces::init()
 void ConjoinWorkspaces::exec()
 {
   // Retrieve the input workspaces
-  Workspace2D_const_sptr ws1 = getProperty("InputWorkspace1");
-  Workspace2D_const_sptr ws2 = getProperty("InputWorkspace2");
+  MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
+  MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
 
   // Check that the input workspaces meet the requirements for this algorithm
   this->validateInputs(ws1,ws2);
 
   // Create the output workspace
   const int totalHists = ws1->getNumberHistograms() + ws2->getNumberHistograms();
-  MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create(ws1,totalHists,ws1->readX(0).size(),
+  MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create("Workspace2D",totalHists,ws1->readX(0).size(),
                                                                              ws1->readY(0).size());
-  Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+  // Copy over stuff from first input workspace
+  WorkspaceFactory::Instance().initializeFromParent(ws1,output,true);
 
   // Create the X values inside a cow pointer - they will be shared in the output workspace
-  DataObjects::Histogram1D::RCtype XValues;
+  cow_ptr<MantidVec> XValues;
   XValues.access() = ws1->readX(0);
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
   // Loop over the input workspaces in turn copying the data into the output one
-    Axis* outAxis = output2D->getAxis(1);
+  Axis* outAxis = output->getAxis(1);
   const int& nhist1 = ws1->getNumberHistograms();
   const Axis* axis1 = ws1->getAxis(1);
-  PARALLEL_FOR2(ws1, output2D)
+  PARALLEL_FOR2(ws1, output)
   for (int i = 0; i < nhist1; ++i)
   {
-		PARALLEL_START_INTERUPT_REGION
-    output2D->setX(i,XValues);
-    output2D->dataY(i) = ws1->readY(i);
-    output2D->dataE(i) = ws1->readE(i);
+    PARALLEL_START_INTERUPT_REGION
+    output->setX(i,XValues);
+    output->dataY(i) = ws1->readY(i);
+    output->dataE(i) = ws1->readE(i);
     // Copy the spectrum number
     outAxis->spectraNo(i) = axis1->spectraNo(i);
     // Propagate masking, if needed
@@ -90,20 +87,20 @@ void ConjoinWorkspaces::exec()
       }
     }    
     m_progress->report();
-		PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-	PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
   //For second loop we use the offset from the first
   const int& nhist2 = ws2->getNumberHistograms();
   const Axis* axis2 = ws2->getAxis(1);
 
-  PARALLEL_FOR2(ws2, output2D)
+  PARALLEL_FOR2(ws2, output)
   for (int j = 0; j < nhist2; ++j)
   {
-		PARALLEL_START_INTERUPT_REGION
-    output2D->setX(nhist1 + j,XValues);
-    output2D->dataY(nhist1 + j) = ws2->readY(j);
-    output2D->dataE(nhist1 + j) = ws2->readE(j);
+    PARALLEL_START_INTERUPT_REGION
+    output->setX(nhist1 + j,XValues);
+    output->dataY(nhist1 + j) = ws2->readY(j);
+    output->dataE(nhist1 + j) = ws2->readE(j);
     // Copy the spectrum number
     outAxis->spectraNo(nhist1 + j) = axis2->spectraNo(j);
     // Propagate masking, if needed
@@ -117,16 +114,16 @@ void ConjoinWorkspaces::exec()
       }
     }
     m_progress->report();
-		PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-	PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Delete the input workspaces from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
   // Create & assign an output workspace property with the workspace name the same as the first input
-  declareProperty(new WorkspaceProperty<Workspace2D>("Output",getPropertyValue("InputWorkspace1"),Direction::Output));
-  setProperty("Output",output2D);
+  declareProperty(new WorkspaceProperty<>("Output",getPropertyValue("InputWorkspace1"),Direction::Output));
+  setProperty("Output",output);
 }
 
 /** Checks that the two input workspace have common binning & size, the same instrument & unit.

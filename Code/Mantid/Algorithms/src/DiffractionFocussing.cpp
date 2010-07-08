@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileProperty.h"
 
 #include <map>
@@ -91,8 +90,7 @@ void DiffractionFocussing::exec()
       detectorList.push_back(d->second);
     // Want version 1 of GroupDetectors here
     API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors",-1.0,-1.0,true,1);
-    DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
-    childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", tmpW2D);
+    childAlg->setProperty("Workspace", tmpW);
     childAlg->setProperty< std::vector<int> >("DetectorList",detectorList);
     try
     {

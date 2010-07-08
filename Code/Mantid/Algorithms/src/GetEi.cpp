@@ -19,7 +19,6 @@ DECLARE_ALGORITHM(GetEi)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using namespace DataObjects;
 
 // adjustable fit criteria, increase the first number or reduce any of the last three for more promiscuous peak fitting
 // from the estimated location of the peak search forward by the following fraction and backward by the same fraction
@@ -41,10 +40,10 @@ GetEi::GetEi() : Algorithm(),
 
 void GetEi::init()
 {// Declare required input parameters for algorithm and do some validation here
-  CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
-  val->add(new WorkspaceUnitValidator<Workspace2D>("TOF"));
-  val->add(new HistogramValidator<Workspace2D>);
-  declareProperty(new WorkspaceProperty<Workspace2D>(
+  CompositeValidator<> *val = new CompositeValidator<>;
+  val->add(new WorkspaceUnitValidator<>("TOF"));
+  val->add(new HistogramValidator<>);
+  declareProperty(new WorkspaceProperty<>(
     "InputWorkspace","",Direction::Input,val),
     "The X units of this workspace must be time of flight with times in\n"
     "micro-seconds");
@@ -76,7 +75,7 @@ void GetEi::init()
 */
 void GetEi::exec()
 {
-  Workspace2D_const_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   const int mon1Spec = getProperty("Monitor1Spec");
   const int mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
@@ -121,7 +120,7 @@ void GetEi::exec()
 *  @throw NotFoundError if no detector is found for the detector ID given
 *  @throw runtime_error if there is a problem with the SpectraDetectorMap
 */
-void GetEi::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
+void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
   const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
@@ -154,7 +153,7 @@ void GetEi::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, in
 *  @return the indexes of the histograms created by the detector whose ID were passed
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 */
-std::vector<int> GetEi::getMonitorSpecIndexs(DataObjects::Workspace2D_const_sptr WS, int specNum1, int specNum2) const
+std::vector<int> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int specNum1, int specNum2) const
 {// getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
   std::vector<int> specInds;
   
@@ -208,7 +207,7 @@ double GetEi::timeToFly(double s, double E_KE) const
 *  @throw out_of_range if the peak runs off the edge of the histogram
 *  @throw runtime_error a sub-algorithm just falls over
 */
-double GetEi::getPeakCentre(DataObjects::Workspace2D_const_sptr WS, const int monitIn, const double peakTime)
+double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime)
 {
   const MantidVec& timesArray = WS->readX(monitIn);
   // we search for the peak only inside some window because there are often more peaks in the monitor histogram
