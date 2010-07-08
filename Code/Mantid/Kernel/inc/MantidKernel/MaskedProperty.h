@@ -77,7 +77,7 @@ namespace Mantid
 			  */
 			  void doMasking()const 
 			  {
-				  TYPE value(value());
+				  TYPE value(this->value());
 				  m_maskedValue=std::string(value.size(),'*');
 			  }
 
