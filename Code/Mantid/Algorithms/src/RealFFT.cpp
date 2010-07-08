@@ -165,8 +165,6 @@ void RealFFT::exec()
       outWS->getAxis(1)->spectraNo(0)=inWS->getAxis(1)->spectraNo(spec);
     }
 
-    outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
-
     setProperty("OutputWorkspace",outWS);
 
 }

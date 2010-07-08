@@ -327,6 +327,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TextAxis.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Workspace.cpp"
 				>
 			</File>
@@ -632,6 +636,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\TableRow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\TextAxis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TextAxisTest.h"
 				>
 			</File>
 			<File

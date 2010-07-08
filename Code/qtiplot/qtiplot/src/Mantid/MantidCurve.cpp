@@ -214,16 +214,7 @@ void MantidCurve::itemChanged()
 QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
                                      const QString& wsName,int index)
 {
-  QString name = wsName + "-";
-  if (ws->getAxis(1)->isSpectra())
-  {
-    int spec = ws->getAxis(1)->spectraNo(index);
-    name += "sp-"+QString::number(spec);
-  }
-  else
-  {
-    name += "wi-"+QString::number(index);
-  }
+  QString name = wsName + "-" + QString::fromStdString(ws->getAxis(1)->label(index));
   return name;
 }
 

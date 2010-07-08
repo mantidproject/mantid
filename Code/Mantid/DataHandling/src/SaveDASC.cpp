@@ -120,7 +120,7 @@ void SaveDASC::writeHeader(API::MatrixWorkspace_const_sptr WS, std::ofstream &ou
   // now write the Y units to the header
   currentUnit = WS->getAxis(1)->unit();
   std::string YunitDist;
-  if (currentUnit.get())
+  if (currentUnit->unitID() != "Empty")
   {
     YunitDist = currentUnit->unitID();
     output << "#Number of " << YunitDist << " points (y)" << std::endl;

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Axis.h"
+#include "MantidAPI/NumericAxis.h"
 
 namespace Mantid
 {
@@ -39,14 +39,13 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RefAxis : public Axis
+class DLLExport RefAxis : public NumericAxis
 {
 public:
 	RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace);
 	virtual ~RefAxis();
 
 	Axis* clone(const MatrixWorkspace* const parentWorkspace);
-	virtual const bool isNumeric() const{return true;}
   virtual int length() const{return m_size;}
   virtual double operator()(const int& index, const int& verticalIndex) const;
   virtual void setValue(const int& index, const double& value);

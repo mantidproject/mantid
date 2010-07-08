@@ -4,6 +4,8 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/Exception.h"
 
+#include <boost/lexical_cast.hpp>
+
 namespace Mantid
 {
 namespace API
@@ -118,6 +120,15 @@ bool SpectraAxis::operator==(const Axis& axis2) const
     return false;
   }
 	return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
+}
+
+/** Returns a text label which shows the value at index and identifies the
+ *  type of the axis.
+ *  @param index The index of an axis value
+ */
+std::string SpectraAxis::label(const int& index)const
+{
+  return "sp-" + boost::lexical_cast<std::string>(spectraNo(index));
 }
 
 } // namespace API

@@ -46,8 +46,8 @@ public:
   {
     TS_ASSERT_EQUALS( spectraAxis->title(), "" )
     TS_ASSERT_EQUALS( numericAxis->title(), "" )
-    TS_ASSERT( ! spectraAxis->unit().get() )
-    TS_ASSERT( ! numericAxis->unit().get() )
+    TS_ASSERT( spectraAxis->unit().get() )
+    TS_ASSERT( numericAxis->unit().get() )
     for (int i=0; i<5; ++i)
     {
       TS_ASSERT_EQUALS( (*spectraAxis)(i), 0.0 )

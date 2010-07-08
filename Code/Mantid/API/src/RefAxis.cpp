@@ -14,7 +14,7 @@ namespace API
  *  @param parentWorkspace A pointer to the workspace that holds this axis
  */
 RefAxis::RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace) : 
-  Axis(),  m_parentWS(parentWorkspace)
+  NumericAxis(length),  m_parentWS(parentWorkspace)
 {
   m_size = length;
 }
@@ -26,7 +26,7 @@ RefAxis::RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace
  *  @param parentWorkspace A pointer to the parent workspace of the new axis
  */
 RefAxis::RefAxis(const RefAxis& right, const MatrixWorkspace* const parentWorkspace) :
-Axis(right), m_parentWS(parentWorkspace), m_size(right.m_size)
+NumericAxis(right), m_parentWS(parentWorkspace), m_size(right.m_size)
 {}
 
 RefAxis::~RefAxis()

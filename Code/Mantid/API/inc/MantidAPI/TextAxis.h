@@ -1,11 +1,13 @@
-#ifndef MANTID_API_AXIS_H_
-#define MANTID_API_AXIS_H_
+#ifndef MANTID_API_TEXTAXIS_H_
+#define MANTID_API_TEXTAXIS_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/Axis.h"
+
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
@@ -19,10 +21,10 @@ namespace API
 //----------------------------------------------------------------------
 class MatrixWorkspace;
 
-/** Class to represent the axis of a workspace.
+/** Class to represent a text axis of a workspace.
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 16/05/2008
+    @author Roman Tolchenov, Tessella plc
+    @date 06/07/2010
 
     Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
@@ -44,53 +46,26 @@ class MatrixWorkspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Axis
+class DLLExport TextAxis: public Axis
 {
 public:
-
-  Axis();
-  virtual ~Axis();
-
-  /// Virtula constructor
-  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL) = 0;
-
-  const std::string& title() const;
-  std::string& title();
-
-  const Kernel::Unit_sptr& unit() const;
-  Kernel::Unit_sptr& unit();
-
-  virtual const bool isSpectra() const{return false;}
-  virtual const bool isNumeric() const{return false;}
-
-  virtual double operator()(const int& index, const int& verticalIndex = 0) const = 0;
-  virtual void setValue(const int& index, const double& value) = 0;
-  virtual const int& spectraNo(const int& index) const;
-  virtual int& spectraNo(const int& index);
-
-  /// Get the length of the axis
-  virtual int length() const = 0;
-
-  /// Check whether two axis are the same, i.e same length and same spectra_values for all elements in the axis
-  virtual bool operator==(const Axis&) const = 0;
-
-  /// Returns a text label of for a value
-  virtual std::string label(const int& index)const = 0;
-
-protected:
-  Axis(const Axis& right);
-
+  TextAxis(const int& length);
+  virtual ~TextAxis(){}
+  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
+  virtual int length() const{return static_cast<int>(m_values.size());}
+  virtual double operator()(const int& index, const int& verticalIndex = 0) const;
+  virtual void setValue(const int& index, const double& value);
+  virtual bool operator==(const Axis&) const;
+  std::string label(const int& index)const;
+  void setLabel(const int& index, const std::string& lbl);
 private:
   /// Private, undefined copy assignment operator
-  const Axis& operator=(const Axis&);
-
-  /// The user-defined title for this axis
-  std::string m_title;
-  /// The unit for this axis
-  Kernel::Unit_sptr m_unit;
+  const TextAxis& operator=(const TextAxis&);
+  /// A vector holding the axis values for the axis.
+  std::vector<std::string> m_values;
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_AXIS_H_*/
+#endif /* MANTID_API_TEXTAXIS_H_ */

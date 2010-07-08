@@ -6,6 +6,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <iostream>
@@ -19,7 +20,7 @@ class PlotAsymmetryByLogValueTest : public CxxTest::TestSuite
 public:
 
     PlotAsymmetryByLogValueTest()
-      :firstRin("../../../../Test/Nexus/MUSR00015189.nxs"),lastRun("../../../../Test/Nexus/MUSR00015199.nxs")
+      :firstRun("../../../../Test/Nexus/MUSR00015189.nxs"),lastRun("../../../../Test/Nexus/MUSR00015199.nxs")
     {
     }
 
@@ -28,7 +29,7 @@ public:
 #ifndef _WIN64
         PlotAsymmetryByLogValue alg;
         alg.initialize();
-        alg.setPropertyValue("FirstRun",firstRin);
+        alg.setPropertyValue("FirstRun",firstRun);
         alg.setPropertyValue("LastRun",lastRun);
         alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
         alg.setPropertyValue("LogValue","Field_Danfysik");
@@ -57,6 +58,17 @@ public:
         TS_ASSERT_DELTA(Y[8],0.0278501,0.00001);
         TS_ASSERT_DELTA(Y[9],0.0191948,0.00001);
         TS_ASSERT_DELTA(Y[10],0.0142141,0.00001);
+
+        const TextAxis* axis = dynamic_cast<const TextAxis*>(outWS->getAxis(1));
+        TS_ASSERT(axis);
+        if (axis)
+        {
+          TS_ASSERT_EQUALS(axis->length(),4);
+          TS_ASSERT_EQUALS(axis->label(0),"Red-Green");
+          TS_ASSERT_EQUALS(axis->label(1),"Red");
+          TS_ASSERT_EQUALS(axis->label(2),"Green");
+          TS_ASSERT_EQUALS(axis->label(3),"Red+Green");
+        }
 #endif
     }
   
@@ -65,7 +77,7 @@ public:
 #ifndef _WIN64
         PlotAsymmetryByLogValue alg;
         alg.initialize();
-        alg.setPropertyValue("FirstRun",firstRin);
+        alg.setPropertyValue("FirstRun",firstRun);
         alg.setPropertyValue("LastRun",lastRun);
         alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
         alg.setPropertyValue("LogValue","Field_Danfysik");
@@ -98,7 +110,7 @@ public:
 #endif
     }
 private:
-  std::string firstRin,lastRun;
+  std::string firstRun,lastRun;
   
 };
 

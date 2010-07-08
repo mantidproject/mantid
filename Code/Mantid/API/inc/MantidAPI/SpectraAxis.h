@@ -68,6 +68,7 @@ public:
   virtual double operator()(const int& index, const int& verticalIndex = 0) const;
   virtual void setValue(const int& index, const double& value);
   virtual bool operator==(const Axis&) const;
+  std::string label(const int& index)const;
 
   const int& spectraNo(const int& index) const;
   int& spectraNo(const int& index);

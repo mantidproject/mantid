@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <iostream>
 
@@ -13,7 +14,7 @@ namespace API
 
 /// Constructor
 Axis::Axis() :
-  m_title(), m_unit(Kernel::Unit_sptr())
+m_title(),m_unit(Mantid::Kernel::UnitFactory::Instance().create("Empty"))
 {
 }
 

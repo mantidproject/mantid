@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -100,11 +101,17 @@ void FFT::exec()
     inWS->getAxis(0)->unit()->caption() == "Energy transfer")&&
     inWS->getAxis(0)->unit()->label() == "meV")
   {
-    outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit("Time","ns"));
+    boost::shared_ptr<Kernel::Units::Label> lblUnit = 
+      boost::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
+    if (lblUnit)
+    {
+      lblUnit->setLabel("Time","ns");
+      outWS->getAxis(0)->unit() = lblUnit;
+    }
     isEnergyMeV = true;
   }
   else
-    outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
+    outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
 
   double df = 1.0 / (dx * ySize);
   if (isEnergyMeV) df /= 2.418e2;

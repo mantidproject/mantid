@@ -1,5 +1,5 @@
-#ifndef MANTID_API_NumericAxis_H_
-#define MANTID_API_NumericAxis_H_
+#ifndef MANTID_API_NUMERICAXIS_H_
+#define MANTID_API_NUMERICAXIS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -21,7 +21,7 @@ namespace API
 //----------------------------------------------------------------------
 class MatrixWorkspace;
 
-/** Class to represent the spectra axis of a workspace.
+/** Class to represent a numeric axis of a workspace.
 
     @author Roman Tolchenov, Tessella plc
     @date 05/07/2010
@@ -57,6 +57,7 @@ public:
   virtual double operator()(const int& index, const int& verticalIndex = 0) const;
   virtual void setValue(const int& index, const double& value);
   virtual bool operator==(const Axis&) const;
+  std::string label(const int& index)const;
 private:
   /// Private, undefined copy assignment operator
   const NumericAxis& operator=(const NumericAxis&);
@@ -67,4 +68,4 @@ private:
 } // namespace API
 } // namespace Mantid
 
-#endif /* MANTID_API_NumericAxis_H_ */
+#endif /* MANTID_API_NUMERICAXIS_H_ */

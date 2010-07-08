@@ -118,6 +118,45 @@ typedef boost::shared_ptr<const Unit> Unit_const_sptr;
 namespace Units
 {
 
+/// Empty unit
+class DLLExport Empty : public Unit
+{
+public:
+  const std::string unitID() const; ///< "Empty"
+  const std::string caption() const { return ""; }
+  const std::string label() const {return ""; }
+
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+
+  /// Constructor
+  Empty() : Unit() {}
+  /// Destructor
+  ~Empty() {}
+};
+
+/// Label unit
+class DLLExport Label : public Empty
+{
+public:
+  const std::string unitID() const; ///< "Label"
+  const std::string caption() const { return m_caption; }
+  const std::string label() const {return m_label; }
+
+  Label();
+  void setLabel(const std::string& cpt, const std::string& lbl = "");
+
+  /// Destructor
+  ~Label() {}
+private:
+  /// Caption
+  std::string m_caption;
+  /// Label
+  std::string m_label;
+};
+
 /// Time of flight in microseconds
 class DLLExport TOF : public Unit
 {

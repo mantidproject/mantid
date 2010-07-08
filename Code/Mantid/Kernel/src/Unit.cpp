@@ -76,6 +76,44 @@ void Unit::addConversion(std::string to, const double& factor, const double& pow
 namespace Units
 {
 
+/* EMPTY
+ * ==============
+ */
+DECLARE_UNIT(Empty)
+
+void Empty::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+{
+  throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
+}
+
+void Empty::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+{
+  throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
+}
+
+/* LABEL
+ * ==============
+ */
+
+DECLARE_UNIT(Label)
+
+/// Constructor
+Label::Label()
+:Empty(),m_caption("Quantity"),m_label("")
+{
+}
+
+/**
+  * Set a caption and a label
+  */
+void Label::setLabel(const std::string& cpt, const std::string& lbl)
+{
+  m_caption = cpt;
+  m_label = lbl;
+}
+
 /* TIME OF FLIGHT
  * ==============
  */

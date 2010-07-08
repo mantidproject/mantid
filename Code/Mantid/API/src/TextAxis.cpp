@@ -1,10 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Exception.h"
-
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -12,17 +10,17 @@ namespace API
 {
 
 /// Constructor
-NumericAxis::NumericAxis(const int& length): Axis()
+TextAxis::TextAxis(const int& length): Axis()
 {
   m_values.resize(length);
 }
 
 /** Virtual constructor
- *  @return A pointer to a copy of the NumericAxis on which the method is called
+ *  @return A pointer to a copy of the TextAxis on which the method is called
  */
-Axis* NumericAxis::clone(const MatrixWorkspace* const)
+Axis* TextAxis::clone(const MatrixWorkspace* const)
 {
-  return new NumericAxis(*this);
+  return new TextAxis(*this);
 }
 
 /** Get the axis value at the position given
@@ -31,14 +29,14 @@ Axis* NumericAxis::clone(const MatrixWorkspace* const)
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double NumericAxis::operator()(const int& index, const int& verticalIndex) const
+double TextAxis::operator()(const int& index, const int& verticalIndex) const
 {
   if (index < 0 || index >= length())
   {
-    throw Kernel::Exception::IndexError(index, length()-1, "NumericAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length()-1, "TextAxis: Index out of range.");
   }
 
-  return m_values[index];
+  return EMPTY_DBL();
 }
 
 /** Sets the axis value at a given position
@@ -46,26 +44,21 @@ double NumericAxis::operator()(const int& index, const int& verticalIndex) const
  *  @param value The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void NumericAxis::setValue(const int& index, const double& value)
+void TextAxis::setValue(const int& index, const double& value)
 {
-  if (index < 0 || index >= length())
-  {
-    throw Kernel::Exception::IndexError(index, length()-1, "NumericAxis: Index out of range.");
-  }
-
-  m_values[index] = value;
+  throw std::domain_error("setValue method cannot be used on a TextAxis.");
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 Reference to the axis to compare to
  */
-bool NumericAxis::operator==(const Axis& axis2) const
+bool TextAxis::operator==(const Axis& axis2) const
 {
 	if (length()!=axis2.length())
   {
 		return false;
   }
-  const NumericAxis* spec2 = dynamic_cast<const NumericAxis*>(&axis2);
+  const TextAxis* spec2 = dynamic_cast<const TextAxis*>(&axis2);
   if (!spec2)
   {
     return false;
@@ -76,10 +69,25 @@ bool NumericAxis::operator==(const Axis& axis2) const
 /** Returns a text label which shows the value at index and identifies the
  *  type of the axis.
  *  @param index The index of an axis value
+ *  @return The label
  */
-std::string NumericAxis::label(const int& index)const
+std::string TextAxis::label(const int& index)const
 {
-  return boost::lexical_cast<std::string>((*this)(index));
+  return m_values[index];
+}
+
+/**
+  * Set the label for value at index
+  * @param index Index
+  */
+void TextAxis::setLabel(const int& index, const std::string& lbl)
+{
+  if (index < 0 || index >= length())
+  {
+    throw Kernel::Exception::IndexError(index, length()-1, "TextAxis: Index out of range.");
+  }
+
+  m_values[index] = lbl;
 }
 
 } // namespace API

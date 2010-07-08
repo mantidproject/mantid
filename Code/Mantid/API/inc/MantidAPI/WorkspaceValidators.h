@@ -138,7 +138,7 @@ private:
     // If m_unitID is empty it means that the workspace must have units, which can be anything
     if ( m_unitID.empty() )
     {
-      return ( unit ? "" : "The workspace must have units" );
+      return ( unit && (!boost::dynamic_pointer_cast<const Kernel::Units::Empty>(unit)) ? "" : "The workspace must have units" );
     }
     //now check if the units of the workspace is correct
     else

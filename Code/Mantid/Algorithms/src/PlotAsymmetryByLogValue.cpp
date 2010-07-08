@@ -9,11 +9,12 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/UnitFactory.h"
+//#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/TextAxis.h"
 
 namespace Mantid
 {
@@ -109,6 +110,19 @@ namespace Mantid
         npoints,    //  the number of data points on a plot
         npoints     //  it's not a histogram
         ));
+      TextAxis* tAxis = new TextAxis(nplots);
+      if (nplots == 1)
+      {
+        tAxis->setLabel(0,"Asymmetry");
+      }
+      else
+      {
+        tAxis->setLabel(0,"Red-Green");
+        tAxis->setLabel(1,"Red");
+        tAxis->setLabel(2,"Green");
+        tAxis->setLabel(3,"Red+Green");
+      }
+      outWS->replaceAxis(1,tAxis);
 
       Progress progress(this,0,1,is,ie+1,1);
       for(size_t i=is;i<=ie;i++)
@@ -204,11 +218,6 @@ namespace Mantid
             outWS->dataY(3)[i-is] = Y + Y1;
             outWS->dataX(3)[i-is] = logp->lastValue();
             outWS->dataE(3)[i-is] = E + E1;
-
-            outWS->getAxis(1)->spectraNo(0) = 1;
-            outWS->getAxis(1)->spectraNo(1) = 2;
-            outWS->getAxis(1)->spectraNo(2) = 3;
-            outWS->getAxis(1)->spectraNo(3) = 4;
           }
           else
             if (!ws_red)
