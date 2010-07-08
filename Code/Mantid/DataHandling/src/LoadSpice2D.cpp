@@ -63,7 +63,10 @@ namespace Mantid
      * bin in X. Each detector is defined as a spectrum of length 1.
      * @param ws: workspace
      * @param specID: ID of the spectrum to store the value in
-     * @param value: value to store
+     * @param value: value to store [count]
+     * @param error: error on the value [count]
+     * @param wavelength: wavelength value [Angstrom]
+     * @param dwavelength: error on the wavelength [Angstrom]
      */
     void store_value(DataObjects::Workspace2D_sptr ws, int specID,
         double value, double error, double wavelength, double dwavelength)
