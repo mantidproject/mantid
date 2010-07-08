@@ -546,14 +546,15 @@ void PeakPickerTool::functionRemoved()
  */
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
-  QString curveFitName = workspaceName()+QString("-fit-")+QString::number(spec());
-  QString curveResName = workspaceName()+QString("-res-")+QString::number(spec());
+  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
+  QString curveFitName = workspaceName()+"-"+axisLabel+QString("-Calc");
+  QString curveResName = workspaceName()+"-"+axisLabel+QString("-Diff");
 
   graph()->removeCurve(curveFitName);
   graph()->removeCurve(curveResName);
 
-  new MantidCurve(out,graph(),"spectra",1,false);
-  new MantidCurve(out,graph(),"spectra",2,false);
+  new MantidCurve(curveFitName,out,graph(),"spectra",1,false);
+  new MantidCurve(curveResName,out,graph(),"spectra",2,false);
 
   graph()->replot();
 }

@@ -908,7 +908,9 @@ namespace Mantid
       const std::string axesNames="axis1,axis2";
       status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
       std::string yUnits=localworkspace->YUnit();
+      std::string yUnitLabel=localworkspace->YUnitLabel();
       status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
+      status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), yUnitLabel.size(), NX_CHAR);
       status=NXclosedata(fileID);
       // error
       name="errors";

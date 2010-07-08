@@ -220,6 +220,9 @@ namespace Mantid
         g_log.information() << "Axis 1 set to unitless quantity \"" << unit2 << "\"\n";
       }
       local_workspace->setYUnit(data.attributes("units"));
+      std::string unitLabel = data.attributes("unit_label");
+      if (unitLabel.empty()) unitLabel = data.attributes("units");
+      local_workspace->setYUnitLabel(unitLabel);
 
       //Are we a distribution
       std::string dist = xbins.attributes("distribution");
