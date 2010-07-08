@@ -1,7 +1,8 @@
+// WorkspaceFactory include must be first otherwise you get a bizarre Poco-related compilation error on Windows
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/SearchHelper.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/ErrorHandling.h" 
-#include "MantidAPI/WorkspaceFactory.h"
 #include <iomanip>
 
 namespace Mantid
