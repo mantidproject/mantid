@@ -136,6 +136,7 @@ namespace Kernel
     m_ConfigPaths.insert(std::make_pair("defaultsave.directory", false));
     m_ConfigPaths.insert(std::make_pair("datasearch.directories",true));
     m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories",true));
+	m_ConfigPaths.insert(std::make_pair("icatDownload.directory",true));
 
     //attempt to load the default properties file that resides in the directory of the executable
     updateConfig(getBaseDir() + m_properties_file_name,false,false);

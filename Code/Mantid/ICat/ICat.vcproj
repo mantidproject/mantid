@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GetDataSets.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GetInvestigation.cpp"
 				>
 			</File>

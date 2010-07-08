@@ -19,31 +19,22 @@ public:
 		TS_ASSERT_THROWS_NOTHING( invstObj.initialize());
 		TS_ASSERT( invstObj.isInitialized() );
 	}
-	void testSearchByAdavanced()
+	void xtestSearchByAdavanced()
 	{
-		std::string s;
-		std::getline(std::cin,s);
-		Session::Instance();
+		/*std::string s;
+		std::getline(std::cin,s);*/
 
+		Session::Instance();
 	if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Now set it...
 		loginobj.setPropertyValue("Username", "mantid_test");
 		loginobj.setPropertyValue("Password", "mantidtestuser");
-		loginobj.setPropertyValue("DBServer", "");
+		//loginobj.setPropertyValue("DBServer", "");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
-
-		//if ( !filelistobj.isInitialized() ) filelistobj.initialize();
-		//// Now set it...
-		//filelistobj.setPropertyValue("StartRun", "100.0");
-		//filelistobj.setPropertyValue("EndRun", "102.0");
-		//filelistobj.setPropertyValue("OutputWorkspace","SearchBy_RunNumber");
-		//		
-		//TS_ASSERT_THROWS_NOTHING(filelistobj.execute());
-		//TS_ASSERT( filelistobj.isExecuted() );
-
+		
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		searchobj.setPropertyValue("StartRun", "100.0");
 		searchobj.setPropertyValue("EndRun", "102.0");
@@ -63,9 +54,9 @@ public:
 
 	}
 private:
-		CFileList filelistobj;
+	CFileList filelistobj;
 	CSearchByRunNumber searchobj;
-	CGetInvestigation invstObj;
+	CGetDataFiles invstObj;
 	Login loginobj;
 };
 #endif

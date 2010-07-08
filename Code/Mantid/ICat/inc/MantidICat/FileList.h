@@ -11,7 +11,10 @@ namespace Mantid
 		class DLLExport CFileList:public API::Algorithm
 		{
 		public:
+
+			///conctructor
 			CFileList():API::Algorithm(){}
+			/// Destructor
 			~CFileList(){}
 
 		    /// Algorithm's name for identification overriding a virtual method
@@ -26,7 +29,7 @@ namespace Mantid
 			void init();
 			/// Overwrites Algorithm method
 			void exec();
-			///
+			/// search for files
 			API::ITableWorkspace_sptr doFileSearch();
 
 

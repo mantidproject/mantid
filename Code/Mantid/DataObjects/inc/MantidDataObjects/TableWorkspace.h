@@ -195,7 +195,7 @@ private:
 			}
 			else
 			{
-				row=-1;
+				throw std::out_of_range("Search object not found in table workspace");
 			 }
 		}
 		catch(std::range_error&)
@@ -263,35 +263,6 @@ private:
       findValue(value,row,col);
     }
 
-
-    /// template method to find a given value in a table.
-    //template<typename  Type>
-    //void findValue(const Type value,int& row,int & col)
-    //{
-    //  int total_columns=columnCount();
-    //  for (int count=0;count<total_columns;++count)
-    //  {
-    //    TableColumn_ptr<Type> tc_sptr= getColumn(count);
-    //    std::vector<Type> dataVec=tc_sptr->data();
-    //    typename std::vector<Type>::iterator itr;
-    //    itr=std::find(dataVec.begin(),dataVec.end(),value);
-    //    if(itr!=dataVec.end())
-    //    {
-    //      std::vector<int>::difference_type pos;
-    //      pos=std::distance(dataVec.begin(),itr);
-    //      //int pos=static_cast<int>itr-dataVec.begin();
-    //      row=static_cast<int>(pos);
-    //      col=count;
-    //      break;
-    //    }
-    //    else
-    //    {
-    //      row=-1;
-    //      col=-1;
-    //    }
-    //  }
-
-    //}
 
 private:
     /// Used in std::find_if algorithm to find a Column with name \a name.

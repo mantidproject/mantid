@@ -1,5 +1,5 @@
-#ifndef LOGINTEST_H
-#define LOGINTEST_H
+#ifndef LOGINTEST_H_
+#define LOGINTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/Login.h"
@@ -11,16 +11,18 @@ class CLoginTest: public CxxTest::TestSuite
 public:
 	void testInit()
 	{
+		Login loginobj;
 		TS_ASSERT_THROWS_NOTHING( loginobj.initialize());
 		TS_ASSERT( loginobj.isInitialized() );
 	}
 	void testLogin()
 	{
-		std::string s;
-		std::getline(std::cin,s);
+		/*std::string s;
+		std::getline(std::cin,s);*/
 		Session::Instance();
+		Login loginobj;
 
-	if ( !loginobj.isInitialized() ) loginobj.initialize();
+	   if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Should fail because mandatory parameter has not been set
 		TS_ASSERT_THROWS(loginobj.execute(),std::runtime_error);
@@ -28,18 +30,36 @@ public:
 		// Now set it...
 		loginobj.setPropertyValue("Username", "mantid_test");
 		loginobj.setPropertyValue("Password", "mantidtestuser");
-		loginobj.setPropertyValue("DBServer", "");
+		//loginobj.setPropertyValue("DBServer", "");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
-
-		std::string sessionid;//=loginobj.getPropertyValue("SessionId");
-		//std::cout<<"test method session id "<<sessionid<<std::endl;
-		sessionid=Session::Instance().getSessionId();
-		std::cout<<"test method session id "<<sessionid<<std::endl;
+		TS_ASSERT(loginobj.isExecuted() );
+		
 	}
-private:
-
+	void testLoginFail()
+	{
+		
 		Login loginobj;
+		Session::Instance();
+
+	   if ( !loginobj.isInitialized() ) loginobj.initialize();
+
+		// Should fail because mandatory parameter has not been set
+		TS_ASSERT_THROWS(loginobj.execute(),std::runtime_error);
+
+		//invalid username
+		loginobj.setPropertyValue("Username", "mantid_test");
+		loginobj.setPropertyValue("Password", "mantidtestuser1");
+		//loginobj.setPropertyValue("DBServer", "");
+		
+		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
+		//should fail
+		TS_ASSERT( !loginobj.isExecuted() );
+		//empty sessionid
+		TS_ASSERT(!Session::Instance().getSessionId().empty());
+		
+	}
+
+		
 };
 #endif
