@@ -129,7 +129,7 @@ void Q1DWeighted::exec()
 
       // Find the position offset for this sub-pixel in real space
       double sub_y = pixelSizeY * ((isub%nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
-      double sub_x = pixelSizeX * (floor(isub/nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
+      double sub_x = pixelSizeX * (floor((double)isub/nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
 
       // Find the position of this sub-pixel in real space and compute Q
       // For reference - in the case where we don't use sub-pixels, simply use:
