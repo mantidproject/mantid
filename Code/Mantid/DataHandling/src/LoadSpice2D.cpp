@@ -178,7 +178,7 @@ namespace Mantid
           API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, nBins+1, nBins));
       ws->setTitle(wsTitle);
       ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Wavelength");
-      ws->setYUnit("Counts");
+      ws->setYUnit("");
       API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(ws);
       setProperty("OutputWorkspace", workspace);
 
