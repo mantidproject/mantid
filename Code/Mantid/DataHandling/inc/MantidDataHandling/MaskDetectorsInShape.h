@@ -5,9 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <vector>
-
 
 namespace Mantid
 {
@@ -34,7 +31,7 @@ namespace DataHandling
     @author Nick Draper, Tessella plc
     @date 16/02/2009
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -73,10 +70,10 @@ private:
   void exec();
 
 	//internal functions
-	std::vector<int> runFindDetectorsInShape(DataObjects::Workspace2D_sptr workspace, 
+	std::vector<int> runFindDetectorsInShape(API::MatrixWorkspace_sptr workspace,
 		const std::string shapeXML, const bool includeMonitors);
 	/// Calls MaskDetectors as a sub-algorithm
-	void runMaskDetectors(DataObjects::Workspace2D_sptr workspace, const std::vector<int> detectorIds);
+	void runMaskDetectors(API::MatrixWorkspace_sptr workspace, const std::vector<int> detectorIds);
 };
 
 } // namespace DataHandling

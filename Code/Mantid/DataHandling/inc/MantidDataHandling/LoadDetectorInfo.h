@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include <vector>
@@ -73,13 +72,13 @@ private:
     double wallThick;                               ///< detector wall thickness
   };
   /// will store a pointer to the user selected workspace
-  DataObjects::Workspace2D_sptr m_workspace;
+  API::MatrixWorkspace_sptr m_workspace;
   /// number of histograms in the workspace
   int m_numHists;
   /// the detector IDs that are monitors, according to the raw file
   std::set<int> m_monitors;
   /// Xbin boundaries for the monitors, normally monitors have a different time delay and hence a different offset
-  DataObjects::Histogram1D::RCtype m_monitorXs;
+  MantidVecPtr m_monitorXs;
   /// stores if the bin boundary values, X arrays, we initially common, because if that is we'll work to maximise sharing
   bool m_commonXs;
   /// the delay time for monitors, this algorithm requires all monitors have the same delay. Normally the delay is zero
@@ -104,7 +103,7 @@ private:
   void adjustXsCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
   void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
   void noteMonitorOffset(const float offSet, const int detID);
-  void setUpXArray(DataObjects::Histogram1D::RCtype &theXValuesArray, int specInd, double offset);
+  void setUpXArray(MantidVecPtr &theXValuesArray, int specInd, double offset);
   void logErrorsFromRead(const std::vector<int> &missingDetectors);
   void sometimesLogSuccess(const detectorInfo &params, bool &setToFalse);
 

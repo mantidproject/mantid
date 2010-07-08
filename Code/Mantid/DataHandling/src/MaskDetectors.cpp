@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MaskDetectors.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <set>
@@ -17,8 +16,6 @@ DECLARE_ALGORITHM(MaskDetectors)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_sptr;
 
 /// (Empty) Constructor
 MaskDetectors::MaskDetectors() {}
@@ -29,8 +26,8 @@ MaskDetectors::~MaskDetectors() {}
 void MaskDetectors::init()
 {
   declareProperty(
-    new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut),
-    "The name of the 2D workspace that will be used as input and\n"
+    new WorkspaceProperty<>("Workspace","", Direction::InOut),
+    "The name of the workspace that will be used as input and\n"
     "output for the algorithm" );
   declareProperty(new ArrayProperty<int>("SpectraList"),
     "A coma separated list or array containing a list of spectra to\n"
@@ -47,7 +44,7 @@ void MaskDetectors::init()
 void MaskDetectors::exec()
 {
   // Get the input workspace
-  const Workspace2D_sptr WS = getProperty("Workspace");
+  const MatrixWorkspace_sptr WS = getProperty("Workspace");
   // Get the size of the vectors
   const int vectorSize = WS->blocksize();
 
@@ -148,7 +145,7 @@ void MaskDetectors::exec()
 
 /// Convert a list of spectra numbers into the corresponding workspace indices
 void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
-                                              const DataObjects::Workspace2D_sptr WS)
+                                              const API::MatrixWorkspace_sptr WS)
 {
   // Convert the vector of properties into a set for easy searching
   std::set<int> spectraSet(spectraList.begin(),spectraList.end());

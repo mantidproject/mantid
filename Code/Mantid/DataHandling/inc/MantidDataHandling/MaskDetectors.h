@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -29,7 +28,7 @@ namespace DataHandling
     @author Russell Taylor, Tessella Support Services plc
     @date 15/04/2008
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -67,7 +66,7 @@ private:
   void init();
   void exec();
   void fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
-                                const DataObjects::Workspace2D_sptr WS);
+                                const API::MatrixWorkspace_sptr WS);
 };
 
 } // namespace DataHandling

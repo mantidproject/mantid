@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveAscii.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
@@ -33,7 +32,7 @@ namespace Mantid
       exts.push_back(".csv");
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
 		      "A comma separated Ascii file that will be created");
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("Workspace",
+      declareProperty(new WorkspaceProperty<>("Workspace",
         "",Direction::Input), "The name of the workspace that will be saved.");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -50,7 +49,7 @@ namespace Mantid
     void SaveAscii::exec()
     {
         // Get the workspace
-        DataObjects::Workspace2D_sptr ws = getProperty("Workspace");
+        MatrixWorkspace_const_sptr ws = getProperty("Workspace");
         int nSpectra = ws->getNumberHistograms();
         int nBins = ws->blocksize();
 

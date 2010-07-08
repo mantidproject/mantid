@@ -20,7 +20,6 @@ DECLARE_ALGORITHM(LoadDetectorInfo)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using namespace DataObjects;
 
 const float LoadDetectorInfo::UNSETOFFSET = float(-1e12);
 const LoadDetectorInfo::detectDatForm LoadDetectorInfo::MARI_TYPE(10, 7, 8);
@@ -37,10 +36,10 @@ LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
 void LoadDetectorInfo::init()
 {
   // Declare required input parameters for algorithm
-  CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
-  val->add(new WorkspaceUnitValidator<Workspace2D>("TOF"));
-  val->add(new HistogramValidator<Workspace2D>);
-  declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut,val),
+  CompositeValidator<> *val = new CompositeValidator<>;
+  val->add(new WorkspaceUnitValidator<>("TOF"));
+  val->add(new HistogramValidator<>);
+  declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut,val),
     "The name of the workspace to that the detector information will be loaded into" );
   std::vector<std::string> exts;
   // each of these allowed extensions must be dealt with in exec() below
@@ -522,12 +521,12 @@ void LoadDetectorInfo::adjustXs(const std::vector<int> &detIDs, const std::vecto
 */
 void LoadDetectorInfo::adjustXs(const double detectorOffset)
 {
-  Histogram1D::RCtype monitorXs;
+  MantidVecPtr monitorXs;
   // for g_log keep a count of the number of spectra that we can't find detectors for in the raw file
   int spuriousSpectra = 0;
   double fracCompl = 1.0/3.0;
 
-  Histogram1D::RCtype newXs;
+  MantidVecPtr newXs;
 
   for ( int specInd = 0; specInd < m_numHists; ++specInd )
   {// check if we dealing with a monitor as these are dealt by a different function
@@ -605,8 +604,8 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
 {
   // space for cached values
   float cachedOffSet = UNSETOFFSET;
-  Histogram1D::RCtype monitorXs;
-  Histogram1D::RCtype cachedXs;
+  MantidVecPtr monitorXs;
+  MantidVecPtr cachedXs;
 
   double fracCompl = 1.0/3.0;
   
@@ -660,7 +659,7 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
 */
 void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors)
 {// the monitors can't have diferent offsets so I can cache the bin boundaries for all the monitors
-  Histogram1D::RCtype monitorXs;
+  MantidVecPtr monitorXs;
 
   double fracCompl = 1.0/3.0;
 
@@ -727,7 +726,7 @@ void LoadDetectorInfo::noteMonitorOffset(const float offSet, const int detID)
 * @param specInd index number of histogram from with to take the original X-values 
 * @param offset _subtract_ this number from all the X-values
 */
-void LoadDetectorInfo::setUpXArray(Histogram1D::RCtype &theXValuesArray, int specInd, double offset)
+void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, int specInd, double offset)
 {
   std::vector<double> &AllXbins = theXValuesArray.access();
   AllXbins.resize(m_workspace->dataX(specInd).size());
