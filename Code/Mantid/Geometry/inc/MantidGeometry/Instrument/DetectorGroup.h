@@ -101,6 +101,16 @@ public:
     return std::vector<Quat>(0);
   }
 
+  /**
+   * Get a parameter defined as a string
+   * @param pname The name of the parameter
+   * @returns A list of size 0 as this is not a parameterized component
+   */
+  std::vector<std::string> getStringParameter(const std::string& pname) const
+  {
+    return std::vector<std::string>(0);
+  }
+
 
 
 private:

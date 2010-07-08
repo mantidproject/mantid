@@ -48,6 +48,31 @@ public:
     TS_ASSERT_EQUALS(pq.getRelativeRot(),Quat(1,1,1,1));
   }
 
+  void testGetParameter()
+  {
+	Component baseComp("Parent",V3D(1,1,1));
+    ParameterMap paramMap;
+
+	std::string strName("StringParam"), strValue("test-string");
+	std::string dblName("DblParam");
+	double dblValue(10.0);
+	std::string posName("PosParam");
+	V3D posValue(1,1,1);
+	std::string quatName("QuatParam");
+	Quat quatValue(2,3,4,5);
+
+	paramMap.add("string", &baseComp, strName, strValue);
+	paramMap.add("double", &baseComp, dblName, dblValue);
+	paramMap.add("V3D", &baseComp, posName, posValue);
+	paramMap.add("Quat", &baseComp, quatName, quatValue);
+
+    ParametrizedComponent paramComp(&baseComp,paramMap);
+
+	TS_ASSERT_EQUALS(paramComp.getStringParameter(strName)[0], strValue);
+	TS_ASSERT_EQUALS(paramComp.getNumberParameter(dblName)[0], dblValue);
+	TS_ASSERT_EQUALS(paramComp.getPositionParameter(posName)[0], posValue);
+	TS_ASSERT_EQUALS(paramComp.getRotationParameter(quatName)[0], quatValue);
+  }
 
 };
 

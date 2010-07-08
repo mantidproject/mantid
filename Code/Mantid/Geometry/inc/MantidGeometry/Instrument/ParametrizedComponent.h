@@ -151,6 +151,17 @@ public:
      {
        return getParameter<Quat>(pname);
      }
+
+	 /**
+      * Get a parameter defined as a string
+      * @param pname The name of the parameter
+      * @return A list of size 0 or 1 containing the parameter value or 
+      * nothing if it does not exist
+      */
+	 std::vector<std::string> getStringParameter(const std::string& pname) const
+     {
+		 return getParameter<std::string>(pname);
+     }
      //@}
 
      void printSelf(std::ostream&) const;

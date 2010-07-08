@@ -113,6 +113,8 @@ public:
   virtual std::vector<V3D> getPositionParameter(const std::string& pname) const = 0;
   /// Get a parameter defined as a Quaternion
   virtual std::vector<Quat> getRotationParameter(const std::string& pname) const = 0;
+  /// Get a parameter defined as a string
+  virtual std::vector<std::string> getStringParameter(const std::string& pname) const = 0;
   //@}
   /** Prints a text representation of itself
    */
