@@ -105,6 +105,8 @@ void FrameworkManagerProxy::clearInstruments()
 
 /**
  * Return a string property from the ConfigService
+ * @param key the key of the config value you require
+ * @returns the value of the config item you require
  */
 std::string FrameworkManagerProxy::getConfigProperty(const std::string & key) const
 {

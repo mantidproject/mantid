@@ -50,7 +50,9 @@ namespace Kernel
 class DLLExport Interpolation
 {
 private:
+  ///internal storage of x values
   std::vector<double> m_x;
+  ///internal storage of y values
   std::vector<double> m_y;
 
   /// method used for doing the interpolation

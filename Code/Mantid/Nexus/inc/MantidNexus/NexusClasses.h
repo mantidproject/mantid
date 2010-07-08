@@ -634,6 +634,12 @@ namespace Mantid
         return NULL;
       }
 
+      ///Loads the values in the log into the workspace
+      ///@param logName the name of the log
+      ///@param value the value
+      ///@param start_t the start time
+      ///@param times the array of time offsets
+      ///@returns a property pointer
       template<class NX_TYPE,class TIME_TYPE>
       Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, time_t start_t,TIME_TYPE times)
       {

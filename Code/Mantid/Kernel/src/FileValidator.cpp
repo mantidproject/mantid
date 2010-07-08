@@ -105,6 +105,8 @@ static bool has_ending(const std::string &value, const std::string & ending)
   return (result == 0); // only care if it matches
 }
 
+///Checks the extension of a filename
+///@param value the filename to check
 bool FileValidator::endswith(const std::string &value) const
 {
   if (m_extensions.empty()) // automatically match a lack of extensions

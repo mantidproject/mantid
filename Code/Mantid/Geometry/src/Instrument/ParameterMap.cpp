@@ -125,12 +125,12 @@ std::string ParameterMap::asString()const
 }
 
 /** Create or adjust "pos" parameter for a component
-  * Assumed that name either equals "x", "y" or "z" otherwise this method will not add/modify "pos" parameter
-    @param comp Component
-    @param name Parameter name
-    @param value Parameter value
+  * Assumed that name either equals "x", "y" or "z" otherwise this method will not add or modify "pos" parameter
+  * @param comp Component
+  * @param name name of the parameter
+  * @param value value
   */
-void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::string& name, const double value)
+void ParameterMap::addPositionCoordinate(const IComponent* comp, const std::string& name, const double value)
 {
   Parameter_sptr param = get(comp,"pos");
   V3D position;

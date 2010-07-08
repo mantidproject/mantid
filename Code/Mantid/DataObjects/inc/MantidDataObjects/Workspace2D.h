@@ -95,12 +95,12 @@ public:
   /// Returns a pointer to the x data
   virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
 
-  /* sets the monitorWorkspace indexlist
+  /** sets the monitorWorkspace indexlist
 	@param mList a vector holding the monitor workspace indexes
   */
   void setMonitorList(std::vector<int>& mList){m_monitorList=mList;}
 
-   /* sets the number of histograms.This method is mainly useful when the user selects 
+   /** sets the number of histograms.This method is mainly useful when the user selects 
    monitor 'select' or 'exclude' options from loadraw UI
 	@param nhistograms is the number of histograms
   */

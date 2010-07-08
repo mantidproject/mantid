@@ -58,6 +58,7 @@ private:
   }
 };
 
+///@cond Do not document
 // Member function specializations for ints and doubles. The definitions are in the
 // cpp file so that multiple symbol errors do not occur in the linking stage.
 template<>
@@ -65,6 +66,7 @@ std::string MandatoryValidator<int>::checkValidity(const int& value) const;
 
 template<>
 std::string MandatoryValidator<double>::checkValidity(const double& value) const;
+///@endcond
 
 } // namespace Kernel
 } // namespace Mantid

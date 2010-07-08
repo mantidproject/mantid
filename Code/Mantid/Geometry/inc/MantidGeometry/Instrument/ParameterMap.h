@@ -128,31 +128,7 @@ public:
       m_map.insert(std::make_pair(comp->getComponentID(),param));
     }
 
-    /** 
-     *  Method is provided to add a parameter of any custom type which must be created with 'new' operator.
-     *  ParameterMap takes the owneship of the parameter. e.g. AMap.add(new CustomParameter,"comp","name","value");
-     *  The caller is resposible for setting the parameter's value.
-     *      e.g. CustomParameter* param = new CustomParameter;
-     *      param->setItsValue(value);
-     *      AMap.add(param,"comp","name");
-     *  @param param A pointer to the parameter
-     *  @param comp A pointer to the component
-     *  @param name The paramenter name
-     */
-    //void add(Parameter* param,const IComponent* comp,const std::string& name)
-    //{
-    //  std::pair<pmap_it,pmap_it> range = m_map.equal_range(comp->getComponentID());
-    //  for(pmap_it it=m_map.begin();it!=m_map.end();++it)
-    //  {
-    //    if (it->second->name() == name)
-    //    {
-    //      it->second.reset(param);
-    //      return;
-    //    }
-    //  }
-    //  m_map.insert(std::make_pair(comp->getComponentID(),boost::shared_ptr<Parameter>(param)));
-    //}
-
+    
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
 

@@ -88,7 +88,7 @@ private:
   bool checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSample(const API::Sample& sample1, const API::Sample& sample2);
   
-  std::string result;
+  std::string result; //< the result string
 };
 
 } // namespace Algorithms

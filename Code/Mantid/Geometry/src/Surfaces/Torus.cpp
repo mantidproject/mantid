@@ -296,6 +296,14 @@ Torus::write(std::ostream& OX) const
   return;
 }
 
+/** SGenerates a bounding box for the Torus
+ *  @param xmax the X max value
+ *  @param ymax the Y max value
+ *  @param zmax the Z max value
+ *  @param xmin the X min value
+ *  @param ymin the Y min value
+ *  @param zmin the Z min value
+ */
 void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
 	///TODO:

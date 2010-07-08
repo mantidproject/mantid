@@ -57,12 +57,15 @@ namespace Mantid
       std::string getTie() const { return m_tie; }
       /// set tie
       std::string& setTie() { return m_tie; }
-      /// get constraint and penalty factor
+      /// get constraint 
       std::string getConstraint() const;
+      /// get penalty factor
       std::string getConstraintPenaltyFactor() const { return m_constraintPenaltyFactor; }
-      /// set constraint and penalty factors
+      /// set constraint min
       std::string& setConstraintMin() { return m_constraintMin; }
+      /// set constraint max
       std::string& setConstraintMax() { return m_constraintMax; }
+      /// set the constraint penalty 
       std::string& setConstraintPenaltyFactor() { return m_constraintPenaltyFactor; }
       /// get formula
       std::string getFormula() const { return m_formula; }
@@ -97,20 +100,19 @@ namespace Mantid
       mutable double m_value;
       /// tie of parameter
       std::string m_tie;
-      /// constraint of parameter
-      std::string m_constraintMin;
-      std::string m_constraintMax;
-      std::string m_constraintPenaltyFactor;
+      std::string m_constraintMin; ///< constraint min boundary
+      std::string m_constraintMax; ///< constraint max boundary
+      std::string m_constraintPenaltyFactor;  ///< the penalty factor
       /// name of fitting function
       std::string m_function;
       /// name of parameter
       std::string m_name;
       /// look up table
       Kernel::Interpolation m_lookUpTable;
-      /// formula
-      std::string m_formula;
-      std::string m_formulaUnit;
-      std::string m_resultUnit;
+
+      std::string m_formula; ///< the formula
+      std::string m_formulaUnit; ///< the unit that the formula expects
+      std::string m_resultUnit;  ///<the rsult unit
 
 	    /// Static reference to the logger class
 	    static Kernel::Logger& g_log;

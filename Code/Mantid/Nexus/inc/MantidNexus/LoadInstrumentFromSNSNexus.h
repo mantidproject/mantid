@@ -121,10 +121,10 @@ namespace API
       void loadInstrument(API::Workspace_sptr localWS,
                           NXEntry entry);
 
-      // Get bank's position and orientation
+      /// Get bank's position and orientation
       void getBankOrientation(NXDetector nxDet, Geometry::V3D& shift, Geometry::Quat& rot);
 
-      // Calculate rotation axis from direction cosines
+      /// Calculate rotation axis from direction cosines
       void calcRotation(const Geometry::V3D& X,const Geometry::V3D& Y,const Geometry::V3D& Z,double& angle, Geometry::V3D& axis);
 
       /// Personal wrapper for sqrt to allow msvs to compile

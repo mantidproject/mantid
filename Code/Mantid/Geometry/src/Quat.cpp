@@ -450,7 +450,7 @@ void Quat::rotate(V3D& v) const
 /*! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
  * stored as an linear array of 16 double
  * The function glRotated must be called
- * param mat The output matrix
+ * @param mat The output matrix
  */
 void Quat::GLMatrix(double* mat) const
 {

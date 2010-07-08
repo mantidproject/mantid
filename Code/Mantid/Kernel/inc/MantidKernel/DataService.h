@@ -143,7 +143,7 @@ public:
       ///name of the new workspace
       const std::string& new_objectname()const{return m_outwsname;}
     private:
-      std::string m_outwsname;
+      std::string m_outwsname; ///< output workspace name
     };
 
   /// Add an object to the service

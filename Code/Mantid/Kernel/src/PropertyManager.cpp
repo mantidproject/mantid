@@ -19,7 +19,9 @@ namespace Mantid
       m_properties(), m_orderedProperties()
     {
     }
-
+    
+    /// copy constructor
+    /// @param other the PropertyManager to copy
     PropertyManager::PropertyManager(const PropertyManager& other) :
       m_properties(), m_orderedProperties(other.m_orderedProperties.size())
     {
@@ -34,6 +36,8 @@ namespace Mantid
       }
     }
 
+    /// Assignment operator - performs a deep copy
+    /// @param other the PropertyManager to copy
     PropertyManager& PropertyManager::operator=(const PropertyManager& other)
     {
       // We need to do a deep copy here
