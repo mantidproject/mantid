@@ -34,7 +34,21 @@ void Q1DWeighted::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator));
-  declareProperty("ErrorWeighting",false,"Choose whether each pixel contribution will be weighted by 1/error^2.");
+
+  BoundedValidator<int> *positiveInt = new BoundedValidator<int>();
+  positiveInt->setLower(0);
+  declareProperty("NPixelDivision", 1, positiveInt,
+      "Number of sub-pixels used for each detector pixel in each direction."
+      "The total number of sub-pixels will be NPixelDivision*NPixelDivision.");
+
+  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  positiveDouble->setLower(0);
+  declareProperty("PixelSizeX", 0.00515, positiveDouble,
+      "Pixel size in the X direction (m).");
+  declareProperty("PixelSizeY", 0.00515, positiveDouble->clone(),
+      "Pixel size in the Y direction (m).");
+  declareProperty("ErrorWeighting", false,
+      "Choose whether each pixel contribution will be weighted by 1/error^2.");
 }
 
 void Q1DWeighted::exec()
@@ -43,8 +57,14 @@ void Q1DWeighted::exec()
 
   // Calculate the output binning
   const std::vector<double> binParams = getProperty("OutputBinning");
+  // XOut defines the output histogram, so its length is equal to the number of bins + 1
   DataObjects::Histogram1D::RCtype XOut;
   const int sizeOut = VectorHelper::createAxisFromRebinParams(binParams,XOut.access());
+
+  // Get pixel size and pixel sub-division
+  double pixelSizeX = getProperty("PixelSizeX");
+  double pixelSizeY = getProperty("PixelSizeY");
+  int nSubPixels = getProperty("NPixelDivision");
 
   // Get weighting option
   const bool errorWeighting = getProperty("ErrorWeighting");
@@ -72,7 +92,10 @@ void Q1DWeighted::exec()
   const double fmp=4.0*M_PI;
 
   // Count histogram for normalization
-  std::vector<double> XNorm(sizeOut, 0.0) ;
+  std::vector<double> XNorm(sizeOut-1, 0.0) ;
+
+  // Beam line axis, to compute scattering angle
+  V3D beamLine = samplePos - sourcePos;
 
   // TODO: look into the parallel macros before trying to be clever
   //PARALLEL_FOR2(inputWS,outputWS)
@@ -98,48 +121,63 @@ void Q1DWeighted::exec()
     MantidVec YIn = inputWS->readY(i);
     MantidVec EIn = inputWS->readE(i);
 
-    double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
-    double factor = fmp*sinTheta;
 
-    // Loop over all xLength-1 detector channels
-    // Note: xLength -1, because X is a histogram and has a number of boundaries
-    // equal to the number of detector channels + 1.
-    for ( int j = 0; j < xLength-1; j++)
+    // Calculate the Q values for the current spectrum
+    // Each pixel is sub-divided in the number of pixels given as input parameter (NPixelDivision)
+    for ( int isub=0; isub<nSubPixels*nSubPixels; isub++ )
     {
-      double q = factor*2.0/(XIn[j]+XIn[j+1]);
-      int iq = 0;
 
-      // Bin assignment depends on whether we have log or linear bins
-      if(binParams[1]>0.0)
-      {
-        iq = (int)floor( (q-binParams[0])/ binParams[1] );
-      } else {
-        iq = (int)floor(log(q/binParams[0]/log(-binParams[1])));
-      }
+      // Find the position offset for this sub-pixel in real space
+      double sub_y = pixelSizeY * ((isub%nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
+      double sub_x = pixelSizeX * (floor(isub/nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
 
-      if (iq>=0 && iq < sizeOut-1)
+      // Find the position of this sub-pixel in real space and compute Q
+      // For reference - in the case where we don't use sub-pixels, simply use:
+      //     double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
+      V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
+      double sinTheta = sin( pos.angle(beamLine)/2.0 );
+      double factor = fmp*sinTheta;
+
+      // Loop over all xLength-1 detector channels
+      // Note: xLength -1, because X is a histogram and has a number of boundaries
+      // equal to the number of detector channels + 1.
+      for ( int j = 0; j < xLength-1; j++)
       {
-        double w = 1.0;
-        if ( errorWeighting )
+        double q = factor*2.0/(XIn[j]+XIn[j+1]);
+        int iq = 0;
+
+        // Bin assignment depends on whether we have log or linear bins
+        if(binParams[1]>0.0)
         {
-          // When using the error as weight we have:
-          //    w_i = 1/s_i^2   where s_i is the uncertainty on the ith pixel.
-          //
-          //    I(q_i) = (sum over i of I_i * w_i) / (sum over i of w_i)
-          //       where all pixels i contribute to the q_i bin, and I_i is the intensity in the ith pixel.
-          //
-          //    delta I(q_i) = 1/sqrt( (sum over i of w_i) )  using simple error propagation.
-          w = 1.0/(EIn[0]*EIn[0]);
+          iq = (int)floor( (q-binParams[0])/ binParams[1] );
+        } else {
+          iq = (int)floor(log(q/binParams[0])/log(-binParams[1]));
         }
 
-        YOut[iq] += YIn[0]*w;
-        EOut[iq] += w*w*EIn[0]*EIn[0];
-        XNorm[iq] += w;
-      }
-    }
+        if (iq>=0 && iq < sizeOut-1)
+        {
+          double w = 1.0;
+          if ( errorWeighting )
+          {
+            // When using the error as weight we have:
+            //    w_i = 1/s_i^2   where s_i is the uncertainty on the ith pixel.
+            //
+            //    I(q_i) = (sum over i of I_i * w_i) / (sum over i of w_i)
+            //       where all pixels i contribute to the q_i bin, and I_i is the intensity in the ith pixel.
+            //
+            //    delta I(q_i) = 1/sqrt( (sum over i of w_i) )  using simple error propagation.
+            w = 1.0/(nSubPixels*nSubPixels*EIn[0]*EIn[0]);
+          }
 
-    progress.report();
-    //PARALLEL_END_INTERUPT_REGION
+          YOut[iq] += YIn[0]*w;
+          EOut[iq] += w*w*EIn[0]*EIn[0];
+          XNorm[iq] += w;
+        }
+      }
+
+      progress.report();
+      //PARALLEL_END_INTERUPT_REGION
+    }
   }
   //PARALLEL_CHECK_INTERUPT_REGION
 
@@ -154,4 +192,3 @@ void Q1DWeighted::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

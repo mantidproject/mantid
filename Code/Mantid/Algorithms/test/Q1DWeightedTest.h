@@ -11,9 +11,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class RadialAverageTest : public CxxTest::TestSuite
-// TODO: test log binning
-// TODO: test unity weights
+class Q1DWeightedTest : public CxxTest::TestSuite
 {
 public:
   void testName()
@@ -73,6 +71,7 @@ public:
     const std::string outputWS("result");
     TS_ASSERT_THROWS_NOTHING( radial_average.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( radial_average.setPropertyValue("OutputBinning","0.01,0.001,0.11") )
+    TS_ASSERT_THROWS_NOTHING( radial_average.setPropertyValue("NPixelDivision", "3") )
     TS_ASSERT_THROWS_NOTHING( radial_average.setPropertyValue("ErrorWeighting", "1") )
 
     TS_ASSERT_THROWS_NOTHING( radial_average.execute() )
@@ -88,16 +87,18 @@ public:
     double tolerance(1e-03);
 
     // The points we are checking were computed using the HFIR IGOR package
+    // For NPixelDivision = 1
+    //   Y[1] = 0.0398848*3600; Y[2] = 0.0371762*3600; Y[30] = 0.030971*3600; Y[80] = 0.0275545*3600; Y[90] = 0.0270528*3600
     TS_ASSERT_EQUALS( result->dataX(0)[0], 0.01);
-    double iq = 0.030971*3600;
+    double iq = 0.0308929*3600;
     TS_ASSERT_DELTA( result->dataY(0)[30], iq, tolerance);
-    iq = 0.0398848*3600;
+    iq = 0.0397903*3600;
     TS_ASSERT_DELTA( result->dataY(0)[1], iq, tolerance);
-    iq = 0.0371762*3600;
+    iq = 0.0373098*3600;
     TS_ASSERT_DELTA( result->dataY(0)[2], iq, tolerance);
-    iq = 0.0275545*3600;
+    iq = 0.0276372*3600;
     TS_ASSERT_DELTA( result->dataY(0)[80], iq, tolerance);
-    iq = 0.0270528*3600;
+    iq = 0.0270194*3600;
     TS_ASSERT_DELTA( result->dataY(0)[90], iq, tolerance);
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);

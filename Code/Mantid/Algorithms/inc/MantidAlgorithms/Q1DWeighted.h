@@ -21,13 +21,16 @@ namespace Algorithms
     Choosing to weight each pixel by 1 gives I(q) where each bin is the average of all pixels contributing to
     that bin.
 
-    TODO: implement sub-bins.
+    Each pixel is sub-divided in NPixelDivision*NPixelDivision sub-pixels when averaging.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace    - The (partly) corrected data in units of wavelength. </LI>
     <LI> OutputWorkspace   - The workspace in which to store the result histogram. </LI>
     <LI> OutputBinning     - The bin parameters to use for the final result. </LI>
+    <LI> NPixelDivision    - The number of pixel sub-divisions in each direction used for calculation. </LI>
+    <LI> PixelSizeX        - The pixel size, in meter, in the X direction.</LI>
+    <LI> PixelSizeY        - The pixel size, in meter, in the Y direction. </LI>
     <LI> ErrorWeighting    - Whether to weight pixel contribution by their error (default: false). </LI>
     </UL>
 
