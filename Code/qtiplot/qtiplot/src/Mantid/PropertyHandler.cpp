@@ -291,7 +291,9 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
   if (pf)
   {
-    if (!m_browser->workspaceName().empty() && m_browser->workspaceIndex() >= 0)
+    if (!m_browser->workspaceName().empty() && 
+         m_browser->workspaceIndex() >= 0 &&
+         pf->centre() == 0.)
     {
       pf->setCentre( (m_browser->startX() + m_browser->endX())/2 );
     }

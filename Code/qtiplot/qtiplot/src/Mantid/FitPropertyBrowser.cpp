@@ -169,12 +169,16 @@ m_logValue(NULL)
   QPushButton* btnSeqFit = new QPushButton("Sequential fit");
   connect(btnSeqFit,SIGNAL(clicked()),this,SLOT(sequentialFit()));
 
+  QPushButton* btnFindPeaks = new QPushButton("Find peaks");
+  connect(btnFindPeaks,SIGNAL(clicked()),this,SLOT(findPeaks()));
+
   m_tip = new QLabel("",w);
 
   buttonsLayout->addWidget(m_btnFit,0,0);
   buttonsLayout->addWidget(m_btnUnFit,0,1);
   buttonsLayout->addWidget(btnClear,0,2);
   buttonsLayout->addWidget(btnSeqFit,1,0);
+  buttonsLayout->addWidget(btnFindPeaks,1,1);
 
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -1884,4 +1888,59 @@ void FitPropertyBrowser::sequentialFit()
     dlg->addWorkspaces(QStringList(QString::fromStdString(wsName)));
   }
   dlg->show();
+}
+
+void FitPropertyBrowser::findPeaks()
+{
+  std::string wsName = workspaceName();
+  if (wsName.empty())
+  {
+    m_appWindow->mantidUI->showCritical("Workspace name is not set");
+    return;
+  }
+
+  std::string peakListName = wsName + "_PeakList_tmp";
+  std::string smoothedName = wsName + "_SmoothedData_tmp";
+
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
+  alg->initialize();
+  alg->setPropertyValue("InputWorkspace",wsName);
+  alg->setProperty("WorkspaceIndex",workspaceIndex());
+  alg->setPropertyValue("PeaksList",peakListName);
+  alg->setPropertyValue("SmoothedData",smoothedName);
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  try
+  {
+    alg->execute();
+    Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(peakListName) );
+
+    clear();
+    Mantid::API::ColumnVector<double> centre = ws->getVector("centre");
+    Mantid::API::ColumnVector<double> width = ws->getVector("width");
+    Mantid::API::ColumnVector<double> height = ws->getVector("height");
+    for(int i=0; i<centre.size(); ++i)
+    {
+      if (centre[i] < startX() || centre[i] > endX()) continue;
+      Mantid::API::IPeakFunction* f = dynamic_cast<Mantid::API::IPeakFunction*>(
+        Mantid::API::FunctionFactory::Instance().createUnwrapped("Gaussian")
+        );
+      if (!f) break;
+      f->initialize();
+      f->setCentre(centre[i]);
+      f->setWidth(width[i]);
+      f->setHeight(height[i]);
+      addFunction(*f);
+      delete f;
+    }
+  }
+  catch(...)
+  {
+    QApplication::restoreOverrideCursor();
+    throw;
+  }
+
+	QApplication::restoreOverrideCursor();
 }

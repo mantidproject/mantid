@@ -162,6 +162,7 @@ public slots:
   void clear();
   void clearBrowser();
   void setPeakToolOn(bool on){m_peakToolOn = on;}
+  void findPeaks();
 
 signals:
   void currentChanged()const;
