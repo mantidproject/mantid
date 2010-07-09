@@ -17,7 +17,7 @@
 */
 
 #include "MantidKernel/DllExport.h"
-
+///@cond nodoc
 /** 
 * holds information about the DAE connection - defined fully in idc.c
 */
@@ -80,6 +80,7 @@ int IDCsetreportfunc(idc_error_report_t report_func);
   * to do the actual reporting */
 int IDCreport(int status, int code, const char* format, ... );
 
+///@endcond
 #ifdef __cplusplus
 }
 #endif

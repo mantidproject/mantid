@@ -260,25 +260,9 @@ int CompositeFunction::parameterIndex(const std::string& name)const
   return getFunction(index)->parameterIndex(pname) + m_paramOffsets[index];
 }
 
-///*
-// * Checks that a pointer points to a parameter of this function and returns its index.
-// * @param p A pointer to a double variable.
-// * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
-// */
-//int CompositeFunction::parameterIndex(const double* p)const
-//{
-//  for(int iFun=0;iFun<nFunctions();iFun++)
-//  {
-//    int i = m_functions[iFun]->parameterIndex(p);
-//    if (i >= 0)
-//    {
-//      return m_paramOffsets[iFun] + i;
-//    }
-//  }
-//  return -1;
-//}
-
-/// Returns the name of parameter i
+/// Returns the name of parameter
+/// @param i The index
+/// @return The name of the parameter
 std::string CompositeFunction::parameterName(int i)const
 {
   int iFun = functionIndex(i);
@@ -807,7 +791,9 @@ void CompositeFunction::setParametersToSatisfyConstraints()
   }
 }
 
-/// Get first constraint
+/// Get constraint
+/// @param i the index
+/// @return A pointer to the constraint
 IConstraint* CompositeFunction::getConstraint(int i)const
 {
   int iFun = functionIndex(i);
@@ -824,7 +810,7 @@ void CompositeFunction::removeConstraint(const std::string& parName)
   getFunction(iFun)->removeConstraint(parameterLocalName(iPar));
 }
 
-/** 
+/** Chexcks if a constraint has been explicitly set
  *  @param i The parameter index
  */
 bool CompositeFunction::isExplicitlySet(int i)const

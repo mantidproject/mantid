@@ -280,6 +280,8 @@ public:
   /// Get a function containing the parameter refered to by the reference. In case of a simple function
   /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
   /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
+  /// @param ref The Parameter reference
+  /// @return A pointer to the containing function
   virtual IFunction* getContainingFunction(const ParameterReference& ref)const = 0;
   /// The same as the method above but the argument is a function
   virtual IFunction* getContainingFunction(const IFunction* fun) = 0;

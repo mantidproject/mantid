@@ -41,7 +41,7 @@ namespace PythonAPI
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  //@cond NODOC
+
   /**
    * A callback class for MatrixWorkspace objects so that their setX methods are proxied through here.
    */
@@ -69,8 +69,8 @@ namespace PythonAPI
    */
   struct WorkspaceAlgebraProxy
   {
-    typedef API::MatrixWorkspace wraptype;
-    typedef boost::shared_ptr<wraptype> wraptype_ptr;
+    typedef API::MatrixWorkspace wraptype; ///< Wrapper type def
+    typedef boost::shared_ptr<wraptype> wraptype_ptr; ///< Shared pointer type def
     
     /** 
      * Perform the given binary operation on two workspaces
@@ -81,63 +81,67 @@ namespace PythonAPI
      */
     static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op, bool inplace);
 
-    //Plus workspace
+    ///Plus workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr plus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'p', false);
     }
     /// Inplace Plus workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr inplace_plus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'p', true);
     }
     /// Minus workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr minus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'm', false);
     }
     /// Inplace Minus workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr inplace_minus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'm', true);
     }
     /// Multiply workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr times(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 't', false);
     }
     /// Inplace Multiply workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr inplace_times(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 't', true);
     }
     /// Divide workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr divide(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'd', false);
     }
     /// Divide workspace
+    /// @param lhs Left hand side
+    /// @param rhs Right hand side
     static wraptype_ptr inplace_divide(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'd', true);
     }
 
-    /** 
-    * Perform the given binary operation on a workspace and a double
-    * @param lhs The left-hand side of the operation
-    * @param rhs The right-hand side of the operation
-    * @param op One of 'p', 'm', 't', 'd' to denote the required operation
-    * @param inplace If true, then the lhs argument is replaced by the result of the operation.
-    */
+    /// Perform the given binary operation on a workspace and a double
     static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace);
 
-    /** 
-    * Perform the given binary operation on a double and a workspace
-    * @param lhs The left-hand side of the operation
-    * @param rhs The right-hand side of the operation
-    * @param op One of 'p', 'm', 't', 'd' to denote the required operation
-    * @param inplace If true, then the lhs argument is replaced by the result of the operation.
-    */ 
+    /// Perform the given binary operation on a double and a workspace
     static wraptype_ptr performBinaryOp(double lhs, const wraptype_ptr rhs, char op);
     /// Plus
     static wraptype_ptr plus(const wraptype_ptr lhs, double rhs)
@@ -233,7 +237,7 @@ namespace PythonAPI
 
   };
 
-  //@endcond
+
 
 }
 }

@@ -1140,7 +1140,7 @@ ISISRAW::~ISISRAW()
   delete[] logsect.lines;
 }
 
-// rtcb1 is of size t_ntc1+1
+/// rtcb1 is of size t_ntc1+1
 int ISISRAW::getTimeChannels(float* rtcb1, int n)
 {
   if (n != t_ntc1+1)

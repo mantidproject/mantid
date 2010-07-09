@@ -8,10 +8,13 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+///@cond nodoc
 DECLARE_FUNCMINIMIZER(PRConjugateGradientMinimizer,Conjugate gradient (Polak-Ribiere imp.))
+///@endcond
 
 // Get a reference to the logger
 Kernel::Logger& PRConjugateGradientMinimizer::g_log = Kernel::Logger::get("PRConjugateGradientMinimizer");
+
 
 void PRConjugateGradientMinimizer::initialize(double* X, const double* Y, 
                                               double *sqrtWeight, const int& nData, 

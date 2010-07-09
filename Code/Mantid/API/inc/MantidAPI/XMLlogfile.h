@@ -76,7 +76,7 @@ namespace Mantid
       const std::string m_formula;            ///< specific to fitting parameter. Specify formula to use for setting this parameter
       const std::string m_formulaUnit;       ///< unit for formula (i.e. for Centre in formula)
       const std::string m_resultUnit;       ///< expected result (output) unit from evaluating the formula
-      boost::shared_ptr<Kernel::Interpolation> m_interpolation; // specific to fitting parameter 
+      boost::shared_ptr<Kernel::Interpolation> m_interpolation; ///< specific to fitting parameter 
       const std::string m_extractSingleValueAs;  ///< describes the way to extract a single value from the log file( average, first number, etc)
       const std::string m_eq;         ///< muParser equation to calculate the parameter value from the log value
       const Geometry::IComponent* m_component;  ///< the component address

@@ -94,13 +94,19 @@ int ISISRAW2::ioRAW(FILE* file, bool from_file, bool read_data)
   return 0; // stop reading here
 }
 
-
+/// Skip data
+/// @param file The file pointer
+/// @param i The amount of data to skip
 void ISISRAW2::skipData(FILE* file, int i)
 {
     if (i < ndes)
         fseek(file,4*ddes[i].nwords,SEEK_CUR);
 }
 
+/// Read data
+/// @param file The file pointer
+/// @param i The amount of data to read
+/// @return true on success
 bool ISISRAW2::readData(FILE* file, int i)
 {
     if (i >= ndes) return false;
@@ -117,6 +123,7 @@ ISISRAW2::~ISISRAW2()
     if (outbuff) delete[] outbuff;
 }
 
+///Clears the output buffer
 void ISISRAW2::clear()
 {
   if (outbuff) delete[] outbuff;

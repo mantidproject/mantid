@@ -168,17 +168,17 @@ struct	vax_single {
 
 /** What IEEE single precision floating point looks like on local machine */
 struct	ieee_single {
-	unsigned int	mantissa: 23;
-	unsigned int	exp     : 8;
-	unsigned int	sign    : 1;
+	unsigned int	mantissa: 23; ///<mantissa
+	unsigned int	exp     : 8; ///<Exponential
+	unsigned int	sign    : 1; ///<sign
 };
 
 /** Vax single precision floating point */
 struct	vax_single {
-	unsigned int	mantissa1 : 7;
-	unsigned int	exp       : 8;
-	unsigned int	sign      : 1;
-	unsigned int	mantissa2 : 16;
+	unsigned int	mantissa1 : 7;  ///<mantissa 1
+	unsigned int	exp       : 8;  ///<Exponential
+	unsigned int	sign      : 1;  ///<sign
+	unsigned int	mantissa2 : 16; ///<mantissa 2
 };
 
 #endif /* WORDS_BIGENDIAN */
@@ -188,8 +188,8 @@ struct	vax_single {
 
 /// Structure holding the limits of s single
 static const struct sgl_limits_struct {
-	struct vax_single s;
-	struct ieee_single ieee;
+	struct vax_single s; ///<vax single struct
+	struct ieee_single ieee; ///<ieee single struct
 } sgl_limits[2] = {
 	{{ 0x7f, 0xff, 0x0, 0xffff },	/* Max Vax */
 	{ 0x0, 0xff, 0x0 }},		/* Max IEEE */
@@ -224,20 +224,20 @@ struct  vax_double {
 
 /** What IEEE double precision floating point looks like */
 struct	ieee_double {
-	unsigned int	mantissa1 : 20;
-	unsigned int	exp       : 11;
-	unsigned int	sign      : 1;
-	unsigned int	mantissa2 : 32;
+	unsigned int	mantissa1 : 20;  ///<mantissa 1
+	unsigned int	exp       : 11; ///<exponential
+	unsigned int	sign      : 1;  ///<sign
+	unsigned int	mantissa2 : 32;  ///<mantissa 2
 };
 
 /** Vax double precision floating point */
 struct  vax_double {
-	unsigned int	mantissa1 : 7;
-	unsigned int	exp       : 8;
-	unsigned int	sign      : 1;
-	unsigned int	mantissa2 : 16;
-	unsigned int	mantissa3 : 16;
-	unsigned int	mantissa4 : 16;
+	unsigned int	mantissa1 : 7;  ///<mantissa 1
+	unsigned int	exp       : 8;  ///<exponential
+	unsigned int	sign      : 1;  ///<sign
+	unsigned int	mantissa2 : 16;  ///<mantissa 2
+	unsigned int	mantissa3 : 16;  ///<mantissa 3
+	unsigned int	mantissa4 : 16;  ///<mantissa 4
 };
 
 #endif /* WORDS_BIGENDIAN */

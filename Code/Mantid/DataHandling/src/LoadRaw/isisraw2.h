@@ -16,11 +16,11 @@ public:
 
 	void skipData(FILE* file, int i);
 	bool readData(FILE* file, int i);
-  void clear();
+  void clear();  
 
-	int ndes;
+	int ndes; ///<ndes
 private:
-	char* outbuff;
+	char* outbuff;  ///<output buffer
 };
 
 

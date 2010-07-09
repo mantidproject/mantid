@@ -13,9 +13,13 @@ namespace CurveFitting
 
 DECLARE_COSTFUNCTION(CostFuncIgnorePosPeaks,Ignore positive peaks)
 
-  /// Calculate value of cost function from observed
-  /// and calculated values
+  /// Calculate value of cost function from observed and calculated values
   /// note yCal modified for computational efficiency
+  /// @param yData Array of yData
+  /// @param inverseError Array of inverse error values
+  /// @param yCal Calculated y
+  /// @param n The number of points 
+  /// @return The calculated cost value
   double CostFuncIgnorePosPeaks::val(const double* yData, const double* inverseError, double* yCal, const int& n)
   {
     for (int i = 0; i < n; i++)

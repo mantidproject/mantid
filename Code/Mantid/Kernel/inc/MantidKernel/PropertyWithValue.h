@@ -24,6 +24,8 @@ namespace Kernel
     With reference to the Gaudi structure, this class can be seen as the equivalent of both the
     Gaudi class of the same name and its sub-classses.
 
+    @class Mantid::Kernel::PropertyWithValue
+
     @author Russell Taylor, Tessella Support Services plc
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007

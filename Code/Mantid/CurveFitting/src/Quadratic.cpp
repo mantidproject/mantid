@@ -25,6 +25,9 @@ void Quadratic::init()
 
 /*! \relates Quadratic 
  * Implements the quadratic function
+ * @param out The result
+ * @param xValues Array of double x values
+ * @param nData Array of integer data
  */
 void Quadratic::function(double* out, const double* xValues, const int& nData)const
 {
@@ -40,6 +43,9 @@ void Quadratic::function(double* out, const double* xValues, const int& nData)co
 
 /*! \relates Quadratic 
  * Calculates the derivatives of the quadratic
+ * @param out The resulting jacobian
+ * @param xValues Array of double x values
+ * @param nData Array of integer data
  */
 void Quadratic::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {

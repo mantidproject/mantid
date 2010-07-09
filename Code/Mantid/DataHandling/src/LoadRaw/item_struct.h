@@ -12,20 +12,29 @@ public:
   /// structure to hold a dae item
 	struct item_t
 	{
-		const T* value;
+		const T* value; ///<array of type T
 		bool det_average;	///< can be averaged over detectors via m_spec_array
-		const int* dim0;
-		const int* dim1;
+		const int* dim0; ///< dimension zero array
+		const int* dim1; ///< dimension one array
+    ///Constructor
 		item_t(const T* v, bool da, const int* d0, const int* d1) : value(v), det_average(da), dim0(d0), dim1(d1) {}
 	};
 
 private:
-	typedef std::map<std::string, item_t> items_map_t;
-	items_map_t m_items;
+	typedef std::map<std::string, item_t> items_map_t;   ///<Type def of internal map of named items
+	items_map_t m_items;  ///<internal map of named items
 	unsigned long* m_spec_array; ///< length m_ndet; used for averaging values with det_average
-	long m_ndet;
+	long m_ndet; ///<number of detectors
 public:
 
+  /** Adds an item
+  @param name the item name
+  @param value the item 
+  @param det_average Detector average or not
+  @param dim0 Diemnsion array zero
+  @param dim1 Diemnsion array one
+  @return 0 on success, -1 if it is a duplicate
+  */
 	int addItem(const std::string& name, const T* value, bool det_average = false, const int* dim0 = NULL, const int* dim1 = NULL)
 	{
 		std::pair<typename items_map_t::iterator, bool> insert_ret;
@@ -40,6 +49,11 @@ public:
 		}
 	}
 
+  /** finds an item
+  @param item_name the item name
+  @param det_average Detector average or not
+  @return The item pointer or NULL
+  */
 	const item_t* findItem(const std::string& item_name, bool det_average)
 	{
 		typename items_map_t::const_iterator iter;

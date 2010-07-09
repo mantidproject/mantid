@@ -21,10 +21,11 @@
 #include "idc.h"
 #include "isisds_command.h"
 
+///@cond nodoc
 /** used to keep status information about the DAE connection */
 struct idc_info
 {
-	SOCKET s;
+	SOCKET s; ///< The socket
 };
 
 /** default function used by IDCreport() - changed by calling IDCsetreportfunc() */
@@ -356,3 +357,5 @@ void idcfgetdat_(int fh[], int* ifsn, int* nos, int value[], int dims_array[], i
 	*errcode = stat;
 }
 
+
+///@endcond

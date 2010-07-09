@@ -14,6 +14,7 @@
     GNU General Public License
 */
 
+///@cond nodoc
 
 #ifndef ISISDS_COMMAND_H
 #define ISISDS_COMMAND_H
@@ -50,8 +51,10 @@ int isisds_send_close(SOCKET s);
 int isisds_set_report_func(isisds_error_report_t report_func);
 int isisds_report(int status, int code, const char* format, ... );
 
+///@endcond
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* ISISDS_COMMAND_H */
+

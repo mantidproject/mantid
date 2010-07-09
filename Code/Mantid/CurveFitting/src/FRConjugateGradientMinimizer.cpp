@@ -8,7 +8,9 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+///@cond nodoc
 DECLARE_FUNCMINIMIZER(FRConjugateGradientMinimizer,Conjugate gradient (Fletcher-Reeves imp.))
+///@endcond
 
 // Get a reference to the logger
 Kernel::Logger& FRConjugateGradientMinimizer::g_log = Kernel::Logger::get("FRConjugateGradientMinimizer");

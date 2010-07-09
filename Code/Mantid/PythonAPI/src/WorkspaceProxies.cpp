@@ -63,12 +63,13 @@ WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const
 }
 
 
-/// Binary operation for workspace and double
-/// @param lhs the left hand side workspace of the operation
-/// @param rhs the right hand side double of the operation
-/// @param op The operation
-/// @param inplace is this is an inplace operation (i.e. does the output overwrite the lhs
-/// @returns The resulting workspace
+/** 
+* Perform the given binary operation on a workspace and a double
+* @param lhs The left-hand side of the operation
+* @param rhs The right-hand side of the operation
+* @param op One of 'p', 'm', 't', 'd' to denote the required operation
+* @param inplace If true, then the lhs argument is replaced by the result of the operation.
+*/
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace)
 {
   wraptype_ptr result;
@@ -116,11 +117,12 @@ WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const
   return result;
 }
 
-/// Binary operation on double and workspace
-/// @param lhs the right hand side double of the operation
-/// @param rhs the left hand side workspace of the operation
-/// @param op The operation
-/// @returns The resulting workspace
+/** Binary operation on double and workspace
+ @param lhs The left-hand side of the operation
+ @param rhs The right-hand side of the operation
+ @param op One of 'p', 'm', 't', 'd' to denote the required operation
+ @returns The resulting workspace
+ */
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(double lhs, const wraptype_ptr rhs, char op)
 {
   wraptype_ptr result;

@@ -10,6 +10,8 @@
 	 log window etc and log file .The masked property will be displayed.
      This class is specialised for string and masks the property value with charcater "*"
     
+    @class Mantid::Kernel::MaskedProperty
+
     Copyright &copy;  2011 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
@@ -88,7 +90,7 @@ namespace Mantid
 				  return m_maskedValue;
      		  }
 		private:
-			mutable TYPE m_maskedValue;
+			mutable TYPE m_maskedValue; ///< the masked value
 
 		};
 	}

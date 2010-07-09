@@ -14,7 +14,7 @@
     GNU General Public License
 */
 
-
+///@cond nodoc
 
 #include <stdio.h>
 #include "isisds_command.h"
@@ -401,3 +401,5 @@ int isisds_set_report_func(isisds_error_report_t report_func)
 	status_reporter = report_func;
 	return 0;
 }
+
+///@endcond
