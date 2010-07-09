@@ -400,6 +400,7 @@ namespace Mantid
       /*!
       Taks a Rule item and makes it a complementary group
       \param RItem to encapsulate
+      \return the complementary group
       */
     {
       if (!RItem)
@@ -1074,6 +1075,7 @@ namespace Mantid
     * OC triangluation of the object, if it exists
     *
     * @param observer :: Point from which solid angle is required
+    * @return the solid angle
     */
     double Object::triangleSolidAngle(const V3D& observer) const
     {
@@ -1148,6 +1150,7 @@ namespace Mantid
     *
     * @param observer :: Point from which solid angle is required - THIS MUST NOT BE SCALED
     * @param scaleFactor :: V3D each component giving the scaling of the object only (not observer)
+    * @return the solid angle
     */
     double Object::triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) const
     {
@@ -1926,6 +1929,7 @@ namespace Mantid
 
     /**
     * get number of triangles
+    * @ return the number of triangles
     */
     int Object::NumberOfTriangles() const
     {

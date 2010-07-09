@@ -17,6 +17,7 @@ operator<<(std::ostream& OX,const RotaryCounter& A)
     Output stream assesor
     \param OX :: Output stream
     \param A :: RotaryCounter to writeout
+    \return the ouput stream
    */
 {
   A.write(OX);

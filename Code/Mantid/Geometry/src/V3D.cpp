@@ -295,6 +295,7 @@ V3D::operator/=(const double D)
   /**
     Equals operator with tolerance factor
     \param v :: V3D for comparison
+    \return true if the items are equal
   */
 bool
 V3D::operator==(const V3D& v) const
@@ -306,7 +307,8 @@ V3D::operator==(const V3D& v) const
 }
 
   /**
-    \todo ADD PRCESSION
+    compare
+    \return true if V is greater
    */
 bool
 V3D::operator<(const V3D& V) const

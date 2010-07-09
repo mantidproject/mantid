@@ -108,6 +108,7 @@ namespace Mantid
 		}
 		/**
 		 * Analyze intersection
+     * \return the resulting TopoDS_Shape
 		 */
 		TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Intersection* rule)
 		{
