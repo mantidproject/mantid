@@ -459,12 +459,12 @@ QPushButton* AlgorithmDialog::createReplaceWSButton(QLineEdit *outputEdit)
 }
 
 /** 
- * Flag an input workspace combobox with its property name
- * @param optionsBox A QComboBox containing the options
+ * Flag an input workspace widget
+ * @param inputWidget A widget used to enter the input workspace
  */
-void AlgorithmDialog::flagInputWS(QComboBox *optionsBox)
+void AlgorithmDialog::flagInputWS(QWidget *inputWidget)
 {
-  m_inputws_opts.push_back(optionsBox);
+  m_inputws_opts.push_back(inputWidget);
 }
 
 //-----------------------------------------------------------
@@ -512,7 +512,18 @@ void AlgorithmDialog::replaceWSClicked(QWidget *outputEdit)
   if( !btn ) return;
   int input =  m_wsbtn_tracker.value(btn);
 
-  QString wsname = m_inputws_opts.value(input - 1)->currentText();
+  QWidget *wsInputWidget = m_inputws_opts.value(input-1);
+  QString wsname(""); 
+  if( QComboBox *options = qobject_cast<QComboBox*>(wsInputWidget) )
+  {
+    wsname = options->currentText();
+  }
+  else if( QLineEdit *editField = qobject_cast<QLineEdit*>(wsInputWidget) )
+  {
+    wsname = editField->text();
+  }
+  else return;
+
   //Adjust tracker
   input = (input % m_inputws_opts.size() ) + 1;
   m_wsbtn_tracker[btn] = input;

@@ -177,7 +177,7 @@ protected:
   QPushButton* createReplaceWSButton(QLineEdit *outputEdit);
 
   /// Flag an input workspace combobox with its property name
-  void flagInputWS(QComboBox *optionsBox);
+  void flagInputWS(QWidget *inputWidget);
   //@}
 						       
  protected slots:
@@ -273,7 +273,7 @@ private:
   QHash<QString, QLabel*> m_validators;
 
   /// Store a list of the names of input workspace boxes
-  QVector<QComboBox*> m_inputws_opts;
+  QVector<QWidget*> m_inputws_opts;
 
   /// Store a list of output workspace text edits
   QVector<QLineEdit*> m_outputws_fields;
