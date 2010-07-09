@@ -18,7 +18,7 @@ sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../..
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../../Images", shell=True)
 
 doxylog = open("../../../../logs/Mantid/doxy.log","w")
-sp.call("doxygen Mantid.doxyfile",stderr=doxylog,shell=True,cwd="Build")
+sp.call("python DoxyWrapper.py Mantid.doxyfile",stderr=doxylog,shell=True,cwd="Build")
 doxylog.close()
 
 timeStart = time.time()
