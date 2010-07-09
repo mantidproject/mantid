@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
+
 namespace Mantid
 {
 namespace Algorithms

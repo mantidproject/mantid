@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
@@ -93,9 +92,9 @@ void GetEi2::exec()
   setProperty("FirstMonitorPeak", m_peak1_pos.second);
 }
 
-/**
- * Calculate the incident energy of the neutrons for the input workspace on this algorithm
- * @param initial_guess A guess for value of the incident energy
+/** Calculate the incident energy of the neutrons for the input workspace on this algorithm
+ *  @param initial_guess A guess for value of the incident energy
+ *  @return The calculated incident energy
  */
 double GetEi2::calculateEi(const double initial_guess)
 {
@@ -154,9 +153,10 @@ double GetEi2::calculateEi(const double initial_guess)
 }
 
 /** Gets the distance between the source and detectors whose workspace index is passed
-*  @param ws_index The workspace index of the detector
-*  @throw runtime_error if there is a problem 
-*/
+ *  @param ws_index The workspace index of the detector
+ *  @return The distance between the source and the given detector(or DetectorGroup)
+ *  @throw runtime_error if there is a problem
+ */
 double GetEi2::getDistanceFromSource(int ws_index) const
 {
   const IObjComponent_sptr source = m_input_ws->getInstrument()->getSource();
@@ -209,18 +209,18 @@ double GetEi2::calculatePeakPosition(int ws_index, double t_min, double t_max)
 }
 
 /** Calls CropWorkspace as a sub-algorithm and passes to it the InputWorkspace property
-*  @param ws_index the index number of the histogram to extract
-*  @param start the number of the first bin to include (starts counting bins at 0)
-*  @param end the number of the last bin to include (starts counting bins at 0)
-*  @throw out_of_range if start, end or specInd are set outside of the vaild range for the workspace
-*  @throw runtime_error if the algorithm just falls over
-*  @throw invalid_argument if the input workspace does not have common binning
-*/
+ *  @param ws_index the index number of the histogram to extract
+ *  @param start the number of the first bin to include (starts counting bins at 0)
+ *  @param end the number of the last bin to include (starts counting bins at 0)
+ *  @return The cropped workspace
+ *  @throw out_of_range if start, end or specInd are set outside of the vaild range for the workspace
+ *  @throw runtime_error if the algorithm just falls over
+ *  @throw invalid_argument if the input workspace does not have common binning
+ */
 MatrixWorkspace_sptr GetEi2::extractSpectrum(int ws_index, const double start, const double end)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
-  DataObjects::Workspace2D_sptr input_2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(m_input_ws); 
-  childAlg->setProperty("InputWorkspace", input_2D);
+  childAlg->setProperty("InputWorkspace", m_input_ws);
   childAlg->setProperty("StartWorkspaceIndex", ws_index);
   childAlg->setProperty("EndWorkspaceIndex", ws_index);
   childAlg->setProperty("XMin", start);
@@ -447,10 +447,10 @@ double GetEi2::calculatePeakWidthAtHalfHeight(MatrixWorkspace_sptr data_ws, cons
   return (xp_hh - xm_hh);
 }
 
-/**
- * Calculate the first moment of the given workspace
- * @param monitor_ws The workspace containing a single spectrum to work on
- * @param prominence The factor over the background by which a peak is to be considered a "real" peak
+/** Calculate the first moment of the given workspace
+ *  @param monitor_ws The workspace containing a single spectrum to work on
+ *  @param prominence The factor over the background by which a peak is to be considered a "real" peak
+ *  @return The calculated first moment
  */
 double GetEi2::calculateFirstMoment(MatrixWorkspace_sptr monitor_ws, const double prominence)
 {

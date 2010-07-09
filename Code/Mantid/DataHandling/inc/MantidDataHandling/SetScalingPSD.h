@@ -5,11 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Property.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
-#include "MantidGeometry/Instrument/Component.h"
 
 namespace Mantid
 {

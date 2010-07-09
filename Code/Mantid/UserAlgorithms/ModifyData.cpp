@@ -1,5 +1,4 @@
 #include "ModifyData.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -11,8 +10,6 @@ DECLARE_ALGORITHM(ModifyData)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D;
 
 /**  Initialization code
  *
@@ -22,10 +19,10 @@ void ModifyData::init()
 {
 
     // Declare a 2D input workspace property.
-    declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
 
     // Declare a 2D output workspace property.
-    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
     // Switches between two ways of accessing the data in the input workspace
     declareProperty("UseVectors",false);
@@ -41,10 +38,10 @@ void ModifyData::exec()
     g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Get the input workspace
-    Workspace2D_sptr inputW = getProperty("InputWorkspace");
+    MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
     // make output Workspace the same type and size as the input one
-    Workspace2D_sptr outputW = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(inputW));
+    MatrixWorkspace_sptr outputW = WorkspaceFactory::Instance().create(inputW);
 
     bool useVectors = getProperty("UseVectors");
 
@@ -80,8 +77,8 @@ void ModifyData::exec()
         g_log.information() << "Option 2. Original values:" << std::endl;
         // Iterate over the workspace and modify the data
         int count = 0;
-        Workspace2D::iterator ti_out(*outputW);
-        for(Workspace2D::const_iterator ti(*inputW); ti != ti.end(); ++ti,++ti_out)
+        MatrixWorkspace::iterator ti_out(*outputW);
+        for(MatrixWorkspace::const_iterator ti(*inputW); ti != ti.end(); ++ti,++ti_out)
         {
             // get the spectrum number
             int i = count / inputW->blocksize();
@@ -106,12 +103,12 @@ void ModifyData::exec()
     setProperty("OutputWorkspace",outputW);
 
     // Get the newly set workspace
-    Workspace2D_sptr newW = getProperty("OutputWorkspace");
+    MatrixWorkspace_const_sptr newW = getProperty("OutputWorkspace");
 
     // Check the new workspace
     g_log.information() << "New values:" << std::endl;
     int count = 0;
-    for(Workspace2D::const_iterator ti(*newW); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::const_iterator ti(*newW); ti != ti.end(); ++ti)
     {
         // Get the reference to a data point
         LocatedDataRef tr = *ti;

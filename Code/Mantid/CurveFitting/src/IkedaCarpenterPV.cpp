@@ -3,14 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IkedaCarpenterPV.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-#include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_multifit_nlin.h>
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/IInstrument.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include <cmath>
 #include <gsl/gsl_math.h>
+#include <gsl/gsl_sf_erf.h>
+#include <gsl/gsl_multifit_nlin.h>
 
 
 namespace Mantid

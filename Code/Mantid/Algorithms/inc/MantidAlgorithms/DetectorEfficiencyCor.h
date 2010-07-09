@@ -2,11 +2,8 @@
 #define MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include <Poco/NObserver.h>
-#include <boost/shared_ptr.hpp>
 #include <climits>
 #include <string>
 #include <vector>

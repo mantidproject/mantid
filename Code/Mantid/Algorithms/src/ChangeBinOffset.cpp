@@ -1,13 +1,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceValidators.h"
-
 #include "MantidAlgorithms/ChangeBinOffset.h"
 
 namespace Mantid

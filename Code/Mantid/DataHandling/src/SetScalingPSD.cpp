@@ -4,9 +4,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cmath>
 #include <fstream>
@@ -24,7 +24,6 @@ namespace Algorithms
   using namespace Kernel;
   using namespace API;
   using namespace Geometry;
-  using namespace DataObjects;
 
   /// Empty default constructor
   SetScalingPSD::SetScalingPSD() :
@@ -42,9 +41,9 @@ namespace Algorithms
     exts.push_back(".sca");
     exts.push_back(".raw");
     declareProperty(new FileProperty("ScalingFilename","", FileProperty::Load, exts),
-		    "The name of the scaling calibrations file to read, including its\n"
-		    "full or relative path. The file extension must be either .sca or\n"
-		    ".raw (filenames are case sensitive on linux)" );
+        "The name of the scaling calibrations file to read, including its\n"
+        "full or relative path. The file extension must be either .sca or\n"
+        ".raw (filenames are case sensitive on linux)" );
     declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
       "The name of the workspace to apply the scaling to. This must be\n"
       "associated with an instrument appropriate for the scaling file" );
@@ -74,9 +73,10 @@ namespace Algorithms
   }
 
   /** Read the scaling information from a file (e.g. merlin_detector.sca) or from the RAW file (.raw)
-  * @param scalingFile Name of scaling file .sca
-  * @param truepos V3D vector of actual positions as read from the file
-  */
+   *  @param scalingFile Name of scaling file .sca
+   *  @param truepos V3D vector of actual positions as read from the file
+   *  @return False if unable to open file, True otherwise
+   */
   bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truepos)
   {
       // Read the scaling information from a text file (.sca extension) or from a raw file (.raw)
@@ -117,7 +117,7 @@ namespace Algorithms
           int detIdLast=-10;
           Geometry:: V3D truPosLast,detPosLast;
          
-		  Progress prog(this,0.0,0.5,detectorCount);
+          Progress prog(this,0.0,0.5,detectorCount);
           // Now loop through lines, one for each detector/monitor. The latter are ignored.
         
           while(getline(sFile,str))
@@ -170,7 +170,7 @@ namespace Algorithms
               truPosLast=truPos;
               posMap[detIndex]=shift;
               //
-			  prog.report();
+              prog.report();
           }
       }
       else if(scalingFile.find(".raw")!=std::string::npos || scalingFile.find(".RAW")!=std::string::npos )
@@ -187,7 +187,7 @@ namespace Algorithms
           }
           int detIdLast=-10;
           Geometry:: V3D truPosLast,detPosLast;
-		  Progress prog(this,0.0,0.5,detectorCount);
+          Progress prog(this,0.0,0.5,detectorCount);
           for(int i=0;i<detectorCount;i++)
           {
               int detIndex=detID[i];
@@ -232,7 +232,7 @@ namespace Algorithms
               truPosLast=truepos[i];
               posMap[detIndex]=shift;
               //
-			  prog.report();
+              prog.report();
           }
       }
       movePos( m_workspace, posMap, scaleMap);
@@ -354,8 +354,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
               pmap.addV3D(baseComp,"sca",V3D(1.0,it->second,1.0));
       }
       //
-	  prog+= double(1)/m_vectDet.size();
-	  progress(prog);
+      prog+= double(1)/m_vectDet.size();
+      progress(prog);
   }
   g_log.debug() << "Range of scaling factors is " << minScale << " to " << maxScale << "\n"
                 << "Average abs scaling fraction is " << aveScale/scaleCount << "\n";

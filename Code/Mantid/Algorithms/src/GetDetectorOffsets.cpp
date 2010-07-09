@@ -18,7 +18,6 @@ DECLARE_ALGORITHM(GetDetectorOffsets)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 
 /// Constructor
 GetDetectorOffsets::GetDetectorOffsets() :

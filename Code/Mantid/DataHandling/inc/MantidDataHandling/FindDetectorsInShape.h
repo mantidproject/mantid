@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -16,15 +15,15 @@ namespace DataHandling
     Required Properties:
     <UL>
     <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm </LI>
-		<LI> ShapeXML - An XML definition of the shape to be projected within the instruemnt of the workspace </LI>
+    <LI> ShapeXML - An XML definition of the shape to be projected within the instruemnt of the workspace </LI>
     </UL>
 
     Optional Properties:
     <UL>
     <LI> IncludeMonitors - True/False whether to include monitors in the results</LI>
-		</UL>
+    </UL>
 
-		Output Properties:
+    Output Properties:
     <UL>
     <LI> DetectorList - An array property containing the detectors ids contained in the shape </LI>
     </UL>

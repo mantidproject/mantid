@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include <sstream>
 #include <numeric>
@@ -69,7 +68,7 @@ void Regroup::exec()
   bool dist = inputW->isDistribution();
 
   int histnumber = inputW->getNumberHistograms();
-  DataObjects::Histogram1D::RCtype XValues_new;
+  MantidVecPtr XValues_new;
   const MantidVec & XValues_old = inputW->readX(0);
   std::vector<int> xoldIndex;// indeces of new x in XValues_old
   // create new output X axis
@@ -77,8 +76,6 @@ void Regroup::exec()
 
   // make output Workspace the same type is the input, but with new length of signal array
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
-  // Try to cast it to a Workspace2D for use later
-  DataObjects::Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputW);
 
   int progress_step = histnumber / 100;
   if (progress_step == 0) progress_step = 1;
@@ -96,15 +93,8 @@ void Regroup::exec()
     // output data arrays are implicitly filled by function
     rebin(XValues,YValues,YErrors,xoldIndex,YValues_new,YErrors_new, dist);
 
-    // Populate the output workspace X values
-    if (outputW_2D)
-    {
-      outputW_2D->setX(hist,XValues_new);
-    }
-    else
-    {
-      outputW->dataX(hist)=XValues_new.access();
-    }
+    outputW->setX(hist,XValues_new);
+
     if (hist % progress_step == 0)
     {
         progress(double(hist)/histnumber);
@@ -195,10 +185,11 @@ void Regroup::rebin(const std::vector<double>& xold, const std::vector<double>& 
 
 /** Creates a new  output X array  according to specific boundary defnitions
  *
- * @param params    rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
- * @param xold      the current x array
- * @param xnew      new output workspace x array
- * @param xoldIndex indeces of new x in XValues_old
+ *  @param params    rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
+ *  @param xold      the current x array
+ *  @param xnew      new output workspace x array
+ *  @param xoldIndex indeces of new x in XValues_old
+ *  @return The number of bin boundaries in the new X array
  **/
 int Regroup::newAxis(const std::vector<double>& params,
     const std::vector<double>& xold, std::vector<double>& xnew,std::vector<int> &xoldIndex)

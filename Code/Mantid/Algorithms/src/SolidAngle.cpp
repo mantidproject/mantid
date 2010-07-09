@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include <cfloat>
 #include <iostream>
 
@@ -19,7 +18,6 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-    using namespace DataObjects;
 
     /// Default constructor
     SolidAngle::SolidAngle() : Algorithm()

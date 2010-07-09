@@ -3,13 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
-//#include <boost/cast.hpp>
-
 
 namespace Mantid
 {
@@ -21,8 +18,6 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-    using DataObjects::Workspace2D;
-    using DataObjects::Workspace2D_sptr;
     using DataObjects::EventList;
     using DataObjects::EventWorkspace;
     using DataObjects::EventWorkspace_sptr;
@@ -63,7 +58,7 @@ namespace Mantid
 
       // workspace independent determination of length
       const int histnumber = inputW->getNumberHistograms();
-      DataObjects::Histogram1D::RCtype XValues_new;
+      MantidVecPtr XValues_new;
       // create new output X axis
       const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
       //std::cout <<"ntcnew" << ntcnew << "\n";

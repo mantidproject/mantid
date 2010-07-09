@@ -5,9 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include <Poco/NObserver.h>
 #include <climits>
 #include <cfloat>
 #include <string>
@@ -17,9 +14,6 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    using API::MatrixWorkspace_sptr;
-    using API::MatrixWorkspace_const_sptr;
-    using API::SpectraDetectorMap;
     /**
     Takes a workspace as input and finds all the detectors with solid angle corrected signals
     that deviate far enough from median value of all detectors to be suspious.  The factors used
@@ -91,7 +85,7 @@ namespace Mantid
 
     private:
       /// A pointer to the input workspace
-      MatrixWorkspace_const_sptr m_InputWS;
+      API::MatrixWorkspace_const_sptr m_InputWS;
       /// The proportion of the median value below which a detector is considered under-reading
       double m_Low;
       /// The factor of the median value above which a detector is considered over-reading
@@ -111,15 +105,15 @@ namespace Mantid
       /// Loads and checks the values passed to the algorithm
       void retrieveProperties();
       /// Calculates the sum of soild angles of detectors for each histogram
-      MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
+      API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
       /// Calculates the sum counts in each histogram
-      MatrixWorkspace_sptr getTotalCounts(int firstSpec, int lastSpec);
+      API::MatrixWorkspace_sptr getTotalCounts(int firstSpec, int lastSpec);
       /// Converts numbers of particle counts into count rates
-      MatrixWorkspace_sptr getRate(MatrixWorkspace_sptr counts);
+      API::MatrixWorkspace_sptr getRate(API::MatrixWorkspace_sptr counts);
       /// Finds the median of values in single bin histograms
-      double getMedian(MatrixWorkspace_const_sptr input) const;
+      double getMedian(API::MatrixWorkspace_const_sptr input) const;
       /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
-      void FindDetects(MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename);
+      void FindDetects(API::MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename);
       void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &notFound);
       void logFinds(std::vector<int>::size_type missing, std::vector<int>::size_type low, std::vector<int>::size_type high, int alreadyMasked);
 

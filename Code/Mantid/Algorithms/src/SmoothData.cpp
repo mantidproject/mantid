@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SmoothData.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -14,7 +13,6 @@ DECLARE_ALGORITHM(SmoothData)
 
 using namespace Kernel;
 using namespace API;
-using namespace DataObjects;
 
 void SmoothData::init()
 {
@@ -57,29 +55,15 @@ void SmoothData::exec()
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
-  Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(outputWorkspace);
-
-  // Next lines enable sharing of the X vector to be carried over to the output workspace if in the input one
-  const MantidVec * const XFirst = &(inputWorkspace->readX(0));
-  Histogram1D::RCtype newX;
-  newX.access() = inputWorkspace->readX(0);
 
   Progress progress(this,0.0,1.0,inputWorkspace->getNumberHistograms());
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   // Loop over all the spectra in the workspace
   for (int i = 0; i < inputWorkspace->getNumberHistograms(); ++i)
   {
-		PARALLEL_START_INTERUPT_REGION
-    // Copy the X data over. Preserve data sharing if present in input workspace.
-    const MantidVec &X = inputWorkspace->readX(i);
-    if (output2D && XFirst==&X)
-    {
-      output2D->setX(i,newX);
-    }
-    else
-    {
-      outputWorkspace->dataX(i) = X;
-    }
+    PARALLEL_START_INTERUPT_REGION
+    // Copy the X data over. Preserves data sharing if present in input workspace.
+    outputWorkspace->setX(i,inputWorkspace->refX(i));
 
     // Now get references to the Y & E vectors in the input and output workspaces
     const MantidVec &Y = inputWorkspace->readY(i);
@@ -128,10 +112,10 @@ void SmoothData::exec()
       totalE -= E[index-1]*E[index-1];
       newE[l] = std::sqrt(std::abs(totalE))/(vecSize-index);
     }
-		progress.report();
-		PARALLEL_END_INTERUPT_REGION
+    progress.report();
+    PARALLEL_END_INTERUPT_REGION
   } // Loop over spectra
-	PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Set the output workspace to its property
   setProperty("OutputWorkspace", outputWorkspace);

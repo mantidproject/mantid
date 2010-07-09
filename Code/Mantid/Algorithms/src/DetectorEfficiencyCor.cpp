@@ -18,7 +18,6 @@ DECLARE_ALGORITHM(DetectorEfficiencyCor)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using namespace DataObjects;
 
 // E = KSquaredToE*K^2    KSquaredToE = (hbar^2)/(2*NeutronMass) 
 const double DetectorEfficiencyCor::KSquaredToE = 2.07212466;// units of meV Angstrom^-2
@@ -398,11 +397,12 @@ void DetectorEfficiencyCor::getCylinderAxis()
 }
 
 /** For basic shapes centred on the origin (0,0,0) this returns the distance to the surface in
-*  the direction of the point given
-*  @param start the distance calculated from origin to the surface in a line towards this point. It should be outside the shape
-*  @param shape the object to calculate for, should be centred on the origin
-*  @throw invalid_argument if there is any error finding the distance
-*/
+ *  the direction of the point given
+ *  @param start the distance calculated from origin to the surface in a line towards this point. It should be outside the shape
+ *  @param shape the object to calculate for, should be centred on the origin
+ *  @return the distance to the surface in the direction of the point given
+ *  @throw invalid_argument if there is any error finding the distance
+ */
 double DetectorEfficiencyCor::DistToSurface(const V3D start, const Object *shape) const
 {  
   // get a vector from the point that was passed to the origin

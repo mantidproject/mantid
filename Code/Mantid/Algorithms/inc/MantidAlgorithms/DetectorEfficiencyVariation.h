@@ -5,8 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <Poco/NObserver.h>
 #include <climits>
 #include <string>
 #include <vector>

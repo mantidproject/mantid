@@ -1,6 +1,4 @@
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <fstream>
@@ -15,7 +13,6 @@ DECLARE_ALGORITHM(FindDetectorsOutsideLimits)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 
 /// Initialisation method.
 void FindDetectorsOutsideLimits::init()
@@ -125,8 +122,9 @@ void FindDetectorsOutsideLimits::exec()
 }
 
 /** Run Integration as a sub-algorithm
-* @throw runtime_error can be passed up from the sub-algorithm throws
-*/
+ *  @return The workspace resulting from the algorithm
+ *  @throw runtime_error can be passed up from the sub-algorithm throws
+ */
 MatrixWorkspace_sptr FindDetectorsOutsideLimits::integrateWorkspace()
 {
   g_log.debug() << "Integrating input workspace" << std::endl;

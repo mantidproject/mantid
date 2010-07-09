@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunction1D.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/tokenizer.hpp>
 
@@ -18,8 +17,9 @@ using namespace Kernel;
 using namespace API;
 
 /** Static callback function used by MuParser to initialize variables implicitly
-    @param varName The name of a new variable
-    @param palg Pointer to the algorithm
+ *  @param varName The name of a new variable
+ *  @param palg Pointer to the algorithm
+ *  @return A pointer to the initialized variable
  */
 double* UserFunction1D::AddVariable(const char *varName, void *palg)
 {

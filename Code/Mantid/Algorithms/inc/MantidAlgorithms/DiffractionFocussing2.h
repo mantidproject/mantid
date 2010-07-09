@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 // To be compatible with VSC Express edition that does not have tr1
