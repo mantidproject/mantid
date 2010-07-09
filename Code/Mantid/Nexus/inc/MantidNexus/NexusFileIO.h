@@ -60,7 +60,6 @@ namespace Mantid
 
 	  int writeNexusProcessedSample( const std::string& title,const Mantid::API::Sample& sample);
       /// read sample data
-      //int readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample);
 	  int readNexusProcessedSample(Mantid::API::Sample& sample);
       /// write the workspace data
       int writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,

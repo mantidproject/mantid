@@ -478,6 +478,7 @@ namespace Mantid
 
       /**  Creates and opens an arbitrary (non-standard) class (group).
       *   @param name The name of the class.
+      *   @return The opened NXClass
       */
       NXClass openNXGroup(const std::string& name)const{return openNXClass<NXClass>(name);}
 

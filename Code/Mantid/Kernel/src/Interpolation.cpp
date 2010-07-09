@@ -30,6 +30,7 @@ namespace Kernel
 
   /** Get interpolated value at location at
   * @param at Location where to get interpolated value
+  * @return the value
   */
   double Interpolation::value(const double& at) const
   {

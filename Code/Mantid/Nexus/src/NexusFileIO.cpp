@@ -562,15 +562,14 @@ namespace Mantid
       return(0);
     }
 
-   // 
-    // Read sample related information from the nexus file
-    
-	int NexusFileIO::readNexusProcessedSample( Mantid::API::Sample& sample)
-    {
+
       /*!
       Read Nexus Sample section
       @param sample pointer to the workspace sample data
+      @return 0 on success
       */
+	int NexusFileIO::readNexusProcessedSample( Mantid::API::Sample& sample)
+    {
       NXstatus status;
 
       //open sample entry
@@ -1278,9 +1277,6 @@ namespace Mantid
 
     }
 
-
-    bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec)
-    {
       /*! Write the details of the spectra detector mapping to the Nexus file using the format proposed for
       Muon data, but using only one NXdetector section for the whole instrument.
       Also do not place other data the Muon NXdetector would hold.
@@ -1288,7 +1284,11 @@ namespace Mantid
       return should leave Nexus at entry level.
       @param localWorkspace The workspace
       @param spec A vector with spectra indeces
+      @return true on success
       */
+    bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec)
+    {
+
 
       const SpectraDetectorMap& spectraMap=localWorkspace->spectraMap();
       API::Axis *spectraAxis = localWorkspace->getAxis(1);

@@ -282,7 +282,7 @@ public:
    *  Allows assignment of a new value to the property by writing,
    *  e.g., myProperty = 3;
    *  @param value The new value to assign to the property
-   *  @param the reference to itself
+   *  @return the reference to itself
    */
   virtual TYPE& operator=( const TYPE& value )
   {
@@ -338,6 +338,7 @@ public:
 
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
+   *  @return Returns the set of valid values for this property, or it returns an empty vector.
    */
   virtual std::set<std::string> allowedValues() const
   {
