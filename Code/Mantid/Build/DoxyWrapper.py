@@ -10,9 +10,9 @@ regExStrings = ['return type of member.*(c_|m_|g_).*is not documented', #remove 
 'Problems running dvips', #moans about dvips not being installed
 'Problems running latex'] #moans about latex not being installed
 
-(stdoutString, stdErrString) = process.communicate()
 
-for line in stdErrString:#process.stderr:
+
+for line in process.stderr:
 	matchCount = 0
 	for regExString in regExStrings:
 		if (re.search(regExString,line) != None):
