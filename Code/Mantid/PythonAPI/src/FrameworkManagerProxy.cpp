@@ -296,6 +296,7 @@ void FrameworkManagerProxy::sendLogMessage(const std::string & msg)
 /**
  * Check if a given workspace name exists in the ADS 
  * @param name A string specifying a name to check
+ * @return true if it exists
  */
 bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
 {
@@ -332,6 +333,7 @@ void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
 /**
  * Get a workspace pointer from the ADS
  * @param wsName The name of the workspace to retrieve, throws if the pointer is invalid
+ * @return The workspace requested, a NotFoundError is thrown is it is not present
  */
 boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspace(const std::string & wsName)
 {

@@ -23,7 +23,7 @@ namespace Mantid
   namespace PythonAPI
   {
 
-    /// The module filename @return the value
+    /// The module filename
     std::string SimplePythonAPI::g_module_name = "mantidsimple.py";
 
     //------------------------------

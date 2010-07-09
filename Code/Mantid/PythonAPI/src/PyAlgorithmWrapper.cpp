@@ -41,6 +41,7 @@ PyAlgorithmCallback::~PyAlgorithmCallback()
 
 /**
  * Return a clone of this object
+ * @returns a pointer to the clone object
  */ 
 Mantid::API::CloneableAlgorithm * PyAlgorithmCallback::clone()
 {
