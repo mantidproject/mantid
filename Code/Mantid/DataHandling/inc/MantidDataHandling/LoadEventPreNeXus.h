@@ -12,7 +12,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-/** @class Mantid::API::LoadEventPreNeXus
+/** @class Mantid::DataHandling::LoadEventPreNeXus
 
     A data loading routine for SNS pre-nexus event files
     
@@ -92,8 +92,8 @@ private:
   ///Execution code
   void exec();
 
-  std::vector<int> spectra_list;
-  std::vector<int> period_list;
+  std::vector<int> spectra_list; ///<the list of Spectra
+  std::vector<int> period_list; ///< the list of periods
 
   /// The times for each pulse.
   std::vector<boost::posix_time::ptime> pulsetimes;
@@ -104,13 +104,13 @@ private:
   /// The total proton charge for the run.
   double proton_charge_tot;
 
-  std::ifstream * eventfile;
-  std::size_t num_events;
-  std::size_t num_pulses;
-  uint32_t numpixel;
+  std::ifstream * eventfile; ///<File stream to the event file
+  std::size_t num_events; ///<the number of events
+  std::size_t num_pulses; ///<the number of pulses
+  uint32_t numpixel; ///<the number of pixels
 
-  std::size_t num_good_events;
-  std::size_t num_error_events;
+  std::size_t num_good_events; ///<the number of good events
+  std::size_t num_error_events; ///<the number of error events
 
   void loadPixelMap(const std::string &filename);
 

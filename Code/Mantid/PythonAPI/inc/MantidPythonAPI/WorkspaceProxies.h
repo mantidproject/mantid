@@ -84,6 +84,7 @@ namespace PythonAPI
     ///Plus workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr plus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'p', false);
@@ -91,6 +92,7 @@ namespace PythonAPI
     /// Inplace Plus workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr inplace_plus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'p', true);
@@ -98,6 +100,7 @@ namespace PythonAPI
     /// Minus workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr minus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'm', false);
@@ -105,6 +108,7 @@ namespace PythonAPI
     /// Inplace Minus workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr inplace_minus(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'm', true);
@@ -112,6 +116,7 @@ namespace PythonAPI
     /// Multiply workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr times(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 't', false);
@@ -119,6 +124,7 @@ namespace PythonAPI
     /// Inplace Multiply workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr inplace_times(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 't', true);
@@ -126,6 +132,7 @@ namespace PythonAPI
     /// Divide workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr divide(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'd', false);
@@ -133,6 +140,7 @@ namespace PythonAPI
     /// Divide workspace
     /// @param lhs Left hand side
     /// @param rhs Right hand side
+    /// @return A shared pointer to the result workspace
     static wraptype_ptr inplace_divide(const wraptype_ptr lhs, const wraptype_ptr rhs)
     {
       return performBinaryOp(lhs, rhs, 'd', true);

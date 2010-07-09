@@ -60,17 +60,26 @@ V3D Detector::getPos() const
   return ObjComponent::getPos();
 }
 
+///Get the distance between the detector and another component
+///@param comp The other component
+///@return The distance
 double Detector::getDistance(const IComponent& comp) const
 {
   return ObjComponent::getDistance(comp);
 }
 
+///Get the twotheta angle between the detector and an observer
+///@param observer The observer position
+///@param axis The axis
+///@return The angle
 double Detector::getTwoTheta(const V3D& observer, const V3D& axis) const
 {
   const V3D sampleDetVec = this->getPos() - observer;
   return sampleDetVec.angle(axis);
 }
 
+///Get the phi angle between the detector with reference to the origin
+///@return The angle
 double Detector::getPhi() const
 {
   double phi = 0.0, dummy;
@@ -78,6 +87,9 @@ double Detector::getPhi() const
   return phi*M_PI/180.0;
 }
 
+///Get the solid angle between the detector and an observer
+///@param observer The observer position
+///@return The solid angle
 double Detector::solidAngle(const V3D& observer) const
 {
 	return ObjComponent::solidAngle(observer);
@@ -93,6 +105,8 @@ bool Detector::isMasked() const
   return false;
 }
 
+/// Is the detector a monitor?
+///@return true if it is a monitor
 bool Detector::isMonitor() const
 {
   return m_isMonitor;

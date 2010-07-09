@@ -258,6 +258,7 @@ std::set<std::string> FrameworkManagerProxy::getWorkspaceGroupNames() const
 /**
  * Get the names within a workspace group
  * @param group_name The name of the group
+ * @return Vector of the names of the contained workspaces
  */
 std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const std::string & group_name) const
 {

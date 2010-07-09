@@ -23,7 +23,7 @@ namespace Mantid
 {
 namespace DataObjects
 {
-/** @class Mantid::API::EventList
+/** @class Mantid::DataObjects::EventList
 
     A class for holding an event list for a single detector
     
@@ -195,10 +195,9 @@ private:
   /** Cached version of the uncertainties. */
   mutable RCtype refE;
 
-  mutable bool isCacheDirty;
-  mutable bool isErrorCacheDirty;
+  mutable bool isCacheDirty; ///<dirty cache flag
+  mutable bool isErrorCacheDirty; ///<dirty cache flag
 
-  
   void generateCountsHistogram() const;
   void generateErrorsHistogram() const;
 

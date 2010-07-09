@@ -64,10 +64,14 @@ namespace Mantid
       AlgorithmProxy(IAlgorithm_sptr alg);
       virtual ~AlgorithmProxy();
 
+      ///The name of the algorithm
       const std::string name() const {return m_name;}
+      /// The version of the algorithm
       const int version() const {return m_version;}
+      /// The category of the algorithm
       const std::string category() const {return m_category;}
 
+      /// The algorithmID
       AlgorithmID getAlgorithmID() const {return AlgorithmID(this);}
 
       void initialize();
@@ -87,7 +91,10 @@ namespace Mantid
       void addObserver(const Poco::AbstractObserver& observer)const;
       void removeObserver(const Poco::AbstractObserver& observer)const;
 
+      ///Set logging on or off
+      ///@param value true = logging enabled
       void setLogging(const bool value) { m_isLoggingEnabled=value; }
+      /// Is the algorithm have logging enabled
       bool isLogging() const { return m_isLoggingEnabled; }
 
     private:

@@ -23,7 +23,7 @@ namespace Mantid
   namespace PythonAPI
   {
 
-    /// The module filename
+    /// The module filename @return the value
     std::string SimplePythonAPI::g_module_name = "mantidsimple.py";
 
     //------------------------------
@@ -635,6 +635,7 @@ namespace Mantid
     * Split the string on the given delimiter
     * @param str The string to split
     * @param delim The delimiter to use
+    * @return A vector of the sections of the string
     */
     std::vector<std::string> SimplePythonAPI::split(const std::string & str,  const std::string & delim)
     {

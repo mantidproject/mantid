@@ -239,6 +239,8 @@ namespace Mantid
         }
       }
 
+      /// Create a history record
+      /// @return A populated PropertyHistory for this class
       virtual const Kernel::PropertyHistory createHistory() const
       {
         return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction());

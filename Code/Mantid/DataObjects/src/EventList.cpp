@@ -386,8 +386,7 @@ namespace DataObjects
     this->refE.access().clear();
   }
 
-  /** Fill a histogram given specified histogram bounds. Does not modify
-   * the eventlist (const method).
+  /** Fill a histogram given specified histogram bounds in this spectra list - replace the cached values.
    */
   void EventList::generateCountsHistogram() const
   {
@@ -398,6 +397,8 @@ namespace DataObjects
 
   /** Fill a histogram given specified histogram bounds. Does not modify
    * the eventlist (const method).
+   * @param X The x bins
+   * @param Y The generated counts histogram
    */
   void EventList::generateCountsHistogram(const StorageType& X, StorageType& Y) const
   {
@@ -471,6 +472,7 @@ namespace DataObjects
     this->isCacheDirty = false;
   }
 
+  ///Generate the error histogram for this event list and replace the cache
   void EventList::generateErrorsHistogram() const
   {
       const StorageType& Y = *refY;
@@ -478,6 +480,9 @@ namespace DataObjects
       generateErrorsHistogram(Y,E);
   }
 
+  ///Generate the Error histogram for the provided counts histogram
+  ///@param Y The counts histogram
+  ///@param E The generated error histogram
   void EventList::generateErrorsHistogram(const StorageType& Y, StorageType& E) const
   {
       // Fill the vector for the errors, containing sqrt(count)

@@ -104,6 +104,7 @@ bool AlgorithmProxy::isExecuted() const
   return m_isExecuted;
 }
 
+///Cancel the execution of the algorithm
 void AlgorithmProxy::cancel()const
 {
   if (m_alg)

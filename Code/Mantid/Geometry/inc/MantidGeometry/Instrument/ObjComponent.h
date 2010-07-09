@@ -76,7 +76,8 @@ public:
   void draw() const;
   void drawObject() const;
   void initDraw() const;
-  const boost::shared_ptr<const Object> Shape()const{return shape;};
+  ///returns a shared pointer to the object class
+  const boost::shared_ptr<const Object> Shape()const{return shape;}; 
 
 
 protected:

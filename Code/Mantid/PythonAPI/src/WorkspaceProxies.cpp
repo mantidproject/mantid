@@ -69,6 +69,7 @@ WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const
 * @param rhs The right-hand side of the operation
 * @param op One of 'p', 'm', 't', 'd' to denote the required operation
 * @param inplace If true, then the lhs argument is replaced by the result of the operation.
+* @return A shared pointer to the result workspace
 */
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace)
 {

@@ -30,7 +30,7 @@ namespace API
   class IFunction;
   class Expression;
 
-/** @class Mantid::API::FunctionFactoryImpl
+/** @class Mantid::API::ConstraintFactoryImpl
 
     The ConstraintFactory class is in charge of the creation of concrete
     instances of Constraints. It inherits most of its implementation from
