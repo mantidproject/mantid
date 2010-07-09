@@ -31,6 +31,7 @@ PropertyHistory::PropertyHistory(const PropertyHistory& A) :
 /**
  * Standard Assignment operator
  * \param A :: PropertyHistory Item to assign to 'this'
+ * \return pointer to this
  */
 PropertyHistory& PropertyHistory::operator=(const PropertyHistory& A)
 {

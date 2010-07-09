@@ -58,6 +58,7 @@ public:
 
     /** Returns reference to the filtered property. Use its nthValue and nthInterval
         to iterate through the allowed values and time intervals.
+        @return A reference to the filtered property
      */
     const TimeSeriesProperty<double>* data()const{return m_prop.get();}
 

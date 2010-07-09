@@ -38,6 +38,7 @@ Property::~Property()
 
 /** Copy assignment operator. Does nothing.
 * @param right The right hand side value
+* @return pointer to this
 */
 Property& Property::operator=( const Property& right )
 {
@@ -97,6 +98,7 @@ void Property::setDocumentation( const std::string& documentation )
 
 /** Returns the set of valid values for this property, if such a set exists.
  *  If not, it returns an empty set.
+ * @return the set of valid values for this property or an empty set
  */
 std::set<std::string> Property::allowedValues() const
 {

@@ -957,8 +957,8 @@ namespace Mantid
 	/**
 	* Calculate the size of a workspace
 	* @param numberofspectra number of spectrums 
+  * @return the size of a workspace
 	*/
-
 	int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
 	{
 		// Calculate the size of a workspace, given its number of spectra to read

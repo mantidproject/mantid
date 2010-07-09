@@ -507,6 +507,7 @@ NXData::NXData(const NXClass& parent,const std::string& name):NXMainClass(parent
  * @param start_time If the "time" dataset does not have the "start" attribute sets the
  *   start time for the series.
  * @param new_name If not empty it is used as the TimeSeries property name
+ *   @return The property or NULL
  */
 Kernel::Property* NXLog::createTimeSeries(const std::string& start_time,const std::string& new_name)
 {

@@ -105,6 +105,7 @@ namespace API
           /** Compare operator
           *  @param s1 First argument
           *  @param s2 Second argument
+          *  @return true if s1<s2
           */
           bool operator()(const std::string& s1, const std::string& s2)
           {

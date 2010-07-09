@@ -200,6 +200,7 @@ namespace Mantid
       NXDataSetTyped(const NXClass& parent,const std::string& name):NXDataSet(parent,name),m_n(0){}
       /** Returns a pointer to the internal data buffer.
       *  @throw runtime_error exception if the data have not been loaded / initialized.
+      *  @return a pointer to the array of items
       */
       T* operator()()const
       {
@@ -210,6 +211,7 @@ namespace Mantid
       *  @param i The linear index of the data element
       *  @throw runtime_error if the data have not been loaded / initialized.
       *  @throw range_error if the index is greater than the buffer size.
+      *  @return A reference to the value
       */
       T& operator[](int i)const
       {
@@ -222,6 +224,7 @@ namespace Mantid
       *  @param j The index along dim1()
       *  @throw runtime_error if the data have not been loaded / initialized.
       *  @throw range_error if the indeces point outside the buffer.
+      *  @return A reference to the value
       */
       T& operator()(int i, int j)const
       {
@@ -233,6 +236,7 @@ namespace Mantid
       *  @param k The index along dim2()
       *  @throw runtime_error if the data have not been loaded / initialized.
       *  @throw range_error if the indeces point outside the buffer.
+      *  @return A reference to the value
       */
       T& operator()(int i, int j, int k)const
       {
@@ -456,6 +460,7 @@ namespace Mantid
       /**
       * Check if a path exists relative to the current class path
       * @param path A string representing the path to test
+      * @return True if it is valid
       */
       bool isValid(const std::string & path) const;
       /**  Templated method for creating derived NX classes. It also opens the created class.
@@ -491,34 +496,42 @@ namespace Mantid
 
       /**  Creates and opens an integer dataset
       *   @param name The name of the dataset
+      *   @return The int
       */
       NXInt openNXInt(const std::string& name)const{return openNXDataSet<int>(name);}
       /**  Creates and opens a float dataset
       *   @param name The name of the dataset
+      *   @return The float
       */
       NXFloat openNXFloat(const std::string& name)const{return openNXDataSet<float>(name);}
       /**  Creates and opens a double dataset
       *   @param name The name of the dataset
+      *   @return The double
       */
       NXDouble openNXDouble(const std::string& name)const{return openNXDataSet<double>(name);}
       /**  Creates and opens a char dataset
       *   @param name The name of the dataset
+      *   @return The char
       */
       NXChar openNXChar(const std::string& name)const{return openNXDataSet<char>(name);}
       /**  Returns a string 
       *   @param name The name of the NXChar dataset
+      *   @return The string
       */
       std::string getString(const std::string& name)const;
       /**  Returns a double 
       *   @param name The name of the NXDouble dataset
+      *   @return The double
       */
       double getDouble(const std::string& name)const;
       /**  Returns a float 
       *   @param name The name of the NXFloat dataset
+      *   @return The float
       */
       float getFloat(const std::string& name)const;
       /**  Returns a int 
       *   @param name The name of the NXInt dataset
+      *   @return The int
       */
       int getInt(const std::string& name)const;
 
@@ -702,10 +715,12 @@ namespace Mantid
       NXMainClass(const NXClass& parent,const std::string& name):NXClass(parent,name){}
       /**  Opens a NXLog class
       *   @param name The name of the NXLog
+      *   @return The log
       */
       NXLog openNXLog(const std::string& name){return openNXClass<NXLog>(name);}
       /**  Opens a NXNote class
       *   @param name The name of the NXNote
+      *   @return The note
       */
       NXNote openNXNote(const std::string& name){return openNXClass<NXNote>(name);}
     };
@@ -787,6 +802,7 @@ namespace Mantid
       std::string NX_class()const{return "NXinstrument";}
       /**  Opens a NXDetector
       *   @param name The name of the class
+      *   @return The detector
       */
       NXDetector openNXDetector(const std::string& name){return openNXClass<NXDetector>(name);}
     };
@@ -805,10 +821,12 @@ namespace Mantid
       std::string NX_class()const{return "NXentry";}
       /**  Opens a NXData
       *   @param name The name of the class
+      *   @return the nxdata entry
       */
       NXData openNXData(const std::string& name){return openNXClass<NXData>(name);}
       /**  Opens a NXInstrument
       *   @param name The name of the class
+      *   @return the instrument
       */
       NXInstrument openNXInstrument(const std::string& name){return openNXClass<NXInstrument>(name);}
     };
@@ -830,6 +848,7 @@ namespace Mantid
       bool isStandard()const;
       /**  Opens an entry -- a topmost Nexus class
       *   @param name The name of the entry
+      *   @return the entry
       */
       NXEntry openEntry(const std::string& name){return openNXClass<NXEntry>(name);}
     private:

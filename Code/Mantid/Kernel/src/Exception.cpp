@@ -286,11 +286,11 @@ IndexError::IndexError(const IndexError& A) :
   std::runtime_error(A),Val(A.Val),maxVal(A.maxVal)
 {}
 
-const char*
-IndexError::what() const throw()
-  /*!
+    /*!
     Writes out the range and limits
+    @return the error string
   */
+const char* IndexError::what() const throw()
 {
   std::stringstream cx;
   cx<<"IndexError:"<<std::runtime_error::what()<<" "<<Val<<" :: 0 <==> "<<maxVal;

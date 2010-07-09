@@ -196,12 +196,12 @@ namespace Mantid
       return Result;
     }
 
-    double 
-      PolyVar<1>::operator()(const double* DArray) const
       /*!
       Calculate the value of the polynomial at a point
       \param DArray :: Values [x,y,z]
+      \return the value at that point
       */
+    double PolyVar<1>::operator()(const double* DArray) const
     {
       double X(1.0);
       double sum(0.0);
@@ -794,12 +794,12 @@ namespace Mantid
       return 2;
     }
 
-    int 
-      PolyVar<1>::getCount(const double eps) const
-      /*!
+          /*!
       Get the count
       \param eps :: Value to used
+      \return The count
       */
+    int PolyVar<1>::getCount(const double eps) const
     {
       int cnt(0);
       for(int i=0;i<=iDegree;i++)
@@ -808,12 +808,12 @@ namespace Mantid
       return cnt++;
     }
 
-    int 
-      PolyVar<1>::isZero(const double eps) const
-      /*!
+          /*!
       Determine if is zero
       \param eps :: Value to used
+      \return 0 if the value is 0, otherwise 1
       */
+    int PolyVar<1>::isZero(const double eps) const
     {
       int i;
       for(i=0;i<=iDegree && fabs(PCoeff[i])<eps;i++);

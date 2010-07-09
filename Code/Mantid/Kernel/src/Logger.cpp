@@ -152,6 +152,7 @@ namespace Mantid
 
     /** Returns true if at least the given log level is set.
      *  @param level The logging level it is best to use the Logger::Priority enum (7=debug, 6=information, 4=warning, 3=error, 2=critical, 1=fatal)
+     *  @return true if at least the given log level is set.
      */
     bool Logger::is(int level) const
     {
@@ -377,6 +378,7 @@ namespace Mantid
      *  This logger is stored until in a static list until it is destroyed, released or Logger::shutdown is called.
      * 
      *  @param name The name of the logger to use - this is usually the class name. 
+     *  @return a reference to the Logger with the given name.
      */
     Logger& Logger::get(const std::string& name)
     {

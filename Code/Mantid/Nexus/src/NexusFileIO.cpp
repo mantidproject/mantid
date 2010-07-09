@@ -1144,6 +1144,7 @@ namespace Mantid
 
     /** Write the algorithm and environment information.
     *  @param localworkspace The workspace
+    *  @return 0 on success
     */
     int NexusFileIO::writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace)
     {

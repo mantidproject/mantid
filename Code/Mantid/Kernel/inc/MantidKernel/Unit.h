@@ -48,10 +48,13 @@ public:
   /// The name of the unit. For a concrete unit, this method's definition is in the DECLARE_UNIT
   /// macro and it will return the argument passed to that macro (which is the unit's key in the
   /// factory).
+  /// @return The unit ID
   virtual const std::string unitID() const = 0;
   /// The full name of the unit
+  /// @return The unit caption
   virtual const std::string caption() const = 0;
   /// A label for the unit to be printed on axes
+  /// @return The unit label
   virtual const std::string label() const = 0;
 
   // Check whether the unit can be converted to another via a simple factor

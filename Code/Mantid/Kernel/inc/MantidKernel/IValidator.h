@@ -57,6 +57,7 @@ public:
 
   /** The set of allowed values that this validator may have, if a discrete set exists.
    *  Overridden in applicable concrete validators; the base class just returns an empty set.
+   *  @return The set of allowed values that this validator may have or an empty set
    */
   virtual std::set<std::string> allowedValues() const { return std::set<std::string>(); }
   

@@ -38,6 +38,7 @@ namespace Mantid
 
     /// Assignment operator - performs a deep copy
     /// @param other the PropertyManager to copy
+    /// @return pointer to this
     PropertyManager& PropertyManager::operator=(const PropertyManager& other)
     {
       // We need to do a deep copy here

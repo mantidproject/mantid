@@ -222,13 +222,13 @@ namespace Mantid
       return;
     }
 
-    template<int VCount>
-    double 
-      PolyVar<VCount>::operator()(const double* DArray) const
-      /*!
+          /*!
       Calculate the value of the polynomial at a point
       \param DArray :: Values [x,y,z]
+      \return the value
       */
+    template<int VCount>
+    double PolyVar<VCount>::operator()(const double* DArray) const
     {
       double X(1.0);
       double sum(0.0);
@@ -731,15 +731,16 @@ namespace Mantid
       return Out;
     }
 
-    template<int VCount>
-    int
-      PolyVar<VCount>::read(const std::string& Line)
-      /*!
+          /*!
       Given a line of type 
       y^2+xy+3.0x 
       convert into a function:
       Variables in list are x,y,z,a,b,c,....
+      \param Line the inpout values in the format x,y,z,a,b,c,....
+      \return 0 on success
       */
+    template<int VCount>
+    int PolyVar<VCount>::read(const std::string& Line)
     {
       const char Variable("xyzabc"[VCount-1]);
       std::string CLine=StrFunc::removeSpace(Line);

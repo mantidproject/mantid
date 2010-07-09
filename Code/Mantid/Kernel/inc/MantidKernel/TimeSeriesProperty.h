@@ -143,6 +143,7 @@ public:
 
   /** Not implemented in this class
    *  @throws Exception::NotImplementedError Not yet implemented
+   * @return Nothing in this case
    */
   std::string setValue(const std::string&)
   {

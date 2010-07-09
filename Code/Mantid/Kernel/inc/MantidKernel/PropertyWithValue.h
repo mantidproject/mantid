@@ -282,6 +282,7 @@ public:
    *  Allows assignment of a new value to the property by writing,
    *  e.g., myProperty = 3;
    *  @param value The new value to assign to the property
+   *  @param the reference to itself
    */
   virtual TYPE& operator=( const TYPE& value )
   {
@@ -309,6 +310,7 @@ public:
 
   /** Allows you to get the value of the property simply by typing its name.
    *  Means you can use an expression like: int i = myProperty;
+   * @return the value
    */
   virtual operator const TYPE& () const
   {
