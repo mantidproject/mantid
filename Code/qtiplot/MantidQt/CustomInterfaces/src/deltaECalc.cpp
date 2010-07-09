@@ -36,11 +36,20 @@ void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles
 
   addAnalysisOptions(pyCode);
   addMaskingCommands(pyCode);
+  // Check save formats
+  pyCode += "mono_sample.save_formats = [";
+  if( m_sets.save_ckSPE->isChecked() )
+  {
+    pyCode += "'.spe'";
+  }
+  if( m_sets.save_ckNexus->isChecked() )
+  {
+    pyCode += ",'.nxs'";
+  }
+  pyCode += "]\n\n";
  
-  pyCode += QString("mono_sample.convert_to_energy(%1, '%2', %3, %4, '%5', %6, '%7')");
-  
+  pyCode += QString("mono_sample.convert_to_energy(%1, '%2', %3, %4, %5, %6, '%7')");
   QString runFilesList = vectorToPyList(runFiles);
-  
   pyCode = pyCode.arg(runFilesList, whiteBeam, m_sets.leEGuess->text());
 
   if( absRunFiles.empty() )
@@ -50,10 +59,9 @@ void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles
   else
   {
     runFilesList = vectorToPyList(absRunFiles);
-    pyCode = pyCode.arg(runFilesList, absWhiteBeam);
+    pyCode = pyCode.arg(runFilesList, "'" + absWhiteBeam + "'");
   }
   pyCode = pyCode.arg(m_sets.leVanEi->text(), saveName);
-  std::cerr << pyCode.toStdString() << "\n";
 
   m_pyScript = pyCode;
 }
@@ -156,42 +164,4 @@ std::string deltaECalc::insertNumber(const std::string &filename, const int numb
   }
   return f.getBaseName()+"_"+boost::lexical_cast<std::string>(number)+
     "."+f.getExtension();
-}
-/** Replaces the marker word in the given text with the text in the QLineEdit
-*  checking if the value will fail validation, storing any error in m_fails
-* @param text the string in which the string will be replaced
-* @param pythonMark the word to search for and replace
-* @param userVal points to the QLineEdit containing the user value
-* @param check the property that will be used to for validity checking
-*/
-void deltaECalc::LEChkCpIn(QString &text, QString pythonMark, QLineEdit * userVal, Property * const check)
-{
-  const QString setting = userVal->text();
-  std::string error = replaceInErrsFind(text, pythonMark, setting, check);
-  if ( ! error.empty() )
-  {
-    m_fails[userVal] = error;
-  }
-}
-/** Replaces the marker word in the given text with the a string
-*  checking if that string will pass validation
-* @param text the string in which the string will be replaced
-* @param pythonMark the word to search for and replace
-* @param setting the string to check the validity of and insert
-* @param check the property used to for validity checking
-* @return a description of any validity failure or "" if the setting is valid
-*/
-std::string deltaECalc::replaceInErrsFind(QString &text, QString pythonMark, const QString &setting, Property * const check) const
-{
-  text.replace(pythonMark, "'"+setting+"'");
-  return check->setValue(setting.toStdString());
-}
-/** appends Python commands that will remove the tempWS string from the
-* workspace name and save the file
-* @param name the finbal name of the workspace (orginal name was tempWS+name)
-*/
-void deltaECalc::saveWorkspace(const QString &name)
-{
-  m_pyScript.append("RenameWorkspace('"+tempWS+name+"', '"+name+"')\n");
-  m_pyScript.append("SaveSPE('"+name+"', '"+name+"')\n");
 }

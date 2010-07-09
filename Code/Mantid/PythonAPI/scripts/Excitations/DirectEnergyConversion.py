@@ -17,11 +17,13 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         '''
         Attach analysis arguments that are particular to the ElasticConversion 
         '''
+        self.save_formats = ['.spe','.nxs']
         self.fix_ei=False
         self.energy_bins = None
-        self.background = True
+        self.background = False
         self.normalise_method = 'monitor-1'
         self.map_file = None
+        
                 
         # Detector diagnosis
         self.spectra_masks = None
@@ -94,7 +96,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         if save_filename is None:
             save_filename = sample_wkspace.getName()
             
-        SaveSPE(sample_wkspace, save_filename)
+        self.save_results(sample_wkspace, save_filename)
         return sample_wkspace
         
     def do_conversion(self, mono_run, white_run, ei_guess, map_file=None, spectra_masks=None, resultws_name = None):
@@ -110,7 +112,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         elif type(str):
             result_ws, det_info_file = self.load_data(mono_run, resultws_name)
         else:
-            TypeError("Run number must be a list or a string")
+            raise TypeError("Run number must be a list or a string")
             
         ei_value, mon1_peak = self.get_ei(result_ws, ei_guess)
         bin_offset = -mon1_peak
@@ -293,4 +295,26 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         median_test_alg = MedianDetectorTest(data_ws, median_tests_ws, SignificanceTest=median_sig, LowThreshold=median_frac_lo, HighThreshold=median_frac_hi)
         MaskDetectors(data_ws, SpectraList=median_test_alg.getPropertyValue('BadSpectraNums'))
         mtd.deleteWorkspace(median_tests_ws)
+
+    def save_results(self, workspace, save_filename, formats = None):
+        '''
+        Save the result workspace to the specfied filename using the list of formats specified in 
+        self.save_formats
+        '''
+        if save_filename == '':
+            raise ValueError('Empty filename is not allowed for saving')
+        if formats is None:
+            formats = self.save_formats
+        if type(formats) == str:
+            formats = [formats]
+        #Make sure we just have a file stem
+        save_filename = os.path.splitext(save_filename)[0]
+        for ext in formats:
+            filename = save_filename + ext
+            if ext == '.spe':
+                SaveSPE(workspace, filename)
+            elif ext == '.nxs':
+                SaveNexus(workspace, filename)
+            else:
+                print 'Unknown file format "%s" encountered while saving results.'
 #-----------------------------------------------------------------

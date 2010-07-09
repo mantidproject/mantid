@@ -42,10 +42,6 @@ namespace MantidQt
       void addAnalysisOptions(QString & analysisScript);
       void addMaskingCommands(QString & analysisScript);
       QString vectorToPyList(const std::vector<std::string> & names) const;
-
-      void LEChkCpIn(QString &text, QString pythonMark, QLineEdit * userVal, Mantid::Kernel::Property * const check);
-	    std::string replaceInErrsFind(QString &text, QString pythonMark, const QString &setting, Mantid::Kernel::Property * const check) const;
-      void saveWorkspace(const QString &name);
   
       // holds the prefix that we give to output workspaces that will be deleted in the Python
       static const QString tempWS;

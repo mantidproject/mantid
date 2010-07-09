@@ -116,7 +116,7 @@ protected:
   //@}
   
   /// Raise a dialog box giving some information
-  void showInformationBox(const QString & message);
+  void showInformationBox(const QString & message) const;
   
   /// Run a piece of python code and return any output that was written to stdout
   QString runPythonCode(const QString & code, bool no_output = false);

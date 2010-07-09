@@ -55,15 +55,16 @@ namespace MantidQt
       void notifyDialog(const DiagResults::TestSummary &display);
 	    void closeDialog();
 
-	    // move the following to the widget
+      // move the following to the widget
 	    QString openFileDialog(const bool save, const QStringList &exts);
-
 	    void loadDefaults();
 	    void insertFileWidgs();
   	  void saveDefaults();
 	    void setupToolTips();
       void connectSignals(const QWidget * const parentInterface);
   	  void setUpValidators();
+      bool isInputValid() const;
+
 	    QString possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp, const QString &WSName);
 	    QString possibleThirdTest(boost::shared_ptr<backTest> &backCheck, const QString &WSName);
       DiagResults::TestSummary singleWhiteBeamTest(whiteBeam1 &python);
@@ -75,6 +76,7 @@ namespace MantidQt
   	  void specifyRuns(const std::vector<std::string> &runFileNames);
 	    void TOFUpd();
 	    void noDispDialog() {m_dispDialog = NULL;}
+      void validateHardMaskFile();
 	  };
   }
 }

@@ -11,62 +11,120 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 static const int MAX_FILE_NOT_FOUND_DISP = 3;
-static const QString TIP_SEC_1 = "\n(selected intrument = ", TIP_SEC_2 = ")";
 
-const QString MWRunFiles::DEFAULT_FILTER = "Files (*.RAW *.raw *.NXS *.nxs);;All Files (*.*)";
-
-MWRunFiles::MWRunFiles(QWidget *parent, QString prevSettingsGr, bool allowEmpty, const QComboBox * const instrum, QString label, QString toolTip, QString exts) :
-  MantidWidget(parent), m_filter(exts),  m_toolTipOrig(toolTip), m_allowEmpty(allowEmpty)
+MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent), m_allowMultipleFiles(false), 
+  m_isOptional(false), m_fileFilter("")
 {
-  // allows saving and loading the values the user entered on to the form
-  m_prevSets.beginGroup(prevSettingsGr);
-
-  m_designedWidg.setupUi(this);
-	
-  setToolTip( m_toolTipOrig+TIP_SEC_1+instrum->currentText()+TIP_SEC_2 );
-  if(instrum)
-  {// this function also adds some information to the tooltip
-    instrumentChange(instrum->currentText());
-  }
-  else
-  {
-    setToolTip(m_toolTipOrig + "\n(no intrument selected)");
-  }
-
-  m_designedWidg.lbDiscrip->setText(label);
-
-  // setup the label on the form that contains a star to look like a validator star
-  QPalette pal = m_designedWidg.valid->palette();
-  pal.setColor(QPalette::WindowText, Qt::darkRed);
-  m_designedWidg.valid->setPalette(pal);
-  m_designedWidg.valid->hide();
+  m_uiForm.setupUi(this);
   
-  const std::vector<std::string>& searchDirs =
-    ConfigService::Instance().getDataSearchDirs();
+  const std::vector<std::string>& searchDirs = ConfigService::Instance().getDataSearchDirs();
   if ( searchDirs.size() > 0 )
   {
     m_defDir = QString::fromStdString(searchDirs.front());
   }
-  
-  connect(m_designedWidg.leFiles, SIGNAL(editingFinished()), this, SLOT(readEntries()));
-  connect(m_designedWidg.pbBrowse, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
-  connect(instrum, SIGNAL(currentIndexChanged(const QString &)),
-    this, SLOT(instrumentChange(const QString &)));
+  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SLOT(readEntries()));
+  connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
+  m_uiForm.fileEditor->clear();
 }
-/** Returns the user entered filenames as a coma seperated list (integers are expanded to
+
+/**
+ * Return the label text on the widget
+ * @returns The current value of the text on the label
+ */
+QString MWRunFiles::getLabelText() const
+{ 
+  return m_uiForm.textLabel->text();
+}
+
+/**
+ * Set the text on the label
+ * @param text A string giving the label to use for the text
+ */
+void MWRunFiles::setLabelText(const QString & text) 
+{ 
+  m_uiForm.textLabel->setText(text);
+}
+
+/**
+ * Return whether this widget allows multiple files to be specified within the edit box
+ * @returns True if multiple files can be specified, false otherwise
+ */
+bool MWRunFiles::allowMultipleFiles() const
+{
+  return m_allowMultipleFiles;
+}
+
+/**
+ * Set whether this widget allows multiple files to be specifed or not
+ * @param allow If true then the widget will accept multiple files else only a single file may be specified
+ */
+void MWRunFiles::allowMultipleFiles(const bool allow)
+{
+  m_allowMultipleFiles = allow;
+  readEntries();
+}
+
+/**
+ * Return whether empty input is allowed
+ */
+bool MWRunFiles::isOptional() const
+{
+  return m_isOptional;
+}
+
+void MWRunFiles::isOptional(const bool optional)
+{
+  m_isOptional = optional;
+  readEntries();
+}
+
+/**
+ * Set a new file filter for the file dialog based on the given extensions
+ * @param fileExts A list of file extensions with with to create the filter
+ */
+void MWRunFiles::setExtensionList(const QStringList & fileExts)
+{
+  m_fileFilter = "Files (";
+  QStringListIterator itr(fileExts);
+  while( itr.hasNext() )
+  {
+    QString ext = itr.next();
+    m_fileFilter += "*" + ext.toLower() + " ";
+    m_fileFilter += "*" + ext.toUpper();
+    if( itr.hasNext() )
+    {
+      m_fileFilter += " ";
+    }
+  }
+  m_fileFilter += ");; All Files (*.*)";
+}
+
+/**
+ * Is the input within the widget valid?
+ * @returns True of the file names within the widget are valid, false otherwise
+ */
+bool MWRunFiles::isValid() const
+{
+  if( m_uiForm.valid->isHidden() )
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+/** Returns the user entered filenames as a comma seperated list (integers are expanded to
 *  filenames)
 *  @return an array of filenames entered in the box
-*  @throw invalid_argument if one of the files couldn't be found it then no filenames are returned
 */
 const std::vector<std::string>& MWRunFiles::getFileNames() const
 {
-  if ( ! m_designedWidg.valid->isHidden() )
-  {// the validator is showing there was a problem with one of the input files
-	  throw std::invalid_argument("Some input files could not be found in the edit box marked with a *");
-  }
   return m_files;
 }
+
 /** Safer than using getRunFiles()[0] in the situation were there are no files
 *  @return an empty string is returned if no input files have been defined or one of the files can't be found, otherwise it's the name of the first input file
 *  @throw invalid_argument if one of the files couldn't be found it then no filenames are returned
@@ -82,29 +140,28 @@ QString MWRunFiles::getFile1() const
 }
 /** Lauches a load file browser allowing a user to select multiple
 *  files
-*  @return the names of the selected files as a coma separated list
+*  @return the names of the selected files as a comma separated list
 */
 QString MWRunFiles::openFileDia()
 {
   QStringList filenames;
-  QString dir = m_prevSets.value("load file dir", m_defDir).toString();
+  QString dir = m_lastDir;
   
-  filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_filter);
+  filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter);
   if(filenames.isEmpty())
   {
 	return "";
   }
-  m_prevSets.setValue("load file dir", 
-	                    QFileInfo(filenames.front()).absoluteDir().path());
+  m_lastDir = QFileInfo(filenames.front()).absoluteDir().path();
   // turns the QStringList into a coma separated list inside a QString
   return filenames.join(", ");
 }
 /// Convert integers from the LineEdit box into filenames but leaves all non-integer values untouched
 void MWRunFiles::readRunNumAndRanges()
 {
-  readComasAndHyphens(m_designedWidg.leFiles->text().toStdString(), m_files);
+  readCommasAndHyphens(m_uiForm.fileEditor->text().toStdString(), m_files);
   // only show the validator if errors are found below
-  m_designedWidg.valid->hide();
+  m_uiForm.valid->hide();
   QStringList errors;
 
   // set up the object we use for validation
@@ -113,11 +170,11 @@ void MWRunFiles::readRunNumAndRanges()
   exts.push_back("NXS"); exts.push_back("nxs");
   FileProperty loadData("Filename", "", FileProperty::Load, exts);
 
-  if ( m_files.size() == 0 && ! m_allowEmpty )
+  if ( m_files.empty() && !isOptional() )
   {
-    errors << "A filename must be specified";
+    errors << "A filename is required.";
   }
-
+  
   std::vector<std::string>::iterator i = m_files.begin(), end = m_files.end();
   //
   // @todo MG: There was no padding originally so this was added to work for TS1 and TS2 at ISIS
@@ -144,13 +201,13 @@ void MWRunFiles::readRunNumAndRanges()
     {
       run_str.insert(0, 5 - ndigits, '0');
     }
-    std::string problem = loadData.setValue(m_instrument.toStdString() + run_str + ".raw");
+    std::string problem = loadData.setValue(m_instrPrefix.toStdString() + run_str + ".raw");
     if( !problem.empty() )
     {
       //Try 8
       run_str.insert(0, 3, '0');
     }
-    *i = m_instrument.toStdString() + run_str + ".raw"; 
+    *i = m_instrPrefix.toStdString() + run_str + ".raw"; 
   }
   if ( errors.size() < MAX_FILE_NOT_FOUND_DISP )
 	{
@@ -165,17 +222,17 @@ void MWRunFiles::readRunNumAndRanges()
   {
     if ( m_files.size() > 0 )
 	{
-      m_designedWidg.valid->setToolTip(errors.join(",\n")+"\nHas the path been entered into your Mantid.user.properties file?");
+      m_uiForm.valid->setToolTip(errors.join(",\n")+"\nHas the path been entered into your Mantid.user.properties file?");
 	}
 	else
 	{
-      m_designedWidg.valid->setToolTip(errors.front());
+      m_uiForm.valid->setToolTip(errors.front());
 	}
-	m_designedWidg.valid->show();
+	m_uiForm.valid->show();
 	m_files.clear();
   }
 }
-void MWRunFiles::readComasAndHyphens(const std::string &in, std::vector<std::string> &out)
+void MWRunFiles::readCommasAndHyphens(const std::string &in, std::vector<std::string> &out)
 {
   out.clear();
   if ( in.empty() )
@@ -241,42 +298,40 @@ void MWRunFiles::readComasAndHyphens(const std::string &in, std::vector<std::str
   }
 }
 /** This slot opens a file browser, then adds any selected file to the
-*  leFiles LineEdit and emits fileChanged()
+*  fileEditor LineEdit and emits fileChanged()
 */
 void MWRunFiles::browseClicked()
 {
   QString uFile = openFileDia();
   if( uFile.trimmed().isEmpty() ) return;
 
-  if ( ! m_designedWidg.leFiles->text().isEmpty() )
+  if ( ! m_uiForm.fileEditor->text().isEmpty() )
   {
-    m_designedWidg.leFiles->setText(
-	  m_designedWidg.leFiles->text()+", " + uFile);
+    m_uiForm.fileEditor->setText(
+	  m_uiForm.fileEditor->text()+", " + uFile);
   }
-  else m_designedWidg.leFiles->setText(uFile);
+  else m_uiForm.fileEditor->setText(uFile);
   
   readEntries();
 }
 void MWRunFiles::instrumentChange(const QString &newInstr)
 {
+  m_instrPrefix = newInstr;
   // the tooltip will tell users which instrument, if any, if associated with this control
   if (newInstr.isEmpty())
   {
-    setToolTip(m_toolTipOrig + "\n(no intrument selected)");
+    setToolTip("(no intrument selected)");
   }
   else
   {
-    if ( toolTip() == m_toolTipOrig+TIP_SEC_1+m_instrument+TIP_SEC_2 )
-    {// this checked if the tool tip was modified outside the widget, it wasn't and so we'll update it
-      setToolTip(m_toolTipOrig+TIP_SEC_1+newInstr+TIP_SEC_2);
-    }
+    setToolTip("Searching for files using prefix " + m_instrPrefix);
   }
-  
-  m_instrument = newInstr;
   
   readEntries();
 }
-/** Puts the coma separated string in the leFiles into the m_files array
+
+/** 
+ * Puts the comma separated string in the fileEditor into the m_files array
 */
 void MWRunFiles::readEntries()
 {
@@ -284,8 +339,14 @@ void MWRunFiles::readEntries()
   emit fileChanged();
 }
 
-MWRunFile::MWRunFile(QWidget *parent, QString prevSettingsGr, bool allowEmpty, const QComboBox * const instrum, QString label, QString toolTip, QString exts):
-  MWRunFiles(parent, prevSettingsGr, allowEmpty, instrum, label, toolTip, exts), m_userChange(false)
+
+
+//****************************************************************************
+//    MWRunFile
+//****************************************************************************
+
+MWRunFile::MWRunFile(QWidget *parent):
+  MWRunFiles(parent), m_userChange(false)
 {
 }
 /** Lauches a load file browser where a user can select only
@@ -295,38 +356,39 @@ MWRunFile::MWRunFile(QWidget *parent, QString prevSettingsGr, bool allowEmpty, c
 QString MWRunFile::openFileDia()
 {
   QString filename;
-  QString dir = m_prevSets.value("load file dir", m_defDir).toString();
+  QString dir = m_lastDir;
   
-  filename = QFileDialog::getOpenFileName(this, "Open file", dir, m_filter);
+  filename = QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter);
   if( ! filename.isEmpty() )
   {
-	m_prevSets.setValue("load file dir", 
-	                    QFileInfo(filename).absoluteDir().path());
+  	m_lastDir = QFileInfo(filename).absoluteDir().path();
   }
   return filename;
 }
-/** Slot changes the filename only if it has not already been changed by
-*  user
+
+/** 
+* Slot changes the filename only if it has not already been changed by
+* user
 */
 void MWRunFile::suggestFilename(const QString &newName)
 {
   try
   {// check if the user has entered another value (other than the default) into the box
     m_userChange =
-      m_userChange || (m_suggestedName != m_designedWidg.leFiles->text());
+      m_userChange || (m_suggestedName != m_uiForm.fileEditor->text());
   }
-  catch (std::invalid_argument)
+  catch (std::invalid_argument&)
   {// its possible that the old value was a bad value and caused an exception, ignore that
   }
   //only set the filename to the default if the user hadn't changed it
   if ( ! m_userChange )
   {
     m_suggestedName = newName;
-    m_designedWidg.leFiles->setText(newName);
+    m_uiForm.fileEditor->setText(newName);
     readEntries();
   }
 }
-/** Slot opens a file browser, writing the selected file to leFiles
+/** Slot opens a file browser, writing the selected file to fileEditor
 *  LineEdit and emits fileChanged()
 */
 void MWRunFile::browseClicked()
@@ -334,7 +396,7 @@ void MWRunFile::browseClicked()
   QString uFile = openFileDia();
   if( uFile.trimmed().isEmpty() ) return;
 
-  m_designedWidg.leFiles->setText(uFile);
+  m_uiForm.fileEditor->setText(uFile);
   
   readEntries();
 }
@@ -349,8 +411,8 @@ void MWRunFile::readEntries()
 
   if ( m_files.size() > 1 )
   {
-    m_designedWidg.valid->setToolTip("Only one file is allowed here (, and - are not\nallowed in filenames)");
-	m_designedWidg.valid->show();
+    m_uiForm.valid->setToolTip("Only one file is allowed here (, and - are not\nallowed in filenames)");
+	m_uiForm.valid->show();
 	m_files.clear();
   }
   

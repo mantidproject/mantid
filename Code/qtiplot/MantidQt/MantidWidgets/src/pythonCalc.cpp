@@ -36,8 +36,7 @@ pythonCalc::pythonCalc(QWidget *interface) : MantidWidget(interface),
 QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &validLbls) const
 {
   // any errors in reading user values and constructing the script were inserted into a map, go through it
-  std::map<const QWidget * const, std::string>::const_iterator errs =
-    m_fails.begin();
+  std::map<const QWidget * const, std::string>::const_iterator errs = m_fails.begin();
   for ( ; errs != m_fails.end(); ++errs)
   {// there are two maps, one links errors to the invalid control and one links controls to validators, put them together to load the errors into the validators
     if ( validLbls.find(errs->first) == validLbls.end() )

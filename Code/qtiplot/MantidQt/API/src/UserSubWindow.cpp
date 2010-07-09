@@ -102,11 +102,11 @@ void UserSubWindow::initializeLocalPython()
  * @param message The message to show
  */
 
-void UserSubWindow::showInformationBox(const QString & message)
+void UserSubWindow::showInformationBox(const QString & message) const
 {
   if( !message.isEmpty() )
   {
-    QMessageBox::information(this, this->windowTitle(), message);
+    QMessageBox::information(const_cast<UserSubWindow*>(this), this->windowTitle(), message);
   }
 }
 

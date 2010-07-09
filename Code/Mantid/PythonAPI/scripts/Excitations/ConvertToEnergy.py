@@ -22,6 +22,7 @@ class EnergyConversion(object):
         '''
         self.file_prefix = file_prefix
         self.file_ext = '.raw'
+        self.save_formats = ['.nxs']
        
         self.setup_mtd_instrument()
         # Call possibly function in inheriting classes

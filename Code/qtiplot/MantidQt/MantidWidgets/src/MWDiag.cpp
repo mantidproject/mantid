@@ -3,12 +3,16 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FileProperty.h"
+
 #include <QSignalMapper>
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QDir>
 #include <QStringList>
 #include <QMessageBox>
+#include <QDoubleValidator>
+
 #include <vector>
 #include <string>
 
@@ -43,20 +47,31 @@ MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const 
   
   loadDefaults();
   setupToolTips();
+  setUpValidators();
   connectSignals(parent);
 }
 
 void MWDiag::insertFileWidgs()
 {
-  m_WBV1 = new MWRunFile(this, m_prevSets.group()+"/WBV1", false, m_instru,
-  			 "White Beam Van 1",
-  			 "Name of a white beam vanadium run from the instrument of interest");
-  m_designWidg.indivTestWhiteLay->addWidget(m_WBV1);
+  QStringList fileExts(".raw");
+  fileExts.append(".nxs");
 
-  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", true, m_instru,
-  			 "White Beam Van 2",
-  			 "Another white beam vanadium run from the same instrument as the first");
+  m_WBV1 = new MWRunFile(this);
+  m_designWidg.indivTestWhiteLay->addWidget(m_WBV1);
+  m_WBV1->setLabelText("White Beam Van 1");
+  m_WBV1->setExtensionList(fileExts);
+  m_WBV1->isOptional(false);
+  connect(m_instru, SIGNAL(currentIndexChanged(const QString &)), m_WBV1, SLOT(instrumentChange(const QString &)));
+
+  m_WBV2 = new MWRunFile(this);
   m_designWidg.effVarTestWhiteLay->addWidget(m_WBV2);
+  m_WBV2->setLabelText("White Beam Van 2");
+  m_WBV2->setExtensionList(fileExts);
+  m_WBV2->isOptional(true);
+  connect(m_instru, SIGNAL(currentIndexChanged(const QString &)), m_WBV2, SLOT(instrumentChange(const QString &)));
+
+  connect(m_designWidg.leIFile, SIGNAL(editingFinished()), this, SLOT(validateHardMaskFile()));
+  validateHardMaskFile();
 }
 
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control
@@ -224,27 +239,39 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
 }
 void MWDiag::setUpValidators()
 {
-  m_validators.clear();
-
-  setupValidator(m_designWidg.valErr);
-  m_validators[m_designWidg.leSignificance] = m_designWidg.valErr;
-  setupValidator(m_designWidg.valInmsk);
-  m_validators[m_designWidg.leIFile] = m_designWidg.valInmsk;
-
-
-  m_validators[m_designWidg.leHighAbs] = newStar(m_designWidg.gbIndividual, 2,1);
-  m_validators[m_designWidg.leLowAbs] = newStar(m_designWidg.gbIndividual, 1, 5);
-  m_validators[m_designWidg.leHighMed] = newStar(m_designWidg.gbIndividual, 2,1);
-  m_validators[m_designWidg.leLowMed] = newStar(m_designWidg.gbIndividual, 2, 5);
-
-  m_validators[m_designWidg.leVariation] = newStar(m_designWidg.gbVariation,2,1);
-
-  m_validators[m_designWidg.leAcceptance] = newStar(m_designWidg.gbBackTest,0,6);
-  m_validators[m_designWidg.leStartTime] = newStar(m_designWidg.gbBackTest, 1,1);
-  m_validators[m_designWidg.leEndTime] = newStar(m_designWidg.gbBackTest, 1, 5);
-
-  hideValidators();
+  // Attach number validators to everything that will only accept a number
+  m_designWidg.leSignificance->setValidator(new QDoubleValidator(this));
+  m_designWidg.leHighAbs->setValidator(new QDoubleValidator(this));
+  m_designWidg.leLowAbs->setValidator(new QDoubleValidator(this));
+  m_designWidg.leHighMed->setValidator(new QDoubleValidator(this));
+  m_designWidg.leLowMed->setValidator(new QDoubleValidator(this));
+  m_designWidg.leVariation->setValidator(new QDoubleValidator(this));
+  m_designWidg.leAcceptance->setValidator(new QDoubleValidator(this));
+  m_designWidg.leStartTime->setValidator(new QDoubleValidator(this));
+  m_designWidg.leEndTime->setValidator(new QDoubleValidator(this));
 }
+
+/**
+ * Returns true if the input on the form is valid, false otherwise
+ */
+bool MWDiag::isInputValid() const
+{
+  bool valid(true);
+  if( m_designWidg.valInmsk->isVisible() )
+  {
+    valid &= false;
+  }
+  else
+  {
+    valid &= true;
+  }
+  
+  valid &= m_WBV1->isValid();
+  valid &= m_WBV2->isValid();
+
+  return valid;
+}
+
 //this function will be replaced a function in a widget
 void MWDiag::browseClicked(const QString &buttonDis)
 {
@@ -264,7 +291,17 @@ void MWDiag::browseClicked(const QString &buttonDis)
 	
   QString filepath = openFileDialog(toSave, extensions);
   if( filepath.isEmpty() ) return;
+  QWidget *focus = QApplication::focusWidget();
+  editBox->setFocus();
   editBox->setText(filepath);
+  if( focus )
+  {
+    focus->setFocus();
+  }
+  else
+  {
+    this->setFocus();
+  }
 }
 /** create, setup and show a dialog box that reports the number of bad
 * detectors.
@@ -350,12 +387,15 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
   std::vector<std::string> tempOutputWS;
   QString prob1;
 
+  if( !isInputValid() )
+  {
+    throw std::invalid_argument("Invalid input detected. Errors are marked with a red star.");
+  }
+
   try
   {
     // these objects read the user settings in the GUI on construction
     whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFileName(), m_instru->currentText(), outWS);
-  
-    prob1 = firstTest.checkNoErrors(m_validators);
   
     // the two tests below are optional, dependent on the information supplied by the user
     boost::shared_ptr<whiteBeam2> optional1;
@@ -400,7 +440,7 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
         sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
       }	
     }
-    catch ( Exception::NullPointerException )
+    catch ( Exception::NullPointerException & )
     {// the diag has died, probably the user closed it
       prob1 = "The results window was closed, calculation aborted";
     }
@@ -448,8 +488,7 @@ QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp,
   {// the user has supplied an input file for the second test so fill the shared_ptr with the script
     whiteBeamComp.reset(
 	    new whiteBeam2(this, m_designWidg, m_WBV2->getFileName(), m_instru->currentText(), WSName));
-	//report any problems trying to construct it, likely to be problems with the values suggested by the user
-    return whiteBeamComp->checkNoErrors(m_validators);
+	  return "";
   }
   return "";
 }
@@ -464,7 +503,7 @@ QString MWDiag::possibleThirdTest(boost::shared_ptr<backTest> &backCheck, const 
   { //generate a Python script
     backCheck.reset(new backTest(this, m_designWidg, m_monoFiles, m_instru->currentText(), WSName));
 	//report any problems trying to construct it, likely to be problems with the values suggested by the user
-	return backCheck->checkNoErrors(m_validators);
+	return "";
   }
   return "";
 }
@@ -590,4 +629,29 @@ void MWDiag::TOFUpd()
   if (m_TOFChanged) return;
   m_TOFChanged = (m_designWidg.leStartTime->text().toDouble() != m_sTOFAutoVal)
     || (m_designWidg.leEndTime->text().toDouble() != m_eTOFAutoVal);
+}
+
+/**
+ * Validate the hard mask file input
+*/
+void MWDiag::validateHardMaskFile()
+{
+  std::string filename = m_designWidg.leIFile->text().toStdString();
+  if( filename.empty() )
+  {
+    m_designWidg.valInmsk->hide();
+    return;
+  }
+
+  FileProperty *validateHardMask = new FileProperty("UnusedName", filename,FileProperty::Load);
+  QString error = QString::fromStdString(validateHardMask->isValid()); 
+  if( error.isEmpty() )
+  {
+    m_designWidg.valInmsk->hide();
+  }
+  else
+  {
+    m_designWidg.valInmsk->show();
+  }
+  m_designWidg.valInmsk->setToolTip(error);
 }
