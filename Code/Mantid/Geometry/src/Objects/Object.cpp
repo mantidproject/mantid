@@ -1929,7 +1929,7 @@ namespace Mantid
 
     /**
     * get number of triangles
-    * @ return the number of triangles
+    * @return the number of triangles
     */
     int Object::NumberOfTriangles() const
     {

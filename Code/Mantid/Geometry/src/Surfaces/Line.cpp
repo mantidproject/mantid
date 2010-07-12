@@ -67,6 +67,7 @@ Line*
 Line::clone() const
   /*! 
     Virtual copy constructor (not currently used)
+    \return the cloned line
   */
 {
   return new Line(*this);

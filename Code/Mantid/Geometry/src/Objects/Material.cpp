@@ -73,7 +73,7 @@ Material::operator=(const Material& A)
   /*!
     Assignment operator
     \param A :: Material to copy
-    return *this
+    \return *this
   */
 {
   if (this!=&A)

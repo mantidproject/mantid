@@ -797,6 +797,7 @@ namespace Kernel
   /**
    * Return the directory that Mantid should use for writing files. A trailing slash is appended
    * so that filenames can more easily be concatenated with this
+   * @return the directory that Mantid should use for writing files
    */
   std::string ConfigServiceImpl::getOutputDir() const
   {

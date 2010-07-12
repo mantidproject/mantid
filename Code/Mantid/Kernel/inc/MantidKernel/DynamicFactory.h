@@ -90,6 +90,7 @@ public:
   /// The class must have been registered with registerClass.
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className the name of the class you wish to create
+  /// @return a shared pointer ot the base class
   virtual boost::shared_ptr<Base> create(const std::string& className) const
   {   
     typename FactoryMap::const_iterator it = _map.find(className);
@@ -105,6 +106,7 @@ public:
   /// The class must have been registered with registerClass.
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className the name of the class you wish to create
+  /// @return a pointer to the base class
   virtual Base* createUnwrapped(const std::string& className) const
   {   
     typename FactoryMap::const_iterator it = _map.find(className);
@@ -192,6 +194,7 @@ public:
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
   /// using Poco::NotificationCenter::addObserver(...)
+  /// @return nothing
   Poco::NotificationCenter notificationCenter;
     
 protected:

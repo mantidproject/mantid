@@ -211,6 +211,7 @@ Torus::surfaceNormal(const Geometry::V3D& Pt) const
     Get the normal at a point
     \param Pt :: The Point of interest
     \todo Does not work
+    \return the normal to the surface at that point
   */
 {
   return Normal;

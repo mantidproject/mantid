@@ -147,7 +147,7 @@ Rule::makeCNFcopy(Rule* &TopRule)
     Since the type of a class can't be changed
     it is necessary to have a static function,
     so that the place that TopRule points is changable
-
+    \return number of changes 
   */
 {
   // Start at top to tree to find an instance

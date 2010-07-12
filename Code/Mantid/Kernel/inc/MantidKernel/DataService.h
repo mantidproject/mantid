@@ -263,6 +263,7 @@ public:
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
   /// using Poco::NotificationCenter::addObserver(...)
+  ///@return nothing
   Poco::NotificationCenter notificationCenter;
 
 protected:

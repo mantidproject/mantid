@@ -353,6 +353,7 @@ Quat& Quat::operator*=(const Quat& _q)
  *
  * Compare two quaternions at 1e-6%tolerance.
  * Use boost close_at_tolerance method
+ * @return true if equal
  */
 bool Quat::operator==(const Quat& q) const
 {
@@ -364,6 +365,7 @@ bool Quat::operator==(const Quat& q) const
  *
  * Compare two quaternions at 1e-6%tolerance.
  *  Use boost close_at_tolerance method
+ * \return true if not equal
  */
 bool Quat::operator!=(const Quat& _q) const
 {
@@ -402,7 +404,7 @@ void Quat::conjugate()
 }
 
 /*! Quaternion length
- *
+ * \return the length
  */
 double Quat::len() const
 {
@@ -410,7 +412,7 @@ double Quat::len() const
 }
 
 /*! Quaternion norm (length squared)
- *
+ * \return the length squared
  */
 double Quat::len2() const
 {
