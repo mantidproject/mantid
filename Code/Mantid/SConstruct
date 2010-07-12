@@ -226,6 +226,12 @@ print "CFLAGS: ",cflags
 conf = Configure(env)
 if conf.CheckCXXHeader('unordered_map.h'):
 	conf.env.Append(CPPDEFINES = ['HAS_UNORDERED_MAP_H'])
+if not conf.CheckCXXHeader('Poco/Notification.h'):
+    print "Failed to find 'Poco/Notification.h'"
+    Exit(-1)
+if not conf.CheckCXXHeader('muParser.h') and not conf.CheckCXXHeader('muParser/muParser.h'):
+    print "Failed to find 'muParser.h'"
+    Exit(-1)
 env = conf.Finish()
 
 #Collect the includes into a single directory 
