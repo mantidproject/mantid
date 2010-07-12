@@ -274,6 +274,8 @@ env.Append(CPPDEFINES=["BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"])
 Export('env')
 
 # Real work begins here
+import release_version
+release_version.writeMantidVersion()
 
 # This order matters slightly! Kernel-geometry-api in that order
 coreSubProjs = []
