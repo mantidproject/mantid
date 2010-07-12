@@ -26,17 +26,21 @@ def getSVNRevision():
     return str(maxVersion)
   except:
     return versionList[0].rstrip()
-#end def
 
-v = '1.0.' +getSVNRevision()
+def writeMantidVersion():
+  version = '1.0.' +getSVNRevision()
 
-f = open('Kernel/inc/MantidKernel/MantidVersion.h','w')
+  HEADER = 'Kernel/inc/MantidKernel/MantidVersion.h'
+  print "Writing version %s into %s " % (version, HEADER)
+  f = open(HEADER,'w')
 
-f.write('//This file is automatically created by Mantid/Code/Mantid/build.bat(sh)\n')
-f.write('#ifndef MANTID_VERSION\n')
-f.write('#define MANTID_VERSION "')
-f.write(v)
-f.write('"\n#endif\n')
+  f.write('//This file is automatically created by Mantid/Code/Mantid/build.bat(sh)\n')
+  f.write('#ifndef MANTID_VERSION\n')
+  f.write('#define MANTID_VERSION "')
+  f.write(version)
+  f.write('"\n#endif\n')
 
-f.close()
+  f.close()
 
+if __name__ == "__main__":
+  writeMantidVersion()
