@@ -55,8 +55,8 @@ namespace Mantid
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& title);
       /// write sample related data
-      /*int writeNexusProcessedSample( const std::string& title,
-							  const boost::shared_ptr<Mantid::API::Sample>& sample);*/
+      /// close the nexus file
+      int closeNexusFile();
 
 	  int writeNexusProcessedSample( const std::string& title,const Mantid::API::Sample& sample);
       /// read sample data
@@ -94,8 +94,8 @@ namespace Mantid
       bool writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws);
       /// read instrument parameters
       bool readNexusParameterMap(API::MatrixWorkspace_sptr ws);
-      /// close the nexus file
-      int closeNexusFile();
+      /// write bin masking information
+      bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws);
 
     private:
       /// Nexus file handle

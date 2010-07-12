@@ -956,6 +956,8 @@ namespace Mantid
       NXputattr (fileID, "units", (void*)sLabel.c_str(), sLabel.size(), NX_CHAR);
       status=NXclosedata(fileID);
 
+      writeNexusBinMasking(localworkspace);
+
       status=NXclosegroup(fileID);
       return((status==NX_ERROR)?3:0);
     }
@@ -1640,6 +1642,72 @@ namespace Mantid
       return(true);
 
     }
+
+    /** 
+      * Write bin masking information
+      * @param ws The workspace
+      * @return true for OK, false for error
+      */
+    bool NexusFileIO::writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws)
+    {
+      std::vector< int > spectra;
+      std::vector< int > bins;
+      std::vector< double > weights;
+      size_t spectra_count = 0;
+      size_t offset = 0;
+      for(int i=0;i<ws->getNumberHistograms(); ++i)
+      {
+        if (ws->hasMaskedBins(i))
+        {
+          const API::MatrixWorkspace::MaskList& mList = ws->maskedBins(i);
+          spectra.push_back(spectra_count);
+          spectra.push_back(offset);
+          API::MatrixWorkspace::MaskList::const_iterator it = mList.begin();
+          for(;it != mList.end(); ++it)
+          {
+            bins.push_back(it->first);
+            weights.push_back(it->second);
+          }
+          ++spectra_count;
+          offset += mList.size();
+        }
+      }
+
+      if (spectra_count == 0) return false;
+
+      NXstatus status;
+
+      // save spectra offsets as a 2d array of ints
+      int dimensions[2];
+      dimensions[0]=spectra_count;
+      dimensions[1]=2;
+      status=NXmakedata(fileID, "masked_spectra", NX_INT32, 2, dimensions);
+      if(status==NX_ERROR) return false;
+      status=NXopendata(fileID, "masked_spectra");
+      const std::string description = "spectra index,offset in masked_bins and mask_weights";
+      NXputattr(fileID, "description", (void*)description.c_str(), description.size()+1, NX_CHAR);
+      status=NXputdata(fileID, (void*)&spectra[0]);
+      status=NXclosedata(fileID);
+
+      // save masked bin indices
+      dimensions[0]=bins.size();
+      status=NXmakedata(fileID, "masked_bins", NX_INT32, 1, dimensions);
+      if(status==NX_ERROR) return false;
+      status=NXopendata(fileID, "masked_bins");
+      status=NXputdata(fileID, (void*)&bins[0]);
+      status=NXclosedata(fileID);
+
+      // save masked bin weights
+      dimensions[0]=bins.size();
+      status=NXmakedata(fileID, "mask_weights", NX_FLOAT64, 1, dimensions);
+      if(status==NX_ERROR) return false;
+      status=NXopendata(fileID, "mask_weights");
+      status=NXputdata(fileID, (void*)&weights[0]);
+      status=NXclosedata(fileID);
+
+      return true;
+    }
+
 
     template<>
     std::string NexusFileIO::logValueType<double>()const{return "double";}

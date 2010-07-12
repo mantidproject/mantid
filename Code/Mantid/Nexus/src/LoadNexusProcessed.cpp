@@ -248,6 +248,7 @@ namespace Mantid
       progress(progressStart+0.2*progressRange,"Reading the workspace history...");
       readParameterMap(mtd_entry, local_workspace);      
 
+      readBinMasking(wksp_cls, local_workspace);
       NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
       
 	  int blocksize(8);
@@ -749,6 +750,38 @@ namespace Mantid
         pmap.add(tokens[1], comp, tokens[2], tokens[3]);
       }
     }
+
+    /**
+     * Read the bin masking information from the mantid_workspace_i/workspace group.
+     * @param wksp_cls The data group
+     * @param local_workspace The workspace to read into
+     */
+    void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, DataObjects::Workspace2D_sptr local_workspace)
+    {
+      if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR)
+      {
+        return;
+      }
+      NXInt spec = wksp_cls.openNXInt("masked_spectra");
+      spec.load();
+      NXInt bins = wksp_cls.openNXInt("masked_bins");
+      bins.load();
+      NXDouble weights = wksp_cls.openNXDouble("mask_weights");
+      weights.load();
+      const int n = spec.dim0();
+      const int n1 = n - 1;
+      for(int i = 0; i < n; ++i)
+      {
+        int si = spec(i,0);
+        int j0 = spec(i,1);
+        int j1 = i < n1 ? spec(i+1,1) : n;
+        for(int j = j0; j < j1; ++j)
+        {
+          local_workspace->maskBin(si,bins[j],weights[j]);
+        }
+      }
+    }
+
 
     /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
      * @param inst_name The name written in the Nexus file

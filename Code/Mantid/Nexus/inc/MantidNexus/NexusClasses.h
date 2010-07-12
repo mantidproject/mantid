@@ -693,13 +693,28 @@ namespace Mantid
       std::vector< std::string >& data();
       /// Returns the description string
       std::string description();
-    private:
+    protected:
       std::string m_author;                ///< author
       std::vector< std::string > m_data;   ///< content
       std::string m_description;           ///< description
       bool m_author_ok;                    ///< author loaded indicator
       bool m_data_ok;                      ///< data loaded indicator
       bool m_description_ok;               ///< description loaded indicator
+    };
+
+    /**  Implements NXnote Nexus class with binary data.
+    */
+    class DLLExport NXBinary:public NXNote
+    {
+    public:
+      /**  Constructor.
+      *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name The name of the NXClass relative to its parent
+      */
+      NXBinary(const NXClass& parent,const std::string& name):NXNote(parent,name){}
+      std::vector< char >& binary();
+    private:
+      std::vector< char > m_binary;   ///< content
     };
 
     //-------------------- main classes -------------------------------//

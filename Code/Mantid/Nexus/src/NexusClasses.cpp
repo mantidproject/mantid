@@ -314,13 +314,6 @@ std::vector< std::string >& NXNote::data()
 {
     if (!m_data_ok)
     {
-      /* old code */
-      //NXChar str = openNXChar("data");
-      //str.load();
-      //if( str.size() == 0 ) return m_data;
-      //std::istringstream istr(std::string(str(),str.dim0()));
-
-      /* new code */
       int rank;
       int dims[4];
       int type;
@@ -328,13 +321,17 @@ std::vector< std::string >& NXNote::data()
       NXgetinfo(m_fileID, &rank, dims, &type);
       int n = dims[0];
       char* buffer = new char[n];
-      NXgetdata(m_fileID,buffer);
+      NXstatus stat = NXgetdata(m_fileID,buffer);
       NXclosedata(m_fileID);
+      m_data.clear();
+      if (stat == NX_ERROR)
+      {
+        delete[] buffer;
+        return m_data;
+      }
       std::istringstream istr(std::string(buffer,n));
       delete[] buffer;
-      /* end of new code */
 
-      m_data.clear();
       std::string line;
       while(getline(istr,line))
       {
@@ -356,6 +353,23 @@ std::string NXNote::description()
         m_description_ok = true;
     }
     return m_description;
+}
+
+std::vector<char>& NXBinary::binary()
+{
+    if (!m_data_ok)
+    {
+      int rank;
+      int dims[4];
+      int type;
+      NXopendata (m_fileID, "data");
+      NXgetinfo(m_fileID, &rank, dims, &type);
+      int n = dims[0];
+      m_binary.resize(n);
+      NXstatus stat = NXgetdata(m_fileID,&m_binary[0]);
+      NXclosedata(m_fileID);
+    }
+    return m_binary;
 }
 
 //---------------------------------------------------------

@@ -77,6 +77,8 @@ namespace Mantid
       void readAlgorithmHistory(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
       ///Read the instrument parameter map
       void readParameterMap(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      ///Read the bin masking information
+      void readBinMasking(NXData & wksp_cls, DataObjects::Workspace2D_sptr local_workspace);
       /// Run LoadInstrument sub algorithm
       void runLoadInstrument(const std::string & inst_name, DataObjects::Workspace2D_sptr local_workspace);
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
