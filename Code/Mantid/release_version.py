@@ -27,11 +27,13 @@ def getSVNRevision():
   except:
     return versionList[0].rstrip()
 
-def writeMantidVersion():
+def writeMantidVersion(verbose=False):
   version = '1.0.' +getSVNRevision()
-
   HEADER = 'Kernel/inc/MantidKernel/MantidVersion.h'
-  print "Writing version %s into %s " % (version, HEADER)
+
+  if verbose:
+    print "Writing version %s into %s " % (version, HEADER)
+
   f = open(HEADER,'w')
 
   f.write('//This file is automatically created by Mantid/Code/Mantid/build.bat(sh)\n')
