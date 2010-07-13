@@ -223,14 +223,14 @@ if os.name == 'posix':
 print "CPPPATHS: ",cppPaths
 print "CFLAGS: ",cflags
 
+libDirList.append(os.path.abspath(dest_dir))
+
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
 cppPaths.append('inc')
 env.Append(CPPPATH=cppPaths)
 env.Replace(MYLIBLIST=libList)
 env.Replace(MYLIBDIRLIST=libDirList)
-
-libDirList.append(os.path.abspath(dest_dir))
 
 #check existence of Header files
 conf = Configure(env)
