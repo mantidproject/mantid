@@ -222,6 +222,16 @@ if os.name == 'posix':
 
 print "CPPPATHS: ",cppPaths
 print "CFLAGS: ",cflags
+
+#Export for SConscripts
+env.Append(CCFLAGS=cflags)
+cppPaths.append('inc')
+env.Append(CPPPATH=cppPaths)
+env.Replace(MYLIBLIST=libList)
+env.Replace(MYLIBDIRLIST=libDirList)
+
+libDirList.append(os.path.abspath(dest_dir))
+
 #check existence of Header files
 conf = Configure(env)
 if conf.CheckCXXHeader('unordered_map.h'):
@@ -236,8 +246,6 @@ env = conf.Finish()
 
 #Collect the includes into a single directory 
 MantidBuild.collectIncludes('.', 'includes') 
-
-libDirList.append(os.path.abspath(dest_dir))
 
 if platform.system() == 'Linux':	
   if rpmBuild :
@@ -260,13 +268,6 @@ elif os.name == 'nt':
 #Disable assert macro.
 if int(debug) == 0:
   env.Append(CPPDEFINES=['NDEBUG'])
-
-#Export for SConscripts
-env.Append(CCFLAGS=cflags)
-cppPaths.append('inc')
-env.Append(CPPPATH=cppPaths)
-env.Replace(MYLIBLIST=libList)
-env.Replace(MYLIBDIRLIST=libDirList)
 
 # Add defines for CPP
 env.Append(CPPDEFINES=["BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"])
