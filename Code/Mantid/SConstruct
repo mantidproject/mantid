@@ -240,7 +240,13 @@ if not conf.CheckCXXHeader('Notification.h') and not conf.CheckCXXHeader('Poco/N
     print "Failed to find 'Poco/Notification.h'"
     Exit(-1)
 if not conf.CheckCXXHeader('muParser.h') and not conf.CheckCXXHeader('muParser/muParser.h'):
-    print "Failed to find 'muParser.h'"
+    print "Failed to find 'muParser/muParser.h'"
+    Exit(-1)
+if not conf.CheckCXXHeader('gsl_multimin.h') and not conf.CheckCXXHeader('gsl/gsl_multimin.h'):
+    print "Failed to find 'gsl/gsl_multimin.h'"
+    Exit(-1)
+if not conf.CheckCXXHeader('napi.h'):
+    print "Failed to find 'napi.h'"
     Exit(-1)
 env = conf.Finish()
 
