@@ -3,8 +3,6 @@ import subprocess
 import sys
 import platform
 
-execfile("release_version.py")
-
 if platform.system() == 'Windows':
 	setenv = 'CALL "%VCINSTALLDIR%\\vcvarsall.bat"'
 	if platform.architecture()[0] == '64bit':
