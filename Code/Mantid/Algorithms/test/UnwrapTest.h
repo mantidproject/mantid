@@ -72,7 +72,6 @@ public:
     boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unwrappedWS"));
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "Wavelength" )
-    TS_ASSERT_EQUALS( outWS->getInstrument(), inWS->getInstrument() )
     TS_ASSERT_EQUALS( &(outWS->spectraMap()), &(inWS->spectraMap()) )
     TS_ASSERT_DIFFERS( outWS->size(), inWS->size() )
     TS_ASSERT_DIFFERS( outWS->blocksize(), inWS->blocksize() )
