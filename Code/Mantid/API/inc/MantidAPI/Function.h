@@ -158,8 +158,6 @@ private:
   std::vector<IConstraint*> m_constraints;
   /// Flags of explicitly set parameters
   std::vector<bool> m_explicitlySet;
-  /// Constraint counter for use in nextConstraint()
-  mutable int m_iConstraint;
   /// Temporary data storage used in functionDeriv
   mutable boost::shared_array<double> m_tmpFunctionOutputMinusStep;
   /// Temporary data storage used in functionDeriv

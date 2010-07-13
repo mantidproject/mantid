@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
+#include <boost/shared_array.hpp>
 #include <cmath>
 
 namespace Mantid
@@ -120,7 +121,7 @@ namespace Mantid
       /// overwrite IFunction base class methods
       std::string name()const{return "Convolution";}
       void function(double* out, const double* xValues, const int& nData)const;
-      //void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
+      void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
       /// Add a function. 
       int addFunction(IFunction* f);
@@ -138,6 +139,10 @@ namespace Mantid
       mutable double* m_resolution;
       /// To keep the size of m_resolution
       mutable int m_resolutionSize;
+      /// Temporary data storage used in functionDeriv
+      mutable boost::shared_array<double> m_tmp;
+      /// Temporary data storage used in functionDeriv
+      mutable boost::shared_array<double> m_tmp1;
     };
 
   } // namespace CurveFitting

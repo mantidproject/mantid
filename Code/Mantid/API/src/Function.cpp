@@ -17,7 +17,6 @@ namespace API
 
 /// Copy contructor
 Function::Function(const Function& f)
-:m_iConstraint(0)
 {
   m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
@@ -30,7 +29,6 @@ Function& Function::operator=(const Function& f)
   m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
   m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
-  m_iConstraint = f.m_iConstraint;
   return *this;
 }
 

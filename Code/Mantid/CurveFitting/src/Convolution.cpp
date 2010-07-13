@@ -151,20 +151,44 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
 
 }
 
-//void Convolution::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
-//{
-//    //const double& height = getParameter("Height");
-//    //const double& peakCentre = getParameter("PeakCentre");
-//    //const double& weight = pow(1/getParameter("Sigma"),2);
-//
-//    //for (int i = 0; i < nData; i++) {
-//    //    double diff = xValues[i]-peakCentre;
-//    //    double e = exp(-0.5*diff*diff*weight);
-//    //    out->set(i,0, e);
-//    //    out->set(i,1, diff*height*e*weight);
-//    //    out->set(i,2, -0.5*diff*diff*height*e);  // derivative with respect to weight not sigma
-//    //}
-//}
+void Convolution::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+{
+  if (nData == 0) return;
+  std::vector<double> dp(nParams());
+  std::vector<double> param(nParams());
+  for(int i=0;i<nParams();i++)
+  {
+    double param = getParameter(i);
+    if (param != 0.0)
+    {
+      dp[i] = param*0.01;
+    }
+    else
+    {
+      dp[i] = 0.01;
+    }
+  }
+
+  if (!m_tmp)
+  {
+    m_tmp.reset(new double[nData]);
+    m_tmp1.reset(new double[nData]);
+  }
+
+  function(m_tmp.get(),xValues, nData);
+
+  for (int j = 0; j < nParams(); j++) 
+  {
+    double p0 = getParameter(j);
+    setParameter(j,p0 + dp[j],false);
+    function(m_tmp1.get(),xValues, nData);
+    for (int i = 0; i < nData; i++) 
+    {
+      out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
+    }
+    setParameter(j,p0,false);
+  }
+}
 
 /**
  * The first function added must be the resolution. 
