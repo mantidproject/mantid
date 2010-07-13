@@ -23,6 +23,7 @@ MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent), m_allowMultipleF
     m_defDir = QString::fromStdString(searchDirs.front());
   }
 
+  setupInstrumentNameIndex();
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SLOT(readEntries()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   m_uiForm.fileEditor->clear();
@@ -343,11 +344,21 @@ void MWRunFiles::browseClicked()
   
   readEntries();
 }
-void MWRunFiles::instrumentChange(const QString &newInstr)
+void MWRunFiles::instrumentChange(const QString & instrName)
 {
-  m_instrPrefix = newInstr;
+  //Lookup for a prefix from a name.
+  if( m_instrNameIndex.contains(instrName) )
+  {
+    m_instrPrefix = m_instrNameIndex.value(instrName);
+  }
+  //Use the name as-is if no name is mapped to it
+  else
+  {
+    m_instrPrefix = instrName;
+  }
+  
   // the tooltip will tell users which instrument, if any, if associated with this control
-  if (newInstr.isEmpty())
+  if (m_instrPrefix.isEmpty())
   {
     setToolTip("(no intrument selected)");
   }
@@ -368,7 +379,33 @@ void MWRunFiles::readEntries()
   emit fileChanged();
 }
 
+/**
+ * Setup the instrument name->prefix lookup index
+ */
+void MWRunFiles::setupInstrumentNameIndex()
+{
+  m_instrNameIndex.clear();
+ 	Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
+	// get instrument names from config file
+	std::string key_name = std::string("instrument.names.") + mtd_config.getString("default.facility");
+	QString names = QString::fromStdString(mtd_config.getString(key_name));
+	QStringList nameList = names.split(";", QString::SkipEmptyParts);
+	// get instrument prefixes from config file
+	std::string key_pref = std::string("instrument.prefixes.") + mtd_config.getString("default.facility");
+	QString prefixes = QString::fromStdString(mtd_config.getString(key_pref));
+	QStringList prefList = prefixes.split(";", QString::SkipEmptyParts);
 
+  int nameCount = nameList.count();
+  if( nameCount != prefList.count() )
+  {
+    throw std::runtime_error("Size mismatch with name/prefix lists. Check that the instrument.names.[facility] and instrument.prefixes.[facility] have the same length.");
+  }
+
+  for( int i = 0; i < nameCount; ++i )
+  {
+    m_instrNameIndex.insert(nameList[i], prefList[i]);
+  }
+}
 
 //****************************************************************************
 //    MWRunFile
@@ -429,11 +466,7 @@ void MWRunFile::browseClicked()
   
   readEntries();
 }
-void MWRunFile::instrumentChange(const QString &inst)
-{
-  MWRunFiles::instrumentChange(inst);
-  emit fileChanged();
-}
+
 void MWRunFile::readEntries()
 {
   MWRunFiles::readEntries();

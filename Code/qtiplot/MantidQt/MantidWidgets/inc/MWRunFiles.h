@@ -74,11 +74,10 @@ namespace MantidQt
       void fileChanged();
 
     public slots:
-      virtual void instrumentChange(const QString &newInstr);
+      virtual void instrumentChange(const QString & instrName);
 
-    private:
-      bool m_allowMultipleFiles;
-      bool m_isOptional;
+    protected:
+      virtual QString openFileDia();
 
     protected:
       Ui::MWRunFiles m_uiForm;
@@ -91,14 +90,21 @@ namespace MantidQt
       QString m_lastDir;
       QString m_fileFilter;
 
-
-      virtual QString openFileDia();
+    protected slots:
+      virtual void browseClicked();
+      virtual void readEntries();
+      
+    
+    private:
       void readRunNumAndRanges();
       void readCommasAndHyphens(const std::string &in, std::vector<std::string> &out);
+      void setupInstrumentNameIndex();
 
-      protected slots:
-        virtual void browseClicked();
-        virtual void readEntries();
+    private:
+      bool m_allowMultipleFiles;
+      bool m_isOptional;
+
+      QHash<QString, QString> m_instrNameIndex;
     };
 
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFile : public MWRunFiles
@@ -117,7 +123,7 @@ namespace MantidQt
     signals:
       void fileChanged();
       public slots:
-        void suggestFilename(const QString &newName);
+      void suggestFilename(const QString &newName);
     protected:
       /// it is possible to set and change the default value for this widget, this stores the last default value given to it
       QString m_suggestedName;
@@ -127,7 +133,6 @@ namespace MantidQt
 
       private slots:
         void browseClicked();
-        void instrumentChange(const QString &);
         void readEntries();
     };
   }

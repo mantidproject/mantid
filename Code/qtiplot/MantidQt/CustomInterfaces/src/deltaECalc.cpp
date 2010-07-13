@@ -47,21 +47,44 @@ void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles
     pyCode += ",'.nxs'";
   }
   pyCode += "]\n\n";
- 
-  pyCode += QString("mono_sample.convert_to_energy(%1, '%2', %3, %4, %5, %6, '%7')");
+  
   QString runFilesList = vectorToPyList(runFiles);
-  pyCode = pyCode.arg(runFilesList, whiteBeam, m_sets.leEGuess->text());
-
-  if( absRunFiles.empty() )
+  if( m_sets.ckSumSpecs->isChecked() )
   {
-    pyCode = pyCode.arg("None","None");
+    pyCode += QString("mono_sample.convert_to_energy(%1, '%2', %3, %4, %5, %6, '%7')");
+
+    pyCode = pyCode.arg(runFilesList, whiteBeam, m_sets.leEGuess->text());
+    if( absRunFiles.empty() )
+    {
+      pyCode = pyCode.arg("None","None");
+    }
+    else
+    {
+      runFilesList = vectorToPyList(absRunFiles);
+      pyCode = pyCode.arg(runFilesList, "'" + absWhiteBeam + "'");
+    }
+    pyCode = pyCode.arg(m_sets.leVanEi->text(), saveName);
   }
   else
   {
-    runFilesList = vectorToPyList(absRunFiles);
-    pyCode = pyCode.arg(runFilesList, "'" + absWhiteBeam + "'");
+    if( absRunFiles.empty() )
+    {
+      pyCode += 
+        "rfiles = " + runFilesList + "\n"
+        "for f in rfiles:\n"
+        "  mono_sample.convert_to_energy(f,'%1', %2, None, None, None)\n";
+      pyCode = pyCode.arg(whiteBeam, m_sets.leEGuess->text());
+    }
+    else
+    {
+      pyCode += "rfiles = " + runFilesList + "\n";
+      pyCode += "abs_rfiles = " + vectorToPyList(absRunFiles) + "\n";
+      pyCode += 
+        "for run, abs in zip(rfiles, abs_rfiles):\n"
+        "  mono_sample.convert_to_energy(run, '%1', %2, abs, '%3', %4)\n";
+      pyCode = pyCode.arg(whiteBeam, m_sets.leEGuess->text(), absWhiteBeam, m_sets.leVanEi->text());
+    }
   }
-  pyCode = pyCode.arg(m_sets.leVanEi->text(), saveName);
 
   m_pyScript = pyCode;
 }

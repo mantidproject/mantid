@@ -148,12 +148,16 @@ void Homer::page1FileWidgs()
   m_runFilesWid->setExtensionList(fileExts);
   connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_runFilesWid, SLOT(instrumentChange(const QString &)));
   connect(m_runFilesWid, SIGNAL(fileChanged()), this, SLOT(runFilesChanged()));
+  QString instrName = m_uiForm.loadRun_cbInst->currentText();
+  m_runFilesWid->instrumentChange(instrName);
 
   m_WBVWid = new MWRunFile(this);
   m_WBVWid->setLabelText("White Beam");
   m_WBVWid->setExtensionList(fileExts);
   m_uiForm.whiteFileLay->insertWidget(0, m_WBVWid);
+  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_WBVWid, SLOT(instrumentChange(const QString &)));
   connect(m_WBVWid, SIGNAL(fileChanged()), this, SLOT(updateWBV()));
+  m_WBVWid->instrumentChange(instrName);
 
   // Monitor the map file changes
   connect(m_uiForm.map_fileInput_leName, SIGNAL(editingFinished()), this, SLOT(validateMapFile()));
@@ -228,7 +232,9 @@ void Homer::setUpPage3()
   m_absRunFilesWid->setLabelText("Mono Van");
   m_absRunFilesWid->setExtensionList(fileExts);
   mapLay->addWidget(m_absRunFilesWid, 0, 0, 1, 3);
-
+  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_absRunFilesWid, SLOT(instrumentChange(const QString &)));
+  QString instrName = m_uiForm.loadRun_cbInst->currentText();
+  m_absRunFilesWid->instrumentChange(instrName);
 
   m_absWhiteWid = new MWRunFile(this);
   m_absWhiteWid->setLabelText("White Beam");
@@ -238,6 +244,8 @@ void Homer::setUpPage3()
   mapLay->takeAt(mapLay->indexOf(item));
   delete item;
   mapLay->addWidget(m_absWhiteWid, 2, 0, 1, 3);
+  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_absWhiteWid, SLOT(instrumentChange(const QString &)));
+  m_absWhiteWid->instrumentChange(instrName);
 
   // Update values on absolute tab with those from vanadium tab
   connect(m_uiForm.map_fileInput_leName, SIGNAL(textChanged(const QString&)), 
@@ -614,8 +622,9 @@ void Homer::validateRebinBox(const QString & text)
  */
 void Homer::validateMapFile()
 {
-  FileProperty *validateMapFile = new FileProperty("UnusedName", m_uiForm.map_fileInput_leName->text().toStdString(),FileProperty::Load);
-  QString error = QString::fromStdString(validateMapFile->isValid()); 
+  FileProperty *validateMapFile = new FileProperty("UnusedName", "",FileProperty::Load);
+  std::string value = m_uiForm.map_fileInput_leName->text().toStdString();
+  QString error = QString::fromStdString(validateMapFile->setValue(value));
   if( error.isEmpty() )
   {
     m_uiForm.valMap->hide();
@@ -694,14 +703,22 @@ bool Homer::runScripts()
   {
     unitsConv.setDiagnosedWorkspaceName("");
   }
-  unitsConv.createProcessingScript(m_runFilesWid->getFileNames(), m_WBVWid->getFileName(),
-				   m_absRunFilesWid->getFileNames(), m_absWhiteWid->getFileName(),
-				   m_uiForm.leNameSPE->text());
+
+  if( m_uiForm.ckRunAbsol->isChecked() )
+  {
+    unitsConv.createProcessingScript(m_runFilesWid->getFileNames(), m_WBVWid->getFileName(),
+      m_absRunFilesWid->getFileNames(), m_absWhiteWid->getFileName(),
+	    m_uiForm.leNameSPE->text());
+  }
+  else
+  {
+    unitsConv.createProcessingScript(m_runFilesWid->getFileNames(), m_WBVWid->getFileName(),
+      std::vector<std::string>(), "", m_uiForm.leNameSPE->text());
+  }
 
   pythonIsRunning(true);
   // we're back to processing the settings on the first page
   m_uiForm.tabWidget->setCurrentIndex(0);
-
   QString errors = unitsConv.run();
   pythonIsRunning(false); 
 

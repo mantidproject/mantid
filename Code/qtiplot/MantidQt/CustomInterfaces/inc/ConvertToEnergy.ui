@@ -147,14 +147,22 @@
              <number>0</number>
             </property>
             <property name="currentIndex" >
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="page_3" >
              <layout class="QGridLayout" name="gridLayout" >
               <item row="1" column="0" >
-               <layout class="QHBoxLayout" name="runFilesLay" />
+               <layout class="QHBoxLayout" name="runFilesLay" >
+                <item>
+                 <widget class="QCheckBox" name="ckSumSpecs" >
+                  <property name="text" >
+                   <string>Sum</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
-              <item row="3" column="0" >
+              <item row="2" column="0" >
                <layout class="QHBoxLayout" name="horizontalLayout_1" >
                 <item>
                  <widget class="QLabel" name="label_3" >
@@ -219,32 +227,8 @@
                 </item>
                </layout>
               </item>
-              <item row="5" column="0" >
+              <item row="4" column="0" >
                <layout class="QHBoxLayout" name="whiteFileLay" />
-              </item>
-              <item row="2" column="0" >
-               <layout class="QHBoxLayout" name="horizontalLayout_5" >
-                <item>
-                 <spacer name="horizontalSpacer_23" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="ckSumSpecs" >
-                  <property name="text" >
-                   <string>Sum Files</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </widget>
@@ -406,7 +390,7 @@
              <number>0</number>
             </property>
             <property name="currentIndex" >
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="page_5" >
              <layout class="QGridLayout" name="gridLayout_4" >
@@ -706,7 +690,7 @@
           <item>
            <widget class="QStackedWidget" name="swRebin" >
             <property name="currentIndex" >
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="page_9" >
              <layout class="QGridLayout" name="gridLayout_9" >
