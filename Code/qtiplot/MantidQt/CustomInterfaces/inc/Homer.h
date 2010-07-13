@@ -70,6 +70,10 @@ namespace MantidQt
       // Initialize the layout
       virtual void initLayout();
       virtual void initLocalPython();
+      void helpClicked();
+      ///run the algorithms that can be run with the data that users supplied
+      void runClicked();
+      void setIDFValues(const QString & prefix);  
 
     private:
       void showEvent(QShowEvent *event);
@@ -80,8 +84,6 @@ namespace MantidQt
       QString defaultName();
       std::string insertNumber(const std::string &filename, const int number);
 
-      // set up the default values, signals and slots, tooltips, etc.
-      QString setUpInstru();
       void setUpPage1();
       void page1FileWidgs();
       void page1Validators();
@@ -112,20 +114,17 @@ namespace MantidQt
         void validateRunEi(const QString &);
         void validateRebinBox(const QString &);
         void validateMapFile();
-        ///run the algorithms that can be run with the data that users supplied
-        void runClicked();
+
         //get rid of this one, no?
         void browseClicked(const QString buttonDis);
         /// open the wiki page for this interface in their browser
-        void helpClicked();
+
         void runFilesChanged();
         void updateSaveName();
         void saveNameUpd();
         void updateWBV();
         void bgRemoveClick();
         void bgRemoveReadSets();
-        void instrSelectionChanged(const QString& prefix);
-        void setIDFValues(const QString & prefix);  
         void saveFormatOptionClicked(QAbstractButton*);
         void updateAbsEi(const QString & text);
         void markAbsEiDirty(bool dirty = true);

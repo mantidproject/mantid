@@ -30,7 +30,8 @@ SOURCES = \
   $$SRCDIR/Homer.cpp \
   $$SRCDIR/deltaECalc.cpp \
   $$SRCDIR/Background.cpp \
-  $$SRCDIR/ConvertToEnergy.cpp
+  $$SRCDIR/ConvertToEnergy.cpp \
+  $$SRCDIR/Indirect.cpp
 
 HEADERS = \
   $$HEADERDIR/SANSRunWindow.h \
@@ -39,7 +40,8 @@ HEADERS = \
   $$HEADERDIR/Homer.h \
   $$HEADERDIR/deltaECalc.h \
   $$HEADERDIR/Background.h \
-  $$HEADERDIR/ConvertToEnergy.h
+  $$HEADERDIR/ConvertToEnergy.h \
+  $$HEADERDIR/Indirect.h
   
 UI_DIR = $$HEADERDIR
 

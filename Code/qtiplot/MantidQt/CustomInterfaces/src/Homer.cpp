@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Homer.h"
+
 #include "MantidQtCustomInterfaces/Background.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -39,16 +40,12 @@ Homer::Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
   UserSubWindow(parent), m_uiForm(uiForm), m_runFilesWid(NULL), m_WBVWid(NULL),
   m_absRunFilesWid(NULL), m_absWhiteWid(NULL), m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
   m_isPyInitialized(false), m_backgroundWasVisible(false), m_absEiDirty(false)
-{}
+{
+}
 
 /// Set up the dialog layout
 void Homer::initLayout()
 {
-  // Remove calibration from this layout
-  m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabCalibration));
-
-  // the next statments add default vales, toolTips, etc.
-  setSettingsGroup(setUpInstru());
   // don't change the order of these setUpPage*() statments
   setUpPage1();
   // they do the custom setting up like setting initial values tool tips on each of the three tab pages 
@@ -66,8 +63,7 @@ void Homer::initLayout()
   connect(m_uiForm.pbAbsMapFileBrowse, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(signalMapper, SIGNAL(mapped(const QString)), this, SLOT(browseClicked(const QString)));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked())); 
+  
   m_uiForm.pbRun->setToolTip("Process run files");
   m_uiForm.pbHelp->setToolTip("Online documentation (loads in a browser)");
 }
@@ -75,7 +71,16 @@ void Homer::initLayout()
 void Homer::initLocalPython()
 {
   m_isPyInitialized = true;
-  setIDFValues(m_uiForm.loadRun_cbInst->currentText());
+}
+
+/**
+ * This function is called from the base interface when the user clicks on the "Help"
+ * button and is viewing Homer.
+ */
+void Homer::helpClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+    "Homer"));
 }
 
 /**
@@ -130,35 +135,32 @@ void Homer::pythonIsRunning(bool running)
   m_uiForm.pbRun->setEnabled( ! running );
   m_diagPage->blockPython(running);
 }
-/** Fill the instrument selection dialog box with the list of instruments
-*  and set the current text to the one that was passed
-*/
-QString Homer::setUpInstru()
-{ 
-  // Populate the prefix box with the known instruments and set the default
-  Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
-  // It's easier here to populate the combobox with a QStringList which can be formed using the split method
-  // than using getInstrumentPrefixes on the ConfigService
-  std::string key = std::string("instrument.prefixes.") + mtd_config.getString("default.facility");
-  QString prefixes = QString::fromStdString(mtd_config.getString(key));
-  QStringList pref_list = prefixes.split(";", QString::SkipEmptyParts);
-  m_uiForm.loadRun_cbInst->clear();
-  m_uiForm.loadRun_cbInst->addItems(pref_list);
 
-  QString curInstru = m_prev.value("CustomInterfaces/Homer/instrument", "").toString();
-  int index = m_uiForm.loadRun_cbInst->findText(curInstru);
-  if( index < 0 )
-  {
-    curInstru = QString::fromStdString(mtd_config.getString("default.instrument"));
-    index =  m_uiForm.loadRun_cbInst->findText(curInstru);
-    if( index < 0 )
-    {
-      index = 0;
+/** Create a suggested output filename based on the supplied input
+*  file names
+*/
+QString Homer::defaultName()
+{
+  try
+  {//this will throw if there is an invalid filename
+    const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
+    if ( fileList.size() == 0 )
+    {// no input files we can't say anything about the output files
+      return "";
     }
+    if ( fileList.size() > 1 && ! m_uiForm.ckSumSpecs->isChecked() )
+    {// multiple input files that are not summed give rise to multiple output files. Prepare to give the output files names that corrospond to the input filenames
+      return "";
+    }
+    // maybe normal operation: the output file name is based on the first input file
+    return deltaECalc::SPEFileName(fileList.front());
   }
-  m_uiForm.loadRun_cbInst->setCurrentIndex(index);
-  return curInstru;
+  catch (std::invalid_argument)
+  {// if there is an invalid filename
+    return "";
+  }//the error is also displayed by the file widget's validator
 }
+
 /// For each widgets in the first tab this adds custom widgets, fills in combination boxes and runs setToolTip()
 void Homer::setUpPage1()
 {
@@ -166,10 +168,6 @@ void Homer::setUpPage1()
   page1Validators();
 
   m_backgroundDialog = new Background(this);
-  
-  // Force a check of the instrument
-  instrSelectionChanged(m_uiForm.loadRun_cbInst->currentText());
-  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrSelectionChanged(const QString&)));
   
   connect(m_uiForm.pbBack, SIGNAL(clicked()), this, SLOT(bgRemoveClick()));
 
@@ -206,7 +204,7 @@ void Homer::page1FileWidgs()
   m_saveChecksGroup->addButton(m_uiForm.save_ckNexus);
   m_saveChecksGroup->setExclusive(false);
 
-  connect(m_saveChecksGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(saveFormatOptionClicked(QAbstractButton*)));
+	connect(m_saveChecksGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(saveFormatOptionClicked(QAbstractButton*)));
 }
 
 /// make validator labels and associate them with the controls that need them in the first tab
@@ -756,14 +754,8 @@ void Homer::browseClicked(const QString buttonDis)
     m_uiForm.tabWidget->widget(0)->setFocus();
   }
 }
-/**
- * A slot to handle the help button click
- */
-void Homer::helpClicked()
-{
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-    "Homer"));
-}
+
+
 
 /** This slot updates the MWDiag and SPE filename suggestor with the
 * names of the files the user has just chosen
@@ -814,30 +806,8 @@ void Homer::updateWBV()
   }
 }
 
-/** Create a suggested output filename based on the supplied input
-*  file names
-*/
-QString Homer::defaultName()
-{
-  try
-  {//this will trhow if there is an invalid filename
-    const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
-    if ( fileList.size() == 0 )
-    {// no input files we can't say anything about the output files
-      return "";
-    }
-    if ( fileList.size() > 1 && ! m_uiForm.ckSumSpecs->isChecked() )
-    {// multiple input files that are not summed give rise to multiple output files. Prepare to give the output files names that corrospond to the input filenames
-      return "";
-    }
-    // maybe normal operation: the output file name is based on the first input file
-    return deltaECalc::SPEFileName(fileList.front());
-  }
-  catch (std::invalid_argument)
-  {// if there is an invalid filename
-    return "";
-  }//the error is also displayed by the file widget's validator
-}
+
+
 /** creates and shows the background removal time of flight form
 */
 void Homer::bgRemoveClick()
@@ -858,33 +828,8 @@ void Homer::bgRemoveReadSets()
   syncBackgroundSettings();
 }
 
-/**
- * Called when a new selection is made in the instrument box
- */
-void Homer::instrSelectionChanged(const QString& prefix)
-{
-  // Need to check that there is a valid parameter file for the instrument else the
-  // analysis won't work
-  QString paramfile_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory"));
-  QDir paramdir(paramfile_dir);
-  paramdir.setFilter(QDir::Files);
-  QStringList filters;
-  filters << prefix + "*_Parameters.xml";
-  paramdir.setNameFilters(filters);
 
-  QStringList entries = paramdir.entryList();
-  if( entries.isEmpty() )
-  {
-    QMessageBox::warning(this, "MantidPlot", "Selected instrument does have a parameter file.\nCannot run analysis");
-    m_uiForm.pbRun->setEnabled(false);
-  }
-  else
-  {
-    m_uiForm.pbRun->setEnabled(true);
-  }
 
-  setIDFValues(prefix);  
-}
 
 void Homer::setIDFValues(const QString & prefix)
 {

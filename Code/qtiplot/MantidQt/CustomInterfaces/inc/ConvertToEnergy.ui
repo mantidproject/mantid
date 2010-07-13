@@ -33,7 +33,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2" >
        <item>
-        <widget class="QStackedWidget" name="swIntrument" >
+        <widget class="QStackedWidget" name="swInstrument" >
          <property name="lineWidth" >
           <number>0</number>
          </property>
@@ -72,26 +72,6 @@
              <property name="editable" >
               <bool>true</bool>
              </property>
-             <item>
-              <property name="text" >
-               <string>MAR</string>
-              </property>
-             </item>
-             <item>
-              <property name="text" >
-               <string>MAP</string>
-              </property>
-             </item>
-             <item>
-              <property name="text" >
-               <string>IRIS</string>
-              </property>
-             </item>
-             <item>
-              <property name="text" >
-               <string>OSIRIS</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item>
@@ -1161,7 +1141,410 @@
       <attribute name="title" >
        <string>Calibration</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_11" />
+      <layout class="QVBoxLayout" name="verticalLayout_10" >
+       <item>
+        <widget class="QGroupBox" name="cal_gbInputs" >
+         <property name="title" >
+          <string/>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_17" >
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_18" >
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_12" >
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5" >
+                <item>
+                 <widget class="QLabel" name="label_2" >
+                  <property name="text" >
+                   <string>Number of Runs:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="cal_leNoRuns" />
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7" >
+                <item>
+                 <widget class="QLabel" name="label_4" >
+                  <property name="text" >
+                   <string>Run Number:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="cal_leRunNo" />
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_21" >
+              <item>
+               <spacer name="verticalSpacer_3" >
+                <property name="orientation" >
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType" >
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0" >
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cal_pbCheck" >
+                <property name="text" >
+                 <string>Check</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="cal_gbSpectralRange" >
+         <property name="title" >
+          <string>Spectral Range</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_20" >
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_19" >
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_15" >
+              <item>
+               <widget class="QLabel" name="label_22" >
+                <property name="text" >
+                 <string>Quasielastic</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbGraphite" >
+                <property name="text" >
+                 <string>Graphite</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbMica" >
+                <property name="text" >
+                 <string>Mica</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbDiffraction" >
+                <property name="text" >
+                 <string>Diffraction</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_13" >
+              <item>
+               <widget class="QLabel" name="label_5" >
+                <property name="text" >
+                 <string>Min</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbGraphiteMin" >
+                <property name="text" >
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbMicaMin" >
+                <property name="text" >
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbDiffractionMin" >
+                <property name="text" >
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_14" >
+              <item>
+               <widget class="QLabel" name="label_12" >
+                <property name="text" >
+                 <string>Max</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbGraphiteMax" >
+                <property name="text" >
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbMicaMax" >
+                <property name="text" >
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="cal_lbDiffractionMax" >
+                <property name="text" >
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+         <zorder></zorder>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="cal_gbTimeRange" >
+         <property name="title" >
+          <string>Time Range</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_19" >
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_23" >
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_16" >
+              <item>
+               <widget class="QLabel" name="label_26" >
+                <property name="text" >
+                 <string>First</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_36" >
+                <property name="text" >
+                 <string>Second</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_19" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_18" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_18" >
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_21" >
+                <item>
+                 <spacer name="horizontalSpacer_4" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_27" >
+                  <property name="text" >
+                   <string>Min:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="cal_leFirstMin" />
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_16" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_35" >
+                  <property name="text" >
+                   <string>Max:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="cal_leFirstMax" />
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_22" >
+                <item>
+                 <spacer name="horizontalSpacer_4" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_37" >
+                  <property name="text" >
+                   <string>Min:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="cal_leSecondMin" />
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_17" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_38" >
+                  <property name="text" >
+                   <string>Max:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="cal_leSecondMax" />
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="cal_gbButtons" >
+         <property name="title" >
+          <string/>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_25" >
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_24" >
+            <item>
+             <spacer name="horizontalSpacer_20" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="cal_pbCreate" >
+              <property name="text" >
+               <string>Create Calibration</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_21" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tabDiagnoseDetectors" >
       <attribute name="title" >
