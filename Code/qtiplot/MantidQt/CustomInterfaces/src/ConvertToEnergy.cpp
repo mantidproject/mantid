@@ -3,7 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/ConvertToEnergy.h"
 #include "MantidQtCustomInterfaces/Homer.h" // user interface for Direct instruments
-#include "MantidQTCustomInterfaces/Indirect.h" // user interface for Indirect instruments
+#include "MantidQtCustomInterfaces/Indirect.h" // user interface for Indirect instruments
 
 #include "MantidKernel/ConfigService.h"
 
