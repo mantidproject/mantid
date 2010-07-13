@@ -2,14 +2,17 @@
 # This module contains utility functions common to the 
 # SANS data reduction scripts
 ########################################################
+import SANSInsts
 from mantidsimple import *
 import math
 
 # Return the details specific to the instrument and bank given
 # as:
 #   dimension, specmin, specmax, backmon_start, backmon_end
-def GetInstrumentDetails(instr_name, detbank):
-	if instr_name == 'LOQ':
+def GetInstrumentDetails(instrument):
+	detbank = instrument.curDetector().name()
+
+	if instrument.name == 'LOQ':
 		if detbank == 'main-detector-bank':
 			return 128, 3, 16386
 		elif detbank == 'HAB':

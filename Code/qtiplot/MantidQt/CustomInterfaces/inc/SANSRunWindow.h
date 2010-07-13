@@ -118,6 +118,8 @@ private:
   void markError(QLabel* label);
   /// Run an assign command
   bool runAssign(int key, QString & logs);
+  /// Get the detectors' names
+  void fillDetectNames(QComboBox *output);
   int getPeriod(const int key);
   void setNumberPeriods(const int key, const int num);
   void unSetPeriods(const int key);

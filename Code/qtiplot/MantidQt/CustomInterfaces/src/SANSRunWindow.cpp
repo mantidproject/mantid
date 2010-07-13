@@ -198,7 +198,7 @@ void SANSRunWindow::initLayout()
  */
 void SANSRunWindow::initLocalPython()
 {
-  // Imoprt the SANS module and set the correct instrument
+  // Import the SANS module and set the correct instrument
   QString result = runPythonCode("try:\n\tfrom SANSReduction import *\nexcept (ImportError,SyntaxError), details:\tprint 'Error importing SANSReduction: ' + str(details)");
   if( result.trimmed().isEmpty() )
   {
@@ -437,6 +437,8 @@ bool SANSRunWindow::loadUserFile()
   // Use python function to read the file and then extract the fields
   runReduceScriptFunction("MaskFile(r'" + filetext + "')");
 
+  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
+
   double unit_conv(1000.);
   // Radius
   double dbl_param = runReduceScriptFunction("printParameter('RMIN'),").toDouble();
@@ -513,7 +515,8 @@ bool SANSRunWindow::loadUserFile()
   }
   
   ////Detector bank
-  param = runReduceScriptFunction("printParameter('DETBANK')");
+  param = runReduceScriptFunction(
+    "printParameter('SANSInsts.getCurDetector().name()')");
   index = m_uiForm.detbank_sel->findText(param);  
   if( index >= 0 && index < 2 )
   {
@@ -1184,8 +1187,6 @@ void SANSRunWindow::selectUserFile()
   }
   
   runReduceScriptFunction("UserPath('" + QFileInfo(m_uiForm.userfile_edit->text()).path() + "')");
-  //Set the correct instrument
-  runReduceScriptFunction(m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString());
 
   if( !loadUserFile() )
   {
@@ -1292,6 +1293,11 @@ bool SANSRunWindow::handleLoadButtonClick()
     showInformationBox("Please load the relevant user file.");
     return false;
   }
+  //ensure the Python objects are up to date with our instrument selection
+  QString pythonSetInst =
+    m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString();
+  runReduceScriptFunction(pythonSetInst);
+
   setProcessingState(true, -1);
 
   if( m_force_reload ) cleanup();
@@ -1808,13 +1814,27 @@ void SANSRunWindow::handleShowMaskButtonClick()
 
 /**
  * A different instrument has been selected
+ * @throw runtime_error if the instrument doesn't have exactly two detectors 
  */
 void SANSRunWindow::handleInstrumentChange(int index)
 {
-  if( index == 0 ) 
+  //Inform the Python objects of the change
+  QString pythonSetInst =
+    m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString();
+  runReduceScriptFunction(pythonSetInst);
+
+  fillDetectNames(m_uiForm.detbank_sel);
+  QString detect = runReduceScriptFunction(
+    "printParameter('SANSInsts.getCurDetector().name()')");
+  int ind = m_uiForm.detbank_sel->findText(detect);  
+  if( ind >= 0 && ind < 2 )
   {
-    m_uiForm.detbank_sel->setItemText(0, "main-detector-bank");
-    m_uiForm.detbank_sel->setItemText(1, "HAB");
+    m_uiForm.detbank_sel->setCurrentIndex(ind);
+  }
+
+  const QString instrument = m_uiForm.inst_opt->itemText(index);
+  if( instrument == "LOQ" ) 
+  {
     m_uiForm.beam_rmin->setText("60");
     m_uiForm.beam_rmax->setText("200");
     
@@ -1824,10 +1844,8 @@ void SANSRunWindow::handleInstrumentChange(int index)
     m_uiForm.file_opt->clear();
     m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   }
-  else
+  else if ( instrument == "SANS2D" )
   { 
-    m_uiForm.detbank_sel->setItemText(0, "rear-detector");
-    m_uiForm.detbank_sel->setItemText(1, "front-detector");
     m_uiForm.beam_rmin->setText("60");
     m_uiForm.beam_rmax->setText("280");
 
@@ -1838,6 +1856,7 @@ void SANSRunWindow::handleInstrumentChange(int index)
     m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
     m_uiForm.file_opt->addItem("nexus", QVariant(".nxs"));
   }
+
   m_cfg_loaded = false;
 }
 
@@ -2119,6 +2138,32 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     }
   }
   return status;
+}
+/** Gets the detectors that the instrument has and fills the
+*  combination box with these, there must exactly two detectors
+*  @parma output[out] this combination box will be cleared and filled with the new names
+*  @throw runtime_error if there aren't exactly two detectors 
+*/
+void SANSRunWindow::fillDetectNames(QComboBox *output)
+{
+  QString detsTuple = runReduceScriptFunction(
+    "printParameter('SANSInsts.getCurInst().listDetectors()')");
+
+  if (detsTuple.isEmpty())
+  {//this happens if the run Python signal hasn't yet been connected
+    return;
+  }
+
+  QStringList dets = detsTuple.split("'", QString::SkipEmptyParts);
+  // the tuple will be of the form ('det1', 'det2'), hence the split should return 5 parts
+  if ( dets.count() != 5 )
+  {
+    QMessageBox::critical(this, "Can't Load Instrument", "The instrument must have only 2 detectors. Can't proceed with this instrument");
+    throw std::runtime_error("Invalid instrument setting, you should be able to continue by selecting a valid instrument");
+  }
+  
+  output->setItemText(0, dets[1]);
+  output->setItemText(1, dets[3]);
 }
 /** gets the number entered into the periods box
 * @param key The box this applies to
