@@ -66,8 +66,8 @@ void SolidAngleCorrection::exec()
     // Skip if we have a monitor or if the detector is masked.
     if ( det->isMonitor() || det->isMasked() ) continue;
 
-    MantidVec YIn = inputWS->readY(i);
-    MantidVec EIn = inputWS->readE(i);
+    const MantidVec& YIn = inputWS->readY(i);
+    const MantidVec& EIn = inputWS->readE(i);
 
     MantidVec& YOut = outputWS->dataY(i);
     MantidVec& EOut = outputWS->dataE(i);
