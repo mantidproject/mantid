@@ -91,6 +91,7 @@ namespace PythonAPI
       .def("getNumberParameter", &Mantid::Geometry::IComponent::getNumberParameter)
       .def("getPositionParameter", &Mantid::Geometry::IComponent::getPositionParameter)
       .def("getRotationParameter", &Mantid::Geometry::IComponent::getRotationParameter)
+	  .def("getStringParameter", &Mantid::Geometry::IComponent::getStringParameter)
       ;
    
     //ICompAssembly class
@@ -132,6 +133,17 @@ namespace PythonAPI
     class_<Mantid::Geometry::ParametrizedComponent, bases<Mantid::Geometry::IComponent>, 
       boost::noncopyable>("ParameterizedComponent", no_init)
       ;
+
+	//Detector
+	class_<Mantid::Geometry::Detector, bases<Mantid::Geometry::IDetector>,
+		boost::noncopyable>("Detector", no_init)
+		;
+
+	//Detector
+	class_<Mantid::Geometry::ParDetector, bases<Mantid::Geometry::IDetector>,
+		boost::noncopyable>("ParDetector", no_init)
+		;
+
     //CompAssembly class
     class_<Mantid::Geometry::CompAssembly, boost::python::bases<Mantid::Geometry::ICompAssembly>, 
       boost::noncopyable>("CompAssembly", no_init)
