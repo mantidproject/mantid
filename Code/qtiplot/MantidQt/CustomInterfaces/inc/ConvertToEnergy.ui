@@ -12,7 +12,7 @@
   <property name="windowTitle" >
    <string>Convert To Energy</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_10" >
+  <layout class="QVBoxLayout" name="verticalLayout_20" >
    <item>
     <widget class="QTabWidget" name="tabWidget" >
      <property name="styleSheet" >
@@ -147,7 +147,7 @@
              <number>0</number>
             </property>
             <property name="currentIndex" >
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="page_3" >
              <layout class="QGridLayout" name="gridLayout" >
@@ -155,7 +155,7 @@
                <layout class="QHBoxLayout" name="runFilesLay" />
               </item>
               <item row="3" column="0" >
-               <layout class="QHBoxLayout" name="horizontalLayout_6" >
+               <layout class="QHBoxLayout" name="horizontalLayout_1" >
                 <item>
                  <widget class="QLabel" name="label_3" >
                   <property name="text" >
@@ -225,7 +225,7 @@
               <item row="2" column="0" >
                <layout class="QHBoxLayout" name="horizontalLayout_5" >
                 <item>
-                 <spacer name="horizontalSpacer_18" >
+                 <spacer name="horizontalSpacer_23" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -406,7 +406,7 @@
              <number>0</number>
             </property>
             <property name="currentIndex" >
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="page_5" >
              <layout class="QGridLayout" name="gridLayout_4" >
@@ -460,7 +460,7 @@
                </spacer>
               </item>
               <item row="1" column="4" >
-               <spacer name="horizontalSpacer_10" >
+               <spacer name="horizontalSpacer_6" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -473,7 +473,7 @@
                </spacer>
               </item>
               <item row="1" column="0" >
-               <spacer name="horizontalSpacer_19" >
+               <spacer name="horizontalSpacer_22" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -504,7 +504,7 @@
                </widget>
               </item>
               <item row="0" column="2" >
-               <spacer name="horizontalSpacer" >
+               <spacer name="horizontalSpacer_10" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -543,7 +543,7 @@
             <widget class="QWidget" name="page_7" >
              <layout class="QHBoxLayout" name="horizontalLayout_3" >
               <item>
-               <spacer name="horizontalSpacer_17" >
+               <spacer name="horizontalSpacer_30" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -706,14 +706,14 @@
           <item>
            <widget class="QStackedWidget" name="swRebin" >
             <property name="currentIndex" >
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="page_9" >
              <layout class="QGridLayout" name="gridLayout_9" >
               <item row="1" column="1" >
                <layout class="QHBoxLayout" name="horizontalLayout_14" >
                 <item>
-                 <spacer name="horizontalSpacer_4" >
+                 <spacer name="horizontalSpacer_28" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -918,7 +918,7 @@
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_16" >
+                 <spacer name="horizontalSpacer_29" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -1153,7 +1153,7 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_12" >
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_5" >
+               <layout class="QHBoxLayout" name="horizontalLayout_26" >
                 <item>
                  <widget class="QLabel" name="label_2" >
                   <property name="text" >
@@ -1431,7 +1431,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_22" >
                 <item>
-                 <spacer name="horizontalSpacer_4" >
+                 <spacer name="horizontalSpacer_31" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -1923,7 +1923,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_10" >
+    <layout class="QHBoxLayout" name="horizontalLayout_6" >
      <item>
       <widget class="QPushButton" name="pbHelp" >
        <property name="maximumSize" >
@@ -1938,7 +1938,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_5" >
+      <spacer name="horizontalSpacer_1" >
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
        </property>
@@ -1964,7 +1964,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_6" >
+      <spacer name="horizontalSpacer_5" >
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
        </property>

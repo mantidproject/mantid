@@ -47,7 +47,6 @@ UI_DIR = $$HEADERDIR
 
 FORMS = \
   $$HEADERDIR/SANSRunWindow.ui \
-  $$HEADERDIR/Homer.ui \
   $$HEADERDIR/ConvertToEnergy.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"
