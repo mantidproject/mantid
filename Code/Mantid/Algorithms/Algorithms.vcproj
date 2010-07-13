@@ -299,6 +299,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FindCenterOfMassPosition.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FindDeadDetectors.cpp"
 				>
 			</File>
@@ -750,6 +754,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\FFTSmooth.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FindCenterOfMassPosition.h"
 				>
 			</File>
 			<File

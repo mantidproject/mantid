@@ -9,7 +9,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/TableRow.h"
 #include <iostream>
 #include <vector>
@@ -25,7 +24,6 @@ DECLARE_ALGORITHM(FindCenterOfMassPosition)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using namespace DataObjects;
 
 void FindCenterOfMassPosition::init()
 {
@@ -121,7 +119,7 @@ void FindCenterOfMassPosition::exec()
       if ( det->isMonitor() ) continue;
 
       // Get the current spectrum
-      MantidVec YIn = inputWS->readY(i);
+      const MantidVec& YIn = inputWS->readY(i);
       double y = (double)((i-n_monitors)%n_pixel_x);
       double x = floor((double)(i-n_monitors)/n_pixel_y);
 
@@ -150,8 +148,8 @@ void FindCenterOfMassPosition::exec()
     // Modify the bounding box around the detector region used to
     // compute the center of mass so that it is centered around
     // the new center of mass position.
-    double radius_x = fmin( (position_x-xmin), (xmax-position_x) );
-    double radius_y = fmin( (position_y-ymin), (ymax-position_y) );
+    double radius_x = std::min( (position_x-xmin), (xmax-position_x) );
+    double radius_y = std::min( (position_y-ymin), (ymax-position_y) );
 
     if (!direct_beam && (radius_x<=beam_radius||radius_y<=beam_radius))
     {
