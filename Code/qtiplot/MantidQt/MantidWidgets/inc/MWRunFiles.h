@@ -59,12 +59,16 @@ namespace MantidQt
       bool isOptional() const;
       void isOptional(const bool);
 
-
       // Standard setters/getters
       void setExtensionList(const QStringList & exts);
       bool isValid() const;
       const std::vector<std::string>& getFileNames() const;
       virtual QString getFile1() const;
+      /// Read settings from the given group
+      void readSettings(const QString & group);
+      /// Save settings in the given group
+      void saveSettings(const QString & group);
+
 
     signals:
       void fileChanged();

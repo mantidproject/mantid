@@ -1,32 +1,29 @@
 #include "MantidQtCustomInterfaces/Homer.h"
-
 #include "MantidQtCustomInterfaces/Background.h"
+#include "MantidQtCustomInterfaces/deltaECalc.h"
+#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtMantidWidgets/MWDiag.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/Exception.h"
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "Poco/Path.h"
 
 #include <QFile>
-#include <QDir>
-#include <QMessageBox>
-#include <QGridLayout>
 #include <QStringList>
-#include <QWidget>
 #include <QUrl>
 #include <QSignalMapper>
 #include <QDesktopServices>
-#include <QHeaderView>
 #include <QFileDialog>
 #include <QButtonGroup>
 #include <QAbstractButton>
 #include <QCloseEvent>
 #include <QHideEvent>
 #include <QShowEvent>
+#include <QMessageBox>
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
@@ -39,18 +36,15 @@ using namespace MantidQt::CustomInterfaces;
 Homer::Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm), m_runFilesWid(NULL), m_WBVWid(NULL),
   m_absRunFilesWid(NULL), m_absWhiteWid(NULL), m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
-  m_isPyInitialized(false), m_backgroundWasVisible(false), m_absEiDirty(false)
-{
-}
+  m_isPyInitialized(false), m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")
+{}
 
 /// Set up the dialog layout
 void Homer::initLayout()
 {
-  // don't change the order of these setUpPage*() statments
+
   setUpPage1();
-  // they do the custom setting up like setting initial values tool tips on each of the three tab pages 
   setUpPage2();
-  // but the initial values on each page can depend on the values in previous pages
   setUpPage3();
   
   // the signal mapper is used to link both browse buttons on the form on to a load file dialog
@@ -63,24 +57,15 @@ void Homer::initLayout()
   connect(m_uiForm.pbAbsMapFileBrowse, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(signalMapper, SIGNAL(mapped(const QString)), this, SLOT(browseClicked(const QString)));
 
-  
   m_uiForm.pbRun->setToolTip("Process run files");
   m_uiForm.pbHelp->setToolTip("Online documentation (loads in a browser)");
+
+  readSettings();
 }
 
 void Homer::initLocalPython()
 {
   m_isPyInitialized = true;
-}
-
-/**
- * This function is called from the base interface when the user clicks on the "Help"
- * button and is viewing Homer.
- */
-void Homer::helpClicked()
-{
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-    "Homer"));
 }
 
 /**
@@ -136,31 +121,6 @@ void Homer::pythonIsRunning(bool running)
   m_diagPage->blockPython(running);
 }
 
-/** Create a suggested output filename based on the supplied input
-*  file names
-*/
-QString Homer::defaultName()
-{
-  try
-  {//this will throw if there is an invalid filename
-    const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
-    if ( fileList.size() == 0 )
-    {// no input files we can't say anything about the output files
-      return "";
-    }
-    if ( fileList.size() > 1 && ! m_uiForm.ckSumSpecs->isChecked() )
-    {// multiple input files that are not summed give rise to multiple output files. Prepare to give the output files names that corrospond to the input filenames
-      return "";
-    }
-    // maybe normal operation: the output file name is based on the first input file
-    return deltaECalc::SPEFileName(fileList.front());
-  }
-  catch (std::invalid_argument)
-  {// if there is an invalid filename
-    return "";
-  }//the error is also displayed by the file widget's validator
-}
-
 /// For each widgets in the first tab this adds custom widgets, fills in combination boxes and runs setToolTip()
 void Homer::setUpPage1()
 {
@@ -204,7 +164,7 @@ void Homer::page1FileWidgs()
   m_saveChecksGroup->addButton(m_uiForm.save_ckNexus);
   m_saveChecksGroup->setExclusive(false);
 
-	connect(m_saveChecksGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(saveFormatOptionClicked(QAbstractButton*)));
+  connect(m_saveChecksGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(saveFormatOptionClicked(QAbstractButton*)));
 }
 
 /// make validator labels and associate them with the controls that need them in the first tab
@@ -240,7 +200,7 @@ void Homer::setUpPage2()
      second argument, depends on the instrument and the detector diagnostic settings are 
      kept separate in "diag/"*/
 
-  m_diagPage = new MWDiag(this, m_prev.group()+"/diag", m_uiForm.loadRun_cbInst);
+  m_diagPage = new MWDiag(this, getInstrumentSettingsGroup() + "/diag", m_uiForm.loadRun_cbInst);
 	
   QLayout *diagLayout = m_uiForm.tabDiagnoseDetectors->layout();
   diagLayout->addWidget(m_diagPage);
@@ -323,7 +283,7 @@ bool Homer::isFileInputValid() const
   }
   if( !valid )
   {
-    error_index = 1;
+    error_index = 0;
   }
   if( m_uiForm.ckRunAbsol->isChecked() )
   {
@@ -409,38 +369,88 @@ bool Homer::isRebinStringValid() const
   else
   {
     valid = false;
-    showInformationBox("Error creating Rebin algorithm, check algorithms have been loaded.");
+    QMessageBox::critical(this->parentWidget(), "Homer", "Error creating Rebin algorithm, check algorithms have been loaded.");
   }
   return valid;
 }
 
+/**
+ * Read the stored settings 
+ */
+void Homer::readSettings()
+{
+  QSettings settings;
+
+  // Instrument specific
+  QString currentGroup = getInstrumentSettingsGroup();
+  settings.beginGroup(currentGroup);
+ 
+  m_uiForm.ckFixEi->setChecked(settings.value("fixei", false).toBool());
+  m_uiForm.ckSumSpecs->setChecked(settings.value("sumsps", false).toBool());
+  m_uiForm.map_fileInput_leName->setText(settings.value("map", "").toString()); 
+  validateMapFile();
+  
+  m_lastSaveDir = settings.value("save file dir", "").toString();
+  m_lastLoadDir = settings.value("load file dir", "").toString();
+
+  //File widget settings
+  m_runFilesWid->readSettings(currentGroup  + "/RunFilesFinder");
+  m_WBVWid->readSettings(currentGroup  + "/WhiteBeamFileFinder");
+  m_absRunFilesWid->readSettings(currentGroup  + "/AbsRunFilesFinder");
+  m_absWhiteWid->readSettings(currentGroup  + "/AbsWhiteBeamFileFinder");
+  
+  settings.endGroup();
+}
+
 /** 
  * Save the form settings to the persistent store 
-*/
+ */
 void Homer::saveSettings()
-{  
-  m_prev.endGroup();
+{
+  QSettings settings;
 
-  QString instrument = m_uiForm.loadRun_cbInst->currentText();
-  m_prev.setValue("CustomInterfaces/Homer/instrument", instrument); 
+  // Instrument specific
+  QString currentGroup = getInstrumentSettingsGroup();
+  settings.beginGroup(currentGroup);
+  settings.setValue("fixei", m_uiForm.ckFixEi->isChecked());
+  settings.setValue("sumsps", m_uiForm.ckSumSpecs->isChecked());
+  settings.setValue("map", m_uiForm.map_fileInput_leName->text());
+
+  settings.setValue("save file dir", m_lastSaveDir);
+  settings.setValue("load file dir", m_lastLoadDir);
+
+  //File widget settings
+  m_runFilesWid->saveSettings(currentGroup  + "/RunFilesFinder");
+  m_WBVWid->saveSettings(currentGroup  + "/WhiteBeamFileFinder");
+  m_absRunFilesWid->saveSettings(currentGroup  + "/AbsRunFilesFinder");
+  m_absWhiteWid->saveSettings(currentGroup  + "/AbsWhiteBeamFileFinder");
   
-  QStringList prevInstrus =
-    m_prev.value("CustomInterfaces/Homer/instrusList","").toStringList();
-  if ( ! prevInstrus.contains(instrument) )
+  settings.endGroup();
+}
+
+/**
+ * Return the general settings group
+ */
+QString Homer::getGeneralSettingsGroup() const
+{
+  return m_topSettingsGroup;
+}
+
+/**
+ * Return the current instrument settings group
+ */
+QString Homer::getInstrumentSettingsGroup() const
+{
+  //The original Homer stored its settings in "CustomInterfaces/Homer/in instrument [PRE]"
+  //where [PRE] is the instrument prefix so we will continue with this
+  QString currentGroup = m_topSettingsGroup;
+  if( !currentGroup.endsWith("/") )
   {
-    prevInstrus.append(instrument);
-    // put the instrument list alphabetic order to make it easier to use
-    prevInstrus.sort();
+    currentGroup += "/";
   }
-  m_prev.setValue("CustomInterfaces/Homer/instrumsList", prevInstrus);
-  
-  // where settings are stored (except the list of previously used instruments) is dependent on the instrument selected
-  setSettingsGroup(instrument);
-
-  m_prev.setValue("fixei", m_uiForm.ckFixEi->isChecked());
-  m_prev.setValue("sumsps", m_uiForm.ckSumSpecs->isChecked());
-	
-  m_prev.setValue("map", m_uiForm.map_fileInput_leName->text());
+  QString prefix = m_uiForm.loadRun_cbInst->itemData(m_uiForm.loadRun_cbInst->currentIndex()).toString();
+  currentGroup += QString("in instrument %1").arg(prefix);
+  return currentGroup;
 }
 
 /**
@@ -466,21 +476,19 @@ QString Homer::openFileDia(const bool save, const QStringList &exts)
   QString filename;
   if(save)
   {
-    filename = QFileDialog::getSaveFileName(this, "Save file",
-	  m_prev.value("save file dir", "").toString(), filter);
-	if( ! filename.isEmpty() )
-	{
-	  m_prev.setValue("save file dir", QFileInfo(filename).absoluteDir().path());
-	}
+    filename = QFileDialog::getSaveFileName(this, "Save file", m_lastSaveDir, filter);
+    if( !filename.isEmpty() )
+    {
+      m_lastSaveDir = QFileInfo(filename).absoluteDir().path();
+    }
   }
   else
   {
-    filename = QFileDialog::getOpenFileName(this, "Open file",
-	  m_prev.value("load file dir", "").toString(), filter);
-	if( ! filename.isEmpty() )
-	{
-	  m_prev.setValue("load file dir", QFileInfo(filename).absoluteDir().path());
-	}
+    filename = QFileDialog::getOpenFileName(this, "Open file", m_lastLoadDir, filter);
+    if( !filename.isEmpty() )
+    {
+      m_lastLoadDir = QFileInfo(filename).absoluteDir().path();
+    }
   }
   return filename;
 }
@@ -503,14 +511,6 @@ void Homer::syncBackgroundSettings()
   emit MWDiag_updateTOFs(bgRange.first, bgRange.second);
 }
 
-
-/** the form entries that are saved are stored under a directory like string
-*  in QSettings tht is dependent on the instrument, this is set up here
-*/
-void Homer::setSettingsGroup(const QString &instrument)
-{
-  m_prev.beginGroup("CustomInterfaces/Homer/in instrument "+instrument);
-}
 
 /**
  * Validate the run file Ei on page 1
@@ -573,7 +573,7 @@ bool Homer::checkEi(const QString & text) const
     }
     else
     {
-      showInformationBox("An error occurred creating the GetEi algorithm, check the algorithms have been loaded.");
+      QMessageBox::critical(this->parentWidget(), "Homer", "An error occurred creating the GetEi algorithm, check the algorithms have been loaded.");
       valid = false;
       m_uiForm.pbRun->setEnabled(false);
     }
@@ -754,8 +754,13 @@ void Homer::browseClicked(const QString buttonDis)
     m_uiForm.tabWidget->widget(0)->setFocus();
   }
 }
-
-
+/**
+ * A slot to handle the help button click
+ */
+void Homer::helpClicked()
+{
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Homer"));
+}
 
 /** This slot updates the MWDiag and SPE filename suggestor with the
 * names of the files the user has just chosen
@@ -763,22 +768,22 @@ void Homer::browseClicked(const QString buttonDis)
 void Homer::runFilesChanged()
 {// this signal to the diag GUI allows the run files we choose here to be the default for its background correction
   try
-  {// there might be an invalid file name in the box
+  {
     const std::vector<std::string> &names = m_runFilesWid->getFileNames();
     emit MWDiag_sendRuns(names);
     // the output file's default name is based on the input file names
     updateSaveName();
   }
-  catch (std::invalid_argument)
-  {// nothing is sent if there is an invalid filename
-  }//the problem is displayed by the file widget's validator
+  catch (std::invalid_argument&)
+  {
+  }
 }
 /** Check if the user has specified a name for the output SPE file,
 * if not insert a name based on the name of the input files
 */
 void Homer::updateSaveName()
-{// if the user added their own value prevent it from being changed
-  if ( ! m_saveChanged ) 
+{
+  if ( !m_saveChanged ) 
   {
     m_uiForm.leNameSPE->setText(defaultName());
   }
@@ -787,12 +792,14 @@ void Homer::updateSaveName()
 *  default in this instance of the dialog box
 */
 void Homer::saveNameUpd()
-{// if the user had already altered the contents of the box it has been noted that the save name is under user control so do nothing
+{
   if (m_saveChanged) return;
   m_saveChanged = m_uiForm.leNameSPE->text() != defaultName();
 }
-/** This slot passes the name of the white beam vanadium file to the MWDiag
-*/
+
+/** 
+ * This slot passes the name of the white beam vanadium file to the MWDiag
+ */
 void Homer::updateWBV()
 {
   try
@@ -806,10 +813,34 @@ void Homer::updateWBV()
   }
 }
 
-
-
-/** creates and shows the background removal time of flight form
+/** Create a suggested output filename based on the supplied input
+*  file names
 */
+QString Homer::defaultName()
+{
+  try
+  {//this will trhow if there is an invalid filename
+    const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
+    if ( fileList.size() == 0 )
+    {// no input files we can't say anything about the output files
+      return "";
+    }
+    if ( fileList.size() > 1 && ! m_uiForm.ckSumSpecs->isChecked() )
+    {// multiple input files that are not summed give rise to multiple output files. Prepare to give the output files names that corrospond to the input filenames
+      return "";
+    }
+    // maybe normal operation: the output file name is based on the first input file
+    return deltaECalc::SPEFileName(fileList.front());
+  }
+  catch (std::invalid_argument&)
+  {
+    return "";
+  }
+}
+
+/** 
+ * Creates and shows the background removal time of flight dialog
+ */
 void Homer::bgRemoveClick()
 {
   connect(m_backgroundDialog, SIGNAL(rejected()), this, SLOT(bgRemoveReadSets()));
@@ -818,8 +849,10 @@ void Homer::bgRemoveClick()
   m_uiForm.pbRun->setEnabled(false);
   m_backgroundDialog->show();
 }
-/** runs when the background removal time of flight form is run
-*/
+
+/** 
+ * Runs when the background removal time of flight form is run
+ */
 void Homer::bgRemoveReadSets()
 {
   // the user can press these buttons again, they were disabled before while the dialog box was up
@@ -828,12 +861,14 @@ void Homer::bgRemoveReadSets()
   syncBackgroundSettings();
 }
 
-
-
-
-void Homer::setIDFValues(const QString & prefix)
+/**
+ * Set the default parameters for the given instrument
+ */
+void Homer::setIDFValues(const QString & name)
 {
   if( !m_isPyInitialized ) return;
+
+  QString prefix = m_uiForm.loadRun_cbInst->itemData(m_uiForm.loadRun_cbInst->currentIndex()).toString();
 
   // Fill in default values for tab
   QString param_defs = 
@@ -853,8 +888,9 @@ void Homer::setIDFValues(const QString & prefix)
   QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
   if( values.count() != 6 )
   {
-    showInformationBox("Error setting default parameter values.\n"
-		       "Check instrument parameter file");
+    QMessageBox::critical(this->parentWidget(), "Homer", 
+      "Error setting default parameter values.\n"
+		  "Check instrument parameter file");
     return;
   }
 
@@ -875,6 +911,7 @@ void Homer::setIDFValues(const QString & prefix)
 
   m_uiForm.leSamMass->setText("1");
   m_uiForm.leRMMMass->setText("1");
+  readSettings();
 }
 
 void Homer::saveFormatOptionClicked(QAbstractButton*)
@@ -906,4 +943,5 @@ void Homer::updateAbsEi(const QString & text)
 void Homer::markAbsEiDirty(bool dirty)
 {
   m_absEiDirty = dirty;
+
 }

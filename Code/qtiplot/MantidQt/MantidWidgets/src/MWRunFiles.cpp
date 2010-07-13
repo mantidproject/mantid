@@ -138,6 +138,35 @@ QString MWRunFiles::getFile1() const
   }
   return "";
 }
+
+/**
+ * Save settings to the given group
+ * @param group The name of the group key to save to
+ */
+void MWRunFiles::saveSettings(const QString & group)
+{
+  QSettings settings;
+  settings.beginGroup(group);
+  
+  settings.setValue("last_directory", m_lastDir);
+  
+  settings.endGroup();
+}
+
+/**
+ * Read settings from the given group
+ * @param group The name of the group key to retrieve data from
+ */
+void MWRunFiles::readSettings(const QString & group)
+{
+  QSettings settings;
+  settings.beginGroup(group);
+  
+  m_lastDir = settings.value("last_directory", "").toString();
+  
+  settings.endGroup();
+}
+
 /** Lauches a load file browser allowing a user to select multiple
 *  files
 *  @return the names of the selected files as a comma separated list
@@ -150,7 +179,7 @@ QString MWRunFiles::openFileDia()
   filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter);
   if(filenames.isEmpty())
   {
-	return "";
+	  return "";
   }
   m_lastDir = QFileInfo(filenames.front()).absoluteDir().path();
   // turns the QStringList into a coma separated list inside a QString

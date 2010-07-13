@@ -2,13 +2,6 @@
 #define MANTIDQTCUSTOMINTERFACES_HOMER_H_
 
 #include "MantidQtCustomInterfaces/ui_ConvertToEnergy.h"
-
-#include "MantidQtCustomInterfaces/deltaECalc.h"
-#include "MantidQtCustomInterfaces/Background.h"
-#include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/IAlgorithm.h"
 #include <QString>
@@ -26,6 +19,16 @@ class QShowEvent;
 
 namespace MantidQt
 {
+  namespace MantidWidgets
+  {
+    //-----------------------------------------------------
+    // Forward declarations
+    //-----------------------------------------------------
+    class MWRunFiles;
+    class MWRunFile;
+    class MWDiag;
+  }
+
   namespace CustomInterfaces
   {
     //-----------------------------------------------------
@@ -70,16 +73,16 @@ namespace MantidQt
       // Initialize the layout
       virtual void initLayout();
       virtual void initLocalPython();
-      void helpClicked();
-      ///run the algorithms that can be run with the data that users supplied
+
       void runClicked();
+      void helpClicked();
       void setIDFValues(const QString & prefix);  
 
     private:
       void showEvent(QShowEvent *event);
       void hideEvent(QHideEvent *event);
       void closeEvent(QCloseEvent *event);
-      /// enable the run button if the results dialog has been closed and the python has stopped
+      /// Enable the run button if the results dialog has been closed and the python has stopped
       void pythonIsRunning(bool running = true);
       QString defaultName();
       std::string insertNumber(const std::string &filename, const int number);
@@ -96,10 +99,11 @@ namespace MantidQt
       bool isRebinStringValid() const;
       bool checkEi(const QString & text) const;
 
-      void setSettingsGroup(const QString &instrument);
       bool runScripts();
-      void checkNoErrors(const deltaECalc &unitsConv);
+      void readSettings();
       void saveSettings();
+      QString getGeneralSettingsGroup() const;
+      QString getInstrumentSettingsGroup() const;
       QString openFileDia(const bool save, const QStringList &exts);
       void syncBackgroundSettings();
 
@@ -110,46 +114,46 @@ namespace MantidQt
       void MWDiag_sendRuns(const std::vector<std::string> &);
 
     private slots:
-        void validateAbsEi(const QString &);
-        void validateRunEi(const QString &);
-        void validateRebinBox(const QString &);
-        void validateMapFile();
+      void validateAbsEi(const QString &);
+      void validateRunEi(const QString &);
+      void validateRebinBox(const QString &);
+      void validateMapFile();
 
-        //get rid of this one, no?
-        void browseClicked(const QString buttonDis);
-        /// open the wiki page for this interface in their browser
+      //get rid of this one, no?
+      void browseClicked(const QString buttonDis);
 
-        void runFilesChanged();
-        void updateSaveName();
-        void saveNameUpd();
-        void updateWBV();
-        void bgRemoveClick();
-        void bgRemoveReadSets();
-        void saveFormatOptionClicked(QAbstractButton*);
-        void updateAbsEi(const QString & text);
-        void markAbsEiDirty(bool dirty = true);
+      void runFilesChanged();
+      void updateSaveName();
+      void saveNameUpd();
+      void updateWBV();
+      void bgRemoveClick();
+      void bgRemoveReadSets();
+      void saveFormatOptionClicked(QAbstractButton*);
+      void updateAbsEi(const QString & text);
+      void markAbsEiDirty(bool dirty = true);
 
     private:
       Ui::ConvertToEnergy m_uiForm;
-
       MantidWidgets::MWRunFiles *m_runFilesWid;
       MantidWidgets::MWRunFile *m_WBVWid;
       MantidWidgets::MWRunFiles *m_absRunFilesWid;
       MantidWidgets::MWRunFile *m_absWhiteWid;
-
       Background *m_backgroundDialog;
       /// A pointer to the widget with the user controls for finding bad detectors
       MantidWidgets::MWDiag *m_diagPage;
+
       /// Saves if the user specified their own name for the SPE output file
-      bool m_saveChanged;
-      bool m_isPyInitialized;
+      bool m_saveChanged; 
       bool m_backgroundWasVisible;
       bool m_absEiDirty;
       QHash<const QWidget * const, QLabel *> m_validators;
-      QSettings m_prev;
-      QButtonGroup * m_saveChecksGroup;
+      QButtonGroup *m_saveChecksGroup;
+      QString m_topSettingsGroup;
+      //@todo These all should be handled by the file widget
+      QString m_lastSaveDir;
+      QString m_lastLoadDir;
 
-
+      bool m_isPyInitialized;
     };
   }
 }

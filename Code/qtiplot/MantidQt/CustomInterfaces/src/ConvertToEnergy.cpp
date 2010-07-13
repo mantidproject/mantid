@@ -17,7 +17,6 @@
 namespace MantidQt
 {
 	namespace CustomInterfaces
-
 	{
 		DECLARE_SUBWINDOW(ConvertToEnergy);
 	}
@@ -34,16 +33,17 @@ using namespace MantidQt::CustomInterfaces;
 * @param parent This is a pointer to the "parent" object in Qt, most likely the main MantidPlot window.
 */
 ConvertToEnergy::ConvertToEnergy(QWidget *parent) :
-UserSubWindow(parent), m_directInstruments(NULL), m_indirectInstruments(NULL)
+  UserSubWindow(parent), m_directInstruments(NULL), m_indirectInstruments(NULL), 
+  m_curInterfaceSetup(""), m_curEmodeType(ConvertToEnergy::Undefined), m_settingsGroup("CustomInterfaces/ConvertToEnergy")
 {
 }
 
 /**
-* Empty virtual function to create interface for subclasses.
-*/
-void ConvertToEnergy::setIDFValues(const QString & prefix) 
+ * Destructor
+ */
+ConvertToEnergy::~ConvertToEnergy()
 {
-	//
+  saveSettings();
 }
 
 /**
@@ -113,7 +113,7 @@ void ConvertToEnergy::initLayout()
 	// connect the "Run" button
 	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
-
+  
 }
 
 /**
@@ -124,7 +124,7 @@ void ConvertToEnergy::initLayout()
 void ConvertToEnergy::initLocalPython()
 {
 	// select starting instrument
-	getStartingInstrument();
+  readSettings();
 }
 
 
@@ -152,6 +152,8 @@ void ConvertToEnergy::setupCbInst()
 	m_uiForm.loadRun_cbInst->clear();
 	m_uiForm.cbInst->clear();
 
+  assert(name_list.size() == pref_list.size());
+
 	// iterate through the two QStringLists adding text (name) and data (prefix) to the ComboBox
 	for ( int i = 0; i < pref_list.size() ; i++ )
 	{
@@ -159,36 +161,83 @@ void ConvertToEnergy::setupCbInst()
 		m_uiForm.cbInst->addItem(name_list[i], QVariant(pref_list[i]));
 	}
 
+  m_uiForm.pbRun->setEnabled(false);
+}
+
+/**
+ * Read settings from the persistent store
+ */
+void ConvertToEnergy::readSettings()
+{
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup);
+  QString instrName = settings.value("instrument-name", "").toString();
+  settings.endGroup();
+
+  setDefaultInstrument(instrName);
+}
+
+/**
+ * Save settings to a persistent storage
+ */
+void ConvertToEnergy::saveSettings()
+{
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup);
+  QString instrName;
+  if( m_curEmodeType == Direct )
+  {
+    instrName = m_uiForm.loadRun_cbInst->currentText();
+  }
+  else if( m_curEmodeType == InDirect )
+  {
+    instrName = m_uiForm.cbInst->currentText();
+  }
+  else
+  {
+    instrName = "";
+  }
+  settings.setValue("instrument-name", instrName);
+
+  settings.endGroup();
 }
 
 /**
 * Sets up the initial instrument for the interface. This value is taken from the users'
 * settings in the menu View -> Preferences -> Mantid -> Instrument
+* @param name The name of the default instrument
 */
-void ConvertToEnergy::getStartingInstrument()
+void ConvertToEnergy::setDefaultInstrument(const QString & name)
 {
-	Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
-
-	QString curInstru = QString::fromStdString(mtd_config.getString("default.instrument"));
-	int index = m_uiForm.loadRun_cbInst->findData(QVariant(curInstru));
-	QString prefix = m_uiForm.loadRun_cbInst->itemText(index);
-
+  int index(-1);
+  if( name.isEmpty() )
+  {
+  	Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
+  	QString curInstru = QString::fromStdString(mtd_config.getString("default.instrument"));
+  	index = m_uiForm.loadRun_cbInst->findData(QVariant(curInstru));
+  }
+  else
+  {
+    index = m_uiForm.loadRun_cbInst->findText(name);
+  }
 	m_uiForm.loadRun_cbInst->setCurrentIndex(index);
 	m_uiForm.cbInst->setCurrentIndex(index);
-
-	instrumentSelectChanged(prefix);
-
+	
+  if( index >= 0 ) 
+  {
+    instrumentSelectChanged(name);
+  }
 }
 
 
 /**
 * This function: 1. loads the instrument and gets the value of deltaE-mode parameter
 *				 2. Based on this value, makes the necessary changes to the form setup (direct or indirect).
-* @param prefix name of the instrument from the QComboBox
+* @param name name of the instrument from the QComboBox
 */
-void ConvertToEnergy::instrumentSelectChanged(const QString& prefix)
+void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 {
-	QString defFile = getIDFPath(prefix);
+	QString defFile = getIDFPath(name);
 
 	if ( defFile == "" )
 	{
@@ -201,8 +250,11 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& prefix)
 	if ( desired == Undefined )
 	{
 		m_curEmodeType = Undefined;
-		QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + prefix + ") does not have a parameter to signify it's deltaE-mode");
-		return;
+		QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + name + ") does not have a parameter to signify it's deltaE-mode");
+    m_uiForm.loadRun_cbInst->blockSignals(true);
+    m_uiForm.loadRun_cbInst->setCurrentIndex(m_uiForm.loadRun_cbInst->findText(m_curInterfaceSetup));
+		m_uiForm.loadRun_cbInst->blockSignals(false);
+    return;
 	}
 
 	DeltaEMode current;
@@ -216,14 +268,14 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& prefix)
 		current = DeltaEMode(m_uiForm.swInstrument->currentIndex());
 	}
 
-	if ( desired != current || m_curInterfaceSetup != prefix )
+	if ( desired != current || m_curInterfaceSetup != name )
 	{
 		changeInterface(desired);
 	}
 
-	m_curInterfaceSetup = prefix;
+	m_curInterfaceSetup = name;
 	m_curEmodeType = desired;
-
+  m_uiForm.pbRun->setEnabled(true);
 }
 
 /**
@@ -246,12 +298,13 @@ QString ConvertToEnergy::getIDFPath(const QString& prefix)
 	if( entries.isEmpty() )
 	{
 		QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + prefix + ") does not have a parameter file.\nCannot run analysis");
-		m_uiForm.pbRun->setEnabled(false);
+    m_uiForm.loadRun_cbInst->blockSignals(true);
+    m_uiForm.loadRun_cbInst->setCurrentIndex(m_uiForm.loadRun_cbInst->findText(m_curInterfaceSetup));
+		m_uiForm.loadRun_cbInst->blockSignals(false);
 		return "";
 	}
 	else
 	{
-		m_uiForm.pbRun->setEnabled(true);
 		defFilePrefix = entries[0];
 		defFilePrefix.chop(15); // cut "_Parameters.xml" off the string
 	}
@@ -349,9 +402,14 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
 * If the instrument selection has changed, calls instrumentSelectChanged
 * @param prefix instrument name from QComboBox object
 */
-void ConvertToEnergy::userSelectInstrument(const QString& prefix) {
+void ConvertToEnergy::userSelectInstrument(const QString& prefix) 
+{
 	if ( prefix != m_curInterfaceSetup )
 	{
 		instrumentSelectChanged(prefix);
 	}
+  if( m_curEmodeType != InDirect )
+  {
+    m_uiForm.pbRun->setEnabled(true);
+  }
 }

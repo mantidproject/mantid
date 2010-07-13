@@ -10,10 +10,9 @@ using namespace MantidQt::CustomInterfaces;
 * It is used primarily to ensure sane values for member variables.
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
-  ConvertToEnergy(parent) , m_mantidplot(parent) /*, m_runFilesWid(NULL),
-  m_diagPage(NULL),m_saveChanged(false), m_isPyInitialized(false) */
+  UserSubWindow(parent), m_uiForm(uiForm) 
 {
-  m_uiForm = uiForm;
+
 }
 
 /**
@@ -22,7 +21,6 @@ Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
 */
 void Indirect::initLayout()
 {
-	//
 }
 
 /**

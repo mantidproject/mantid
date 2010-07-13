@@ -22,7 +22,7 @@ namespace MantidQt
 
     public:
       /// there has to be a default constructor but you can call it with a pointer to the thing that will take ownership of it
-      MWDiag(QWidget *parent=NULL, QString prevSettingsGr="CustomWidgets/Diag", const QComboBox * const instru = NULL);
+      MWDiag(QWidget *parent=NULL, QString prevSettingsGr="", const QComboBox * const instru = NULL);
       QString run(const QString &outWS = "", const bool saveSettings = true);
       void blockPython(const bool block = true);
  	  signals:
