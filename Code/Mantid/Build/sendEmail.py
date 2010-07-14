@@ -26,7 +26,7 @@ localLogDir = '../../../../logs/' + project + '/'
 
 def ParseSubversionString(mssgSvn):
     ticketList = []
-    SvnID = -1
+    SvnID = 0
 
     #attempt to parse out the svn revision and ticket number
     reSvnRevision = re.compile("r(\\d+)\\s\\|", re.IGNORECASE)
