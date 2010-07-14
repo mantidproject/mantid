@@ -134,14 +134,20 @@ namespace PythonAPI
       boost::noncopyable>("ParameterizedComponent", no_init)
       ;
 
+    /**
+     * MG 14/07/2010 - These classes do not offer any additional functionality they just allow 
+     * Python to recogise that an object of this type may exist. The detector class 
+     * is prefixed with Mantid due to an unfortunate name class in an existing user script (SANS)
+     * where a function was already called Detector. Given that the name here should rarely be used
+     * this seemed like an acceptable compromise.
+     */
 	//Detector
 	class_<Mantid::Geometry::Detector, bases<Mantid::Geometry::IDetector>,
-		boost::noncopyable>("Detector", no_init)
+		boost::noncopyable>("MantidDetector", no_init)
 		;
-
 	//Detector
 	class_<Mantid::Geometry::ParDetector, bases<Mantid::Geometry::IDetector>,
-		boost::noncopyable>("ParDetector", no_init)
+		boost::noncopyable>("MantidParDetector", no_init)
 		;
 
     //CompAssembly class
