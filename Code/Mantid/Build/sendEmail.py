@@ -53,11 +53,11 @@ def ParseSubversionLog():
     except IOError:
         pass
     #if SvnID couldn't be gathered from svn.log, get it another way
-    if SvnID == -1:
+    if SvnID == -2:
         try:
             SvnID = int(buildNotification.getSVNRevision())
         except ValueError: # getSVNRevision didn't return as expected
-            SvnID = -1
+            SvnID = -3
     # return values
     return ticketList, SvnID, mssgSvn
 #end of ParseSubversionLog
