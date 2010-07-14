@@ -37,6 +37,7 @@ void SumSpectra::init()
   declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
     "The last Workspace index to be included in the summing (default\n"
     "highest index)" );
+  declareProperty("IncludeMonitors",true,"Whether to include monitor spectra in the sum (default: yes)");
 }
 
 /** Executes the algorithm
@@ -47,6 +48,8 @@ void SumSpectra::exec()
   // Try and retrieve the optional properties
   m_MinSpec = getProperty("StartWorkspaceIndex");
   m_MaxSpec = getProperty("EndWorkspaceIndex");
+
+  const bool keepMonitors = getProperty("IncludeMonitors");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
@@ -90,6 +93,13 @@ void SumSpectra::exec()
   // Loop over spectra
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
+    // Get the detector object for this spectrum
+    Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+    // Skip monitors, if the property is set to do so
+    if ( !keepMonitors && det->isMonitor() ) continue;
+    // Skip masked detectors
+    if ( det->isMasked() ) continue;
+
     // Retrieve the spectrum into a vector
     const MantidVec& YValues = localworkspace->readY(i);
     const MantidVec& YErrors = localworkspace->readE(i);
@@ -105,18 +115,17 @@ void SumSpectra::exec()
 
     progress.report();
   }
+
+  // Pointer to sqrt function
+  typedef double (*uf)(double);
+  uf rs=std::sqrt;
   //take the square root of all the accumulated squared errors - Assumes Gaussian errors
-  std::transform(YError.begin(), YError.end(), YError.begin(), dblSqrt);
+  std::transform(YError.begin(), YError.end(), YError.begin(), rs);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",outputWorkspace);
 
   return;
-}
-
-double SumSpectra::dblSqrt(double in)
-{
-  return sqrt(in);
 }
 
 } // namespace Algorithms

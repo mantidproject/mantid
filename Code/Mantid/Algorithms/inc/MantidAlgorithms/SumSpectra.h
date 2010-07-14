@@ -23,6 +23,7 @@ namespace Algorithms
     <UL>
     <LI> StartSpectrum - Workspace index number to integrate from (default 0)</LI>
     <LI> EndSpectrum - Workspace index number to integrate to (default max)</LI>
+    <LI> IncludeMonitors - Whether to include monitor spectra in the sum (default yes)
     </UL>
 
     @author Nick Draper, Tessella Support Services plc
@@ -71,9 +72,6 @@ private:
   int m_MinSpec;
   /// The spectrum to finish the integration at
   int m_MaxSpec;
-
-  /// Personal wrapper for sqrt to allow msvs to compile
-  static double dblSqrt(double in);
 };
 
 } // namespace Algorithm
