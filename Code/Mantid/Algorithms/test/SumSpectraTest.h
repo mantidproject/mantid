@@ -19,9 +19,9 @@ public:
 
   SumSpectraTest()
   {
-		outputSpace1 = "SumSpectraOut1";
-	  outputSpace2 = "SumSpectraOut2";
-	  inputSpace = "SumSpectraIn";
+    outputSpace1 = "SumSpectraOut1";
+    outputSpace2 = "SumSpectraOut2";
+    inputSpace = "SumSpectraIn";
 
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
@@ -64,7 +64,7 @@ public:
   }
 
 
-  void xtestExecWithLimits()
+  void testExecWithLimits()
   {
     if ( !alg.isInitialized() ) alg.initialize();
     TS_ASSERT_THROWS_NOTHING( alg.execute());
@@ -75,14 +75,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
 
-		// Get back the saved workspace
+    // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace1));
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     int max;
-    TS_ASSERT_EQUALS( max = input2D->blocksize(), output2D->blocksize())
-    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS( max = input2D->blocksize(), output2D->blocksize());
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1);
     double yy[5] = {45,48,51,54,57};
 
     Mantid::MantidVec &x = output2D->dataX(0);
@@ -94,18 +94,18 @@ public:
 
     for (int i = 0; i < max; ++i)
     {
-			TS_ASSERT_EQUALS( x[i], i );
+      TS_ASSERT_EQUALS( x[i], i );
       TS_ASSERT_EQUALS( y[i], yy[i] );
       TS_ASSERT_DELTA( e[i], sqrt(yy[i]), 0.001 );
     }
 
-	}
-	
-	void xtestExecWithoutLimits()
+  }
+
+  void testExecWithoutLimits()
   {
-		
-		SumSpectra alg2;
-		TS_ASSERT_THROWS_NOTHING( alg2.initialize());
+
+    SumSpectra alg2;
+    TS_ASSERT_THROWS_NOTHING( alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
     // Set the properties
@@ -122,7 +122,7 @@ public:
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace2));
-		Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
     int max = output2D->blocksize();
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1);
@@ -137,7 +137,7 @@ public:
 
     for (int i = 0; i < max; ++i)
     {
-			TS_ASSERT_EQUALS( x[i], i );
+      TS_ASSERT_EQUALS( x[i], i );
       TS_ASSERT_EQUALS( y[i], yy[i] );
       TS_ASSERT_DELTA( e[i], sqrt(yy[i]), 0.001 );
     }
@@ -146,8 +146,8 @@ public:
 private:
   SumSpectra alg;   // Test with range limits
   std::string outputSpace1;
-	std::string outputSpace2;
-	std::string inputSpace;
+  std::string outputSpace2;
+  std::string inputSpace;
 };
 
 #endif /*SUMSPECTRATEST_H_*/
