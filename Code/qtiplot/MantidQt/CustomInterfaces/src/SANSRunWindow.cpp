@@ -1833,7 +1833,7 @@ void SANSRunWindow::handleInstrumentChange(int index)
   }
 
   const QString instrument = m_uiForm.inst_opt->itemText(index);
-  if( instrument == "LOQ" ) 
+  if( instrument == "LOQ" )
   {
     m_uiForm.beam_rmin->setText("60");
     m_uiForm.beam_rmax->setText("200");
@@ -2044,6 +2044,8 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     run_number += extension;
   }
   bool status(true);
+  //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
+  const static QString runPythonSep("C++ImplementationReservedC++");
   if( is_trans )
   {
     QString direct_run = m_run_no_boxes.value(key + 3)->text();
@@ -2067,10 +2069,11 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
     assign_fn += ", period = " + QString::number(getPeriod(key))+")";
     //assign the workspace name to a Python variable and read back some details
-    QString ws_names = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
+    QString pythonC="t1, t2 = " + assign_fn + ";print t1,'"+runPythonSep+"',t2";
+    QString ws_names = runReduceScriptFunction(pythonC);
     //read the informtion returned from Python
-    QString trans_ws = ws_names.section(" ", 0,0);
-    QString direct_ws = ws_names.section(" ", 1);
+    QString trans_ws = ws_names.section(runPythonSep, 0,0);
+    QString direct_ws = ws_names.section(runPythonSep, 1);
 
     status = ( ! trans_ws.isEmpty() ) && ( ! direct_ws.isEmpty() );
 
@@ -2111,11 +2114,12 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     assign_fn += "('" + run_number + "', reload = True";
     assign_fn += ", period = " + QString::number(getPeriod(key)) + ")";
     //assign the workspace name to a Python variable and read back some details
-    QString run_info = runReduceScriptFunction("SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE, logvalues");
+    QString run_info = "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE,'"+runPythonSep+"',logvalues";
+    run_info = runReduceScriptFunction(run_info);
     //read the informtion returned from Python
-    QString base_workspace = run_info.section(" ", 0, 0);
+    QString base_workspace = run_info.section(runPythonSep, 0, 0);
 
-    logs = run_info.section(" ", 1);
+    logs = run_info.section(runPythonSep, 1);
     if( !logs.isEmpty() )
     {
       trimPyMarkers(logs);

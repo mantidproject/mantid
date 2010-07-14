@@ -544,21 +544,15 @@ def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period
         #get the number of periods in a group using the fact that each period has a different name
         nNames = len(pWorksp.getNames())
         numPeriods = nNames - 1
+        wsName = _leaveSinglePeriod(pWorksp, period)
+        pWorksp = mtd[wsName]
     else :
         #if the work space isn't a group there is only one period
         numPeriods = 1
         
-    #period greater than one means we must be looking at a workspace group
-    if numPeriods > 1 :
-        if not pWorksp.isGroup() : raise Exception('_loadRawData: A period number can only be specified for a group and workspace '+ pWorksp.getName() + ' is not a group')
-        wsName = _leaveSinglePeriod(pWorksp, period)
-        pWorksp = mtd[wsName]
-    else :
-        #if it is a group but they hadn't specified the period it means load the first spectrum
-        if pWorksp.isGroup() :
-            wsName = _leaveSinglePeriod(pWorksp, 1)
-            pWorksp = mtd[wsName]
-    
+    if (period > numPeriods) or (period < 1):
+        raise ValueError('_loadRawData: Period number ' + str(period) + ' doesn\'t exist in workspace ' + pWorksp.getName())
+
     sample_details = pWorksp.getSampleDetails()
     SampleGeometry(sample_details.getGeometryFlag())
     SampleThickness(sample_details.getThickness())
