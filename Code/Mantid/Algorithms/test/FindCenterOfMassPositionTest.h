@@ -8,6 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include "SANSInstrumentCreationHelper.h"
 
