@@ -19,9 +19,6 @@ namespace DataObjects
 // Initialise the instance count
 int ManagedWorkspace2D::g_uniqueID = 1;
 
-// Get a reference to the logger
-Kernel::Logger& ManagedWorkspace2D::g_log = Kernel::Logger::get("ManagedWorkspace2D");
-
 #ifdef _WIN32
 #pragma warning (push)
 #pragma warning( disable:4355 )
@@ -31,7 +28,7 @@ Kernel::Logger& ManagedWorkspace2D::g_log = Kernel::Logger::get("ManagedWorkspac
 #endif //_WIN32
 /// Constructor
 ManagedWorkspace2D::ManagedWorkspace2D() :
-  Workspace2D(), m_bufferedData(100, *this),m_indexWrittenTo(-1)
+  AbsManagedWorkspace2D(), m_indexWrittenTo(-1)
 {
 }
 #ifdef _WIN32
@@ -168,198 +165,7 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
   }
 }
 
-/// Get pseudo size
-int ManagedWorkspace2D::size() const
-{
-  return m_noVectors * blocksize();
-}
 
-/// Get the size of each vector
-int ManagedWorkspace2D::blocksize() const
-{
-  return (m_noVectors > 0) ? static_cast<int>(m_YLength) : 0;
-}
-
-/** Set the x values
- *  @param histnumber Index of the histogram to be set
- *  @param PA The data to enter
- */
-void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setX, histogram number out of range");
-
-  getDataBlock(histnumber)->setX(histnumber, PA);
-  return;
-}
-
-/** Set the x values
- *  @param histnumber Index of the histogram to be set
- *  @param Vec The data to enter
- */
-void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setX, histogram number out of range");
-
-  getDataBlock(histnumber)->setX(histnumber, Vec);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
- *  @param PY The data to enter
- */
-void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
- *  @param PY The data to enter
- *  @param PE The corresponding errors
- */
-void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
-        const Histogram1D::RCtype& PE)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY, PE);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
- *  @param PY The data to enter
- *  @param PE The corresponding errors
- */
-void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY,
-        const Histogram1D::RCtype::ptr_type& PE)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY, PE);
-  return;
-}
-
-/** Get the x data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the x data
- */
-MantidVec& ManagedWorkspace2D::dataX(const int index)
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
-
-  return getDataBlock(index)->dataX(index);
-}
-
-/** Get the y data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the y data
- */
-MantidVec& ManagedWorkspace2D::dataY(const int index)
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataY, histogram number out of range");
-
-  return getDataBlock(index)->dataY(index);
-}
-
-/** Get the error data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the error data
- */
-MantidVec& ManagedWorkspace2D::dataE(const int index)
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataE, histogram number out of range");
-
-  return getDataBlock(index)->dataE(index);
-}
-
-/** Get the x data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the x data
- */
-const MantidVec& ManagedWorkspace2D::dataX(const int index) const
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataX(index);
-}
-
-/** Get the y data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the y data
- */
-const MantidVec& ManagedWorkspace2D::dataY(const int index) const
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataY, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataY(index);
-}
-
-/** Get the error data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the error data
- */
-const MantidVec& ManagedWorkspace2D::dataE(const int index) const
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataE, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
-}
-
-Kernel::cow_ptr<MantidVec> ManagedWorkspace2D::refX(const int index) const
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->refX(index);
-}
-
-/** Returns the number of histograms.
-    For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
-	  being virtual so it now just calls this private (and virtual) method which does the work.
-*/
-const int ManagedWorkspace2D::getHistogramNumberHelper() const
-{
-  return m_noVectors;
-}
-
-/** Get a pointer to the data block containing the data corresponding to a given index
- *  @param index The index to search for
- *  @return A pointer to the data block containing the index requested
- */
-// not really a const method, but need to pretend it is so that const data getters can call it
-ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
-{
-  int startIndex = index - ( index%m_vectorsPerBlock );
-  // Look to see if the data block is already buffered
-  mru_list::const_iterator it = m_bufferedData.find(startIndex);
-  if ( it != m_bufferedData.end() )
-  {
-    return *it;
-  }
-
-  // If not found, need to load block into memory and mru list
-  ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(startIndex, m_vectorsPerBlock, m_XLength, m_YLength);
-  // Check whether datablock has previously been saved. If so, read it in.
-  readDataBlock(newBlock,startIndex);
-  m_bufferedData.insert(newBlock);
-  return newBlock;
-}
 
 /**  This function decides if ManagedDataBlock2D with given startIndex needs to 
      be loaded from storage and loads it.
@@ -388,7 +194,11 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startInd
 
 }
 
-void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite)
+/**
+ * Write a data block to disk.
+ * @param toWrite pointer to the ManagedDataBlock2D to write.
+ */
+void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 {
       int fileIndex = 0;
       // Check whether we need to pad file with zeroes before writing data
@@ -435,59 +245,22 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite)
       m_indexWrittenTo = std::max(m_indexWrittenTo, toWrite->minIndex());
 }
 
-//----------------------------------------------------------------------
-// mru_list member function definitions
-//----------------------------------------------------------------------
 
-/** Constructor
- *  @param max_num_items_ The length of the list
- *  @param out A reference to the containing class
- */
-ManagedWorkspace2D::mru_list::mru_list(const std::size_t &max_num_items_, ManagedWorkspace2D &out) :
-  max_num_items(max_num_items_),
-  outer(out)
+/** Returns the number of histograms.
+    For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
+    being virtual so it now just calls this private (and virtual) method which does the work.
+*/
+const int ManagedWorkspace2D::getHistogramNumberHelper() const
 {
+  return m_noVectors;
 }
 
-/** Insert an item into the list. If it's already in the list, it's moved to the top.
- *  If it's a new item, it's put at the top and the last item in the list is written to file and dropped.
- *  @param item The ManagedDataBlock to put in the list
- */
-void ManagedWorkspace2D::mru_list::insert(ManagedDataBlock2D* item)
-{
-  std::pair<item_list::iterator,bool> p=il.push_front(item);
-
-  if (!p.second)
-  { /* duplicate item */
-    il.relocate(il.begin(), p.first); /* put in front */
-  }
-  else if (il.size()>max_num_items)
-  { /* keep the length <= max_num_items */
-    // This is dropping an item - need to write it to disk (if it's changed) and delete
-    ManagedDataBlock2D *toWrite = il.back();
-    if ( toWrite->hasChanges() )
-    {
-      outer.writeDataBlock(toWrite);
-    }
-    il.pop_back();
-    delete toWrite;
-  }
-}
-
-/// Delete all the data blocks pointed to by the list, and empty the list itself
-void ManagedWorkspace2D::mru_list::clear()
-{
-  for (item_list::iterator it = il.begin(); it != il.end(); ++it)
-  {
-    delete *it;
-  }
-  il.clear();
-}
-
+/// Return the size used in memory
 long int ManagedWorkspace2D::getMemorySize() const
 {
     return (long int)(double(m_vectorSize)/1024)*m_bufferedData.size()*m_vectorsPerBlock;
 }
+
 
 } // namespace DataObjects
 } // namespace Mantid

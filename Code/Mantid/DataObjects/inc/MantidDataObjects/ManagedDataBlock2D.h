@@ -53,7 +53,9 @@ namespace DataObjects
 */
 class DLLExport ManagedDataBlock2D
 {
+  /// Output a string representation to a stream
   friend DLLExport std::fstream& operator<<(std::fstream&, ManagedDataBlock2D&);
+  /// Input a string representation to a stream
   friend DLLExport std::fstream& operator>>(std::fstream&, ManagedDataBlock2D&);
   
 public:

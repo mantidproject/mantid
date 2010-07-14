@@ -4,8 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Workspace2D.h"
-#include "ManagedDataBlock2D.h"
+#include "MantidDataObjects/ManagedDataBlock2D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/AbsManagedWorkspace2D.h"
 #include <fstream>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
@@ -46,66 +47,8 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	class DLLExport ManagedWorkspace2D : public Workspace2D
+	class DLLExport ManagedWorkspace2D : public AbsManagedWorkspace2D
 {
-
-  /** An MRU (most recently used) list keeps record of the last n
-   *  inserted items, listing first the newer ones. Care has to be
-   *  taken when a duplicate item is inserted: instead of letting it
-   *  appear twice, the MRU list relocates it to the first position.
-   *  This class has been taken from one of the examples given in the
-   *  Boost.MultiIndex documentation (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
-   */
-  class mru_list
-  {
-  public:
-    mru_list(const std::size_t &max_num_items_, ManagedWorkspace2D &out);
-
-    void insert(ManagedDataBlock2D* item);
-    void clear();
-    /// Size of the list
-    size_t size() const {return il.size();}
-
-  private:
-    /// typedef for the container holding the list
-    typedef boost::multi_index::multi_index_container<
-      ManagedDataBlock2D*,
-      boost::multi_index::indexed_by<
-        boost::multi_index::sequenced<>,
-        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
-      >
-    > item_list;
-
-    /// The most recently used list
-    item_list il;
-    /// The length of the list
-    const std::size_t max_num_items;
-    /// Reference to the containing class
-    ManagedWorkspace2D &outer;
-
-  public:
-    /// Import the multi index container iterator
-    typedef item_list::nth_index<1>::type::const_iterator const_iterator;
-    /// An iterator pointing to the beginning of the list sorted by minIndex
-    const_iterator begin() const
-    {
-      return il.get<1>().begin();
-    }
-    /// An iterator pointing one past the end of the list sorted by minIndex
-    const_iterator end() const
-    {
-      return il.get<1>().end();
-    }
-    /** Find an element of the list from the key of the minIndex
-     *  @param minIndex The minIndex value to search the list for
-     */
-    const_iterator find(unsigned int minIndex) const
-    {
-      return il.get<1>().find(minIndex);
-    }
-  };
-
-  friend class mru_list;
 
 public:
   ManagedWorkspace2D();
@@ -113,25 +56,7 @@ public:
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
 
-  virtual void setX(const int histnumber, const Histogram1D::RCtype&);
-  virtual void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
-  virtual void setData(int const histnumber, const Histogram1D::RCtype&);
-  virtual void setData(int const histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-  virtual void setData(int const histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
-
-  //section required for iteration
-  virtual int size() const;
-  virtual int blocksize() const;
-
-  virtual MantidVec& dataX(const int index);
-  virtual MantidVec& dataY(const int index);
-  virtual MantidVec& dataE(const int index);
-  virtual const MantidVec& dataX(int const index) const;
-  virtual const MantidVec& dataY(int const index) const;
-  virtual const MantidVec& dataE(int const index) const;
-  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
-
-  long int getMemorySize() const;
+  virtual long int getMemorySize() const;
 	virtual bool threadSafe() const { return false; }
 
 protected:
@@ -139,9 +64,7 @@ protected:
   /// Reads in a data block.
   virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
   /// Saves the dropped data block to disk.
-  virtual void writeDataBlock(ManagedDataBlock2D *toWrite);
-  /// The number of vectors in each data block
-  int m_vectorsPerBlock;
+  virtual void writeDataBlock(ManagedDataBlock2D *toWrite) const;
 
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
@@ -156,30 +79,18 @@ private:
 
   ManagedDataBlock2D* getDataBlock(const int index) const;
 
-  /// The length of the X vector in each Histogram1D. Must all be the same.
-  int m_XLength;
-  /// The length of the Y & E vectors in each Histogram1D. Must all be the same.
-  int m_YLength;
-  /// The size in bytes of each vector
-  long long m_vectorSize;
   /// The number of blocks per temporary file
   int m_blocksPerFile;
-
-  /// The most-recently-used list of buffered data blocks
-  mutable mru_list m_bufferedData;
 
   /// The name of the temporary file
   std::string m_filename;
   /// The stream handle to the temporary file used to store the data
   mutable std::vector<std::fstream*> m_datafile;
   /// Index written up to in temporary file
-  int m_indexWrittenTo;
+  mutable int m_indexWrittenTo;
 
   /// Static instance count. Used to ensure temporary filenames are distinct.
   static int g_uniqueID;
-
-  /// Static reference to the logger class
-  static Kernel::Logger &g_log;
 };
 
 } // namespace DataObjects

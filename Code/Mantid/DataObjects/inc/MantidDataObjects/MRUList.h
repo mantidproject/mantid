@@ -1,3 +1,5 @@
+#ifndef MRULIST_H
+#define MRULIST_H
 /*
  * MRUList.h
  *
@@ -23,19 +25,6 @@ namespace DataObjects
 
   using namespace boost::multi_index;
 
-
-//  /**
-//   * Interface for classes that will use a MRUList.
-//   * The class needs to implement some callbacks.
-//   */
-//  template<class T>
-//  class DLLExport IMRUUser
-//  {
-//  public:
-//    virtual void dropItemCallback(T* item_to_drop) const = 0;
-//  };
-
-
   /** An MRU (most recently used) list keeps record of the last n
   *  inserted items, listing first the newer ones. Care has to be
   *  taken when a duplicate item is inserted: instead of letting it
@@ -47,10 +36,6 @@ namespace DataObjects
   class DLLExport MRUList
   {
   public:
-
-    //Function callback type definition
-//    typedef void (IMRUUser<T>::*dropItemCallback)(T*);
-
 
   private:
     /// hideous typedef for the container holding the list
@@ -70,11 +55,7 @@ namespace DataObjects
     /// The length of the list
     const std::size_t max_num_items;
 
-//    /// Reference to the containing class
-//    const IMRUUser<T> *outer;
-
   public:
-
     /** Constructor
     *  @param max_num_items_ The length of the list
     */
@@ -82,7 +63,6 @@ namespace DataObjects
       max_num_items(max_num_items_)
       {
       }
-
 
   public:
     /** Insert an item into the list. If it's already in the list, it's moved to the top.
@@ -112,7 +92,6 @@ namespace DataObjects
     }
 
 
-
     /// Delete all the data blocks pointed to by the list, and empty the list itself
     void clear()
     {
@@ -125,6 +104,7 @@ namespace DataObjects
 
     /// Size of the list
     size_t size() const {return il.size();}
+
 
   public:
     /** Find an element of the list from the key of the minIndex
@@ -147,111 +127,8 @@ namespace DataObjects
 
 
 
-
-
-
-  //----------------------------------------------------------------------
-  // Iterator functions
-  //----------------------------------------------------------------------
-
-//  /// An iterator pointing to the beginning of the list sorted by minIndex
-//  template<class T>
-//  typename MRUList<T>::const_iterator MRUList<T>::begin()
-//  {
-//    return this->il.get().begin();
-//  }
-//
-//  /// An iterator pointing one past the end of the list sorted by minIndex
-//  template<class T>
-//  typename MRUList<T>::const_iterator MRUList<T>::end() const
-//  {
-//    return this->il.get().end();
-//  }
-//
-//  /** Find an element of the list from the key of the minIndex
-//  *  @param minIndex The minIndex value to search the list for
-//  */
-//  template<class T>
-//  typename MRUList<T>::const_iterator MRUList<T>::find(unsigned int minIndex) const
-//  {
-//    return this->il.get().find(minIndex);
-//  }
-//
-//  //----------------------------------------------------------------------
-//  // mru_list member function definitions
-////  //----------------------------------------------------------------------
-//
-//  /** Constructor
-//  *  @param max_num_items_ The length of the list
-//  */
-//  template<class T>
-//  MRUList<T>::MRUList(const std::size_t &max_num_items_) :
-//  max_num_items(max_num_items_)
-//  {
-//  }
-//
-//  /** Insert an item into the list. If it's already in the list, it's moved to the top.
-//  *  If it's a new item, it's put at the top and the last item in the list is written to file and dropped.
-//  *  @param item The CompressedDataBlock to put in the list
-//  */
-//  template<class T>
-//  void MRUList<T>::insert(T* item)
-//  {
-//    std::pair<typename MRUList<T>::item_list::iterator,bool> p=this->il.push_front(item);
-//
-//    if (!p.second)
-//    { /* duplicate item */
-//      this->il.relocate(this->il.begin(), p.first); /* put in front */
-//    }
-//    else if (this->il.size()>max_num_items)
-//    { /* keep the length <= max_num_items */
-//      // This is dropping an item - need to write it to disk (if it's changed) and delete
-//      T *toWrite = this->il.back();
-//      /*if ( toWrite->hasChanges() )
-//      {
-//        outer.writeDataBlock(toWrite);
-//      }*/
-//      this->il.pop_back//
-  //  /// Delete all the data blocks pointed to by the list, and empty the list itself
-  //  template<class T>
-  //  void MRUList<T>::clear()
-  //  {
-  //    for (typename MRUList<T>::item_list::iterator it = this->il.begin(); it != this->il.end(); ++it)
-  //    {
-  //      delete *it;
-  //    }
-  //    this->il.clear();
-  //  }
-  //
-//      delete toWrite;
-//    }
-//  }
-//
-//  /// Delete all the data blocks pointed to by the list, and empty the list itself
-//  template<class T>
-//  void MRUList<T>::clear()
-//  {
-//    for (typename MRUList<T>::item_list::iterator it = this->il.begin(); it != this->il.end(); ++it)
-//    {
-//      delete *it;
-//    }
-//    this->il.clear();
-//  }
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 }
 
 
+#endif // MRULIST_H
