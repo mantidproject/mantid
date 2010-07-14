@@ -1,5 +1,5 @@
-#ifndef SOLIDANGLECORRECTIONTEST_H_
-#define SOLIDANGLECORRECTIONTEST_H_
+#ifndef CALCULATEEFFICIENCYTEST_H_
+#define CALCULATEEFFICIENCYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CalculateEfficiency.h"
