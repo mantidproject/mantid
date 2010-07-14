@@ -19,7 +19,7 @@ Kernel::Logger& CompressedWorkspace2D::g_log = Kernel::Logger::get("CompressedWo
 
 /// Constructor
 CompressedWorkspace2D::CompressedWorkspace2D() :
-AbsManagedWorkspace2D<100>()
+AbsManagedWorkspace2D(100)
 {
 }
 
@@ -33,7 +33,7 @@ void CompressedWorkspace2D::init(const int &NVectors, const int &XLength, const 
 {
   g_log.information("Creating a CompressedWorkspace2D");
 
-  AbsManagedWorkspace2D<100>::init(NVectors,XLength,YLength);
+  AbsManagedWorkspace2D::init(NVectors,XLength,YLength);
 
   if (! Kernel::ConfigService::Instance().getValue("CompressedWorkspace.VectorsPerBlock", m_vectorsPerBlock) )
     m_vectorsPerBlock = 4;
@@ -86,7 +86,7 @@ void CompressedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int start
   uncompressBlock(newBlock,startIndex);
 }
 
-void CompressedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite)
+void CompressedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 {
   CompressedPointer p = compressBlock(toWrite,toWrite->minIndex());
   CompressedPointer old_p = m_compressedData[toWrite->minIndex()];
@@ -109,7 +109,7 @@ long int CompressedWorkspace2D::getMemorySize() const
  *  @param block Pointer to the source block for compression
  *  @param startIndex The starting index of the block
  */
-CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,int startIndex)
+CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,int startIndex) const
 {
   //std::cerr<<"compress "<<startIndex<<'\n';
 

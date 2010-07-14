@@ -46,7 +46,7 @@ namespace DataObjects
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport CompressedWorkspace2D : public AbsManagedWorkspace2D<100>
+  class DLLExport CompressedWorkspace2D : public AbsManagedWorkspace2D
   {
   public:
 
@@ -65,7 +65,7 @@ namespace DataObjects
     /// Reads in a data block.
     virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
     /// Saves the dropped data block to disk.
-    virtual void writeDataBlock(ManagedDataBlock2D *toWrite);
+    virtual void writeDataBlock(ManagedDataBlock2D *toWrite) const;
 
   private:
     // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
@@ -80,7 +80,7 @@ namespace DataObjects
     typedef std::map<size_t,CompressedPointer > CompressedMap;
 
     /// Compresses a block
-    CompressedPointer compressBlock(ManagedDataBlock2D* block,int startIndex);
+    CompressedPointer compressBlock(ManagedDataBlock2D* block,int startIndex) const;
     /// Uncompress a block
     void uncompressBlock(ManagedDataBlock2D* block,int startIndex)const;
 

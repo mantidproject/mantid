@@ -2,6 +2,7 @@
 #define ABSMANAGEDWORKSPACE2D_H 
 
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/MRUList.h"
 #include "MantidDataObjects/ManagedDataBlock2D.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -19,6 +20,7 @@ namespace Mantid
 {
 namespace DataObjects
 {
+
   /** AbsManagedWorkspace2D
 
   This is an abstract class for a managed workspace. 
@@ -48,70 +50,13 @@ namespace DataObjects
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  template<int NBlocks>
   class DLLExport AbsManagedWorkspace2D : public Workspace2D
   {
-
-    /** An MRU (most recently used) list keeps record of the last n
-    *  inserted items, listing first the newer ones. Care has to be
-    *  taken when a duplicate item is inserted: instead of letting it
-    *  appear twice, the MRU list relocates it to the first position.
-    *  This class has been taken from one of the examples given in the
-    *  Boost.MultiIndex documentation (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
-    */
-    class mru_list
-    {
-    public:
-      mru_list(const std::size_t &max_num_items_, AbsManagedWorkspace2D &out);
-
-      void insert(ManagedDataBlock2D* item);
-      void clear();
-      /// Size of the list
-      size_t size() const {return il.size();}
-
-    private:
-      /// typedef for the container holding the list
-      typedef boost::multi_index::multi_index_container<
-        ManagedDataBlock2D*,
-        boost::multi_index::indexed_by<
-        boost::multi_index::sequenced<>,
-        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
-        >
-      > item_list;
-
-      /// The most recently used list
-      item_list il;
-      /// The length of the list
-      const std::size_t max_num_items;
-      /// Reference to the containing class
-      AbsManagedWorkspace2D &outer;
-
-    public:
-      /// Import the multi index container iterator
-      typedef item_list::nth_index<1>::type::const_iterator const_iterator;
-      /// An iterator pointing to the beginning of the list sorted by minIndex
-      const_iterator begin() const
-      {
-        return il.get<1>().begin();
-      }
-      /// An iterator pointing one past the end of the list sorted by minIndex
-      const_iterator end() const
-      {
-        return il.get<1>().end();
-      }
-      /** Find an element of the list from the key of the minIndex
-      *  @param minIndex The minIndex value to search the list for
-      */
-      const_iterator find(unsigned int minIndex) const
-      {
-        return il.get<1>().find(minIndex);
-      }
-    };
-
-    friend class mru_list;
+    typedef MRUList<ManagedDataBlock2D> mru_list;
+    //friend class mru_list;
 
   public:
-    AbsManagedWorkspace2D();
+    AbsManagedWorkspace2D(int NBlocks=100);
     virtual ~AbsManagedWorkspace2D();
 
     virtual const std::string id() const {return "AbsManagedWorkspace2D";}
@@ -142,12 +87,13 @@ namespace DataObjects
 
     virtual void init(const int &NVectors, const int &XLength, const int &YLength);
     /// Number of blocks in temporary storage
-    int getNumberBlocks()const{return m_bufferedData.size();}
+    int getNumberBlocks() const
+    {return m_bufferedData.size();}
 
     /// Reads in a data block.
     virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const = 0;
     /// Saves the dropped data block to disk.
-    virtual void writeDataBlock(ManagedDataBlock2D *toWrite) = 0;
+    virtual void writeDataBlock(ManagedDataBlock2D *toWrite) const = 0;
 
     /// The number of vectors in each data block
     int m_vectorsPerBlock;
@@ -172,23 +118,32 @@ namespace DataObjects
     ManagedDataBlock2D* getDataBlock(const int index) const;
 
     /// The most-recently-used list of buffered data blocks
-    mutable mru_list m_bufferedData;
+    mutable MRUList<ManagedDataBlock2D> m_bufferedData;
 
     /// Static reference to the logger class
     static Kernel::Logger &g_log;
+
+  public:
+    /// Callback func
+    template <class ManagedDataBlock2D>
+    void dropItemCallback(ManagedDataBlock2D* item_to_write_maybe)
+    {
+      std::cout << "dropItemCallback called!" << std::endl;
+    }
+
   };
 
 // Get a reference to the logger
-template<int NBlocks>
-Kernel::Logger& AbsManagedWorkspace2D<NBlocks>::g_log = Kernel::Logger::get("AbsManagedWorkspace2D");
+Kernel::Logger& AbsManagedWorkspace2D::g_log = Kernel::Logger::get("AbsManagedWorkspace2D");
+
 
 
 /// Constructor
-template<int NBlocks>
-AbsManagedWorkspace2D<NBlocks>::AbsManagedWorkspace2D() :
-Workspace2D(), m_bufferedData(NBlocks, *this)
+AbsManagedWorkspace2D::AbsManagedWorkspace2D(int NBlocks) :
+Workspace2D(), m_bufferedData(NBlocks)
 {
 }
+
 
 /** Sets the size of the workspace and sets up the temporary file
 *  @param NVectors The number of vectors/histograms/detectors in the workspace
@@ -196,8 +151,7 @@ Workspace2D(), m_bufferedData(NBlocks, *this)
 *  @param YLength The number of data/error points in each vector (must all be the same)
 *  @throw std::runtime_error if unable to open a temporary file
 */
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::init(const int &NVectors, const int &XLength, const int &YLength)
+void AbsManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
 {
   m_noVectors = NVectors;
   m_axes.resize(2);
@@ -213,23 +167,20 @@ void AbsManagedWorkspace2D<NBlocks>::init(const int &NVectors, const int &XLengt
 }
 
 /// Destructor. Clears the buffer and deletes the temporary file.
-template<int NBlocks>
-AbsManagedWorkspace2D<NBlocks>::~AbsManagedWorkspace2D()
+AbsManagedWorkspace2D::~AbsManagedWorkspace2D()
 {
   // delete all ManagedDataBlock2D's
   m_bufferedData.clear();
 }
 
 /// Get pseudo size
-template<int NBlocks>
-int AbsManagedWorkspace2D<NBlocks>::size() const
+int AbsManagedWorkspace2D::size() const
 {
   return m_noVectors * blocksize();
 }
 
 /// Get the size of each vector
-template<int NBlocks>
-int AbsManagedWorkspace2D<NBlocks>::blocksize() const
+int AbsManagedWorkspace2D::blocksize() const
 {
   return (m_noVectors > 0) ? static_cast<int>(m_YLength) : 0;
 }
@@ -238,8 +189,7 @@ int AbsManagedWorkspace2D<NBlocks>::blocksize() const
 *  @param histnumber Index of the histogram to be set
 *  @param PA The data to enter
 */
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::setX(const int histnumber, const Histogram1D::RCtype& PA)
+void AbsManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
@@ -252,8 +202,7 @@ void AbsManagedWorkspace2D<NBlocks>::setX(const int histnumber, const Histogram1
 *  @param histnumber Index of the histogram to be set
 *  @param Vec The data to enter
 */
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
+void AbsManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
@@ -266,8 +215,7 @@ void AbsManagedWorkspace2D<NBlocks>::setX(const int histnumber, const Histogram1
 *  @param histnumber Index of the histogram to be set
 *  @param PY The data to enter
 */
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::setData(const int histnumber, const Histogram1D::RCtype& PY)
+void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
@@ -281,8 +229,7 @@ void AbsManagedWorkspace2D<NBlocks>::setData(const int histnumber, const Histogr
 *  @param PY The data to enter
 *  @param PE The corresponding errors
 */
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::setData(const int histnumber, const Histogram1D::RCtype& PY,
+void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
                                     const Histogram1D::RCtype& PE)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
@@ -297,8 +244,7 @@ void AbsManagedWorkspace2D<NBlocks>::setData(const int histnumber, const Histogr
 *  @param PY The data to enter
 *  @param PE The corresponding errors
 */
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY,
+void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY,
                                     const Histogram1D::RCtype::ptr_type& PE)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
@@ -312,8 +258,7 @@ void AbsManagedWorkspace2D<NBlocks>::setData(const int histnumber, const Histogr
 *  @param index The number of the histogram
 *  @return A vector of doubles containing the x data
 */
-template<int NBlocks>
-MantidVec& AbsManagedWorkspace2D<NBlocks>::dataX(const int index)
+MantidVec& AbsManagedWorkspace2D::dataX(const int index)
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
@@ -321,12 +266,11 @@ MantidVec& AbsManagedWorkspace2D<NBlocks>::dataX(const int index)
   return getDataBlock(index)->dataX(index);
 }
 
-/** Get the y data of a specified histogram
+/** Get the y data of a specified hMRUList<ManagedDataBlock2D>istogram
 *  @param index The number of the histogram
 *  @return A vector of doubles containing the y data
 */
-template<int NBlocks>
-MantidVec& AbsManagedWorkspace2D<NBlocks>::dataY(const int index)
+MantidVec& AbsManagedWorkspace2D::dataY(const int index)
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
@@ -338,8 +282,7 @@ MantidVec& AbsManagedWorkspace2D<NBlocks>::dataY(const int index)
 *  @param index The number of the histogram
 *  @return A vector of doubles containing the error data
 */
-template<int NBlocks>
-MantidVec& AbsManagedWorkspace2D<NBlocks>::dataE(const int index)
+MantidVec& AbsManagedWorkspace2D::dataE(const int index)
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
@@ -351,8 +294,7 @@ MantidVec& AbsManagedWorkspace2D<NBlocks>::dataE(const int index)
 *  @param index The number of the histogram
 *  @return A vector of doubles containing the x data
 */
-template<int NBlocks>
-const MantidVec& AbsManagedWorkspace2D<NBlocks>::dataX(const int index) const
+const MantidVec& AbsManagedWorkspace2D::dataX(const int index) const
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
@@ -364,8 +306,7 @@ const MantidVec& AbsManagedWorkspace2D<NBlocks>::dataX(const int index) const
 *  @param index The number of the histogram
 *  @return A vector of doubles containing the y data
 */
-template<int NBlocks>
-const MantidVec& AbsManagedWorkspace2D<NBlocks>::dataY(const int index) const
+const MantidVec& AbsManagedWorkspace2D::dataY(const int index) const
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
@@ -377,8 +318,7 @@ const MantidVec& AbsManagedWorkspace2D<NBlocks>::dataY(const int index) const
 *  @param index The number of the histogram
 *  @return A vector of doubles containing the error data
 */
-template<int NBlocks>
-const MantidVec& AbsManagedWorkspace2D<NBlocks>::dataE(const int index) const
+const MantidVec& AbsManagedWorkspace2D::dataE(const int index) const
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
@@ -386,8 +326,7 @@ const MantidVec& AbsManagedWorkspace2D<NBlocks>::dataE(const int index) const
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
 }
 
-template<int NBlocks>
-Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D<NBlocks>::refX(const int index) const
+Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const int index) const
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
@@ -399,8 +338,7 @@ Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D<NBlocks>::refX(const int index)
 For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
 being virtual so it now just calls this private (and virtual) method which does the work.
 */
-template<int NBlocks>
-const int AbsManagedWorkspace2D<NBlocks>::getHistogramNumberHelper() const
+const int AbsManagedWorkspace2D::getHistogramNumberHelper() const
 {
   return m_noVectors;
 }
@@ -410,77 +348,35 @@ const int AbsManagedWorkspace2D<NBlocks>::getHistogramNumberHelper() const
 *  @return A pointer to the data block containing the index requested
 */
 // not really a const method, but need to pretend it is so that const data getters can call it
-template<int NBlocks>
-ManagedDataBlock2D* AbsManagedWorkspace2D<NBlocks>::getDataBlock(const int index) const
+ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const int index) const
 {
   int startIndex = index - ( index%m_vectorsPerBlock );
+
   // Look to see if the data block is already buffered
-  typename mru_list::const_iterator it = m_bufferedData.find(startIndex);
-  if ( it != m_bufferedData.end() )
-  {
-    return *it;
-  }
+  ManagedDataBlock2D *existingBlock =  m_bufferedData.find(startIndex);
+  if (existingBlock)
+    return existingBlock;
 
   // If not found, need to load block into memory and mru list
   ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(startIndex, m_vectorsPerBlock, m_XLength, m_YLength);
   // Check whether datablock has previously been saved. If so, read it in.
   readDataBlock(newBlock,startIndex);
-  m_bufferedData.insert(newBlock);
-  return newBlock;
-}
 
-//----------------------------------------------------------------------
-// mru_list member function definitions
-//----------------------------------------------------------------------
-
-/** Constructor
-*  @param max_num_items_ The length of the list
-*  @param out A reference to the containing class
-*/
-template<int NBlocks>
-AbsManagedWorkspace2D<NBlocks>::mru_list::mru_list(const std::size_t &max_num_items_, AbsManagedWorkspace2D &out) :
-max_num_items(max_num_items_),
-outer(out)
-{
-}
-
-/** Insert an item into the list. If it's already in the list, it's moved to the top.
-*  If it's a new item, it's put at the top and the last item in the list is written to file and dropped.
-*  @param item The CompressedDataBlock to put in the list
-*/
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::mru_list::insert(ManagedDataBlock2D* item)
-{
-  std::pair<item_list::iterator,bool> p=il.push_front(item);
-
-  if (!p.second)
-  { /* duplicate item */
-    il.relocate(il.begin(), p.first); /* put in front */
-  }
-  else if (il.size()>max_num_items)
-  { /* keep the length <= max_num_items */
-    // This is dropping an item - need to write it to disk (if it's changed) and delete
-    ManagedDataBlock2D *toWrite = il.back();
-    if ( toWrite->hasChanges() )
-    {
-      outer.writeDataBlock(toWrite);
-    }
-    il.pop_back();
+  //Put the read block in the MRU
+  ManagedDataBlock2D *toWrite = m_bufferedData.insert(newBlock);
+  if (toWrite)
+  {
+    //We got out a block - it is a block that is being dropped.
+    //If it changed, we need to save it
+    if (toWrite->hasChanges())
+      //std::cout << "OKAY ILL TRY TO WRITE IT NOW\n";
+      this->writeDataBlock(toWrite);
+    //And it is up to us to delete the block now.
     delete toWrite;
   }
-}
 
-/// Delete all the data blocks pointed to by the list, and empty the list itself
-template<int NBlocks>
-void AbsManagedWorkspace2D<NBlocks>::mru_list::clear()
-{
-  for (item_list::iterator it = il.begin(); it != il.end(); ++it)
-  {
-    delete *it;
-  }
-  il.clear();
+  return newBlock;
 }
-
 
 
 } // namespace DataObjects
