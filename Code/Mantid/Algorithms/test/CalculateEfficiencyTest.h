@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/SolidAngleCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -13,6 +14,47 @@ using namespace Mantid::Kernel;
 class CalculateEfficiencyTest : public CxxTest::TestSuite
 {
 public:
+
+  /*
+   * Generate fake data for which we know what the result should be
+   */
+  void setUp()
+  {
+    inputWS = "sampledata";
+
+    Mantid::DataObjects::Workspace2D_sptr ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
+
+    // Set up the X bin for the monitor channels
+    for ( int i=0; i<SANSInstrumentCreationHelper::nMonitors; i++ )
+    {
+      MantidVec& X = ws->dataX(i);
+      MantidVec& Y = ws->dataY(i);
+      MantidVec& E = ws->dataE(i);
+      X[0] = 1;
+      X[1] = 2;
+    }
+
+    for ( int ix=0; ix<SANSInstrumentCreationHelper::nBins; ix++ )
+    {
+      for ( int iy=0; iy<SANSInstrumentCreationHelper::nBins; iy++)
+      {
+        int i = ix*SANSInstrumentCreationHelper::nBins+iy+SANSInstrumentCreationHelper::nMonitors;
+        MantidVec& X = ws->dataX(i);
+        MantidVec& Y = ws->dataY(i);
+        MantidVec& E = ws->dataE(i);
+        X[0] = 1;
+        X[1] = 2;
+        Y[0] = 2.0;
+        E[0] = 1;
+        ws->getAxis(1)->spectraNo(i) = i;
+      }
+    }
+    // Change one of the bins so that it will be excluded for having a high signal
+    MantidVec& Y = ws->dataY(SANSInstrumentCreationHelper::nMonitors+5);
+    Y[0] = 202.0;
+
+  }
+
   void testName()
   {
     TS_ASSERT_EQUALS( correction.name(), "CalculateEfficiency" )
@@ -32,6 +74,63 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING( correction.initialize() )
     TS_ASSERT( correction.isInitialized() )
+  }
+
+  void testExec()
+  {
+    if (!correction.isInitialized()) correction.initialize();
+
+    const std::string outputWS("result");
+    correction.setPropertyValue("InputWorkspace",inputWS);
+    TS_ASSERT_THROWS_NOTHING( correction.setPropertyValue("OutputWorkspace",outputWS) )
+
+    TS_ASSERT_THROWS_NOTHING( correction.execute() )
+    TS_ASSERT( correction.isExecuted() )
+
+    Mantid::API::Workspace_sptr ws_out;
+    TS_ASSERT_THROWS_NOTHING( ws_out = Mantid::API::AnalysisDataService::Instance().retrieve(outputWS) );
+    Mantid::DataObjects::Workspace2D_sptr ws2d_out = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+
+    double tolerance(1e-03);
+    TS_ASSERT_DELTA( ws2d_out->dataY(1+SANSInstrumentCreationHelper::nMonitors)[0], 0.9, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataY(15+SANSInstrumentCreationHelper::nMonitors)[0], 0.9, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataY(6+SANSInstrumentCreationHelper::nMonitors)[0], 0.9, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataY(5+SANSInstrumentCreationHelper::nMonitors)[0], 90.9, tolerance );
+
+    TS_ASSERT_DELTA( ws2d_out->dataE(1+SANSInstrumentCreationHelper::nMonitors)[0], 0.4502, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataE(15+SANSInstrumentCreationHelper::nMonitors)[0], 0.4502, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataE(6+SANSInstrumentCreationHelper::nMonitors)[0], 0.4502, tolerance );
+
+    // Check that pixels that were out of range were masked
+    TS_ASSERT(!ws2d_out->getDetector(5+SANSInstrumentCreationHelper::nMonitors)->isMasked())
+    TS_ASSERT(!ws2d_out->getDetector(1+SANSInstrumentCreationHelper::nMonitors)->isMasked())
+
+
+    // Repeat the calculation by excluding high/low pixels
+
+    TS_ASSERT_THROWS_NOTHING( correction.setProperty<double>("MinEfficiency",0.5) )
+    TS_ASSERT_THROWS_NOTHING( correction.setProperty<double>("MaxEfficiency",1.50) )
+
+    TS_ASSERT_THROWS_NOTHING( correction.execute() )
+    TS_ASSERT( correction.isExecuted() )
+
+    TS_ASSERT_THROWS_NOTHING( ws_out = Mantid::API::AnalysisDataService::Instance().retrieve(outputWS) );
+    ws2d_out = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+
+    TS_ASSERT_DELTA( ws2d_out->dataY(1+SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataY(15+SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataY(6+SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance );
+
+    TS_ASSERT_DELTA( ws2d_out->dataE(1+SANSInstrumentCreationHelper::nMonitors)[0], 0.5002, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataE(15+SANSInstrumentCreationHelper::nMonitors)[0], 0.5002, tolerance );
+    TS_ASSERT_DELTA( ws2d_out->dataE(6+SANSInstrumentCreationHelper::nMonitors)[0], 0.5002, tolerance );
+
+    // Check that pixels that were out of range were masked
+    TS_ASSERT(ws2d_out->getDetector(5+SANSInstrumentCreationHelper::nMonitors)->isMasked())
+    TS_ASSERT(!ws2d_out->getDetector(1+SANSInstrumentCreationHelper::nMonitors)->isMasked())
+
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
   /*
