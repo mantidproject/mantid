@@ -1,3 +1,4 @@
+// Note that this file had been modified to work with Mantid. See inline comments around lines 668 & 762.
 /*
 	stdsoap2.h 2.7.16
 
@@ -664,6 +665,12 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 # define OPENSSL_NO_KRB5
 # include <openssl/bio.h>
 # include <openssl/err.h>
+// RJT, 14/7/10: For some bizarre reason these symbols end up being defined in our Mac build, which leads to
+// it trying to include windows.h - obviously bad news on a Mac
+# ifdef __APPLE__
+#  undef OPENSSL_SYS_WINDOWS
+#  undef OPENSSL_SYS_WIN32
+# endif
 # include <openssl/rand.h>
 # include <openssl/ssl.h>
 # include <openssl/x509v3.h>
@@ -752,7 +759,7 @@ extern "C" {
 #  elif defined(__GLIBC__)
 #   include <bits/wordsize.h>
 #   if (__WORDSIZE == 64)
-#    define LONG64 long long
+#    define LONG64 long long  // RJT: Had to change this from int64_t so that our TableWorkspace column types were compatible
 #    define ULONG64 uint64_t
 #    ifndef SOAP_LONG_FORMAT
 #     define SOAP_LONG_FORMAT "%ld"
