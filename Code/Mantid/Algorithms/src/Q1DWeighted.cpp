@@ -118,8 +118,8 @@ void Q1DWeighted::exec()
 
     // Get the current spectrum for both input workspaces
     const MantidVec& XIn = inputWS->readX(i);
-    MantidVec YIn = inputWS->readY(i);
-    MantidVec EIn = inputWS->readE(i);
+    const MantidVec& YIn = inputWS->readY(i);
+    const MantidVec& EIn = inputWS->readE(i);
 
 
     // Calculate the Q values for the current spectrum
