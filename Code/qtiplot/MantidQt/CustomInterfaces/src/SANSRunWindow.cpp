@@ -2072,8 +2072,8 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     QString pythonC="t1, t2 = " + assign_fn + ";print t1,'"+runPythonSep+"',t2";
     QString ws_names = runReduceScriptFunction(pythonC);
     //read the informtion returned from Python
-    QString trans_ws = ws_names.section(runPythonSep, 0,0);
-    QString direct_ws = ws_names.section(runPythonSep, 1);
+    QString trans_ws = ws_names.section(runPythonSep, 0,0).trimmed();
+    QString direct_ws = ws_names.section(runPythonSep, 1).trimmed();
 
     status = ( ! trans_ws.isEmpty() ) && ( ! direct_ws.isEmpty() );
 
@@ -2117,7 +2117,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     QString run_info = "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE,'"+runPythonSep+"',logvalues";
     run_info = runReduceScriptFunction(run_info);
     //read the informtion returned from Python
-    QString base_workspace = run_info.section(runPythonSep, 0, 0);
+    QString base_workspace = run_info.section(runPythonSep, 0, 0).trimmed();
 
     logs = run_info.section(runPythonSep, 1);
     if( !logs.isEmpty() )
