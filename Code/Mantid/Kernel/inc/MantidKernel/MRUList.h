@@ -20,7 +20,7 @@
 
 namespace Mantid
 {
-namespace DataObjects
+namespace Kernel
 {
 
   using namespace boost::multi_index;

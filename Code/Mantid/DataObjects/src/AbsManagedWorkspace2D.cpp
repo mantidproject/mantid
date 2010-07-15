@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataObjects/AbsManagedWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/MRUList.h"
 #include "MantidDataObjects/ManagedDataBlock2D.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"

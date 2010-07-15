@@ -2,7 +2,7 @@
 #define ABSMANAGEDWORKSPACE2D_H 
 
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/MRUList.h"
+#include "MantidKernel/MRUList.h"
 #include "MantidDataObjects/ManagedDataBlock2D.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -54,7 +54,7 @@ namespace DataObjects
   {
   protected:
     /// Most-Recently-Used list of ManagedDataBlock2D objects.
-    typedef MRUList<ManagedDataBlock2D> mru_list;
+    typedef Mantid::Kernel::MRUList<ManagedDataBlock2D> mru_list;
     //friend class mru_list;
 
   public:
@@ -112,7 +112,7 @@ namespace DataObjects
     static Kernel::Logger &g_log;
 
     /// The most-recently-used list of buffered data blocks
-    mutable MRUList<ManagedDataBlock2D> m_bufferedData;
+    mutable Mantid::Kernel::MRUList<ManagedDataBlock2D> m_bufferedData;
 
   private:
     // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
