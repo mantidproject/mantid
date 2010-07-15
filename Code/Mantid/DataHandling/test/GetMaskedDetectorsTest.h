@@ -16,10 +16,10 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-class MaskDetectorsTest : public CxxTest::TestSuite
+class GetMaskedDetectorsTest : public CxxTest::TestSuite
 {
 public:
-  MaskDetectorsTest()
+  GetMaskedDetectorsTest()
   {
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
