@@ -55,12 +55,13 @@ public:
     space->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 5 );
 
     // Register the workspace in the data service
-    AnalysisDataService::Instance().add("testSpace", space);
+    inputWS = "test_masked_ws";
+    AnalysisDataService::Instance().add(inputWS, space);
 
     // Mask detectors in the test workspace
     MaskDetectors marker_mask;
     marker_mask.initialize();
-    marker_mask.setPropertyValue("Workspace","testSpace");
+    marker_mask.setPropertyValue("Workspace", inputWS);
     marker_mask.setPropertyValue("DetectorList","1,3");
     marker_mask.execute();
     boost::shared_ptr<IInstrument> instrument = space->getInstrument();
@@ -87,7 +88,7 @@ public:
   void testExec()
   {
     if ( !marker.isInitialized() ) marker.initialize();
-    marker.setPropertyValue("InputWorkspace","testSpace");
+    marker.setPropertyValue("InputWorkspace", inputWS);
     TS_ASSERT_THROWS_NOTHING( marker.execute());
     TS_ASSERT( marker.isExecuted() );
 
@@ -97,11 +98,12 @@ public:
     TS_ASSERT_EQUALS(list[0], 1);
     TS_ASSERT_EQUALS(list[1], 3);
 
-    AnalysisDataService::Instance().remove("testSpace");
+    AnalysisDataService::Instance().remove(inputWS);
   }
 
 private:
   GetMaskedDetectors marker;
+  std::string inputWS;
 };
 
 #endif /*MARKDEADDETECTORSTEST_H_*/

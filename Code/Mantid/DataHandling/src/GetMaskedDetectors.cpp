@@ -4,7 +4,7 @@
 #include "MantidDataHandling/GetMaskedDetectors.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <set>
+#include <map>
 
 namespace Mantid
 {
@@ -40,14 +40,15 @@ void GetMaskedDetectors::exec()
   // List masked of detector IDs
   std::vector<int> detectorList;
 
-  // Loop through every spectrum and get the list of masked detector IDs
-  for ( int i=0; i<WS->getNumberHistograms(); i++ )
+  std::map<int, Geometry::IDetector_sptr> det_map = WS->getInstrument()->getDetectors();
+
+  for (std::map<int, Geometry::IDetector_sptr>::const_iterator iter = det_map.begin();
+      iter != det_map.end(); ++iter )
   {
-    Geometry::IDetector_const_sptr det = WS->getDetector(i);
-    if ( det->isMasked() )
+    if ( iter->second->isMasked() )
     {
-      detectorList.push_back(i);
-    }
+      detectorList.push_back(iter->first);
+     }
   }
 
   setProperty("DetectorList", detectorList);
