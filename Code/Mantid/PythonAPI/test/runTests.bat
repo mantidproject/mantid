@@ -23,9 +23,9 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "C:\Python25\include" /I "..\.." /I "..\inc"  /I "../../Kernel/inc" /I "../../API/inc" /I "../../PythonAPI/inc" /I "../../Geometry/inc" /I "../../DataObjects/inc" /D_CRT_SECURE_NO_DEPRECATE /DBOOST_ALL_DYN_LINK /wd4275 /EHsc /MDd /W3 /nologo /c /ZI /TP 
+cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "C:\Python25\include" /I "..\.." /I "..\inc"  /I "../../Kernel/inc" /I "../../API/inc" /I "../../PythonAPI/inc" /I "../../Geometry/inc" /I "../../DataObjects/inc" /D_CRT_SECURE_NO_DEPRECATE /DBOOST_DEBUG_PYTHON /DBOOST_PYTHON_NO_LINK /wd4275 /EHsc /MDd /W3 /nologo /c /ZI /TP 
 
-link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /LIBPATH:"C:\Python25\libs" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantiddataobjects.lib Mantiddatahandling.lib Mantidgeometry.lib MantidAPI.lib MantidPythonAPI.lib MantidAlgorithms.lib runner.obj
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /LIBPATH:"C:\Python25\libs" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantiddataobjects.lib Mantiddatahandling.lib Mantidgeometry.lib MantidAPI.lib MantidPythonAPI_d.lib MantidAlgorithms.lib boost_python-vc80-mt-gyd-1_43.lib runner.obj
   
 echo "Running the tests..."
 runner.exe

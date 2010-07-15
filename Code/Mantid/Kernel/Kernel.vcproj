@@ -255,6 +255,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MaskedProperty.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Property.cpp"
 				>
 			</File>
@@ -486,6 +490,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\MantidVersion.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\MaskedProperty.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\MRUList.h"
 				>
 			</File>
 			<File
