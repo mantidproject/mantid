@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <sys/resource.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -42,7 +43,7 @@ public:
   EventWorkspaceTest()
   {
     NUMPIXELS = 500;
-    NUMBINS = 1001;
+    NUMBINS = 1025;
     NUMEVENTS = 100;
     BIN_DELTA = 1000;
   }
@@ -102,7 +103,6 @@ public:
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS( ew->blocksize(), NUMBINS-1);
     TS_ASSERT_EQUALS( ew->size(), (NUMBINS-1)*NUMPIXELS);
-
 
     //Are the returned arrays the right size?
     const EventList el(ew->getEventListAtWorkspaceIndex(1));
@@ -283,10 +283,88 @@ public:
     //TS_ASSERT_THROWS( ew->addTime(-100, t - minutes(5) ), std::range_error);
   }
 
+
+  /// Linux-only method for getting memory usage
+  int memory_usage()
+  {
+    return 0; //Temporarily disabled for non-linux OSs
+
+    char buf[30];
+    snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
+    FILE* pf = fopen(buf, "r");
+    if (pf) {
+        int size; //       total program size
+        fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
+        fclose(pf);
+        return size*4; //On my system each number here = 4 kb
+    }
+    fclose(pf);
+    return 0;
+  }
+
   //------------------------------------------------------------------------------
   void test_histogram_cache()
   {
-	  //Try caching and most-recently-used MRU list.
+    //Try caching and most-recently-used MRU list.
+    EventWorkspace_const_sptr ew2 = ew;
+    //Are the returned arrays the right size?
+    MantidVec data1 = ew2->dataY(1);
+    TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
+    //This should get the cached one
+    MantidVec data2 = ew2->dataY(1);
+    TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
+    //All elements are the same
+    for (int i=0; i<data1.size();i++)
+      TS_ASSERT_EQUALS( data1[i], data2[i]);
+
+    //Now test the caching
+    for (int i=0; i<100;i++)
+      data1 = ew2->dataY(i);
+
+    int mem1 = memory_usage();
+    int last = 100;
+    //Read more; memory use should be the same?
+    for (int i=last; i<last+100;i++)
+      data1 = ew2->dataY(i);
+    int mem2 = memory_usage();
+//    std::cout << "\nMemory use changed by " << mem2-mem1 << " kb.\n";
+
+    last=200; mem1=mem2;
+    for (int i=last; i<last+100;i++)
+      data1 = ew2->dataY(i);
+    mem2 = memory_usage();
+//    std::cout << "Memory use changed by " << mem2-mem1 << " kb.\n";
+
+//    mem1=mem2;
+//    std::vector<int> test_vector;
+//    test_vector.resize(1024*1024, 0);
+//    mem2 = memory_usage();
+//    std::cout << "Memory use changed by " << mem2-mem1 << " kb.\n";
+//
+//    mem1=mem2;
+//    test_vector.clear();
+//    std::vector<int>().swap(test_vector);
+//    mem2 = memory_usage();
+//    std::cout << "Memory use changed by " << mem2-mem1 << " kb.\n";
+  }
+
+
+  //------------------------------------------------------------------------------
+  void test_histogram_cache_dataE()
+  {
+    //Try caching and most-recently-used MRU list.
+    EventWorkspace_const_sptr ew2 = ew;
+    //Are the returned arrays the right size?
+    MantidVec data1 = ew2->dataE(1);
+    TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
+    //This should get the cached one
+    MantidVec data2 = ew2->dataE(1);
+    TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
+    //All elements are the same
+    for (int i=0; i<data1.size();i++)
+      TS_ASSERT_EQUALS( data1[i], data2[i]);
+
+
   }
 
 

@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 
 #include <string>
+#include "MantidKernel/MRUList.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -26,6 +27,38 @@ namespace Kernel
 namespace DataObjects
 {
 
+/**
+ * This little class holds a MantidVec of data and an index marker that
+ * is used for uniqueness.
+ */
+class MantidVecWithMarker {
+public:
+  /**
+   * Constructor.
+   * @param the_index unique index into the workspace of this data
+   * @param the_data a MantidVec of data.
+   */
+  MantidVecWithMarker(const int the_index, const MantidVec& the_data)
+  {
+    m_index = the_index;
+    m_data = the_data;
+  }
+
+  /// Unique index value.
+  int m_index;
+  /// Vector of data
+  MantidVec m_data;
+  /// Function returns a unique index, used for hashing for MRU list
+  int hashIndexFunction() const
+  {
+    return m_index;
+  }
+  /// Set the unique index value.
+  void setIndex(const int the_index)
+  {
+    m_index = the_index;
+  }
+};
 
 
 ///Map to EventList objects, with an int as the index.
@@ -42,6 +75,9 @@ typedef std::vector<EventList*> EventListVector;
 class DLLExport EventWorkspace : public API::MatrixWorkspace
 {
  public:
+  /// Typedef for a Most-Recently-Used list of Data objects.
+  typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
+
   /// The name of the workspace type.
   virtual const std::string id() const {return "EventWorkspace";}
 
@@ -152,6 +188,14 @@ private:
 
   /// Vector where the index is the frameId and the value is the corresponding time, in Posix timing.
   std::vector<boost::posix_time::ptime> frameTime;
+
+  /// The most-recently-used list of dataY histograms
+  mutable mru_list m_bufferedDataY;
+
+  /// The most-recently-used list of dataE histograms
+  mutable mru_list m_bufferedDataE;
+
+
 };
 
 ///shared pointer to the EventWorkspace class

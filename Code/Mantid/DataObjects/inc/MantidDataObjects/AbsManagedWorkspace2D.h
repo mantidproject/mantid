@@ -112,7 +112,7 @@ namespace DataObjects
     static Kernel::Logger &g_log;
 
     /// The most-recently-used list of buffered data blocks
-    mutable Mantid::Kernel::MRUList<ManagedDataBlock2D> m_bufferedData;
+    mutable mru_list m_bufferedData;
 
   private:
     // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

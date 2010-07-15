@@ -43,7 +43,7 @@ namespace Kernel
       T*,
       boost::multi_index::indexed_by<
         boost::multi_index::sequenced<>,
-        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(T,int,minIndex)>
+        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(T,int,hashIndexFunction)>
       >
     > item_list;
 
@@ -107,12 +107,13 @@ namespace Kernel
 
 
   public:
-    /** Find an element of the list from the key of the minIndex
-    *  @param minIndex The minIndex value to search the list for
+    /** Find an element of the list from the key of the index
+    *  @param index The index value to search the list for
+    *  @return The object found, or NULL if not found.
     */
-    T* find(const unsigned int minIndex) const
+    T* find(const unsigned int index) const
     {
-      typename ordered_item_list::const_iterator it = il.get<1>().find(minIndex);
+      typename ordered_item_list::const_iterator it = il.get<1>().find(index);
       if (it == il.get<1>().end())
       {
         return NULL;

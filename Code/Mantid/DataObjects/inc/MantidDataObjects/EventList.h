@@ -179,6 +179,11 @@ public:
   void generateCountsHistogram(const StorageType& X, StorageType& Y) const;
   void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
 
+  /** Delete the cached version of the CALCULATED histogram data. */
+  void emptyCacheData() const;
+
+  void releaseDataMemory() const;
+
 private:
   ///List of events.
   mutable std::vector<TofEvent> events;
@@ -200,9 +205,6 @@ private:
 
   void generateCountsHistogram() const;
   void generateErrorsHistogram() const;
-
-  /** Delete the cached version of the CALCULATED histogram data. */
-  void emptyCacheData();
 
 };
 

@@ -24,11 +24,16 @@ namespace DataObjects
                  = Kernel::Logger::get("EventWorkspace");
 
   //---- Constructors -------------------------------------------------------------------
-  EventWorkspace::EventWorkspace()
+  EventWorkspace::EventWorkspace() : m_bufferedDataY(100), m_bufferedDataE(100)
   {
   }
   EventWorkspace::~EventWorkspace()
-  {}
+  {
+    //Make sure you free up the memory in the MRU
+    m_bufferedDataY.clear();
+    m_bufferedDataE.clear();
+    //Go through the event list and clear them
+  }
 
   //-----------------------------------------------------------------------------
   /** Initialize the pixels
@@ -282,7 +287,6 @@ namespace DataObjects
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
     return this->data[index]->dataX();
-
   }
 
   /// Return the const data Y vector at a given workspace index
@@ -290,7 +294,28 @@ namespace DataObjects
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
-    return this->data[index]->dataY();
+
+    //Is the data in the mrulist?
+    MantidVecWithMarker * data = m_bufferedDataY.find(index);
+    if (data == NULL)
+    {
+      //This will calculate it
+      data = new MantidVecWithMarker(index, this->data[index]->dataY());
+      MantidVecWithMarker * oldData;
+      //Lets save it in the MRU
+      oldData = m_bufferedDataY.insert(data);
+      //And clear up the memory of the old one, if it is dropping out.
+      if (oldData)
+      {
+//        std::stringstream out;
+//        out << "Data cache cleared when retrieving " << index << ". I got rid of " << oldData->m_index << ".";
+//        g_log.information(out.str());
+        this->data[oldData->m_index]->releaseDataMemory();
+        // apparently unnecessary -> oldData->m_data.clear();
+        delete oldData;
+      }
+    }
+    return data->m_data;
   }
 
   /// Return the const data E vector at a given workspace index
@@ -298,7 +323,24 @@ namespace DataObjects
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    return this->data[index]->dataE();
+
+    //Is the data in the mrulist?
+    MantidVecWithMarker * data = m_bufferedDataE.find(index);
+    if (data == NULL)
+    {
+      //This will calculate it
+      data = new MantidVecWithMarker(index, this->data[index]->dataE());
+      MantidVecWithMarker * oldData;
+      //Lets save it in the MRU
+      oldData = m_bufferedDataE.insert(data);
+      //And clear up the memory of the old one, if it is dropping out.
+      if (oldData)
+      {
+        this->data[oldData->m_index]->releaseDataMemory();
+        delete oldData;
+      }
+    }
+    return data->m_data;
   }
 
   /// Get a pointer to the x data at the given workspace index

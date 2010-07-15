@@ -379,11 +379,24 @@ namespace DataObjects
   /** Delete the cached version of the CALCULATED histogram data.
    * Necessary when modifying the event list.
    * */
-  void EventList::emptyCacheData()
+  void EventList::emptyCacheData() const
   {
     this->isCacheDirty = true;
     this->refY.access().clear();
     this->refE.access().clear();
+  }
+
+  /** Delete and release the memory of the calculated histogram data
+   *
+   */
+  void EventList::releaseDataMemory() const
+  {
+    this->isCacheDirty = true;
+    this->refY.access().clear();
+    this->refE.access().clear();
+    //This swapping trick is necessary to make std::vector release the allocated memory!!!
+    MantidVec().swap( this->refY.access() );
+    MantidVec().swap( this->refE.access() );
   }
 
   /** Fill a histogram given specified histogram bounds in this spectra list - replace the cached values.

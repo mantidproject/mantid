@@ -63,6 +63,7 @@ public:
   virtual ~ManagedDataBlock2D();
 
   int minIndex() const;
+  int hashIndexFunction() const;
   bool hasChanges() const;
   void hasChanges(bool has);
 
