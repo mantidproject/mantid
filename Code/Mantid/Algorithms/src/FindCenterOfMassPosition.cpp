@@ -31,8 +31,8 @@ void FindCenterOfMassPosition::init()
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace","",Direction::Output),
-      "The name of the table workspace containing the center of mass position.");
+  declareProperty("Output","","If not empty, a table workspace of that "
+      "name will contain the center of mass position.");
 
   BoundedValidator<int> *positiveInt = new BoundedValidator<int>();
   positiveInt->setLower(0);
@@ -62,7 +62,7 @@ void FindCenterOfMassPosition::exec()
   // Option to exclude beam area
   bool direct_beam = getProperty("DirectBeam");
 
-  // Need an input for the X bin to use, assume 0 for now
+  //TODO: Need an input for the X bin to use, assume 0 for now
   int specID = 0;
   // Need input for detector dimensions
   int n_pixel_x = getProperty("NPixelX");
@@ -193,17 +193,36 @@ void FindCenterOfMassPosition::exec()
     progress.report();
   }
 
-  // Store the result in a table workspace
-  Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  m_result->addColumn("str","Name");
-  m_result->addColumn("double","Value");
+  std::string output = getProperty("Output");
 
-  Mantid::API::TableRow row = m_result->appendRow();
-  row << "X (m)" << center_x;
-  row = m_result->appendRow();
-  row << "Y (m)" << center_y;
+  // If an output workspace name was given, create a TableWorkspace with the results,
+  // otherwise use an ArrayProperty
+  if (!output.empty())
+  {
+    // Store the result in a table workspace
+    declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace","",Direction::Output));
 
-  setProperty("OutputWorkspace",m_result);
+    // Set the name of the new workspace
+    setPropertyValue("OutputWorkspace",output);
+
+    Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    m_result->addColumn("str","Name");
+    m_result->addColumn("double","Value");
+
+    Mantid::API::TableRow row = m_result->appendRow();
+    row << "X (m)" << center_x;
+    row = m_result->appendRow();
+    row << "Y (m)" << center_y;
+
+    setProperty("OutputWorkspace",m_result);
+  } else {
+    // Store the results using an ArrayProperty
+    declareProperty(new ArrayProperty<double> ("CenterOfMass",new NullValidator<std::vector<double> >,Direction::Output));
+    std::vector<double> center_of_mass;
+    center_of_mass.push_back(center_x);
+    center_of_mass.push_back(center_y);
+    setProperty("CenterOfMass", center_of_mass);
+  }
 
   g_log.information() << "Center of Mass found at x=" << center_x << " y=" << center_y << std::endl;
 }

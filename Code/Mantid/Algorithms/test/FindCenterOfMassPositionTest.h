@@ -52,35 +52,24 @@ public:
 
   }
 
-  void testName()
+  void testParameters()
   {
-    setUp();
+    Mantid::Algorithms::FindCenterOfMassPosition center;
     TS_ASSERT_EQUALS( center.name(), "FindCenterOfMassPosition" )
-  }
 
-  void testVersion()
-  {
     TS_ASSERT_EQUALS( center.version(), 1 )
-  }
 
-  void testCategory()
-  {
     TS_ASSERT_EQUALS( center.category(), "SANS" )
-  }
-
-  void testInit()
-  {
-    TS_ASSERT_THROWS_NOTHING( center.initialize() )
-    TS_ASSERT( center.isInitialized() )
   }
 
   void testExec()
   {
+    Mantid::Algorithms::FindCenterOfMassPosition center;
     if (!center.isInitialized()) center.initialize();
 
     const std::string outputWS("center_of_mass");
     center.setPropertyValue("InputWorkspace",inputWS);
-    center.setPropertyValue("OutputWorkspace",outputWS);
+    center.setPropertyValue("Output",outputWS);
     center.setPropertyValue("NPixelX","30");
     center.setPropertyValue("NPixelY","30");
 
@@ -107,11 +96,12 @@ public:
 
   void testExecScatteredData()
   {
+    Mantid::Algorithms::FindCenterOfMassPosition center;
     if (!center.isInitialized()) center.initialize();
 
     const std::string outputWS("center_of_mass");
     center.setPropertyValue("InputWorkspace",inputWS);
-    center.setPropertyValue("OutputWorkspace",outputWS);
+    center.setPropertyValue("Output",outputWS);
     center.setPropertyValue("NPixelX","30");
     center.setPropertyValue("NPixelY","30");
     center.setPropertyValue("DirectBeam","0");
@@ -138,13 +128,34 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }
 
+  void testExecWithArrayResult()
+  {
+    Mantid::Algorithms::FindCenterOfMassPosition center;
+    if (!center.isInitialized()) center.initialize();
+
+    center.setPropertyValue("InputWorkspace",inputWS);
+    center.setPropertyValue("NPixelX","30");
+    center.setPropertyValue("NPixelY","30");
+
+    TS_ASSERT_THROWS_NOTHING( center.execute() )
+    TS_ASSERT( center.isExecuted() )
+
+    std::vector<double> list = center.getProperty("CenterOfMass");
+    TS_ASSERT_EQUALS(list.size(), 2);
+    TS_ASSERT_DELTA(list[0], center_x, 0.0001);
+    TS_ASSERT_DELTA(list[1], center_y, 0.0001);
+
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+  }
+
   /*
    * Test that will load an actual data file and perform the center of mass
    * calculation. This test takes a longer time to execute so we won't include
    * it in the set of unit tests.
    */
-  void emptyCell()
+  void validate()
   {
+    Mantid::Algorithms::FindCenterOfMassPosition center;
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/SANS2D/BioSANS_exp61_scan0002_0001_emptycell.xml");
@@ -156,7 +167,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( center.setPropertyValue("InputWorkspace",inputWS) )
     const std::string outputWS("result");
-    TS_ASSERT_THROWS_NOTHING( center.setPropertyValue("OutputWorkspace",outputWS) )
+    TS_ASSERT_THROWS_NOTHING( center.setPropertyValue("Output",outputWS) )
     center.setPropertyValue("NPixelX","192");
     center.setPropertyValue("NPixelY","192");
 
@@ -184,7 +195,6 @@ public:
   }
 
 private:
-  Mantid::Algorithms::FindCenterOfMassPosition center;
   std::string inputWS;
   double center_x;
   double center_y;
