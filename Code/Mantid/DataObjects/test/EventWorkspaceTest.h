@@ -309,9 +309,8 @@ public:
   {
     // Linux only memory test
 #ifdef WIN32
-    return 0; //Temporarily disabled for non-linux OSs
-#endif
-
+    //Temporarily disabled for non-linux OSs
+#else
     char buf[30];
     snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
     FILE* pf = fopen(buf, "r");
@@ -322,6 +321,7 @@ public:
         return size*4; //On my system each number here = 4 kb
     }
     fclose(pf);
+#endif
     return 0;
   }
 
