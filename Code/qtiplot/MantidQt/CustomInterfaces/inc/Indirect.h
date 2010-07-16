@@ -33,7 +33,29 @@ namespace MantidQt
       virtual void setIDFValues(const QString & prefix);
 
     private:
+	  /// user interface form object
       Ui::ConvertToEnergy m_uiForm;
+	  /// get path to instrument definition file
+	  QString getIDFPath(const QString& name);
+	  /// populate the spectra ranges for the "Calibration" tab.
+	  void getSpectraRanges(const QString& defFile);
+	  /// clear various line edit boxes
+	  void clearReflectionInfo();
+
+	private slots:
+	  void analyserSelected(int index);
+	  void reflectionSelected(int index);
+	  void backgroundRemoval();
+	  void plotRaw();
+	  void rebinData();
+	  void calibPlot();
+	  void calibCreate();
+
+	private: /*
+	  int m_minSpectra, m_maxSpectra;
+	  int m_peakStart, m_peakEnd;
+	  int m_backStart, m_backEnd;
+	  double m_eFixed; */
     };
   }
 }

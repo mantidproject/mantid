@@ -473,22 +473,35 @@
             </widget>
             <widget class="QWidget" name="page_6" >
              <layout class="QGridLayout" name="gridLayout_10" >
-              <item row="0" column="0" >
+              <item row="0" column="1" >
                <widget class="QCheckBox" name="ckDetailedBalance" >
                 <property name="text" >
                  <string>Detailed Balance</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" >
+              <item row="0" column="2" >
                <widget class="QCheckBox" name="ckNormalise" >
                 <property name="text" >
                  <string>Normalise by Monitor</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2" >
+              <item row="0" column="3" >
                <spacer name="horizontalSpacer_10" >
+                <property name="orientation" >
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0" >
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="0" >
+               <spacer name="horizontalSpacer" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -650,23 +663,32 @@
               <item>
                <widget class="QLabel" name="lbEFixed" >
                 <property name="text" >
-                 <string>Efixed value: &lt;value></string>
+                 <string>Efixed value:</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="leEfixed" />
               </item>
               <item>
                <widget class="QLabel" name="lbSpectraMin" >
                 <property name="text" >
-                 <string>Spectra Min: &lt;value></string>
+                 <string>Spectra Min:</string>
                 </property>
                </widget>
               </item>
               <item>
+               <widget class="QLineEdit" name="leSpectraMin" />
+              </item>
+              <item>
                <widget class="QLabel" name="lbSpectraMax" >
                 <property name="text" >
-                 <string>Spectra Max: &lt;value></string>
+                 <string>Spectra Max</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="leSpectraMax" />
               </item>
              </layout>
             </widget>
@@ -1137,20 +1159,6 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_12" >
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_26" >
-                <item>
-                 <widget class="QLabel" name="label_2" >
-                  <property name="text" >
-                   <string>Number of Runs:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="cal_leNoRuns" />
-                </item>
-               </layout>
-              </item>
-              <item>
                <layout class="QHBoxLayout" name="horizontalLayout_7" >
                 <item>
                  <widget class="QLabel" name="label_4" >
@@ -1162,6 +1170,19 @@
                 <item>
                  <widget class="QLineEdit" name="cal_leRunNo" />
                 </item>
+                <item>
+                 <spacer name="horizontalSpacer_23" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
                </layout>
               </item>
              </layout>
@@ -1169,25 +1190,9 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_21" >
               <item>
-               <spacer name="verticalSpacer_3" >
-                <property name="orientation" >
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeType" >
-                 <enum>QSizePolicy::Minimum</enum>
-                </property>
-                <property name="sizeHint" stdset="0" >
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QPushButton" name="cal_pbCheck" >
+               <widget class="QPushButton" name="cal_pbPlot" >
                 <property name="text" >
-                 <string>Check</string>
+                 <string>Plot Raw</string>
                 </property>
                </widget>
               </item>
@@ -1321,14 +1326,14 @@
               <item>
                <widget class="QLabel" name="label_26" >
                 <property name="text" >
-                 <string>First</string>
+                 <string>Peak</string>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QLabel" name="label_36" >
                 <property name="text" >
-                 <string>Second</string>
+                 <string>Background</string>
                 </property>
                </widget>
               </item>
@@ -1385,7 +1390,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leFirstMin" />
+                 <widget class="QLineEdit" name="cal_lePeakMin" />
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_16" >
@@ -1408,7 +1413,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leFirstMax" />
+                 <widget class="QLineEdit" name="cal_lePeakMax" />
                 </item>
                </layout>
               </item>
@@ -1435,7 +1440,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leSecondMin" />
+                 <widget class="QLineEdit" name="cal_leBackMin" />
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_17" >
@@ -1458,7 +1463,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leSecondMax" />
+                 <widget class="QLineEdit" name="cal_leBackMax" />
                 </item>
                </layout>
               </item>
@@ -1489,6 +1494,13 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cal_ckPlotResult" >
+              <property name="text" >
+               <string>Plot Result</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QPushButton" name="cal_pbCreate" >

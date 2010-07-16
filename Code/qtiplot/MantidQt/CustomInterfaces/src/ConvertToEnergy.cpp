@@ -305,7 +305,7 @@ QString ConvertToEnergy::getIDFPath(const QString& prefix)
 	}
 	else
 	{
-		defFilePrefix = entries[0];
+		defFilePrefix = entries[(entries.count()-1)];
 		defFilePrefix.chop(15); // cut "_Parameters.xml" off the string
 	}
 
@@ -382,7 +382,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
 		{
 			m_indirectInstruments = new Indirect(qobject_cast<QWidget*>(this->parent()), m_uiForm);
 			m_indirectInstruments->initLayout();
-			connect(m_directInstruments, SIGNAL(runAsPythonScript(const QString&)),
+			connect(m_indirectInstruments, SIGNAL(runAsPythonScript(const QString&)),
 				this, SIGNAL(runAsPythonScript(const QString&)));
 			m_indirectInstruments->initLocalPython();
 		}
