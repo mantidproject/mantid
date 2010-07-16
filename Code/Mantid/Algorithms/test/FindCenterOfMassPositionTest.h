@@ -158,7 +158,7 @@ public:
     Mantid::Algorithms::FindCenterOfMassPosition center;
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/SANS2D/BioSANS_exp61_scan0002_0001_emptycell.xml");
+    loader.setPropertyValue("Filename","../../../../Test/Data/SANS2D/BioSANS_empty_cell.xml");
     const std::string inputWS("wav");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.execute();
@@ -182,14 +182,13 @@ public:
     TS_ASSERT_EQUALS(table->columnCount(),2);
 
     // Check that the position is the same as obtained with the HFIR code
-    // to within 0.3 pixel
     TableRow row = table->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"X (m)");
-    TS_ASSERT_DELTA(row.Double(1),16.6038,0.3);
+    TS_ASSERT_DELTA(row.Double(1),16.6038,1e-4);
 
     row = table->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"Y (m)");
-    TS_ASSERT_DELTA(row.Double(1),96.771,0.3);
+    TS_ASSERT_DELTA(row.Double(1),96.771,1e-4);
     
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }

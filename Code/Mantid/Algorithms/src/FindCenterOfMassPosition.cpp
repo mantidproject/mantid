@@ -75,12 +75,20 @@ void FindCenterOfMassPosition::exec()
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,max_iteration);
 
-  // Define box around center of mass. Only pixels falling within this region
-  // will be considered
-  double xmin = 1.0;
-  double xmax = n_pixel_x-2.0;
-  double ymin = 1.0;
-  double ymax = n_pixel_y-2.0;
+  // Define box around center of mass so that only pixels in an area
+  // _centered_ on the latest center position are considered. At each
+  // iteration we will recompute the bounding box, and we will make
+  // it as large as possible. The largest box is defined as:
+  double xmin0 = 1.0;
+  double xmax0 = n_pixel_x-2.0;
+  double ymin0 = 1.0;
+  double ymax0 = n_pixel_y-2.0;
+
+  // Starting values for the bounding box and the center
+  double xmin = xmin0;
+  double xmax = xmax0;
+  double ymin = ymin0;
+  double ymax = ymax0;
   double center_x = n_pixel_x / 2.0;
   double center_y = n_pixel_y / 2.0;
 
@@ -148,8 +156,8 @@ void FindCenterOfMassPosition::exec()
     // Modify the bounding box around the detector region used to
     // compute the center of mass so that it is centered around
     // the new center of mass position.
-    double radius_x = std::min( (position_x-xmin), (xmax-position_x) );
-    double radius_y = std::min( (position_y-ymin), (ymax-position_y) );
+    double radius_x = std::min( (position_x-xmin0), (xmax0-position_x) );
+    double radius_y = std::min( (position_y-ymin0), (ymax0-position_y) );
 
     if (!direct_beam && (radius_x<=beam_radius||radius_y<=beam_radius))
     {
