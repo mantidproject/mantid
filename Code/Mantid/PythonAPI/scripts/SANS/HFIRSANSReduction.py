@@ -7,7 +7,7 @@
 from mantidsimple import *
 
 # Python import
-import os, sys
+import os, sys, math
 
 ## Version number
 __version__ = 0.1
@@ -457,21 +457,27 @@ def _verify_result(reduced_file, test_file):
     assert(len(data_mantid)==len(data_igor))
     
     # Utility methods for manipulating the lists
+    def _diff_chi2(x,y): return (x[1]-y[1])*(x[1]-y[1])/(x[2]*x[2])
     def _diff_iq(x,y): return x[1]-y[1]
     def _diff_err(x,y): return x[2]-y[2]
     def _add(x,y): return x+y
     
     # Check that I(q) is the same for both data sets
     deltas = map(_diff_iq, data_mantid, data_igor)
-    delta  = reduce(_add, deltas)
-    assert(delta<1e-5)
+    delta  = reduce(_add, deltas)/len(deltas)
+    assert(math.fabs(delta)<1e-6)
     
     # Then compare the errors
     deltas = map(_diff_err, data_mantid, data_igor)
-    delta  = reduce(_add, deltas)
-    assert(delta<1e-5)
+    delta_err  = reduce(_add, deltas)/len(deltas)
+    assert(math.fabs(delta_err)<1e-6)
     
-    print "Completed tests"
+    # Compute chi2 of our result relative to IGOR 
+    deltas = map(_diff_chi2, data_mantid, data_igor)
+    chi2  = reduce(_add, deltas)
+    assert(chi2<1e-5)
+    
+    print "Completed tests: delta = %g / %g  chi2 = %g" % (delta, delta_err, chi2) 
     
 def test_default():   
      # Data file to reduce
@@ -517,7 +523,39 @@ def test_center_by_hand():
     
     _verify_result(reduced_file="mantid_center_by_hand.txt", test_file=TEST_DIR+"reduced_center_by_hand.txt")
     
-if __name__ == "__main__":
-    test_center_by_hand()
+def test_center_calculated():
+    """
+        Beam center entered by hand
+        Subtract dark current
+        Correct for solid angle 
+        Correct for detector efficiency, excluding high/low pixels
+        No transmission
+        No background
+    """
+    # Data file to reduce
+    datafile = TEST_DIR+"BioSANS_test_data.xml"
+    
+    # Reduction parameters
+    method = SANSReductionMethod()
+    method.dark_current_filepath = TEST_DIR+"BioSANS_dark_current.xml"
+    method.sensitivity_flood_filepath = TEST_DIR+"BioSANS_flood_data.xml"
+    method.sensitivity_dark_filepath = TEST_DIR+"BioSANS_dark_current.xml"
+    method.sensitivity_high = 1.5
+    method.sensitivity_low = 0.5
+    
+    # Instrument parameters
+    conf = InstrumentConfiguration()
+    conf.beam_center_method = InstrumentConfiguration.BEAM_CENTER_DIRECT_BEAM
+    conf.beam_center_filepath = TEST_DIR+"BioSANS_empty_cell.xml"
 
+    reduction = SANSReduction(datafile, method, conf)    
+    reduction.reduce()
+    
+    SaveCSV(Filename="mantid_center_calculated.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")
+    
+    _verify_result(reduced_file="mantid_center_calculated.txt", test_file=TEST_DIR+"reduced_center_calculated.txt")
+    
+if __name__ == "__main__":
+    test_center_calculated()
+    #test_center_by_hand()
     
