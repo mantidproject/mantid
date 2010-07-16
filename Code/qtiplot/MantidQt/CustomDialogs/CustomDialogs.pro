@@ -28,14 +28,16 @@ SOURCES = $$SRCDIR/LoadRawDialog.cpp \
     $$SRCDIR/CreateSampleShapeDialog.cpp \
     $$SRCDIR/SampleShapeHelpers.cpp \
     $$SRCDIR/MantidGLWidget.cpp \
-    $$SRCDIR/PlotAsymmetryByLogValueDialog.cpp
+    $$SRCDIR/PlotAsymmetryByLogValueDialog.cpp \
+    $$SRCDIR/LoadDAEDialog.cpp
     
 HEADERS = $$HEADERDIR/LoadRawDialog.h \
     $$HEADERDIR/LOQScriptInputDialog.h \
     $$HEADERDIR/CreateSampleShapeDialog.h \
     $$HEADERDIR/SampleShapeHelpers.h \
     $$HEADERDIR/MantidGLWidget.h \
-    $$HEADERDIR/PlotAsymmetryByLogValueDialog.h
+    $$HEADERDIR/PlotAsymmetryByLogValueDialog.h \
+    $$HEADERDIR/LoadDAEDialog.h
     
 UI_DIR = $$HEADERDIR
 

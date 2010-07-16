@@ -3,7 +3,6 @@
 #include "MantidDock.h"
 #include <algorithm>
 #include "ImportWorkspaceDlg.h"
-#include "LoadDAEDlg.h"
 #include "AlgMonitor.h"
 #include "MantidSampleLogDialog.h"
 #include "AlgorithmHistoryWindow.h"
@@ -283,45 +282,12 @@ void MantidUI::saveNexusWorkspace()
 /**
     loadDAEWorkspace
 
-    Loads a workspace from DAE by executing LoadDAE algorithm asynchronously.
-    Algorithm's proprties are set in loadDAEDlg dialog.
+    Loads a workspace from DAE by executing LoadDAE algorithm.
 */
 void MantidUI::loadDAEWorkspace()
 {
 
-	loadDAEDlg* dlg = new loadDAEDlg(m_appWindow);
-	dlg->setModal(true);
-	dlg->exec();
-	if (!dlg->getHostName().isEmpty())
-	{
-		//Check workspace does not exist
-		QString workspaceName = dlg->getWorkspaceName();
-		if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
-		{
-			if ( QMessageBox::question(appWindow(),"MantidPlot - Confirm","Workspace "+workspaceName+" already exists. Do you want to replace it?",
-				QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) return;
-		}
-
-		Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadDAE");
-
-		alg->setPropertyValue("DAEname", dlg->getHostName().toStdString());
-		alg->setPropertyValue("OutputWorkspace", dlg->getWorkspaceName().toStdString());
-		if ( !dlg->getSpectrumMin().isEmpty() && !dlg->getSpectrumMax().isEmpty() )
-		{
-			alg->setPropertyValue("SpectrumMin", dlg->getSpectrumMin().toStdString());
-			alg->setPropertyValue("SpectrumMax", dlg->getSpectrumMax().toStdString());
-		}
-		if ( !dlg->getSpectrumList().isEmpty() )
-		{
-			alg->setPropertyValue("SpectrumList", dlg->getSpectrumList().toStdString());
-		}
-
-		m_DAE_map[dlg->getWorkspaceName().toStdString()] = dlg->updateInterval();
-
-		executeAlgorithmAsync(alg);
-		//fix for  Ticket #699 moved this line down
-		alg->addObserver(m_finishedLoadDAEObserver);
-	}
+  executeAlgorithm("LoadDAE", -1);
 }
 
 /**

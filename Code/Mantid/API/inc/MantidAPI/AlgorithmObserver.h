@@ -117,6 +117,18 @@ public:
     {
         alg->addObserver(m_errorObserver);
     }
+
+    /**   Disconnect from algorithm alg. Should be called in the destructor of inherited classes.
+          @param alg Algorithm to be disconnected
+    */
+    void stopObserving(IAlgorithm_const_sptr alg)
+    {
+        alg->removeObserver(m_progressObserver);
+        alg->removeObserver(m_startObserver);
+        alg->removeObserver(m_finishObserver);
+        alg->removeObserver(m_errorObserver);
+    }
+
 /// @cond Doxygen cannot handle the macro around the argument name
 
     /** Handler of the progress notifications. Must be overriden in inherited classes.

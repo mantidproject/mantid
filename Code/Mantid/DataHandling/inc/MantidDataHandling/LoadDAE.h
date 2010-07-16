@@ -83,8 +83,10 @@ namespace Mantid
     private:
       /// Overwrites Algorithm method.
       void init();
-      /// Overwrites Algorithm method
+      /// Overwrites Algorithm method. 
       void exec();
+      /// Does actual loading
+      void loadDAE();
 
       /// Validates the optional 'spectra to read' properties, if they have been set
       void checkOptionalProperties();
@@ -119,6 +121,8 @@ namespace Mantid
       int m_spec_max;
       /// Good proton charge
       float m_proton_charge;
+      /// has true during the first run of loadDAE and false all subsequent runs
+      bool m_firstRun;
       
       ///a flag int value to indicate that the value wasn't set by users
       static const int unSetInt = INT_MAX-15;

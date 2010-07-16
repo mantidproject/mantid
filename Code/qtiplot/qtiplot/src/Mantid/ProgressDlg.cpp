@@ -55,6 +55,7 @@ void ProgressDlg::cancelClicked()
 
 void ProgressDlg::backgroundClicked()
 {
+  stopObserving(m_alg);
     emit done();
 }
 

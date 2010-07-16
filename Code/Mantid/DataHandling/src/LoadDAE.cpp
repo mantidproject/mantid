@@ -12,6 +12,7 @@
 #include <cmath>
 #include <boost/shared_array.hpp>
 #include "Poco/Path.h"
+#include <Poco/Thread.h>
 
 #include "LoadDAE/idc.h"
 
@@ -31,7 +32,7 @@ namespace Mantid
     /// Empty default constructor
     LoadDAE::LoadDAE() :
       Algorithm(), m_daename(""), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),m_firstRun(true)
     {}
 
 
@@ -93,6 +94,8 @@ namespace Mantid
       declareProperty(new ArrayProperty<int>("SpectrumList"),
         "A comma-separated list of individual spectra to read.  Only used\n"
         "if explicitly set. Not available for multiperiod data files.");
+
+      declareProperty("UpdateRate",0, mustBePositive->clone());
     }
 
     /** Function called by IDC routines to report an error. Passes the error through to the logger
@@ -105,13 +108,97 @@ namespace Mantid
       g_StaticLog.error(message);
     }
 
+    /** Overwrites Algorithm method. If UpdateRate is set calls repeatedly loadDAE()until canceled.
+     */
+    void LoadDAE::exec()
+    {
+      // Launch UpdateDAE algorithm if UpdateRate > 0
+      int rate = getProperty("UpdateRate");
+      rate *= 1000;
+      if (rate > 0)
+      {
+        Poco::Thread *thread = Poco::Thread::current();
+        if (thread == 0)
+        {
+          g_log.error("Cannot execute UpdateDAE in the main thread.");
+          throw std::runtime_error("Cannot execute UpdateDAE in the main thread.");
+        }
+        for(;;)
+        {
+          try
+          {
+            loadDAE();
+            m_firstRun = false;
+          }
+          catch(CancelException& ex)
+          {// it is the normal way of ending this algorithm
+            try
+            {
+              // to end the algorithm normally restore the output workspace properties from the last iteration
+              Workspace_sptr ws = AnalysisDataService::Instance().retrieve(getPropertyValue("OutputWorkspace"));
+              WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+              if (wsg)
+              {
+                std::vector<std::string> wsNames = wsg->getNames();
+                std::vector<std::string>::const_iterator it = wsNames.begin();
+                for(;it != wsNames.end(); ++it)
+                {
+                  Workspace_sptr ws1 = AnalysisDataService::Instance().retrieve(*it);
+                  std::stringstream propName;
+                  propName << "OutputWorkspace";
+                  if (it != wsNames.begin())
+                  {
+                    propName << '_' << it - wsNames.begin();
+                  }
+                  setProperty(propName.str(),ws1);
+                }
+              }
+              else
+              {
+                setProperty("OutputWorkspace",ws);
+              }
+            }
+            catch(...)
+            {
+              // user canceled at the first run or deleted the output during sleep time
+              throw ;//ex;
+            }
+            return;
+          }
+          // store the output workspace even if the algorithm has not finished
+          const std::vector< Property*>& props = getProperties();
+          for (unsigned int i = 0; i < props.size(); ++i)
+          {
+            IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+            if (wsProp)
+            {
+              try
+              {
+                wsProp->store();
+              }
+              catch (std::runtime_error&)
+              {
+                g_log.error("Error storing output workspace in AnalysisDataService");
+                throw;
+              }
+            }
+          }
+          thread->sleep(rate);
+        }
+      }
+      else
+      {
+        loadDAE();
+      }
+    }
+
     /** Executes the algorithm. Reading in the file and creating and populating
      *  the output workspace
      *
      *  @throw Exception::FileError If the DAE cannot be found/opened
      *  @throw std::invalid_argument If the optional properties are set to invalid values
      */
-    void LoadDAE::exec()
+    void LoadDAE::loadDAE()
     {
       int sv_dims_array[1] = { 1 }, sv_ndims = 1;   // used for rading single values with IDC routines
       int dims_array[2];
@@ -289,11 +376,14 @@ namespace Mantid
           std::string outws("");
           outws=outputWorkspace+"_"+suffix.str();
           std::string WSName = localWSName + "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+          if (m_firstRun)
+          {
+            declareProperty(new WorkspaceProperty<Workspace>(outws,WSName,Direction::Output));
+          }
           g_log.information() << "Workspace " << WSName << " created. \n";
           if(wsGrpSptr)wsGrpSptr->add(WSName);
           // Assign the result to the output workspace property
-          setProperty(outws,localWorkspace);
+          setProperty(outws,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
         }
         else 
           setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
@@ -308,6 +398,7 @@ namespace Mantid
       // Can't delete this here - it's allocated with malloc deep in the C code.
       // Just accept the small leak.
       //if (iName) delete[] iName;
+
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set

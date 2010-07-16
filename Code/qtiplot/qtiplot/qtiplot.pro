@@ -449,7 +449,6 @@ HEADERS  += src/ApplicationWindow.h \
             src/ScriptManagerWidget.h\
             src/Mantid/MantidApplication.h \
 	    src/Mantid/LoadRawDlg.h \
-	    src/Mantid/LoadDAEDlg.h \
 	    src/Mantid/ExecuteAlgorithm.h \
 	    src/Mantid/ImportWorkspaceDlg.h \
 	    src/Mantid/AbstractMantidLog.h \
@@ -631,7 +630,6 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/ScriptManagerWidget.cpp\
             src/Mantid/MantidApplication.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
-	    src/Mantid/LoadDAEDlg.cpp \
 	    src/Mantid/ExecuteAlgorithm.cpp \
 	    src/Mantid/ImportWorkspaceDlg.cpp \
 	    src/Mantid/AbstractMantidLog.cpp \

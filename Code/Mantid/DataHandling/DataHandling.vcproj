@@ -373,10 +373,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\UpdateDAE.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\UpdateInstrumentFromRaw.cpp"
 				>
 			</File>
@@ -696,10 +692,6 @@
 			</File>
 			<File
 				RelativePath=".\test\SetScalingPSDtest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\UpdateDAE.h"
 				>
 			</File>
 			<File
