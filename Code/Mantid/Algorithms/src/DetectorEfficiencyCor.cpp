@@ -114,14 +114,14 @@ void DetectorEfficiencyCor::exec()
     { 
       correctForEfficiency(i);
     }
-    catch (Exception::NotFoundError &excep)
+    catch (Exception::NotFoundError &)
     {
       // if we don't have all the data there will be spectra we can't correct, avoid leaving the workspace part corrected 
       MantidVec& dud = m_outputWS->dataY(i);
       std::transform(dud.begin(),dud.end(),dud.begin(), std::bind2nd(std::multiplies<double>(),0));
       PARALLEL_CRITICAL(deteff_invalid)
       {
-	m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
+	      m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
       }
     }      
 
@@ -229,9 +229,9 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
     {
       if( it == dets.begin() )
       {
-	*youtItr = 0.0;
-	*eoutItr = 0.0;
-	(*wavItr) = calculateOneOverK(*xItr, *(xItr + 1 ));
+	      *youtItr = 0.0;
+	      *eoutItr = 0.0;
+	      *wavItr = calculateOneOverK(*xItr, *(xItr + 1 ));
       }
       const double oneOverWave = *wavItr;
       const double correcti = avgKi*oneOverWave/detectorEfficiency(det_const*oneOverWave);

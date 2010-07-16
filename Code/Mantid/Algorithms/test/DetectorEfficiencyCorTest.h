@@ -209,8 +209,8 @@ public:
     y.access()[NBins-1] = 0.0;
     e.access()[NBins-1] = 0.0;
     
-    int specNums[NSpectra];
-    int detIDs[NSpectra];
+    int specNums[3*NSpectra];
+    int detIDs[3*NSpectra];
     for (int i=0; i< NSpectra; i++)
     {
       space2D->setX(i,x);
@@ -225,8 +225,6 @@ public:
       detIDs[i+2] = i+3;
     }
     space2D->mutableSpectraMap().populate(specNums, detIDs, 3*NSpectra);
-    
-    
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
