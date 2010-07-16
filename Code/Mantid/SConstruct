@@ -248,6 +248,9 @@ if not conf.CheckCXXHeader('gsl_multimin.h') and not conf.CheckCXXHeader('gsl/gs
 if not conf.CheckCXXHeader('napi.h'):
     print "Failed to find 'napi.h'"
     Exit(-1)
+if not conf.CheckCXXHeader('ssl.h') and not conf.CheckCXXHeader('openssl/ssl.h'):
+   print "Failed to find 'openssl/ssl.h'"
+   Exit(-1)
 env = conf.Finish()
 
 #Collect the includes into a single directory 
