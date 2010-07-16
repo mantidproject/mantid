@@ -99,7 +99,7 @@ public:
     AnalysisDataService::Instance().remove(inName);
   }
 
-  void testDataWithGroupedDetectors()
+  void xtestDataWithGroupedDetectors()
   {
     const std::string wsName = "testInput";
     makeTestWS(wsName);
