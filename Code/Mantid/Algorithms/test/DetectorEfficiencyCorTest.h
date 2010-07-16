@@ -195,14 +195,14 @@ public:
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     
     Histogram1D::RCtype x,y,e;
-    x.access().resize(NBins+1);
-    y.access().resize(NBins);
-    e.access().resize(NBins);
+    x.access().resize(NBins+1, 0.0);
+    y.access().resize(NBins, 0.0);
+    e.access().resize(NBins, 0.01);
     for (int i = 0; i < NBins; ++i)
     {
       x.access()[i] = static_cast<double>((1 + i)/100);
       y.access()[i] = 5 + i;
-      e.access()[i] = std::sqrt(5);
+      e.access()[i] = sqrt(5.0);
     }
     x.access()[NBins] = static_cast<double>(NBins);
     // Fill a couple of zeros just as a check that it doesn't get changed
