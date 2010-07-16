@@ -2,8 +2,6 @@
 #define MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/InputWSDetectorInfo.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include <climits>
 #include <string>
 #include <vector>
@@ -84,7 +82,7 @@ namespace Algorithms
 */              
 class DLLExport DetectorEfficiencyCor : public API::Algorithm
 {
-public:
+ public:
   DetectorEfficiencyCor();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "DetectorEfficiencyCor"; }
@@ -93,6 +91,27 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const{return "CorrectionFunctions";}
 
+ private:
+  /// Retrieve algorithm properties
+  void retrieveProperties();
+  /// Correct the given spectra index for efficiency
+  void correctForEfficiency(int spectraIndex);
+  /// Calculate one over the wave vector for 2 bin bounds
+  double calculateOneOverK(double loBinBound, double uppBinBound) const;
+  /// Sets the detector geometry cache if necessary
+  void updateGeometryCache(boost::shared_ptr<Geometry::IDetector> det);
+  /// Sets cylinder axis for the current shape
+  void setCylinderAxis();
+  /// Computes the distance to the given shape from a starting point
+  double distToSurface(const Geometry::V3D start, const Geometry::Object *shape) const;
+  /// Computes the detector efficiency for a given paramater
+  double detectorEfficiency(const double alpha) const;
+  /// Computes an approximate expansion of a Chebysev polynomial
+  double chebevApprox(double a, double b, const double exspansionCoefs[], double x) const;
+  /// Log any errors with spectra that occurred
+  void logErrors() const;
+
+
 private:
   /// the user selected workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -100,8 +119,6 @@ private:
   API::MatrixWorkspace_sptr m_outputWS;
   /// points the map that stores additional properties for detectors in that map
   const Geometry::ParameterMap *m_paraMap;
-  /// points to a detector masking helper object, or NULL if the mask map couldn't be opened
-  boost::shared_ptr<InputWSDetectorInfo> m_detMasking;
 
   /// stores the user selected value for incidient energy of the neutrons
   double m_Ei;
@@ -117,29 +134,11 @@ private:
   double m_sinThetaCache;
   /// cached value for the axis of cylinder that the detectors are based on, last time it was calculated
   Geometry::V3D m_baseAxisCache;
-  /// cached value a parameter used in the detector efficiency calculation, 1-wallthickness/radius
-  double m_1_t2rad;
-  /// caches the part of the calculation that is constant for a whole detector
-  double m_CONST_rad_sintheta_1_t2rad_atms;
+  /// Sample position
+  Geometry::V3D m_samplePos;
+  /// The spectra numbers that were skipped
+  std::vector<int> m_spectraSkipped;
 
-  /// stores 1/wvec for all the bin boundries 
-  std::vector<double> m_1_wvec;
-  /// points to the start of the workspace X-values, TOF bin boundaries, and is used to tell if the bin boundaries have changed
-  const std::vector<double> *m_XsCache;
-
-  ///a flag int value to indicate that the value wasn't set by users
-  static const int UNSETINT = INT_MAX-15;
-
-  void retrieveProperties();
-  void efficiencyCorrect(int spectraNumber);
-  void set1_wvec(int spectraIn);
-  double get1OverK(double DeltaE) const;
-  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det);
-  void getCylinderAxis();
-  double DistToSurface(const Geometry::V3D start, const Geometry::Object *shape) const;
-  double EFF(const double oneOverwvec) const;//, double rad, double atms, double t2rad, double sintheta);
-  double EFFCHB(double a, double b, const double exspansionCoefs[], double x) const;
-  void logErrors(std::vector<int> &spuriousSpectra, std::vector<int> &unsetParams) const;
 
   // Implement abstract Algorithm methods
   void init();
@@ -154,7 +153,7 @@ private:
   /// the number of coefficients in each of the c_eff_f and c_eff_g arrays
   static const short NUMCOEFS;
   /// constants to use for the ISIS 3He detectors 2.0*sigref*wref/atmref
-  static const double CONSTA;
+  static const double g_helium_prefactor;
   
 };
 
