@@ -32,7 +32,7 @@ namespace DataObjects
     //Make sure you free up the memory in the MRU
     m_bufferedDataY.clear();
     m_bufferedDataE.clear();
-    //Go through the event list and clear them
+    //Go through the event list and clear them?
   }
 
   //-----------------------------------------------------------------------------

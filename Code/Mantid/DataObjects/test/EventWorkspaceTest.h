@@ -288,22 +288,6 @@ public:
   }
 
   //------------------------------------------------------------------------------
-  void test_histogram_cache_dataE()
-  {
-    //Try caching and most-recently-used MRU list.
-    EventWorkspace_const_sptr ew2 = ew;
-    //Are the returned arrays the right size?
-    MantidVec data1 = ew2->dataE(1);
-    TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
-    //This should get the cached one
-    MantidVec data2 = ew2->dataE(1);
-    TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
-    //All elements are the same
-    for (int i=0; i<data1.size();i++)
-      TS_ASSERT_EQUALS( data1[i], data2[i]);
-  }
-  //------------------------------------------------------------------------------
-
   /// Linux-only method for getting memory usage
   int memory_usage()
   {
@@ -339,35 +323,76 @@ public:
     for (int i=0; i<data1.size();i++)
       TS_ASSERT_EQUALS( data1[i], data2[i]);
 
-    //Now test the caching
+    //Now test the caching. The first 100 will load in memory
     for (int i=0; i<100;i++)
       data1 = ew2->dataY(i);
 
-    int mem1 = memory_usage();
+    int mem1, mem2;
+    mem1 = memory_usage();
     int last = 100;
     //Read more; memory use should be the same?
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
-    int mem2 = memory_usage();
-//    std::cout << "\nMemory use changed by " << mem2-mem1 << " kb.\n";
 
+#ifndef WIN32
+    mem2 = memory_usage();
+    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
+#endif
+
+    //Do it some more
     last=200; mem1=mem2;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
-    mem2 = memory_usage();
-//    std::cout << "Memory use changed by " << mem2-mem1 << " kb.\n";
 
-//    mem1=mem2;
-//    std::vector<int> test_vector;
-//    test_vector.resize(1024*1024, 0);
-//    mem2 = memory_usage();
-//    std::cout << "Memory use changed by " << mem2-mem1 << " kb.\n";
-//
-//    mem1=mem2;
-//    test_vector.clear();
-//    std::vector<int>().swap(test_vector);
-//    mem2 = memory_usage();
-//    std::cout << "Memory use changed by " << mem2-mem1 << " kb.\n";
+#ifndef WIN32
+    mem2 = memory_usage();
+    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
+#endif
+
+  }
+
+
+  //------------------------------------------------------------------------------
+  void test_histogram_cache_dataE()
+  {
+    //Try caching and most-recently-used MRU list.
+    EventWorkspace_const_sptr ew2 = ew;
+    //Are the returned arrays the right size?
+    MantidVec data1 = ew2->dataE(1);
+    TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
+    //This should get the cached one
+    MantidVec data2 = ew2->dataE(1);
+    TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
+    //All elements are the same
+    for (int i=0; i<data1.size();i++)
+      TS_ASSERT_EQUALS( data1[i], data2[i]);
+
+    //Now test the caching. The first 100 will load in memory
+    for (int i=0; i<100;i++)
+      data1 = ew2->dataE(i);
+
+    int mem1, mem2;
+    mem1 = memory_usage();
+    int last = 100;
+    //Read more; memory use should be the same?
+    for (int i=last; i<last+100;i++)
+      data1 = ew2->dataE(i);
+
+#ifndef WIN32
+    mem2 = memory_usage();
+    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
+#endif
+
+    //Do it some more
+    last=200; mem1=mem2;
+    for (int i=last; i<last+100;i++)
+      data1 = ew2->dataE(i);
+
+#ifndef WIN32
+    mem2 = memory_usage();
+    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
+#endif
+
   }
 
 
