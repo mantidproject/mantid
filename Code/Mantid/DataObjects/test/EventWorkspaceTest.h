@@ -14,7 +14,11 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include <sys/resource.h>
+
+#ifndef WIN32
+  #include <sys/resource.h>
+#endif
+
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -283,11 +287,30 @@ public:
     //TS_ASSERT_THROWS( ew->addTime(-100, t - minutes(5) ), std::range_error);
   }
 
+  //------------------------------------------------------------------------------
+  void test_histogram_cache_dataE()
+  {
+    //Try caching and most-recently-used MRU list.
+    EventWorkspace_const_sptr ew2 = ew;
+    //Are the returned arrays the right size?
+    MantidVec data1 = ew2->dataE(1);
+    TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
+    //This should get the cached one
+    MantidVec data2 = ew2->dataE(1);
+    TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
+    //All elements are the same
+    for (int i=0; i<data1.size();i++)
+      TS_ASSERT_EQUALS( data1[i], data2[i]);
+  }
+  //------------------------------------------------------------------------------
 
   /// Linux-only method for getting memory usage
   int memory_usage()
   {
+    // Linux only memory test
+#ifdef WIN32
     return 0; //Temporarily disabled for non-linux OSs
+#endif
 
     char buf[30];
     snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
@@ -302,7 +325,6 @@ public:
     return 0;
   }
 
-  //------------------------------------------------------------------------------
   void test_histogram_cache()
   {
     //Try caching and most-recently-used MRU list.
@@ -349,29 +371,6 @@ public:
   }
 
 
-  //------------------------------------------------------------------------------
-  void test_histogram_cache_dataE()
-  {
-    //Try caching and most-recently-used MRU list.
-    EventWorkspace_const_sptr ew2 = ew;
-    //Are the returned arrays the right size?
-    MantidVec data1 = ew2->dataE(1);
-    TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
-    //This should get the cached one
-    MantidVec data2 = ew2->dataE(1);
-    TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
-    //All elements are the same
-    for (int i=0; i<data1.size();i++)
-      TS_ASSERT_EQUALS( data1[i], data2[i]);
-
-
-  }
-
-
-
 };
-
-
-
 
 #endif /* EVENTWORKSPACETEST_H_ */
