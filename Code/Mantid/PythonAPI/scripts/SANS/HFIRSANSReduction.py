@@ -7,7 +7,7 @@
 from mantidsimple import *
 
 # Python import
-import os
+import os, sys
 
 ## Version number
 __version__ = 0.1
@@ -34,6 +34,11 @@ class InstrumentConfiguration:
         be reduced
     """
     
+    # Beam center finding methods
+    BEAM_CENTER_NONE        = 0
+    BEAM_CENTER_DIRECT_BEAM = 1
+    BEAM_CENTER_SCATTERING  = 2
+    
     def __init__(self):
         """
             Initialization
@@ -47,9 +52,12 @@ class InstrumentConfiguration:
         # data channels start
         self.nMonitors = 2
         ## Pixel size in mm
-        self.pixel_size_x = 5.1522
-        self.pixel_size_y = 5.1462
+        self.pixel_size_x = 5.15
+        self.pixel_size_y = 5.15
         ## Beam center [either set by hand or find]
+        self.beam_center_method = InstrumentConfiguration.BEAM_CENTER_NONE
+        self.beam_center_filepath = None
+        self.beam_center_beam_radius = 20
         self.beam_center_x = 16
         self.beam_center_y = 95
         ## Sample-to-detector distance in mm
@@ -113,16 +121,16 @@ class SANSReductionMethod:
         
         
         ## Normalization counter
-        self.normalization = SANSReductionMethod.NORMALIZATION_MONITOR
+        self.normalization = SANSReductionMethod.NORMALIZATION_TIME
         
         
         # Mask parameters #####################################################
         # TODO: to allow for instruments with multiple PSDs, we might want to 
         # change this to a Mask class that takes care of the instrument-specific junk. 
-        self.mask_nx_high = 5
-        self.mask_nx_low  = 5
-        self.mask_ny_high = 3
-        self.mask_ny_low  = 3
+        self.mask_nx_high = 0
+        self.mask_nx_low  = 0
+        self.mask_ny_high = 0
+        self.mask_ny_low  = 0
         self.mask_user_defined = []
         
 
@@ -132,12 +140,13 @@ class SANSReductionMethod:
         self.sensitivity_flood_filepath = None
         ## Dark current file for sensitivity correction
         self.sensitivity_dark_filepath = None
-        ## Mask pixels with out-of-range sensitivity
-        self.sensitivity_mask_high_low = True
         ## Highest allowed sensitivity, above that pixels will be masked 
-        self.sensitivity_high = 1.5
+        self.sensitivity_high = None
         ## Lowest allowed sensitivity, below that pixels will be masked
-        self.sensitivity_low = 0.5
+        self.sensitivity_low = None
+
+
+        # Transmission parameters #############################################
         
 
 class SANSReduction:
@@ -186,6 +195,21 @@ class SANSReduction:
         # Make a copy that will be our reduced data
         CloneWorkspace(self.workspace, self.reduced_ws)
         
+        # Find beam center position
+        if self.configuration.beam_center_method is not InstrumentConfiguration.BEAM_CENTER_NONE:
+            direct_beam = (self.configuration.beam_center_method is InstrumentConfiguration.BEAM_CENTER_DIRECT_BEAM)
+            LoadSpice2D(self.configuration.beam_center_filepath, "beam_center")
+            beam_center = FindCenterOfMassPosition("beam_center",
+                                                   Output = None,
+                                                   NPixelX=self.configuration.nx_pixels,
+                                                   NPixelY=self.configuration.ny_pixels,
+                                                   DirectBeam = direct_beam,
+                                                   BeamRadius = self.configuration.beam_center_beam_radius)
+            ctr_str = beam_center.getPropertyValue("CenterOfMass")
+            ctr = ctr_str.split(',')
+            self.configuration.beam_center_x = float(ctr[0])
+            self.configuration.beam_center_y = float(ctr[1])
+    
         # Apply corrections to sample data        
         self._apply_corrections(self.reduced_ws)
         
@@ -198,12 +222,13 @@ class SANSReduction:
             self._apply_corrections(bck_ws)
             
             # Subtract corrected background
-            Divide(self.reduced_ws, bck_ws, self.reduced_ws)
+            Minus(self.reduced_ws, bck_ws, self.reduced_ws)
             
         # Transform to I(q)
-        
-        
-        
+        Q1DWeighted(self.reduced_ws, "Iq", "0.01,0.001,0.11", 
+                    PixelSizeX=self.configuration.pixel_size_x,
+                    PixelSizeY=self.configuration.pixel_size_y, ErrorWeighting=True)        
+    
     def _apply_corrections(self, ws):
         """
             Apply the data corrections to a given workspace. The input workspace 
@@ -214,8 +239,8 @@ class SANSReduction:
         """
         # Move detector array to correct position
         MoveInstrumentComponent(ws, self.configuration.detector_ID, 
-                                X = -(self.configuration.beam_center_x-96.0) * self.configuration.pixel_size_x/1000.0, 
-                                Y = -(self.configuration.beam_center_y-96.0) * self.configuration.pixel_size_y/1000.0, 
+                                X = -(self.configuration.beam_center_x-self.configuration.nx_pixels/2.0+0.5) * self.configuration.pixel_size_x/1000.0, 
+                                Y = -(self.configuration.beam_center_y-self.configuration.ny_pixels/2.0+0.5) * self.configuration.pixel_size_y/1000.0, 
                                 Z = self.configuration.sample_detector_distance/1000.0,
                                 RelativePosition="1")
         # Get counting time
@@ -308,38 +333,29 @@ class SANSReduction:
                 Divide(sensdark_ws, sensdarktimer_ws, sensdark_ws)      
                 Minus(flood_ws, sensdark_ws, flood_ws)
             
-            # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
-        
-            # Find beam center for flood data
-        
-        
-            # TODO: Need an Algo that will produce a workspace with the following spectra values
-            # solid_angle_corr[x][y] = (sqrt(1+(pixel_size_x*(x-beam_center_x)/sample_detector_distance)^2
-            #                           +(pixel_size_y*(y-beam_center_y)/sample_detector_distance)^2))^3
+            #TODO: find the center of the flood data independently
             
-            #Multiply(flood_ws, solid_angle_corr, flood_ws)
+            # Move the flood data detector before applying the solid angle correction
+            MoveInstrumentComponent(flood_ws, self.configuration.detector_ID, 
+                                   X = -(self.configuration.beam_center_x-self.configuration.nx_pixels/2.0+0.5) * self.configuration.pixel_size_x/1000.0, 
+                                   Y = -(self.configuration.beam_center_y-self.configuration.ny_pixels/2.0+0.5) * self.configuration.pixel_size_y/1000.0, 
+                                   Z = self.configuration.sample_detector_distance/1000.0,
+                                   RelativePosition="1")
+            # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
+            SolidAngleCorrection(flood_ws, flood_ws)
         
             # Create efficiency profile: 
             # Divide each pixel by average signal, and mask high and low pixels.
-            SumSpectra(flood_ws, "flood_total_signal", self.configuration.nMonitors)
-            Divide(flood_ws, "flood_total_signal", flood_ws)
+            CalculateEfficiency(flood_ws, flood_ws, self.method.sensitivity_low, self.method.sensitivity_high)
             
-            # Mask pixels with signal above and below cut
-            if self.method.sensitivity_mask_high_low:
-                pass
-                # Need to use an Algorithm that will mask pixels below
-                # self.method.sensitivity_low and above self.method.sensitivity_high
+            # Divide by detector efficiency
+            Divide(self.reduced_ws, flood_ws, self.reduced_ws)
             
-                # Once we have masked the pixels, we need to recalculate the average signal
-                # so that the efficiency profile isn't biased by the pixels we rejected.
-        
-            # Divide by detector efficiency, if provided (how about offset in beam center?)
-            Divide(flood_ws, "flood_total_signal", flood_ws)
-            
+            # Copy over the efficiency's masked pixels to the reduced workspace
+            masked_detectors = GetMaskedDetectors(flood_ws)
+            MaskDetectors(self.reduced_ws, None, masked_detectors.getPropertyValue("DetectorList"))
             
         # Correct data for solid angle effects (Note: SA_Corr_2DSAS)
-        # solid_angle_corr[x][y] = (sqrt(1+(pixel_size_x*(x-beam_center_x)/sample_detector_distance)^2
-        #                           +(pixel_size_y*(y-beam_center_y)/sample_detector_distance)^2))^3
         SolidAngleCorrection(ws, ws)
           
         # Apply transmission correction #######################################
@@ -364,12 +380,102 @@ class SANSReduction:
         """
         return _extract_workspace_name(self.data_filepath, suffix)
 
+################### TESTS ##################################################################
+#TODO: Place this as tests in another file. Imports within MantidPlot don't behave as within
+#      a standard python interpreter so we'll leave these here for now.
 
+# Set directory containg the test data, relative to the Mantid release directory.
+TEST_DIR = "../../../Test/Data/SANS2D/"
+
+def _read_IGOR(filepath):
+    """
+        Read in an HFIR IGOR output file with reduced data
+        @param filepath: path of the file to be read
+    """
+    data = []
+    with open(filepath) as f:
+        # Skip first header line
+        f.readline()
+        for line in f:
+            toks = line.split()
+            try:
+                q    = float(toks[0])
+                iq   = float(toks[1])
+                diq  = float(toks[2])
+                diq2 = float(toks[3])
+                data.append([q, iq, diq])
+            except:
+                print "_read_IGOR:", sys.exc_value  
+    return data
     
-
-if __name__ == "__main__":
-    # Data file to reduce
-    datafile = "/home/mantid/workspace/Mantid/Test/Data/SANS2D/BioSANS_exp61_scan0004_0001.xml"
+def _read_Mantid(filepath):
+    """
+        Read in a CVS Mantid file
+        @param filepath: path of the file to be read
+    """
+    data = []
+    with open(filepath) as f:
+        # Read Q line. Starts with 'A', so remove the first item
+        qtoks = f.readline().split()
+        qtoks.pop(0)
+        
+        # Second line is I(q), Starts with 0 to be skipped
+        iqtoks = f.readline().split()
+        iqtoks.pop(0)
+        
+        # Third and fourth lines are dummy lines
+        f.readline()
+        f.readline()
+        
+        # Fifth line is dI(q). Starts with 0 to be skipped
+        diqtoks = f.readline().split()
+        diqtoks.pop(0)
+        
+        for i in range(len(qtoks)-1):
+            try:
+                q   = float(qtoks[i])
+                iq  = float(iqtoks[i])
+                diq = float(diqtoks[i])
+                data.append([q, iq, diq])
+            except:
+                print "_read_Mantid:", i, sys.exc_value   
+    return data
+    
+def _verify_result(reduced_file, test_file):
+    """
+        Compare the data in two reduced data files.
+        @param reduced_file: path of the Mantid-reduced file
+        @param test_file: path of the IGOR-reduced file
+    """
+    
+    # Read reduced file
+    data_mantid = _read_Mantid(reduced_file)
+    # Read the test data to compare with
+    data_igor = _read_IGOR(test_file)
+    
+    # Check length
+    assert(len(data_mantid)==len(data_igor))
+    
+    # Utility methods for manipulating the lists
+    def _diff_iq(x,y): return x[1]-y[1]
+    def _diff_err(x,y): return x[2]-y[2]
+    def _add(x,y): return x+y
+    
+    # Check that I(q) is the same for both data sets
+    deltas = map(_diff_iq, data_mantid, data_igor)
+    delta  = reduce(_add, deltas)
+    assert(delta<1e-5)
+    
+    # Then compare the errors
+    deltas = map(_diff_err, data_mantid, data_igor)
+    delta  = reduce(_add, deltas)
+    assert(delta<1e-5)
+    
+    print "Completed tests"
+    
+def test_default():   
+     # Data file to reduce
+    datafile = TEST_DIR+"BioSANS_test_data.xml"
     # Reduction parameters
     method = SANSReductionMethod()
     # Instrument parameters
@@ -377,4 +483,41 @@ if __name__ == "__main__":
 
     reduction = SANSReduction(datafile, method, conf)    
     reduction.reduce()
+    
+def test_center_by_hand():
+    """
+        Beam center entered by hand
+        Subtract dark current
+        Correct for solid angle 
+        Correct for detector efficiency, excluding high/low pixels
+        No transmission
+        No background
+    """
+    # Data file to reduce
+    datafile = TEST_DIR+"BioSANS_test_data.xml"
+    
+    # Reduction parameters
+    method = SANSReductionMethod()
+    method.dark_current_filepath = TEST_DIR+"BioSANS_dark_current.xml"
+    method.sensitivity_flood_filepath = TEST_DIR+"BioSANS_flood_data.xml"
+    method.sensitivity_dark_filepath = TEST_DIR+"BioSANS_dark_current.xml"
+    method.sensitivity_high = 1.5
+    method.sensitivity_low = 0.5
+    
+    # Instrument parameters
+    conf = InstrumentConfiguration()
+    conf.beam_center_method = InstrumentConfiguration.BEAM_CENTER_NONE
+    conf.beam_center_x = 16
+    conf.beam_center_y = 95
+
+    reduction = SANSReduction(datafile, method, conf)    
+    reduction.reduce()
+    
+    SaveCSV(Filename="mantid_center_by_hand.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")
+    
+    _verify_result(reduced_file="mantid_center_by_hand.txt", test_file=TEST_DIR+"reduced_center_by_hand.txt")
+    
+if __name__ == "__main__":
+    test_center_by_hand()
+
     
