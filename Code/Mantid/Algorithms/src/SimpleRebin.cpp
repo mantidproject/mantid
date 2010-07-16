@@ -75,11 +75,19 @@ namespace Mantid
         if (eventOutW == eventW)
         {
           // This only sets the X axis. Actual rebinning will be done upon data access.
+          std::stringstream out;
+          out << "Setting new X bins in place in EventWorkspace " << eventW->getName() << ".";
+          g_log.information(out.str());
           eventOutW->setAllX(XValues_new);
+          g_log.information("eventOutW->setAllX is complete.");
         }
         else
         {
           //--- Different output - create a Workspace2D ----
+          std::stringstream out;
+          out << "Creating a Workspace2D from the EventWorkspace " << eventW->getName() << ".";
+          g_log.information(out.str());
+
           //Create a Workspace2D
           // This creates a new Workspace2D through a torturous route using the WorkspaceFactory.
           // The Workspace2D is created with an EMPTY CONSTRUCTOR

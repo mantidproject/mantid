@@ -27,12 +27,19 @@ namespace DataObjects
   EventWorkspace::EventWorkspace() : m_bufferedDataY(100), m_bufferedDataE(100)
   {
   }
+
   EventWorkspace::~EventWorkspace()
   {
     //Make sure you free up the memory in the MRU
     m_bufferedDataY.clear();
     m_bufferedDataE.clear();
     //Go through the event list and clear them?
+    EventListVector::iterator i = this->data.begin();
+    for( ; i != this->data.end(); ++i )
+    {
+      //Deleting the event list should call its destructor to release the vector memory.
+      delete (*i);
+    }
   }
 
   //-----------------------------------------------------------------------------
@@ -122,6 +129,11 @@ namespace DataObjects
     return true;
   }
 
+  /// Return how many entries in the Y MRU list are used.
+  int EventWorkspace::MRUSize() const
+  {
+    return this->m_bufferedDataY.size();
+  }
 
   //-----------------------------------------------------------------------------
   // --- Data Access ----
@@ -279,7 +291,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   // --- Const Data Access ----
-  //-----------------------------------------------------------------------------
+  //---------------------------top--------------------------------------------------
 
   /// Return the const data X vector at a given workspace index
   const MantidVec& EventWorkspace::dataX(const int index) const
@@ -294,6 +306,9 @@ namespace DataObjects
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
+
+    //std::stringstream out;  out << "I'm retrieving DataY for index " << index << ".";
+    //g_log.information(out.str());
 
     //Is the data in the mrulist?
     MantidVecWithMarker * data = m_bufferedDataY.find(index);
@@ -349,7 +364,6 @@ namespace DataObjects
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::refX, histogram number out of range");
     return this->data[index]->getRefX();
-
   }
 
   //-----------------------------------------------------------------------------
@@ -359,8 +373,7 @@ namespace DataObjects
    * @param index Workspace histogram index to set.
    * @param x The X vector of histogram bins to use.
    */
-  void EventWorkspace::setX(const int index,
-      const Kernel::cow_ptr<MantidVec> &x)
+  void EventWorkspace::setX(const int index, const Kernel::cow_ptr<MantidVec> &x)
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::setX, histogram number out of range");
@@ -373,11 +386,22 @@ namespace DataObjects
    */
   void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x)
   {
+    //int counter=0;
     EventListVector::iterator i = this->data.begin();
     for( ; i != this->data.end(); ++i )
     {
       (*i)->setX(x);
+      /*if (counter++ % 100 == 0)
+      {
+        std::stringstream out; out << "Setting X for pixel " << counter << ".";
+        g_log.information(out.str());
+      }*/
     }
+
+    //Clear MRU lists now, free up memory
+    this->m_bufferedDataY.clear();
+    this->m_bufferedDataE.clear();
+
   }
 
 

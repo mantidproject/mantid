@@ -27,6 +27,8 @@ namespace Kernel
 namespace DataObjects
 {
 
+//============================================================================
+//============================================================================
 /**
  * This little class holds a MantidVec of data and an index marker that
  * is used for uniqueness.
@@ -44,15 +46,26 @@ public:
     m_data = the_data;
   }
 
+  /// Destructor
+  ~MantidVecWithMarker()
+  {
+    m_data.clear();
+    //Trick to release the allocated memory
+    MantidVec().swap(m_data);
+  }
+
   /// Unique index value.
   int m_index;
+
   /// Vector of data
   MantidVec m_data;
+
   /// Function returns a unique index, used for hashing for MRU list
   int hashIndexFunction() const
   {
     return m_index;
   }
+
   /// Set the unique index value.
   void setIndex(const int the_index)
   {
@@ -66,6 +79,9 @@ typedef std::map<const int, EventList*> EventListMap;
 typedef std::vector<EventList*> EventListVector;
 
 
+
+//============================================================================
+//============================================================================
 /** \class EventWorkspace
 
     This class is intended to fulfill the design specified in 
@@ -162,6 +178,8 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   /// Returns true always - an EventWorkspace always represents histogramm-able data
   virtual const bool isHistogramData() const;
+
+  int MRUSize() const;
 
 private:
   /// NO COPY ALLOWED

@@ -175,6 +175,14 @@ public:
     TS_ASSERT_EQUALS( el2.dataY()[1], 2);
     TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-2], 2); //The last bin
     TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-1], 2); //The last bin
+
+    //Now do it a second time
+    rebin.setPropertyValue("InputWorkspace","test_inEvent");
+    rebin.setPropertyValue("OutputWorkspace","test_inEvent");
+    rebin.setPropertyValue("Params", "0.0,4.0,100");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT_EQUALS(el2.dataX().size(), 26);
+
   }
 
 

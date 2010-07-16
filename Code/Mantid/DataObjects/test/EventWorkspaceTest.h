@@ -119,6 +119,12 @@ public:
 
   }
 
+  //------------------------------------------------------------------------------
+  void test_destructor()
+  {
+    EventWorkspace * ew2 = new EventWorkspace();
+    delete ew2;
+  }
 
   //------------------------------------------------------------------------------
   void test_constructor_not_settingx()
@@ -309,6 +315,7 @@ public:
     return 0;
   }
 
+  //------------------------------------------------------------------------------
   void test_histogram_cache()
   {
     //Try caching and most-recently-used MRU list.
@@ -331,6 +338,7 @@ public:
     mem1 = memory_usage();
     int last = 100;
     //Read more; memory use should be the same?
+
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
 
@@ -344,12 +352,38 @@ public:
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
 
+
 #ifndef WIN32
     mem2 = memory_usage();
     TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
 #endif
 
+
+    //----- Now we test that setAllX clears the memory ----
+    mem1=mem2;
+
+    //Yes, our eventworkspace MRU is full
+    TS_ASSERT_EQUALS( ew->MRUSize(), 100);
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.resize(5);
+    for (int i = 0; i < 4; ++i) xRef[i] = i*BIN_DELTA;
+    ew->setAllX(axis);
+
+    //MRU should have been cleared now
+    TS_ASSERT_EQUALS( ew->MRUSize(), 0);
+
+#ifndef WIN32
+    mem2 = memory_usage();
+    TS_ASSERT_LESS_THAN( mem2-mem1, 0); //Memory usage should be lower!.
+#endif
+
   }
+//
+//  void test_clearing_memory()
+//  {
+//    EventWorkspace_sptr
+//  }
 
 
   //------------------------------------------------------------------------------

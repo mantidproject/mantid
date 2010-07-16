@@ -136,6 +136,8 @@ namespace DataObjects
   /// Destructor
   EventList::~EventList()
   {
+    //Make sure the vector memory is released.
+    this->releaseDataMemory();
   }
 
   // --- Operators -------------------------------------------------------------------
@@ -287,7 +289,7 @@ namespace DataObjects
    */
   void EventList::setX(const RCtype::ptr_type& X, Unit* set_xUnit)
   {
-    this->emptyCache();
+    this->emptyCacheData();
     this->refX = X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
@@ -299,7 +301,7 @@ namespace DataObjects
    */
   void EventList::setX(const RCtype& X, Unit* set_xUnit)
   {
-    this->emptyCache();
+    this->emptyCacheData();
     this->refX = X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
@@ -311,7 +313,7 @@ namespace DataObjects
    */
   void EventList::setX(const StorageType& X, Unit* set_xUnit)
   {
-    this->emptyCache();
+    this->emptyCacheData();
     this->refX.access()=X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
@@ -336,7 +338,7 @@ namespace DataObjects
   {
     if (isCacheDirty)
       this->generateCountsHistogram();
-    return *(this->refY);
+    return (this->refY);
   }
 
   /** Returns the E data. */
@@ -346,7 +348,7 @@ namespace DataObjects
       this->generateCountsHistogram();
     if (isErrorCacheDirty)
       this->generateErrorsHistogram();
-    return *(this->refE);
+    return (this->refE);
   }
 
   /** Returns a reference to the X data */
@@ -357,7 +359,7 @@ namespace DataObjects
   }
 
   // --- Histogram functions -------------------------------------------------
-  void EventList::emptyCache() const
+  /*void EventList::emptyCache() const
   {
     if (refX->size() > 0)
     {
@@ -375,6 +377,7 @@ namespace DataObjects
       this->refE.access().clear();
     }
   }
+  */
 
   /** Delete the cached version of the CALCULATED histogram data.
    * Necessary when modifying the event list.
@@ -382,8 +385,10 @@ namespace DataObjects
   void EventList::emptyCacheData() const
   {
     this->isCacheDirty = true;
-    this->refY.access().clear();
-    this->refE.access().clear();
+    //this->refY.access().clear();
+    this->refY.clear();
+    this->isErrorCacheDirty = true;
+    this->refE.clear();
   }
 
   /** Delete and release the memory of the calculated histogram data
@@ -392,11 +397,12 @@ namespace DataObjects
   void EventList::releaseDataMemory() const
   {
     this->isCacheDirty = true;
-    this->refY.access().clear();
-    this->refE.access().clear();
+    this->refY.clear();
+    this->isErrorCacheDirty = true;
+    this->refE.clear();
     //This swapping trick is necessary to make std::vector release the allocated memory!!!
-    MantidVec().swap( this->refY.access() );
-    MantidVec().swap( this->refE.access() );
+    MantidVec().swap( this->refY );
+    MantidVec().swap( this->refE );
   }
 
   /** Fill a histogram given specified histogram bounds in this spectra list - replace the cached values.
@@ -404,8 +410,7 @@ namespace DataObjects
   void EventList::generateCountsHistogram() const
   {
       const StorageType& X = *refX;
-      StorageType& Y = refY.access();
-      generateCountsHistogram(X,Y);
+      generateCountsHistogram(X,refY);
   }
 
   /** Fill a histogram given specified histogram bounds. Does not modify
@@ -488,9 +493,7 @@ namespace DataObjects
   ///Generate the error histogram for this event list and replace the cache
   void EventList::generateErrorsHistogram() const
   {
-      const StorageType& Y = *refY;
-      StorageType& E = refE.access();
-      generateErrorsHistogram(Y,E);
+      generateErrorsHistogram(refY,refE);
   }
 
   ///Generate the Error histogram for the provided counts histogram

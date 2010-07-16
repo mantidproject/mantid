@@ -196,9 +196,9 @@ private:
   /** Cached version of the x axis. */
   mutable RCtype refX;
   /** Cached version of the counts. */
-  mutable RCtype refY;
+  mutable MantidVec refY;
   /** Cached version of the uncertainties. */
-  mutable RCtype refE;
+  mutable MantidVec refE;
 
   mutable bool isCacheDirty; ///<dirty cache flag
   mutable bool isErrorCacheDirty; ///<dirty cache flag

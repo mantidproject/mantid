@@ -82,8 +82,9 @@ namespace Kernel
       }
       else if (this->il.size()>max_num_items)
       { /* keep the length <= max_num_items */
-        // This is dropping an item - need to write it to disk (if it's changed) and delete
-        // but this is left up to the calling class to do.
+        // This is dropping an item - you may need to write it to disk (if it's changed) and delete
+        // but this is left up to the calling class to do,
+        // by returning the to-be-dropped item pointer.
         T *toWrite = this->il.back();
         this->il.pop_back();
         return toWrite;
@@ -92,12 +93,12 @@ namespace Kernel
     }
 
 
-    /// Delete all the data blocks pointed to by the list, and empty the list itself
+    /// Delete all the T's pointed to by the list, and empty the list itself
     void clear()
     {
       for (typename MRUList<T>::item_list::iterator it = this->il.begin(); it != this->il.end(); ++it)
       {
-        delete *it;
+        delete (*it);
       }
       this->il.clear();
     }
