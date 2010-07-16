@@ -18,7 +18,8 @@ namespace Algorithms
     Required Properties:
     <UL>
     <LI> InputWorkspace    - The data in units of wavelength. </LI>
-    <LI> OutputWorkspace   - The name of the table workspace containing the center of mass position. </LI>
+    <LI> Output            - The name of the table workspace containing the center of mass position.
+                             If none is provided, an ArrayProperty named CenterOfMass will contain the result.</LI>
     <LI> NPixelX           - Number of detector pixels in the X direction. Default: 192</LI>
     <LI> NPixelY           - Number of detector pixels in the Y direction. default: 192</LI>
     <LI> DirectBeam        - If true, a direct beam calculation will be performed. Otherwise, the center of mass
