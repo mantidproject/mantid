@@ -99,13 +99,13 @@ public:
     AnalysisDataService::Instance().remove(inName);
   }
 
-  void xtestDataWithGroupedDetectors()
+  void testDataWithGroupedDetectors()
   {
     const std::string wsName = "testInput";
-    makeTestWS(wsName);
+    MatrixWorkspace_sptr inputWS = makeTestWS(wsName);
+    AnalysisDataService::Instance().add(wsName, inputWS);
 
     DetectorEfficiencyCor grouper;
-    grouper.setChild(true);
     TS_ASSERT_THROWS_NOTHING(grouper.initialize());
     TS_ASSERT(grouper.isInitialized());
     TS_ASSERT_THROWS_NOTHING(grouper.setPropertyValue("InputWorkspace", wsName));
@@ -188,7 +188,7 @@ public:
 
 
   // Set up a small workspace for testing
-  void makeTestWS(std::string WSName)
+  MatrixWorkspace_sptr makeTestWS(std::string WSName)
   {
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", NSpectra, NBins + 1, NBins);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
@@ -256,9 +256,7 @@ public:
 	instrument->markAsDetector(detector);
       }
     }
-	
-
-    AnalysisDataService::Instance().add(WSName, space2D);
+    return space2D;
   }
 
   boost::shared_ptr<Object> getObject(std::string xmlShape)
