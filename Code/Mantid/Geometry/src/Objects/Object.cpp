@@ -762,7 +762,8 @@ namespace Mantid
       std::string Ln=Line;
       // Remove all surfaces :
       std::ostringstream cx;
-      for(int i=0;i<static_cast<int>(Ln.length());i++)
+      const std::string::size_type length = Ln.length();
+      for ( int i=0; i < length; i++)
       {
         if (isdigit(Ln[i]) || Ln[i]=='-')
         {
@@ -787,7 +788,7 @@ namespace Mantid
           Ridx++;
           i+=nLen;
         }
-        cx<<Ln[i];
+        if ( i < length ) cx<<Ln[i];
       }
       Ln=cx.str();
       // PROCESS BRACKETS
