@@ -190,28 +190,30 @@ public:
   // Set up a small workspace for testing
   MatrixWorkspace_sptr makeTestWS(std::string WSName)
   {
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", NSpectra, NBins + 1, NBins);
+    const int nspecs(10);
+    const int nbins(4);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nspecs, nbins + 1, nbins);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     
     Histogram1D::RCtype x,y,e;
-    x.access().resize(NBins+1, 0.0);
-    y.access().resize(NBins, 0.0);
-    e.access().resize(NBins, 0.01);
-    for (int i = 0; i < NBins; ++i)
+    x.access().resize(nbins+1, 0.0);
+    y.access().resize(nbins, 0.0);
+    e.access().resize(nbins, 0.01);
+    for (int i = 0; i < nbins; ++i)
     {
       x.access()[i] = static_cast<double>((1 + i)/100);
       y.access()[i] = 5 + i;
       e.access()[i] = sqrt(5.0);
     }
-    x.access()[NBins] = static_cast<double>(NBins);
+    x.access()[nbins] = static_cast<double>(nbins);
     // Fill a couple of zeros just as a check that it doesn't get changed
-    y.access()[NBins-1] = 0.0;
-    e.access()[NBins-1] = 0.0;
+    y.access()[nbins-1] = 0.0;
+    e.access()[nbins-1] = 0.0;
     
-    int specNums[3*NSpectra];
-    int detIDs[3*NSpectra];
-    for (int i=0; i< NSpectra; i++)
+    int *specNums = new int[3*nspecs];
+    int *detIDs = new int[3*nspecs];
+    for (int i=0; i< nspecs; i++)
     {
       space2D->setX(i,x);
       space2D->setData(i,y,e);
@@ -224,7 +226,9 @@ public:
       detIDs[i+1] = i+2;
       detIDs[i+2] = i+3;
     }
-    space2D->mutableSpectraMap().populate(specNums, detIDs, 3*NSpectra);
+    space2D->mutableSpectraMap().populate(specNums, detIDs, 3*nspecs);
+    delete specNums;
+    delete detIDs;
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
@@ -244,7 +248,7 @@ public:
 
     ParameterMap &pmap = space2D->instrumentParameters();
     //Detector info
-    for( int i = 0; i < NSpectra; ++i)
+    for( int i = 0; i < nspecs; ++i)
     {
       for( int j = 0; j < 3; ++j)
       {
