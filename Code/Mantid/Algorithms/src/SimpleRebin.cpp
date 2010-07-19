@@ -61,7 +61,6 @@ namespace Mantid
       MantidVecPtr XValues_new;
       // create new output X axis
       const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
-      //std::cout <<"ntcnew" << ntcnew << "\n";
 
       //---------------------------------------------------------------------------------
       //Now, determine if the input workspace is actually an EventWorkspace
@@ -96,12 +95,10 @@ namespace Mantid
           //Initialize progress reporting.
           Progress prog(this,0.0,1.0, histnumber);
 
-          // This operation is NOT ThreadSafe (apparently), and so is out of the loop
-//          for (int i=0; i < histnumber; ++i)
-
           //Cast away the const-ness for accessing the event list.
           EventWorkspace_sptr non_const_eventW = boost::const_pointer_cast<EventWorkspace>(eventW);
-//          const EventList& el = non_const_eventW->getEventListAtWorkspaceIndex(1);
+
+          //Get the X axis before parallelizing (multiple accesses to the shared_ptr caused problems)
           MantidVec X = XValues_new.access();
 
           //Go through all the histograms and set the data
@@ -109,7 +106,6 @@ namespace Mantid
           for (int i=0; i < histnumber; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
-            //std::cout << "histogram " << i << "\n";
 
             //Set the X axis for each output histogram
             outputW->setX(i, XValues_new);
@@ -146,11 +142,9 @@ namespace Mantid
           outputW->setYUnitLabel(eventW->YUnitLabel());
 
           // Assign it to the output workspace property
-          //std::cout << "setProperty OutputWorkspace" << "\n";
           setProperty("OutputWorkspace", outputW);
         }
 
-        //std::cout << "done eventWorkspace rebin\n";
       } // END ---- EventWorkspace
 
       else

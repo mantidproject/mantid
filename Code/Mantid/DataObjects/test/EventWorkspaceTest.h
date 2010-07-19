@@ -95,6 +95,7 @@ public:
     return retVal;
   }
 
+  //------------------------------------------------------------------------------
   void setUp()
   {
     ew = createEventWorkspace(1, 1);
@@ -118,6 +119,7 @@ public:
     TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error);
   }
 
+  //------------------------------------------------------------------------------
   void test_getMemorySize()
   {
     TS_ASSERT_EQUALS( ew->getMemorySize(), (ew->getNumberEvents() * sizeof(TofEvent) + NUMPIXELS * sizeof(EventList))/1024);
@@ -382,6 +384,7 @@ public:
 
 //#ifndef WIN32
 //    mem2 = memory_usage();
+//    std::cout << "Mem change " << mem2-mem1 << "\n";
 //    TS_ASSERT_LESS_THAN( mem2-mem1, 0); //Memory usage should be lower!.
 //#endif
 
@@ -413,53 +416,22 @@ public:
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataE(i);
 
-    return; //skipping the next tests
-
-#ifndef WIN32
-    mem2 = memory_usage();
-    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-#endif
+//#ifndef WIN32
+//    mem2 = memory_usage();
+//    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
+//#endif
 
     //Do it some more
     last=200; mem1=mem2;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataE(i);
 
-#ifndef WIN32
-    mem2 = memory_usage();
-    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-#endif
+//#ifndef WIN32
+//    mem2 = memory_usage();
+//    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
+//#endif
 
   }
-
-  //------------------------------------------------------------------------------
-  void xtest_clearing_memory()
-  {
-    std::cout << "01\n";
-    EventWorkspace * ew3 = new EventWorkspace();
-    ew3->initialize(1000,1,1);
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec& xRef = axis.access();
-    xRef.resize(10);
-    for (int i = 0; i < 10; ++i) xRef[i] = i*BIN_DELTA;
-    ew3->setAllX(axis);
-
-    MantidVec data1;
-
-    int mem1, mem2;
-#ifndef WIN32
-    mem1 = memory_usage();
-#endif
-    const EventWorkspace * ewc = const_cast<EventWorkspace *>( ew3 );
-    for (int i=0; i<100;i++)
-      data1 = ewc->dataY(i);
-#ifndef WIN32
-    mem2 = memory_usage();
-    TS_ASSERT_LESS_THAN( mem2-mem1, 0);
-#endif
-
-  }
-
 
 
 };
