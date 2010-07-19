@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <fstream>
 #include <cmath>
 
@@ -75,50 +76,63 @@ void FindDetectorsOutsideLimits::exec()
   integratedWorkspace->isDistribution(false);
   integratedWorkspace->setYUnit("");
 
-  g_log.debug() << "Finding dead detectors" << std::endl;
   // store the IDs of the spectra and detectors that fail
-  std::vector<int> lows, highs;
+  std::set<int> lows, highs;
 
   // iterate over the data values setting the live and dead values
   const int numSpec = integratedWorkspace->getNumberHistograms();
   const int progStep = static_cast<int>(ceil(numSpec / 100.0));
+  
+  PARALLEL_FOR1(integratedWorkspace)
   for (int i = 0; i < numSpec; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
     if (i % progStep == 0)
     {
       progress(static_cast<double>(i)/numSpec);
       interruption_point();
     }
     // the Y-values are the input and one of the outputs of this function, the E-values, error values, are unchanged but will be meaning less at the end of this algorithm
-    double &yInputOutput = integratedWorkspace->dataY(i)[0];
-    if ( yInputOutput <= lowThreshold )
+    const double yValue = integratedWorkspace->readY(i)[0];
+    if ( yValue <= lowThreshold )
     {
-      lows.push_back(integratedWorkspace->getAxis(1)->spectraNo(i));
-      yInputOutput = deadValue;
+      PARALLEL_CRITICAL(fdol_a)
+      {
+        lows.insert(integratedWorkspace->getAxis(1)->spectraNo(i));
+      }
+      integratedWorkspace->dataY(i)[0] = deadValue;
       continue;
     }
-    if ( yInputOutput >= highThreshold )
+    if ( yValue >= highThreshold )
     {
-      highs.push_back(integratedWorkspace->getAxis(1)->spectraNo(i));
-      yInputOutput = deadValue;
+     PARALLEL_CRITICAL(fdol_b)
+      {
+        highs.insert(integratedWorkspace->getAxis(1)->spectraNo(i));
+      }
+      integratedWorkspace->dataY(i)[0] = deadValue;
       continue;     
     }
-    // if we've got to here there were no problems
-    yInputOutput = liveValue;
+    // if we've got to here there were no problems, flag this
+    integratedWorkspace->dataY(i)[0] = liveValue;
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   writeFile(getPropertyValue("OutputFile"), lows, highs);
 
-  g_log.information() << "Found a total of " << lows.size()+highs.size() << " failing "
+  g_log.information() << "Found a total of " << lows.size() + highs.size() << " failing "
     << "spectra (" << lows.size() << " reading low and " << highs.size()
     << " reading high)" << std::endl;
   
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", integratedWorkspace);
   
-  //sum the highs and the lows
-  lows.insert(lows.end(), highs.begin(), highs.end());
-  setProperty("BadSpectraNums", lows);
+  std::vector<int> badSpectra(lows.size() + highs.size(), 0);
+  badSpectra.assign(lows.begin(), lows.end());
+  badSpectra.insert(badSpectra.end(), highs.begin(), highs.end());
+
+  setProperty("BadSpectraNums", badSpectra);
 }
 
 /** Run Integration as a sub-algorithm
@@ -150,38 +164,13 @@ MatrixWorkspace_sptr FindDetectorsOutsideLimits::integrateWorkspace()
   return childAlg->getProperty("OutputWorkspace"); 
 }
 
-/** Create an array of detector IDs from the two arrays of spectra numbers that were passed to it
-*  @param lowList a list of spectra numbers
-*  @param highList another list of spectra numbers
-*  @param detMap the map that contains the list of detectors associated with each spectrum
-*  @param total output property, the array of detector IDs
-*/
-void FindDetectorsOutsideLimits::createOutputArray(const std::vector<int> &lowList, const std::vector<int> &highList, const SpectraDetectorMap& detMap, std::vector<int> &total) const
-{
-  // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
-  total.reserve(lowList.size()+highList.size());
-
-  for ( std::vector<int>::size_type i = 0; i < lowList.size(); ++i )
-  {
-    std::vector<int> tStore = detMap.getDetectors(lowList[i]);
-    total.resize(total.size()+tStore.size());
-    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
-  }
-
-  for ( std::vector<int>::size_type i = 0; i < highList.size(); ++i )
-  {
-    std::vector<int> tStore = detMap.getDetectors(highList[i]);
-    total.resize(total.size()+tStore.size());
-    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
-  }
-}
 /** Write a mask file which lists bad spectra in groups saying what the problem is. The file
 * is human readable
 *  @param fname name of file, if omitted no file is written
 *  @param lowList list of spectra numbers for specttra that failed the test on low integral
 *  @param highList list of spectra numbers for spectra with integrals that are too high
 */
-void FindDetectorsOutsideLimits::writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList) const
+void FindDetectorsOutsideLimits::writeFile(const std::string &fname, const std::set<int> &lowList, const std::set<int> &highList) const
 {
   //it's not an error if the name is "", we just don't write anything
   if ( fname.empty() )
@@ -197,38 +186,45 @@ void FindDetectorsOutsideLimits::writeFile(const std::string &fname, const std::
     g_log.error("Could not open file \"" + fname + "\", file output disabled");
     return;
   }
-
-  file << "---"<<name()<<"---" << std::endl;
-  file << "----"<<"Low Integral : "<<lowList.size()<<"----" << std::endl;
-  for ( std::vector<int>::size_type i = 0 ; i < lowList.size(); ++i )
-  {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
-    file << lowList[i];
-    if ( (i + 1) % 10 == 0 || i == lowList.size()-1 )
-    {// write an end of line after every 10 entries or when we have run out of entries
-      file << std::endl;
-    }
-    else
-    {
-      file << " ";
-    }
-  }
-  file << "----" << "High Integral : " << highList.size() << "----" << std::endl;
-  for ( std::vector<int>::size_type i = 0 ; i < highList.size(); ++i )
-  {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
-    file << highList[i];
-    if ( (i + 1) % 10 == 0 || i == highList.size()-1 )
-    {// write an end of line after every 10 entries and when we have run out of entries
-      file << std::endl;
-    }
-    else
-    {
-      file << " ";
-    }
-  }
+  
+  file << "---" << name() << "---" << std::endl;
+  writeList(file, lowList, "----Low Integral : ", "----");
+  writeList(file, highList, "----High Integral : ", "----");
   file << std::endl;
 
   file.close();
   g_log.debug() << "File output complete" << std::endl;
+}
+
+/**
+ * Write a list to an output stream
+ * @param outputStream The stream to use to write out
+ * @param specList The set of spectrum numbers to write out
+ * @param prefix A string to prefix the number of spectra line
+ * @param suffix A string to suffix the number of spectra line
+ */
+void FindDetectorsOutsideLimits::writeList(std::ostream & outputStream, const std::set<int> & specList, 
+                                           const std::string & prefix, const std::string & suffix) const
+{
+  std::set<int>::size_type nentries = specList.size();
+  outputStream << prefix << nentries << suffix << std::endl;
+  const unsigned int blocksize(10);
+  unsigned int item_count(0);
+  const std::set<int>::const_iterator iend = specList.end();
+  for ( std::set<int>::const_iterator itr = specList.begin() ; itr != iend; )
+  {
+    outputStream << *itr;
+    ++item_count;
+    if( ++itr != iend && item_count < blocksize)
+    {
+      outputStream << " "; 
+    }
+    else
+    {
+      item_count = 0;
+      outputStream << std::endl;
+    }
+   }
 }
 
 }

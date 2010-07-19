@@ -43,7 +43,7 @@ public:
     // Register the workspace in the data service and initialise it with abitary data
     Workspace2D_sptr work_in =
     //the x values look like this -1, 2, 5, 8, 11, 14, 17, 20, 23, 26
-      WorkspaceCreationHelper::Create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
+    WorkspaceCreationHelper::Create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
 
     //yVeryDead is a detector with low counts
     boost::shared_ptr<Mantid::MantidVec> yVeryDead(new Mantid::MantidVec(sizex,0.1));
@@ -88,8 +88,8 @@ public:
     alg.setPropertyValue("RangeLower", "-1");
     alg.setPropertyValue("GoodValue", liveVal);
     alg.setPropertyValue("BadValue", deadVal);
-    std::string filename = "FindDetectorsOutsideLimitsTestFile.txt";
-    alg.setPropertyValue("OutputFile",filename);
+    alg.setPropertyValue("OutputFile", "FindDetectorsOutsideLimitsTestFile.txt");
+    std::string filename = alg.getProperty("OutputFile");
 
     // Testing behavour with Range_lower or Range_upper not set
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -119,6 +119,9 @@ public:
     }
     
     TS_ASSERT( Poco::File(filename).exists() )
+
+    checkFile(filename);
+
     Poco::File(filename).remove();
 
     // Set cut off much of the range and yTooDead will stop failing on high counts
@@ -127,10 +130,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     //retrieve the output workspace
-    TS_ASSERT_THROWS_NOTHING(
-      work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve("testdead_out")
-      ))
+    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")))
     //Check the dead detectors found agrees with what was setup above
     for (int i=0; i< sizey; i++)
     {
@@ -141,10 +141,30 @@ public:
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
     
+    checkFile(filename);
     Poco::File(filename).remove();
 
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");
+  }
+
+private:
+
+  void checkFile(const std::string & filename)
+  {
+    // Quick test number of lines within file
+    std::ifstream file(filename.c_str(), std::ios_base::in );
+    TS_ASSERT(file.good());
+
+    std::string line;
+    size_t line_count(0);
+    while( std::getline(file, line))
+    {
+      line_count += 1;
+    }
+    file.close();
+    TS_ASSERT_EQUALS(line_count, 6)
+
   }
 
 };

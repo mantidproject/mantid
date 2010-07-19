@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include <vector>
+#include <set>
 #include <string>
 
 namespace Mantid
@@ -80,8 +80,8 @@ namespace Mantid
       void exec();
 
       API::MatrixWorkspace_sptr integrateWorkspace();
-      void createOutputArray(const std::vector<int> &lowList, const std::vector<int> &highList, const API::SpectraDetectorMap &detMap, std::vector<int> &total) const;
-      void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList) const;
+      void writeFile(const std::string &fname, const std::set<int> &lowList, const std::set<int> &highList) const;
+      void writeList(std::ostream & outputStream, const std::set<int> & specList, const std::string & prefix, const std::string & suffix) const;
       
     };
 

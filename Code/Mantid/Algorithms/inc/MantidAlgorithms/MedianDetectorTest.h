@@ -69,11 +69,7 @@ namespace Mantid
     {
     public:
       /// Default constructor initialises all values to zero and runs the base class constructor
-      MedianDetectorTest() :
-          API::Algorithm(),
-          m_Low(0.1), m_High(1.5), m_MinSpec(0), m_MaxSpec(UNSETINT),
-          m_usableMaskMap(true), m_fracDone(0.0), m_TotalTime(RTTotal)
-      {};
+      MedianDetectorTest();
       /// Destructor
       virtual ~MedianDetectorTest() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -84,19 +80,6 @@ namespace Mantid
       virtual const std::string category() const { return "Diagnostics";}
 
     private:
-      /// A pointer to the input workspace
-      API::MatrixWorkspace_const_sptr m_InputWS;
-      /// The proportion of the median value below which a detector is considered under-reading
-      double m_Low;
-      /// The factor of the median value above which a detector is considered over-reading
-      double m_High;
-      ///The index of the first spectrum to calculate
-      int m_MinSpec;
-      /// The index of the last spectrum to calculate
-      int m_MaxSpec;
-      /// when this is set to false reading and writing to the detector map is disabled, this is done if there is no map in the workspace
-      bool m_usableMaskMap;
-
       // Overridden Algorithm methods
       void init();
       void exec();
@@ -111,18 +94,29 @@ namespace Mantid
       /// Converts numbers of particle counts into count rates
       API::MatrixWorkspace_sptr getRate(API::MatrixWorkspace_sptr counts);
       /// Finds the median of values in single bin histograms
-      double getMedian(API::MatrixWorkspace_const_sptr input) const;
+      double getMedian(API::MatrixWorkspace_sptr input);
       /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
       void FindDetects(API::MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename);
+      /// Writes the results to a file
       void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &notFound);
+      /// Logs the findings of the tests
       void logFinds(std::vector<int>::size_type missing, std::vector<int>::size_type low, std::vector<int>::size_type high, int alreadyMasked);
+      /// Masks the bad indices caused by missing detector information
+      void maskBadSpectra(API::MatrixWorkspace_sptr inputWS, const std::vector<int> & badIndices);
 
+      /// A pointer to the input workspace
+      API::MatrixWorkspace_const_sptr m_InputWS;
+      /// The proportion of the median value below which a detector is considered under-reading
+      double m_Low;
+      /// The factor of the median value above which a detector is considered over-reading
+      double m_High;
+      ///The index of the first spectrum to calculate
+      int m_MinSpec;
+      /// The index of the last spectrum to calculate
+      int m_MaxSpec;
       /// the number of numbers on each line of the output file
-      static const int LINESIZE = 10;
-      ///a flag int value to indicate that the value wasn't set by users
-      static const int UNSETINT = INT_MAX-15;
+      static const int g_file_linesize = 10;
 
-      //data and functions for the progress bar 
       /// An estimate of the percentage of the algorithm runtimes that has been completed 
       double m_fracDone;
       /// For the progress bar, estimates of how many additions, or equilivent, member functions will do for each spectrum
