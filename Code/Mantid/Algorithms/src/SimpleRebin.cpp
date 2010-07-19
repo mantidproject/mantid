@@ -96,22 +96,30 @@ namespace Mantid
           //Initialize progress reporting.
           Progress prog(this,0.0,1.0, histnumber);
 
-          //Go through all the histograms and set the data
-          for (int i=0; i <  histnumber; ++i)
-          {
-            //std::cout << "histogram " << i << "\n";
-            //Set it in the input workspace so as to let it generate the right histogram
-            //boost::const_pointer_cast<EventWorkspace>(eventW)->setX(i, XValues_new);
+          // This operation is NOT ThreadSafe (apparently), and so is out of the loop
+//          for (int i=0; i < histnumber; ++i)
 
-            //And set it in the output histogram.
+          //Cast away the const-ness for accessing the event list.
+          EventWorkspace_sptr non_const_eventW = boost::const_pointer_cast<EventWorkspace>(eventW);
+//          const EventList& el = non_const_eventW->getEventListAtWorkspaceIndex(1);
+          MantidVec X = XValues_new.access();
+
+          //Go through all the histograms and set the data
+          PARALLEL_FOR3(inputW, eventW, outputW)
+          for (int i=0; i < histnumber; ++i)
+          {
+            PARALLEL_START_INTERUPT_REGION
+            //std::cout << "histogram " << i << "\n";
+
+            //Set the X axis for each output histogram
             outputW->setX(i, XValues_new);
 
             //Get a const event list reference. eventW->dataY() doesn't work.
-            const EventList& el = boost::const_pointer_cast<EventWorkspace>(eventW)->getEventListAtWorkspaceIndex(i);
+            const EventList& el = non_const_eventW->getEventListAtWorkspaceIndex(i);
 
             //Now use this const method to generate a histogram without changing the event list or requiring const casts
             MantidVec y_data, e_data;
-            el.generateCountsHistogram(XValues_new.access(), y_data);
+            el.generateCountsHistogram(X, y_data);
             el.generateErrorsHistogram(y_data, e_data);
 
             //Copy the data over.
@@ -120,7 +128,9 @@ namespace Mantid
 
             //Report progress
             prog.report();
+            PARALLEL_END_INTERUPT_REGION
           }
+          PARALLEL_CHECK_INTERUPT_REGION
 
           //Copy all the axes
           for (int i=1; i<inputW->axes(); i++)
