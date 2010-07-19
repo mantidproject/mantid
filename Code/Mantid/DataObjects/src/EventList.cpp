@@ -149,8 +149,9 @@ namespace DataObjects
     //Copy all data from the rhs.
     this->events.assign(rhs.events.begin(), rhs.events.end());
     this->refX = rhs.refX;
-    this->refY = rhs.refY;
-    this->refE = rhs.refE;
+//    this->refY.assign(rhs.refY.begin(), rhs.refY.end());
+//    this->refE.assign(rhs.refE.begin(), rhs.refE.end());
+//    this->refE = rhs.refE;
     this->order = rhs.order;
     this->isCacheDirty = rhs.isCacheDirty;
     this->isErrorCacheDirty = rhs.isErrorCacheDirty;

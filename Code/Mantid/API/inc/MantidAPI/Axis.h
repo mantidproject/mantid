@@ -51,7 +51,7 @@ public:
   Axis();
   virtual ~Axis();
 
-  /// Virtula constructor
+  /// Virtual constructor
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL) = 0;
 
   const std::string& title() const;

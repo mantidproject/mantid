@@ -54,6 +54,23 @@ public:
     MantidVec().swap(m_data);
   }
 
+
+private:
+  /// Copy constructor
+  MantidVecWithMarker(const MantidVecWithMarker &other)
+  {
+    this->operator=(other);
+  }
+
+  /// Assignment operator
+  MantidVecWithMarker& operator=(const MantidVecWithMarker &other)
+  {
+    m_index = other.m_index;
+    m_data.assign(other.m_data.begin(), other.m_data.end());
+    return *this;
+  }
+
+public:
   /// Unique index value.
   int m_index;
 
@@ -116,6 +133,8 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   /// Get the number of histograms. aka the number of pixels or detectors.
   const int getNumberHistograms() const;
+
+  long int getMemorySize() const;
 
   //------------------------------------------------------------
 
@@ -212,6 +231,9 @@ private:
 
   /// The most-recently-used list of dataE histograms
   mutable mru_list m_bufferedDataE;
+
+  /// Cached copy of the # of events in the list, cached at the end of doneLoadingData()
+  mutable std::size_t m_cachedNumberOfEvents;
 
 
 };

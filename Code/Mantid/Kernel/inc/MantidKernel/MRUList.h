@@ -24,6 +24,7 @@ namespace Kernel
 {
 
   using namespace boost::multi_index;
+  using Kernel::Exception::NotImplementedError;
 
   /** An MRU (most recently used) list keeps record of the last n
   *  inserted items, listing first the newer ones. Care has to be
@@ -63,6 +64,25 @@ namespace Kernel
       max_num_items(max_num_items_)
       {
       }
+
+    /** Destructor
+    */
+    ~MRUList()
+    {
+      //std::cout << "MRUList destructor called!\n";
+      this->clear();
+    }
+
+  private:
+    MRUList(MRUList& other)
+    {
+      throw NotImplementedError("Can't copy a MRU List.");
+    }
+    MRUList& operator=(MRUList& other)
+    {
+      throw NotImplementedError("Can't copy a MRU List.");
+    }
+
 
   public:
     /** Insert an item into the list. If it's already in the list, it's moved to the top.

@@ -17,14 +17,15 @@ namespace Mantid
 
 namespace DataObjects
 {
-  using Kernel::Exception::NotImplementedError;
+using Kernel::Exception::NotImplementedError;
 
   // get a reference to the logger
   Kernel::Logger& EventWorkspace::g_log
                  = Kernel::Logger::get("EventWorkspace");
 
   //---- Constructors -------------------------------------------------------------------
-  EventWorkspace::EventWorkspace() : m_bufferedDataY(100), m_bufferedDataE(100)
+  EventWorkspace::EventWorkspace() : m_bufferedDataY(100), m_bufferedDataE(100),
+      m_cachedNumberOfEvents(0)
   {
   }
 
@@ -129,10 +130,28 @@ namespace DataObjects
     return true;
   }
 
+  //-----------------------------------------------------------------------------
   /// Return how many entries in the Y MRU list are used.
   int EventWorkspace::MRUSize() const
   {
     return this->m_bufferedDataY.size();
+  }
+
+  //-----------------------------------------------------------------------------
+  /// Returns the amount of memory used in KB
+  long int EventWorkspace::getMemorySize() const
+  {
+//    std::stringstream out;
+//    out << "Get memory size. m_cachedNumberOfEvents = " << m_cachedNumberOfEvents <<
+//        ". sizeof(TofEvent) = " << sizeof(TofEvent) <<
+//        ". sizeof(EventList) = " << sizeof(EventList);
+//    g_log.information(out.str());
+//    std::cout << out.str() << "\n";
+
+    //Add up the two buffers and the events.
+    return ((this->m_bufferedDataY.size() + this->m_bufferedDataE.size()) * this->blocksize() * sizeof(double)
+        + this->m_cachedNumberOfEvents * sizeof(TofEvent)
+        + this->getNumberHistograms() * sizeof(EventList) ) / 1024;
   }
 
   //-----------------------------------------------------------------------------
@@ -224,7 +243,6 @@ namespace DataObjects
       //Copy the pointer to the event list in there.
       this->data[counter] = it->second;
 
-      //std::cout << "added" << std::endl;
       counter++;
     }
 
@@ -248,6 +266,9 @@ namespace DataObjects
     //Get your memory back :)
     delete [] index_table;
     delete [] pixelid_table;
+
+    //Cache the # of events (for getMemorySize)
+    this->m_cachedNumberOfEvents = this->getNumberEvents();
 
     //Set the flag for raising errors later
     this->done_loading_data = true;
@@ -289,9 +310,11 @@ namespace DataObjects
   }
 
 
+
+
   //-----------------------------------------------------------------------------
   // --- Const Data Access ----
-  //---------------------------top--------------------------------------------------
+  //-----------------------------------------------------------------------------
 
   /// Return the const data X vector at a given workspace index
   const MantidVec& EventWorkspace::dataX(const int index) const
@@ -301,6 +324,8 @@ namespace DataObjects
     return this->data[index]->dataX();
   }
 
+
+  //---------------------------------------------------------------------------
   /// Return the const data Y vector at a given workspace index
   const MantidVec& EventWorkspace::dataY(const int index) const
   {
@@ -333,6 +358,7 @@ namespace DataObjects
     return data->m_data;
   }
 
+  //---------------------------------------------------------------------------
   /// Return the const data E vector at a given workspace index
   const MantidVec& EventWorkspace::dataE(const int index) const
   {
@@ -358,6 +384,7 @@ namespace DataObjects
     return data->m_data;
   }
 
+  //---------------------------------------------------------------------------
   /// Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
   {

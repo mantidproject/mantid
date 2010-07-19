@@ -173,13 +173,9 @@ public:
   /** Return the size of the histogram representation of the data (size of Y) **/
   virtual size_t histogram_size() const;
 
-  /** Delete the cached version of the histogram data. */
-  void emptyCache() const;
-
   void generateCountsHistogram(const StorageType& X, StorageType& Y) const;
   void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
 
-  /** Delete the cached version of the CALCULATED histogram data. */
   void emptyCacheData() const;
 
   void releaseDataMemory() const;

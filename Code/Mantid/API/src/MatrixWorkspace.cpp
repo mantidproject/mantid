@@ -380,6 +380,7 @@ const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int& spectrum
 
 long int MatrixWorkspace::getMemorySize() const
 {
+  //3 doubles per histogram bin.
   return 3*size()*sizeof(double)/1024;
 }
 
