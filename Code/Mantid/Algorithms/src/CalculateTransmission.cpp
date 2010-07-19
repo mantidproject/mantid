@@ -93,22 +93,28 @@ void CalculateTransmission::exec()
     throw std::invalid_argument("Could not find the incident and transmission monitor spectra\n");
   }
   // Check that given spectra are monitors
-  if ( !sampleWS->getDetector(indices.front())->isMonitor()
-       || !sampleWS->getDetector(indices.back())->isMonitor() )
+  if ( !sampleWS->getDetector(indices.front())->isMonitor() )
   {
-    g_log.error("One of the UDETs provided is not marked as a monitor");
-    throw std::invalid_argument("One of the UDETs provided is not marked as a monitor");
+    g_log.error("The Incident Beam Monitor UDET provided is not marked as a monitor");
+    throw std::invalid_argument("The Incident Beam Monitor UDET provided is not marked as a monitor");
+  }
+  if ( !sampleWS->getDetector(indices.back())->isMonitor() )
+  {
+    g_log.information("The Transmission Monitor UDET provided is not marked as a monitor");
   }
   MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
   MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
   const std::vector<int> directSpectra = directWS->spectraMap().getSpectra(udets);
   WorkspaceHelpers::getIndicesFromSpectra(sampleWS,directSpectra,indices);
   // Check that given spectra are monitors
-  if ( !directWS->getDetector(indices.front())->isMonitor()
-       || !directWS->getDetector(indices.back())->isMonitor() )
+  if ( !directWS->getDetector(indices.front())->isMonitor() )
   {
-    g_log.error("One of the UDETs provided is not marked as a monitor");
-    throw std::invalid_argument("One of the UDETs provided is not marked as a monitor");
+    g_log.error("The Incident Beam Monitor UDET provided is not marked as a monitor");
+    throw std::invalid_argument("The Incident Beam Monitor UDET provided is not marked as a monitor");
+  }
+  if ( !directWS->getDetector(indices.back())->isMonitor() )
+  {
+    g_log.information("The Transmission Monitor UDET provided is not marked as a monitor");
   }
   MatrixWorkspace_sptr M2_direct = this->extractSpectrum(directWS,indices[0]);
   MatrixWorkspace_sptr M3_direct = this->extractSpectrum(directWS,indices[1]);
