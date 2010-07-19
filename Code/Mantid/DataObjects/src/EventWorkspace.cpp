@@ -144,6 +144,7 @@ using Kernel::Exception::NotImplementedError;
 //    std::stringstream out;
 //    out << "Get memory size. m_cachedNumberOfEvents = " << m_cachedNumberOfEvents <<
 //        ". sizeof(TofEvent) = " << sizeof(TofEvent) <<
+//        ". sizeof(std::size_t) = " << sizeof(std::size_t) <<
 //        ". sizeof(EventList) = " << sizeof(EventList);
 //    g_log.information(out.str());
 //    std::cout << out.str() << "\n";

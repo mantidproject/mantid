@@ -76,7 +76,7 @@ private:
   TofEvent();
 
   /// Destructor
-  virtual ~TofEvent();
+  ~TofEvent();
 
   /// Copy from another TofEvent object
   TofEvent& operator=(const TofEvent&rhs);
