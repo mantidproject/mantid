@@ -316,7 +316,7 @@ QString ConvertToEnergy::getIDFPath(const QString& prefix)
 /**
 * Runs a Python script to discover whether the selected instrument is direct or indirect.
 * @param defFile path to instrument definition file.
-* @return UNDEFINED deltaE-mode not found, otherwise the relevant value (DIRECT or INDIRECT)
+* @return 'Undefined' deltaE-mode not found, otherwise the relevant value ('Direct' or 'InDirect')
 */
 ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString& defFile)
 {

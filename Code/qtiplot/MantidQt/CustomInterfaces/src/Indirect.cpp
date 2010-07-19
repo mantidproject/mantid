@@ -1,10 +1,13 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
 
+#include "MantidQtCustomInterfaces/Background.h"
+
 #include "MantidKernel/ConfigService.h"
 
 #include <QUrl>
 #include <QDesktopServices>
 #include <QDir>
+#include <QFileDialog>
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -13,14 +16,14 @@ using namespace MantidQt::CustomInterfaces;
 * It is used primarily to ensure sane values for member variables.
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
-UserSubWindow(parent), m_uiForm(uiForm) 
+UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL)
 {
-
+	// Constructor
 }
 
 /**
 * This function performs any one-time actions needed when the Inelastic interface
-* is first selected.
+* is first selected, such as connecting signals to slots.
 */
 void Indirect::initLayout()
 {
@@ -29,15 +32,25 @@ void Indirect::initLayout()
 	// "Energy Transfer" tab
 	connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
 	connect(m_uiForm.cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
+	connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
 
-	connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundRemoval()));
+	connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
 	connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
 	connect(m_uiForm.rebin_pbRebin, SIGNAL(clicked()), this, SLOT(rebinData()));
+
+	// "Browse" buttons
+	connect(m_uiForm.pbRunFilesBrowse, SIGNAL(clicked()), this, SLOT(browseRun()));
+	connect(m_uiForm.pbCalibrationFilesBrowse, SIGNAL(clicked()), this, SLOT(browseCalib()));
+	connect(m_uiForm.pbMappingFileBrowse, SIGNAL(clicked()), this, SLOT(browseMap()));
+	connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), this, SLOT(browseSave()));
 
 	// "Calibration" tab
 	connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calibPlot()));
 	connect(m_uiForm.cal_pbCreate, SIGNAL(clicked()), this, SLOT(calibCreate()));
 
+	// set values of m_dataDir and m_saveDir
+	m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
+	m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
 }
 
@@ -65,7 +78,136 @@ void Indirect::helpClicked()
 */
 void Indirect::runClicked()
 {
-	// showInformationBox("Indirect Interface \"Run\" event.");
+	QString groupFile = createMapFile(m_uiForm.cbMappingOptions->currentText());
+	if ( groupFile == "" )
+	{
+		return;
+	}
+
+	QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
+	filePrefix += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_";
+
+	QString pyInput =
+		"from mantidsimple import *\n"
+		"# Set up variables\n"
+		"filename = r'" +m_uiForm.leRunFiles->text()+ "'\n"
+		"first = " +m_uiForm.leSpectraMin->text()+ "\n"
+		"last = " +m_uiForm.leSpectraMax->text()+ "\n"
+		"efixed = " +m_uiForm.leEfixed->text()+ "\n"
+		"inWS = 'Mon_in'\n"
+		"try:\n"
+		"   LoadRaw(filename, inWS, SpectrumMin = 1, SpectrumMax = 1)\n"
+		"except SystemExit:\n"
+		"   print 'Could not open .raw file.'\n"
+		"   sys.exit('Could not open .raw file.')\n"
+		"outWS = 'TimeRegime'\n"
+		"LoadRaw(filename, outWS, SpectrumMin = 1, SpectrumMax = 3)\n"
+		"workspace = mantid.getMatrixWorkspace(outWS)\n"
+		"SpecA = workspace.readX(0)[0]\n"
+		"SpecB = workspace.readX(2)[0]\n"
+		"mantid.deleteWorkspace(outWS)\n"
+		"monWS = 'Mon'\n"
+		"if ( SpecA == SpecB ): # Single Monitor (?)\n"
+		"   alg = Unwrap(inWS, monWS, LRef = '37.86')\n"
+		"   join = float(alg.getPropertyValue('JoinWavelength'))\n"
+		"   RemoveBins(monWS, monWS, join-0.001, join+0.001, Interpolation='Linear')\n"
+		"   FFTSmooth(monWS, monWS, 0)\n"
+		"else: # Multiple Monitor (?)\n"
+		"   ConvertUnits(inWS, monWS, 'Wavelength')\n"
+		"mantid.deleteWorkspace(inWS)\n";
+	if ( m_uiForm.ckMonEff->isChecked() )
+	{
+		pyInput +=
+			"#Monitor Efficiency\n"
+			"CreateSingleValuedWorkspace('moneff', 1.276e-3)\n"
+			"OneMinusExponentialCor(monWS, monWS, (8.3 * 0.025) )\n"
+			"Divide(monWS,'moneff',monWS)\n"
+			"mantid.deleteWorkspace('moneff')\n";
+	}
+	pyInput +=
+		"inWS = 'Time'\n"
+		"LoadRaw(filename, inWS, SpectrumMin = first, SpectrumMax = last)\n";
+	if ( m_uiForm.ckUseCalib->isChecked() )
+	{
+		if ( m_uiForm.leCalibrationFile->text() == "" )
+		{
+			showInformationBox("Please enter path to calibration file.");
+			return;
+		}
+		pyInput +=
+			"# Use Calibration File\n"
+			"calib = r\"" +m_uiForm.leCalibrationFile->text()+ "\"\n"
+			"try:\n"
+			"   LoadNexusProcessed(calib, 'calib')\n" // Calibration File Path goes here
+			"except SystemExit:\n"
+			"   print 'Could not open calibration file. Please check file path is correct.'\n"
+			"   sys.exit('Could not open calibration file.')\n"
+			"tmp = mantid.getMatrixWorkspace(inWS)\n"
+			"shist = tmp.getNumberHistograms()\n"
+			"tmp = mantid.getMatrixWorkspace('calib')\n"
+			"chist = tmp.getNumberHistograms()\n"
+			"if chist != shist:\n"
+			"	print 'Number of spectra in calibration file does not match data file.'\n"
+			"	mantid.deleteWorkspace('calib')\n"
+			"	sys.exit('Number of spectra in calibration file does not match data file.')\n"
+			"else:\n"
+			"	Divide(inWS,'calib',inWS)\n"
+			"	mantid.deleteWorkspace('calib')\n";
+	}
+	pyInput +=
+		"enWS = 'Energy'\n"
+		"# Normalise to Monitor\n"
+		"ConvertUnits(inWS,enWS, 'Wavelength')\n"
+		"RebinToWorkspace(enWS,monWS,enWS)\n"
+		"Divide(enWS,monWS,enWS)\n"
+		"ConvertUnits(enWS,enWS,'DeltaE','Indirect',efixed)\n"
+		"mantid.deleteWorkspace(monWS)\n"
+		"mantid.deleteWorkspace(inWS)\n";
+	if ( m_uiForm.ckDetailedBalance->isChecked() )
+	{
+		pyInput +=
+			"# Detailed Balance\n"
+			"ExponentialCorrection(enWS, enWS, 1.0, (11.606 / ( 2 * 300 ) ) )\n";
+	}
+	pyInput +=
+		"scaleWS = 'scale'\n"
+		"scale = 1e9\n"
+		"CreateSingleValuedWorkspace(scaleWS, scale)\n"
+		"Multiply(enWS, scaleWS, enWS)\n"
+		"mantid.deleteWorkspace(scaleWS)\n";
+
+	pyInput +=
+		"iconWS = '" +m_uiForm.cbAnalyser->currentText() + "'\n"
+		"GroupDetectors(enWS, iconWS, MapFile=r'" + groupFile +"')\n"
+		"mantid.deleteWorkspace(enWS)\n";
+	if ( m_uiForm.leNameSPE->text() != "" )
+	{
+		pyInput += "savefile = r'" +m_uiForm.leNameSPE->text()+ "'\n";
+	}
+	else {
+		pyInput +=
+			"savefile = mtd.getConfigProperty('defaultsave.directory')\n"
+			"savefile += '" +filePrefix+ "'\n";
+		if ( m_uiForm.cbAnalyser->currentText() == "graphite" )
+		{
+			pyInput += "savefile += 'ipg.nxs'\n";
+		}
+		else if ( m_uiForm.cbAnalyser->currentText() == "mica" || m_uiForm.cbAnalyser->currentText() == "fmica" )
+		{
+			pyInput += "savefile += 'imi.nxs'\n";
+		}
+	}
+	pyInput +=
+		"SaveNexusProcessed(iconWS, savefile)\n";
+
+	QString pyOutput = runPythonCode(pyInput).trimmed();
+
+	if ( pyOutput != "" )
+	{
+		showInformationBox("The following error occurred:\n" + pyOutput
+			+ "\n\nAnalysis did not complete.");
+	}
+
 }
 
 /**
@@ -75,7 +217,6 @@ void Indirect::runClicked()
 */
 void Indirect::setIDFValues(const QString & prefix)
 {
-
 	// empty ComboBoxes, LineEdits,etc of previous values
 	m_uiForm.cbAnalyser->clear();
 	m_uiForm.cbReflection->clear();
@@ -276,6 +417,69 @@ void Indirect::clearReflectionInfo()
 	m_uiForm.cal_leBackMax->clear();
 }
 
+/**
+* This function creates the mapping/grouping file for the data analysis.
+* @param groupType Type of grouping (All, Group, Indiviual)
+* @return path to mapping file, or an empty string if file could not be created.
+*/
+QString Indirect::createMapFile(const QString& groupType)
+{
+
+	QString groupFile, ngroup, nspec;
+	QString ndet = "( "+m_uiForm.leSpectraMax->text()+" - "+m_uiForm.leSpectraMin->text()+") + 1";
+
+	if ( groupType == "File" )
+	{
+		groupFile = m_uiForm.leMappingFile->text();
+		if ( groupFile == "" )
+		{
+			showInformationBox("You must enter a path to the .map file.");
+		}
+		return groupFile;
+	}
+	else if ( groupType == "Groups" )
+	{
+		ngroup = m_uiForm.leNoGroups->text();
+		nspec = "( " +ndet+ " ) / " +ngroup;
+	}
+	else if ( groupType == "All" )
+	{
+		ngroup = "1";
+		nspec = ndet;
+	}
+	else if ( groupType == "Individual" )
+	{
+		ngroup = ndet;
+		nspec = "1";
+	}
+
+	groupFile = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
+	groupFile += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText();
+	groupFile += "_" + groupType + ".map";	
+
+	QString pyInput =
+		"filename = mtd.getConfigProperty('defaultsave.directory')\n"
+		"filename += \"" +groupFile+ "\"\n"
+		"handle = open(filename, 'w')\n" // open file
+		"ngroup = " +ngroup+ "\n" // set values
+		"nspec = " +nspec+ "\n"
+		"first = " +m_uiForm.leSpectraMin->text()+ "\n"
+		"handle.write(str(ngroup) +  \"\\n\" )\n"
+		"for n in range(0, ngroup):\n"
+		"   n1 = n * nspec + first\n"
+		"   handle.write(str(n+1) +  \"\\n\" )\n" // group number
+		"   handle.write(str(nspec) +  \"\\n\" )\n" // number of spectra in group
+		"   for i in range(1, nspec+1):\n"
+		"      n3 = n1 + i - 1\n"
+		"      handle.write(str(n3).center(4) + \" \")\n"
+		"   handle.write(\"\\n\")\n"
+		"handle.close()\n"
+		"print filename\n";
+
+	QString pyOutput = runPythonCode(pyInput).trimmed();
+
+	return pyOutput;
+}
 
 /**
 * This function is called when the user selects an analyser from the cbAnalyser QComboBox
@@ -292,11 +496,13 @@ void Indirect::analyserSelected(int index)
 	QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
 	if ( currentData == QVariant::Invalid )
 	{
+		m_uiForm.lbReflection->setEnabled(false);
 		m_uiForm.cbReflection->setEnabled(false);
 		return;
 	}
 	else
 	{
+		m_uiForm.lbReflection->setEnabled(true);
 		m_uiForm.cbReflection->setEnabled(true);
 		QStringList reflections = currentData.toStringList();
 		for ( int i = 0; i < reflections.count(); i++ )
@@ -361,32 +567,141 @@ void Indirect::reflectionSelected(int index)
 	m_uiForm.cal_lePeakMax->setText(values[4]);
 	m_uiForm.cal_leBackMin->setText(values[5]);
 	m_uiForm.cal_leBackMax->setText(values[6]);
-
-	/* // Not sure if these are really necessary atm, but don't want to have to retype them if they are.
-	m_minSpectra	=	values[0].toInt();
-	m_maxSpectra	=	values[1].toInt();
-	m_eFixed		=	values[2].toDouble();
-	m_peakStart		=	values[3].toInt();
-	m_peakEnd		=	values[4].toInt();
-	m_backStart		=	values[5].toInt();
-	m_backEnd		=	values[6].toInt(); */
 }
 
-void Indirect::backgroundRemoval()
+/**
+* This function runs when the user makes a selection on the cbMappingOptions QComboBox.
+* @param groupType Value of selection made by user.
+*/
+void Indirect::mappingOptionSelected(const QString& groupType)
 {
-	//
+	if ( groupType == "File" )
+	{
+		m_uiForm.swMapping->setCurrentIndex(0);
+		m_uiForm.swMapping->setEnabled(true);
+	}
+	else if ( groupType == "All" )
+	{
+		m_uiForm.swMapping->setCurrentIndex(2);
+		m_uiForm.swMapping->setEnabled(false);
+	}
+	else if ( groupType == "Individual" )
+	{
+		m_uiForm.swMapping->setCurrentIndex(2);
+		m_uiForm.swMapping->setEnabled(false);
+	}
+	else if ( groupType == "Groups" )
+	{
+		m_uiForm.swMapping->setCurrentIndex(1);
+		m_uiForm.swMapping->setEnabled(true);
+	}
 }
 
+/**
+* This function is called when a user clicks on the "Browse" button assosciated with
+* the "Run Files" section.
+*/
+void Indirect::browseRun()
+{
+	QString runFile = QFileDialog::getOpenFileName(this, "Select RAW Data",
+		m_dataDir, "ISIS Raw Files (*.raw)");
+	m_uiForm.leRunFiles->setText(runFile);
+}
 
+/**
+* As above, but for the Calibration file.
+*/
+void Indirect::browseCalib()
+{
+	QString calFile = QFileDialog::getOpenFileName(this, "Select Calibration File",
+		m_dataDir, "Calib Files (*calib.nxs)");
+	m_uiForm.leCalibrationFile->setText(calFile);
+	if ( calFile != "" )
+	{
+		m_uiForm.ckUseCalib->setChecked(true);
+	}
+}
+/**
+* Again, as above but for the Mapping File.
+*/
+void Indirect::browseMap()
+{
+	QString mapFile = QFileDialog::getOpenFileName(this, "Select Mapping / Grouping File",
+		m_dataDir, "Spectra Mapping File (*.map)");
+	m_uiForm.leMappingFile->setText(mapFile);
+}
+
+/**
+* Select location to save file.
+*/
+void Indirect::browseSave()
+{
+	QString Analyser = m_uiForm.cbAnalyser->currentText();
+	QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
+	filePrefix += "_" + Analyser + m_uiForm.cbReflection->currentText() + "_";
+
+	QString defSave = m_saveDir + filePrefix;
+	if ( Analyser == "graphite" )
+		defSave += "ipg.nxs";
+	else
+		defSave += "imi.nxs";
+	QString savFile = QFileDialog::getSaveFileName(this, "Save File Name",
+		defSave, "Nexus File (*.nxs);;SPE File (*.spe)");
+
+	m_uiForm.leNameSPE->setText(savFile);
+}
+
+/**
+* This function is called when the user clicks on the Background Removal button. It
+* displays the Background Removal dialog, initialising it if it hasn't been already.
+*/
+void Indirect::backgroundClicked()
+{
+	if ( m_backgroundDialog == NULL )
+	{
+		m_backgroundDialog = new Background(this);
+		m_backgroundDialog->show();
+	}
+	else
+	{
+		m_backgroundDialog->show();
+	}
+}
+
+/**
+* Plots raw time data from .raw file before any data conversion has been performed.
+*/
 void Indirect::plotRaw()
 {
-	//
+	QString rawFile = m_uiForm.leRunFiles->text();
+	if ( rawFile == "" )
+	{
+		showInformationBox("Please enter the path for the .raw file.");
+		return;
+	}
+
+	QString pyInput =
+		"from mantidsimple import *\n"
+		"from mantidplot import *\n"
+		"try:\n"
+		"   LoadRaw(r'" + rawFile + "', 'RawTime')\n"
+		"except SystemExit:\n"
+		"   print 'Could not open .raw file. Please check file path.'\n"
+		"   sys.exit('Could not open .raw file.')\n"
+		"graph = plotSpectrum('RawTime', 0)\n";
+	QString pyOutput = runPythonCode(pyInput).trimmed();
+
+	if ( pyOutput != "" )
+	{
+		showInformationBox(pyOutput);
+	}
 }
 
-
+/**
+*/
 void Indirect::rebinData()
 {
-	//
+	showInformationBox("Not yet implemented.");
 }
 
 /**
@@ -409,10 +724,10 @@ void Indirect::calibPlot()
 		"from mantidsimple import *\n"
 		"from mantidplot import *\n"
 		"try:\n"
-		"   LoadRaw(r\"%1\", \"Raw\", SpectrumMin=%2, SpectrumMax=%3)\n"
-		"except ValueError:\n"
-		"   print \"Could not load .raw file. Please check run number.\"\n"
-		"   sys.exit(0)\n"
+		"   LoadRaw(r'%1', 'Raw', SpectrumMin=%2, SpectrumMax=%3)\n"
+		"except:\n"
+		"   print 'Could not load .raw file. Please check run number.'\n"
+		"   sys.exit('Could not load .raw file.')\n"
 		"graph = plotSpectrum(\"Raw\", 0)\n";
 
 	pyInput = pyInput.arg(input_path); // %1 = path to data search directory
@@ -484,6 +799,10 @@ void Indirect::calibCreate()
 	{ // plot graph of Calibration result if requested by user.
 		pyInput +=	"graph = plotTimeBin(\"Time\", 0)\n";
 	}
+	else
+	{ // if graph is not wanted, remove the workspace
+		pyInput += "mantid.deleteWorkspace(\"Time\")\n";
+	}
 
 	pyInput = pyInput.arg(input_path); // %1 = path to data search directory
 	pyInput = pyInput.arg(output_path); // %2 = path to output directory (where to save the file)
@@ -499,5 +818,6 @@ void Indirect::calibCreate()
 	}
 
 	m_uiForm.leCalibrationFile->setText(output_path);
+	m_uiForm.ckUseCalib->setChecked(true);
 
 }

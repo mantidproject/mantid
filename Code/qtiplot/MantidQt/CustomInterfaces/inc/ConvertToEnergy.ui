@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>489</width>
-    <height>600</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -114,7 +114,7 @@
               <widget class="QComboBox" name="cbAnalyser" />
              </item>
              <item>
-              <widget class="QLabel" name="label" >
+              <widget class="QLabel" name="lbReflection" >
                <property name="text" >
                 <string>Reflection</string>
                </property>
@@ -252,22 +252,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item>
-                   <widget class="QLabel" name="lbMapping" >
-                    <property name="sizePolicy" >
-                     <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="layoutDirection" >
-                     <enum>Qt::LeftToRight</enum>
-                    </property>
-                    <property name="text" >
-                     <string>Mapping</string>
-                    </property>
-                   </widget>
-                  </item>
                  </layout>
                 </item>
                 <item>
@@ -277,9 +261,6 @@
                   </item>
                   <item>
                    <widget class="QLineEdit" name="leCalibrationFile" />
-                  </item>
-                  <item>
-                   <widget class="QLineEdit" name="leMappingFile" />
                   </item>
                  </layout>
                 </item>
@@ -294,13 +275,6 @@
                   </item>
                   <item>
                    <widget class="QPushButton" name="pbCalibrationFilesBrowse" >
-                    <property name="text" >
-                     <string>Browse</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pbMappingFileBrowse" >
                     <property name="text" >
                      <string>Browse</string>
                     </property>
@@ -324,10 +298,106 @@
                     </property>
                    </widget>
                   </item>
-                  <item>
-                   <widget class="QComboBox" name="cbMappingOptions" />
-                  </item>
                  </layout>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_10" >
+                <property name="spacing" >
+                 <number>6</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="lbMapping" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="layoutDirection" >
+                   <enum>Qt::LeftToRight</enum>
+                  </property>
+                  <property name="text" >
+                   <string>Mapping</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="cbMappingOptions" >
+                  <item>
+                   <property name="text" >
+                    <string>All</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text" >
+                    <string>Groups</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text" >
+                    <string>Individual</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text" >
+                    <string>File</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QStackedWidget" name="swMapping" >
+                  <property name="lineWidth" >
+                   <number>0</number>
+                  </property>
+                  <property name="currentIndex" >
+                   <number>2</number>
+                  </property>
+                  <widget class="QWidget" name="page_11" >
+                   <layout class="QHBoxLayout" name="horizontalLayout_5" >
+                    <item>
+                     <widget class="QLineEdit" name="leMappingFile" />
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pbMappingFileBrowse" >
+                      <property name="text" >
+                       <string>Browse</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                  <widget class="QWidget" name="page_12" >
+                   <layout class="QHBoxLayout" name="horizontalLayout_26" >
+                    <item>
+                     <widget class="QLabel" name="lbNoGroups" >
+                      <property name="text" >
+                       <string>Number of Groups: </string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="leNoGroups" />
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_32" >
+                      <property name="orientation" >
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0" >
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                  <widget class="QWidget" name="pgMapping_blank" />
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -481,9 +551,9 @@
                </widget>
               </item>
               <item row="0" column="2" >
-               <widget class="QCheckBox" name="ckNormalise" >
+               <widget class="QCheckBox" name="ckMonEff" >
                 <property name="text" >
-                 <string>Normalise by Monitor</string>
+                 <string>Monitor Efficiency</string>
                 </property>
                </widget>
               </item>
@@ -1161,7 +1231,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_7" >
                 <item>
-                 <widget class="QLabel" name="label_4" >
+                 <widget class="QLabel" name="cal_lbRunNo" >
                   <property name="text" >
                    <string>Run Number:</string>
                   </property>
@@ -1214,7 +1284,7 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_15" >
               <item>
-               <widget class="QLabel" name="label_22" >
+               <widget class="QLabel" name="cal_lbQuasielastic" >
                 <property name="text" >
                  <string>Quasielastic</string>
                 </property>
@@ -1246,7 +1316,7 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_13" >
               <item>
-               <widget class="QLabel" name="label_5" >
+               <widget class="QLabel" name="cal_lbSpectraMin" >
                 <property name="text" >
                  <string>Min</string>
                 </property>
@@ -1278,7 +1348,7 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_14" >
               <item>
-               <widget class="QLabel" name="label_12" >
+               <widget class="QLabel" name="cal_lbSpectraMax" >
                 <property name="text" >
                  <string>Max</string>
                 </property>
@@ -1324,14 +1394,14 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_16" >
               <item>
-               <widget class="QLabel" name="label_26" >
+               <widget class="QLabel" name="cal_lbPeak" >
                 <property name="text" >
                  <string>Peak</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_36" >
+               <widget class="QLabel" name="cal_lbBack" >
                 <property name="text" >
                  <string>Background</string>
                 </property>
@@ -1383,7 +1453,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_27" >
+                 <widget class="QLabel" name="cal_lbPeakMin" >
                   <property name="text" >
                    <string>Min:</string>
                   </property>
@@ -1406,7 +1476,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_35" >
+                 <widget class="QLabel" name="cal_lbPeakMax" >
                   <property name="text" >
                    <string>Max:</string>
                   </property>
@@ -1433,7 +1503,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_37" >
+                 <widget class="QLabel" name="cal_lbBackMin" >
                   <property name="text" >
                    <string>Min:</string>
                   </property>
@@ -1456,7 +1526,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_38" >
+                 <widget class="QLabel" name="cal_lbBackMax" >
                   <property name="text" >
                    <string>Max:</string>
                   </property>

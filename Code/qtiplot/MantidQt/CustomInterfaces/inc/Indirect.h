@@ -12,6 +12,35 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
+	/// Forward Declarations
+    class Background;
+	
+	/** 
+    This class defines handles the ConvertToEnergy interface for indirect instruments (IRIS/OSIRIS).    
+
+    @author Michael Whitty
+	@author Martyn Gigg
+
+    Copyright &copy; 2010 STFC Rutherford Appleton Laboratories
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    */
 
     class Indirect : public MantidQt::API::UserSubWindow
     {
@@ -33,29 +62,40 @@ namespace MantidQt
       virtual void setIDFValues(const QString & prefix);
 
     private:
-	  /// user interface form object
-      Ui::ConvertToEnergy m_uiForm;
+
 	  /// get path to instrument definition file
 	  QString getIDFPath(const QString& name);
 	  /// populate the spectra ranges for the "Calibration" tab.
 	  void getSpectraRanges(const QString& defFile);
 	  /// clear various line edit boxes
 	  void clearReflectionInfo();
+	  /// create the mapping/grouping file
+	  QString createMapFile(const QString& groupType);
 
 	private slots:
-	  void analyserSelected(int index);
-	  void reflectionSelected(int index);
-	  void backgroundRemoval();
-	  void plotRaw();
-	  void rebinData();
-	  void calibPlot();
-	  void calibCreate();
+	  void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
+	  void reflectionSelected(int index); ///< set up parameter file values based on reflection
+	  void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
+	  void browseRun(); ///< show openFileDialog for run file
+	  void browseCalib(); ///< show openFileDialog for calibration file
+	  void browseMap(); ///< show openFileDialog for mapping file
+	  void browseSave(); ///< show saveFileDialog for save file
+	  void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
+	  void plotRaw(); ///< plot raw data from instrument
+	  void rebinData(); ///< rebin transformed data
+	  void calibPlot(); ///< plot raw data for calibration run
+	  void calibCreate(); ///< create calibration file
 
-	private: /*
-	  int m_minSpectra, m_maxSpectra;
-	  int m_peakStart, m_peakEnd;
-	  int m_backStart, m_backEnd;
-	  double m_eFixed; */
+	private:
+	  /// user interface form object
+      Ui::ConvertToEnergy m_uiForm;
+	  /// background removal dialog
+	  Background *m_backgroundDialog;
+
+	  QString m_dataDir; ///< default data search directory
+	  QString m_saveDir; ///< default data save directory
+	  /// whether user has set values for BG Removal
+	  bool m_bgRemoval;
     };
   }
 }
