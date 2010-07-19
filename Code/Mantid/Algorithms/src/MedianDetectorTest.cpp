@@ -119,7 +119,7 @@ void MedianDetectorTest::exec()
   const std::string outFile = getPropertyValue("outputfile");
   std::vector<int> deadList;
   // Find report and mask any detectors whoses signals are outside the threshold range
-  FindDetects(counts, av, deadList, outFile);// function reads the properties ErrorThreshold, lower and upper thresholds
+  FindDetects(counts, av, deadList, outFile);
 
   // Now the calculation is complete, setting the output property to the workspace will register it in the Analysis Data Service and allow the user to see it
   setProperty("OutputWorkspace", counts);
@@ -404,9 +404,9 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
   double minNumStandDevs = getProperty("SignificanceTest");
 
   //an array that will store the spectra indexes related to bad detectors
-  std::vector<int> highs, missingDataIndices;
+  std::set<int> highs, missingDataIndices;
   // reuse an vector, just to save memory and CPU time
-  std::vector<int> &lows = specNums;
+  std::set<int> lows;
   // get ready to write to the log the number of bad detectors found
   int cAlreadyMasked = 0;
 
@@ -442,7 +442,7 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
       responses->dataY(i)[0] = BadVal;
       PARALLEL_CRITICAL(MedianDetectorTest_missa)
       {
-	missingDataIndices.push_back(i);
+	missingDataIndices.insert(i);
       }
       continue;
     }
@@ -460,9 +460,9 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
     const double sig = minNumStandDevs*responses->readE(i)[0];
     if( std::abs(sig) == std::numeric_limits<double>::infinity() || sig!=sig )
     {
-      PARALLEL_CRITICAL(MedianDetectorTest_missb)
+      PARALLEL_CRITICAL(MedianDetectorTest_missc)
       {
-	lows.push_back(responses->getAxis(1)->spectraNo(i));
+	lows.insert(responses->getAxis(1)->spectraNo(i));
       }
       continue;
     }
@@ -473,7 +473,7 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
       {
 	PARALLEL_CRITICAL(MedianDetectorTest_missd)
 	{
-	  lows.push_back(responses->getAxis(1)->spectraNo(i));
+	  lows.insert(responses->getAxis(1)->spectraNo(i));
 	}
 	responses->dataY(i)[0] = BadVal;
 	continue;
@@ -486,7 +486,7 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
       {
 	PARALLEL_CRITICAL(MedianDetectorTest_misse)
 	{
-	  highs.push_back(responses->getAxis(1)->spectraNo(i));
+	  highs.insert(responses->getAxis(1)->spectraNo(i));
 	}
 	responses->dataY(i)[0] = BadVal;
 	continue;
@@ -502,8 +502,11 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
   // a record is kept in the output file, however.
   writeFile(filename, lows, highs, missingDataIndices);
   logFinds(missingDataIndices.size(), lows.size(), highs.size(), cAlreadyMasked);
-  // the output array doesn't list missingDataIndices because the array is used for masking detectors and informing users of the numbers of faulty instruments. A log wanring was produced above
-  specNums.insert(lows.end(), highs.begin(), highs.end());
+
+  specNums.clear();
+  specNums.insert(specNums.end(), lows.begin(), lows.end());
+  specNums.insert(specNums.end(), highs.begin(), highs.end());
+
 }
 
 /** Write a mask file which lists bad spectra in groups saying what the problem is. The file
@@ -513,7 +516,8 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
 *  @param highList list of spectra numbers for spectra with integrals that are too high
 *  @param problemIndices spectrum indices for spectra that lack, this function tries to convert them to spectra numbers adn catches any IndexError exceptions
 */
-void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &problemIndices)
+void MedianDetectorTest::writeFile(const std::string &fname, const std::set<int> &lowList, 
+				   const std::set<int> &highList, const std::set<int> &problemIndices)
 {
   //it's not an error if the name is "", we just don't write anything
   if ( fname.empty() )
@@ -529,79 +533,71 @@ void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<i
     return;
   }
 
-  int numEntries = lowList.size() + highList.size() + problemIndices.size();
-  double numLines = static_cast<double>(numEntries)/g_file_linesize;
-  int progStep = static_cast<int>(ceil(numLines/30));
+  const int numEntries = lowList.size() + highList.size() + problemIndices.size();
 
   file << "---"<<name()<<"---" << std::endl;
   file << "----"<<"Low Integral : "<<lowList.size()<<"----" << std::endl;
-  for ( std::vector<int>::size_type i = 0 ; i < lowList.size(); ++i )
-  {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
-    file << lowList[i];
-    if ( (i + 1) % g_file_linesize == 0 || i == lowList.size()-1 )
-    {// write an end of line after a lot of numbers have been written or when we have run out of entries
-      file << std::endl;
-      if ( i % progStep == 0 )
-      {
-        progress(advanceProgress( progStep*RTWriteFile/numLines) );
-        progress( m_fracDone );
-        interruption_point();
-      }
-    }
-    else
-    {
-      file << " ";
-    }
-  }
+  writeListToFile(file, lowList, numEntries);
+
   file << "----" << "High Integral : " << highList.size() << "----" << std::endl;
-  for ( std::vector<int>::size_type i = 0 ; i < highList.size(); ++i )
-  {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
-    file << highList[i];
-    if ( (i + 1) % g_file_linesize == 0 || i == highList.size()-1 )
-    {// write an end of line after  a lot of numbers have been written  and when we have run out of entries
-      file << std::endl;
-      if ( i % progStep == 1 )
-      {
-        progress(advanceProgress( progStep*RTWriteFile/numLines) );
-        progress( m_fracDone );
-        interruption_point();
-      }
-    }
-    else
-    {
-      file << " ";
-    }
-  }
+  writeListToFile(file, highList, numEntries);
   file << std::endl;
-  file << "----" << "Spectra not linked to a valid detector in the instrument definition : " << problemIndices.size() << "----" << std::endl;
-  for ( std::vector<int>::size_type i = 0 ; i < problemIndices.size(); ++i )
-  {
-    try
-    {
-      file << m_InputWS->getAxis(1)->spectraNo(problemIndices[i]);
-    }
-    catch (Exception::IndexError)
-    {
-      file << std::endl << "-Spectrum with index " << i << " does have a spectrum number";
-    }
-    if ( (i + 1) % 10 == 0 || i == problemIndices.size()-1 )
-    {// write an end of line after every 10 entries and when we have run out of entries
-      file << std::endl;
-      if ( i % progStep == 0 )
-      {
-        progress(advanceProgress( progStep*RTWriteFile/numLines) );
-        progress( m_fracDone );
-        interruption_point();
-      }
-    }
-    else
-    {
-      file << " ";
-    }
-  }
+  file << "----" << "Spectra not linked to a valid detector in the instrument definition : " 
+       << problemIndices.size() << "----" << std::endl;
+  writeListToFile(file, problemIndices, numEntries, true);
   file << std::endl;
 
   file.close();
+}
+
+/**
+ * Write a list of indices to a file
+ * @param The file stream
+ * @param indices A set of indices to write
+ * @param totalLines The total number of lines that will be written to the file
+ * @param convertToSpectraNo If true, the index will be converted to a spectra number first
+ */
+void MedianDetectorTest::writeListToFile(std::ofstream & file, const std::set<int> & indices, const int totalLines,
+					 bool convertToSpectraNo)
+{
+  double numLines = static_cast<double>(totalLines)/g_file_linesize;
+  int progStep = static_cast<int>(ceil(numLines/30));
+  int numWritten(0);
+  for ( std::set<int>::const_iterator itr = indices.begin() ; itr != indices.end(); )
+  {
+    // output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
+    if( convertToSpectraNo )
+    {
+      try
+      {
+	file << m_InputWS->getAxis(1)->spectraNo(*itr);
+      }
+      catch (Exception::IndexError&)
+      {
+	file << std::endl << "-Spectrum with index " << *itr << " does have a spectrum number";
+      }
+    }
+    else
+    {
+      file << *itr;
+    }
+    ++numWritten;
+    if ( ++itr == indices.end() || numWritten % g_file_linesize == 0 )
+    {
+      file << std::endl;
+      if ( (numWritten-1) % progStep == 0 )
+      {
+        progress(advanceProgress( progStep*RTWriteFile/numLines) );
+        progress( m_fracDone );
+        interruption_point();
+      }
+    }
+    else
+    {
+      file << " ";
+    }
+  }
+
 }
 
 /**
@@ -617,14 +613,14 @@ void MedianDetectorTest::logFinds(std::vector<int>::size_type missing, std::vect
   {
     g_log.warning() << "Detectors in " << missing << " spectra couldn't be masked because they were missing" << std::endl;
   }  
-  g_log.information() << "Found " << low << " spectra with low counts and " << high << " spectra with high counts, "<< alreadyMasked 
-		      << " were already marked bad." << std::endl;
+  g_log.information() << "Found " << low << " spectra with low counts and " << high << " spectra with high counts, "
+		      << alreadyMasked << " were already marked bad." << std::endl;
 }
 
 /**
  * Mask a set of workspace indices given
  * @param inputWS The workspace to mask
- * @param badIndexes A list of workspace indices to mask
+ * @param badIndices A list of workspace indices to mask
  */
 void MedianDetectorTest::maskBadSpectra(API::MatrixWorkspace_sptr inputWS, const std::vector<int> & badIndices)
 {

@@ -48,8 +48,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
-    std::vector<int> OArray;
-    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty("BadSpectraNums") )
+    std::vector<int> ZeroArray;
+    TS_ASSERT_THROWS_NOTHING( ZeroArray = alg.getProperty("BadSpectraNums") )
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("MedianDetectorTestOutput"));
@@ -100,7 +100,9 @@ public:
         outputMat->readY(lHist).front(), GOOD_VAL )
     }
     //now check the array
-    std::vector<int>::const_iterator it = OArray.begin();
+    TS_ASSERT_DIFFERS(ZeroArray.size(), 0 )
+
+    std::vector<int>::const_iterator it = ZeroArray.begin();
     for (int lHist = 0 ; lHist < firstGoodSpec; lHist++ )
     {
       TS_ASSERT_EQUALS( *it, lHist+1 )
@@ -112,7 +114,7 @@ public:
       ++it;
     }
     //check that extra entries haven't been written to the array
-    TS_ASSERT_EQUALS( it, OArray.end() )
+    TS_ASSERT_EQUALS( it, ZeroArray.end() )
   }
 
   void testFile()

@@ -98,11 +98,13 @@ namespace Mantid
       /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
       void FindDetects(API::MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename);
       /// Writes the results to a file
-      void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &notFound);
+      void writeFile(const std::string &fname, const std::set<int> &lowList, const std::set<int> &highList, const std::set<int> &notFound);
       /// Logs the findings of the tests
-      void logFinds(std::vector<int>::size_type missing, std::vector<int>::size_type low, std::vector<int>::size_type high, int alreadyMasked);
+      void logFinds(size_t missing, size_t low, size_t high, int alreadyMasked);
       /// Masks the bad indices caused by missing detector information
       void maskBadSpectra(API::MatrixWorkspace_sptr inputWS, const std::vector<int> & badIndices);
+      /// Write a list of indices to a file
+      void writeListToFile(std::ofstream & file, const std::set<int> & indices, const int totalLines, bool convertToSpectraNo = false);
 
       /// A pointer to the input workspace
       API::MatrixWorkspace_const_sptr m_InputWS;
