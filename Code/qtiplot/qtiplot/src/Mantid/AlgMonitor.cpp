@@ -46,7 +46,8 @@ void AlgorithmMonitor::add(IAlgorithm_sptr alg)
     alg->addObserver(m_progressObserver);
     m_algorithms.push_back(alg->getAlgorithmID());
     ++m_nRunning;
-    emit countChanged(m_nRunning);
+    emit algorithmStarted(alg->getAlgorithmID());
+    emit countChanged();
     unlock();
 }
 
@@ -59,7 +60,8 @@ void AlgorithmMonitor::remove(const IAlgorithm* alg)
       m_algorithms.erase(i);
       --m_nRunning;
     }
-    emit countChanged(m_nRunning);
+    emit algorithmFinished(alg->getAlgorithmID());
+    emit countChanged();
     unlock();
 }
 
@@ -74,7 +76,7 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
-    if (m_monitorDlg->isVisible()) 
+    //if (m_monitorDlg->isVisible()) 
     emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),int(pNf->progress*100),QString::fromStdString(pNf->message));
 }
 
@@ -88,7 +90,7 @@ void AlgorithmMonitor::showDialog()
   if( !m_monitorDlg->isVisible() )
   {
     m_monitorDlg->setVisible(true);
-    m_monitorDlg->update(m_nRunning);
+    m_monitorDlg->update();
   }
 }
 
@@ -111,8 +113,8 @@ void AlgorithmMonitor::cancelAll()
 MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(parent),m_algMonitor(algMonitor)
 {
     m_tree = 0;
-    update(0);
-    connect(algMonitor,SIGNAL(countChanged(int)),this,SLOT(update(int)), Qt::QueuedConnection);
+    update();
+    connect(algMonitor,SIGNAL(countChanged()),this,SLOT(update()), Qt::QueuedConnection);
     connect(algMonitor,SIGNAL(needUpdateProgress(void*,int, const QString&)),
 	    SLOT(updateProgress(void*,int, const QString&)));
 
@@ -135,7 +137,7 @@ MonitorDlg::~MonitorDlg()
 {
 }
 
-void MonitorDlg::update(int)
+void MonitorDlg::update()
 {
     if (!m_tree)
     {

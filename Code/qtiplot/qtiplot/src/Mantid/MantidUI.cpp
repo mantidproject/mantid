@@ -6,10 +6,8 @@
 #include "AlgMonitor.h"
 #include "MantidSampleLogDialog.h"
 #include "AlgorithmHistoryWindow.h"
-//#include "MemoryImage.h"
 #include "MantidCurve.h"
 #include "FitPropertyBrowser.h"
-#include "ProgressDlg.h"
 
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -115,7 +113,10 @@ m_appWindow(aw)
     connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
 
     m_algMonitor = new AlgorithmMonitor(this);
-    connect(m_algMonitor,SIGNAL(countChanged(int)),m_exploreAlgorithms,SLOT(countChanged(int)), Qt::QueuedConnection);
+    connect(m_algMonitor,SIGNAL(algorithmStarted(void*)),m_exploreAlgorithms,SLOT(algorithmStarted(void*)), Qt::QueuedConnection);
+    connect(m_algMonitor,SIGNAL(algorithmFinished(void*)),m_exploreAlgorithms,SLOT(algorithmFinished(void*)), Qt::QueuedConnection);
+    connect(m_algMonitor,SIGNAL(needUpdateProgress(void*,int, const QString&)),
+      m_exploreAlgorithms,SLOT(updateProgress(void*,int, const QString&)), Qt::QueuedConnection);
     m_algMonitor->start();
 
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
@@ -1074,30 +1075,13 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
   return alg;
 }
 
-void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog)
+void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
 {
-  ProgressDlg *progress_box = NULL;
-    if (showDialog)
-    {
-        progress_box = new ProgressDlg(alg,appWindow());
-    }
-
     m_algMonitor->add(alg);
 
     try
     {
-      // Raise the dialog first so that it is properly constructed before the algorithm
-      // begins. No need for it to be modal as the user can background it and regain
-      // application control anyway.
-      if(progress_box)
-      {
-	progress_box->show();
-	progress_box->startAlgorithm();
-      }
-      else
-      {
-	alg->executeAsync();
-      }
+      alg->executeAsync();
     }
     catch(...)
     {
@@ -1132,7 +1116,7 @@ void MantidUI::createLoadDAEMantidMatrix(const QString& wsQName)
         IAlgorithm_sptr updater = CreateAlgorithm("UpdateDAE");
         updater->setPropertyValue("Workspace",wsName);
         updater->setPropertyValue("UpdateRate",QString::number(updateInterval).toStdString());
-        executeAlgorithmAsync(updater,false);
+        executeAlgorithmAsync(updater);
     }
 }
 

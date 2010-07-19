@@ -5,7 +5,6 @@
 // Includes
 //----------------------
 #include "MantidQtAPI/AlgorithmDialog.h"
-#include "MantidAPI/AlgorithmObserver.h"
 
 //---------------------------
 // Qt Forward declarations
@@ -48,7 +47,7 @@ namespace CustomDialogs
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class LoadDAEDialog : public MantidQt::API::AlgorithmDialog, public Mantid::API::AlgorithmObserver
+class LoadDAEDialog : public MantidQt::API::AlgorithmDialog
 {
   Q_OBJECT
 
@@ -59,16 +58,9 @@ public:
   /// Destruktor
   ~LoadDAEDialog();
 
-private slots:
-
-    void changeUpdateState(int);
-    void updateIntervalEntered(const QString & text );
-
 protected:
   /// This does the work and must be overridden in each deriving class
   void initLayout();
-  /// Called on the algorithm finish
-  void finishHandle(const Mantid::API::IAlgorithm* alg);
 
 private:
   /* GUI components */
@@ -77,7 +69,6 @@ private:
   QLineEdit *minSpLineEdit;
   QLineEdit *maxSpLineEdit;
   QLineEdit *listSpLineEdit;
-  QCheckBox *updateCheck;
   QLineEdit *updateLineEdit;
 
 };

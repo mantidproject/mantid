@@ -378,7 +378,7 @@ private:
 // Create a pointer to the named algorithm and version
     Mantid::API::IAlgorithm_sptr createAlgorithm(const QString& algName, int version);
     // Execute algorithm asinchronously
-    void executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog = true);
+    void executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg);
 
     // Notification handlers and corresponding observers.
     void handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);

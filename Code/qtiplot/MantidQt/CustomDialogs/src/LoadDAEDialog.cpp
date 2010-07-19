@@ -71,25 +71,17 @@ void LoadDAEDialog::initLayout()
   tie(listSpLineEdit, "SpectrumList", paramsLayout);
 
   QHBoxLayout *updateLayout = new QHBoxLayout;
-  updateCheck = new QCheckBox("Update every");
+  QLabel *updateLabel = new QLabel("Update every");
   updateLineEdit = new QLineEdit;
   QIntValidator *ival = new QIntValidator(1,99999999,updateLineEdit);
   updateLineEdit->setValidator(ival);
-  //QString propValue = MantidQt::API::AlgorithmInputHistory::Instance().previousInput("UpdateDAE","UpdateRate");
-  //if (!propValue.isEmpty())
-  //{
-  //  updateLineEdit->setText(propValue);
-  //  updateCheck->setCheckState(Qt::Checked);
-  //}
+
   label = new QLabel(" seconds");
-  paramsLayout->addWidget(updateCheck,5,0);
+  paramsLayout->addWidget(updateLabel,5,0);
   updateLayout->addWidget(updateLineEdit);
   updateLayout->addWidget(label);
   paramsLayout->addLayout(updateLayout,5,1);
-  connect(updateCheck,SIGNAL(stateChanged(int)),this,SLOT(changeUpdateState(int)));
-  connect(updateLineEdit,SIGNAL(textEdited(const QString & )),this,SLOT(updateIntervalEntered(const QString &)));
   tie(updateLineEdit,"UpdateRate",updateLayout);
-
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addLayout(paramsLayout);
@@ -99,26 +91,6 @@ void LoadDAEDialog::initLayout()
   setWindowTitle(tr("Load Workspace from DAE"));
   setFixedHeight(sizeHint().height());
 
-  //observeFinish(boost::shared_ptr<Mantid::API::IAlgorithm>(getAlgorithm(),NoDeleting()));
-
-}
-
-void LoadDAEDialog::changeUpdateState(int state)
-{
-    if (state == Qt::Checked && updateLineEdit->text().isEmpty()) updateLineEdit->setText("10");
-}
-
-void LoadDAEDialog::updateIntervalEntered(const QString & text )
-{
-    if (!text.isEmpty())
-        updateCheck->setCheckState(Qt::Checked);
-    else
-        updateCheck->setCheckState(Qt::Unchecked);
-}
-
-void LoadDAEDialog::finishHandle(const Mantid::API::IAlgorithm* alg)
-{
-  std::cerr<<"\n\n OK finished\n\n";
 }
 
 }

@@ -5,6 +5,7 @@
 #include <QTreeWidget>
 #include <QComboBox>
 #include <QPoint>
+#include <QVector>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -16,6 +17,9 @@ class QLabel;
 class QMenu;
 class QPushButton;
 class QTreeWidget;
+class QProgressBar;
+class QVBoxLayout;
+class QHBoxLayout;
 
 
 class MantidDockWidget: public QDockWidget
@@ -106,14 +110,22 @@ public slots:
     void findAlgTextChanged(const QString& text);
     void treeSelectionChanged();
     void selectionChanged(const QString& algName);
-    void countChanged(int n);
-    void tst();
+    void updateProgress(void* alg, const int p, const QString& msg);
+    void algorithmStarted(void* alg);
+    void algorithmFinished(void* alg);
 protected:
+    void showProgressBar();
+    void hideProgressBar();
+
     QTreeWidget *m_tree;
     FindAlgComboBox* m_findAlg;
-    QLabel *m_runningAlgsLabel;
+    QPushButton *m_runningButton;
+    QProgressBar* m_progressBar;
+    QVBoxLayout* m_progressLayout;
+    QHBoxLayout * m_runningLayout;
     bool m_treeChanged;
     bool m_findAlgChanged;
+    QVector<void*> m_algID;
     friend class MantidUI;
 private:
     MantidUI *m_mantidUI;

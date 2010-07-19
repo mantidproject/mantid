@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMutexLocker>
+#include <QProgressBar>
 
 #include <map>
 #include <iostream>
@@ -852,9 +853,8 @@ void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
 }
 
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
-    QDockWidget(w)
+    QDockWidget(w),m_progressBar(NULL),m_algID(NULL),m_mantidUI(mui)
 {
-  m_mantidUI = mui;
   setWindowTitle(tr("Algorithms"));
   setObjectName("exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -879,19 +879,24 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
   buttonLayout->addWidget(m_findAlg);
   buttonLayout->addStretch();
 
-  QHBoxLayout * runningLayout = new QHBoxLayout();
-  m_runningAlgsLabel = new QLabel("Running 0");
-  QPushButton *runningButton = new QPushButton("Details");
-  runningLayout->addWidget(m_runningAlgsLabel);
-  runningLayout->addStretch();
-  runningLayout->addWidget(runningButton);
-  connect(runningButton,SIGNAL(clicked()),m_mantidUI,SLOT(showAlgMonitor()));
+  m_runningLayout = new QHBoxLayout();
+  
+  m_progressLayout = new QVBoxLayout();
+  //m_progressBar = new QProgressBar();
+  //m_progressBar->setAlignment(Qt::AlignHCenter);
+  //m_progressLayout->addWidget(m_progressBar);
+
+  m_runningButton = new QPushButton("Details");
+  //m_runningLayout->addLayout(m_progressLayout);
+  m_runningLayout->addStretch();
+  m_runningLayout->addWidget(m_runningButton);
+  connect(m_runningButton,SIGNAL(clicked()),m_mantidUI,SLOT(showAlgMonitor()));
   //
   QVBoxLayout * layout = new QVBoxLayout();
   f->setLayout(layout);
   layout->addLayout(buttonLayout);
   layout->addWidget(m_tree);
-  layout->addLayout(runningLayout);
+  layout->addLayout(m_runningLayout);
   //
 
   m_treeChanged = false;
@@ -1033,15 +1038,61 @@ void AlgorithmDockWidget::selectionChanged(const QString& algName)
   m_findAlgChanged = false;
 }
 
-void AlgorithmDockWidget::countChanged(int n)
+void AlgorithmDockWidget::updateProgress(void* alg, const int p, const QString& msg)
 {
-  m_runningAlgsLabel->setText("Running "+QString::number(n));
+  if (m_algID.empty()) return;
+  if (alg == m_algID.first() && p >= 0 && p <= 100 && m_progressBar)
+  {
+    m_progressBar->setValue(p);
+    m_progressBar->setFormat(msg + " %p%");
+  }
 }
 
-void AlgorithmDockWidget::tst()
+void AlgorithmDockWidget::algorithmStarted(void* alg)
 {
-  MemoryManager::Instance().getMemoryInfo();
+  m_algID.push_front(alg);
+  hideProgressBar();
+  showProgressBar();
 }
+
+void AlgorithmDockWidget::algorithmFinished(void* alg)
+{
+  if (m_algID.empty()) return;
+  if (alg == m_algID.first())
+  {
+    m_algID.pop_front();
+    hideProgressBar();
+  }
+}
+
+void AlgorithmDockWidget::showProgressBar()
+{
+  if (m_progressBar == NULL)
+  {
+    // remove the stretch item
+    m_runningLayout->removeItem(m_runningLayout->takeAt(0));
+    // insert progress bar
+    m_progressBar = new QProgressBar();
+    m_progressBar->setAlignment(Qt::AlignHCenter);
+    m_progressLayout->addWidget(m_progressBar);
+    m_runningLayout->insertLayout(0,m_progressLayout);
+  }
+}
+
+void AlgorithmDockWidget::hideProgressBar()
+{
+  if (m_progressBar && m_algID.empty())
+  {
+    m_progressLayout->removeWidget(m_progressBar);
+    m_progressBar->close();
+    m_runningLayout->removeItem(m_runningLayout->takeAt(0));
+    m_runningLayout->removeItem(m_runningLayout->takeAt(0));
+    m_runningLayout->addStretch();
+    m_runningLayout->addWidget(m_runningButton);
+    m_progressBar = NULL;
+  }
+}
+
 
 //-------------------- AlgorithmTreeWidget ----------------------//
 

@@ -37,8 +37,10 @@ public:
   void lock(){s_mutex.lock();}
   void unlock(){s_mutex.unlock();}
 signals:
-  void countChanged(int);
+  void algorithmStarted(void* alg);
+  void algorithmFinished(void* alg);
   void needUpdateProgress(void* alg,int p, const QString& msg);
+  void countChanged();
 protected:
 
   /// Algorithm notification handlers
@@ -72,7 +74,7 @@ public:
   MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor);
   ~MonitorDlg();
 public slots:
-  void update(int n);
+  void update();
   // The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping with the typedef
   void updateProgress(void* alg, const int p, const QString& msg);
 private:
