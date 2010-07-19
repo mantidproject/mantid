@@ -19,12 +19,15 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-// E = KSquaredToE*K^2    KSquaredToE = (hbar^2)/(2*NeutronMass) 
-const double DetectorEfficiencyCor::KSquaredToE = 2.07212466;// units of meV Angstrom^-2
+namespace
+{
 
-const short  DetectorEfficiencyCor::NUMCOEFS = 25;
+// E = KSquaredToE*K^2    KSquaredToE = (hbar^2)/(2*NeutronMass) 
+const double KSquaredToE = 2.07212466; // units of meV Angstrom^-2
+
+const short  NUMCOEFS = 25;
 // series expansion coefficients copied from a fortran source code file
-const double DetectorEfficiencyCor::c_eff_f[] =
+const double c_eff_f[] =
   {0.7648360390553052,     -0.3700950778935237,
    0.1582704090813516,     -6.0170218669705407E-02,  2.0465515957968953E-02,
   -6.2690181465706840E-03,  1.7408667184745830E-03, -4.4101378999425122E-04,
@@ -35,7 +38,7 @@ const double DetectorEfficiencyCor::c_eff_f[] =
    1.4100387524251801E-14, -8.6430862467068437E-16, -1.1129985821867194E-16,
   -4.5505266221823604E-16,  3.8885561437496108E-16};
 
-const double DetectorEfficiencyCor::c_eff_g[] ={2.033429926215546,
+const double c_eff_g[] ={2.033429926215546,
                   -2.3123407369310212E-02, 7.0671915734894875E-03,
                   -7.5970017538257162E-04, 7.4848652541832373E-05,
                    4.5642679186460588E-05,-2.3097291253000307E-05,
@@ -50,17 +53,19 @@ const double DetectorEfficiencyCor::c_eff_g[] ={2.033429926215546,
                   -7.6805495297094239E-12, 1.8568853399347773E-12};
 
 // constants from the fortran code multiplied together sigref=143.23d0, wref=3.49416d0, atmref=10.0d0 const = 2.0*sigref*wref/atmref
-const double DetectorEfficiencyCor::g_helium_prefactor = 2.0*143.23*3.49416/10.0;
+const double g_helium_prefactor = 2.0*143.23*3.49416/10.0;
 
 // this should be a big number but not so big that there are rounding errors
 const double DIST_TO_UNIVERSE_EDGE = 1e3;
 
+}
+
 // this default constructor calls default constructors and sets other member data to imposible (flag) values 
 DetectorEfficiencyCor::DetectorEfficiencyCor() : 
   Algorithm(), m_inputWS(),m_outputWS(), m_paraMap(NULL), m_Ei(-1.0), m_ki(-1.0),
-  m_shapeCache(NULL), m_radCache(-1), m_sinThetaCache(-1e3), m_baseAxisCache(),
-  m_samplePos(), m_spectraSkipped()
+  m_shapeCache(), m_samplePos(), m_spectraSkipped()
   {
+    m_shapeCache.clear();
   }
 
 /**
@@ -97,7 +102,6 @@ void DetectorEfficiencyCor::exec()
   // wave number that the neutrons originally had
   m_ki = std::sqrt(m_Ei/KSquaredToE);
   
-
   // Store some information about the instrument setup that will not change
   m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
 
@@ -197,11 +201,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
   for( ; it != iend ; ++it )
   {
     IDetector_sptr det_member = m_inputWS->getInstrument()->getDetector(*it);
-    PARALLEL_CRITICAL(deteff_detcache)
-    {
-      updateGeometryCache(det_member);
-    }
-
+    
     Parameter_sptr par = m_paraMap->get(det_member.get(),"3He(atm)");
     if ( !par )
     {
@@ -214,9 +214,22 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
       throw Exception::NotFoundError("wallT(m)", spectraIn);
     }
     const double wallThickness = par->value<double>();
+    double detRadius(0.0);
+    V3D detAxis;
+    getDetectorGeometry(det_member, detRadius, detAxis);
 
+   // now get the sin of the angle, it's the magnitude of the cross product of unit vector along the detector tube axis and a unit vector directed from the sample to the detector centre
+    V3D vectorFromSample = det_member->getPos() - m_samplePos;
+    vectorFromSample.normalize();
+    Quat rot = det_member->getRotation();
+    // rotate the original cylinder object axis to get the detector axis in the actual instrument
+    rot.rotate(detAxis); 
+    detAxis.normalize();
+    // Scalar product is quicker than cross product
+    double cosTheta = detAxis.scalar_prod(vectorFromSample);
+    double sinTheta = std::sqrt(1.0 - cosTheta*cosTheta);
     // Detector constant
-    const double det_const = g_helium_prefactor*(m_radCache - wallThickness)*atms/m_sinThetaCache;
+    const double det_const = g_helium_prefactor*(detRadius - wallThickness)*atms/sinTheta;
 
     std::vector<double>::const_iterator yinItr = yValues.begin();
     std::vector<double>::const_iterator einItr = eValues.begin();
@@ -241,14 +254,13 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
       ++xItr; ++wavItr;
     }
   }
-
-    
 }
 
 /**
  * Calculates one over the wave number of a neutron based on a lower and upper bin boundary
  * @param loBinBound A value interpreted as the lower bin bound of a histogram
- * @param upploBinBound A value interpreted as the upper bin bound of a histogram
+ * @param uppBinBound A value interpreted as the upper bin bound of a histogram
+ * @return The value of 1/K for this energy bin
  */
 double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBinBound) const
 {
@@ -257,69 +269,61 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBin
   return std::sqrt(oneOverKSquared);
 }
 
-/** Sets m_rad and m_sin to the detector radius and the sin of angle between its axis and a
-*  line to the sample. Doesn't check if we're looking at a monitor
-*  @param det a pointer to the detector to query
-*  @throw invalid_argument when the shape of the detector is inconsistent with a cylinder aligned along one axis
+/** Update the shape cache if necessary
+* @param det a pointer to the detector to query
+* @param detRadius An output paramater that contains the detector radius
+* @param detAxis An output parameter that contains the detector axis vector
 */
-void DetectorEfficiencyCor::updateGeometryCache(boost::shared_ptr<Geometry::IDetector> det)
+void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, V3D & detAxis)
 {
-  // get the shape information to find the radius and the base orientation of the cylinder
-  const boost::shared_ptr< const Object > shape = det->Shape();
-  // check if the shape if is different for this detector compared to the last, as most of the time the shapes are the same
-  if ( shape.get() != m_shapeCache )
+  boost::shared_ptr<const Object> shape_sptr = det->Shape();
+  std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> >::const_iterator it = 
+    m_shapeCache.find(shape_sptr.get());
+  if( it == m_shapeCache.end() )
   {
-    m_shapeCache = shape.get();
-    setCylinderAxis();
+    double xDist = distToSurface( V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get() );
+    double zDist = distToSurface( V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get() );
+    if ( std::abs(zDist - xDist) < 1e-8 )
+    {
+      detRadius = zDist/2.0;
+      detAxis = V3D(0,1,0);
+      // assume radi in z and x and the axis is in the y
+      PARALLEL_CRITICAL(deteff_shapecachea)
+      {
+        m_shapeCache.insert(std::pair<const Object *,std::pair<double, V3D> >(shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+      }
+      return;
+    }
+    double yDist = distToSurface( V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get() );
+    if ( std::abs(yDist - zDist) < 1e-8 )
+    {
+      detRadius = yDist/2.0;
+      detAxis = V3D(1,0,0);
+      // assume that y and z are radi of the cylinder's circular cross-section and the axis is perpendicular, in the x direction
+      PARALLEL_CRITICAL(deteff_shapecacheb)
+      {
+        m_shapeCache.insert(std::pair<const Object *,std::pair<double, V3D> >(shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+      }
+      return;
+    }
+    
+    if ( std::abs(xDist - yDist) < 1e-8 )
+    {
+      detRadius = xDist/2.0;
+      detAxis = V3D(0,0,1);
+      PARALLEL_CRITICAL(deteff_shapecachec)
+      {
+        m_shapeCache.insert(std::pair<const Object *,std::pair<double, V3D> >(shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+      }
+      return;
+    }
   }
-  
-  // now get the sin of the angle, it's the magnitude of the cross product of unit vector along the detector tube axis and a unit vector directed from the sample to the detector centre
-  V3D vectorFromSample = det->getPos() - m_samplePos;
-  vectorFromSample.normalize();
-
-  Quat rot = det->getRotation();
-  // m_baseAxis was set by the last call to getCylinderAxis() above
-  V3D detAxis = m_baseAxisCache;
-  // rotate the original cylinder object axis to get the detector axis in the actual instrument
-  rot.rotate(detAxis); 
-  detAxis.normalize();
-
-  // Scalar product is quicker than cross product
-  double cosTheta = detAxis.scalar_prod(vectorFromSample);
-  m_sinThetaCache = std::sqrt(1.0 - cosTheta*cosTheta);
-}
-
-/** Calculates the radius of cylinderical detectors, function assumes that the detector's axis is aligned with
-*  either the x-axis, the y-axis or the z-axis
-*  @throw invalid_argument if we cannot get the radius or axis direction
-*/
-void DetectorEfficiencyCor::setCylinderAxis()
-{
-  double xDist = distToSurface( V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), m_shapeCache );
-  double yDist = distToSurface( V3D(0, DIST_TO_UNIVERSE_EDGE, 0), m_shapeCache );
-  double zDist = distToSurface( V3D(0, 0, DIST_TO_UNIVERSE_EDGE), m_shapeCache );
-  
-  if ( std::abs(yDist - zDist) < 1e-8 )
-  {// assume that y and z are radi of the cylinder's circular cross-section and the axis is perpendicular, in the x direction
-    m_radCache = yDist/2.0;
-    m_baseAxisCache = V3D(1, 0, 0);
-    return;
-  }
-  if ( std::abs(zDist - xDist) < 1e-8 )
-  {// assume radi in z and x and the axis is in the y
-    m_radCache = zDist/2.0;
-    m_baseAxisCache = V3D(0, 1, 0);
-    return;
-  }
-  if ( std::abs(xDist - yDist) < 1e-8 )
+  else
   {
-    m_radCache = xDist/2.0;
-    m_baseAxisCache = V3D(0, 0, 1);
-    return;
+    std::pair<double, V3D> geometry = it->second;
+    detRadius = it->second.first;
+    detAxis = it->second.second;
   }
-  
-  g_log.error() << "Found a detector that doesn't appear to be a cylinder on either the x-axis, the y-axis or the z-axis\n";
-  throw std::invalid_argument("Fatal error while calculating the radius and axis of a detector, the detector shape is not as expected" );
 }
 
 /** For basic shapes centred on the origin (0,0,0) this returns the distance to the surface in

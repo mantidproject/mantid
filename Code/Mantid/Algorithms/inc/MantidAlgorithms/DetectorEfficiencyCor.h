@@ -2,9 +2,11 @@
 #define MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/V3D.h"
 #include <climits>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace Mantid
 {
@@ -99,9 +101,7 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
-  void updateGeometryCache(boost::shared_ptr<Geometry::IDetector> det);
-  /// Sets cylinder axis for the current shape
-  void setCylinderAxis();
+  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, Geometry::V3D & detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Geometry::V3D start, const Geometry::Object *shape) const;
   /// Computes the detector efficiency for a given paramater
@@ -125,15 +125,8 @@ private:
   /// stores the wave number of incidient neutrons, calculated from the energy
   double m_ki;
 
-  // lots of cached data
-  /// a cached pointer to the shape used to save calculation time as most detectors have the same shape
-  const Geometry::Object *m_shapeCache;
-  /// the cached value for the radius in the cached shape used to save calculation time
-  double m_radCache;
-  /// sin of angle between its axis and a line to the sample.
-  double m_sinThetaCache;
-  /// cached value for the axis of cylinder that the detectors are based on, last time it was calculated
-  Geometry::V3D m_baseAxisCache;
+  /// A lookup of previously seen shape objects used to save calculation time as most detectors have the same shape
+  std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> > m_shapeCache;
   /// Sample position
   Geometry::V3D m_samplePos;
   /// The spectra numbers that were skipped
@@ -144,16 +137,16 @@ private:
   void init();
   void exec();
 
-  /// Links the energy to the wave number, I got this from Prof T.G.Perring 
-  static const double KSquaredToE;
-  /// coefficients for Taylor series/assymptotic expansion used at large wavenumbers and large angle
-  static const double c_eff_f[];
-  /// coefficients for Taylor series/assymptotic expansion used at low wavenumbers and low angle
-  static const double c_eff_g[];
-  /// the number of coefficients in each of the c_eff_f and c_eff_g arrays
-  static const short NUMCOEFS;
-  /// constants to use for the ISIS 3He detectors 2.0*sigref*wref/atmref
-  static const double g_helium_prefactor;
+  ///// Links the energy to the wave number, I got this from Prof T.G.Perring 
+  //const double KSquaredToE;
+  ///// coefficients for Taylor series/assymptotic expansion used at large wavenumbers and large angle
+  //const double c_eff_f[];
+  ///// coefficients for Taylor series/assymptotic expansion used at low wavenumbers and low angle
+  //const double c_eff_g[];
+  ///// the number of coefficients in each of the c_eff_f and c_eff_g arrays
+  //const short NUMCOEFS;
+  ///// constants to use for the ISIS 3He detectors 2.0*sigref*wref/atmref
+  //const double g_helium_prefactor;
   
 };
 
