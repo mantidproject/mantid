@@ -47,7 +47,7 @@ namespace MantidQt
       Q_OBJECT
 
     public:
-      /// explicit constructor, not to allow any overloading
+      /// explicit constructor, not to allow any implicit conversion of types
       explicit Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm);
 
       /// Initialize the layout
@@ -62,15 +62,20 @@ namespace MantidQt
       virtual void setIDFValues(const QString & prefix);
 
     private:
-
-	  /// get path to instrument definition file
-	  QString getIDFPath(const QString& name);
-	  /// populate the spectra ranges for the "Calibration" tab.
-	  void getSpectraRanges(const QString& defFile);
-	  /// clear various line edit boxes
-	  void clearReflectionInfo();
-	  /// create the mapping/grouping file
-	  QString createMapFile(const QString& groupType);
+	  QString getIDFPath(const QString& name); ///< get path to instrument definition file
+	  void getSpectraRanges(const QString& defFile); ///< populate the spectra ranges for the "Calibration" tab.
+	  void clearReflectionInfo(); ///< clear various line edit boxes
+	  QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
+	  QString savePyCode(QString filePrefix); ///< create python code as string to save files
+	  QString basePyCode(); ///< base python code that doesn't need to change
+	  QString monEffPyCode(); ///< create python code for monitor efficiency section of run
+	  QString useCalibPyCode(); ///< create python code for applying a calibration file
+	  QString scaleAndGroupPyCode(QString groupFile); ///< scales data then uses mapping file
+	  QString cteAndRebinPyCode(); ///< convert units to energy and rebin
+	  bool isDirty(); ///< state whether interface has had any changes
+	  void isDirty(bool state); ///< signify changes to interface
+	  bool isDirtyRebin();
+	  void isDirtyRebin(bool state);
 
 	private slots:
 	  void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
@@ -82,20 +87,24 @@ namespace MantidQt
 	  void browseSave(); ///< show saveFileDialog for save file
 	  void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
 	  void plotRaw(); ///< plot raw data from instrument
+	  void autoRebinCheck(bool state); ///< handle checking/unchecking of "Auto Rebin"
+	  void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
 	  void rebinData(); ///< rebin transformed data
 	  void calibPlot(); ///< plot raw data for calibration run
 	  void calibCreate(); ///< create calibration file
+	  void setasDirty(); ///< sets m_isDirty(true)
+	  void setasDirtyRebin(); ///< sets m_isDirtyRebin(true)
 
 	private:
-	  /// user interface form object
-      Ui::ConvertToEnergy m_uiForm;
-	  /// background removal dialog
-	  Background *m_backgroundDialog;
+	  
+      Ui::ConvertToEnergy m_uiForm; ///< user interface form object
+	  Background *m_backgroundDialog; ///< background removal dialog
 
 	  QString m_dataDir; ///< default data search directory
 	  QString m_saveDir; ///< default data save directory
-	  /// whether user has set values for BG Removal
-	  bool m_bgRemoval;
+	  bool m_bgRemoval; ///< whether user has set values for BG removal
+	  bool m_isDirty; ///< whether pre-rebin options have changed
+	  bool m_isDirtyRebin; ///< whether rebin/post-rebin options have changed
     };
   }
 }

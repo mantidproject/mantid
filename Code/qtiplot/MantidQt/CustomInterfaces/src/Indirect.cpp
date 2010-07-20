@@ -16,7 +16,7 @@ using namespace MantidQt::CustomInterfaces;
 * It is used primarily to ensure sane values for member variables.
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
-UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL)
+UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true), m_isDirtyRebin(true)
 {
 	// Constructor
 }
@@ -33,10 +33,30 @@ void Indirect::initLayout()
 	connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
 	connect(m_uiForm.cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
 	connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
-
+	// action buttons
 	connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
 	connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
 	connect(m_uiForm.rebin_pbRebin, SIGNAL(clicked()), this, SLOT(rebinData()));
+	// check boxes
+	connect(m_uiForm.rebin_ckAutoRebin, SIGNAL(toggled(bool)), this, SLOT(autoRebinCheck(bool)));
+	connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
+
+	// line edits,etc (for isDirty)
+	connect(m_uiForm.leRunFiles, SIGNAL(textChanged()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leRunFiles, SIGNAL(textChanged()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leEfixed, SIGNAL(textChanged()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leSpectraMin, SIGNAL(textChanged()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leSpectraMax, SIGNAL(textChanged()), this, SLOT(setasDirty()));
+	connect(m_uiForm.ckMonEff, SIGNAL(toggled()), this, SLOT(setasDirty()));
+	connect(m_uiForm.ckSumFiles, SIGNAL(toggled()), this, SLOT(setasDirty()));
+	connect(m_uiForm.ckUseCalib, SIGNAL(toggled()), this, SLOT(setasDirty()));
+
+	// line edits,etc (for isDirtyRebin)
+	connect(m_uiForm.rebin_leELow, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.rebin_leEWidth, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.rebin_leEHigh, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.leDetailedBalance, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.leMappingFile, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
 
 	// "Browse" buttons
 	connect(m_uiForm.pbRunFilesBrowse, SIGNAL(clicked()), this, SLOT(browseRun()));
@@ -87,119 +107,68 @@ void Indirect::runClicked()
 	QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
 	filePrefix += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_";
 
-	QString pyInput =
-		"from mantidsimple import *\n"
-		"# Set up variables\n"
-		"filename = r'" +m_uiForm.leRunFiles->text()+ "'\n"
-		"first = " +m_uiForm.leSpectraMin->text()+ "\n"
-		"last = " +m_uiForm.leSpectraMax->text()+ "\n"
-		"efixed = " +m_uiForm.leEfixed->text()+ "\n"
-		"inWS = 'Mon_in'\n"
-		"try:\n"
-		"   LoadRaw(filename, inWS, SpectrumMin = 1, SpectrumMax = 1)\n"
-		"except SystemExit:\n"
-		"   print 'Could not open .raw file.'\n"
-		"   sys.exit('Could not open .raw file.')\n"
-		"outWS = 'TimeRegime'\n"
-		"LoadRaw(filename, outWS, SpectrumMin = 1, SpectrumMax = 3)\n"
-		"workspace = mantid.getMatrixWorkspace(outWS)\n"
-		"SpecA = workspace.readX(0)[0]\n"
-		"SpecB = workspace.readX(2)[0]\n"
-		"mantid.deleteWorkspace(outWS)\n"
-		"monWS = 'Mon'\n"
-		"if ( SpecA == SpecB ): # Single Monitor (?)\n"
-		"   alg = Unwrap(inWS, monWS, LRef = '37.86')\n"
-		"   join = float(alg.getPropertyValue('JoinWavelength'))\n"
-		"   RemoveBins(monWS, monWS, join-0.001, join+0.001, Interpolation='Linear')\n"
-		"   FFTSmooth(monWS, monWS, 0)\n"
-		"else: # Multiple Monitor (?)\n"
-		"   ConvertUnits(inWS, monWS, 'Wavelength')\n"
-		"mantid.deleteWorkspace(inWS)\n";
-	if ( m_uiForm.ckMonEff->isChecked() )
-	{
-		pyInput +=
-			"#Monitor Efficiency\n"
-			"CreateSingleValuedWorkspace('moneff', 1.276e-3)\n"
-			"OneMinusExponentialCor(monWS, monWS, (8.3 * 0.025) )\n"
-			"Divide(monWS,'moneff',monWS)\n"
-			"mantid.deleteWorkspace('moneff')\n";
-	}
-	pyInput +=
-		"inWS = 'Time'\n"
-		"LoadRaw(filename, inWS, SpectrumMin = first, SpectrumMax = last)\n";
-	if ( m_uiForm.ckUseCalib->isChecked() )
-	{
-		if ( m_uiForm.leCalibrationFile->text() == "" )
-		{
-			showInformationBox("Please enter path to calibration file.");
-			return;
-		}
-		pyInput +=
-			"# Use Calibration File\n"
-			"calib = r\"" +m_uiForm.leCalibrationFile->text()+ "\"\n"
-			"try:\n"
-			"   LoadNexusProcessed(calib, 'calib')\n" // Calibration File Path goes here
-			"except SystemExit:\n"
-			"   print 'Could not open calibration file. Please check file path is correct.'\n"
-			"   sys.exit('Could not open calibration file.')\n"
-			"tmp = mantid.getMatrixWorkspace(inWS)\n"
-			"shist = tmp.getNumberHistograms()\n"
-			"tmp = mantid.getMatrixWorkspace('calib')\n"
-			"chist = tmp.getNumberHistograms()\n"
-			"if chist != shist:\n"
-			"	print 'Number of spectra in calibration file does not match data file.'\n"
-			"	mantid.deleteWorkspace('calib')\n"
-			"	sys.exit('Number of spectra in calibration file does not match data file.')\n"
-			"else:\n"
-			"	Divide(inWS,'calib',inWS)\n"
-			"	mantid.deleteWorkspace('calib')\n";
-	}
-	pyInput +=
-		"enWS = 'Energy'\n"
-		"# Normalise to Monitor\n"
-		"ConvertUnits(inWS,enWS, 'Wavelength')\n"
-		"RebinToWorkspace(enWS,monWS,enWS)\n"
-		"Divide(enWS,monWS,enWS)\n"
-		"ConvertUnits(enWS,enWS,'DeltaE','Indirect',efixed)\n"
-		"mantid.deleteWorkspace(monWS)\n"
-		"mantid.deleteWorkspace(inWS)\n";
-	if ( m_uiForm.ckDetailedBalance->isChecked() )
-	{
-		pyInput +=
-			"# Detailed Balance\n"
-			"ExponentialCorrection(enWS, enWS, 1.0, (11.606 / ( 2 * 300 ) ) )\n";
-	}
-	pyInput +=
-		"scaleWS = 'scale'\n"
-		"scale = 1e9\n"
-		"CreateSingleValuedWorkspace(scaleWS, scale)\n"
-		"Multiply(enWS, scaleWS, enWS)\n"
-		"mantid.deleteWorkspace(scaleWS)\n";
+	QString pyInput = "from mantidsimple import *\n";
 
-	pyInput +=
-		"iconWS = '" +m_uiForm.cbAnalyser->currentText() + "'\n"
-		"GroupDetectors(enWS, iconWS, MapFile=r'" + groupFile +"')\n"
-		"mantid.deleteWorkspace(enWS)\n";
-	if ( m_uiForm.leNameSPE->text() != "" )
+	if ( isDirty() )
 	{
-		pyInput += "savefile = r'" +m_uiForm.leNameSPE->text()+ "'\n";
-	}
-	else {
-		pyInput +=
-			"savefile = mtd.getConfigProperty('defaultsave.directory')\n"
-			"savefile += '" +filePrefix+ "'\n";
-		if ( m_uiForm.cbAnalyser->currentText() == "graphite" )
-		{
-			pyInput += "savefile += 'ipg.nxs'\n";
-		}
-		else if ( m_uiForm.cbAnalyser->currentText() == "mica" || m_uiForm.cbAnalyser->currentText() == "fmica" )
-		{
-			pyInput += "savefile += 'imi.nxs'\n";
-		}
-	}
-	pyInput +=
-		"SaveNexusProcessed(iconWS, savefile)\n";
+		pyInput += basePyCode();
 
+		if ( m_uiForm.ckMonEff->isChecked() )
+		{
+			pyInput += monEffPyCode();
+		}
+
+		pyInput +=
+			"inWS = 'Time'\n"
+			"CropWorkspace('RawFile', 'Time', StartWorkspaceIndex = (first - 1), EndWorkspaceIndex = (last - 1))\n"
+			"mantid.deleteWorkspace('RawFile')\n";
+
+		if ( m_uiForm.ckUseCalib->isChecked() )
+		{
+			QString calibFile = useCalibPyCode();
+			if (calibFile == "")
+				return;
+			else
+				pyInput += calibFile;
+		}
+
+		pyInput +=
+			"enWS = 'Energy'\n"
+			"# Normalise to Monitor\n"
+			"ConvertUnits(inWS,enWS, 'Wavelength')\n"
+			"RebinToWorkspace(enWS,monWS,enWS)\n"
+			"Divide(enWS,monWS,enWS)\n"
+			"mantid.deleteWorkspace(monWS)\n"
+			"mantid.deleteWorkspace(inWS)\n";
+	}
+
+	if ( isDirty() || isDirtyRebin() )
+	{ 
+		pyInput += cteAndRebinPyCode();
+
+		pyInput += "enWS = enWSr\n";
+
+		if ( m_uiForm.ckDetailedBalance->isChecked() )
+		{
+			pyInput +=
+				"# Detailed Balance\n"
+				"ExponentialCorrection(enWS, enWS, 1.0, (11.606 / ( 2 * " // 11.606 from where ?
+				+ m_uiForm.leDetailedBalance->text() +
+				" ) ) )\n";
+		}
+
+		pyInput += scaleAndGroupPyCode(groupFile);
+
+		pyInput += savePyCode(filePrefix);
+
+	}
+	else
+	{
+		pyInput += "iconWS = '" +m_uiForm.cbAnalyser->currentText()+"_"+m_uiForm.cbReflection->currentText()+ "'\n";
+		pyInput += savePyCode(filePrefix);
+	}
+
+	// run it
 	QString pyOutput = runPythonCode(pyInput).trimmed();
 
 	if ( pyOutput != "" )
@@ -207,6 +176,9 @@ void Indirect::runClicked()
 		showInformationBox("The following error occurred:\n" + pyOutput
 			+ "\n\nAnalysis did not complete.");
 	}
+
+	isDirty(false);
+	isDirtyRebin(false);
 
 }
 
@@ -221,6 +193,9 @@ void Indirect::setIDFValues(const QString & prefix)
 	m_uiForm.cbAnalyser->clear();
 	m_uiForm.cbReflection->clear();
 	clearReflectionInfo();
+
+	autoRebinCheck(m_uiForm.rebin_ckAutoRebin->isChecked());
+	detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
 
 	// Get list of analysers and populate cbAnalyser
 	QString pyInput = 
@@ -290,6 +265,8 @@ void Indirect::setIDFValues(const QString & prefix)
 			m_uiForm.cbAnalyser->addItem(text);
 		}
 	}
+
+
 
 	analyserSelected(m_uiForm.cbAnalyser->currentIndex());
 
@@ -415,6 +392,8 @@ void Indirect::clearReflectionInfo()
 	m_uiForm.cal_lePeakMax->clear();
 	m_uiForm.cal_leBackMin->clear();
 	m_uiForm.cal_leBackMax->clear();
+
+	isDirty(true);
 }
 
 /**
@@ -479,6 +458,214 @@ QString Indirect::createMapFile(const QString& groupType)
 	QString pyOutput = runPythonCode(pyInput).trimmed();
 
 	return pyOutput;
+}
+
+/**
+* Returns QString containing the first block of Python code for the run event. This is the code up
+* to the point where the first decision is made.
+* @return python code as string
+*/
+QString Indirect::basePyCode()
+{
+	QString pyInput =
+		"# Set up variables\n"
+		"first = " +m_uiForm.leSpectraMin->text()+ "\n"
+		"last = " +m_uiForm.leSpectraMax->text()+ "\n"
+		"efixed = " +m_uiForm.leEfixed->text()+ "\n"
+		"try:\n"
+		"   LoadRaw(r'" +m_uiForm.leRunFiles->text()+ "', 'RawFile')\n" 
+		"except SystemExit:\n"
+		"   print 'Could not open .raw file.'\n"
+		"   sys.exit('Could not open .raw file.')\n"
+		"CropWorkspace('RawFile', 'TimeRegime', StartWorkspaceIndex = 0, EndWorkspaceIndex = 2)\n"
+		"workspace = mantid.getMatrixWorkspace('TimeRegime')\n"
+		"SpecA = workspace.readX(0)[0]\n"
+		"SpecB = workspace.readX(2)[0]\n"
+		"CropWorkspace('TimeRegime', 'Mon_In', StartWorkspaceIndex = 0, EndWorkspaceIndex = 0)\n"
+		"mantid.deleteWorkspace('TimeRegime')\n"
+		"monWS = 'Mon'\n"
+		"if ( SpecA == SpecB ): # Single Monitor (?)\n"
+		"   alg = Unwrap('Mon_In', monWS, LRef = '37.86')\n" // LRef from where?
+		"   join = float(alg.getPropertyValue('JoinWavelength'))\n"
+		"   RemoveBins(monWS, monWS, join-0.001, join+0.001, Interpolation='Linear')\n"
+		"   FFTSmooth(monWS, monWS, 0)\n"
+		"else: # Multiple Monitor (?)\n"
+		"   ConvertUnits('Mon_In', monWS, 'Wavelength')\n"
+		"mantid.deleteWorkspace('Mon_In')\n";
+	return pyInput;
+}
+/**
+* This function creates the Python script necessary to save the workspace data
+* in the formats requested.
+* @return python code as a string
+*/
+QString Indirect::savePyCode(QString filePrefix)
+{
+	QString pyInput = "\n# Save Files\n";
+	if ( m_uiForm.leNameSPE->text() != "" )
+	{
+		pyInput += "savefile = r'" +m_uiForm.leNameSPE->text()+ "'\n";
+	}
+	else {
+		pyInput +=
+			"savefile = mtd.getConfigProperty('defaultsave.directory')\n"
+			"savefile += '" +filePrefix+ "'\n";
+		if ( m_uiForm.cbAnalyser->currentText() == "graphite" )
+		{
+			pyInput += "savefile += 'ipg'\n";
+		}
+		else if ( m_uiForm.cbAnalyser->currentText() == "mica" || m_uiForm.cbAnalyser->currentText() == "fmica" )
+		{
+			pyInput += "savefile += 'imi'\n";
+		}
+	}
+
+	if ( m_uiForm.save_ckNexus->isChecked() )
+	{
+		pyInput += "SaveNexusProcessed(iconWS, savefile + '.nxs')\n";
+	}
+	if ( m_uiForm.save_ckSPE->isChecked() )
+	{
+		pyInput += "SaveSPE(iconWS, savefile + '.spe')\n";
+	}
+
+	return pyInput;
+}
+/**
+* This function provides the Python code necessary for the 'Monitor Efficiency'
+* section of ConvertToEnergy.
+* @return QString containing Python script.
+*/
+QString Indirect::monEffPyCode()
+{
+	QString pyInput =
+			"\n#Monitor Efficiency\n"
+			"CreateSingleValuedWorkspace('moneff', 1.276e-3)\n" // value 1.276e-3 (unt)- what is it?
+			"OneMinusExponentialCor(monWS, monWS, (8.3 * 0.025) )\n" // values 8.3 (?), 0.025 (zz) - what is it?
+			"Divide(monWS,'moneff',monWS)\n"
+			"mantid.deleteWorkspace('moneff')\n";
+	return pyInput;
+}
+
+/**
+* Creates the Python code to use a calibration file in ConvertToEnergy.
+* @return code to use calibration file, or empty string if an error was encountered.
+*/
+QString Indirect::useCalibPyCode()
+{
+	QString calibFile = m_uiForm.leCalibrationFile->text();
+			if ( calibFile == "" )
+		{
+			showInformationBox("Please enter path to calibration file.");
+			return "";
+		}
+	QString pyInput =
+			"# Use Calibration File\n"
+			"calib = r'" +calibFile+ "'\n"
+			"try:\n"
+			"   LoadNexusProcessed(calib, 'calib')\n" // Calibration File Path goes here
+			"except SystemExit:\n"
+			"   print 'Could not open calibration file. Please check file path is correct.'\n"
+			"   sys.exit('Could not open calibration file.')\n"
+			"tmp = mantid.getMatrixWorkspace('Time')\n"
+			"shist = tmp.getNumberHistograms()\n"
+			"tmp = mantid.getMatrixWorkspace('calib')\n"
+			"chist = tmp.getNumberHistograms()\n"
+			"if chist != shist:\n"
+			"	print 'Number of spectra in calibration file does not match data file.'\n"
+			"	mantid.deleteWorkspace('calib')\n"
+			"	sys.exit('Number of spectra in calibration file does not match data file.')\n"
+			"else:\n"
+			"	Divide('Time','calib',inWS)\n"
+			"	mantid.deleteWorkspace('calib')\n";
+	return pyInput;
+}
+
+/**
+* Creates Python code necessary to scale the data and then groups it as described in the mapping
+* file.
+* @param groupFile path to mapping file
+* @return python code as string
+*/
+QString Indirect::scaleAndGroupPyCode(QString groupFile)
+{
+	QString pyInput = 
+		"\n# Scale Values\n"
+		"scaleWS = 'scale'\n"
+		"scale = 1e9\n"
+		"CreateSingleValuedWorkspace(scaleWS, scale)\n"
+		"Multiply(enWS, scaleWS, enWS)\n"
+		"mantid.deleteWorkspace(scaleWS)\n"
+		"\n# Group Values\n"
+		"iconWS = '" +m_uiForm.cbAnalyser->currentText()+"_"+m_uiForm.cbReflection->currentText()+ "'\n"
+		"GroupDetectors(enWS, iconWS, MapFile=r'" + groupFile +"')\n"
+		"mantid.deleteWorkspace(enWS)\n";
+
+	return pyInput;
+}
+/**
+* This function handles the process of converting the units to Energy from Wavelength, and also
+* rebins the data based on the user's selections.
+* @return python code as a string
+*/
+QString Indirect::cteAndRebinPyCode()
+{
+	QString pyInput =
+		"\n# Convert To Energy And Rebin\n"
+		"enWS = 'Energy'\n"
+		"enWSr = 'EnergyRebinned'\n"
+		"ConvertUnits(enWS,enWSr,'DeltaE','Indirect',efixed";
+	if ( m_uiForm.rebin_ckAutoRebin->isChecked() )
+	{ // if "Auto Rebin" is checked we use ConvertUnits Align Bins at this point
+		pyInput += ", AlignBins = True)\n";
+	}
+	else
+	{
+		pyInput += ")\n"; // closes ConvertUnits function
+		QString rebinParam = m_uiForm.rebin_leELow->text() + ","
+			+ m_uiForm.rebin_leEWidth->text() + ","
+			+ m_uiForm.rebin_leEHigh->text();
+		pyInput += "Rebin(enWSr,enWSr,'" + rebinParam + "')\n";
+	}
+
+	return pyInput;
+}
+/**
+* Used to check whether any changes have been made by the user to the interface.
+* @return boolean m_isDirty
+*/
+bool Indirect::isDirty()
+{
+	return m_isDirty;
+}
+
+/**
+* Used to set value of m_isDirty, called from each function that signifies a change in the user interface.
+* Will be set to false in functions that use the input.
+* @param state whether to set the value to true or false.
+*/
+void Indirect::isDirty(bool state)
+{
+	m_isDirty = state;
+}
+
+/**
+* Used to check whether any changes have been made by the user to the interface.
+* @return boolean m_isDirtyRebin
+*/
+bool Indirect::isDirtyRebin()
+{
+	return m_isDirtyRebin;
+}
+
+/**
+* Used to set value of m_isDirtyRebin, called from each function that signifies a change in the user interface.
+* Will be set to false in functions that use the input.
+* @param state whether to set the value to true or false.
+*/
+void Indirect::isDirtyRebin(bool state)
+{
+	m_isDirtyRebin = state;
 }
 
 /**
@@ -595,6 +782,8 @@ void Indirect::mappingOptionSelected(const QString& groupType)
 		m_uiForm.swMapping->setCurrentIndex(1);
 		m_uiForm.swMapping->setEnabled(true);
 	}
+
+	isDirtyRebin(true);
 }
 
 /**
@@ -642,13 +831,17 @@ void Indirect::browseSave()
 
 	QString defSave = m_saveDir + filePrefix;
 	if ( Analyser == "graphite" )
-		defSave += "ipg.nxs";
+		defSave += "ipg";
 	else
-		defSave += "imi.nxs";
+		defSave += "imi";
 	QString savFile = QFileDialog::getSaveFileName(this, "Save File Name",
-		defSave, "Nexus File (*.nxs);;SPE File (*.spe)");
+		defSave, "File Stem (*)");
 
-	m_uiForm.leNameSPE->setText(savFile);
+	if ( savFile != "" )
+	{
+		m_uiForm.leNameSPE->setText(savFile);
+		isDirty(true); 
+	}
 }
 
 /**
@@ -696,12 +889,107 @@ void Indirect::plotRaw()
 		showInformationBox(pyOutput);
 	}
 }
+/**
+* This function will disable the necessary elements of the interface when the user selects "Auto Rebin"
+* and enable them again when this is de-selected.
+* @param state whether the Auto Rebin checkbox is checked
+*/
+void Indirect::autoRebinCheck(bool state) 
+{
+	m_uiForm.rebin_pbRebin->setEnabled( !state );
+	m_uiForm.rebin_lbLow->setEnabled( !state );
+	m_uiForm.rebin_lbWidth->setEnabled( !state );
+	m_uiForm.rebin_lbHigh->setEnabled( !state );
+	m_uiForm.rebin_leELow->setEnabled( !state );
+	m_uiForm.rebin_leEWidth->setEnabled( !state );
+	m_uiForm.rebin_leEHigh->setEnabled( !state );
+
+	isDirtyRebin(true);
+}
+/**
+* Disables/enables the relevant parts of the UI when user checks/unchecks the Detailed Balance
+* ckDetailedBalance checkbox.
+* @param state state of the checkbox
+*/
+void Indirect::detailedBalanceCheck(bool state)
+{
+	m_uiForm.leDetailedBalance->setEnabled(state);
+	m_uiForm.lbDBKelvin->setEnabled(state);
+
+	isDirtyRebin(true);
+}
+
 
 /**
+* //
 */
 void Indirect::rebinData()
 {
-	showInformationBox("Not yet implemented.");
+	QString groupFile = createMapFile(m_uiForm.cbMappingOptions->currentText());
+	if ( groupFile == "" )
+	{
+		return;
+	}
+
+	QString pyInput = "from mantidsimple import *\n";
+
+	if ( isDirty() )
+	{ 
+		pyInput += basePyCode();
+
+		if ( m_uiForm.ckMonEff->isChecked() )
+		{
+			pyInput += monEffPyCode();
+		}
+
+		pyInput +=
+			"inWS = 'Time'\n"
+			"CropWorkspace('RawFile', 'Time', StartWorkspaceIndex = (first - 1), EndWorkspaceIndex = (last - 1))\n"
+			"mantid.deleteWorkspace('RawFile')\n";
+
+		if ( m_uiForm.ckUseCalib->isChecked() )
+		{
+			QString calibFile = useCalibPyCode();
+			if (calibFile == "")
+				return;
+			else
+				pyInput += calibFile;
+		}
+
+		pyInput +=
+			"enWS = 'Energy'\n"
+			"# Normalise to Monitor\n"
+			"ConvertUnits(inWS,enWS, 'Wavelength')\n"
+			"RebinToWorkspace(enWS,monWS,enWS)\n"
+			"Divide(enWS,monWS,enWS)\n"
+			"mantid.deleteWorkspace(monWS)\n"
+			"mantid.deleteWorkspace(inWS)\n";
+
+	}
+
+	pyInput += cteAndRebinPyCode();
+
+	pyInput += "enWS = enWSr\n";
+
+	if ( m_uiForm.ckDetailedBalance->isChecked() )
+	{
+		pyInput +=
+			"# Detailed Balance\n"
+			"ExponentialCorrection(enWS, enWS, 1.0, (11.606 / ( 2 * " // 11.606 from where ?
+			+ m_uiForm.leDetailedBalance->text() +
+			" ) ) )\n";
+	}
+
+	pyInput += scaleAndGroupPyCode(groupFile);
+
+	// run it
+	QString pyOutput = runPythonCode(pyInput).trimmed();
+
+	if ( pyOutput != "" )
+	{
+		showInformationBox("The following error occurred:\n" + pyOutput
+			+ "\n\nAnalysis did not complete.");
+	}
 }
 
 /**
@@ -780,28 +1068,28 @@ void Indirect::calibCreate()
 		"from mantidsimple import *\n"
 		"from mantidplot import *\n"
 		"try:\n"
-		"   LoadRaw(r\"%1\", \"Raw\", SpectrumMin=%3, SpectrumMax=%4)\n"
+		"   LoadRaw(r'%1', 'Raw', SpectrumMin=%3, SpectrumMax=%4)\n"
 		"except ValueError:\n"
-		"   print \"Could not load .raw file. Please check run number.\"\n"
+		"   print 'Could not load .raw file. Please check run number.'\n"
 		"   sys.exit(0)\n"
-		"tmp = mantid.getMatrixWorkspace(\"Raw\")\n"
+		"tmp = mantid.getMatrixWorkspace('Raw')\n"
 		"nhist = tmp.getNumberHistograms() - 1\n"
 		"xRange = " + xRange + "\n"
-		"Integration(\"Raw\", \"Time1\", xRange[0], xRange[1], 0, nhist)\n"
-		"Integration(\"Raw\", \"Time2\", xRange[2], xRange[3], 0, nhist)\n"
-		"Minus(\"Time1\", \"Time2\", \"Time\")\n"
-		"mantid.deleteWorkspace(\"Raw\")\n"
-		"mantid.deleteWorkspace(\"Time1\")\n"
-		"mantid.deleteWorkspace(\"Time2\")\n"
-		"SaveNexusProcessed(\"Time\", r\"%2\", \"Vanadium\")\n";
+		"Integration('Raw', 'Time1', xRange[0], xRange[1], 0, nhist)\n"
+		"Integration('Raw', 'Time2', xRange[2], xRange[3], 0, nhist)\n"
+		"Minus('Time1', 'Time2', 'Time')\n"
+		"mantid.deleteWorkspace('Raw')\n"
+		"mantid.deleteWorkspace('Time1')\n"
+		"mantid.deleteWorkspace('Time2')\n"
+		"SaveNexusProcessed('Time', r'%2', 'Vanadium')\n";
 
 	if ( m_uiForm.cal_ckPlotResult->isChecked() )
 	{ // plot graph of Calibration result if requested by user.
-		pyInput +=	"graph = plotTimeBin(\"Time\", 0)\n";
+		pyInput +=	"graph = plotTimeBin('Time', 0)\n";
 	}
 	else
 	{ // if graph is not wanted, remove the workspace
-		pyInput += "mantid.deleteWorkspace(\"Time\")\n";
+		pyInput += "mantid.deleteWorkspace('Time')\n";
 	}
 
 	pyInput = pyInput.arg(input_path); // %1 = path to data search directory
@@ -820,4 +1108,19 @@ void Indirect::calibCreate()
 	m_uiForm.leCalibrationFile->setText(output_path);
 	m_uiForm.ckUseCalib->setChecked(true);
 
+}
+
+/**
+* Sets interface as "Dirty" - catches all relevant user changes that don't need special action
+*/
+void Indirect::setasDirty()
+{
+	isDirty(true);
+}
+/*
+* Sets interface as "Dirty" - catches all relevant user changes that don't need special action
+*/
+void Indirect::setasDirtyRebin()
+{
+	isDirtyRebin(true);
 }

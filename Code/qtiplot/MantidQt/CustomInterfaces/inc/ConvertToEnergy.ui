@@ -543,13 +543,6 @@
             </widget>
             <widget class="QWidget" name="page_6" >
              <layout class="QGridLayout" name="gridLayout_10" >
-              <item row="0" column="1" >
-               <widget class="QCheckBox" name="ckDetailedBalance" >
-                <property name="text" >
-                 <string>Detailed Balance</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="2" >
                <widget class="QCheckBox" name="ckMonEff" >
                 <property name="text" >
@@ -557,7 +550,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="3" >
+              <item row="0" column="6" >
                <spacer name="horizontalSpacer_10" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
@@ -582,6 +575,39 @@
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item row="0" column="3" >
+               <widget class="QCheckBox" name="ckDetailedBalance" >
+                <property name="text" >
+                 <string>Detailed Balance</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="4" >
+               <widget class="QLineEdit" name="leDetailedBalance" >
+                <property name="sizePolicy" >
+                 <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize" >
+                 <size>
+                  <width>40</width>
+                  <height>300</height>
+                 </size>
+                </property>
+                <property name="text" >
+                 <string>300</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5" >
+               <widget class="QLabel" name="lbDBKelvin" >
+                <property name="text" >
+                 <string>Kelvin</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -1019,6 +1045,9 @@
                   <property name="text" >
                    <string>Auto Rebin</string>
                   </property>
+                  <property name="checked" >
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1046,7 +1075,7 @@
               <item row="0" column="1" >
                <layout class="QHBoxLayout" name="horizontalLayout_13" >
                 <item>
-                 <widget class="QLabel" name="label_14" >
+                 <widget class="QLabel" name="rebin_lbLow" >
                   <property name="text" >
                    <string>Low</string>
                   </property>
@@ -1076,7 +1105,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_15" >
+                 <widget class="QLabel" name="rebin_lbWidth" >
                   <property name="text" >
                    <string>Width</string>
                   </property>
@@ -1099,7 +1128,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_16" >
+                 <widget class="QLabel" name="rebin_lbHigh" >
                   <property name="text" >
                    <string>High</string>
                   </property>
