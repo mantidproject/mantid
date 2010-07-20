@@ -1776,10 +1776,10 @@ void ConfigDialog::updateCurveFitSettings()
   setting = defaultPeakShape->currentText().toStdString();
   mantid_config.setString("CurveFitting.DefaultPeak", setting);
 
-  setting = QString::number(findPeaksFWHM->value());
+  setting = QString::number(findPeaksFWHM->value()).toStdString();
   mantid_config.setString("CurveFitting.FindPeaksFWHM", setting);
 
-  setting = QString::number(findPeaksTolerance->value());
+  setting = QString::number(findPeaksTolerance->value()).toStdString();
   mantid_config.setString("CurveFitting.FindPeaksTolerance", setting);
 }
 
