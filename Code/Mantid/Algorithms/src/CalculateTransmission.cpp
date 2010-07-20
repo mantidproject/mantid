@@ -95,8 +95,7 @@ void CalculateTransmission::exec()
   // Check that given spectra are monitors
   if ( !sampleWS->getDetector(indices.front())->isMonitor() )
   {
-    g_log.error("The Incident Beam Monitor UDET provided is not marked as a monitor");
-    throw std::invalid_argument("The Incident Beam Monitor UDET provided is not marked as a monitor");
+    g_log.information("The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
   if ( !sampleWS->getDetector(indices.back())->isMonitor() )
   {
@@ -109,8 +108,7 @@ void CalculateTransmission::exec()
   // Check that given spectra are monitors
   if ( !directWS->getDetector(indices.front())->isMonitor() )
   {
-    g_log.error("The Incident Beam Monitor UDET provided is not marked as a monitor");
-    throw std::invalid_argument("The Incident Beam Monitor UDET provided is not marked as a monitor");
+    g_log.information("The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
   if ( !directWS->getDetector(indices.back())->isMonitor() )
   {
@@ -134,36 +132,45 @@ void CalculateTransmission::exec()
     setProperty("UnfittedData",transmission);
   }
   
-  MatrixWorkspace_sptr fit;
-  const std::string fitMethod = getProperty("FitMethod");
-  logFit = ( fitMethod == "Log" );
-  if (logFit)
+  // Check that there are more than a single bin in the transmission
+  // workspace. Skip the fit it there isn't.
+  if (transmission->dataY(0).size()==1)
   {
-    g_log.debug("Fitting to the logarithm of the transmission");
-    // Take a copy of this workspace for the fitting
-    MatrixWorkspace_sptr logTransmission = this->extractSpectrum(transmission,0);
-  
-    // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
-    MantidVec & Y = logTransmission->dataY(0);
-    MantidVec & E = logTransmission->dataE(0);
-    Progress progress(this,0.4,0.6,Y.size());
-    for (unsigned int i=0; i < Y.size(); ++i)
-    {
-      E[i] = std::abs(E[i]/Y[i]);
-      Y[i] = std::log10(Y[i]);
-      progress.report();
-    }
-
-    // Now fit this to a straight line
-    fit = this->fitToData(logTransmission);
-  } // logFit true
+    setProperty("OutputWorkspace",transmission);
+  }
   else
   {
-    g_log.debug("Fitting directly to the data (i.e. linearly)");
-    fit = this->fitToData(transmission);
-  }
+    MatrixWorkspace_sptr fit;
+    const std::string fitMethod = getProperty("FitMethod");
+    logFit = ( fitMethod == "Log" );
+    if (logFit)
+    {
+      g_log.debug("Fitting to the logarithm of the transmission");
+      // Take a copy of this workspace for the fitting
+      MatrixWorkspace_sptr logTransmission = this->extractSpectrum(transmission,0);
 
-  setProperty("OutputWorkspace",fit);
+      // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
+      MantidVec & Y = logTransmission->dataY(0);
+      MantidVec & E = logTransmission->dataE(0);
+      Progress progress(this,0.4,0.6,Y.size());
+      for (unsigned int i=0; i < Y.size(); ++i)
+      {
+        E[i] = std::abs(E[i]/Y[i]);
+        Y[i] = std::log10(Y[i]);
+        progress.report();
+      }
+  
+      // Now fit this to a straight line
+      fit = this->fitToData(logTransmission);
+    } // logFit true
+    else
+    {
+      g_log.debug("Fitting directly to the data (i.e. linearly)");
+      fit = this->fitToData(transmission);
+    }
+
+    setProperty("OutputWorkspace",fit);
+  }
 }
 
 /** Extracts a single spectrum from a Workspace2D into a new workspaces. Uses CropWorkspace to do this.
@@ -231,7 +238,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
   std::string fitStatus = childAlg->getProperty("FitStatus");
   if ( fitStatus != "success" )
   {
-    g_log.error("Unable to successfully fit the data");
+    g_log.error("Unable to successfully fit the data: " + fitStatus);
     throw std::runtime_error("Unable to successfully fit the data");
   }
  

@@ -9,6 +9,7 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidCurveFitting/Linear.h"
+#include "SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
 
@@ -81,6 +82,40 @@ public:
     {
       TS_ASSERT_DELTA( Y[i], 1.0, 0.005 )
     }
+  }
+
+  void testSingleBin()
+  {
+    // Create an test workspace with a single wavelength bin and test that
+    // the algorithm completes.
+
+    inputWS = "sampletransdata";
+
+    DataObjects::Workspace2D_sptr ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, ws);
+
+    TS_ASSERT_EQUALS( ws->dataY(0).size(), 1 )
+
+    Mantid::Algorithms::CalculateTransmission trans;
+    if ( !trans.isInitialized() ) trans.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("SampleRunWorkspace",inputWS) )
+    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("DirectRunWorkspace",inputWS) )
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("IncidentBeamMonitor",1) )
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("TransmissionMonitor",2) )
+    std::string outputWS("outputWS2");
+    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("OutputWorkspace",outputWS) )
+
+    trans.execute();
+    TS_ASSERT( trans.isExecuted() )
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
+    const Mantid::MantidVec &tran = output->readY(0);
+    TS_ASSERT_DELTA( tran[0], 1.0, 0.005 )
+
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
 private:
