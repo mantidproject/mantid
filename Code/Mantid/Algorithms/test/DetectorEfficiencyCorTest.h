@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -101,10 +102,98 @@ public:
 
   void testDataWithGroupedDetectors()
   {
-    const std::string wsName = "testInput";
-    MatrixWorkspace_sptr inputWS = makeTestWS(wsName);
-    AnalysisDataService::Instance().add(wsName, inputWS);
+    const int nspecs(2);
+    const int nbins(4);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nspecs, nbins + 1, nbins);
+    space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    
+    Histogram1D::RCtype x,y,e;
+    x.access().resize(nbins+1, 0.0);
+    y.access().resize(nbins, 0.0);
+    e.access().resize(nbins, 0.0);
+    for (int i = 0; i < nbins; ++i)
+    {
+      x.access()[i] = static_cast<double>((1 + i)/100);
+      y.access()[i] = 5 + i;
+      e.access()[i] = sqrt(5.0);
+    }
+    x.access()[nbins] = static_cast<double>(nbins);
+    // Fill a couple of zeros just as a check that it doesn't get changed
+    y.access()[nbins-1] = 0.0;
+    e.access()[nbins-1] = 0.0;
+    
+    int *specNums = new int[nspecs];
+    int *detIDs = new int[nspecs];
+    for (int i=0; i< nspecs; i++)
+    {
+      space2D->setX(i,x);
+      space2D->setData(i,y,e);
+      space2D->getAxis(1)->spectraNo(i) = i+1;
+      
+      specNums[i] = i+1;
+      detIDs[i] = i+1;
+    }
+    space2D->mutableSpectraMap().populate(specNums, detIDs, nspecs);
+    delete specNums;
+    delete detIDs;
 
+    std::string xmlShape = "<cylinder id=\"shape\"> ";
+    xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
+    xmlShape +=	"<axis x=\"0.0\" y=\"1.0\" z=\"0\" /> " ;
+    xmlShape +=	"<radius val=\"0.0127\" /> " ;
+    xmlShape +=	"<height val=\"1\" /> " ;
+    xmlShape +=	"</cylinder>";
+    xmlShape +=	"<algebra val=\"shape\" /> ";  
+    
+    std::string shapeXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
+    
+    // Set up the DOM parser and parse xml string
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc;
+    
+    pDoc = pParser.parseString(shapeXML);
+    
+    // Get pointer to root element
+    Poco::XML::Element* pRootElem = pDoc->documentElement();
+    
+    //convert into a Geometry object
+    ShapeFactory sFactory;
+    boost::shared_ptr<Object> shape = sFactory.createShape(pRootElem);
+    
+    pDoc->release();
+
+    space2D->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+    boost::shared_ptr<Instrument> instrument = space2D->getBaseInstrument();
+    ObjComponent *sample = new ObjComponent("sample", shape, NULL);
+    sample->setPos(0,0,0);
+    instrument->markAsSamplePos(sample);
+    
+
+    ParameterMap &pmap = space2D->instrumentParameters();
+    //Detector info
+    for( int i = 0; i < nspecs; ++i)
+    {
+      Detector *detector = new Detector("det",shape, NULL);
+      detector->setPos(i*0.2,i*0.2,5);
+      detector->setID(i+1);
+      pmap.add("double", detector, "3He(atm)", 10.0);
+      pmap.add("double", detector, "wallT(m)", 0.0008);
+      instrument->markAsDetector(detector);
+    }
+
+    const std::string wsName = "testInput";
+    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().add(wsName, space2D);
+
+    GroupDetectors2 combine;
+    combine.initialize();
+    TS_ASSERT_THROWS_NOTHING(combine.setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(combine.setPropertyValue("OutputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(combine.setPropertyValue("WorkspaceIndexList", "0,1"));
+    combine.execute();
+    TS_ASSERT(combine.isExecuted());
+    
     DetectorEfficiencyCor grouper;
     TS_ASSERT_THROWS_NOTHING(grouper.initialize());
     TS_ASSERT(grouper.isInitialized());
@@ -116,21 +205,11 @@ public:
     
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
-    TS_ASSERT_EQUALS(result->getNumberHistograms(), 10);
-
-    TS_ASSERT_DELTA(result->readY(0).front(), 5.036868, 1e-6);
+    TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
+    TS_ASSERT_DELTA(result->readY(0).front(), 10.073676, 1e-6);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-6);
-    //Errors
-    TS_ASSERT_DELTA(result->readE(0).front(), 2.252556, 1e-6);
-    TS_ASSERT_DELTA(result->readE(0).back(), 0.0, 1e-6);
-
-
-    TS_ASSERT_DELTA(result->readY(4)[2], 7.026159, 1e-6);
-    TS_ASSERT_DELTA(result->readY(4).back(), 0.0, 1e-6);
-    //Errors
-    TS_ASSERT_DELTA(result->readE(4)[2], 2.244424, 1e-6);
-    TS_ASSERT_DELTA(result->readE(4).back(), 0.0, 1e-6);
-
+    
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 
@@ -146,12 +225,11 @@ public:
     loader.setProperty("LoadLogFiles", false);
     if( small_set )
     {
-      loader.setPropertyValue("SpectrumMin", "69538");
-      loader.setPropertyValue("SpectrumMax", "69638");
+      loader.setPropertyValue("SpectrumList", "69626,69632");
     }
     TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
-
+  
   void loadDetInfo(std::string WSName, std::string file)
   {
     LoadDetectorInfo loader;
@@ -184,83 +262,6 @@ public:
   void tearDown()
   {
     Poco::File(m_DatFile).remove();    
-  }
-
-
-  // Set up a small workspace for testing
-  MatrixWorkspace_sptr makeTestWS(std::string WSName)
-  {
-    const int nspecs(10);
-    const int nbins(4);
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nspecs, nbins + 1, nbins);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    
-    Histogram1D::RCtype x,y,e;
-    x.access().resize(nbins+1, 0.0);
-    y.access().resize(nbins, 0.0);
-    e.access().resize(nbins, 0.01);
-    for (int i = 0; i < nbins; ++i)
-    {
-      x.access()[i] = static_cast<double>((1 + i)/100);
-      y.access()[i] = 5 + i;
-      e.access()[i] = sqrt(5.0);
-    }
-    x.access()[nbins] = static_cast<double>(nbins);
-    // Fill a couple of zeros just as a check that it doesn't get changed
-    y.access()[nbins-1] = 0.0;
-    e.access()[nbins-1] = 0.0;
-    
-    int *specNums = new int[3*nspecs];
-    int *detIDs = new int[3*nspecs];
-    for (int i=0; i< nspecs; i++)
-    {
-      space2D->setX(i,x);
-      space2D->setData(i,y,e);
-      space2D->getAxis(1)->spectraNo(i) = i+1;
-      
-      specNums[i] = i+1;
-      specNums[i+1] = i+1;
-      specNums[i+2] = i+1;
-      detIDs[i] = i+1;
-      detIDs[i+1] = i+2;
-      detIDs[i+2] = i+3;
-    }
-    space2D->mutableSpectraMap().populate(specNums, detIDs, 3*nspecs);
-    delete specNums;
-    delete detIDs;
-
-    std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
-    xmlShape +=	"<axis x=\"0.0\" y=\"1.0\" z=\"0\" /> " ;
-    xmlShape +=	"<radius val=\"0.0127\" /> " ;
-    xmlShape +=	"<height val=\"1\" /> " ;
-    xmlShape +=	"</cylinder>";
-    xmlShape +=	"<algebra val=\"shape\" /> ";  
-    
-    boost::shared_ptr<Object> shape = getObject(xmlShape);
-    space2D->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
-    boost::shared_ptr<Instrument> instrument = space2D->getBaseInstrument();
-    ObjComponent *sample = new ObjComponent("sample", shape, NULL);
-    sample->setPos(0,0,0);
-    instrument->markAsSamplePos(sample);
-    
-
-    ParameterMap &pmap = space2D->instrumentParameters();
-    //Detector info
-    for( int i = 0; i < nspecs; ++i)
-    {
-      for( int j = 0; j < 3; ++j)
-      {
-	Detector *detector = new Detector("det",shape, NULL);
-	detector->setPos(j*10,i*10,5);
-	detector->setID(i+j+1);
-	pmap.add("double", detector, "3He(atm)", 10.0);
-	pmap.add("double", detector, "wallT(m)", 0.0008);
-	instrument->markAsDetector(detector);
-      }
-    }
-    return space2D;
   }
 
   boost::shared_ptr<Object> getObject(std::string xmlShape)
