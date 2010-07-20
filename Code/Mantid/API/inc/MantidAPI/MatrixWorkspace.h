@@ -99,10 +99,13 @@ public:
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
   virtual int size() const = 0;
-  /// Returns the size of each block of data returned by the dataX accessors
+  /// Returns the size of each block of data returned by the dataY accessors
   virtual int blocksize() const = 0;
   /// Returns the number of histograms in the workspace
   virtual const int getNumberHistograms() const = 0;
+
+  /// Returns the bin index for a given X value of a given workspace index
+  size_t binIndexOf(const double xValue, const int index = 0) const;
 
   //----------------------------------------------------------------------
   // DATA ACCESSORS

@@ -483,6 +483,39 @@ void MatrixWorkspace::populateInstrumentParameters()
     }
 }
 
+/**
+ * Returns the bin index of the given X value
+ * @param xValue The X value to search for
+ * @param index The index within the workspace to search within (default = 0)
+ * @returns An index that 
+ */
+size_t MatrixWorkspace::binIndexOf(const double xValue, const int index) const
+{
+  if( index < 0 || index >= getNumberHistograms() )
+  {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - Index out of range.");
+  }
+  const MantidVec & xValues = this->dataX(index);
+  // Lower bound will test if the value is greater than the last but we need to see if X is valid at the start
+  if( xValue < xValues.front() )
+  {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than lowest in current range.");
+  }
+  MantidVec::const_iterator lowit = std::lower_bound(xValues.begin(), xValues.end(), xValue);
+  if( lowit == xValues.end() )
+  {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater than highest in current range.");
+  }
+  // If we are pointing at the first value then that means we still want to be in the first bin
+  if( lowit == xValues.begin() )
+  {
+    ++lowit;
+  }
+  size_t hops = std::distance(xValues.begin(), lowit);
+  // The bin index is offset by one from the number of hops between iterators as they start at zero
+  return hops - 1;
+}
+
 
 } // namespace API
 } // Namespace Mantid

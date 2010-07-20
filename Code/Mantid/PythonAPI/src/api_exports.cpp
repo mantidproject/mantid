@@ -153,6 +153,9 @@ namespace PythonAPI
       ;
   }
 
+  // Overloads for binIndexOf function which has 1 optional argument
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads, Mantid::API::MatrixWorkspace::binIndexOf, 1, 2)
+    
   void export_matrixworkspace()
   {
     /// Shared pointer registration
@@ -172,13 +175,14 @@ namespace PythonAPI
     class_< Mantid::API::MatrixWorkspace, bases<Mantid::API::Workspace>, MatrixWorkspaceCallback, 
       boost::noncopyable >("MatrixWorkspace", no_init)
       .def("getNumberHistograms", &Mantid::API::MatrixWorkspace::getNumberHistograms)
+      .def("getNumberBins", &Mantid::API::MatrixWorkspace::blocksize)
+      .def("binIndexOf", &Mantid::API::MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads() )
       .def("readX", &Mantid::API::MatrixWorkspace::readX, return_value_policy<return_by_value>() )
       .def("readY", &Mantid::API::MatrixWorkspace::readY, return_value_policy<return_by_value>() )
       .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy<return_by_value>() )
       .def("dataX", (data_access)&Mantid::API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
       .def("dataY", (data_access)&Mantid::API::MatrixWorkspace::dataY, return_internal_reference<>() )
       .def("dataE", (data_access)&Mantid::API::MatrixWorkspace::dataE, return_internal_reference<>() )
-      .def("blocksize", &Mantid::API::MatrixWorkspace::blocksize)
       .def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, 
          return_value_policy< copy_const_reference >() )
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
@@ -204,6 +208,8 @@ namespace PythonAPI
       .def("__rdiv__", (binary_fn2)&WorkspaceAlgebraProxy::rdivide)
       .def("__idiv__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_divide)
       .def("__idiv__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_divide)
+      // Deprecated, here for backwards compatability
+      .def("blocksize", &Mantid::API::MatrixWorkspace::blocksize)
       ;
   }
 
@@ -257,9 +263,9 @@ namespace PythonAPI
     //Sample class
     class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
       .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)&Sample::getLogData, 
-        return_internal_reference<>())//return_value_policy<return_by_value>())
+        return_internal_reference<>())
       .def("getLogData", (const std::vector<Mantid::Kernel::Property*> & (Mantid::API::Sample::*)() const)&Sample::getLogData, 
-        return_internal_reference<>())//return_value_policy<return_by_value>())
+        return_internal_reference<>())
       .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
       .def("getProtonCharge", &Mantid::API::Sample::getProtonCharge, return_value_policy< copy_const_reference>())
       .def("getGeometryFlag", &Mantid::API::Sample::getGeometryFlag)
@@ -324,16 +330,20 @@ namespace PythonAPI
       ;
 
     // Unit checking
-    class_<API::WorkspaceUnitValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("WorkspaceUnitValidator", init<std::string>())
+    class_<API::WorkspaceUnitValidator<API::MatrixWorkspace>, 
+      bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("WorkspaceUnitValidator", init<std::string>())
       ;
     // Histogram checking
-    class_<API::HistogramValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("HistogramValidator", init<bool>())
+    class_<API::HistogramValidator<API::MatrixWorkspace>, 
+      bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("HistogramValidator", init<bool>())
       ;
     // Raw count checker
-    class_<API::RawCountValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("RawCountValidator", init<bool>())
+    class_<API::RawCountValidator<API::MatrixWorkspace>, 
+	   bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("RawCountValidator", init<bool>())
       ;
     // Check for common bins
-    class_<API::CommonBinsValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("CommonBinsValidator")
+    class_<API::CommonBinsValidator<API::MatrixWorkspace>, 
+	   bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("CommonBinsValidator")
       ;
 	
   }

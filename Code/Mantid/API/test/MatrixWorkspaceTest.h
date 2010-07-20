@@ -189,6 +189,52 @@ public:
     delete ws2;
   }
   
+  void testSize()
+  {
+    MatrixWorkspace *wkspace = new Mantid::DataObjects::WorkspaceTester;
+    //Test workspace takes the middle value here as the size of each vector
+    wkspace->initialize(1,4,3);
+    
+    TS_ASSERT_EQUALS(wkspace->blocksize(), 4);
+    TS_ASSERT_EQUALS(wkspace->size(), 4);
+    
+  }
+
+  void testBinIndexOf()
+  {
+    MatrixWorkspace *wkspace = new Mantid::DataObjects::WorkspaceTester;
+    wkspace->initialize(1,4,2);
+    //Data is all 1.0s
+    wkspace->dataX(0)[1] = 2.0;
+    wkspace->dataX(0)[2] = 3.0;
+    wkspace->dataX(0)[3] = 4.0;
+    
+    TS_ASSERT_EQUALS(wkspace->getNumberHistograms(), 1);
+
+    //First bin
+    TS_ASSERT_EQUALS(wkspace->binIndexOf(1.3), 0);    
+    // Bin boundary
+    TS_ASSERT_EQUALS(wkspace->binIndexOf(2.0), 0);
+    // Mid range
+    TS_ASSERT_EQUALS(wkspace->binIndexOf(2.5), 1);
+    // Still second bin
+    TS_ASSERT_EQUALS(wkspace->binIndexOf(2.001), 1);
+    // Last bin
+    TS_ASSERT_EQUALS(wkspace->binIndexOf(3.1), 2);
+    // Last value
+    TS_ASSERT_EQUALS(wkspace->binIndexOf(4.0), 2);
+    
+    // Error handling
+
+    // Bad index value
+    TS_ASSERT_THROWS(wkspace->binIndexOf(2.5, 1), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace->binIndexOf(2.5, -1), std::out_of_range);
+    
+    // Bad X values
+    TS_ASSERT_THROWS(wkspace->binIndexOf(5.), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace->binIndexOf(0.), std::out_of_range);
+  }
+  
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 
