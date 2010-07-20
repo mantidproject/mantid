@@ -27,7 +27,7 @@ public:
 
   std::string name()const{return "ResolutionTest_Gauss";}
 
-  void function(double* out, const double* xValues, const int& nData)const
+  void functionLocal(double* out, const double* xValues, const int& nData)const
   {
     double c = getParameter("c");
     double h = getParameter("h");
@@ -38,7 +38,7 @@ public:
       out[i] = h*exp(-x*x*w);
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
   {
     double c = getParameter("c");
     double h = getParameter("h");

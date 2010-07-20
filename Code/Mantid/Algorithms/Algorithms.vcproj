@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CalculateEfficiency.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CalculateTransmission.cpp"
 				>
 			</File>
@@ -566,6 +570,10 @@
 			</File>
 			<File
 				RelativePath=".\test\BinaryOperationTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CalculateEfficiency.h"
 				>
 			</File>
 			<File

@@ -83,8 +83,6 @@ public:
   int spec()const{return m_spec;}
   /// The parent graph
   Graph* graph()const{return d_graph;}
-  /// Set the default peak function
-  void setDefaultPeakName(const std::string& fnName);
   /// Prepare a context menu
   void prepareContextMenu(QMenu& menu); 
 
@@ -190,7 +188,7 @@ private:
   double m_xMax;    // Upper fit boundary
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
-  std::string m_defaultPeakName; // The default peak function name
+  //std::string m_defaultPeakName; // The default peak function name
 };
 
 

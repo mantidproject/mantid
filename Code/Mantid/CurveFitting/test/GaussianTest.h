@@ -898,12 +898,13 @@ public:
     //bk->addConstraint(bc_b);
 
     // set up Gaussian fitting function
-    SimplexGaussian* fn = new SimplexGaussian();
+    //SimplexGaussian* fn = new SimplexGaussian();
+    Gaussian* fn = new Gaussian();
     fn->initialize();
 
     fn->setParameter("Height",200.0);
     fn->setParameter("PeakCentre",79450.0);
-    fn->setParameter("Sigma",300.0);
+    fn->setParameter("Sigma",10.0);
 
     // add constraint to function
     BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
@@ -916,7 +917,11 @@ public:
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    alg.setFunction(fnWithBk);
+    //alg.setFunction(fnWithBk);
+    alg.setPropertyValue("Function",*fnWithBk);
+    alg.setPropertyValue("Minimizer","Simplex");
+
+    delete fnWithBk;
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -931,11 +936,20 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 5.1604,1);
 
-    TS_ASSERT_DELTA( fn->height(), 232.1146 ,1);
-    TS_ASSERT_DELTA( fn->centre(), 79430.1 ,1);
-    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 26.14 ,0.1);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 8.0575 ,0.1);
-    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
+    IFunction* fun = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    TS_ASSERT(fun);
+    
+    TS_ASSERT_DELTA( fun->getParameter("f1.Height"), 216.419 ,1);
+    TS_ASSERT_DELTA( fun->getParameter("f1.PeakCentre"), 79430.1 ,1);
+    TS_ASSERT_DELTA( fun->getParameter("f1.Sigma"), 27.08 ,0.1);
+    TS_ASSERT_DELTA( fun->getParameter("f0.A0"), 2.18 ,0.1);
+    TS_ASSERT_DELTA( fun->getParameter("f0.A1"), 0.0 ,0.01); 
+
+    //TS_ASSERT_DELTA( fn->height(), 232.1146 ,1);
+    //TS_ASSERT_DELTA( fn->centre(), 79430.1 ,1);
+    //TS_ASSERT_DELTA( fn->getParameter("Sigma"), 26.14 ,0.1);
+    //TS_ASSERT_DELTA( bk->getParameter("A0"), 8.0575 ,0.1);
+    //TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
 
     AnalysisDataService::Instance().remove(outputSpace);
   }

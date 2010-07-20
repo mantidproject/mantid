@@ -268,6 +268,11 @@ void PropertyHandler::initParameters()
   }
 }
 
+/**
+  * Add a function to the function handled by this handler.
+  * @param fnName A function name or full initialization string
+  *   in the form name=FunctionName,param1=Value,param2=Value,...
+  */
 PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
 {
   if (!m_cf) return NULL;
@@ -365,7 +370,14 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;
   m_browser->setFitEnabled(true);
-  m_browser->m_defaultFunction = fnName;
+  if (pf)
+  {
+    m_browser->setDefaultPeakType(f->name());
+  }
+  else
+  {
+    m_browser->setDefaultBackgroundType(f->name());
+  }
   m_browser->setFocus();
   m_browser->setCurrentFunction(h);
   return h;
@@ -818,6 +830,15 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
         pf->setHeight(m_pf->height());
         pf->setWidth(m_pf->width());
       }
+    }
+
+    if (pf)
+    {
+      m_browser->setDefaultPeakType(fnName.toStdString());
+    }
+    else
+    {
+      m_browser->setDefaultBackgroundType(fnName.toStdString());
     }
 
     QList<QtProperty*> subs = m_item->property()->subProperties();

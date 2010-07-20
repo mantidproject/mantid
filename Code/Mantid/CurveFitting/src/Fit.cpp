@@ -4,12 +4,14 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <sstream>
 #include <numeric>
@@ -90,6 +92,11 @@ namespace CurveFitting
   */
   void Fit::exec()
   {
+    int peakRadius;
+    if ( Kernel::ConfigService::Instance().getValue("CurveFitting.PeakRadius",peakRadius) )
+    {
+      API::IPeakFunction::setPeakRadius(peakRadius);
+    }
     // Try to retrieve optional properties
     int histNumber = getProperty("WorkspaceIndex");
     const int maxInterations = getProperty("MaxIterations");

@@ -23,8 +23,7 @@ PeakPickerTool::PeakPickerTool(Graph *graph, MantidUI *mantidUI) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
 m_mantidUI(mantidUI),m_wsName(),m_spec(),m_init(false),//m_current(0),
-m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false),
-m_defaultPeakName("Gaussian")
+m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
 
@@ -389,8 +388,7 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
 // Add a new peak with centre c and height h. 
 void PeakPickerTool::addPeak(double c,double h)
 {
-  std::string fnName = fitBrowser()->isPeak()? 
-    fitBrowser()->defaultFunctionType() : m_defaultPeakName;
+  std::string fnName = fitBrowser()->defaultPeakType();
   PropertyHandler* handler = fitBrowser()->addFunction(fnName);
   if (!handler || !handler->pfun()) return;
   handler->setCentre(c);
@@ -505,20 +503,6 @@ void PeakPickerTool::xMax(double x)
   if (x < m_xMin)
   {
     m_xMin = x;
-  }
-}
-
-/** Set the default peak function
- */
-void PeakPickerTool::setDefaultPeakName(const std::string& fnName)
-{
-  boost::shared_ptr<Mantid::API::IPeakFunction> f = 
-    boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-       Mantid::API::FunctionFactory::Instance().create(fnName)
-    );
-  if (f)
-  {
-    m_defaultPeakName = fnName;
   }
 }
 
@@ -727,14 +711,13 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
  */
 void PeakPickerTool::addPeak()
 {
-  int i = fitBrowser()->registeredPeaks().indexOf(QString::fromStdString(m_defaultPeakName));
+  int i = fitBrowser()->registeredPeaks().indexOf(QString::fromStdString(fitBrowser()->defaultPeakType()));
   bool ok = false;
   QString fnName = 
     QInputDialog::getItem(m_mantidUI->appWindow(), "MantidPlot - Fit", "Select peak type", fitBrowser()->registeredPeaks(),i,false,&ok);
   if (ok)
   {
-    m_defaultPeakName = fnName.toStdString();
-    fitBrowser()->setDefaultFunctionType(m_defaultPeakName);
+    fitBrowser()->setDefaultPeakType(fnName.toStdString());
     m_addingPeak = true;
     d_graph->plotWidget()->canvas()->setCursor(Qt::CrossCursor);
     setToolTip("Click to add the peak");

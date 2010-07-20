@@ -68,6 +68,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 
 static const char* choose_folder_xpm[]={
     "16 16 11 1",
@@ -802,8 +803,20 @@ void ConfigDialog::initCurveFittingTab()
   functionArguments = new QLineEdit();
   functionArguments->setToolTip(tip);
   grid->addWidget(functionArguments, 1,1);
-  grid->setRowStretch(2,1);
-  
+
+  grid->addWidget(new QLabel(tr("Default peak shape")),2,0);
+  defaultPeakShape = new QComboBox();
+  grid->addWidget(defaultPeakShape, 2,1);
+
+  grid->addWidget(new QLabel(tr("FindPeaks FWHM")),3,0);
+  findPeaksFWHM = new QSpinBox();
+  grid->addWidget(findPeaksFWHM, 3,1);
+
+  grid->addWidget(new QLabel(tr("FindPeaks Tolerance")),4,0);
+  findPeaksTolerance = new QSpinBox();
+  grid->addWidget(findPeaksTolerance, 4,1);
+
+  grid->setRowStretch(5,1);
   label = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until MantidPlot has been restarted.</span>");
   curveTabLayout->addWidget(label);
 
@@ -820,6 +833,10 @@ void ConfigDialog::initCurveFittingTab()
     if( dynamic_cast<Mantid::API::IBackgroundFunction*>(function) )
     {
       backgroundFunctions->addItem(QString::fromStdString(name));
+    }
+    if( dynamic_cast<Mantid::API::IPeakFunction*>(function) )
+    {
+      defaultPeakShape->addItem(QString::fromStdString(name));
     }
   }
   
@@ -849,6 +866,36 @@ void ConfigDialog::initCurveFittingTab()
   {
     backgroundFunctions->setCurrentIndex(index);
   }
+
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.DefaultPeak"));
+  if (setting.isEmpty()) setting = "Gaussian";
+  index = defaultPeakShape->findText(setting);
+  if (index >= 0)
+  {
+    defaultPeakShape->setCurrentIndex(index);
+  }
+
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksFWHM"));
+  if (!setting.isEmpty())
+  {
+    findPeaksFWHM->setValue(setting.toInt());
+  }
+  else
+  {
+    findPeaksFWHM->setValue(7);
+  }
+
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksTolerance"));
+  if (!setting.isEmpty())
+  {
+    findPeaksTolerance->setValue(setting.toInt());
+  }
+  else
+  {
+    findPeaksTolerance->setValue(4);
+  }
+
+  
 }
 
 
@@ -1725,6 +1772,15 @@ void ConfigDialog::updateCurveFitSettings()
   }
 
   mantid_config.setString("CurveFitting.AutoBackground", setting);
+
+  setting = defaultPeakShape->currentText().toStdString();
+  mantid_config.setString("CurveFitting.DefaultPeak", setting);
+
+  setting = QString::number(findPeaksFWHM->value());
+  mantid_config.setString("CurveFitting.FindPeaksFWHM", setting);
+
+  setting = QString::number(findPeaksTolerance->value());
+  mantid_config.setString("CurveFitting.FindPeaksTolerance", setting);
 }
 
 

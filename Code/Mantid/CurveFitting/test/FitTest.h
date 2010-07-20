@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -43,7 +44,7 @@ public:
 
   std::string name()const{return "Gauss";}
 
-  void function(double* out, const double* xValues, const int& nData)const
+  void functionLocal(double* out, const double* xValues, const int& nData)const
   {
     double c = getParameter("c");
     double h = getParameter("h");
@@ -54,7 +55,7 @@ public:
       out[i] = h*exp(-0.5*x*x*w);
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
@@ -142,6 +143,7 @@ class FitTest : public CxxTest::TestSuite
 public:
   FitTest()
   {
+    Kernel::ConfigService::Instance().setString("CurveFitting.PeakRadius","100");
     FrameworkManager::Instance();
   }
 

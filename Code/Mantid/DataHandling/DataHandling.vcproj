@@ -193,6 +193,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GetMaskedDetectors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GroupDetectors.cpp"
 				>
 			</File>
@@ -412,6 +416,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FindDetectorsInShapeTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\GetMaskedDetectors.h"
 				>
 			</File>
 			<File

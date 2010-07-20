@@ -22,7 +22,7 @@ void Gaussian::init()
 }
 
 
-void Gaussian::function(double* out, const double* xValues, const int& nData)const
+void Gaussian::functionLocal(double* out, const double* xValues, const int& nData)const
 {
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");
@@ -34,7 +34,7 @@ void Gaussian::function(double* out, const double* xValues, const int& nData)con
     }
 }
 
-void Gaussian::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void Gaussian::functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
 {
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");

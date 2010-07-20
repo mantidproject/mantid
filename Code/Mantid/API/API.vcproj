@@ -259,6 +259,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IPeakFunction.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ITableWorkspace.cpp"
 				>
 			</File>

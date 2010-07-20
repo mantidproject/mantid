@@ -164,6 +164,8 @@ private:
   QWidget *curveFittingPage;
   QComboBox *backgroundFunctions;
   QLineEdit *functionArguments;
+  QComboBox *defaultPeakShape;
+  QSpinBox  *findPeaksFWHM,*findPeaksTolerance;
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;

@@ -48,6 +48,8 @@ m_appWindow((ApplicationWindow*)parent),
 m_currentHandler(0),
 m_compositeFunction(0),
 m_defaultFunction("Gaussian"),
+m_defaultPeak("Gaussian"),
+m_defaultBackground("LinearBackground"),
 m_guessOutputName(true),
 m_changeSlotsEnabled(false),
 m_peakToolOn(false),
@@ -70,6 +72,19 @@ m_logValue(NULL)
     }
     setAutoBackgroundName(m_autoBgName);
   }
+
+  std::string def = Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.DefaultPeak");
+  if (!def.empty())
+  {
+    m_defaultPeak = def;
+  }
+
+  def = Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground");
+  if (!def.empty())
+  {
+    m_defaultBackground = def;
+  }
+  m_defaultFunction = m_defaultPeak;
 
   setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -548,6 +563,30 @@ void FitPropertyBrowser::setDefaultFunctionType(const std::string& fnType)
 {
   m_defaultFunction = fnType;
 }
+
+/// Get the default peak type
+std::string FitPropertyBrowser::defaultPeakType()const
+{
+  return m_defaultPeak;
+}
+/// Set the default peak type
+void FitPropertyBrowser::setDefaultPeakType(const std::string& fnType)
+{
+  m_defaultPeak = fnType;
+  setDefaultFunctionType(fnType);
+}
+/// Get the default background type
+std::string FitPropertyBrowser::defaultBackgroundType()const
+{
+  return m_defaultBackground;
+}
+/// Set the default background type
+void FitPropertyBrowser::setDefaultBackgroundType(const std::string& fnType)
+{
+  m_defaultBackground = fnType;
+  setDefaultFunctionType(fnType);
+}
+
 
 /// Get the input workspace name
 std::string FitPropertyBrowser::workspaceName()const
@@ -1902,12 +1941,21 @@ void FitPropertyBrowser::findPeaks()
   std::string peakListName = wsName + "_PeakList_tmp";
   std::string smoothedName = wsName + "_SmoothedData_tmp";
 
+  int FWHM,Tolerance;
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksFWHM"));
+  FWHM = setting.isEmpty() ? 7 : setting.toInt();
+
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksTolerance"));
+  Tolerance = setting.isEmpty() ? 4 : setting.toInt();
+
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
   alg->initialize();
   alg->setPropertyValue("InputWorkspace",wsName);
   alg->setProperty("WorkspaceIndex",workspaceIndex());
   alg->setPropertyValue("PeaksList",peakListName);
   alg->setPropertyValue("SmoothedData",smoothedName);
+  alg->setProperty("FWHM",FWHM);
+  alg->setProperty("Tolerance",Tolerance);
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -1925,7 +1973,7 @@ void FitPropertyBrowser::findPeaks()
     {
       if (centre[i] < startX() || centre[i] > endX()) continue;
       Mantid::API::IPeakFunction* f = dynamic_cast<Mantid::API::IPeakFunction*>(
-        Mantid::API::FunctionFactory::Instance().createUnwrapped("Gaussian")
+        Mantid::API::FunctionFactory::Instance().createUnwrapped(defaultPeakType())
         );
       if (!f) break;
       f->initialize();

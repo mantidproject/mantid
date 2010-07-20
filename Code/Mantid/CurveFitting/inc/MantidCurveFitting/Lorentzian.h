@@ -63,10 +63,9 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "Lorentzian";}
-      virtual void function(double* out, const double* xValues, const int& nData)const;
-      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
-
     protected:
+      virtual void functionLocal(double* out, const double* xValues, const int& nData)const;
+      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData);
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
 

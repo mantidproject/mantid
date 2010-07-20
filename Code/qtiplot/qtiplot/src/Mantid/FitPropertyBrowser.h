@@ -89,6 +89,14 @@ public:
   std::string defaultFunctionType()const;
   /// Set the default function type
   void setDefaultFunctionType(const std::string& fnType);
+  /// Get the default peak type
+  std::string defaultPeakType()const;
+  /// Set the default peak type
+  void setDefaultPeakType(const std::string& fnType);
+  /// Get the default background type
+  std::string defaultBackgroundType()const;
+  /// Set the default background type
+  void setDefaultBackgroundType(const std::string& fnType);
 
   /// Get the input workspace name
   std::string workspaceName()const;
@@ -315,6 +323,10 @@ private:
 
   /// Default function name
   std::string m_defaultFunction;
+  /// Default peak name
+  std::string m_defaultPeak;
+  /// Default background name
+  std::string m_defaultBackground;
 
   /// The current function index
   int m_index_;
