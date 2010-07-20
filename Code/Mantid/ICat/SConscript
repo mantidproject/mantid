@@ -14,7 +14,11 @@ myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_ICAT',1),'WITH_NONAMESPACES','WITH_OPENSSL'])
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
-myenv.Append(MYLIBLIST='PocoNet')
+# Link to the appropriate version of Poco
+if bool(env['debug']) == True:
+    myenv.Append(MYLIBLIST='PocoNetd')
+else:
+    myenv.Append(MYLIBLIST='PocoNet')
 
 if platform.system() == "Windows":
     ssl_libs = ['ssleay32','libeay32']
