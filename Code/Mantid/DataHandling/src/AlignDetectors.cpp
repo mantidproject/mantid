@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/AlignDetectors.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
@@ -20,6 +21,10 @@ DECLARE_ALGORITHM(AlignDetectors)
 
 using namespace Kernel;
 using namespace API;
+using DataObjects::EventList;
+using DataObjects::EventWorkspace;
+using DataObjects::EventWorkspace_sptr;
+using DataObjects::EventWorkspace_const_sptr;
 
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors()
@@ -29,11 +34,13 @@ AlignDetectors::AlignDetectors()
 AlignDetectors::~AlignDetectors()
 {}
 
+//-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
   this->g_log.setName("DataHandling::AlignDetectors");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  //Workspace unit must be TOF.
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new RawCountValidator<>);
   declareProperty(
@@ -46,6 +53,8 @@ void AlignDetectors::init()
      "The CalFile containing the position correction factors");
 }
 
+
+//-----------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::FileError If the calibration file cannot be opened and read successfully
  *  @throw Exception::InstrumentDefinitionError If unable to obtain the source-sample distance
@@ -55,6 +64,11 @@ void AlignDetectors::exec()
   // Get the input workspace
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
+  //Check if its an event workspace
+  EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  if (eventW != NULL)
+    std::cout << "Event Workspace for input\n";
+
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");
   std::map<int,double> offsets;
@@ -63,7 +77,7 @@ void AlignDetectors::exec()
 
   if ( ! this->readCalFile(calFileName, offsets) )
   {
-    throw Exception::FileError("Problem reading file", calFileName);
+    throw Exception::FileError("Problem reading calibration file", calFileName);
   }
 
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -107,6 +121,8 @@ void AlignDetectors::exec()
 
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
+
+  //std::cout << "About to start the looping\n";
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR2(inputWS,outputWS)
@@ -165,6 +181,8 @@ void AlignDetectors::exec()
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
+
+//-----------------------------------------------------------------------
 /// Reads the calibration file. Returns true for success, false otherwise.
 bool AlignDetectors::readCalFile(const std::string& calFileName, std::map<int,double>& offsets)
 {

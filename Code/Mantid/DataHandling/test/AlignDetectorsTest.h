@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/AlignDetectors.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid::DataHandling;
@@ -16,6 +17,11 @@ class AlignDetectorsTest : public CxxTest::TestSuite
 public:
   AlignDetectorsTest()
   {
+  }
+
+  /** Setup for loading raw data */
+  void setUp_Raw()
+  {
     LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/HRP38692.RAW");
@@ -24,59 +30,89 @@ public:
     loader.setProperty("SpectrumMin",320);
     loader.setProperty("SpectrumMax",330);
     loader.execute();
-	
   }
 
-  void testName()
+  void testTheBasics()
   {
-    TS_ASSERT_EQUALS( align.name(), "AlignDetectors" )
-  }
-
-  void testVersion()
-  {
-    TS_ASSERT_EQUALS( align.version(), 1 )
-  }
-
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( align.category(), "DataHandling\\Detectors" )
+    TS_ASSERT_EQUALS( align.name(), "AlignDetectors" );
+    TS_ASSERT_EQUALS( align.version(), 1 );
+    TS_ASSERT_EQUALS( align.category(), "DataHandling\\Detectors" );
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( align.initialize() )
-    TS_ASSERT( align.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( align.initialize() );
+    TS_ASSERT( align.isInitialized() );
 
     std::vector<Property*> props = align.getProperties();
-    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 3 )
+    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 3 );
   }
 
-  void testExec()
+  /** Test alignDetectors for a Workspace2D loaded from some
+   * raw data file.
+   */
+  void testExecWorkspace2D()
   {
+    setUp_Raw();
     if ( !align.isInitialized() ) align.initialize();
 
-    TS_ASSERT_THROWS( align.execute(), std::runtime_error )
+    TS_ASSERT_THROWS( align.execute(), std::runtime_error );
 
     align.setPropertyValue("InputWorkspace", inputWS);
     const std::string outputWS = "aligned";
     align.setPropertyValue("OutputWorkspace", outputWS);
     align.setPropertyValue("CalibrationFile", "../../../../Test/Data/hrpd_new_072_01.cal");
 
-    TS_ASSERT_THROWS_NOTHING( align.execute() )
-    TS_ASSERT( align.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( align.execute() );
+    TS_ASSERT( align.isExecuted() );
 
     boost::shared_ptr<MatrixWorkspace> inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
     boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
 
-    TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "dSpacing" )
-    TS_ASSERT_EQUALS( &(outWS->spectraMap()), &(inWS->spectraMap()) )
-    TS_ASSERT_EQUALS( outWS->size(), inWS->size() )
-    TS_ASSERT_EQUALS( outWS->blocksize(), inWS->blocksize() )
+    TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "dSpacing" );
+    TS_ASSERT_EQUALS( &(outWS->spectraMap()), &(inWS->spectraMap()) );
+    TS_ASSERT_EQUALS( outWS->size(), inWS->size() );
+    TS_ASSERT_EQUALS( outWS->blocksize(), inWS->blocksize() );
 
-    TS_ASSERT_DELTA( outWS->dataX(2)[50], 0.7223, 0.0001 )
-    TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] )
-    TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] )
-	AnalysisDataService::Instance().remove(outputWS);
+    TS_ASSERT_DELTA( outWS->dataX(2)[50], 0.7223, 0.0001 );
+    TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] );
+    TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] );
+    AnalysisDataService::Instance().remove(outputWS);
+  }
+
+
+
+
+  /** Setup for loading raw data */
+  void setUp_Event()
+  {
+    LoadEventPreNeXus loader;
+    loader.initialize();
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat" );
+    loader.setPropertyValue("EventFilename", eventfile);
+    loader.setProperty("PulseidFilename", pulsefile);
+    loader.setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
+    loader.setPropertyValue("OutputWorkspace", "eventWS");
+    loader.execute();
+  }
+
+
+  void xtestExecEventWorkspace()
+  {
+    this->setUp_Event();
+
+    //Start by init'ing the algorithm
+    TS_ASSERT_THROWS_NOTHING( align.initialize() );
+    TS_ASSERT( align.isInitialized() );
+
+    //Set all the properties
+    align.setPropertyValue("InputWorkspace", "eventWS");
+    const std::string outputWS = "aligned";
+    align.setPropertyValue("OutputWorkspace", outputWS);
+    align.setPropertyValue("CalibrationFile", "../../../../Test/Data/hrpd_new_072_01.cal");
+
+    align.execute();
   }
 
 private:
