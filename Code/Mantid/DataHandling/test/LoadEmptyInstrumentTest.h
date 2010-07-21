@@ -88,6 +88,36 @@ public:
     TS_ASSERT_EQUALS(output->spectraMap().nElements(),2400);
   }
 
+  void testExecMUSR()
+  {
+    LoadEmptyInstrument loaderMUSR;
+
+    TS_ASSERT_THROWS_NOTHING(loaderMUSR.initialize());
+    TS_ASSERT( loaderMUSR.isInitialized() );
+    loaderMUSR.setPropertyValue("Filename", "../../../../Test/Instrument/MUSR_Definition.xml");
+    inputFile = loaderMUSR.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentTestMUSR";
+    loaderMUSR.setPropertyValue("OutputWorkspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderMUSR.getPropertyValue("Filename") )
+    TS_ASSERT_EQUALS( result, inputFile);
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderMUSR.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderMUSR.execute());
+
+    TS_ASSERT( loaderMUSR.isExecuted() );
+
+
+    MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    
+    // Check the total number of elements in the map for SLS
+    TS_ASSERT_EQUALS(output->spectraMap().nElements(),64);
+  }
+
 
   void testParameterTags()
   {
