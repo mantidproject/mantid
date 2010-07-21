@@ -31,6 +31,8 @@ AlignDetectors::~AlignDetectors()
 
 void AlignDetectors::init()
 {
+  this->g_log.setName("DataHandling::AlignDetectors");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new RawCountValidator<>);
