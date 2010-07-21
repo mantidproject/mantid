@@ -93,7 +93,7 @@ void LoadEventPreNeXus::init()
   this->declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
                         "TS mapping file converting detector id to pixel id. Used only if specified.");
 
-  this->declareProperty(new FileProperty(INSTRUMENT_PARAM, "", FileProperty::OptionalLoad, ".xml"),
+  this->declareProperty(new FileProperty(INSTRUMENT_PARAM, "", FileProperty::OptionalLoad, "Definition.xml"),
                         "Instrument Geometry file to load. Used only if specified.");
 
   // which pixels to load
