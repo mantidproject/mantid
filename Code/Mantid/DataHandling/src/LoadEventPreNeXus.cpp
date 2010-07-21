@@ -82,7 +82,7 @@ LoadEventPreNeXus::~LoadEventPreNeXus()
 void LoadEventPreNeXus::init()
 {
   // reset the logger's name
-  this->g_log.setName("LoadEventPreNeXus");
+  this->g_log.setName("DataHandling::LoadEventPreNeXus");
 
   // which files to use
   this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, "event.dat"),

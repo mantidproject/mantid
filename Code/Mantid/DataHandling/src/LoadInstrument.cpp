@@ -58,7 +58,7 @@ LoadInstrument::LoadInstrument() : Algorithm(), hasParameterElement_beenSet(fals
 void LoadInstrument::init()
 {
   // reset the logger's name
-  this->g_log.setName("LoadInstrument");
+  this->g_log.setName("DataHandling::LoadInstrument");
 
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
