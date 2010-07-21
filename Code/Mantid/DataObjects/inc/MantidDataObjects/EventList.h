@@ -56,7 +56,8 @@ namespace DataObjects
  */
 class DLLExport TofEvent {
 private:
-  /** The units of the time of flight index in nanoseconds. */
+  /** The units of the time of flight index in nanoseconds.
+   * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1 */
   double time_of_flight;
 
   /**

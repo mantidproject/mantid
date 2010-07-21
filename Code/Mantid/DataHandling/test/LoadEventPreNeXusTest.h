@@ -65,6 +65,7 @@ public:
 
   void test_LoadPreNeXus_TOPAZ()
   {
+    //std::string eventfile( "/home/janik/data/TOPAZ_1241/preNeXus/TOPAZ_1241_neutron_event.dat" );
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename",
@@ -97,6 +98,10 @@ public:
     TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
     TS_ASSERT( ew->getAxis(1)->spectraNo(numpixels_with_events-1) < 15*256*256);
 
+//    //Check if the instrument was loaded correctly
+//    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
+//    TS_ASSERT_EQUALS (  inst->getName(), "TOPAZ" );
+
   }
 
 
@@ -108,6 +113,7 @@ public:
     eventLoader->setProperty("PulseidFilename", pulsefile);
     eventLoader->setPropertyValue("MappingFilename",
           "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
+    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instruments/CNCS_Definition.xml");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
 
     //Get the event file size
@@ -154,6 +160,52 @@ public:
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(2)[0], 2);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(256)[0], 256);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(61661)[0], 61661);
+
+    //Check if the instrument was loaded correctly
+    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
+    //Ya, this is the wrong instrument, but it doesn't matter
+    TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
+
+
+  }
+
+
+  void xtest_LoadPreNeXus_CNCS()
+  {
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
+
+    //Get the event file size
+    struct stat filestatus;
+    stat(eventfile.c_str(), &filestatus);
+
+    //std::cout << "***** executing *****" << std::endl;
+    TS_ASSERT( eventLoader->execute() );
+
+    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
+            (AnalysisDataService::Instance().retrieve("cncs"));
+
+    //The # of events = size of the file / 8 bytes (per event)
+    //This fails cause of errors in events
+    //TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
+
+    //Only some of the pixels weretof loaded, because of lot of them are empty
+    int numpixels_with_events = 42515;
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
+
+    //Check if the instrument was loaded correctly
+    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
+    //Ya, this is the wrong instrument, but it doesn't matter
+    TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
+
+    //Mapping between workspace index and spectrum number
+    //Is the length good?
+    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
+
+
+
   }
 
 

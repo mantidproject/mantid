@@ -42,11 +42,14 @@ namespace Mantid
 /// Make the code clearer by having this an explicit type
 typedef uint32_t PixelType;
 
+/// Type for the DAS time of flight (data file)
+typedef uint32_t DasTofType;
+
 /// Structure that matches the form in the binary event list.
 struct DasEvent
 {
   /// Time of flight.
-  uint32_t tof;
+  DasTofType tof;
   /// Pixel identifier as published by the DAS/DAE/DAQ.
   PixelType pid;
 };
@@ -118,9 +121,13 @@ private:
 
   void readPulseidFile(const std::string &filename);
 
+  void runLoadInstrument(const std::string &filename, API::MatrixWorkspace_sptr localWorkspace);
+
   void fixPixelId(PixelType &pixel, uint32_t &period) const;
 
   void procEvents(DataObjects::EventWorkspace_sptr & workspace);
+
+  void procEventsParallel(DataObjects::EventWorkspace_sptr & workspace);
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
 
