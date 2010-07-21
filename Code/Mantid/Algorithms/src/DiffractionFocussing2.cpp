@@ -47,6 +47,8 @@ DiffractionFocussing2::~DiffractionFocussing2()
  */
 void DiffractionFocussing2::init()
 {
+  this->g_log.setName("Algorithms::DiffractionFocussing2");
+
   API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
   wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
   wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
