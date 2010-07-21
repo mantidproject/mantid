@@ -42,21 +42,21 @@ void Indirect::initLayout()
 	connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
 
 	// line edits,etc (for isDirty)
-	connect(m_uiForm.leRunFiles, SIGNAL(textChanged()), this, SLOT(setasDirty()));
-	connect(m_uiForm.leRunFiles, SIGNAL(textChanged()), this, SLOT(setasDirty()));
-	connect(m_uiForm.leEfixed, SIGNAL(textChanged()), this, SLOT(setasDirty()));
-	connect(m_uiForm.leSpectraMin, SIGNAL(textChanged()), this, SLOT(setasDirty()));
-	connect(m_uiForm.leSpectraMax, SIGNAL(textChanged()), this, SLOT(setasDirty()));
-	connect(m_uiForm.ckMonEff, SIGNAL(toggled()), this, SLOT(setasDirty()));
-	connect(m_uiForm.ckSumFiles, SIGNAL(toggled()), this, SLOT(setasDirty()));
-	connect(m_uiForm.ckUseCalib, SIGNAL(toggled()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leRunFiles, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leRunFiles, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leEfixed, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
+	connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
+	connect(m_uiForm.ckMonEff, SIGNAL(pressed()), this, SLOT(setasDirty()));
+	connect(m_uiForm.ckSumFiles, SIGNAL(pressed()), this, SLOT(setasDirty()));
+	connect(m_uiForm.ckUseCalib, SIGNAL(pressed()), this, SLOT(setasDirty()));
 
 	// line edits,etc (for isDirtyRebin)
-	connect(m_uiForm.rebin_leELow, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
-	connect(m_uiForm.rebin_leEWidth, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
-	connect(m_uiForm.rebin_leEHigh, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
-	connect(m_uiForm.leDetailedBalance, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
-	connect(m_uiForm.leMappingFile, SIGNAL(textChanged()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.rebin_leELow, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.rebin_leEWidth, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.rebin_leEHigh, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
+	connect(m_uiForm.leMappingFile, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
 
 	// "Browse" buttons
 	connect(m_uiForm.pbRunFilesBrowse, SIGNAL(clicked()), this, SLOT(browseRun()));
@@ -990,6 +990,9 @@ void Indirect::rebinData()
 		showInformationBox("The following error occurred:\n" + pyOutput
 			+ "\n\nAnalysis did not complete.");
 	}
+
+	isDirty(false);
+	isDirtyRebin(false);
 }
 
 /**
