@@ -94,13 +94,20 @@ public:
     DataObjects::Workspace2D_sptr ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, ws);
 
+    const std::string emptyWS("directbeam_ws");
+    DataObjects::Workspace2D_sptr empty_ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(emptyWS);
+
+    // According to this detector geometry, Monitor #1 is spectrum 0, and Monitor #2 is spectrum 1.
+    empty_ws->dataY(0)[0] = 10.0;
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(emptyWS, empty_ws);
+
     TS_ASSERT_EQUALS( ws->dataY(0).size(), 1 )
 
     Mantid::Algorithms::CalculateTransmission trans;
     if ( !trans.isInitialized() ) trans.initialize();
 
     TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("SampleRunWorkspace",inputWS) )
-    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("DirectRunWorkspace",inputWS) )
+    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("DirectRunWorkspace",emptyWS) )
     TS_ASSERT_THROWS_NOTHING( trans.setProperty("IncidentBeamMonitor",1) )
     TS_ASSERT_THROWS_NOTHING( trans.setProperty("TransmissionMonitor",2) )
     std::string outputWS("outputWS2");
@@ -111,11 +118,18 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
-    const Mantid::MantidVec &tran = output->readY(0);
-    TS_ASSERT_DELTA( tran[0], 1.0, 0.005 )
+    TS_ASSERT_DELTA( output->readY(0)[0], 5.0, 0.005 )
+
+    // If we reverse the monitors, we should invert the output
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("IncidentBeamMonitor",2) )
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("TransmissionMonitor",1) )
+    trans.execute();
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
+    TS_ASSERT_DELTA( output->readY(0)[0], 0.2, 0.005 )
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(emptyWS);
   }
 
 private:

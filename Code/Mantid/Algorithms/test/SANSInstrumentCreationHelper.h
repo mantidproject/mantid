@@ -37,6 +37,10 @@ public:
     Mantid::API::AnalysisDataService::Instance().addOrReplace(workspace, ws);
     ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Wavelength");
     ws->setYUnit("");
+    for (int i = 0; i < ws->getNumberHistograms(); ++i)
+    {
+      ws->getAxis(1)->spectraNo(i) = i;
+    }
 
     // Load instrument geometry
     runLoadInstrument("SANSTEST", ws);
