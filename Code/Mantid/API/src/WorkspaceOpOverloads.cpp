@@ -406,16 +406,17 @@ void WorkspaceHelpers::getIndicesFromSpectra(const MatrixWorkspace_const_sptr WS
   // Just return an empty list if this isn't a Workspace2D
   else return;
 
-  // Convert the vector of properties into a set for easy searching
-  std::set<int> spectraSet(spectraList.begin(),spectraList.end());
-
-  for (int i = 0; i < WS->getNumberHistograms(); ++i)
+  std::vector<int>::const_iterator iter = spectraList.begin();
+  while( iter != spectraList.end() )
   {
-    int currentSpec = spectraAxis->spectraNo(i);
-    if ( spectraSet.find(currentSpec) != spectraSet.end() )
+    for (int i = 0; i < WS->getNumberHistograms(); ++i)
     {
-      indexList.push_back(i);
+      if ( spectraAxis->spectraNo(i) == *iter )
+      {
+        indexList.push_back(i);
+      }
     }
+    ++iter;
   }
 }
 
