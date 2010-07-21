@@ -414,7 +414,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
     std::cout << "--- Find out where the iterators need to be ----\n";
     //--- Find out where the iterators need to be ----
     PixelMapType::iterator it_counter;
-    PixelMapType::iterator start_map_it[num_cpus+1];
+    PixelMapType::iterator * start_map_it = new PixelMapType::iterator[num_cpus+1];
     start_map_it[0] = das_pixel_map.begin();
     size_t counter = 0;
     size_t block_counter = 0;
@@ -465,6 +465,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
       }
     }
 
+    delete [] start_map_it;
 
 
 //

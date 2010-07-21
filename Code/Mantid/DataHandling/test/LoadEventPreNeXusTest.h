@@ -113,7 +113,6 @@ public:
     eventLoader->setProperty("PulseidFilename", pulsefile);
     eventLoader->setPropertyValue("MappingFilename",
           "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
-    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instruments/CNCS_Definition.xml");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
 
     //Get the event file size
@@ -161,12 +160,6 @@ public:
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(256)[0], 256);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(61661)[0], 61661);
 
-    //Check if the instrument was loaded correctly
-    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
-    //Ya, this is the wrong instrument, but it doesn't matter
-    TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
-
-
   }
 
 
@@ -203,8 +196,6 @@ public:
     //Mapping between workspace index and spectrum number
     //Is the length good?
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
-
-
 
   }
 
