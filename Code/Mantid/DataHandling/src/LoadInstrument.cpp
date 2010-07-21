@@ -57,6 +57,9 @@ LoadInstrument::LoadInstrument() : Algorithm(), hasParameterElement_beenSet(fals
 /// Initialisation method.
 void LoadInstrument::init()
 {
+  // reset the logger's name
+  this->g_log.setName("LoadInstrument");
+
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
@@ -1453,12 +1456,14 @@ void LoadInstrument::runLoadParameterFile()
     const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
     loadInstParam->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
     loadInstParam->execute();
-  } catch (std::invalid_argument&)
+  } catch (std::invalid_argument& e)
   {
     g_log.information("Invalid argument to LoadParameter sub-algorithm");
-  } catch (std::runtime_error&)
+    g_log.information(e.what());
+  } catch (std::runtime_error& e)
   {
     g_log.information("Unable to successfully run LoadParameter sub-algorithm");
+    g_log.information(e.what());
   }
 }
 
