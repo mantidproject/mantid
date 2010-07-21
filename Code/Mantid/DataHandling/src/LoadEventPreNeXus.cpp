@@ -234,8 +234,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
       //The addEventQuickly method does not clear the cache, making things slightly faster.
       workspace->getEventList(temp.pid).addEventQuickly(event);
 
-            // TODO work with period
-            // TODO filter based on pixel ids
+      // TODO work with period
+      // TODO filter based on pixel ids
       my_events++;
     }
 
@@ -481,6 +481,8 @@ static ptime getTime(uint32_t sec, uint32_t nano)
  */
 void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
 {
+  this->proton_charge_tot = 0.;
+
   // jump out early if there isn't a filename
   if (filename.empty()) {
     this->g_log.information("NOT using a pulseid file");
@@ -496,7 +498,6 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
   size_t offset = 0;
   Pulse* buffer = new Pulse[buffer_size];
   size_t obj_size = sizeof(Pulse);
-  double proton_charge_total = 0.;
   double temp;
 
   // go through the file
@@ -507,12 +508,13 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
     {
       this->pulsetimes.push_back(getTime(buffer[i].seconds, buffer[i].nanoseconds));
       this->event_indices.push_back(buffer[i].event_index);
-      temp = buffer[i].pCurrent * CURRENT_CONVERSION;
+      temp = buffer[i].pCurrent; // * CURRENT_CONVERSION;
       this->proton_charge.push_back(temp);
+      //std::cout << (offset + i) << " " << *(this->pulsetimes.rbegin()) << " " << *(this->proton_charge.rbegin())<< std::endl; // REMOVE
       if (temp < 0.)
-	this->g_log.warning("Individiual proton charge < 0 being ignored");
+        this->g_log.warning("Individiual proton charge < 0 being ignored");
       else
-	proton_charge_total += temp;
+        this->proton_charge_tot += temp;
     }
     offset += buffer_size;
 
@@ -520,6 +522,10 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
     if (offset + buffer_size > this->num_pulses)
       buffer_size = this->num_pulses - offset;
   }
+  this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
+  stringstream msg;
+  msg << "Total proton charge of " << this->proton_charge_tot << " microAmp*hours";
+  this->g_log.information(msg.str());
 
   delete buffer;
   handle->close();
