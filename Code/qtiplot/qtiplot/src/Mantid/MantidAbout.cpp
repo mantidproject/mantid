@@ -43,17 +43,6 @@ MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidQtDialog(parent
 	url->setOpenExternalLinks(true);
 
 
-	QPixmap mantidLogoPixmap(":/Mantid Logo.png");
-	QLabel* mantidlogo=m_uiForm.mantidplotlogo;
-	mantidlogo->setPixmap(mantidLogoPixmap);
-
-	QPixmap isisLogoPixmap(":/ISIS Logo.gif");
-	QLabel *isislogo=m_uiForm.isislogo;
-	isislogo->setPixmap(isisLogoPixmap);
-
-	QPixmap snsLogoPixmap(":/SNS Logo.gif");
-	QLabel *snslogo=m_uiForm.snslogo;
-	snslogo->setPixmap(snsLogoPixmap);
-		
+	
 }
 

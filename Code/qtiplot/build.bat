@@ -1,13 +1,13 @@
-rem @echo off
+@echo off
+setlocal
 
-SETLOCAL
-if "%1" == "" set ARCH=x86
+if "%1" == "" SET ARCH=x86
 
-if /i %1 == x86 SET ARCH=x86 && SET QMAKE_ARGS=""
-if /i %1 == amd64 SET ARCH=amd64 && SET QMAKE_ARGS="CONFIG+=build64"
+if /i "%1" == "x86" SET ARCH=x86 && SET QMAKE_ARGS=""
+if /i "%1" == "amd64" SET ARCH=amd64 && SET QMAKE_ARGS="CONFIG+=build64"
 
-if /i not %1 == x86 (
-    if /i not %1 == amd64 (
+if /i not %ARCH% == x86 (
+    if /i not %ARCH% == amd64 (
         goto usage
     )
 )
@@ -53,3 +53,6 @@ EXIT 1
 :qtiploterr
 echo "MantidPlot build failed."
 EXIT 1
+
+:usage
+echo "Use either build x86 or build amd64"
