@@ -85,6 +85,7 @@ namespace PythonAPI
       .def("isRunningAsync", &Mantid::API::IAlgorithm::isRunningAsync)
       .def("isInitialized", &Mantid::API::IAlgorithm::isInitialized)
       .def("isExecuted", &Mantid::API::IAlgorithm::isExecuted)
+      .def("setRethrows", &Mantid::API::IAlgorithm::setRethrows)
       .def("setPropertyValue", &Mantid::API::IAlgorithm::setPropertyValue)
       .def("getPropertyValue", &Mantid::API::IAlgorithm::getPropertyValue)
       .def("getProperties", &Mantid::API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())

@@ -314,6 +314,7 @@ namespace Mantid
       }
       else
       {
+        os << "\talgm.setRethrows(True)\n";
         os << "\talgm.execute()\n";
       }
 
