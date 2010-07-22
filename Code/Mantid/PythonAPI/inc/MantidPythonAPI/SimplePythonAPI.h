@@ -85,6 +85,8 @@ class DLLExport SimplePythonAPI
 				const std::map<std::string, std::set<std::string> >& categories);
   /// Write string to run algorithm asynchronously
   static void writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, const std::string & prefix = "");
+  /// Write the python help string for the function version of an algorithm.
+  static void writeFunctionPyHelp(std::ostream& os, const PropertyVector& properties, const StringVector& names);
   /// Convert EOL characters to their string representation
   static std::string convertEOLToString(const std::string & value);
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])

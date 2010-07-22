@@ -254,6 +254,47 @@ namespace Mantid
     }
 
     /**
+     * Write the help text for the function definitions that look more pythonic.
+     *
+     */
+    void SimplePythonAPI::writeFunctionPyHelp(std::ostream& os, const PropertyVector& properties,
+                                              const StringVector& names)
+    {
+      os << "\t\"\"\"\n";
+
+      size_t size = properties.size();
+      Mantid::Kernel::Property *prop;
+      for (size_t i = 0; i < size; ++i)
+      {
+        prop = properties[i];
+        os << "\t" << names[i] << "("
+           << Mantid::Kernel::Direction::asText(prop->direction());
+        if (!prop->isValid().empty())
+          os << ":req";
+        os << ") *" << prop->type() << "* "<< "\n";
+        std::set<std::string> allowed = prop->allowedValues();
+        if (!prop->documentation().empty() || !allowed.empty())
+        {
+          os << "\t    " << prop->documentation();
+          if (!allowed.empty())
+          {
+            os << " [";
+            std::set<std::string>::const_iterator sIter = allowed.begin();
+            std::set<std::string>::const_iterator sEnd = allowed.end();
+            for( ; sIter != sEnd ; )
+            {
+              os << (*sIter);
+              if( ++sIter != sEnd ) os << ", ";
+            }
+            os << "]";
+          }
+          os << "\n";
+        }
+      }
+      os << "\t\"\"\"\n";
+    }
+
+    /**
     * Write a Python function defintion
     * @param os The stream to use to write the definition
     * @param algm The name of the algorithm
@@ -284,8 +325,11 @@ namespace Mantid
       }
 
       //end of function parameters
-      os << "):\n"
-        << "\talgm = mantid.createAlgorithm(\"" << algm << "\")\n";
+      os << "):\n";
+
+      writeFunctionPyHelp(os, properties, sanitizedNames);
+
+      os << "\talgm = mantid.createAlgorithm(\"" << algm << "\")\n";
 
       // Redo loop for setting values
       pIter = properties.begin();
