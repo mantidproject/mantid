@@ -86,6 +86,7 @@ namespace PythonAPI
     
     class_<Mantid::Geometry::IComponent, boost::noncopyable>("IComponent", no_init)
       .def("getPos", &Mantid::Geometry::IComponent::getPos)
+	  .def("getDistance", &Mantid::Geometry::IComponent::getDistance)
       .def("getName", &Mantid::Geometry::IComponent::getName)
       .def("type", &Mantid::Geometry::IComponent::type)
       .def("getNumberParameter", &Mantid::Geometry::IComponent::getNumberParameter)
@@ -121,7 +122,7 @@ namespace PythonAPI
       .def("solidAngle", &Mantid::Geometry::IDetector::solidAngle)
       .def("getTwoTheta", &Mantid::Geometry::IDetector::getTwoTheta)
       .def("getPhi", &Mantid::Geometry::IDetector::getPhi)
-      ;
+	  ;
 
     /**
      * Concrete implementations
