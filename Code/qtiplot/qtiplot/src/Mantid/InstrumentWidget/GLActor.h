@@ -28,7 +28,7 @@
   Base class for all objects in a 3D Scene. Methods are provide to position and rotate the objects.
   The objects can also be set as active or not. Actors maintian safe pointer to a GLObject.
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

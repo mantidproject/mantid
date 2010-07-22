@@ -13,7 +13,7 @@ namespace API
 
   \author N. Draper
     
-  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
  	

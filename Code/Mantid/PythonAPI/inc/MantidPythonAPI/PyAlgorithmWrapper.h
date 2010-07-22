@@ -29,7 +29,7 @@ namespace PythonAPI
     @author Martyn Gigg, Tessella Support Services plc
     @date 20/12/2009
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

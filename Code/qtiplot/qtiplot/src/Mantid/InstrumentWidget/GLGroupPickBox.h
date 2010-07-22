@@ -16,7 +16,7 @@
   GLGroupPickBox class takes an image and based on mouse operations draws the box and fires the objects that are 
   with in the box.
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
  	

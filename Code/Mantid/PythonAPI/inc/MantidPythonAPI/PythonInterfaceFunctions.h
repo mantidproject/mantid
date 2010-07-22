@@ -16,7 +16,7 @@ namespace Mantid
 	@author ISIS, STFC
 	@date 13/01/2010
 	
-	Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+	Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 	
 	This file is part of Mantid.
 	

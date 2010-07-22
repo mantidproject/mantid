@@ -16,7 +16,7 @@ namespace API
     @author Laurent C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 30/05/2008
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

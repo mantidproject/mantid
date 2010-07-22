@@ -17,7 +17,7 @@ namespace Algorithms
     @author Roman Tolchenov
     @date 07/07/2009
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

@@ -23,7 +23,7 @@ namespace Mantid
     @author Roman Tolchenov, Tessella plc
     @date 2/02/2010
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

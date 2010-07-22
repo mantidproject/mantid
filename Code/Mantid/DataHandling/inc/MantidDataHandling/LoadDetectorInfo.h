@@ -28,10 +28,10 @@ namespace DataHandling
     <LI> FileName - Path to the DAT or RAW file </LI>
     </UL>
 
-    @author Steve Williams STFC Rutherford Appleton Laboratory
+    @author Steve Williams ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
     @date 27/07/2009
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

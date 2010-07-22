@@ -18,7 +18,7 @@ class GLColor;
    The class inherits from QwtColorMap and implements reading a color color map from a file. 
    There is also a mode which indicates the scale type. 
 
-   Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+   Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
    
    This file is part of Mantid.
    

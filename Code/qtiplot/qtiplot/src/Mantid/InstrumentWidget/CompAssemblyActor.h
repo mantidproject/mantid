@@ -13,7 +13,7 @@
   This class has the implementation for calling the children of ICompAssembly's IObjComponent to render themselves
   and call the ICompAssemblys. This maintains the count of the children for easy lookup.
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

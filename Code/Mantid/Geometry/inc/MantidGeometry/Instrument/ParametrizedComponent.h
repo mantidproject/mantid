@@ -30,7 +30,7 @@ class Quat;
     @author Roman Tolchenov, Tessella Support Services plc
     @date 4/12/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

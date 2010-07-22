@@ -27,7 +27,7 @@ template<class TYPE> class TimeSeriesProperty;
     @author Roman Tolchenov, Tessella plc
     @date 26/11/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

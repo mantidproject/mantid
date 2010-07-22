@@ -14,7 +14,7 @@
   This class is an implementation of virtual trackball using mouse interactions. It uses Quaternions for
   performing the rotations.
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

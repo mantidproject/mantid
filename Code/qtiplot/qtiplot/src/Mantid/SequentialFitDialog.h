@@ -21,7 +21,7 @@ class FitPropertyBrowser;
     @author Roman Tolchenov, Tessella plc
     @date 4/06/2010
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

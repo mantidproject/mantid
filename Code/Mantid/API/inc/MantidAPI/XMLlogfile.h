@@ -30,7 +30,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 12/1/2009
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

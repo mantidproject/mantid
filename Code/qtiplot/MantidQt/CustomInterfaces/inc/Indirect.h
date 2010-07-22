@@ -21,7 +21,7 @@ namespace MantidQt
     @author Michael Whitty
 	@author Martyn Gigg
 
-    Copyright &copy; 2010 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

@@ -19,7 +19,7 @@ namespace Mantid
 
 		This is an implementation class for handling geometry without triangulating and using opengl glu methods.
 
-		Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+		Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
 		This file is part of Mantid.
 

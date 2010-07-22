@@ -25,7 +25,7 @@ namespace Geometry
   \author S. Ansell
   \brief For a leg of a track
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

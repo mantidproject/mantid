@@ -34,7 +34,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 10/12/2007
 
-    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

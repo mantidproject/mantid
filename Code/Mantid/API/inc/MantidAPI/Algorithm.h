@@ -80,7 +80,7 @@ namespace Mantid
 		@author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
 		@date 12/09/2007
 
-		Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+		Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
 		This file is part of Mantid.
 

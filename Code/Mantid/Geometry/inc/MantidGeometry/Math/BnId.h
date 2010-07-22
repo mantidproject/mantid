@@ -24,7 +24,7 @@ namespace Geometry
   \todo Could be improved by using a set of 
   unsigned integers. 
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
  	

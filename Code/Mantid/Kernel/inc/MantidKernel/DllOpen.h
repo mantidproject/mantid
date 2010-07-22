@@ -18,7 +18,7 @@ class Logger;
  @author ISIS, STFC
  @date 25/10/2007
  
- Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
  This file is part of Mantid.
 

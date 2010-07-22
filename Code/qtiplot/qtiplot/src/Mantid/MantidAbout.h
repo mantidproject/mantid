@@ -14,7 +14,7 @@
     @author Sofia Antony, ISIS, RAL
     @date 13/01/2010
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

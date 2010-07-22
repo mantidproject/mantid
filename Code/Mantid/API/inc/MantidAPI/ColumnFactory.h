@@ -38,7 +38,7 @@ namespace API
     @author Roman Tolchenov, Tessella Support Services plc
     @date 31/10/2008
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

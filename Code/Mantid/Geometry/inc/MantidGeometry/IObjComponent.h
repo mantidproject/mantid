@@ -27,7 +27,7 @@ class GeometryHandler;
     @author Russell Taylor, Tessella Support Services plc
     @date 26/06/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

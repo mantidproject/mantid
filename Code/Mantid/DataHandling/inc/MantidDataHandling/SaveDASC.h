@@ -22,7 +22,7 @@ namespace DataHandling
      <LI> Filename - The filename for output </LI>
      </UL>
 
-     @author Steve Williams STFC Rutherford Appleton Laboratory
+     @author Steve Williams ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
      @date 27/07/2009
 
      This file is part of Mantid.

@@ -11,7 +11,7 @@
    This class has the implementation for rendering Instrument. it provides the interface for picked ObjComponent and other
    operation for selective rendering of the instrument
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

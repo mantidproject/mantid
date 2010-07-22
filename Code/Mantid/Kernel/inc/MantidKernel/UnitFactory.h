@@ -45,7 +45,7 @@ class Logger;
     @author Russell Taylor, Tessella Support Services plc
     @date 13/03/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

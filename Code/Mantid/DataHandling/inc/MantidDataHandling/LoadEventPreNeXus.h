@@ -19,7 +19,7 @@ namespace Mantid
     @author Janik, SNS ORNL
     @date 4/02/2010
     
-    Copyright &copy; 2010 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

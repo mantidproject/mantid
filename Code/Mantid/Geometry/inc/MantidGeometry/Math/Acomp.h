@@ -33,7 +33,7 @@ namespace Geometry
   a set of unions.
   - intersection : (logical and) : ^ : e.g abcd
   - union : (logical or) : v : e.g a+b+c+d
-   Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+   Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
  	

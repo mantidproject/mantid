@@ -27,7 +27,7 @@ namespace Mantid
 
     This class reads the geometry (triangles) cached in the vtk format file and copies them to the object.
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

@@ -16,7 +16,7 @@ namespace Kernel
 
     @author Russell Taylor, Tessella plc
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

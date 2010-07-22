@@ -30,7 +30,7 @@ namespace Geometry
     Each IComponent has a defined bounding box which at the moment
     is cuboid.
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

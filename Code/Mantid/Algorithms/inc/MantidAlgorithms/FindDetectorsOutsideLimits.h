@@ -39,7 +39,7 @@ namespace Mantid
     @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
     @date 07/07/2009
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

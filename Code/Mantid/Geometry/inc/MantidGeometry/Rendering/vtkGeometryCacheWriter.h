@@ -24,7 +24,7 @@ namespace Mantid
 
     This class writes the geometry (triangles) cached from Object to the vtk format file.
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

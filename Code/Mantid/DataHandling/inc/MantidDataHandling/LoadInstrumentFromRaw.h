@@ -43,7 +43,7 @@ namespace API
     @author Anders Markvardsen, ISIS, RAL
     @date 2/5/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

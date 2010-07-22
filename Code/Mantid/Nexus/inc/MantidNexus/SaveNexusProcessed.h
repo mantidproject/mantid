@@ -25,7 +25,7 @@ namespace Mantid
     <LI> Title - the title to describe the saved processed data
     </UL>
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

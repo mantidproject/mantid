@@ -27,7 +27,7 @@ namespace CustomDialogs
     @author Roman Tolchenov, Tessella Support Services plc
     @date 14/07/2010
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

@@ -35,7 +35,7 @@ namespace Geometry
   An object is a collection of Rules and
   surface object
 
-  Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
+  Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

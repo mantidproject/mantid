@@ -10,7 +10,7 @@ namespace Mantid
 
     Utility method for saving NeXus format of Mantid Workspace
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

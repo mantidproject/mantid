@@ -47,7 +47,7 @@ class QComboBox;
 
   This is a QT widget for the controls and display of instrument geometry
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

@@ -32,7 +32,7 @@ namespace Mantid
     written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
     This class support all arithmetic operations for quaternions
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

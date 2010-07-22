@@ -18,7 +18,7 @@ namespace DataHandling
     @author Martyn Gigg, Tessella Support Services plc
     @date 13/03/2009
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

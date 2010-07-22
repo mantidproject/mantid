@@ -14,9 +14,9 @@
     <LI> Password - The password of the logged in user </LI>
     </UL>
    
-    @author Sofia Antony, STFC Rutherford Appleton Laboratory
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
     @date 07/07/2010
-    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

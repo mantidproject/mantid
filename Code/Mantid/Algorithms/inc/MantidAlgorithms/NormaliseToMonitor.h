@@ -43,7 +43,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 30/09/2008
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

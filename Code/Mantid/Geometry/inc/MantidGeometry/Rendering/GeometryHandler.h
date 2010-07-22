@@ -21,7 +21,7 @@ namespace Mantid
 
 		This is an abstract class for handling geometry primitives.
 
-		Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+		Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
 		This file is part of Mantid.
 

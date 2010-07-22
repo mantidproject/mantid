@@ -70,7 +70,7 @@ private:
 
     @author Roman Tolchenov, Tessella Support Services plc
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

@@ -29,7 +29,7 @@ namespace CurveFitting
     @author Anders J Markvardsen, ISIS, RAL
     @date 02/10/2009
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

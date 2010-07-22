@@ -71,7 +71,7 @@ namespace Mantid
     @author Sofia Antony, Rutherford Appleton Laboratory
     @date 19/01/2010
 
-    Copyright &copy; 2007-10 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

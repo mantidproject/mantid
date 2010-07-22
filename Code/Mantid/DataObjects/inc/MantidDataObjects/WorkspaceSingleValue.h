@@ -23,7 +23,7 @@ namespace DataObjects
     @author Nicholas Draper
     @date 19/05/2008
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

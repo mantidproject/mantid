@@ -76,7 +76,7 @@ namespace DataHandling
     @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

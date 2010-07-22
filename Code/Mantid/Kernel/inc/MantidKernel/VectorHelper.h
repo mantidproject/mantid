@@ -19,7 +19,7 @@ namespace Kernel
     @author Laurent C Chapon, Rutherford Appleton Laboratory
     @date 16/12/2008
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

@@ -21,7 +21,7 @@ namespace Mantid
 		This class is an cache for the geometry triangles and if needed generates the triangles using
 		other GeometryHandlers.
 
-		Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+		Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
 		This file is part of Mantid.
 

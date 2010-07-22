@@ -20,7 +20,7 @@
   This Class takes input as ObjComponents and renders them with in the Qt widget. also
   provides the user interaction with the rendered object.
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 
