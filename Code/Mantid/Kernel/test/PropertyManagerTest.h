@@ -229,6 +229,16 @@ public:
     TS_ASSERT_EQUALS( retrieved, 1234567890123456789LL );
   }
 
+  void testRemoveProperty()
+  {
+    PropertyManagerHelper mgr;
+    const std::string name("TestProperty");
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(name, 10.0));
+    TS_ASSERT_THROWS_NOTHING(mgr.removeProperty(name));
+    TS_ASSERT_EQUALS(mgr.getProperties().size(), 0 );
+    
+  }
+
 private:
   PropertyManagerHelper manager;
 

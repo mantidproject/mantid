@@ -188,7 +188,7 @@ namespace Mantid
         getPointerToProperty(name);
         return true;
       }
-      catch (Exception::NotFoundError e)
+      catch (Exception::NotFoundError &e)
       {
         return false;
       }
@@ -293,7 +293,9 @@ namespace Mantid
       if(existsProperty(name))
       {		 //remove it
         Property* prop=getPointerToProperty(name);
-        m_properties.erase(name);
+	std::string key = name;
+	std::transform(key.begin(), key.end(), key.begin(), toupper);
+        m_properties.erase(key);
         std::vector<Property*>::iterator itr;
         itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);
         m_orderedProperties.erase(itr);
