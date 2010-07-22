@@ -4,23 +4,18 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/Path.h"
+#include "Poco/File.h"
+
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using Mantid::API::Sample;
-
-// Helper class
-class ConcreteProperty : public Property
-{
-public:
-  ConcreteProperty() : Property( "Test", typeid( int ) ) {}
-  Property* clone() { return new ConcreteProperty(*this); }
-  bool isDefault() const { return true; }
-  std::string getDefault() const { return "getDefault() is not implemented in this class"; }
-  std::string value() const { return "Nothing"; }
-  std::string setValue( const std::string& value ) { return ""; }
-};
 
 class SampleTest : public CxxTest::TestSuite
 {
@@ -32,33 +27,39 @@ public:
     TS_ASSERT( ! sample.getName().compare("test") )
   }
 
-  void testAddGetLogData()
+  void testShape()
   {
-    Property *p = new ConcreteProperty();
-    TS_ASSERT_THROWS_NOTHING( sample.addLogData(p) )
-
-    Property *pp;
-    TS_ASSERT_THROWS_NOTHING( pp = sample.getLogData("Test") )
-    TS_ASSERT_EQUALS( p, pp )
-    TS_ASSERT( ! pp->name().compare("Test") )
-    TS_ASSERT( dynamic_cast<ConcreteProperty*>(pp) )
-    TS_ASSERT_THROWS( sample.getLogData("NotThere"), Exception::NotFoundError )
-
-    std::vector< Property* > props = sample.getLogData();
-    TS_ASSERT( ! props.empty() )
-    TS_ASSERT_EQUALS( props.size(), 1 )
-    TS_ASSERT( ! props[0]->name().compare("Test") )
-    TS_ASSERT( dynamic_cast<ConcreteProperty*>(props[0]) )
-  }
-
-  void testGetSetCharge()
-  {
-    TS_ASSERT_EQUALS( sample.getProtonCharge(), 0.0 )
-    TS_ASSERT_THROWS_NOTHING( sample.setProtonCharge(10.0) )
-    TS_ASSERT_EQUALS( sample.getProtonCharge(), 10.0 )
+    
+    std::string xmlShape = "<cylinder id=\"shape\"> ";
+    xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
+    xmlShape +=	"<axis x=\"0.0\" y=\"1.0\" z=\"0\" /> " ;
+    xmlShape +=	"<radius val=\"0.0127\" /> " ;
+    xmlShape +=	"<height val=\"1\" /> " ;
+    xmlShape +=	"</cylinder>";
+    xmlShape +=	"<algebra val=\"shape\" /> ";  
+    std::string shapeXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
+    
+    // Set up the DOM parser and parse xml string
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc;
+    
+    pDoc = pParser.parseString(shapeXML);
+    
+    // Get pointer to root element
+    Poco::XML::Element* pRootElem = pDoc->documentElement();
+    
+    //convert into a Geometry object
+    ShapeFactory sFactory;
+    boost::shared_ptr<Object> shape_sptr = sFactory.createShape(pRootElem);
+    pDoc->release();
+    
+    TS_ASSERT_THROWS_NOTHING(sample.setShapeObject(*shape_sptr))
+    const Object & sampleShape = sample.getShapeObject();
+    TS_ASSERT_EQUALS(shape_sptr->getName(), sampleShape.getName());
   }
 
 private:
+
   Sample sample;
 };
 
