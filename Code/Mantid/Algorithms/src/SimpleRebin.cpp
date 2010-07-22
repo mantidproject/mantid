@@ -40,7 +40,7 @@ namespace Mantid
       declareProperty(
         new ArrayProperty<double>("Params", new RebinParamsValidator),
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-        "this can be folowed by a comma and more widths and last boundary pairs");
+        "this can be followed by a comma and more widths and last boundary pairs");
     }
 
 
@@ -76,18 +76,14 @@ namespace Mantid
         if (eventOutW == eventW)
         {
           // This only sets the X axis. Actual rebinning will be done upon data access.
-          std::stringstream out;
-          out << "Setting new X bins in place in EventWorkspace " << eventW->getName() << ".";
-          g_log.information(out.str());
+          g_log.information() << "Setting new X bins in place in EventWorkspace " << eventW->getName() << ".\n";
           eventOutW->setAllX(XValues_new);
           g_log.information("eventOutW->setAllX is complete.");
         }
         else
         {
           //--- Different output - create a Workspace2D ----
-          std::stringstream out;
-          out << "Creating a Workspace2D from the EventWorkspace " << eventW->getName() << ".";
-          g_log.information(out.str());
+          g_log.information() << "Creating a Workspace2D from the EventWorkspace " << eventW->getName() << ".\n";
 
           //Create a Workspace2D
           // This creates a new Workspace2D through a torturous route using the WorkspaceFactory.
@@ -96,12 +92,6 @@ namespace Mantid
 
           //Initialize progress reporting.
           Progress prog(this,0.0,1.0, histnumber);
-
-          //Cast away the const-ness for accessing the event list.
-          EventWorkspace_sptr non_const_eventW = boost::const_pointer_cast<EventWorkspace>(eventW);
-
-          //Get the X axis before parallelizing (multiple accesses to the shared_ptr caused problems)
-          MantidVec X = XValues_new.access();
 
           //Go through all the histograms and set the data
           PARALLEL_FOR3(inputW, eventW, outputW)
@@ -113,11 +103,11 @@ namespace Mantid
             outputW->setX(i, XValues_new);
 
             //Get a const event list reference. eventW->dataY() doesn't work.
-            const EventList& el = non_const_eventW->getEventListAtWorkspaceIndex(i);
+            const EventList& el = eventW->getEventListAtWorkspaceIndex(i);
 
             //Now use this const method to generate a histogram without changing the event list or requiring const casts
             MantidVec y_data, e_data;
-            el.generateCountsHistogram(X, y_data);
+            el.generateCountsHistogram(*XValues_new, y_data);
             el.generateErrorsHistogram(y_data, e_data);
 
             //Copy the data over.
