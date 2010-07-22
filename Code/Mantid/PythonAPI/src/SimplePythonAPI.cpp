@@ -498,6 +498,10 @@ namespace Mantid
       os << "\tif cmd == None or cmd == '':\n"
         << "\t\tmtdGlobalHelp()\n"
         << "\t\treturn\n";
+      os << "\n\ttry:\n"
+          << "\t\tcmd = cmd.func_name\n"
+          << "\texcept ValueError:\n"
+          << "\t\tpass\n";
       os << "\n\tcmd = string.lower(cmd)\n";
       //Functons help
       SimplePythonAPI::IndexVector::const_iterator mIter = helpStrings.begin();
