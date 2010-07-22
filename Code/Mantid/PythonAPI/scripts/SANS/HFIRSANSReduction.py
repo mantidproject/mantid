@@ -164,7 +164,7 @@ class SANSReductionMethod:
         ## Flood data for sensitivity correction
         self.sensitivity_flood_filepath = None
         ## Dark current file for sensitivity correction
-        self.sensitivity_dark_filepath = None
+        self.sensitivity_use_dark_current = False
         ## Highest allowed sensitivity, above that pixels will be masked 
         self.sensitivity_high = None
         ## Lowest allowed sensitivity, below that pixels will be masked
@@ -177,6 +177,7 @@ class SANSReductionMethod:
         self.transmission_radius = 3.0
         self.transmission_sample_filepath = None
         self.transmission_empty_filepath = None
+        self.transmission_use_dark_current = False
         
 
 class SANSReduction:
@@ -205,6 +206,9 @@ class SANSReduction:
         ## Configuration
         self.configuration = configuration
         
+        # Internal data members
+        self._dark_ws = None
+        
         
         
     def reduce(self):
@@ -225,9 +229,11 @@ class SANSReduction:
         # Make a copy that will be our reduced data
         CloneWorkspace(self.workspace, self.reduced_ws)
         
-        # Find beam center position
+        # Find beam center position. If no beam finding option was provided, use the current value
         if self.configuration.beam_center_method is not InstrumentConfiguration.BEAM_CENTER_NONE:
+            # Check whether the direct beam or scattering pattern option was selected
             direct_beam = (self.configuration.beam_center_method is InstrumentConfiguration.BEAM_CENTER_DIRECT_BEAM)
+            # Load the file to extract the beam center from, and process it.
             LoadSpice2D(self.configuration.beam_center_filepath, "beam_center")
             beam_center = FindCenterOfMassPosition("beam_center",
                                                    Output = None,
@@ -288,21 +294,7 @@ class SANSReduction:
 
         # Subtract dark current ###############################################
         if self.method.dark_current_filepath is not None:
-            dark_ws = _extract_workspace_name(self.method.dark_current_filepath)
-            LoadSpice2D(self.method.dark_current_filepath, dark_ws)
-        
-            # Normalize the dark current data to counting time
-            if self.method.dark_normalization == SANSReductionMethod.NORMALIZATION_TIME:
-                darktimer_ws = dark_ws+"_timer"
-                CropWorkspace(dark_ws, darktimer_ws,
-                              StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
-                              EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))        
-                
-                Multiply(dark_ws, timer_ws, dark_ws)
-                Divide(dark_ws, darktimer_ws, dark_ws)      
-        
-            # Perform subtraction
-            Minus(ws, dark_ws, ws)
+            self._subtract_dark_current(ws, ws, timer_ws)
             
         # Normalize data ######################################################
         if self.method.normalization == SANSReductionMethod.NORMALIZATION_MONITOR:
@@ -344,26 +336,8 @@ class SANSReduction:
             LoadSpice2D(self.method.sensitivity_flood_filepath, flood_ws)
 
             # Subtract dark current
-            if self.method.sensitivity_dark_filepath is not None:
-                sensdark_ws = _extract_workspace_name(self.method.sensitivity_dark_filepath)
-                LoadSpice2D(self.method.sensitivity_dark_filepath, sensdark_ws)
-                
-                # Normalize the dark current data to counting time
-                sensdarktimer_ws = sensdark_ws+"_timer"
-                CropWorkspace(sensdark_ws, sensdarktimer_ws,
-                              StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
-                              EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
-                
-                floodtimer_ws = flood_ws+"_timer"     
-                CropWorkspace(flood_ws, floodtimer_ws,
-                              StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
-                              EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
-                
-                Multiply(sensdark_ws, floodtimer_ws, sensdark_ws)
-                Divide(sensdark_ws, sensdarktimer_ws, sensdark_ws)      
-                Minus(flood_ws, sensdark_ws, flood_ws)
-            
-            #TODO: find the center of the flood data independently
+            if self.method.sensitivity_use_dark_current:
+                self._subtract_dark_current(flood_ws, flood_ws)
             
             # Move the flood data detector before applying the solid angle correction
             MoveInstrumentComponent(flood_ws, self.configuration.detector_ID, 
@@ -389,23 +363,17 @@ class SANSReduction:
         SolidAngleCorrection(ws, ws)
           
         # Apply transmission correction #######################################
-        # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
         if self.method.transmission_method==SANSReductionMethod.TRANSMISSION_DIRECT_BEAM:
+            # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
             self._transmission_correction()
+                    
+            # 2- Apply correction (Note: Apply2DTransCorr)
+            #Apply angle-dependent transmission correction using the zero-angle transmission
+            ApplyTransmissionCorrection(InputWorkspace=self.reduced_ws, 
+                                        TransmissionWorkspace="transmission_fit", 
+                                        OutputWorkspace=self.reduced_ws)
             
         
-        # If a dark current workspace was given, correct the result for the dark current
-        
-        # 2- Apply correction (Note: Apply2DTransCorr)
-        # TODO: Need an Algo that will produce a workspace with the following spectra values
-        # sec[x][y] = sqrt(1+(pixel_size_x*(x-beam_center_x)/sample_detector_distance)^2
-        #                     +(pixel_size_y*(y-beam_center_y)/sample_detector_distance)^2)
-        # ws[x][y] = ws[x][y]/transmission^((sec[x][y]+1)/2)
-        # err[x][y] = sqrt( ws[x][y] / (transmission^((sec[x][y]+1)/2))^2 
-        #                    + ((d_transmission*ws[x][y]*((sec[x][y]+1)/2))/(transmission^((sec[x][y]+1)/2+1)))^2
-        
-        
-        # TODO: set the X bins as wavelength with the correct value
         
     def _transmission_correction(self):
         """
@@ -414,16 +382,17 @@ class SANSReduction:
             Pixels around the beam center will be summed to create a transmission "monitor".
             
             Depending on the reduction method settings, the time or monitor channel
-            will be used for normalization.
-             
-            @param sample_ws: workspace containing data with direct beam on sample
-            @param empty_ws: workspace containing data with direct beam w/o sample
+            will be used for normalization.             
         """
         sample_ws = _extract_workspace_name(self.method.transmission_sample_filepath)
         LoadSpice2D(self.method.transmission_sample_filepath, sample_ws)
         
         empty_ws = _extract_workspace_name(self.method.transmission_empty_filepath)
         LoadSpice2D(self.method.transmission_empty_filepath, empty_ws)
+        
+        if self.method.transmission_use_dark_current:
+            self._subtract_dark_current(sample_ws, sample_ws)
+            self._subtract_dark_current(empty_ws, empty_ws)
         
         # Find which pixels to sum up as our "monitor". At this point we have moved the detector
         # so that the beam is at (0,0), so all we need is to sum the area around that point.
@@ -452,12 +421,48 @@ class SANSReduction:
                               IncidentBeamMonitor=str(self.method.normalization), 
                               TransmissionMonitor=str(first_det))
         
-        #TODO: If dark current is specified, subtract it
         
-        #Apply angle-dependent transmission correction using the zero-angle transmission
-        ApplyTransmissionCorrection(InputWorkspace=self.reduced_ws, 
-                                    TransmissionWorkspace="transmission_fit", 
-                                    OutputWorkspace=self.reduced_ws)
+    def _subtract_dark_current(self, input_ws, output_ws, timer_ws=None):
+        """
+            Subtract the dark current from the input workspace.
+            If no timer workspace is provided, the counting time will be extracted
+            from the input workspace.
+            
+            @param input_ws: input workspace
+            @param output_ws: output workspace
+            @param timer_ws: if provided, will be used to scale the dark current
+        """
+        # Sanity check
+        if self.method.dark_current_filepath is None:
+            raise RuntimeError, "SANSReduction._subtract_dark_current: method called with no defined dark current"
+
+        # Check whether the dark current was already loaded, otherwise load it
+        # Load dark current, which will be used repeatedly
+        if self._dark_ws is None:
+            self._dark_ws = _extract_workspace_name(self.method.dark_current_filepath)
+            LoadSpice2D(self.method.dark_current_filepath, self._dark_ws)
+        
+            # Normalize the dark current data to counting time
+            if self.method.dark_normalization == SANSReductionMethod.NORMALIZATION_TIME:
+                darktimer_ws = self._dark_ws+"_timer"
+                CropWorkspace(self._dark_ws, darktimer_ws,
+                              StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                              EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))        
+                
+                Divide(self._dark_ws, darktimer_ws, self._dark_ws)      
+    
+        # If no timer workspace was provided, get the counting time from the data
+        if timer_ws is None:
+            timer_ws = "tmp_timer"     
+            CropWorkspace(input_ws, timer_ws,
+                          StartWorkspaceIndex = str(SANSReductionMethod.NORMALIZATION_TIME), 
+                          EndWorkspaceIndex   = str(SANSReductionMethod.NORMALIZATION_TIME))  
+        # Scale the stored dark current by the counting time
+        Multiply(self._dark_ws, timer_ws, "scaled_dark_current")
+        # Perform subtraction
+        Minus(input_ws, "scaled_dark_current", output_ws)
+            
+        
         
     def _extract_workspace_name(self, suffix=''):
         """

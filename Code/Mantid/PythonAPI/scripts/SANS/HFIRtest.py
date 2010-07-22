@@ -1,5 +1,7 @@
 """
     Validation tests for the HFIR SANS reduction.
+    
+    TODO: test transmission calculation w/dark current subtraction
 """
 from HFIRSANSReduction import *
 # Set directory containg the test data, relative to the Mantid release directory.
@@ -127,7 +129,7 @@ def test_center_by_hand():
     method = SANSReductionMethod()
     method.dark_current_filepath = TEST_DIR+"BioSANS_dark_current.xml"
     method.sensitivity_flood_filepath = TEST_DIR+"BioSANS_flood_data.xml"
-    method.sensitivity_dark_filepath = TEST_DIR+"BioSANS_dark_current.xml"
+    method.sensitivity_use_dark_current = True
     method.sensitivity_high = 1.5
     method.sensitivity_low = 0.5
     
@@ -160,7 +162,7 @@ def test_center_calculated():
     method = SANSReductionMethod()
     method.dark_current_filepath = TEST_DIR+"BioSANS_dark_current.xml"
     method.sensitivity_flood_filepath = TEST_DIR+"BioSANS_flood_data.xml"
-    method.sensitivity_dark_filepath = TEST_DIR+"BioSANS_dark_current.xml"
+    method.sensitivity_use_dark_current = True
     method.sensitivity_high = 1.5
     method.sensitivity_low = 0.5
     
@@ -216,6 +218,6 @@ def test_transmission():
 if __name__ == "__main__":
     # EXECUTE THIS FROM Mantid/release
     #test_center_calculated()
-    #test_center_by_hand()
-    test_transmission()
+    test_center_by_hand()
+    #test_transmission()
     
