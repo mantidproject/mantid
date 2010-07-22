@@ -102,10 +102,14 @@ public:
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;
 
+
   /** To set whether algorithm is a child.
    *  @param isChild True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
    */
   virtual void setChild(const bool isChild) = 0;
+
+  /// To query whether an algorithm should rethrow exceptions when executing.
+  virtual void setRethrows(const bool rethrow) = 0;
 
   /// Add an observer for a notification
   virtual void addObserver(const Poco::AbstractObserver& observer)const = 0;

@@ -23,7 +23,7 @@ Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy
 AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
   PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
   m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),
-  m_isExecuted(),m_isLoggingEnabled(true)
+  m_isExecuted(),m_isLoggingEnabled(true), m_rethrow(false)
 {
   Algorithm_sptr a = boost::dynamic_pointer_cast<Algorithm>(alg);
   if (!a)
@@ -141,6 +141,12 @@ void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
   if (m_alg) m_alg->removeObserver(observer);
 }
 
+void AlgorithmProxy::setRethrows(const bool rethrow)
+{
+  this->m_rethrow = rethrow;
+  if(m_alg) m_alg->setRethrows(rethrow);
+}
+
 //----------------------------------------------------------------------
 // Private methods
 //----------------------------------------------------------------------
@@ -150,6 +156,7 @@ void AlgorithmProxy::createConcreteAlg()
 {
   m_alg = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().createUnmanaged(name(),version()));
   m_alg->initializeFromProxy(*this);
+  m_alg->setRethrows(this->m_rethrow);
   addObservers();
 }
 

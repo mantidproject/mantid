@@ -201,6 +201,8 @@ namespace Mantid
 			bool isChild() const;
 			void setChild(const bool isChild);
 
+			void setRethrows(const bool rethrow);
+
 			/// Asynchronous execution.
 			Poco::ActiveResult<bool> executeAsync();
 
@@ -315,6 +317,7 @@ namespace Mantid
 
 			bool m_runningAsync; ///< Algorithm is running asynchronously
 			bool m_running; ///< Algorithm is running
+			bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
 
 			double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an sub-algorithm
 			double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish

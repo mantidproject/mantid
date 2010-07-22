@@ -83,6 +83,7 @@ namespace Mantid
       /// To query whether algorithm is a child. A proxy is always at top level, returns false
       bool isChild() const {return false;}
       void setChild(const bool isChild) {} ///< Do nothing
+      void setRethrows(const bool rethrow);
 
       void cancel() const;
       bool isRunningAsync();
@@ -119,6 +120,7 @@ namespace Mantid
       Algorithm_sptr m_alg;  ///< Pointer to the real algorithm, only defined when the algorithm is running
       bool m_isExecuted;     ///< Executed flag
       bool m_isLoggingEnabled;///< is the logging of the underlying algorithm enabled
+      bool m_rethrow; ///< Whether or not to rethrow exceptions.
 
       /// Temporary holder of external observers wishing to subscribe
       mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;

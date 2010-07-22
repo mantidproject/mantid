@@ -24,8 +24,8 @@ Algorithm::Algorithm() :
   PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
   m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
   m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-  m_isExecuted(false),m_isChildAlgorithm(false),m_runningAsync(false),m_running(false),
-  m_algorithmID(0)
+  m_isExecuted(false),m_isChildAlgorithm(false),m_runningAsync(false),
+  m_running(false),m_rethrow(false),m_algorithmID(0)
 {
 }
 
@@ -164,7 +164,7 @@ bool Algorithm::execute()
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
 					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync) 
+					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
 					  {
 						  m_runningAsync = false;
 						  throw;
@@ -179,7 +179,7 @@ bool Algorithm::execute()
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
 					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync) 
+					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
 					  {
 						  m_runningAsync = false;
 						  throw;
@@ -194,7 +194,7 @@ bool Algorithm::execute()
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
 					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync) 
+					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
 					  {
 						  m_runningAsync = false;
 						  throw;
@@ -208,7 +208,7 @@ bool Algorithm::execute()
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
 					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync) 
+					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
 					  {
 						  m_runningAsync = false;
 						  throw;
@@ -223,7 +223,7 @@ bool Algorithm::execute()
 					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
 					  m_running = false;
 					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync) 
+					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
 					  {
 						  m_runningAsync = false;
 						  throw;
@@ -272,7 +272,7 @@ bool Algorithm::execute()
     }
     catch(std::runtime_error& ex)
     {
-      if (m_isChildAlgorithm || m_runningAsync) throw;
+      if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
       else
       {
         g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
@@ -283,7 +283,7 @@ bool Algorithm::execute()
     }
     catch(std::logic_error& ex)
     {
-      if (m_isChildAlgorithm || m_runningAsync) throw;
+      if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
       else
       {
         g_log.error()<< "Logic Error in execution of algorithm "<< this->name()<<std::endl;
@@ -585,6 +585,11 @@ void Algorithm::setChild(const bool isChild)
   m_isChildAlgorithm = isChild;
 }
 
+void Algorithm::setRethrows(const bool rethrow)
+{
+  this->m_rethrow = rethrow;
+}
+
 /**
  * Asynchronous execution
  */
@@ -592,7 +597,6 @@ Poco::ActiveResult<bool> Algorithm::executeAsync()
 { 
   return m_executeAsync(Poco::Void());
 }
-
 
 /** To Process workspace groups.
  *  @param inputwsPtr input workspacegroup pointer to iterate through all members
