@@ -1,7 +1,15 @@
-##########################################################################
-# holds infomration that is unlikely change about SANS2D and LOQ and
-# functions and classes to make accessing that data easier 
-##########################################################################
+import sys
+
+def instrument_factory(name):
+    """
+        Returns an instance of the instrument with the given class name
+        @param name: name of the instrument class to instantiate
+    """
+    if name in globals():
+        return globals()[name]()
+    else:
+        raise RuntimeError, "Instrument %s doesn't exist\n  %s" % (name, sys.exc_value)
+
 class DetectorBank :
     def __init__(self, longAndShort, inst, initialSpectrum) :
         self._names = dict([('long', longAndShort[0]), ('short', longAndShort[1])])
@@ -23,12 +31,9 @@ class DetectorBank :
             if guess.lower() == name.lower() :
                 return True
         return False
-#######################################################################
-# Holds data about an instrument, like SANS2D, and DetectorStats objects
-# that corrospond to its detector banks
-class Instrument :
-    def __init__(self, inst) :
-        self.name = inst
+    
+class Instrument(object) :
+    def __init__(self) :
         #the low anlge detector is some times called the main detector, some times the rear detector
         self.lowAngDetSet = True
 
@@ -62,47 +67,23 @@ class Instrument :
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
-
-_loqInfo = Instrument('LOQ')
-_loqInfo.N_MONITORS = 2
-_loqInfo.DETECTORS = {'LOW_ANGLE' : DetectorBank(('main-detector-bank', 'main'), 'LOQ', _loqInfo.N_MONITORS) }
-_loqInfo.DETECTORS['HIGH_ANGLE'] = DetectorBank(('HAB', 'HAB'), 'LOQ', (128**2)+_loqInfo.N_MONITORS)
-
-_sans2DInfo = Instrument('SANS2D')
-_sans2DInfo.N_MONITORS = 4
-_sans2DInfo.DETECTORS = {'LOW_ANGLE' : DetectorBank(('rear-detector', 'rear'), 'SANS2D', _sans2DInfo.N_MONITORS)}
-_sans2DInfo.DETECTORS['HIGH_ANGLE'] = DetectorBank(('front-detector', 'front'), 'SANS2D', (192**2)+_sans2DInfo.N_MONITORS)
+        
+        
+class LOQ(Instrument):
+    name = "LOQ"
+    N_MONITORS = 2
     
-allInsts = {'LOQ' : _loqInfo, 'SANS2D' : _sans2DInfo}
-#remove this copy
-all = allInsts
+    def __init__(self):
+        super(LOQ, self).__init__()
+        self.DETECTORS = {'LOW_ANGLE' : DetectorBank(('main-detector-bank', 'main'), 'LOQ', LOQ.N_MONITORS),
+                          'HIGH_ANGLE' : DetectorBank(('HAB', 'HAB'), 'LOQ', (128**2)+LOQ.N_MONITORS)}
 
-#####################################################################################
-#module level variables that hold the currently selected instrument and detector
-#####################################################################################
-_curInst = allInsts['SANS2D']
-_curDetector = _curInst.curDetector()
 
-#to make the code more robust to errors use the following getter and set methods instead of setting _curInst, etc
-def getCurDetector() :
-    return _curDetector
+class SANS2D(Instrument): 
+    name = "SANS2D"
+    N_MONITORS = 4
 
-def getCurInst() :
-    return _curInst
-#######################################################################################################
-# can rasie KeyError if the name that was passed is not in the instrument dictonary
-######################################################################################################
-def setCurInst(name) :
-    global _curInst
-    _curInst = allInsts[name]
-
-def setDetector(detName) :
-    global _curInst
-    if _curInst.setDetector(detName) :
-        global curDetector
-        curDetector = _curInst.curDetector()
-        return True
-    return False
-
-def setDefaultDetector() :
-   _curInst.setDefaultDetector()
+    def __init__(self):
+        super(SANS2D, self).__init__()
+        self.DETECTORS = {'LOW_ANGLE' : DetectorBank(('rear-detector', 'rear'), 'SANS2D', SANS2D.N_MONITORS),
+                          'HIGH_ANGLE' : DetectorBank(('front-detector', 'front'), 'SANS2D', (192**2)+SANS2D.N_MONITORS)}

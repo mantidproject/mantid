@@ -78,8 +78,12 @@ TIMEMASKSTRING_F = ''
 # Instrument information
 INSTR_DIR = mtd.getConfigProperty('instrumentDefinition.directory')
 
+# Instrument object. Start with a default
+#TODO: get rid of all those globals
+INSTRUMENT = SANSInsts.instrument_factory("SANS2D")
+
 #TODO remove all instances of INSTR_NAME
-INSTR_NAME = SANSInsts.getCurInst().name
+INSTR_NAME = INSTRUMENT.name
 
 # Beam centre in metres
 XBEAM_CENTRE = None
@@ -253,33 +257,33 @@ def printParameter(var):
 ########################### 
 def SANS2D():
     _printMessage('SANS2D()')
-    global INSTR_NAME, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
-    SANSInsts.setCurInst('SANS2D')
+    global INSTRUMENT, INSTR_NAME, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
+    INSTRUMENT = SANSInsts.instrument_factory("SANS2D")
     #TODO remove all instances of INSTR_NAME
-    INSTR_NAME = SANSInsts.getCurInst().name
+    INSTR_NAME = INSTRUMENT.name
 
     TRANS_WAV1_FULL = TRANS_WAV1 = 2.0
     TRANS_WAV2_FULL = TRANS_WAV2 = 14.0
-    SANSInsts.getCurInst().lowAngDetSet = True
+    INSTRUMENT.lowAngDetSet = True
 
 def LOQ():
     _printMessage('LOQ()')
-    global INSTR_NAME, MONITORSPECTRUM, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
-    SANSInsts.setCurInst('LOQ')
+    global INSTRUMENT, INSTR_NAME, MONITORSPECTRUM, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
+    INSTRUMENT = SANSInsts.instrument_factory("LOQ")
     #TODO remove all instances of INSTR_NAME
     INSTR_NAME = SANSInsts.getCurInst().name
 
     MONITORSPECTRUM = 2
     TRANS_WAV1_FULL = TRANS_WAV1 = 2.2
     TRANS_WAV2_FULL = TRANS_WAV2 = 10.0
-    SANSInsts.getCurInst().lowAngDetSet = True
+    INSTRUMENT.lowAngDetSet = True
 
 def Detector(det_name):
     _printMessage('Detector("' + det_name + '")')
-
-    if not SANSInsts.setDetector(det_name) :
+    global INSTRUMENT
+    if not INSTRUMENT.setDetector(det_name) :
         _issueWarning('Detector not found')
-        _issueWarning('Detector set to ' + SANSInsts.getCurDetector().name() + ' in ' + SANSInsts.getCurInst().name)
+        _issueWarning('Detector set to ' + INSTRUMENT.curDetector().name() + ' in ' + INSTRUMENT.name)
 
 def Set1D():
     _printMessage('Set1D()')
@@ -447,6 +451,7 @@ def TransmissionCan(can, direct, reload = True, period = -1):
 
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True, period = -1):
+    global INSTRUMENT
     if run_string == '' or run_string.startswith('.'):
         return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
     pieces = run_string.split('.')
@@ -483,7 +488,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
     if is_trans:
         try:
             if INSTR_NAME == 'SANS2D' and int(shortrun_no) < 568:
-                dimension = SANSUtility.GetInstrumentDetails(SANSInsts.getCurInst())[0]
+                dimension = SANSUtility.GetInstrumentDetails(INSTRUMENT)[0]
                 specmin = dimension*dimension*2
                 specmax = specmin + 4
             else:
@@ -1208,8 +1213,8 @@ def _initReduction(xcentre = None, ycentre = None):
         _CAN_SETUP = _init_run(SCATTER_CAN, [xcentre, ycentre], True)
 
     # Instrument specific information using function in utility file
-    global DIMENSION, SPECMIN, SPECMAX
-    DIMENSION, SPECMIN, SPECMAX  = SANSUtility.GetInstrumentDetails(SANSInsts.getCurInst())
+    global DIMENSION, SPECMIN, SPECMAX, INSTRUMENT
+    DIMENSION, SPECMIN, SPECMAX  = SANSUtility.GetInstrumentDetails(INSTRUMENT)
 
     return _SAMPLE_SETUP, _CAN_SETUP
 
@@ -1297,11 +1302,11 @@ def _init_run(raw_ws, beamcoords, emptycell):
         final_ws = "can_temp_workspace"
     else:
         final_ws = raw_ws.getName().split('_')[0]
-        final_ws += SANSInsts.all[INSTR_NAME].curDetector().name('short')
+        final_ws += INSTRUMENT.curDetector().name('short')
         final_ws += '_' + CORRECTION_TYPE
 
     # Put the components in the correct positions
-    currentDet = SANSInsts.all[INSTR_NAME].curDetector().name() 
+    currentDet = INSTRUMENT.curDetector().name() 
     maskpt_rmin, maskpt_rmax = SetupComponentPositions(currentDet, raw_ws.getName(), beamcoords[0], beamcoords[1])
     
     # Create a run details object
@@ -1416,9 +1421,9 @@ def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orien
     SANSUtility.MaskByBinRange(workspace,TIMEMASKSTRING)
     
     #this function only masks one detector, find out which one that should be
-    setLowAngle = SANSInsts.all[INSTR_NAME].lowAngDetSet
+    setLowAngle = INSTRUMENT.lowAngDetSet
     if not useActiveDetector :
-        setLowAngle = not SANSInsts.all[INSTR_NAME].lowAngDetSet
+        setLowAngle = not INSTRUMENT.lowAngDetSet
         
     if setLowAngle :
         specstring = SPECMASKSTRING_R
@@ -1456,7 +1461,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         if base_runno < 568:
             MONITORSPECTRUM = 73730
             orientation=SANSUtility.Orientation.Vertical
-            if SANSInsts.curDetect.name() == 'front-detector':
+            if INSTRUMENT.curDetector().name() == 'front-detector':
                 SPECMIN = DIMENSION*DIMENSION + 1 
                 SPECMAX = DIMENSION*DIMENSION*2
             else:
@@ -1533,7 +1538,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     ##################################################################################   
         
     ############################ Efficiency correction ################################
-    if SANSInsts.all[INSTR_NAME].lowAngDetSet :
+    if INSTRUMENT.lowAngDetSet :
         CorrectToFile(tmpWS, DIRECT_BEAM_FILE_R, tmpWS, "Wavelength", "Divide")
     else:
         CorrectToFile(tmpWS, DIRECT_BEAM_FILE_F, tmpWS, "Wavelength", "Divide")
@@ -1679,7 +1684,7 @@ def RunReduction(coords):
 
     # Do the correction
     if xshift != 0.0 or yshift != 0.0:
-        currentDet = SANSInsts.all[INSTR_NAME].curDetector().name()
+        currentDet = INSTRUMENT.curDetector().name()
         MoveInstrumentComponent(SCATTER_SAMPLE.getName(), ComponentName = currentDet, X = str(xshift), Y = str(yshift), RelativePosition="1")
         if SCATTER_CAN.getName() != '':
             MoveInstrumentComponent(SCATTER_CAN.getName(), ComponentName = currentDet, X = str(xshift), Y = str(yshift), RelativePosition="1")
@@ -1775,14 +1780,14 @@ def ViewCurrentMask():
     if RMAX > 0.0:
         SANSUtility.MaskOutsideCylinder(top_layer, RMAX, 0.0, 0.0)
 
-    dimension = SANSUtility.GetInstrumentDetails(SANSInsts.getCurInst())[0]
+    dimension = SANSUtility.GetInstrumentDetails(INSTRUMENT)[0]
 
     #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
     #start with the currently selected detector
-    firstSpec1 = SANSInsts.all[INSTR_NAME].curDetector().firstSpec
+    firstSpec1 = INSTRUMENT.curDetector().firstSpec
     _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
     #now the other detector
-    firstSpec2 = SANSInsts.all[INSTR_NAME].otherDetector().firstSpec
+    firstSpec2 = INSTRUMENT.otherDetector().firstSpec
     _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
     
     # Mark up "dead" detectors with error value 
