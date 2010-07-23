@@ -21,15 +21,28 @@ void ApplyTransmissionCorrection::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("TransmissionWorkspace","",Direction::Input,wsValidator->clone()));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
+      "Workspace to apply the transmission correction to");
+  declareProperty("TransmissionWorkspace", "", "Workspace containing the transmission values");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+      "Workspace to store the corrected data in");
+
+  // Alternatively, the user can specify a transmission that will ba applied to all wavelength bins
+  declareProperty("TransmissionValue", EMPTY_DBL(),
+      "Transmission value to apply to all wavelengths. If specified, "
+      "TransmissionWorkspace will not be used.");
+  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  mustBePositive->setLower(0.0);
+  declareProperty("TransmissionError", 0.0, mustBePositive,
+    "The error on the transmission value (default 0.0)" );
+
 }
 
 void ApplyTransmissionCorrection::exec()
 {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_const_sptr transWS = getProperty("TransmissionWorkspace");
+  const double trans_value = getProperty("TransmissionValue");
+  const double trans_error = getProperty("TransmissionError");
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -43,17 +56,27 @@ void ApplyTransmissionCorrection::exec()
 
   Progress progress(this,0.0,1.0,numHists);
 
-  // Check that the two input workspaces are consistent (same number of X bins)
-  if ( transWS->readY(0).size() != inputWS->readY(0).size() )
-  {
-    g_log.error() << "Input and transmission workspaces have a different number of wavelength bins" << std::endl;
-    throw std::invalid_argument("Input and transmission workspaces have a different number of wavelength bins");
+  // If a transmission value was given, use it instead of the transmission workspace
+  MantidVec trans(inputWS->readY(0).size(), trans_value);
+  MantidVec dtrans(inputWS->readY(0).size(),trans_error);
+  MantidVec& TrIn = trans;
+  MantidVec& ETrIn = dtrans;
+
+  if ( isEmpty(trans_value) ) {
+    // Get the transmission workspace
+    MatrixWorkspace_const_sptr transWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+          (AnalysisDataService::Instance().retrieve(getPropertyValue("TransmissionWorkspace")));
+
+    // Check that the two input workspaces are consistent (same number of X bins)
+    if ( transWS->readY(0).size() != inputWS->readY(0).size() )
+    {
+      g_log.error() << "Input and transmission workspaces have a different number of wavelength bins" << std::endl;
+      throw std::invalid_argument("Input and transmission workspaces have a different number of wavelength bins");
+    }
+
+    TrIn  = transWS->readY(0);
+    ETrIn = transWS->readE(0);
   }
-
-  // Access the transmission data
-  const MantidVec& TrIn  = transWS->readY(0);
-  const MantidVec& ETrIn = transWS->readE(0);
-
   // Loop through the spectra and apply correction
   for (int i = 0; i < numHists; ++i)
   {
