@@ -89,6 +89,7 @@ namespace Mantid
           // This creates a new Workspace2D through a torturous route using the WorkspaceFactory.
           // The Workspace2D is created with an EMPTY CONSTRUCTOR
           outputW = WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1);
+          WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
 
           //Initialize progress reporting.
           Progress prog(this,0.0,1.0, histnumber);
