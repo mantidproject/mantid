@@ -263,6 +263,32 @@ double Component::getDistance(const IComponent& comp) const
   return getPos().distance(comp.getPos());
 }
 
+/// Default implementation
+std::vector<double> Component::getNumberParameter(const std::string&) const
+{
+  return std::vector<double>(0);
+}
+
+/// Default implementation
+std::vector<V3D> Component::getPositionParameter(const std::string&) const
+{
+  return std::vector<V3D>(0);
+}
+
+/// Default implementation  
+std::vector<Quat> Component::getRotationParameter(const std::string&) const
+{
+  return std::vector<Quat>(0);
+}
+
+/// Default implementation  
+std::vector<std::string> Component::getStringParameter(const std::string&) const
+{
+  return std::vector<std::string>(0);
+}
+
+
+
 /** Prints a text representation of itself
  * @param os The ouput stream to write to
  */

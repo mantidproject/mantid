@@ -53,6 +53,11 @@ double Mantid::EMPTY_DBL()
   return /*  -  */  DBL_MAX/2;
 }
 
+/// Constructor
+Mantid::Kernel::RegistrationHelper::RegistrationHelper(int)
+{
+}
+
 /**
  * Get the directory containing the program executable
  * @returns A string containing the path of the directory 

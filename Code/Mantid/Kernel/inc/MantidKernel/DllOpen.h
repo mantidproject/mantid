@@ -64,7 +64,7 @@ private:
 	DllOpen()
 	{};
 	/// Copy operator private as not needed
-	DllOpen(const DllOpen &a)
+	DllOpen(const DllOpen &)
 	{};
 	///Destructor private as not needed	
 	~DllOpen()

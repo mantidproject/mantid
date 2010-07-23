@@ -81,14 +81,14 @@ namespace Units
  */
 DECLARE_UNIT(Empty)
 
-void Empty::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void Empty::toTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
+    const double&, const int&, const double&, const double&) const
 {
   throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
 }
 
-void Empty::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void Empty::fromTOF(std::vector<double>&, std::vector<double>&, const double&, const double& ,
+    const double&, const int&, const double&, const double&) const
 {
   throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
 }
@@ -119,15 +119,15 @@ void Label::setLabel(const std::string& cpt, const std::string& lbl)
  */
 DECLARE_UNIT(TOF)
 
-void TOF::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void TOF::toTOF(std::vector<double>&, std::vector<double>& , const double& , const double&,
+    const double&, const int&, const double&, const double& ) const
 {
   // Nothing to do
   return;
 }
 
-void TOF::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void TOF::fromTOF(std::vector<double>&, std::vector<double>&, const double&, const double& ,
+    const double&, const int&, const double&, const double&) const
 {
   // Nothing to do
   return;
@@ -149,8 +149,8 @@ Wavelength::Wavelength() : Unit()
 }
 
 
-void Wavelength::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void Wavelength::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int&, const double&, const double&) const
 {
   // First the crux of the conversion
   double factor = ( PhysicalConstants::NeutronMass * ( l1 + l2 ) ) / PhysicalConstants::h;
@@ -164,8 +164,8 @@ void Wavelength::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, c
   std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );
 }
 
-void Wavelength::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void Wavelength::fromTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int&, const double&, const double&) const
 {
   double ltot = l1 + l2;
   // Protect against divide by zero
@@ -199,8 +199,8 @@ Energy::Energy() : Unit()
   addConversion("Wavelength",factor,-0.5);
 }
 
-void Energy::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void Energy::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int&, const double&, const double&) const
 {
   const double TOFinMicroseconds = 1e6;
 
@@ -215,8 +215,8 @@ void Energy::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
   }
 }
 
-void Energy::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void Energy::fromTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int&, const double&, const double&) const
 {
   const double TOFisinMicroseconds = 1e-12;  // The input tof number gets squared so this is (10E-6)^2
 
@@ -246,8 +246,8 @@ dSpacing::dSpacing() : Unit()
   addConversion("QSquared",(factor*factor),-2.0);
 }
 
-void dSpacing::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void dSpacing::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double& twoTheta, const int&, const double& , const double& ) const
 {
   // First the crux of the conversion
   double factor = ( 2.0 * PhysicalConstants::NeutronMass * sin(twoTheta/2.0) * ( l1 + l2 ) )
@@ -261,8 +261,8 @@ void dSpacing::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
   std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );
 }
 
-void dSpacing::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void dSpacing::fromTOF(std::vector<double>& xdata, std::vector<double>& , const double& l1, const double& l2,
+    const double& twoTheta, const int& , const double&, const double&) const
 {
   // First the crux of the conversion. Note that the input data is DIVIDED by this factor below.
   double factor = ( 2.0 * PhysicalConstants::NeutronMass * sin(twoTheta/2.0) * ( l1 + l2 ) )
@@ -291,8 +291,8 @@ MomentumTransfer::MomentumTransfer() : Unit()
   addConversion("dSpacing",factor,-1.0);
 }
 
-void MomentumTransfer::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void MomentumTransfer::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double& twoTheta, const int&, const double&, const double&) const
 {
   // First the crux of the conversion
   double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
@@ -311,8 +311,8 @@ void MomentumTransfer::toTOF(std::vector<double>& xdata, std::vector<double>& yd
   }
 }
 
-void MomentumTransfer::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void MomentumTransfer::fromTOF(std::vector<double>& xdata, std::vector<double>& , const double& l1, const double& l2,
+    const double& twoTheta, const int&, const double&, const double&) const
 {
   // First the crux of the conversion
   double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
@@ -343,8 +343,8 @@ QSquared::QSquared() : Unit()
   addConversion("dSpacing",factor,-0.5);
 }
 
-void QSquared::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void QSquared::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double& twoTheta, const int&, const double&, const double&) const
 {
   // First the crux of the conversion
   double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
@@ -363,8 +363,8 @@ void QSquared::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
   }
 }
 
-void QSquared::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void QSquared::fromTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double& twoTheta, const int&, const double&, const double&) const
 {
   // First the crux of the conversion
   double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
@@ -390,8 +390,8 @@ void QSquared::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, c
  */
 DECLARE_UNIT(DeltaE)
 
-void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int& emode, const double& efixed, const double&) const
 {
   // Efixed must be set to something
   if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");
@@ -445,8 +445,8 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
   }
 }
 
-void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int& emode, const double& efixed, const double&) const
 {
   // Efixed must be set to something
   if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");
@@ -507,8 +507,8 @@ void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
  */
 DECLARE_UNIT(DeltaE_inWavenumber)
 
-void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int& emode, const double& efixed, const double&) const
 {
   // Efixed must be set to something
   if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");
@@ -562,8 +562,8 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
   }
 }
 
-void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-    const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double>& , const double& l1, const double& l2,
+    const double&, const int& emode, const double& efixed, const double&) const
 {
   // Efixed must be set to something
   if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");

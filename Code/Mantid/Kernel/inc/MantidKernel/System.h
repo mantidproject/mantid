@@ -67,10 +67,7 @@ namespace Kernel
   public:
     /// Constructor. Does nothing.
     /// @param i Takes an int
-    RegistrationHelper(int i) 
-    { 
-      // Does nothing 
-    }
+    RegistrationHelper(int i); // Implemented in cpp file to kill compiler warning
   };
 
   //Return the executable path

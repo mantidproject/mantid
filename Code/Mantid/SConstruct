@@ -208,6 +208,7 @@ if os.name == 'posix':
 	conf.Finish()
 
 	cflags.append('-Wall')
+	cflags.append('-Wextra')
 	# Debug symbols are useful in release too
 	cflags.append('-g')
 	lpts.append('-g')
