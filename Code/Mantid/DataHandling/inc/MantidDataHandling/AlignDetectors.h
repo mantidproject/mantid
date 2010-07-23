@@ -61,6 +61,8 @@ private:
   void init();
   void exec();
 
+  void execEvent();
+
   bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets);
 };
 

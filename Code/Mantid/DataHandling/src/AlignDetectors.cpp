@@ -26,6 +26,8 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
 
+const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
+
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors()
 {}
@@ -67,7 +69,10 @@ void AlignDetectors::exec()
   //Check if its an event workspace
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != NULL)
-    std::cout << "Event Workspace for input\n";
+  {
+    this->execEvent();
+    return;
+  }
 
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");
@@ -108,7 +113,6 @@ void AlignDetectors::exec()
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
   }
-  const double constant = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / inputWS->blocksize();
@@ -157,7 +161,7 @@ void AlignDetectors::exec()
         factor += numerator / sinTheta;
       }
       // Now average the factor and multiplies by the prefactor.
-      factor*= constant/ndets;
+      factor*= CONSTANT/ndets;
       // Get references to the x data
       MantidVec& xOut = outputWS->dataX(i);
       // Make sure reference to input X vector is obtained after output one because in the case
@@ -181,6 +185,74 @@ void AlignDetectors::exec()
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
+void AlignDetectors::execEvent()
+{
+  g_log.information("Processing event workspace");
+
+  // the calibration information is already read in at this point
+
+  // convert the input workspace into the event workspace we already know it is
+  const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
+  EventWorkspace_const_sptr inputWS
+                 = boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+
+  // generate the output workspace pointer
+  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
+  EventWorkspace_sptr outputWS;
+  if (matrixOutputWS == matrixInputWS)
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  else
+  {
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1));
+    //API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+    outputWS->mutableSpectraMap().clear();
+    this->setProperty("OutputWorkspace", outputWS);
+  }
+
+  // Read in the calibration data
+  const std::string calFileName = this->getProperty("CalibrationFile");
+  std::map<int,double> offsets;
+
+  progress(0.0,"Reading calibration file");
+
+  if ( ! this->readCalFile(calFileName, offsets) )
+  {
+    throw Exception::FileError("Problem reading calibration file", calFileName);
+  }
+
+  // Set the final unit that our output workspace will have
+  outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
+
+  // Get a pointer to the instrument contained in the workspace
+  IInstrument_const_sptr instrument = inputWS->getInstrument();
+  // And one to the SpectraDetectorMap
+  const SpectraDetectorMap& specMap = inputWS->spectraMap();
+
+  // Get the distance between the source and the sample (assume in metres)
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  double l1;
+  try
+  {
+    l1 = instrument->getSource()->getDistance(*sample);
+    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
+  }
+  catch (Exception::NotFoundError e)
+  {
+    g_log.error("Unable to calculate source-sample distance");
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
+  }
+
+  // generate map of the tof->d conversion factors
+  std::map<int,double> conversions;
+  for (std::map<int,double>::const_iterator iter = offsets.begin(); iter != offsets.end(); ++iter)
+  {
+    // this should do the wonderful calculation of the geometric position as
+    // done in the histogram case
+    conversions[iter->first] = iter->second;
+  }
+
+}
 
 //-----------------------------------------------------------------------
 /// Reads the calibration file. Returns true for success, false otherwise.
