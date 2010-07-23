@@ -47,9 +47,8 @@ namespace MantidQt
       Q_OBJECT
 
     public: 
-      SaveWorkspaces(QWidget *parent, const QString & suggFname = "",
-        const QHash<const QCheckBox * const, QString> & defSavs =
-        QHash<const QCheckBox * const, QString>());
+      SaveWorkspaces(QWidget *parent, const QString & suggFname,
+        QHash<const QCheckBox * const, QString> & defSavs);
       void initLayout();
       ///Returns the save extension expected the name algorithm
       static QString getSaveAlgExt(const QString & algName);

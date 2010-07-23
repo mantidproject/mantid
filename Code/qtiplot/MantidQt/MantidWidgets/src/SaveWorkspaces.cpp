@@ -32,7 +32,7 @@ using namespace Mantid::API;
  *  @param suggFname sets the initial entry in the filename box
  *  @param defSavs sets which boxes are ticked
  */
-SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, const QHash<const QCheckBox * const, QString> & defSavs) :
+SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs) :
   API::MantidQtDialog(parent)
 {
   setWindowTitle("Save Workspaces");
