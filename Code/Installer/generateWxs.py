@@ -8,6 +8,16 @@ import uuid
 import string
 import platform
 
+QTDIR = 'c:/qt/lib' #hardcoded to c:/qt location - this is true for build servers and most developers
+SIPDIR = 'C:/Python25/Lib/site-packages'
+PYQTDIR = SIPDIR + '/PyQt4'
+USERALGORITHMSDIR = '../Mantid/UserAlgorithms'
+
+vfile = open('build_number.txt','r')
+vstr = vfile.read()
+vlen = len(vstr)
+vfile.close()
+
 def getFileVersion():
   try:
     VERSIONFILE = '../MantidVersion.txt'
@@ -18,12 +28,6 @@ def getFileVersion():
   except:
     return "0.0"
 #end def
-
-
-vfile = open('build_number.txt','r')
-vstr = vfile.read()
-vlen = len(vstr)
-vfile.close()
 
 MantidVersion = getFileVersion() + '.' + vstr[12:vlen-2]
 print('Mantid version '+MantidVersion)
@@ -38,7 +42,6 @@ else:
     toget = 'toget'
     upgrade_uuid = '{E9B6F1A9-8CB7-4441-B783-4E7A921B37F0}'
     
-QTDIR = toget + '/qt'
 
 # To perform a major upgrade, i.e. uninstall the old version if an old one exists, 
 # the product and package GUIDs need to change everytime
@@ -186,6 +189,13 @@ def addAllFilesExt(location,name,ext,parent):
             #print fil
             addFileV(name+'_'+fn+'_file',name+str(i),fil,location+'/'+fil,parent)
             i += 1
+
+def addSingleFile(location,fil,name,parent):
+    #print 'Include single file'
+    location = os.path.abspath(location);
+    fn = name.replace('-','_')
+    fn = fn.replace('+','_')
+    addFileV(fn+'_file',name,fil,location+'/'+fil,parent)
 
 def addFeature(Id,title,description,level,parent,absent='allow',allowAdvertise='yes'):
     e = doc.createElement('Feature')
@@ -635,9 +645,12 @@ addTo(Data,'CreateFolder',{})
 #----------------- User Algorithms -------------------------------------
 UserAlgorithmsDir = addDirectory('UserAlgorithmsDir','UAlgs','UserAlgorithms',InstallDir)
 UserAlgorithms = addComponent('UserAlgorithms',comp_guid['UserAlgorithms'],UserAlgorithmsDir)
-addAllFilesExt('../Mantid/UserAlgorithms','ualg','cpp',UserAlgorithms)
-addAllFilesExt('../Mantid/UserAlgorithms','ualg','h',UserAlgorithms)
-addAllFiles(toget + '/UserAlgorithms','UA',UserAlgorithms)
+#all cpp, h and three specific files
+addAllFilesExt(USERALGORITHMSDIR,'ualg','cpp',UserAlgorithms)
+addAllFilesExt(USERALGORITHMSDIR,'ualg','h',UserAlgorithms)
+addSingleFile(USERALGORITHMSDIR,'build.bat','UA_build.bat',UserAlgorithms)
+addSingleFile(USERALGORITHMSDIR,'createAlg.py','UA_ca.py',UserAlgorithms)
+addSingleFile(USERALGORITHMSDIR,'Sconstruct','UA_Scon',UserAlgorithms)
 addFileV('MantidKernel_lib','MKernel.lib','MantidKernel.lib','../Mantid/Kernel/lib/MantidKernel.lib',UserAlgorithms)
 addFileV('MantidAPI_lib','MAPI.lib','MantidAPI.lib','../Mantid/API/lib/MantidAPI.lib',UserAlgorithms)
 addFileV('MantidDataObjects_lib','MDObject.lib','MantidDataObjects.lib','../Mantid/DataObjects/lib/MantidDataObjects.lib',UserAlgorithms)
@@ -648,9 +661,9 @@ addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../Third_Party
 #--------------- Python ---------------------------------------------------------------------------------
 PyQtDir = addDirectory('PyQtDir','PyQt4','PyQt4',binDir)
 Sip = addComponent('Sip',comp_guid['Sip'],binDir)
-addAllFiles(toget + '/sip','sip',Sip)
+addSingleFile(SIPDIR,'sip.pyd','sip',Sip)
 PyQt = addComponent('PyQt',comp_guid['PyQt'],PyQtDir)
-addAllFiles(toget + '/PyQt4','PyQt',PyQt)
+addAllFilesExt(PYQTDIR,'PyQt','pyd',PyQt)
 addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', '../Mantid/PythonAPI/MantidFramework.py', MantidDlls)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
