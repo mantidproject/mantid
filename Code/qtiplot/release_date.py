@@ -22,11 +22,22 @@ def getSVNRevision():
     return versionList[0].rstrip()
 #end def
 
+def getFileVersion():
+  try:
+    VERSIONFILE = '../MantidVersion.txt'
+    f = open(VERSIONFILE,'r')
+    line = f.readline()
+    f.close()
+    return line.rstrip()
+  except:
+    return "0.0"
+#end def
+
 def main(argv=None):
   if argv is None:
     argv = sys.argv
   svn = ''
-  version='1.0'
+  version=getFileVersion()
   if len(argv) > 1:
     version = argv[1]
   if len(argv) > 2:

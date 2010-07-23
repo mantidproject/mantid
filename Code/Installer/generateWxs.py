@@ -8,12 +8,24 @@ import uuid
 import string
 import platform
 
+def getFileVersion():
+  try:
+    VERSIONFILE = '../MantidVersion.txt'
+    f = open(VERSIONFILE,'r')
+    line = f.readline()
+    f.close()
+    return line.rstrip()
+  except:
+    return "0.0"
+#end def
+
+
 vfile = open('build_number.txt','r')
 vstr = vfile.read()
 vlen = len(vstr)
 vfile.close()
 
-MantidVersion = '1.0.' + vstr[12:vlen-2]
+MantidVersion = getFileVersion() + '.' + vstr[12:vlen-2]
 print('Mantid version '+MantidVersion)
 
 # Architecture

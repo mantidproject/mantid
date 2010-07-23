@@ -26,9 +26,20 @@ def getSVNRevision():
     return str(maxVersion)
   except:
     return versionList[0].rstrip()
+    
+def getFileVersion():
+  try:
+    VERSIONFILE = '../MantidVersion.txt'
+    f = open(VERSIONFILE,'r')
+    line = f.readline()
+    f.close()
+    return line.rstrip()
+  except:
+    return "0.0"
+
 
 def writeMantidVersion(verbose=False):
-  version = '1.0.' +getSVNRevision()
+  version = getFileVersion() + '.' +getSVNRevision()
   HEADER = 'Kernel/inc/MantidKernel/MantidVersion.h'
 
   if verbose:
