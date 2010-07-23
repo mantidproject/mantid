@@ -97,6 +97,7 @@ def setCurInst(name) :
     _curInst = allInsts[name]
 
 def setDetector(detName) :
+    global _curInst
     if _curInst.setDetector(detName) :
         global curDetector
         curDetector = _curInst.curDetector()

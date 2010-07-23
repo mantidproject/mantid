@@ -7,8 +7,10 @@
 #include "MantidQtCustomInterfaces/ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
+#include "MantidQtMantidWidgets/SaveWorkspaces.h"
 
 #include <QHash>
+#include <QSettings>
 #include <QStringList>
 #include "Poco/NObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -26,23 +28,37 @@ namespace Mantid
   }
 }
 
-//---------------------------
-// Qt Forward Declarations
-//---------------------------
-class QLineEdit;
-class QSignalMapper;
-class QLabel;
 class QAction;
 
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
-//-----------------------------
-// Forward declaration
-//-----------------------------
+	/** 
+    Implements the SANS, small angle nuetron scattering, dialog box
 
+    @author Martyn Gigg
 
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    */
 class SANSRunWindow : public MantidQt::API::UserSubWindow
 {
   Q_OBJECT
@@ -69,14 +85,22 @@ private:
   virtual void initLocalPython();
   /**@name Utility functions */
   //@{
+  /// Initialise some of the data and signal connections in the save box
+  void setupSaveBox();
   /// connect the buttons click events to signals
   void connectButtonSignals();
+  /// connect signals from the textChanged() signal from text boxes, index changed on ComboBoxes etc.
+  void connectChangeSignals();
   /// Create the necessary widget maps
   void initWidgetMaps();
   ///Read previous settings
   void readSettings();
+  /// Sets the states of the save box controls to the states read from the QSettings object
+  void readSaveSettings(QSettings & valueStore);
   ///Save settings
   void saveSettings();
+  ///Stores the state of the save box controls in QSettings
+  void saveSaveSettings(QSettings & valueStore);
   /// Run a reduce function
   QString runReduceScriptFunction(const QString & pycode);
   /// Trim python print markers
@@ -116,6 +140,8 @@ private:
   void setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode);
   /// Mark an error on a label
   void markError(QLabel* label);
+  /// set the name of the output workspace, empty means there is no output
+  void resetDefaultOutput(const QString & wsName="");
   /// Run an assign command
   bool runAssign(int key, QString & logs);
   /// Get the detectors' names
@@ -153,6 +179,12 @@ private slots:
   void selectUserFile();
   /// Select a CSV file
   void selectCSVFile();
+  /// Raises a browse dialog to select the filename used to save the output
+  void saveFileBrowse();
+  /// Raises a dialog that allows people to save multiple workspaces
+  void saveWorkspacesDialog();
+  ///deals with the save workspaces dialog box closing
+  void saveWorkspacesClosed();
   /// A run number has changed
   void runChanged();
   /// Receive a load button click
@@ -163,16 +195,20 @@ private slots:
   void handlePlotButtonClick();
   /// Find centre button click handler
   void handleRunFindCentre();
-  ///Handle save button click
-  void handleSaveButtonClick();
+  ///Save the output from a single run reduction in the user selected formats
+  void handleDefSaveClick();
   /// A ComboBox option change
   void handleStepComboChange(int new_index);
   /// Called when the show mask button has been clicked
   void handleShowMaskButtonClick();
   ///Handle the change in instrument 
   void handleInstrumentChange(int);
+  ///Record if that user has changed the default filename
+  void setUserFname();
   /// Update the centre finding progress
   void updateCentreFindingStatus(const QString & msg);
+  /// Enable the default save button only if there an output workspace and a filename to save it to
+  void enableOrDisableDefaultSave();
   /// Append log message to log window
   void updateLogWindow(const QString & msg);
   /// Switch mode
@@ -193,6 +229,8 @@ private:
   Ui::SANSRunWindow m_uiForm;
   /// this object holds the functionality in the Add Files tab
   SANSAddFiles *m_addFilesTab;
+  /// this points to a saveWorkspaces, which allows users to save any workspace, when one is opened
+  MantidWidgets::SaveWorkspaces *m_saveWorkspaces;
   /// The data directory (as an absolute path)
   QString m_data_dir;
   /// The instrument definition directory
@@ -201,6 +239,8 @@ private:
   QString m_last_dir;
   /// Is the user file loaded
   bool m_cfg_loaded;
+  ///True if the user cahnged the default filename text, false otherwise
+  bool m_userFname;
   /// The sample that was loaded
   QString m_sample_no;
   /// A map for quickly retrieving the different line edits
@@ -209,12 +249,17 @@ private:
   QHash<int, QLabel*> m_period_lbls;
   /// A list of the full workspace names
   QHash<int, QString> m_workspace_names;
-  // A signal mapper to pick up various button clicks
+  /// Stores the last output workspace from single run mode, should be emptied when run in batch mode
+  QString m_outputWS;
+  /// A signal mapper to pick up various button clicks
   QSignalMapper *m_reducemapper;
-  // A flag to mark that warnings have been issued about geometry issues
+  /// A flag to mark that warnings have been issued about geometry issues
   bool m_warnings_issued;
-  // A flag that causes the reload of the data
+  /// A flag that causes the reload of the data
   bool m_force_reload;
+  /// Holds pointers to the check box for each supported save format with the name of its save algorithm
+  QHash<const QCheckBox * const, QString> m_savFormats;
+  typedef QHash<const QCheckBox * const, QString>::const_iterator SavFormatsConstIt;
   /// A flag indicating there were warning messsages in the log
   bool m_log_warnings;
   // An observer for a delete notification from Mantid

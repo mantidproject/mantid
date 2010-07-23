@@ -24,7 +24,6 @@
 #include <QHash>
 #include <QTextStream>
 #include <QTreeWidgetItem>
-#include <QSettings>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QSignalMapper>
@@ -45,6 +44,7 @@ namespace CustomInterfaces
 }
 }
 
+using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -57,8 +57,9 @@ Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
 //----------------------------------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_addFilesTab(NULL), m_data_dir(""), m_ins_defdir(""),
-  m_last_dir(""), m_cfg_loaded(true), m_sample_no(), m_run_no_boxes(),
+  UserSubWindow(parent), m_addFilesTab(NULL), m_saveWorkspaces(NULL),
+  m_data_dir(""), m_ins_defdir(""), m_last_dir(""),
+  m_cfg_loaded(true), m_userFname(false), m_sample_no(), m_run_no_boxes(),
   m_period_lbls(), m_warnings_issued(false), m_force_reload(false),
   m_log_warnings(false),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
@@ -93,27 +94,17 @@ void SANSRunWindow::initLayout()
   m_reducemapper = new QSignalMapper(this);
   m_mode_mapper = new QSignalMapper(this);
 
-  m_allowed_batchtags.insert("sample_sans",0);
-  m_allowed_batchtags.insert("sample_trans",1);
-  m_allowed_batchtags.insert("sample_direct_beam",2);
-  m_allowed_batchtags.insert("can_sans",3);
-  m_allowed_batchtags.insert("can_trans",4);
-  m_allowed_batchtags.insert("can_direct_beam",5);
-  m_allowed_batchtags.insert("background_sans",-1);
-  m_allowed_batchtags.insert("background_trans",-1);
-  m_allowed_batchtags.insert("background_direct_beam",-1);
-  m_allowed_batchtags.insert("output_as",6);
-
-
   //Set column stretch on the mask table
   m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
 
-  //Button connections
+  setupSaveBox();
+  
   connectButtonSignals();
 
   // Disable most things so that load is the only thing that can be done
   m_uiForm.oneDBtn->setEnabled(false);
   m_uiForm.twoDBtn->setEnabled(false);
+  m_uiForm.saveDefault_btn->setEnabled(false);
   for( int i = 1; i < 4; ++i)
   {
     m_uiForm.tabWidget->setTabEnabled(i, false);
@@ -147,27 +138,7 @@ void SANSRunWindow::initLayout()
   //Create the widget hash maps
   initWidgetMaps();
 
-  //Connect each box's edited signal to flag if the box's text has changed
-  for( int idx = 0; idx < 9; ++idx )
-  {
-    connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
-  }
-
-  connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
-
-  // Combo boxes
-  connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
-    SLOT(handleStepComboChange(int)));
-  connect(m_uiForm.q_dq_opt, SIGNAL(currentIndexChanged(int)), this, 
-    SLOT(handleStepComboChange(int)));
-  connect(m_uiForm.qy_dqy_opt, SIGNAL(currentIndexChanged(int)), this, 
-    SLOT(handleStepComboChange(int)));
-
-  connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
-    SLOT(handleInstrumentChange(int)));
-
-  // Default transmission switch
-  connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+  connectChangeSignals();
 
   // Add Python set functions as underlying data 
   m_uiForm.inst_opt->setItemData(0, "LOQ()");
@@ -211,6 +182,55 @@ void SANSRunWindow::initLocalPython()
     setProcessingState(true, -1);    
   }
 }
+/** Initialise some of the data and signal connections in the save box
+*/
+void SANSRunWindow::setupSaveBox()
+{
+  connect(m_uiForm.saveDefault_btn, SIGNAL(clicked()), this, SLOT(handleDefSaveClick()));
+  connect(m_uiForm.saveSel_btn, SIGNAL(clicked()),
+    this, SLOT(saveWorkspacesDialog()));
+  connect(m_uiForm.saveFilename_btn, SIGNAL(clicked()),
+    this, SLOT(saveFileBrowse()));
+  connect(m_uiForm.outfile_edit, SIGNAL(textEdited(const QString &)),
+    this, SLOT(setUserFname()));
+
+  //link the save option tick boxes to their save algorithm
+  m_savFormats.insert(m_uiForm.saveNex_check, "SaveNexus");
+  m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
+  m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
+  m_savFormats.insert(m_uiForm.saveCSV_check, "SaveCSV");
+
+  for(SavFormatsConstIt i=m_savFormats.begin(); i != m_savFormats.end(); ++i)
+  {
+    connect(i.key(), SIGNAL(stateChanged(int)),
+      this, SLOT(enableOrDisableDefaultSave()));
+  }
+}
+/** Raises a saveWorkspaces dialog which allows people to save any workspace or
+*  workspaces the user chooses
+*/
+void SANSRunWindow::saveWorkspacesDialog()
+{
+  //this dialog must have delete on close selected to aviod a memory leak
+  m_saveWorkspaces =
+    new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats);
+  //this dialog sometimes needs to run Python, pass this to Mantidplot via our runAsPythonScript() signal
+  connect(m_saveWorkspaces, SIGNAL(runAsPythonScript(const QString&)),
+    this, SIGNAL(runAsPythonScript(const QString&)));
+  //we need know if we have a pointer to a valid window or not
+  connect(m_saveWorkspaces, SIGNAL(closing()),
+    this, SLOT(saveWorkspacesClosed()));
+  m_uiForm.saveSel_btn->setEnabled(false);
+  m_saveWorkspaces->show();
+}
+/**When the save workspaces dialog box is closes its pointer, m_saveWorkspaces,
+* is set to NULL and the raise dialog button is re-enabled
+*/
+void SANSRunWindow::saveWorkspacesClosed()
+{
+  m_uiForm.saveSel_btn->setEnabled(true);
+  m_saveWorkspaces = NULL;
+}
 /** Connection the buttons to their signals
 */
 void SANSRunWindow::connectButtonSignals()
@@ -221,7 +241,6 @@ void SANSRunWindow::connectButtonSignals()
 
   connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
   connect(m_uiForm.runcentreBtn, SIGNAL(clicked()), this, SLOT(handleRunFindCentre()));
-  connect(m_uiForm.saveBtn, SIGNAL(clicked()), this, SLOT(handleSaveButtonClick()));
 
   // Reduction buttons
   connect(m_uiForm.oneDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
@@ -233,11 +252,41 @@ void SANSRunWindow::connectButtonSignals()
   connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
   connect(m_uiForm.clear_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
 }
+/** Connect signals from the textChanged() signal from text boxes, index changed
+*  on ComboBoxes etc.
+*/
+void SANSRunWindow::connectChangeSignals()
+{
+  //Connect each box's edited signal to flag if the box's text has changed
+  for( int idx = 0; idx < 9; ++idx )
+  {
+    connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
+  }
+
+  connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
+  connect(m_uiForm.outfile_edit, SIGNAL(textEdited(const QString&)),
+    this, SLOT(enableOrDisableDefaultSave()));
+
+  // Combo boxes
+  connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleStepComboChange(int)));
+  connect(m_uiForm.q_dq_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleStepComboChange(int)));
+  connect(m_uiForm.qy_dqy_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleStepComboChange(int)));
+
+  connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(handleInstrumentChange(int)));
+
+  // Default transmission switch
+  connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+}
 /**
  * Initialize the widget maps
  */
 void SANSRunWindow::initWidgetMaps()
 {
+  //          single run mode settings
     //Text edit map
     m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
     m_run_no_boxes.insert(1, m_uiForm.sct_can_edit);
@@ -249,7 +298,7 @@ void SANSRunWindow::initWidgetMaps()
     m_run_no_boxes.insert(7, m_uiForm.direct_can_edit);
     m_run_no_boxes.insert(8, m_uiForm.direct_bkgd_edit);
 
-        //Period label hash. Each label has a buddy set to its corresponding text edit field
+    //Period label hash. Each label has a buddy set to its corresponding text edit field
     m_period_lbls.insert(0, m_uiForm.sct_prd_tot1);
     m_period_lbls.insert(1, m_uiForm.sct_prd_tot2);
     m_period_lbls.insert(2, m_uiForm.sct_prd_tot3);
@@ -260,7 +309,20 @@ void SANSRunWindow::initWidgetMaps()
     m_period_lbls.insert(7, m_uiForm.direct_prd_tot2);   
     m_period_lbls.insert(8, m_uiForm.direct_prd_tot3);
 
-    // SANS2D det names/label map
+  //       batch mode settings
+  m_allowed_batchtags.insert("sample_sans",0);
+  m_allowed_batchtags.insert("sample_trans",1);
+  m_allowed_batchtags.insert("sample_direct_beam",2);
+  m_allowed_batchtags.insert("can_sans",3);
+  m_allowed_batchtags.insert("can_trans",4);
+  m_allowed_batchtags.insert("can_direct_beam",5);
+  m_allowed_batchtags.insert("background_sans",-1);
+  m_allowed_batchtags.insert("background_trans",-1);
+  m_allowed_batchtags.insert("background_direct_beam",-1);
+  m_allowed_batchtags.insert("output_as",6);
+
+  //            detector info  
+  // SANS2D det names/label map
     QHash<QString, QLabel*> labelsmap;
     labelsmap.insert("Front_Det_Z", m_uiForm.dist_smp_frontZ);
     labelsmap.insert("Front_Det_X", m_uiForm.dist_smp_frontX);
@@ -342,10 +404,24 @@ void SANSRunWindow::readSettings()
   m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
 
   value_store.endGroup();
+  readSaveSettings(value_store);
 
   g_log.debug() << "Found previous data directory " << m_uiForm.datadir_edit->text().toStdString()
     << "\nFound previous user mask file" << m_uiForm.userfile_edit->text().toStdString() 
     << "\nFound instrument definition directory " << m_ins_defdir.toStdString() << std::endl;
+
+}
+/** Sets the states of the checkboxes in the save box using those
+* in the passed QSettings object
+*  @param valueStore where the settings will be stored
+*/
+void SANSRunWindow::readSaveSettings(QSettings & valueStore)
+{
+  valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
+  m_uiForm.saveNex_check->setChecked(valueStore.value("nexus",false).toBool());
+  m_uiForm.saveCan_check->setChecked(valueStore.value("canSAS",false).toBool());
+  m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
+  m_uiForm.saveCSV_check->setChecked(valueStore.value("CSV", false).toBool());
 }
 
 /**
@@ -379,8 +455,20 @@ void SANSRunWindow::saveSettings()
   }
   value_store.setValue("runmode",mode_id);
   value_store.endGroup();
+  saveSaveSettings(value_store);
 }
-
+/** Stores the state of the checkboxes in the save box with the
+* passed QSettings object
+*  @param valueStore where the settings will be stored
+*/
+void SANSRunWindow::saveSaveSettings(QSettings & valueStore)
+{
+  valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
+  valueStore.setValue("nexus", m_uiForm.saveNex_check->isChecked());
+  valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
+  valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
+  valueStore.setValue("CSV", m_uiForm.saveCSV_check->isChecked());
+}
 /**
  * Run a function from the SANS reduction script, ensuring that the first call imports the module
  * @param pycode The code to execute
@@ -766,16 +854,18 @@ void SANSRunWindow::setProcessingState(bool running, int type)
     m_uiForm.load_dataBtn->setEnabled(false);
   }
 
+  //buttons that are available as long as Python is available
   m_uiForm.oneDBtn->setEnabled(!running);
   m_uiForm.twoDBtn->setEnabled(!running);
-  //m_uiForm.plotBtn->setEnabled(!running);
-  m_uiForm.saveBtn->setEnabled(!running);
+  m_uiForm.saveSel_btn->setEnabled(!running);
   m_uiForm.runcentreBtn->setEnabled(!running);
   m_uiForm.userfileBtn->setEnabled(!running);
   m_uiForm.data_dirBtn->setEnabled(!running);
-
+  
   if( running )
   {
+    m_uiForm.saveDefault_btn->setEnabled(false);
+
     if( type == 0 )
     {   
       m_uiForm.oneDBtn->setText("Running ...");
@@ -788,6 +878,8 @@ void SANSRunWindow::setProcessingState(bool running, int type)
   }
   else
   {
+    enableOrDisableDefaultSave();
+
     m_uiForm.oneDBtn->setText("1D Reduce");
     m_uiForm.twoDBtn->setText("2D Reduce");
   }
@@ -1231,7 +1323,30 @@ void SANSRunWindow::selectCSVFile()
   m_last_dir = QFileInfo(m_uiForm.csv_filename->text()).path();
   if( m_cfg_loaded ) setProcessingState(false, -1);
 }
+/** Raises a browse dialog and inserts the selected file into the
+*  save text edit box, outfile_edit
+*/
+void SANSRunWindow::saveFileBrowse()
+{
+  QString title = "Save output workspace as";
 
+  QSettings prevValues;
+  prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
+  //use their previous directory first and go to their default if that fails
+  QString prevPath = prevValues.value("dir", QString::fromStdString(
+    ConfigService::Instance().getString("defaultsave.directory"))).toString();
+
+  QString filter = ";;AllFiles (*.*)";
+  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter);
+
+  if( ! oFile.isEmpty() )
+  {
+    m_uiForm.outfile_edit->setText(oFile);
+    
+    QString directory = QFileInfo(oFile).path();
+    prevValues.setValue("dir", directory);
+  }
+}
 /**
  * Mark that a run number has changed
 */
@@ -1240,7 +1355,6 @@ void SANSRunWindow::runChanged()
   m_warnings_issued = false;
   forceDataReload(true);
 }
-
 /**
  * Flip the flag to confirm whether data is reloaded
  * @param force If true, the data is reloaded when reduce is clicked
@@ -1299,6 +1413,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   runReduceScriptFunction(pythonSetInst);
 
   setProcessingState(true, -1);
+  m_uiForm.load_dataBtn->setText("Loading ...");
 
   if( m_force_reload ) cleanup();
 
@@ -1307,6 +1422,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   {
     showInformationBox("Error: No sample run given, cannot continue.");
     setProcessingState(false, -1);
+    m_uiForm.load_dataBtn->setText("Loading Data");
     return false;
   }
 
@@ -1314,6 +1430,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   {
     showInformationBox("Error: Can run supplied without direct run, cannot continue.");
     setProcessingState(false, -1);
+      m_uiForm.load_dataBtn->setText("Load Data");
     return false;
   }
 
@@ -1382,6 +1499,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   if (!is_loaded) 
   {
     setProcessingState(false, -1);
+    m_uiForm.load_dataBtn->setText("Load Data");
     return false;
   }
 
@@ -1403,6 +1521,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     catch(std::exception &)
     {
       setProcessingState(false, -1);
+      m_uiForm.load_dataBtn->setText("Load Data");
       showInformationBox("Error: Could not retrieve sample workspace from Mantid");
       return false;
     }
@@ -1445,6 +1564,7 @@ bool SANSRunWindow::handleLoadButtonClick()
  
   m_sample_no = run_number;
   setProcessingState(false, -1);
+  m_uiForm.load_dataBtn->setText("Load Data");
   return true;
 }
 
@@ -1546,8 +1666,13 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
-    //Need to check which mode we're in
-  if( m_uiForm.single_mode_btn->isChecked() )
+  //new reduction is going to take place, remove the results from the last reduction
+  resetDefaultOutput();
+
+  //The possiblities are batch mode or single run mode
+  const RunMode runMode =
+    m_uiForm.single_mode_btn->isChecked() ? SingleMode : BatchMode;
+  if ( runMode == SingleMode )
   {
     // Currently the components are moved with each reduce click. Check if a load is necessary
     // This must be done before the script is written as we need to get correct values from the
@@ -1571,13 +1696,16 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     trans_behav += "NewTrans";
   }
 
+  const static QString runPythonSep("C++ImplementationReservedC++");
   //Need to check which mode we're in
-  if( m_uiForm.single_mode_btn->isChecked() )
+  if ( runMode == SingleMode )
   {
     py_code += "\nreduced = WavRangeReduction(use_def_trans=" + trans_behav + ")\n";
+    //output the name of the output workspace, this is returned up by the runPythonCode() call below
+    py_code += "print '"+runPythonSep+"'+reduced";
     if( m_uiForm.plot_check->isChecked() )
     {
-      py_code += "PlotResult(reduced)\n";
+      py_code += "\nPlotResult(reduced)\n";
     }
   }
   else
@@ -1616,7 +1744,14 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   m_lastreducetype = idtype;
 
   //Execute the code
-  runPythonCode(py_code, false);
+  QString pythonStdOut = runPythonCode(py_code, false);
+  if ( runMode == SingleMode )
+  {
+    QString reducedWS = pythonStdOut.split(runPythonSep)[1];
+    reducedWS = reducedWS.split("\n")[0];
+    resetDefaultOutput(reducedWS);
+  }
+
   // Mark that a reload is necessary to rerun the same reduction
   forceDataReload();
   //Reenable stuff
@@ -1746,13 +1881,30 @@ void SANSRunWindow::handleRunFindCentre()
   //Reenable stuff
   setProcessingState(false, 0);
 }
-
-/**
- * Save a workspace
- */
-void SANSRunWindow::handleSaveButtonClick()
+/** Save the output workspace from a single run reduction (i.e. the
+*  workspace m_outputWS) in all the user selected formats
+*/
+void SANSRunWindow::handleDefSaveClick()
 {
-  runPythonCode("SaveRKHDialog()", false);
+  const QString fileBase = m_uiForm.outfile_edit->text();
+  if (fileBase.isEmpty())
+  {
+    QMessageBox::warning(this, "Filename required", "A filename must be entred into the text box above to save this file");
+  }
+
+  QString saveCommand;
+  for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
+  {//the key is the check box
+    if (i.key()->isChecked())
+    {// and value() is the name of the algorithm associated with that chackbox
+      QString algName = i.value();
+      QString ext = SaveWorkspaces::getSaveAlgExt(algName);
+      QString fname = fileBase.endsWith(ext) ? fileBase : fileBase+ext;
+      saveCommand += algName+"('"+m_outputWS+"','"+fname+"')\n";
+    }
+  }
+
+  runPythonCode(saveCommand);
 }
 
 /**
@@ -1859,7 +2011,13 @@ void SANSRunWindow::handleInstrumentChange(int index)
 
   m_cfg_loaded = false;
 }
-
+/** Record if the user has changed the default filename, because then we don't
+*  change it
+*/
+void SANSRunWindow::setUserFname()
+{
+  m_userFname = true;
+}
 /**
  * Update the centre finding status label
  * @param msg The message string
@@ -1878,7 +2036,30 @@ void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
     }
   }  
 }
-
+/**Enables  the default save button, saveDefault_Btn, if there is an output workspace
+* stored in m_outputWS and text in outfile_edit
+*/
+void SANSRunWindow::enableOrDisableDefaultSave()
+{
+  if ( m_outputWS.isEmpty() )
+  {//setEnabled(false) gets run below 
+  }
+  else if ( m_uiForm.outfile_edit->text().isEmpty() )
+  {//setEnabled(false) gets run below 
+  }
+  else
+  {//ensure that one format box is checked
+    for(SavFormatsConstIt i=m_savFormats.begin(); i != m_savFormats.end(); ++i)
+    {
+      if (i.key()->isChecked())
+      {
+        m_uiForm.saveDefault_btn->setEnabled(true);
+        return;
+      }
+    }
+  }
+  m_uiForm.saveDefault_btn->setEnabled(false);
+}
 /**
  * Update the logging window with status messages
  * @param msg The message received
@@ -1984,7 +2165,6 @@ void SANSRunWindow::clearLogger()
   m_uiForm.logging_field->clear();
   m_uiForm.tabWidget->setTabText(4, "Logging");
 }
-
 /**
  * Handle a verbose mode check box state change
  * state The new state
@@ -2011,6 +2191,20 @@ void SANSRunWindow::updateTransInfo(int state)
   {
     m_uiForm.trans_min->setText(runReduceScriptFunction("printParameter('TRANS_WAV1_FULL'),"));
     m_uiForm.trans_max->setText(runReduceScriptFunction("printParameter('TRANS_WAV2_FULL'),"));
+  }
+}
+/** Record the output workspace name, if there is no output
+*  workspace pass an empty string or an empty argument list
+*  @param wsName the name of the output workspace or empty for no output
+*/
+void SANSRunWindow::resetDefaultOutput(const QString & wsName)
+{
+  m_outputWS = wsName;
+  enableOrDisableDefaultSave();
+
+  if ( ! m_userFname )
+  {
+    m_uiForm.outfile_edit->setText(wsName);
   }
 }
 /** 
@@ -2265,7 +2459,6 @@ QString SANSRunWindow::getWorkspaceName(int key)
 void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf)
 {
   QString wksp_name = QString::fromStdString(p_dnf->object_name());
-  QHashIterator<int, QString> itr(m_workspace_names);
   int names_count = m_workspace_names.count();
   for( int key = 0; key < names_count; ++key )
   {

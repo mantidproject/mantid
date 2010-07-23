@@ -29,7 +29,8 @@ SOURCES = \
   $$SRCDIR/pythonCalc.cpp \
   $$SRCDIR/DiagResults.cpp \
   $$SRCDIR/MWDiag.cpp \
-  $$SRCDIR/MWDiagCalcs.cpp
+  $$SRCDIR/MWDiagCalcs.cpp \
+  $$SRCDIR/SaveWorkspaces.cpp
 
 HEADERS = \
   $$HEADERDIR/MantidWidget.h \
@@ -38,7 +39,8 @@ HEADERS = \
   $$HEADERDIR/WidgetDllOption.h \
   $$HEADERDIR/DiagResults.h \
   $$HEADERDIR/MWDiag.h \
-  $$HEADERDIR/MWDiagCalcs.h
+  $$HEADERDIR/MWDiagCalcs.h \
+  $$HEADERDIR/SaveWorkspaces.h
   
 UI_DIR = $$HEADERDIR
 
