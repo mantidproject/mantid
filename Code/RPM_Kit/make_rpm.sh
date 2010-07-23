@@ -36,8 +36,17 @@ do
     esac
 done
 shift $(($OPTIND - 1))
-#
-mantid_version="1.0"
+
+# Get Mantid version from MantidVersion.txt file
+cd ../
+mantid_versionfile=`pwd`/MantidVersion.txt
+cd RPM_Kit
+if test -f $mantid_versionfile; then
+    mantid_version=`cat $mantid_versionfile`
+else
+    echo "Error: Cannot open $mantid_versionfile"
+    exit 1
+fi
 #
 mantid_svn="http://svn.mantidproject.org/mantid/trunk"
 rm -f Mantid-$mantid_version.tar.gz
