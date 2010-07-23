@@ -49,7 +49,7 @@ public:
 
     TS_ASSERT_EQUALS(fac->name(),"ISIS");
     TS_ASSERT_EQUALS(fac->zeroPadding(),5);
-    const std::vector<const std::string> exts = fac->extensions();
+    const std::vector<std::string> exts = fac->extensions();
     TS_ASSERT_EQUALS(exts.size(),5);
     TS_ASSERT_EQUALS(exts[0],"nxs");
     TS_ASSERT_EQUALS(exts[1],"raw");

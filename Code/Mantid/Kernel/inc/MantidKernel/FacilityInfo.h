@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllExport.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/InstrumentInfo.h"
 
@@ -52,7 +52,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport FacilityInfo
+class EXPORT_OPT_MANTID_KERNEL FacilityInfo
 {
 public:
   FacilityInfo(const Poco::XML::Element* elem);
@@ -61,7 +61,7 @@ public:
   /// Returns default zero padding for this facility
   const int zeroPadding()const{return m_zeroPadding;}
   /// Returns a list of file extensions
-  const std::vector<const std::string> extensions()const{return m_extensions;}
+  const std::vector<std::string> extensions()const{return m_extensions;}
   /// Returns the prefered file extension
   const std::string preferedExtension()const{return m_extensions.front();}
   /// Returns a list of instruments of this facility
@@ -76,7 +76,7 @@ private:
 
   const std::string m_name;                    ///< facility name
   int m_zeroPadding;                           ///< default zero padding for this facility
-  std::vector<const std::string> m_extensions; ///< file extensions in order of preference
+  std::vector<std::string> m_extensions; ///< file extensions in order of preference
   std::vector<InstrumentInfo> m_instruments;   ///< list of istruments of thsi facility
   static Logger& g_log;                        ///< logger
 };

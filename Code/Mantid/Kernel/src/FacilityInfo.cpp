@@ -75,7 +75,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem)
   */
 void FacilityInfo::addExtension(const std::string& ext)
 {
-  std::vector<const std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),ext);
+  std::vector<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),ext);
   if (it == m_extensions.end())
   {
     m_extensions.push_back(ext);

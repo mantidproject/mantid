@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllExport.h"
 #include "MantidKernel/Logger.h"
 
 #include <set>
@@ -56,7 +56,7 @@ class FacilityInfo;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport InstrumentInfo
+class EXPORT_OPT_MANTID_KERNEL InstrumentInfo
 {
 public:
   InstrumentInfo(FacilityInfo* f,const Poco::XML::Element* elem);
@@ -67,13 +67,13 @@ public:
   /// Returns zero padding for this instrument
   const int zeroPadding()const{return m_zeroPadding;}
   /// Return list of techniques
-  const std::set<const std::string>& techniques()const{return m_technique;}
+  const std::set<std::string>& techniques()const{return m_technique;}
 private:
   const FacilityInfo* m_facility;          ///< facility
   std::string m_name;                      ///< instrument name
   std::string m_shortName;                 ///< instrument short name
   int m_zeroPadding;                       ///< default zero padding for this facility
-  std::set<const std::string> m_technique; ///< list of techniques the instrument can do
+  std::set<std::string> m_technique; ///< list of techniques the instrument can do
   static Logger& g_log;                    ///< logger
 };
 
