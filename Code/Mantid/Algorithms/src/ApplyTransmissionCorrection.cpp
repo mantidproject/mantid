@@ -104,10 +104,10 @@ void ApplyTransmissionCorrection::exec()
     for (int j = 0; j < (int)inputWS->readY(0).size(); j++)
     {
       const double t_term = pow(TrIn[j], exp_term);
-      YOut[j] = YIn[j]/t_term;
       const double d1 = EIn[j]/t_term;
       const double d2 = ETrIn[j]*YIn[j]*exp_term/pow(TrIn[j], exp_term+1.0);
       EOut[j] = sqrt( d1*d1 + d2*d2 );
+      YOut[j] = YIn[j]/t_term;
     }
     progress.report();
   }

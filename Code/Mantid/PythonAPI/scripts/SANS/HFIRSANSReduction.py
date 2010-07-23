@@ -178,6 +178,8 @@ class SANSReductionMethod:
         self.transmission_sample_filepath = None
         self.transmission_empty_filepath = None
         self.transmission_use_dark_current = False
+        self.transmission_value = None
+        self.transmission_error = None
         
 
 class SANSReduction:
@@ -301,7 +303,7 @@ class SANSReduction:
             # Normalize by monitor counts
             Divide(ws, monitor_ws, ws)
             
-            # Result needs to be multiplied by 1e8
+            # Result needs to be multiplied by 1e8 [why?]
             Scale(ws, ws, 1.0e8, 'Multiply')
             
         elif self.method.normalization == SANSReductionMethod.NORMALIZATION_TIME:
@@ -353,11 +355,11 @@ class SANSReduction:
             CalculateEfficiency(flood_ws, flood_ws, self.method.sensitivity_low, self.method.sensitivity_high)
             
             # Divide by detector efficiency
-            Divide(self.reduced_ws, flood_ws, self.reduced_ws)
+            Divide(ws, flood_ws, ws)
             
             # Copy over the efficiency's masked pixels to the reduced workspace
             masked_detectors = GetMaskedDetectors(flood_ws)
-            MaskDetectors(self.reduced_ws, None, masked_detectors.getPropertyValue("DetectorList"))
+            MaskDetectors(ws, None, masked_detectors.getPropertyValue("DetectorList"))
             
         # Correct data for solid angle effects (Note: SA_Corr_2DSAS)
         SolidAngleCorrection(ws, ws)
@@ -365,17 +367,23 @@ class SANSReduction:
         # Apply transmission correction #######################################
         if self.method.transmission_method==SANSReductionMethod.TRANSMISSION_DIRECT_BEAM:
             # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
-            self._transmission_correction()
+            self._transmission_correction("transmission_fit")
                     
             # 2- Apply correction (Note: Apply2DTransCorr)
             #Apply angle-dependent transmission correction using the zero-angle transmission
-            ApplyTransmissionCorrection(InputWorkspace=self.reduced_ws, 
+            ApplyTransmissionCorrection(InputWorkspace=ws, 
                                         TransmissionWorkspace="transmission_fit", 
-                                        OutputWorkspace=self.reduced_ws)
+                                        OutputWorkspace=ws)
+            
+        elif self.method.transmission_method==SANSReductionMethod.TRANSMISSION_BY_HAND:
+            ApplyTransmissionCorrection(InputWorkspace=ws, 
+                                        TransmissionValue=self.method.transmission_value,
+                                        TransmissionError=self.method.transmission_error, 
+                                        OutputWorkspace=ws)
             
         
         
-    def _transmission_correction(self):
+    def _transmission_correction(self, output_ws):
         """
             Compute the transmission using the attenuated direct beam method.
             
@@ -417,7 +425,7 @@ class SANSReduction:
         # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
         # as the monitor channel.
         CalculateTransmission(DirectRunWorkspace="empty_mon", SampleRunWorkspace="sample_mon", 
-                              OutputWorkspace="transmission_fit",
+                              OutputWorkspace=output_ws,
                               IncidentBeamMonitor=str(self.method.normalization), 
                               TransmissionMonitor=str(first_det))
         

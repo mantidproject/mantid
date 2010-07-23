@@ -194,10 +194,12 @@ def test_transmission():
     # Reduction parameters
     method = SANSReductionMethod()
     
-    method.transmission_method = SANSReductionMethod.TRANSMISSION_DIRECT_BEAM
+    method.transmission_method = SANSReductionMethod.TRANSMISSION_BY_HAND
+    #method.transmission_method = SANSReductionMethod.TRANSMISSION_DIRECT_BEAM
     method.transmission_sample_filepath = TEST_DIR+"BioSANS_sample_trans.xml"
     method.transmission_empty_filepath = TEST_DIR+"BioSANS_empty_trans.xml"
-    #method.transmission_radius=10
+    method.transmission_value = 0.51944
+    method.transmission_error = 0.011078
     
     # Instrument parameters
     conf = InstrumentConfiguration()
@@ -218,6 +220,7 @@ def test_transmission():
 if __name__ == "__main__":
     # EXECUTE THIS FROM Mantid/release
     #test_center_calculated()
-    test_center_by_hand()
-    #test_transmission()
+    #test_center_by_hand()
+    test_transmission()
+    
     
