@@ -57,7 +57,7 @@ namespace MantidQt
       /// open the wiki page for this interface in a web browser
       void helpClicked();
       /// perform whatever operations needed for analysis
-      void runClicked();
+      void runClicked(bool tryToSave=true);
       /// gather necessary information from Instument Definition Files
       virtual void setIDFValues(const QString & prefix);
 
@@ -67,11 +67,6 @@ namespace MantidQt
 	  void clearReflectionInfo(); ///< clear various line edit boxes
 	  QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
 	  QString savePyCode(QString filePrefix); ///< create python code as string to save files
-	  QString basePyCode(); ///< base python code that doesn't need to change
-	  QString monEffPyCode(); ///< create python code for monitor efficiency section of run
-	  QString useCalibPyCode(); ///< create python code for applying a calibration file
-	  QString scaleAndGroupPyCode(QString groupFile); ///< scales data then uses mapping file
-	  QString cteAndRebinPyCode(); ///< convert units to energy and rebin
 	  bool isDirty(); ///< state whether interface has had any changes
 	  void isDirty(bool state); ///< signify changes to interface
 	  bool isDirtyRebin();
@@ -87,7 +82,7 @@ namespace MantidQt
 	  void browseSave(); ///< show saveFileDialog for save file
 	  void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
 	  void plotRaw(); ///< plot raw data from instrument
-	  void autoRebinCheck(bool state); ///< handle checking/unchecking of "Auto Rebin"
+	  void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
 	  void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
 	  void rebinData(); ///< rebin transformed data
 	  void calibPlot(); ///< plot raw data for calibration run

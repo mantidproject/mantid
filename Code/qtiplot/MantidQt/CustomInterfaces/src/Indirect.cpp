@@ -38,7 +38,7 @@ void Indirect::initLayout()
 	connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
 	connect(m_uiForm.rebin_pbRebin, SIGNAL(clicked()), this, SLOT(rebinData()));
 	// check boxes
-	connect(m_uiForm.rebin_ckAutoRebin, SIGNAL(toggled(bool)), this, SLOT(autoRebinCheck(bool)));
+	connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinCheck(bool)));
 	connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
 
 	// line edits,etc (for isDirty)
@@ -96,7 +96,7 @@ void Indirect::helpClicked()
 * This function will control the actions needed for the Indirect interface when the
 * "Run" button is clicked by the user.
 */
-void Indirect::runClicked()
+void Indirect::runClicked(bool tryToSave)
 {
 	QString groupFile = createMapFile(m_uiForm.cbMappingOptions->currentText());
 	if ( groupFile == "" )
@@ -107,68 +107,66 @@ void Indirect::runClicked()
 	QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
 	filePrefix += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_";
 
-	QString pyInput = "from mantidsimple import *\n";
+	QString pyInput = "from mantidsimple import *\n"
+		"import IndirectEnergyConversion as ind\n";
 
 	if ( isDirty() )
 	{
-		pyInput += basePyCode();
+		pyInput +=
+			"workspace, wsname = ind.loadData('"+m_uiForm.leRunFiles->text()+"')\n"
+			"MonWS_n = ind.timeRegime(workspace)\n";
 
 		if ( m_uiForm.ckMonEff->isChecked() )
 		{
-			pyInput += monEffPyCode();
+			pyInput += "ind.monitorEfficiency()\n";
 		}
 
 		pyInput +=
-			"inWS = 'Time'\n"
-			"CropWorkspace('RawFile', 'Time', StartWorkspaceIndex = (first - 1), EndWorkspaceIndex = (last - 1))\n"
-			"mantid.deleteWorkspace('RawFile')\n";
+			"CropWorkspace(wsname, 'Time', StartWorkspaceIndex = (%0 - 1), EndWorkspaceIndex = (%1 - 1))\n"
+			"mantid.deleteWorkspace(wsname)\n";
+
+		pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
+		pyInput = pyInput.arg(m_uiForm.leSpectraMax->text());
 
 		if ( m_uiForm.ckUseCalib->isChecked() )
 		{
-			QString calibFile = useCalibPyCode();
-			if (calibFile == "")
-				return;
-			else
-				pyInput += calibFile;
+			QString calibFile = m_uiForm.leCalibrationFile->text();
+			pyInput += "ind.useCalib(r'"+calibFile+"')\n";
 		}
 
 		pyInput +=
-			"enWS = 'Energy'\n"
-			"# Normalise to Monitor\n"
-			"ConvertUnits(inWS,enWS, 'Wavelength')\n"
-			"RebinToWorkspace(enWS,monWS,enWS)\n"
-			"Divide(enWS,monWS,enWS)\n"
-			"mantid.deleteWorkspace(monWS)\n"
-			"mantid.deleteWorkspace(inWS)\n";
+			"normalised = ind.normToMon()\n"
+			"ind.conToEnergy("+m_uiForm.leEfixed->text()+")\n";
 	}
 
 	if ( isDirty() || isDirtyRebin() )
 	{ 
-		pyInput += cteAndRebinPyCode();
-
-		pyInput += "enWS = enWSr\n";
+		if ( ! m_uiForm.rebin_ckDNR->isChecked() )
+		{ 
+			QString rebinParam = m_uiForm.rebin_leELow->text() + ","
+				+ m_uiForm.rebin_leEWidth->text() + ","
+				+ m_uiForm.rebin_leEHigh->text();
+			pyInput += "ind.rebinData('"+rebinParam+"')\n";
+		}
+		else
+		{
+			pyInput += "CropWorkspace('ConvertedToEnergy', 'Energy')\n";
+		}
 
 		if ( m_uiForm.ckDetailedBalance->isChecked() )
 		{
-			pyInput +=
-				"# Detailed Balance\n"
-				"ExponentialCorrection(enWS, enWS, 1.0, (11.606 / ( 2 * " // 11.606 from where ?
-				+ m_uiForm.leDetailedBalance->text() +
-				" ) ) )\n";
+			pyInput += "db = ind.detailedBalance("+m_uiForm.leDetailedBalance->text()+")\n";
 		}
 
-		pyInput += scaleAndGroupPyCode(groupFile);
-
-		pyInput += savePyCode(filePrefix);
-
+		pyInput += "scale = ind.scaleAndGroup(r'"+groupFile+"')\n";
 	}
-	else
+
+	if (tryToSave)
 	{
-		pyInput += "iconWS = '" +m_uiForm.cbAnalyser->currentText()+"_"+m_uiForm.cbReflection->currentText()+ "'\n";
+		pyInput += "iconWS = scale\n";
 		pyInput += savePyCode(filePrefix);
 	}
 
-	// run it
 	QString pyOutput = runPythonCode(pyInput).trimmed();
 
 	if ( pyOutput != "" )
@@ -194,36 +192,36 @@ void Indirect::setIDFValues(const QString & prefix)
 	m_uiForm.cbReflection->clear();
 	clearReflectionInfo();
 
-	autoRebinCheck(m_uiForm.rebin_ckAutoRebin->isChecked());
+	rebinCheck(m_uiForm.rebin_ckDNR->isChecked());
 	detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
 
 	// Get list of analysers and populate cbAnalyser
 	QString pyInput = 
 		"from mantidsimple import *\n"
-		"LoadEmptyInstrument(\"%1\", \"ins\")\n"
+		"LoadEmptyInstrument(r'%1', 'ins')\n"
 		"workspace = mtd['ins']\n"
 		"instrument = workspace.getInstrument()\n"
-		"ana_list_split = instrument.getStringParameter(\"analysers\")[0].split(\",\")\n"
+		"ana_list_split = instrument.getStringParameter('analysers')[0].split(\",\")\n"
 		"reflections = []\n"
 		"for i in range(0,len(ana_list_split)):\n"
 		"   list = []\n"
-		"   name = \"refl-\" +ana_list_split[i]\n"
+		"   name = 'refl-' + ana_list_split[i]\n"
 		"   list.append( ana_list_split[i] )\n"
 		"   try:\n"
 		"      item = instrument.getStringParameter(name)[0]\n"
 		"   except IndexError:\n"
-		"      item = \"\"\n"
-		"   refl = item.split(\",\")\n"
+		"      item = ''\n"
+		"   refl = item.split(',')\n"
 		"   list.append( refl )\n"
 		"   reflections.append(list)\n"
 		"for i in range(0, len(reflections)):\n"
-		"   message = reflections[i][0] + \"-\"\n"
+		"   message = reflections[i][0] + '-'\n"
 		"   for j in range(0,len(reflections[i][1])):\n"
 		"      message += str(reflections[i][1][j])\n"
 		"      if j < ( len(reflections[i][1]) -1 ):\n"
-		"         message += \",\"\n"
+		"         message += ','\n"
 		"   print message\n"
-		"mtd.deleteWorkspace(\"ins\")\n";
+		"mtd.deleteWorkspace('ins')\n";
 
 	QString defFile = getIDFPath(m_uiForm.cbInst->currentText());
 	if ( defFile == "" )
@@ -266,13 +264,8 @@ void Indirect::setIDFValues(const QString & prefix)
 		}
 	}
 
-
-
 	analyserSelected(m_uiForm.cbAnalyser->currentIndex());
-
-
 }
-
 
 /**
 * Gets the path to the selected instrument's Instrument Definition File (IDF), if the instrument has a parameter file.
@@ -313,29 +306,29 @@ void Indirect::getSpectraRanges(const QString& defFile)
 {
 	QString pyInput =
 		"from mantidsimple import *\n"
-		"LoadEmptyInstrument(\"%1\", \"ins\")\n"
+		"LoadEmptyInstrument(r'%1', 'ins')\n"
 		"workspace = mtd['ins']\n"
 		"instrument = workspace.getInstrument()\n"
 		"analyser = []\n"
 		"analyser_final = []\n"
 		"for i in range(0, instrument.nElements() ):\n"
-		"	if instrument[i].type() == \"ParCompAssembly\":\n"
+		"	if instrument[i].type() == 'ParCompAssembly':\n"
 		"		analyser.append(instrument[i])\n"
 		"for i in range(0, len(analyser) ):\n"
 		"	analyser_final.append(analyser[i])\n"
 		"	for j in range(0, analyser[i].nElements() ):\n"
-		"		if analyser[i][j].type() == \"ParCompAssembly\":\n"
+		"		if analyser[i][j].type() == 'ParCompAssembly':\n"
 		"			try:\n"
 		"				analyser_final.remove(analyser[i])\n"
 		"			except ValueError:\n"
 		"				pass\n"
 		"			analyser_final.append(analyser[i][j])\n"
 		"for i in range(0, len(analyser_final)):\n"
-		"	message = analyser_final[i].getName() + \"-\"\n"
-		"	message += str(analyser_final[i][0].getID()) + \",\"\n"
+		"	message = analyser_final[i].getName() + '-'\n"
+		"	message += str(analyser_final[i][0].getID()) + ','\n"
 		"	message += str(analyser_final[i][analyser_final[i].nElements()-1].getID())\n"
 		"	print message\n"
-		"mtd.deleteWorkspace(\"ins\")\n";
+		"mtd.deleteWorkspace('ins')\n";
 
 	pyInput = pyInput.arg(defFile);
 
@@ -403,7 +396,6 @@ void Indirect::clearReflectionInfo()
 */
 QString Indirect::createMapFile(const QString& groupType)
 {
-
 	QString groupFile, ngroup, nspec;
 	QString ndet = "( "+m_uiForm.leSpectraMax->text()+" - "+m_uiForm.leSpectraMin->text()+") + 1";
 
@@ -437,63 +429,18 @@ QString Indirect::createMapFile(const QString& groupType)
 	groupFile += "_" + groupType + ".map";	
 
 	QString pyInput =
-		"filename = mtd.getConfigProperty('defaultsave.directory')\n"
-		"filename += \"" +groupFile+ "\"\n"
-		"handle = open(filename, 'w')\n" // open file
-		"ngroup = " +ngroup+ "\n" // set values
-		"nspec = " +nspec+ "\n"
-		"first = " +m_uiForm.leSpectraMin->text()+ "\n"
-		"handle.write(str(ngroup) +  \"\\n\" )\n"
-		"for n in range(0, ngroup):\n"
-		"   n1 = n * nspec + first\n"
-		"   handle.write(str(n+1) +  \"\\n\" )\n" // group number
-		"   handle.write(str(nspec) +  \"\\n\" )\n" // number of spectra in group
-		"   for i in range(1, nspec+1):\n"
-		"      n3 = n1 + i - 1\n"
-		"      handle.write(str(n3).center(4) + \" \")\n"
-		"   handle.write(\"\\n\")\n"
-		"handle.close()\n"
-		"print filename\n";
+		"import IndirectEnergyConversion as ind\n"
+		"mapfile = ind.createMappingFile('"+groupFile+"', %0, %1, %2)\n"
+		"print mapfile\n";
+	pyInput = pyInput.arg(ngroup);
+	pyInput = pyInput.arg(nspec);
+	pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
 
 	QString pyOutput = runPythonCode(pyInput).trimmed();
 
 	return pyOutput;
 }
 
-/**
-* Returns QString containing the first block of Python code for the run event. This is the code up
-* to the point where the first decision is made.
-* @return python code as string
-*/
-QString Indirect::basePyCode()
-{
-	QString pyInput =
-		"# Set up variables\n"
-		"first = " +m_uiForm.leSpectraMin->text()+ "\n"
-		"last = " +m_uiForm.leSpectraMax->text()+ "\n"
-		"efixed = " +m_uiForm.leEfixed->text()+ "\n"
-		"try:\n"
-		"   LoadRaw(r'" +m_uiForm.leRunFiles->text()+ "', 'RawFile')\n" 
-		"except SystemExit:\n"
-		"   print 'Could not open .raw file.'\n"
-		"   sys.exit('Could not open .raw file.')\n"
-		"CropWorkspace('RawFile', 'TimeRegime', StartWorkspaceIndex = 0, EndWorkspaceIndex = 2)\n"
-		"workspace = mantid.getMatrixWorkspace('TimeRegime')\n"
-		"SpecA = workspace.readX(0)[0]\n"
-		"SpecB = workspace.readX(2)[0]\n"
-		"CropWorkspace('TimeRegime', 'Mon_In', StartWorkspaceIndex = 0, EndWorkspaceIndex = 0)\n"
-		"mantid.deleteWorkspace('TimeRegime')\n"
-		"monWS = 'Mon'\n"
-		"if ( SpecA == SpecB ): # Single Monitor (?)\n"
-		"   alg = Unwrap('Mon_In', monWS, LRef = '37.86')\n" // LRef from where?
-		"   join = float(alg.getPropertyValue('JoinWavelength'))\n"
-		"   RemoveBins(monWS, monWS, join-0.001, join+0.001, Interpolation='Linear')\n"
-		"   FFTSmooth(monWS, monWS, 0)\n"
-		"else: # Multiple Monitor (?)\n"
-		"   ConvertUnits('Mon_In', monWS, 'Wavelength')\n"
-		"mantid.deleteWorkspace('Mon_In')\n";
-	return pyInput;
-}
 /**
 * This function creates the Python script necessary to save the workspace data
 * in the formats requested.
@@ -527,105 +474,6 @@ QString Indirect::savePyCode(QString filePrefix)
 	if ( m_uiForm.save_ckSPE->isChecked() )
 	{
 		pyInput += "SaveSPE(iconWS, savefile + '.spe')\n";
-	}
-
-	return pyInput;
-}
-/**
-* This function provides the Python code necessary for the 'Monitor Efficiency'
-* section of ConvertToEnergy.
-* @return QString containing Python script.
-*/
-QString Indirect::monEffPyCode()
-{
-	QString pyInput =
-			"\n#Monitor Efficiency\n"
-			"CreateSingleValuedWorkspace('moneff', 1.276e-3)\n" // value 1.276e-3 (unt)- what is it?
-			"OneMinusExponentialCor(monWS, monWS, (8.3 * 0.025) )\n" // values 8.3 (?), 0.025 (zz) - what is it?
-			"Divide(monWS,'moneff',monWS)\n"
-			"mantid.deleteWorkspace('moneff')\n";
-	return pyInput;
-}
-
-/**
-* Creates the Python code to use a calibration file in ConvertToEnergy.
-* @return code to use calibration file, or empty string if an error was encountered.
-*/
-QString Indirect::useCalibPyCode()
-{
-	QString calibFile = m_uiForm.leCalibrationFile->text();
-			if ( calibFile == "" )
-		{
-			showInformationBox("Please enter path to calibration file.");
-			return "";
-		}
-	QString pyInput =
-			"# Use Calibration File\n"
-			"calib = r'" +calibFile+ "'\n"
-			"try:\n"
-			"   LoadNexusProcessed(calib, 'calib')\n" // Calibration File Path goes here
-			"except SystemExit:\n"
-			"   print 'Could not open calibration file. Please check file path is correct.'\n"
-			"   sys.exit('Could not open calibration file.')\n"
-			"tmp = mantid.getMatrixWorkspace('Time')\n"
-			"shist = tmp.getNumberHistograms()\n"
-			"tmp = mantid.getMatrixWorkspace('calib')\n"
-			"chist = tmp.getNumberHistograms()\n"
-			"if chist != shist:\n"
-			"	print 'Number of spectra in calibration file does not match data file.'\n"
-			"	mantid.deleteWorkspace('calib')\n"
-			"	sys.exit('Number of spectra in calibration file does not match data file.')\n"
-			"else:\n"
-			"	Divide('Time','calib',inWS)\n"
-			"	mantid.deleteWorkspace('calib')\n";
-	return pyInput;
-}
-
-/**
-* Creates Python code necessary to scale the data and then groups it as described in the mapping
-* file.
-* @param groupFile path to mapping file
-* @return python code as string
-*/
-QString Indirect::scaleAndGroupPyCode(QString groupFile)
-{
-	QString pyInput = 
-		"\n# Scale Values\n"
-		"scaleWS = 'scale'\n"
-		"scale = 1e9\n"
-		"CreateSingleValuedWorkspace(scaleWS, scale)\n"
-		"Multiply(enWS, scaleWS, enWS)\n"
-		"mantid.deleteWorkspace(scaleWS)\n"
-		"\n# Group Values\n"
-		"iconWS = '" +m_uiForm.cbAnalyser->currentText()+"_"+m_uiForm.cbReflection->currentText()+ "'\n"
-		"GroupDetectors(enWS, iconWS, MapFile=r'" + groupFile +"')\n"
-		"mantid.deleteWorkspace(enWS)\n";
-
-	return pyInput;
-}
-/**
-* This function handles the process of converting the units to Energy from Wavelength, and also
-* rebins the data based on the user's selections.
-* @return python code as a string
-*/
-QString Indirect::cteAndRebinPyCode()
-{
-	QString pyInput =
-		"\n# Convert To Energy And Rebin\n"
-		"enWS = 'Energy'\n"
-		"enWSr = 'EnergyRebinned'\n"
-		"ConvertUnits(enWS,enWSr,'DeltaE','Indirect',efixed";
-	if ( m_uiForm.rebin_ckAutoRebin->isChecked() )
-	{ // if "Auto Rebin" is checked we use ConvertUnits Align Bins at this point
-		pyInput += ", AlignBins = True)\n";
-	}
-	else
-	{
-		pyInput += ")\n"; // closes ConvertUnits function
-		QString rebinParam = m_uiForm.rebin_leELow->text() + ","
-			+ m_uiForm.rebin_leEWidth->text() + ","
-			+ m_uiForm.rebin_leEHigh->text();
-		pyInput += "Rebin(enWSr,enWSr,'" + rebinParam + "')\n";
 	}
 
 	return pyInput;
@@ -721,17 +569,17 @@ void Indirect::reflectionSelected(int index)
 
 	QString pyInput =
 		"from mantidsimple import *\n"
-		"LoadEmptyInstrument(\"%1\", \"ins\")\n"
-		"LoadParameterFile(\"ins\", \"%2\")\n"
+		"LoadEmptyInstrument(r'%1', 'ins')\n"
+		"LoadParameterFile('ins', r'%2')\n"
 		"instrument = mtd['ins'].getInstrument()\n"
-		"print int(instrument.getNumberParameter(\"spectra-min\")[0])\n"
-		"print int(instrument.getNumberParameter(\"spectra-max\")[0])\n"
-		"print instrument.getNumberParameter(\"efixed-val\")[0]\n"
-		"print int(instrument.getNumberParameter(\"peak-start\")[0])\n"
-		"print int(instrument.getNumberParameter(\"peak-end\")[0])\n"
-		"print int(instrument.getNumberParameter(\"back-start\")[0])\n"
-		"print int(instrument.getNumberParameter(\"back-end\")[0])\n"
-		"mtd.deleteWorkspace(\"ins\")\n";
+		"print int(instrument.getNumberParameter('spectra-min')[0])\n"
+		"print int(instrument.getNumberParameter('spectra-max')[0])\n"
+		"print instrument.getNumberParameter('efixed-val')[0]\n"
+		"print int(instrument.getNumberParameter('peak-start')[0])\n"
+		"print int(instrument.getNumberParameter('peak-end')[0])\n"
+		"print int(instrument.getNumberParameter('back-start')[0])\n"
+		"print int(instrument.getNumberParameter('back-end')[0])\n"
+		"mtd.deleteWorkspace('ins')\n";
 
 	pyInput = pyInput.arg(defFile);
 	pyInput = pyInput.arg(paramFile);
@@ -890,11 +738,11 @@ void Indirect::plotRaw()
 	}
 }
 /**
-* This function will disable the necessary elements of the interface when the user selects "Auto Rebin"
+* This function will disable the necessary elements of the interface when the user selects "Do Not Rebin"
 * and enable them again when this is de-selected.
-* @param state whether the Auto Rebin checkbox is checked
+* @param state whether the "Do Not Rebin" checkbox is checked
 */
-void Indirect::autoRebinCheck(bool state) 
+void Indirect::rebinCheck(bool state) 
 {
 	m_uiForm.rebin_pbRebin->setEnabled( !state );
 	m_uiForm.rebin_lbLow->setEnabled( !state );
@@ -925,74 +773,7 @@ void Indirect::detailedBalanceCheck(bool state)
 */
 void Indirect::rebinData()
 {
-	QString groupFile = createMapFile(m_uiForm.cbMappingOptions->currentText());
-	if ( groupFile == "" )
-	{
-		return;
-	}
-
-	QString pyInput = "from mantidsimple import *\n";
-
-	if ( isDirty() )
-	{ 
-		pyInput += basePyCode();
-
-		if ( m_uiForm.ckMonEff->isChecked() )
-		{
-			pyInput += monEffPyCode();
-		}
-
-		pyInput +=
-			"inWS = 'Time'\n"
-			"CropWorkspace('RawFile', 'Time', StartWorkspaceIndex = (first - 1), EndWorkspaceIndex = (last - 1))\n"
-			"mantid.deleteWorkspace('RawFile')\n";
-
-		if ( m_uiForm.ckUseCalib->isChecked() )
-		{
-			QString calibFile = useCalibPyCode();
-			if (calibFile == "")
-				return;
-			else
-				pyInput += calibFile;
-		}
-
-		pyInput +=
-			"enWS = 'Energy'\n"
-			"# Normalise to Monitor\n"
-			"ConvertUnits(inWS,enWS, 'Wavelength')\n"
-			"RebinToWorkspace(enWS,monWS,enWS)\n"
-			"Divide(enWS,monWS,enWS)\n"
-			"mantid.deleteWorkspace(monWS)\n"
-			"mantid.deleteWorkspace(inWS)\n";
-
-	}
-
-	pyInput += cteAndRebinPyCode();
-
-	pyInput += "enWS = enWSr\n";
-
-	if ( m_uiForm.ckDetailedBalance->isChecked() )
-	{
-		pyInput +=
-			"# Detailed Balance\n"
-			"ExponentialCorrection(enWS, enWS, 1.0, (11.606 / ( 2 * " // 11.606 from where ?
-			+ m_uiForm.leDetailedBalance->text() +
-			" ) ) )\n";
-	}
-
-	pyInput += scaleAndGroupPyCode(groupFile);
-
-	// run it
-	QString pyOutput = runPythonCode(pyInput).trimmed();
-
-	if ( pyOutput != "" )
-	{
-		showInformationBox("The following error occurred:\n" + pyOutput
-			+ "\n\nAnalysis did not complete.");
-	}
-
-	isDirty(false);
-	isDirtyRebin(false);
+	runClicked(false);
 }
 
 /**
@@ -1039,7 +820,7 @@ void Indirect::calibPlot()
 */
 void Indirect::calibCreate()
 {
-	QString runNo = m_uiForm.cal_leRunNo->displayText();
+	QString runNo = m_uiForm.cal_leRunNo->text();
 	if ( runNo == "" )
 	{
 		showInformationBox("Please input a run number.");
@@ -1058,47 +839,30 @@ void Indirect::calibCreate()
 		dataSearchDirs.append(QString::fromStdString(dataDirs[i]));
 	}
 
-	QString xRange = 
-		"[ " + m_uiForm.cal_lePeakMin->text() + ", "
-		+ m_uiForm.cal_lePeakMax->text() + ", "
-		+ m_uiForm.cal_leBackMin->text() + ", "
-		+ m_uiForm.cal_leBackMax->text() + "]";
-
 	QString input_path = dataSearchDirs[0] + prefix + runNo + ".raw";
 	QString output_path = output_dir + prefix.toLower() + runNo + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
 
 	QString pyInput =
-		"from mantidsimple import *\n"
-		"from mantidplot import *\n"
-		"try:\n"
-		"   LoadRaw(r'%1', 'Raw', SpectrumMin=%3, SpectrumMax=%4)\n"
-		"except ValueError:\n"
-		"   print 'Could not load .raw file. Please check run number.'\n"
-		"   sys.exit(0)\n"
-		"tmp = mantid.getMatrixWorkspace('Raw')\n"
-		"nhist = tmp.getNumberHistograms() - 1\n"
-		"xRange = " + xRange + "\n"
-		"Integration('Raw', 'Time1', xRange[0], xRange[1], 0, nhist)\n"
-		"Integration('Raw', 'Time2', xRange[2], xRange[3], 0, nhist)\n"
-		"Minus('Time1', 'Time2', 'Time')\n"
-		"mantid.deleteWorkspace('Raw')\n"
-		"mantid.deleteWorkspace('Time1')\n"
-		"mantid.deleteWorkspace('Time2')\n"
-		"SaveNexusProcessed('Time', r'%2', 'Vanadium')\n";
+		"import IndirectEnergyConversion as ind\n"
+		"calibration = ind.createCalibFile(r'%0', r'%1', %2, %3, %4, %5, %6, %7)\n";
 
 	if ( m_uiForm.cal_ckPlotResult->isChecked() )
 	{ // plot graph of Calibration result if requested by user.
-		pyInput +=	"graph = plotTimeBin('Time', 0)\n";
+		pyInput +=	"graph = plotTimeBin(calibration, 0)\n";
 	}
 	else
 	{ // if graph is not wanted, remove the workspace
-		pyInput += "mantid.deleteWorkspace('Time')\n";
+		pyInput += "mantid.deleteWorkspace(calibration)\n";
 	}
 
-	pyInput = pyInput.arg(input_path); // %1 = path to data search directory
-	pyInput = pyInput.arg(output_path); // %2 = path to output directory (where to save the file)
-	pyInput = pyInput.arg(m_uiForm.leSpectraMin->text()); // %3 = spectra min value
-	pyInput = pyInput.arg(m_uiForm.leSpectraMax->text()); // %4 = spectra max value
+	pyInput = pyInput.arg(input_path); // %0 = path to raw file
+	pyInput = pyInput.arg(output_path); // %1 = path to output directory (where to save the file)
+	pyInput = pyInput.arg(m_uiForm.cal_lePeakMin->text());
+	pyInput = pyInput.arg(m_uiForm.cal_lePeakMax->text());
+	pyInput = pyInput.arg(m_uiForm.cal_leBackMin->text());
+	pyInput = pyInput.arg(m_uiForm.cal_leBackMax->text());
+	pyInput = pyInput.arg(m_uiForm.leSpectraMin->text()); // %6 = spectra min value
+	pyInput = pyInput.arg(m_uiForm.leSpectraMax->text()); // %7 = spectra max value
 
 	QString pyOutput = runPythonCode(pyInput).trimmed();
 
