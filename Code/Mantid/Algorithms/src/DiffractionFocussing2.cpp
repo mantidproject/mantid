@@ -262,6 +262,7 @@ void DiffractionFocussing2::execEvent()
   DataObjects::EventWorkspace_sptr out;
   out = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1) );
+  API::WorkspaceFactory::Instance().initializeFromParent(inputW, out, true);
   //Make sure the output spectra map is clear (it should be anyway).
   out->mutableSpectraMap().clear();
 
