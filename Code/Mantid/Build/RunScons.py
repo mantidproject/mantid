@@ -13,6 +13,7 @@ svnlog = open("../../../../logs/Mantid/svn.log","w")
 sp.call("svn log -v -rBASE",stdout=svnlog,shell=True)
 svnlog.close()
 
+sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert --depth files ..", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../Third_Party", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../../Test", shell=True)
 sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert ../../Images", shell=True)
