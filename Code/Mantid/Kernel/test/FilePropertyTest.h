@@ -25,6 +25,7 @@ public:
 
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
+    TS_ASSERT_EQUALS(fp->getDefaultExt(), "")
 
     ///Test a GEM file in the test directory
     std::string msg = fp->setValue("GEM38370.raw");
@@ -39,7 +40,8 @@ public:
       new Mantid::Kernel::FileProperty("Filename","", Mantid::Kernel::FileProperty::Load, exts);
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
-      
+    TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw")
+
     ///Test a GEM file in the test directory
     std::string msg = fp->setValue("GEM38370.raw");
     TS_ASSERT_EQUALS(msg, "")    

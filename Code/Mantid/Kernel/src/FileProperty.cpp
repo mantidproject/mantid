@@ -16,7 +16,7 @@ using namespace Mantid::Kernel;
  * Constructor
  * @param name          The name of the property
  * @param default_value A default value for the property
- * @param exts          The set of allowed extensions
+ * @param exts          The allowed extensions, the front entry in the vector will be the default extension
  * @param action        An enum indicating whether this should be a load/save property
  * @param direction     An optional direction (default=Input)
  */
@@ -25,6 +25,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
   : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action == FileProperty::Load) ), direction), 
     m_action(action)
 {
+  m_defaultExt = exts.size() > 0 ? exts.front() : "";
 }
 
 /**
@@ -39,7 +40,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
          const std::string & ext, unsigned int direction)
   : PropertyWithValue<std::string>(name, default_value,
            new FileValidator(std::vector<std::string>(1,ext), (action == FileProperty::Load) ), direction),
-    m_action(action)
+    m_action(action), m_defaultExt(ext)
 {
 }
 

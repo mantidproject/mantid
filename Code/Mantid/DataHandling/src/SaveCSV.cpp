@@ -67,7 +67,7 @@ void SaveCSV::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "The filename of the output CSV file" );
-  declareProperty(new FileProperty("Filename", "",FileProperty::Save),
+  declareProperty(new FileProperty("Filename", "",FileProperty::Save, ".csv"),
     "The name of the workspace containing the data you want to save to\n"
     "a CSV file" );
   declareProperty("Separator", ",",

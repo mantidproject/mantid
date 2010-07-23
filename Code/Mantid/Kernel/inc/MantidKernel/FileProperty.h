@@ -47,6 +47,8 @@ public:
 
   ///Overridden setValue method
   virtual std::string setValue(const std::string & filename);
+  /// Returns the main file extension that's used 
+  std::string getDefaultExt() const {return m_defaultExt;}
 
 private:
   /// Check that a given directory exists
@@ -55,6 +57,8 @@ private:
   std::string convertExtension(const std::string & filepath) const;
   /// The action type of this property, i.e. load/save
   unsigned int m_action;
+  ///The default file extension associated with the type of file this property will handle
+  std::string m_defaultExt;
 };
 
 }
