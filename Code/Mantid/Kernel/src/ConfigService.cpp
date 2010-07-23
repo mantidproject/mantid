@@ -8,6 +8,7 @@
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/SignalChannel.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
@@ -15,6 +16,10 @@
 #include "Poco/Path.h"
 #include "Poco/File.h"
 #include "Poco/StringTokenizer.h"
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
 
 #include <fstream>
 #include <sstream>
@@ -143,6 +148,8 @@ namespace Kernel
     //and then append the user properties
     updateConfig(getUserFilename(), true, true);
 
+    updateFacilities();
+
     g_log.debug() << "ConfigService created." << std::endl;
     g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
     g_log.information() << "This is Mantid Version " << MANTID_VERSION << std::endl;
@@ -161,6 +168,11 @@ namespace Kernel
     Kernel::Logger::shutdown();
     delete m_pSysConfig;
     delete m_pConf;                // potential double delete???
+    for(std::vector<FacilityInfo*>::iterator it = m_facilities.begin();it!=m_facilities.end();++it)
+    {
+      delete *it;
+    }
+    m_facilities.clear();
   }
 
   /** Loads the config file provided.
@@ -844,6 +856,81 @@ namespace Kernel
       throw Exception::NotFoundError("Unknown facility name. No instrument prefixes defined.", facility);
     }
   }
+
+  /**
+    * Load facility information from instrumentDir/Facilities.xml file
+    */
+  void ConfigServiceImpl::updateFacilities()
+  {
+    std::string instrDir = getString("instrumentDefinition.directory");
+    std::string fileName = instrDir + "Facilities.xml";
+
+    // Set up the DOM parser and parse xml file
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc;
+    try
+    {
+      pDoc = pParser.parse(fileName);
+    }
+    catch(...)
+    {
+      g_log.error("Unable to parse file " + fileName);
+      throw Kernel::Exception::FileError("Unable to parse File:" , fileName);
+    }
+    // Get pointer to root element
+    Poco::XML::Element* pRootElem = pDoc->documentElement();
+    if ( !pRootElem->hasChildNodes() )
+    {
+      g_log.error("XML file: " + fileName + "contains no root element.");
+      throw Kernel::Exception::InstrumentDefinitionError("No root element in XML facilities file", fileName);
+    }
+
+    Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
+    unsigned int n = pNL_facility->length();
+
+    for (unsigned int i = 0; i < n; ++i)
+    {
+      Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_facility->item(i));
+      if (elem)
+      {
+        m_facilities.push_back(new FacilityInfo(elem));
+      }
+    }
+
+  }
+
+  /** Get the default facility
+    */
+  const FacilityInfo& ConfigServiceImpl::Facility()const
+  {
+    std::string defFacility = getString("default.facility");
+    if (defFacility.empty())
+    {
+      defFacility = "ISIS";
+    }
+    return Facility(defFacility);
+  }
+
+  /**
+    * Get a facility
+    * @param fName Facility name
+    * @throws NotFoundException if the facility is not found
+    */
+  const FacilityInfo& ConfigServiceImpl::Facility(const std::string& fName)const
+  {
+    std::vector<FacilityInfo*>::const_iterator it = m_facilities.begin();
+    for(;it != m_facilities.end(); ++it)
+    {
+      if ((**it).name() == fName)
+      {
+        return **it;
+      }
+    }
+    g_log.error("Facility "+fName+" not found");
+    throw Exception::NotFoundError("Facilities",fName);
+  }
+
+
 
   /// \cond TEMPLATE 
   template DLLExport int ConfigServiceImpl::getValue(const std::string&,double&);

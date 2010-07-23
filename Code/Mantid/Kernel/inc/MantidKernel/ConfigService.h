@@ -32,6 +32,7 @@ namespace Mantid
     // More forward declarations
     //----------------------------------------------------------------------
     class Logger;
+    class FacilityInfo;
 
     /** The ConfigService class provides a simple facade to access the Configuration functionality of the Mantid Framework.
         The class gathers information from config files and the system variables.  
@@ -96,6 +97,11 @@ namespace Mantid
       /// Get the list of known instrument prefixes for the given facility
       const std::vector<std::string>& getInstrumentPrefixes(const std::string& facility) const;
 
+      /// Get the default facility
+      const FacilityInfo& Facility()const;
+      /// Get a facility
+      const FacilityInfo& Facility(const std::string& fName)const;
+
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
 
@@ -125,6 +131,8 @@ namespace Mantid
       void cacheDataSearchPaths();
       /// Create the map of facility name to instrument prefix list
       void cacheInstrumentPrefixes();
+      /// Load facility information from instrumentDir/Facilities.xml file
+      void updateFacilities();
 
       // Forward declaration of inner class
       template <class T>
@@ -158,6 +166,9 @@ namespace Mantid
       std::vector<std::string> m_DataSearchDirs;
       /// A map of facilities to instruments
       std::map<std::string,std::vector<std::string> > m_instr_prefixes;
+
+      /// The list of available facilities
+      std::vector<FacilityInfo*> m_facilities;
     };
 
     /// Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

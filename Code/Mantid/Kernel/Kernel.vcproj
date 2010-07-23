@@ -207,6 +207,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FacilityInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FileProperty.cpp"
 				>
 			</File>
@@ -220,6 +224,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Glob.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\InstrumentInfo.cpp"
 				>
 			</File>
 			<File
@@ -405,6 +413,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\FacilitiesTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\FacilityInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\Fast_Exponential.h"
 				>
 			</File>
@@ -434,6 +450,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\Instantiator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\InstrumentInfo.h"
 				>
 			</File>
 			<File
