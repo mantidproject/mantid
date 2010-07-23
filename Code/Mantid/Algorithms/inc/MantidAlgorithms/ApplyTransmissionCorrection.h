@@ -20,11 +20,16 @@ namespace Algorithms
 
     T(theta) = T^[(1+sec(2theta))/2]
 
+    The zero-angle transmission can either be specified in a workspace with wavelength binning
+    consistent with the input workspace, or be specified as a constant with error.
+
     Required Properties:
     <UL>
     <LI> InputWorkspace    - The data in units of wavelength. </LI>
     <LI> OutputWorkspace   - The workspace in which to store the result histogram. </LI>
     <LI> TransmissionWorkspace - The workspace containing the zero-angle transmission </LI>
+    <LI> TransmissionValue - Transmission value to apply to all wavelengths. If specified, TransmissionWorkspace will not be used </LI>
+    <LI> TransmissionError - The error on the transmission value (default 0.0) </LI>
     </UL>
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
