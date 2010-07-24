@@ -604,7 +604,7 @@ bool SANSRunWindow::loadUserFile()
   
   ////Detector bank
   param = runReduceScriptFunction(
-    "printParameter('SANSInsts.getCurDetector().name()')");
+    "printParameter('INSTRUMENT.curDetector().name()')");
   index = m_uiForm.detbank_sel->findText(param);  
   if( index >= 0 && index < 2 )
   {
@@ -1977,7 +1977,7 @@ void SANSRunWindow::handleInstrumentChange(int index)
 
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
-    "printParameter('SANSInsts.getCurDetector().name()')");
+    "printParameter('INSTRUMENT.curDetector().name()')");
   int ind = m_uiForm.detbank_sel->findText(detect);  
   if( ind >= 0 && ind < 2 )
   {
@@ -2345,7 +2345,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
 void SANSRunWindow::fillDetectNames(QComboBox *output)
 {
   QString detsTuple = runReduceScriptFunction(
-    "printParameter('SANSInsts.getCurInst().listDetectors()')");
+    "printParameter('INSTRUMENT.listDetectors()')");
 
   if (detsTuple.isEmpty())
   {//this happens if the run Python signal hasn't yet been connected
