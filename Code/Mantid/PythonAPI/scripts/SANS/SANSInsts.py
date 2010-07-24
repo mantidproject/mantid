@@ -87,3 +87,6 @@ class SANS2D(Instrument):
         super(SANS2D, self).__init__()
         self.DETECTORS = {'LOW_ANGLE' : DetectorBank(('rear-detector', 'rear'), 'SANS2D', SANS2D.N_MONITORS),
                           'HIGH_ANGLE' : DetectorBank(('front-detector', 'front'), 'SANS2D', (192**2)+SANS2D.N_MONITORS)}
+
+# The following should be refactored away:
+all = {"LOQ" : LOQ(), "SANS2D" : SANS2D()}
