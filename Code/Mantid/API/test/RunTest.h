@@ -71,6 +71,31 @@ public:
     TS_ASSERT_THROWS_NOTHING( runInfo.setProtonCharge(10.0) )
     TS_ASSERT_EQUALS( runInfo.getProtonCharge(), 10.0 )
   }
+
+  void testCopyAndAssignment()
+  {
+    Run runInfo;
+    runInfo.setProtonCharge(10.0);
+    Property *p = new ConcreteProperty();
+    TS_ASSERT_THROWS_NOTHING( runInfo.addProperty(p) );
+    TS_ASSERT_EQUALS( runInfo.getProperties().size(), 2);
+    
+    //Copy constructor
+    Run runInfo_2(runInfo);
+    TS_ASSERT_EQUALS( runInfo_2.getProperties().size(), 2);
+    TS_ASSERT_DELTA( runInfo_2.getProtonCharge(), 10.0, 1e-8);
+    TS_ASSERT_EQUALS( runInfo_2.getLogData("Test")->value(), "Nothing" );    
+
+
+    // Now assignment
+    runInfo.setProtonCharge(15.0);
+    runInfo.removeProperty("Test");
+    runInfo_2 = runInfo;
+    TS_ASSERT_EQUALS( runInfo_2.getProperties().size(), 1);
+    TS_ASSERT_DELTA( runInfo_2.getProtonCharge(), 15.0, 1e-8);
+    
+
+  }
 };
 
 

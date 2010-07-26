@@ -46,6 +46,10 @@ namespace Mantid
       Run();
       /// Virtual destructor
       virtual ~Run();
+      /// Copy constructor
+      Run(const Run& copy);
+      /// Assignment operator
+      const Run& operator=(const Run& rhs);
     
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop);

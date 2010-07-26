@@ -26,6 +26,28 @@ namespace Mantid
     }
 
     /**
+     * Copy constructor
+     * @param copy The object to initialize the copy from
+     */
+    Run::Run(const Run& copy) : PropertyManager(copy), m_protonChargeName(copy.m_protonChargeName)
+    {
+    }
+
+    /**
+     * Assignment operator
+     * @param rhs The object whose properties should be copied into this
+     * @returns A cont reference to the copied object
+     */
+    const Run& Run::operator=(const Run& rhs)
+    {
+      if( this == &rhs ) return *this;
+      PropertyManager::operator=(rhs);
+      return *this;
+    }
+
+    
+
+    /**
      * Add data to the object in the form of a property
      * @param prop A pointer to a property whose ownership is transferred to this object
      */
