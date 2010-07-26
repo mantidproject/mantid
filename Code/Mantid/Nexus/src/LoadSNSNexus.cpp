@@ -37,7 +37,6 @@ LoadSNSNexus::LoadSNSNexus():m_L1(0) {}
 /// Initialisation method.
 void LoadSNSNexus::init()
 {
-    std::cerr << "00:" << std::endl; // REMOVE
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
 		    "The name of the SNS Nexus file to load" );      
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
@@ -143,10 +142,9 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins+1,nBins));
     ws->setTitle(entry.name());
     
-    std::string runDet = entry.getString("run_number");
+    std::string run_num = entry.getString("run_number");
     //The sample is left to delete the property
-    ws->mutableSample().addLogData(
-      new PropertyWithValue<std::string>("run_number", runDet));
+    ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     ws->setYUnit("Counts");
@@ -219,11 +217,11 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
         ws->getAxis(1)->spectraNo(i)= i+1;
     }
     ws->mutableSpectraMap().populate(spectra.get(),spectra.get(),nSpectra);
-    std::cerr << "loadEntry10:" << std::endl;// REMOVE
+
     NXFloat proton_charge = entry.openNXFloat("proton_charge");
     proton_charge.load();
     //ws->getSample()->setProtonCharge(*proton_charge());
-	ws->mutableSample().setProtonCharge(*proton_charge());
+    ws->mutableRun().setProtonCharge(*proton_charge());
     std::cerr << "loadEntry11:" << std::endl;// REMOVE
 
     //---- Now load the instrument using the LoadInstrumentFromSNSNexus algorithm ----

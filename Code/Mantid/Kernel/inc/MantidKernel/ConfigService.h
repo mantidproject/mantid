@@ -119,7 +119,7 @@ namespace Mantid
       // Starts up the logging
       void configureLogging();
       /// Provies a string of a default configuration
-      const std::string defaultConfig() const;
+      std::string defaultConfig() const;
       /// Writes out a fresh user properties file
       void createUserPropertiesFile() const;
       /// Convert any relative paths to absolute ones and store them locally so that

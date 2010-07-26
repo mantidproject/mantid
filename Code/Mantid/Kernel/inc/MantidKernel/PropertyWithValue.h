@@ -113,7 +113,7 @@ void toValue(const std::string& strvalue, T& value)
 }
 
 template <typename T>
-void toValue(const std::string& strvalue, boost::shared_ptr<T>& value)
+void toValue(const std::string&, boost::shared_ptr<T>&)
 {
   throw boost::bad_lexical_cast();
 }

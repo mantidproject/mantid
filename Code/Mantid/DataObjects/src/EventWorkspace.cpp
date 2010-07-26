@@ -104,7 +104,7 @@ using Kernel::Exception::NotImplementedError;
   /** Get the number of histograms, usually the same as the number of pixels or detectors. 
   @returns the number of histograms / event lists
   */
-  const int EventWorkspace::getNumberHistograms() const
+  int EventWorkspace::getNumberHistograms() const
   {
     return this->data.size();
   }
@@ -125,7 +125,7 @@ using Kernel::Exception::NotImplementedError;
   //-----------------------------------------------------------------------------
   /// Returns true always - an EventWorkspace always represents histogramm-able data
   /// @returns If the data is a histogtram - always true for an eventWorkspace
-  const bool EventWorkspace::isHistogramData() const
+  bool EventWorkspace::isHistogramData() const
   {
     return true;
   }

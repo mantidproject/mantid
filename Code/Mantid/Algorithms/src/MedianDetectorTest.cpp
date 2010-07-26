@@ -169,7 +169,7 @@ void MedianDetectorTest::retrieveProperties()
 * @param lastSpec the index number of the last histogram to analyse
 * @return A pointer to the workspace (or an empty pointer)
 */
-MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastSpec )
+API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastSpec )
 {
   g_log.information("Calculating soild angles");
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -209,7 +209,7 @@ MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastS
 * @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
-MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(int firstSpec, int lastSpec )
+API::MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(int firstSpec, int lastSpec)
 {
   g_log.information() << "Integrating input workspace" << std::endl;
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -248,7 +248,7 @@ MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(int firstSpec, int lastS
 * @throw invalid_argument if the ConvertToDistribution validation on the input workspace fails (a workspace that is already a distribution is acceptable)
 * @throw runtime_error if there is an during the execution of ConvertToDistribution
 */
-MatrixWorkspace_sptr MedianDetectorTest::getRate(MatrixWorkspace_sptr counts)
+API::MatrixWorkspace_sptr MedianDetectorTest::getRate(API::MatrixWorkspace_sptr counts)
 {
   g_log.information("Calculating time averaged count rates");
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -294,7 +294,7 @@ MatrixWorkspace_sptr MedianDetectorTest::getRate(MatrixWorkspace_sptr counts)
 * @return The median value of the histograms in the workspace that was passed to it
 * @throw out_of_range if a value is incountered that is unbelievibly high or negative
 */
-double MedianDetectorTest::getMedian(MatrixWorkspace_sptr input)
+double MedianDetectorTest::getMedian(API::MatrixWorkspace_sptr input)
 {
   g_log.information("Calculating the median count rate of the spectra");
 
@@ -392,7 +392,7 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_sptr input)
 * @param filename write the list of spectra numbers for failed detectors to a file with this name
 * @return An array that of the index numbers of the histograms that fail
 */
-void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &specNums, const std::string &filename)
+void MedianDetectorTest::FindDetects(API::MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &specNums, const std::string &filename)
 {
   g_log.information("Applying the criteria to find failing detectors");
   
@@ -552,7 +552,7 @@ void MedianDetectorTest::writeFile(const std::string &fname, const std::set<int>
 
 /**
  * Write a list of indices to a file
- * @param The file stream
+ * @param file The file stream
  * @param indices A set of indices to write
  * @param totalLines The total number of lines that will be written to the file
  * @param convertToSpectraNo If true, the index will be converted to a spectra number first
@@ -607,7 +607,7 @@ void MedianDetectorTest::writeListToFile(std::ofstream & file, const std::set<in
  * @param high The number of spectra counting high
  * @param alreadyMasked The number of spectra already masked when tested.
  */
-void MedianDetectorTest::logFinds(std::vector<int>::size_type missing, std::vector<int>::size_type low, std::vector<int>::size_type high, int alreadyMasked)
+void MedianDetectorTest::logFinds(size_t missing, size_t low, size_t high, int alreadyMasked)
 {
   if ( missing > 0 )
   {

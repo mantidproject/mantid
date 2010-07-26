@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 

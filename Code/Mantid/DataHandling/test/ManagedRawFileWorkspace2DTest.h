@@ -136,7 +136,7 @@ public:
     TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output2D->sample().getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
@@ -161,7 +161,7 @@ public:
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
    // boost::shared_ptr<Sample> sample = output2D->getSample();
-    Property *l_property = output2D->sample().getLogData( std::string("TEMP1") );
+    Property *l_property = output2D->run().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );

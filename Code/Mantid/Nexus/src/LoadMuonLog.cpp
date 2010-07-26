@@ -64,7 +64,6 @@ void LoadMuonLog::exec()
   // Also set the sample name at this point, as part of the sample related log data.
 
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
- // boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
   localWorkspace->mutableSample().setName(nxload.getSampleName());
 
   // Attempt to load the content of each NXlog section into the Sample object
@@ -105,12 +104,12 @@ void LoadMuonLog::exec()
     // store Property in Sample object and delete unused object
     if ( nxload.logTypeNumeric(i) )
     {
-      localWorkspace->mutableSample().addLogData(l_PropertyDouble);
+      localWorkspace->mutableRun().addLogData(l_PropertyDouble);
       delete l_PropertyString;
     }
     else
     {
-      localWorkspace->mutableSample().addLogData(l_PropertyString);
+      localWorkspace->mutableRun().addLogData(l_PropertyString);
       delete l_PropertyDouble;
     }
     prog.report();

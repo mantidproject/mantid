@@ -93,7 +93,7 @@ public:
     //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
     //TS_ASSERT( ! result.compare(entryName));
 
-	// changed so that 1D workspaces are no longer written.
+    // changed so that 1D workspaces are no longer written.
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 

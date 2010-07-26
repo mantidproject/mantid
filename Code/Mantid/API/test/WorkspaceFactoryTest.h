@@ -20,7 +20,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class WorkspaceTest: public MatrixWorkspace
   {
   public:
-    virtual const int getNumberHistograms() const { return 1;}
+    virtual int getNumberHistograms() const { return 1;}
 
     WorkspaceTest() : data(MantidVec(1,1)) {}
    	//  static std::string WSTYPE;
@@ -28,21 +28,21 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     //section required to support iteration
     virtual int size() const {return 1000000;}
     virtual int blocksize() const  {return 10000;}
-    virtual MantidVec& dataX(int const index) {return data;}
+    virtual MantidVec& dataX(int const) {return data;}
     ///Returns the y data
-    virtual MantidVec& dataY(int const index) {return data;}
+    virtual MantidVec& dataY(int const) {return data;}
     ///Returns the error data
-    virtual MantidVec& dataE(int const index) {return data;}
+    virtual MantidVec& dataE(int const) {return data;}
 
-    virtual const MantidVec& dataX(int const index)const {return data;}
+    virtual const MantidVec& dataX(int const)const {return data;}
     ///Returns the y data
-    virtual const MantidVec& dataY(int const index)const {return data;}
+    virtual const MantidVec& dataY(int const)const {return data;}
     ///Returns the error data
-    virtual const MantidVec& dataE(int const index)const {return data;}
-    cow_ptr<MantidVec> refX(const int index) const {return cow_ptr<MantidVec>();}
-    void setX(const int index, const cow_ptr<MantidVec>& X) {}
+    virtual const MantidVec& dataE(int const)const {return data;}
+    cow_ptr<MantidVec> refX(const int) const {return cow_ptr<MantidVec>();}
+    void setX(const int, const cow_ptr<MantidVec>& ) {}
     
-    virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
+    virtual void init(const int &, const int &, const int &){};
 
   private:
     MantidVec data;
@@ -52,7 +52,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class Workspace1DTest: public WorkspaceTest
   {
   public:
-    const int getNumberHistograms() const { return 1;}
+    int getNumberHistograms() const { return 1;}
     //  static std::string WSTYPE;
     const std::string id() const {return "Workspace1DTest";}
   };
@@ -62,7 +62,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   public:
   	//  static std::string WSTYPE;
     const std::string id() const {return "Workspace2DTest";}
-    const int getNumberHistograms() const { return 2;}
+    int getNumberHistograms() const { return 2;}
 
     void init(const int &NVectors, const int &XLength, const int &YLength)
     {
@@ -78,7 +78,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   public:
   	//  static std::string WSTYPE;
     const std::string id() const {return "ManagedWorkspace2D";}
-    const int getNumberHistograms() const { return 2;}
+    int getNumberHistograms() const { return 2;}
   };
 
   class NotInFactory : public WorkspaceTest

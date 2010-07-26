@@ -580,7 +580,7 @@ namespace Mantid
       openNexusData("proton_charge");
       {
         getNexusData(&m_proton_charge);
-        ws->mutableSample().setProtonCharge(m_proton_charge);
+        ws->mutableRun().setProtonCharge(m_proton_charge);
       }
       closeNexusData();
 
@@ -650,13 +650,13 @@ namespace Mantid
                   *(value.get()+(i+1)*vinfo.dims[1]-1) = 0; // ensure the terminating zero
                   logv->addValue(t,std::string(value.get()+i*vinfo.dims[1]));
                 }
-                ws->mutableSample().addLogData(logv);
+                ws->mutableRun().addLogData(logv);
                 if (std::string(nxname.get()) == "icp_event")
                 {
                   LogParser parser(logv);
-                  ws->mutableSample().addLogData(parser.createPeriodLog(period));
-                  ws->mutableSample().addLogData(parser.createAllPeriodsLog());
-                  ws->mutableSample().addLogData(parser.createRunningLog());
+                  ws->mutableRun().addLogData(parser.createPeriodLog(period));
+                  ws->mutableRun().addLogData(parser.createAllPeriodsLog());
+                  ws->mutableRun().addLogData(parser.createRunningLog());
                 }
               }
               else if (vinfo.type == NX_FLOAT32)
@@ -669,7 +669,7 @@ namespace Mantid
                   time_t t = start_t + int(times[i]);
                   logv->addValue(t,value[i]);
                 }
-                ws->mutableSample().addLogData(logv);
+                ws->mutableRun().addLogData(logv);
               }
               else if (vinfo.type == NX_INT32)
               {
@@ -681,7 +681,7 @@ namespace Mantid
                   time_t t = start_t + int(times[i]);
                   logv->addValue(t,value[i]);
                 }
-                ws->mutableSample().addLogData(logv);
+                ws->mutableRun().addLogData(logv);
               }
               else
               {

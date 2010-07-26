@@ -1652,7 +1652,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
     if (!ws) return;
 
-	Mantid::Kernel::Property * logData =ws->sample().getLogData(logname.toStdString()); //ws->getSample()->getLogData(logname.toStdString());
+	Mantid::Kernel::Property * logData =ws->run().getLogData(logname.toStdString()); 
     if (!logData) return;
 	
     Mantid::Kernel::LogFilter flt(logData);
@@ -1682,7 +1682,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
         {
             try
             {
-				f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->sample().getLogData("running"));//ws->getSample()->getLogData("running"));
+				f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
                 if (f) flt.addFilter(f);
                 else
                 {
@@ -1699,7 +1699,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
         if (filter == 2 || filter ==3)
         {
-            std::vector<Mantid::Kernel::Property*> ps =ws->sample().getLogData(); //ws->getSample()->getLogData();
+            std::vector<Mantid::Kernel::Property*> ps =ws->run().getLogData();
             for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();it++)
                 if ((*it)->name().find("period ") == 0)
                 {

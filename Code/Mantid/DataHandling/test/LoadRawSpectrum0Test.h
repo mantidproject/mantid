@@ -79,7 +79,7 @@ public:
     TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output2D->sample().getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
 	AnalysisDataService::Instance().remove(outputSpace);
   }
 
@@ -149,18 +149,19 @@ public:
 
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr2->sample()))
-	TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr3->sample()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr4->sample()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr5->sample()) )
+    TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()))
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run()) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run()) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run()) )
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr6->sample()) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run()) )
 	
   }
   
 private:
-  LoadRawSpectrum0 loader;//,loader2,loader3;
+  LoadRawSpectrum0 loader;
   std::string inputFile;
   std::string outputSpace;
 };

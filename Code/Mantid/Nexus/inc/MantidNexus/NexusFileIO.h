@@ -1,7 +1,7 @@
 #ifndef NEXUSFILEIO_H
 #define NEXUSFILEIO_H
 #include <napi.h>
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "boost/date_time/local_time_adjustor.hpp"
@@ -50,23 +50,19 @@ namespace Mantid
 
       /// open the nexus file for writing
       int openNexusWrite(const std::string& fileName);
-      /// open the nexus file for reading
-      int openNexusRead(const std::string& fileName, int& workspaceNumber);
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& title);
-      /// write sample related data
       /// close the nexus file
       int closeNexusFile();
-
-	  int writeNexusProcessedSample( const std::string& title,const Mantid::API::Sample& sample);
-      /// read sample data
-	  int readNexusProcessedSample(Mantid::API::Sample& sample);
+      /// Write a Nexus sample section
+      int writeNexusProcessedSample( const std::string& title, const API::Sample & sample,
+				     const Mantid::API::Run& runProperties);
       /// write the workspace data
       int writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
-							const bool& uniformSpectra, const std::vector<int>& spec);
+				   const bool& uniformSpectra, const std::vector<int>& spec);
       /// find size of open entry data section
       int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
-               bool& uniformBounds, std::string& axesNames, std::string& yUnits );
+			    bool& uniformBounds, std::string& axesNames, std::string& yUnits );
       /// read X values for one (or the generic if uniform) spectra
       int getXValues(MantidVec& xValues, const int& spectra);
       /// read values and errors for spectra
@@ -77,19 +73,10 @@ namespace Mantid
       /// write the source XML file used, if it exists
       bool writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
                             const std::string& version);
-      /// read the source XML file used
-      bool readNexusInstrumentXmlName(std::string& instrumentXml,std::string& date,
-                            std::string& version);
-      /// read the source XML file used
-      std::string readNexusInstrumentName();
       /// write an instrument section - currently only the name
       bool writeNexusInstrument(const API::IInstrument_const_sptr& instrument);
       /// write any spectra map information to Nexus file
       bool writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec);
-      /// read spectra map information
-      bool readNexusProcessedSpectraMap(API::MatrixWorkspace_sptr localWorkspace);
-      /// Read the vertical axis (axis(1)) values
-      bool readNexusProcessedAxis(API::MatrixWorkspace_sptr localWorkspace);
       /// write instrument parameters
       bool writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws);
       /// read instrument parameters
@@ -107,18 +94,12 @@ namespace Mantid
       /// write a text value plus possible attribute
       bool writeNxText( const std::string& name, const std::string& value, const std::vector<std::string>& attributes,
 				 const std::vector<std::string>& avalues);
-      /// read a text value plus possible attribute
-      bool readNxText(const std::string& name, std::string& value, std::vector<std::string>& attributes,
-				 std::vector<std::string>& avalues);
       /// write an NXnote with standard fields (but NX_CHAR rather than NX_BINARY data)
       bool writeNxNote(const std::string& noteName, const std::string& author, const std::string& date,
                          const std::string& description, const std::string& pairValues);
       /// write a flost value plus possible attributes
       bool writeNxFloat(const std::string& name, const double& value, const std::vector<std::string>& attributes,
 	                           const std::vector<std::string>& avalues);
-      /// read a float value and possible attributes
-      bool readNxFloat(const std::string& name, double& value, std::vector<std::string>& attributes,
-	                           std::vector<std::string>& avalues);
       /// write a float array along with any defined attributes
       bool writeNxFloatArray(const std::string& name, const std::vector<double>& values, const std::vector<std::string>& attributes,
 	                           const std::vector<std::string>& avalues);
@@ -129,8 +110,6 @@ namespace Mantid
       void writeNexusDoubleLog(const Kernel::TimeSeriesProperty<double> *d_timeSeries);
       /// Write NXlog data for given string TimeSeriesProperty
       void writeNexusStringLog(const Kernel::TimeSeriesProperty<std::string> *s_timeSeries);
-      /// read the named NXlog and create TimeSeriesProp in sample
-      void readNXlog(const char* nxname, Mantid::API::Sample& sample);
       /// check if the gievn item exists in the current level
       bool checkEntryAtLevel(const std::string& item) const;
       /// check if given attribute name is in currently opened entry

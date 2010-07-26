@@ -179,7 +179,7 @@ void MantidSampleLogDialog::init()
   {
       throw std::runtime_error("Wrong type of a Workspace");
   }
-  const std::vector< Mantid::Kernel::Property * > & logData = ws->sample().getLogData();//ws->getSample()->getLogData();
+  const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
   std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
   int max_length(0);
   for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();

@@ -71,7 +71,7 @@ IComponent* Component::clone() const
 /*!  Get the component's ID
  *   @return ID
 */
-const ComponentID Component::getComponentID()const
+ComponentID Component::getComponentID()const
 {
   return ComponentID((const IComponent*)(this));
 }

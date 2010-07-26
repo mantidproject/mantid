@@ -42,6 +42,7 @@ Property::~Property()
 */
 Property& Property::operator=( const Property& right )
 {
+  (void)right; // Get rid of compiler warning but we need the argument for doxygen
   return *this;
 }
 

@@ -30,6 +30,7 @@ namespace Algorithms
     <LI> CheckSpectraMap - Whether to check that the spectra-detector maps match (default: true) </LI>
     <LI> CheckInstrument - Whether to check that the instruments match (default: true) </LI>
     <LI> CheckMasking    - Whether to check that the bin masking matches (default: true) </LI>
+    <LI> CheckSample     - Whether to check that the sample object mathces (default: false) </LI>
     </UL>
     
     Output Properties:
@@ -87,6 +88,7 @@ private:
   bool checkInstrument(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSample(const API::Sample& sample1, const API::Sample& sample2);
+  bool checkRunProperties(const API::Run& run1, const API::Run& run2);
   
   std::string result; ///< the result string
 };

@@ -20,7 +20,7 @@ public:
   virtual ~WorkspaceTester() {}
 
   // Empty overrides of virtual methods
-  virtual const int getNumberHistograms() const { return 1;}
+  virtual int getNumberHistograms() const { return 1;}
   const std::string id() const {return "WorkspaceTester";}
   void init(const int& i, const int& j, const int& k)
   {
@@ -31,14 +31,14 @@ public:
   }
   int size() const {return vec.size();}
   int blocksize() const {return vec.size();}
-  MantidVec& dataX(int const index) {return vec;}
-  MantidVec& dataY(int const index) {return vec;}
-  MantidVec& dataE(int const index) {return vec;}
-  const MantidVec& dataX(int const index) const {return vec;}
-  const MantidVec& dataY(int const index) const {return vec;}
-  const MantidVec& dataE(int const index) const {return vec;}
-  Kernel::cow_ptr<MantidVec> refX(const int index) const {return Kernel::cow_ptr<MantidVec>();}
-  void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) {}
+  MantidVec& dataX(int const ) {return vec;}
+  MantidVec& dataY(int const ) {return vec;}
+  MantidVec& dataE(int const ) {return vec;}
+  const MantidVec& dataX(int const) const {return vec;}
+  const MantidVec& dataY(int const) const {return vec;}
+  const MantidVec& dataE(int const) const {return vec;}
+  Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
+  void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
 
 private:
   MantidVec vec;

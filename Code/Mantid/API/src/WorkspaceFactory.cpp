@@ -87,6 +87,7 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
   child->setInstrument(parent->getInstrument());  // This call also copies the parameter map
   child->m_spectramap = parent->m_spectramap;
   child->m_sample = parent->m_sample;
+  child->m_run = parent->m_run;
   child->setYUnit(parent->m_YUnit);
   child->setYUnitLabel(parent->m_YUnitLabel);
   child->isDistribution(parent->isDistribution());

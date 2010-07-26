@@ -283,16 +283,14 @@ namespace Mantid
         NXLog nxLog = runlogs.openNXLog(it->nxname);
         Kernel::Property* logv = nxLog.createTimeSeries(start_time);
         if (!logv) continue;
-        ws->mutableSample().addLogData(logv);
+        ws->mutableRun().addLogData(logv);
       }
 
       ws->setTitle(entry.getString("title"));
 
-      std::string runDet =
-        boost::lexical_cast<std::string>(entry.getInt("run_number"));
+      std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
       //The sample is left to delete the property
-      ws->mutableSample().addLogData(
-        new PropertyWithValue<std::string>("run_number", runDet));
+      ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
     
       ws->populateInstrumentParameters();
     }

@@ -485,7 +485,7 @@ namespace Kernel
    * Provides a default Configuration string to use if the config file cannot be loaded.
    * @returns The string value of default properties
    */
-  const std::string ConfigServiceImpl::defaultConfig() const
+  std::string ConfigServiceImpl::defaultConfig() const
   {
     std::string propFile = 
       "# logging configuration"

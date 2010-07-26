@@ -491,10 +491,9 @@ namespace Mantid
     void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
     {
       NXMainClass sample = mtd_entry.openNXClass<NXMainClass>("sample");
-      //boost::shared_ptr<Mantid::API::Sample> sample_details = local_workspace->getSample();
       try
       {
-        local_workspace->mutableSample().setProtonCharge(sample.getDouble("proton_charge"));
+        local_workspace->mutableRun().setProtonCharge(sample.getDouble("proton_charge"));
       }
       catch(std::runtime_error & )
       {
@@ -561,7 +560,7 @@ namespace Mantid
                 g_log.debug() << "set sample height=" << height->getSingleValue(0) << std::endl;
               }
             }
-            else local_workspace->mutableSample().addLogData(p);
+            else local_workspace->mutableRun().addLogData(p);
           }
         }
       }

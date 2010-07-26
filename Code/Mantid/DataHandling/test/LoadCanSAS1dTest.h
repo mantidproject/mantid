@@ -56,7 +56,7 @@ public:
 	TS_ASSERT_THROWS_NOTHING( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace) );
 	Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
 
-  Mantid::Kernel::Property *logP = ws2d->sample().getLogData("run_number");
+  Mantid::Kernel::Property *logP = ws2d->run().getLogData("run_number");
   TS_ASSERT_EQUALS( logP->value(), "LOQ48097")
 
   //Single histogram

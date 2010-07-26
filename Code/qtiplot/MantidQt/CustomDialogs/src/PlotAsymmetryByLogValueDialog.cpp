@@ -174,7 +174,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
           Mantid::API::AnalysisDataService::Instance().retrieve(gws->getNames()[1])
         );
       }
-      const std::vector< Mantid::Kernel::Property* >& props = mws->sample().getLogData();
+      const std::vector< Mantid::Kernel::Property* >& props = mws->run().getLogData();
       if (gws)
       {
         std::vector<std::string> wsNames = gws->getNames();

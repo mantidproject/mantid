@@ -7,7 +7,7 @@
 #include "MantidAPI/PairedGroupAlgorithm.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/Sample.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid
 {
@@ -108,13 +108,13 @@ namespace Mantid
        */
       virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out) {}
 
-      /** Only overridden by operations that affect the properties of the sample (e.g. Plus
+      /** Only overridden by operations that affect the properties of the run (e.g. Plus
        *  where the proton currents (charges) are added). Otherwise it does nothing.
        *  @param lhs one of the workspaces to operate on
        *  @param rhs the other workspace
        *  @param ans the output workspace
        */
-      virtual void operateOnSample(const API::Sample& lhs, const API::Sample& rhs, API::Sample& ans) const {};
+      virtual void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run& ans) const {};
 
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);

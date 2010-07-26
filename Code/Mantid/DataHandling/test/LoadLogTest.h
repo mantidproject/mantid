@@ -70,7 +70,7 @@ public:
     
 	 // boost::shared_ptr<Sample> sample = output->getSample();
 
-    Property *l_property = output->sample().getLogData("HRP37129_ICPevent");
+    Property *l_property = output->run().getLogData("HRP37129_ICPevent");
     TimeSeriesProperty<std::string> *l_timeSeries = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
 
     std::string timeSeriesString = l_timeSeries->value();
@@ -124,27 +124,27 @@ public:
 
     // obtain the expected log files which should be in the same directory as the raw datafile
 
-    Property *l_property = output->sample().getLogData( std::string("ICPevent") );
+    Property *l_property = output->run().getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,28), "2007-Nov-13 15:19:13   BEGIN" );
 
-    l_property = output->sample().getLogData( std::string("cphs_6") );
+    l_property = output->run().getLogData( std::string("cphs_6") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
-    l_property = output->sample().getLogData( std::string("PROP3") );
+    l_property = output->run().getLogData( std::string("PROP3") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
-    l_property = output->sample().getLogData( std::string("SE_He_Level") );
+    l_property = output->run().getLogData( std::string("SE_He_Level") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2007-Nov-13 15:17:08  -1" );
 
-    l_property = output->sample().getLogData( std::string("TEMP1") );
+    l_property = output->run().getLogData( std::string("TEMP1") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
@@ -193,7 +193,7 @@ public:
 
     // obtain the expected log files which should be in the same directory as the raw datafile
 
-    Property *l_property = output->sample().getLogData( std::string("ICPevent") );
+    Property *l_property = output->run().getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
@@ -241,17 +241,17 @@ void testExecWiththreecolumnLogfile()
 
     // obtain the expected log files which should be in the same directory as the raw datafile
 
-    Property *l_property = output->sample().getLogData( std::string("ICPevent") );
+    Property *l_property = output->run().getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,36), "2009-Nov-10 17:22:13   CHANGE_PERIOD" );
 
-    l_property =output->sample().getLogData( std::string("J6CX") );
+    l_property =output->run().getLogData( std::string("J6CX") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,20), "2009-Nov-10 17:22:14" );
 
-	l_property = output->sample().getLogData( std::string("BeamCurrent") );
+	l_property = output->run().getLogData( std::string("BeamCurrent") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,20), "2009-Nov-10 10:14:03" );
@@ -300,12 +300,12 @@ void testloadlogwithalternatedatastream()
 
     // obtain the expected log files which should be in the same directory as the raw datafile
 
-    Property *l_property = output->sample().getLogData( std::string("ICPevent") );
+    Property *l_property = output->run().getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,36), "2009-Nov-11 11:25:57   CHANGE_PERIOD" );
 
-    Property* string_property = output->sample().getLogData( std::string("RF1Ampon") );
+    Property* string_property = output->run().getLogData( std::string("RF1Ampon") );
 	TimeSeriesProperty<std::string> *l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
 	std::map<dateAndTime, std::string> vmap=l_timeSeriesString1->valueAsMap();
 	std::map<dateAndTime, std::string>::const_iterator itr;
@@ -313,14 +313,14 @@ void testloadlogwithalternatedatastream()
 	{TS_ASSERT_EQUALS( itr->second, "False" );
 	}
 
-	string_property = output->sample().getLogData( std::string("ShutterStatus") );
+	string_property = output->run().getLogData( std::string("ShutterStatus") );
 	l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
 	std::map<dateAndTime, std::string> vmap1=l_timeSeriesString1->valueAsMap();
 	for(itr=vmap1.begin();itr!=vmap1.end();++itr)
 	{TS_ASSERT_EQUALS( itr->second, "OPEN" );
 	}
     
-	 Property* double_property = output->sample().getLogData( std::string("b2v2") );
+	 Property* double_property = output->run().getLogData( std::string("b2v2") );
 	TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(double_property);
 	std::map<dateAndTime,double> vmapb2v2=l_timeSeriesDouble1->valueAsMap();
 	std::map<dateAndTime,double>::const_iterator vmapb2v2itr;

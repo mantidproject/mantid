@@ -70,7 +70,7 @@ public:
   virtual int blocksize() const
   { return 1; }
 
-  const int getNumberHistograms() const
+  int getNumberHistograms() const
   { return 1; }
 
   //inheritance redirections

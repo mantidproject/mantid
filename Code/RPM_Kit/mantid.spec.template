@@ -109,6 +109,9 @@ for i in qtiplotrc.py qtiUtil.py mantidplotrc.py mantidplot.py; do
     install -m755 Code/qtiplot/qtiplot/$i $RPM_BUILD_ROOT/%{mantidbindir}/$i
 done
 install -m755 Code/Mantid/PythonAPI/MantidFramework.py $RPM_BUILD_ROOT/%{mantidbindir}
+install -m755 Code/Mantid/PythonAPI/MantidHeader.py $RPM_BUILD_ROOT/%{mantidbindir}
+install -m755 Code/Mantid/PythonAPI/MantidStartup.py $RPM_BUILD_ROOT/%{mantidbindir}
+install -m755 Code/Mantid/PythonAPI/MantidScript $RPM_BUILD_ROOT/%{mantidbindir}
 
 # on ubuntu sip goes into /usr/lib/pyshared etc
 # not sure why this is needed

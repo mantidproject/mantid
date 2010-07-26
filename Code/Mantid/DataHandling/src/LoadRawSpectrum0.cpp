@@ -94,16 +94,16 @@ namespace Mantid
 			// Create the 2D workspace for the output
 			DataObjects::Workspace2D_sptr localWorkspace =createWorkspace(total_specs, m_lengthIn,m_lengthIn-1,title);
 					
-			Sample& sample = localWorkspace->mutableSample();
+			Run& run = localWorkspace->mutableRun();
 
 			if(bLoadlogFiles)
 			{
 				runLoadLog(m_filename,localWorkspace);
 				Property* log = createPeriodLog(1);
-				if (log) sample.addLogData(log);
+				if (log) run.addLogData(log);
 			}
 			// Set the total proton charge for this run
-			setProtonCharge(sample);
+			setProtonCharge(run);
 			
 			WorkspaceGroup_sptr wsgrp_sptr = createGroupWorkspace();
 			setWorkspaceProperty("OutputWorkspace", title, wsgrp_sptr, localWorkspace,m_numberOfPeriods, false);
@@ -121,13 +121,13 @@ namespace Mantid
 						//remove previous period data
 						std::stringstream prevPeriod;
 						prevPeriod << "PERIOD " << (period);
-						//std::string prevPeriod="PERIOD "+suffix.str();
-						Sample& sampleObj = localWorkspace->mutableSample();
-						sampleObj.removeLogData(prevPeriod.str());
+						Run& runObj = localWorkspace->mutableRun();
+						runObj.removeLogData(prevPeriod.str());
 						//add current period data
 						Property* log = createPeriodLog(period+1);
 						if (log) 
-						{ sampleObj.addLogData(log);
+						{ 
+						  runObj.addLogData(log);
 						}
 					}
 					//skip all spectra except the first one in each period

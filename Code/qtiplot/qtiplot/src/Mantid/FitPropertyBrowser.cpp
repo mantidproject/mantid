@@ -1845,7 +1845,7 @@ void FitPropertyBrowser::setLogValue(const QString& lv)
         );
       if (ws)
       {
-        const std::vector<Mantid::Kernel::Property*> logs = ws->sample().getLogData();
+        const std::vector<Mantid::Kernel::Property*> logs = ws->run().getLogData();
         for(int i=0;i<logs.size();++i)
         {
           m_logs << QString::fromStdString(logs[i]->name());

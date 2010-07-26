@@ -202,7 +202,7 @@ private:
       //addNoise(ws,0.01);
       Kernel::TimeSeriesProperty<double>* logd = new Kernel::TimeSeriesProperty<double>("var");
       logd->addValue("2007-11-01T18:18:53",1+iWS*0.3);
-      ws->mutableSample().addLogData(logd);
+      ws->mutableRun().addLogData(logd);
       std::ostringstream wsName;
       wsName << "PlotPeakGroup_" << iWS ;
       AnalysisDataService::Instance().add(wsName.str(),ws);

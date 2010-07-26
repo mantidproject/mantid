@@ -117,16 +117,7 @@ public:
     remove(m_filename.c_str());
   }
 
-
-// testing of  searchandreplaceSpecialChars is done. 
-  //I made this method public and tested,changed back to private.
- /* void xtestspecialcharacters()
-  {
-	  SaveCanSAS1D savealg;
-	  std::string input="sasdjksd<aw&gjkjk\"j";
-	  savealg.searchandreplaceSpecialChars(input);
-  }*/
-  private :
+private :
   const std::string m_rawoutws, m_filename;
   std::string m_runNum;
   MatrixWorkspace_sptr ws;

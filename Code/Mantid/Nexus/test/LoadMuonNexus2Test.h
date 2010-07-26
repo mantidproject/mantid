@@ -101,7 +101,7 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    Property *l_property = output->sample().getLogData( std::string("temperature_1_log") );
+    Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::map<dateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(),37);
@@ -341,7 +341,7 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    Property *l_property = output->sample().getLogData( std::string("temperature_1_log") );
+    Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::map<dateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(),42);
@@ -443,7 +443,7 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    Property *l_property = output->sample().getLogData( std::string("temperature_1_log") );
+    Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::map<dateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(),31);

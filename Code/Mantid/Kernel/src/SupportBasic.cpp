@@ -85,7 +85,9 @@ int extractWord(std::string& Line,const std::string& Word,const int cnt)
   // Pos == Start of find
   unsigned int LinePt=minSize+pos;
   for(;minSize<Word.size() && LinePt<Line.size()
-	&& Word[minSize]==Line[LinePt];LinePt++,minSize++);
+	&& Word[minSize]==Line[LinePt];LinePt++,minSize++)
+  {
+  }
 
   Line.erase(pos,LinePt-(pos-1));
   return 1;

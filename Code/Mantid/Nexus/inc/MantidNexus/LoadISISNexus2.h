@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include <climits>
@@ -83,6 +82,8 @@ namespace Mantid
       void checkOptionalProperties();
       /// Run LoadInstrument as a subalgorithm
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
+      /// Load in details about the run
+      void loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry);
       /// Load in details about the sample
       void loadSampleData(DataObjects::Workspace2D_sptr, NXEntry & entry);
       /// Load log data from the nexus file

@@ -134,62 +134,6 @@ namespace Mantid
       return(0);
     }
 
-    int NexusFileIO::openNexusRead(const std::string& fileName, int& workspaceNumber )
-    {
-      // Open named file and entry "mantid_workspace_<n> - file must exist
-      // If workspaceNumber>0, use as value on <n>, otherwise take highest
-      //
-      // @throw Exception::FileError if cannot open Nexus file for reading, or no
-      //                             mantid_workspace_<n> entry
-      //
-      NXaccess mode;
-      NXstatus status;
-      std::string className="NXentry";
-      std::string mantidEntryName;
-      m_filename=fileName;
-      mode = NXACC_READ;
-      // check file exists
-      if(!Poco::File(fileName).exists())
-      {
-        g_log.error("File not found " + fileName);
-        throw Exception::FileError("File not found:" , fileName);	  
-      }
-      // open for reading
-      status=NXopen(fileName.c_str(), mode, &fileID);
-      if(status==NX_ERROR)
-      {
-        g_log.error("Unable to open file " + fileName);
-        throw Exception::FileError("Unable to open File:" , fileName);	  
-      }
-      // search for mantid_workspace_<n> entries
-      int count=findMantidWSEntries();
-      if(count<1)
-      {
-        g_log.error("File contains no mantid_workspace_ entries " + fileName);
-        throw Exception::FileError("File contains no mantid_workspace_ entries: " , fileName);
-      }
-      //
-      // if workspaceNumber==0 then take highest existing workspace, else look for given number
-      //
-      if( workspaceNumber>0 )
-      {
-        if( workspaceNumber<=count )
-        {
-          count=workspaceNumber;
-        }
-        else
-        {
-          g_log.error("Requested entry number is greater than available in file: " + fileName);
-          throw Exception::FileError("File does not contains mantid_workspace_" + workspaceNumber , fileName);
-        }
-      }
-      std::stringstream suffix;
-      suffix << (count);
-      mantidEntryName="mantid_workspace_"+suffix.str();
-      status=NXopengroup(fileID,mantidEntryName.c_str(),className.c_str());
-      return(status==NX_OK ? 0:1);
-    }
-
     int NexusFileIO::closeNexusFile()
     {
 
@@ -247,38 +191,6 @@ namespace Mantid
       return(true);
     }
 
-    bool NexusFileIO::readNexusInstrumentXmlName(std::string& instrumentXml,std::string& date,
-      std::string& version)
-    {
-      std::vector<std::string> attributes,avalues;
-      if( ! readNxText( "instrument_source", instrumentXml, attributes, avalues) )
-        return(false);
-      for(unsigned int i=1;i<=attributes.size();i++)
-      {
-        if(attributes[i-1].compare("date") == 0)
-        {
-          date=avalues[i-1];
-        }
-        else if(attributes[i-1].compare("version") == 0)
-        {
-          version=avalues[i-1];
-        }
-      }
-
-      return(true);
-    }
-
-    std::string NexusFileIO::readNexusInstrumentName()
-    {
-      std::vector<std::string> attributes,avalues;
-      std::string name;
-      NXstatus status=NXopengroup(fileID,"instrument","NXinstrument");
-      if (status==NX_ERROR) return "";
-      if (! readNxText("name",name,attributes,avalues) ) name = "";
-      NXclosegroup(fileID);
-      return name;
-    }
-
     bool NexusFileIO::writeNexusInstrument(const API::IInstrument_const_sptr& instrument)
     {
       NXstatus status;
@@ -318,40 +230,7 @@ namespace Mantid
       status=NXclosedata(fileID);
       return(true);
     }
-    //
-    // read an NXdata entry with char values along with attribute names and values
-    //
-    bool NexusFileIO::readNxText(const std::string& name, std::string& value, std::vector<std::string>& attributes,
-      std::vector<std::string>& avalues)
-    {
-      NXstatus status;
-      status=NXopendata(fileID, name.c_str());
-      if(status==NX_ERROR)
-        return(false);
-      int length,type;
-      char aname[NX_MAXNAMELEN];
-      char avalue[NX_MAXNAMELEN]; // value is not restricted to this, but it is a reasonably large value
-      while(NXgetnextattr(fileID,aname,&length,&type)==NX_OK)
-      {
-        if(type==NX_CHAR) // ignoring non char attributes
-        {
-          attributes.push_back(aname);
-          NXgetattr(fileID,aname,(void *)avalue,&length,&type);
-          avalues.push_back(avalue);
-        }
-      }
-      int rank,dim[1];
-      status=NXgetinfo(fileID, &rank, dim, &type);
-      if(type==NX_CHAR && dim[0]>0)
-      {
-        char *dvalue=new char[dim[0]+1];
-        status=NXgetdata(fileID, (void *)dvalue);
-        dvalue[dim[0]]='\0';
-        value=dvalue;
-      }
-      status=NXclosedata(fileID);
-      return(true);
-    }
+
     //
     // write an NXdata entry with Float value
     //
@@ -367,32 +246,6 @@ namespace Mantid
       for(unsigned int it=0; it<attributes.size(); ++it)
         status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
       status=NXputdata(fileID, (void*)&value);
-      status=NXclosedata(fileID);
-      return(true);
-    }
-    //
-    // read an NXdata entry with Float value
-    //
-    bool NexusFileIO::readNxFloat(const std::string& name, double& value, std::vector<std::string>& attributes,
-      std::vector<std::string>& avalues)
-    {
-      NXstatus status;
-      status=NXopendata(fileID, name.c_str());
-      if(status==NX_ERROR)
-        return(false);
-      int length=NX_MAXNAMELEN,type;
-      char aname[NX_MAXNAMELEN];
-      char avalue[NX_MAXNAMELEN]; // value is not restricted to this (64), but should be sufficient
-      while(NXgetnextattr(fileID,aname,&length,&type)==NX_OK)
-      {
-        if(type==NX_CHAR) // ignoring non char attributes
-        {
-          attributes.push_back(aname);
-          NXgetattr(fileID,aname,(void *)avalue,&length,&type);
-          avalues.push_back(avalue);
-        }
-      }
-      status=NXgetdata(fileID, (void*)&value);
       status=NXclosedata(fileID);
       return(true);
     }
@@ -436,7 +289,6 @@ namespace Mantid
       for(size_t i=0;i<values.size();i++)
       {
         strncpy(&strs[i*maxlen],values[i].c_str(),maxlen);
-        //strs[i]=static_cast<char*> values[i].c_str();
       }
       status=NXputdata(fileID, (void*)strs);
       status=NXclosedata(fileID);
@@ -479,7 +331,8 @@ namespace Mantid
     // Write sample related information to the nexus file
     //}
 
-	int NexusFileIO::writeNexusProcessedSample( const std::string& name,const Mantid::API::Sample& sample)
+    int NexusFileIO::writeNexusProcessedSample( const std::string& name, const API::Sample & sample,
+						const Mantid::API::Run& runProperties)
     {
       NXstatus status;
 
@@ -496,8 +349,16 @@ namespace Mantid
           return(3);
       // Write proton_charge here, if available. Note that TOFRaw has this at the NXentry level, though there is
       // some debate if this is appropriate. Hence for Mantid write it to the NXsample section as it is stored in Sample.
-      const double totalProtonCharge=sample.getProtonCharge();
-      if( totalProtonCharge>0 )
+      double totalProtonCharge(-1.0);
+      try
+      {
+	totalProtonCharge = runProperties.getProtonCharge();
+      }
+      catch(Exception::NotFoundError&)
+      {
+      }
+
+      if( totalProtonCharge > 0.0 )
       {
         attributes.push_back("units");
         avalues.push_back("microAmps*hour");
@@ -505,13 +366,12 @@ namespace Mantid
           return(4);
       }
       // Examine TimeSeries (Log) data and call function to write double or string data
-      std::vector<Kernel::Property*> sampleProps=sample.getLogData();
+      std::vector<Kernel::Property*> sampleProps = runProperties.getLogData();
       for(unsigned int i=0;i<sampleProps.size();i++)
       {
 
         std::string name=sampleProps[i]->name();
         std::string type=sampleProps[i]->type();
-        //std::string value=sampleProps[i]->value();
         TimeSeriesProperty<std::string> *s_timeSeries=dynamic_cast<TimeSeriesProperty<std::string>*>(sampleProps[i]);
         if(s_timeSeries!=0)
         {
@@ -563,65 +423,6 @@ namespace Mantid
     }
 
 
-      /*!
-      Read Nexus Sample section
-      @param sample pointer to the workspace sample data
-      @return 0 on success
-      */
-	int NexusFileIO::readNexusProcessedSample( Mantid::API::Sample& sample)
-    {
-      NXstatus status;
-
-      //open sample entry
-      status=NXopengroup(fileID,"sample","NXsample");
-      if(status==NX_ERROR)
-        return(1);
-      //
-      std::vector<std::string> attributes,avalues;
-      std::string name;
-      if( checkEntryAtLevel("name") )
-      {
-        readNxText( "name", name, attributes, avalues);
-      }
-      else
-        name="";  // Missing name entry, set null
-
-      sample.setName(name);
-      // Read proton_charge, if available. Note that TOFRaw has this at the NXentry level, though there is
-      // some debate if this is appropriate. Hence for Mantid read it from the NXsample section as it is stored in Sample.
-      double totalProtonCharge;
-      if( checkEntryAtLevel("proton_charge") )
-      {
-        if( readNxFloat( "proton_charge", totalProtonCharge, attributes, avalues) )
-        {
-          sample.setProtonCharge(totalProtonCharge);
-          if(attributes.size()==1) // check units if present
-            if(attributes[0].compare("units")==0 && avalues[0].compare("microAmps*hour")!=0)
-              g_log.warning("Unexpected units of Proton charge ignored: " + avalues[0]);
-        }
-      }
-      //
-      char *nxname,*nxclass;
-      int nxdatatype;
-      nxname= new char[NX_MAXNAMELEN];
-      nxclass = new char[NX_MAXNAMELEN];
-      //
-      // search for NXlog sections to read
-      status=NXinitgroupdir(fileID); // just in case
-      while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
-      {
-        std::string nxClass=nxclass;
-        if(nxClass=="NXlog")
-        {
-          readNXlog(nxname,sample);
-        }
-      }
-      delete[] nxname;
-      delete[] nxclass;
-      //
-      status=NXclosegroup(fileID);
-      return((status==NX_ERROR)?3:0);
-    }
 
     void NexusFileIO::writeNexusDoubleLog(const TimeSeriesProperty<double> *d_timeSeries)
     {
@@ -742,113 +543,6 @@ namespace Mantid
       status=NXclosegroup(fileID);
       //
     }
-
-    void NexusFileIO::readNXlog(const char* nxname, Mantid::API::Sample& sample)
-    {
-      // read an NXlog section and save the timeseries data within the sample
-      NXstatus status;
-      status=NXopengroup(fileID,nxname,"NXlog");
-      if(status==NX_ERROR) return;
-      //
-      int stat,rank,dims[4],type;
-      char values[]="value",time[]="time"; // section names
-      //
-      // read time values
-      status=NXopendata(fileID,time);
-      if(status==NX_ERROR)
-      {
-        status=NXclosegroup(fileID);
-        return;
-      }
-      status=NXgetinfo(fileID,&rank,dims,&type);
-      double* timeVals= new double[dims[0]];
-      status=NXgetdata(fileID,timeVals);
-
-      char buffer[26];
-      int length=25;
-      type=NX_CHAR;
-      status=NXgetattr(fileID, "start", buffer, &length, &type);
-      if(status==NX_ERROR)
-      {
-        g_log.warning("readNXlog found NXlog with no start time - ignoring log ");
-        NXclosedata(fileID);
-        NXclosegroup(fileID);
-        return;
-      }
-      buffer[length]='\0';
-      //struct tm *tm;
-      std::string startT=buffer;
-      if( (startT.find('T')) >0 )
-        startT.replace(startT.find('T'),1," ");
-      //boost::posix_time::ptime pt=boost::posix_time::time_from_string(startT);
-      //time_t startTimeOld=to_time_t(pt);
-      time_t startTime=createTime_t_FromString(startT);
-      //strptime(buffer,"%Y-%m-%dT%H:%M:%S",tm);
-      //time_t startTime = mktime(tm);
-      status=NXclosedata(fileID);
-      // read data values
-      stat=NXopendata(fileID,values);
-      stat=NXgetinfo(fileID,&rank,dims,&type);
-      if(type==NX_FLOAT64)
-      {
-        TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(nxname);
-        double* dataVals= new double[dims[0]];
-        status=NXgetdata(fileID,dataVals);
-        for( int j=0;j<dims[0];j++)
-        {
-          l_PropertyDouble->addValue(startTime+static_cast<time_t>(timeVals[j]), dataVals[j]);
-        }
-        char aname[] = "type";
-        char adata[NX_MAXNAMELEN];
-        int iDataLen = NX_MAXNAMELEN,iType = NX_CHAR;
-        NXgetattr(fileID, aname, adata, &iDataLen, &iType);
-        std::string logType = std::string(adata,iDataLen);
-        if (logType == "int")
-        {
-          TimeSeriesProperty<int> *l_Property = new TimeSeriesProperty<int>(nxname);
-          std::map<dateAndTime, double> pd = l_PropertyDouble->valueAsMap();
-          for(std::map<dateAndTime, double>::const_iterator p=pd.begin();p!=pd.end();p++)
-          {
-            l_Property->addValue(p->first,int(p->second));
-          }
-          delete l_PropertyDouble;
-          sample.addLogData(l_Property);
-        }
-        else if (logType == "bool")
-        {
-          TimeSeriesProperty<bool> *l_Property = new TimeSeriesProperty<bool>(nxname);
-          std::map<dateAndTime, double> pd = l_PropertyDouble->valueAsMap();
-          for(std::map<dateAndTime, double>::const_iterator p=pd.begin();p!=pd.end();p++)
-          {
-            l_Property->addValue(p->first,p->second != 0.0);
-          }
-          delete l_PropertyDouble;
-          sample.addLogData(l_Property);
-        }
-        else
-        {
-          sample.addLogData(l_PropertyDouble);
-        }
-      }
-      else if(type==NX_CHAR)
-      {
-        TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(nxname);
-        char* dataVals= new char[dims[0]*dims[1]];
-        status=NXgetdata(fileID,(void *)dataVals);
-        char* value=new char[dims[1]+1];
-        value[dims[1]]='\0';
-        for( int j=0;j<dims[0];j++)
-        {
-          value=strncpy(value,&dataVals[j*dims[1]],dims[1]);
-          l_PropertyString->addValue(startTime+static_cast<time_t>(timeVals[j]), value);
-        }
-        delete[] value;
-        sample.addLogData(l_PropertyString);
-      }
-      status=NXclosedata(fileID);
-      status=NXclosegroup(fileID);
-    }
-
 
     int NexusFileIO::writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
       const bool& uniformSpectra, const std::vector<int>& spec)
@@ -1423,148 +1117,6 @@ namespace Mantid
       return(true);
     }
 
-    bool NexusFileIO::readNexusProcessedSpectraMap(API::MatrixWorkspace_sptr localWorkspace)
-    {
-      /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
-      Muon data. Use this to build spectraMap
-      @param localWorkspace The workspace
-      @return true for OK, false for error
-      */
-
-      SpectraDetectorMap& spectraMap = localWorkspace->mutableSpectraMap();
-      NXstatus status;
-      status=NXopengroup(fileID,"instrument","NXinstrument");
-      if(status==NX_ERROR)
-        return(false);
-      //
-      if(!checkEntryAtLevel("detector"))  // to avoid Nexus Error messages
-      {
-        NXclosegroup(fileID);
-        return(false);
-      }
-      status=NXopengroup(fileID,"detector","NXdetector");
-      if(status==NX_ERROR)
-      {
-        NXclosegroup(fileID);
-        return(false);
-      }
-      //
-      // read data from Nexus sections detector_{index,count,list}
-      int dim[1],rank,type;
-      status=NXopendata(fileID, "detector_index");
-      status=NXgetinfo(fileID, &rank, dim, &type);
-      if(status==NX_ERROR || rank!=1 || type!=NX_INT32)
-      {
-        status=NXclosedata(fileID);
-        status=NXclosegroup(fileID);
-        return(false);
-      }
-      int nSpectra=dim[0];
-      int *detector_index=new int[nSpectra];
-      int *detector_count=new int[nSpectra];
-      status=NXgetdata(fileID, (void*)detector_index);
-      status=NXclosedata(fileID);
-      //
-      status=NXopendata(fileID, "detector_count");
-      status=NXgetdata(fileID, (void*)detector_count);
-      status=NXclosedata(fileID);
-      //
-      status=NXopendata(fileID, "detector_list");
-      status=NXgetinfo(fileID, &rank, dim, &type);
-      int nDet=dim[0];
-      int *detector_list=new int[nDet];
-      status=NXgetdata(fileID, (void*)detector_list);
-      status=NXclosedata(fileID);
-
-      int *spectra = NULL;
-      status=NXopendata(fileID, "spectra");
-      if (status == NX_OK)
-      {
-        status=NXgetinfo(fileID, &rank, dim, &type);
-        int nSpec=dim[0];
-        assert(nSpec == nSpectra);
-        spectra=new int[nSpec];
-        status=NXgetdata(fileID, (void*)spectra);
-        status=NXclosedata(fileID);
-      }
-      else
-      {
-        spectra = new int[nSpectra];
-        for(int i=0;i<nSpectra;i++)
-          spectra[i] = i + 1;
-      }
-
-      // build spectra_list for populate method
-      int *spectra_list=new int[nDet];
-      for(int i=0;i<nSpectra;i++)
-      {
-        int s = spectra[i];
-        int offset=detector_index[i];
-        for(int j=0;j<detector_count[i];j++)
-        {
-          spectra_list[offset+j]=s;
-        }
-      }
-      spectraMap.populate(spectra_list,detector_list,nDet); //Populate the Spectra Map with parameters
-
-      // tidy up
-      delete[] detector_list;
-      delete[] detector_index;
-      delete[] detector_count;
-      delete[] spectra_list;
-      delete[] spectra;
-      //
-      status=NXclosegroup(fileID); // close detector group
-      status=NXclosegroup(fileID); // close instrument group
-
-      return(true);
-    }
-
-    bool NexusFileIO::readNexusProcessedAxis(API::MatrixWorkspace_sptr localWorkspace)
-    {
-      NXstatus status;
-      // Populate the vertical axis from the "axis2" attribute
-      status=NXopengroup(fileID,"workspace","NXdata");
-      if (status==NX_ERROR)
-      {
-        NXclosegroup(fileID);
-        return(false);
-      }
-      status=NXopendata(fileID,"axis2");
-      if (status==NX_ERROR)
-      {
-        NXclosegroup(fileID);
-        NXclosedata(fileID);
-        return(false);
-      }
-      int rank,dim[2],type;
-      NXgetinfo(fileID, &rank, dim, &type);
-
-      // If this is not a spectrum axis, replace the default axis with a numeric one
-      Axis* axis2 = localWorkspace->getAxis(1);
-      if (axis2->unit())
-      {
-        Axis* const newAxis = new NumericAxis(dim[0]);
-        // Copy over the unit (set in LoadNexusProcessed)
-        newAxis->unit() = axis2->unit();
-        localWorkspace->replaceAxis(1,newAxis);
-        // Change the cached pointer to point to the new axis
-        axis2 = newAxis;
-      }
-      // Create a vector of the correct size and read in the axis values
-      std::vector<double> axisVals(dim[0]);
-      NXgetdata(fileID,&axisVals[0]);
-      // Set the axis values
-      for (int i=0; i < dim[0]; ++i)
-        axis2->setValue(i,axisVals[i]);
-
-      // Clean up
-      NXclosedata(fileID);
-      status=NXclosegroup(fileID);
-
-      return(true);
-    }
-
     bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws)
     {
       /*! Writes the instrument parameter map if not empty. Must be called inside NXentry group.
@@ -1576,70 +1128,6 @@ namespace Mantid
       std::string str = params.asString();
       if (str.empty()) str = " ";
       return writeNxNote("instrument_parameter_map"," "," "," ",str);
-
-    }
-
-    bool NexusFileIO::readNexusParameterMap(API::MatrixWorkspace_sptr ws)
-    {
-      /*! Reads the instrument parameter map from the data string in "instrument_parameter_map" group (NXnote).
-      Must be called inside NXentry group.
-      @param ws The workspace
-      @return true for OK, false for error
-      */
-
-      if (NX_ERROR == NXopengroup(fileID,"instrument_parameter_map","NXnote")) return false;
-      //
-      std::string value;
-      std::vector<std::string> avalues,attributes;
-
-      if( ! readNxText( "data", value, attributes, avalues) )
-        return(false);
-
-      Geometry::ParameterMap& params = ws->instrumentParameters();
-      params.clear();
-      IInstrument_sptr instr = ws->getBaseInstrument();
-
-      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
-      boost::char_separator<char> sep("|");
-      tokenizer parTok(value, sep);
-      // Iterate over the properties
-      for (tokenizer::iterator it = parTok.begin(); it != parTok.end(); ++it)
-      {
-        if ( ! it->empty() )
-        {
-          Geometry::IComponent* comp = 0;
-          tokenizer itemTok(*it,boost::char_separator<char>(";"));
-          tokenizer::iterator i = itemTok.begin();
-          std::string compName = *i++;
-          if (compName.find("detID:") != std::string::npos)
-          {
-            int detID = atoi(compName.substr(6).c_str());
-            comp = instr->getDetector(detID).get();
-            if (!comp)
-            {
-              g_log.warning()<<"Cannot find detector "<<detID<<'\n';
-              continue;
-            }
-          }
-          else
-          {
-            comp = instr->getComponentByName(compName).get();
-            if (!comp)
-            {
-              g_log.warning()<<"Cannot find component "<<compName<<'\n';
-              continue;
-            }
-          }
-          std::string type = *i++;
-          std::string name = *i++;
-          std::string val = *i;
-          params.add(type,comp,name,val);
-        }
-      }
-
-      NXclosegroup(fileID);
-      return(true);
 
     }
 

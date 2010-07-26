@@ -110,7 +110,7 @@ public:
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     //boost::shared_ptr<Sample> sample = output->getSample();
-    Property *l_property = output->sample().getLogData( std::string("beamlog_current") );
+    Property *l_property = output->run().getLogData( std::string("beamlog_current") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );

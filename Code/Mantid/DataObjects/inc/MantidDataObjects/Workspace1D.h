@@ -63,7 +63,7 @@ public:
   virtual int blocksize() const;
 
   ///Returns the number of histgrams - always 1 in this case
-  const int getNumberHistograms() const { return 1; }
+  int getNumberHistograms() const { return 1; }
 
   //inheritance redirections
   // Reimplemented these Histogram1D methods simply to hide the other ones

@@ -165,9 +165,12 @@ namespace Mantid
         runLoadInstrument(localWorkspace );
         runLoadMappingTable(localWorkspace );
         runLoadLog(localWorkspace );
-		Property* log=createPeriodLog(1);
-		if(log)localWorkspace->mutableSample().addLogData(log);
-		localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+	Property* log=createPeriodLog(1);
+	if(log)
+	{
+	  localWorkspace->mutableRun().addLogData(log);
+	}
+	localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         for (int i = 0; i < m_numberOfSpectra; ++i)
           localWorkspace->getAxis(1)->spectraNo(i)= i+1;
         localWorkspace->populateInstrumentParameters();
@@ -244,11 +247,14 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
-		  Property* log=createPeriodLog(period+1);
-		  if(log)localWorkspace->mutableSample().addLogData(log);
+	  Property* log=createPeriodLog(period+1);
+	  if(log)
+	  {
+	    localWorkspace->mutableRun().addLogData(log);
+	  }
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
-          localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+          localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -262,14 +268,17 @@ namespace Mantid
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
          		 
-		   //remove previous period data
-		   std::stringstream index;
-		   index << (period);
-		   std::string prevPeriod="PERIOD "+index.str();
-		  localWorkspace->mutableSample().removeLogData(prevPeriod);
-		  //add current period data
-		  Property* log=createPeriodLog(period+1);
-		  if(log)localWorkspace->mutableSample().addLogData(log);
+	  //remove previous period data
+	  std::stringstream index;
+	  index << (period);
+	  std::string prevPeriod="PERIOD "+index.str();
+	  localWorkspace->mutableRun().removeLogData(prevPeriod);
+	  //add current period data
+	  Property* log=createPeriodLog(period+1);
+	  if(log)
+	  {
+	    localWorkspace->mutableRun().addLogData(log);
+	  }
         }
 
         // check if values stored in logfiles should be used to define parameters of the instrument

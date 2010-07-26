@@ -585,15 +585,15 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
 {
   if (this->proton_charge.empty()) // nothing to do
     return; 
-  Sample& sample = workspace->mutableSample();
-  sample.setProtonCharge(this->proton_charge_tot);
+  Run& run = workspace->mutableRun();
+  run.setProtonCharge(this->proton_charge_tot);
 
   TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("ProtonCharge");
   size_t num = this->proton_charge.size();
   for (size_t i = 0; i < num; i++)
     log->addValue(to_time_t(this->pulsetimes[i]), this->proton_charge[i]);
   /// TODO set the units for the log
-  sample.addLogData(log);
+  run.addLogData(log);
 }
 
 //-----------------------------------------------------------------------------

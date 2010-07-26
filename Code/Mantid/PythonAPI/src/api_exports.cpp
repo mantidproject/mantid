@@ -188,7 +188,7 @@ namespace PythonAPI
          return_value_policy< copy_const_reference >() )
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
       .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
-      .def("getSampleDetails", &Mantid::API::MatrixWorkspace::sample, return_internal_reference<>() )
+      .def("getRun", &Mantid::API::MatrixWorkspace::run, return_internal_reference<>() )
       .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
       .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
       .def("__radd__",(binary_fn2)&WorkspaceAlgebraProxy::rplus)
@@ -211,9 +211,9 @@ namespace PythonAPI
       .def("__idiv__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_divide)
       // Deprecated, here for backwards compatability
       .def("blocksize", &Mantid::API::MatrixWorkspace::blocksize)
+      .def("getSampleDetails", &Mantid::API::MatrixWorkspace::run, return_internal_reference<>() )
       ;
   }
-
 
   void export_tableworkspace()
   {
@@ -253,9 +253,6 @@ namespace PythonAPI
       ;
   }
   
-  // Sample class
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Sample_getLogData_overloads, getLogData, 0, 1)
-  
   void export_sample()
   {
     //Pointer
@@ -263,16 +260,26 @@ namespace PythonAPI
 
     //Sample class
     class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
-      .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)&Sample::getLogData, 
-        return_internal_reference<>())
-      .def("getLogData", (const std::vector<Mantid::Kernel::Property*> & (Mantid::API::Sample::*)() const)&Sample::getLogData, 
-        return_internal_reference<>())
       .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
-      .def("getProtonCharge", &Mantid::API::Sample::getProtonCharge, return_value_policy< copy_const_reference>())
       .def("getGeometryFlag", &Mantid::API::Sample::getGeometryFlag)
       .def("getThickness", &Mantid::API::Sample::getThickness)
       .def("getHeight", &Mantid::API::Sample::getHeight)
       .def("getWidth", &Mantid::API::Sample::getWidth)
+     ;
+  }
+
+  void export_run()
+  {
+    //Pointer
+    register_ptr_to_python<Mantid::API::Run*>();
+
+    //Run class
+    class_< Mantid::API::Run, boost::noncopyable >("Run", no_init)
+      .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Run::*)(const std::string&) const)&Run::getLogData, 
+        return_internal_reference<>())
+      .def("getLogData", (const std::vector<Mantid::Kernel::Property*> & (Mantid::API::Run::*)() const)&Run::getLogData, 
+        return_internal_reference<>())
+      .def("getProtonCharge", &Mantid::API::Run::getProtonCharge)
      ;
   }
 
@@ -358,6 +365,7 @@ namespace PythonAPI
     export_tableworkspace();
     export_workspacegroup();
     export_sample();
+    export_run();
     export_instrument();
     export_workspace_property();
     export_workspacefactory();

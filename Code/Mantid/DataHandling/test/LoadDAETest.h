@@ -52,12 +52,12 @@ public:
    // TS_ASSERT_THROWS(m_loader.execute(),std::runtime_error);
 
     // Set inputs
-    m_loader.setPropertyValue("DAEname", m_inputDAE);
-    m_loader.setPropertyValue("SpectrumMin", "1");
-    m_loader.setPropertyValue("SpectrumMax", "2");
+	    TS_ASSERT_THROWS_NOTHING(m_loader.setPropertyValue("DAEname", m_inputDAE))
+	      TS_ASSERT_THROWS_NOTHING(m_loader.setPropertyValue("SpectrumMin", "1"))
+	      TS_ASSERT_THROWS_NOTHING(m_loader.setPropertyValue("SpectrumMax", "2"))
 
     m_outputSpace = "DAEouter";
-    m_loader.setPropertyValue("OutputWorkspace", m_outputSpace);
+    TS_ASSERT_THROWS_NOTHING(m_loader.setPropertyValue("OutputWorkspace", m_outputSpace))
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = m_loader.getPropertyValue("DAEname") )

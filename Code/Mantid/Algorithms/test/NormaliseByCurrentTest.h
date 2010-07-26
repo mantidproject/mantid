@@ -56,7 +56,7 @@ public:
     TS_ASSERT( ! norm.isExecuted() )
     // Now set the charge
     MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normIn"));
-    input->mutableSample().setProtonCharge(2.0);
+    input->mutableRun().setProtonCharge(2.0);
     input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     input->setYUnit("Counts");
 

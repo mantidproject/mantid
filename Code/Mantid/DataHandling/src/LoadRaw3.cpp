@@ -138,17 +138,16 @@ void LoadRaw3::exec()
   // Only run the sub-algorithms once
   runLoadInstrument(m_filename,localWorkspace);
   runLoadMappingTable(m_filename,localWorkspace);
-  Sample& sample = localWorkspace->mutableSample();
+  Run& run = localWorkspace->mutableRun();
   if (bLoadlogFiles)
   {
     runLoadLog(m_filename,localWorkspace);
     Property* log = createPeriodLog(1);
-    if (log) sample.addLogData(log);
+    if (log) run.addLogData(log);
   }
   // Set the total proton charge for this run
-  setProtonCharge(sample);
-
-  setRunNumber(sample);
+  setProtonCharge(run);
+  setRunNumber(run);
 
   // populate instrument parameters
   g_log.debug("Populating the instrument parameters...");
@@ -225,19 +224,19 @@ void LoadRaw3::exec()
         //std::string prevPeriod="PERIOD "+suffix.str();
 		if(localWorkspace)
 		{
-			Sample& sampleObj = localWorkspace->mutableSample();
-			sampleObj.removeLogData(prevPeriod.str());
+			Run& runObj = localWorkspace->mutableRun();
+			runObj.removeLogData(prevPeriod.str());
 			//add current period data
 			Property* log = createPeriodLog(period+1);
-			if (log) sampleObj.addLogData(log);
+			if (log) runObj.addLogData(log);
 		}
 		if(monitorWorkspace)
 		{
-			Sample& sampleObj = monitorWorkspace->mutableSample();
-			sampleObj.removeLogData(prevPeriod.str());
+			Run& runObj = monitorWorkspace->mutableRun();
+			runObj.removeLogData(prevPeriod.str());
 			//add current period data
 			Property* log = createPeriodLog(period+1);
-			if (log) sampleObj.addLogData(log);
+			if (log) runObj.addLogData(log);
 		}
       }//end of if loop for loadlogfiles
       if (bseparateMonitors)
@@ -563,9 +562,12 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
   {
     runLoadLog(fileName,localWorkspace);
     Property* log=createPeriodLog(1);
-    if(log)localWorkspace->mutableSample().addLogData(log);
+    if(log)
+    {
+      localWorkspace->mutableRun().addLogData(log);
+    }
   }
-  setProtonCharge(localWorkspace->mutableSample());
+  setProtonCharge(localWorkspace->mutableRun());
 
   m_prog = 0.7;
   progress(m_prog);
@@ -592,8 +594,8 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
  *  @param fileName  raw file name
  */
 void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,
-											  bool binclude,bool bexclude,bool bseparate,
-											  int m_numberOfSpectra,const std::string &fileName)
+					 bool binclude,bool bexclude,bool bseparate,
+					 int m_numberOfSpectra,const std::string &fileName)
 {
 
   std::vector<int> monitorSpecList;

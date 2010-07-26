@@ -167,7 +167,7 @@ void SequentialFitDialog::validateLogs(const QString wsName)
     );
   if (ws)
   {
-    const std::vector<Mantid::Kernel::Property*> logs = ws->sample().getLogData();
+    const std::vector<Mantid::Kernel::Property*> logs = ws->run().getLogData();
     QStringList logNames;
     for(int i=0;i<logs.size();++i)
     {

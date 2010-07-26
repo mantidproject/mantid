@@ -117,7 +117,7 @@ namespace Mantid
         double logValue;
         if (!logName.empty())
         {
-          Kernel::Property* prop = data.ws->sample().getLogData(logName);
+          Kernel::Property* prop = data.ws->run().getLogData(logName);
           if (!prop)
           {
             throw std::invalid_argument("Log value "+logName+" does not exist");

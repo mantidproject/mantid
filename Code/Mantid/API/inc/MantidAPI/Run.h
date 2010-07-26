@@ -49,6 +49,8 @@ namespace Mantid
     
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop);
+      /// Does the property exist on the object
+      bool hasProperty(const std::string & name) const { return Kernel::PropertyManager::existsProperty(name); }
 
       // Expose some of the PropertyManager publicly
       using Kernel::PropertyManager::removeProperty;
@@ -61,6 +63,27 @@ namespace Mantid
       void setProtonCharge( const double charge);
       /// Get the proton charge
       double getProtonCharge() const;
+      /**
+       * Add a log entry
+       * @parma p A pointer to the property containing the log entry
+       */
+      void addLogData( Kernel::Property *p ) { addProperty(p); }
+      /**
+       * Access a single log entry
+       * @param name The name of the log entry to retrieve
+       * @returns A pointer to a property containing the log entry
+       */ 
+      Kernel::Property* getLogData( const std::string &name ) const { return getProperty(name); }
+      /**
+       * Access all log entries
+       * @returns A list of all of the log entries
+       */ 
+      const std::vector< Kernel::Property* >& getLogData() const {return getProperties(); } 
+      /**
+       * Remove a named log entry
+       * @param name The name of the entry to remove
+       */
+      void removeLogData(const std::string &name) { return removeProperty(name); }
       //@}
 
     private:

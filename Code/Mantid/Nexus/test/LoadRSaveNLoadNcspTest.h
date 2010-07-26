@@ -137,7 +137,7 @@ void testExecOnLoadraw()
     TS_ASSERT_EQUALS( output->YUnit(), "Counts" )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output->sample().getProtonCharge(), 0.8347, 0.0001 )
+    TS_ASSERT_DELTA( output->run().getProtonCharge(), 0.8347, 0.0001 )
 
     //
     // check that the instrument data has been loaded, copied from LoadInstrumentTest
@@ -205,19 +205,17 @@ void testExecOnLoadraw()
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 
-    //boost::shared_ptr<Sample> sample = output->getSample();
 
-    Property *l_property =output->sample().getLogData( std::string("height") );
+    Property *l_property =output->run().getLogData( std::string("height") );
     TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble1->value();
-
 
     //
     // Testing log data - this was failing at one time as internal format of log data changed, but now OK again
     //
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,30), "2008-Jun-17 11:10:44  -0.86526" );
 
-    l_property = output->sample().getLogData( std::string("ICPevent") );
+    l_property = output->run().getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     timeSeriesString = l_timeSeriesString->value();
     //

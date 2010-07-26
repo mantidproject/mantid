@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Objects/Object.h"
 
 namespace Mantid
@@ -41,47 +40,45 @@ namespace API
 class DLLExport Sample
 {
 public:
+  /// Default constructor
   Sample();
+  /// Virtual destructor
   virtual ~Sample();
 
+  /// Set the name of the sample
   void setName( const std::string &name );
+  /// Returns the name of the sample
   const std::string& getName() const;
-
-  void addLogData( Kernel::Property *p );
-  Kernel::Property* getLogData( const std::string &name ) const;
-  const std::vector< Kernel::Property* >& getLogData() const;
-  void removeLogData(const std::string &name);
-
-  void setProtonCharge( const double &charge);
-  const double& getProtonCharge() const;
-
+  /// Set the geometrical shape of the sample
   void setShapeObject(const Geometry::Object & sample_shape);
+  /// Returns the geometrical shape of the sample
   const Geometry::Object& getShapeObject() const;
 
+  /// Sets the geometry flag
   void setGeometryFlag(int geom_id);
+  /// Returns the geometry flag
   int getGeometryFlag() const;
-
+  /// Sets the thickness
   void setThickness(double thick);
+  /// Returns the thickness
   double getThickness() const;
-
+  /// Sets the height
   void setHeight(double height);
+  /// Returns the height
   double getHeight() const;
-
+  /// Sets the width
   void setWidth(double width);
+  /// Returns the width
   double getWidth() const;
   
-  ///// copy constructor. 
+  /// Copy constructor. 
   Sample(const Sample& copy);
-  ///// copy assignment operator. 
+  /// Copy assignment operator. 
   const Sample& operator=(const Sample& rhs);
 
 private: 
   /// The name for the sample
   std::string m_name;
-  /// Stores the information read in from the logfiles.
-  Kernel::PropertyManager m_manager;
-  /// The good proton charge for this run in uA.hour
-  double m_protonCharge;
   /// The sample shape object
   Geometry::Object m_sample_shape;
   /// The sample geometry flag

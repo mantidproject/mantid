@@ -565,17 +565,15 @@ namespace Mantid
       {
         Kernel::TimeSeriesProperty<double>* p = new Kernel::TimeSeriesProperty<double>("fromNexus");
         p->addValue(start_time(),-90.);
-        localWorkspace->mutableSample().addLogData(p);
+        localWorkspace->mutableRun().addLogData(p);
       }
 
-      NXEntry run = root.openEntry("run");
-      localWorkspace->setTitle(run.getString("title"));
+      NXEntry nxRun = root.openEntry("run");
+      localWorkspace->setTitle(nxRun.getString("title"));
 
-      std::string runDet =
-        boost::lexical_cast<std::string>(run.getInt("number"));
+      std::string run_num = boost::lexical_cast<std::string>(nxRun.getInt("number"));
       //The sample is left to delete the property
-      localWorkspace->mutableSample().addLogData(
-        new PropertyWithValue<std::string>("run_number", runDet));
+      localWorkspace->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 
     }
 

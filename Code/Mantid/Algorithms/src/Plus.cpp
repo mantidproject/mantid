@@ -57,9 +57,15 @@ namespace Mantid
     *  @param rhs the other workspace sample to be summed
     *  @param ans the sample in the output workspace
     */
-    void Plus::operateOnSample(const Sample& lhs, const Sample& rhs, Sample& ans) const
+    void Plus::operateOnRun(const Run& lhs, const Run& rhs, Run& ans) const
     {
-      ans.setProtonCharge( lhs.getProtonCharge() + rhs.getProtonCharge() );
+      try
+      {
+	ans.setProtonCharge( lhs.getProtonCharge() + rhs.getProtonCharge() );
+      }
+      catch(Exception::NotFoundError &)
+      {
+      }
     }
 
   }

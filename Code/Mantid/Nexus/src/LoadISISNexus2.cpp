@@ -198,6 +198,7 @@ namespace Mantid
       runLoadInstrument(local_workspace);
 
       local_workspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
+      loadRunDetails(local_workspace, entry);
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
       loadLogs(local_workspace, entry);
@@ -548,6 +549,20 @@ namespace Mantid
       //    runLoadInstrumentFromNexus(localWorkspace);
       //}
     }
+    
+    /**
+    * Load data about the run
+    *   @param local_workspace The workspace to load the run information in to
+    *   @param entry The Nexus entry
+    */
+    void LoadISISNexus2::loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
+    {
+      API::Run & run = local_workspace->mutableRun();
+      run.setProtonCharge(entry.getFloat("proton_charge"));
+
+      std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
+      run.addLogData(new PropertyWithValue<std::string>("run_number", run_num));
+    }
 
     /**
     * Load data about the sample
@@ -556,15 +571,6 @@ namespace Mantid
     */
     void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
-      Sample &sampleDets = local_workspace->mutableSample();
-      sampleDets.setProtonCharge(entry.getFloat("proton_charge"));
-
-      std::string runDet =
-        boost::lexical_cast<std::string>(entry.getInt("run_number"));
-      //The sample is left to delete the property
-      sampleDets.addLogData(
-        new PropertyWithValue<std::string>("run_number", runDet));
-
       /// Sample geometry
       NXInt spb = entry.openNXInt("isis_vms_compat/SPB");
       // Just load the index we need, not the whole block. The flag is the third value in
@@ -609,13 +615,13 @@ namespace Mantid
             nxLog.close();
             continue;
           }
-          ws->mutableSample().addLogData(logv);
+          ws->mutableRun().addLogData(logv);
           if (it->nxname == "icp_event")
           {
             LogParser parser(logv);
-            ws->mutableSample().addLogData(parser.createPeriodLog(period));
-            ws->mutableSample().addLogData(parser.createAllPeriodsLog());
-            ws->mutableSample().addLogData(parser.createRunningLog());
+            ws->mutableRun().addLogData(parser.createPeriodLog(period));
+            ws->mutableRun().addLogData(parser.createAllPeriodsLog());
+            ws->mutableRun().addLogData(parser.createRunningLog());
           }
           nxLog.close();
         }
@@ -640,7 +646,7 @@ namespace Mantid
               selog.close();
               continue;
             }
-            ws->mutableSample().addLogData(logv);
+            ws->mutableRun().addLogData(logv);
             nxLog.close();
           }
           selog.close();

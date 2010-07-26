@@ -64,8 +64,12 @@ void CheckWorkspacesMatch::doComparison()
   if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1->spectraMap(),ws2->spectraMap()) ) return;
   if ( static_cast<bool>(getProperty("CheckInstrument")) && ! checkInstrument(ws1,ws2) ) return;
   if ( static_cast<bool>(getProperty("CheckMasking")) && ! checkMasking(ws1,ws2) ) return;
-  if ( static_cast<bool>(getProperty("CheckSample")) && ! checkSample( ws1->sample(), ws2->sample() ) ) return;
-  
+  if ( static_cast<bool>(getProperty("CheckSample")) )
+  {
+    if( !checkSample(ws1->sample(), ws2->sample()) ) return;
+    if( !checkRunProperties(ws1->run(), ws2->run()) ) return;
+  } 
+      
   return;
 }
 
@@ -298,17 +302,47 @@ bool CheckWorkspacesMatch::checkSample(const API::Sample& sample1, const API::Sa
     result = "Sample name mismatch";
     return false;
   }
+  // N.B. Sample shape properties are not currently written out to nexus processed files, so omit here
   
-  if ( sample1.getProtonCharge() != sample2.getProtonCharge() )
+  // All OK if here
+  return true;
+}
+
+/// Checks that the Run matches
+/// @param run1 the first run object
+/// @param run2 the second run object
+/// @retval true The sample matches
+/// @retval false The samples does not match
+
+bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::Run& run2)
+{
+  double run1Charge(-1.0);
+  try
   {
-    g_log.debug() << "WS1 proton charge: " << sample1.getProtonCharge() << "\n";
-    g_log.debug() << "WS2 proton charge: " << sample2.getProtonCharge() << "\n";
+    run1Charge = run1.getProtonCharge();
+  }
+  catch(Exception::NotFoundError&)
+  {
+  }
+  double run2Charge(-1.0);
+  try
+  {
+    run2Charge = run2.getProtonCharge();
+  }
+  catch(Exception::NotFoundError&)
+  {
+  }
+
+  if ( run1Charge != run2Charge )
+  {
+    g_log.debug() << "WS1 proton charge: " << run1Charge << "\n";
+    g_log.debug() << "WS2 proton charge: " << run2Charge << "\n";
     result = "Proton charge mismatch";
     return false;
   }
   
-  const std::vector<Kernel::Property*>& ws1logs = sample1.getLogData();
-  const std::vector<Kernel::Property*>& ws2logs = sample2.getLogData();
+  const std::vector<Kernel::Property*>& ws1logs = run1.getLogData();
+  const std::vector<Kernel::Property*>& ws2logs = run2.getLogData();
   // Check that the number of separate logs is the same
   if ( ws1logs.size() != ws2logs.size() )
   {
@@ -339,10 +373,6 @@ bool CheckWorkspacesMatch::checkSample(const API::Sample& sample1, const API::Sa
       return false;
     }
   }
-  
-  // N.B. Sample shape properties are not currently written out to nexus processed files, so omit here
-  
-  // All OK if here
   return true;
 }
 

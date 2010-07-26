@@ -80,7 +80,7 @@ public:
     TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output2D->sample().getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
      //Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
@@ -105,12 +105,12 @@ public:
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
    // boost::shared_ptr<Sample> sample = output2D->getSample();
-    Property *l_property = output2D->sample().getLogData( std::string("TEMP1") );
+    Property *l_property = output2D->run().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
-    l_property = output2D->sample().getLogData( "run_number" );
+    l_property = output2D->run().getLogData( "run_number" );
     TS_ASSERT_EQUALS( l_property->value(), "15869" );
 
     //----------------------------------------------------------------------
@@ -383,13 +383,15 @@ public:
 
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr2->sample()))
-	TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr3->sample()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr4->sample()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr5->sample()) )
+    TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run()) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run()) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run()) )
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr6->sample()) )
+    TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr6->sample()) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run()) )
 
 	itr1=wsNamevec.begin();
     for (;itr1!=wsNamevec.end();++itr1)
@@ -498,7 +500,7 @@ public:
     TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output2D->sample().getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
@@ -522,7 +524,7 @@ public:
       ////----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    Property *l_property = output2D->sample().getLogData( std::string("TEMP1") );
+    Property *l_property = output2D->run().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
@@ -628,13 +630,13 @@ public:
 
     TS_ASSERT_EQUALS( monoutsptr1->getInstrument(), monoutsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(monoutsptr1->spectraMap()), &(monoutsptr2->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(monoutsptr1->sample()), &(monoutsptr2->sample()) )
-    TS_ASSERT_DIFFERS(  &(monoutsptr1->sample()), &(monoutsptr3->sample()) )
-    TS_ASSERT_DIFFERS(  &(monoutsptr1->sample()), &(monoutsptr4->sample()) )
-    TS_ASSERT_DIFFERS(  &(monoutsptr1->sample()), &(monoutsptr5->sample()) )
+    TS_ASSERT_DIFFERS( &(monoutsptr1->run()), &(monoutsptr2->run()) )
+    TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr3->run()) )
+    TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr4->run()) )
+    TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr5->run()) )
     TS_ASSERT_EQUALS( monoutsptr1->getInstrument(), monoutsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(monoutsptr1->spectraMap()), &(monoutsptr6->spectraMap()) )
-    TS_ASSERT_DIFFERS(  &(monoutsptr1->sample()), &(monoutsptr6->sample()) )
+    TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr6->run()) )
 	
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
@@ -686,13 +688,13 @@ public:
 
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr2->sample() ))
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr3->sample() ) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr4->sample() ) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr5->sample() ) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run() ))
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run() ) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run() ) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run() ) )
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr6->sample() ) )
+    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run() ) )
 
 	it=monitorwsNamevec.begin();
     for (;it!=monitorwsNamevec.end();++it)

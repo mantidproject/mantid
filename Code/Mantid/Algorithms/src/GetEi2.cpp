@@ -11,19 +11,17 @@
 #include <algorithm>
 #include <sstream>
 
-namespace Mantid
-{
-  namespace Algorithms
-  {
-    // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(GetEi2)
-  }
-}
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::Algorithms;
+
+namespace Mantid
+{
+namespace Algorithms
+{
+  
+  // Register the algorithm into the algorithm factory
+  DECLARE_ALGORITHM(GetEi2)
 
 /** 
 * Default contructor
@@ -252,7 +250,7 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(int ws_index, const double start, c
  * @param peak_e An output vector containing just the E values of the peak data
  * @returns The width of the peak at half height
 */
-double GetEi2::calculatePeakWidthAtHalfHeight(MatrixWorkspace_sptr data_ws, const double prominence, 
+double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws, const double prominence, 
                                               std::vector<double> & peak_x, std::vector<double> & peak_y, std::vector<double> & peak_e) const
 {
   // First create a temporary vector of bin_centre values to work with
@@ -452,7 +450,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(MatrixWorkspace_sptr data_ws, cons
  *  @param prominence The factor over the background by which a peak is to be considered a "real" peak
  *  @return The calculated first moment
  */
-double GetEi2::calculateFirstMoment(MatrixWorkspace_sptr monitor_ws, const double prominence)
+double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws, const double prominence)
 {
   std::vector<double> peak_x, peak_y, peak_e;
   calculatePeakWidthAtHalfHeight(monitor_ws, prominence, peak_x, peak_y, peak_e);
@@ -477,7 +475,7 @@ double GetEi2::calculateFirstMoment(MatrixWorkspace_sptr monitor_ws, const doubl
  * @param end The maximum value for the new bin range
  * @returns The rebinned workspace
 */
-MatrixWorkspace_sptr GetEi2::rebin(MatrixWorkspace_sptr monitor_ws, const double first, const double width, const double end)
+API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws, const double first, const double width, const double end)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", monitor_ws);
@@ -614,5 +612,8 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
 void GetEi2::storeEi(const double ei) const
 {
   Property *incident_energy = new PropertyWithValue<double>("Ei",ei,Direction::Input);
-  m_input_ws->mutableSample().addLogData(incident_energy);
+  m_input_ws->mutableRun().addLogData(incident_energy);
+}
+
+}
 }

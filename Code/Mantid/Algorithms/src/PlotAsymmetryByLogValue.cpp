@@ -150,7 +150,7 @@ namespace Mantid
         {
           ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
           TimeSeriesProperty<double>* logp = 
-              dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+              dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
           double Y,E; 
           calcIntAsymmetry(ws_red,Y,E);
           outWS->dataY(0)[i-is] = Y;
@@ -170,7 +170,7 @@ namespace Mantid
             {
               ws_red = loadNexus->getProperty(wsProp);
               TimeSeriesProperty<double>* logp = 
-                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
               outWS->dataY(0)[i-is] = Y;
@@ -196,7 +196,7 @@ namespace Mantid
             if (!ws_red || !ws_green)
               throw std::invalid_argument("Red or green period is out of range");
             TimeSeriesProperty<double>* logp = 
-                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
             double Y,E; 
             calcIntAsymmetry(ws_red,ws_green,Y,E);
             outWS->dataY(0)[i-is] = Y;

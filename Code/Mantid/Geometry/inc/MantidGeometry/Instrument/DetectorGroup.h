@@ -122,7 +122,7 @@ private:
   
 	// functions inherited from IComponent
   Component* clone() const{ return NULL; }
-  const ComponentID getComponentID(void) const{ return NULL; }
+  ComponentID getComponentID(void) const{ return NULL; }
   boost::shared_ptr<const IComponent> getParent() const
   {
     return boost::shared_ptr<const IComponent>();

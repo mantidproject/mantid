@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -82,6 +83,11 @@ public:
   const  Sample& sample() const;
   Sample& mutableSample();
 
+  /// Run details object access
+  const Run & run() const;
+  /// Writable version of the run object
+  Run& mutableRun();
+
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
   Geometry::IDetector_sptr getDetector(const int index) const;
   double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
@@ -102,7 +108,7 @@ public:
   /// Returns the size of each block of data returned by the dataY accessors
   virtual int blocksize() const = 0;
   /// Returns the number of histograms in the workspace
-  virtual const int getNumberHistograms() const = 0;
+  virtual int getNumberHistograms() const = 0;
 
   /// Returns the bin index for a given X value of a given workspace index
   size_t binIndexOf(const double xValue, const int index = 0) const;
@@ -138,12 +144,12 @@ public:
   virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) = 0;
   //----------------------------------------------------------------------
 
-  const int axes() const;
+  int axes() const;
   Axis* const getAxis(const int& axisIndex) const;
   void replaceAxis(const int& axisIndex, Axis* const newAxis);
 
   /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
-  virtual const bool isHistogramData() const;
+  virtual bool isHistogramData() const;
 
   std::string YUnit() const;
   void setYUnit(const std::string& newUnit);
@@ -185,6 +191,8 @@ private:
   Kernel::cow_ptr<SpectraDetectorMap> m_spectramap;
   /// The information on the sample environment
   Kernel::cow_ptr<Sample> m_sample;
+  /// The run information
+  Kernel::cow_ptr<Run> m_run;
 
   /// The unit for the data values (e.g. Counts)
   std::string m_YUnit;

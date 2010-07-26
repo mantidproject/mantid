@@ -10,7 +10,7 @@ namespace API
 
 /// Constructor
 Sample::Sample() :
-  m_name(), m_manager(), m_protonCharge(0.0), m_sample_shape(), m_geom_id(0), m_thick(0.0),
+  m_name(), m_sample_shape(), m_geom_id(0), m_thick(0.0),
   m_height(0.0), m_width(0.0)
 {
 }
@@ -19,8 +19,7 @@ Sample::Sample() :
   *  @param copy const reference to the sample object
 */
 Sample::Sample(const Sample& copy) :
-  m_name(copy.m_name), m_manager(copy.m_manager), m_protonCharge(copy.m_protonCharge), 
-  m_sample_shape(copy.m_sample_shape), m_geom_id(copy.m_geom_id), 
+  m_name(copy.m_name), m_sample_shape(copy.m_sample_shape), m_geom_id(copy.m_geom_id), 
   m_thick(copy.m_thick), m_height(copy.m_height), m_width(copy.m_width)
 {
 }
@@ -32,8 +31,6 @@ Sample::Sample(const Sample& copy) :
 {
   if (this == &rhs) return *this;
   m_name = rhs.m_name;
-  m_manager = rhs.m_manager;
-  m_protonCharge = rhs.m_protonCharge;
   m_sample_shape = rhs.m_sample_shape;
   m_geom_id = rhs.m_geom_id;
   m_thick = rhs.m_thick;
@@ -61,48 +58,6 @@ void Sample::setName( const std::string &name )
 const std::string& Sample::getName() const
 {
   return m_name;
-}
-
-/** Add a set of data as read in from a log file.
- *  Note that the sample takes over ownership of the data, so the user should not delete it.
- *  @param p A pointer to the property (typically a TimeSeriesProperty) containing the data.
- */
-void Sample::addLogData( Kernel::Property *p )
-{
-  m_manager.declareProperty(p);
-}
-
-/** Retrieve a particular dataset
- *  @param name The name of the dataset (as contained in the original property object)
- *  @return A pointer to the property containing the dataset
- */
-Kernel::Property* Sample::getLogData( const std::string &name ) const
-{
-  return m_manager.getProperty(name);
-}
-
-/** Retrieve the full set of log properties
- *  @return A vector of pointers to the property objects
- */
-const std::vector<Kernel::Property*>& Sample::getLogData() const
-{
-  return m_manager.getProperties();
-}
-
-/** Set the good proton charge total for this run
- *  @param charge The proton charge in uA.hour
- */
-void Sample::setProtonCharge( const double &charge)
-{
-  m_protonCharge = charge;
-}
-
-/** Retrieve the total good proton charge delivered in this run
- *  @return The proton charge in uA.hour
- */
-const double& Sample::getProtonCharge() const
-{
-  return m_protonCharge;
 }
 
 /**
@@ -197,13 +152,5 @@ double Sample::getWidth() const
   return m_width;
 }
 
-/**Deletes a log data item
- * @param name The name of the item to delete
- */
-void Sample::removeLogData(const std::string &name)
-{
-  m_manager.removeProperty(name);
 }
-
-} // namespace API
-} // namespace Mantid
+}

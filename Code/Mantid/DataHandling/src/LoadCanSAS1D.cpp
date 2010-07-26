@@ -222,9 +222,8 @@ void LoadCanSAS1D::createRunNumLog(const Poco::XML::Element * const sasEntry, co
 
   throwException(runText, elemName, fileName);
 
-  API::Sample &sam = wSpace->mutableSample();
-  sam.addLogData(
-    new PropertyWithValue<std::string>("run_number", runText->innerText()));
+  API::Run &run = wSpace->mutableRun();
+  run.addLogData(new PropertyWithValue<std::string>("run_number", runText->innerText()));
 }
 
 }

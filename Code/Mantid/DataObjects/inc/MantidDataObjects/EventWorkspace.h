@@ -132,7 +132,7 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   int blocksize() const;
 
   /// Get the number of histograms. aka the number of pixels or detectors.
-  const int getNumberHistograms() const;
+  int getNumberHistograms() const;
 
   long int getMemorySize() const;
 
@@ -196,7 +196,7 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   std::size_t getNumberEvents() const;
 
   /// Returns true always - an EventWorkspace always represents histogramm-able data
-  virtual const bool isHistogramData() const;
+  virtual bool isHistogramData() const;
 
   int MRUSize() const;
 

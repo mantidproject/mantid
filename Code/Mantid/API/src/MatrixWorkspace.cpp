@@ -19,7 +19,7 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : 
   Workspace(), m_axes(), m_isInitialized(false),
-  sptr_instrument(new Instrument), m_spectramap(), m_sample(),
+  sptr_instrument(new Instrument), m_spectramap(), m_sample(), m_run(),
   m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(), m_masks()
 {}
 
@@ -127,6 +127,23 @@ Sample& MatrixWorkspace::mutableSample()
   return m_sample.access();
 }
 
+/** Get a constant reference to the Run object associated with this workspace.
+ */
+const Run& MatrixWorkspace::run() const
+{
+  return *m_run;
+}
+
+/** Get a reference to the Run object associated with this workspace.
+ *  This non-const method will copy the Run object if it is shared between 
+ *  more than one workspace, and the reference returned will be to the copy.
+ *  Can ONLY be taken by reference!
+ */
+Run& MatrixWorkspace::mutableRun()
+{
+  return m_run.access();
+}
+
 /** Get the effective detector for the given spectrum
  *  @param  index The workspace index for which the detector is required
  *  @return A single detector object representing the detector(s) contributing
@@ -214,7 +231,7 @@ const Geometry::ParameterMap& MatrixWorkspace::constInstrumentParameters() const
 }
 
 /// The number of axes which this workspace has
-const int MatrixWorkspace::axes() const
+int MatrixWorkspace::axes() const
 {
   return static_cast<int>(m_axes.size());
 }
@@ -265,7 +282,7 @@ void MatrixWorkspace::replaceAxis(const int& axisIndex, Axis* const newAxis)
 }
 
 /// Returns true if the workspace contains data in histogram form, false if it's point-like
-const bool MatrixWorkspace::isHistogramData() const
+bool MatrixWorkspace::isHistogramData() const
 {
   return ( readX(0).size()==readY(0).size() ? false : true );
 }
@@ -396,7 +413,7 @@ void MatrixWorkspace::populateInstrumentParameters()
 
     // Get the data in the logfiles associated with the raw data
 
-    const std::vector<Kernel::Property*>& logfileProp = sample().getLogData();
+    const std::vector<Kernel::Property*>& logfileProp = run().getLogData();
 
 
     // Get pointer to parameter map that we may add parameters to and information about

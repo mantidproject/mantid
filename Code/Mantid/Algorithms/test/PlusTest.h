@@ -391,6 +391,35 @@ public:
     TS_ASSERT_EQUALS(a->readY(0)[0],10);
     TS_ASSERT_EQUALS(a,b);
   }
+
+  void testRunAddition()
+  {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+    a->mutableRun().setProtonCharge(10.);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+    b->mutableRun().setProtonCharge(5.);
+
+    AnalysisDataService::Instance().add("a", a);
+    AnalysisDataService::Instance().add("b", b);
+
+    Plus alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+      alg.setPropertyValue("LHSWorkspace","a");
+      alg.setPropertyValue("RHSWorkspace","b");    
+      alg.setPropertyValue("OutputWorkspace","c");
+    )
+    alg.execute();
+
+    MatrixWorkspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("c")));
+
+    TS_ASSERT_DELTA(work_out1->run().getProtonCharge(), 15.0, 1e-8);
+   
+    AnalysisDataService::Instance().remove("a");
+    AnalysisDataService::Instance().remove("b");
+    AnalysisDataService::Instance().remove("c");
+  }
   
 private:
 

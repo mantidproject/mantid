@@ -30,14 +30,14 @@ void AddSampleLog::exec()
 {
   // A pointer to the workspace to add a log to
   MatrixWorkspace_sptr wSpace = getProperty("Workspace");
-  // we're going to edit the workspaces sample so get a non-const reference to it
-  Sample &theSample = wSpace->mutableSample();
+  // we're going to edit the workspaces run details so get a non-const reference to it
+  Run &theRun = wSpace->mutableRun();
 
   // get the data that the user wants to add
   std::string propName = getProperty("LogName");
   std::string propValue = getProperty("LogText");
 
-  theSample.addLogData(new PropertyWithValue<std::string>(propName, propValue));
+  theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
 
   setProperty("Workspace", wSpace);
 }

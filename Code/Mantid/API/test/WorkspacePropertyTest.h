@@ -18,26 +18,26 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   class WorkspaceTest: public MatrixWorkspace
   {
   public:
-    virtual const int getNumberHistograms() const { return 1;}
+    virtual int getNumberHistograms() const { return 1;}
 
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}
     virtual int blocksize() const  {return 1000000;}
-    virtual MantidVec& dataX(int const index) {return data;}
+    virtual MantidVec& dataX(int const) {return data;}
     ///Returns the y data
-    virtual MantidVec& dataY(int const index) {return data;}
+    virtual MantidVec& dataY(int const) {return data;}
     ///Returns the error data
-    virtual MantidVec& dataE(int const index) {return data;}
+    virtual MantidVec& dataE(int const) {return data;}
 
-    virtual const MantidVec& dataX(int const index)const {return data;}
+    virtual const MantidVec& dataX(int const)const {return data;}
     ///Returns the y data
-    virtual const MantidVec& dataY(int const index)const {return data;}
+    virtual const MantidVec& dataY(int const )const {return data;}
     ///Returns the error data
-    virtual const MantidVec& dataE(int const index)const {return data;}
-    cow_ptr<MantidVec> refX(const int index) const {return cow_ptr<MantidVec>();}
-    void setX(const int index, const cow_ptr<MantidVec>& X) {}
-    virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
+    virtual const MantidVec& dataE(int const)const {return data;}
+    cow_ptr<MantidVec> refX(const int) const {return cow_ptr<MantidVec>();}
+    void setX(const int, const cow_ptr<MantidVec>&) {}
+    virtual void init(const int &, const int &, const int &){};
 
   private:
     MantidVec data;
@@ -48,26 +48,26 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   class WorkspaceTest2 : public MatrixWorkspace
   {
   public:
-    virtual const int getNumberHistograms() const { return 1;}
+    virtual int getNumberHistograms() const { return 1;}
 
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}
     virtual int blocksize() const  {return 1000000;}
-    virtual MantidVec& dataX(int const index) {return data;}
+    virtual MantidVec& dataX(int const) {return data;}
     ///Returns the y data
-    virtual MantidVec& dataY(int const index) {return data;}
+    virtual MantidVec& dataY(int const) {return data;}
     ///Returns the error data
-    virtual MantidVec& dataE(int const index) {return data;}
+    virtual MantidVec& dataE(int const) {return data;}
 
-    virtual const MantidVec& dataX(int const index)const {return data;}
+    virtual const MantidVec& dataX(int const)const {return data;}
     ///Returns the y data
-    virtual const MantidVec& dataY(int const index)const {return data;}
+    virtual const MantidVec& dataY(int const)const {return data;}
     ///Returns the error data
-    virtual const MantidVec& dataE(int const index)const {return data;}
-    cow_ptr<MantidVec> refX(const int index) const {return cow_ptr<MantidVec>();}
-    void setX(const int index, const cow_ptr<MantidVec>& X) {}
-    virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
+    virtual const MantidVec& dataE(int const)const {return data;}
+    cow_ptr<MantidVec> refX(const int) const {return cow_ptr<MantidVec>();}
+    void setX(const int, const cow_ptr<MantidVec>&) {}
+    virtual void init(const int &, const int &, const int &){};
 
   private:
     MantidVec data;

@@ -43,34 +43,34 @@ public:
 
         TS_ASSERT_EQUALS(ws->spectraMap().nElements(),17792);
 
-        const std::vector< Property* >& logs = ws->sample().getLogData();
-        TS_ASSERT_EQUALS(logs.size(),26);
+        const std::vector< Property* >& logs = ws->run().getLogData();
+        TS_ASSERT_EQUALS(logs.size(),27);
 
-        TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_event"));
+        TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->run().getLogData("icp_event"));
         TS_ASSERT(slog);
         std::string str = slog->value();
         TS_ASSERT_EQUALS(str.size(),1023);
         TS_ASSERT_EQUALS(str.substr(0,37),"2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
-        slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_debug"));
+        slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->run().getLogData("icp_debug"));
         TS_ASSERT(slog);
         TS_ASSERT_EQUALS(slog->size(),50);
 
-        TimeSeriesProperty<double>* dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->sample().getLogData("total_counts"));
+        TimeSeriesProperty<double>* dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->run().getLogData("total_counts"));
         TS_ASSERT(dlog);
         TS_ASSERT_EQUALS(dlog->size(),172);
 
-        dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->sample().getLogData("period"));
+        dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->run().getLogData("period"));
         TS_ASSERT(dlog);
         TS_ASSERT_EQUALS(dlog->size(),172);
 
-        TimeSeriesProperty<bool>* blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->sample().getLogData("period 1"));
+        TimeSeriesProperty<bool>* blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->run().getLogData("period 1"));
         TS_ASSERT(blog);
         TS_ASSERT_EQUALS(blog->size(),1);
 
         TS_ASSERT_EQUALS(ws->sample().getName(),"");
         
-        Property *l_property = ws->sample().getLogData( "run_number" );
+        Property *l_property = ws->run().getLogData( "run_number" );
         TS_ASSERT_EQUALS( l_property->value(), "49886" );
     }
     void testExec2()

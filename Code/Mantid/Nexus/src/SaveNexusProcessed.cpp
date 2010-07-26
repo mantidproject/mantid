@@ -16,6 +16,9 @@
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+
 namespace Mantid
 {
 namespace NeXus
@@ -24,9 +27,6 @@ namespace NeXus
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveNexusProcessed)
 
-  using namespace Kernel;
-  using namespace API;
-  using namespace DataObjects;
 
   /// Empty default constructor
   SaveNexusProcessed::SaveNexusProcessed() :
@@ -155,8 +155,8 @@ namespace NeXus
        nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
 
     progress(0.7);
-//    boost::shared_ptr<Mantid::API::Sample> sample=m_inputWorkspace->getSample();
-    if( nexusFile->writeNexusProcessedSample(m_inputWorkspace->sample().getName(), m_inputWorkspace->sample()) != 0 )
+    if( nexusFile->writeNexusProcessedSample(m_inputWorkspace->sample().getName(), m_inputWorkspace->sample(),
+					     m_inputWorkspace->run()) != 0 )
     {
        g_log.error("Failed to write NXsample");
        throw Exception::FileError("Failed to write NXsample", m_filename);

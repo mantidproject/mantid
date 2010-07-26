@@ -14,7 +14,7 @@ namespace Mantid
     /**
      * Default constructor
      */
-    Run::Run() : PropertyManager(), m_protonChargeName("proton-charge")
+    Run::Run() : PropertyManager(), m_protonChargeName("proton_charge_tot")
     {
     }
 
@@ -40,7 +40,7 @@ namespace Mantid
      */
     void Run::setProtonCharge(const double charge)
     {
-      if( !existsProperty(m_protonChargeName) )
+      if( !hasProperty(m_protonChargeName) )
       {
 	addProperty(new Kernel::PropertyWithValue<double>(m_protonChargeName, charge));
       }

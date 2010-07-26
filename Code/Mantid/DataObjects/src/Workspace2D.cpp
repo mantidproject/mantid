@@ -133,7 +133,7 @@ namespace Mantid
     /** Gets the number of histograms
     \return Integer
     */
-    const int
+    int
       Workspace2D::getNumberHistograms() const
     {
       return getHistogramNumberHelper();

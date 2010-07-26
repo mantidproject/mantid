@@ -7,7 +7,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidAPI/Sample.h"
+#include "MantidAPI/Run.h"
 #include <boost/shared_ptr.hpp>
 #include <fstream>  
 
@@ -253,11 +253,12 @@ namespace Mantid
     {
       //initialise the run number to an empty string, this may or may not be changed later
       std::string run;
-      try {
-        Kernel::Property *logP=m_workspace->sample().getLogData("run_number");
-        run = logP->value();
+      if( m_workspace->run().hasProperty("run_number") )
+      {
+        Kernel::Property *logP = m_workspace->run().getLogData("run_number");
+	run = logP->value();
       }
-      catch(Exception::NotFoundError)
+      else
       {
         g_log.debug() << "Didn't find RunNumber log in workspace. Writing <Run></Run> to the CANSAS file\n";
       }
@@ -453,18 +454,17 @@ namespace Mantid
       std::string sasProcsvn="\n\t\t\t<term name=\"svn\">";
       sasProcsvn+=version;
       sasProcsvn+="</term>";
-      //outFile<<sasProcsvn;
       sasProcess+=sasProcsvn;
 
-      const API::Sample& sample=  m_workspace->sample();
-      std::string user_file="";
-      try
+      const API::Run& run=  m_workspace->run();
+      std::string user_file("");
+      if( run.hasProperty("UserFile") )
       {
-        user_file=sample.getLogData("UserFile")->value();
+        user_file = run.getLogData("UserFile")->value();
       }
-      catch(std::runtime_error&ex)
+      else
       {
-        g_log.debug()<<ex.what()<<std::endl;
+        g_log.warning()<< "Run does not contain \"UserFile\" information. A blank entry will be written." <<std::endl;
       }
 
       std::string sasProcuserfile="\n\t\t\t<term name=\"user_file\">";

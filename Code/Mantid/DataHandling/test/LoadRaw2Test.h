@@ -76,7 +76,7 @@ public:
     TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output2D->sample().getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
@@ -101,7 +101,7 @@ public:
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
   //  boost::shared_ptr<Sample> sample = output2D->sample();
-    Property *l_property = output2D->sample().getLogData( std::string("TEMP1") );
+    Property *l_property = output2D->run().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
@@ -269,17 +269,20 @@ public:
     // Check these are the same
     TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output2->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(output1->sample()), &(output2->sample()) )
+    TS_ASSERT_EQUALS( &(output1->sample()), &(output2->sample()) )
+    TS_ASSERT_DIFFERS( &(output1->run()), &(output2->run()) )
     TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output6->spectraMap()) )
-    TS_ASSERT_DIFFERS( &(output1->sample()), &(output6->sample()) )
+    TS_ASSERT_EQUALS( &(output1->sample()), &(output6->sample()) )
+    TS_ASSERT_DIFFERS( &(output1->run()), &(output6->run()) )
+
     
     AnalysisDataService::Instance().remove("multiperiod2");
-	AnalysisDataService::Instance().remove("multiperiod2_2");
-	AnalysisDataService::Instance().remove("multiperiod2_3");
-	AnalysisDataService::Instance().remove("multiperiod2_4");
-	AnalysisDataService::Instance().remove("multiperiod2_5");
-	AnalysisDataService::Instance().remove("multiperiod2_6");
+    AnalysisDataService::Instance().remove("multiperiod2_2");
+    AnalysisDataService::Instance().remove("multiperiod2_3");
+    AnalysisDataService::Instance().remove("multiperiod2_4");
+    AnalysisDataService::Instance().remove("multiperiod2_5");
+    AnalysisDataService::Instance().remove("multiperiod2_6");
 
   }
 

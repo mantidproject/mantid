@@ -33,7 +33,7 @@ namespace Mantid
     /*!  Get the component's ID
     *   @return ID
     */
-    const ComponentID ParametrizedComponent::getComponentID()const
+    ComponentID ParametrizedComponent::getComponentID()const
     {
       return ComponentID(m_base);
     }

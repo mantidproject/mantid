@@ -112,7 +112,7 @@ public:
   virtual const PropertyHistory createHistory() const;
 
   /// returns the direction of the property
-  const unsigned int direction() const
+  unsigned int direction() const
   {
     return m_direction;
   }

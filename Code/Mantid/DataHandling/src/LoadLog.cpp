@@ -97,8 +97,8 @@ void LoadLog::exec()
     throw Exception::FileError("Filename is a directory:" , m_filename);
   }
 
-  // Get the input workspace and retrieve sample from workspace.
-  // the log file(s) will be loaded into the Sample container of the workspace 
+  // Get the input workspace and retrieve run from workspace.
+  // the log file(s) will be loaded into the run object of the workspace 
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // If m_filename is the filename of a raw datafile then search for potential log files
@@ -173,7 +173,7 @@ void LoadLog::exec()
     std::string threecolumnLogfile = getThreeColumnName();
     if( !threecolumnLogfile.empty() )
     {
-      std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableSample());
+      std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableRun());
       //remove the file name from potential logfiles list if it's there in the .log file.
       std::set<std::string>::const_iterator itr;
       for(itr=blockFileNameList.begin();itr!=blockFileNameList.end();++itr)
@@ -202,8 +202,8 @@ void LoadLog::exec()
   // Add mantid-created logs
   
   m_periods=parser.getPeriodsProperty();
-  localWorkspace->mutableSample().addLogData(parser.createAllPeriodsLog());
-  localWorkspace->mutableSample().addLogData(parser.createRunningLog());
+  localWorkspace->mutableRun().addLogData(parser.createAllPeriodsLog());
+  localWorkspace->mutableRun().addLogData(parser.createRunningLog());
 
   // Extract the common part of log file names (the workspace name)
   std::string ws_name = Poco::Path(m_filename).getFileName();
@@ -265,7 +265,7 @@ void LoadLog::exec()
         Property* log = parser.createLogProperty(*logs_itr,stringToLower(log_name));
         if (log)
         {
-          localWorkspace->mutableSample().addLogData(log);
+          localWorkspace->mutableRun().addLogData(log);
         }
       }
       catch(std::exception&)
@@ -403,12 +403,12 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
   return logfilesList;
 }
 
-/** This method reads the.log file and creates timeseries property and sets that to the sample object
+/** This method reads the.log file and creates timeseries property and sets that to the run object
  * @param logfile three column log(.log) file name.
- * @param sample sample object
+ * @param run The run information object
  * @returns list of logfiles which exists as blockname in the .log file
  */
-std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,API::Sample& sample)
+std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,API::Run& run)
 {    
   std::set<std::string> blockFileNameList;
   std::string sdata,str;
@@ -505,12 +505,13 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
   {
     std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr=dMap.begin();
     for(;itr!=dMap.end();++itr)
-    {sample.addLogData(itr->second);
+    {
+      run.addLogData(itr->second);
     }	
     std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr=sMap.begin();
     for(;sitr!=sMap.end();++sitr)
     {
-      sample.addLogData(sitr->second);
+      run.addLogData(sitr->second);
     }
   }
   catch(std::invalid_argument &e)
