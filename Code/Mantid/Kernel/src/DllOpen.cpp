@@ -37,8 +37,8 @@ Logger& DllOpen::log = Logger::get("DllOpen");
  **/
 void* DllOpen::OpenDll(const std::string& libName)
 {
-	std::string str = LIB_PREFIX + libName + LIB_POSTFIX;
-	return OpenDllImpl(str);
+  std::string str = LIB_PREFIX + libName + LIB_POSTFIX;
+  return OpenDllImpl(str);
 }
 
 /* Opens the shared library after appending the required formatting,
@@ -50,9 +50,9 @@ void* DllOpen::OpenDll(const std::string& libName)
  **/
 void* DllOpen::OpenDll(const std::string& libName, const std::string& filePath)
 {
-	std::string str = filePath + PATH_SEPERATOR + LIB_PREFIX + libName
-			+ LIB_POSTFIX;
-	return OpenDllImpl(str);
+  std::string str = filePath + PATH_SEPERATOR + LIB_PREFIX + libName
+    + LIB_POSTFIX;
+  return OpenDllImpl(str);
 }
 
 /* Retrieves a function from the opened library.
@@ -63,7 +63,7 @@ void* DllOpen::OpenDll(const std::string& libName, const std::string& filePath)
  **/
 void* DllOpen::GetFunction(void* libName, const std::string& funcName)
 {
-	return GetFunctionImpl(libName, funcName);
+  return GetFunctionImpl(libName, funcName);
 }
 
 /* Closes an open library.
@@ -72,7 +72,7 @@ void* DllOpen::GetFunction(void* libName, const std::string& funcName)
  **/
 void DllOpen::CloseDll(void* libName)
 {
-	CloseDllImpl(libName);
+  CloseDllImpl(libName);
 }
 
 /** Converts a file name (without directory) to a undecorated library name.
@@ -82,40 +82,40 @@ void DllOpen::CloseDll(void* libName)
  **/
 const std::string DllOpen::ConvertToLibName(const std::string& fileName)
 {
-	//take a copy of the input string
-	std::string retVal = fileName;
+  //take a copy of the input string
+  std::string retVal = fileName;
 
-	if ((retVal.find(LIB_PREFIX) == 0 ) && (retVal.find(PATH_SEPERATOR)
-			== std::string::npos))
-	{
-		//found
-		retVal = retVal.substr(LIB_PREFIX.size(), retVal.size()
-				- LIB_PREFIX.size());
-	}
-	else
-	{
-		//prefix not found
-		return "";
-	}
+  if ((retVal.find(LIB_PREFIX) == 0 ) && (retVal.find(PATH_SEPERATOR)
+    == std::string::npos))
+  {
+    //found
+    retVal = retVal.substr(LIB_PREFIX.size(), retVal.size()
+      - LIB_PREFIX.size());
+  }
+  else
+  {
+    //prefix not found
+    return "";
+  }
 
-	if (retVal.rfind(LIB_POSTFIX) == (retVal.size()-LIB_POSTFIX.size()))
-	{
-		//found
-		retVal = retVal.substr(0, retVal.size()-LIB_POSTFIX.size());
-	}
-	else
-	{
-		//postfix not found
-		return "";
-	}
-	return retVal;
+  if (retVal.rfind(LIB_POSTFIX) == (retVal.size()-LIB_POSTFIX.size()))
+  {
+    //found
+    retVal = retVal.substr(0, retVal.size()-LIB_POSTFIX.size());
+  }
+  else
+  {
+    //postfix not found
+    return "";
+  }
+  return retVal;
 }
 
 /* Adds a directory to the dll cearch path
  **/
 void DllOpen::addSearchDirectory(const std::string& dir)
 {
-    addSearchDirectoryImpl(dir);
+  addSearchDirectoryImpl(dir);
 }
 
 #if _WIN32
@@ -129,39 +129,39 @@ const std::string DllOpen::PATH_SEPERATOR = "\\";
  **/
 void* DllOpen::OpenDllImpl(const std::string& filePath)
 {
-	void* handle = LoadLibrary(filePath.c_str());
-	if (!handle)
-	{
+  void* handle = LoadLibrary(filePath.c_str());
+  if (!handle)
+  {
 
-		LPVOID lpMsgBuf;
-		LPVOID lpDisplayBuf;
-		DWORD dw = GetLastError();
+    LPVOID lpMsgBuf;
+    LPVOID lpDisplayBuf;
+    DWORD dw = GetLastError();
 
-		FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				dw,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				(LPTSTR) &lpMsgBuf,
-				0, NULL );
+    FormatMessage(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER |
+      FORMAT_MESSAGE_FROM_SYSTEM |
+      FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL,
+      dw,
+      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPTSTR) &lpMsgBuf,
+      0, NULL );
 
-		// Display the error message and exit the process
-		size_t n = lstrlen((LPCTSTR)lpMsgBuf) + 40;
+    // Display the error message and exit the process
+    size_t n = lstrlen((LPCTSTR)lpMsgBuf) + 40;
 
-		lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, n*sizeof(TCHAR));
-		//        StringCchPrintf((LPTSTR)lpDisplayBuf, 
-		//          LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-		//          TEXT("failed with error %d: %s"), 
-		//          dw, lpMsgBuf); 
-		_snprintf((char*)lpDisplayBuf, n, "failed with error %d: %s", dw, lpMsgBuf);
-		log.error()<<"Could not open library " << filePath << ": " << lpDisplayBuf << std::endl;
+    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, n*sizeof(TCHAR));
+    //        StringCchPrintf((LPTSTR)lpDisplayBuf, 
+    //          LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+    //          TEXT("failed with error %d: %s"), 
+    //          dw, lpMsgBuf); 
+    _snprintf((char*)lpDisplayBuf, n, "failed with error %d: %s", dw, lpMsgBuf);
+    log.error()<<"Could not open library " << filePath << ": " << (LPCTSTR)lpDisplayBuf << std::endl;
 
-		LocalFree(lpMsgBuf);
-		LocalFree(lpDisplayBuf);
-	}
-	return handle;
+    LocalFree(lpMsgBuf);
+    LocalFree(lpDisplayBuf);
+  }
+  return handle;
 }
 
 /* Retrieves a function from the opened .dll file.
@@ -172,7 +172,7 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
  **/
 void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
 {
-	return (void*)GetProcAddress((HINSTANCE)libName, funcName.c_str());
+  return (void*)GetProcAddress((HINSTANCE)libName, funcName.c_str());
 }
 
 /* Closes an open .dll file.
@@ -180,14 +180,14 @@ void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
  **/
 void DllOpen::CloseDllImpl(void* libName)
 {
-	FreeLibrary((HINSTANCE)libName);
+  FreeLibrary((HINSTANCE)libName);
 }
 
 /* Adds a directory to the dll cearch path
  **/
 void DllOpen::addSearchDirectoryImpl(const std::string& dir)
 {
-    SetDllDirectory(dir.c_str());
+  SetDllDirectory(dir.c_str());
 }
 
 #else
@@ -208,12 +208,12 @@ const std::string DllOpen::PATH_SEPERATOR = "/";
  **/
 void* DllOpen::OpenDllImpl(const std::string& filePath)
 {
-	void* handle = dlopen(filePath.c_str(), RTLD_NOW | RTLD_GLOBAL);
-	if (!handle)
-	{
-		log.error("Could not open library " + filePath + ": " + dlerror());
-	}
-	return handle;
+  void* handle = dlopen(filePath.c_str(), RTLD_NOW | RTLD_GLOBAL);
+  if (!handle)
+  {
+    log.error("Could not open library " + filePath + ": " + dlerror());
+  }
+  return handle;
 }
 
 /* Retrieves a function from the opened library.
@@ -224,7 +224,7 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
  **/
 void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
 {
-	return dlsym(libName, funcName.c_str());
+  return dlsym(libName, funcName.c_str());
 }
 
 /* Closes an open .so file.
@@ -232,7 +232,7 @@ void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
  **/
 void DllOpen::CloseDllImpl(void* libName)
 {
-	dlclose(libName);
+  dlclose(libName);
 }
 
 /* Adds a directory to the dll cearch path
