@@ -301,7 +301,9 @@ public:
     TS_ASSERT_DELTA( out[0], 0.1018,0.001);
 
     AnalysisDataService::Instance().remove(wsname);
-    InstrumentDataService::Instance().remove("GEM_Definition.xml");
+    // Append value of date-time tag inside the geometry file to the constructor handle 
+    // for change to LoadInstrument
+    InstrumentDataService::Instance().remove("GEM_Definition.xml16th Sep 2008");
   }
 
 

@@ -92,18 +92,6 @@ void LoadInstrument::exec()
   const int stripPath = m_filename.find_last_of("\\/");
   std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
 
-  // Check whether the instrument is already in the InstrumentDataService
-  if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
-  {
-    // If it does, just use the one from the one stored there
-    localWorkspace->setInstrument(InstrumentDataService::Instance().retrieve(instrumentFile));
-	 // Get reference to Instrument 
-	m_instrument = localWorkspace->getBaseInstrument();
-	//get list of monitors and set the property
-	std::vector<int>monitordetIdList=m_instrument->getMonitors();
-	setProperty("MonitorList",monitordetIdList);
-    return;
-  }
   // Get reference to Instrument and set its name
   m_instrument = localWorkspace->getBaseInstrument();
 
@@ -125,6 +113,24 @@ void LoadInstrument::exec()
   {
     g_log.error("XML file: " + m_filename + "contains no root element.");
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
+  }
+ 
+  // Handle used in the singleton constructor for instrument file should append the value
+  // of the date-time tag inside the file to determine if it is already in memory so that
+  // changes to the instrument file will cause file to be reloaded.
+  instrumentFile = instrumentFile + pRootElem->getAttribute("date");
+
+  // Check whether the instrument is already in the InstrumentDataService
+  if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
+  {
+    // If it does, just use the one from the one stored there
+    localWorkspace->setInstrument(InstrumentDataService::Instance().retrieve(instrumentFile));
+	 // Get reference to Instrument 
+	m_instrument = localWorkspace->getBaseInstrument();
+	//get list of monitors and set the property
+	std::vector<int>monitordetIdList=m_instrument->getMonitors();
+	setProperty("MonitorList",monitordetIdList);
+    return;
   }
 
   readDefaults(pRootElem->getChildElement("defaults"));
