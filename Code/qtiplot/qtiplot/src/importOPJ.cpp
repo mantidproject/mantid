@@ -55,6 +55,8 @@
 
 #include <gsl/gsl_math.h>
 
+using std::vector;
+
 #define OBJECTXOFFSET 200
 
 QString strreverse(const QString &str) //QString reversing

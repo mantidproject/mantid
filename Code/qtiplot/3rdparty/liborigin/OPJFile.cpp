@@ -35,6 +35,9 @@
 #include <algorithm> //required for std::swap
 #include "OPJFile.h"
 
+using std::vector;
+using std::string;
+
 const char* colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 #define MAX_LEVEL 20
 #define ERROR_MSG "Please send the OPJ file and the opjfile.log to the author of liborigin!\n"

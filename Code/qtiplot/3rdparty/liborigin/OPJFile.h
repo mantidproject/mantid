@@ -40,7 +40,8 @@
 #include <vector>
 #include "tree.hh"
 
-using namespace std;
+// Russell Taylor, 23/07/10: Remove evil import - caused clash with std::tr1::function
+//using namespace std;
 
 struct rect {
 	short left;
@@ -71,8 +72,8 @@ struct originWindow {
 	enum State {Normal, Minimized, Maximized};
 	enum Title {Name, Label, Both};
 
-	string name;
-	string label;
+	std::string name;
+	std::string label;
 	int objectID;
 	bool bHidden;
 	State state;
@@ -81,7 +82,7 @@ struct originWindow {
 	double creation_date;	  // Julian date/time
 	double modification_date; // Julian date/time
 
-	originWindow(string _name="", string _label="", bool _bHidden=false)
+	originWindow(std::string _name="", std::string _label="", bool _bHidden=false)
 	:	name(_name)
 	,	label(_label)
 	,	bHidden(_bHidden)
@@ -94,7 +95,7 @@ struct originWindow {
 struct originData {
 	int type; // 0 - double, 1 - string
 	double d;
-	string s;
+	std::string s;
 	originData(double _d)
 	:	d(_d)
 	,	type(0)
@@ -110,19 +111,19 @@ struct originData {
 enum ColumnType {X, Y, Z, XErr, YErr, Label, NONE};
 
 struct spreadColumn {
-	string name;
+	std::string name;
 	ColumnType type;
 	int value_type;//Numeric = 0, Text = 1, Date = 2, Time = 3, Month = 4, Day = 5, Text&Numeric = 6
 	int value_type_specification; //see above
 	int significant_digits;
 	int decimal_places;
 	int numeric_display_type;//Default Decimal Digits=0, Decimal Places=1, Significant Digits=2
-	string command;
-	string comment;
+	std::string command;
+	std::string comment;
 	int width;
 	int index;
-	vector <originData> odata;
-	spreadColumn(string _name="", int _index=0)
+	std::vector <originData> odata;
+	spreadColumn(std::string _name="", int _index=0)
 	:	name(_name)
 	,	index(_index)
 	,	command("")
@@ -140,8 +141,8 @@ struct spreadSheet : public originWindow {
 	int maxRows;
 	bool bLoose;
 	bool bMultisheet;
-	vector <spreadColumn> column;
-	spreadSheet(string _name="")
+	std::vector <spreadColumn> column;
+	spreadSheet(std::string _name="")
 	:	originWindow(_name)
 	,	bLoose(true)
 	,	bMultisheet(false)
@@ -151,8 +152,8 @@ struct spreadSheet : public originWindow {
 struct excel : public originWindow {
 	int maxRows;
 	bool bLoose;
-	vector <spreadSheet> sheet;
-	excel(string _name="", string _label="", int _maxRows=0, bool _bHidden=false, bool _bLoose=true)
+	std::vector <spreadSheet> sheet;
+	excel(std::string _name="", std::string _label="", int _maxRows=0, bool _bHidden=false, bool _bLoose=true)
 	:	originWindow(_name, _label, _bHidden)
 	,	maxRows(_maxRows)
 	,	bLoose(_bLoose)
@@ -169,13 +170,13 @@ struct matrix : public originWindow {
 	int significant_digits;
 	int decimal_places;
 	int numeric_display_type;//Default Decimal Digits=0, Decimal Places=1, Significant Digits=2
-	string command;
+	std::string command;
 	int width;
 	int index;
 	ViewType view;
 	HeaderViewType header;
-	vector <double> data;
-	matrix(string _name="", int _index=0)
+	std::vector <double> data;
+	matrix(std::string _name="", int _index=0)
 	:	originWindow(_name)
 	,	index(_index)
 	,	command("")
@@ -190,14 +191,14 @@ struct matrix : public originWindow {
 };
 
 struct function {
-	string name;
+	std::string name;
 	int type;//Normal = 0, Polar = 1
-	string formula;
+	std::string formula;
 	double begin;
 	double end;
 	int points;
 	int index;
-	function(string _name="", int _index=0)
+	function(std::string _name="", int _index=0)
 	:	name(_name)
 	,	index(_index)
 	,	type(0)
@@ -210,7 +211,7 @@ struct function {
 
 
 struct text {
-	string txt;
+	std::string txt;
 	rect clientRect;
 	int color;
 	int fontsize;
@@ -219,10 +220,10 @@ struct text {
 	int border_type;
 	int attach;
 
-	text(const string& _txt="")
+	text(const std::string& _txt="")
 		:	txt(_txt)
 	{};
-	text(const string& _txt, const rect& _clientRect, int _color, int _fontsize, int _rotation, int _tab, int _border_type, int _attach)
+	text(const std::string& _txt, const rect& _clientRect, int _color, int _fontsize, int _rotation, int _tab, int _border_type, int _attach)
 		:	txt(_txt)
 		,	clientRect(_clientRect)
 		,	color(_color)
@@ -270,12 +271,12 @@ struct vectorProperties
 	unsigned short arrow_lenght;
 	unsigned char arrow_angle;
 	bool arrow_closed;
-	string endXColName;
-	string endYColName;
+	std::string endXColName;
+	std::string endYColName;
 
 	int position;
-	string angleColName;
-	string magnitudeColName;
+	std::string angleColName;
+	std::string magnitudeColName;
 	float multiplier;
 	int const_angle;
 	int const_magnitude;
@@ -291,9 +292,9 @@ struct vectorProperties
 
 struct graphCurve {
 	int type;
-	string dataName;
-	string xColName;
-	string yColName;
+	std::string dataName;
+	std::string xColName;
+	std::string yColName;
 	int line_color;
 	int line_style;
 	int line_connect;
@@ -372,8 +373,8 @@ struct graphAxisTick {
 	int decimal_places;
 	int fontsize;
 	bool fontbold;
-	string dataName;
-	string colName;
+	std::string dataName;
+	std::string colName;
 	int rotation;
 };
 
@@ -456,10 +457,10 @@ struct graphLayer {
 	double histogram_begin;
 	double histogram_end;
 
-	vector<text> texts;
-	vector<line> lines;
-	vector<bitmap> bitmaps;
-	vector<graphCurve> curve;
+	std::vector<text> texts;
+	std::vector<line> lines;
+	std::vector<bitmap> bitmaps;
+	std::vector<graphCurve> curve;
 };
 
 struct graphLayerRange {
@@ -476,29 +477,29 @@ struct graphLayerRange {
 };
 
 struct graph : public originWindow {
-	vector<graphLayer> layer;
+	std::vector<graphLayer> layer;
 	unsigned short width;
 	unsigned short height;
 
-	graph(string _name="")
+	graph(std::string _name="")
 	:	originWindow(_name)
 	{};
 };
 
 struct note : public originWindow {
-	string text;
-	note(string _name="")
+	std::string text;
+	note(std::string _name="")
 	:	originWindow(_name)
 	{};
 };
 
 struct projectNode {
 	int type; // 0 - object, 1 - folder
-	string name;
+	std::string name;
 	double creation_date;	  // Julian date/time
 	double modification_date; // Julian date/time
 
-	projectNode(string _name="", int _type=0, double _creation_date=0.0, double _modification_date=0.0)
+	projectNode(std::string _name="", int _type=0, double _creation_date=0.0, double _modification_date=0.0)
 	:	name(_name)
 	,	type(_type)
 	,	creation_date(_creation_date)
@@ -578,7 +579,7 @@ public:
 	matrix::ViewType matrixViewType(int m) const { return MATRIX[m].view; }	//!< get view type of matrix m
 	matrix::HeaderViewType matrixHeaderViewType(int m) const { return MATRIX[m].header; }	//!< get header view type of matrix m
 	double matrixData(int m, int c, int r) const { return MATRIX[m].data[r*MATRIX[m].nr_cols+c]; }	//!< get data of row r of column c of matrix m
-	vector<double> matrixData(int m) const { return MATRIX[m].data; }	//!< get data of matrix m
+	std::vector<double> matrixData(int m) const { return MATRIX[m].data; }	//!< get data of matrix m
 
 	//function properties
 	int numFunctions() const { return FUNCTION.size(); }			//!< get number of functions
@@ -632,9 +633,9 @@ public:
 	text layerXAxisTitle(int s, int l) const { return GRAPH[s].layer[l].xAxis.label; }		//!< get label of X-axis of layer l of graph s
 	text layerYAxisTitle(int s, int l) const { return GRAPH[s].layer[l].yAxis.label; }		//!< get label of Y-axis of layer l of graph s
 	text layerLegend(int s, int l) const { return GRAPH[s].layer[l].legend; }		//!< get legend of layer l of graph s
-	vector<text> layerTexts(int s, int l) const { return GRAPH[s].layer[l].texts; } //!< get texts of layer l of graph s
-	vector<line> layerLines(int s, int l) const { return GRAPH[s].layer[l].lines; } //!< get lines of layer l of graph s
-	vector<bitmap> layerBitmaps(int s, int l) const { return GRAPH[s].layer[l].bitmaps; } //!< get bitmaps of layer l of graph s
+	std::vector<text> layerTexts(int s, int l) const { return GRAPH[s].layer[l].texts; } //!< get texts of layer l of graph s
+	std::vector<line> layerLines(int s, int l) const { return GRAPH[s].layer[l].lines; } //!< get lines of layer l of graph s
+	std::vector<bitmap> layerBitmaps(int s, int l) const { return GRAPH[s].layer[l].bitmaps; } //!< get bitmaps of layer l of graph s
 	graphAxisBreak layerXBreak(int s, int l) const { return GRAPH[s].layer[l].xAxisBreak; } //!< get break of horizontal axis of layer l of graph s
 	graphAxisBreak layerYBreak(int s, int l) const { return GRAPH[s].layer[l].yAxisBreak; } //!< get break of vertical axis of layer l of graph s
 	graphLayerRange layerXRange(int s, int l) const {
@@ -643,44 +644,44 @@ public:
 	graphLayerRange layerYRange(int s, int l) const {
 		return graphLayerRange(GRAPH[s].layer[l].yAxis.min, GRAPH[s].layer[l].yAxis.max, GRAPH[s].layer[l].yAxis.step);
 	} //!< get Y-range of layer l of graph s
-	vector<int> layerXTicks(int s, int l) const {
-		vector<int> tick;
+	std::vector<int> layerXTicks(int s, int l) const {
+		std::vector<int> tick;
 		tick.push_back(GRAPH[s].layer[l].xAxis.majorTicks);
 		tick.push_back(GRAPH[s].layer[l].xAxis.minorTicks);
 		return tick;
 	} //!< get X-axis ticks of layer l of graph s
-	vector<int> layerYTicks(int s, int l) const {
-		vector<int> tick;
+	std::vector<int> layerYTicks(int s, int l) const {
+		std::vector<int> tick;
 		tick.push_back(GRAPH[s].layer[l].yAxis.majorTicks);
 		tick.push_back(GRAPH[s].layer[l].yAxis.minorTicks);
 		return tick;
 	} //!< get Y-axis ticks of layer l of graph s
-	vector<graphGrid> layerGrid(int s, int l) const {
-		vector<graphGrid> grid;
+	std::vector<graphGrid> layerGrid(int s, int l) const {
+		std::vector<graphGrid> grid;
 		grid.push_back(GRAPH[s].layer[l].xAxis.majorGrid);
 		grid.push_back(GRAPH[s].layer[l].xAxis.minorGrid);
 		grid.push_back(GRAPH[s].layer[l].yAxis.majorGrid);
 		grid.push_back(GRAPH[s].layer[l].yAxis.minorGrid);
 		return grid;
 	} //!< get grid of layer l of graph s
-	vector<graphAxisFormat> layerAxisFormat(int s, int l) const {
-		vector<graphAxisFormat> format;
+	std::vector<graphAxisFormat> layerAxisFormat(int s, int l) const {
+		std::vector<graphAxisFormat> format;
 		format.push_back(GRAPH[s].layer[l].yAxis.formatAxis[0]); //bottom
 		format.push_back(GRAPH[s].layer[l].yAxis.formatAxis[1]); //top
 		format.push_back(GRAPH[s].layer[l].xAxis.formatAxis[0]); //left
 		format.push_back(GRAPH[s].layer[l].xAxis.formatAxis[1]); //right
 		return format;
 	} //!< get title and format of axes of layer l of graph s
-	vector<graphAxisTick> layerAxisTickLabels(int s, int l) const {
-		vector<graphAxisTick> tick;
+	std::vector<graphAxisTick> layerAxisTickLabels(int s, int l) const {
+		std::vector<graphAxisTick> tick;
 		tick.push_back(GRAPH[s].layer[l].yAxis.tickAxis[0]); //bottom
 		tick.push_back(GRAPH[s].layer[l].yAxis.tickAxis[1]); //top
 		tick.push_back(GRAPH[s].layer[l].xAxis.tickAxis[0]); //left
 		tick.push_back(GRAPH[s].layer[l].xAxis.tickAxis[1]); //right
 		return tick;
 	} //!< get tick labels of axes of layer l of graph s
-	vector<double> layerHistogram(int s, int l) const {
-		vector<double> range;
+	std::vector<double> layerHistogram(int s, int l) const {
+		std::vector<double> range;
 		range.push_back(GRAPH[s].layer[l].histogram_bin);
 		range.push_back(GRAPH[s].layer[l].histogram_begin);
 		range.push_back(GRAPH[s].layer[l].histogram_end);
@@ -739,8 +740,8 @@ private:
 	int compareExcelColumnnames(int excel, int sheet, char *sname) const;  //!< returns matching column index
 	int compareMatrixnames(char *sname) const;				//!< returns matching matrix index
 	int compareFunctionnames(const char *sname) const;				//!< returns matching function index
-	vector<string> findDataByIndex(int index) const;
-	string findObjectByIndex(int index);
+	std::vector<std::string> findDataByIndex(int index) const;
+	std::string findObjectByIndex(int index);
 	void readSpreadInfo(FILE *fopj, FILE *fdebug);
 	void readExcelInfo(FILE *f, FILE *debug);
 	void readMatrixInfo(FILE *fopj, FILE *fdebug);
@@ -759,13 +760,13 @@ private:
 	int version;				//!< project version
 	int dataIndex;
 	int objectIndex;
-	string resultsLog;
-	vector <spreadSheet> SPREADSHEET;
-	vector <matrix> MATRIX;
-	vector <excel> EXCEL;
-	vector <function> FUNCTION;
-	vector <graph> GRAPH;
-	vector <note> NOTE;
+	std::string resultsLog;
+	std::vector <spreadSheet> SPREADSHEET;
+	std::vector <matrix> MATRIX;
+	std::vector <excel> EXCEL;
+	std::vector <function> FUNCTION;
+	std::vector <graph> GRAPH;
+	std::vector <note> NOTE;
 	tree <projectNode> projectTree;
 };
 
