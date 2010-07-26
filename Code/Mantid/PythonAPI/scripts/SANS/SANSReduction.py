@@ -558,7 +558,7 @@ def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period
     if (period > numPeriods) or (period < 1):
         raise ValueError('_loadRawData: Period number ' + str(period) + ' doesn\'t exist in workspace ' + pWorksp.getName())
 
-    sample_details = pWorksp.getSampleDetails()
+    sample_details = pWorksp.getSampleInfo()
     SampleGeometry(sample_details.getGeometryFlag())
     SampleThickness(sample_details.getThickness())
     SampleHeight(sample_details.getHeight())

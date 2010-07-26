@@ -14,7 +14,7 @@ namespace Mantid
     /**
      * Default constructor
      */
-    Run::Run() : PropertyManager(), m_protonChargeName("proton_charge_tot")
+    Run::Run() : m_manager(), m_protonChargeName("proton_charge_tot")
     {
     }
 
@@ -29,7 +29,7 @@ namespace Mantid
      * Copy constructor
      * @param copy The object to initialize the copy from
      */
-    Run::Run(const Run& copy) : PropertyManager(copy), m_protonChargeName(copy.m_protonChargeName)
+    Run::Run(const Run& copy) : m_manager(copy.m_manager), m_protonChargeName(copy.m_protonChargeName)
     {
     }
 
@@ -41,11 +41,9 @@ namespace Mantid
     const Run& Run::operator=(const Run& rhs)
     {
       if( this == &rhs ) return *this;
-      PropertyManager::operator=(rhs);
+      m_manager = rhs.m_manager;
       return *this;
     }
-
-    
 
     /**
      * Add data to the object in the form of a property
@@ -53,7 +51,7 @@ namespace Mantid
      */
     void Run::addProperty(Kernel::Property *prop)
     {
-      this->declareProperty(prop, "");
+      m_manager.declareProperty(prop, "");
     }
     
     /** 
@@ -64,7 +62,7 @@ namespace Mantid
     {
       if( !hasProperty(m_protonChargeName) )
       {
-	addProperty(new Kernel::PropertyWithValue<double>(m_protonChargeName, charge));
+	addProperty(m_protonChargeName, charge);
       }
       else
       {
@@ -80,7 +78,7 @@ namespace Mantid
      */
     double Run::getProtonCharge() const
     {
-      double charge = PropertyManager::getProperty(m_protonChargeName);
+      double charge = m_manager.getProperty(m_protonChargeName);
       return charge;
     }
 

@@ -133,7 +133,6 @@ void LoadRaw3::exec()
 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, m_lengthIn,m_lengthIn-1,title);
-  //localWorkspace->setTitle(title);
 
   // Only run the sub-algorithms once
   runLoadInstrument(m_filename,localWorkspace);
@@ -148,6 +147,7 @@ void LoadRaw3::exec()
   // Set the total proton charge for this run
   setProtonCharge(run);
   setRunNumber(run);
+  loadRunParameters(localWorkspace);
 
   // populate instrument parameters
   g_log.debug("Populating the instrument parameters...");

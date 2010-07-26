@@ -103,11 +103,11 @@ namespace Mantid
       std::string m_samplename;
 
       /// The number of spectra in the raw file
-      int m_numberOfSpectra;
+      int m_numberOfSpectra, m_numberOfSpectraInFile;
       /// The number of periods in the raw file
-      int m_numberOfPeriods;
+      int m_numberOfPeriods, m_numberOfPeriodsInFile;
       /// The nuber of time chanels per spectrum
-      int m_numberOfChannels;
+      int m_numberOfChannels, m_numberOfChannelsInFile;
       /// Is there a detector block
       bool m_have_detector;
 

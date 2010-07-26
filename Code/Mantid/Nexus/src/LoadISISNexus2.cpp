@@ -12,7 +12,10 @@
 #include "MantidAPI/LogParser.h"
 #include "MantidAPI/XMLlogfile.h"
 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormat.h>
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
@@ -33,10 +36,11 @@ namespace Mantid
 
     /// Empty default constructor
     LoadISISNexus2::LoadISISNexus2() : 
-    Algorithm(), m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), 
-      m_numberOfPeriods(0), m_numberOfChannels(0), m_have_detector(false), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
-      m_entrynumber(0), m_range_supplied(true), m_tof_data(), m_proton_charge(0.),
-      m_spec(), m_monitors(), m_progress()
+    Algorithm(), m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
+    m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
+    m_have_detector(false), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
+    m_entrynumber(0), m_range_supplied(true), m_tof_data(), m_proton_charge(0.),
+    m_spec(), m_monitors(), m_progress()
     {}
 
     /// Initialisation method.
@@ -125,17 +129,17 @@ namespace Mantid
 
         //Grab the number of channels
         NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
-        m_numberOfPeriods = chans.dim0();
-        m_numberOfSpectra = nmons;
-        m_numberOfChannels = chans.dim2();
+        m_numberOfPeriodsInFile = m_numberOfPeriods = chans.dim0();
+        m_numberOfSpectraInFile = m_numberOfSpectra = nmons;
+        m_numberOfChannelsInFile = m_numberOfChannels = chans.dim2();
       }
       else 
       {
         NXData nxData = entry.openNXData("detector_1");
         NXInt data = nxData.openIntData();
-        m_numberOfPeriods  = data.dim0();
-        m_numberOfSpectra = nsp1[0];
-        m_numberOfChannels = data.dim2();
+        m_numberOfPeriodsInFile = m_numberOfPeriods = data.dim0();
+        m_numberOfSpectraInFile = m_numberOfSpectra = nsp1[0];
+        m_numberOfChannelsInFile = m_numberOfChannels = data.dim2();
 
         if( nmons > 0 && m_numberOfSpectra == data.dim1() )
         {
@@ -198,7 +202,6 @@ namespace Mantid
       runLoadInstrument(local_workspace);
 
       local_workspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
-      loadRunDetails(local_workspace, entry);
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
       loadLogs(local_workspace, entry);
@@ -213,7 +216,8 @@ namespace Mantid
         m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
       }
       int firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
-      loadPeriodData(firstentry, entry, local_workspace); 
+      loadPeriodData(firstentry, entry, local_workspace);
+      loadRunDetails(local_workspace, entry);
 
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
       {
@@ -557,11 +561,79 @@ namespace Mantid
     */
     void LoadISISNexus2::loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
-      API::Run & run = local_workspace->mutableRun();
-      run.setProtonCharge(entry.getFloat("proton_charge"));
+      API::Run & runDetails = local_workspace->mutableRun();
+      runDetails.setProtonCharge(entry.getFloat("proton_charge"));
 
       std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
-      run.addLogData(new PropertyWithValue<std::string>("run_number", run_num));
+      runDetails.addProperty("run_number", run_num);
+      
+      //
+      // Some details are only stored in the VMS compatability block so we'll pull everything from there
+      // for consistency
+
+      NXClass vms_compat = entry.openNXGroup("isis_vms_compat");
+      // Run header
+      NXChar char_data = vms_compat.openNXChar("HDR");
+      char_data.load();
+      runDetails.addProperty("run_header", std::string(char_data(),80));
+      // Run title
+      runDetails.addProperty("run_title", local_workspace->getTitle());
+      
+      // Data details on run not the workspace
+      runDetails.addProperty("nspectra", static_cast<int>(m_numberOfSpectraInFile));
+      runDetails.addProperty("nchannels", static_cast<int>(m_numberOfChannelsInFile));
+      runDetails.addProperty("nperiods", static_cast<int>(m_numberOfPeriodsInFile));
+
+      // RPB struct info
+      NXInt rpb_int = vms_compat.openNXInt("IRPB");
+      rpb_int.load();
+      runDetails.addProperty("dur", rpb_int[0]);	// actual run duration
+      runDetails.addProperty("durunits", rpb_int[1]);	// scaler for above (1=seconds)
+      runDetails.addProperty("dur_freq", rpb_int[2]);  // testinterval for above (seconds)
+      runDetails.addProperty("dmp", rpb_int[3]);       // dump interval
+      runDetails.addProperty("dmp_units", rpb_int[4]);	// scaler for above
+      runDetails.addProperty("dmp_freq", rpb_int[5]);	// interval for above
+      runDetails.addProperty("freq", rpb_int[6]);	// 2**k where source frequency = 50 / 2**k
+      
+      // Now double data
+      NXDouble rpb_dbl = vms_compat.openNXDouble("RRPB");
+      rpb_dbl.load();
+      runDetails.addProperty("gd_prtn_chrg", rpb_dbl[7]);  // good proton charge (uA.hour)
+      runDetails.addProperty("tot_prtn_chrg", rpb_dbl[8]); // total proton charge (uA.hour)
+      runDetails.addProperty("goodfrm",rpb_int[9]);	// good frames
+      runDetails.addProperty("rawfrm", rpb_int[10]);	// raw frames
+      runDetails.addProperty("dur_wanted", rpb_int[11]); // requested run duration (units as for "duration" above)
+      runDetails.addProperty("dur_secs", rpb_int[12]);	// actual run duration in seconds
+      runDetails.addProperty("mon_sum1", rpb_int[13]);	// monitor sum 1
+      runDetails.addProperty("mon_sum2", rpb_int[14]);	// monitor sum 2
+      runDetails.addProperty("mon_sum3",rpb_int[15]);	// monitor sum 3
+
+      // End date and time is stored separately in ISO format in the "raw_data1/endtime" class
+      char_data = entry.openNXChar("end_time");
+      char_data.load();
+      std::string end_time_iso = std::string(char_data(), 19);
+      std::string end_date(""), end_time("");
+      try
+      {
+	Poco::DateTime end_time_output;
+	int timezone_diff(0);
+	Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT, end_time_iso, end_time_output, timezone_diff);
+	end_date = Poco::DateTimeFormatter::format(end_time_output, "%DD-%MM-%YYYY", timezone_diff);
+	end_time = Poco::DateTimeFormatter::format(end_time_output, "%HH-%MM-%SS", timezone_diff);
+      }
+      catch(Poco::SyntaxException&)
+      {
+	end_date = "\?\?-\?\?-\?\?\?\?";
+	end_time = "\?\?-\?\?-\?\?";
+	g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
+      }
+      
+      runDetails.addProperty("enddate", end_date);
+      runDetails.addProperty("endtime", end_time);
+      runDetails.addProperty("prop",rpb_int[21]); // RB (proposal) number
+      vms_compat.close();
+      
+
     }
 
     /**

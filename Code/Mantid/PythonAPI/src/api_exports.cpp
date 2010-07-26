@@ -189,6 +189,7 @@ namespace PythonAPI
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
       .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
       .def("getRun", &Mantid::API::MatrixWorkspace::run, return_internal_reference<>() )
+      .def("getSampleInfo", &Mantid::API::MatrixWorkspace::sample, return_internal_reference<>() )
       .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
       .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
       .def("__radd__",(binary_fn2)&WorkspaceAlgebraProxy::rplus)
@@ -274,12 +275,15 @@ namespace PythonAPI
     register_ptr_to_python<Mantid::API::Run*>();
 
     //Run class
-    class_< Mantid::API::Run, boost::noncopyable >("Run", no_init)
+    class_< Mantid::API::Run,  boost::noncopyable >("Run", no_init)
       .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Run::*)(const std::string&) const)&Run::getLogData, 
         return_internal_reference<>())
       .def("getLogData", (const std::vector<Mantid::Kernel::Property*> & (Mantid::API::Run::*)() const)&Run::getLogData, 
         return_internal_reference<>())
       .def("getProtonCharge", &Mantid::API::Run::getProtonCharge)
+      .def("hasProperty", &Mantid::API::Run::hasProperty)
+      .def("getProperty", &Mantid::API::Run::getProperty, return_value_policy<return_by_value>())
+      .def("getProperties", &Mantid::API::Run::getProperties, return_internal_reference<>())
      ;
   }
 

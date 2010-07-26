@@ -5,9 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
+#include <vector>
 
 namespace Mantid
 {
+  //-------------------------------------------------------------------
+  // Forward declarations
+  //-------------------------------------------------------------------
+
   namespace API
   {
 
@@ -16,7 +21,7 @@ namespace Mantid
        of log entries
 
        @author Martyn Gigg, Tessella plc
-       @date 26/11/2007
+       @date 22/07/2010
        
        Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
        
@@ -38,7 +43,7 @@ namespace Mantid
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
        Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Run : private Kernel::PropertyManager
+    class DLLExport Run
     {
 
     public:
@@ -53,13 +58,31 @@ namespace Mantid
     
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop);
+      /// Add a property of given type
+      template<class TYPE>
+      void addProperty(const std::string & name, const TYPE & value);
       /// Does the property exist on the object
-      bool hasProperty(const std::string & name) const { return Kernel::PropertyManager::existsProperty(name); }
-
+      bool hasProperty(const std::string & name) const { return m_manager.existsProperty(name); }
       // Expose some of the PropertyManager publicly
-      using Kernel::PropertyManager::removeProperty;
-      using Kernel::PropertyManager::getProperty;
-      using Kernel::PropertyManager::getProperties;
+      /**
+       * Remove a named property
+       */
+      void removeProperty(const std::string &name) { m_manager.removeProperty(name); }
+      /**
+       * Return all of the current properties
+       * @returns A vector of the current list of properties
+       */
+      const std::vector<Kernel::Property*>& getProperties() const { return m_manager.getProperties(); }
+      /**
+       * Returns the named property
+       * @param name The name of the property
+       * @returns The named property
+       */
+      Kernel::Property * getProperty(const std::string & name) const
+      {
+	Kernel::Property *p = m_manager.getProperty(name);
+	return p;
+      }
 
       /** @name Legacy functions */
       //@{
@@ -69,7 +92,7 @@ namespace Mantid
       double getProtonCharge() const;
       /**
        * Add a log entry
-       * @parma p A pointer to the property containing the log entry
+       * @param p A pointer to the property containing the log entry
        */
       void addLogData( Kernel::Property *p ) { addProperty(p); }
       /**
@@ -77,7 +100,7 @@ namespace Mantid
        * @param name The name of the log entry to retrieve
        * @returns A pointer to a property containing the log entry
        */ 
-      Kernel::Property* getLogData( const std::string &name ) const { return getProperty(name); }
+      Kernel::Property* getLogData(const std::string &name) const { return getProperty(name); }
       /**
        * Access all log entries
        * @returns A list of all of the log entries
@@ -91,9 +114,22 @@ namespace Mantid
       //@}
 
     private:
+      /// A pointer to a property manager
+      Kernel::PropertyManager m_manager;
       /// The name of the proton charge property
       const std::string m_protonChargeName;
     };
+
+    /**
+     * Add a property of a specified type (Simply creates a Kernel::Property of that type
+     * @param name The name of the type
+     * @param value The value of the property
+     */
+    template<class TYPE>
+    void Run::addProperty(const std::string & name, const TYPE & value)
+    {
+      addProperty(new Kernel::PropertyWithValue<TYPE>(name, value));
+    }
 
   }
 }

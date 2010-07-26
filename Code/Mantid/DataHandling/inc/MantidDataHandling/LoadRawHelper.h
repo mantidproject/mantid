@@ -73,7 +73,7 @@ namespace Mantid
 
       /// reads data
       bool readData(FILE* file,int histToRead);
-                  
+      
       ///creates shared pointer to workspace from parent workspace
       DataObjects::Workspace2D_sptr createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
 						    int nVectors=-1,int xLengthIn=-1,int yLengthIn=-1); 
@@ -102,6 +102,9 @@ namespace Mantid
 
       /// load log algorithm
       void runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr,int period=1);
+
+      /// Read in run parameters
+      void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace) const;
 
       ///gets the monitor spectrum list from the workspace
       void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<int>& monitorSpecList);
