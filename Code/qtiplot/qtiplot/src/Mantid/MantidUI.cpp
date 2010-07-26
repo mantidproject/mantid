@@ -75,7 +75,15 @@ m_appWindow(aw)
 
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
-    m_fitFunction = new FitPropertyBrowser(aw);
+    try
+    {
+      m_fitFunction = new FitPropertyBrowser(aw);
+    }
+    catch(...)
+    {
+      m_fitFunction = NULL;
+      showCritical("The curve fitting plugin is missing");
+    }
 
   	actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
 	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
@@ -150,8 +158,11 @@ void MantidUI::init()
 
     // Now that the framework is initialized we need to populate the algorithm tree
     m_exploreAlgorithms->update();
-    m_fitFunction->init();
-    m_fitFunction->hide();
+    if (m_fitFunction)
+    {
+      m_fitFunction->init();
+      m_fitFunction->hide();
+    }
 
     //connect the signal from the algorithm factory to monitor updates
     connect(this, SIGNAL(algorithms_updated()), m_exploreAlgorithms, SLOT(update()));
@@ -170,14 +181,18 @@ void MantidUI::addMenuItems(QMenu *menu)
   actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
   menu->addAction(actionToggleAlgorithms);
   
-  actionToggleFitFunction = m_fitFunction->toggleViewAction();
-  menu->addAction(actionToggleFitFunction);
+  if (m_fitFunction)
+  {
+    actionToggleFitFunction = m_fitFunction->toggleViewAction();
+    menu->addAction(actionToggleFitFunction);
+  }
 
 }
 
 // Show / hide the FitPropertyBrowser
 void MantidUI::showFitPropertyBrowser(bool on)
 {
+  if (!m_fitFunction) return;
   if (on)
   {
     m_fitFunction->show();

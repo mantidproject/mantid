@@ -58,18 +58,22 @@ m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().ge
 m_autoBackground(NULL),
 m_logValue(NULL)
 {
+  // Make sure plugins are loaded
+  std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
+  if( !libpath.empty() )
+  {
+    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
+  }
+
+  // Try to create a Gaussian. Failing will mean that CurveFitting dll is not loaded
+  boost::shared_ptr<Mantid::API::IFunction> f = 
+    Mantid::API::FunctionFactory::Instance().create("Gaussian");
   if (m_autoBgName.toLower() == "none")
   {
     m_autoBgName = "";
   }
   else
   {
-    // Make sure plugins are loaded
-    std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
-    if( !libpath.empty() )
-    {
-      Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-    }
     setAutoBackgroundName(m_autoBgName);
   }
 

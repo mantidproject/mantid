@@ -306,6 +306,11 @@ void ApplicationWindow::init(bool factorySettings)
 	undoStackWindow->setWidget(d_undo_view);
 	undoStackWindow->hide();
 
+    //Initialize Mantid
+    // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
+    // we register Python algorithms
+    mantidUI->init();
+	
 	// Needs to be done after initialization of dock windows,
 	// because we now use QDockWidget::toggleViewAction()
 	createActions();
@@ -372,11 +377,6 @@ void ApplicationWindow::init(bool factorySettings)
     //apply user settings
     updateAppFonts();
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
-    //Initialize Mantid
-    // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
-    // we register Python algorithms
-    mantidUI->init();
-	
     
     //Scripting
     m_script_envs = QHash<QString, ScriptingEnv*>();
@@ -812,11 +812,18 @@ void ApplicationWindow::initToolBars()
 	btnRemovePoints->setIcon(QIcon(QPixmap(gomme_xpm)));
 	plotTools->addAction(btnRemovePoints);
 
-	btnMultiPeakPick = new QAction(tr("Select Multiple Peaks..."), this);
-	btnMultiPeakPick->setActionGroup(dataTools);
-	btnMultiPeakPick->setCheckable( true );
-	btnMultiPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
-	plotTools->addAction(btnMultiPeakPick);
+  if (mantidUI->fitFunctionBrowser())
+  {
+    btnMultiPeakPick = new QAction(tr("Select Multiple Peaks..."), this);
+    btnMultiPeakPick->setActionGroup(dataTools);
+    btnMultiPeakPick->setCheckable( true );
+    btnMultiPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
+    plotTools->addAction(btnMultiPeakPick);
+  }
+  else
+  {
+    btnMultiPeakPick = NULL;
+  }
 
 	connect( dataTools, SIGNAL( triggered( QAction* ) ), this, SLOT( pickDataTool( QAction* ) ) );
 	plotTools->addSeparator ();
