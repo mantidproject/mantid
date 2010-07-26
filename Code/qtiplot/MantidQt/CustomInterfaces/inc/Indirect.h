@@ -81,6 +81,7 @@ namespace MantidQt
 	  void browseMap(); ///< show openFileDialog for mapping file
 	  void browseSave(); ///< show saveFileDialog for save file
 	  void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
+	  void backgroundRemoval();
 	  void plotRaw(); ///< plot raw data from instrument
 	  void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
 	  void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"

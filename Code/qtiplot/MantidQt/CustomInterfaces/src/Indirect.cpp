@@ -112,31 +112,45 @@ void Indirect::runClicked(bool tryToSave)
 
 	if ( isDirty() )
 	{
-		pyInput +=
-			"workspace, wsname = ind.loadData('"+m_uiForm.leRunFiles->text()+"')\n"
-			"MonWS_n = ind.timeRegime(workspace)\n";
+		QString runFiles = m_uiForm.leRunFiles->text();
+		runFiles.replace(";", "', r'");
 
-		if ( m_uiForm.ckMonEff->isChecked() )
+		pyInput += "rawfiles = [r'"+runFiles+"']\n"
+			"Sum=";
+		if ( m_uiForm.ckSumFiles->isChecked() )
+			pyInput += "True\n";
+		else
+			pyInput += "False\n";
+
+		pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n";
+		pyInput += "last = " +m_uiForm.leSpectraMax->text()+ "\n";
+
+		if ( m_bgRemoval )
 		{
-			pyInput += "ind.monitorEfficiency()\n";
+			QPair<double,double> bgRange = m_backgroundDialog->getRange();
+			QString startTOF, endTOF;
+			startTOF.setNum(bgRange.first, 'e');
+			endTOF.setNum(bgRange.second, 'e');
+			pyInput += "bgRemove = [%1, %2]\n";
+			pyInput = pyInput.arg(startTOF);
+			pyInput = pyInput.arg(endTOF);
 		}
-
-		pyInput +=
-			"CropWorkspace(wsname, 'Time', StartWorkspaceIndex = (%0 - 1), EndWorkspaceIndex = (%1 - 1))\n"
-			"mantid.deleteWorkspace(wsname)\n";
-
-		pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
-		pyInput = pyInput.arg(m_uiForm.leSpectraMax->text());
+		else
+		{
+			pyInput += "bgRemove = [0, 0]\n";
+		}
 
 		if ( m_uiForm.ckUseCalib->isChecked() )
 		{
 			QString calibFile = m_uiForm.leCalibrationFile->text();
-			pyInput += "ind.useCalib(r'"+calibFile+"')\n";
+			pyInput += "calib = r'"+calibFile+"'\n";
+		}
+		else
+		{
+			pyInput += "calib = ''\n";
 		}
 
-		pyInput +=
-			"normalised = ind.normToMon()\n"
-			"ind.conToEnergy("+m_uiForm.leEfixed->text()+")\n";
+		pyInput += "efixed = "+m_uiForm.leEfixed->text()+"\n";
 	}
 
 	if ( isDirty() || isDirtyRebin() )
@@ -146,25 +160,32 @@ void Indirect::runClicked(bool tryToSave)
 			QString rebinParam = m_uiForm.rebin_leELow->text() + ","
 				+ m_uiForm.rebin_leEWidth->text() + ","
 				+ m_uiForm.rebin_leEHigh->text();
-			pyInput += "ind.rebinData('"+rebinParam+"')\n";
+			pyInput += "rebinParam = '"+rebinParam+"'\n";
 		}
 		else
 		{
-			pyInput += "CropWorkspace('ConvertedToEnergy', 'Energy')\n";
+			pyInput += "rebinParam = ''\n";
 		}
 
 		if ( m_uiForm.ckDetailedBalance->isChecked() )
 		{
-			pyInput += "db = ind.detailedBalance("+m_uiForm.leDetailedBalance->text()+")\n";
+			pyInput += "tempK = "+m_uiForm.leDetailedBalance->text()+"\n";
+		}
+		else
+		{
+			pyInput += "tempK = -1\n";
 		}
 
-		pyInput += "scale = ind.scaleAndGroup(r'"+groupFile+"')\n";
+		pyInput += "mapfile = r'"+groupFile+"'\n";
+
+
+		pyInput += "icon_workspaces = ind.convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, rebinParam = rebinParam)\n";
 	}
 
 	if (tryToSave)
 	{
-		pyInput += "iconWS = scale\n";
-		pyInput += savePyCode(filePrefix);
+	//	pyInput += "iconWS = scale\n";
+	//	pyInput += savePyCode(filePrefix);
 	}
 
 	QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -594,7 +615,6 @@ void Indirect::reflectionSelected(int index)
 		return;
 	}
 
-
 	m_uiForm.leSpectraMin->setText(values[0]);
 	m_uiForm.leSpectraMax->setText(values[1]);
 	m_uiForm.leEfixed->setText(values[2]);
@@ -640,8 +660,9 @@ void Indirect::mappingOptionSelected(const QString& groupType)
 */
 void Indirect::browseRun()
 {
-	QString runFile = QFileDialog::getOpenFileName(this, "Select RAW Data",
+	QStringList runFiles = QFileDialog::getOpenFileNames(this, "Select RAW Data Files",
 		m_dataDir, "ISIS Raw Files (*.raw)");
+	QString runFile = runFiles.join(";");
 	m_uiForm.leRunFiles->setText(runFile);
 }
 
@@ -701,12 +722,32 @@ void Indirect::backgroundClicked()
 	if ( m_backgroundDialog == NULL )
 	{
 		m_backgroundDialog = new Background(this);
+		connect(m_backgroundDialog, SIGNAL(accepted()), this, SLOT(backgroundRemoval()));
+		connect(m_backgroundDialog, SIGNAL(rejected()), this, SLOT(backgroundRemoval()));
 		m_backgroundDialog->show();
 	}
 	else
 	{
 		m_backgroundDialog->show();
 	}
+}
+
+/**
+* Slot called when m_backgroundDialog is closed. Assesses whether user desires background removal.
+*/
+void Indirect::backgroundRemoval()
+{
+	if ( m_backgroundDialog->removeBackground() )
+	{
+		m_bgRemoval = true;
+		m_uiForm.pbBack_2->setText("Background Removal (On)");
+	}
+	else
+	{
+		m_bgRemoval = false;
+		m_uiForm.pbBack_2->setText("Background Removal (Off)");
+	}
+	isDirty(true);
 }
 
 /**

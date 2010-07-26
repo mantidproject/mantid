@@ -6,14 +6,32 @@ import CommonFunctions as common
 from mantidsimple import *
 
 
-def loadData(path, outWS='RawFile', Sum=False):
+def loadData(rawfiles, outWS='RawFile', Sum=False):
 	try:
-		LoadRaw(path,outWS)
+		LoadRaw(rawfiles[0], outWS)
 	except ValueError, message:
 		print message
 		sys.exit(message)
-	workspace = mtd.getMatrixWorkspace(outWS)
-	return workspace, outWS
+	if ( len(rawfiles) > 1 and Sum ):
+		for i in range(1, len(rawfiles)):
+			tmp_ws = outWS + str(i)
+			LoadRaw(rawfiles[i], tmp_ws)
+			Plus(outWS, tmp_ws, outWS)
+			mantid.deleteWorkspace(tmp_ws)
+		workspace = mtd.getMatrixWorkspace(outWS)
+		return [workspace], [outWS]
+	else:
+		workspace_list = []
+		ws_name_list = [outWS]
+		if ( len(rawfiles) > 1 ):
+			for i in range(1, len(rawfiles)):
+				ws_name = outWS + str(i)
+				LoadRaw(rawfiles[i], ws_name)
+				ws_name_list.append(ws_name)
+		for i in ws_name_list:
+			workspace_list.append(mtd.getMatrixWorkspace(i))
+		return workspace_list, ws_name_list
+		
 
 def getFirstMonFirstDet(workspace):
 	'''
@@ -105,6 +123,9 @@ def useCalib(path, inWS_n='Time', outWS_n='Time'):
 	return outWS_n
 
 def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
+	'''
+	This function normalises the detectors to the monitor.
+	'''
 	ConvertUnits(inWS_n,outWS_n, 'Wavelength')
 	RebinToWorkspace(outWS_n,monWS_n,outWS_n)
 	Divide(outWS_n,monWS_n,outWS_n)
@@ -113,10 +134,16 @@ def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
 	return outWS_n
 
 def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
+	'''
+	This function is the actual "convert to energy" step.
+	'''
 	ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
 	return outWS_n
 
 def rebinData(rebinParam, inWS_n = 'ConvertedToEnergy', outWS_n = 'Energy'):
+	'''
+	This function rebings the data, where rebinParams is a string of form: "ELow, EWidth, EHigh"
+	'''
 	Rebin(inWS_n, outWS_n, rebinParam)
 	return outWS_n
 
@@ -132,18 +159,45 @@ def scaleAndGroup(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
 	mantid.deleteWorkspace(inWS_n)
 	return outWS_n
 
-def convert_to_energy(rawfile, calib, mapfile, first, last, efixed, tempK):
-	workspace, ws_name = loadData(rawfile)
-	MonitorWS_n = timeRegime(workspace)
-	MonWS_n = monitorEfficiency()
-	CropWorkspace(ws_name, 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
-	mantid.deleteWorkspace(ws_name)
-	calibrated = useCalib(calib)
-	normalised = normToMon()
-	cte = conToEnergy(efixed)
-	db = detailedBalance(tempK)
-	scale = scaleAndGroup(mapfile)
-	return scale
+def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
+	ConvertToDistribution(inWS_n)
+	FlatBackground(inWS_n, outWS_n, tofStart, tofEnd, Mode = 'Mean')
+	ConvertFromDistribution(inWS_n)
+	if ( inWS_n != outWS_n ):
+		ConvertFromDistribution(outWS_n)
+	return outWS_n
+
+def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bgremove = [0, 0], tempK=-1, calib='', rebinParam='', cleanUp = True):
+	'''
+	This function, when passed the proper arguments, will run through the steps of convert to energy
+	for the indirect instruments and put out a workspace title IconCompleted.
+	This "optional" steps can be avoided by not passing in the tempK (for detailed balance), calib (for calibration)
+	rebinParam (for rebinning), or bgremove (for background removal) arguments.
+	NOTE: Unlike the MantidPlot GUI, this will not create a map file. You can create a map file either by hand
+	or with the createMappingFile function.
+	'''
+	output_workspaces = []
+	workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
+	for i in range(0, len(workspace)):
+		MonitorWS_n = timeRegime(workspace[i], inWS_n = ws_name[i])
+		MonWS_n = monitorEfficiency()
+		runNo = workspace[i].getRun().getLogData("run_number").value()
+		CropWorkspace(ws_name[i], 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
+		mantid.deleteWorkspace(ws_name[i])
+		if ( bgremove != [0, 0] ):
+			backgroundRemoval(bgremove[0], bgremove[1])
+		if ( calib != '' ):
+			calibrated = useCalib(calib)
+		normalised = normToMon()
+		cte = conToEnergy(efixed, outWS_n='EnergyRebinned' + str(i))
+		if ( rebinParam != ''):
+			rebin = rebinData(rebinParam, inWS_n='EnergyRebinned' + str(i))
+		if ( tempK != -1 ):
+			db = detailedBalance(tempK)
+		scale = scaleAndGroup(mapfile, outWS_n='IconComplete' + str(i) + '_' + runNo)
+		output_workspaces.append(scale)
+	return output_workspaces
+
 
 def createMappingFile(groupFile, ngroup, nspec, first):
 	filename = mtd.getConfigProperty('defaultsave.directory')
