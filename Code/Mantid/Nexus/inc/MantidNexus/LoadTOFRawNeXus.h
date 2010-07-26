@@ -20,7 +20,7 @@ namespace NeXus
  the init() & exec() methods.
 
  Required Properties:
- <UL>s
+ <UL>
  <LI> Filename - The name of and path to the input Nexus file </LI>
  <LI> OutputWorkspace - The name of the workspace in which to store the imported data
  (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
