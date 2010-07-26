@@ -75,17 +75,8 @@ m_appWindow(aw)
 
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
-    try
-    {
-      m_fitFunction = new FitPropertyBrowser(aw);
-    }
-    catch(...)
-    {
-      m_fitFunction = NULL;
-      showCritical("The curve fitting plugin is missing");
-    }
 
-  	actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
+    actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
 	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
 
@@ -127,14 +118,6 @@ m_appWindow(aw)
       m_exploreAlgorithms,SLOT(updateProgress(void*,int, const QString&)), Qt::QueuedConnection);
     m_algMonitor->start();
 
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
-
     mantidMenu = new QMenu(m_appWindow);
     mantidMenu->setObjectName("mantidMenu");
 	// for activating the keyboard shortcut for Clear All Memory even if no clciking on Mantid Menu
@@ -152,16 +135,30 @@ void MantidUI::init()
     MantidLog::connect(this);
     FrameworkManager::Instance();
 
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
+
     // Check facility and instrument so that a log message appears if they aren't defined properly
     std::string prop = Mantid::Kernel::ConfigService::Instance().getString("default.facility");
     Mantid::Kernel::ConfigService::Instance().getInstrumentPrefixes(prop);
 
     // Now that the framework is initialized we need to populate the algorithm tree
     m_exploreAlgorithms->update();
-    if (m_fitFunction)
+    try
     {
+      m_fitFunction = new FitPropertyBrowser(m_appWindow);
       m_fitFunction->init();
       m_fitFunction->hide();
+    }
+    catch(...)
+    {
+      m_fitFunction = NULL;
+      showCritical("The curve fitting plugin is missing");
     }
 
     //connect the signal from the algorithm factory to monitor updates
