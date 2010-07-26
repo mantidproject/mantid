@@ -315,6 +315,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Run.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Sample.cpp"
 				>
 			</File>
@@ -616,6 +620,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\RefAxis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\Run.h"
 				>
 			</File>
 			<File
