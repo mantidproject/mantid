@@ -80,7 +80,7 @@ class EXPORT_OPT_MANTIDQT_API UserSubWindow : public QWidget
 
 public:
   /// Name of the interface
-  static std::string name() { return "UnnamedInterface"; }
+  static std::string name() { return "UserSubWindow::name() default Reimplement static name() method."; }
   /// A list of aliases
   static std::set<std::string> aliases() { return std::set<std::string>(); }
 

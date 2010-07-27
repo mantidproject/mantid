@@ -123,6 +123,22 @@ double DetectorGroup::getPhi() const
   return result/m_detectors.size();  
 }
 
+/** Return IDs for the detectors grouped
+ * 
+ *  @return vector of detector IDs
+ */
+std::vector<int> DetectorGroup::getDetectorIDs()
+{
+  std::vector<int> result;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    result.push_back( (*it).first );
+  }
+  return result;
+}
+
+
 /** Gives the total solid angle subtended by a group of detectors by summing the
  *  contributions from the individual detectors.
  *  @param observer The point from which the detector is being viewed

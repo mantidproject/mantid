@@ -68,6 +68,9 @@ public:
   ///Try to find a point that lies within (or on) the object
   int getPointInObject(V3D& point) const;
 
+  /// What detectors are contained in the group?
+  std::vector<int> getDetectorIDs();
+
   /** @name ParamaterMap access */
   //@{
   // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to

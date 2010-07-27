@@ -70,6 +70,12 @@ public:
     TS_ASSERT_EQUALS( detg.getPos()[2], 2.0 )
   }
 
+  void testGetDetectorIDs()
+  {
+    std::vector<int> ids = group->getDetectorIDs();
+    TS_ASSERT_EQUALS( ids.size(), 2 )
+  }
+
   void testGetID()
   {
     TS_ASSERT_EQUALS( dg->getID(), 99 )
