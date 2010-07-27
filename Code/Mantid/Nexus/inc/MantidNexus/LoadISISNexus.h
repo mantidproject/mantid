@@ -98,9 +98,13 @@ namespace Mantid
             void checkOptionalProperties();
             void loadData(int, int, int&, DataObjects::Workspace2D_sptr );
             void runLoadInstrument(DataObjects::Workspace2D_sptr);
-            //     void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
             void loadMappingTable(DataObjects::Workspace2D_sptr);
-            void loadProtonCharge(DataObjects::Workspace2D_sptr);
+	    void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
+	    template<class TYPE>
+	    TYPE getEntryValue(const std::string & name);
+	    template<class TYPE>
+	    TYPE getNXData(const std::string & name);
+
             void loadLogs(DataObjects::Workspace2D_sptr,int period = 1);
 
             /// The name and path of the input file
@@ -166,6 +170,39 @@ namespace Mantid
             /// Personal wrapper for sqrt to allow msvs to compile
             static double dblSqrt(double in);
         };
+      
+      /**
+       * Get a value from the nexus file. The name should be relative and the parent group already opened.
+       * @param name The name of the NX entry
+       * @returns The value of entry
+       */
+      template<class TYPE>
+      TYPE LoadISISNexus::getEntryValue(const std::string & name)
+      {
+	openNexusData(name);
+	TYPE value;
+	getNexusData(&value);
+	closeNexusData();
+	return value;
+      }
+
+      /**
+       * Get the first entry from an NX data group
+       * @param name The group name
+       * @returns The data value
+       */
+      template<class TYPE>
+      TYPE LoadISISNexus::getNXData(const std::string & name)
+      {
+	openNexusData(name);
+	TYPE value[1];
+	getNexusData(value);
+	closeNexusData();
+	return value[0];
+      }
+
+
+
 
     } // namespace NeXus
 } // namespace Mantid

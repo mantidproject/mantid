@@ -84,15 +84,6 @@ void LoadRaw3::exec()
   //open the raw file
   FILE* file=openRawFile(m_filename);
 
-  // Need to check that the file is not a text file as the ISISRAW routines don't deal with these very well, i.e 
-  // reading continues until a bad_alloc is encountered.
-  if( isAscii(file) )
-  {
-    g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
-	fclose(file);
-    throw std::invalid_argument("Incorrect file type encountered.");
-  }
-
   bool bLoadlogFiles = getProperty("LoadLogFiles");
 
   bool bincludeMonitors = true;

@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
+class ISISRAW;
 class ISISRAW2;
 
 namespace Mantid
@@ -53,11 +54,13 @@ namespace Mantid
       LoadRawHelper();
       /// Destructor
       ~LoadRawHelper();
+      ///Opens Raw File
+      FILE* openRawFile(const std::string & fileName);
+      /// Read in run parameters Public so that LoadRaw2 can use it
+      void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const = NULL) const;
     protected:
       /// Overwrites Algorithm method.
       void init();
-      ///Opens Raw File
-      FILE* openRawFile(const std::string & fileName);
       ///checks the file is an ascii file
       bool isAscii(FILE* file) const;
       /// Reads title from the isisraw class
@@ -103,8 +106,6 @@ namespace Mantid
       /// load log algorithm
       void runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr,int period=1);
 
-      /// Read in run parameters
-      void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace) const;
 
       ///gets the monitor spectrum list from the workspace
       void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<int>& monitorSpecList);

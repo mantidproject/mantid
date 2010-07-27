@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
+#include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
@@ -85,22 +86,15 @@ namespace Mantid
     {
       // Retrieve the filename from the properties
       m_filename = getPropertyValue("Filename");
-
-      if( isAscii(m_filename) )
-      {
-	g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
-	throw std::invalid_argument("Incorrect file type encountered.");
-      }
-
-      //ISISRAW iraw(NULL);
-      FILE* file = fopen(m_filename.c_str(),"rb");
-      if (file == NULL)
-      {
-        g_log.error("Unable to open file " + m_filename);
-        throw Exception::FileError("Unable to open File:" , m_filename);
-      }
+      LoadRawHelper *helper = new LoadRawHelper;
+      FILE* file = helper->openRawFile(m_filename);
       isisRaw->ioRAW(file, true);
-      const std::string title(isisRaw->hdr.hd_title);
+      
+      std::string title(isisRaw->hdr.hd_run, 69);
+      // Insert some spaces to tidy the string up a bit
+      title.insert(5, " ");
+      title.insert(26, " ");
+      title.insert(51, " ");
       g_log.information("**** Run title: "+title+ "***");
 
       // Read in the number of spectra in the RAW file
@@ -195,8 +189,11 @@ namespace Mantid
                (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
       localWorkspace->setTitle(title);
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      // Run parameters
+      helper->loadRunParameters(localWorkspace, isisRaw.get());
+      delete helper;
+      helper = NULL;
 
-      //if (dhdr.d_comp == 0) throw std::runtime_error("Oops..");
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
 
@@ -204,7 +201,6 @@ namespace Mantid
         {
             localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                 (WorkspaceFactory::Instance().create(localWorkspace));
-            //localWorkspace->newInstrumentParameters(); ????
         }
 
         isisRaw->skipData(file,period*(m_numberOfSpectra+1));
@@ -314,33 +310,6 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
 
     return p;
 }
-
-    /**
-     * Check if a file is a text file
-     * @param filename The file path to check
-     * @returns true if the file an ascii text file, false otherwise
-     */
-    bool LoadRaw2::isAscii(const std::string & filename) const
-    {
-      FILE* file = fopen(filename.c_str(), "rb");
-      char data[256];
-      int n = fread(data, 1, sizeof(data), file);
-      char *pend = &data[n];
-      /*
-       * Call it a binary file if we find a non-ascii character in the 
-       * first 256 bytes of the file.
-       */
-      for( char *p = data;  p < pend; ++p )
-      {
-	unsigned long ch = (unsigned long)*p;
-	if( !(ch <= 0x7F) )
-	{
-	  return false;
-	}
-	
-      }
-      return true;
-    }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
     void LoadRaw2::checkOptionalProperties()

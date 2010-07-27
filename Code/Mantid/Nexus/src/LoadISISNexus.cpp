@@ -13,7 +13,11 @@
 #include "MantidAPI/XMLlogfile.h"
 
 #include "Poco/Path.h"
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormat.h>
 
+#include "boost/lexical_cast.hpp"
 #include <cmath>
 #include <sstream>
 #include <cctype>
@@ -145,6 +149,8 @@ namespace Mantid
       // Set the units on the workspace to TOF & Counts
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       localWorkspace->setYUnit("Counts");
+      const std::string title = getNexusString("title");
+      localWorkspace->setTitle(title);
 
       Progress prog(this,0.,1.,total_specs*m_numberOfPeriods);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
@@ -157,7 +163,7 @@ namespace Mantid
           {
             runLoadInstrument(localWorkspace );
             loadMappingTable(localWorkspace );
-            loadProtonCharge(localWorkspace);
+	    loadRunDetails(localWorkspace);
             loadLogs(localWorkspace );
           }
         }
@@ -166,14 +172,13 @@ namespace Mantid
           // Only run the sub-algorithms once
           runLoadInstrument(localWorkspace );
           loadMappingTable(localWorkspace );
-          loadProtonCharge(localWorkspace);
+	  loadRunDetails(localWorkspace);
           loadLogs(localWorkspace );
         }
         else   // We are working on a higher period of a multiperiod file
         {
           localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create(localWorkspace));
-          //localWorkspace->newInstrumentParameters(); ???
 
           loadLogs(localWorkspace ,period);
         }
@@ -333,17 +338,6 @@ namespace Mantid
         throw std::runtime_error("Cannot open group "+name+" of class "+nx_class);
       }
 
-      //boost::shared_array<char> nxname( new char[NX_MAXNAMELEN] );
-      //boost::shared_array<char> nxclass( new char[NX_MAXNAMELEN] );
-      //int nxdatatype;
-
-      //int stat = NX_OK;
-      //while(stat != NX_EOD)
-      //{
-      //    stat=NXgetnextentry(m_fileID,nxname.get(),nxclass.get(),&nxdatatype);
-      //    std::cerr<<nxname.get()<<"  "<<nxclass.get()<<"  "<<nxdatatype<<"\n";
-      //}
-      //std::cerr<<'\n';
     }
 
     /// Closes Nexus group
@@ -572,21 +566,90 @@ namespace Mantid
 
     }
 
-    /**  Loag the proton charge from the file.
+    /**  Loag the run details from the file
     *   Group /raw_data_1 must be open.
+    * @param localWorkspace The workspace details to use
     */
-    void LoadISISNexus::loadProtonCharge(DataObjects::Workspace2D_sptr ws)
+    void LoadISISNexus::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      openNexusData("proton_charge");
-      {
-        getNexusData(&m_proton_charge);
-        ws->mutableRun().setProtonCharge(m_proton_charge);
-      }
+      API::Run & runDetails = localWorkspace->mutableRun();
+      m_proton_charge = getEntryValue<double>("proton_charge");
+      runDetails.setProtonCharge(m_proton_charge);
+      int run_number = getEntryValue<int>("run_number");
+      runDetails.addProperty("run_number", boost::lexical_cast<std::string>(run_number));
+
+
+      openNexusGroup("isis_vms_compat","IXvms");
+      char header[80];
+      openNexusData("HDR");
+      getNexusData(&header);
       closeNexusData();
+      runDetails.addProperty("run_header", std::string(header,80));
+      runDetails.addProperty("run_title", localWorkspace->getTitle());
+      
+
+      runDetails.addProperty("nspectra", getNXData<int>("NSP1"));
+      runDetails.addProperty("nchannels", getNXData<int>("NTC1"));
+      runDetails.addProperty("nperiods", getNXData<int>("NPER"));
+
+      int rpb_int[32];
+      openNexusData("IRPB");
+      getNexusData(&rpb_int[0]);
+      closeNexusData();
+
+      double rpb_dbl[32];
+      openNexusData("RRPB");
+      getNexusData(&rpb_dbl[0]);
+      closeNexusData();
+      
+      runDetails.addProperty("dur", rpb_int[0]);	// actual run duration
+      runDetails.addProperty("durunits", rpb_int[1]);	// scaler for above (1=seconds)
+      runDetails.addProperty("dur_freq", rpb_int[2]);  // testinterval for above (seconds)
+      runDetails.addProperty("dmp", rpb_int[3]);       // dump interval
+      runDetails.addProperty("dmp_units", rpb_int[4]);	// scaler for above
+      runDetails.addProperty("dmp_freq", rpb_int[5]);	// interval for above
+      runDetails.addProperty("freq", rpb_int[6]);	// 2**k where source frequency = 50 / 2**k
+      runDetails.addProperty("gd_prtn_chrg", rpb_dbl[7]);  // good proton charge (uA.hour)
+      runDetails.addProperty("tot_prtn_chrg", rpb_dbl[8]); // total proton charge (uA.hour)
+      runDetails.addProperty("goodfrm",rpb_int[9]);	// good frames
+      runDetails.addProperty("rawfrm", rpb_int[10]);	// raw frames
+      runDetails.addProperty("dur_wanted", rpb_int[11]); // requested run duration (units as for "duration" above)
+      runDetails.addProperty("dur_secs", rpb_int[12]);	// actual run duration in seconds
+      runDetails.addProperty("mon_sum1", rpb_int[13]);	// monitor sum 1
+      runDetails.addProperty("mon_sum2", rpb_int[14]);	// monitor sum 2
+      runDetails.addProperty("mon_sum3",rpb_int[15]);	// monitor sum 3
+      
+      closeNexusGroup(); // isis_vms_compat
+
+      //std::string end_time_iso = getNXData<>("end_time");
+      char strvalue[19];
+      openNexusData("end_time");
+      getNexusData(&strvalue);
+      closeNexusData();
+      std::string end_time_iso(strvalue, 19);
+      std::string end_date(""), end_time("");
+      try
+      {
+	Poco::DateTime end_time_output;
+	int timezone_diff(0);
+	Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT, end_time_iso, end_time_output, timezone_diff);
+	end_date = Poco::DateTimeFormatter::format(end_time_output, "%d-%m-%Y", timezone_diff);
+	end_time = Poco::DateTimeFormatter::format(end_time_output, "%H:%M:%S", timezone_diff);
+      }
+      catch(Poco::SyntaxException&)
+      {
+	end_date = "\?\?-\?\?-\?\?\?\?";
+	end_time = "\?\?-\?\?-\?\?";
+	g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
+      }
+      
+      runDetails.addProperty("enddate", end_date);
+      runDetails.addProperty("endtime", end_time);
+      runDetails.addProperty("rb_proposal",rpb_int[21]); // RB (proposal) number
 
       openNexusGroup("sample","NXsample");
       std::string sample_name = getNexusString("name");
-      ws->mutableSample().setName(sample_name);
+      localWorkspace->mutableSample().setName(sample_name);
       closeNexusGroup();
     }
 

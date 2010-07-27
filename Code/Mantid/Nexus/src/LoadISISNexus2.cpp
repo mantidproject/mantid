@@ -618,8 +618,8 @@ namespace Mantid
 	Poco::DateTime end_time_output;
 	int timezone_diff(0);
 	Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT, end_time_iso, end_time_output, timezone_diff);
-	end_date = Poco::DateTimeFormatter::format(end_time_output, "%DD-%MM-%YYYY", timezone_diff);
-	end_time = Poco::DateTimeFormatter::format(end_time_output, "%HH-%MM-%SS", timezone_diff);
+	end_date = Poco::DateTimeFormatter::format(end_time_output, "%d-%m-%Y", timezone_diff);
+	end_time = Poco::DateTimeFormatter::format(end_time_output, "%H:%M:%S", timezone_diff);
       }
       catch(Poco::SyntaxException&)
       {
@@ -630,7 +630,7 @@ namespace Mantid
       
       runDetails.addProperty("enddate", end_date);
       runDetails.addProperty("endtime", end_time);
-      runDetails.addProperty("prop",rpb_int[21]); // RB (proposal) number
+      runDetails.addProperty("rb_proposal",rpb_int[21]); // RB (proposal) number
       vms_compat.close();
       
 

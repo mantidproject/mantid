@@ -79,6 +79,15 @@ namespace Mantid
 	g_log.error("Unable to open file " + fileName);
 	throw Exception::FileError("Unable to open File:", fileName);
       }
+      // Need to check that the file is not a text file as the ISISRAW routines don't deal with these very well, i.e 
+      // reading continues until a bad_alloc is encountered.
+      if( isAscii(file) )
+      {
+	g_log.error() << "File \"" << fileName << "\" is not a valid RAW file.\n";
+	fclose(file);
+	throw std::invalid_argument("Incorrect file type encountered.");
+      }
+      
       return file;
 
     }
@@ -88,7 +97,7 @@ namespace Mantid
      */
     void LoadRawHelper::readTitle(FILE* file,std::string & title)
     {
-      ioRaw(file,true );
+      ioRaw(file, true);
       // This reads in the HDR_STRUCT run, user, title, date & time fields
       std::string header(isisRaw->hdr.hd_run, 69);
       // Insert some spaces to tidy the string up a bit
@@ -690,40 +699,50 @@ namespace Mantid
      * workspace run object
      * @param localWorkspace The workspace to attach the information to
      */
-    void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace) const
+    void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const rawFile) const
     {
+      ISISRAW * localISISRaw(NULL);
+      if( !rawFile )
+      {
+	localISISRaw = isisRaw.get();
+      }
+      else
+      {
+	localISISRaw = rawFile;
+      }      
+
       API::Run& runDetails = localWorkspace->mutableRun();
       // Run header is what we have set as the workspace title
       const std::string run_header = localWorkspace->getTitle();
       runDetails.addProperty("run_header", run_header);
       // Run title is stored in a different attribute
-      runDetails.addProperty("run_title", std::string(isisRaw->r_title,80));
+      runDetails.addProperty("run_title", std::string(localISISRaw->r_title,80));
       
       // Data details on run not the workspace
-      runDetails.addProperty("nspectra", static_cast<int>(isisRaw->t_nsp1));
-      runDetails.addProperty("nchannels", static_cast<int>(isisRaw->t_ntc1));
-      runDetails.addProperty("nperiods", static_cast<int>(isisRaw->t_nper));
+      runDetails.addProperty("nspectra", static_cast<int>(localISISRaw->t_nsp1));
+      runDetails.addProperty("nchannels", static_cast<int>(localISISRaw->t_ntc1));
+      runDetails.addProperty("nperiods", static_cast<int>(localISISRaw->t_nper));
 
       // RPB struct info
-      runDetails.addProperty("r_dur", isisRaw->rpb.r_dur);	// actual run duration
-      runDetails.addProperty("r_durunits", isisRaw->rpb.r_durunits);	// scaler for above (1=seconds)
-      runDetails.addProperty("r_dur_freq",isisRaw->rpb.r_dur_freq);  // testinterval for above (seconds)
-      runDetails.addProperty("r_dmp", isisRaw->rpb.r_dmp);       // dump interval
-      runDetails.addProperty("r_dmp_units", isisRaw->rpb.r_dmp_units);	// scaler for above
-      runDetails.addProperty("r_dmp_freq",isisRaw->rpb.r_dmp_freq);	// interval for above
-      runDetails.addProperty("r_freq",isisRaw->rpb.r_freq);	// 2**k where source frequency = 50 / 2**k
-      runDetails.addProperty("r_gd_prtn_chrg", static_cast<double>(isisRaw->rpb.r_gd_prtn_chrg));  // good proton charge (uA.hour)
-      runDetails.addProperty("r_tot_prtn_chrg", static_cast<double>(isisRaw->rpb.r_tot_prtn_chrg)); // total proton charge (uA.hour)
-      runDetails.addProperty("r_goodfrm",isisRaw->rpb.r_goodfrm);	// good frames
-      runDetails.addProperty("r_rawfrm", isisRaw->rpb.r_rawfrm);	// raw frames
-      runDetails.addProperty("r_dur_wanted",isisRaw->rpb.r_dur_wanted); // requested run duration (units as for "duration" above)
-      runDetails.addProperty("r_dur_secs",isisRaw->rpb.r_dur_secs );	// actual run duration in seconds
-      runDetails.addProperty("r_mon_sum1", isisRaw->rpb.r_mon_sum1);	// monitor sum 1
-      runDetails.addProperty("r_mon_sum2",isisRaw->rpb.r_mon_sum2);	// monitor sum 2
-      runDetails.addProperty("r_mon_sum3",isisRaw->rpb.r_mon_sum3);	// monitor sum 3
-      runDetails.addProperty("r_enddate",std::string(isisRaw->rpb.r_enddate, 11)); // format DD-MMM-YYYY
-      runDetails.addProperty("r_endtime", std::string(isisRaw->rpb.r_endtime, 8)); // format HH-MM-SS
-      runDetails.addProperty("r_prop",isisRaw->rpb.r_prop); // RB (proposal) number
+      runDetails.addProperty("dur", localISISRaw->rpb.r_dur);	// actual run duration
+      runDetails.addProperty("durunits", localISISRaw->rpb.r_durunits);	// scaler for above (1=seconds)
+      runDetails.addProperty("dur_freq",localISISRaw->rpb.r_dur_freq);  // testinterval for above (seconds)
+      runDetails.addProperty("dmp", localISISRaw->rpb.r_dmp);       // dump interval
+      runDetails.addProperty("dmp_units", localISISRaw->rpb.r_dmp_units);	// scaler for above
+      runDetails.addProperty("dmp_freq",localISISRaw->rpb.r_dmp_freq);	// interval for above
+      runDetails.addProperty("freq",localISISRaw->rpb.r_freq);	// 2**k where source frequency = 50 / 2**k
+      runDetails.addProperty("gd_prtn_chrg", static_cast<double>(localISISRaw->rpb.r_gd_prtn_chrg));  // good proton charge (uA.hour)
+      runDetails.addProperty("tot_prtn_chrg", static_cast<double>(localISISRaw->rpb.r_tot_prtn_chrg)); // total proton charge (uA.hour)
+      runDetails.addProperty("goodfrm",localISISRaw->rpb.r_goodfrm);	// good frames
+      runDetails.addProperty("rawfrm", localISISRaw->rpb.r_rawfrm);	// raw frames
+      runDetails.addProperty("dur_wanted",localISISRaw->rpb.r_dur_wanted); // requested run duration (units as for "duration" above)
+      runDetails.addProperty("dur_secs",localISISRaw->rpb.r_dur_secs );	// actual run duration in seconds
+      runDetails.addProperty("mon_sum1", localISISRaw->rpb.r_mon_sum1);	// monitor sum 1
+      runDetails.addProperty("mon_sum2",localISISRaw->rpb.r_mon_sum2);	// monitor sum 2
+      runDetails.addProperty("mon_sum3",localISISRaw->rpb.r_mon_sum3);	// monitor sum 3
+      runDetails.addProperty("enddate",std::string(localISISRaw->rpb.r_enddate, 11)); // format DD-MMM-YYYY
+      runDetails.addProperty("endtime", std::string(localISISRaw->rpb.r_endtime, 8)); // format HH-MM-SS
+      runDetails.addProperty("rb_proposal",localISISRaw->rpb.r_prop); // RB (proposal) number
 
     }
 

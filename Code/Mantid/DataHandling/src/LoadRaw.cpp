@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -76,19 +77,19 @@ namespace Mantid
     {
       // Retrieve the filename from the properties
       m_filename = getPropertyValue("Filename");
-      if( isAscii(m_filename) )
-      {
-	g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
-	throw std::invalid_argument("Incorrect file type encountered.");
-      }
-      
-      ISISRAW iraw(NULL);
-      if (iraw.readFromFile(m_filename.c_str()) != 0)
-      {
-        g_log.error("Unable to open file " + m_filename);
-        throw Exception::FileError("Unable to open File:" , m_filename);
-      }
 
+      LoadRawHelper *helper = new LoadRawHelper;
+      FILE* file = helper->openRawFile(m_filename);
+      ISISRAW iraw;
+      iraw.ioRAW(file, true);
+
+      std::string title(iraw.hdr.hd_run, 69);
+      // Insert some spaces to tidy the string up a bit
+      title.insert(5, " ");
+      title.insert(26, " ");
+      title.insert(51, " ");
+      g_log.information("**** Run title: "+title+ "***");
+      
       // Read in the number of spectra in the RAW file
       m_numberOfSpectra = iraw.t_nsp1;
       // Read the number of periods in this file
@@ -138,6 +139,12 @@ namespace Mantid
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      localWorkspace->setTitle(title);
+      // Run parameters
+      helper->loadRunParameters(localWorkspace, &iraw);
+      delete helper;
+      helper = NULL;
+
 
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
