@@ -14,7 +14,7 @@ namespace Mantid
     /**
      * Default constructor
      */
-    Run::Run() : m_manager(), m_protonChargeName("proton_charge_tot")
+    Run::Run() : m_manager(), m_protonChargeName("gd_prtn_chrg")
     {
     }
 
@@ -51,6 +51,12 @@ namespace Mantid
      */
     void Run::addProperty(Kernel::Property *prop)
     {
+      // Throws if the property exists already but make an exception for the proton charge
+      // and overwrite it's value as we don't want to store the proton charge in two separate locations
+      if( prop->name() == m_protonChargeName && hasProperty(m_protonChargeName) )
+      {
+	removeProperty(m_protonChargeName);
+      }
       m_manager.declareProperty(prop, "");
     }
     

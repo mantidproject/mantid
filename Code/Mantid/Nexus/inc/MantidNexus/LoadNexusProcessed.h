@@ -11,6 +11,7 @@
 
 namespace Mantid
 {
+
   namespace NeXus
   {
     /**
@@ -71,6 +72,8 @@ namespace Mantid
                                               const double& progressStart, const double& progressRange);
       /// Read the data from the sample group
       void readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      /// Add a property to the sample object
+      bool addSampleProperty(NXMainClass & sample_entry, const std::string & entryName, API::Sample& sampleDetails);
       /// Read the spectra 
       void readInstrumentGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
       /// Read the algorithm history

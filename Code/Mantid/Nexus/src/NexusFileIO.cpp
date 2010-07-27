@@ -40,18 +40,6 @@ namespace Mantid
     {
     }
 
-    int NexusFileIO::writeNexusTextField( const NXhandle& h, const std::string& name, const std::string& value)
-    {
-      // write a NXdata section "name" with string value "value" (not used?)
-      int status;
-      int dims_array[1] = { value.size() };
-      status=NXmakedata(h, name.c_str(), NX_CHAR, 1, dims_array);
-      status=NXopendata(h, name.c_str());
-      status=NXputdata(h, (void*)&(value[0]));
-      status=NXclosedata(h);
-      return(0);
-    }
-
     //
     // Write out the data in a workspace in Nexus "Processed" format.
     // This *Proposed* standard comprises the fields:
@@ -143,7 +131,7 @@ namespace Mantid
       return(0);
     }
 
-    int NexusFileIO::writeNexusProcessedHeader( const std::string& title)
+    int NexusFileIO::writeNexusProcessedHeader( const std::string& title) const
     {
       // Write Nexus mantid workspace header fields for the NXentry/IXmantid/NXprocessed field.
       // The URLs are not correct as they do not exist presently, but follow the format for other
@@ -151,7 +139,7 @@ namespace Mantid
       //
       std::string className="Mantid Processed Workspace";
       std::vector<std::string> attributes,avalues;
-      if( ! writeNxText("title", title, attributes, avalues) )
+      if( ! writeNxValue<std::string>("title", title, NX_CHAR, attributes, avalues) )
         return(3);
       //
       attributes.push_back("URL");
@@ -159,17 +147,17 @@ namespace Mantid
       attributes.push_back("Version");
       avalues.push_back("1.0");
       // this may not be the "correct" long term path, but it is valid at present 
-      if( ! writeNxText( "definition", className, attributes, avalues) )
+      if( ! writeNxValue<std::string>( "definition", className, NX_CHAR, attributes, avalues) )
         return(3);
       avalues.clear();
       avalues.push_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
       avalues.push_back("1.0");
-      if( ! writeNxText( "definition_local", className, attributes, avalues) )
+      if( ! writeNxValue<std::string>( "definition_local", className, NX_CHAR, attributes, avalues) )
         return(3);
       return(0);
     }
     bool NexusFileIO::writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
-      const std::string& version)
+      const std::string& version) const
     {
       //
       // The name used for the instrument XML definition is stored as part of the file, rather than
@@ -186,12 +174,12 @@ namespace Mantid
         attributes.push_back("Version");
         avalues.push_back(version);
       }
-      if( ! writeNxText( "instrument_source", instrumentXml, attributes, avalues) )
+      if( ! writeNxValue<std::string>( "instrument_source", instrumentXml, NX_CHAR, attributes, avalues) )
         return(false);
       return(true);
     }
 
-    bool NexusFileIO::writeNexusInstrument(const API::IInstrument_const_sptr& instrument)
+    bool NexusFileIO::writeNexusInstrument(const API::IInstrument_const_sptr& instrument) const
     {
       NXstatus status;
 
@@ -203,57 +191,123 @@ namespace Mantid
       //
       std::string name=instrument->getName();
       std::vector<std::string> attributes,avalues;
-      if( ! writeNxText( "name", name, attributes, avalues) )
+      if( ! writeNxValue<std::string>( "name", name, NX_CHAR, attributes, avalues) )
         return(false);
 
       status=NXclosegroup(fileID);
 
       return(true);
     }
-    //
-    // write an NXdata entry with char values
-    //
-    bool NexusFileIO::writeNxText( const std::string& name, const std::string& value, const std::vector<std::string>& attributes,
-      const std::vector<std::string>& avalues)
+    /** Returns true if the given property is a time series property
+     * @param prop The property to test
+     * @returns True if it is a time series, false otherwise
+     */
+    bool NexusFileIO::isTimeSeries(Kernel::Property* prop) const
     {
-      NXstatus status;
-      int dimensions[1];
-      std::string value1 = value;
-      if (value1.empty()) value1 += ' ';
-      dimensions[0]=value1.size() + 1;
-      status=NXmakedata(fileID, name.c_str(), NX_CHAR, 1, dimensions);
-      if(status==NX_ERROR) return(false);
-      status=NXopendata(fileID, name.c_str());
-      for(unsigned int it=0; it<attributes.size(); ++it)
-        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size(), NX_CHAR);
-      status=NXputdata(fileID, (void*)value1.c_str());
-      status=NXclosedata(fileID);
-      return(true);
+      if( dynamic_cast<TimeSeriesProperty<std::string>*>(prop) ||
+	  dynamic_cast<TimeSeriesProperty<int>*>(prop) ||
+	  dynamic_cast<TimeSeriesProperty<double>*>(prop) ||
+	  dynamic_cast<TimeSeriesProperty<bool>*>(prop) )
+      {
+	return true;
+      }
+      else
+      {
+	return false;
+      }
+    }
+    /** Write a time series log entry.
+     * @param prop The time series property containing the data. This must be a time series or it will fail. 
+     * @returns A boolean indicating success or failure
+     */
+    bool NexusFileIO::writeTimeSeriesLog(Kernel::Property* prop) const
+    {
+      bool success(true);
+      if( TimeSeriesProperty<std::string> *s_timeSeries = dynamic_cast<TimeSeriesProperty<std::string>* >(prop) )
+      {
+	writeNumericTimeLog_String(s_timeSeries);
+      }
+      else if( TimeSeriesProperty<double> *d_timeSeries=dynamic_cast<TimeSeriesProperty<double>*>(prop) )
+      {
+	writeNumericTimeLog<double>(d_timeSeries);
+      }
+      else if( TimeSeriesProperty<int> *i_timeSeries=dynamic_cast<TimeSeriesProperty<int>*>(prop) )
+      {
+	writeNumericTimeLog<int>(i_timeSeries);
+      }
+      else if( TimeSeriesProperty<bool> *b_timeSeries=dynamic_cast<TimeSeriesProperty<bool>*>(prop) )
+      {
+	writeNumericTimeLog<bool>(b_timeSeries);
+      }
+      else
+      {
+	success = false;
+      }
+      return success;
+    }
+    /** Write a single-valued log entry 
+     * @param prop The property containing the data.
+     * @returns A boolean indicating success or failure
+     */
+    bool NexusFileIO::writeSingleValueLog(Kernel::Property* prop) const
+    {
+      std::vector<std::string> attrs(0);
+      std::vector<std::string> attrValues(0);
+      bool success(true);
+      if( PropertyWithValue<std::string> *strProp = dynamic_cast<PropertyWithValue<std::string>*>(prop) )
+      {
+	std::string value = strProp->value();
+	if( value.empty() ) value = " ";
+	writeSingleValueNXLog(strProp->name(), strProp->value(), NX_CHAR, attrs, attrValues);
+      }
+      else if(PropertyWithValue<double> *dblProp = dynamic_cast<PropertyWithValue<double>*>(prop) )
+      {
+	try
+	{
+	  double value = boost::lexical_cast<double>(dblProp->value());
+	  writeSingleValueNXLog(dblProp->name(), value, NX_FLOAT64, attrs, attrValues);
+	}
+	catch(boost::bad_lexical_cast &)
+	{
+	  success = true;
+	}
+      }
+      else if(PropertyWithValue<int> *intProp = dynamic_cast<PropertyWithValue<int>*>(prop) )
+      {
+	try
+	{
+	  int value = boost::lexical_cast<int>(intProp->value());
+	  writeSingleValueNXLog(intProp->name(), value, NX_INT32, attrs, attrValues);
+	}
+	catch(boost::bad_lexical_cast &)
+	{
+	  success = true;
+	}
+      }
+      else if(PropertyWithValue<bool> *boolProp = dynamic_cast<PropertyWithValue<bool>*>(prop) )
+      {
+	try
+	{
+	  bool value = boost::lexical_cast<bool>(boolProp->value());
+	  writeSingleValueNXLog(boolProp->name(), value, NX_UINT8, attrs, attrValues);
+	}
+	catch(boost::bad_lexical_cast &)
+	{
+	  success = true;
+	}
+      }
+      else
+      {
+	success = false;
+      }
+      return success;
     }
 
-    //
-    // write an NXdata entry with Float value
-    //
-    bool NexusFileIO::writeNxFloat(const std::string& name, const double& value, const std::vector<std::string>& attributes,
-      const std::vector<std::string>& avalues)
-    {
-      NXstatus status;
-      int dimensions[1];
-      dimensions[0]=1;
-      status=NXmakedata(fileID, name.c_str(), NX_FLOAT64, 1, dimensions);
-      if(status==NX_ERROR) return(false);
-      status=NXopendata(fileID, name.c_str());
-      for(unsigned int it=0; it<attributes.size(); ++it)
-        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
-      status=NXputdata(fileID, (void*)&value);
-      status=NXclosedata(fileID);
-      return(true);
-    }
     //
     // write an NXdata entry with Float array values
     //
     bool NexusFileIO::writeNxFloatArray(const std::string& name, const std::vector<double>& values, const std::vector<std::string>& attributes,
-      const std::vector<std::string>& avalues)
+      const std::vector<std::string>& avalues) const
     {
       NXstatus status;
       int dimensions[1];
@@ -271,7 +325,7 @@ namespace Mantid
     // write an NXdata entry with String array values
     //
     bool NexusFileIO::writeNxStringArray(const std::string& name, const std::vector<std::string>& values, const std::vector<std::string>& attributes,
-      const std::vector<std::string>& avalues)
+      const std::vector<std::string>& avalues) const
     {
       NXstatus status;
       int dimensions[2];
@@ -300,7 +354,7 @@ namespace Mantid
     // Use NX_CHAR instead of NX_BINARY for the parameter values to make more simple.
     //
     bool NexusFileIO::writeNxNote(const std::string& noteName, const std::string& author, const std::string& date,
-      const std::string& description, const std::string& pairValues)
+      const std::string& description, const std::string& pairValues) const
     {
       NXstatus status;
       status=NXmakegroup(fileID,noteName.c_str(),"NXnote");
@@ -314,13 +368,13 @@ namespace Mantid
         attributes.push_back("date");
         avalues.push_back(date);
       }
-      if( ! writeNxText( "author", author, attributes, avalues) )
+      if( ! writeNxValue<std::string>( "author", author, NX_CHAR, attributes, avalues) )
         return(false);
       attributes.clear();
       avalues.clear();
-      if( ! writeNxText( "description", description, attributes, avalues) )
+      if( ! writeNxValue<std::string>( "description", description, NX_CHAR, attributes, avalues) )
         return(false);
-      if( ! writeNxText( "data", pairValues, attributes, avalues) )
+      if( ! writeNxValue<std::string>( "data", pairValues, NX_CHAR, attributes, avalues) )
         return(false);
 
       status=NXclosegroup(fileID);
@@ -329,10 +383,10 @@ namespace Mantid
 
     //
     // Write sample related information to the nexus file
-    //}
+    //
 
     int NexusFileIO::writeNexusProcessedSample( const std::string& name, const API::Sample & sample,
-						const Mantid::API::Run& runProperties)
+						const Mantid::API::Run& runProperties) const
     {
       NXstatus status;
 
@@ -345,145 +399,55 @@ namespace Mantid
       std::vector<std::string> attributes,avalues;
       // only write name if not null
       if( name.size()>0 )
-        if( ! writeNxText( "name", name, attributes, avalues) )
+        if( ! writeNxValue<std::string>( "name", name, NX_CHAR, attributes, avalues) )
           return(3);
-      // Write proton_charge here, if available. Note that TOFRaw has this at the NXentry level, though there is
+      // Write proton_charge here, if available and there's no log with the same name. Note that TOFRaw has this at the NXentry level, though there is
       // some debate if this is appropriate. Hence for Mantid write it to the NXsample section as it is stored in Sample.
-      double totalProtonCharge(-1.0);
-      try
+      if( !runProperties.hasProperty("proton_charge") )
       {
-	totalProtonCharge = runProperties.getProtonCharge();
-      }
-      catch(Exception::NotFoundError&)
-      {
+	try
+	{
+	  double totalProtonCharge = runProperties.getProtonCharge();
+	  attributes.push_back("units");
+	  avalues.push_back("microAmps*hour");
+	  if( ! writeNxValue<double>( "proton_charge", totalProtonCharge, NX_FLOAT64, attributes, avalues) )
+	    return(4);
+	}
+	catch(Exception::NotFoundError&)
+	{
+	}
       }
 
-      if( totalProtonCharge > 0.0 )
-      {
-        attributes.push_back("units");
-        avalues.push_back("microAmps*hour");
-        if( ! writeNxFloat( "proton_charge", totalProtonCharge, attributes, avalues) )
-          return(4);
-      }
-      // Examine TimeSeries (Log) data and call function to write double or string data
+      // Examine (Log) data and call function to write double or string data
       std::vector<Kernel::Property*> sampleProps = runProperties.getLogData();
-      for(unsigned int i=0;i<sampleProps.size();i++)
+      size_t nlogs = sampleProps.size();
+      for(unsigned int i=0; i < nlogs; i++)
       {
-
-        std::string name=sampleProps[i]->name();
-        std::string type=sampleProps[i]->type();
-        TimeSeriesProperty<std::string> *s_timeSeries=dynamic_cast<TimeSeriesProperty<std::string>*>(sampleProps[i]);
-        if(s_timeSeries!=0)
-        {
-          writeNexusStringLog(s_timeSeries);
-        }
-        else
-        {
-          TimeSeriesProperty<double> *d_timeSeries=dynamic_cast<TimeSeriesProperty<double>*>(sampleProps[i]);
-          TimeSeriesProperty<int> *i_timeSeries=dynamic_cast<TimeSeriesProperty<int>*>(sampleProps[i]);
-          TimeSeriesProperty<bool> *b_timeSeries=dynamic_cast<TimeSeriesProperty<bool>*>(sampleProps[i]);
-          if(d_timeSeries!=0)
-          {
-            writeNexusNumericLog<double>(d_timeSeries);
-          }
-          else if(i_timeSeries!=0)
-          {
-            writeNexusNumericLog<int>(i_timeSeries);
-          }
-          else if(b_timeSeries!=0)
-          {
-            writeNexusNumericLog<bool>(b_timeSeries);
-          }
-        }
+	Kernel::Property *prop = sampleProps[i];
+	if( isTimeSeries(prop) )
+	{
+	  if( !writeTimeSeriesLog(prop) ) return 5;
+	}
+	else
+	{
+	  if( !writeSingleValueLog(prop) ) return 5;
+	}
       }
 
-      TimeSeriesProperty<int> geomId("geom_id");
-      geomId.addValue(0, sample.getGeometryFlag());
-      writeNexusNumericLog<int>(&geomId);
-      
-      TimeSeriesProperty<double> thick("geom_thickness");
-      thick.addValue(0, sample.getThickness());
-      writeNexusNumericLog<double>(&thick);
-
-      TimeSeriesProperty<double> width("geom_width");
-      width.addValue(0, sample.getWidth());
-      writeNexusNumericLog<double>(&width);
-
-      TimeSeriesProperty<double> height("geom_height");
-      height.addValue(0, sample.getHeight());
-      writeNexusNumericLog<double>(&height);
-      g_log.debug() << "Set geom_id to " << sample.getGeometryFlag();
-      g_log.debug() << ", geom_thickness to " << sample.getThickness();
-      g_log.debug() << ", geom_width to " << sample.getWidth();
-      g_log.debug() << " and geom_height to " << sample.getHeight() << std::endl;
-      
+      // Sample geometry
+      attributes = std::vector<std::string>(0);
+      avalues = std::vector<std::string>(0);
+      writeNxValue<int>("geom_id", sample.getGeometryFlag(), NX_INT32, attributes, avalues);
+      writeNxValue<double>("geom_thickness", sample.getThickness(), NX_FLOAT64, attributes, avalues);
+      writeNxValue<double>("geom_width", sample.getWidth(), NX_FLOAT64, attributes, avalues);
+      writeNxValue<double>("geom_height", sample.getHeight(), NX_FLOAT64, attributes, avalues);
       status=NXclosegroup(fileID);
 
       return(0);
     }
 
-
-
-    void NexusFileIO::writeNexusDoubleLog(const TimeSeriesProperty<double> *d_timeSeries)
+    void NexusFileIO::writeNumericTimeLog_String(const TimeSeriesProperty<std::string> *s_timeSeries) const
     {
-      // write NXlog section for double values
-      NXstatus status;
-      // get a name for the log, possibly removing the the path component
-      std::string logName=d_timeSeries->name();
-      size_t ipos=logName.find_last_of("/\\");
-      if(ipos!=std::string::npos)
-        logName=logName.substr(ipos+1);
-      // extract values from timeseries
-      std::vector<std::string> dV=d_timeSeries->time_tValue();
-      std::vector<double> values;
-      std::vector<double> times;
-      time_t t0; // ,time;
-      bool first=true;
-      for(size_t i=0;i<dV.size();i++)
-      {
-        std::stringstream ins;
-        double val;
-        time_t time;
-        ins << dV[i];
-        ins >> time >> val;
-        values.push_back(val);
-        if(first)
-        {
-          t0=time; // start time of log
-          first=false;
-        }
-        times.push_back(static_cast<double>(time-t0));
-      }
-      // create log
-      status=NXmakegroup(fileID,logName.c_str(),"NXlog");
-      if(status==NX_ERROR)
-        return;
-      status=NXopengroup(fileID,logName.c_str(),"NXlog");
-      // write log data
-      std::vector<std::string> attributes,avalues;
-      writeNxFloatArray("value", values,  attributes, avalues);
-      // get ISO time, if t0 valid
-      char buffer [25];
-      if(t0>0)
-      {
-        strftime (buffer,25,"%Y-%m-%dT%H:%M:%S",localtime(&t0));
-        attributes.push_back("start");
-        avalues.push_back(buffer);
-      }
-      else
-      {
-        g_log.warning("Bad start time in log file " + logName);
-      }
-
-      writeNxFloatArray("time", times,  attributes, avalues);
-      //
-      status=NXclosegroup(fileID);
-      //
-    }
-
-    void NexusFileIO::writeNexusStringLog(const TimeSeriesProperty<std::string> *s_timeSeries)
-    {
-      // write NXlog section for string log values - not yet testedF and may not be supported by Nexus NXlog
       NXstatus status;
       // get a name for the log, possibly removing the the path component
       std::string logName=s_timeSeries->name();
@@ -503,7 +467,10 @@ namespace Mantid
         time_t time;
         ins << dV[i];
         ins >> time;
-        std::getline(ins,val); // this is wrong, val only gets first word from string
+	/** MG 27/07/2010: The comment below was here when refactored. As the code is being used heavily and no bug has 
+	    been reported about chopped off entries, nothing was changed. */
+	// this is wrong, val only gets first word from string
+        std::getline(ins,val); 
         size_t found;
         found=val.find_first_not_of(" \t");
         if(found==std::string::npos)
@@ -545,7 +512,7 @@ namespace Mantid
     }
 
     int NexusFileIO::writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
-      const bool& uniformSpectra, const std::vector<int>& spec)
+      const bool& uniformSpectra, const std::vector<int>& spec) const
     {
       NXstatus status;
 
@@ -657,7 +624,7 @@ namespace Mantid
     }
 
     int NexusFileIO::getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
-      bool& uniformBounds, std::string& axesUnits, std::string& yUnits )
+      bool& uniformBounds, std::string& axesUnits, std::string& yUnits ) const
     {
       //
       // Read the size of the data section in a mantid_workspace_entry and also get the names of axes
@@ -696,7 +663,7 @@ namespace Mantid
       len=NX_MAXNAMELEN;
       if(checkAttributeName("units"))
       {
-        status=NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
+        status=NXgetattr(fileID,(char*)"units",(void *)sbuf,&len,&type);
         if(status!=NX_ERROR)
           yUnits=sbuf;
         status=NXclosedata(fileID);
@@ -708,7 +675,7 @@ namespace Mantid
         return(4);
       len=NX_MAXNAMELEN;
       type=NX_CHAR;
-      NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
+      NXgetattr(fileID,(char*)"units",(void *)sbuf,&len,&type);
       axesUnits = std::string(sbuf,len);
       status=NXgetinfo(fileID, &rank, dim, &type);
       // non-uniform X has 2D axis1 data
@@ -726,7 +693,7 @@ namespace Mantid
       status=NXopendata(fileID,"axis2");
       len=NX_MAXNAMELEN;
       type=NX_CHAR;
-      NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
+      NXgetattr(fileID,(char*)"units",(void *)sbuf,&len,&type);
       axesUnits += std::string(":") + std::string(sbuf,len);
       NXclosedata(fileID);
       status=NXclosegroup(fileID);
@@ -752,7 +719,7 @@ namespace Mantid
       return false;
     }
 
-    int NexusFileIO::getXValues(MantidVec& xValues, const int& spectra)
+    int NexusFileIO::getXValues(MantidVec& xValues, const int& spectra) const
     {
       //
       // find the X values for spectra. If uniform, the spectra number is ignored.
@@ -789,7 +756,7 @@ namespace Mantid
       return(0);
     }
 
-    int NexusFileIO::getSpectra(MantidVec& values, MantidVec& errors, const int& spectra)
+    int NexusFileIO::getSpectra(MantidVec& values, MantidVec& errors, const int& spectra) const
     {
       //
       // read the values and errors for spectra
@@ -841,7 +808,7 @@ namespace Mantid
     *  @param localworkspace The workspace
     *  @return 0 on success
     */
-    int NexusFileIO::writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace)
+    int NexusFileIO::writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace) const
     {
       // Write Process section
       NXstatus status;
@@ -889,7 +856,7 @@ namespace Mantid
       return(0);
     }
 
-    int NexusFileIO::findMantidWSEntries()
+    int NexusFileIO::findMantidWSEntries() const
     {
       // search exiting file for entries of form mantid_workspace_<n> and return count
       int count=0;
@@ -982,7 +949,8 @@ namespace Mantid
       @param spec A vector with spectra indeces
       @return true on success
       */
-    bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec)
+    bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, 
+						    const std::vector<int>& spec) const
     {
 
 
@@ -1117,7 +1085,7 @@ namespace Mantid
       return(true);
     }
 
-    bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws)
+    bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws) const
     {
       /*! Writes the instrument parameter map if not empty. Must be called inside NXentry group.
       @param ws The workspace
@@ -1136,7 +1104,7 @@ namespace Mantid
       * @param ws The workspace
       * @return true for OK, false for error
       */
-    bool NexusFileIO::writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws)
+    bool NexusFileIO::writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const
     {
       std::vector< int > spectra;
       std::vector< int > bins;

@@ -562,7 +562,9 @@ namespace Mantid
     void LoadISISNexus2::loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
       API::Run & runDetails = local_workspace->mutableRun();
-      runDetails.setProtonCharge(entry.getFloat("proton_charge"));
+      // Charge is stored as a float
+      m_proton_charge = static_cast<double>(entry.getFloat("proton_charge"));
+      runDetails.setProtonCharge(m_proton_charge);
 
       std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
       runDetails.addProperty("run_number", run_num);

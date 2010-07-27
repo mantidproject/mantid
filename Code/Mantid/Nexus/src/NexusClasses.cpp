@@ -515,6 +515,58 @@ NXData::NXData(const NXClass& parent,const std::string& name):NXMainClass(parent
 //          NXLog methods
 //---------------------------------------------------------
 
+/** Creates a property wrapper around the log entry
+ * @returns A valid property pointer or NULL
+ */
+Kernel::Property * NXLog::createProperty()
+{
+  NXInfo vinfo = getDataSetInfo("time");
+  if( vinfo.stat == NX_ERROR )
+  {
+    return createSingleValueProperty();
+  }
+  else
+  {
+    return createTimeSeries();
+  }
+}
+
+/** Creates a single value property of the log
+ * @returns A pointer to a newly created property wrapped around the log entry
+ */
+Kernel::Property* NXLog::createSingleValueProperty()
+{
+  const std::string valAttr("value");
+  NXInfo vinfo = getDataSetInfo(valAttr);
+  Kernel::Property *prop;
+  int nxType = vinfo.type;
+  if( nxType == NX_FLOAT64 )
+  {
+    prop = new Kernel::PropertyWithValue<double>(name(), getDouble(valAttr));
+  }
+  else if( nxType == NX_INT32 )
+  {
+    prop = new Kernel::PropertyWithValue<int>(name(), getInt(valAttr));
+  }
+  else if( nxType == NX_CHAR )
+  {
+    prop = new Kernel::PropertyWithValue<std::string>(name(), getString(valAttr));
+  }
+  else if( nxType == NX_UINT8 )
+  {
+    NXDataSetTyped<uint8_t> value(*this, valAttr);
+    value.load();
+    bool state = value[0];
+    prop = new Kernel::PropertyWithValue<bool>(name(), state);
+  }
+  else
+  {
+    prop = NULL;
+  }
+
+  return prop;
+}
+
 /** createTimeSeries
  * Create a TimeSeries property form the records of the NXLog group. Times are in dataset "time"
  * and the values are in dataset "value"

@@ -493,78 +493,140 @@ namespace Mantid
       NXMainClass sample = mtd_entry.openNXClass<NXMainClass>("sample");
       try
       {
-        local_workspace->mutableRun().setProtonCharge(sample.getDouble("proton_charge"));
-      }
-      catch(std::runtime_error & )
-      {
-        g_log.warning() << "Cannot access proton charge field.\n";
-      }
-      try
-      {
         local_workspace->mutableSample().setName(sample.getString("name"));
       }
       catch(std::runtime_error & )
       {
       }
 
-      //Log data is stored as multiple NXlog classes, each with a time and value attribute
-     // boost::shared_ptr<API::Sample> run_details = local_workspace->getSample();
+      // Log data is stored as NXlog classes where a time series contains time & value attributes and a single value contains
+      // only a value attribute
       const std::vector<NXClassInfo> & logs = sample.groups();
       std::vector<NXClassInfo>::const_iterator iend = logs.end();
       for( std::vector<NXClassInfo>::const_iterator itr = logs.begin(); itr != iend; ++itr )
       {
-        if( itr->nxclass == "NXlog" ) 
+	std::string entryName = itr->nxname;
+	if( addSampleProperty(sample, entryName, local_workspace->mutableSample()) )
+	{
+	  continue;
+	}
+	if( itr->nxclass == "NXlog" ) 
         {
           NXLog log_entry = sample.openNXLog(itr->nxname);
-          Kernel::Property *p = log_entry.createTimeSeries();
-          if( p ) 
+          Kernel::Property *prop = log_entry.createProperty();
+          if( prop ) 
           {
-            if(itr->nxname == "geom_id")
-            {
-              TimeSeriesProperty<double> *geomDouble
-                = dynamic_cast<TimeSeriesProperty<double>*>(p);
-              if (geomDouble)
-              {
-                const int geomId = static_cast<int>(geomDouble->getSingleValue(0));
-                local_workspace->mutableSample().setGeometryFlag(geomId);
-                g_log.debug() << "Set sample geometry ID=" << geomId << std::endl;
-              }
-            }
-            else if(itr->nxname == "geom_thickness")
-            {
-              TimeSeriesProperty<double> *thick
-                = dynamic_cast<TimeSeriesProperty<double>*>(p);
-              if (thick)
-              {
-                local_workspace->mutableSample().setThickness(thick->getSingleValue(0));
-                g_log.debug() << "set sample thickness=" << thick->getSingleValue(0) << std::endl;
-              }
-            }
-            else if(itr->nxname == "geom_width")
-            {
-              TimeSeriesProperty<double> *width
-                = dynamic_cast<TimeSeriesProperty<double>*>(p);
-              if (width)
-              {
-                local_workspace->mutableSample().setWidth(width->getSingleValue(0));
-                g_log.debug() << "set sample width=" << width->getSingleValue(0) << std::endl;
-              }
-            }
-            else if(itr->nxname == "geom_height")
-            {
-              TimeSeriesProperty<double> *height
-                = dynamic_cast<TimeSeriesProperty<double>*>(p);
-              if (height)
-              {
-                local_workspace->mutableSample().setHeight(height->getSingleValue(0));
-                g_log.debug() << "set sample height=" << height->getSingleValue(0) << std::endl;
-              }
-            }
-            else local_workspace->mutableRun().addLogData(p);
+	    local_workspace->mutableRun().addLogData(prop);
           }
-        }
+	  else
+	  {
+	    g_log.warning() << "Cannot load log property \"" << entryName << "\"\n";
+	  }
+	}
       }
+      // Now any datasets that are not grouped
+      const std::vector<NXInfo> & attrs = sample.datasets();
+      std::vector<NXInfo>::const_iterator aend = attrs.end();
+      for( std::vector<NXInfo>::const_iterator itr = attrs.begin(); itr != aend; ++itr )
+      {
+	addSampleProperty(sample, itr->nxname, local_workspace->mutableSample());
+      }
+
+      // For the proton charge check that we haven't already loaded a log of the same name. If so
+      // set the proton charge from the gd_proton_chrg entry
+      if( local_workspace->run().hasProperty("proton_charge") )
+      {
+	try
+	{
+	  Kernel::Property *charge_log = local_workspace->run().getProperty("gd_prtn_chrg");
+	  local_workspace->mutableRun().setProtonCharge(boost::lexical_cast<double>(charge_log->value()));
+	}
+	catch(boost::bad_lexical_cast & )
+	{
+	  g_log.warning() << "Cannot make double from gd_prtn_chrg property\n";
+	}
+	catch(Kernel::Exception::NotFoundError & )
+	{
+	  g_log.warning() << "Cannot access gd_prtn_chrg property.\n";
+	}
+      }
+      else
+      {
+	try
+	{
+	  local_workspace->mutableRun().setProtonCharge(sample.getDouble("proton_charge"));
+	}
+	catch(std::runtime_error & )
+	{
+	  g_log.warning() << "Cannot access single-valued proton charge field.\n";
+	}
+      }
+	
     }
+    
+    /** Add a property to the sample object
+     * @param sample_entry The NX entry for the sample group
+     * @param entryName The name of the entry
+     * @param sampleDetails The sample object to add the property to
+     * @returns True if the property has been handled, false otherwise
+     */
+      bool LoadNexusProcessed::addSampleProperty(NXMainClass & sample_entry, const std::string & entryName, API::Sample& sampleDetails)
+    {
+      // There are 4 special names:  geom_id, geom_thickness, geom_width and geom_height that are properties of the sample
+      // and for historic reasons must be searched for first as Timeseries properties (as they were first written) and then
+      // as simple attributes of the sample group
+      if( entryName == "geom_id" || entryName == "geom_thickness" || 
+	  entryName == "geom_width" || entryName == "geom_height" )
+      {
+	//Try NXLog time series entry first
+	Kernel::TimeSeriesProperty<double> *prop(NULL);
+	try
+	{
+	  NXLog logEntry = sample_entry.openNXLog(entryName);
+	  prop = dynamic_cast<Kernel::TimeSeriesProperty<double>*>(logEntry.createTimeSeries());
+	}
+	catch(std::runtime_error &)
+	{
+	  prop = NULL;
+	}
+
+	if( prop )
+	{
+	  double value = prop->getSingleValue(0);
+	  if( entryName == "geom_id" )
+	  {
+	    sampleDetails.setGeometryFlag(static_cast<int>(value));
+	  }
+	  else
+	  {
+	    if( entryName == "geom_thickness" ) sampleDetails.setThickness(value);
+	    else if( entryName == "geom_width" ) sampleDetails.setWidth(value);
+	    else if( entryName == "geom_height" ) sampleDetails.setHeight(value);
+	    else {}
+	  }
+	}
+	//Assume it's a single attribute value
+	else
+	{
+	  if( entryName == "geom_id" )
+	  {
+	    sampleDetails.setGeometryFlag(sample_entry.getInt(entryName));
+	  }
+	  else
+	  {
+	    double value = sample_entry.getDouble(entryName);
+	    if( entryName == "geom_thickness" ) sampleDetails.setThickness(value);
+	    else if( entryName == "geom_width" ) sampleDetails.setWidth(value);
+	    else if( entryName == "geom_height" ) sampleDetails.setHeight(value);
+	    else {}
+	  }
+	}
+	return true;
+      }
+      // Entry has not been handled
+      return false;
+    }
+
 
 	 /**
      * Binary predicate function object to sort the AlgorithmHistory vector by execution order

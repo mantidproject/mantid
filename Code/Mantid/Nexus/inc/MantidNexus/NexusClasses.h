@@ -404,7 +404,7 @@ namespace Mantid
             m_data.reset(new T[n]);
             m_n = n;
           }
-        }
+	}
         catch(...)
         {
           std::ostringstream ostr;
@@ -580,9 +580,13 @@ namespace Mantid
       NXLog(const NXClass& parent,const std::string& name):NXClass(parent,name){}
       /// Nexus class id
       std::string NX_class()const{return "NXlog";}
+      /// Creates a property wrapper around the log
+      Kernel::Property * createProperty();
       /// Creates a TimeSeriesProperty and returns a pointer to it
       Kernel::Property* createTimeSeries(const std::string& start_time = "",const std::string& new_name = "");
     private:
+      /// Creates a single value property of the log
+      Kernel::Property* createSingleValueProperty();
       ///Parse a time series
       template<class TYPE>
       Kernel::Property* parseTimeSeries(const std::string & logName, TYPE times, const std::string& time0 = "")
