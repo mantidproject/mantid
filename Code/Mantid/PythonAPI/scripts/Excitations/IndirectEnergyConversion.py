@@ -16,7 +16,11 @@ def loadData(rawfiles, outWS='RawFile', Sum=False):
 		for i in range(1, len(rawfiles)):
 			tmp_ws = outWS + str(i)
 			LoadRaw(rawfiles[i], tmp_ws)
-			Plus(outWS, tmp_ws, outWS)
+			try:
+				Plus(outWS, tmp_ws, outWS)
+			except:
+				print 'Rawfiles do not match, not suitable for summing.'
+				sys.exit('Rawfiles not suitable for summing.')
 			mantid.deleteWorkspace(tmp_ws)
 		workspace = mtd.getMatrixWorkspace(outWS)
 		return [workspace], [outWS]
@@ -167,7 +171,7 @@ def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
 		ConvertFromDistribution(outWS_n)
 	return outWS_n
 
-def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bgremove = [0, 0], tempK=-1, calib='', rebinParam='', cleanUp = True):
+def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bgremove = [0, 0], tempK=-1, calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='', saveFormats = [], savedir=''):
 	'''
 	This function, when passed the proper arguments, will run through the steps of convert to energy
 	for the indirect instruments and put out a workspace title IconCompleted.
@@ -176,12 +180,14 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bg
 	NOTE: Unlike the MantidPlot GUI, this will not create a map file. You can create a map file either by hand
 	or with the createMappingFile function.
 	'''
-	output_workspaces = []
+	output_workspace_names = []
+	runNos = []
 	workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
 	for i in range(0, len(workspace)):
 		MonitorWS_n = timeRegime(workspace[i], inWS_n = ws_name[i])
 		MonWS_n = monitorEfficiency()
 		runNo = workspace[i].getRun().getLogData("run_number").value()
+		runNos.append(runNo)
 		CropWorkspace(ws_name[i], 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
 		mantid.deleteWorkspace(ws_name[i])
 		if ( bgremove != [0, 0] ):
@@ -191,12 +197,18 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bg
 		normalised = normToMon()
 		cte = conToEnergy(efixed, outWS_n='EnergyRebinned' + str(i))
 		if ( rebinParam != ''):
-			rebin = rebinData(rebinParam, inWS_n='EnergyRebinned' + str(i))
+			rebin = rebinData(rebinParam, inWS_n=cte)
+		else:
+			if CleanUp:
+				RenameWorkspace(cte, 'Energy')
+			else:
+				CloneWorkspace(cte, 'Energy')
 		if ( tempK != -1 ):
 			db = detailedBalance(tempK)
 		scale = scaleAndGroup(mapfile, outWS_n='IconComplete' + str(i) + '_' + runNo)
-		output_workspaces.append(scale)
-	return output_workspaces
+		output_workspace_names.append(scale)
+	if ( saveFormats != [] ):
+		saveItems(output_workspace_names, runNos, saveFormats, instrument, savesuffix, directory = savedir)
 
 
 def createMappingFile(groupFile, ngroup, nspec, first):
@@ -230,3 +242,17 @@ def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specM
 	mantid.deleteWorkspace('CalB')
 	SaveNexusProcessed(outWS_n, savefile, 'Vanadium')
 	return outWS_n
+
+def saveItems(workspaces, runNos, fileFormats, ins, suffix, directory = ''):
+	for i in range(0, len(workspaces)):
+		filename = ins + runNos[i] + '_' + suffix
+		if directory != '':
+			filename = os.path.join(directory, filename)
+		for j in fileFormats:
+			if j == 'spe':
+				SaveSPE(workspaces[i], filename + '.spe')
+			elif j == 'nxs':
+				SaveNexusProcessed(workspaces[i], filename + '.nxs')
+			else:
+				print 'Save: unknown file type.'
+				system.exit('Save: unknown file type.')

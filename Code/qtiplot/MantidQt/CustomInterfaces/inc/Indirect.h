@@ -66,7 +66,7 @@ namespace MantidQt
 	  void getSpectraRanges(const QString& defFile); ///< populate the spectra ranges for the "Calibration" tab.
 	  void clearReflectionInfo(); ///< clear various line edit boxes
 	  QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
-	  QString savePyCode(QString filePrefix); ///< create python code as string to save files
+	  QString savePyCode(); ///< create python code as string to save files
 	  bool isDirty(); ///< state whether interface has had any changes
 	  void isDirty(bool state); ///< signify changes to interface
 	  bool isDirtyRebin();

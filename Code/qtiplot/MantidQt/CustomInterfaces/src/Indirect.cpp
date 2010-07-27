@@ -100,9 +100,7 @@ void Indirect::runClicked(bool tryToSave)
 {
 	QString groupFile = createMapFile(m_uiForm.cbMappingOptions->currentText());
 	if ( groupFile == "" )
-	{
 		return;
-	}
 
 	QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
 	filePrefix += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_";
@@ -141,14 +139,9 @@ void Indirect::runClicked(bool tryToSave)
 		}
 
 		if ( m_uiForm.ckUseCalib->isChecked() )
-		{
-			QString calibFile = m_uiForm.leCalibrationFile->text();
-			pyInput += "calib = r'"+calibFile+"'\n";
-		}
+			pyInput += "calib = r'"+m_uiForm.leCalibrationFile->text()+"'\n";
 		else
-		{
 			pyInput += "calib = ''\n";
-		}
 
 		pyInput += "efixed = "+m_uiForm.leEfixed->text()+"\n";
 	}
@@ -168,25 +161,31 @@ void Indirect::runClicked(bool tryToSave)
 		}
 
 		if ( m_uiForm.ckDetailedBalance->isChecked() )
-		{
 			pyInput += "tempK = "+m_uiForm.leDetailedBalance->text()+"\n";
-		}
 		else
-		{
 			pyInput += "tempK = -1\n";
-		}
 
 		pyInput += "mapfile = r'"+groupFile+"'\n";
 
-
-		pyInput += "icon_workspaces = ind.convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, rebinParam = rebinParam)\n";
 	}
 
 	if (tryToSave)
 	{
-	//	pyInput += "iconWS = scale\n";
-	//	pyInput += savePyCode(filePrefix);
+		pyInput += savePyCode();
 	}
+	else
+	{
+		pyInput +=
+			"fileFormats = []\n"
+			"ins = ''\n"
+			"directory = ''\n"
+			"suffix = ''\n";
+	}
+
+	pyInput += "ind.convert_to_energy(rawfiles, mapfile, "
+		"first, last, efixed, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, "
+		"rebinParam = rebinParam, instrument = ins, savesuffix = suffix, saveFormats = fileFormats,"
+		"savedir = directory)\n";
 
 	QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -194,6 +193,7 @@ void Indirect::runClicked(bool tryToSave)
 	{
 		showInformationBox("The following error occurred:\n" + pyOutput
 			+ "\n\nAnalysis did not complete.");
+		return;
 	}
 
 	isDirty(false);
@@ -463,39 +463,42 @@ QString Indirect::createMapFile(const QString& groupType)
 }
 
 /**
-* This function creates the Python script necessary to save the workspace data
-* in the formats requested.
+* This function creates the Python script necessary to set the variables used for saving data
+* in the main convert_to_energy script.
 * @return python code as a string
 */
-QString Indirect::savePyCode(QString filePrefix)
+QString Indirect::savePyCode()
 {
-	QString pyInput = "\n# Save Files\n";
-	if ( m_uiForm.leNameSPE->text() != "" )
-	{
-		pyInput += "savefile = r'" +m_uiForm.leNameSPE->text()+ "'\n";
-	}
-	else {
-		pyInput +=
-			"savefile = mtd.getConfigProperty('defaultsave.directory')\n"
-			"savefile += '" +filePrefix+ "'\n";
-		if ( m_uiForm.cbAnalyser->currentText() == "graphite" )
-		{
-			pyInput += "savefile += 'ipg'\n";
-		}
-		else if ( m_uiForm.cbAnalyser->currentText() == "mica" || m_uiForm.cbAnalyser->currentText() == "fmica" )
-		{
-			pyInput += "savefile += 'imi'\n";
-		}
-	}
+	QString analyser = m_uiForm.cbAnalyser->currentText();
+
+	QString ins = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
+	QString suffix = analyser + m_uiForm.cbReflection->currentText() + "_";
+	QString directory = m_uiForm.leNameSPE->text();
+
+	if ( analyser == "graphite" )
+		suffix += "ipg";
+	else if ( analyser == "mica" || analyser == "fmica" )
+		suffix += "imi";
+
+	QStringList fileFormats;
+	QString fileFormatList;
 
 	if ( m_uiForm.save_ckNexus->isChecked() )
-	{
-		pyInput += "SaveNexusProcessed(iconWS, savefile + '.nxs')\n";
-	}
+		fileFormats << "nxs";
 	if ( m_uiForm.save_ckSPE->isChecked() )
-	{
-		pyInput += "SaveSPE(iconWS, savefile + '.spe')\n";
-	}
+		fileFormats << "spe";
+
+	if ( fileFormats.size() != 0 )
+		fileFormatList = "[ '" + fileFormats.join("', '") + "']";
+	else
+		fileFormatList = "[]";
+
+	QString pyInput =
+		"# Save File Parameters\n"
+		"ins = '" + ins + "'\n"
+		"suffix = '" + suffix + "'\n"
+		"fileFormats = " + fileFormatList + "\n"
+		"directory = r'" + directory + "'\n";
 
 	return pyInput;
 }
@@ -694,21 +697,12 @@ void Indirect::browseMap()
 */
 void Indirect::browseSave()
 {
-	QString Analyser = m_uiForm.cbAnalyser->currentText();
-	QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
-	filePrefix += "_" + Analyser + m_uiForm.cbReflection->currentText() + "_";
+	QString savDir = QFileDialog::getExistingDirectory(this, "Save Directory",
+		m_saveDir, QFileDialog::ShowDirsOnly);
 
-	QString defSave = m_saveDir + filePrefix;
-	if ( Analyser == "graphite" )
-		defSave += "ipg";
-	else
-		defSave += "imi";
-	QString savFile = QFileDialog::getSaveFileName(this, "Save File Name",
-		defSave, "File Stem (*)");
-
-	if ( savFile != "" )
+	if ( savDir != "" )
 	{
-		m_uiForm.leNameSPE->setText(savFile);
+		m_uiForm.leNameSPE->setText(savDir);
 		isDirty(true); 
 	}
 }
