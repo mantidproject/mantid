@@ -132,6 +132,7 @@ m_appWindow(aw)
 // Should it be moved to the constructor?
 void MantidUI::init()
 {
+  Mantid::Kernel::ConfigService::Instance();
     MantidLog::connect(this);
     FrameworkManager::Instance();
 
