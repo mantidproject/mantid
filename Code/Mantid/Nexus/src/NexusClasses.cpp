@@ -4,7 +4,6 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/Exception.h"
 #include <cstdio>
-#include <stdint.h>
 
 namespace Mantid
 {
@@ -555,7 +554,7 @@ Kernel::Property* NXLog::createSingleValueProperty()
   }
   else if( nxType == NX_UINT8 )
   {
-    NXDataSetTyped<uint8_t> value(*this, valAttr);
+    NXDataSetTyped<unsigned char> value(*this, valAttr);
     value.load();
     bool state = value[0];
     prop = new Kernel::PropertyWithValue<bool>(name(), state);
