@@ -165,6 +165,7 @@ namespace Kernel
    */
   ConfigServiceImpl::~ConfigServiceImpl()
   {
+    std::cerr << "ConfigService destroyed." << std::endl;
     Kernel::Logger::shutdown();
     delete m_pSysConfig;
     delete m_pConf;                // potential double delete???
@@ -858,12 +859,16 @@ namespace Kernel
   }
 
   /**
-    * Load facility information from instrumentDir/Facilities.xml file
+    * Load facility information from instrumentDir/Facilities.xml file if fName parameter
+    * is not set
+    * @param fName An alternative file name for loading facilities information.
     */
-  void ConfigServiceImpl::updateFacilities()
+  void ConfigServiceImpl::updateFacilities(const std::string& fName)
   {
+    m_facilities.clear();
+
     std::string instrDir = getString("instrumentDefinition.directory");
-    std::string fileName = instrDir + "Facilities.xml";
+    std::string fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
 
     // Set up the DOM parser and parse xml file
     Poco::XML::DOMParser pParser;
@@ -875,14 +880,14 @@ namespace Kernel
     catch(...)
     {
       g_log.error("Unable to parse file " + fileName);
-      throw Kernel::Exception::FileError("Unable to parse File:" , fileName);
+      throw Kernel::Exception::FileError("Unable to parse file:" , fileName);
     }
     // Get pointer to root element
     Poco::XML::Element* pRootElem = pDoc->documentElement();
     if ( !pRootElem->hasChildNodes() )
     {
       g_log.error("XML file: " + fileName + "contains no root element.");
-      throw Kernel::Exception::InstrumentDefinitionError("No root element in XML facilities file", fileName);
+      throw std::runtime_error("No root element in Facilities.xml file");
     }
 
     Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
@@ -895,6 +900,11 @@ namespace Kernel
       {
         m_facilities.push_back(new FacilityInfo(elem));
       }
+    }
+
+    if (m_facilities.empty())
+    {
+      throw std::runtime_error("The facility definition file "+fileName+" defines no facilities");
     }
 
   }

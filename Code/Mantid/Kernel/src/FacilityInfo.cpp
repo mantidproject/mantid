@@ -4,6 +4,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Support.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/NodeList.h"
@@ -28,8 +29,8 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem)
 {
   if (m_name.empty())
   {
-    g_log.error("Facility anme is not defined");
-    throw std::runtime_error("Facility anme is not defined");
+    g_log.error("Facility name is not defined");
+    throw std::runtime_error("Facility name is not defined");
   }
   std::string paddingStr = elem->getAttribute("zeropadding");
   if ( paddingStr.empty() || !StrFunc::convert(paddingStr,m_zeroPadding) )
@@ -67,6 +68,11 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem)
       {/*skip this instrument*/}
     }
   }
+
+  if (m_instruments.empty())
+  {
+    throw std::runtime_error("Facility "+m_name+" does not have any instrument;");
+  }
 }
 
 /**
@@ -89,16 +95,38 @@ void FacilityInfo::addExtension(const std::string& ext)
   */
 const InstrumentInfo FacilityInfo::Instrument(const std::string& iName)const
 {
+  std::string iname;
+  if (iName.empty())
+  {
+    iname = ConfigService::Instance().getString("default.instrument");
+    if (iname.empty())
+    {
+      return m_instruments.front();
+    }
+  }
+  else
+  {
+    iname = iName;
+  }
   std::vector<InstrumentInfo>::const_iterator it = m_instruments.begin();
   for(;it != m_instruments.end(); ++it)
   {
-    if (it->name() == iName)
+    if (it->name() == iname)
     {
       return *it;
     }
   }
-  g_log.error("Instrument "+iName+" not found in facility "+name());
-  throw Exception::NotFoundError("FacilityInfo",iName);
+
+  // if unsuccessful try shortname
+  for(it = m_instruments.begin(); it != m_instruments.end(); ++it)
+  {
+    if (it->shortName() == iname)
+    {
+      return *it;
+    }
+  }
+  g_log.error("Instrument "+iname+" not found in facility "+name());
+  throw Exception::NotFoundError("FacilityInfo",iname);
 }
 
 /**

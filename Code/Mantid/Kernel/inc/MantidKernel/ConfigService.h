@@ -97,6 +97,8 @@ namespace Mantid
       /// Get the list of known instrument prefixes for the given facility
       const std::vector<std::string>& getInstrumentPrefixes(const std::string& facility) const;
 
+      /// Load facility information from instrumentDir/Facilities.xml file 
+      void updateFacilities(const std::string& fName = "");
       /// Get the default facility
       const FacilityInfo& Facility()const;
       /// Get a facility
@@ -131,8 +133,6 @@ namespace Mantid
       void cacheDataSearchPaths();
       /// Create the map of facility name to instrument prefix list
       void cacheInstrumentPrefixes();
-      /// Load facility information from instrumentDir/Facilities.xml file
-      void updateFacilities();
 
       // Forward declaration of inner class
       template <class T>

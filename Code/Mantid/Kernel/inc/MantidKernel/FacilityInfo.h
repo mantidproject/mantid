@@ -69,7 +69,7 @@ public:
   /// Returns a list of instruments of given technique
   const std::vector<InstrumentInfo> Instruments(const std::string& tech)const;
   /// Returns instruments with given name
-  const InstrumentInfo Instrument(const std::string& iName)const;
+  const InstrumentInfo Instrument(const std::string& iName = "")const;
 private:
   /// Add new extension
   void addExtension(const std::string& ext);

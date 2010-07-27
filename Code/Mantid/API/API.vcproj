@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FileFinder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
@@ -472,6 +476,14 @@
 			</File>
 			<File
 				RelativePath=".\test\ExpressionTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\FileFinder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FileFinderTest.h"
 				>
 			</File>
 			<File

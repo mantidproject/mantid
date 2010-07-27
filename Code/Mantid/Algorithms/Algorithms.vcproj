@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ApplyTransmissionCorrection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\BinaryOperation.cpp"
 				>
 			</File>
@@ -562,6 +566,10 @@
 			</File>
 			<File
 				RelativePath=".\test\AnyShapeAbsorptionTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ApplyTransmissionCorrection.h"
 				>
 			</File>
 			<File
