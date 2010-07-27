@@ -106,7 +106,6 @@ GRAVITY = False
 # This indicates whether a 1D or a 2D analysis is performed
 CORRECTION_TYPE = '1D'
 # Component positions
-SAMPLE_Z_CORR = 0.0
 PHIMIN=-90.0
 PHIMAX=90.0
 PHIMIRROR=True
@@ -136,29 +135,6 @@ MONITORSPECTRUM = 2
 MONITORSPECLOCKED = False
 # if this is set InterpolationRebin will be used on the monitor spectrum used to normalise the sample
 SAMP_INTERPOLATE = False
-
-# Detector position information for SANS2D
-FRONT_DET_RADIUS = 306.0
-FRONT_DET_DEFAULT_SD_M = 4.0
-FRONT_DET_DEFAULT_X_M = 1.1
-REAR_DET_DEFAULT_SD_M = 4.0
-
-# LOG files for SANS2D will have these encoder readings  
-FRONT_DET_Z = 0.0
-FRONT_DET_X = 0.0
-FRONT_DET_ROT = 0.0
-REAR_DET_Z = 0.0
-# Rear_Det_X  Will Be Needed To Calc Relative X Translation Of Front Detector 
-REAR_DET_X = 0.0
-
-# MASK file stuff ==========================================================
-# correction terms to SANS2d encoders - store in MASK file ?
-FRONT_DET_Z_CORR = 0.0
-FRONT_DET_Y_CORR = 0.0 
-FRONT_DET_X_CORR = 0.0 
-FRONT_DET_ROT_CORR = 0.0
-REAR_DET_Z_CORR = 0.0 
-REAR_DET_X_CORR = 0.0
 
 #------------------------------- End of input section -----------------------------------------
 
@@ -250,7 +226,11 @@ def UserPath(directory):
 # Access function for retrieving parameters
 #####################################################
 def printParameter(var):
-    exec('print ' + var)
+    try:
+        exec('print ' + var)
+    except:
+        _issueWarning("Could not find parameter " + var + ", trying instrument object")
+        exec('print INSTRUMENT.' + var)
 
 ########################### 
 # Instrument
@@ -332,12 +312,12 @@ def AssignSample(sample_run, reload = True, period = -1):
         PERIOD_NOS["SCATTER_SAMPLE"] = period
         return SCATTER_SAMPLE.getName(), None
         
-    global FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X
-    FRONT_DET_Z = float(logvalues['Front_Det_Z'])
-    FRONT_DET_X = float(logvalues['Front_Det_X'])
-    FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
-    REAR_DET_Z = float(logvalues['Rear_Det_Z'])
-    REAR_DET_X = float(logvalues['Rear_Det_X'])
+    #global FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X
+    INSTRUMENT.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
+    INSTRUMENT.FRONT_DET_X = float(logvalues['Front_Det_X'])
+    INSTRUMENT.FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
+    INSTRUMENT.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
+    INSTRUMENT.REAR_DET_X = float(logvalues['Rear_Det_X'])
 
     PERIOD_NOS["SCATTER_SAMPLE"] = period
     return SCATTER_SAMPLE.getName(), logvalues
@@ -380,11 +360,11 @@ def AssignCan(can_run, reload = True, period = -1):
         return SCATTER_CAN.getName(), ""
     
     smp_values = []
-    smp_values.append(FRONT_DET_Z + FRONT_DET_Z_CORR)
-    smp_values.append(FRONT_DET_X + FRONT_DET_X_CORR)
-    smp_values.append(FRONT_DET_ROT + FRONT_DET_ROT_CORR)
-    smp_values.append(REAR_DET_Z + REAR_DET_Z_CORR)
-    smp_values.append(REAR_DET_X + REAR_DET_X_CORR)
+    smp_values.append(INSTRUMENT.FRONT_DET_Z + INSTRUMENT.FRONT_DET_Z_CORR)
+    smp_values.append(INSTRUMENT.FRONT_DET_X + INSTRUMENT.FRONT_DET_X_CORR)
+    smp_values.append(INSTRUMENT.FRONT_DET_ROT + INSTRUMENT.FRONT_DET_ROT_CORR)
+    smp_values.append(INSTRUMENT.REAR_DET_Z + INSTRUMENT.REAR_DET_Z_CORR)
+    smp_values.append(INSTRUMENT.REAR_DET_X + INSTRUMENT.REAR_DET_X_CORR)
 
     PERIOD_NOS["SCATTER_CAN"] = period
     # Check against sample values and warn if they are not the same but still continue reduction
@@ -392,11 +372,11 @@ def AssignCan(can_run, reload = True, period = -1):
         return  SCATTER_CAN.getName(), logvalues
     
     can_values = []
-    can_values.append(float(logvalues['Front_Det_Z']) + FRONT_DET_Z_CORR)
-    can_values.append(float(logvalues['Front_Det_X']) + FRONT_DET_X_CORR)
-    can_values.append(float(logvalues['Front_Det_Rot']) + FRONT_DET_ROT_CORR)
-    can_values.append(float(logvalues['Rear_Det_Z']) + REAR_DET_Z_CORR)
-    can_values.append(float(logvalues['Rear_Det_X']) + REAR_DET_X_CORR)
+    can_values.append(float(logvalues['Front_Det_Z']) + INSTRUMENT.FRONT_DET_Z_CORR)
+    can_values.append(float(logvalues['Front_Det_X']) + INSTRUMENT.FRONT_DET_X_CORR)
+    can_values.append(float(logvalues['Front_Det_Rot']) + INSTRUMENT.FRONT_DET_ROT_CORR)
+    can_values.append(float(logvalues['Rear_Det_Z']) + INSTRUMENT.REAR_DET_Z_CORR)
+    can_values.append(float(logvalues['Rear_Det_X']) + INSTRUMENT.REAR_DET_X_CORR)
 
 
     det_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
@@ -796,17 +776,13 @@ def clearCurrentMaskDefaults():
     RMIN = RMAX = DEF_RMIN = DEF_RMAX = None
     global WAV1, WAV2, DWAV, Q_REBIN, QXY2, DQY
     WAV1 = WAV2 = DWAV = Q_REBIN = QXY = DQY = None
-    global SAMPLE_Z_CORR
-    SAMPLE_Z_CORR = 0.0
     global RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS
     # Scaling values
     RESCALE = 100.  # percent
     SAMPLE_GEOM = 3
     SAMPLE_WIDTH = SAMPLE_HEIGHT = SAMPLE_THICKNESS = 1.0
-    global FRONT_DET_Z_CORR, FRONT_DET_Y_CORR, FRONT_DET_X_CORR, FRONT_DET_ROT_CORR 
-    FRONT_DET_Z_CORR = FRONT_DET_Y_CORR = FRONT_DET_X_CORR = FRONT_DET_ROT_CORR = 0.0
-    global REAR_DET_Z_CORR, REAR_DET_X_CORR
-    REAR_DET_Z_CORR = REAR_DET_X_CORR = 0.0
+    INSTRUMENT.FRONT_DET_Z_CORR = INSTRUMENT.FRONT_DET_Y_CORR = INSTRUMENT.FRONT_DET_X_CORR = INSTRUMENT.FRONT_DET_ROT_CORR = 0.0
+    INSTRUMENT.REAR_DET_Z_CORR = INSTRUMENT.REAR_DET_X_CORR = 0.0
     
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
@@ -1109,32 +1085,25 @@ def _readDetectorCorrections(details):
 
     if det_name == 'REAR':
         if det_axis == 'X':
-            global REAR_DET_X_CORR
-            REAR_DET_X_CORR = shift
+            INSTRUMENT.REAR_DET_X_CORR = shift
         elif det_axis == 'Z':
-            global REAR_DET_Z_CORR
-            REAR_DET_Z_CORR = shift
+            INSTRUMENT.REAR_DET_Z_CORR = shift
         else:
             pass
     else:
         if det_axis == 'X':
-            global FRONT_DET_X_CORR
-            FRONT_DET_X_CORR = shift
+            INSTRUMENT.FRONT_DET_X_CORR = shift
         elif det_axis == 'Y':
-            global FRONT_DET_Y_CORR
-            FRONT_DET_Y_CORR = shift
+            INSTRUMENT.FRONT_DET_Y_CORR = shift
         elif det_axis == 'Z':
-            global FRONT_DET_Z_CORR
-            FRONT_DET_Z_CORR = shift
+            INSTRUMENT.FRONT_DET_Z_CORR = shift
         elif det_axis == 'ROT':
-            global FRONT_DET_ROT_CORR
-            FRONT_DET_ROT_CORR = shift
+            INSTRUMENT.FRONT_DET_ROT_CORR = shift
         else:
             pass    
 
 def SetSampleOffset(value):
-    global SAMPLE_Z_CORR
-    SAMPLE_Z_CORR = float(value)/1000.
+    INSTRUMENT.set_sample_offset(value)
 
 def SetMonitorSpectrum(specNum, interp=False):
     global MONITORSPECTRUM
@@ -1204,7 +1173,7 @@ def _initReduction(xcentre = None, ycentre = None):
         xcentre = XBEAM_CENTRE
         ycentre = YBEAM_CENTRE
 
-    global _SAMPLE_SETUP	
+    global _SAMPLE_SETUP    
     if _SAMPLE_SETUP == None:
         _SAMPLE_SETUP = _init_run(SCATTER_SAMPLE, [xcentre, ycentre], False)
     
@@ -1307,7 +1276,7 @@ def _init_run(raw_ws, beamcoords, emptycell):
 
     # Put the components in the correct positions
     currentDet = INSTRUMENT.curDetector().name() 
-    maskpt_rmin, maskpt_rmax = SetupComponentPositions(currentDet, raw_ws.getName(), beamcoords[0], beamcoords[1])
+    maskpt_rmin, maskpt_rmax = INSTRUMENT.set_component_positions(raw_ws.getName(), beamcoords[0], beamcoords[1])
     
     # Create a run details object
     if emptycell == True:
@@ -1375,40 +1344,6 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
     else: 
         return result
 
-##
-# Setup component positions, xbeam and ybeam in metres
-##
-def SetupComponentPositions(detector, dataws, xbeam, ybeam):
-    # Put the components in the correct place
-    # The sample holder
-    MoveInstrumentComponent(dataws, 'some-sample-holder', Z = SAMPLE_Z_CORR, RelativePosition="1")
-    
-    # The detector
-    if INSTR_NAME == 'LOQ':
-        xshift = (317.5/1000.) - xbeam
-        yshift = (317.5/1000.) - ybeam
-        MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, RelativePosition="1")
-        # LOQ instrument description has detector at 0.0, 0.0
-        return [xshift, yshift], [xshift, yshift] 
-    else:
-        if detector == 'front-detector':
-            rotateDet = (-FRONT_DET_ROT - FRONT_DET_ROT_CORR)
-            RotateInstrumentComponent(dataws, detector,X="0.",Y="1.0",Z="0.",Angle=rotateDet)
-            RotRadians = math.pi*(FRONT_DET_ROT + FRONT_DET_ROT_CORR)/180.
-            xshift = (REAR_DET_X + REAR_DET_X_CORR - FRONT_DET_X - FRONT_DET_X_CORR + FRONT_DET_RADIUS*math.sin(RotRadians ) )/1000. - FRONT_DET_DEFAULT_X_M - xbeam
-            yshift = (FRONT_DET_Y_CORR /1000.  - ybeam)
-            # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
-            # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-            zshift = (FRONT_DET_Z + FRONT_DET_Z_CORR + FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000. - FRONT_DET_DEFAULT_SD_M
-            MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-            return [0.0, 0.0], [0.0, 0.0]
-        else:
-            xshift = -xbeam
-            yshift = -ybeam
-            zshift = (REAR_DET_Z + REAR_DET_Z_CORR)/1000. - REAR_DET_DEFAULT_SD_M
-            mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))
-            MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-            return [0.0,0.0], [xshift, yshift]
 
 ##
 # Apply the spectrum and time masks to one detector in a given workspace

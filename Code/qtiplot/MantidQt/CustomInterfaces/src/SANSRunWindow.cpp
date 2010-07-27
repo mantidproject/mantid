@@ -582,7 +582,7 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.scale_factor->setText(QString::number(dbl_param/100.));
 
   //Sample offset if one has been specified
-  dbl_param = runReduceScriptFunction("printParameter('SAMPLE_Z_CORR'),").toDouble();
+  dbl_param = runReduceScriptFunction("printParameter('INSTRUMENT.SAMPLE_Z_CORR'),").toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
 
   //Centre coordinates
