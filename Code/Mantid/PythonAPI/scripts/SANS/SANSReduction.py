@@ -24,6 +24,7 @@ import SANSInsts
 import math
 from mantidsimple import *
 
+# disable plotting if running outside Mantidplot
 try:
     from mantidplot import plotSpectrum, mergePlots
 except ImportError:
@@ -40,12 +41,6 @@ except ImportError:
     def appwidgets():
         return []
 
-# ---------------------------- CORRECTION INPUT -----------------------------------------
-# The information between this line and the other '-----' delimiter needs to be provided
-# for the script to function. From the GUI, the tags will be replaced by the appropriate
-# information. 
-
-# The tags get replaced by input from the GUI
 # The workspaces
 SCATTER_SAMPLE = None
 SCATTER_CAN = SANSUtility.WorkspaceDetails('', -1)
@@ -119,13 +114,6 @@ SAMPLE_THICKNESS = 1.0
 
 
 # These values are used for the start and end bins for FlatBackground removal.
-###############################################################################################
-# RICHARD'S NOTE FOR SANS2D: these may need to vary with chopper phase and detector distance !
-# !TASK! Put the values in the mask file if they need to be different ?????
-##############################################################################################
-# The GUI will replace these with default values of
-# LOQ: 31000 -> 39000
-# S2D: 85000 -> 100000
 BACKMON_START = None
 BACKMON_END = None
 
@@ -135,8 +123,6 @@ MONITORSPECTRUM = 2
 MONITORSPECLOCKED = False
 # if this is set InterpolationRebin will be used on the monitor spectrum used to normalise the sample
 SAMP_INTERPOLATE = False
-
-#------------------------------- End of input section -----------------------------------------
 
 # Transmission variables
 TRANS_FIT_DEF = 'Log'
@@ -169,7 +155,6 @@ TRANS_INTERPOLATE = False
 ###################################################################################################################
 _NOPRINT_ = False
 _VERBOSE_ = False
-# "Enumerations"
 DefaultTrans = True
 NewTrans = False
 # Mismatched detectors
