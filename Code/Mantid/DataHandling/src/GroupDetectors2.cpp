@@ -19,6 +19,23 @@
 #include <vector>
 #include <numeric>
 
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
+
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::Node;
+using Poco::XML::NodeList;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeFilter;
+
 namespace Mantid
 {
 namespace DataHandling
@@ -136,8 +153,18 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
   {// The file property has been set so try to load the file
     try
     {
-      // the format of the input file is in source file "GroupDetectors2.h"
-      processFile(filename, workspace, unUsedSpec);
+      // check if XML file and if yes assume it is a XML grouping file
+      std::string filenameCopy(filename);
+      std::transform(filenameCopy.begin(), filenameCopy.end(), filenameCopy.begin(), tolower);
+      if ( (filenameCopy.find(".xml")) != std::string::npos )
+      {
+        processXMLFile(filename, workspace, unUsedSpec);
+      }
+      else
+      {
+        // the format of this input file format is described in "GroupDetectors2.h"
+        processFile(filename, workspace, unUsedSpec);
+      }
     }
     catch ( std::exception )
     {
@@ -287,6 +314,78 @@ void GroupDetectors2::processFile(std::string fname,
   m_FracCompl += fileReadProg( m_GroupSpecInds.size(), specs2index.size() );
   return;
 }
+
+/** Get groupings from XML file
+*
+*  @param fname the full path name of the file to open
+*  @param workspace a pointer to the input workspace, used to get spectra indexes from numbers
+*  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
+*  @throws FileError if there's any problem with the file or its format
+*/
+void GroupDetectors2::processXMLFile(std::string fname,
+  API::MatrixWorkspace_const_sptr workspace, std::vector<int> &unUsedSpec)
+{
+  // tring to open the file the user told us exists, skip down 20 lines to find out what happens if we can read from it
+  g_log.debug() << "Opening input file ... " << fname;
+
+  // Set up the DOM parser and parse xml file
+  DOMParser pParser;
+  Document* pDoc;
+  try
+  {
+    pDoc = pParser.parse(fname);
+  }
+  catch(...)
+  {
+    g_log.error("Unable to parse file " + fname);
+    throw Kernel::Exception::FileError("Unable to parse File:" , fname);
+  }
+  // Get pointer to root element
+  Element* pRootElem = pDoc->documentElement();
+  if ( !pRootElem->hasChildNodes() )
+  {
+    g_log.error("XML file: " + fname + "contains no root element.");
+    throw Kernel::Exception::FileError("No root element in XML grouping file:" , fname);
+  }  
+
+  NodeList* pNL_group = pRootElem->getElementsByTagName("group");
+  if ( pNL_group->length() == 0 )
+  {
+    g_log.error("XML group file: " + fname + "contains no group elements.");
+    throw Kernel::Exception::FileError("XML group file contains no group elements:" , fname);
+  }
+
+  // allow spectra number to spectra index look ups
+  std::map<int,int> specs2index;
+  const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(workspace->getAxis(1));
+  if (axis)
+  {
+    axis->getSpectraIndexMap(specs2index);
+  }
+
+  unsigned int numberGroups = pNL_group->length();
+  for (unsigned int iGroup = 0; iGroup < numberGroups; iGroup++)
+  {
+    Element* pGroupElem = static_cast<Element*>(pNL_group->item(iGroup));
+    
+    Element* idlistElement = pGroupElem->getChildElement("ids");
+    if (idlistElement)
+    {
+      std::string ids = idlistElement->getAttribute("val");
+
+      // the spectra numbers that will be included in the group
+      readSpectraIndexes(ids, specs2index, m_GroupSpecInds[iGroup], unUsedSpec, ",");
+    }
+    else
+    {
+      g_log.error("XML group file: " + fname + "contains no <ids> elements.");
+      throw Kernel::Exception::FileError("XML group file contains no <ids> elements:" , fname);
+    }
+   
+  }
+  pNL_group->release();
+}
+
 /** The function expects that the string passed to it contains an integer number,
 *  it reads the number and returns it
 *  @param line a line read from the file, we'll interpret this
@@ -397,16 +496,17 @@ void GroupDetectors2::readFile(std::map<int,int> &specs2index, std::ifstream &Fi
 *  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
 *  @throws invalid_argument when a number couldn't be found or the number is not in the spectra map
 */
-void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &specs2index, std::vector<int> &output, std::vector<int> &unUsedSpec)
+void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &specs2index, std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator)
 {
   // remove comments and white space
-  Poco::StringTokenizer dataComment(line, "#", IGNORE_SPACES);
-  if ( dataComment.begin() != dataComment.end() )
+  Poco::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
+  Poco::StringTokenizer::Iterator iend = dataComment.end();
+  for( Poco::StringTokenizer::Iterator itr = dataComment.begin(); itr != iend; ++itr )
   {
     std::vector<int> specNums;
     specNums.reserve(output.capacity());
 
-    RangeHelper::getList(*dataComment.begin(), specNums);
+    RangeHelper::getList(*itr, specNums);
     
     std::vector<int>::const_iterator specN = specNums.begin();
     for( ;specN!=specNums.end(); ++specN)

@@ -146,13 +146,16 @@ private:
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_ _numbers_ 
   void processFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
                                                 std::vector<int> &unUsedSpec);
+  /// gets groupings from XML file 
+  void processXMLFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
+                                                std::vector<int> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
   void readFile(std::map<int,int> &specs2index, std::ifstream &File,
     int &lineNum, std::vector<int> &unUsedSpec);
   /// used while reading the file reads reads specftra numbers from the string and returns spectra indexes 
   void readSpectraIndexes(std::string line, std::map<int,int> &specs2index,
-                   std::vector<int> &output, std::vector<int> &unUsedSpec);
+                   std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator="#");
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
   double fileReadProg(int numGroupsRead, int numInHists);

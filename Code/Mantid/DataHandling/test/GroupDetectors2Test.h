@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidNexus/LoadMuonNexus2.h"
 #include <iostream>
 #include <numeric>
 #include <fstream>
@@ -22,6 +23,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::NeXus;
 
 class GroupDetectors2Test : public CxxTest::TestSuite
 {
@@ -314,6 +316,46 @@ public:
     remove(inputFile.c_str());
   }
 
+  void testReadingFromXML()
+  {
+    LoadMuonNexus2 nxLoad;
+    nxLoad.initialize();
+
+    // Now set required filename and output workspace name
+    std::string inputFile = "../../../../Test/Nexus/MUSR00015190.nxs";
+    nxLoad.setPropertyValue("FileName", inputFile);
+
+    std::string outputSpace="outer";
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
+    
+    //
+    // Test execute to read file and populate workspace
+    //
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
+    TS_ASSERT( nxLoad.isExecuted() );    
+
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));    
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 64);
+
+    GroupDetectors2 groupAlg;
+    groupAlg.initialize();
+    groupAlg.setPropertyValue("InputWorkspace", outputSpace+"_1");
+    groupAlg.setPropertyValue("OutputWorkspace", "boevs");
+    groupAlg.setPropertyValue("MapFile", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping.xml");
+    TS_ASSERT_THROWS_NOTHING(groupAlg.execute());    
+    TS_ASSERT( groupAlg.isExecuted() );
+
+    MatrixWorkspace_sptr output1;
+    TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("boevs")));    
+    Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
+    TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 2);
+
+    AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().remove("boevs");
+  }
+
   private:
     const std::string inputWS, outputBase, inputFile;
     enum constants { NHIST = 6, NBINS = 4 };
@@ -347,6 +389,7 @@ public:
         << "5-6";
       file.close();
     }
+
 };
 
 #endif /*GROUPDETECTORS2TEST_H_*/
