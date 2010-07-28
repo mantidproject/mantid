@@ -15,7 +15,7 @@ namespace Mantid
   {
 
     /**
-    This class finds 
+    This class finds data files given an instrument name (optionally) and a run number
 
     @author Roman Tolchenov, Tessella plc
     @date 23/07/2010

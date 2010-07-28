@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ArchiveSearchFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Axis.cpp"
 				>
 			</File>
@@ -431,6 +435,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\ArchiveSearchFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\Axis.h"
 				>
 			</File>
@@ -512,6 +520,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\IAlgorithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\IArchiveSearch.h"
 				>
 			</File>
 			<File

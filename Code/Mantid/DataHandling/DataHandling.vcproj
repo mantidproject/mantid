@@ -209,6 +209,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ISISDataArchive.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadDAE\isisds_command.cpp"
 				>
 			</File>
@@ -440,6 +444,14 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadDAE\idc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\ISISDataArchive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ISISDataArchiveTest.h"
 				>
 			</File>
 			<File
