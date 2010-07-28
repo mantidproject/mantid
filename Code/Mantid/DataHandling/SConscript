@@ -20,6 +20,6 @@ else:
     myenv.Append(MYLIBLIST='PocoNet')
 
 #BUILD CODE
-shared = myenv.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidDataHandling.pdb')
+shared = myenv.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidDataHandling.pdb')
 retval = { 'shared': shared, 'sharedobjs' : listSharedObjects, 'libs': ['MantidDataHandling'] }
 Return('retval')
