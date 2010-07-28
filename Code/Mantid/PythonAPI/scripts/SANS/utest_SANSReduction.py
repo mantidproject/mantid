@@ -36,12 +36,24 @@ class TestReduction(unittest.TestCase):
         self.assertEquals(SANSReduction._SAMPLE_SETUP._maskrmin, [0,0])
         self.assertEquals(SANSReduction._SAMPLE_SETUP._maskrmax, [-0.084199999999999997, 0.19650000000000001])
 
-        SaveCSV(Filename="tmp_reduction.txt", InputWorkspace=ws, Separator="\t", LineSeparator="\n")
-        data = _read_Mantid("tmp_reduction.txt")
+        x = mtd[ws].dataX(0)[:len(mtd[ws].dataX(0))]
+        y = mtd[ws].dataY(0)
+        e = mtd[ws].dataE(0)
+        data = zip(x,y,e)
+
         self.assertEquals(len(data), 178)
-        self.assertEquals(data[10], [0.024379899999999999, 83.676100000000005, 0.46270299999999998])
-        self.assertEquals(data[100], [0.14489299999999999, 3.6894499999999999, 0.023424])
-        self.assertEquals(data[50], [0.053831799999999999, 22.861999999999998, 0.112137])
+
+        self.assertAlmostEqual(data[10][0], 0.0243799, 0.00001)
+        self.assertAlmostEqual(data[10][1], 83.6761, 0.00001)
+        self.assertAlmostEqual(data[10][2], 0.462703, 0.00001)
+
+        self.assertAlmostEqual(data[100][0], 0.144893, 0.00001)
+        self.assertAlmostEqual(data[100][1], 3.68945, 0.00001)
+        self.assertAlmostEqual(data[100][2], 0.023424, 0.00001)
+
+        self.assertAlmostEqual(data[50][0], 0.0538318, 0.00001)
+        self.assertAlmostEqual(data[50][1], 22.862, 0.00001)
+        self.assertAlmostEqual(data[50][2], 0.112137, 0.00001)
 
 
     def test_reduction_front(self):
@@ -50,12 +62,24 @@ class TestReduction(unittest.TestCase):
         self.assertEquals(SANSReduction._SAMPLE_SETUP._maskrmin, [0,0])
         self.assertEquals(SANSReduction._SAMPLE_SETUP._maskrmax, [0,0])
 
-        SaveCSV(Filename="tmp_reduction.txt", InputWorkspace=ws, Separator="\t", LineSeparator="\n")
-        data = _read_Mantid("tmp_reduction.txt")
+        x = mtd[ws].dataX(0)[:len(mtd[ws].dataX(0))]
+        y = mtd[ws].dataY(0)
+        e = mtd[ws].dataE(0)
+        data = zip(x,y,e)
+
         self.assertEquals(len(data), 122)
-        self.assertEquals(data[10], [0.10981100000000001, 6.56454, 0.29157300000000003])
-        self.assertEquals(data[100], [0.65261999999999998, 0.70353500000000002, 0.0057024299999999997])
-        self.assertEquals(data[50],  [0.24246599999999999, 1.53335, 0.019475699999999999])
+
+        self.assertAlmostEqual(data[10][0], 0.109811, 0.00001)
+        self.assertAlmostEqual(data[10][1], 6.56454, 0.00001)
+        self.assertAlmostEqual(data[10][2], 0.291573, 0.00001)
+
+        self.assertAlmostEqual(data[100][0], 0.65262, 0.00001)
+        self.assertAlmostEqual(data[100][1], 0.703535, 0.00001)
+        self.assertAlmostEqual(data[100][2], 0.00570243, 0.00001)
+
+        self.assertAlmostEqual(data[50][0], 0.242466, 0.00001)
+        self.assertAlmostEqual(data[50][1], 1.53335, 0.00001)
+        self.assertAlmostEqual(data[50][2], 0.0194757, 0.00001)
 
 
 class TestInstrument(unittest.TestCase):
