@@ -122,6 +122,7 @@ public:
         MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS_1"));
         TS_ASSERT_EQUALS(ws->blocksize(),995);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),10);
+	TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
 
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
         TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
@@ -154,7 +155,7 @@ public:
         TS_ASSERT_EQUALS(ws->blocksize(),995);
      //   TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
         TS_ASSERT_EQUALS(ws->getTitle(), "hello\\0");
-
+	TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
         TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
         TS_ASSERT_EQUALS(ws->readX(0)[2],7.);

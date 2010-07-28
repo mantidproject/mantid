@@ -597,7 +597,7 @@ namespace Mantid
       getNexusData(&rpb_int[0]);
       closeNexusData();
 
-      double rpb_dbl[32];
+      float rpb_dbl[32];
       openNexusData("RRPB");
       getNexusData(&rpb_dbl[0]);
       closeNexusData();

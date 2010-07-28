@@ -598,10 +598,10 @@ namespace Mantid
       runDetails.addProperty("freq", rpb_int[6]);	// 2**k where source frequency = 50 / 2**k
       
       // Now double data
-      NXDouble rpb_dbl = vms_compat.openNXDouble("RRPB");
+      NXFloat rpb_dbl = vms_compat.openNXFloat("RRPB");
       rpb_dbl.load();
-      runDetails.addProperty("gd_prtn_chrg", rpb_dbl[7]);  // good proton charge (uA.hour)
-      runDetails.addProperty("tot_prtn_chrg", rpb_dbl[8]); // total proton charge (uA.hour)
+      runDetails.addProperty("gd_prtn_chrg", static_cast<double>(rpb_dbl[7]));  // good proton charge (uA.hour)
+      runDetails.addProperty("tot_prtn_chrg", static_cast<double>(rpb_dbl[8])); // total proton charge (uA.hour)
       runDetails.addProperty("goodfrm",rpb_int[9]);	// good frames
       runDetails.addProperty("rawfrm", rpb_int[10]);	// raw frames
       runDetails.addProperty("dur_wanted", rpb_int[11]); // requested run duration (units as for "duration" above)
