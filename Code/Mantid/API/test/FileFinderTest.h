@@ -24,7 +24,7 @@ public:
 
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
-      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,s*\">"
+      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,N*,s*,S*\">"
       "    <instrument name=\"HRPD\" shortname=\"HRP\">"
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"
@@ -84,10 +84,20 @@ public:
 
   void testFindFile()
   {
+    ConfigService::Instance().setString("datasearch.searcharchive","Off");
     std::string path = FileFinder::Instance().findFile("CSP78173");
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
+    path = FileFinder::Instance().findFile("HRP37129");
+    std::cerr<<"Path: "<<path<<'\n';
+    TS_ASSERT(path.size() > 3);
+    TS_ASSERT_EQUALS(path.substr(path.size()-3),"S02");
+    //ConfigService::Instance().setString("datasearch.searcharchive","On");
+    //path = FileFinder::Instance().findFile("CSP77374");
+    //std::cerr<<"Path: "<<path<<'\n';
+    //path = FileFinder::Instance().findFile("CSP78174");
+    //std::cerr<<"Path: "<<path<<'\n';
   }
 
   void testFindFiles()

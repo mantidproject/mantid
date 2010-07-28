@@ -165,7 +165,7 @@ namespace Kernel
    */
   ConfigServiceImpl::~ConfigServiceImpl()
   {
-    std::cerr << "ConfigService destroyed." << std::endl;
+    //std::cerr << "ConfigService destroyed." << std::endl;
     Kernel::Logger::shutdown();
     delete m_pSysConfig;
     delete m_pConf;                // potential double delete???

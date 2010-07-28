@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllExport.h"
 
+#include <boost/shared_ptr.hpp>
 #include <string>
 
 #define DECLARE_ARCHIVESEARCH(classname,facility) \
@@ -57,6 +58,9 @@ namespace Mantid
         */
       virtual std::string getPath(const std::string& fName)const = 0;
     };
+
+		///Typedef for a shared pointer to an IArchiveSearch
+		typedef boost::shared_ptr<IArchiveSearch> IArchiveSearch_sptr;
 
   }
 }

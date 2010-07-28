@@ -2,9 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/IArchiveSearch.h"
+#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/LibraryManager.h"
+#include "MantidKernel/Glob.h"
 
 #include "Poco/Path.h"
 #include "Poco/File.h"
@@ -26,6 +30,12 @@ namespace Mantid
      */
     FileFinderImpl::FileFinderImpl()
     {
+      // Make sure plugins are loaded
+      std::string libpath = Kernel::ConfigService::Instance().getString("plugins.directory");
+      if( !libpath.empty() )
+      {
+        Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
+      }
     }
 
     /**
@@ -40,11 +50,25 @@ namespace Mantid
       std::vector<std::string>::const_iterator it = searchPaths.begin();
       for(;it != searchPaths.end(); ++it)
       {
-        Poco::Path path(*it,fName);
-        Poco::File file(path);
-        if (file.exists())
+        if (fName.find("*") != std::string::npos)
         {
-          return path.toString();
+          Poco::Path path(*it,fName);
+          Poco::Path pathPattern(path);
+          std::set<std::string> files;
+          Kernel::Glob::glob(pathPattern, files);
+          if ( !files.empty() )
+          {
+            return *files.begin();
+          }
+        }
+        else
+        {
+          Poco::Path path(*it,fName);
+          Poco::File file(path);
+          if (file.exists())
+          {
+            return path.toString();
+          }
         }
       }
       return "";
@@ -124,6 +148,44 @@ namespace Mantid
       {
         std::string path = getFullPath(fName + "." + *ext);
         if ( !path.empty() ) return path;
+      }
+
+      // Search the archive of the default facility
+      std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
+      std::transform(archiveOpt.begin(),archiveOpt.end(),archiveOpt.begin(),tolower);
+      if ( !archiveOpt.empty() && archiveOpt != "off" )
+      {
+        IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(
+          Kernel::ConfigService::Instance().Facility().name()
+          );
+        if (arch)
+        {
+          std::string path = arch->getPath(fName);
+          if ( !path.empty() )
+          {
+            std::vector<std::string>::const_iterator ext = exts.begin();
+            for(;ext != exts.end(); ++ext)
+            {
+              Poco::Path pathPattern(path + "." + *ext);
+              if (ext->find("*") != std::string::npos)
+              {
+                continue;
+                std::set<std::string> files;
+                Kernel::Glob::glob(pathPattern, files);
+                std::cerr<<"Searching for:"<<pathPattern.toString()<<'\n';
+                std::cerr<<"Found:"<<files.size()<<'\n';
+              }
+              else
+              {
+                Poco::File file(pathPattern);
+                if (file.exists())
+                {
+                  return file.path();
+                }
+              }
+            }
+          }
+        }
       }
       return "";
     }
