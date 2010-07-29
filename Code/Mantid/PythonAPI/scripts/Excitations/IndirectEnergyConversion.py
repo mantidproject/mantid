@@ -2,13 +2,14 @@
 """
 
 import ConvertToEnergy
-import CommonFunctions as common
 from mantidsimple import *
-
+from mantidplot import *
 
 def loadData(rawfiles, outWS='RawFile', Sum=False):
+	( dir, file ) = os.path.split(rawfiles[0])
+	( name, ext ) = os.path.splitext(file)
 	try:
-		LoadRaw(rawfiles[0], outWS)
+		LoadRaw(rawfiles[0], name)
 	except ValueError, message:
 		print message
 		sys.exit(message)
@@ -17,21 +18,22 @@ def loadData(rawfiles, outWS='RawFile', Sum=False):
 			tmp_ws = outWS + str(i)
 			LoadRaw(rawfiles[i], tmp_ws)
 			try:
-				Plus(outWS, tmp_ws, outWS)
+				Plus(name, tmp_ws, name)
 			except:
 				print 'Rawfiles do not match, not suitable for summing.'
 				sys.exit('Rawfiles not suitable for summing.')
 			mantid.deleteWorkspace(tmp_ws)
-		workspace = mtd.getMatrixWorkspace(outWS)
-		return [workspace], [outWS]
+		workspace = mtd.getMatrixWorkspace(name)
+		return [workspace], [name]
 	else:
 		workspace_list = []
-		ws_name_list = [outWS]
+		ws_name_list = [name]
 		if ( len(rawfiles) > 1 ):
 			for i in range(1, len(rawfiles)):
-				ws_name = outWS + str(i)
-				LoadRaw(rawfiles[i], ws_name)
-				ws_name_list.append(ws_name)
+				( dir, file ) = os.path.split(rawfiles[i])
+				( name, ext ) = os.path.splitext(file)
+				LoadRaw(rawfiles[i], name)
+				ws_name_list.append(name)
 		for i in ws_name_list:
 			workspace_list.append(mtd.getMatrixWorkspace(i))
 		return workspace_list, ws_name_list
@@ -134,7 +136,8 @@ def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
 	RebinToWorkspace(outWS_n,monWS_n,outWS_n)
 	Divide(outWS_n,monWS_n,outWS_n)
 	mantid.deleteWorkspace(monWS_n)
-	mantid.deleteWorkspace(inWS_n)
+	if (inWS_n != outWS_n):
+		mantid.deleteWorkspace(inWS_n)
 	return outWS_n
 
 def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
@@ -209,6 +212,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bg
 		output_workspace_names.append(scale)
 	if ( saveFormats != [] ):
 		saveItems(output_workspace_names, runNos, saveFormats, instrument, savesuffix, directory = savedir)
+	return output_workspace_names, runNos
 
 
 def createMappingFile(groupFile, ngroup, nspec, first):
@@ -231,7 +235,7 @@ def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specM
 	try:
 		LoadRaw(rawfile, 'Raw', SpectrumMin = specMin, SpectrumMax = specMax)
 	except:
-		sys.exit('Could not load raw file.')
+		sys.exit('Calib: Could not load raw file.')
 	tmp = mantid.getMatrixWorkspace('Raw')
 	nhist = tmp.getNumberHistograms() - 1
 	Integration('Raw', 'CalA', peakMin, peakMax, 0, nhist)
@@ -242,6 +246,22 @@ def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specM
 	mantid.deleteWorkspace('CalB')
 	SaveNexusProcessed(outWS_n, savefile, 'Vanadium')
 	return outWS_n
+
+def res(file, nspec, iconOpt, rebinParam, background):
+	''' ? '''
+	(direct, filename) = os.path.split(file)
+	(root, ext) = os.path.splitext(filename)
+	mapping = createMappingFile('res.map', 1, nspec, iconOpt['first'])
+	rawfiles = [file]
+	workspace_list, runNos = convert_to_energy(rawfiles, mapping, iconOpt['first'], iconOpt['last'], iconOpt['efixed'])
+	iconWS = workspace_list[0]
+	Rebin(iconWS, iconWS, rebinParam)
+	FFTSmooth(iconWS,iconWS,0)
+	name = root[:3] + mantid.getMatrixWorkspace(workspace_list[0]).getRun().getLogData("run_number").value() + '_res'
+	FlatBackground(iconWS, name, background[0], background[1])
+	mantid.deleteWorkspace(iconWS)
+	SaveNexusProcessed(name, name+'.nxs')
+	return name
 
 def saveItems(workspaces, runNos, fileFormats, ins, suffix, directory = ''):
 	for i in range(0, len(workspaces)):
@@ -256,3 +276,131 @@ def saveItems(workspaces, runNos, fileFormats, ins, suffix, directory = ''):
 			else:
 				print 'Save: unknown file type.'
 				system.exit('Save: unknown file type.')
+
+def demon(rawFiles, calFile, first, last, SumFiles=False, CleanUp=True, plotOpt=False):
+	'''
+	DEMON function for unit conversion on diffraction backs of IRIS/OSIRIS.
+	MANDATORY PARAMS:
+	@param rawFiles list of files to load (list[string])
+	@param calFile CalFile/Grouping file (string)
+	@param first first spectra number of diffraction block (integer)
+	@param last last spectra number of diffraction block (integer)
+	OPTIONAL PARAMS:
+	@param SumFiles whether to sum input files, or run through them sequentially (boolean)
+	@param CleanUp whether to remove intermediate workspaces from memory (boolean)
+	@param plotOpt whether to plot the spectra of the result (boolean)
+		-- WARNING - with large numbers of spectra and/or lots of input files plotOpt will slow down the script significantly
+	'''
+	ws_list, ws_names = loadData(rawFiles, Sum=SumFiles)
+	runNos = []
+	workspaces = []
+	for i in range(0, len(ws_names)):
+		# Get Monitor WS
+		MonitorWS = timeRegime(ws_list[i], inWS_n=ws_names[i])
+		monitorEfficiency(inWS_n=MonitorWS)
+		# Get Run no, crop file
+		runNo = ws_list[i].getRun().getLogData("run_number").value()
+		runNos.append(runNo)
+		savefile = rawFiles[0][:3] + runNo + '_dem'
+		CropWorkspace(ws_names[i], ws_names[i], StartWorkspaceIndex = (first-1), EndWorkspaceIndex = (last-1) )
+		# Normalise to Monitor
+		normalised = normToMon(inWS_n=ws_names[i], outWS_n=ws_names[i], monWS_n=MonitorWS)
+		# Convert to dSpacing
+		ConvertUnits(ws_names[i], savefile, 'dSpacing')
+		# DiffractionFocussing(ws_names[i], savefile, calFile) -- not needed?
+		workspaces.append(savefile)
+		if CleanUp:
+			mantid.deleteWorkspace(ws_names[i])
+		SaveNexusProcessed(savefile, savefile+'.nxs')
+	if plotOpt:
+		for demon in workspaces:
+			nspec = mantid.getMatrixWorkspace(demon).getNumberHistograms()
+			plotSpectrum(demon, range(0, nspec))
+	return workspaces, runNos
+
+def elwin(inputFiles, eRange, iconOpt = {}):
+	outWS_list = []
+	for file in inputFiles:
+		(direct, filename) = os.path.split(file)
+		(root, ext) = os.path.splitext(filename)
+		if ext == '.nxs':
+			LoadNexus(file, root)
+			savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_elw'
+			nhist = mantid.getMatrixWorkspace(root).getNumberHistograms()
+			Integration(root, savefile, eRange[0], eRange[1], 0, nhist-1)
+			SaveNexusProcessed(savefile, savefile+'.nxs')
+			outWS_list.append(savefile)
+			mantid.deleteWorkspace(root)
+		elif ext == '.raw':
+			if ( len(iconOpt) != 8 ):
+				message = 'Elwin: Number of values for iconOpt parameter do not match expectation. Please view function definition for details.'
+				print message
+				sys.exit(message)
+			inWS_l, runNos = convert_to_energy([file], iconOpt['map'], iconOpt['first'], iconOpt['last'], iconOpt['efixed'], bgremove = iconOpt['bgremove'], tempK=iconOpt['tempK'], calib=iconOpt['calib'], rebinParam=iconOpt['rebin'])
+			inWS = inWS_l[0]
+			savefile = file[:3] + runNos[0] + '_elw'
+			nhist = mantid.getMatrixWorkspace(inWS).getNumberHistograms()
+			Integration(inWS, savefile, eRange[0], eRange[1], 0, nhist-1)
+			SaveNexusProcessed(savefile, savefile+'.nxs')
+			outWS_list.append(savefile)
+			mantid.deleteWorkspace(inWS)
+		else:
+			print 'Unrecognised file type.'
+			sys.exit('Elwin: unrecognised input file type (' +ext+ ')')
+	return outWS_list
+
+def slice(inputfiles, enXRange = [], tofXRange = [], inWS_n='Energy', outWS_n='Time', spectra = [0,0]):
+	'''
+	This function does the "Slice" part of modes. To be passed in a list of input files (either .raw or .nxs),
+	and a (2) 4-element list of X-values to integrate over for the files passed in, one for Energy and one for TOF.
+	If your files only deal with one of these, you can omit the other.
+	'''
+	if ( enXRange == [] and tofXRange == [] ):
+		message = 'Slice: no x-ranges for integration were provided.'
+		print message
+		sys.exit(message)
+	for file in inputfiles:
+		(direct, filename) = os.path.split(file)
+		(root, ext) = os.path.splitext(filename)
+		if ext == '.nxs':
+			if (enXRange == []):
+				message = 'Slice: values for integration over energy have not been supplied.'
+				print message
+				sys.exit(message)
+			root = root[:-3]
+			LoadNexus(file, root)
+			nhist = mantid.getMatrixWorkspace(root).getNumberHistograms()
+			savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_sle'
+			Integration(root, 'Unit1', enXRange[0], enXRange[1], 0, nhist-1)
+			Integration(root, 'Unit2', enXRange[2], enXRange[3], 0, nhist-1)
+			Minus('Unit1', 'Unit2', savefile)
+			SaveNexusProcessed(savefile, savefile+'.nxs')
+			mantid.deleteWorkspace(root)
+		elif ext == '.raw':
+			if (tofXRange == []):
+				message = 'Slice: values for integration over time of flight have not been supplied.'
+				print message
+				sys.exit(message)
+			unit = 'Time'
+			if spectra == [0, 0]:
+				LoadRaw(file, root)
+			else:
+				LoadRaw(file, root, SpectrumMin = spectra[0], SpectrumMax = spectra[1])
+			nhist = mantid.getMatrixWorkspace(root).getNumberHistograms()
+			savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_slt'
+			Integration(root, 'Unit1', tofXRange[0], tofXRange[1], 0, nhist-1)
+			Integration(root, 'Unit2', tofXRange[2], tofXRange[3], 0, nhist-1)
+			Minus('Unit1', 'Unit2', savefile)
+			SaveNexusProcessed(savefile, savefile+'.nxs')
+			mantid.deleteWorkspace(root)
+		else:
+			message = 'Slice: Unrecognised file extension ('+ext+')'
+			print message
+			sys.exit(message)
+	mantid.deleteWorkspace('Unit1')
+	mantid.deleteWorkspace('Unit2')
+
+def fury(sample, resolution):
+	''' S(Q,w) to I(Q,t) via FFT (FastFourierTrans) '''
+	LoadNexus(sample, 'sample')
+	LoadNexus(resolution, 'resolution')

@@ -1577,6 +1577,180 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_2" >
+         <property name="title" >
+          <string>RES Options</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_22" >
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_28" >
+            <item>
+             <widget class="QLabel" name="cal_lbRebin" >
+              <property name="text" >
+               <string>Rebinning</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_34" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="cal_lbElow" >
+              <property name="text" >
+               <string>ELow</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="cal_leELow" >
+              <property name="maximumSize" >
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="cal_lbEWidth" >
+              <property name="text" >
+               <string>EWidth</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="cal_leEWidth" >
+              <property name="maximumSize" >
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="cal_lbEHigh" >
+              <property name="text" >
+               <string>EHigh</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="cal_leEHigh" >
+              <property name="maximumSize" >
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_35" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_27" >
+            <item>
+             <widget class="QLabel" name="cal_lbBackgroundSubtraction" >
+              <property name="text" >
+               <string>Background Subtraction</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_36" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="cal_lbStartX" >
+              <property name="text" >
+               <string>StartX</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="cal_leStartX" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="cal_lbEndX" >
+              <property name="text" >
+               <string>EndX</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="cal_leEndX" >
+              <property name="maximumSize" >
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_33" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="cal_gbButtons" >
          <property name="title" >
           <string/>

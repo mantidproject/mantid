@@ -503,6 +503,36 @@ QString Indirect::savePyCode()
 	return pyInput;
 }
 /**
+* This function is called after calib has run and creates a RES file for use in later analysis (Fury,etc)
+* @param file the input file (WBV run.raw)
+*/
+void Indirect::createRESfile(const QString& file)
+{
+	//
+	QString pyInput =
+		"import IndirectEnergyConversion as ind\n"
+		"iconOpt = { 'first': " +m_uiForm.leSpectraMin->text()+
+		", 'last': " +m_uiForm.leSpectraMax->text()+
+		", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n";
+	QString rebinParam = m_uiForm.cal_leELow->text() + "," +
+		m_uiForm.cal_leEWidth->text() + "," +
+		m_uiForm.cal_leEHigh->text();
+	QString background = "[ " +m_uiForm.cal_leStartX->text()+ ", " +m_uiForm.cal_leEndX->text()+"]";
+
+	pyInput +=
+		"nspec = iconOpt['last'] - iconOpt['first'] + 1\n"
+		"background = " + background + "\n"
+		"rebinParam = '" + rebinParam + "'\n"
+		"file = r'" + file + "'\n"
+
+		"outWS = ind.res(file, nspec, iconOpt, rebinParam, background)\n";
+
+	QString pyOutput = runPythonCode(pyInput).trimmed();
+
+	if ( pyOutput != "" )
+		showInformationBox("Unable to create RES file.");
+}
+/**
 * Used to check whether any changes have been made by the user to the interface.
 * @return boolean m_isDirty
 */
@@ -905,6 +935,10 @@ void Indirect::calibCreate()
 	{
 		showInformationBox("Errors:\n" + pyOutput);
 		return;
+	}
+	else
+	{
+		createRESfile(input_path);
 	}
 
 	m_uiForm.leCalibrationFile->setText(output_path);

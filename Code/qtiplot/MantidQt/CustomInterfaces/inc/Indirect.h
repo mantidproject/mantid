@@ -67,6 +67,7 @@ namespace MantidQt
 	  void clearReflectionInfo(); ///< clear various line edit boxes
 	  QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
 	  QString savePyCode(); ///< create python code as string to save files
+	  void createRESfile(const QString& file); ///< create a RES file for use in Fury
 	  bool isDirty(); ///< state whether interface has had any changes
 	  void isDirty(bool state); ///< signify changes to interface
 	  bool isDirtyRebin();
