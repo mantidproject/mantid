@@ -34,7 +34,7 @@ public:
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		searchobj.setPropertyValue("StartRun", "100.0");
 		searchobj.setPropertyValue("EndRun", "102.0");
-		searchobj.setPropertyValue("Instruments","LOQ");
+		searchobj.setPropertyValue("Instrument","LOQ");
 		searchobj.setPropertyValue("OutputWorkspace","investigations");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -42,7 +42,7 @@ public:
 
 		if (!invstObj.isInitialized() ) invstObj.initialize();
 		invstObj.setPropertyValue("InvestigationId","12576918");
-		invstObj.setPropertyValue("InputWorkspace", "investigations");//records of investigations
+		//invstObj.setPropertyValue("InputWorkspace", "investigations");//records of investigations
 		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
 		//		
 		TS_ASSERT_THROWS_NOTHING(invstObj.execute());

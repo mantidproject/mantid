@@ -12,6 +12,8 @@ namespace Mantid
 	{
 		using namespace Kernel;
 		using namespace API;
+
+		DECLARE_ALGORITHM(CGetDataFiles)
 		/// Initialising the algorithm
 		void CGetDataFiles::init()
 		{
@@ -19,10 +21,10 @@ namespace Mantid
 			mustBePositive->setLower(0);
 			declareProperty<long long>("InvestigationId",0,mustBePositive,"Id of the selected investigation");
 
-			declareProperty("Title","","The title of the investigation to do data search ");
+			//declareProperty("Title","","The title of the investigation to do data search ");
 
-			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("InputWorkspace","",Direction::Input),
-				"The name of the workspace which stored the last icat investigation search result");
+			//declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("InputWorkspace","",Direction::Input),
+			//	"The name of the workspace which stored the last icat investigation search result");
 
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
                             "The name of the workspace to store the file data search details");
@@ -36,9 +38,9 @@ namespace Mantid
 		/// This method returns a set of data files for a given investigationid
 		API::ITableWorkspace_sptr CGetDataFiles::doDataFilesSearch()
 		{
-			std::string invstTitle=getProperty("Title");
+			//std::string invstTitle=getProperty("Title");
 			//input workspace
-			API::ITableWorkspace_sptr inputws_sptr=getProperty("InputWorkspace");
+			//API::ITableWorkspace_sptr inputws_sptr=getProperty("InputWorkspace");
 
 			//int row=0;
 			//const int col=2; //need to find a way to get column index in table workspace.

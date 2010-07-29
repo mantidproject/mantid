@@ -14,7 +14,7 @@ namespace Mantid
 		using namespace Kernel;
 
 		DECLARE_ALGORITHM(Login)
-		
+
 		/// Init method to declare algorithm properties
 		void Login::init()
 		{
@@ -28,18 +28,21 @@ namespace Mantid
 		/// execute the algorithm
 		void Login::exec()
 		{
+			progress(m_prog, "Connecting to ICat DataBase...");
 			ICATPortBindingProxy icat;
 			doLogin(icat);
 		}
 
-	   /**This method calls the ICat the login api and connects to DB and returns session id.
-		 *@param icat ICat proxy object
+	  /**This method calls the ICat the login api and connects to DB and returns session id.
+		*@param icat ICat proxy object
 		*/
 		void Login::doLogin(ICATPortBindingProxy& icat)
 		{
+			m_prog=0.2;
 			std::string username=getProperty("Username");
 			std::string password=getProperty("Password");
-						
+			progress(m_prog, "User Name and Password...");
+
 			// Define ssl authentication scheme
 			if (soap_ssl_client_context(&icat,
 				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
@@ -54,19 +57,22 @@ namespace Mantid
 				//icat.soap_stream_fault(std::cerr);
 				CErrorHandling::throwErrorMessages(icat);
 			}
-			
+
 			// Login to icat
 			ns1__login login;
 			ns1__loginResponse loginResponse;
-			
+
 			login.username = &username;
 			login.password = &password;
 
 			std::string session_id;
+
 			int query_id = icat.login(&login, &loginResponse);
 			if( query_id == 0 )
 			{
 				session_id = *(loginResponse.return_);
+				m_prog=0.8;
+				progress(m_prog, "Session Id Obtained...");
 				//save session id
 				ICat::Session::Instance().setSessionId(session_id);
 				//save user name
@@ -74,12 +80,13 @@ namespace Mantid
 			}
 			else
 			{ 
-				//icat.soap_stream_fault(std::cerr);
 				CErrorHandling::throwErrorMessages(icat);
+				return;
 			}
-			
+			m_prog=1.0;
+			progress(m_prog, "Login Succesful...");
 
-									
+
 		}
 	}
 }

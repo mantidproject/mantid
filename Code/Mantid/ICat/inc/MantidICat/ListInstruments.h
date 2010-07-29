@@ -1,22 +1,17 @@
-#ifndef MANTID_ICAT_LOGIN_H_
-#define MANTID_ICAT_LOGIN_H_
+#ifndef MANTID_ICAT_LISTINSTRUMENTS_H_
+#define MANTID_ICAT_LISTINSTRUMENTS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 
-/**  Login class for logging into ICat DB .This class written as a Mantid algorithm. 
-     This class uses Gsoap generated ProxyObject to connect to ICat and uses Login API .
-	 
-	Required Properties:
-    <UL>
-    <LI> Username - The logged in user name </LI>
-    <LI> Password - The password of the logged in user </LI>
-    </UL>
-   
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-    @date 07/07/2010
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+/**  CListInstruments class is responsible for loading  instruments list from ICat DB .
+     This class written as a Mantid algorithm. This algorithm is used to poulate the 
+	 ICat Search Interface instrument box  
+      
+    @author Sofia Antony, STFC Rutherford Appleton Laboratory
+    @date 09/07/2010
+    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -36,37 +31,33 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
+
 namespace Mantid
 {
 	namespace ICat
 	{
-	
-		class DLLExport Login: public API::Algorithm
+		class DLLExport CListInstruments:public API::Algorithm
 		{
 		public:
 			/// constructor
-			Login():API::Algorithm(),m_prog(0){}
-			/// Destructor
-			~Login(){}
+			CListInstruments():API::Algorithm(){}
+			/// destructor
+			~CListInstruments(){}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "Login"; }
+			virtual const std::string name() const { return "ListInstruments"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual const int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method
 			virtual const std::string category() const { return "ICat"; }
 
 		private:
-			/// Overwrites Algorithm method.
+			/// Overwrites Algorithm init method.
 			void init();
-			/// Overwrites Algorithm method
+			/// Overwrites Algorithm exec method
 			void exec();
-			/// login method
-			void doLogin( ICATPortBindingProxy & icat);
 
-			/// attributes
-			double m_prog;
-			
-
+			/// Search method 
+			API::ITableWorkspace_sptr  listInstruments();
 		};
 	}
 }

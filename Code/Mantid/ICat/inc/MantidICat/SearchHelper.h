@@ -46,7 +46,7 @@ namespace Mantid
 			int doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response);
 			
 			/// method to search by run number
-			int doSearchByRunNumber(const double& dstartRun,const double& dendRun,const std::string& instrName,ns1__investigationInclude einclude,
+			int doSearchByRunNumber(const double& dstartRun,const double& dendRun,bool bCase,const std::string& instrName,ns1__investigationInclude einclude,
 				API::ITableWorkspace_sptr& responsews_sptr);
 
 			/// calls getInvestigationIncludes api's
@@ -55,17 +55,22 @@ namespace Mantid
 			/// this method calls Icat api getInvestigationIncludes and returns datasets for the given investigation id.
 			int doDataSetsSearch(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
 
-		private:
-					
+			/// This method lists the isntruments
+			API::ITableWorkspace_sptr listInstruments();
 
+			/// This method disconnects last connected  session from icat DB
+			int doLogout();
+			
+
+		private:
+			
 			/// This method sets the request parameters for investigation includes.
 			void setReqParamforInvestigationIncludes(long long invstId,ns1__investigationInclude include,ns1__getInvestigationIncludes& request);
 
 			/// set request param for investigation includes
-			void setReqParamforSearchByRunNumber(const double& dstart,const double& dend,ns1__investigationInclude einclude,
+			void setReqParamforSearchByRunNumber(const double& dstart,const double& dend,bool bCase,ns1__investigationInclude einclude,
 				boost::shared_ptr<ns1__searchByAdvanced>& request);
 	
-
 			///This method saves the file search response to table workspace
 			API::ITableWorkspace_sptr saveFileSearchResponse(const ns1__searchByAdvancedResponse& response);
 
@@ -75,8 +80,17 @@ namespace Mantid
 			/// this method saves investigation include response to a table workspace
 			API::ITableWorkspace_sptr saveInvestigationIncludesResponse(const ns1__getInvestigationIncludesResponse& response);
 
-			/// this method saves Datasets to a table workspace
+			/// This method saves Datasets to a table workspace
 			API::ITableWorkspace_sptr saveDataSets(const ns1__getInvestigationIncludesResponse& response);
+
+			/// This method sets the request parameters
+			void setReqparamforlistInstruments(ns1__listInstruments& request);
+
+			/// This method saves Instrument List to a table workspace
+			API::ITableWorkspace_sptr saveInstrumentList(const ns1__listInstrumentsResponse& response);
+
+			/// This method creates table workspace
+			API::ITableWorkspace_sptr createTableWorkspace();
 
 
 			/* This is a template method to save data to table workspace

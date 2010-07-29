@@ -16,15 +16,18 @@ public:
 	
 	void testInit()
 	{
+		CSearchByRunNumber searchobj;
+		Login loginobj;
 		TS_ASSERT_THROWS_NOTHING( searchobj.initialize());
 		TS_ASSERT( searchobj.isInitialized() );
 	}
-	void testSearchByRunNumberandInstrument()
+	void xtestSearchByRunNumberandInstrument()
 	{
 		/*std::string s;
 		std::getline(std::cin,s);*/
+		CSearchByRunNumber searchobj;
+		Login loginobj;
 		Session::Instance();
-
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -38,21 +41,21 @@ public:
 		
 		searchobj.setPropertyValue("StartRun", "100.0");
 		searchobj.setPropertyValue("EndRun", "109.0");
-		searchobj.setPropertyValue("Instruments","LOQ");
+		searchobj.setPropertyValue("Instrument","LOQ");
 		searchobj.setPropertyValue("OutputWorkspace","SearchBy_RunNumber");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
 
 	}
-	void xtestSearchByRunNumberInvalidInput()
+	void testSearchByRunNumberInvalidInput()
 	{
 
 		/*std::string s;
 		std::getline(std::cin,s);*/
 
+		Login loginobj;
 		Session::Instance();
-
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Now set it...
@@ -62,22 +65,21 @@ public:
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
-
+		CSearchByRunNumber searchobj;
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
-		// start run number < end run number
+		// start run number > end run number
 		searchobj.setPropertyValue("StartRun", "150.0");
 		searchobj.setPropertyValue("EndRun", "102.0");
-		searchobj.setPropertyValue("Instruments","LOQ");
+		searchobj.setPropertyValue("Instrument","LOQ");
 		searchobj.setPropertyValue("OutputWorkspace","SearchBy_RunNumber");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		//should fail
-		TS_ASSERT( !loginobj.isExecuted() );
+		TS_ASSERT( !searchobj.isExecuted() );
 
 	}
 private:
-		CSearchByRunNumber searchobj;
-		Login loginobj;
+		
 };
 #endif

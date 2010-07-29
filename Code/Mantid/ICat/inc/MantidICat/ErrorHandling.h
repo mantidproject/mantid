@@ -50,12 +50,16 @@ namespace Mantid
 				const int len=600;
 				icat.soap_sprint_fault(buf,len);
 				std::string error(buf);
-				std::basic_string <char>::size_type index=error.find("Detail:");
+				std::string begmsg("<message>");
+				std::string endmsg("</message>");
+				
+				std::basic_string <char>::size_type index1=error.find(begmsg);
+				std::basic_string <char>::size_type index2=error.find(endmsg);
 				std::string exception;
-				if(index!=std::string::npos)
-				{	exception=error.substr(0,index-1);
+				if(index1!=std::string::npos && index2!=std::string::npos)
+				{	
+					exception = error.substr(index1+begmsg.length(),index2-(index1+begmsg.length()));
 				}
-				//std::cout<<exception<<std::endl;
 				throw std::runtime_error(exception);
 			}
 

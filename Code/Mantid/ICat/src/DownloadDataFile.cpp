@@ -39,6 +39,7 @@ namespace Mantid
 			declareProperty("Filename","","Name of the file to download");
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("InputWorkspace","",Direction::Input),
 				"The name of the workspace which stored the last icat search result");
+			declareProperty("FileLocation","",Direction::Output);
 		}
 		/// Execute the algorithm
 		void CDownloadDataFile::exec()
@@ -95,14 +96,18 @@ namespace Mantid
 					std::string fileloc=*response.return_->location;
 					//std::cout<<"file location is "<<fileloc<<std::endl;
 
-					// the file location string contains some extra at the beggining of the string.
-					//removing the extra string "file://" from the file location string.
-					std::basic_string<char>::size_type index=fileloc.find_first_of("f");
-					const std::basic_string <char>::size_type npos = -1;
-					if(index!=npos)
+					// the file location string format is something like 
+					// \\isis\inst$\Instruments$\NDXMERLIN\Instrument\data\cycle_07_3\MER00601.raw 
+
+					//change the forward slash to backward slash to work on linux
+					std::basic_string<char>::size_type index;
+					index=fileloc.find("\\");
+					if(index!=std::string::npos)
 					{
-						fileloc.erase(index,7);
+						fileloc.replace(index,0,"/");
+						g_log.error()<<"location string is"<<fileloc<<std::endl;
 					}
+
 					//if we are able to open the file from the location returned by the file location
 					//the user got the permission to acess isis archive
 					std::ifstream isisfile(fileloc.c_str());
@@ -111,17 +116,9 @@ namespace Mantid
 						isis_archive=false;
 					}
 					else
-					{
-						//
-						//if(isRawFile(fileName))
-						//{
-      //                    //need to call loadraw
-						//}
-						//else if (isNexusFile(fileName))
-						//{
-						//	//need to call load nexus.
-						//}
-
+					{	
+						setProperty("FileLocation",fileloc);
+						g_log.information()<<"isis archive location for the selected file is"<<fileloc<<std::endl;
 					}
 
 				}
@@ -137,6 +134,7 @@ namespace Mantid
 			}
 			if(!isis_archive)
 			{
+				g_log.information()<<"File can not be opened from isis archive,calling ICat API to download"<<std::endl;
 				std::vector<std::string> fileList;
 				//fileList.push_back(inputfile);
 				std::string runNumber;
@@ -172,21 +170,19 @@ namespace Mantid
 				setRequestParameters(*citr,ws_sptr,request);
 
 				ns1__downloadDatafileResponse response;
-				std::string URL;
 				// get the URL using ICAT API
 				int ret=icat.downloadDatafile(&request,&response);
 				if(ret!=0)
 				{
 					CErrorHandling::throwErrorMessages(icat);
 				}
-				
-				if(response.URL)
+				if(!response.URL)
 				{
-					URL=*response.URL;
+					throw std::runtime_error("Empty URL returned from ICat databse");
 				}
 
 				//download using Poco HttpClient session and save to local disk
-				doDownloadandSavetoLocalDrive(URL,*citr);
+				doDownloadandSavetoLocalDrive(*response.URL,*citr);
 			}//end of for loop for download file list iteration
 
 		}
@@ -203,7 +199,7 @@ namespace Mantid
 			ns1__getDatafile& request)
 		{			
 			//write code to look up this filename in the table workspace
-			int row=0;const int col=2;
+			int row=0;const int col=0;
 			long long fileId=0;
 			try
 			{
@@ -244,7 +240,7 @@ namespace Mantid
 		void CDownloadDataFile::setRequestParameters(const std::string fileName,API::ITableWorkspace_sptr ws_sptr,ns1__downloadDatafile& request)
 		{			
 			//look up  filename in the table workspace
-			int row=0;const int col=2;long long fileId=0;
+			int row=0;const int col=0;long long fileId=0;
 			ws_sptr->find(fileName,row,col);
 			try
 			{
@@ -334,7 +330,7 @@ namespace Mantid
 			std::string fextn=fileName.substr(dotIndex+1,fileName.size()-dotIndex);
 
 			bool binary;
-			(!fextn.compare("raw")|| !fextn.compare("RAW")|| !fextn.compare("nxs")) ? binary = true : binary = false;
+			(!fextn.compare("raw")|| !fextn.compare("RAW")|| !fextn.compare("nxs")|| !fextn.compare("NXS")) ? binary = true : binary = false;
 			//std::cout<<"file opening mode  for filename "<<fileName<<"is "<<binary<<std::endl;
 			return binary;
 
@@ -366,7 +362,7 @@ namespace Mantid
 				std::istream& rs = session.receiveResponse(res);
 				clock_t end=clock();
 		        float diff = float(end - start)/CLOCKS_PER_SEC;
-				g_log.debug()<<"Time taken to download file "<< fileName<<"is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+				g_log.information()<<"Time taken to download file "<< fileName<<"is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 				//save file to local disk
 				saveFiletoDisk(rs,fileName);
 
@@ -392,8 +388,8 @@ namespace Mantid
 		{
 			
 			std::string filepath = Kernel::ConfigService::Instance().getString("icatDownload.directory");
-			//std::cout<<"ICatDownload path is "<<filepath<<std::endl;
 			filepath += fileName;
+			
 			std::ios_base::openmode mode;
 			//if raw/nexus file open it in binary mode else ascii 
 			isBinaryFile(fileName)? mode = std::ios_base::binary : mode = std::ios_base::out;

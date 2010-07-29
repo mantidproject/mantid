@@ -1,22 +1,15 @@
-#ifndef MANTID_ICAT_LOGIN_H_
-#define MANTID_ICAT_LOGIN_H_
+#ifndef MANTID_ICAT_LOGOUT_H_
+#define MANTID_ICAT_LOGOUT_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 
 
-/**  Login class for logging into ICat DB .This class written as a Mantid algorithm. 
-     This class uses Gsoap generated ProxyObject to connect to ICat and uses Login API .
-	 
-	Required Properties:
-    <UL>
-    <LI> Username - The logged in user name </LI>
-    <LI> Password - The password of the logged in user </LI>
-    </UL>
-   
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-    @date 07/07/2010
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+/** Logout class is responsible for disconnecting from  ICat DB .This class written as a Mantid algorithm. 
+    
+    @author Sofia Antony, STFC Rutherford Appleton Laboratory
+    @date 23/07/2010
+    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -41,15 +34,15 @@ namespace Mantid
 	namespace ICat
 	{
 	
-		class DLLExport Login: public API::Algorithm
+		class DLLExport CLogout: public API::Algorithm
 		{
 		public:
 			/// constructor
-			Login():API::Algorithm(),m_prog(0){}
+			CLogout():API::Algorithm(),m_prog(0){}
 			/// Destructor
-			~Login(){}
+			~CLogout(){}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "Login"; }
+			virtual const std::string name() const { return "Logout"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual const int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method
@@ -61,7 +54,7 @@ namespace Mantid
 			/// Overwrites Algorithm method
 			void exec();
 			/// login method
-			void doLogin( ICATPortBindingProxy & icat);
+			void doLogout();
 
 			/// attributes
 			double m_prog;

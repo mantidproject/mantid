@@ -9,11 +9,13 @@
 #include "MantidICat/SearchByRunNumber.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include <iomanip>
 #include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
+using namespace Mantid::API;
 class CDownloadDataFileTest: public CxxTest::TestSuite
 {
 public:
@@ -24,7 +26,8 @@ public:
 	}
 	void testDownLoadDataFile()
 	{
-				
+		//std::string str;
+		//std::getline(std::cin,str);
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -39,7 +42,7 @@ public:
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		searchobj.setPropertyValue("StartRun", "100.0");
 		searchobj.setPropertyValue("EndRun", "102.0");
-		searchobj.setPropertyValue("Instruments","HET");
+		searchobj.setPropertyValue("Instrument","HET");
 		searchobj.setPropertyValue("OutputWorkspace","investigations");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -47,7 +50,7 @@ public:
 
 		if ( !invstObj.isInitialized() ) invstObj.initialize();
 		invstObj.setPropertyValue("InvestigationId","13539191");
-		invstObj.setPropertyValue("InputWorkspace", "investigations");//records of investigations
+		//invstObj.setPropertyValue("InputWorkspace", "investigations");//records of investigations
 		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
 		//		
 		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
@@ -67,17 +70,20 @@ public:
 		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
 		filepath += "download_time.txt";
 
-		std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::trunc);
+		std::ofstream ofs(filepath.c_str(), std::ios_base::out );
 		if ( ofs.rdstate() & std::ios::failbit )
 		{
 			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
 		}
-		ofs<<"Time taken for http download over internet from isis data server for files with investigation id 12576918 file is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+		ofs<<"Time taken for http download over internet from isis data server for files with investigation id 12576918 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 		
 						
 		TS_ASSERT( downloadobj.isExecuted() );
 		//delete the file after execution
-		remove("HET00097.RAW");
+		//remove("HET00097.RAW");
+
+		AnalysisDataService::Instance().remove("investigations");
+		AnalysisDataService::Instance().remove("investigation");
 
 	}
 
@@ -98,7 +104,7 @@ public:
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		searchobj.setPropertyValue("StartRun", "17440.0");
 		searchobj.setPropertyValue("EndRun", "17556.0");
-		searchobj.setPropertyValue("Instruments","EMU");
+		searchobj.setPropertyValue("Instrument","EMU");
 		searchobj.setPropertyValue("OutputWorkspace","investigations");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -108,7 +114,7 @@ public:
 	//	invstObj.setPropertyValue("Title", "Polythene T=290 F=922" );
 
 		invstObj.setPropertyValue("InvestigationId", "24070400");
-		invstObj.setPropertyValue("InputWorkspace", "investigations");
+		//invstObj.setPropertyValue("InputWorkspace", "investigations");
 
 		invstObj.setPropertyValue("OutputWorkspace","investigation");
 		//		
@@ -128,23 +134,26 @@ public:
 		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
 		filepath += "download_time.txt";
 		
-		std::ofstream ofs(filepath.c_str(), std::ios_base::app);
+		std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
 		if ( ofs.rdstate() & std::ios::failbit )
 		{
 			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
 		}
 		ofs<<"Time taken for http download  from isis data server over internet for files with investigation id 24070400 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
-		ofs.close();
+		//ofs.close();
 		
 		TS_ASSERT( downloadobj.isExecuted() );
 		//delete the file after execution
-		remove("EMU00017452.nxs");
+		//remove("EMU00017452.nxs");
+		AnalysisDataService::Instance().remove("investigations");
+		AnalysisDataService::Instance().remove("investigation");
 	}
+	
 	void testDownloaddataFile1()
 	{	
 		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
 		filepath += "download_time.txt";
-		std::ofstream ofs(filepath.c_str(), std::ios_base::app);
+		std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
 		if ( ofs.rdstate() & std::ios::failbit )
 		{
 			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
