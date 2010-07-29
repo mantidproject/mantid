@@ -1270,7 +1270,7 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
 
       // check if <min> or <max> elements present
 
-      std::vector<std::string> constraint(2); 
+      std::vector<std::string> constraint(2, ""); 
       
       NodeList* pNLMin = pParamElem->getElementsByTagName("min");
       unsigned int numberMin = pNLMin->length();

@@ -212,7 +212,7 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
 
 }
 
-void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const int& nData)const
+void IkedaCarpenterPV::function(double* out, const double* xValues, const int& nData)const
 {
     const double& I = getParameter("I");
     const double& alpha0 =getParameter("Alpha0");
@@ -294,7 +294,7 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const i
     }
 }
 
-void IkedaCarpenterPV::functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData)
+void IkedaCarpenterPV::functionDeriv(API::Jacobian* out, const double* xValues, const int& nData)
 {
   calNumericalDeriv(out, xValues, nData);
 }
