@@ -984,8 +984,16 @@ public slots:
 
 	void showToolBarsMenu();
   void savetoNexusFile();
-  
 
+  //slot for writing to log window
+  void writetoLogWindow(const QString& );
+
+  /// execute loadraw asynchronously
+  void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
+  
+  /// execute loadnexus asynchronously
+  void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
+ 
 signals:
 	void modified();
 	void resultsContextMenu();
@@ -1068,6 +1076,16 @@ private slots:
 
   /// for zooming the selected graph using mouse drag tool
   void magnify();
+
+  /// Handler for ICat login menu 
+  void ICatLogin();
+  /// Handler for ICat search menu
+  void ICatSearch();
+
+  void ICatLogout();
+
+  /// method to create widgets from mantid qt;
+  void setGeometry(QMdiSubWindow* usr_win,QWidget* user_interface);
 
 
   ///
@@ -1247,7 +1265,7 @@ private:
 	QLineEdit *info;
 
 	QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
-	QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu;
+	QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
 	QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
 	QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
 
@@ -1260,6 +1278,7 @@ private:
     QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
     QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
     QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
+	QAction *actionICatLogin,*actionICatSearch,*actionICatLogout;
 #ifdef SCRIPTING_CONSOLE
     QAction *actionShowConsole;
 #endif

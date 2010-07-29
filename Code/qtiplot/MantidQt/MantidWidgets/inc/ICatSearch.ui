@@ -1,0 +1,263 @@
+<ui version="4.0" >
+ <class>ICatSearch</class>
+ <widget class="QWidget" name="ICatSearch" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>713</width>
+    <height>591</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>ICatSearch</string>
+  </property>
+  <widget class="QTableWidget" name="searchtableWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>30</y>
+     <width>461</width>
+     <height>521</height>
+    </rect>
+   </property>
+   <property name="toolTip" >
+    <string>ICat Search Results Window</string>
+   </property>
+   <property name="alternatingRowColors" >
+    <bool>true</bool>
+   </property>
+   <property name="selectionMode" >
+    <enum>QAbstractItemView::SingleSelection</enum>
+   </property>
+   <property name="showGrid" >
+    <bool>true</bool>
+   </property>
+   <column>
+    <property name="text" >
+     <string>InvestigationId</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>RbNumber</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Title</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Type</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Instrument</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Investigator</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>RunRange</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Year</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTreeWidget" name="searchtreeWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>231</width>
+     <height>521</height>
+    </rect>
+   </property>
+   <property name="toolTip" >
+    <string>ICat Search Widget</string>
+   </property>
+   <property name="statusTip" >
+    <string/>
+   </property>
+   <column>
+    <property name="text" >
+     <string>Search Widget</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QGroupBox" name="searchgroupBox" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>130</y>
+     <width>211</width>
+     <height>109</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>SearchBox</string>
+   </property>
+   <widget class="QLabel" name="runNumberLabel" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>22</y>
+      <width>31</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Run#:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="startRunEdit" >
+    <property name="geometry" >
+     <rect>
+      <x>47</x>
+      <y>21</y>
+      <width>63</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip" >
+     <string>Start Run Number</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="endRunEdit" >
+    <property name="geometry" >
+     <rect>
+      <x>133</x>
+      <y>20</y>
+      <width>63</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip" >
+     <string>End Run Number</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="instrumentLabel" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>116</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Instrument:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="instrmentBox" >
+    <property name="geometry" >
+     <rect>
+      <x>134</x>
+      <y>50</y>
+      <width>63</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip" >
+     <string>Instrument Box</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="casesensitiveBox" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>78</y>
+      <width>116</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Case Sensitive</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="searchButton" >
+    <property name="geometry" >
+     <rect>
+      <x>134</x>
+      <y>77</y>
+      <width>63</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Search</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="searchlabel" >
+   <property name="geometry" >
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>693</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>543</x>
+     <y>560</y>
+     <width>158</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout" >
+    <item>
+     <widget class="QPushButton" name="okButton" >
+      <property name="text" >
+       <string>OK</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="cancelButton" >
+      <property name="text" >
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+   <zorder>cancelButton</zorder>
+   <zorder>okButton</zorder>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>startRunEdit</tabstop>
+  <tabstop>endRunEdit</tabstop>
+  <tabstop>instrmentBox</tabstop>
+  <tabstop>casesensitiveBox</tabstop>
+  <tabstop>searchButton</tabstop>
+  <tabstop>okButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>searchtreeWidget</tabstop>
+  <tabstop>searchtableWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

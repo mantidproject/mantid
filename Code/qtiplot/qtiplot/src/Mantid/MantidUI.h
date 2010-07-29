@@ -15,6 +15,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidQtAPI/AlgorithmDialog.h"
 
 #include <Poco/NObserver.h>
 
@@ -154,6 +155,12 @@ public:
     // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
     MultiLayer* plotSelectedRows(MantidMatrix *m, bool errs = true);
 
+	/// This method executes loadraw algorithm from  ICatInterface
+	void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
+
+	/// This method executes loadnexus algorithm from ICatInterface
+	void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
+
 public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false);
@@ -184,6 +191,10 @@ public:
 
     // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
     Table* createTableDetectors(MantidMatrix *m);
+
+	//
+	bool executeICatLogout(int version);
+	
 public slots:
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
@@ -238,6 +249,7 @@ signals:
   void algorithmAboutToBeCreated();
 private:
   Mantid::API::IAlgorithm_sptr findAlgorithmPointer(const QString & algName);
+  
 
   //-----------------------------------
 
@@ -417,6 +429,12 @@ private:
 
     void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
 	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
+
+	/// This method executes LoadRaw/LoadNexus algorithm from ICat interface
+	 MantidQt::API::AlgorithmDialog * createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
+
+	 /// This method accepts user inputs and executes loadraw/load nexus algorithm
+	 void acceptLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
 	
 
     // Private variables

@@ -158,6 +158,7 @@ macx {
   LIBS += -lMantidKernel
 
   LIBS += -lMantidQtAPI
+  LIBS += -lMantidWidgets
 
 CONFIG(debug, debug|release) {
   LIBS	+= -lPocoUtild
@@ -218,6 +219,7 @@ win32 {
   LIBS += MantidGeometry.lib
   LIBS += MantidKernel.lib
   LIBS += MantidQtAPI.lib
+  LIBS += MantidWidgets.lib
 }
 
 QMAKE_POST_LINK += $${QMAKE_COPY} qtiplotrc.py \"$$DESTDIR\" &

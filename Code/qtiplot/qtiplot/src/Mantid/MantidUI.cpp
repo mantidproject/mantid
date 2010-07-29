@@ -21,11 +21,11 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/ConfigService.h"
+
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -838,31 +838,86 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 }
 void MantidUI::executeAlgorithm(QString algName, int version)
 {
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
-  if( !alg ) return;
-  QString presets(""), enabled("");
-  //If a workspace is selected in the dock then set this as a preset for the dialog
-  QString selected = getSelectedWorkspaceName();
-  if( !selected.isEmpty() )
-  {
-    QString property_name = findInputWorkspaceProperty(alg);
-    presets = "|" + property_name + "=" + selected + "|";
-    enabled = property_name + ",";
-  }
-  //Check if a workspace is selected in the dock and set this as a preference for the input workspace
-  MantidQt::API::AlgorithmDialog *dlg = 
-    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
+	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
+    if( !alg ) return;
+	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+	acceptLoadAlgorithm(dlg,alg);
+	
+}
+/** This method is to execute loadraw from ICat Interface
+  *@param fileName - name of the file
+  *@param wsName - name of the workspace
+*/
+void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& wsName)
+{
 
-  if( !dlg ) return;
-  if ( dlg->exec() == QDialog::Accepted)
-  {
-    delete dlg;
-    executeAlgorithmAsync(alg);
-  }
-  else
-  {
-    delete dlg;
-  }
+	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadRaw", -1);
+    if( !alg ) return;
+
+	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+	QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
+	if(!list.empty())
+	{
+		//set the file name(including location) obtained from ICat API
+		list[0]->setText(fileName);
+		//set the workspace name 
+		if(list[1])
+		{
+			list[1]->setText(wsName);
+		}
+	}
+	acceptLoadAlgorithm(dlg,alg);
+
+	
+}
+void MantidUI::loadnexusfromICatInterface(const QString& fileName,const QString& wsName)
+{
+	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadNexus", -1);
+    if( !alg ) return;
+
+	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+	if(!dlg) return;
+	QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
+	if(!list.empty())
+	{
+		list[0]->setText(fileName);
+		if(list[1])
+		{
+			list[1]->setText(wsName);
+		}
+	}
+    acceptLoadAlgorithm(dlg,alg);
+}
+
+MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
+{
+	
+	QString presets(""), enabled("");
+	//If a workspace is selected in the dock then set this as a preset for the dialog
+	QString selected = getSelectedWorkspaceName();
+	if( !selected.isEmpty() )
+	{
+		QString property_name = findInputWorkspaceProperty(alg);
+		presets = "|" + property_name + "=" + selected + "|";
+		enabled = property_name + ",";
+	}
+	//Check if a workspace is selected in the dock and set this as a preference for the input workspace
+	MantidQt::API::AlgorithmDialog *dlg = 
+		MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
+	return dlg;
+}
+void MantidUI::acceptLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
+{
+	if( !dlg ) return;
+	if ( dlg->exec() == QDialog::Accepted)
+	{
+		delete dlg;
+		executeAlgorithmAsync(alg);
+	}
+	else
+	{
+		delete dlg;
+	}
 }
 
 void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList)
@@ -1100,6 +1155,15 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
     {
         QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
     }
+	
+}
+bool MantidUI::executeICatLogout(int version)
+{
+	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("Logout", version);
+    if( !alg ) return false;
+	Poco::ActiveResult<bool> result(alg->executeAsync());
+	return result.failed();
+
 }
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)

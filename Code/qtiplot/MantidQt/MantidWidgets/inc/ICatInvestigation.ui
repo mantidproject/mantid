@@ -1,0 +1,185 @@
+<ui version="4.0" >
+ <class>ICatInvestigation</class>
+ <widget class="QWidget" name="ICatInvestigation" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>679</width>
+    <height>501</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Investigation Data</string>
+  </property>
+  <widget class="QTreeWidget" name="invsttreeWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>11</x>
+     <y>35</y>
+     <width>241</width>
+     <height>411</height>
+    </rect>
+   </property>
+   <property name="horizontalScrollBarPolicy" >
+    <enum>Qt::ScrollBarAsNeeded</enum>
+   </property>
+   <property name="autoScrollMargin" >
+    <number>9</number>
+   </property>
+   <property name="alternatingRowColors" >
+    <bool>false</bool>
+   </property>
+   <column>
+    <property name="text" >
+     <string>Data</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTableWidget" name="invsttableWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>255</x>
+     <y>35</y>
+     <width>413</width>
+     <height>411</height>
+    </rect>
+   </property>
+   <property name="font" >
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="alternatingRowColors" >
+    <bool>true</bool>
+   </property>
+   <property name="selectionMode" >
+    <enum>QAbstractItemView::SingleSelection</enum>
+   </property>
+   <property name="selectionBehavior" >
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <property name="sortingEnabled" >
+    <bool>true</bool>
+   </property>
+   <column>
+    <property name="text" >
+     <string>Name</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>File Size</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>File Id</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Format</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Format Version</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Format Type</string>
+    </property>
+   </column>
+   <column>
+    <property name="text" >
+     <string>Create Time</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLabel" name="invstlabel" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>14</y>
+     <width>658</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="loadcheckBox" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>460</y>
+     <width>151</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Controlled loading of data</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>348</x>
+     <y>460</y>
+     <width>320</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2" >
+    <item>
+     <widget class="QPushButton" name="okButton" >
+      <property name="text" >
+       <string>Ok</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="cancelButton" >
+      <property name="text" >
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="downloadButton" >
+      <property name="text" >
+       <string>Download</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="LoadButton" >
+      <property name="text" >
+       <string>Load</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <zorder>layoutWidget</zorder>
+  <zorder>invsttreeWidget</zorder>
+  <zorder>invsttableWidget</zorder>
+  <zorder>invstlabel</zorder>
+  <zorder>loadcheckBox</zorder>
+ </widget>
+ <tabstops>
+  <tabstop>invsttreeWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

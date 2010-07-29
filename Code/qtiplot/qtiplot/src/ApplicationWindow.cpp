@@ -178,6 +178,8 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtMantidWidgets/ICatSearch.h"
+
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
@@ -1152,6 +1154,12 @@ void ApplicationWindow::initMainMenu()
 	help->addAction(actionHelpBugReports);
 	help->insertSeparator();
 	help->addAction(actionAbout);
+	
+	icat = new QMenu(this);
+	icat->setObjectName("ICatMenu");
+	icat->addAction(actionICatLogin);
+	icat->addAction(actionICatSearch);
+	icat->addAction(actionICatLogout);
 	disableActions();
 }
 
@@ -1392,15 +1400,18 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 
     menuBar()->insertItem(tr("&Windows"), windowsMenu);
 	windowsMenuAboutToShow();
-	menuBar()->insertItem(tr("&Help"), help );
-
 	// -- Mantid: add script actions, if any exist --
 	QListIterator<QMenu*> mIter(d_user_menus);
 	while( mIter.hasNext() )
 	{
 	  QMenu* item = mIter.next();
 	  menuBar()->insertItem(tr(item->title()), item);
-	}
+	 
+	 }
+	
+	menuBar()->insertItem(tr("&ICat"),icat);
+	menuBar()->insertItem(tr("&Help"), help );
+	
 	reloadCustomActions();
 }
 
@@ -7291,7 +7302,7 @@ void ApplicationWindow::showFitPolynomDialog()
 }
 
 void ApplicationWindow::updateLog(const QString& result)
-{
+{	
 	if ( !result.isEmpty() ){
 		current_folder->appendLogInfo(result);
 		showResults(true);
@@ -12535,6 +12546,22 @@ void ApplicationWindow::createActions()
 	actionMagnify = new QAction(QIcon(QPixmap(magnifier_xpm)), tr("Zoom &In/Out and Drag Canvas"), this);
 	connect(actionMagnify, SIGNAL(activated()), this, SLOT(magnify()));
 
+	actionICatLogin  = new QAction("Login",this);
+	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
+	actionICatLogin->setToolTip(tr("ICat Login"));
+	connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
+
+	actionICatSearch=new QAction("Search",this);
+	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
+	actionICatSearch->setToolTip(tr("ICat Search"));
+	connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatSearch()));
+	//connect(actionICatSearch, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
+
+	actionICatLogout=new QAction("Logout",this);
+	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
+	actionICatLogout->setToolTip(tr("ICat Logout"));
+	connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
+
 	
 }
 
@@ -16034,63 +16061,57 @@ void ApplicationWindow::removeCustomAction(QAction *action)
 
 void ApplicationWindow::performCustomAction(QAction *action)
 {
-  if (!action || !d_user_actions.contains(action))
-    return;
+	if (!action || !d_user_actions.contains(action))
+		return;
 #ifdef SCRIPTING_PYTHON
-  QString action_data = action->data().toString();
-  if( QFileInfo(action_data).exists() )
-  {
-    QFile script_file(action_data);
-    if ( !script_file.open(IO_ReadOnly) )
-    {
-      QMessageBox::information(this, "MantidPlot", "Error: There was a problem reading\n" + action_data);
-      return;
-    }
-    QTextStream stream(&script_file);
-    QString code("");
-    while( !stream.atEnd() )
-    {
-      code.append(stream.readLine() + "\n");
-    }
-    runPythonScript(code);
-  }
-  else
-  {
-    //First search for an existing window
-    foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
-    {
-      if( sub_win->widget()->objectName() == action_data )
-      {
-	sub_win->widget()->show();
-	return;
-      }
-    }
-    //If we are here the above search failed so create a new interface
-    QMdiSubWindow* usr_win = new QMdiSubWindow;
-    usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-    MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
-    if( user_interface )
-    { 
-      QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(), 
-			  usr_win->frameGeometry().bottomRight() - usr_win->geometry().bottomRight());
-      usr_win->setWidget(user_interface);
-      QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(), 
-			       frame.bottomRight() + user_interface->geometry().bottomRight());
-      usr_win->setGeometry(iface_geom);
-      connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, 
-	      SLOT(runPythonScript(const QString&)));
-      d_workspace->addSubWindow(usr_win);
-      usr_win->show();
-      user_interface->initializeLocalPython();
-    }
-    else
-    { 
-      delete usr_win;
-    }
-  }
+	QString action_data = action->data().toString();
+	if( QFileInfo(action_data).exists() )
+	{
+		QFile script_file(action_data);
+		if ( !script_file.open(IO_ReadOnly) )
+		{
+			QMessageBox::information(this, "MantidPlot", "Error: There was a problem reading\n" + action_data);
+			return;
+		}
+		QTextStream stream(&script_file);
+		QString code("");
+		while( !stream.atEnd() )
+		{
+			code.append(stream.readLine() + "\n");
+		}
+		runPythonScript(code);
+	}
+	else
+	{
+		//First search for an existing window
+		foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
+		{
+			if( sub_win->widget()->objectName() == action_data )
+			{
+				sub_win->widget()->show();
+				return;
+			}
+		}
+
+		QMdiSubWindow* usr_win = new QMdiSubWindow;
+		usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
+		MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
+		if(user_interface)
+		{
+			setGeometry(usr_win,user_interface);
+			connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, 
+				SLOT(runPythonScript(const QString&)));
+			user_interface->initializeLocalPython();
+		}
+		else
+		{
+			delete usr_win;
+		}
+
+	}
 #else
-  QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
-			tr("MantidPlot was not built with Python scripting support included!"));
+	QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
+		tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
 
@@ -16410,5 +16431,65 @@ void ApplicationWindow::magnify()
 	QList<Graph *> layers = plot->layersList();
     foreach(Graph *g, layers)
     	g->enablePanningMagnifier();
+}
+/// Handler for ICat Login Menu
+void ApplicationWindow::ICatLogin()
+{
+	mantidUI->executeAlgorithm("Login",1);
+}
+
+void ApplicationWindow::ICatSearch()
+{	
+	QMdiSubWindow* usr_win = new QMdiSubWindow(this);
+	usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
+	QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch(usr_win);
+	if(icatsearch_interface)
+	{
+		setGeometry(usr_win,icatsearch_interface);
+	}
+	else
+	{
+		delete usr_win;
+	}
+}
+void ApplicationWindow::setGeometry(QMdiSubWindow* usr_win,QWidget* user_interface)
+{   
+      QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(), 
+		  usr_win->geometry().bottomRight() - usr_win->geometry().bottomRight());
+      usr_win->setWidget(user_interface);
+      QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(), 
+			       frame.bottomRight() + user_interface->geometry().bottomRight()+QPoint(15,35));
+      usr_win->setGeometry(iface_geom);
+      d_workspace->addSubWindow(usr_win);
+      usr_win->show();
+     
+   
+	
+}
+void ApplicationWindow::ICatLogout()
+{
+	mantidUI->executeICatLogout(1);
+}
+
+///slot for writing to log window
+void ApplicationWindow::writetoLogWindow(const QString& error)
+{	
+	results->setTextColor(Qt::red);
+  	results->insertPlainText(error+"\n");
+	QTextCursor cur = results->textCursor();
+    cur.movePosition(QTextCursor::End);
+    results->setTextCursor(cur);
+}
+/* This method executes load raw asynchrnously
+ * @param  fileName - name of the file to load
+ * @param wsName -name of the workspace to store data
+*/
+void ApplicationWindow::executeLoadRawAsynch(const QString& fileName,const QString& wsName )
+{
+	mantidUI->loadrawfromICatInterface(fileName,wsName);
+}
+void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QString& wsName)
+{
+	mantidUI->loadnexusfromICatInterface(fileName,wsName);
 }
 
