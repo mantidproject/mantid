@@ -316,8 +316,10 @@ public:
     remove(inputFile.c_str());
   }
 
+
   void testReadingFromXML()
   {
+#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -354,6 +356,7 @@ public:
 
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove("boevs");
+#endif
   }
 
   private:
