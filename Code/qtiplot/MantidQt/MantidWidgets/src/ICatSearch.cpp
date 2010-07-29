@@ -109,8 +109,10 @@ void ICatSearch::onSearch()
 	// get the selected instrument
 	getSelectedInstrument(instrName);
 
+	std::string instr(instrName.toStdString());
+
 	// execute the search by run number algorithm
-	ITableWorkspace_sptr ws_sptr = executeSearchByRunNumber(startRun,endRun,isCaseSensitiveSearch(),instrName.toStdString());
+	ITableWorkspace_sptr ws_sptr = executeSearchByRunNumber(startRun,endRun,isCaseSensitiveSearch(),instr);
 	if(!ws_sptr)
 	{
 		return;
@@ -314,7 +316,7 @@ void ICatSearch::getSelectedInstrument(QString& instrName)
   *@param startRun start run number 
   *@param endRun end run number 
 */
-ITableWorkspace_sptr  ICatSearch::executeSearchByRunNumber(double& startRun,double& endRun,bool bCase,std::string& instrName)
+ITableWorkspace_sptr  ICatSearch::executeSearchByRunNumber(const double &startRun,const double &endRun,bool bCase,const std::string& instrName)
 {
 	QString algName("SearchByRunNumber");
 	const int version=1;

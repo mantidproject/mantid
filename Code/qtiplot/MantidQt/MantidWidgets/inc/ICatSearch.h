@@ -47,7 +47,7 @@ private:
    /// get the user selected instrument
   void getSelectedInstrument(QString& instrName);
   /// execute the algorithm
-  Mantid::API::ITableWorkspace_sptr  executeSearchByRunNumber(double &startRun,double &endRun,bool bCase,std::string& instrName);
+   Mantid::API::ITableWorkspace_sptr  executeSearchByRunNumber(const double &startRun,const double &endRun,bool bCase,const std::string& instrName);
 
    /// setting tool tips for all elements
   void setToolTips();
