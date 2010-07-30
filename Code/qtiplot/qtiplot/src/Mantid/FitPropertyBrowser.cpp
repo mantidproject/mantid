@@ -1845,6 +1845,7 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString& aName)
       nameList.removeFirst();
       m_autoBgAttributes = nameList.join(" ");
     }
+    Mantid::Kernel::ConfigService::Instance().setString("curvefitting.autoBackground",aName.toStdString());
   }
   catch(...)
   {

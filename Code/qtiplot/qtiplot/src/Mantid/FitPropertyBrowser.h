@@ -162,6 +162,7 @@ public:
   bool isAutoBack()const{return m_autoBackground!=NULL;}
   void setAutoBackgroundName(const QString& aName);
   void refitAutoBackground();
+  QString getAutoBackgroundString()const{return m_autoBgName + " " + m_autoBgAttributes;}
 
   /// Number of decimal places in double properties
   int getDecimals()const{return m_decimals;}

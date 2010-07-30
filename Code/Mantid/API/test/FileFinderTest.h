@@ -90,7 +90,6 @@ public:
     Poco::File file(path);
     TS_ASSERT(file.exists());
     path = FileFinder::Instance().findFile("HRP37129");
-    std::cerr<<"Path: "<<path<<'\n';
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size()-3),"S02");
     //ConfigService::Instance().setString("datasearch.searcharchive","On");

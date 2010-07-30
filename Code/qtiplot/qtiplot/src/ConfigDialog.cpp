@@ -849,9 +849,12 @@ void ConfigDialog::initCurveFittingTab()
       defaultPeakShape->addItem(QString::fromStdString(name));
     }
   }
+
+  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
   
   // Set the correct default property
-  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"));
+  QString setting = //QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"));
+    app->mantidUI->fitFunctionBrowser()->getAutoBackgroundString();
   QStringList value = setting.split(' ');
   int index(-1);
   if( value.isEmpty() )
@@ -915,7 +918,6 @@ void ConfigDialog::initCurveFittingTab()
     peakRadius->setValue(5);
   }
 
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
   decimals->setValue(app->mantidUI->fitFunctionBrowser()->getDecimals());
   
 }
@@ -1793,7 +1795,10 @@ void ConfigDialog::updateCurveFitSettings()
     setting += std::string(" ") + args.toStdString();
   }
 
-  mantid_config.setString("curvefitting.autoBackground", setting);
+  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+
+  //mantid_config.setString("curvefitting.autoBackground", setting);
+  app->mantidUI->fitFunctionBrowser()->setAutoBackgroundName(QString::fromStdString(setting));
 
   setting = defaultPeakShape->currentText().toStdString();
   mantid_config.setString("curvefitting.defaultPeak", setting);
@@ -1807,7 +1812,6 @@ void ConfigDialog::updateCurveFitSettings()
   setting = QString::number(peakRadius->value()).toStdString();
   mantid_config.setString("curvefitting.peakRadius", setting);
 
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 }
 

@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 
 namespace Mantid
@@ -34,17 +36,22 @@ public:
   {
       m_J->set(m_iY0 + iY,iP,value);
   }
- /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
-  *   @param value Value to add
-  *   @param iActiveP The index of an active parameter.
-  */
-  //virtual void addNumberToColumn(const double& value, const int& iActiveP) 
-  //{
-  //  m_J->addNumberToColumn(value,m_iaP0+iActiveP);
-  //}
 };
 
+/// Default value for the peak radius
 int IPeakFunction::s_peakRadius = 5; 
+
+/**
+  * Constructor. Sets peak radius to the value of curvefitting.peakRadius property
+  */
+IPeakFunction::IPeakFunction()
+{
+  int peakRadius;
+  if ( Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",peakRadius) )
+  {
+    setPeakRadius(peakRadius);
+  }
+}
 
 /** 
  * General implementation of the method for all peaks. Limits the peak evaluation to
@@ -117,6 +124,8 @@ void IPeakFunction::setPeakRadius(const int& r)
   if (r > 0)
   {
     s_peakRadius = r;
+    std::string setting = boost::lexical_cast<std::string>(r);
+    Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",setting);
   }
 }
 

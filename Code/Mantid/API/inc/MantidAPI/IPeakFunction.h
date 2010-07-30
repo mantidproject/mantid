@@ -40,6 +40,8 @@ namespace API
 class DLLExport IPeakFunction : public IFunctionWithLocation
 {
 public:
+  /// Constructor
+  IPeakFunction();
   /// Returns the peak FWHM
   virtual double width()const = 0;
 
