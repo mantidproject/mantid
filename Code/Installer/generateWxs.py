@@ -10,7 +10,7 @@ import platform
 
 QTDIR = 'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
 QTLIBDIR = QTDIR + '/lib'
-QTPLUGINDIR = QTDIR + '/plugin'
+QTPLUGINDIR = QTDIR + '/plugins'
 SIPDIR = 'C:/Python25/Lib/site-packages'
 PYQTDIR = SIPDIR + '/PyQt4'
 USERALGORITHMSDIR = '../Mantid/UserAlgorithms'
