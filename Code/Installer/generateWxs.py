@@ -664,7 +664,7 @@ Sip = addComponent('Sip',comp_guid['Sip'],binDir)
 addSingleFile(SIPDIR,'sip.pyd','sip',Sip)
 PyQt = addComponent('PyQt',comp_guid['PyQt'],PyQtDir)
 addAllFilesExt(PYQTDIR,'PyQt','pyd',PyQt)
-addSingleFile(PYQTDIR,'__init__.py','pyqt4_init',PyQt)
+addSingleFile(PYQTDIR,'__init__.py','pyqt4ini',PyQt)
 addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', '../Mantid/PythonAPI/MantidFramework.py', MantidDlls)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
