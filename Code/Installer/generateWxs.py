@@ -8,7 +8,7 @@ import uuid
 import string
 import platform
 
-QTDIR = 'c:/qt-4.4.3/lib' #hardcoded to c:/qt location - this is true for build servers and most developers
+QTDIR = 'c:/qt/lib' #hardcoded to c:/qt location - this is true for build servers and most developers
 SIPDIR = 'C:/Python25/Lib/site-packages'
 PYQTDIR = SIPDIR + '/PyQt4'
 USERALGORITHMSDIR = '../Mantid/UserAlgorithms'
