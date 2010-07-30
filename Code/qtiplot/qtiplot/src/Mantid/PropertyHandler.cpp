@@ -1222,6 +1222,7 @@ void PropertyHandler::removeConstraint(QtProperty* parProp)
     }
     m_fun->removeConstraint(parProp->propertyName().toStdString());
   }
+  m_constraints.clear();
 }
 
 /**

@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <sstream>
 #include <cmath>
+#include <stdexcept>
 
 void DoubleEditorFactory::connectPropertyManager(QtDoublePropertyManager *manager)
 {
