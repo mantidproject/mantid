@@ -41,7 +41,7 @@ public:
 
   IkedaCarpenterPVTest()
   {
-    ConfigService::Instance().setString("CurveFitting.PeakRadius","100");
+    ConfigService::Instance().setString("curvefitting.peakRadius","100");
   }
 
   void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)

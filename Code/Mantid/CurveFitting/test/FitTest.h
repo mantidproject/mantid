@@ -143,7 +143,7 @@ class FitTest : public CxxTest::TestSuite
 public:
   FitTest()
   {
-    Kernel::ConfigService::Instance().setString("CurveFitting.PeakRadius","100");
+    Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");
     FrameworkManager::Instance();
   }
 

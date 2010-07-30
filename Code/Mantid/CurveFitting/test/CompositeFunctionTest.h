@@ -167,7 +167,7 @@ class CurveFittingCompositeFunctionTest : public CxxTest::TestSuite
 public:
   CurveFittingCompositeFunctionTest()
   {
-    Kernel::ConfigService::Instance().setString("CurveFitting.PeakRadius","100");
+    Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");
     FrameworkManager::Instance();
   }
 
