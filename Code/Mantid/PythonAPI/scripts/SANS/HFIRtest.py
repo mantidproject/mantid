@@ -22,7 +22,6 @@ def _read_IGOR(filepath):
                 q    = float(toks[0])
                 iq   = float(toks[1])
                 diq  = float(toks[2])
-                diq2 = float(toks[3])
                 data.append([q, iq, diq])
             except:
                 print "_read_IGOR:", sys.exc_value  
@@ -103,14 +102,14 @@ def _verify_result(reduced_file, test_file, tolerance=1e-6):
     print "Completed tests: delta = %g / %g  chi2 = %g" % (delta, delta_err, chi2) 
     
 def test_default():   
-     # Data file to reduce
+    # Data file to reduce
     datafile = TEST_DIR+"BioSANS_test_data.xml"
     # Reduction parameters
     method = SANSReductionMethod()
     # Instrument parameters
     conf = InstrumentConfiguration()
 
-    reduction = SANSReduction(datafile, method, conf)    
+    reduction = SANSReduction(method, conf, filepath=datafile)    
     reduction.reduce()
     
 def test_center_by_hand():
@@ -133,13 +132,14 @@ def test_center_by_hand():
     method.sensitivity_high = 1.5
     method.sensitivity_low = 0.5
     
+    method.beam_center_method = SANSReductionMethod.BEAM_CENTER_NONE
+    method.beam_center_x = 16
+    method.beam_center_y = 95
+
     # Instrument parameters
     conf = InstrumentConfiguration()
-    conf.beam_center_method = InstrumentConfiguration.BEAM_CENTER_NONE
-    conf.beam_center_x = 16
-    conf.beam_center_y = 95
 
-    reduction = SANSReduction(datafile, method, conf)    
+    reduction = SANSReduction(method, conf, filepath=datafile)    
     reduction.reduce()
     
     SaveCSV(Filename="mantid_center_by_hand.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")
@@ -166,12 +166,13 @@ def test_center_calculated():
     method.sensitivity_high = 1.5
     method.sensitivity_low = 0.5
     
+    method.beam_center_method = SANSReductionMethod.BEAM_CENTER_DIRECT_BEAM
+    method.beam_center_filepath = TEST_DIR+"BioSANS_empty_cell.xml"
+
     # Instrument parameters
     conf = InstrumentConfiguration()
-    conf.beam_center_method = InstrumentConfiguration.BEAM_CENTER_DIRECT_BEAM
-    conf.beam_center_filepath = TEST_DIR+"BioSANS_empty_cell.xml"
 
-    reduction = SANSReduction(datafile, method, conf)    
+    reduction = SANSReduction(method, conf, filepath=datafile)    
     reduction.reduce()
     
     SaveCSV(Filename="mantid_center_calculated.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")
@@ -201,12 +202,13 @@ def test_transmission():
     method.transmission_value = 0.51944
     method.transmission_error = 0.011078
     
+    method.beam_center_method = SANSReductionMethod.BEAM_CENTER_DIRECT_BEAM
+    method.beam_center_filepath = TEST_DIR+"BioSANS_empty_cell.xml"
+
     # Instrument parameters
     conf = InstrumentConfiguration()
-    conf.beam_center_method = InstrumentConfiguration.BEAM_CENTER_DIRECT_BEAM
-    conf.beam_center_filepath = TEST_DIR+"BioSANS_empty_cell.xml"
 
-    reduction = SANSReduction(datafile, method, conf)    
+    reduction = SANSReduction(method, conf, filepath=datafile)    
     reduction.reduce()
     
     SaveCSV(Filename="mantid_transmission.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")

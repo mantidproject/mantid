@@ -4,6 +4,7 @@
     WARNING: this is not meant to be production code... 
 """
 # Mantid imports
+from Reducer import SANSInstrument
 from mantidsimple import *
 
 # Python import
@@ -28,16 +29,11 @@ def _extract_workspace_name(filepath, suffix=''):
 
     return basename+suffix
 
-class InstrumentConfiguration:
+class InstrumentConfiguration(SANSInstrument):
     """
         Information tied to the instrument and the set of data files to
         be reduced
     """
-    
-    # Beam center finding methods
-    BEAM_CENTER_NONE        = 0
-    BEAM_CENTER_DIRECT_BEAM = 1
-    BEAM_CENTER_SCATTERING  = 2
     
     def __init__(self):
         """
@@ -54,12 +50,6 @@ class InstrumentConfiguration:
         ## Pixel size in mm
         self.pixel_size_x = 5.15
         self.pixel_size_y = 5.15
-        ## Beam center [either set by hand or find]
-        self.beam_center_method = InstrumentConfiguration.BEAM_CENTER_NONE
-        self.beam_center_filepath = None
-        self.beam_center_beam_radius = 20
-        self.beam_center_x = 16
-        self.beam_center_y = 95
         ## Sample-to-detector distance in mm
         self.sample_detector_distance = 6000
         ## Detector name
@@ -131,7 +121,12 @@ class SANSReductionMethod:
     TRANSMISSION_BY_HAND = 1
     TRANSMISSION_DIRECT_BEAM = 2
     TRANSMISSION_BEAM_SPREADER = 3
-
+    
+    # Beam center finding methods
+    BEAM_CENTER_NONE        = 0
+    BEAM_CENTER_DIRECT_BEAM = 1
+    BEAM_CENTER_SCATTERING  = 2
+    
     def __init__(self):
         """
             Initialization
@@ -144,6 +139,12 @@ class SANSReductionMethod:
         ## Background data
         self.background_filepath = None
         
+        ## Beam center [either set by hand or find]
+        self.beam_center_method = SANSReductionMethod.BEAM_CENTER_NONE
+        self.beam_center_filepath = None
+        self.beam_center_beam_radius = 20
+        self.beam_center_x = 16
+        self.beam_center_y = 95
         
         ## Normalization counter
         self.normalization = SANSReductionMethod.NORMALIZATION_TIME
@@ -184,7 +185,7 @@ class SANSReductionMethod:
 
 class SANSReduction:
     
-    def __init__(self, filepath, method, configuration, workspace=None):
+    def __init__(self, method, configuration, filepath=None, workspace=None):
         """
             @param filepath: path of the file to reduce
             @param method: SANSReductionMethod object
@@ -232,21 +233,21 @@ class SANSReduction:
         CloneWorkspace(self.workspace, self.reduced_ws)
         
         # Find beam center position. If no beam finding option was provided, use the current value
-        if self.configuration.beam_center_method is not InstrumentConfiguration.BEAM_CENTER_NONE:
+        if self.method.beam_center_method is not SANSReductionMethod.BEAM_CENTER_NONE:
             # Check whether the direct beam or scattering pattern option was selected
-            direct_beam = (self.configuration.beam_center_method is InstrumentConfiguration.BEAM_CENTER_DIRECT_BEAM)
+            direct_beam = (self.method.beam_center_method is SANSReductionMethod.BEAM_CENTER_DIRECT_BEAM)
             # Load the file to extract the beam center from, and process it.
-            LoadSpice2D(self.configuration.beam_center_filepath, "beam_center")
+            LoadSpice2D(self.method.beam_center_filepath, "beam_center")
             beam_center = FindCenterOfMassPosition("beam_center",
                                                    Output = None,
                                                    NPixelX=self.configuration.nx_pixels,
                                                    NPixelY=self.configuration.ny_pixels,
                                                    DirectBeam = direct_beam,
-                                                   BeamRadius = self.configuration.beam_center_beam_radius)
+                                                   BeamRadius = self.method.beam_center_beam_radius)
             ctr_str = beam_center.getPropertyValue("CenterOfMass")
             ctr = ctr_str.split(',')
-            self.configuration.beam_center_x = float(ctr[0])
-            self.configuration.beam_center_y = float(ctr[1])
+            self.method.beam_center_x = float(ctr[0])
+            self.method.beam_center_y = float(ctr[1])
     
         # Apply corrections to sample data        
         self._apply_corrections(self.reduced_ws)
@@ -277,8 +278,8 @@ class SANSReduction:
         """
         # Move detector array to correct position
         MoveInstrumentComponent(ws, self.configuration.detector_ID, 
-                                X = -(self.configuration.beam_center_x-self.configuration.nx_pixels/2.0+0.5) * self.configuration.pixel_size_x/1000.0, 
-                                Y = -(self.configuration.beam_center_y-self.configuration.ny_pixels/2.0+0.5) * self.configuration.pixel_size_y/1000.0, 
+                                X = -(self.method.beam_center_x-self.configuration.nx_pixels/2.0+0.5) * self.configuration.pixel_size_x/1000.0, 
+                                Y = -(self.method.beam_center_y-self.configuration.ny_pixels/2.0+0.5) * self.configuration.pixel_size_y/1000.0, 
                                 Z = self.configuration.sample_detector_distance/1000.0,
                                 RelativePosition="1")
         # Get counting time
@@ -343,8 +344,8 @@ class SANSReduction:
             
             # Move the flood data detector before applying the solid angle correction
             MoveInstrumentComponent(flood_ws, self.configuration.detector_ID, 
-                                   X = -(self.configuration.beam_center_x-self.configuration.nx_pixels/2.0+0.5) * self.configuration.pixel_size_x/1000.0, 
-                                   Y = -(self.configuration.beam_center_y-self.configuration.ny_pixels/2.0+0.5) * self.configuration.pixel_size_y/1000.0, 
+                                   X = -(self.method.beam_center_x-self.configuration.nx_pixels/2.0+0.5) * self.configuration.pixel_size_x/1000.0, 
+                                   Y = -(self.method.beam_center_y-self.configuration.ny_pixels/2.0+0.5) * self.configuration.pixel_size_y/1000.0, 
                                    Z = self.configuration.sample_detector_distance/1000.0,
                                    RelativePosition="1")
             # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
@@ -380,6 +381,9 @@ class SANSReduction:
                                         TransmissionValue=self.method.transmission_value,
                                         TransmissionError=self.method.transmission_error, 
                                         OutputWorkspace=ws)
+    
+        elif self.method.transmission_method==SANSReductionMethod.TRANSMISSION_BEAM_SPREADER:
+            pass
             
         
         
@@ -479,3 +483,5 @@ class SANSReduction:
         """
         return _extract_workspace_name(self.data_filepath, suffix)
 
+
+    
