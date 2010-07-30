@@ -8,7 +8,7 @@ import uuid
 import string
 import platform
 
-QTDIR = 'c:/qt/lib' #hardcoded to c:/qt location - this is true for build servers and most developers
+QTDIR = 'c:/qt-4.4.3/lib' #hardcoded to c:/qt location - this is true for build servers and most developers
 SIPDIR = 'C:/Python25/Lib/site-packages'
 PYQTDIR = SIPDIR + '/PyQt4'
 USERALGORITHMSDIR = '../Mantid/UserAlgorithms'
@@ -664,6 +664,7 @@ Sip = addComponent('Sip',comp_guid['Sip'],binDir)
 addSingleFile(SIPDIR,'sip.pyd','sip',Sip)
 PyQt = addComponent('PyQt',comp_guid['PyQt'],PyQtDir)
 addAllFilesExt(PYQTDIR,'PyQt','pyd',PyQt)
+addSingleFile(PYQTDIR,'__init__.py','pyqt4_init',PyQt)
 addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', '../Mantid/PythonAPI/MantidFramework.py', MantidDlls)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
