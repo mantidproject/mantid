@@ -83,33 +83,62 @@ class SANSReducer(Reducer):
         self._beam_finder = SANSReductionSteps.BaseBeamFinder(x,y)
         
     def get_beam_center(self): 
+        """
+            Return the beam center position
+        """
         return self._beam_finder.get_beam_center()
     
     def set_beam_finder(self, finder):
+        """
+            Set the ReductionStep object that finds the beam center
+            @param finder: BaseBeamFinder object
+        """
         if issubclass(finder.__class__, SANSReductionSteps.BaseBeamFinder) or None:
             self._beam_finder = finder
         else:
             raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
     
     def set_sensitivity_correcter(self, correcter):
+        """
+            Set the ReductionStep object that applies the sensitivity correction.
+            The ReductionStep object stores the sensitivity, so that the object
+            can be re-used on multiple data sets and the sensitivity will not be
+            recalculated.
+            @param correcter: ReductionStep object
+        """
         if issubclass(correcter.__class__, ReductionStep) or None:
             self._sensitivity_correcter = correcter
         else:
             raise RuntimeError, "Reducer.set_sensitivity_correcter expects an object of class ReductionStep"
     
     def set_dark_current_subtracter(self, subtracter):
+        """
+            Set the ReductionStep object that subtracts the dark current from the data.
+            The loaded dark current is stored by the ReductionStep object so that the
+            subtraction can be applied to multiple data sets without reloading it.
+            @param subtracter: ReductionStep object
+        """
         if issubclass(subtracter.__class__, ReductionStep) or None:
             self._dark_current_subtracter = subtracter
         else:
             raise RuntimeError, "Reducer.set_dark_current expects an object of class ReductionStep"
     
     def set_solid_angle_correcter(self, correcter):
+        """
+            Set the ReductionStep object that performs the solid angle correction.
+            @param subtracter: ReductionStep object
+        """
         if issubclass(correcter.__class__, ReductionStep) or None:
             self._solid_angle_correcter = correcter
         else:
             raise RuntimeError, "Reducer.set_solid_angle_correcter expects an object of class ReductionStep"
     
     def set_azimuthal_averager(self, averager):
+        """
+            Set the ReductionStep object that performs azimuthal averaging
+            and transforms the 2D reduced data set into I(Q).
+            @param averager: ReductionStep object
+        """
         if issubclass(averager.__class__, ReductionStep) or None:
             self._azimuthal_averager = averager
         else:
@@ -128,6 +157,18 @@ class SANSReducer(Reducer):
     def post_process(self): raise NotImplemented
     
     def _to_steps(self, file_ws):
+        """
+            Creates a list of reduction steps for the given data set
+            following a predefined reduction approach. For each 
+            predefined step, we check that a ReductionStep object 
+            exists to take of it. If one does, we append it to the 
+            list of steps to be executed.
+            
+            @param file_ws: name of the workspace to apply the reduction to
+        """
+        
+        # Clean the list of steps
+        self._reduction_steps = []
         
         # Load file
         self.append_step(SANSReductionSteps.LoadRun(datafile=self._data_files[file_ws]))

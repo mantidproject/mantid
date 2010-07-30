@@ -63,6 +63,11 @@ class FindBeamCenter(BaseBeamFinder):
         reducer.set_beam_center(float(ctr[0]), float(ctr[1]))
 
 class SubtractDarkCurrent(ReductionStep):
+    """
+        ReductionStep class that subtracts the dark current from the data.
+        The loaded dark current is stored by the ReductionStep object so that the
+        subtraction can be applied to multiple data sets without reloading it.
+    """
     def __init__(self, dark_current_file, timer_ws=None):
         """
             @param timer_ws: if provided, will be used to scale the dark current
@@ -167,7 +172,8 @@ class Normalize(ReductionStep):
             
 class WeightedAzimuthalAverage(ReductionStep):
     """
-        Normalize the data to time or monitor
+        ReductionStep class that performs azimuthal averaging
+        and transforms the 2D reduced data set into I(Q).
     """
     def execute(self, reducer, workspace):
         Q1DWeighted(workspace, "Iq", "0.01,0.001,0.11", 
@@ -176,14 +182,18 @@ class WeightedAzimuthalAverage(ReductionStep):
             
 class SolidAngle(ReductionStep):
     """
-        Normalize the data to time or monitor
+        ReductionStep class that performs the solid angle correction.
     """
     def execute(self, reducer, workspace):
         SolidAngleCorrection(workspace, workspace)
             
 class SensitivityCorrection(ReductionStep):
     """
-        Compute the sensitivity correction and apply it to the input workspace
+        Compute the sensitivity correction and apply it to the input workspace.
+        
+        The ReductionStep object stores the sensitivity, so that the object
+        be re-used on multiple data sets and the sensitivity will not be
+        recalculated.
     """
     def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5):
         super(SensitivityCorrection, self).__init__()
