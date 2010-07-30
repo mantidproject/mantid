@@ -237,13 +237,21 @@ def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specM
 	except:
 		sys.exit('Calib: Could not load raw file.')
 	tmp = mantid.getMatrixWorkspace('Raw')
-	nhist = tmp.getNumberHistograms() - 1
-	Integration('Raw', 'CalA', peakMin, peakMax, 0, nhist)
-	Integration('Raw', 'CalB', backMin, backMax, 0, nhist)
+	nhist = tmp.getNumberHistograms()
+	Integration('Raw', 'CalA', peakMin, peakMax, 0, nhist -1)
+	Integration('Raw', 'CalB', backMin, backMax, 0, nhist -1)
 	Minus('CalA', 'CalB', outWS_n)
 	mantid.deleteWorkspace('Raw')
 	mantid.deleteWorkspace('CalA')
 	mantid.deleteWorkspace('CalB')
+	cal_ws = mantid.getMatrixWorkspace(outWS_n)
+	sum = 0
+	for i in range(0, nhist):
+		sum += cal_ws.readY(i)[0]
+	value = sum / nhist
+	CreateSingleValuedWorkspace('avg', value)
+	Divide(outWS_n, 'avg', outWS_n)
+	mantid.deleteWorkspace('avg')	
 	SaveNexusProcessed(outWS_n, savefile, 'Vanadium')
 	return outWS_n
 
@@ -349,7 +357,7 @@ def elwin(inputFiles, eRange, iconOpt = {}):
 			sys.exit('Elwin: unrecognised input file type (' +ext+ ')')
 	return outWS_list
 
-def slice(inputfiles, enXRange = [], tofXRange = [], inWS_n='Energy', outWS_n='Time', spectra = [0,0]):
+def slice(inputfiles, calib, enXRange = [], tofXRange = [], inWS_n='Energy', outWS_n='Time', spectra = [0,0]):
 	'''
 	This function does the "Slice" part of modes. To be passed in a list of input files (either .raw or .nxs),
 	and a (2) 4-element list of X-values to integrate over for the files passed in, one for Energy and one for TOF.
@@ -387,6 +395,8 @@ def slice(inputfiles, enXRange = [], tofXRange = [], inWS_n='Energy', outWS_n='T
 			else:
 				LoadRaw(file, root, SpectrumMin = spectra[0], SpectrumMax = spectra[1])
 			nhist = mantid.getMatrixWorkspace(root).getNumberHistograms()
+			if calib != '':
+				useCalib(calib, inWS_n=root, outWS_n=root)
 			savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_slt'
 			Integration(root, 'Unit1', tofXRange[0], tofXRange[1], 0, nhist-1)
 			Integration(root, 'Unit2', tofXRange[2], tofXRange[3], 0, nhist-1)
@@ -400,7 +410,59 @@ def slice(inputfiles, enXRange = [], tofXRange = [], inWS_n='Energy', outWS_n='T
 	mantid.deleteWorkspace('Unit1')
 	mantid.deleteWorkspace('Unit2')
 
-def fury(sample, resolution):
-	''' S(Q,w) to I(Q,t) via FFT (FastFourierTrans) '''
-	LoadNexus(sample, 'sample')
-	LoadNexus(resolution, 'resolution')
+def fury(sam_file, res_file, rebinParam, outWS_n = ''):
+	(direct, filename) = os.path.split(sam_file)
+	(root, ext) = os.path.splitext(filename)
+
+	workspace_res = 'res_file'
+	LoadNexus(res_file, workspace_res)
+
+	Rebin(workspace_res, workspace_res, rebinParam)
+	Integration(workspace_res, workspace_res+'_sv')
+	FFT(workspace_res, workspace_res+'_fft')
+	ExtractSingleSpectrum(workspace_res+'_fft', workspace_res+'_fft', 2)
+	Divide(workspace_res+'_fft', workspace_res+'_sv', workspace_res+'_ssr')
+
+	mantid.deleteWorkspace(workspace_res+'_sv')
+	mantid.deleteWorkspace(workspace_res+'_fft')
+	mantid.deleteWorkspace(workspace_res)
+
+	workspace_sam = 'sample'
+	LoadNexus(sam_file, workspace_sam)
+	Rebin(workspace_sam, workspace_sam, rebinParam)
+	Integration(workspace_sam, workspace_sam+'_int')
+	nhist = mantid.getMatrixWorkspace(workspace_sam).getNumberHistograms()
+	runNo = mantid.getMatrixWorkspace(workspace_sam).getRun().getLogData("run_number").value()
+	for n in range(0, nhist):
+		tmpWS = 'tmp_ws_fury_' + str(n)
+		FFT(workspace_sam, tmpWS, n)
+		ExtractSingleSpectrum(tmpWS, tmpWS, 2)
+		if (n == 0):
+			RenameWorkspace(tmpWS, workspace_sam+'_fft')
+		else:
+			ConjoinWorkspaces(workspace_sam+'_fft', tmpWS)
+
+	Divide(workspace_sam+'_fft', workspace_sam+'_int',  workspace_sam+'_result')
+
+	mantid.deleteWorkspace(workspace_sam)
+	mantid.deleteWorkspace(workspace_sam+'_fft')
+	mantid.deleteWorkspace(workspace_sam+'_int')
+
+	res_result = workspace_res +'_result'
+	for n in range(0, nhist):
+		tmpWS = 'tmp_res_conjoining' + str(n)
+		ExtractSingleSpectrum(workspace_res+'_ssr', tmpWS, 0)
+		if (n == 0):
+			RenameWorkspace(tmpWS, res_result)
+		else:
+			ConjoinWorkspaces(res_result, tmpWS)
+
+	mantid.deleteWorkspace(workspace_res+'_ssr')
+
+	savefile = root[:3] + runNo + '_iqt'
+	if outWS_n == '':
+		outWS_n = savefile
+
+	Divide(workspace_sam+'_result', workspace_res+'_result', outWS_n)
+	mantid.deleteWorkspace(workspace_sam+'_result')
+	mantid.deleteWorkspace(workspace_res+'_result')

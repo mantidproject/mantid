@@ -8,6 +8,8 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QLineEdit>
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -16,7 +18,7 @@ using namespace MantidQt::CustomInterfaces;
 * It is used primarily to ensure sane values for member variables.
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
-UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true), m_isDirtyRebin(true)
+UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true), m_isDirtyRebin(true), m_bgRemoval(false)
 {
 	// Constructor
 }
@@ -40,6 +42,7 @@ void Indirect::initLayout()
 	// check boxes
 	connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinCheck(bool)));
 	connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
+	connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
 	// line edits,etc (for isDirty)
 	connect(m_uiForm.leRunFiles, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
@@ -100,7 +103,9 @@ void Indirect::runClicked(bool tryToSave)
 {
 	QString groupFile = createMapFile(m_uiForm.cbMappingOptions->currentText());
 	if ( groupFile == "" )
+	{
 		return;
+	}
 
 	QString filePrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
 	filePrefix += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_";
@@ -116,9 +121,13 @@ void Indirect::runClicked(bool tryToSave)
 		pyInput += "rawfiles = [r'"+runFiles+"']\n"
 			"Sum=";
 		if ( m_uiForm.ckSumFiles->isChecked() )
+		{
 			pyInput += "True\n";
+		}
 		else
+		{
 			pyInput += "False\n";
+		}
 
 		pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n";
 		pyInput += "last = " +m_uiForm.leSpectraMax->text()+ "\n";
@@ -139,9 +148,13 @@ void Indirect::runClicked(bool tryToSave)
 		}
 
 		if ( m_uiForm.ckUseCalib->isChecked() )
+		{
 			pyInput += "calib = r'"+m_uiForm.leCalibrationFile->text()+"'\n";
+		}
 		else
+		{
 			pyInput += "calib = ''\n";
+		}
 
 		pyInput += "efixed = "+m_uiForm.leEfixed->text()+"\n";
 	}
@@ -215,6 +228,7 @@ void Indirect::setIDFValues(const QString & prefix)
 
 	rebinCheck(m_uiForm.rebin_ckDNR->isChecked());
 	detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
+	resCheck(m_uiForm.cal_ckRES->isChecked());
 
 	// Get list of analysers and populate cbAnalyser
 	QString pyInput = 
@@ -508,11 +522,10 @@ QString Indirect::savePyCode()
 */
 void Indirect::createRESfile(const QString& file)
 {
-	//
 	QString pyInput =
 		"import IndirectEnergyConversion as ind\n"
-		"iconOpt = { 'first': " +m_uiForm.leSpectraMin->text()+
-		", 'last': " +m_uiForm.leSpectraMax->text()+
+		"iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
+		", 'last': " +m_uiForm.cal_leResSpecMax->text()+
 		", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n";
 	QString rebinParam = m_uiForm.cal_leELow->text() + "," +
 		m_uiForm.cal_leEWidth->text() + "," +
@@ -697,6 +710,7 @@ void Indirect::browseRun()
 		m_dataDir, "ISIS Raw Files (*.raw)");
 	QString runFile = runFiles.join(";");
 	m_uiForm.leRunFiles->setText(runFile);
+	isDirty(true);
 }
 
 /**
@@ -711,6 +725,7 @@ void Indirect::browseCalib()
 	{
 		m_uiForm.ckUseCalib->setChecked(true);
 	}
+	isDirty(true);
 }
 /**
 * Again, as above but for the Mapping File.
@@ -720,6 +735,7 @@ void Indirect::browseMap()
 	QString mapFile = QFileDialog::getOpenFileName(this, "Select Mapping / Grouping File",
 		m_dataDir, "Spectra Mapping File (*.map)");
 	m_uiForm.leMappingFile->setText(mapFile);
+	isDirtyRebin(true);
 }
 
 /**
@@ -779,6 +795,28 @@ void Indirect::backgroundRemoval()
 */
 void Indirect::plotRaw()
 {
+	bool ok;
+
+	QString spectraRange = QInputDialog::getText(this, "Insert Spectra Ranges",
+		"Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(),
+		&ok);
+
+	if ( !ok || spectraRange.isEmpty() )
+	{
+		return;
+	}
+
+	QStringList specList = spectraRange.split("-");
+	if ( specList.size() > 2 )
+	{
+		showInformationBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
+		return;
+	}
+	else
+	{
+		spectraRange = "range("+specList[0]+","+specList[1]+"+1)";
+	}
+
 	QString rawFile = m_uiForm.leRunFiles->text();
 	if ( rawFile == "" )
 	{
@@ -794,6 +832,7 @@ void Indirect::plotRaw()
 		"except SystemExit:\n"
 		"   print 'Could not open .raw file. Please check file path.'\n"
 		"   sys.exit('Could not open .raw file.')\n"
+		"GroupDetectors('RawTime', 'RawTime', SpectraList="+spectraRange+")\n"
 		"graph = plotSpectrum('RawTime', 0)\n";
 	QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -831,7 +870,31 @@ void Indirect::detailedBalanceCheck(bool state)
 
 	isDirtyRebin(true);
 }
+/**
+* @param state whether checkbox is checked or unchecked
+*/
+void Indirect::resCheck(bool state)
+{
+	// line edits
+	m_uiForm.cal_leResSpecMin->setEnabled(state);
+	m_uiForm.cal_leResSpecMax->setEnabled(state);
+	m_uiForm.cal_leStartX->setEnabled(state);
+	m_uiForm.cal_leEndX->setEnabled(state);
+	m_uiForm.cal_leELow->setEnabled(state);
+	m_uiForm.cal_leEWidth->setEnabled(state);
+	m_uiForm.cal_leEHigh->setEnabled(state);
 
+	// labels
+	m_uiForm.cal_lbResSpecMin->setEnabled(state);
+	m_uiForm.cal_lbResSpecMax->setEnabled(state);
+	m_uiForm.cal_lbResBG->setEnabled(state);
+	m_uiForm.cal_lbStartX->setEnabled(state);
+	m_uiForm.cal_lbEndX->setEnabled(state);
+	m_uiForm.cal_lbELow->setEnabled(state);
+	m_uiForm.cal_lbEWidth->setEnabled(state);
+	m_uiForm.cal_lbEHigh->setEnabled(state);
+	m_uiForm.cal_lbSpecSelect->setEnabled(state);
+}
 
 /**
 * //
@@ -938,7 +1001,10 @@ void Indirect::calibCreate()
 	}
 	else
 	{
+		if ( m_uiForm.cal_ckRES->isChecked() )
+		{
 		createRESfile(input_path);
+		}
 	}
 
 	m_uiForm.leCalibrationFile->setText(output_path);
