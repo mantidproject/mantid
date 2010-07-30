@@ -17,6 +17,7 @@
 #include "MantidKernel/LibraryManager.h"
 
 #include "FilenameEditorFactory.h"
+#include "DoubleEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -54,9 +55,10 @@ m_guessOutputName(true),
 m_changeSlotsEnabled(false),
 m_peakToolOn(false),
 m_auto_back(false),
-m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground"))),
+m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
 m_autoBackground(NULL),
-m_logValue(NULL)
+m_logValue(NULL),
+m_decimals(-1)
 {
   // Make sure plugins are loaded
   std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
@@ -77,13 +79,13 @@ m_logValue(NULL)
     setAutoBackgroundName(m_autoBgName);
   }
 
-  std::string def = Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.DefaultPeak");
+  std::string def = Mantid::Kernel::ConfigService::Instance().getString("curvefitting.defaultPeak");
   if (!def.empty())
   {
     m_defaultPeak = def;
   }
 
-  def = Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground");
+  def = Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground");
   if (!def.empty())
   {
     m_defaultBackground = def;
@@ -159,6 +161,7 @@ m_logValue(NULL)
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
   QtDoubleSpinBoxFactory *doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(w);
+  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
   FilenameEditorFactory* filenameEditFactory = new FilenameEditorFactory(w);
 
@@ -166,9 +169,12 @@ m_logValue(NULL)
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
-  m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
+  //m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
+  m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_filenameManager, filenameEditFactory);
+
+  updateDecimals();
 
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
@@ -191,6 +197,10 @@ m_logValue(NULL)
   QPushButton* btnFindPeaks = new QPushButton("Find peaks");
   connect(btnFindPeaks,SIGNAL(clicked()),this,SLOT(findPeaks()));
 
+  m_btnPlotGuess = new QPushButton("Plot guess");
+  connect(m_btnPlotGuess,SIGNAL(clicked()),this,SLOT(plotOrRemoveGuessAll()));
+  m_btnPlotGuess->setEnabled(false);
+
   m_tip = new QLabel("",w);
 
   buttonsLayout->addWidget(m_btnFit,0,0);
@@ -198,6 +208,7 @@ m_logValue(NULL)
   buttonsLayout->addWidget(btnClear,0,2);
   buttonsLayout->addWidget(btnSeqFit,1,0);
   buttonsLayout->addWidget(btnFindPeaks,1,1);
+  buttonsLayout->addWidget(m_btnPlotGuess,1,2);
 
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -1643,6 +1654,18 @@ void FitPropertyBrowser::removeGuessAll()
   emit removeGuess();
 }
 
+void FitPropertyBrowser::plotOrRemoveGuessAll()
+{
+  if (getHandler()->hasPlot())
+  {
+    removeGuessAll();
+  }
+  else
+  {
+    plotGuessAll();
+  }
+}
+
 /** Create a double property and set some settings
  * @param name The name of the new property
  * @return Pointer to the created property
@@ -1650,7 +1673,8 @@ void FitPropertyBrowser::removeGuessAll()
 QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name)const
 {
   QtProperty* prop = m_doubleManager->addProperty(name);
-  m_doubleManager->setDecimals(prop,6);
+  m_doubleManager->setDecimals(prop,m_decimals);
+  m_doubleManager->setRange(prop,-DBL_MAX,DBL_MAX);
   return prop;
 }
 
@@ -1946,10 +1970,10 @@ void FitPropertyBrowser::findPeaks()
   std::string smoothedName = wsName + "_SmoothedData_tmp";
 
   int FWHM,Tolerance;
-  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksFWHM"));
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
   FWHM = setting.isEmpty() ? 7 : setting.toInt();
 
-  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksTolerance"));
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
   Tolerance = setting.isEmpty() ? 4 : setting.toInt();
 
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
@@ -1995,4 +2019,34 @@ void FitPropertyBrowser::findPeaks()
   }
 
 	QApplication::restoreOverrideCursor();
+}
+
+void FitPropertyBrowser::setPeakToolOn(bool on)
+{
+  m_peakToolOn = on;
+  m_btnPlotGuess->setEnabled(on);
+}
+
+void FitPropertyBrowser::updateDecimals()
+{
+  if (m_decimals < 0)
+  {
+    QSettings settings;
+    settings.beginGroup("Mantid/FitBrowser");
+    m_decimals = settings.value("decimals",6).toInt();
+  }
+  QSet<QtProperty *> props = m_doubleManager->properties();
+  foreach(QtProperty *prop,props)
+  {
+    m_doubleManager->setDecimals(prop,m_decimals);
+  }
+}
+
+void FitPropertyBrowser::setDecimals(int d)
+{
+  m_decimals = d;
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser");
+  settings.setValue("decimals",d);
+  updateDecimals();
 }

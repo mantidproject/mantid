@@ -163,13 +163,17 @@ public:
   void setAutoBackgroundName(const QString& aName);
   void refitAutoBackground();
 
+  /// Number of decimal places in double properties
+  int getDecimals()const{return m_decimals;}
+  void setDecimals(int d);
+
 public slots:
   void fit();
   void sequentialFit();
   void undoFit();
   void clear();
   void clearBrowser();
-  void setPeakToolOn(bool on){m_peakToolOn = on;}
+  void setPeakToolOn(bool on);
   void findPeaks();
 
 signals:
@@ -218,10 +222,12 @@ private slots:
   void plotGuessAll();
   void removeGuessCurrent();
   void removeGuessAll();
+  void plotOrRemoveGuessAll();
   void saveFunction();
   void loadFunction();
   void copy();///< Copy the function string to the clipboard
   void paste();///< Paste a function string from the clipboard
+  void updateDecimals();
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -270,6 +276,8 @@ private:
   QPushButton* m_btnFit;
   /// Button for undoing fit
   QPushButton* m_btnUnFit;
+  /// Button for plotting the overall function
+  QPushButton* m_btnPlotGuess;
   /// To display a tip text
   QLabel* m_tip;
 
@@ -357,6 +365,9 @@ private:
 
   /// Log names
   QStringList m_logs;
+
+  /// Number of decimal places in double properties
+  int m_decimals;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

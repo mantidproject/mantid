@@ -166,6 +166,8 @@ private:
   QLineEdit *functionArguments;
   QComboBox *defaultPeakShape;
   QSpinBox  *findPeaksFWHM,*findPeaksTolerance;
+  QSpinBox  *peakRadius;
+  QSpinBox  *decimals;
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;

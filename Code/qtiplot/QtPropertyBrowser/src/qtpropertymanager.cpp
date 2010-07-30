@@ -102,6 +102,7 @@
 
 #include <limits.h>
 #include <float.h>
+#include <math.h>
 
 #if defined(Q_CC_MSVC)
 #    pragma warning(disable: 4786) /* MS VS 6: truncating debug info after 255 characters */
@@ -1106,7 +1107,9 @@ QString QtDoublePropertyManager::valueText(const QtProperty *property) const
     const QtDoublePropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
     if (it == d_ptr->m_values.constEnd())
         return QString();
-    return QString::number(it.value().val, 'f', it.value().decimals);
+    double absVal = fabs(it.value().val);
+    char format = absVal > 1e5 || (absVal != 0 && absVal < 1e-5) ? 'e' : 'f';
+    return QString::number(it.value().val,format , it.value().decimals);
 }
 
 /*!

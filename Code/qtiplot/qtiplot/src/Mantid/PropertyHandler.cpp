@@ -1167,7 +1167,7 @@ void PropertyHandler::addConstraint(QtProperty* parProp,bool lo,bool up,double l
     ostr << loBound << "<";
     if (!hasLo)
     {
-      cnew.first = m_browser->m_doubleManager->addProperty("LowerBound");
+      cnew.first = m_browser->addDoubleProperty("LowerBound");
       parProp->addSubProperty(cnew.first);
     }
     else
@@ -1182,7 +1182,7 @@ void PropertyHandler::addConstraint(QtProperty* parProp,bool lo,bool up,double l
     ostr << "<" << upBound;
     if (!hasUp)
     {
-      cnew.second = m_browser->m_doubleManager->addProperty("UpperBound");
+      cnew.second = m_browser->addDoubleProperty("UpperBound");
       parProp->addSubProperty(cnew.second);
     }
     else
@@ -1270,6 +1270,10 @@ void PropertyHandler::plot(Graph* g)const
     // Graph now owns m_curve. Use m_curve->removeMe() to remove (and delete) from Graph
     g->insertCurve(m_curve);
     connect(m_curve,SIGNAL(forgetMe(PlotCurve*)),this,SLOT(plotRemoved(PlotCurve*)));
+    if (this == m_browser->getHandler())
+    {
+      m_browser->m_btnPlotGuess->setText("Remove guess");
+    }
   }
 }
 
@@ -1282,6 +1286,10 @@ void PropertyHandler::removePlot()
   {
     m_curve->removeMe();
     m_curve = NULL;
+    if (this == m_browser->getHandler())
+    {
+      m_browser->m_btnPlotGuess->setText("Plot guess");
+    }
   }
 }
 

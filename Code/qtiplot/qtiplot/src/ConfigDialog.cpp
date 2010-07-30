@@ -35,6 +35,8 @@
 #include "ColorBox.h"
 #include "pixmaps.h"
 #include "DoubleSpinBox.h"
+#include "Mantid/MantidUI.h"
+#include "Mantid/FitPropertyBrowser.h"
 
 #include <QLocale>
 #include <QPushButton>
@@ -816,7 +818,15 @@ void ConfigDialog::initCurveFittingTab()
   findPeaksTolerance = new QSpinBox();
   grid->addWidget(findPeaksTolerance, 4,1);
 
-  grid->setRowStretch(5,1);
+  grid->addWidget(new QLabel(tr("Peak Radius (in FWHM)")),5,0);
+  peakRadius = new QSpinBox();
+  grid->addWidget(peakRadius, 5,1);
+
+  grid->addWidget(new QLabel(tr("Double property decimals")),6,0);
+  decimals = new QSpinBox();
+  grid->addWidget(decimals, 6,1);
+
+  grid->setRowStretch(7,1);
   label = new QLabel("<span style=\"font-weight:600;\">Note: Changes will not take effect until MantidPlot has been restarted.</span>");
   curveTabLayout->addWidget(label);
 
@@ -841,7 +851,7 @@ void ConfigDialog::initCurveFittingTab()
   }
   
   // Set the correct default property
-  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground"));
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"));
   QStringList value = setting.split(' ');
   int index(-1);
   if( value.isEmpty() )
@@ -867,7 +877,7 @@ void ConfigDialog::initCurveFittingTab()
     backgroundFunctions->setCurrentIndex(index);
   }
 
-  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.DefaultPeak"));
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.defaultPeak"));
   if (setting.isEmpty()) setting = "Gaussian";
   index = defaultPeakShape->findText(setting);
   if (index >= 0)
@@ -875,7 +885,7 @@ void ConfigDialog::initCurveFittingTab()
     defaultPeakShape->setCurrentIndex(index);
   }
 
-  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksFWHM"));
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
   if (!setting.isEmpty())
   {
     findPeaksFWHM->setValue(setting.toInt());
@@ -885,7 +895,7 @@ void ConfigDialog::initCurveFittingTab()
     findPeaksFWHM->setValue(7);
   }
 
-  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.FindPeaksTolerance"));
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
   if (!setting.isEmpty())
   {
     findPeaksTolerance->setValue(setting.toInt());
@@ -895,6 +905,18 @@ void ConfigDialog::initCurveFittingTab()
     findPeaksTolerance->setValue(4);
   }
 
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.peakRadius"));
+  if (!setting.isEmpty())
+  {
+    peakRadius->setValue(setting.toInt());
+  }
+  else
+  {
+    peakRadius->setValue(5);
+  }
+
+  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  decimals->setValue(app->mantidUI->fitFunctionBrowser()->getDecimals());
   
 }
 
@@ -1771,16 +1793,22 @@ void ConfigDialog::updateCurveFitSettings()
     setting += std::string(" ") + args.toStdString();
   }
 
-  mantid_config.setString("CurveFitting.AutoBackground", setting);
+  mantid_config.setString("curvefitting.autoBackground", setting);
 
   setting = defaultPeakShape->currentText().toStdString();
-  mantid_config.setString("CurveFitting.DefaultPeak", setting);
+  mantid_config.setString("curvefitting.defaultPeak", setting);
 
   setting = QString::number(findPeaksFWHM->value()).toStdString();
-  mantid_config.setString("CurveFitting.FindPeaksFWHM", setting);
+  mantid_config.setString("curvefitting.findPeaksFWHM", setting);
 
   setting = QString::number(findPeaksTolerance->value()).toStdString();
-  mantid_config.setString("CurveFitting.FindPeaksTolerance", setting);
+  mantid_config.setString("curvefitting.findPeaksTolerance", setting);
+
+  setting = QString::number(peakRadius->value()).toStdString();
+  mantid_config.setString("curvefitting.peakRadius", setting);
+
+  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 }
 
 
