@@ -8,7 +8,9 @@ import uuid
 import string
 import platform
 
-QTDIR = 'c:/qt/lib' #hardcoded to c:/qt location - this is true for build servers and most developers
+QTDIR = 'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
+QTLIBDIR = QTDIR + '/lib'
+QTPLUGINDIR = QTDIR + '/plugin'
 SIPDIR = 'C:/Python25/Lib/site-packages'
 PYQTDIR = SIPDIR + '/PyQt4'
 USERALGORITHMSDIR = '../Mantid/UserAlgorithms'
@@ -72,6 +74,7 @@ if ARCH == '32':
     comp_guid['Sip'] = '{A051F48C-CA96-4cd5-B936-D446CBF67588}'
     comp_guid['PyQt'] = '{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}'
     comp_guid['Colormaps'] = '{902DBDE3-42AE-49d3-819D-1C83C18D280A}'
+    comp_guid['QtImagePlugins'] = '{6e3c6f03-5933-40b1-9733-1bd71132404c}'
 else:
     comp_guid['MantidDLLs'] = '{c9748bae-5934-44ab-b144-420589db1623}'
     comp_guid['QTIPlot'] = '{bfe90c00-9f39-4fde-8dbc-17f419210e12}'
@@ -93,6 +96,7 @@ else:
     comp_guid['Sip'] = '{e057fcf0-47ba-4a32-a1af-d6c70e1ff8e4}'
     comp_guid['PyQt'] = '{86c24261-2f6f-47e5-b268-0d6b1334d638}'
     comp_guid['Colormaps'] = '{9e4a6fc4-39ea-4b8f-ba49-265d6dcfbb4c}'
+    comp_guid['QtImagePlugins'] = '{7c1ec169-d331-4b9c-b0e4-3214bcf2cbf4}'
     
 MantidInstallDir = 'MantidInstall'
 
@@ -477,7 +481,7 @@ else:
 #---------------------------------------------------------------
 
 QTIPlot = addComponent('QTIPlot',comp_guid['QTIPlot'],binDir)
-addDlls(QTDIR,'qt',QTIPlot)
+addDlls(QTLIBDIR,'qt',QTIPlot)
 QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../Mantid/release/MantidPlot.exe',QTIPlot)
 # TODO: Currently the MantidLauncher only works for the 32-bit system since the registry access seems more of a pain on a 64 bit system
 if ARCH== '32':
@@ -499,7 +503,7 @@ files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.
 for index, name in enumerate(files_to_remove):
     addTo(MantidDlls,'RemoveFile',{'Id':'RemFile_' + str(index),'On':'uninstall','LongName': name, 'Name':name[:8]})
 
-if (QTDIR == 'C:/Qt/4_4_0/bin'): 	 
+if (QTLIBDIR == 'C:/Qt/4_4_0/bin'): 	 
 	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../Mantid/release/MantidPlot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
@@ -528,6 +532,26 @@ pyalgsExampleDir = addDirectory('PyAlgsExampleDir','Examples','Examples',pyalgsD
 pyalgsExamples = addComponent('PyAlgsEx',comp_guid['PyAlgsEx'],pyalgsExampleDir)
 addAllFiles('../Mantid/PythonAPI/PythonAlgorithms','PyAlEx',pyalgsExamples)
 
+
+##
+# Qt plugins
+#
+# Qt requires several image plugins to be able to load icons such as gif, jpeg and these need to live in
+# a directory QTPLUGINSDIR/imageformats
+#
+# We will have the structure
+# --[MantidInstall]/plugins/
+#         --qtplugins
+#               --imageformats/
+#               --MantidQtCustom*.dll
+##
+qtpluginsDir = addDirectory('QtPlugInsDir','qplugdir','qtplugins',pluginsDir)
+qtimageformatsDir = addDirectory('QtImageDllsDir','imgdldir','imageformats',qtpluginsDir)
+qtimagedlls = addComponent('QtImagePlugins',comp_guid['QtImagePlugins'],qtimageformatsDir)
+addDlls(QTPLUGINDIR + '/imageformats', 'imgdll',qtimagedlls)
+
+# Now we need a file in the main Qt library to tell Qt where the plugins are using the qt.conf file
+addSingleFile('./','qt.conf','qtcfile', MantidDlls)
 
 # Add qt custom dialogs library
 addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../Mantid/release/MantidQtCustomDialogs.dll',Plugins)
@@ -701,6 +725,7 @@ addCRefs(sconsList,MantidExec)
 addCRef('PyQt',MantidExec)
 addCRef('Sip',MantidExec)
 addCRef('PyAlgsEx',MantidExec)
+addCRef('QtImagePlugins', MantidExec)
 
 Redist = addHiddenFeature('Redist',Complete)
 addModules(toget + '/VCRedist',Redist)
