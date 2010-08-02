@@ -26,12 +26,12 @@ cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.py
 python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
-echo "Compiling the test executable..."
 mantid_libpath=../../debug
+echo "Compiling the test executable... Libraries in $mantid_libpath"
 g++ -O0 -g3 -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
     -I../../DataObjects/inc -I ../inc -I ../../../Third_Party/src/cxxtest \
     -L$mantid_libpath -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
-    -lboost_date_time
+    -lboost_date_time -lPocoFoundationd -lPocoNetd
 echo
 
 echo "Running the tests..."
@@ -43,5 +43,5 @@ echo
 #   when something in the chain has failed.
 echo "Cleaning up..."
 #rm -f *.properties
-rm -f *Test.log
+#rm -f *Test.log
 echo "Done."
