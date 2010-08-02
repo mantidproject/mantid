@@ -25,6 +25,10 @@ class ReductionSingleton:
         # Store instance reference as the only member in the handle
         self.__dict__['_ReductionSingleton__instance'] = ReductionSingleton.__instance
         
+    @classmethod
+    def clean(cls):
+        ReductionSingleton.__instance = SANSReducer()
+        
     def __getattr__(self, attr):
         """ Delegate access to implementation """
         return getattr(self.__instance, attr)
@@ -41,16 +45,14 @@ def DataPath(path):
 def HFIRSANS():
     ReductionSingleton().set_instrument(HFIRSANSReduction.InstrumentConfiguration())
 
-class FindBeamCenter:
-    BEAMFINDER_DIRECT_BEAM = SANSReductionSteps.FindBeamCenter.BEAMFINDER_DIRECT_BEAM
-    BEAMFINDER_SCATTERING = SANSReductionSteps.FindBeamCenter.BEAMFINDER_SCATTERING
+def DirectBeamCenter(datafile, beam_radius=3.0):
+    ReductionSingleton().set_beam_finder(SANSReductionSteps.DirectBeamCenter(datafile, beam_radius=beam_radius))
 
-    def __init__(self, datafile, method=BEAMFINDER_DIRECT_BEAM):
-        #ReductionSingleton().append_step(SANSReductionSteps.FindBeamCenter(datafile, method))
-        ReductionSingleton().set_beam_finder(SANSReductionSteps.FindBeamCenter(datafile, method))
-        
+def ScatteringBeamCenter(datafile, beam_radius=3.0):
+    ReductionSingleton().set_beam_finder(SANSReductionSteps.ScatteringBeamCenter(datafile, beam_radius=beam_radius))
+
 def SetBeamCenter(x,y):
-    ReductionSingleton().set_beam_center(x,y)
+    ReductionSingleton().set_beam_finder(SANSReductionSteps.BaseBeamFinder(x,y))
     
 def Reduce1D():
     ReductionSingleton().reduce()
@@ -68,7 +70,10 @@ def TimeNormalization():
     ReductionSingleton().set_normalizer(SANSReducer.NORMALIZATION_TIME)
     
 def MonitorNormalization():
-    ReductionSingleton().set_normalizer(SANSReducer.NORMALIZATION_MONITOR)
+    ReductionSingleton().set_normalizer(SANSReducer.NORMALIZATION_MONITOR)    
+    
+def NoNormalization():
+    ReductionSingleton().set_normalizer(None)
     
 def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5):
     ReductionSingleton().set_sensitivity_correcter(SANSReductionSteps.SensitivityCorrection(flood_data, min_sensitivity, max_sensitivity))
@@ -91,5 +96,17 @@ def NoSolidAngle():
 def AzimuthalAverage():
     ReductionSingleton().set_azimuthal_averager(SANSReductionSteps.WeightedAzimuthalAverage())
 
-    
-    
+def SetTransmission(trans, error):
+    ReductionSingleton().set_transmission(SANSReductionSteps.BaseTransmission(trans, error))
+
+def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0):
+    ReductionSingleton().set_transmission(SANSReductionSteps.DirectBeamTransmission(sample_file=sample_file,
+                                                                                    empty_file=empty_file,
+                                                                                    beam_radius=beam_radius))
+
+def BeamSpreaderTransmission():
+    ReductionSingleton().set_transmission(SANSReductionSteps.BeamSpreaderTransmission())
+  
+def Mask(): raise NotImplemented
+
+def Background(): raise NotImplemented

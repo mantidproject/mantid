@@ -39,6 +39,9 @@ class SANSReducer(Reducer):
     ## Azimuthal averaging
     _azimuthal_averager = None
     
+    ## Transmission calculator
+    _transmission_calculator = None
+    
     def __init__(self):
         super(SANSReducer, self).__init__()
         
@@ -68,19 +71,16 @@ class SANSReducer(Reducer):
         else:
             self._normalizer = SANSReductionSteps.Normalize(option)
         
-    def set_beam_center(self, x, y):
+    def set_transmission(self, trans):
         """
-             Set the beam center
-             @param x: x-position of the beam
-             @param y: y-position of the beam
+             Set the transmission
+             @param trans: transmission value
+             @param error: uncertainty on the transmission
         """
-        # Check that we have floats
-        try: 
-            x = float(x)
-            y = float(y)
-        except:
-            raise RuntimeError, "Reducer.set_beam_center: input coordinates are expected to be floats (%s %s)" % (str(x), str(y))
-        self._beam_finder = SANSReductionSteps.BaseBeamFinder(x,y)
+        if issubclass(trans.__class__, SANSReductionSteps.BaseTransmission) or None:
+            self._transmission_calculator = trans
+        else:
+            raise RuntimeError, "Reducer.set_transmission expects an object of class ReductionStep"
         
     def get_beam_center(self): 
         """
@@ -190,6 +190,10 @@ class SANSReducer(Reducer):
         # Solid angle correction
         if self._solid_angle_correcter is not None:
             self.append_step(self._solid_angle_correcter)
+        
+        # Calculate transmission correction
+        if self._transmission_calculator is not None:
+            self.append_step(self._transmission_calculator) 
         
         # Perform azimuthal averaging
         if self._azimuthal_averager is not None:

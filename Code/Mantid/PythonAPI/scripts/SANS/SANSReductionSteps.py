@@ -25,28 +25,11 @@ class BaseBeamFinder(ReductionStep):
     def execute(self, reducer, workspace):
         pass
         
-class FindBeamCenter(BaseBeamFinder):
-    """
-        Find the beam center with one of two methods
-    """
-    BEAMFINDER_DIRECT_BEAM = 1
-    BEAMFINDER_SCATTERING = 2
-   
-    def __init__(self, datafile, method=BEAMFINDER_DIRECT_BEAM, beam_radius=3):
-        super(FindBeamCenter, self).__init__()
-        ## Location of the data file used to find the beam center
-        self._datafile = datafile
-        ## Method used to find the beam center
-        self._method = method
-        self._beam_radius = beam_radius
-        
-    def execute(self, reducer, workspace=None):
+    def _find_beam(self, direct_beam, reducer, workspace=None):
         """
             Find the beam center.
             @param reducer: Reducer object for which this step is executed
         """
-        # Check whether the direct beam or scattering pattern option was selected
-        direct_beam = (self._method is FindBeamCenter.BEAMFINDER_DIRECT_BEAM)
         # Load the file to extract the beam center from, and process it.
         filepath = reducer._full_file_path(self._datafile)
         LoadSpice2D(filepath, "beam_center")
@@ -60,7 +43,155 @@ class FindBeamCenter(BaseBeamFinder):
         ctr_str = beam_center.getPropertyValue("CenterOfMass")
         ctr = ctr_str.split(',')
         
-        reducer.set_beam_center(float(ctr[0]), float(ctr[1]))
+        self._beam_center_x = float(ctr[0])
+        self._beam_center_y = float(ctr[1])
+
+
+class ScatteringBeamCenter(BaseBeamFinder):
+    """
+        Find the beam center using the scattering data
+    """  
+    def __init__(self, datafile, beam_radius=3):
+        super(ScatteringBeamCenter, self).__init__()
+        ## Location of the data file used to find the beam center
+        self._datafile = datafile
+        self._beam_radius = beam_radius
+        
+    def execute(self, reducer, workspace=None):
+        """
+            Find the beam center.
+            @param reducer: Reducer object for which this step is executed
+        """
+        super(ScatteringBeamCenter, self)._find_beam(False, reducer, workspace)
+
+class DirectBeamCenter(BaseBeamFinder):
+    """
+        Find the beam center using the direct beam
+    """  
+    def __init__(self, datafile, beam_radius=3):
+        super(DirectBeamCenter, self).__init__()
+        ## Location of the data file used to find the beam center
+        self._datafile = datafile
+        self._beam_radius = beam_radius
+        
+    def execute(self, reducer, workspace=None):
+        """
+            Find the beam center.
+            @param reducer: Reducer object for which this step is executed
+        """
+        super(DirectBeamCenter, self)._find_beam(True, reducer, workspace)
+
+class BaseTransmission(ReductionStep):
+    """
+        Base transmission. Holds the transmission value
+        as well as the algorithm for calculating it.
+    """
+    def __init__(self, trans=0.0, error=0.0):
+        super(BaseTransmission, self).__init__()
+        self._trans = trans
+        self._error = error
+        
+    def get_transmission(self):
+        return [self._trans, self._error]
+    
+    def execute(self, reducer, workspace):
+        ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                    TransmissionValue=self._trans,
+                                    TransmissionError=self._error, 
+                                    OutputWorkspace=workspace) 
+        
+  
+class BeamSpreaderTransmission(BaseTransmission):
+    """
+        Calculate transmission with one of two methods
+    """
+    def __init__(self): 
+        super(BeamSpreaderTransmission, self).__init__()
+        raise NotImplemented
+        
+    def execute(self, reducer, workspace=None):
+        """
+            Calculate transmission and apply correction
+            @param reducer: Reducer object for which this step is executed
+            @param workspace: workspace to apply correction to
+        """
+        raise NotImplmented
+            
+            
+class DirectBeamTransmission(BaseTransmission):
+    """
+        Calculate transmission with one of two methods
+    """
+    def __init__(self, sample_file, empty_file, beam_radius=3.0):
+        super(DirectBeamTransmission, self).__init__()
+        ## Location of the data files used to calculate transmission
+        self._sample_file = sample_file
+        self._empty_file = empty_file
+        ## Radius of the beam
+        self._beam_radius = beam_radius
+        ## Transmission workspace (output of transmission calculation)
+        self._transmission_ws = None
+        
+    def execute(self, reducer, workspace=None):
+        """
+            Calculate transmission and apply correction
+            @param reducer: Reducer object for which this step is executed
+            @param workspace: workspace to apply correction to
+        """
+        if self._transmission_ws is None:
+            # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
+            self._transmission_ws = "transmission_fit"
+
+            sample_ws = "_transmission_sample"
+            filepath = reducer._full_file_path(self._sample_file)
+            LoadSpice2D(filepath, sample_ws)
+            
+            empty_ws = "_transmission_empty"
+            filepath = reducer._full_file_path(self._empty_file)
+            LoadSpice2D(filepath, empty_ws)
+            
+            # Subtract dark current
+            if reducer._dark_current_subtracter is not None:
+                reducer._dark_current_subtracter.execute(reducer, sample_ws)
+                reducer._dark_current_subtracter.execute(reducer, empty_ws)
+            
+            # Find which pixels to sum up as our "monitor". At this point we have moved the detector
+            # so that the beam is at (0,0), so all we need is to sum the area around that point.
+            #TODO: in IGOR, the error-weighted average is computed instead of simply summing up the pixels
+            cylXML = '<infinite-cylinder id="transmission_monitor">' + \
+                       '<centre x="0.0" y="0.0" z="0.0" />' + \
+                       '<axis x="0.0" y="0.0" z="1.0" />' + \
+                       '<radius val="%12.10f" />' % (self._beam_radius*reducer.instrument.pixel_size_x/1000.0) + \
+                     '</infinite-cylinder>\n'
+                     
+            det_finder = FindDetectorsInShape(Workspace=workspace, ShapeXML=cylXML)
+            det_list = det_finder.getPropertyValue("DetectorList")
+            
+            first_det = int(det_list.split(',')[0])
+            
+            GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace="empty_mon",  DetectorList=det_list, KeepUngroupedSpectra="1")
+            GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace="sample_mon", DetectorList=det_list, KeepUngroupedSpectra="1")
+            
+            #TODO: check that both workspaces have the same masked spectra
+            
+            # Get normalization for transmission calculation
+            norm_spectrum = reducer.NORMALIZATION_TIME
+            if reducer._normalizer is not None:
+                norm_spectrum = reducer._normalizer.get_normalization_spectrum()
+            
+            # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
+            # as the monitor channel.
+            CalculateTransmission(DirectRunWorkspace="empty_mon", SampleRunWorkspace="sample_mon", 
+                                  OutputWorkspace=self._transmission_ws,
+                                  IncidentBeamMonitor=str(norm_spectrum), 
+                                  TransmissionMonitor=str(first_det))
+            
+        # 2- Apply correction (Note: Apply2DTransCorr)
+        #Apply angle-dependent transmission correction using the zero-angle transmission
+        ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                    TransmissionWorkspace=self._transmission_ws, 
+                                    OutputWorkspace=workspace)            
+            
 
 class SubtractDarkCurrent(ReductionStep):
     """
@@ -156,6 +287,9 @@ class Normalize(ReductionStep):
     def __init__(self, normalization_spectrum=0):
         super(Normalize, self).__init__()
         self._normalization_spectrum = normalization_spectrum
+        
+    def get_normalization_spectrum(self):
+        return self._normalization_spectrum
         
     def execute(self, reducer, workspace):
         # Get counting time or monitor
