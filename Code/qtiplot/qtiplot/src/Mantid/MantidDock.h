@@ -121,7 +121,6 @@ protected:
     FindAlgComboBox* m_findAlg;
     QPushButton *m_runningButton;
     QProgressBar* m_progressBar;
-    QVBoxLayout* m_progressLayout;
     QHBoxLayout * m_runningLayout;
     bool m_treeChanged;
     bool m_findAlgChanged;

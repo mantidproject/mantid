@@ -883,9 +883,6 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
   m_runningLayout = new QHBoxLayout();
   m_runningLayout->setName("testA");
   
-  m_progressLayout = new QVBoxLayout();
-  m_progressLayout->setName("testB");
-
   m_runningButton = new QPushButton("Details");
   m_runningLayout->addStretch();
   m_runningLayout->addWidget(m_runningButton);
@@ -1068,13 +1065,12 @@ void AlgorithmDockWidget::showProgressBar()
 {
   if (m_progressBar == NULL)
   {
-    // remove the stretch item
-    m_runningLayout->removeItem(m_runningLayout->takeAt(0));
     // insert progress bar
     m_progressBar = new QProgressBar();
     m_progressBar->setAlignment(Qt::AlignHCenter);
-    m_progressLayout->addWidget(m_progressBar);
-    m_runningLayout->insertLayout(0,m_progressLayout);
+    m_runningLayout->insertWidget(1,m_progressBar);
+    // remove the stretch item
+    m_runningLayout->removeItem(m_runningLayout->takeAt(0));
   }
 }
 
@@ -1083,13 +1079,10 @@ void AlgorithmDockWidget::hideProgressBar()
 
   if (m_progressBar && m_algID.empty())
   {
-    m_progressLayout->removeWidget(m_progressBar);
-    m_progressLayout->setParent(NULL);
+    m_runningLayout->insertStretch(0);
+    m_runningLayout->removeWidget(m_progressBar);
     m_progressBar->close();
-    m_runningLayout->removeItem(m_runningLayout->takeAt(0));
-    m_runningLayout->removeItem(m_runningLayout->takeAt(0));
-    m_runningLayout->addStretch();
-    m_runningLayout->addWidget(m_runningButton);
+    delete m_progressBar;
     m_progressBar = NULL;
   }
 }
