@@ -217,7 +217,6 @@ void AlignDetectors::execEvent()
   // Read in the calibration data
   const std::string calFileName = this->getProperty("CalibrationFile");
   std::map<int,double> offsets;
-  The travel
   progress(0.0,"Reading calibration file");
 
   if ( ! this->readCalFile(calFileName, offsets) )
