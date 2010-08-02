@@ -8,8 +8,6 @@
 #------------------------
 CONFIG += qt warn_on exceptions debug_and_release
 
-QMAKESPEC=win32-msvc2005
-
 win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS WIN32 BOOST_ALL_DYN_LINK
 
 #-------------------------------

@@ -2,9 +2,6 @@
 ###################### USER-SERVICEABLE PART ################################
 #############################################################################
 
-win32 {
- QMAKESPEC=win32-msvc2005  
-}
 unix {
 QMAKE_CXXFLAGS_RELEASE += -g
 QMAKE_LFLAGS_RELEASE += -g

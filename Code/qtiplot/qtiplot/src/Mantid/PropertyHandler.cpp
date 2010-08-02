@@ -18,6 +18,15 @@
 #include "../Graph.h"
 #include <QMessageBox>
 
+// Visual studio 2010 can't deal with NULL (for a pointer) being passed to the constructor of an std::pair
+// You have to use the c++0x keyword 'nullptr' instead.
+// _MSC_VER=1600 is Visual Studio 2010, so in all other cases I create a define to turn nullptr into NULL
+#if (_MSC_VER!=1600)
+  #ifndef nullptr
+    #define nullptr NULL
+  #endif
+#endif
+
 // Constructor
 PropertyHandler::PropertyHandler(Mantid::API::IFunction* fun,
                 Mantid::API::CompositeFunction* parent,
@@ -1160,7 +1169,7 @@ void PropertyHandler::addConstraint(QtProperty* parProp,bool lo,bool up,double l
   }
 
   m_browser->m_changeSlotsEnabled = false;
-  std::pair<QtProperty*,QtProperty*> cnew(NULL,NULL);
+  std::pair<QtProperty*,QtProperty*> cnew(nullptr,nullptr);
   std::ostringstream ostr;
   if (lo) 
   {
