@@ -41,6 +41,7 @@ static const string PULSEID_PARAM("PulseidFilename");
 static const string MAP_PARAM("MappingFilename");
 static const string INSTRUMENT_PARAM("InstrumentFilename");
 static const string PID_PARAM("SpectrumList");
+static const string PAD_PIXELS_PARAM("PadEmptyPixels");
 static const string PERIOD_PARAM("PeriodList");
 static const string OUT_PARAM("OutputWorkspace");
 
@@ -102,6 +103,9 @@ void LoadEventPreNeXus::init()
   // which states to load
   this->declareProperty(new ArrayProperty<int>(PERIOD_PARAM),
                         "A list of periods to read. Only used if set.");
+  // Pad out empty pixels?
+  this->declareProperty(new PropertyWithValue<bool>(PAD_PIXELS_PARAM, false, Direction::Input) );
+//                        "Set to True to pad empty pixels, loaded from the instrument geometry file. Nothing is done if no geometry file was specified.");
 
   // the output workspace name
   this->declareProperty(new WorkspaceProperty<EventWorkspace>(OUT_PARAM,"",Direction::Output));
@@ -139,14 +143,14 @@ void LoadEventPreNeXus::exec()
   localWorkspace->setYUnit("Counts");
   // TODO localWorkspace->setTitle(title);
 
-  //Process the events into pixels
-  this->procEvents(localWorkspace);
-  
   // load the instrument geometry file
   string instrument_filename = this->getPropertyValue(INSTRUMENT_PARAM);
   //TODO: Auto-find the instrument file if not specified
   if (instrument_filename.length() > 0)
     this->runLoadInstrument(instrument_filename, localWorkspace);
+
+  //Process the events into pixels
+  this->procEvents(localWorkspace);
 
   //Save output
   this->setProperty(OUT_PARAM, localWorkspace);
@@ -194,6 +198,7 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &filename, MatrixWor
   }
   else
   {
+    this->instrument_loaded_correctly = true;
 //    m_monitordetectorList = loadInst->getProperty("MonitorList");
 //    std::vector<int>::const_iterator itr;
 //    for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
@@ -285,9 +290,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
       //Covert the pixel ID from DAS pixel to our pixel ID
       this->fixPixelId(temp.pid, period);
 
-      //Parallel: this critical block is almost certainly killing parallel efficiency.
-      //workspace->getEventList(temp.pid) += event;
-
       //The addEventQuickly method does not clear the cache, making things slightly faster.
       workspace->getEventList(temp.pid).addEventQuickly(event);
 
@@ -306,17 +308,32 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     prog.report();
   }
 
-  /*
-  //OK, you've done all the events; but if some pixels got no events, their
-  //  EventList wasn't initialized.
-  std::vector<PixelType>::iterator pix;
-  for (pix = this->pixelmap.begin(); pix < this->pixelmap.end(); pix++)
+
+  //--------- Pad Empty Pixels -----------
+  if (this->getProperty(PAD_PIXELS_PARAM))
   {
-    //Go through each pixel in the map
-    // and simply get the event list. It will be created if empty.
-    workspace->getEventList(*pix);
+    //We want to pad out empty pixels.
+    if (!this->instrument_loaded_correctly)
+    {
+      g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
+    }
+    else
+    {
+      std::map<int, Geometry::IDetector_sptr> detector_map = workspace->getInstrument()->getDetectors();
+      std::map<int, Geometry::IDetector_sptr>::iterator it;
+      for (it = detector_map.begin(); it != detector_map.end(); it++)
+      {
+        //Go through each pixel in the map, but forget monitors.
+        if (!it->second->isMonitor())
+        {
+          // and simply get the event list. It will be created if it was not there already.
+          workspace->getEventList(it->first); //it->first is detector ID #
+        }
+      }
+
+    }
   }
-   */
+
 
   // add the frame information to the event workspace
   for (size_t i = 0; i < this->num_pulses; i++)
@@ -327,8 +344,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
   workspace->doneLoadingData();
 
-  //std::cout << "Shortest tof " << shortest_tof << " longest was " << longest_tof << "\n";
-
   //Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec& xRef = axis.access();
@@ -337,12 +352,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   xRef[1] = longest_tof + 1;
   workspace->setAllX(axis);
 
-
-  stringstream msg;
-  msg << "Read " << this->num_good_events << " events + "
-      << this->num_error_events << " errors";
-  msg << ". Shortest tof: " << shortest_tof << " microsec; longest tof: " << longest_tof << " microsec.";
-  this->g_log.information(msg.str());
+  g_log.information() << "Read " << this->num_good_events << " events + "
+      << this->num_error_events << " errors"
+      << ". Shortest TOF: " << shortest_tof << " microsec; longest TOF: " << longest_tof << " microsec.";
 
 }
 
