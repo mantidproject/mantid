@@ -98,7 +98,7 @@ public:
   }
 
 
-  void testExecEventWorkspace()
+  void xtestExecEventWorkspace()
   {
     this->setUp_Event();
 
