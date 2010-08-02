@@ -17,6 +17,7 @@
 #include "MantidKernel/Support.h"
 #include "MantidKernel/Exception.h"
 
+#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/RegexSupport.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
@@ -464,9 +465,9 @@ int Object::checkSurfaceValid(const Geometry::V3D& C, const Geometry::V3D& Nm) c
  */
 {
   int status(0);
-  Geometry::V3D tmp = C + Nm * (Surface::getSurfaceTolerance() * 5.0);
+  Geometry::V3D tmp = C + Nm * (Tolerance * 5.0);
   status = (!isValid(tmp)) ? 1 : -1;
-  tmp -= Nm * (Surface::getSurfaceTolerance() * 10.0);
+  tmp -= Nm * (Tolerance * 10.0);
   status += (!isValid(tmp)) ? 1 : -1;
   return status / 2;
 }
@@ -847,7 +848,7 @@ int Object::calcValidType(const Geometry::V3D& Pt, const Geometry::V3D& uVec) co
  \retval -1 :: Exit Point
  */
 {
-  const Geometry::V3D shift(uVec * Surface::getSurfaceTolerance() * 25.0);
+  const Geometry::V3D shift(uVec * Tolerance * 25.0);
   const Geometry::V3D testA(Pt - shift);
   const Geometry::V3D testB(Pt + shift);
   const int flagA = isValid(testA);
@@ -1206,7 +1207,7 @@ double Object::SphereSolidAngle(const V3D observer, const std::vector<Geometry::
     const double radius) const
 {
   const double distance = (observer - vectors[0]).norm();
-  const double tol = Surface::getSurfaceTolerance();
+  const double tol = Tolerance;
   if (distance > radius + tol)
   {
     const double sa = 2.0 * M_PI * (1.0 - cos(asin(radius / distance)));
@@ -1757,7 +1758,7 @@ int Object::lineHitsBoundingBox(const Geometry::V3D& orig, const Geometry::V3D& 
   // Assume that orig is outside of BoundingBox.
   //
   double lambda;
-  const double tol = Surface::getSurfaceTolerance();
+  const double tol = Tolerance;
   if (orig.X() > xmax)
   {
     if (dir.X() < -tol)
@@ -1838,7 +1839,7 @@ int Object::inBoundingBox(const Geometry::V3D& point, const double& xmax, const 
     const double& zmax, const double& xmin, const double& ymin, const double& zmin) const
 {
   //
-  const double tol = Surface::getSurfaceTolerance();
+  const double tol = Tolerance;
   if (point.X() <= xmax + tol && point.X() >= xmin - tol && point.Y() <= ymax + tol && point.Y() >= ymin
       - tol && point.Z() <= zmax + tol && point.Z() >= zmin - tol)
     return 1;

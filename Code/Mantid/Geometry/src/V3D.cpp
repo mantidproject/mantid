@@ -4,15 +4,13 @@
 #include <cstdlib>
 
 #include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Tolerance.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
 namespace Geometry
 {
-
-  /// The default precision 1e-7
-const double Tolerance(1e-7);
 
 /// Constructor [Null]
 V3D::V3D():x(0),y(0),z(0)

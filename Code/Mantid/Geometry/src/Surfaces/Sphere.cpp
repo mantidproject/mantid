@@ -14,6 +14,7 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidKernel/Support.h"
+#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
@@ -154,7 +155,7 @@ Sphere::side(const Geometry::V3D& Pt) const
   const double displace = centreToPoint(Pt) - Radius;
   //MG:  Surface test  - This does not use onSurface since it would double the amount of
   // computation if the object is not on the surface which is most likely
-  if( std::abs(displace) < getSurfaceTolerance() )
+  if( std::abs(displace) < Tolerance )
   {
     return 0;
   }
@@ -170,7 +171,7 @@ Sphere::onSurface(const Geometry::V3D& Pt) const
     \return 1 :: on the surfacae or 0 if not.
   */
 {
-  if( distance(Pt) > getSurfaceTolerance() )
+  if( distance(Pt) > Tolerance )
   {
     return 0;
   }
@@ -269,7 +270,7 @@ Sphere::write(std::ostream& OX) const
   std::ostringstream cx;
   Quadratic::writeHeader(cx);
   cx.precision(Surface::Nprecision);
-  if (Centre.distance(Geometry::V3D(0,0,0))<getSurfaceTolerance())
+  if (Centre.distance(Geometry::V3D(0,0,0))<Tolerance)
     {
       cx<<"so "<<Radius;
     }

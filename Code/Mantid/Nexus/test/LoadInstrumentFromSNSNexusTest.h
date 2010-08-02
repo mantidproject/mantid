@@ -11,6 +11,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/PhysicalConstants.h"
 using namespace Mantid;
 using namespace Mantid::NeXus;
 using namespace Mantid::Geometry;

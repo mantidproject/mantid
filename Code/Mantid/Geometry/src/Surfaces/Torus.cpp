@@ -13,6 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
@@ -98,14 +99,14 @@ Torus::operator==(const Torus& A) const
   if(this==&A)
     return 1;
 
-  if ( (fabs(Displacement-A.Displacement)>getSurfaceTolerance()) ||
-       (fabs(Iradius-A.Iradius)>getSurfaceTolerance()) ||
-       (fabs(Dradius-A.Dradius)>getSurfaceTolerance()) )
+  if ( (fabs(Displacement-A.Displacement)>Tolerance) ||
+       (fabs(Iradius-A.Iradius)>Tolerance) ||
+       (fabs(Dradius-A.Dradius)>Tolerance) )
     return 0;
 
-  if (Centre.distance(A.Centre)>getSurfaceTolerance())
+  if (Centre.distance(A.Centre)>Tolerance)
     return 0;
-  if (Normal.distance(A.Normal)>getSurfaceTolerance())
+  if (Normal.distance(A.Normal)>Tolerance)
     return 0;
 
   return 1;
@@ -197,7 +198,7 @@ Torus::setNorm(const Geometry::V3D& A)
     \param A :: New Normal direction
   */
 {
-  if (A.norm()>getSurfaceTolerance())
+  if (A.norm()>Tolerance)
     {
       Normal=A;
       Normal.normalize();
@@ -233,7 +234,7 @@ Torus::distance(const Geometry::V3D& Pt) const
 {
   const Geometry::V3D Px=Pt-Centre;
   // test is the centre to point distance is zero
-  if(Px.norm()<getSurfaceTolerance())
+  if(Px.norm()<Tolerance)
     return Px.norm();
   return Px.norm();
 }
@@ -280,7 +281,7 @@ Torus::write(std::ostream& OX) const
 {
   //               -3 -2 -1 0 1 2 3        
   const char Tailends[]="zyx xyz";
-  const int Ndir=Normal.masterDir(getSurfaceTolerance());
+  const int Ndir=Normal.masterDir(Tolerance);
   if (Ndir==0)
     {
       Surface::write(OX);

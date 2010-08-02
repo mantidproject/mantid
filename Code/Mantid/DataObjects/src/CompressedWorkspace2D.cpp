@@ -6,6 +6,15 @@
 #include <zlib.h>
 #include <cstring>
 
+// Visual studio 2010 can't deal with NULL (for a pointer) being passed to the constructor of an std::pair
+// You have to use the c++0x keyword 'nullptr' instead.
+// _MSC_VER=1600 is Visual Studio 2010, so in all other cases I create a define to turn nullptr into NULL
+#if (_MSC_VER!=1600)
+  #ifndef nullptr
+    #define nullptr NULL
+  #endif
+#endif
+
 DECLARE_WORKSPACE(CompressedWorkspace2D)
 
 namespace Mantid
@@ -58,7 +67,7 @@ void CompressedWorkspace2D::init(const int &NVectors, const int &XLength, const 
 
   for(int i=0;i<NVectors;i+=m_vectorsPerBlock)
   {
-    CompressedPointer p(NULL,tmpBuff.second);
+    CompressedPointer p(nullptr,tmpBuff.second);
     p.first = new Bytef[p.second];
     memcpy(p.first,tmpBuff.first,p.second);
     m_compressedData[i] = p;

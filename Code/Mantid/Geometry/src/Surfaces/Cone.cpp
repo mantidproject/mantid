@@ -14,6 +14,7 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidKernel/Support.h"
+#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Surfaces/Line.h"
@@ -158,11 +159,11 @@ namespace Mantid
 		{
 			if(this==&A)
 				return 1;
-			if (fabs(cangle-A.cangle)>getSurfaceTolerance())
+			if (fabs(cangle-A.cangle)>Tolerance)
 				return 0;
-			if (Centre.distance(A.Centre)>getSurfaceTolerance())
+			if (Centre.distance(A.Centre)>Tolerance)
 				return 0;
-			if (Normal.distance(A.Normal)>getSurfaceTolerance())
+			if (Normal.distance(A.Normal)>Tolerance)
 				return 0;
 
 			return 1;
@@ -235,7 +236,7 @@ namespace Mantid
 			\param A :: New Normal direction
 			*/
 		{
-			if (A.norm()>getSurfaceTolerance())
+			if (A.norm()>Tolerance)
 			{
 				Normal=A;
 				Normal.normalize();
@@ -287,7 +288,7 @@ namespace Mantid
 		{
 			const Geometry::V3D Px=Pt-Centre;
 			// test is the centre to point distance is zero
-			if(Px.norm()<getSurfaceTolerance())
+			if(Px.norm()<Tolerance)
 				return Px.norm();
 			double Pangle=Px.scalar_prod(Normal)/Px.norm();
 			if (Pangle<0.0)
@@ -316,7 +317,7 @@ namespace Mantid
 			double rptAngle=cR.scalar_prod(Normal);
 			rptAngle*=rptAngle/cR.scalar_prod(cR);
 			const double eqn(sqrt(rptAngle));
-			if (fabs(eqn-cangle)<getSurfaceTolerance())
+			if (fabs(eqn-cangle)<Tolerance)
 				return 0;
 			return (eqn>cangle) ? 1 : -1;  
 		}
@@ -337,7 +338,7 @@ namespace Mantid
 			rptAngle*=rptAngle/cR.scalar_prod(cR);
 			const double eqn(sqrt(rptAngle));
 
-			return (fabs(eqn-cangle)>getSurfaceTolerance()) ? 0 : 1;  
+			return (fabs(eqn-cangle)>Tolerance) ? 0 : 1;  
 		}
 
 		void
@@ -350,7 +351,7 @@ namespace Mantid
 		{
 			//               -3 -2 -1 0 1 2 3        
 			const char Tailends[]="zyx xyz";
-			const int Ndir=Normal.masterDir(getSurfaceTolerance());
+			const int Ndir=Normal.masterDir(Tolerance);
 			if (Ndir==0)
 			{
 				Quadratic::write(OX);
@@ -359,11 +360,11 @@ namespace Mantid
 			std::ostringstream cx;
 			Quadratic::writeHeader(cx);
 
-			const int Cdir=Centre.masterDir(getSurfaceTolerance());
+			const int Cdir=Centre.masterDir(Tolerance);
 			cx.precision(Surface::Nprecision);
 			// Name and transform 
 
-			if (Cdir || Centre.nullVector(getSurfaceTolerance()))
+			if (Cdir || Centre.nullVector(Tolerance))
 			{
 				cx<<" k";
 				cx<< Tailends[Ndir+3]<<" ";          // set x,y,z based on Ndir

@@ -1,7 +1,7 @@
 #include "MantidGeometry/Quat.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Tolerance.h"
 #include <cmath>
-#include <boost/test/floating_point_comparison.hpp>
 #include <stdexcept>
 #include <cstdlib>
 
@@ -10,10 +10,6 @@ namespace Mantid
 {
 namespace Geometry
 {
-
-/// Use boost float comparison
-boost::test_tools::close_at_tolerance<double> quat_tol(boost::test_tools::percent_tolerance(1e-6));
-
 
 /*! Null Constructor
  * Initialize the quaternion with the identity q=1.0+0i+0j+0k;
@@ -357,7 +353,13 @@ Quat& Quat::operator*=(const Quat& _q)
  */
 bool Quat::operator==(const Quat& q) const
 {
-	return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));
+  return (std::fabs(w-q.w)>Tolerance ||
+          std::fabs(a-q.a)>Tolerance ||
+          std::fabs(b-q.b)>Tolerance ||
+          std::fabs(c-q.c)>Tolerance)  ?
+          false : true;
+
+	//return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));
 }
 
 /*! Quaternion non-equal operator

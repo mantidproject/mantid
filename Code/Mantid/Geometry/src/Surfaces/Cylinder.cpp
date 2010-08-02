@@ -16,6 +16,7 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidKernel/Support.h"
+#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Surfaces/Line.h"
@@ -170,7 +171,7 @@ Cylinder::side(const Geometry::V3D& Pt) const
 				double y=Pt[(Nvec+1) % 3]-Centre[(Nvec+1) % 3];;
 				y*=y;
 				const double displace=x+y-Radius*Radius;
-				if (fabs(displace/Radius)<getSurfaceTolerance())
+				if (fabs(displace/Radius)<Tolerance)
 					return 0;
 				return (displace>0.0) ? 1 : -1;
 			}
@@ -197,7 +198,7 @@ Cylinder::onSurface(const Geometry::V3D& Pt) const
       x*=x;
       double y=Pt[(Nvec+1) % 3]-Centre[(Nvec+1) % 3];;
       y*=y;
-      return (fabs((x+y)-Radius*Radius)>getSurfaceTolerance()) ? 0 : 1;
+      return (fabs((x+y)-Radius*Radius)>Tolerance) ? 0 : 1;
     }
   return Quadratic::onSurface(Pt);
 }
@@ -213,7 +214,7 @@ Cylinder::setNvec()
   Nvec=0;
   for(int i=0;i<3;i++)
     {
-      if (fabs(Normal[i])>(1.0-getSurfaceTolerance()))
+      if (fabs(Normal[i])>(1.0-Tolerance))
 	{
 	  Nvec=i+1;
 	  return;
@@ -333,7 +334,7 @@ Cylinder::write(std::ostream& OX) const
 {
   //               -3 -2 -1 0 1 2 3        
   const char Tailends[]="zyx xyz";
-  const int Ndir=Normal.masterDir(getSurfaceTolerance());
+  const int Ndir=Normal.masterDir(Tolerance);
   if (Ndir==0)
     {
       // general surface
@@ -341,14 +342,14 @@ Cylinder::write(std::ostream& OX) const
       return;
     }
   
-  const int Cdir=Centre.masterDir(getSurfaceTolerance());
+  const int Cdir=Centre.masterDir(Tolerance);
   std::ostringstream cx;
 
   writeHeader(cx);
   cx.precision(Surface::Nprecision);
   // Name and transform 
    
-  if (Cdir*Cdir==Ndir*Ndir || Centre.nullVector(getSurfaceTolerance()))
+  if (Cdir*Cdir==Ndir*Ndir || Centre.nullVector(Tolerance))
     {
       cx<<"c";
       cx<< Tailends[Ndir+3]<<" ";          // set x,y,z based on Ndir

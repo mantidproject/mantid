@@ -188,7 +188,7 @@ namespace Mantid
         getPointerToProperty(name);
         return true;
       }
-      catch (Exception::NotFoundError &e)
+      catch (Exception::NotFoundError&)
       {
         return false;
       }

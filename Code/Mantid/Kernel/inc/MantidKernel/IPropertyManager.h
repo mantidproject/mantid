@@ -212,7 +212,9 @@ protected:
   /// Get a property by an index
   virtual Property* getPointerToPropertyOrdinal(const int &index) const = 0;
 
-  /** Templated method to get the value of a property
+  /** Templated method to get the value of a property.
+   *  No generic definition, only specialised ones. Although the definitions are mostly the
+   *  same, Visual Studio can't cope with 
    *  @param name The name of the property (case insensitive)
    *  @return The value of the property
    *  @throw std::runtime_error If an attempt is made to assign a property to a different type
@@ -222,7 +224,7 @@ protected:
   T getValue(const std::string &name) const;
 
   /// Utility class that enables the getProperty() method to effectively be templated on the return type
-  struct TypedValue
+  struct DLLExport TypedValue
   {
     /// Reference to the containing PropertyManager
     const IPropertyManager& pm;
@@ -232,9 +234,22 @@ protected:
     /// Constructor
     TypedValue(const IPropertyManager& p, const std::string &name) : pm(p), prop(name) {}
 
-    /// Templated cast operator so that a TypedValue can be cast to what is actually wanted
+    // Unfortunately, MSVS2010 can't handle just having a single templated cast operator T()
+    // (it has problems with the string one). This operator is needed to convert a TypedValue
+    // into what we actually want. It can't even handle just having a specialization for strings.
+    // So we have to explicitly define an operator for each type of property that we have.
+    operator int ();
+    operator long long ();
+    operator bool ();
+    operator double ();
+    operator std::string ();
+    operator Property* ();
+
+    // We can have some partial specialisation for Array and Workspace properties
     template<typename T>
-    operator T() { return pm.getValue<T>(prop); }
+    operator std::vector<T> () { return pm.getValue<std::vector<T> >(prop);}
+    template<typename T>
+    operator boost::shared_ptr<T> () { return pm.getValue<boost::shared_ptr<T> >(prop); }
   };
 
 public:

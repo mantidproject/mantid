@@ -73,7 +73,7 @@ public:
     const int version = extractAlgVersion(tempAlg);
     const std::string className = extractAlgName(tempAlg);
     delete newI;
-    typename versionMap::iterator it = m_vmap.find(className);
+    typename versionMap::const_iterator it = m_vmap.find(className);
     if (!className.empty())
     {
       if( it == m_vmap.end())
@@ -83,7 +83,7 @@ public:
         if(version == it->second )
         {
           g_log.fatal() << "Cannot register algorithm " << className << " twice with the same version\n";
-	  return;
+          return;
         }
         if(version > it->second)
           m_vmap[className]=version;

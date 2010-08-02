@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -60,7 +61,7 @@ namespace Mantid
       */
     {
       const double dL=fabs(Dist-A.Dist);
-      return (dL>Surface::getSurfaceTolerance()) ? 
+      return (dL>Tolerance) ? 
         Dist<A.Dist : Direction<A.Direction;
     }
 
@@ -281,7 +282,7 @@ namespace Mantid
         if (ac->Direction==1 && bc->Direction==-1)
         {
           // Touching surface / identical surface
-          if (fabs(ac->Dist-bc->Dist)>Surface::getSurfaceTolerance())
+          if (fabs(ac->Dist-bc->Dist)>Tolerance)
           {
             // track leave ac into bc.
             addTUnit(ac->ObjID,ac->PtA,bc->PtA,bc->Dist);

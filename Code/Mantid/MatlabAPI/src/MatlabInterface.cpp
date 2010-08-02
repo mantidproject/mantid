@@ -6,6 +6,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+
+// Need this define to avoid a conflict in Visual Studio 2010
+#if (_MSC_VER==1600) // This is MSVS2010
+  #define CHAR16_T _CHAR16T
+#endif
 #include "engine.h"
 /// A debugging define
 #define ARGCHECK   // Also need mwdebug.c for this

@@ -149,6 +149,16 @@ namespace Kernel
     {
         this->setPropertyValue(name, value);
     }
+
+    // Definitions for TypedValue cast operators
+    // Have to come after getValue definitions above to keep MSVS2010 happy
+    IPropertyManager::TypedValue::operator int () { return pm.getValue<int>(prop); }
+    IPropertyManager::TypedValue::operator long long () { return pm.getValue<long long>(prop); }
+    IPropertyManager::TypedValue::operator bool () { return pm.getValue<bool>(prop); }
+    IPropertyManager::TypedValue::operator double () { return pm.getValue<double>(prop); }
+    IPropertyManager::TypedValue::operator std::string () { return pm.getPropertyValue(prop); }
+    IPropertyManager::TypedValue::operator Property* () { return pm.getPointerToProperty(prop); }
+
     /// @endcond
 
 } // namespace Kernel

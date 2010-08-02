@@ -74,7 +74,6 @@ class DLLExport Surface
 
   void setName(int const N) { Name=N; }            ///< Set Name
   int getName() const { return Name; }             ///< Get Name
-  static double getSurfaceTolerance() { return 1e-6; } ///< Get Tolerance for all surface types
 
   /// Sets the surface based on a string input in MCNPX format
   virtual int setSurface(const std::string& R) =0; 

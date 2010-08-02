@@ -16,6 +16,7 @@
 #include "MantidKernel/Exception.h"
 
 #include "MantidKernel/Support.h"
+#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
@@ -32,7 +33,7 @@ namespace Geometry
 
 Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
 
-/// Numerical tolerance, now set by Surface::getSurfaceTolerance()
+/// Numerical tolerance, now set by Surface::Tolerance
 //const double PTolerance(1e-6); 
 
 Plane::Plane() : Quadratic(),
@@ -128,7 +129,7 @@ Plane::setSurface(const std::string& Pstr)
         { 
 	  NormV=Geometry::V3D(surf[0],surf[1],surf[2]);
 	  const double ll=NormV.normalize();
-	  if (ll<getSurfaceTolerance())   // avoid 
+	  if (ll<Tolerance)   // avoid 
 	    return -4;
 	  Dist= surf[3]/ll;
 	}
@@ -239,7 +240,7 @@ Plane::side(const Geometry::V3D& A) const
 {
   double Dp=NormV.scalar_prod(A);
   Dp-=Dist;
-  if (getSurfaceTolerance()<fabs(Dp))
+  if (Tolerance<fabs(Dp))
     return (Dp>0) ? 1 : -1;
   return 0;
 }
@@ -281,7 +282,7 @@ Plane::planeType() const
   */
 {
   for(int i=0;i<3;i++)
-    if (fabs(NormV[i])>(1.0-getSurfaceTolerance()))
+    if (fabs(NormV[i])>(1.0-Tolerance))
       return i+1;
   return 0;
 }
