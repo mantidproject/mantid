@@ -185,6 +185,10 @@ void AlignDetectors::exec()
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
+//-----------------------------------------------------------------------
+/**
+ * Execute the align detectors algorithm for an event workspace.
+ */
 void AlignDetectors::execEvent()
 {
   g_log.information("Processing event workspace");
@@ -213,7 +217,7 @@ void AlignDetectors::execEvent()
   // Read in the calibration data
   const std::string calFileName = this->getProperty("CalibrationFile");
   std::map<int,double> offsets;
-
+  The travel
   progress(0.0,"Reading calibration file");
 
   if ( ! this->readCalFile(calFileName, offsets) )
