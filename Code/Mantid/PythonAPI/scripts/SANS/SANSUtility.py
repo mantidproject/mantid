@@ -6,34 +6,19 @@ import SANSInsts
 from mantidsimple import *
 import math
 
-# Return the details specific to the instrument and bank given
-# as:
-#   dimension, specmin, specmax, backmon_start, backmon_end
-def GetInstrumentDetails(instrument):
-	detbank = instrument.curDetector().name()
+def GetInstrumentDetails(instrum):
+    """
+        Return the details specific to the instrument's current detector bank
+        @return number of pixels ac, first spectrum in the current detector, its last spectrum
+	"""
+    det = instrum.cur_detector()
+    #LOQ HAB is not working yet for some reason
+    if instrum.name() == 'LOQ':
+        if instrum.cur_detector().name() == 'HAB':
+            return det.n_columns, det.first_spec_num, 17792
 
-	if instrument.name == 'LOQ':
-		if detbank == 'main-detector-bank':
-			return 128, 3, 16386
-		elif detbank == 'HAB':
-			return 128, 16387, 17792
-		else:
-			return -1, -1, -1, -1, -1
-	else:
-		# This is the number of monitors before the first set of detectors 
-		monstart = 8
-		dim = 192
-		if detbank == 'front-detector':
-			smin = dim*dim + 1 + monstart
-			smax = dim*dim*2 + monstart
-			return dim, smin, smax
-		elif detbank == 'rear-detector':
-			smin = 1 + monstart
-			smax = dim*dim + monstart
-			return 192, smin, smax
-		else:
-			return -1, -1, -1, -1, -1
-			
+    return det.n_columns, det.first_spec_num, det.last_spec_num
+
 # Parse a log file containing run information and return the detector positions
 def parseLogFile(logfile):
 	logkeywords = {'Rear_Det_X':0.0, 'Rear_Det_Z':0.0, 'Front_Det_X':0.0, 'Front_Det_Z':0.0, \
@@ -391,3 +376,7 @@ class RunDetails(object):
 	
 	def getSuffix(self):
 		return self._suffix
+		
+  
+if __name__ == '__main__':
+    pass

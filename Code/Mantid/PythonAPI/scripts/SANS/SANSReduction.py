@@ -23,7 +23,6 @@ import SANSUtility
 import SANSInsts
 import math
 from mantidsimple import *
-
 # disable plotting if running outside Mantidplot
 try:
     from mantidplot import plotSpectrum, mergePlots
@@ -77,9 +76,6 @@ INSTR_DIR = mtd.getConfigProperty('instrumentDefinition.directory')
 #TODO: get rid of all those globals
 INSTRUMENT = SANSInsts.instrument_factory("SANS2D")
 
-#TODO remove all instances of INSTR_NAME
-INSTR_NAME = INSTRUMENT.name
-
 # Beam centre in metres
 XBEAM_CENTRE = None
 YBEAM_CENTRE = None
@@ -112,17 +108,9 @@ SAMPLE_WIDTH = 1.0
 SAMPLE_HEIGHT = 1.0
 SAMPLE_THICKNESS = 1.0 
 
-
 # These values are used for the start and end bins for FlatBackground removal.
 BACKMON_START = None
 BACKMON_END = None
-
-# The monitor spectrum taken from the GUI
-MONITORSPECTRUM = 2
-# agruments after MON/LENGTH need to take precendence over those after MON/SPECTRUM and this variable ensures that
-MONITORSPECLOCKED = False
-# if this is set InterpolationRebin will be used on the monitor spectrum used to normalise the sample
-SAMP_INTERPOLATE = False
 
 # Transmission variables
 TRANS_FIT_DEF = 'Log'
@@ -222,10 +210,8 @@ def printParameter(var):
 ########################### 
 def SANS2D():
     _printMessage('SANS2D()')
-    global INSTRUMENT, INSTR_NAME, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
+    global INSTRUMENT, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
     INSTRUMENT = SANSInsts.instrument_factory("SANS2D")
-    #TODO remove all instances of INSTR_NAME
-    INSTR_NAME = INSTRUMENT.name
 
     TRANS_WAV1_FULL = TRANS_WAV1 = 2.0
     TRANS_WAV2_FULL = TRANS_WAV2 = 14.0
@@ -233,12 +219,9 @@ def SANS2D():
 
 def LOQ():
     _printMessage('LOQ()')
-    global INSTRUMENT, INSTR_NAME, MONITORSPECTRUM, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
+    global INSTRUMENT, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
     INSTRUMENT = SANSInsts.instrument_factory("LOQ")
-    #TODO remove all instances of INSTR_NAME
-    INSTR_NAME = INSTRUMENT.name
 
-    MONITORSPECTRUM = 2
     TRANS_WAV1_FULL = TRANS_WAV1 = 2.2
     TRANS_WAV2_FULL = TRANS_WAV2 = 10.0
     INSTRUMENT.lowAngDetSet = True
@@ -248,7 +231,7 @@ def Detector(det_name):
     global INSTRUMENT
     if not INSTRUMENT.setDetector(det_name) :
         _issueWarning('Detector not found')
-        _issueWarning('Detector set to ' + INSTRUMENT.curDetector().name() + ' in ' + INSTRUMENT.name)
+        _issueWarning('Detector set to ' + INSTRUMENT.cur_detector().name() + ' in ' + INSTRUMENT.name())
 
 def Set1D():
     _printMessage('Set1D()')
@@ -281,11 +264,11 @@ def AssignSample(sample_run, reload = True, period = -1):
     _SAMPLE_RUN = sample_run
     SCATTER_SAMPLE,reset,logname,filepath, _SAMPLE_N_PERIODS = _assignHelper(sample_run, False, reload, period)
     if SCATTER_SAMPLE.getName() == '':
-        _issueWarning('Unable to load sans sample run, cannot continue.')
+        _issueWarning('Unable to load SANS sample run, cannot continue.')
         return '','()'
     if reset == True:
         _SAMPLE_SETUP = None
-    if (INSTR_NAME == 'SANS2D'):
+    if (INSTRUMENT.name() == 'SANS2D'):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
         logvalues = _loadDetectorLogs(logname,filepath)
@@ -333,7 +316,7 @@ def AssignCan(can_run, reload = True, period = -1):
         return '','()'
     if reset == True:
         _CAN_SETUP  = None
-    if (INSTR_NAME == 'SANS2D'):
+    if (INSTRUMENT.name() == 'SANS2D'):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
         logvalues = _loadDetectorLogs(logname,filepath)
@@ -428,7 +411,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
     if run_no == '':
         return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
         
-    if INSTR_NAME == 'LOQ':
+    if INSTRUMENT.name() == 'LOQ':
         field_width = 5
     else:
         field_width = 8
@@ -443,7 +426,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
     if reload == False and mtd.workspaceExists(wkspname):
         return WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
 
-    basename = INSTR_NAME + fullrun_no
+    basename = INSTRUMENT.name() + fullrun_no
     filename = os.path.join(DATA_PATH,basename)
     # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
     if not os.path.exists(filename + '.' + ext):
@@ -452,7 +435,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
         period = 1
     if is_trans:
         try:
-            if INSTR_NAME == 'SANS2D' and int(shortrun_no) < 568:
+            if INSTRUMENT.name() == 'SANS2D' and int(shortrun_no) < 568:
                 dimension = SANSUtility.GetInstrumentDetails(INSTRUMENT)[0]
                 specmin = dimension*dimension*2
                 specmax = specmin + 4
@@ -473,7 +456,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
             
     inWS = SANSUtility.WorkspaceDetails(wkspname, shortrun_no)
-    return inWS,True, INSTR_NAME + logname, filepath, nPeriods
+    return inWS,True, INSTRUMENT.name() + logname, filepath, nPeriods
 
 def padRunNumber(run_no, field_width):
     nchars = len(run_no)
@@ -751,7 +734,7 @@ def SetPhiLimit(phimin,phimax, phimirror=True):
 #####################################
 # Clear current mask defaults
 #####################################
-def clearCurrentMaskDefaults():
+def _restore_defaults():
 
     Mask('MASK/CLEAR')
     Mask('MASK/CLEAR/TIME')
@@ -772,10 +755,7 @@ def clearCurrentMaskDefaults():
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
     
-    global MONITORSPECTRUM, MONITORSPECLOCKED, SAMP_INTERPOLATE, TRANS_INCID_MON, TRANS_TRANS_MON, TRANS_INTERPOLATE
-    MONITORSPECTRUM = 2
-    MONITORSPECLOCKED = False
-    SAMP_INTERPOLATE = False
+    global TRANS_INCID_MON, TRANS_TRANS_MON, TRANS_INTERPOLATE
     
     TRANS_INCID_MON = 2
     TRANS_TRANS_MON = 3
@@ -858,7 +838,7 @@ def MaskFile(filename):
     if os.path.exists(filename) == False:
         _fatalError("Cannot read mask file '" + filename + "', path does not exist.")
         
-    clearCurrentMaskDefaults()
+    _restore_defaults()
 
     file_handle = open(filename, 'r')
     for line in file_handle:
@@ -1019,10 +999,14 @@ def _readMONValues(line):
         details = details[0:interPlace]
 
     if details.upper().startswith('LENGTH'):
-        SuggestMonitorSpectrum(int(details.split()[1]), interpolate)
+        SuggestMonitorSpectrum(int(details.split()[1]))
+        if interpolate :
+            INSTRUMENT.suggest_interp_scattering_mon()
     
     elif details.upper().startswith('SPECTRUM'):
-        SetMonitorSpectrum(int(details.split('=')[1]), interpolate)
+        SetMonitorSpectrum(int(details.split('=')[1]))
+        if interpolate :
+            INSTRUMENT.interp_scattering_mon()
     
     elif details.upper().startswith('TRANS'):
         parts = details.split('=')
@@ -1090,28 +1074,11 @@ def _readDetectorCorrections(details):
 def SetSampleOffset(value):
     INSTRUMENT.set_sample_offset(value)
 
-def SetMonitorSpectrum(specNum, interp=False):
-    global MONITORSPECTRUM
-    MONITORSPECTRUM = int(specNum)
-    
-    global SAMP_INTERPOLATE
-    if not SAMP_INTERPOLATE :                  #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
-        SAMP_INTERPOLATE = bool(interp)
+def SetMonitorSpectrum(specNum):
+    INSTRUMENT.set_scattering_mon(specNum)
 
-    global MONITORSPECLOCKED
-    MONITORSPECLOCKED = True
-
-def SuggestMonitorSpectrum(specNum, interp=False):
-    global MONITORSPECLOCKED
-    if MONITORSPECLOCKED :
-        return
-
-    global SAMP_INTERPOLATE
-    if not SAMP_INTERPOLATE :                  #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
-        SAMP_INTERPOLATE = bool(interp)
-
-    global MONITORSPECTRUM
-    MONITORSPECTRUM = int(specNum)
+def SuggestMonitorSpectrum(specNum):
+    INSTRUMENT.suggest_scattering_mon(specNum)
 
 def SetTransSpectrum(specNum, interp=False):
     global TRANS_INCID_MON
@@ -1256,11 +1223,11 @@ def _init_run(raw_ws, beamcoords, emptycell):
         final_ws = "can_temp_workspace"
     else:
         final_ws = raw_ws.getName().split('_')[0]
-        final_ws += INSTRUMENT.curDetector().name('short')
+        final_ws += INSTRUMENT.cur_detector().name('short')
         final_ws += '_' + CORRECTION_TYPE
 
     # Put the components in the correct positions
-    currentDet = INSTRUMENT.curDetector().name() 
+    currentDet = INSTRUMENT.cur_detector().name() 
     maskpt_rmin, maskpt_rmax = INSTRUMENT.set_component_positions(raw_ws.getName(), beamcoords[0], beamcoords[1])
     
     # Create a run details object
@@ -1299,7 +1266,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
             fit_type = TRANS_FIT
         #retrieve the user setting that tells us whether Rebin or InterpolatingRebin will be used during the normalisation 
         global TRANS_INTERPOLATE
-        if INSTR_NAME == 'LOQ':
+        if INSTRUMENT.name() == 'LOQ':
             # Change the instrument definition to the correct one in the LOQ case
             LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
             LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
@@ -1369,19 +1336,19 @@ def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orien
 ##
 def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False):
     '''Performs the data reduction steps'''
-    global SPECMIN, SPECMAX, MONITORSPECTRUM
+    global SPECMIN, SPECMAX
     sample_raw = run_setup.getRawWorkspace()
 #but does the full run still exist at this point, doesn't matter  I'm changing the meaning of RawWorkspace get all references to it
 #but then what do we call the workspaces?
 
 #    period = run_setup.getPeriod()
     orientation = orientation=SANSUtility.Orientation.Horizontal
-    if INSTR_NAME == "SANS2D":
+    if INSTRUMENT.name() == "SANS2D":
         base_runno = sample_raw.getRunNumber()
         if base_runno < 568:
             MONITORSPECTRUM = 73730
             orientation=SANSUtility.Orientation.Vertical
-            if INSTRUMENT.curDetector().name() == 'front-detector':
+            if INSTRUMENT.cur_detector().name() == 'front-detector':
                 SPECMIN = DIMENSION*DIMENSION + 1 
                 SPECMAX = DIMENSION*DIMENSION*2
             else:
@@ -1394,13 +1361,15 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
 
     ############################# Setup workspaces ######################################
     monitorWS = "Monitor"
-    _printMessage('monitor ' + str(MONITORSPECTRUM), True)
+    montorSpecNum = INSTRUMENT.get_scattering_mon()
+    _printMessage('monitor ' + str(montorSpecNum), True)
     sample_name = sample_raw.getName()
     # Get the monitor ( StartWorkspaceIndex is off by one with cropworkspace)
     CropWorkspace(sample_name, monitorWS,
-        StartWorkspaceIndex = str(MONITORSPECTRUM - 1), EndWorkspaceIndex = str(MONITORSPECTRUM - 1))
-    if INSTR_NAME == 'LOQ':
-        RemoveBins(monitorWS, monitorWS, '19900', '20500', Interpolation="Linear")
+        StartWorkspaceIndex= montorSpecNum-1, EndWorkspaceIndex=montorSpecNum-1)
+    if INSTRUMENT.name() == 'LOQ':
+        RemoveBins(monitorWS, monitorWS, '19900', '20500',
+            Interpolation="Linear")
     
     # Remove flat background
     if BACKMON_START != None and BACKMON_END != None:
@@ -1435,7 +1404,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     # ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
     ConvertUnits(monitorWS, monitorWS, "Wavelength")
     wavbin =  str(wav_start) + "," + str(DWAV) + "," + str(wav_end)
-    if SAMP_INTERPOLATE :
+    if INSTRUMENT.is_scattering_mon_interp :
         InterpolatingRebin(monitorWS, monitorWS,wavbin)
     else :
         Rebin(monitorWS, monitorWS,wavbin)
@@ -1468,7 +1437,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     scalefactor = RESCALE
     # Data reduced with Mantid is a factor of ~pi higher than colette.
     # For LOQ only, divide by this until we understand why.
-    if INSTR_NAME == 'LOQ':
+    if INSTRUMENT.name() == 'LOQ':
         rescaleToColette = math.pi
         scalefactor /= rescaleToColette
     
@@ -1604,10 +1573,12 @@ def RunReduction(coords):
 
     # Do the correction
     if xshift != 0.0 or yshift != 0.0:
-        currentDet = INSTRUMENT.curDetector().name()
-        MoveInstrumentComponent(SCATTER_SAMPLE.getName(), ComponentName = currentDet, X = str(xshift), Y = str(yshift), RelativePosition="1")
+        currentDet = INSTRUMENT.cur_detector().name()
+        MoveInstrumentComponent(SCATTER_SAMPLE.getName(),
+            ComponentName=currentDet, X=xshift, Y=yshift, RelativePosition="1")
         if SCATTER_CAN.getName() != '':
-            MoveInstrumentComponent(SCATTER_CAN.getName(), ComponentName = currentDet, X = str(xshift), Y = str(yshift), RelativePosition="1")
+            MoveInstrumentComponent(SCATTER_CAN.getName(),
+             ComponentName=currentDet, X=xshift, Y=yshift, RelativePosition="1")
 
     _SAMPLE_SETUP.setMaskPtMin([0.0,0.0])
     _SAMPLE_SETUP.setMaskPtMax([xcentre, ycentre])
@@ -1694,7 +1665,7 @@ def PlotResult(workspace):
 
 def ViewCurrentMask():
     top_layer = 'CurrentMask'
-    LoadEmptyInstrument(INSTR_DIR + '/' + INSTR_NAME + "_Definition.xml",top_layer)
+    LoadEmptyInstrument(INSTR_DIR + '/' + INSTRUMENT.name() + "_Definition.xml",top_layer)
     if RMIN > 0.0: 
         SANSUtility.MaskInsideCylinder(top_layer, RMIN, XBEAM_CENTRE, YBEAM_CENTRE)
     if RMAX > 0.0:
@@ -1704,7 +1675,7 @@ def ViewCurrentMask():
 
     #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
     #start with the currently selected detector
-    firstSpec1 = INSTRUMENT.curDetector().firstSpec
+    firstSpec1 = INSTRUMENT.cur_detector().firstSpec
     _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
     #now the other detector
     firstSpec2 = INSTRUMENT.otherDetector().firstSpec

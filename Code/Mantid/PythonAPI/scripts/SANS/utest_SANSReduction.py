@@ -1,10 +1,13 @@
 """
     Unit tests for SANS reduction
 """
+from MantidFramework import *
+mtd.initialise()
 import sys
 import unittest
 import SANSReduction
 import SANSInsts
+import SANSUtility
 from mantidsimple import *
 
 class TestReduction(unittest.TestCase):
@@ -14,8 +17,8 @@ class TestReduction(unittest.TestCase):
     """
     
     def setUp(self):
-        SANSReduction.DataPath("/home/m2d/workspace/mantid/Test/Data/SANS2D")
-        SANSReduction.UserPath("/home/m2d/workspace/mantid/Test/Data/SANS2D")
+        SANSReduction.DataPath("../../../../../Test/Data/SANS2D")
+        SANSReduction.UserPath("../../../../../Test/Data/SANS2D")
         SANSReduction.SANS2D()    
         SANSReduction.Set1D()
         SANSReduction.MaskFile('MASKSANS2D.091A')
@@ -23,7 +26,7 @@ class TestReduction(unittest.TestCase):
                 
     def test_move_detector(self):
         # Refactor test: Removing the following line and replacing it by a call to a call to an instrument class method. 
-        #v1, v2 = SANSReduction.SetupComponentPositions(SANSReduction.INSTRUMENT.curDetector().name() , self.ws_name, 3.69, 2.59)    
+        #v1, v2 = SANSReduction.SetupComponentPositions(SANSReduction.INSTRUMENT.cur_detector().name() , self.ws_name, 3.69, 2.59)    
         v1, v2 = SANSReduction.INSTRUMENT.set_component_positions(self.ws_name, 3.69, 2.59)    
         self.assertEquals(v1[0],0)
         self.assertEquals(v1[1],0)
@@ -91,13 +94,38 @@ class TestInstrument(unittest.TestCase):
     def setUp(self):
         self.instrument = SANSInsts.instrument_factory("SANS2D")
 
+    def test_SANS2D_default_settings(self):
+        self.assertEqual(self.instrument.name(), "SANS2D")
+        self.assertTrue(self.instrument.setDetector("front"))
+        self.assertFalse(self.instrument.setDetector("not-a-detector"))
+        self.assertEqual(self.instrument.get_scattering_mon(), 2)
+        self.assertEqual(self.instrument.is_scattering_mon_interp(), False)
         
-    def testSANS2D(self):
-        instrument = SANSInsts.instrument_factory("SANS2D")
-        self.assertEqual(instrument.name, "SANS2D")
-        self.assertTrue(instrument.setDetector("front"))
-        self.assertFalse(instrument.setDetector("not-a-detector"))
+    def test_Detector_bank_spectra(self):
+        inst = SANSInsts.SANS2D()
+        self.assertTrue(inst.setDetector('low-angle'))
+        width, first, end = SANSUtility.GetInstrumentDetails(inst)
+        self.assertEqual(width, 192)
+        self.assertEqual(first,  9) 
+        self.assertEqual(end,  36872)
+        self.assertTrue(inst.setDetector('high-angle'))
+        width, first, end = SANSUtility.GetInstrumentDetails(inst)
+        self.assertEqual(width, 192)
+        self.assertEqual(first, 36873) 
+        self.assertEqual(end, 73736)
 
+        inst = SANSInsts.LOQ()
+        width, first, end = SANSUtility.GetInstrumentDetails(inst)
+        self.assertTrue(inst.setDetector('low-angle'))
+        self.assertEqual(width, 128)
+        self.assertEqual(first, 3) 
+        self.assertEqual(end, 16386)
+        self.assertTrue(inst.setDetector('high-angle'))
+        width, first, end = SANSUtility.GetInstrumentDetails(inst)
+        self.assertEqual(width, 128)
+        self.assertEqual(first, 16387) 
+        self.assertEqual(end, 17792)
+        
 if __name__ == '__main__':
     unittest.main()
     

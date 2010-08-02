@@ -566,10 +566,11 @@ bool SANSRunWindow::loadUserFile()
   }
 
   //Monitor spectra
-  m_uiForm.monitor_spec->setText(runReduceScriptFunction("printParameter('MONITORSPECTRUM'),"));
+  m_uiForm.monitor_spec->setText(runReduceScriptFunction(
+    "printParameter('INSTRUMENT.get_scattering_mon()'),"));
   m_uiForm.trans_monitor->setText(runReduceScriptFunction("printParameter('TRANS_INCID_MON'),"));
-  m_uiForm.monitor_interp->setChecked(
-    runReduceScriptFunction("printParameter('SAMP_INTERPOLATE'),") == "True");
+  m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
+    "printParameter('INSTRUMENT.is_scattering_mon_interp'),") == "True");
   m_uiForm.trans_interp->setChecked(
     runReduceScriptFunction("printParameter('TRANS_INTERPOLATE'),") == "True");
 
@@ -604,7 +605,7 @@ bool SANSRunWindow::loadUserFile()
   
   ////Detector bank
   param = runReduceScriptFunction(
-    "printParameter('INSTRUMENT.curDetector().name()')");
+    "printParameter('INSTRUMENT.cur_detector().name()')");
   index = m_uiForm.detbank_sel->findText(param);  
   if( index >= 0 && index < 2 )
   {
@@ -1639,9 +1640,11 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   //Sample offset
   exec_reduce += "SetSampleOffset(" + m_uiForm.smpl_offset->text() + ")\n";
   //Monitor spectrum
-  exec_reduce += "SetMonitorSpectrum(" + m_uiForm.monitor_spec->text() + ", ";
-  exec_reduce += m_uiForm.monitor_interp->isChecked() ? "True" : "False";
-  exec_reduce += ")\n";
+  exec_reduce += "SetMonitorSpectrum(" + m_uiForm.monitor_spec->text() + ")\n";
+  if(m_uiForm.monitor_interp->isChecked())
+  {
+    exec_reduce += "INSTRUMENT.interp_scattering_mon()\n";
+  }
   //the monitor to normalise the tranmission spectrum against
   exec_reduce += "SetTransSpectrum(" + m_uiForm.trans_monitor->text() + ", ";
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
@@ -1977,7 +1980,7 @@ void SANSRunWindow::handleInstrumentChange(int index)
 
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
-    "printParameter('INSTRUMENT.curDetector().name()')");
+    "printParameter('INSTRUMENT.cur_detector().name()')");
   int ind = m_uiForm.detbank_sel->findText(detect);  
   if( ind >= 0 && ind < 2 )
   {
