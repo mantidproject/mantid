@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{902CB04F-8893-4FE8-83B8-09F9DB20A82A}</ProjectGuid>
+    <RootNamespace>Kernel</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)$(ProjectName)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildStep>
+      <Message>Performing Custom Build Step - copying properties file to debug</Message>
+      <Command>copy "$(SolutionDir)\Properties\*properties" "$(SolutionDir)\debug" /Y
+</Command>
+      <Outputs>$(SolutionDir)\debug\Mantid.properties;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>PocoFoundationd.lib;PocoUtild.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CustomBuildStep>
+      <Message>Performing Custom Build Step - copying properties files</Message>
+      <Command>copy "$(SolutionDir)\Properties\*properties" "$(SolutionDir)\release" /Y
+</Command>
+      <Outputs>$(SolutionDir)\release\Mantid.properties;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>PocoFoundation.lib;PocoUtil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ArrayProperty.cpp" />
+    <ClCompile Include="src\ConfigService.cpp" />
+    <ClCompile Include="src\DateAndTime.cpp" />
+    <ClCompile Include="src\DllOpen.cpp" />
+    <ClCompile Include="src\EnvironmentHistory.cpp" />
+    <ClCompile Include="src\Exception.cpp" />
+    <ClCompile Include="src\FacilityInfo.cpp" />
+    <ClCompile Include="src\FileProperty.cpp" />
+    <ClCompile Include="src\FileValidator.cpp" />
+    <ClCompile Include="src\FilterChannel.cpp" />
+    <ClCompile Include="src\Glob.cpp" />
+    <ClCompile Include="src\InstrumentInfo.cpp" />
+    <ClCompile Include="src\Interpolation.cpp" />
+    <ClCompile Include="src\IPropertyManager.cpp" />
+    <ClCompile Include="src\LibraryManager.cpp" />
+    <ClCompile Include="src\LibraryWrapper.cpp" />
+    <ClCompile Include="src\ListValidator.cpp" />
+    <ClCompile Include="src\LogFilter.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\MandatoryValidator.cpp" />
+    <ClCompile Include="src\MaskedProperty.cpp" />
+    <ClCompile Include="src\Property.cpp" />
+    <ClCompile Include="src\PropertyHistory.cpp" />
+    <ClCompile Include="src\PropertyManager.cpp" />
+    <ClCompile Include="src\PropertyManagerOwner.cpp" />
+    <ClCompile Include="src\PropertyWithValue.cpp" />
+    <ClCompile Include="src\RebinParamsValidator.cpp" />
+    <ClCompile Include="src\SignalChannel.cpp" />
+    <ClCompile Include="src\SingletonHolder.cpp" />
+    <ClCompile Include="src\SupportBasic.cpp" />
+    <ClCompile Include="src\SupportKernel.cpp" />
+    <ClCompile Include="src\System.cpp" />
+    <ClCompile Include="src\ThreadSafeLogStream.cpp" />
+    <ClCompile Include="src\Timer.cpp" />
+    <ClCompile Include="src\TimeSeriesProperty.cpp" />
+    <ClCompile Include="src\Unit.cpp" />
+    <ClCompile Include="src\UnitFactory.cpp" />
+    <ClCompile Include="src\VectorHelper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\MantidKernel\ArrayProperty.h" />
+    <ClInclude Include="inc\mantidkernel\facilityinfo.h" />
+    <ClInclude Include="inc\mantidkernel\instrumentinfo.h" />
+    <ClInclude Include="test\ArrayPropertyTest.h" />
+    <ClInclude Include="inc\MantidKernel\BoundedValidator.h" />
+    <ClInclude Include="test\BoundedValidatorTest.h" />
+    <ClInclude Include="inc\MantidKernel\Cache.h" />
+    <ClInclude Include="test\CacheTest.h" />
+    <ClInclude Include="inc\MantidKernel\ConfigService.h" />
+    <ClInclude Include="test\ConfigServiceTest.h" />
+    <ClInclude Include="inc\MantidKernel\cow_ptr.h" />
+    <ClInclude Include="inc\MantidKernel\DataService.h" />
+    <ClInclude Include="inc\MantidKernel\DateAndTime.h" />
+    <ClInclude Include="inc\MantidKernel\DllExport.h" />
+    <ClInclude Include="inc\MantidKernel\DllOpen.h" />
+    <ClInclude Include="inc\MantidKernel\DocumentationHeader.h" />
+    <ClInclude Include="inc\MantidKernel\DynamicFactory.h" />
+    <ClInclude Include="test\DynamicFactoryTest.h" />
+    <ClInclude Include="inc\MantidKernel\EnvironmentHistory.h" />
+    <ClInclude Include="inc\MantidKernel\Exception.h" />
+    <ClInclude Include="inc\MantidKernel\Fast_Exponential.h" />
+    <ClInclude Include="inc\MantidKernel\FileProperty.h" />
+    <ClInclude Include="inc\MantidKernel\FileValidator.h" />
+    <ClInclude Include="test\FileValidatorTest.h" />
+    <ClInclude Include="inc\MantidKernel\FilterChannel.h" />
+    <ClInclude Include="test\FilterChannelTest.h" />
+    <ClInclude Include="inc\MantidKernel\Glob.h" />
+    <ClInclude Include="inc\MantidKernel\Instantiator.h" />
+    <ClInclude Include="inc\MantidKernel\Interpolation.h" />
+    <ClInclude Include="test\InterpolationTest.h" />
+    <ClInclude Include="inc\MantidKernel\IPropertyManager.h" />
+    <ClInclude Include="inc\MantidKernel\IValidator.h" />
+    <ClInclude Include="inc\MantidKernel\LibraryManager.h" />
+    <ClInclude Include="test\LibraryManagerTest.h" />
+    <ClInclude Include="inc\MantidKernel\LibraryWrapper.h" />
+    <ClInclude Include="inc\MantidKernel\ListValidator.h" />
+    <ClInclude Include="test\ListValidatorTest.h" />
+    <ClInclude Include="inc\MantidKernel\LogFilter.h" />
+    <ClInclude Include="inc\MantidKernel\Logger.h" />
+    <ClInclude Include="inc\MantidKernel\MandatoryValidator.h" />
+    <ClInclude Include="test\MandatoryValidatorTest.h" />
+    <ClInclude Include="inc\MantidKernel\MantidVersion.h" />
+    <ClInclude Include="inc\MantidKernel\MaskedProperty.h" />
+    <ClInclude Include="inc\MantidKernel\MRUList.h" />
+    <ClInclude Include="inc\MantidKernel\MultiThreaded.h" />
+    <ClInclude Include="inc\MantidKernel\NullValidator.h" />
+    <ClInclude Include="test\NullValidatorTest.h" />
+    <ClInclude Include="inc\MantidKernel\PhysicalConstants.h" />
+    <ClInclude Include="inc\MantidKernel\Property.h" />
+    <ClInclude Include="inc\MantidKernel\PropertyHistory.h" />
+    <ClInclude Include="inc\MantidKernel\PropertyManager.h" />
+    <ClInclude Include="inc\MantidKernel\PropertyManagerOwner.h" />
+    <ClInclude Include="test\PropertyManagerTest.h" />
+    <ClInclude Include="test\PropertyTest.h" />
+    <ClInclude Include="inc\MantidKernel\PropertyWithValue.h" />
+    <ClInclude Include="test\PropertyWithValueTest.h" />
+    <ClInclude Include="inc\MantidKernel\RebinParamsValidator.h" />
+    <ClInclude Include="inc\MantidKernel\SignalChannel.h" />
+    <ClInclude Include="test\SignalChannelTest.h" />
+    <ClInclude Include="inc\MantidKernel\SingletonHolder.h" />
+    <ClInclude Include="inc\MantidKernel\Support.h" />
+    <ClInclude Include="inc\MantidKernel\SupportTempCode.h" />
+    <ClInclude Include="test\SupportTest.h" />
+    <ClInclude Include="inc\MantidKernel\System.h" />
+    <ClInclude Include="inc\MantidKernel\ThreadSafeLogStream.h" />
+    <ClInclude Include="inc\MantidKernel\Timer.h" />
+    <ClInclude Include="inc\MantidKernel\TimeSeriesProperty.h" />
+    <ClInclude Include="test\TimeSeriesPropertyTest.h" />
+    <ClInclude Include="inc\MantidKernel\Unit.h" />
+    <ClInclude Include="inc\MantidKernel\UnitFactory.h" />
+    <ClInclude Include="test\UnitTest.h" />
+    <ClInclude Include="inc\MantidKernel\VectorHelper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\TestChannel.hh" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

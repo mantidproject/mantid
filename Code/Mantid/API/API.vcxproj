@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AD0CD585-694E-4367-B7D0-2F16C4EF59F8}</ProjectGuid>
+    <RootNamespace>API</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfAtl>Dynamic</UseOfAtl>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)$(ProjectName)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include;../../Third_Party/include/muParser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>BOOST_ALL_DYN_LINK;IN_MANTID_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(SolutionName)kernel.lib;ws2_32.lib;muparser_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>../debug;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include;../../Third_Party/include/muParser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>BOOST_ALL_DYN_LINK;_WIN32;IN_MANTID_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(SolutionName)kernel.lib;ws2_32.lib;muparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>../release;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Algorithm.cpp" />
+    <ClCompile Include="src\AlgorithmFactory.cpp" />
+    <ClCompile Include="src\AlgorithmHistory.cpp" />
+    <ClCompile Include="src\AlgorithmManager.cpp" />
+    <ClCompile Include="src\AlgorithmProxy.cpp" />
+    <ClCompile Include="src\AnalysisDataService.cpp" />
+    <ClCompile Include="src\ArchiveSearchFactory.cpp" />
+    <ClCompile Include="src\Axis.cpp" />
+    <ClCompile Include="src\CloneableAlgorithm.cpp" />
+    <ClCompile Include="src\Column.cpp" />
+    <ClCompile Include="src\ColumnFactory.cpp" />
+    <ClCompile Include="src\CompositeFunction.cpp" />
+    <ClCompile Include="src\ConstraintFactory.cpp" />
+    <ClCompile Include="src\Expression.cpp" />
+    <ClCompile Include="src\FileFinder.cpp" />
+    <ClCompile Include="src\FrameworkManager.cpp" />
+    <ClCompile Include="src\Function.cpp" />
+    <ClCompile Include="src\FunctionFactory.cpp" />
+    <ClCompile Include="src\IFunction.cpp" />
+    <ClCompile Include="src\IInstrument.cpp" />
+    <ClCompile Include="src\Instrument.cpp" />
+    <ClCompile Include="src\InstrumentDataService.cpp" />
+    <ClCompile Include="src\IPeakFunction.cpp" />
+    <ClCompile Include="src\ITableWorkspace.cpp" />
+    <ClCompile Include="src\LocatedDataRef.cpp" />
+    <ClCompile Include="src\LocatedDataValue.cpp" />
+    <ClCompile Include="src\LogParser.cpp" />
+    <ClCompile Include="src\MatrixWorkspace.cpp" />
+    <ClCompile Include="src\MemoryManager.cpp" />
+    <ClCompile Include="src\NumericAxis.cpp" />
+    <ClCompile Include="src\PairedGroupAlgorithm.cpp" />
+    <ClCompile Include="src\ParameterReference.cpp" />
+    <ClCompile Include="src\ParameterTie.cpp" />
+    <ClCompile Include="src\ParInstrument.cpp" />
+    <ClCompile Include="src\Progress.cpp" />
+    <ClCompile Include="src\RefAxis.cpp" />
+    <ClCompile Include="src\Run.cpp" />
+    <ClCompile Include="src\Sample.cpp" />
+    <ClCompile Include="src\SpectraAxis.cpp" />
+    <ClCompile Include="src\SpectraDetectorMap.cpp" />
+    <ClCompile Include="src\TableRow.cpp" />
+    <ClCompile Include="src\TextAxis.cpp" />
+    <ClCompile Include="src\Workspace.cpp" />
+    <ClCompile Include="src\WorkspaceFactory.cpp" />
+    <ClCompile Include="src\WorkspaceGroup.cpp" />
+    <ClCompile Include="src\WorkspaceHistory.cpp" />
+    <ClCompile Include="src\WorkspaceOpOverloads.cpp" />
+    <ClCompile Include="src\WorkspaceProperty.cpp" />
+    <ClCompile Include="src\WorkspaceTracer.cpp" />
+    <ClCompile Include="src\XMLlogfile.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\MantidAPI\Algorithm.h" />
+    <ClInclude Include="inc\MantidAPI\AlgorithmFactory.h" />
+    <ClInclude Include="inc\MantidAPI\AlgorithmHistory.h" />
+    <ClInclude Include="inc\mantidapi\archivesearchfactory.h" />
+    <ClInclude Include="inc\mantidapi\filefinder.h" />
+    <ClInclude Include="inc\mantidapi\iarchivesearch.h" />
+    <ClInclude Include="inc\mantidapi\run.h" />
+    <ClInclude Include="test\AlgorithmHistoryTest.h" />
+    <ClInclude Include="inc\MantidAPI\AlgorithmManager.h" />
+    <ClInclude Include="test\AlgorithmManagerTest.h" />
+    <ClInclude Include="inc\MantidAPI\AlgorithmObserver.h" />
+    <ClInclude Include="inc\MantidAPI\AlgorithmProxy.h" />
+    <ClInclude Include="test\AlgorithmTest.h" />
+    <ClInclude Include="inc\MantidAPI\AnalysisDataService.h" />
+    <ClInclude Include="test\AnalysisDataServiceTest.h" />
+    <ClInclude Include="inc\MantidAPI\Axis.h" />
+    <ClInclude Include="test\AxisTest.h" />
+    <ClInclude Include="inc\MantidAPI\CloneableAlgorithm.h" />
+    <ClInclude Include="inc\MantidAPI\Column.h" />
+    <ClInclude Include="inc\MantidAPI\ColumnFactory.h" />
+    <ClInclude Include="inc\MantidAPI\CompositeFunction.h" />
+    <ClInclude Include="test\CompositeFunctionTest.h" />
+    <ClInclude Include="inc\MantidAPI\ConstraintFactory.h" />
+    <ClInclude Include="inc\MantidAPI\DeclareUserAlg.h" />
+    <ClInclude Include="inc\MantidAPI\DllExport.h" />
+    <ClInclude Include="inc\MantidAPI\Expression.h" />
+    <ClInclude Include="test\ExpressionTest.h" />
+    <ClInclude Include="inc\MantidAPI\FrameworkManager.h" />
+    <ClInclude Include="test\FrameworkManagerTest.h" />
+    <ClInclude Include="inc\MantidAPI\Function.h" />
+    <ClInclude Include="inc\MantidAPI\FunctionFactory.h" />
+    <ClInclude Include="test\FunctionFactoryTest.h" />
+    <ClInclude Include="test\FunctionTest.h" />
+    <ClInclude Include="inc\MantidAPI\IAlgorithm.h" />
+    <ClInclude Include="inc\MantidAPI\IBackgroundFunction.h" />
+    <ClInclude Include="inc\MantidAPI\IConstraint.h" />
+    <ClInclude Include="inc\MantidAPI\IDataItem.h" />
+    <ClInclude Include="inc\MantidAPI\IFunction.h" />
+    <ClInclude Include="inc\MantidAPI\IFunctionWithLocation.h" />
+    <ClInclude Include="inc\MantidAPI\IInstrument.h" />
+    <ClInclude Include="inc\MantidAPI\ILocatedData.h" />
+    <ClInclude Include="inc\MantidAPI\Instrument.h" />
+    <ClInclude Include="inc\MantidAPI\InstrumentDataService.h" />
+    <ClInclude Include="test\InstrumentDataServiceTest.h" />
+    <ClInclude Include="test\InstrumentTest.h" />
+    <ClInclude Include="inc\MantidAPI\IPeakFunction.h" />
+    <ClInclude Include="inc\MantidAPI\ITableWorkspace.h" />
+    <ClInclude Include="inc\MantidAPI\IWorkspaceProperty.h" />
+    <ClInclude Include="inc\MantidAPI\LocatedDataRef.h" />
+    <ClInclude Include="inc\MantidAPI\LocatedDataValue.h" />
+    <ClInclude Include="inc\MantidAPI\LogParser.h" />
+    <ClInclude Include="inc\MantidAPI\MatrixWorkspace.h" />
+    <ClInclude Include="test\MatrixWorkspaceTest.h" />
+    <ClInclude Include="inc\MantidAPI\MemoryManager.h" />
+    <ClInclude Include="inc\MantidAPI\NumericAxis.h" />
+    <ClInclude Include="inc\MantidAPI\PairedGroupAlgorithm.h" />
+    <ClInclude Include="inc\MantidAPI\ParameterReference.h" />
+    <ClInclude Include="test\ParameterReferenceTest.h" />
+    <ClInclude Include="inc\MantidAPI\ParameterTie.h" />
+    <ClInclude Include="test\ParameterTieTest.h" />
+    <ClInclude Include="inc\MantidAPI\ParInstrument.h" />
+    <ClInclude Include="test\ParInstrumentTest.h" />
+    <ClInclude Include="inc\MantidAPI\Progress.h" />
+    <ClInclude Include="inc\MantidAPI\RefAxis.h" />
+    <ClInclude Include="inc\MantidAPI\Sample.h" />
+    <ClInclude Include="test\SampleTest.h" />
+    <ClInclude Include="inc\MantidAPI\SpectraAxis.h" />
+    <ClInclude Include="inc\MantidAPI\SpectraDetectorMap.h" />
+    <ClInclude Include="test\SpectraDetectorMapTest.h" />
+    <ClInclude Include="inc\MantidAPI\TableRow.h" />
+    <ClInclude Include="inc\MantidAPI\TextAxis.h" />
+    <ClInclude Include="test\TextAxisTest.h" />
+    <ClInclude Include="inc\MantidAPI\Workspace.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceFactory.h" />
+    <ClInclude Include="test\WorkspaceFactoryTest.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceGroup.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceHistory.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceIterator.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceIteratorCode.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceOpOverloads.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceProperty.h" />
+    <ClInclude Include="test\WorkspacePropertyTest.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceTracer.h" />
+    <ClInclude Include="inc\MantidAPI\WorkspaceValidators.h" />
+    <ClInclude Include="inc\MantidAPI\XMLlogfile.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\MemoryManager.cpp_WIN32">
+      <FileType>CppCode</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Geometry\Geometry.vcxproj">
+      <Project>{f1eb475d-8936-49e5-ac28-3b3830483487}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Kernel\Kernel.vcxproj">
+      <Project>{902cb04f-8893-4fe8-83b8-09f9db20a82a}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
