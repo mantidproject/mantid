@@ -38,12 +38,10 @@ public:
   /**
    * Constructor.
    * @param the_index unique index into the workspace of this data
-   * @param the_data a MantidVec of data.
    */
-  MantidVecWithMarker(const int the_index, const MantidVec& the_data)
+  MantidVecWithMarker(const int the_index)
   {
     m_index = the_index;
-    m_data = the_data;
   }
 
   /// Destructor
@@ -59,14 +57,15 @@ private:
   /// Copy constructor
   MantidVecWithMarker(const MantidVecWithMarker &other)
   {
-    this->operator=(other);
+    throw Kernel::Exception::NotImplementedError("Cannot copy MantidVecWithMarker.");
   }
 
   /// Assignment operator
   MantidVecWithMarker& operator=(const MantidVecWithMarker &other)
   {
-    m_index = other.m_index;
-    m_data.assign(other.m_data.begin(), other.m_data.end());
+    throw Kernel::Exception::NotImplementedError("Cannot assign to MantidVecWithMarker.");
+//    m_index = other.m_index;
+//    m_data.assign(other.m_data.begin(), other.m_data.end());
     return *this;
   }
 
@@ -74,7 +73,7 @@ public:
   /// Unique index value.
   int m_index;
 
-  /// Vector of data
+  /// Pointer to a vector of data
   MantidVec m_data;
 
   /// Function returns a unique index, used for hashing for MRU list

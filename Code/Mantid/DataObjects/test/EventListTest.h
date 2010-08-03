@@ -247,16 +247,15 @@ public:
     el.clear();
     const EventList el2(el);
 
-    //Getting data before setting X makes a single bin, with all counts.
-    TS_ASSERT_EQUALS(el2.dataY().size(), 1);
-    TS_ASSERT_EQUALS(el2.dataY()[0], 0);
+    //Getting data before setting X returns empty vector
+    TS_ASSERT_EQUALS(el2.dataY()->size(), 0);
 
     //Now do set up an X axis.
     this->test_setX();
     EventList::StorageType X, Y;
     const EventList el3(el);
     X = el3.dataX();
-    Y = el3.dataY();
+    Y = *el3.dataY();
     //Histogram is 0, since I cleared all the events
     for (int i=0; i<X.size()-1; i++)
     {
@@ -271,8 +270,7 @@ public:
     //Now give it some fake data, with NUMEVENTS events in it.
     this->fake_data();
     const EventList el4(el);
-    TS_ASSERT_EQUALS(el4.dataY().size(), 1);
-    TS_ASSERT_EQUALS(el4.dataY()[0], NUMEVENTS);
+    TS_ASSERT_EQUALS(el4.dataY()->size(), 0);
   }
 
   void fake_uniform_data()
@@ -295,7 +293,7 @@ public:
     EventList::StorageType X, Y;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
     X = el3.dataX();
-    Y = el3.dataY();
+    Y = *el3.dataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     //The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
@@ -313,7 +311,7 @@ public:
     EventList::StorageType X, Y;
     const EventList el3(el);
     X = el3.dataX();
-    Y = el3.dataY();
+    Y = *el3.dataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     for (int i=0; i<X.size()-1; i++)
     {

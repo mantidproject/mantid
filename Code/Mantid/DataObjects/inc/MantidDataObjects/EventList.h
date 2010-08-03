@@ -106,80 +106,56 @@ public:
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
   typedef Kernel::cow_ptr<StorageType > RCtype;
 
-  /// Constructor (empty)
   EventList();
-  /** Constructor copying from an existing event list */
+
   EventList(const EventList&rhs);
 
-  /** Constructor, taking a vector of events */
   EventList(const std::vector<TofEvent> &events);
 
-  /// Destructor
   virtual ~EventList();
 
-  /** Copy into this event list from another */
   EventList& operator=(const EventList&);
 
-  /** Append an event to the histogram. */
   EventList& operator+=(const TofEvent& event);
 
-  /** Append a list of events to the histogram. */
   EventList& operator+=(const std::vector<TofEvent>& more_events);
 
-  /** Append a list of events to the histogram. */
   EventList& operator+=(const EventList& more_events);
 
-  /** Append an event to the histogram, without clearing the cache, to make it faster. */
   void addEventQuickly(const TofEvent &event);
 
-  /** Return the list of TofEvents contained. */
   std::vector<TofEvent>& getEvents();
   const std::vector<TofEvent>& getEvents() const;
 
-  /** Clear the list of events */
   void clear();
 
-  /** Sort events by TOF or Frame */
   void sort(const EventSortType order) const;
-  /** Sort events by TOF */
+
   void sortTof() const;
-  /** Sort events by Frame */
+
   void sortFrame() const;
 
-  /** Set the x-component for the histogram view. */
   void setX(const RCtype::ptr_type& X, Unit* set_xUnit = NULL);
 
-  /** Set the x-component for the histogram view. */
   void setX(const RCtype& X, Unit* set_xUnit = NULL);
 
-  /** Set the x-component for the histogram view. */
   void setX(const StorageType& X, Unit* set_xUnit = NULL);
 
-
-  /** Returns the x data. */
   virtual const StorageType& dataX() const;
 
-  /** Returns the y data. */
-  virtual const StorageType& dataY() const;
+  virtual StorageType * dataY() const;
 
-  /** Returns the e data. */
-  virtual const StorageType& dataE() const;
+  virtual StorageType * dataE() const;
 
-  /** Returns a reference to the X data */
   Kernel::cow_ptr<MantidVec> getRefX() const;
 
-  /** Return the number of events in the list. */
   virtual std::size_t getNumberEvents() const;
 
-  /** Return the size of the histogram representation of the data (size of Y) **/
   virtual size_t histogram_size() const;
 
   void generateCountsHistogram(const StorageType& X, StorageType& Y) const;
+
   void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
-
-  void emptyCacheData() const;
-
-  void releaseDataMemory() const;
 
 private:
   ///List of events.
@@ -192,13 +168,6 @@ private:
   mutable EventSortType order;
   /** Cached version of the x axis. */
   mutable RCtype refX;
-  /** Cached version of the counts. */
-  mutable MantidVec refY;
-  /** Cached version of the uncertainties. */
-  mutable MantidVec refE;
-
-  mutable bool isCacheDirty; ///<dirty cache flag
-  mutable bool isErrorCacheDirty; ///<dirty cache flag
 
   void generateCountsHistogram() const;
   void generateErrorsHistogram() const;

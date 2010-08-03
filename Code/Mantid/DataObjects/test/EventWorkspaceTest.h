@@ -85,7 +85,7 @@ public:
         for (int i = 0; i < NUMBINS; ++i)
           xRef[i] = i*BIN_DELTA;
 
-        //Try setting a single axis
+        //Try setting a single axis, make sure it doesn't throw
         retVal->setX(2, axis);
 
         //Set all the histograms at once.
@@ -112,8 +112,8 @@ public:
     //Are the returned arrays the right size?
     const EventList el(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS-1);
-    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS-1);
 
     //Don't access data after doneLoadingData
     TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error);
@@ -139,15 +139,14 @@ public:
     //Do the workspace, but don't set x
     ew = createEventWorkspace(1, 0);
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
-    TS_ASSERT_EQUALS( ew->blocksize(), 1);
-    TS_ASSERT_EQUALS( ew->size(), 1*NUMPIXELS);
+    TS_ASSERT_EQUALS( ew->blocksize(), 0);
+    TS_ASSERT_EQUALS( ew->size(), 0);
 
-    //Didn't set X? well the default bin = everything
+    //Didn't set X? well all the histograms are size 0
     const EventList el(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el.dataX().size(), 0);
-    TS_ASSERT_EQUALS( el.dataY().size(), 1);
-    TS_ASSERT_EQUALS( el.dataE().size(), 1);
-    TS_ASSERT_EQUALS( el.dataY()[0], NUMEVENTS);
+    TS_ASSERT_EQUALS( el.dataY()->size(), 0);
+    TS_ASSERT_EQUALS( el.dataE()->size(), 0);
 
   }
 
@@ -210,11 +209,11 @@ public:
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
-    TS_ASSERT_EQUALS( el.dataY()[0], 0);
-    TS_ASSERT_EQUALS( el.dataY()[1], 1);
-    TS_ASSERT_EQUALS( el.dataY()[2], 1);
-    TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS], 1);
-    TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS+1], 0);
+    TS_ASSERT_EQUALS( (*el.dataY())[0], 0);
+    TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[2], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS+1], 0);
   }
 
   //------------------------------------------------------------------------------
@@ -266,18 +265,18 @@ public:
 
     //Are the returned arrays the right size?
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS/2);
-    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS/2-1);
-    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS/2-1);
+    TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS/2-1);
+    TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS/2-1);
 
     //Now there are 2 events in each bin
-    TS_ASSERT_EQUALS( el.dataY()[0], 2);
-    TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS/2-1], 2);
-    TS_ASSERT_EQUALS( el.dataY()[NUMEVENTS/2], 0);
+    TS_ASSERT_EQUALS( (*el.dataY())[0], 2);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2-1], 2);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2], 0);
 
     //But pixel 1 is the same
     const EventList el1(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
-    TS_ASSERT_EQUALS( el1.dataY()[1], 1);
+    TS_ASSERT_EQUALS( (*el1.dataY())[1], 1);
   }
 
   //------------------------------------------------------------------------------

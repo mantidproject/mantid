@@ -340,21 +340,17 @@ using Kernel::Exception::NotImplementedError;
     MantidVecWithMarker * data = m_bufferedDataY.find(index);
     if (data == NULL)
     {
-      //This will calculate it
-      data = new MantidVecWithMarker(index, this->data[index]->dataY());
-      MantidVecWithMarker * oldData;
+      //Create the MRU object
+      data = new MantidVecWithMarker(index);
+      //Set the Y data in it
+      this->data[index]->generateCountsHistogram( *this->data[index]->getRefX(), data->m_data);
+
       //Lets save it in the MRU
-      oldData = m_bufferedDataY.insert(data);
+      MantidVecWithMarker * oldData = m_bufferedDataY.insert(data);
+
       //And clear up the memory of the old one, if it is dropping out.
       if (oldData)
-      {
-//        std::stringstream out;
-//        out << "Data cache cleared when retrieving " << index << ". I got rid of " << oldData->m_index << ".";
-//        g_log.information(out.str());
-        this->data[oldData->m_index]->releaseDataMemory();
-        // apparently unnecessary -> oldData->m_data.clear();
         delete oldData;
-      }
     }
     return data->m_data;
   }
@@ -370,17 +366,25 @@ using Kernel::Exception::NotImplementedError;
     MantidVecWithMarker * data = m_bufferedDataE.find(index);
     if (data == NULL)
     {
-      //This will calculate it
-      data = new MantidVecWithMarker(index, this->data[index]->dataE());
-      MantidVecWithMarker * oldData;
+      //Get a handle on the event list.
+      const EventList * el = this->data[index];
+
+      //Create the MRU object
+      data = new MantidVecWithMarker(index);
+
+      //First you need to calculate Y
+      MantidVec Y;
+      this->data[index]->generateCountsHistogram( *el->getRefX(), Y);
+
+      //Now use that to get E
+      this->data[index]->generateErrorsHistogram( Y, data->m_data);
+
       //Lets save it in the MRU
-      oldData = m_bufferedDataE.insert(data);
+      MantidVecWithMarker * oldData = m_bufferedDataY.insert(data);
+
       //And clear up the memory of the old one, if it is dropping out.
       if (oldData)
-      {
-        this->data[oldData->m_index]->releaseDataMemory();
         delete oldData;
-      }
     }
     return data->m_data;
   }
