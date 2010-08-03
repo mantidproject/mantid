@@ -5,6 +5,8 @@ import ConvertToEnergy
 from mantidsimple import *
 from mantidplot import *
 
+import re
+
 def loadData(rawfiles, outWS='RawFile', Sum=False):
 	( dir, file ) = os.path.split(rawfiles[0])
 	( name, ext ) = os.path.splitext(file)
@@ -60,10 +62,6 @@ def getFirstMonFirstDet(workspace):
 	return FirstMon, FirstDet
 
 def timeRegime(inWS, inWS_n='Rawfile', outWS_n='MonWS'):
-	'''
-	This function determines whether or not we need to Unwrap to the Monitor, and then
-	performs the appropriate action.
-	'''
 	FirstMon, FirstDet = getFirstMonFirstDet(inWS)
 	LRef = getReferenceLength(inWS, FirstDet)
 	SpecMon = inWS.readX(FirstMon)[0]
@@ -80,11 +78,6 @@ def timeRegime(inWS, inWS_n='Rawfile', outWS_n='MonWS'):
 	return outWS_n
 
 def monitorEfficiency(inWS_n='MonWS', unt=1.276e-3, zz=0.025):
-	'''
-	This function corrects for monitor efficiency.
-	unt and zz are some monitor-specific values. The defaults here are those used in the
-	ISIS indirect instruments (IRIS and OSIRIS).
-	'''
 	CreateSingleValuedWorkspace('moneff', unt) #value 1.276e-3 (unt)- what is it?
 	OneMinusExponentialCor(inWS_n, inWS_n, (8.3 * zz) ) #values 8.3 (?), 0.025 (zz) - what is it?
 	Divide(inWS_n,'moneff',inWS_n)
@@ -92,10 +85,6 @@ def monitorEfficiency(inWS_n='MonWS', unt=1.276e-3, zz=0.025):
 	return inWS_n
 
 def getReferenceLength(workspace, fdi):
-	'''
-	This function determined the reference length to use when "Unwrapping" monitors.
-	This is the length of the neutron flight path from source -> sample -> detector
-	'''
 	instrument = workspace.getInstrument()
 	sample = instrument.getSample()
 	source = instrument.getSource()
@@ -107,9 +96,6 @@ def getReferenceLength(workspace, fdi):
 	return LRef
 
 def useCalib(path, inWS_n='Time', outWS_n='Time'):
-	'''
-	This step corrects for detector efficiency using the provided calibration file.
-	'''
 	try:
 		LoadNexusProcessed(path, 'calib')
 	except ValueError, message:
@@ -129,9 +115,6 @@ def useCalib(path, inWS_n='Time', outWS_n='Time'):
 	return outWS_n
 
 def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
-	'''
-	This function normalises the detectors to the monitor.
-	'''
 	ConvertUnits(inWS_n,outWS_n, 'Wavelength')
 	RebinToWorkspace(outWS_n,monWS_n,outWS_n)
 	Divide(outWS_n,monWS_n,outWS_n)
@@ -141,16 +124,10 @@ def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
 	return outWS_n
 
 def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
-	'''
-	This function is the actual "convert to energy" step.
-	'''
 	ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
 	return outWS_n
 
 def rebinData(rebinParam, inWS_n = 'ConvertedToEnergy', outWS_n = 'Energy'):
-	'''
-	This function rebings the data, where rebinParams is a string of form: "ELow, EWidth, EHigh"
-	'''
 	Rebin(inWS_n, outWS_n, rebinParam)
 	return outWS_n
 
@@ -174,7 +151,7 @@ def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
 		ConvertFromDistribution(outWS_n)
 	return outWS_n
 
-def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bgremove = [0, 0], tempK=-1, calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='', saveFormats = [], savedir=''):
+def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', reflection = '', SumFiles=False, bgremove = [0, 0], tempK=-1, calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='', saveFormats = [], savedir=''):
 	'''
 	This function, when passed the proper arguments, will run through the steps of convert to energy
 	for the indirect instruments and put out a workspace title IconCompleted.
@@ -187,10 +164,12 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bg
 	runNos = []
 	workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
 	for i in range(0, len(workspace)):
-		MonitorWS_n = timeRegime(workspace[i], inWS_n = ws_name[i])
-		MonWS_n = monitorEfficiency()
+		(direct, filename) = os.path.split(rawfiles[i])
 		runNo = workspace[i].getRun().getLogData("run_number").value()
 		runNos.append(runNo)
+		name = filename[:3].lower() + runNo + '_' + analyser + reflection
+		MonitorWS_n = timeRegime(workspace[i], inWS_n = ws_name[i])
+		MonWS_n = monitorEfficiency()
 		CropWorkspace(ws_name[i], 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
 		mantid.deleteWorkspace(ws_name[i])
 		if ( bgremove != [0, 0] ):
@@ -198,7 +177,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bg
 		if ( calib != '' ):
 			calibrated = useCalib(calib)
 		normalised = normToMon()
-		cte = conToEnergy(efixed, outWS_n='EnergyRebinned' + str(i))
+		cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
 		if ( rebinParam != ''):
 			rebin = rebinData(rebinParam, inWS_n=cte)
 		else:
@@ -208,11 +187,41 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, SumFiles=False, bg
 				CloneWorkspace(cte, 'Energy')
 		if ( tempK != -1 ):
 			db = detailedBalance(tempK)
-		scale = scaleAndGroup(mapfile, outWS_n='IconComplete' + str(i) + '_' + runNo)
+		scale = scaleAndGroup(mapfile, outWS_n=name)
 		output_workspace_names.append(scale)
 	if ( saveFormats != [] ):
 		saveItems(output_workspace_names, runNos, saveFormats, instrument, savesuffix, directory = savedir)
 	return output_workspace_names, runNos
+
+def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, savesuffix, saveFormats, savedir, CleanUp=False):
+	ws_list = mantid.getWorkspaceNames()
+	energy = re.compile('_'+analyser+reflection+r'_intermediate$')
+	int_list = []
+	if ( len(int_list) == 0 ):
+		message = "No intermediate workspaces were found. Run with 'Keep Intermediate Workspaces' checked."
+		print message
+		sys.exit(message)
+	output_workspace_names = []
+	runNos = []
+	for workspace in ws_list:
+		if energy.search(workspace):
+			int_list.append(workspace)
+	for cte in int_list:
+		runNo = mantid.getMatrixWorkspace(cte).getRun().getLogData("run_number").value()
+		runNos.append(runNo)
+		if ( rebinParam != ''):
+			rebin = rebinData(rebinParam, inWS_n=cte)
+		else:
+			if CleanUp:
+				RenameWorkspace(cte, 'Energy')
+			else:
+				CloneWorkspace(cte, 'Energy')
+		if ( tempK != -1 ):
+			db = detailedBalance(tempK)
+		scale = scaleAndGroup(mapfile, outWS_n=cte[:-13])
+		output_workspace_names.append(scale)
+	if ( saveFormats != [] ):
+		saveItems(output_workspace_names, runNos, saveFormats, instrument, savesuffix, directory = savedir)
 
 
 def createMappingFile(groupFile, ngroup, nspec, first):
@@ -256,7 +265,6 @@ def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specM
 	return outWS_n
 
 def res(file, nspec, iconOpt, rebinParam, background):
-	''' ? '''
 	(direct, filename) = os.path.split(file)
 	(root, ext) = os.path.splitext(filename)
 	mapping = createMappingFile('res.map', 1, nspec, iconOpt['first'])

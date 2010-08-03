@@ -321,6 +321,9 @@
                   <property name="text" >
                    <string>Mapping</string>
                   </property>
+                  <property name="buddy" >
+                   <cstring>cbMappingOptions</cstring>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -375,6 +378,9 @@
                      <widget class="QLabel" name="lbNoGroups" >
                       <property name="text" >
                        <string>Number of Groups: </string>
+                      </property>
+                      <property name="buddy" >
+                       <cstring>leNoGroups</cstring>
                       </property>
                      </widget>
                     </item>
@@ -610,6 +616,9 @@
                 <property name="text" >
                  <string>Kelvin</string>
                 </property>
+                <property name="buddy" >
+                 <cstring>leDetailedBalance</cstring>
+                </property>
                </widget>
               </item>
              </layout>
@@ -764,6 +773,9 @@
                 <property name="text" >
                  <string>Efixed value:</string>
                 </property>
+                <property name="buddy" >
+                 <cstring>leEfixed</cstring>
+                </property>
                </widget>
               </item>
               <item>
@@ -774,6 +786,9 @@
                 <property name="text" >
                  <string>Spectra Min:</string>
                 </property>
+                <property name="buddy" >
+                 <cstring>leSpectraMin</cstring>
+                </property>
                </widget>
               </item>
               <item>
@@ -783,6 +798,9 @@
                <widget class="QLabel" name="lbSpectraMax" >
                 <property name="text" >
                  <string>Spectra Max</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>leSpectraMax</cstring>
                 </property>
                </widget>
               </item>
@@ -1054,6 +1072,16 @@
                  </widget>
                 </item>
                 <item>
+                 <widget class="QCheckBox" name="ckCleanUp" >
+                  <property name="text" >
+                   <string>Keep Intermediate Workspaces</string>
+                  </property>
+                  <property name="checked" >
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="horizontalSpacer_12" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
@@ -1081,6 +1109,9 @@
                  <widget class="QLabel" name="rebin_lbLow" >
                   <property name="text" >
                    <string>Low</string>
+                  </property>
+                  <property name="buddy" >
+                   <cstring>rebin_leELow</cstring>
                   </property>
                  </widget>
                 </item>
@@ -1112,6 +1143,9 @@
                   <property name="text" >
                    <string>Width</string>
                   </property>
+                  <property name="buddy" >
+                   <cstring>rebin_leEWidth</cstring>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1134,6 +1168,9 @@
                  <widget class="QLabel" name="rebin_lbHigh" >
                   <property name="text" >
                    <string>High</string>
+                  </property>
+                  <property name="buddy" >
+                   <cstring>rebin_leEHigh</cstring>
                   </property>
                  </widget>
                 </item>
@@ -1266,6 +1303,9 @@
                  <widget class="QLabel" name="cal_lbRunNo" >
                   <property name="text" >
                    <string>Run Number:</string>
+                  </property>
+                  <property name="buddy" >
+                   <cstring>cal_leRunNo</cstring>
                   </property>
                  </widget>
                 </item>
@@ -1489,6 +1529,9 @@
                   <property name="text" >
                    <string>Min:</string>
                   </property>
+                  <property name="buddy" >
+                   <cstring>cal_lePeakMin</cstring>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1511,6 +1554,9 @@
                  <widget class="QLabel" name="cal_lbPeakMax" >
                   <property name="text" >
                    <string>Max:</string>
+                  </property>
+                  <property name="buddy" >
+                   <cstring>cal_lePeakMax</cstring>
                   </property>
                  </widget>
                 </item>
@@ -1539,6 +1585,9 @@
                   <property name="text" >
                    <string>Min:</string>
                   </property>
+                  <property name="buddy" >
+                   <cstring>cal_leBackMin</cstring>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1561,6 +1610,9 @@
                  <widget class="QLabel" name="cal_lbBackMax" >
                   <property name="text" >
                    <string>Max:</string>
+                  </property>
+                  <property name="buddy" >
+                   <cstring>cal_leBackMax</cstring>
                   </property>
                  </widget>
                 </item>
@@ -1634,6 +1686,9 @@
                   <property name="text" >
                    <string>Rebin: ELow</string>
                   </property>
+                  <property name="buddy" >
+                   <cstring>cal_leELow</cstring>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1660,6 +1715,9 @@
                 <property name="text" >
                  <string>Minimum</string>
                 </property>
+                <property name="buddy" >
+                 <cstring>cal_leResSpecMin</cstring>
+                </property>
                </widget>
               </item>
               <item>
@@ -1667,12 +1725,18 @@
                 <property name="text" >
                  <string>StartX</string>
                 </property>
+                <property name="buddy" >
+                 <cstring>cal_leStartX</cstring>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QLabel" name="cal_lbEWidth" >
                 <property name="text" >
                  <string>EWidth</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>cal_leEWidth</cstring>
                 </property>
                </widget>
               </item>
@@ -1731,6 +1795,9 @@
                 <property name="text" >
                  <string>Maximum</string>
                 </property>
+                <property name="buddy" >
+                 <cstring>cal_leResSpecMax</cstring>
+                </property>
                </widget>
               </item>
               <item>
@@ -1738,12 +1805,18 @@
                 <property name="text" >
                  <string>EndX</string>
                 </property>
+                <property name="buddy" >
+                 <cstring>cal_leEndX</cstring>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QLabel" name="cal_lbEHigh" >
                 <property name="text" >
                  <string>EHigh</string>
+                </property>
+                <property name="buddy" >
+                 <cstring>cal_leEHigh</cstring>
                 </property>
                </widget>
               </item>
@@ -2293,6 +2366,80 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>cbInst</tabstop>
+  <tabstop>cbAnalyser</tabstop>
+  <tabstop>cbReflection</tabstop>
+  <tabstop>leRunFiles</tabstop>
+  <tabstop>pbRunFilesBrowse</tabstop>
+  <tabstop>ckSumFiles</tabstop>
+  <tabstop>leCalibrationFile</tabstop>
+  <tabstop>pbCalibrationFilesBrowse</tabstop>
+  <tabstop>ckUseCalib</tabstop>
+  <tabstop>cbMappingOptions</tabstop>
+  <tabstop>leNoGroups</tabstop>
+  <tabstop>leMappingFile</tabstop>
+  <tabstop>pbMappingFileBrowse</tabstop>
+  <tabstop>pbBack_2</tabstop>
+  <tabstop>pbPlotRaw</tabstop>
+  <tabstop>ckMonEff</tabstop>
+  <tabstop>ckDetailedBalance</tabstop>
+  <tabstop>leDetailedBalance</tabstop>
+  <tabstop>leEfixed</tabstop>
+  <tabstop>leSpectraMin</tabstop>
+  <tabstop>leSpectraMax</tabstop>
+  <tabstop>rebin_ckDNR</tabstop>
+  <tabstop>rebin_leELow</tabstop>
+  <tabstop>rebin_leEWidth</tabstop>
+  <tabstop>rebin_leEHigh</tabstop>
+  <tabstop>rebin_pbRebin</tabstop>
+  <tabstop>leNameSPE</tabstop>
+  <tabstop>pbBrowseSPE</tabstop>
+  <tabstop>save_ckSPE</tabstop>
+  <tabstop>save_ckNexus</tabstop>
+  <tabstop>cal_leRunNo</tabstop>
+  <tabstop>cal_pbPlot</tabstop>
+  <tabstop>cal_lePeakMin</tabstop>
+  <tabstop>cal_lePeakMax</tabstop>
+  <tabstop>cal_leBackMin</tabstop>
+  <tabstop>cal_leBackMax</tabstop>
+  <tabstop>cal_ckRES</tabstop>
+  <tabstop>cal_leResSpecMin</tabstop>
+  <tabstop>cal_leResSpecMax</tabstop>
+  <tabstop>cal_leStartX</tabstop>
+  <tabstop>cal_leEndX</tabstop>
+  <tabstop>cal_leELow</tabstop>
+  <tabstop>cal_leEWidth</tabstop>
+  <tabstop>cal_leEHigh</tabstop>
+  <tabstop>cal_ckPlotResult</tabstop>
+  <tabstop>cal_pbCreate</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>leEGuess</tabstop>
+  <tabstop>leEWidth</tabstop>
+  <tabstop>pbBack</tabstop>
+  <tabstop>map_fileInput_leName</tabstop>
+  <tabstop>leEHigh</tabstop>
+  <tabstop>leELow</tabstop>
+  <tabstop>cbNormal</tabstop>
+  <tabstop>map_fileInput_pbBrowse</tabstop>
+  <tabstop>ckFixEi</tabstop>
+  <tabstop>loadRun_cbInst</tabstop>
+  <tabstop>ckRunDiag</tabstop>
+  <tabstop>ckRunAbsol</tabstop>
+  <tabstop>leVanMap</tabstop>
+  <tabstop>pbAbsMapFileBrowse</tabstop>
+  <tabstop>leAbsWhiteFile</tabstop>
+  <tabstop>leAbsMonoFiles</tabstop>
+  <tabstop>leVanELow</tabstop>
+  <tabstop>leVanEHigh</tabstop>
+  <tabstop>leVanEi</tabstop>
+  <tabstop>leRMMMass</tabstop>
+  <tabstop>leSamMass</tabstop>
+  <tabstop>leVanMass</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>ckSumSpecs</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
