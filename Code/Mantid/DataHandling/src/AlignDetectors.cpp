@@ -28,7 +28,9 @@ using DataObjects::EventWorkspace_const_sptr;
 
 const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
-/** Calculate the conversion factor for a single pixel.
+/** Calculate the conversion factor for a single pixel. The result still needs
+ * to be multiplied by CONSTANT.
+ *
  * @param l1 Primary flight path.
  */
 double calcConversion(const double l1,
@@ -52,6 +54,25 @@ double calcConversion(const double l1,
   const double numerator = (1.0+offset);
   sinTheta*= (l1+l2);
   return numerator / sinTheta;
+}
+
+double calcConversion(const double l1,
+                      const Geometry::V3D &beamline,
+                      const double beamline_norm,
+                      const Geometry::V3D &samplePos,
+                      const IInstrument_const_sptr &instrument,
+                      const std::vector<int> &detectors,
+                      const std::map<int,double> &offsets)
+{
+  double factor = 0.;
+  double offset;
+  for (std::vector<int>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
+  {
+    offset = offsets.find(*iter)->second;
+    factor += calcConversion(l1, beamline, beamline_norm, samplePos,
+                             instrument->getDetector(*iter), offset);
+  }
+  return factor * CONSTANT / static_cast<double>(detectors.size());
 }
 
 /// (Empty) Constructor
@@ -162,6 +183,9 @@ void AlignDetectors::exec()
     try {
       // Get the spectrum number for this histogram
       const int spec = inputWS->getAxis(1)->spectraNo(i);
+      double factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
+                                     specMap.getDetectors(spec), offsets);
+      /*
       // Loop over the detectors that contribute to this spectrum and calculate the average correction
       const int ndets = specMap.ndet(spec);
       const std::vector<int> dets = specMap.getDetectors(spec);
@@ -188,6 +212,7 @@ void AlignDetectors::exec()
       }
       // Now average the factor and multiplies by the prefactor.
       factor*= CONSTANT/ndets;
+      */
       // Get references to the x data
       MantidVec& xOut = outputWS->dataX(i);
       // Make sure reference to input X vector is obtained after output one because in the case
