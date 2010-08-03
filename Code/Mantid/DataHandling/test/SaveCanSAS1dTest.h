@@ -93,8 +93,7 @@ public:
     }
 
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine,"\t\t<Title>15869 DTA RIB              White Van                13-APR-2005 14:10:46</Title>");
-
+    TS_ASSERT_EQUALS ( fileLine, "\t\t<Title>White Van                             JAWS 45X45                                </Title>")
     std::getline( testFile, fileLine );
     {
       std::ostringstream correctLine;
