@@ -93,8 +93,8 @@ def SolidAngle():
 def NoSolidAngle():
     ReductionSingleton().set_solid_angle_correcter(None)
     
-def AzimuthalAverage():
-    ReductionSingleton().set_azimuthal_averager(SANSReductionSteps.WeightedAzimuthalAverage())
+def AzimuthalAverage(suffix="_Iq"):
+    ReductionSingleton().set_azimuthal_averager(SANSReductionSteps.WeightedAzimuthalAverage(suffix=suffix))
 
 def SetTransmission(trans, error):
     ReductionSingleton().set_transmission(SANSReductionSteps.BaseTransmission(trans, error))
@@ -104,9 +104,18 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0):
                                                                                     empty_file=empty_file,
                                                                                     beam_radius=beam_radius))
 
-def BeamSpreaderTransmission():
-    ReductionSingleton().set_transmission(SANSReductionSteps.BeamSpreaderTransmission())
+def BeamSpreaderTransmission(sample_spreader, direct_spreader,
+                             sample_scattering, direct_scattering,
+                             spreader_transmission=1.0, spreader_transmission_err=0.0 ):
+    ReductionSingleton().set_transmission(SANSReductionSteps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
+                                                                                      direct_spreader=direct_spreader,
+                                                                                      sample_scattering=sample_scattering, 
+                                                                                      direct_scattering=direct_scattering,
+                                                                                      spreader_transmission=spreader_transmission, 
+                                                                                      spreader_transmission_err=spreader_transmission_err))
   
 def Mask(): raise NotImplemented
 
 def Background(): raise NotImplemented
+
+def SaveCSV(): raise NotImplemented

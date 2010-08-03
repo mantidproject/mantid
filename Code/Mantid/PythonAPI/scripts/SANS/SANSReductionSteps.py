@@ -103,11 +103,20 @@ class BaseTransmission(ReductionStep):
   
 class BeamSpreaderTransmission(BaseTransmission):
     """
-        Calculate transmission with one of two methods
+        Calculate transmission using the beam-spreader method
     """
-    def __init__(self): 
+    def __init__(self, sample_spreader, direct_spreader,
+                       sample_scattering, direct_scattering,
+                       spreader_transmission=1.0, spreader_transmission_err=0.0): 
         super(BeamSpreaderTransmission, self).__init__()
-        raise NotImplemented
+        self._sample_spreader = sample_spreader
+        self._direct_spreader = direct_spreader
+        self._sample_scattering = sample_scattering
+        self._direct_scattering = direct_scattering
+        self._spreader_transmission = spreader_transmission
+        self._spreader_transmission_err = spreader_transmission_err
+        ## Transmission workspace (output of transmission calculation)
+        self._transmission_ws = None
         
     def execute(self, reducer, workspace=None):
         """
@@ -115,12 +124,58 @@ class BeamSpreaderTransmission(BaseTransmission):
             @param reducer: Reducer object for which this step is executed
             @param workspace: workspace to apply correction to
         """
-        raise NotImplmented
+        if self._transmission_ws is None:
+            # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
+            self._transmission_ws = "transmission_fit"
+            
+            sample_spreader_ws = "_trans_sample_spreader"
+            filepath = reducer._full_file_path(self._sample_spreader)
+            LoadSpice2D(filepath, sample_spreader_ws)
+            
+            direct_spreader_ws = "_trans_direct_spreader"
+            filepath = reducer._full_file_path(self._direct_spreader)
+            LoadSpice2D(filepath, direct_spreader_ws)
+            
+            sample_scatt_ws = "_trans_sample_scatt"
+            filepath = reducer._full_file_path(self._sample_scattering)
+            LoadSpice2D(filepath, sample_scatt_ws)
+            
+            direct_scatt_ws = "_trans_direct_scatt"
+            filepath = reducer._full_file_path(self._direct_scattering)
+            LoadSpice2D(filepath, direct_scatt_ws)
+            
+            # Subtract dark current
+            if reducer._dark_current_subtracter is not None:
+                reducer._dark_current_subtracter.execute(reducer, sample_spreader_ws)
+                reducer._dark_current_subtracter.execute(reducer, direct_spreader_ws)
+                reducer._dark_current_subtracter.execute(reducer, sample_scatt_ws)
+                reducer._dark_current_subtracter.execute(reducer, direct_scatt_ws)
+            
+            # Get normalization for transmission calculation
+            norm_spectrum = reducer.NORMALIZATION_TIME
+            if reducer._normalizer is not None:
+                norm_spectrum = reducer._normalizer.get_normalization_spectrum()
+            
+            # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
+            # as the monitor channel.
+            CalculateTransmissionBeamSpreader(SampleSpreaderRunWorkspace=sample_spreader_ws, 
+                                              DirectSpreaderRunWorkspace=direct_spreader_ws,
+                                              SampleScatterRunWorkspace=sample_scatt_ws, 
+                                              DirectScatterRunWorkspace=direct_scatt_ws, 
+                                              OutputWorkspace=self._transmission_ws,
+                                              SpreaderTransmissionValue=str(self._spreader_transmission), 
+                                              SpreaderTransmissionError=str(self._spreader_transmission_err))
+
+        # 2- Apply correction (Note: Apply2DTransCorr)
+        #Apply angle-dependent transmission correction using the zero-angle transmission
+        ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                    TransmissionWorkspace=self._transmission_ws, 
+                                    OutputWorkspace=workspace)                
             
             
 class DirectBeamTransmission(BaseTransmission):
     """
-        Calculate transmission with one of two methods
+        Calculate transmission using the direct beam method
     """
     def __init__(self, sample_file, empty_file, beam_radius=3.0):
         super(DirectBeamTransmission, self).__init__()
@@ -309,8 +364,13 @@ class WeightedAzimuthalAverage(ReductionStep):
         ReductionStep class that performs azimuthal averaging
         and transforms the 2D reduced data set into I(Q).
     """
+    def __init__(self, suffix="_Iq"):
+        super(WeightedAzimuthalAverage, self).__init__()
+        self._suffix = suffix
+        
     def execute(self, reducer, workspace):
-        Q1DWeighted(workspace, "Iq", "0.01,0.001,0.11", 
+        output_ws = workspace+str(self._suffix)    
+        Q1DWeighted(workspace, output_ws, "0.01,0.001,0.11", 
                     PixelSizeX=reducer.instrument.pixel_size_x,
                     PixelSizeY=reducer.instrument.pixel_size_y, ErrorWeighting=True)  
             
