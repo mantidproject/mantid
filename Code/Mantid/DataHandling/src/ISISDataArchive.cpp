@@ -22,7 +22,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_ARCHIVESEARCH(ISISDataArchive,ISIS);
+DECLARE_ARCHIVESEARCH(ISISDataArchive,ISISDataSearch);
 
 /**
   * Calls a web service to get a full path to a file

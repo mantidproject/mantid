@@ -153,10 +153,10 @@ namespace Mantid
       // Search the archive of the default facility
       std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
       std::transform(archiveOpt.begin(),archiveOpt.end(),archiveOpt.begin(),tolower);
-      if ( !archiveOpt.empty() && archiveOpt != "off" )
+      if ( !archiveOpt.empty() && archiveOpt != "off" && !Kernel::ConfigService::Instance().Facility().archiveSearch().empty())
       {
         IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(
-          Kernel::ConfigService::Instance().Facility().name()
+          *Kernel::ConfigService::Instance().Facility().archiveSearch().begin()
           );
         if (arch)
         {

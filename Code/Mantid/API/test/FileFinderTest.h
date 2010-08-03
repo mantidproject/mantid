@@ -25,6 +25,9 @@ public:
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
       "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,N*,s*,S*\">"
+      "    <archive>"
+      "      <archiveSearch plugin=\"ISISDataSearch\" />"
+      "    </archive>"
       "    <instrument name=\"HRPD\" shortname=\"HRP\">"
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"
@@ -92,6 +95,7 @@ public:
     path = FileFinder::Instance().findFile("HRP37129");
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size()-3),"S02");
+
     //ConfigService::Instance().setString("datasearch.searcharchive","On");
     //path = FileFinder::Instance().findFile("CSP77374");
     //std::cerr<<"Path: "<<path<<'\n';

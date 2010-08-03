@@ -51,6 +51,28 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem)
     addExtension(*it);
   }
 
+  Poco::XML::NodeList* pNL_archives = elem->getElementsByTagName("archive");
+  if (pNL_archives->length() > 1)
+  {
+    g_log.error("Facility must have only one archive tag");
+    throw std::runtime_error("Facility must have only one archive tag");
+  }
+  else if (pNL_archives->length() == 1)
+  {
+    Poco::XML::Element* elemArch = dynamic_cast<Poco::XML::Element*>(pNL_archives->item(0));
+    Poco::XML::NodeList* pNL_interfaces = elem->getElementsByTagName("archiveSearch");
+    for (unsigned int i = 0; i < pNL_interfaces->length(); ++i)
+    {
+      Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_interfaces->item(i));
+      std::string plugin = elem->getAttribute("plugin");
+      if (!plugin.empty())
+      {
+        m_archiveSearch.insert(plugin);
+      }
+    }
+
+  }
+
   Poco::XML::NodeList* pNL_instrument = elem->getElementsByTagName("instrument");
   unsigned int n = pNL_instrument->length();
 

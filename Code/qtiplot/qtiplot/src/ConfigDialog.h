@@ -155,6 +155,7 @@ private:
   /// Mantid tab for setting directories
   QWidget *directoriesPage;
   QLineEdit* leDataSearchDirs;///< datasearch.directories
+  QCheckBox* cbSearchArchive;///< datasearch.searcharchive
   QLineEdit* leDefaultSaveDir;///< defaultsave.directory
   QLineEdit* lePythonScriptsDirs;///< pythonscripts.directories
   QLineEdit* lePythonAlgorithmsDirs;///< pythonalgorithms.directories

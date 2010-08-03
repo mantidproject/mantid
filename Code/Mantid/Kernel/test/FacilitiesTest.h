@@ -33,6 +33,10 @@ public:
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
       "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,s*\">"
+      "    <archive>"
+      "      <archiveSearch plugin=\"ADataSearch\" />"
+      "      <archiveSearch plugin=\"BDataSearch\" />"
+      "    </archive>"
       "    <instrument name=\"HRPD\" shortname=\"HRP\">"
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"
@@ -57,6 +61,11 @@ public:
     TS_ASSERT_EQUALS(exts[3],"n*");
     TS_ASSERT_EQUALS(exts[4],"s*");
     TS_ASSERT_EQUALS(fac->preferedExtension(),"nxs");
+
+    TS_ASSERT_EQUALS(fac->archiveSearch().size(),2);
+    std::set<std::string>::const_iterator it = fac->archiveSearch().begin();
+    TS_ASSERT_EQUALS(*it,"ADataSearch");
+    TS_ASSERT_EQUALS(*++it,"BDataSearch");
 
     const std::vector<InstrumentInfo> instrums = fac->Instruments();
     TS_ASSERT_EQUALS(instrums.size(),2);
@@ -112,6 +121,29 @@ public:
     const FacilityInfo& fac = ConfigService::Instance().Facility();
     InstrumentInfo instr = fac.Instrument();
     TS_ASSERT_EQUALS(instr.name(),"HRPD");
+  }
+
+  void testFacilitiesArchiveMissing()
+  {
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<facilities>"
+      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,s*\">"
+      "    <instrument name=\"HRPD\" shortname=\"HRP\">"
+      "      <technique>Powder Diffraction</technique>"
+      "    </instrument>"
+      "    <instrument name=\"WISH\" zeropadding=\"8\">"
+      "      <technique>Powder Diffraction</technique>"
+      "      <technique>Single Crystal Diffraction</technique>"
+      "    </instrument>"
+      "  </facility>"
+      "</facilities>";
+
+    FacilityInfo* fac = getFacility(xmlStr);
+
+    TS_ASSERT(fac);
+
+    TS_ASSERT_EQUALS(fac->name(),"ISIS");
+    TS_ASSERT_EQUALS(fac->archiveSearch().size(),0);
   }
 
 private:

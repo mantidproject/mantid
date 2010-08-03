@@ -64,6 +64,8 @@ public:
   const std::vector<std::string> extensions()const{return m_extensions;}
   /// Returns the prefered file extension
   const std::string preferedExtension()const{return m_extensions.front();}
+  /// Return the archive search interface names
+  const std::set<std::string>& archiveSearch()const{return m_archiveSearch;}
   /// Returns a list of instruments of this facility
   const std::vector<InstrumentInfo>& Instruments()const{return m_instruments;}
   /// Returns a list of instruments of given technique
@@ -76,7 +78,8 @@ private:
 
   const std::string m_name;                    ///< facility name
   int m_zeroPadding;                           ///< default zero padding for this facility
-  std::vector<std::string> m_extensions; ///< file extensions in order of preference
+  std::vector<std::string> m_extensions;       ///< file extensions in order of preference
+  std::set<std::string> m_archiveSearch;       ///< names of the archive search interface
   std::vector<InstrumentInfo> m_instruments;   ///< list of istruments of thsi facility
   static Logger& g_log;                        ///< logger
 };
