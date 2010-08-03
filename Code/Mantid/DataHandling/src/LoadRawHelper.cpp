@@ -33,7 +33,7 @@ namespace Mantid
     LoadRawHelper::LoadRawHelper() :
       Algorithm(),isisRaw(new ISISRAW2),
       m_list(false),m_spec_list(),m_spec_min(0),
-      m_spec_max(unSetInt),m_specTimeRegimes(),m_bmspeclist(false)
+      m_spec_max(EMPTY_INT()),m_specTimeRegimes(),m_bmspeclist(false)
     {
     }
 
@@ -767,8 +767,8 @@ namespace Mantid
 
       m_list = !m_spec_list.empty();
       m_bmspeclist = !m_spec_list.empty();
-      m_interval = (m_spec_max != unSetInt) || (m_spec_min != 1);
-      if (m_spec_max == unSetInt)
+      m_interval = (m_spec_max != EMPTY_INT()) || (m_spec_min != 1);
+      if (m_spec_max == EMPTY_INT())
 	m_spec_max = 1;
       // Check validity of spectra list property, if set
       if (m_list)

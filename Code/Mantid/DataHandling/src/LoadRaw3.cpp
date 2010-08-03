@@ -53,7 +53,7 @@ void LoadRaw3::init()
   declareProperty("SpectrumMin", 1, mustBePositive,
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
-  declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
   declareProperty(new ArrayProperty<int> ("SpectrumList"),

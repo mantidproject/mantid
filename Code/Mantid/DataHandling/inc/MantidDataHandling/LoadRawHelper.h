@@ -184,9 +184,6 @@ namespace Mantid
       /// TimeSeriesProperty<int> containing data periods.
       boost::shared_ptr<Kernel::Property> m_perioids;
 
-      /// A flag int value to indicate that the value wasn't set by users
-      static const int unSetInt = INT_MAX-15;
-
       /// boolean for list spectra options
       bool m_bmspeclist;
 

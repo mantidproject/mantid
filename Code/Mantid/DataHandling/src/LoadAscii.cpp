@@ -32,7 +32,7 @@ namespace Mantid
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "A comma separated Ascii file");
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("Workspace",
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace",
         "",Direction::Output), "The name of the workspace that will be created.");
 
       //fix for #782
@@ -136,7 +136,7 @@ namespace Mantid
         ++nBins;
       } // read the file
 
-      DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+      MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
       try {
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
@@ -153,7 +153,7 @@ namespace Mantid
         localWorkspace->getAxis(1)->spectraNo(i) = i+1;
       }
 
-      setProperty("Workspace",localWorkspace);
+      setProperty("OutputWorkspace",localWorkspace);
     }
 
   } // namespace DataHandling

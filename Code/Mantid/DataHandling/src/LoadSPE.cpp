@@ -49,7 +49,7 @@ void LoadSPE::init()
 {
   declareProperty(new FileProperty("Filename","", FileProperty::Load, ".spe"),
                   "Name of the SPE file to load" );
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::Output),
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
     "The name to use for the output workspace" );
 }
 
@@ -153,7 +153,7 @@ void LoadSPE::exec()
   fclose(speFile);
 
   // Set the output workspace property
-  setProperty("Workspace", workspace);
+  setProperty("OutputWorkspace", workspace);
 }
 
 /** Reads in the data corresponding to a single spectrum

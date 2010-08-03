@@ -229,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Load.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadAscii.cpp"
 				>
 			</File>
@@ -471,6 +475,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidDataHandling\Load.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadAscii.h"
 				>
 			</File>
@@ -608,6 +616,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadSpice2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadTest.h"
 				>
 			</File>
 			<File

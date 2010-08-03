@@ -136,8 +136,6 @@ namespace Mantid
       /// The current value of the progress counter
       double m_prog;
 
-      /// A flag int value to indicate that the value wasn't set by users
-      static const int unSetInt = INT_MAX-15;
       /// a vector holding the indexes of monitors
       std::vector<int> m_monitordetectorList;
       /// Read in the time bin boundaries
