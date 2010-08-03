@@ -98,7 +98,7 @@ public:
   }
 
 
-  void xtestExecEventWorkspace()
+  void testExecEventWorkspace()
   {
     this->setUp_Event();
 
@@ -110,7 +110,7 @@ public:
     align.setPropertyValue("InputWorkspace", "eventWS");
     const std::string outputWS = "aligned";
     align.setPropertyValue("OutputWorkspace", outputWS);
-    align.setPropertyValue("CalibrationFile", "../../../../Test/Data/hrpd_new_072_01.cal");
+    align.setPropertyValue("CalibrationFile", "../../../../Test/Data/refl_fake.cal");
 
     align.execute();
   }

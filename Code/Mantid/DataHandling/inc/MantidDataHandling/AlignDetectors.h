@@ -5,11 +5,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
+using DataObjects::EventList;
+using DataObjects::EventWorkspace;
+using DataObjects::EventWorkspace_sptr;
+using DataObjects::EventWorkspace_const_sptr;
+
 namespace DataHandling
 {
+
 /** Performs a unit change from TOF to dSpacing, correcting the X values to account for small
     errors in the detector positions.
 
@@ -64,6 +71,8 @@ private:
   void execEvent();
 
   bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets);
+
+  EventWorkspace_const_sptr eventW;
 };
 
 } // namespace DataHandling
