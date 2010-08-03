@@ -1404,7 +1404,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     # ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
     ConvertUnits(monitorWS, monitorWS, "Wavelength")
     wavbin =  str(wav_start) + "," + str(DWAV) + "," + str(wav_end)
-    if INSTRUMENT.is_scattering_mon_interp :
+    if INSTRUMENT.is_scattering_mon_interp() :
         InterpolatingRebin(monitorWS, monitorWS,wavbin)
     else :
         Rebin(monitorWS, monitorWS,wavbin)
