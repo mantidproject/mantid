@@ -128,17 +128,15 @@ QStringList InterfaceManagerImpl::getUserSubWindowKeys() const
 /// Default Constructor
 InterfaceManagerImpl::InterfaceManagerImpl()
 {
-
-  //Attempt to load libraries that may contain custom dialog classes
-  //First get the path from the configuration manager
-  std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
+  // Attempt to load libraries that may contain custom interface classes
+  const std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("mantidqt.plugins.directory");
   if( !libpath.empty() )
   {
-    int loaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-    if( loaded == 0 )
+    int nloaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
+    if( nloaded == 0 )
     {
-      g_log.information() << "A path has been specified for the custom algorithm dialogs but no libraries could be loaded. "
-			  << "Please check that the 'plugins.directory' variable in the Mantid.properties file points to "
+      g_log.warning() << "Unable to load Qt plugin libraries.\n"
+			  << "Please check that the 'mantidqt.plugins.directory' variable in the .properties file points to "
 			  << "the correct location."
 			  << std::endl;
     }

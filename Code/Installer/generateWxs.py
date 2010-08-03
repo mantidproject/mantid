@@ -75,6 +75,7 @@ if ARCH == '32':
     comp_guid['PyQt'] = '{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}'
     comp_guid['Colormaps'] = '{902DBDE3-42AE-49d3-819D-1C83C18D280A}'
     comp_guid['QtImagePlugins'] = '{6e3c6f03-5933-40b1-9733-1bd71132404c}'
+    comp_guid['MantidQtPlugins'] = '{d035e5aa-2815-4869-836d-8fc4b8e7a418}'
 else:
     comp_guid['MantidDLLs'] = '{c9748bae-5934-44ab-b144-420589db1623}'
     comp_guid['QTIPlot'] = '{bfe90c00-9f39-4fde-8dbc-17f419210e12}'
@@ -97,6 +98,7 @@ else:
     comp_guid['PyQt'] = '{86c24261-2f6f-47e5-b268-0d6b1334d638}'
     comp_guid['Colormaps'] = '{9e4a6fc4-39ea-4b8f-ba49-265d6dcfbb4c}'
     comp_guid['QtImagePlugins'] = '{7c1ec169-d331-4b9c-b0e4-3214bcf2cbf4}'
+    comp_guid['MantidQtPlugins'] = '{22fa661e-17d5-4e33-8f2c-654c473268c3}'
     
 MantidInstallDir = 'MantidInstall'
 
@@ -315,6 +317,7 @@ def createPropertiesFile(filename):
     # Field replacements
     replacements = {
     "plugins.directory":"plugins.directory = ../plugins",
+    "mantidqt.plugins.directory" : "mantidqt.plugins.directory = ../plugins/qtplugins/mantid",
     "instrumentDefinition.directory":"instrumentDefinition.directory = ../instrument",
     "parameterDefinition.directory":"parameterDefinition.directory = ../instrument",    
     "requiredpythonscript.directories":"""requiredpythonscript.directories = ../scripts/Crystallography;../scripts/Disordered Materials;../scripts/Engineering;\\
@@ -553,10 +556,11 @@ addDlls(QTPLUGINDIR + '/imageformats', 'imgdll',qtimagedlls)
 # Now we need a file in the main Qt library to tell Qt where the plugins are using the qt.conf file
 addSingleFile('./','qt.conf','qtcfile', MantidDlls)
 
-# Add qt custom dialogs library
-addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../Mantid/release/MantidQtCustomDialogs.dll',Plugins)
-# Add qt custom interfaces library
-addFileV('MantidQtCustomInterfaces','MQTCInt.dll','MantidQtCustomInterfaces.dll','../Mantid/release/MantidQtCustomInterfaces.dll',Plugins)
+# Qt plugins
+mtdqtdllDir = addDirectory('MantidQtPluginsDir','mqtdir','mantid',qtpluginsDir)
+mtdqtdlls = addComponent('MantidQtPlugins', comp_guid['MantidQtPlugins'], mtdqtdllDir)
+addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../Mantid/release/MantidQtCustomDialogs.dll',mtdqtdlls)
+addFileV('MantidQtCustomInterfaces','MQTCInt.dll','MantidQtCustomInterfaces.dll','../Mantid/release/MantidQtCustomInterfaces.dll',mtdqtdlls)
 
 documentsDir = addDirectory('DocumentsDir','docs','docs',InstallDir)
 Documents = addComponent('Documents',comp_guid['Documents'],documentsDir)
@@ -726,6 +730,7 @@ addCRef('PyQt',MantidExec)
 addCRef('Sip',MantidExec)
 addCRef('PyAlgsEx',MantidExec)
 addCRef('QtImagePlugins', MantidExec)
+addCRef('MantidQtPlugins', MantidExec)
 
 Redist = addHiddenFeature('Redist',Complete)
 addModules(toget + '/VCRedist',Redist)

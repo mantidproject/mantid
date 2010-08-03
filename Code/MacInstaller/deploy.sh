@@ -4,6 +4,25 @@
 # subdirectory that lies below this one. This directory is then the root
 # when packagemaker is called using Mantid.pmdoc
 
+# Ensures library paths point to the correct location
+update_lib_paths() {
+    pluginlibs=$1
+    macoslibs=$2
+    qtlibs=$3
+    for lib in $pluginlibs
+    do
+      for m in $macoslibs
+      do
+        install_name_tool -change @loader_path/./$m @loader_path/../Contents/MacOS/$m $lib
+        install_name_tool -change $m @loader_path/../Contents/MacOS/$m $lib
+      done
+      for qt in $qtlibs
+      do
+        install_name_tool -change $qt @loader_path/../Contents/Frameworks/$qt $lib
+      done
+    done
+}
+
 # First copy in the MantidPlot executable bundle
 cp -R ../Mantid/release/MantidPlot.app/Contents MantidPlot.app/
 
@@ -99,21 +118,13 @@ cp ../Mantid/release/libMantidDataHandling.dylib MantidPlot.app/plugins/
 cp ../Mantid/release/libMantidDataObjects.dylib MantidPlot.app/plugins/
 cp ../Mantid/release/libMantidNexus.dylib MantidPlot.app/plugins/
 install_name_tool -change /usr/local/lib/libNeXus.0.dylib @loader_path/../Contents/Frameworks/libNeXus.0.dylib MantidPlot.app/plugins/libMantidNexus.dylib
-cp ../Mantid/release/libMantidQtCustomDialogs.dylib MantidPlot.app/plugins/
-cp ../Mantid/release/libMantidQtCustomInterfaces.dylib MantidPlot.app/plugins/
+# Mantid Qt plugins
+cp ../Mantid/release/libMantidQtCustomDialogs.dylib MantidPlot.app/plugins/qtplugins/mantid
+cp ../Mantid/release/libMantidQtCustomInterfaces.dylib MantidPlot.app/plugins/qtplugins/mantid
+# Example Python algorithm
 cp ../Mantid/PythonAPI/PythonAlgorithms/Squares.py MantidPlot.app/plugins/PythonAlgs/Examples/
 
 PLUGINLIBS='MantidPlot.app/plugins/*.dylib'
-for lib in $PLUGINLIBS
-do
-  for m in $MACOSLIBS
-  do
-    install_name_tool -change @loader_path/./$m @loader_path/../Contents/MacOS/$m $lib
-    install_name_tool -change $m @loader_path/../Contents/MacOS/$m $lib
-  done
-  for qt in $QTLIBS
-  do
-    install_name_tool -change $qt @loader_path/../Contents/Frameworks/$qt $lib
-  done
-done
-
+update_lib_paths $PLUGINLIBS $MACOSLIBS $QTLIBS
+PLUGINSLIBS='MantidPlot.app/plugins/qtplugins/mantid/*.dylib'
+update_lib_paths $PLUGINLIBS $MACOSLIBS $QTLIBS

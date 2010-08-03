@@ -6,5 +6,6 @@
 rm -R MantidPlot.app/Contents
 rm MantidPlot.app/instrument/*
 rm MantidPlot.app/plugins/*.*
+rm MantidPlot.app/plugins/qtplugins/mantid/*.*
 rm MantidPlot.app/plugins/PythonAlgs/Examples/*
 rm -R MantidPlot.app/scripts/*

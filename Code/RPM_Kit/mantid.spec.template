@@ -50,6 +50,7 @@ Requires:	muParser
 %define mantidlibdir		%{mantiddir}/bin
 %define mantidbindir		%{mantiddir}/bin
 %define mantidpluginsdir	%{mantiddir}/plugins
+%define mantidqtpluginsdir  %{mantiddir}/plugins/qtplugins/mantid
 %define mantidscriptsdir	%{mantiddir}/scripts
 %define mantidincludesdir	%{mantiddir}/include
 %define mantidimagesdir		%{mantiddir}/images
@@ -90,8 +91,8 @@ mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 install -m755 Code/Mantid/release/libMantidWidgets.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/Mantid/release/libMantidQtAPI.so $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/Mantid/release/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
-install -m755 Code/Mantid/release/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
+install -m755 Code/Mantid/release/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidqtpluginsdir}
+install -m755 Code/Mantid/release/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidqtpluginsdir}
 install -m755 Code/Mantid/release/libQtPropertyBrowser.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/Mantid/Build/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
 for i in Code/Mantid/release/*.so; do
@@ -129,6 +130,7 @@ sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.sh > $RPM_BUILD_ROOT/etc
 sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.csh > $RPM_BUILD_ROOT/etc/profile.d/mantid.csh
 echo %{mantidlibdir} > $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 echo %{mantidpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
+echo %{mantidqtpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 install -m644 Code/Mantid/Properties/Mantid.properties $RPM_BUILD_ROOT/%{mantidbindir}
 sed -i -e "s!plugins\.directory.*!plugins.directory = %{mantidpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscriptsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties

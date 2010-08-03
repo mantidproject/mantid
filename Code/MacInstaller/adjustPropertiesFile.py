@@ -7,6 +7,7 @@
 # Field replacements
 replacements = {
     "plugins.directory":"plugins.directory = ../../plugins",
+    "mantidqt.plugins.directory" : "mantidqt.plugins.directory = ../plugins/qtplugins/mantid",
     "instrumentDefinition.directory":"instrumentDefinition.directory = ../../instrument",
     "parameterDefinition.directory":"parameterDefinition.directory = ../../instrument",    
     "requiredpythonscript.directories":"""requiredpythonscript.directories = ../../scripts/Crystallography;../../scripts/Disordered Materials;../../scripts/Engineering;\\
