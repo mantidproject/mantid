@@ -88,17 +88,18 @@ public:
   {
     LoadEventPreNeXus loader;
     loader.initialize();
-    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat" );
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
+    loader.setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", "eventWS");
+    loader.setPropertyValue("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
     loader.execute();
   }
 
 
-  void testExecEventWorkspace()
+  void testExecEventWorkspace_sameOutputWS()
   {
     this->setUp_Event();
 
@@ -108,7 +109,7 @@ public:
 
     //Set all the properties
     align.setPropertyValue("InputWorkspace", "eventWS");
-    const std::string outputWS = "aligned";
+    const std::string outputWS = "eventWS";
     align.setPropertyValue("OutputWorkspace", outputWS);
     align.setPropertyValue("CalibrationFile", "../../../../Test/Data/refl_fake.cal");
 

@@ -267,10 +267,10 @@ void AlignDetectors::execEvent()
   else
   {
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1));
+        API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
     //API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
     outputWS->mutableSpectraMap().clear();
-    this->setProperty("OutputWorkspace", outputWS);
+    this->setProperty("OutputWorkspace", matrixOutputWS);
   }
 
   // Read in the calibration data
@@ -343,8 +343,8 @@ void AlignDetectors::execEvent()
     conversions[spec] = factor;
 
     //Perform the multiplication on all events
-    outputWS->getEventListAtWorkspaceIndex(spec).convertToDSpacing(factor);
-    std::cout << "converting " << spec << " with factor " << factor << ".\n";
+    outputWS->getEventListAtWorkspaceIndex(i).convertToDSpacing(factor);
+    //std::cout << "converting " << spec << " with factor " << factor << ".\n";
   }
 
 }
