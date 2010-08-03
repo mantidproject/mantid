@@ -55,6 +55,10 @@ namespace DataObjects
  * in which it was detected.
  */
 class DLLExport TofEvent {
+
+  /// EventList has the right to mess with TofEvent.
+  friend class EventList;
+
 private:
   /** The units of the time of flight index in nanoseconds.
    * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1 */
@@ -156,6 +160,8 @@ public:
   void generateCountsHistogram(const StorageType& X, StorageType& Y) const;
 
   void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
+
+  void convertToDSpacing(const double factor);
 
 private:
   ///List of events.

@@ -402,7 +402,7 @@ namespace DataObjects
         }
         ++bin;
       }
-      //Go to the next event, we've already binned this first one.
+      //Go to the next event, we've alreadyconversions Map with key = pixel ID, and value =  binned this first one.
       ++itev;
 
       //Keep going through all the events
@@ -440,6 +440,31 @@ namespace DataObjects
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt); 
 
   }
+
+
+  // --------------------------------------------------------------------------
+  /**
+   * Convert the units in the TofEvent's contained to d-spacing.
+   * WARNING: There is no check to see if you did this before! Don't be dumb
+   *          and do it twice!
+   * @param factor: conversion factor (multiply TOF by this to get d-spacing)
+   */
+  void EventList::convertToDSpacing(const double factor)
+  {
+
+    //Do we even have any events to do?
+    if (this->events.size() > 0)
+    {
+      //Iterate through all events (sorted by tof)
+      std::vector<TofEvent>::iterator itev;
+      for (itev= this->events.begin(); itev != this->events.end(); itev++)
+      {
+        itev->time_of_flight *= factor;
+      }
+      //The sorting of the list will be unchanged, since it is just a multiplicative factor.
+    }
+  }
+
 
 } /// namespace DataObjects
 } /// namespace Mantid

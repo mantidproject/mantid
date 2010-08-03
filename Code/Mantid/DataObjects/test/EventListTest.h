@@ -351,6 +351,22 @@ public:
   }
 
 
+  void test_convert_to_dspacing()
+  {
+    this->fake_uniform_data();
+    size_t old_num = this->el.getEvents().size();
+
+    //Do convert
+    this->el.convertToDSpacing( 2.5 );
+    //Unchanged size
+    TS_ASSERT_EQUALS(old_num, this->el.getEvents().size());
+
+    //Original tofs were 100, 5100, 10100, etc.)
+    TS_ASSERT_EQUALS(this->el.getEvents()[0].tof(), 250.0);
+    TS_ASSERT_EQUALS(this->el.getEvents()[1].tof(), 12750.0);
+
+  }
+
   //==================================================================================
   //--- Unit unittests ---
 
