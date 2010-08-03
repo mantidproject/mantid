@@ -193,34 +193,7 @@ void AlignDetectors::exec()
       const int spec = inputWS->getAxis(1)->spectraNo(i);
       double factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
                                      specMap.getDetectors(spec), offsets);
-      /*
-      // Loop over the detectors that contribute to this spectrum and calculate the average correction
-      const int ndets = specMap.ndet(spec);
-      const std::vector<int> dets = specMap.getDetectors(spec);
-      double factor = 0.0;
-      for (int j = 0; j < ndets; ++j)
-      {
-        const int detsj=dets[j];
-        Geometry::IDetector_const_sptr det = instrument->getDetector(detsj);
-        // Get the sample-detector distance for this detector (in metres)
 
-        // The scattering angle for this detector (in radians).
-        Geometry::V3D detPos = det->getPos();
-        // Now detPos will be set with respect to samplePos
-        detPos-=samplePos;
-        // 0.5*cos(2theta)
-        double l2=detPos.norm();
-        double halfcosTheta=detPos.scalar_prod(beamline)/(l2*beamline_norm);
-        // This is sin(theta)
-        double sinTheta=sqrt(0.5-halfcosTheta);
-        const double numerator = (1.0+offsets[detsj]);
-        //
-        sinTheta*= (l1+l2);
-        factor += numerator / sinTheta;
-      }
-      // Now average the factor and multiplies by the prefactor.
-      factor*= CONSTANT/ndets;
-      */
       // Get references to the x data
       MantidVec& xOut = outputWS->dataX(i);
       // Make sure reference to input X vector is obtained after output one because in the case
