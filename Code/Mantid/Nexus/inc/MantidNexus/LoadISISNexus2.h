@@ -84,6 +84,8 @@ namespace Mantid
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       /// Load in details about the run
       void loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry);
+      /// Parse an ISO formatted date-time string into separate date and time strings
+      void parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const;
       /// Load in details about the sample
       void loadSampleData(DataObjects::Workspace2D_sptr, NXEntry & entry);
       /// Load log data from the nexus file

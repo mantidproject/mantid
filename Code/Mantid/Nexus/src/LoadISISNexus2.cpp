@@ -615,27 +615,44 @@ namespace Mantid
       char_data.load();
       std::string end_time_iso = std::string(char_data(), 19);
       std::string end_date(""), end_time("");
+      parseISODateTime(end_time_iso, end_date, end_time);
+      runDetails.addProperty("enddate", end_date);
+      runDetails.addProperty("endtime", end_time);
+
+      char_data = entry.openNXChar("start_time");
+      char_data.load();
+      std::string start_time_iso = std::string(char_data(), 19);
+      std::string start_date(""), start_time("");
+      parseISODateTime(start_time_iso, start_date, start_time);
+      runDetails.addProperty("startdate", start_date);
+      runDetails.addProperty("starttime", start_time);
+      
+      runDetails.addProperty("rb_proposal",rpb_int[21]); // RB (proposal) number
+      vms_compat.close();
+    }
+
+    /**
+     * Parse an ISO formatted date-time string into separate date and time strings
+     * @param datetime_iso The string containing the ISO formatted date-time
+     * @param date An output parameter containing the date from the original string or ??-??-???? if the format is unknown
+     * @param time An output parameter containing the time from the original string or ??-??-?? if the format is unknown
+     */
+    void LoadISISNexus2::parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const
+    {
       try
       {
-	Poco::DateTime end_time_output;
-	int timezone_diff(0);
-	Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT, end_time_iso, end_time_output, timezone_diff);
-	end_date = Poco::DateTimeFormatter::format(end_time_output, "%d-%m-%Y", timezone_diff);
-	end_time = Poco::DateTimeFormatter::format(end_time_output, "%H:%M:%S", timezone_diff);
+        Poco::DateTime datetime_output;
+        int timezone_diff(0);
+        Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT, datetime_iso, datetime_output, timezone_diff);
+        date = Poco::DateTimeFormatter::format(datetime_output, "%d-%m-%Y", timezone_diff);
+        time = Poco::DateTimeFormatter::format(datetime_output, "%H:%M:%S", timezone_diff);
       }
       catch(Poco::SyntaxException&)
       {
-	end_date = "\?\?-\?\?-\?\?\?\?";
-	end_time = "\?\?-\?\?-\?\?";
-	g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
+        date = "\?\?-\?\?-\?\?\?\?";
+        time = "\?\?:\?\?:\?\?";
+        g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
       }
-      
-      runDetails.addProperty("enddate", end_date);
-      runDetails.addProperty("endtime", end_time);
-      runDetails.addProperty("rb_proposal",rpb_int[21]); // RB (proposal) number
-      vms_compat.close();
-      
-
     }
 
     /**

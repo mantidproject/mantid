@@ -83,11 +83,7 @@ namespace Mantid
       ISISRAW iraw;
       iraw.ioRAW(file, true);
 
-      std::string title(iraw.hdr.hd_run, 69);
-      // Insert some spaces to tidy the string up a bit
-      title.insert(5, " ");
-      title.insert(26, " ");
-      title.insert(51, " ");
+      std::string title(iraw.r_title, 80);
       g_log.information("**** Run title: "+title+ "***");
       
       // Read in the number of spectra in the RAW file

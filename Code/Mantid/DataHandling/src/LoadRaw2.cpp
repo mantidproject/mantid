@@ -90,12 +90,8 @@ namespace Mantid
       FILE* file = helper->openRawFile(m_filename);
       isisRaw->ioRAW(file, true);
       
-      std::string title(isisRaw->hdr.hd_run, 69);
-      // Insert some spaces to tidy the string up a bit
-      title.insert(5, " ");
-      title.insert(26, " ");
-      title.insert(51, " ");
-      g_log.information("**** Run title: "+title+ "***");
+      std::string title(isisRaw->r_title, 80);
+      g_log.information("**** Run title: "+ title + "***");
 
       // Read in the number of spectra in the RAW file
       m_numberOfSpectra = isisRaw->t_nsp1;

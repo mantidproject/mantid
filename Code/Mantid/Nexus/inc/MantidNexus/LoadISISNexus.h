@@ -99,11 +99,12 @@ namespace Mantid
             void loadData(int, int, int&, DataObjects::Workspace2D_sptr );
             void runLoadInstrument(DataObjects::Workspace2D_sptr);
             void loadMappingTable(DataObjects::Workspace2D_sptr);
-	    void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
-	    template<class TYPE>
-	    TYPE getEntryValue(const std::string & name);
-	    template<class TYPE>
-	    TYPE getNXData(const std::string & name);
+            void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
+            void parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const;
+            template<class TYPE>
+            TYPE getEntryValue(const std::string & name);
+            template<class TYPE>
+            TYPE getNXData(const std::string & name);
 
             void loadLogs(DataObjects::Workspace2D_sptr,int period = 1);
 
