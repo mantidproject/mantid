@@ -304,11 +304,13 @@ void AlignDetectors::execEvent()
   std::map<int,double> conversions;
 
   // generate map of the tof->d conversion factors
+  int spec;
+  double factor;
   for (int i = 0; i < numberOfSpectra; ++i)
   {
     // Get the spectrum number for this histogram
-    const int spec = inputWS->getAxis(1)->spectraNo(i);
-    double factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
+    spec = inputWS->getAxis(1)->spectraNo(i);
+    factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
                                    specMap.getDetectors(spec), offsets);
 
     // this should do the wonderful calculation of the geometric position as
@@ -316,7 +318,7 @@ void AlignDetectors::execEvent()
     conversions[spec] = factor;
 
     //Perform the multiplication on all events
-    outputWS->getEventListAtWorkspaceIndex(i).convertToDSpacing(factor);
+    outputWS->getEventListAtWorkspaceIndex(i).convertTof(factor);
     //std::cout << "converting " << spec << " with factor " << factor << ".\n";
   }
 

@@ -449,11 +449,11 @@ namespace DataObjects
    *          and do it twice!
    * @param factor: conversion factor (multiply TOF by this to get d-spacing)
    */
-  void EventList::convertToDSpacing(const double factor)
+  void EventList::convertTof(const double factor)
   {
 
     //Do we even have any events to do?
-    if (this->events.size() > 0)
+    if (!this->events.empty())
     {
       //Iterate through all events (sorted by tof)
       std::vector<TofEvent>::iterator itev;

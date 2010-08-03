@@ -161,7 +161,7 @@ public:
 
   void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
 
-  void convertToDSpacing(const double factor);
+  void convertTof(const double factor);
 
 private:
   ///List of events.

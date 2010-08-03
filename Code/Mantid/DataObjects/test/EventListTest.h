@@ -357,7 +357,7 @@ public:
     size_t old_num = this->el.getEvents().size();
 
     //Do convert
-    this->el.convertToDSpacing( 2.5 );
+    this->el.convertTof( 2.5 );
     //Unchanged size
     TS_ASSERT_EQUALS(old_num, this->el.getEvents().size());
 
