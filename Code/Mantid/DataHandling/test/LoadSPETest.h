@@ -37,7 +37,7 @@ public:
     std::string outWS("outWS");
 
     TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("Filename","Example.spe") )
-    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("Workspace",outWS) )
+    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("OutputWorkspace",outWS) )
 
     TS_ASSERT_THROWS_NOTHING( loader.execute() )
     TS_ASSERT( loader.isExecuted() )
