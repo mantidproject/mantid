@@ -148,9 +148,9 @@ public:
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
-    TS_ASSERT_EQUALS( el.dataY()[0], 1);
-    TS_ASSERT_EQUALS( el.dataY()[1], 1);
-    TS_ASSERT_EQUALS( el.dataY()[NUMBINS-2], 1); //The last bin
+    TS_ASSERT_EQUALS( (*el.dataY())[0], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMBINS-2], 1); //The last bin
 
     SimpleRebin rebin;
     rebin.initialize();
@@ -167,14 +167,14 @@ public:
     //Correct # of bins?
     TS_ASSERT_EQUALS(test_in->blocksize(), 25);
     TS_ASSERT_EQUALS(el2.dataX().size(), 26);
-    TS_ASSERT_EQUALS(el2.dataY().size(), 25);
-    TS_ASSERT_EQUALS(el2.dataE().size(), 25);
+    TS_ASSERT_EQUALS(el2.dataY()->size(), 25);
+    TS_ASSERT_EQUALS(el2.dataE()->size(), 25);
 
     //# of events per bin was doubled
-    TS_ASSERT_EQUALS( el2.dataY()[0], 2);
-    TS_ASSERT_EQUALS( el2.dataY()[1], 2);
-    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-2], 2); //The last bin
-    TS_ASSERT_EQUALS( el2.dataY()[NUMBINS/2-1], 2); //The last bin
+    TS_ASSERT_EQUALS( (*el2.dataY())[0], 2);
+    TS_ASSERT_EQUALS( (*el2.dataY())[1], 2);
+    TS_ASSERT_EQUALS( (*el2.dataY())[NUMBINS/2-2], 2); //The last bin
+    TS_ASSERT_EQUALS( (*el2.dataY())[NUMBINS/2-1], 2); //The last bin
 
     //Now do it a second time
     rebin.setPropertyValue("InputWorkspace","test_inEvent");
@@ -195,15 +195,15 @@ public:
     //Correct # of bins?
     TS_ASSERT_EQUALS(test_in->blocksize(), NUMBINS-1);
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataY().size(), NUMBINS-1);
-    TS_ASSERT_EQUALS( el.dataE().size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS-1);
     //Good histogram
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
-    TS_ASSERT_EQUALS( el.dataY()[0], 1);
-    TS_ASSERT_EQUALS( el.dataY()[1], 1);
-    TS_ASSERT_EQUALS( el.dataY()[NUMBINS-2], 1); //The last bin
+    TS_ASSERT_EQUALS( (*el.dataY())[0], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMBINS-2], 1); //The last bin
 
     SimpleRebin rebin;
     rebin.initialize();
