@@ -68,9 +68,13 @@ double calcConversion(const double l1,
   double offset;
   for (std::vector<int>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
   {
-    offset = offsets.find(*iter)->second;
-    factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(*iter), offset);
+    std::map<int,double>::const_iterator off_iter = offsets.find(*iter);
+    if( off_iter != offsets.end() )
+    {
+      offset = offsets.find(*iter)->second;
+      factor += calcConversion(l1, beamline, beamline_norm, samplePos,
+                               instrument->getDetector(*iter), offset);
+    }
   }
   return factor * CONSTANT / static_cast<double>(detectors.size());
 }
