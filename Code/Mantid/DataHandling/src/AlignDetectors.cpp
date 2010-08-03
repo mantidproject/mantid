@@ -28,6 +28,32 @@ using DataObjects::EventWorkspace_const_sptr;
 
 const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
+/** Calculate the conversion factor for a single pixel.
+ * @param l1 Primary flight path.
+ */
+double calcConversion(const double l1,
+                      const Geometry::V3D &beamline,
+                      const double beamline_norm,
+                      const Geometry::V3D &samplePos,
+                      const Geometry::IDetector_const_sptr &det,
+                      const double offset)
+{
+  // Get the sample-detector distance for this detector (in metres)
+
+  // The scattering angle for this detector (in radians).
+  Geometry::V3D detPos = det->getPos();
+  // Now detPos will be set with respect to samplePos
+  detPos-=samplePos;
+  // 0.5*cos(2theta)
+  double l2=detPos.norm();
+  double halfcosTheta=detPos.scalar_prod(beamline)/(l2*beamline_norm);
+  // This is sin(theta)
+  double sinTheta=sqrt(0.5-halfcosTheta);
+  const double numerator = (1.0+offset);
+  sinTheta*= (l1+l2);
+  return numerator / sinTheta;
+}
+
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors()
 {}
