@@ -91,10 +91,6 @@ class Instrument(object) :
             'default-incident-monitor-spectrum')[0])
         #this is used by suggest_incident_mntr() below 
         self._incid_monitor_lckd = False
-        #used in transmission calculations
-        self.trans_monitor = int(self.definition.getNumberParameter(
-            'default-transmission-monitor-spectrum')[0])
-        self.incid_mon_4_trans_calc = self._incid_monitor
         
     def suggest_incident_mntr(self, spectrum_number):
         """
@@ -125,6 +121,30 @@ class Instrument(object) :
             @param value: sample value offset
         """
         self.SAMPLE_Z_CORR = float(value)/1000.
+        
+class HFIRSANS(Instrument):
+    """
+        HFIR SANS instrument description
+    """
+    def __init__(self, instrument_id="BIOSANS") :
+        self._NAME = instrument_id
+        super(HFIRSANS, self).__init__()
+        
+        ## Number of detector pixels in X
+        self.nx_pixels = int(self.definition.getNumberParameter("number-of-x-pixels")[0])
+        ## Number of detector pixels in Y
+        self.ny_pixels = int(self.definition.getNumberParameter("number-of-y-pixels")[0])
+        ## Number of counters. This is the number of detector channels (spectra) before the
+        # data channels start
+        self.nMonitors = int(self.definition.getNumberParameter("number-of-monitors")[0])
+        ## Pixel size in mm
+        self.pixel_size_x = self.definition.getNumberParameter("x-pixel-size")[0]
+        self.pixel_size_y = self.definition.getNumberParameter("y-pixel-size")[0]
+        ## Sample-to-detector distance in mm (read from each data file)
+        self.sample_detector_distance = 0
+        ## Detector name
+        self.detector_ID = self.definition.getStringParameter("detector-name")[0]
+        
         
 class ISISInstrument(Instrument) :
     def __init__(self) :
@@ -164,6 +184,11 @@ class ISISInstrument(Instrument) :
         self.FRONT_DET_ROT_CORR = 0.0
         self.REAR_DET_Z_CORR = 0.0 
         self.REAR_DET_X_CORR = 0.0
+
+        #used in transmission calculations
+        self.trans_monitor = int(self.definition.getNumberParameter(
+            'default-transmission-monitor-spectrum')[0])
+        self.incid_mon_4_trans_calc = self._incid_monitor
 
     def name(self):
         return self._NAME

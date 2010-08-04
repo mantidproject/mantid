@@ -4,8 +4,7 @@
     only for SANS instruments. The SANS-specific commands will likely only work 
     with the SANSReducer. 
 """
-#TODO: When the SANSReduction refactor is completed, change this import to SANSReduction
-import HFIRSANSReduction
+import SANSInsts
 from SANSReducer import SANSReducer
 import SANSReductionSteps
 
@@ -43,7 +42,7 @@ def DataPath(path):
     ReductionSingleton().set_data_path(path)
 
 def HFIRSANS():
-    ReductionSingleton().set_instrument(HFIRSANSReduction.InstrumentConfiguration())
+    ReductionSingleton().set_instrument(SANSInsts.HFIRSANS())
 
 def DirectBeamCenter(datafile, beam_radius=3.0):
     ReductionSingleton().set_beam_finder(SANSReductionSteps.DirectBeamCenter(datafile, beam_radius=beam_radius))

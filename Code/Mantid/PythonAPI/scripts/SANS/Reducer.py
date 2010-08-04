@@ -18,15 +18,10 @@
     
 """
 import os
+import SANSInsts
 
 ## Version number
 __version__ = '0.0'
-
-class SANSInstrument(object):
-    """
-        Base class for instrument settings
-    """
-    def __init__(self): raise NotImplemented
     
 class Reducer(object):
     """
@@ -44,7 +39,7 @@ class Reducer(object):
     _reduction_steps = []
         
     def set_instrument(self, configuration):
-        if issubclass(configuration.__class__, SANSInstrument):
+        if issubclass(configuration.__class__, SANSInsts.Instrument):
             self.instrument = configuration
         else:
             raise RuntimeError, "SANSReducer.set_instrument expects an Instrument object, found %s" % configuration.__class__

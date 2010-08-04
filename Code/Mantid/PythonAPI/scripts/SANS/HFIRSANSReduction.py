@@ -4,7 +4,6 @@
     WARNING: this is not meant to be production code... 
 """
 # Mantid imports
-from Reducer import SANSInstrument
 from mantidsimple import *
 
 # Python import
@@ -29,7 +28,7 @@ def _extract_workspace_name(filepath, suffix=''):
 
     return basename+suffix
 
-class InstrumentConfiguration(SANSInstrument):
+class InstrumentConfiguration(object):
     """
         Information tied to the instrument and the set of data files to
         be reduced
