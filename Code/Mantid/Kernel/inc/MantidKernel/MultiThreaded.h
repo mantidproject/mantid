@@ -96,6 +96,15 @@
 
 #define PARALLEL_THREAD_NUMBER omp_get_thread_num()
 
+#define PARALLEL \
+                PRAGMA(omp parallel)
+
+#define PARALLEL_SECTIONS \
+                PRAGMA(omp sections nowait)
+
+#define PARALLEL_SECTION \
+                PRAGMA(omp section)
+
 #else //_OPENMP
 ///Empty definitions - to enable set your complier to enable openMP
 #define PARALLEL_FOR_NO_WSP_CHECK()
@@ -110,6 +119,9 @@
 #define PARALLEL_CRITICAL(name)
 #define PARALLEL_ATOMIC
 #define PARALLEL_THREAD_NUMBER 0
+#define PARALLEL
+#define PARALLEL_SECTIONS
+#define PARALLEL_SECTION
 #endif //_OPENMP
 
 #endif //MANTID_KERNEL_MULTITHREADED_H_
