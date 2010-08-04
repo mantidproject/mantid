@@ -113,6 +113,7 @@ void CalculateTransmissionBeamSpreader::exec()
   MatrixWorkspace_sptr sample_spreader_sum;
   MatrixWorkspace_sptr direct_spreader_sum;
 
+#ifdef _OPENMP
   PRAGMA(omp parallel)
   {
     PRAGMA(omp sections nowait)
@@ -127,6 +128,13 @@ void CalculateTransmissionBeamSpreader::exec()
         direct_spreader_sum = this->sumSpectra(direct_spreaderWS);
     }
   }
+#else
+  sample_scatter_sum = this->sumSpectra(sample_scatterWS);
+  direct_scatter_sum = this->sumSpectra(direct_scatterWS);
+  sample_spreader_sum = this->sumSpectra(sample_spreaderWS);
+  direct_spreader_sum = this->sumSpectra(direct_spreaderWS);
+#endif
+
   // Beam spreader transmission
   MatrixWorkspace_sptr spreader_trans = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   spreader_trans->setYUnit("");
