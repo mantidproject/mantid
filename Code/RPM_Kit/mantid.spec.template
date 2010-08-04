@@ -82,6 +82,7 @@ mkdir -p $RPM_BUILD_ROOT/%{mantidlibdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidbindir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4
 mkdir -p $RPM_BUILD_ROOT/%{mantidpluginsdir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidqtpluginsdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidscriptsdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidimagesdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidinstrumentdir}
