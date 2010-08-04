@@ -148,6 +148,15 @@ namespace Mantid
       double dwavelength = 0;
       from_element<double>(dwavelength, sasEntryElem, "wavelength_spread", fileName);
 
+      // Read in positions
+      sasEntryElem = pRootElem->getChildElement("Motor_Positions");
+      throwException(sasEntryElem, "Motor_Positions", fileName);
+
+      // Read in sample-detector distance in mm
+      double distance = 0;
+      from_element<double>(distance, sasEntryElem, "sample_det_dist", fileName);
+      distance *= 1000.0;
+
       // Read in counters
       sasEntryElem = pRootElem->getChildElement("Counters");
       throwException(sasEntryElem, "Counters", fileName);
@@ -165,6 +174,9 @@ namespace Mantid
       element = sasDataElem->getChildElement("Detector");
       throwException(element, "Detector", fileName);
       std::string data_str = element->innerText();
+
+      // Store source-detector distance
+      declareProperty("SourceDetectorDistance", distance, Kernel::Direction::Output);
 
       // Create the output workspace
 

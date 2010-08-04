@@ -125,6 +125,9 @@ public:
     // Check that we can modify a parameter
     sample_aperture_size->set(15.0);
     TS_ASSERT_EQUALS( sample_aperture_size->value<double>(), 15.0);
+
+    double distance = spice2d.getProperty("SourceDetectorDistance");
+    TS_ASSERT_EQUALS( distance, 6000.0 );
   }
 
 private:
