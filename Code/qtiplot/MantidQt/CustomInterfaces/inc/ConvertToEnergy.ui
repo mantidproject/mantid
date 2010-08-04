@@ -101,7 +101,11 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cbInst" />
+              <widget class="QComboBox" name="cbInst" >
+               <property name="toolTip" >
+                <string>Select instrument experiment(s) were run on.</string>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="lbAnalyser" >
@@ -111,7 +115,11 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cbAnalyser" />
+              <widget class="QComboBox" name="cbAnalyser" >
+               <property name="toolTip" >
+                <string>Select Analyser bank to use.</string>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="lbReflection" >
@@ -121,7 +129,11 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cbReflection" />
+              <widget class="QComboBox" name="cbReflection" >
+               <property name="toolTip" >
+                <string>Select Reflection used for experiment(s).</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -257,10 +269,18 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_5" >
                   <item>
-                   <widget class="QLineEdit" name="leRunFiles" />
+                   <widget class="QLineEdit" name="leRunFiles" >
+                    <property name="toolTip" >
+                     <string>Path to raw data files, seperated by a semicolon.</string>
+                    </property>
+                   </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="leCalibrationFile" />
+                   <widget class="QLineEdit" name="leCalibrationFile" >
+                    <property name="toolTip" >
+                     <string>Path to calibration file.</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </item>
@@ -268,6 +288,9 @@
                  <layout class="QVBoxLayout" name="verticalLayout_7" >
                   <item>
                    <widget class="QPushButton" name="pbRunFilesBrowse" >
+                    <property name="toolTip" >
+                     <string>Browse for Run Files.</string>
+                    </property>
                     <property name="text" >
                      <string>Browse</string>
                     </property>
@@ -275,6 +298,9 @@
                   </item>
                   <item>
                    <widget class="QPushButton" name="pbCalibrationFilesBrowse" >
+                    <property name="toolTip" >
+                     <string>Browse for Calibration file.</string>
+                    </property>
                     <property name="text" >
                      <string>Browse</string>
                     </property>
@@ -286,6 +312,9 @@
                  <layout class="QVBoxLayout" name="verticalLayout_8" >
                   <item>
                    <widget class="QCheckBox" name="ckSumFiles" >
+                    <property name="toolTip" >
+                     <string>Sum multiple files together.</string>
+                    </property>
                     <property name="text" >
                      <string>Sum Files</string>
                     </property>
@@ -293,6 +322,9 @@
                   </item>
                   <item>
                    <widget class="QCheckBox" name="ckUseCalib" >
+                    <property name="toolTip" >
+                     <string>Use calibration file to adjust for detector efficiency.</string>
+                    </property>
                     <property name="text" >
                      <string>Use Calib File</string>
                     </property>
@@ -328,6 +360,9 @@
                 </item>
                 <item>
                  <widget class="QComboBox" name="cbMappingOptions" >
+                  <property name="toolTip" >
+                   <string>Select type of detector grouping to apply.</string>
+                  </property>
                   <item>
                    <property name="text" >
                     <string>All</string>
@@ -361,10 +396,17 @@
                   <widget class="QWidget" name="page_11" >
                    <layout class="QHBoxLayout" name="horizontalLayout_5" >
                     <item>
-                     <widget class="QLineEdit" name="leMappingFile" />
+                     <widget class="QLineEdit" name="leMappingFile" >
+                      <property name="toolTip" >
+                       <string>Path to custom mapping file.</string>
+                      </property>
+                     </widget>
                     </item>
                     <item>
                      <widget class="QPushButton" name="pbMappingFileBrowse" >
+                      <property name="toolTip" >
+                       <string>Browse for custom mapping file.</string>
+                      </property>
                       <property name="text" >
                        <string>Browse</string>
                       </property>
@@ -385,7 +427,11 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLineEdit" name="leNoGroups" />
+                     <widget class="QLineEdit" name="leNoGroups" >
+                      <property name="toolTip" >
+                       <string>Desired number of groups.</string>
+                      </property>
+                     </widget>
                     </item>
                     <item>
                      <spacer name="horizontalSpacer_32" >
@@ -411,6 +457,9 @@
                <layout class="QHBoxLayout" name="horizontalLayout_11" >
                 <item>
                  <widget class="QPushButton" name="pbBack_2" >
+                  <property name="toolTip" >
+                   <string>Remove a range of background value.</string>
+                  </property>
                   <property name="text" >
                    <string>Background Removal</string>
                   </property>
@@ -431,6 +480,9 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="pbPlotRaw" >
+                  <property name="toolTip" >
+                   <string>Plot raw time values.</string>
+                  </property>
                   <property name="text" >
                    <string>Plot Time</string>
                   </property>
@@ -606,6 +658,9 @@
                   <height>300</height>
                  </size>
                 </property>
+                <property name="toolTip" >
+                 <string>Temperature value to use in Detailed Balance.</string>
+                </property>
                 <property name="text" >
                  <string>300</string>
                 </property>
@@ -779,7 +834,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leEfixed" />
+               <widget class="QLineEdit" name="leEfixed" >
+                <property name="toolTip" >
+                 <string>Value of Efixed for conversion from time to energy.</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QLabel" name="lbSpectraMin" >
@@ -792,7 +851,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leSpectraMin" />
+               <widget class="QLineEdit" name="leSpectraMin" >
+                <property name="toolTip" >
+                 <string>Minimum spectra number for data.</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QLabel" name="lbSpectraMax" >
@@ -805,7 +868,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leSpectraMax" />
+               <widget class="QLineEdit" name="leSpectraMax" >
+                <property name="toolTip" >
+                 <string>Maximum spectra number for data.</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -1063,6 +1130,9 @@
                <layout class="QHBoxLayout" name="horizontalLayout_12" >
                 <item>
                  <widget class="QCheckBox" name="rebin_ckDNR" >
+                  <property name="toolTip" >
+                   <string>Do not perform rebinning step on this data.</string>
+                  </property>
                   <property name="text" >
                    <string>Do Not Rebin</string>
                   </property>
@@ -1096,6 +1166,9 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="rebin_pbRebin" >
+                  <property name="toolTip" >
+                   <string>Run program up to point where data would be saved, but don't save it.</string>
+                  </property>
                   <property name="text" >
                    <string>Rebin</string>
                   </property>
@@ -1123,6 +1196,13 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
+                  <property name="toolTip" >
+                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">x&lt;span style=" vertical-align:sub;">1 &lt;/span>value for rebinning (start point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1149,7 +1229,15 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leEWidth" />
+                 <widget class="QLineEdit" name="rebin_leEWidth" >
+                  <property name="toolTip" >
+                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Δx&lt;span style=" vertical-align:sub;">1&lt;/span> for rebinning (width of bins)&lt;/p>&lt;/body>&lt;/html></string>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_14" >
@@ -1175,7 +1263,15 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leEHigh" />
+                 <widget class="QLineEdit" name="rebin_leEHigh" >
+                  <property name="toolTip" >
+                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -1203,6 +1299,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="save_ckSPE" >
+              <property name="toolTip" >
+               <string>Save file in SPE format.</string>
+              </property>
               <property name="text" >
                <string>SPE</string>
               </property>
@@ -1213,6 +1312,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="save_ckNexus" >
+              <property name="toolTip" >
+               <string>Save file in Nexus format.</string>
+              </property>
               <property name="text" >
                <string>Nexus</string>
               </property>
@@ -1310,7 +1412,11 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leRunNo" />
+                 <widget class="QLineEdit" name="cal_leRunNo" >
+                  <property name="toolTip" >
+                   <string>Run number of White Beam Vanadium run.</string>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_23" >
@@ -1333,6 +1439,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_21" >
               <item>
                <widget class="QPushButton" name="cal_pbPlot" >
+                <property name="toolTip" >
+                 <string>Plot first detector spectra</string>
+                </property>
                 <property name="text" >
                  <string>Plot Raw</string>
                 </property>
@@ -1535,7 +1644,11 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_lePeakMin" />
+                 <widget class="QLineEdit" name="cal_lePeakMin" >
+                  <property name="toolTip" >
+                   <string>Start of range of Peak in Time of Flight</string>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_16" >
@@ -1561,7 +1674,11 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_lePeakMax" />
+                 <widget class="QLineEdit" name="cal_lePeakMax" >
+                  <property name="toolTip" >
+                   <string>End of range of peak in Time of Flight</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -1591,7 +1708,11 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leBackMin" />
+                 <widget class="QLineEdit" name="cal_leBackMin" >
+                  <property name="toolTip" >
+                   <string>Start of range of background in time of flight.</string>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_17" >
@@ -1617,7 +1738,11 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leBackMax" />
+                 <widget class="QLineEdit" name="cal_leBackMax" >
+                  <property name="toolTip" >
+                   <string>End of range of background in time of flight.</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -1638,6 +1763,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_29" >
             <item>
              <widget class="QCheckBox" name="cal_ckRES" >
+              <property name="toolTip" >
+               <string>Create RES file</string>
+              </property>
               <property name="text" >
                <string>Create RES File</string>
               </property>
@@ -1692,12 +1820,32 @@
                  </widget>
                 </item>
                 <item>
+                 <spacer name="horizontalSpacer_33" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
                  <widget class="QLineEdit" name="cal_leELow" >
                   <property name="maximumSize" >
                    <size>
                     <width>75</width>
                     <height>16777215</height>
                    </size>
+                  </property>
+                  <property name="toolTip" >
+                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">x&lt;span style=" vertical-align:sub;">1 &lt;/span>value for rebinning (start point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
                   </property>
                  </widget>
                 </item>
@@ -1755,6 +1903,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="toolTip" >
+                 <string>Min Spectra range for creation of RES file</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -1771,6 +1922,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="toolTip" >
+                 <string>Start of background range to subtract from RES in Energy</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -1780,6 +1934,13 @@
                   <width>75</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="toolTip" >
+                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Δx&lt;span style=" vertical-align:sub;">1&lt;/span> for rebinning (width of bins)&lt;/p>&lt;/body>&lt;/html></string>
                 </property>
                </widget>
               </item>
@@ -1835,6 +1996,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="toolTip" >
+                 <string>Max spectra range for creation of RES file</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -1845,6 +2009,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="toolTip" >
+                 <string>End of background range to subtract from RES in energy</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -1854,6 +2021,13 @@
                   <width>75</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="toolTip" >
+                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
                 </property>
                </widget>
               </item>
@@ -1887,6 +2061,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="cal_ckPlotResult" >
+              <property name="toolTip" >
+               <string>Plot resulting calibration file when created.</string>
+              </property>
               <property name="text" >
                <string>Plot Result</string>
               </property>
@@ -1894,6 +2071,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="cal_pbCreate" >
+              <property name="toolTip" >
+               <string>Create calibration file and RES file is applicable</string>
+              </property>
               <property name="text" >
                <string>Create Calibration</string>
               </property>
@@ -2318,6 +2498,9 @@
          <height>25</height>
         </size>
        </property>
+       <property name="toolTip" >
+        <string>Open interface help page in your web browser.</string>
+       </property>
        <property name="text" >
         <string>?</string>
        </property>
@@ -2343,6 +2526,9 @@
          <width>91</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="toolTip" >
+        <string>Run conversion to energy process.</string>
        </property>
        <property name="text" >
         <string>Run</string>

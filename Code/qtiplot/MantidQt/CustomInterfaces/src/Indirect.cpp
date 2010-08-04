@@ -123,7 +123,7 @@ void Indirect::initLocalPython()
 void Indirect::helpClicked()
 {
     QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-        "ConvertToEnergy#Inelastic"));
+        "ConvertToEnergy#Indirect_Interface"));
 }
 
 /**
@@ -149,76 +149,74 @@ void Indirect::runClicked(bool tryToSave)
     QString pyInput = "from mantidsimple import *\n"
         "import IndirectEnergyConversion as ind\n";
 
-    if ( isDirty() )
+    pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n";
+    pyInput += "last = " +m_uiForm.leSpectraMax->text()+ "\n";
+    pyInput += "ana = '"+m_uiForm.cbAnalyser->currentText()+"'\n";
+    pyInput += "ref = '"+m_uiForm.cbReflection->currentText()+"'\n";
+
+
+    QString runFiles = m_uiForm.leRunFiles->text();
+    runFiles.replace(";", "', r'");
+
+    pyInput += "rawfiles = [r'"+runFiles+"']\n"
+        "Sum=";
+    if ( m_uiForm.ckSumFiles->isChecked() )
     {
-        QString runFiles = m_uiForm.leRunFiles->text();
-        runFiles.replace(";", "', r'");
-
-        pyInput += "rawfiles = [r'"+runFiles+"']\n"
-            "Sum=";
-        if ( m_uiForm.ckSumFiles->isChecked() )
-        {
-            pyInput += "True\n";
-        }
-        else
-        {
-            pyInput += "False\n";
-        }
-
-        pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n";
-        pyInput += "last = " +m_uiForm.leSpectraMax->text()+ "\n";
-        pyInput += "ana = '"+m_uiForm.cbAnalyser->currentText()+"'\n";
-        pyInput += "ref = '"+m_uiForm.cbReflection->currentText()+"'\n";
-
-        if ( m_bgRemoval )
-        {
-            QPair<double,double> bgRange = m_backgroundDialog->getRange();
-            QString startTOF, endTOF;
-            startTOF.setNum(bgRange.first, 'e');
-            endTOF.setNum(bgRange.second, 'e');
-            pyInput += "bgRemove = [%1, %2]\n";
-            pyInput = pyInput.arg(startTOF);
-            pyInput = pyInput.arg(endTOF);
-        }
-        else
-        {
-            pyInput += "bgRemove = [0, 0]\n";
-        }
-
-        if ( m_uiForm.ckUseCalib->isChecked() )
-        {
-            pyInput += "calib = r'"+m_uiForm.leCalibrationFile->text()+"'\n";
-        }
-        else
-        {
-            pyInput += "calib = ''\n";
-        }
-
-        pyInput += "efixed = "+m_uiForm.leEfixed->text()+"\n";
+        pyInput += "True\n";
+    }
+    else
+    {
+        pyInput += "False\n";
     }
 
-    if ( isDirty() || isDirtyRebin() )
+    if ( m_bgRemoval )
+    {
+        QPair<double,double> bgRange = m_backgroundDialog->getRange();
+        QString startTOF, endTOF;
+        startTOF.setNum(bgRange.first, 'e');
+        endTOF.setNum(bgRange.second, 'e');
+        pyInput += "bgRemove = [%1, %2]\n";
+        pyInput = pyInput.arg(startTOF);
+        pyInput = pyInput.arg(endTOF);
+    }
+    else
+    {
+        pyInput += "bgRemove = [0, 0]\n";
+    }
+
+    if ( m_uiForm.ckUseCalib->isChecked() )
+    {
+        pyInput += "calib = r'"+m_uiForm.leCalibrationFile->text()+"'\n";
+    }
+    else
+    {
+        pyInput += "calib = ''\n";
+    }
+
+    pyInput += "efixed = "+m_uiForm.leEfixed->text()+"\n";
+
+
+
+    if ( ! m_uiForm.rebin_ckDNR->isChecked() )
     { 
-        if ( ! m_uiForm.rebin_ckDNR->isChecked() )
-        { 
-            QString rebinParam = m_uiForm.rebin_leELow->text() + ","
-                + m_uiForm.rebin_leEWidth->text() + ","
-                + m_uiForm.rebin_leEHigh->text();
-            pyInput += "rebinParam = '"+rebinParam+"'\n";
-        }
-        else
-        {
-            pyInput += "rebinParam = ''\n";
-        }
-
-        if ( m_uiForm.ckDetailedBalance->isChecked() )
-            pyInput += "tempK = "+m_uiForm.leDetailedBalance->text()+"\n";
-        else
-            pyInput += "tempK = -1\n";
-
-        pyInput += "mapfile = r'"+groupFile+"'\n";
-
+        QString rebinParam = m_uiForm.rebin_leELow->text() + ","
+            + m_uiForm.rebin_leEWidth->text() + ","
+            + m_uiForm.rebin_leEHigh->text();
+        pyInput += "rebinParam = '"+rebinParam+"'\n";
     }
+    else
+    {
+        pyInput += "rebinParam = ''\n";
+    }
+
+    if ( m_uiForm.ckDetailedBalance->isChecked() )
+        pyInput += "tempK = "+m_uiForm.leDetailedBalance->text()+"\n";
+    else
+        pyInput += "tempK = -1\n";
+
+    pyInput += "mapfile = r'"+groupFile+"'\n";
+
+
 
     if (tryToSave)
     {
@@ -254,8 +252,21 @@ void Indirect::runClicked(bool tryToSave)
         pyInput += "ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
             "fileFormats, directory, CleanUp = clean)\n";
     }
+    else
+    {
+        pyInput +=
+            "import re\n"
+            "wslist = mantid.getWorkspaceNames()\n"
+            "save_ws = re.compile(r'_'+ana+ref+'$')\n"
+            "ws_list = []\n"
+            "runNos = []\n"
+            "for workspace in wslist:\n"
+            "   if save_ws.search(workspace):\n"
+            "      ws_list.append(workspace)\n"
+            "      runNos.append(mantid.getMatrixWorkspace(workspace).getRun().getLogData(\"run_number\").value())\n"
+            "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix, directory)\n";
+    }
 
-    showInformationBox(pyInput);
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
     if ( pyOutput != "" )
@@ -484,6 +495,9 @@ void Indirect::clearReflectionInfo()
     m_uiForm.cal_lePeakMax->clear();
     m_uiForm.cal_leBackMin->clear();
     m_uiForm.cal_leBackMax->clear();
+
+    m_uiForm.cal_leResSpecMin->clear();
+    m_uiForm.cal_leResSpecMax->clear();
 
     isDirty(true);
 }
@@ -1056,6 +1070,9 @@ void Indirect::reflectionSelected(int index)
     m_uiForm.cal_lePeakMax->setText(values[4]);
     m_uiForm.cal_leBackMin->setText(values[5]);
     m_uiForm.cal_leBackMax->setText(values[6]);
+
+    m_uiForm.cal_leResSpecMin->setText(values[0]);
+    m_uiForm.cal_leResSpecMax->setText(values[1]);
 }
 
 /**

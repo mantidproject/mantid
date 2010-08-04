@@ -180,6 +180,8 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', ref
 		cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
 		if ( rebinParam != ''):
 			rebin = rebinData(rebinParam, inWS_n=cte)
+			if CleanUp:
+				mantid.deleteWorkspace(cte)
 		else:
 			if CleanUp:
 				RenameWorkspace(cte, 'Energy')
@@ -211,6 +213,8 @@ def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, save
 		runNos.append(runNo)
 		if ( rebinParam != ''):
 			rebin = rebinData(rebinParam, inWS_n=cte)
+			if CleanUp:
+				mantid.deleteWorkspace(cte)
 		else:
 			if CleanUp:
 				RenameWorkspace(cte, 'Energy')
@@ -244,6 +248,7 @@ def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specM
 	try:
 		LoadRaw(rawfile, 'Raw', SpectrumMin = specMin, SpectrumMax = specMax)
 	except:
+		print "Could not load .raw file."
 		sys.exit('Calib: Could not load raw file.')
 	tmp = mantid.getMatrixWorkspace('Raw')
 	nhist = tmp.getNumberHistograms()
