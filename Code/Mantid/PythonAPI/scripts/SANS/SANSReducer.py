@@ -198,11 +198,17 @@ class SANSReducer(Reducer):
         # Perform azimuthal averaging
         if self._azimuthal_averager is not None:
             self.append_step(self._azimuthal_averager)
+            
+        # Save output to file
     
     def reduce(self):
         """
             Go through the list of reduction steps
         """
+        # Check that an instrument was specified
+        if self.instrument is None:
+            raise RuntimeError, "SANSReducer: trying to run a reduction with an instrument specified"
+
         # Go through the list of steps that are common to all data files
         self.pre_process()
         

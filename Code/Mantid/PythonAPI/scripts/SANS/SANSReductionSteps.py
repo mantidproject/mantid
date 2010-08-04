@@ -22,7 +22,7 @@ class BaseBeamFinder(ReductionStep):
     def get_beam_center(self):
         return [self._beam_center_x, self._beam_center_y]
     
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, workspace=None):
         pass
         
     def _find_beam(self, direct_beam, reducer, workspace=None):
@@ -326,7 +326,9 @@ class LoadRun(ReductionStep):
     def execute(self, reducer, workspace):       
         # Load data
         filepath = reducer._full_file_path(self._data_file)
-        LoadSpice2D(filepath, workspace)
+        loader = LoadSpice2D(filepath, workspace)
+        reducer.instrument.sample_detector_distance = float(loader.getPropertyValue("SampleDetectorDistance"))
+        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         
         # Move detector array to correct position
         MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 

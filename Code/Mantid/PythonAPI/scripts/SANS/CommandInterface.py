@@ -117,5 +117,3 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
 def Mask(): raise NotImplemented
 
 def Background(): raise NotImplemented
-
-def SaveCSV(): raise NotImplemented

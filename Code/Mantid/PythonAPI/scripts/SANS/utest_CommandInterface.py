@@ -101,7 +101,8 @@ class TestCommands(unittest.TestCase):
         HFIRSANS()
         self.assertEqual(len(ReductionSingleton()._data_files), 0)
         AppendDataFile("BioSANS_test_data.xml")
-        self.assertEqual(len(ReductionSingleton()._data_files), 1)      
+        self.assertEqual(len(ReductionSingleton()._data_files), 1)  
+        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 6000.0)    
         
     def test_norm_options(self):
         self.assertEqual(ReductionSingleton()._normalizer._normalization_spectrum, 1)
