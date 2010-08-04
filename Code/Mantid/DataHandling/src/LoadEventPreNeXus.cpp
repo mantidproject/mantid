@@ -623,12 +623,11 @@ size_t LoadEventPreNeXus::getFrameIndex(const std::size_t event_index, const std
 
   // search for the next frame that increases the event index
   size_t next_frame_index = last_frame_index + 1;
-  for ( ; next_frame_index < this->num_pulses; next_frame_index++)
+  for ( ; next_frame_index < this->num_pulses - 1; next_frame_index++)
   {
     if (this->event_indices[next_frame_index] > this->event_indices[last_frame_index])
       break;
   }
-
   // determine the frame index
   if (this->event_indices[next_frame_index] <= event_index)
     return next_frame_index;
