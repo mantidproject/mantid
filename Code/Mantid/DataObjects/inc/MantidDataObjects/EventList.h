@@ -161,7 +161,11 @@ public:
 
   void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
 
-  void convertTof(const double factor);
+  void convertTof(const double factor, const double offset=0.);
+
+  void scaleTof(const double factor);
+
+  void addTof(const double offset);
 
 private:
   ///List of events.

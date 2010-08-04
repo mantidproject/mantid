@@ -351,7 +351,7 @@ public:
   }
 
 
-  void test_convert_to_dspacing()
+  void test_convertTof()
   {
     this->fake_uniform_data();
     size_t old_num = this->el.getEvents().size();

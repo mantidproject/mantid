@@ -444,27 +444,61 @@ namespace DataObjects
 
   // --------------------------------------------------------------------------
   /**
+   * Convert the time of flight by tof'=tof*factor+offset
+   */
+  void EventList::convertTof(const double factor, const double offset)
+  {
+    if (this->events.empty())
+      return;
+    if (factor == 1.)
+    {
+      this->addTof(offset);
+      return;
+    }
+    if (offset == 0.)
+    {
+      this->scaleTof(factor);
+      return;
+    }
+
+    // iterate through all events
+    std::vector<TofEvent>::iterator iter;
+    for (iter = this->events.begin(); iter != this->events.end(); iter++)
+      iter->time_of_flight = iter->time_of_flight * factor + offset;
+  }
+
+  /**
    * Convert the units in the TofEvent's contained to d-spacing.
    * WARNING: There is no check to see if you did this before! Don't be dumb
    *          and do it twice!
    * @param factor: conversion factor (multiply TOF by this to get d-spacing)
    */
-  void EventList::convertTof(const double factor)
+  void EventList::scaleTof(const double factor)
   {
 
     //Do we even have any events to do?
-    if (!this->events.empty())
+    if (this->events.empty())
+      return;
+
+    //Iterate through all events
+    std::vector<TofEvent>::iterator itev;
+    for (itev= this->events.begin(); itev != this->events.end(); itev++)
     {
-      //Iterate through all events (sorted by tof)
-      std::vector<TofEvent>::iterator itev;
-      for (itev= this->events.begin(); itev != this->events.end(); itev++)
-      {
-        itev->time_of_flight *= factor;
-      }
-      //The sorting of the list will be unchanged, since it is just a multiplicative factor.
+      itev->time_of_flight *= factor;
     }
+    //The sorting of the list will be unchanged, since it is just a multiplicative factor.
   }
 
+  void EventList::addTof(const double offset)
+  {
+    if (this->events.empty())
+      return;
+
+    // iterate through all events
+    std::vector<TofEvent>::iterator iter;
+    for (iter = this->events.begin(); iter != this->events.end(); iter++)
+      iter->time_of_flight += offset;
+  }
 
 } /// namespace DataObjects
 } /// namespace Mantid
