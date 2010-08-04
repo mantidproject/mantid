@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include <cmath>
 
 namespace Mantid
 {
@@ -109,11 +108,25 @@ void CalculateTransmissionBeamSpreader::exec()
   MatrixWorkspace_sptr direct_spreader_mon = this->extractSpectrum(direct_spreaderWS,indices[0]);
 
   // Sum the whole detector for each of the four data sets
-  MatrixWorkspace_sptr sample_scatter_sum = this->sumSpectra(sample_scatterWS);
-  MatrixWorkspace_sptr direct_scatter_sum = this->sumSpectra(direct_scatterWS);
-  MatrixWorkspace_sptr sample_spreader_sum = this->sumSpectra(sample_spreaderWS);
-  MatrixWorkspace_sptr direct_spreader_sum = this->sumSpectra(direct_spreaderWS);
+  MatrixWorkspace_sptr sample_scatter_sum;
+  MatrixWorkspace_sptr direct_scatter_sum;
+  MatrixWorkspace_sptr sample_spreader_sum;
+  MatrixWorkspace_sptr direct_spreader_sum;
 
+  PRAGMA(omp parallel)
+  {
+    PRAGMA(omp sections nowait)
+    {
+      PRAGMA(omp section)
+        sample_scatter_sum = this->sumSpectra(sample_scatterWS);
+      PRAGMA(omp section)
+        direct_scatter_sum = this->sumSpectra(direct_scatterWS);
+      PRAGMA(omp section)
+        sample_spreader_sum = this->sumSpectra(sample_spreaderWS);
+      PRAGMA(omp section)
+        direct_spreader_sum = this->sumSpectra(direct_spreaderWS);
+    }
+  }
   // Beam spreader transmission
   MatrixWorkspace_sptr spreader_trans = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   spreader_trans->setYUnit("");
