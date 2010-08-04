@@ -565,7 +565,8 @@ void Plot::removeCurve(int index)
 
 	c->detach();
 	QwtPlotItem* p = d_curves.take (index);
-	--curve_key;
+  // RNT: Making curve_key unique prevents clashes elsewhere
+	//--curve_key;
 	delete p;	
 }
 

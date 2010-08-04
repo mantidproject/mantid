@@ -3244,7 +3244,7 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 	c_keys.resize(n_curves);
 	c_keys[n_curves - 1] = d_plot->insertCurve(c);
 
-	c->setPen(QPen(Qt::black, widthLine));
+  c->setPen(QPen(Qt::black, widthLine));
 
 	if (style == HorizontalBars)
 		c->setData(Y.data(), X.data(), size);
@@ -3286,6 +3286,7 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth)
 	c_type[n_curves - 1] = User;	
 	c_keys.resize(n_curves);
 	c_keys[n_curves - 1] = d_plot->insertCurve(c);
+
   int colorIndex , symbolIndex;
   guessUniqueCurveLayout(colorIndex, symbolIndex);
   if (lineWidth < 0) lineWidth = widthLine;
@@ -3620,11 +3621,11 @@ void Graph::addLegendItem()
     text.append("\\l("+QString::number(n_curves)+")");//+"%("+QString::number(n_curves)+")");
 
     // RJT (23/09/09): Insert actual text directly into legend rather than a 'code' for later parsing
-    PlotCurve *c = (PlotCurve *)d_plot->curve(n_curves);
+    PlotCurve *c = (PlotCurve *)d_plot->curve(c_keys[n_curves-1]);
     if (c)
       text.append(c->title().text());
     else
-      text.append("%("+QString::number(n_curves)+")");
+      text.append("%("+QString::number(c_keys[n_curves-1])+")");
 
     d_legend->setText(text);
     d_legend->repaint();
