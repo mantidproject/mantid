@@ -175,8 +175,8 @@ namespace Mantid
       throwException(element, "Detector", fileName);
       std::string data_str = element->innerText();
 
-      // Store source-detector distance
-      declareProperty("SourceDetectorDistance", distance, Kernel::Direction::Output);
+      // Store sample-detector distance
+      declareProperty("SampleDetectorDistance", distance, Kernel::Direction::Output);
 
       // Create the output workspace
 
