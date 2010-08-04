@@ -90,6 +90,7 @@ protected slots:
 private:
         void setRenderingOptions();
         void setLightingModel(int);
+  void drawAxes();
 	void drawDisplayScene();
 	void drawPickingScene();
 	void switchToPickingMode();

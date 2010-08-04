@@ -143,6 +143,38 @@ void GL3DWidget::setLightingModel(int state)
   update();
 }
 
+/** Draw 3D axes centered at the origin.
+ *
+ */
+void GL3DWidget::drawAxes()
+{
+  glPointSize(3.0);
+  glLineWidth(3.0);
+
+  double axis_length = 100.0;
+  //To make sure the lines are colored
+  glEnable(GL_COLOR_MATERIAL);
+  glDisable(GL_TEXTURE_2D);
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+  glColor3f(1.0, 0., 0.);
+  glBegin(GL_LINES);
+  glVertex3d(0.0,0.0,0.0);
+  glVertex3d(axis_length, 0.0,0.0);
+  glEnd();
+
+  glColor3f(0., 1.0, 0.);
+  glBegin(GL_LINES);
+  glVertex3d(0.0,0.0,0.0);
+  glVertex3d(0.0, axis_length, 0.0);
+  glEnd();
+
+  glColor3f(0., 0., 1.);
+  glBegin(GL_LINES);
+  glVertex3d(0.0,0.0,0.0);
+  glVertex3d(0.0, 0.0, axis_length);
+  glEnd();
+}
 
 /**
  * This method draws the scene onto the graphics context
@@ -161,17 +193,24 @@ void GL3DWidget::drawDisplayScene()
   {
     glDisable(GL_LIGHTING);
     scene->draw();
-    //scene->drawBoundingBox();
+    this->drawAxes();
   }
   else
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     scene->draw();
+    //This draws a point at the origin, I guess
     glPointSize(3.0);
     glBegin(GL_POINTS);
     glVertex3d(0.0,0.0,0.0);
     glEnd();
-      QApplication::restoreOverrideCursor();
+    //Also some axes
+    this->drawAxes();
+
+
+    QApplication::restoreOverrideCursor();
+
+
   }
   glPopMatrix();
 }
