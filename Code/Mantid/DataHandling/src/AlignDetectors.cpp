@@ -76,9 +76,13 @@ double calcConversion(const double l1,
     if( off_iter != offsets.end() )
     {
       offset = offsets.find(*iter)->second;
-      factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                               instrument->getDetector(*iter), offset);
     }
+    else
+    {
+      offset = 0.;
+    }
+    factor += calcConversion(l1, beamline, beamline_norm, samplePos,
+                             instrument->getDetector(*iter), offset);
   }
   return factor * CONSTANT / static_cast<double>(detectors.size());
 }
