@@ -567,12 +567,13 @@ bool SANSRunWindow::loadUserFile()
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction(
-    "printParameter('INSTRUMENT.get_scattering_mon()'),"));
-  m_uiForm.trans_monitor->setText(runReduceScriptFunction("printParameter('TRANS_INCID_MON'),"));
+    "printParameter('INSTRUMENT.get_incident_mntr()'),"));
+  m_uiForm.trans_monitor->setText(runReduceScriptFunction(
+    "printParameter('INSTRUMENT.incid_mon_4_trans_calc'),"));
   m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
-    "printParameter('INSTRUMENT.is_scattering_mon_interp'),") == "True");
+    "printParameter('INSTRUMENT.is_interpolating_norm'),") == "True");
   m_uiForm.trans_interp->setChecked(
-    runReduceScriptFunction("printParameter('TRANS_INTERPOLATE'),") == "True");
+    runReduceScriptFunction("printParameter('INSTRUMENT.use_interpol_trans_calc'),") == "True");
 
   //Direct efficiency correction
   m_uiForm.direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE_R'),"));
@@ -1640,13 +1641,11 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   //Sample offset
   exec_reduce += "SetSampleOffset(" + m_uiForm.smpl_offset->text() + ")\n";
   //Monitor spectrum
-  exec_reduce += "SetMonitorSpectrum(" + m_uiForm.monitor_spec->text() + ")\n";
-  if(m_uiForm.monitor_interp->isChecked())
-  {
-    exec_reduce += "INSTRUMENT.interp_scattering_mon()\n";
-  }
+  exec_reduce += "SetMonitorSpectrum(" + m_uiForm.monitor_spec->text() + ",";
+  exec_reduce += m_uiForm.monitor_interp->isChecked() ? "True" : "False";
+  exec_reduce += ")\n";
   //the monitor to normalise the tranmission spectrum against
-  exec_reduce += "SetTransSpectrum(" + m_uiForm.trans_monitor->text() + ", ";
+  exec_reduce += "SetTransSpectrum(" + m_uiForm.trans_monitor->text() + ",";
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
   exec_reduce += ")\n";
   //Extra mask information

@@ -12,10 +12,11 @@ def GetInstrumentDetails(instrum):
         @return number of pixels ac, first spectrum in the current detector, its last spectrum
 	"""
     det = instrum.cur_detector()
-    #LOQ HAB is not working yet for some reason
-    if instrum.name() == 'LOQ':
-        if instrum.cur_detector().name() == 'HAB':
-            return det.n_columns, det.first_spec_num, 17792
+    #LOQ HAB is not a square detector and so has no width
+    #for backwards compatibility we have to return a width
+    if instrum.name() == 'LOQ' and instrum.cur_detector().name() == 'HAB':
+        if det.n_columns is None :
+            return 128, det.first_spec_num, det.last_spec_num
 
     return det.n_columns, det.first_spec_num, det.last_spec_num
 

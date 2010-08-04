@@ -130,11 +130,6 @@ TRANS_WAV1 = None
 TRANS_WAV2 = None
 TRANS_WAV1_FULL = None
 TRANS_WAV2_FULL = None
-# Mon/Det for SANS2D
-TRANS_INCID_MON = 2
-TRANS_TRANS_MON = 3
-# this is if to use InterpolatingRebin on the monitor spectrum used to normalise the transmission
-TRANS_INTERPOLATE = False
 
 ###################################################################################################################
 #
@@ -754,13 +749,6 @@ def _restore_defaults():
     
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
-    
-    global TRANS_INCID_MON, TRANS_TRANS_MON, TRANS_INTERPOLATE
-    
-    TRANS_INCID_MON = 2
-    TRANS_TRANS_MON = 3
-    TRANS_INTERPOLATE = False
-
 ####################################
 # Add a mask to the correct string
 ###################################
@@ -793,15 +781,15 @@ def Mask(details):
                 bin_range = type[1:].lstrip()
             TIMEMASKSTRING += ';' + bin_range
         elif len(detname) == 2:
-            type = detname[0]
-            if SANSInsts.all['LOQ'].isDetectorName(type) or SANSInsts.all['SANS2D'].isDetectorName(type) :
+            det_type = detname[0]
+            if INSTRUMENT.isDetectorName(det_type) :
                 spectra = detname[1]
-                if SANSInsts.all['LOQ'].isHighAngleDetector(type) or SANSInsts.all['SANS2D'].isHighAngleDetector(type) :
+                if INSTRUMENT.isHighAngleDetector(type) :
                     SPECMASKSTRING_F += ',' + spectra
                 else:
                     SPECMASKSTRING_R += ',' + spectra
             else:
-                _issueWarning('Unrecognized detector on mask line "' + details + '". Skipping line.')
+                _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + INSTRUMENT.name() + '. Skipping line.')
         else:
             _issueWarning('Unrecognized masking option "' + details + '"')
     elif len(parts) == 3:
@@ -815,13 +803,13 @@ def Mask(details):
             if len(parts) == 3:
                 detname = parts[0].rstrip()
                 bin_range = parts[1].rstrip() + ' ' + parts[2].lstrip() 
-                if SANSInsts.all['LOQ'].detectorExists(detname) or SANSInsts.all['SANS2D'].detectorExists(detname) :
-                    if detname.upper() == 'FRONT' or detname.upper() == 'HAB':
+                if INSTRUMENT.detectorExists(detname) :
+                    if INSTRUMENT.isHighAngleDetector(detname) :
                         TIMEMASKSTRING_F += ';' + bin_range
                     else:
                         TIMEMASKSTRING_R += ';' + bin_range
                 else:
-                    _issueWarning('Unrecognized detector on mask line "' + details + '". Skipping line.')
+                    _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + INSTRUMENT.name() + '. Skipping line.')
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
     else:
@@ -999,14 +987,10 @@ def _readMONValues(line):
         details = details[0:interPlace]
 
     if details.upper().startswith('LENGTH'):
-        SuggestMonitorSpectrum(int(details.split()[1]))
-        if interpolate :
-            INSTRUMENT.suggest_interp_scattering_mon()
+        SuggestMonitorSpectrum(int(details.split()[1]), interpolate)
     
     elif details.upper().startswith('SPECTRUM'):
-        SetMonitorSpectrum(int(details.split('=')[1]))
-        if interpolate :
-            INSTRUMENT.interp_scattering_mon()
+        SetMonitorSpectrum(int(details.split('=')[1]), interpolate)
     
     elif details.upper().startswith('TRANS'):
         parts = details.split('=')
@@ -1074,19 +1058,23 @@ def _readDetectorCorrections(details):
 def SetSampleOffset(value):
     INSTRUMENT.set_sample_offset(value)
 
-def SetMonitorSpectrum(specNum):
-    INSTRUMENT.set_scattering_mon(specNum)
+def SetMonitorSpectrum(specNum, interp=False):
+    INSTRUMENT.set_incident_mntr(specNum)
+    #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
+    if interp :
+        INSTRUMENT.set_interpolating_norm()
 
-def SuggestMonitorSpectrum(specNum):
-    INSTRUMENT.suggest_scattering_mon(specNum)
+def SuggestMonitorSpectrum(specNum, interp=False):
+    INSTRUMENT.suggest_incident_mntr(specNum)
+    #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
+    if interp :
+        INSTRUMENT.suggest_interpolating_norm()
 
 def SetTransSpectrum(specNum, interp=False):
-    global TRANS_INCID_MON
-    TRANS_INCID_MON = int(specNum)
-
-    global TRANS_INTERPOLATE
-    if not TRANS_INTERPOLATE :                 #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
-        TRANS_INTERPOLATE = bool(interp)
+    INSTRUMENT.incid_mon_4_trans_calc = int(specNum)
+    #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
+    if interp :
+        INSTRUMENT.use_interpol_trans_calc = True
 
 def SetRearEfficiencyFile(filename):
     global DIRECT_BEAM_FILE_R
@@ -1265,20 +1253,34 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         else:
             fit_type = TRANS_FIT
         #retrieve the user setting that tells us whether Rebin or InterpolatingRebin will be used during the normalisation 
-        global TRANS_INTERPOLATE
         if INSTRUMENT.name() == 'LOQ':
             # Change the instrument definition to the correct one in the LOQ case
             LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
             LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
-            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, True)
-            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, True)
+            
+            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
+                '1,2', BACKMON_START, BACKMON_END, wavbin, 
+                INSTRUMENT.use_interpol_trans_calc, True)
+            
+            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
+                '1,2', BACKMON_START, BACKMON_END, wavbin,
+                INSTRUMENT.use_interpol_trans_calc, True)
+            
             CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength = translambda_min, MaxWavelength =  translambda_max, \
                                   FitMethod = fit_type, OutputUnfittedData=True)
         else:
-            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, False)
-            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, False)
-            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, TRANS_INCID_MON, TRANS_TRANS_MON, MinWavelength = translambda_min, \
-                                  MaxWavelength = translambda_max, FitMethod = fit_type, OutputUnfittedData=True)
+            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
+                '1,2', BACKMON_START, BACKMON_END, wavbin,
+                INSTRUMENT.use_interpol_trans_calc, False)
+            
+            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
+                '1,2', BACKMON_START, BACKMON_END, wavbin,
+                INSTRUMENT.use_interpol_trans_calc, False)
+            
+            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
+                INSTRUMENT.incid_mon_4_trans_calc, INSTRUMENT.trans_monitor,
+                MinWavelength = translambda_min, MaxWavelength = translambda_max,
+                FitMethod = fit_type, OutputUnfittedData=True)
         # Remove temporaries
         mantid.deleteWorkspace(trans_tmp_out)
         mantid.deleteWorkspace(direct_tmp_out)
@@ -1361,7 +1363,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
 
     ############################# Setup workspaces ######################################
     monitorWS = "Monitor"
-    montorSpecNum = INSTRUMENT.get_scattering_mon()
+    montorSpecNum = INSTRUMENT.get_incident_mntr()
     _printMessage('monitor ' + str(montorSpecNum), True)
     sample_name = sample_raw.getName()
     # Get the monitor ( StartWorkspaceIndex is off by one with cropworkspace)
@@ -1404,7 +1406,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     # ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
     ConvertUnits(monitorWS, monitorWS, "Wavelength")
     wavbin =  str(wav_start) + "," + str(DWAV) + "," + str(wav_end)
-    if INSTRUMENT.is_scattering_mon_interp() :
+    if INSTRUMENT.is_interpolating_norm() :
         InterpolatingRebin(monitorWS, monitorWS,wavbin)
     else :
         Rebin(monitorWS, monitorWS,wavbin)

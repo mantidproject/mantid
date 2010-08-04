@@ -6,8 +6,6 @@ mtd.initialise()
 import sys
 import unittest
 import SANSReduction
-import SANSInsts
-import SANSUtility
 from mantidsimple import *
 
 class TestReduction(unittest.TestCase):
@@ -84,48 +82,6 @@ class TestReduction(unittest.TestCase):
         self.assertAlmostEqual(data[50][1], 1.53335, 0.00001)
         self.assertAlmostEqual(data[50][2], 0.0194757, 0.00001)
 
-
-class TestInstrument(unittest.TestCase):
-    """
-        Simple test to check that the API all works out.
-        No actual value checking.
-    """
-    
-    def setUp(self):
-        self.instrument = SANSInsts.instrument_factory("SANS2D")
-
-    def test_SANS2D_default_settings(self):
-        self.assertEqual(self.instrument.name(), "SANS2D")
-        self.assertTrue(self.instrument.setDetector("front"))
-        self.assertFalse(self.instrument.setDetector("not-a-detector"))
-        self.assertEqual(self.instrument.get_scattering_mon(), 2)
-        self.assertEqual(self.instrument.is_scattering_mon_interp(), False)
-        
-    def test_Detector_bank_spectra(self):
-        inst = SANSInsts.SANS2D()
-        self.assertTrue(inst.setDetector('low-angle'))
-        width, first, end = SANSUtility.GetInstrumentDetails(inst)
-        self.assertEqual(width, 192)
-        self.assertEqual(first,  9) 
-        self.assertEqual(end,  36872)
-        self.assertTrue(inst.setDetector('high-angle'))
-        width, first, end = SANSUtility.GetInstrumentDetails(inst)
-        self.assertEqual(width, 192)
-        self.assertEqual(first, 36873) 
-        self.assertEqual(end, 73736)
-
-        inst = SANSInsts.LOQ()
-        width, first, end = SANSUtility.GetInstrumentDetails(inst)
-        self.assertTrue(inst.setDetector('low-angle'))
-        self.assertEqual(width, 128)
-        self.assertEqual(first, 3) 
-        self.assertEqual(end, 16386)
-        self.assertTrue(inst.setDetector('high-angle'))
-        width, first, end = SANSUtility.GetInstrumentDetails(inst)
-        self.assertEqual(width, 128)
-        self.assertEqual(first, 16387) 
-        self.assertEqual(end, 17792)
-        
 if __name__ == '__main__':
     unittest.main()
     

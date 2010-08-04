@@ -3,6 +3,7 @@
     
     TODO: test transmission calculation w/dark current subtraction
 """
+from __future__ import with_statement
 from HFIRSANSReduction import *
 # Set directory containg the test data, relative to the Mantid release directory.
 TEST_DIR = "../../../Test/Data/SANS2D/"

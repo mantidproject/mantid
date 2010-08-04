@@ -17,7 +17,7 @@ def instrument_factory(name):
 class DetectorBank :
     def __init__(self, instr, det_type) :
         self.parent = instr
-        #detectors are known by many names
+        #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
         self._names = {
           'uni' : det_type,
           'long': instr.getStringParameter(det_type+'-detector-name')[0],
@@ -30,12 +30,22 @@ class DetectorBank :
             #'first-low-angle-spec-number' is an optimal instrument parameter
             self.first_spec_num = 0
         
-        self.n_columns = int(
-            instr.getNumberParameter('low-angle-detector-num-columns')[0])
-        n_rows = int(
-            instr.getNumberParameter('low-angle-detector-num-rows')[0])
+        self.n_columns = None
+        cols_data = instr.getNumberParameter(det_type+'-detector-num-columns')
+        if len(cols_data) > 0 : self.n_columns = int(cols_data[0])
 
-        self._num_pixels = int(self.n_columns*n_rows)
+        n_rows = None
+        rows_data = instr.getNumberParameter(det_type+'-detector-num-rows')
+        if len(rows_data) > 0 : n_rows = int(rows_data[0])
+
+        #deal with LOQ's non-square front detector 
+        if (self.n_columns == None) or (n_rows == None) :
+            if (instr.getName() == 'LOQ') and (det_type == 'high-angle') :
+                self._num_pixels = 1406
+            else : raise LogicError('Number of columns or rows data missing for instrument ' + instr.name())
+        else :
+            self._num_pixels = int(self.n_columns*n_rows)
+        
         self.last_spec_num = self.first_spec_num + self._num_pixels - 1
 
     def place_after(self, previousDet):
@@ -62,6 +72,10 @@ class DetectorBank :
     
 class Instrument(object) :
     def __init__(self) :
+        """
+            Reads the instrument definition xml file
+            @raise IndexError if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
+        """ 
     
         temp_WS_name = '_'+self._NAME+'instrument_definition'
         #read the information about the instrument that stored in it's xml
@@ -72,33 +86,37 @@ class Instrument(object) :
         self.definition = definitionWS.getInstrument()
         mtd.deleteWorkspace(temp_WS_name)
         
-        #the spectrum with this number is used to normalise the workspace data
-        self._scattering_mon = int(self.definition.getNumberParameter(
-            'default-scattering-monitor-spec')[0])
-        #this is used by suggest_scattering_mon() below 
-        self._scattering_mon_locked = False
+        #the spectrum with this number is used to normalize the workspace data
+        self._incid_monitor = int(self.definition.getNumberParameter(
+            'default-incident-monitor-spectrum')[0])
+        #this is used by suggest_incident_mntr() below 
+        self._incid_monitor_lckd = False
+        #used in transmission calculations
+        self.trans_monitor = int(self.definition.getNumberParameter(
+            'default-transmission-monitor-spectrum')[0])
+        self.incid_mon_4_trans_calc = self._incid_monitor
         
-    def suggest_scattering_mon(self, scattering_mon):
+    def suggest_incident_mntr(self, spectrum_number):
         """
             Only sets the monitor spectrum number if it isn't locked, used
-            so MON/SPECTRUM in user files don't change MON/LENGTH settings
+            so MON/SPECTRUM in ISIS user files don't change MON/LENGTH settings
             @param the set the monitor spectrum number to be that with this number, regardless of lock 
         """
-        if not self._scattering_mon_locked :
-            self._scattering_mon = int(scattering_mon)
+        if not self._incid_monitor_lckd :
+            self._incid_monitor = int(spectrum_number)
         
-    def get_scattering_mon(self):
+    def get_incident_mntr(self):
         """
-            @return the spectrum number of the scattering monitor
+            @return the spectrum number of the incident scattering monitor
         """
-        return self._scattering_mon
+        return self._incid_monitor
         
-    def set_scattering_mon(self, scattering_mon):
+    def set_incident_mntr(self, spectrum_number):
         """
-            @param the set the monitor spectrum number to be that with this number, regardless of lock 
+            @param set the incident scattering monitor spectrum number to be that with this number, regardless of lock 
         """
-        self._scattering_mon = int(scattering_mon)
-        self._scattering_mon_locked = True
+        self._incid_monitor = int(spectrum_number)
+        self._incid_monitor_lckd = True
         
     def set_component_positions(self, ws, xbeam, ybeam): raise NotImplemented
         
@@ -118,6 +136,11 @@ class ISISInstrument(Instrument) :
         self.DETECTORS = {'low-angle' : firstDetect}
         self.DETECTORS['high-angle'] = secondDetect
     
+        self.setDefaultDetector()
+        # if this is set InterpolationRebin will be used on the monitor spectrum used to normalize the sample, useful because wavelength resolution in the monitor spectrum can be course in the range of interest 
+        self._use_interpol_norm = False
+        self.use_interpol_trans_calc = False
+
         self.SAMPLE_Z_CORR = 0
         
         # Detector position information for SANS2D
@@ -135,8 +158,6 @@ class ISISInstrument(Instrument) :
         # Rear_Det_X  Will Be Needed To Calc Relative X Translation Of Front Detector 
         self.REAR_DET_X = 0
 
-        # MASK file stuff ==========================================================
-        # correction terms to SANS2d encoders - store in MASK file ?
         self.FRONT_DET_Z_CORR = 0.0
         self.FRONT_DET_Y_CORR = 0.0 
         self.FRONT_DET_X_CORR = 0.0 
@@ -144,26 +165,22 @@ class ISISInstrument(Instrument) :
         self.REAR_DET_Z_CORR = 0.0 
         self.REAR_DET_X_CORR = 0.0
 
-        #the low anlge detector is some times called the main detector, some times the rear detector
-        self.lowAngDetSet = True
-        # if this is set InterpolationRebin will be used on the monitor spectrum used to normalise the sample
-        self._scattering_mon_interp = False
-
     def name(self):
         return self._NAME
         
-    def is_scattering_mon_interp(self):
-        return self._scattering_mon_interp
+    def is_interpolating_norm(self):
+        return self._use_interpol_norm
      
-    def interp_scattering_mon(self):
+    def set_interpolating_norm(self):
         """
-            This method sets that the monitor spectrum should be interpolated, there is currently no unset setting the instrument will need to be reset for that    
+            This method sets that the monitor spectrum should be interpolated,
+            there is currently no unset method but its off by default    
         """
-        self._scattering_mon_interp = True
+        self._use_interpol_norm = True
      
-    def suggest_interp_scattering_mon(self):
-        if not self._scattering_mon_locked :
-            self._scattering_mon_interp = True
+    def suggest_interpolating_norm(self):
+        if not self._incid_monitor_lckd :
+            self._use_interpol_norm = True
      
     def cur_detector(self) :
         if self.lowAngDetSet : return self.DETECTORS['low-angle']
@@ -199,7 +216,7 @@ class ISISInstrument(Instrument) :
 class LOQ(ISISInstrument):
     def __init__(self):
         self._NAME = "LOQ"
-	super(LOQ, self).__init__()
+        super(LOQ, self).__init__()
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -249,11 +266,6 @@ class SANS2D(ISISInstrument):
             mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0,0.0], [xshift, yshift]
-
-
-# The following should be refactored away:
-all = {"LOQ" : LOQ(), "SANS2D" : SANS2D()}
   
 if __name__ == '__main__':
-    test = SANS2D()
-    print test.listDetectors()
+    pass
