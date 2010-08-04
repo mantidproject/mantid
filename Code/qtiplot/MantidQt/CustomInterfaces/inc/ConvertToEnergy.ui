@@ -285,6 +285,30 @@
                  </layout>
                 </item>
                 <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_28" >
+                  <item>
+                   <widget class="QLabel" name="valRunFiles" >
+                    <property name="styleSheet" >
+                     <string notr="true" >color: rgb(255, 0, 4)</string>
+                    </property>
+                    <property name="text" >
+                     <string>*</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="valCalibration" >
+                    <property name="styleSheet" >
+                     <string notr="true" >color: rgb(255, 0, 4)</string>
+                    </property>
+                    <property name="text" >
+                     <string>*</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
                  <layout class="QVBoxLayout" name="verticalLayout_7" >
                   <item>
                    <widget class="QPushButton" name="pbRunFilesBrowse" >
@@ -403,6 +427,16 @@
                      </widget>
                     </item>
                     <item>
+                     <widget class="QLabel" name="valMapFile" >
+                      <property name="styleSheet" >
+                       <string notr="true" >color: rgb(255, 0, 4)</string>
+                      </property>
+                      <property name="text" >
+                       <string>*</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
                      <widget class="QPushButton" name="pbMappingFileBrowse" >
                       <property name="toolTip" >
                        <string>Browse for custom mapping file.</string>
@@ -430,6 +464,16 @@
                      <widget class="QLineEdit" name="leNoGroups" >
                       <property name="toolTip" >
                        <string>Desired number of groups.</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="valNoGroups" >
+                      <property name="styleSheet" >
+                       <string notr="true" >color: rgb(255, 0, 4)</string>
+                      </property>
+                      <property name="text" >
+                       <string>*</string>
                       </property>
                      </widget>
                     </item>
@@ -611,7 +655,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="6" >
+              <item row="0" column="7" >
                <spacer name="horizontalSpacer_10" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
@@ -666,13 +710,23 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="5" >
+              <item row="0" column="6" >
                <widget class="QLabel" name="lbDBKelvin" >
                 <property name="text" >
                  <string>Kelvin</string>
                 </property>
                 <property name="buddy" >
                  <cstring>leDetailedBalance</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5" >
+               <widget class="QLabel" name="valDetailedBalance" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
                 </property>
                </widget>
               </item>
@@ -841,6 +895,16 @@
                </widget>
               </item>
               <item>
+               <widget class="QLabel" name="valEFixed" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QLabel" name="lbSpectraMin" >
                 <property name="text" >
                  <string>Spectra Min:</string>
@@ -858,6 +922,16 @@
                </widget>
               </item>
               <item>
+               <widget class="QLabel" name="valSpectraMin" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QLabel" name="lbSpectraMax" >
                 <property name="text" >
                  <string>Spectra Max</string>
@@ -871,6 +945,16 @@
                <widget class="QLineEdit" name="leSpectraMax" >
                 <property name="toolTip" >
                  <string>Maximum spectra number for data.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="valSpectraMax" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
                 </property>
                </widget>
               </item>
@@ -1206,6 +1290,16 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item>
+                 <widget class="QLabel" name="valELow" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="horizontalSpacer_13" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
@@ -1240,6 +1334,16 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item>
+                 <widget class="QLabel" name="valEWidth" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="horizontalSpacer_14" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
@@ -1270,6 +1374,16 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valEHigh" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
                   </property>
                  </widget>
                 </item>
@@ -1415,6 +1529,16 @@ p, li { white-space: pre-wrap; }
                  <widget class="QLineEdit" name="cal_leRunNo" >
                   <property name="toolTip" >
                    <string>Run number of White Beam Vanadium run.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valRunNo" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
                   </property>
                  </widget>
                 </item>
@@ -1651,6 +1775,16 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item>
+                 <widget class="QLabel" name="valPeakMin" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="horizontalSpacer_16" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
@@ -1677,6 +1811,16 @@ p, li { white-space: pre-wrap; }
                  <widget class="QLineEdit" name="cal_lePeakMax" >
                   <property name="toolTip" >
                    <string>End of range of peak in Time of Flight</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valPeakMax" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
                   </property>
                  </widget>
                 </item>
@@ -1715,6 +1859,16 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item>
+                 <widget class="QLabel" name="valBackMin" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="horizontalSpacer_17" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
@@ -1741,6 +1895,16 @@ p, li { white-space: pre-wrap; }
                  <widget class="QLineEdit" name="cal_leBackMax" >
                   <property name="toolTip" >
                    <string>End of range of background in time of flight.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valBackMax" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
                   </property>
                  </widget>
                 </item>
@@ -1849,6 +2013,16 @@ p, li { white-space: pre-wrap; }
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QLabel" name="valResELow" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
              </layout>
@@ -1947,6 +2121,40 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
+             <layout class="QVBoxLayout" name="verticalLayout_29" >
+              <item>
+               <widget class="QLabel" name="valResSpecMin" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="valStartX" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="valResEWidth" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QVBoxLayout" name="verticalLayout_24" >
               <property name="spacing" >
                <number>0</number>
@@ -2028,6 +2236,40 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_30" >
+              <item>
+               <widget class="QLabel" name="valResSpecMax" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="valEndX" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="valResEHigh" >
+                <property name="styleSheet" >
+                 <string notr="true" >color: rgb(255, 0, 4)</string>
+                </property>
+                <property name="text" >
+                 <string>*</string>
                 </property>
                </widget>
               </item>

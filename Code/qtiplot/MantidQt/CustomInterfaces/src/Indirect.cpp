@@ -103,9 +103,10 @@ void Indirect::initLayout()
     m_uiForm.cal_leEWidth->setValidator(m_valDbl);
     m_uiForm.cal_leEHigh->setValidator(m_valDbl);
 
-    // set default values for save
+    // set default values for save formats
     m_uiForm.save_ckSPE->setChecked(false);
     m_uiForm.save_ckNexus->setChecked(true);
+
 }
 
 /**
@@ -635,22 +636,22 @@ bool Indirect::validateInput()
     if ( m_uiForm.leRunFiles->text() == "" )
     {
         valid = false;
-        m_uiForm.leRunFiles->setStyleSheet("background-color: red");
+        m_uiForm.valRunFiles->setText("*");
     }
     else
     {
-        m_uiForm.leRunFiles->setStyleSheet("");
+        m_uiForm.valRunFiles->setText("");
     }
 
     // calib file input
     if ( m_uiForm.leCalibrationFile->text() == "" && m_uiForm.ckUseCalib->isChecked() )
     {
         valid = false;
-        m_uiForm.leCalibrationFile->setStyleSheet("background-color: red");
+        m_uiForm.valCalibration->setText("*");
     }
     else
     {
-        m_uiForm.leCalibrationFile->setStyleSheet("");
+        m_uiForm.valCalibration->setText("");
     }
 
     // mapping selection
@@ -661,35 +662,35 @@ bool Indirect::validateInput()
         )
     {
         valid = false;
-        m_uiForm.leNoGroups->setStyleSheet("background-color: red");
-        m_uiForm.leMappingFile->setStyleSheet("background-color: red");
+        m_uiForm.valNoGroups->setText("*");
+        m_uiForm.valMapFile->setText("*");
     }
     else
     {
-        m_uiForm.leNoGroups->setStyleSheet("");
-        m_uiForm.leMappingFile->setStyleSheet("");
+        m_uiForm.valNoGroups->setText("");
+        m_uiForm.valMapFile->setText("");
     }
 
     // detailed balance
     if ( m_uiForm.ckDetailedBalance->isChecked() && m_uiForm.leDetailedBalance->text() == "" )
     {
         valid = false;
-        m_uiForm.leDetailedBalance->setStyleSheet("background-color: red");
+        m_uiForm.valDetailedBalance->setText("*");
     }
     else
     {
-        m_uiForm.leDetailedBalance->setStyleSheet("");
+        m_uiForm.valDetailedBalance->setText("");
     }
 
     // efixed
     if ( m_uiForm.leEfixed->text() == "" )
     {
         valid = false;
-        m_uiForm.leEfixed->setStyleSheet("background-color: red");
+        m_uiForm.valEFixed->setText("*");
     }
     else
     {
-        m_uiForm.leEfixed->setStyleSheet("");
+        m_uiForm.valEFixed->setText("");
     }
 
     // SpectraMin/SpectraMax
@@ -704,13 +705,13 @@ bool Indirect::validateInput()
         )
     {
         valid = false;
-        m_uiForm.leSpectraMin->setStyleSheet("background-color: red");
-        m_uiForm.leSpectraMax->setStyleSheet("background-color: red");
+        m_uiForm.valSpectraMin->setText("*");
+        m_uiForm.valSpectraMax->setText("*");
     }
     else
     {
-        m_uiForm.leSpectraMin->setStyleSheet("");
-        m_uiForm.leSpectraMax->setStyleSheet("");
+        m_uiForm.valSpectraMin->setText("");
+        m_uiForm.valSpectraMax->setText("");
     }
 
     if ( ! m_uiForm.rebin_ckDNR->isChecked() )
@@ -719,46 +720,46 @@ bool Indirect::validateInput()
         if ( m_uiForm.rebin_leELow->text() == "" )
         {
             valid = false;
-            m_uiForm.rebin_leELow->setStyleSheet("background-color: red");
+            m_uiForm.valELow->setText("*");
         }
         else
         {
-            m_uiForm.rebin_leELow->setStyleSheet("");
+            m_uiForm.valELow->setText("");
         }
 
         if ( m_uiForm.rebin_leEWidth->text() == "" )
         {
             valid = false;
-            m_uiForm.rebin_leEWidth->setStyleSheet("background-color: red");
+            m_uiForm.valEWidth->setText("*");
         }
         else
         {
-            m_uiForm.rebin_leEWidth->setStyleSheet("");
+            m_uiForm.valEWidth->setText("");
         }
 
         if ( m_uiForm.rebin_leEHigh->text() == "" )
         {
             valid = false;
-            m_uiForm.rebin_leEHigh->setStyleSheet("background-color: red");
+            m_uiForm.valEHigh->setText("*");
         }
         else
         {
-            m_uiForm.rebin_leEHigh->setStyleSheet("");
+            m_uiForm.valEHigh->setText("");
         }
 
         if ( m_uiForm.rebin_leELow->text().toDouble() > m_uiForm.rebin_leEHigh->text().toDouble() )
         {
             valid = false;
-            m_uiForm.rebin_leELow->setStyleSheet("background-color: red");
-            m_uiForm.rebin_leEHigh->setStyleSheet("background-color: red");
+            m_uiForm.valELow->setText("*");
+            m_uiForm.valEHigh->setText("*");
         }
 
     }
     else
     {
-        m_uiForm.rebin_leELow->setStyleSheet("");
-        m_uiForm.rebin_leEWidth->setStyleSheet("");
-        m_uiForm.rebin_leEHigh->setStyleSheet("");
+        m_uiForm.valELow->setText("");
+        m_uiForm.valEWidth->setText("");
+        m_uiForm.valEHigh->setText("");
     }
 
 
@@ -776,66 +777,66 @@ bool Indirect::validateCalib()
     if ( m_uiForm.cal_leRunNo->text() == "" )
     {
         valid = false;
-        m_uiForm.cal_leRunNo->setStyleSheet("background-color: red");
+        m_uiForm.valRunNo->setText("*");
     }
     else
     {
-        m_uiForm.cal_leRunNo->setStyleSheet("");
+        m_uiForm.valRunNo->setText("");
     }
 
     // peak min/max, back min/max (calib)
     if ( m_uiForm.cal_lePeakMin->text() == "" )
     {
         valid = false;
-        m_uiForm.cal_lePeakMin->setStyleSheet("background-color: red");
+        m_uiForm.valPeakMin->setText("*");
     }
     else
     {
-        m_uiForm.cal_lePeakMin->setStyleSheet("");
+        m_uiForm.valPeakMin->setText("");
     }
 
     if ( m_uiForm.cal_lePeakMax->text() == "" )
     {
         valid = false;
-        m_uiForm.cal_lePeakMax->setStyleSheet("background-color: red");
+        m_uiForm.valPeakMax->setText("*");
     }
     else
     {
-        m_uiForm.cal_lePeakMax->setStyleSheet("");
+        m_uiForm.valPeakMax->setText("");
     }
 
     if ( m_uiForm.cal_leBackMin->text() == "" )
     {
         valid = false;
-        m_uiForm.cal_leBackMin->setStyleSheet("background-color: red");
+        m_uiForm.valBackMin->setText("*");
     }
     else
     {
-        m_uiForm.cal_leBackMin->setStyleSheet("");
+        m_uiForm.valBackMin->setText("");
     }
 
     if ( m_uiForm.cal_leBackMax->text() == "" )
     {
         valid = false;
-        m_uiForm.cal_leBackMax->setStyleSheet("background-color: red");
+        m_uiForm.valBackMax->setText("*");
     }
     else
     {
-        m_uiForm.cal_leBackMax->setStyleSheet("");
+        m_uiForm.valBackMax->setText("");
     }
 
     if ( m_uiForm.cal_lePeakMin->text().toInt() > m_uiForm.cal_lePeakMax->text().toInt() )
     {
         valid = false;
-        m_uiForm.cal_lePeakMin->setStyleSheet("background-color: red");
-        m_uiForm.cal_lePeakMax->setStyleSheet("background-color: red");
+        m_uiForm.valPeakMin->setText("*");
+        m_uiForm.valPeakMax->setText("*");
     }
 
     if ( m_uiForm.cal_leBackMin->text().toInt() > m_uiForm.cal_leBackMax->text().toInt() )
     {
         valid = false;
-        m_uiForm.cal_leBackMin->setStyleSheet("background-color: red");
-        m_uiForm.cal_leBackMax->setStyleSheet("background-color: red");
+        m_uiForm.valBackMin->setText("*");
+        m_uiForm.valBackMax->setText("*");
     }
 
 
@@ -845,104 +846,104 @@ bool Indirect::validateCalib()
         if ( m_uiForm.cal_leResSpecMin->text() == "" )
         {
             valid = false;
-            m_uiForm.cal_leResSpecMin->setStyleSheet("background-color: red");
+            m_uiForm.valResSpecMin->setText("*");
         }
         else
         {
-            m_uiForm.cal_leResSpecMin->setStyleSheet("");
+            m_uiForm.valResSpecMin->setText("");
         }
         if ( m_uiForm.cal_leResSpecMax->text() == "" )
         {
             valid = false;
-            m_uiForm.cal_leResSpecMax->setStyleSheet("background-color: red");
+            m_uiForm.valResSpecMax->setText("*");
         }
         else
         {
-            m_uiForm.cal_leResSpecMax->setStyleSheet("");
+            m_uiForm.valResSpecMax->setText("");
         }
 
         if ( m_uiForm.cal_leResSpecMin->text().toInt() > m_uiForm.cal_leResSpecMax->text().toInt() )
         {
             valid = false;
-            m_uiForm.cal_leResSpecMin->setStyleSheet("background-color: red");
-            m_uiForm.cal_leResSpecMax->setStyleSheet("background-color: red");
+            m_uiForm.valResSpecMin->setText("*");
+            m_uiForm.valResSpecMax->setText("*");
         }
 
         // start/end x
         if ( m_uiForm.cal_leStartX->text() == "" )
         {
             valid = false;
-            m_uiForm.cal_leStartX->setStyleSheet("background-color: red");
+            m_uiForm.valStartX->setText("*");
         }
         else
         {
-            m_uiForm.cal_leStartX->setStyleSheet("");
+            m_uiForm.valStartX->setText("*");
         }
         if ( m_uiForm.cal_leEndX->text() == "" )
         {
             valid = false;
-            m_uiForm.cal_leEndX->setStyleSheet("background-color: red");
+            m_uiForm.valEndX->setText("*");
         }
         else
         {
-            m_uiForm.cal_leEndX->setStyleSheet("");
+            m_uiForm.valEndX->setText("");
         }
 
         if ( m_uiForm.cal_leStartX->text().toInt() > m_uiForm.cal_leEndX->text().toInt() )
         {
             valid = false;
-            m_uiForm.cal_leStartX->setStyleSheet("background-color: red");
-            m_uiForm.cal_leEndX->setStyleSheet("background-color: red");
+        m_uiForm.valStartX->setText("*");
+        m_uiForm.valEndX->setText("*");
         }
 
         // rebinning (res)
         if ( m_uiForm.cal_leEWidth->text() == "" )
         {
             valid = false;
-            m_uiForm.cal_leEWidth->setStyleSheet("background-color: red");
+            m_uiForm.valResEWidth->setText("*");
         }
         else
         {
-            m_uiForm.cal_leEWidth->setStyleSheet("");
+            m_uiForm.valResEWidth->setText("");
         }
 
         if ( m_uiForm.cal_leELow->text() == "" )
         {
             valid = false;
-            m_uiForm.cal_leELow->setStyleSheet("background-color: red");
+            m_uiForm.valResELow->setText("*");
         }
         else
         {
-            m_uiForm.cal_leELow->setStyleSheet("");
+            m_uiForm.valResELow->setText("");
         }
 
         if ( m_uiForm.cal_leEHigh->text() == "" )
         {
             valid = false;
-            m_uiForm.cal_leEHigh->setStyleSheet("background-color: red");
+            m_uiForm.valResEHigh->setText("*");
         }
         else
         {
-            m_uiForm.cal_leEHigh->setStyleSheet("");
+            m_uiForm.valResEHigh->setText("");
         }
 
         if ( m_uiForm.cal_leELow->text().toInt() > m_uiForm.cal_leEHigh->text().toInt() )
         {
             valid = false;
-            m_uiForm.cal_leELow->setStyleSheet("background-color: red");
-            m_uiForm.cal_leEHigh->setStyleSheet("background-color: red");
+            m_uiForm.valResELow->setText("*");
+            m_uiForm.valResEHigh->setText("*");
         }
 
     }
     else
     {
-        m_uiForm.cal_leResSpecMin->setStyleSheet("");
-        m_uiForm.cal_leResSpecMax->setStyleSheet("");
-        m_uiForm.cal_leStartX->setStyleSheet("");
-        m_uiForm.cal_leEndX->setStyleSheet("");
-        m_uiForm.cal_leELow->setStyleSheet("");
-        m_uiForm.cal_leEWidth->setStyleSheet("");
-        m_uiForm.cal_leEHigh->setStyleSheet("");
+        m_uiForm.valResSpecMin->setText("");
+        m_uiForm.valResSpecMax->setText("");
+        m_uiForm.valStartX->setText("");
+        m_uiForm.valEndX->setText("");
+        m_uiForm.valResELow->setText("");
+        m_uiForm.valResEWidth->setText("");
+        m_uiForm.valResEHigh->setText("");
     }
 
     return valid;
@@ -1073,6 +1074,11 @@ void Indirect::reflectionSelected(int index)
 
     m_uiForm.cal_leResSpecMin->setText(values[0]);
     m_uiForm.cal_leResSpecMax->setText(values[1]);
+
+
+    // clear validation markers
+    validateInput();
+    validateCalib();
 }
 
 /**
