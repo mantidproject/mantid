@@ -115,6 +115,7 @@ def test_default():
     
 def test_center_by_hand():
     """
+        TODO: get rid of this file, and of HFIRSANSReduction
         Beam center entered by hand
         Subtract dark current
         Correct for solid angle 
@@ -146,77 +147,6 @@ def test_center_by_hand():
     SaveCSV(Filename="mantid_center_by_hand.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")
     
     _verify_result(reduced_file="mantid_center_by_hand.txt", test_file=TEST_DIR+"reduced_center_by_hand.txt")
-    
-def test_center_calculated():
-    """
-        Beam center calculated
-        Subtract dark current
-        Correct for solid angle 
-        Correct for detector efficiency, excluding high/low pixels
-        No transmission
-        No background
-    """
-    # Data file to reduce
-    datafile = TEST_DIR+"BioSANS_test_data.xml"
-    
-    # Reduction parameters
-    method = SANSReductionMethod()
-    method.dark_current_filepath = TEST_DIR+"BioSANS_dark_current.xml"
-    method.sensitivity_flood_filepath = TEST_DIR+"BioSANS_flood_data.xml"
-    method.sensitivity_use_dark_current = True
-    method.sensitivity_high = 1.5
-    method.sensitivity_low = 0.5
-    
-    method.beam_center_method = SANSReductionMethod.BEAM_CENTER_DIRECT_BEAM
-    method.beam_center_filepath = TEST_DIR+"BioSANS_empty_cell.xml"
-
-    # Instrument parameters
-    conf = InstrumentConfiguration()
-
-    reduction = SANSReduction(method, conf, filepath=datafile)    
-    reduction.reduce()
-    
-    SaveCSV(Filename="mantid_center_calculated.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")
-    
-    _verify_result(reduced_file="mantid_center_calculated.txt", test_file=TEST_DIR+"reduced_center_calculated.txt")
-    
-def test_transmission():
-    """
-        Beam center calculated
-        No dark current subtraction
-        Correct for solid angle 
-        No detector efficiency correction
-        No background
-        Transmission calculation uses sum of counts around the beam instead
-        of using an error-weighted average.
-    """
-    # Data file to reduce
-    datafile = TEST_DIR+"BioSANS_test_data.xml"
-    
-    # Reduction parameters
-    method = SANSReductionMethod()
-    
-    method.transmission_method = SANSReductionMethod.TRANSMISSION_BY_HAND
-    #method.transmission_method = SANSReductionMethod.TRANSMISSION_DIRECT_BEAM
-    method.transmission_sample_filepath = TEST_DIR+"BioSANS_sample_trans.xml"
-    method.transmission_empty_filepath = TEST_DIR+"BioSANS_empty_trans.xml"
-    method.transmission_value = 0.51944
-    method.transmission_error = 0.011078
-    
-    method.beam_center_method = SANSReductionMethod.BEAM_CENTER_DIRECT_BEAM
-    method.beam_center_filepath = TEST_DIR+"BioSANS_empty_cell.xml"
-
-    # Instrument parameters
-    conf = InstrumentConfiguration()
-
-    reduction = SANSReduction(method, conf, filepath=datafile)    
-    reduction.reduce()
-    
-    SaveCSV(Filename="mantid_transmission.txt", InputWorkspace="Iq", Separator="\t", LineSeparator="\n")
-    
-    _verify_result(reduced_file="mantid_transmission.txt", 
-                   test_file=TEST_DIR+"reduced_transmission.txt",
-                   tolerance = 0.1)
     
     
     

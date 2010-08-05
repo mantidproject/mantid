@@ -37,6 +37,11 @@ class ReductionSingleton:
         return setattr(self.__instance, attr, value)
 
 ## List of user commands ######################################################
+def Clear():
+    """
+        Clears the Reducer of changes applied by all previous commands
+    """
+    ReductionSingleton.clean()
 
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
@@ -92,8 +97,10 @@ def SolidAngle():
 def NoSolidAngle():
     ReductionSingleton().set_solid_angle_correcter(None)
     
-def AzimuthalAverage(suffix="_Iq"):
-    ReductionSingleton().set_azimuthal_averager(SANSReductionSteps.WeightedAzimuthalAverage(suffix=suffix))
+def AzimuthalAverage(binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=False):
+    ReductionSingleton().set_azimuthal_averager(SANSReductionSteps.WeightedAzimuthalAverage(binning=binning,
+                                                                                            suffix=suffix,
+                                                                                            error_weighting=error_weighting))
 
 def SetTransmission(trans, error):
     ReductionSingleton().set_transmission(SANSReductionSteps.BaseTransmission(trans, error))
@@ -113,6 +120,13 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                       spreader_transmission=spreader_transmission, 
                                                                                       spreader_transmission_err=spreader_transmission_err))
   
-def Mask(): raise NotImplemented
+def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
+    ReductionSingleton().set_mask(SANSReductionSteps.Mask(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high))
 
 def Background(): raise NotImplemented
+
+def SaveIqAscii():
+    ReductionSingleton().set_save_Iq(SANSReductionSteps.SaveIqAscii())
+
+def NoSaveIq():
+    ReductionSingleton().set_save_Iq(None)

@@ -366,15 +366,20 @@ class WeightedAzimuthalAverage(ReductionStep):
         ReductionStep class that performs azimuthal averaging
         and transforms the 2D reduced data set into I(Q).
     """
-    def __init__(self, suffix="_Iq"):
+    def __init__(self, binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=False):
         super(WeightedAzimuthalAverage, self).__init__()
+        self._binning = binning
         self._suffix = suffix
+        self._error_weighting = error_weighting
         
     def execute(self, reducer, workspace):
         output_ws = workspace+str(self._suffix)    
-        Q1DWeighted(workspace, output_ws, "0.01,0.001,0.11", 
+        Q1DWeighted(workspace, output_ws, self._binning, 
                     PixelSizeX=reducer.instrument.pixel_size_x,
-                    PixelSizeY=reducer.instrument.pixel_size_y, ErrorWeighting=True)  
+                    PixelSizeY=reducer.instrument.pixel_size_y, ErrorWeighting=self._error_weighting)  
+        
+    def get_output_workspace(self, workspace):
+        return workspace+str(self._suffix)
             
 class SolidAngle(ReductionStep):
     """
@@ -429,3 +434,36 @@ class SensitivityCorrection(ReductionStep):
         MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
     
 
+class Mask(ReductionStep):
+    """
+        Apply mask to workspace
+    """
+    def __init__(self, nx_low=0, nx_high=0, ny_low=0, ny_high=0):
+        super(Mask, self).__init__()
+        self._nx_low = nx_low
+        self._nx_high = nx_high
+        self._ny_low = ny_low
+        self._ny_high = ny_high
+        
+    def execute(self, reducer, workspace):
+        # Get a list of detector pixels to mask
+        masked_pixels = reducer.instrument.get_masked_pixels(self._nx_low,
+                                                             self._nx_high,
+                                                             self._ny_low,
+                                                             self._ny_high)
+        
+        # Transform the list of pixels into a list of Mantid detector IDs
+        masked_detectors = reducer.instrument.get_masked_detectors(masked_pixels)
+        
+        # Mask the pixels by passing the list of IDs
+        MaskDetectors(workspace, None, masked_detectors)
+
+class SaveIqAscii(ReductionStep):
+    def __init__(self):
+        super(SaveIqAscii, self).__init__()
+        
+    def execute(self, reducer, workspace):
+        if reducer._azimuthal_averager is not None:
+            output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
+            SaveAscii(Filename=output_ws+'.txt', Workspace=output_ws)
+    

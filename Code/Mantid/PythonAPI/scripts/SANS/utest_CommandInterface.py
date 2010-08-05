@@ -117,6 +117,7 @@ class TestCommands(unittest.TestCase):
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         SensitivityCorrection("BioSANS_flood_data.xml")
+        AzimuthalAverage(error_weighting=True)
         Reduce1D()
         
         self.assertEqual(ReductionSingleton()._normalizer._normalization_spectrum, 1)
@@ -130,6 +131,7 @@ class TestCommands(unittest.TestCase):
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml")
+        AzimuthalAverage(error_weighting=True)
         Reduce1D()
         
         data = mtd["BioSANS_test_data_Iq"].dataY(0)
@@ -145,6 +147,7 @@ class TestCommands(unittest.TestCase):
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
+        AzimuthalAverage(error_weighting=True)
         Reduce1D()
         
         data = mtd["BioSANS_test_data_Iq"].dataY(0)
@@ -159,6 +162,7 @@ class TestCommands(unittest.TestCase):
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
+        AzimuthalAverage(error_weighting=True)
         Reduce1D()
         
         data = mtd["BioSANS_test_data_Iq"].dataY(0)
@@ -175,7 +179,7 @@ class TestCommands(unittest.TestCase):
     
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
                                empty_file="BioSANS_empty_trans.xml")
-        
+        AzimuthalAverage(error_weighting=True)
         AppendDataFile("BioSANS_test_data.xml")
         Reduce1D()
         
@@ -190,7 +194,7 @@ class TestCommands(unittest.TestCase):
         DataPath("../../../Test/Data/SANS2D/")
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
-    
+        AzimuthalAverage(error_weighting=True)
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml", 
                                  direct_spreader="BioSANS_empty_cell.xml",
                                  sample_scattering="BioSANS_test_data.xml", 
@@ -213,6 +217,7 @@ class TestCommands(unittest.TestCase):
         SetTransmission(0.51944, 0.011078)
         trans = ReductionSingleton()._transmission_calculator.get_transmission()
         self.assertEqual(trans[0],0.51944)
+        AzimuthalAverage(error_weighting=True)
         Reduce1D()
                 
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_transmission.txt", 0.0001))
@@ -226,6 +231,7 @@ class TestCommands(unittest.TestCase):
         SensitivityCorrection("BioSANS_flood_data.xml")
         trans = ReductionSingleton()._transmission_calculator.get_transmission()
         self.assertEqual(trans[0],0.51944)
+        AzimuthalAverage(error_weighting=True)
         Reduce1D()
         
         #self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_transmission.txt"))

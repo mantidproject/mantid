@@ -42,6 +42,12 @@ class SANSReducer(Reducer):
     ## Transmission calculator
     _transmission_calculator = None
     
+    ## Masking step
+    _mask = None
+    
+    ## Output saving step
+    _save_iq = None
+    
     def __init__(self):
         super(SANSReducer, self).__init__()
         
@@ -81,6 +87,16 @@ class SANSReducer(Reducer):
             self._transmission_calculator = trans
         else:
             raise RuntimeError, "Reducer.set_transmission expects an object of class ReductionStep"
+        
+    def set_mask(self, mask):
+        """
+            Set the reduction step that will apply the mask
+            @param mask: ReductionStep object
+        """
+        if issubclass(mask.__class__, ReductionStep) or None:
+            self._mask = mask
+        else:
+            raise RuntimeError, "Reducer.set_mask expects an object of class ReductionStep"
         
     def get_beam_center(self): 
         """
@@ -144,6 +160,16 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_azimuthal_averager expects an object of class ReductionStep"
     
+    def set_save_Iq(self, save_iq):
+        """
+            Set the ReductionStep object that saves the I(q) output
+            @param averager: ReductionStep object
+        """
+        if issubclass(save_iq.__class__, ReductionStep) or None:
+            self._save_iq = save_iq
+        else:
+            raise RuntimeError, "Reducer.set_save_Iq expects an object of class ReductionStep"
+    
     def pre_process(self): 
         """
             Reduction steps that are meant to be executed only once per set
@@ -182,6 +208,8 @@ class SANSReducer(Reducer):
             self.append_step(self._normalizer)
         
         # Mask
+        if self._mask is not None:
+            self.append_step(self._mask)
         
         # Sensitivity correction
         if self._sensitivity_correcter is not None:
@@ -200,6 +228,8 @@ class SANSReducer(Reducer):
             self.append_step(self._azimuthal_averager)
             
         # Save output to file
+        if self._save_iq is not None:
+            self.append_step(self._save_iq)
     
     def reduce(self):
         """
