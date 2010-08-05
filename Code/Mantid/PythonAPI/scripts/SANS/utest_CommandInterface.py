@@ -2,9 +2,9 @@
     Unit tests for SANS reduction command set
 """
 import math
+import sys
 import unittest
 from CommandInterface import *
-from HFIRtest import _read_IGOR
 from mantidsimple import *
 
 # Set directory containg the test data, relative to the Mantid release directory.
@@ -13,6 +13,25 @@ TEST_DIR = "../../../Test/Data/SANS2D/"
 def _diff_iq(x,y): return x-y
 def _add(x,y): return x+y
 
+def _read_IGOR(filepath):
+    """
+        Read in an HFIR IGOR output file with reduced data
+        @param filepath: path of the file to be read
+    """
+    data = []
+    with open(filepath) as f:
+        # Skip first header line
+        f.readline()
+        for line in f:
+            toks = line.split()
+            try:
+                q    = float(toks[0])
+                iq   = float(toks[1])
+                diq  = float(toks[2])
+                data.append([q, iq, diq])
+            except:
+                print "_read_IGOR:", sys.exc_value  
+    return data
      
 def _check_result(ws, test_file, tolerance=1e-6):
     """
@@ -74,6 +93,18 @@ class TestCommands(unittest.TestCase):
     def setUp(self):
         # The reducer is a singleton, so create a new instance for each unit test
         ReductionSingleton.clean()
+        self.assertEqual(ReductionSingleton()._sensitivity_correcter, None)
+        self.assertEqual(ReductionSingleton()._mask, None)
+        self.assertEqual(ReductionSingleton()._transmission_calculator, None)
+        self.assertEqual(ReductionSingleton()._save_iq, None)
+        self.assertEqual(ReductionSingleton()._azimuthal_averager.__class__.__name__, "WeightedAzimuthalAverage")
+        self.assertEqual(ReductionSingleton()._beam_finder.__class__.__name__, "BaseBeamFinder")
+        self.assertEqual(ReductionSingleton()._normalizer.__class__.__name__, "Normalize")
+        self.assertEqual(ReductionSingleton()._solid_angle_correcter.__class__.__name__, "SolidAngle")
+        self.assertEqual(len(ReductionSingleton()._reduction_steps), 0)
+        self.assertEqual(len(ReductionSingleton()._data_files), 0)
+        self.assertEqual(ReductionSingleton().instrument, None)
+        self.assertEqual(ReductionSingleton()._data_path, '.')
                 
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
@@ -221,6 +252,18 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
                 
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_transmission.txt", 0.0001))
+            
+    def test_center_by_hand(self):
+        DataPath("../../../Test/Data/SANS2D/")
+        HFIRSANS()
+        SetBeamCenter(16, 95)
+        AppendDataFile("BioSANS_test_data.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml")
+        DarkCurrent("BioSANS_dark_current.xml")
+        AzimuthalAverage(error_weighting=True)
+        Reduce1D()
+                
+        self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_by_hand.txt", 0.0001))
             
     def skip_test_transmission_by_hand_w_sensitivity(self):
         DataPath("../../../Test/Data/SANS2D/")

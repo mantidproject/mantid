@@ -38,6 +38,10 @@ class Reducer(object):
     ## List of reduction steps
     _reduction_steps = []
         
+    def __init__(self):
+        self._data_files = {}
+        self._reduction_steps = []
+        
     def set_instrument(self, configuration):
         if issubclass(configuration.__class__, SANSInsts.Instrument):
             self.instrument = configuration
