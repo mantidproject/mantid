@@ -91,14 +91,16 @@ namespace Mantid
       }
       else
       {
-        std::string::const_iterator it = std::find_if(hint.begin(),hint.end(),isdigit);
-        if (it == hint.end())
+        /// Find the last non-digit as the instrument name can contain numbers
+        std::string::const_reverse_iterator it = std::find_if(hint.rbegin(),hint.rend(), std::not1(std::ptr_fun(isdigit)));
+        // No non-digit or all non-digits
+        if (it == hint.rend() || it == hint.rbegin())
         {
           throw std::invalid_argument("Malformed hint to FileFinderImpl::makeFileName: "+hint);
         }
-        std::string::size_type i = it - hint.begin();
-        instrPart = hint.substr(0,i);
-        runPart = hint.substr(i);
+        std::string::size_type nChars = std::distance(it, hint.rend());
+        instrPart = hint.substr(0,nChars);
+        runPart = hint.substr(nChars);
       }
 
       Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().Facility().Instrument(instrPart);

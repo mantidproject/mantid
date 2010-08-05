@@ -34,6 +34,9 @@ public:
       "    <instrument name=\"ABCD\" shortname=\"ABC\" zeropadding=\"8\">"
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"
+      "    <instrument name=\"EFG2H\" shortname=\"EFG2H\" zeropadding=\"8\">"
+      "      <technique>Powder Diffraction</technique>"
+      "    </instrument>"
       "    <instrument name=\"CRISP\" shortname=\"CSP\">"
       "      <technique>Technique</technique>"
       "    </instrument>"
@@ -83,6 +86,7 @@ public:
     fName = FileFinder::Instance().makeFileName("0");
     TS_ASSERT_EQUALS(fName,"HRP00000");
 
+    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123"));
   }
 
   void testFindFile()

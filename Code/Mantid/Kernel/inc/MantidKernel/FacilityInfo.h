@@ -63,7 +63,7 @@ public:
   /// Returns a list of file extensions
   const std::vector<std::string> extensions()const{return m_extensions;}
   /// Returns the prefered file extension
-  const std::string preferedExtension()const{return m_extensions.front();}
+  const std::string preferredExtension()const{return m_extensions.front();}
   /// Return the archive search interface names
   const std::set<std::string>& archiveSearch()const{return m_archiveSearch;}
   /// Returns a list of instruments of this facility
