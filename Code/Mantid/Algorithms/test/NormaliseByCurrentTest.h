@@ -78,6 +78,25 @@ public:
     TS_ASSERT_EQUALS( output->YUnitLabel(), "Counts per microAmp.hour" )
   }
 
+  void testExecZero()
+  {
+    NormaliseByCurrent norm1;
+    norm1.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( norm1.setPropertyValue("InputWorkspace","normIn") )
+    TS_ASSERT_THROWS_NOTHING( norm1.setPropertyValue("OutputWorkspace","normOut") )
+
+    // Set the charge to zero
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normIn"));
+    input->mutableRun().setProtonCharge(0.0);
+    input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    input->setYUnit("Counts");
+
+    TS_ASSERT_THROWS_NOTHING( norm1.execute() )
+    TS_ASSERT( !norm1.isExecuted() )
+
+  }
+
 private:
   NormaliseByCurrent norm;
 };

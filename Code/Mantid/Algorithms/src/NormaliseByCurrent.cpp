@@ -48,6 +48,11 @@ void NormaliseByCurrent::exec()
     throw;
   }
 
+  if (charge == 0)
+  {
+    throw std::domain_error("The proton charge is zero");
+  }
+
   g_log.information() << "Normalisation current: " << charge << " uamps" <<  std::endl;
 
   charge=1.0/charge; // Inverse of the charge to be multiplied by
