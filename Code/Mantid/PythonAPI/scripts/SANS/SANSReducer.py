@@ -5,6 +5,7 @@
 """
 from Reducer import Reducer
 from Reducer import ReductionStep
+from Reducer import extract_workspace_name
 import SANSReductionSteps
 from mantidsimple import *
 
@@ -47,6 +48,9 @@ class SANSReducer(Reducer):
     
     ## Output saving step
     _save_iq = None
+    
+    ## Background subtracter
+    _background_subtracter = None
     
     def __init__(self):
         super(SANSReducer, self).__init__()
@@ -170,6 +174,18 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_save_Iq expects an object of class ReductionStep"
     
+    def set_background(self, data_file=None):
+        """
+            Sets the background data to be subtracted from sample data files
+            @param data_file: Name of the background file
+        """
+        if data_file is None:
+            self._background_subtracter = None
+        else:
+            # Check that the file exists
+            self._full_file_path(data_file)
+            self._background_subtracter = SANSReductionSteps.SubtractBackground(data_file)
+    
     def pre_process(self): 
         """
             Reduction steps that are meant to be executed only once per set
@@ -178,50 +194,64 @@ class SANSReducer(Reducer):
         """
         if self._beam_finder is not None:
             self._beam_finder.execute(self)
-
+            
+        # Create the list of reduction steps
+        self._to_steps()            
     
     def post_process(self): raise NotImplemented
     
-    def _to_steps(self, file_ws):
+    def _2D_steps(self):
         """
-            Creates a list of reduction steps for the given data set
+            Creates a list of reduction steps to be applied to
+            each data set, including the background file. 
+            Only the steps applied to a data set
+            before azimuthal averaging are included.
+        """
+        reduction_steps = []
+        
+        # Load file
+        reduction_steps.append(SANSReductionSteps.LoadRun())
+        
+        # Dark current subtraction
+        if self._dark_current_subtracter is not None:
+            reduction_steps.append(self._dark_current_subtracter)
+        
+        # Normalize
+        if self._normalizer is not None:
+            reduction_steps.append(self._normalizer)
+        
+        # Mask
+        if self._mask is not None:
+            reduction_steps.append(self._mask)
+        
+        # Sensitivity correction
+        if self._sensitivity_correcter is not None:
+            reduction_steps.append(self._sensitivity_correcter)
+            
+        # Solid angle correction
+        if self._solid_angle_correcter is not None:
+            reduction_steps.append(self._solid_angle_correcter)
+        
+        # Calculate transmission correction
+        if self._transmission_calculator is not None:
+            reduction_steps.append(self._transmission_calculator) 
+            
+        return reduction_steps
+    
+    def _to_steps(self):
+        """
+            Creates a list of reduction steps for each data set
             following a predefined reduction approach. For each 
             predefined step, we check that a ReductionStep object 
             exists to take of it. If one does, we append it to the 
             list of steps to be executed.
-            
-            @param file_ws: name of the workspace to apply the reduction to
         """
+        # Get the basic 2D steps
+        self._reduction_steps = self._2D_steps()
         
-        # Clean the list of steps
-        self._reduction_steps = []
-        
-        # Load file
-        self.append_step(SANSReductionSteps.LoadRun(datafile=self._data_files[file_ws]))
-        
-        # Dark current subtraction
-        if self._dark_current_subtracter is not None:
-            self.append_step(self._dark_current_subtracter)
-        
-        # Normalize
-        if self._normalizer is not None:
-            self.append_step(self._normalizer)
-        
-        # Mask
-        if self._mask is not None:
-            self.append_step(self._mask)
-        
-        # Sensitivity correction
-        if self._sensitivity_correcter is not None:
-            self.append_step(self._sensitivity_correcter)
-            
-        # Solid angle correction
-        if self._solid_angle_correcter is not None:
-            self.append_step(self._solid_angle_correcter)
-        
-        # Calculate transmission correction
-        if self._transmission_calculator is not None:
-            self.append_step(self._transmission_calculator) 
+        # Subtract the background
+        if self._background_subtracter is not None:
+            self.append_step(self._background_subtracter)
         
         # Perform azimuthal averaging
         if self._azimuthal_averager is not None:
@@ -230,24 +260,4 @@ class SANSReducer(Reducer):
         # Save output to file
         if self._save_iq is not None:
             self.append_step(self._save_iq)
-    
-    def reduce(self):
-        """
-            Go through the list of reduction steps
-        """
-        # Check that an instrument was specified
-        if self.instrument is None:
-            raise RuntimeError, "SANSReducer: trying to run a reduction with an instrument specified"
-
-        # Go through the list of steps that are common to all data files
-        self.pre_process()
-        
-        for file_ws in self._data_files:
-            # Create the list of reduction steps
-            self._to_steps(file_ws)
             
-            for item in self._reduction_steps:
-                item.execute(self, file_ws)
-        
-        
-        

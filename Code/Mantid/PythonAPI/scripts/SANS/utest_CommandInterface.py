@@ -105,6 +105,7 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(len(ReductionSingleton()._data_files), 0)
         self.assertEqual(ReductionSingleton().instrument, None)
         self.assertEqual(ReductionSingleton()._data_path, '.')
+        self.assertEqual(ReductionSingleton()._background_subtracter, None)
                 
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
@@ -264,6 +265,22 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
                 
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_by_hand.txt", 0.0001))
+            
+    def test_background(self):
+        DataPath("../../../Test/Data/SANS2D/")
+        HFIRSANS()
+        SetBeamCenter(16, 95)
+        AppendDataFile("BioSANS_test_data.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml")
+        DarkCurrent("BioSANS_dark_current.xml")
+        Background("BioSANS_test_data.xml")
+        AzimuthalAverage(error_weighting=True)
+        Reduce1D()
+                
+        data = mtd["BioSANS_test_data_Iq"].dataY(0)
+        self.assertEqual(data[0], 0.0)
+        self.assertEqual(data[10], 0.0)
+        self.assertEqual(data[20], 0.0)
             
     def skip_test_transmission_by_hand_w_sensitivity(self):
         DataPath("../../../Test/Data/SANS2D/")

@@ -319,11 +319,18 @@ class LoadRun(ReductionStep):
         Load a data file, move its detector to the right position according
         to the beam center and normalize the data.
     """
-    def __init__(self, datafile):
+    def __init__(self, datafile=None):
         super(LoadRun, self).__init__()
         self._data_file = datafile
         
-    def execute(self, reducer, workspace):       
+    def execute(self, reducer, workspace):      
+        # If we don't have a data file, look up the workspace handle
+        if self._data_file is None:
+            if workspace in reducer._data_files:
+                self._data_file = reducer._data_files[workspace]
+            else:
+                raise RuntimeError, "SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+        
         # Load data
         filepath = reducer._full_file_path(self._data_file)
         loader = LoadSpice2D(filepath, workspace)
@@ -466,4 +473,24 @@ class SaveIqAscii(ReductionStep):
         if reducer._azimuthal_averager is not None:
             output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
             SaveAscii(Filename=output_ws+'.txt', Workspace=output_ws)
+            
+            
+class SubtractBackground(ReductionStep):
+    """
+        Subtracts background from a sample data workspace.
+        The processed background workspace is stored for later use.
+    """
+    def __init__(self, background_file):
+        super(SubtractBackground, self).__init__()
+        self._background_file = background_file
+        self._background_ws = None
+        
+    def execute(self, reducer, workspace):
+        if self._background_ws is None:
+            self._background_ws = extract_workspace_name(self._background_file)
+            for item in reducer._2D_steps():
+                item.execute(reducer, self._background_ws)
+        
+        Minus(workspace, self._background_ws, workspace)
+        
     

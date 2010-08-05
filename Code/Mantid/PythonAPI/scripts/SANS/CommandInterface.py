@@ -123,7 +123,11 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     ReductionSingleton().set_mask(SANSReductionSteps.Mask(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high))
 
-def Background(): raise NotImplemented
+def Background(filename):
+    ReductionSingleton().set_background(filename) 
+
+def NoBackground():
+    ReductionSingleton().set_background(None) 
 
 def SaveIqAscii():
     ReductionSingleton().set_save_Iq(SANSReductionSteps.SaveIqAscii())

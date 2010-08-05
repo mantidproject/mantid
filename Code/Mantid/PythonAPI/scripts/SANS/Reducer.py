@@ -101,10 +101,26 @@ class Reducer(object):
             
         self._data_files[workspace] = data_file 
     
+    def pre_process(self):
+        """
+            Reduction steps that are meant to be executed only once per set
+            of data files. After this is executed, all files will go through
+            the list of reduction steps.
+        """
+        pass
+    
     def reduce(self):
         """
             Go through the list of reduction steps
         """
+        # Check that an instrument was specified
+        if self.instrument is None:
+            raise RuntimeError, "Reducer: trying to run a reduction with an instrument specified"
+
+        # Go through the list of steps that are common to all data files
+        self.pre_process()
+
+        # Go through the list of files to be reduced
         for file_ws in self._data_files:
             for item in self._reduction_steps:
                 item.execute(self, file_ws)        
