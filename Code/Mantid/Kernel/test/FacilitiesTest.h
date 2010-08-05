@@ -60,7 +60,7 @@ public:
     TS_ASSERT_EQUALS(exts[2],"sav");
     TS_ASSERT_EQUALS(exts[3],"n*");
     TS_ASSERT_EQUALS(exts[4],"s*");
-    TS_ASSERT_EQUALS(fac->preferedExtension(),"nxs");
+    TS_ASSERT_EQUALS(fac->preferredExtension(),"nxs");
 
     TS_ASSERT_EQUALS(fac->archiveSearch().size(),2);
     std::set<std::string>::const_iterator it = fac->archiveSearch().begin();
