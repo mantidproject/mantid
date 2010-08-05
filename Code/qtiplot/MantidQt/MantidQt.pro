@@ -1,7 +1,8 @@
 include(mantidqt.pri)
 
 TEMPLATE = subdirs
-SUBDIRS = API MantidWidgets CustomDialogs CustomInterfaces
+CONFIG += ordered
+SUBDIRS = API MantidWidgets CustomDialogs CustomInterfaces DesignerPlugins
 
 #----------------------------
 # Clean this directory as well
