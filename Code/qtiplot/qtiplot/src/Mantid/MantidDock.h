@@ -34,6 +34,8 @@ public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
   void deleteWorkspaces();
   void renameWorkspace();
+  void populateChildData(QTreeWidgetItem* item);
+
 protected slots:
   void popupMenu(const QPoint & pos);
   void workspaceSelected();
@@ -41,7 +43,6 @@ protected slots:
 private slots:
   void addTreeEntry(const QString &, Mantid::API::Workspace_sptr);
   void replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr);
-  void populateChildData(QTreeWidgetItem* item);
   void unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr);
   void removeWorkspaceEntry(const QString &);
   void treeSelectionChanged();
@@ -61,6 +62,7 @@ private:
 protected:
   MantidTreeWidget * m_tree;
   friend class MantidUI;
+
 private:
   MantidUI * const m_mantidUI;
   QPushButton *m_loadButton;

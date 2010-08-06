@@ -285,8 +285,8 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
 QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   QTreeWidgetItem *ws_item = new QTreeWidgetItem(QStringList(ws_name));
-  // Need to add a child so that it becomes expandable
-  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList("Workspace"));
+  // Need to add a child so that it becomes expandable. Using the correct ID is needed when plotting from non-expanded groups.
+  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList(AnalysisDataService::Instance().retrieve(ws_name.toStdString())->id().c_str()));
   wsid_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(wsid_item);
   return ws_item;
@@ -777,6 +777,8 @@ QList<QString> MantidTreeWidget::getSelectedWorkspaceNames() const
     // Look for children (workspace groups)
     if ( (*it)->child(0)->text(0) == "WorkspaceGroup" )
     {
+      // Have to populate the group's children if it hasn't been expanded
+      if (!(*it)->isExpanded()) static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
       const int count = (*it)->childCount();
       for ( int i=1; i < count; ++i )
       {
