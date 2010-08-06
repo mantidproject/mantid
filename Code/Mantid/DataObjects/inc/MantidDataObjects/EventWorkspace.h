@@ -163,6 +163,7 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   /// Set the x-axis data for the given pixel.
   void setX(const int, const  Kernel::cow_ptr<MantidVec> &);
+  void setX(const int, const MantidVec &);
 
   /// Set the x-axis data (histogram bins) for all pixels
   void setAllX(Kernel::cow_ptr<MantidVec> &x);

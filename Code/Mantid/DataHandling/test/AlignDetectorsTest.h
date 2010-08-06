@@ -116,6 +116,23 @@ public:
     align.execute();
   }
 
+  void testExecEventWorkspace_differentOutputWS()
+  {
+    this->setUp_Event();
+
+    //Start by init'ing the algorithm
+    TS_ASSERT_THROWS_NOTHING( align.initialize() );
+    TS_ASSERT( align.isInitialized() );
+
+    //Set all the properties
+    align.setPropertyValue("InputWorkspace", "eventWS");
+    const std::string outputWS = "alignedWS";
+    align.setPropertyValue("OutputWorkspace", outputWS);
+    align.setPropertyValue("CalibrationFile", "../../../../Test/Data/refl_fake.cal");
+
+    align.execute();
+  }
+
 private:
   AlignDetectors align;
   std::string inputWS;

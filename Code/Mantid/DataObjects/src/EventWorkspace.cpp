@@ -160,27 +160,27 @@ using Kernel::Exception::NotImplementedError;
   //-----------------------------------------------------------------------------
 
   /** Get an EventList object at the given pixelid/spectrum number
-   * @param pixelid Pixel ID (aka spectrum number)
+   * @param spectrumNumber Spectrum number to get. This is not necessarily the same as the workspace Index.
    * @returns A reference to the eventlist
    */
-  EventList& EventWorkspace::getEventList(const int pixelid)
+  EventList& EventWorkspace::getEventList(const int spectrumNumber)
   {
     if (this->done_loading_data)
       throw std::runtime_error("EventWorkspace::getEventList called after doneLoadingData(). Try getEventListAtWorkspaceIndex() instead.");
     //An empty entry will be made if needed
-    EventListMap::iterator it = this->data_map.find(pixelid);
+    EventListMap::iterator it = this->data_map.find(spectrumNumber);
     if (it == this->data_map.end())
     {
       //Need to make a new one!
       EventList * newel = new EventList();
       //Save it in the map
-      this->data_map[pixelid] = newel;
+      this->data_map[spectrumNumber] = newel;
       return (*newel);
     }
     else
     {
       //Already exists; return it
-      return *this->data_map[pixelid];
+      return *this->data_map[spectrumNumber];
     }
   }
 
@@ -401,33 +401,46 @@ using Kernel::Exception::NotImplementedError;
   //-----------------------------------------------------------------------------
   // --- Histogramming ----
   //-----------------------------------------------------------------------------
-  /*** Set a histogram X vector.
+  /*** Set a histogram X vector. Should only be called after doneLoadingData().
    * @param index Workspace histogram index to set.
    * @param x The X vector of histogram bins to use.
    */
   void EventWorkspace::setX(const int index, const Kernel::cow_ptr<MantidVec> &x)
   {
+    if (!this->done_loading_data)
+      throw std::runtime_error("EventWorkspace::setX called before doneLoadingData().");
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::setX, histogram number out of range");
     this->data[index]->setX(x);
   }
 
+
+  /*** Set a histogram X vector but create a COW pointer for it. Should only be called after doneLoadingData().
+   * @param index Workspace histogram index to set.
+   * @param x The X vector of histogram bins to use.
+   */
+  void EventWorkspace::setX(const int index, const MantidVec &X)
+  {
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.assign(X.begin(), X.end());
+    this->setX(index, axis);
+  }
+
+
   //-----------------------------------------------------------------------------
-  /*** Set all histogram X vectors.
+  /*** Set all histogram X vectors. Should only be called after doneLoadingData().
    * @param x The X vector of histogram bins to use.
    */
   void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x)
   {
+    if (!this->done_loading_data)
+      throw std::runtime_error("EventWorkspace::setAllX called before doneLoadingData().");
     //int counter=0;
     EventListVector::iterator i = this->data.begin();
     for( ; i != this->data.end(); ++i )
     {
       (*i)->setX(x);
-      /*if (counter++ % 100 == 0)
-      {
-        std::stringstream out; out << "Setting X for pixel " << counter << ".";
-        g_log.information(out.str());
-      }*/
     }
 
     //Clear MRU lists now, free up memory

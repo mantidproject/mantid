@@ -7,6 +7,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/SpectraAxis.h"
 #include <cfloat>
 #include <fstream>
 #include "MantidKernel/VectorHelper.h"
@@ -15,6 +16,8 @@
 
 namespace Mantid
 {
+using namespace Kernel;
+using namespace API;
 
 namespace Algorithms
 {
@@ -22,8 +25,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing2)
 
-using namespace Kernel;
-using namespace API;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
@@ -262,14 +263,22 @@ void DiffractionFocussing2::execEvent()
   DataObjects::EventWorkspace_sptr out;
   out = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1) );
+  //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(inputW, out, true);
   //Make sure the output spectra map is clear (it should be anyway).
   out->mutableSpectraMap().clear();
 
   // Make sure the group list is initialized
   this->initializeGroups();
+  g_log.information() << nGroups << " groups found in .cal file.\n";
 
-  // Now the real work
+  //Flag to determine whether the X for a group has been set
+  std::vector<bool> flags(nGroups,true);
+
+  //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
+  std::vector< MantidVec > original_X_to_use(nGroups);
+
+  //Shortcup to the spectra Map (maps spectrum # to a [list of] detector ID #s
   const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
   const API::Axis* const inSpecAxis = inputW->getAxis(1);
 
@@ -285,16 +294,19 @@ void DiffractionFocussing2::execEvent()
 
     //Check whether this spectra is in a valid group
     const int group=spectra_group[i];
-    /*std::cout << "Workspace index " << i << ", which is spectrum # " <<
-        spectrum_no << ", goes to group " << group <<
-        "; this spectrum has " << detlist.size() << " detectors" <<
-          "\n";*/
+    //std::cout << "Workspace index " << i << ", which is spectrum # " << spectrum_no << ", goes to group " << group << "; this spectrum has " << detlist.size() << " detectors" << "\n";
     if (group==-1) // Not in a group
       continue;
 
-    // Get the group
-    //group2vectormap::iterator it=group2xvector.find(group);
-    //group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
+    // Assign the new X axis only once (i.e when this group is encountered the first time)
+    if (flags[group])
+    {
+      //Copy the X axis for later
+      original_X_to_use[group].assign( eventW->refX(i)->begin(), eventW->refX(i)->end())  ;
+      //Flag not to copy it again.
+      flags[group]=false;
+    }
+
     // Add the detectors for this spectrum to the output workspace's spectra-detector map
     out->mutableSpectraMap().addSpectrumEntries(group, detlist);
     //std::cout << "Group has " << out->mutableSpectraMap().getDetectors(group).size() << " detectors now.\n";
@@ -303,10 +315,46 @@ void DiffractionFocussing2::execEvent()
     out->getEventList(group) += eventW->getEventListAtWorkspaceIndex(i);
 
   }
-  //Clean up the workspace index but don't change the spectraMap
+  //Clean up the workspace index but don't change the spectraMap, since we made that manually
   out->doneLoadingData(0);
 
-  //std::cout << "Setting the output workspace\n";
+  //Now that the data is cleaned up, go through it and set the X vectors to the input workspace we first talked about.
+
+  //(map to go from spectrum # to workspace index in the OUTPUT workspace)
+  Mantid::API::SpectraAxis* axis = dynamic_cast<Mantid::API::SpectraAxis*>(out->getAxis(1));
+  Mantid::API::SpectraAxis::spec2index_map mymap;
+  axis->getSpectraIndexMap(mymap);
+
+  for (int g=0; g < nGroups; g++)
+  {
+    //First look in the map to see if you find the group #
+    Mantid::API::SpectraAxis::spec2index_map::iterator it = mymap.find(g);
+    if (it == mymap.end())
+    {
+      if (g>0)
+        g_log.warning() << "Warning! No workspace index found for group # " << g << ". Histogram will be empty.\n";
+      continue;
+    }
+
+    //Now this is the workspace index of that group
+    int workspaceIndex = it->second;
+    //std::cout << "group" << g << " workspace index " << workspaceIndex << "\n";
+    if (workspaceIndex >= out->getNumberHistograms())
+    {
+      g_log.warning() << "Warning! Invalid workspace index found for group # " << g << ". Histogram will be empty.\n";
+      continue;
+    }
+
+    //Now you set the X axis to the X you saved before.
+    if (original_X_to_use[g].size() > 0)
+    {
+      out->setX(workspaceIndex, original_X_to_use[g] );
+      g_log.information() << "X axis for workspace index " << workspaceIndex << " set, with " << original_X_to_use[g].size() << " bins.\n";
+    }
+    else
+      g_log.warning() << "Warning! No X histogram bins were found for group # " << g << ". Histogram will be empty.\n";
+  }
+
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out));
   return;
 }

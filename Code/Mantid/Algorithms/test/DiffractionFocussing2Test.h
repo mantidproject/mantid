@@ -80,7 +80,7 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
 	}
 
-	void testEventWorkspace()
+	void testEventWorkspaceSameOutputWS()
 	{
     //----- Load some event data --------
 	  LoadEventPreNeXus * eventLoader;
@@ -104,6 +104,19 @@ public:
     //Fake a d-spacing unit in the data.
     inputW->getAxis(0)->unit() =UnitFactory::Instance().create("dSpacing");
 
+    //Create a DIFFERENT x-axis for each pixel. Starting bing = the workspace index #
+    for (int pix=0; pix < numpixels_with_events; pix++)
+    {
+      Kernel::cow_ptr<MantidVec> axis;
+      MantidVec& xRef = axis.access();
+      xRef.resize(50);
+      for (int i = 0; i < 50; ++i)
+        xRef[i] = pix + i*1.0;
+
+      //Set an X-axis
+      inputW->setX(pix, axis);
+    }
+
     /*
     // Have to align because diffraction focussing wants d-spacing
     Mantid::DataHandling::AlignDetectors align;
@@ -116,7 +129,8 @@ public:
     */
 
     focus.setPropertyValue("InputWorkspace", "refl");
-    focus.setPropertyValue("OutputWorkspace", "focusedWS" );
+    std::string outputws( "refl" );
+    focus.setPropertyValue("OutputWorkspace", outputws);
 
     //This fake calibration file was generated using DiffractionFocussing2Test_helper.py
     focus.setPropertyValue("GroupingFileName","../../../../Test/Data/refl_fake.cal");
@@ -126,7 +140,7 @@ public:
     TS_ASSERT( focus.isExecuted() );
 
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("focusedWS"));
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
     //The fake grouping file has 100 groups, starting at 1, so there'll be 100 histograms
     int numgroups = 100;
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
@@ -163,6 +177,11 @@ public:
       }
       //Look up how many events in the output, summed up spectrum (workspace index = group-1)
       TS_ASSERT_EQUALS(numevents, output->getEventListAtWorkspaceIndex(group-1).getNumberEvents());
+
+      //The first X bin of each group corresponds to the workspace index in the INPUT workspace of the first pixel in the group.
+      int workspaceindex_in_output = group-1;
+      TS_ASSERT( (*output->refX(workspaceindex_in_output)).size() > 0);
+      TS_ASSERT_EQUALS((*output->refX(workspaceindex_in_output))[0], mymap[ mylist[0] ]);
     }
 
 
