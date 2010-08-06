@@ -59,7 +59,7 @@ public:
   /// Return the name of the facility
   const std::string name()const{return m_name;}
   /// Returns default zero padding for this facility
-  const int zeroPadding()const{return m_zeroPadding;}
+  int zeroPadding()const{return m_zeroPadding;}
   /// Returns a list of file extensions
   const std::vector<std::string> extensions()const{return m_extensions;}
   /// Returns the prefered file extension
@@ -73,6 +73,8 @@ public:
   /// Returns instruments with given name
   const InstrumentInfo Instrument(const std::string& iName = "")const;
 private:
+  ///Default constructor
+  FacilityInfo();
   /// Add new extension
   void addExtension(const std::string& ext);
 

@@ -46,19 +46,28 @@ public:
   bool isLoadProperty() const;
 
   ///Overridden setValue method
-  virtual std::string setValue(const std::string & filename);
+  virtual std::string setValue(const std::string & propValue);
   /// Returns the main file extension that's used 
   std::string getDefaultExt() const {return m_defaultExt;}
 
-private:
+ private:
+  void setUp(const std::string & defExt);
+  /// Do the allowed values match the facility preference extensions for run files
+  bool extsMatchRunFiles();
+  /// Handles the filename if this is a save property
+  std::string setLoadProperty(const std::string & propValue);
+  /// Handles the filename if this is a save property
+  std::string setSaveProperty(const std::string & propValue);
   /// Check that a given directory exists
-  std::string checkDirectory(const std::string & filepath) const;
+  std::string createDirectory(const std::string & path) const;
   /// Check file extension to see if a lower- or upper-cased version will also match if the first does not exist
   std::string convertExtension(const std::string & filepath) const;
   /// The action type of this property, i.e. load/save
   unsigned int m_action;
   ///The default file extension associated with the type of file this property will handle
   std::string m_defaultExt;
+  /// Is this property for run files?
+  bool m_runFileProp;
 };
 
 }

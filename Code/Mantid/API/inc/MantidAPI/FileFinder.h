@@ -45,8 +45,8 @@ namespace Mantid
     public:
       std::string getFullPath(const std::string& fName)const;
       std::string makeFileName(const std::string& hint)const;
-      std::string findFile(const std::string& hint)const;
-      std::vector<std::string> findFiles(const std::string& hint)const;
+      std::string findRun(const std::string& hint)const;
+      std::vector<std::string> findRuns(const std::string& hint)const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;

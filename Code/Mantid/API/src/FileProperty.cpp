@@ -2,10 +2,13 @@
 // Includes
 //-----------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
+#include <cctype>
 
 namespace Mantid
 {
@@ -29,9 +32,9 @@ using namespace Mantid::Kernel;
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
 			   const std::vector<std::string> & exts, unsigned int direction) 
   : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action == FileProperty::Load) ), direction), 
-    m_action(action)
+    m_action(action), m_defaultExt(""), m_runFileProp(false)
 {
-  m_defaultExt = exts.size() > 0 ? exts.front() : "";
+  setUp((exts.size() > 0) ? exts.front() : "");
 }
 
 /**
@@ -46,8 +49,9 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
          const std::string & ext, unsigned int direction)
   : PropertyWithValue<std::string>(name, default_value,
            new FileValidator(std::vector<std::string>(1,ext), (action == FileProperty::Load) ), direction),
-    m_action(action), m_defaultExt(ext)
+    m_action(action), m_defaultExt(ext), m_runFileProp(false)
 {
+  setUp(ext);
 }
 
 /**
@@ -60,113 +64,158 @@ bool FileProperty::isLoadProperty() const
 }
 
 /**
- * Set the filename
- * @param filename The value here is treated as a filename.
+ * Set the value of the property
+ * @param propValue The value here is treated as relating to a filename
  * @returns A string indicating the outcome of the attempt to set the property. An empty string indicates success.
  */
-std::string FileProperty::setValue(const std::string & filename)
+std::string FileProperty::setValue(const std::string & propValue)
 {
-  // If the path is absolute then don't do any searching but make sure the directory exists for a Save property
-  if( Poco::Path(filename).isAbsolute() )
+  // If this looks like an absolute path then don't do any searching but make sure the 
+  // directory exists for a Save property
+  if( Poco::Path(propValue).isAbsolute() )
   {
     std::string error("");
     if( !isLoadProperty() )
     {
-       error = checkDirectory(filename);
+       error = createDirectory(propValue);
        if( !error.empty() ) return error;
     }
 
-    error = PropertyWithValue<std::string>::setValue(filename);
-    if( error.empty() ) return error;
-    // Change the file extension to a lower/upper cased version of the extension to check if this can be found instead
-    std::string diffcase_ext = convertExtension(filename);
-    return PropertyWithValue<std::string>::setValue(diffcase_ext);
+    return PropertyWithValue<std::string>::setValue(propValue);
   }
 
-  std::string valid_string("");
+  std::string errorMsg("");
   // For relative paths, differentiate between load and save types
   if( isLoadProperty() )
   {
-    if( filename.empty() ) return PropertyWithValue<std::string>::setValue(filename);
+    errorMsg = setLoadProperty(propValue);
+  }
+  else
+  {
+    errorMsg = setSaveProperty(propValue);
+  }
+  return errorMsg;
+}
 
-    Poco::File relative(filename);
-    Poco::File check_file(Poco::Path(Poco::Path::current()).resolve(relative.path()));
-    valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
-    if( !valid_string.empty() || !check_file.exists() )
+/**
+ * Set up the property
+ * @param defExt The default extension
+ */
+void FileProperty::setUp(const std::string & defExt)
+{
+  m_defaultExt = defExt;
+  if( isLoadProperty() && extsMatchRunFiles() )
+  {
+    m_runFileProp = true;
+  }
+  else
+  {
+    m_runFileProp = false;
+  }
+}
+
+/**
+ * Do the allowed values match the facility preference extensions for run files
+ * @returns True if the extensions match those in the facility's preference list for 
+ * run file extensions, false otherwise
+ */
+bool FileProperty::extsMatchRunFiles()
+{
+  Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().Facility();
+  const std::vector<std::string>  facilityExts = facilityInfo.extensions();
+  std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
+  std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
+  const std::set<std::string> allowedExts = this->allowedValues();
+
+  bool match(false);
+  for( std::set<std::string>::const_iterator it = allowedExts.begin(); it != allowedExts.end(); ++it )
+  {
+    if( std::find(facilityExtsBegin, facilityExtsEnd, *it) != facilityExtsEnd )
     {
-      std::string diffcase_ext = convertExtension(filename);
-      valid_string = PropertyWithValue<std::string>::setValue(diffcase_ext);
-      check_file = Poco::Path(Poco::Path::current()).resolve(diffcase_ext);
-      if( valid_string.empty() && check_file.exists() ) return "";
+      match = true;
+      break;
+    }
+  }
 
-      Poco::File relative_diffext(diffcase_ext);
-      const std::vector<std::string>& search_dirs = ConfigService::Instance().getDataSearchDirs();
-      std::vector<std::string>::const_iterator iend = search_dirs.end();
-      for( std::vector<std::string>::const_iterator it = search_dirs.begin(); it != iend; ++it )
-      {
-        check_file = Poco::File(Poco::Path(*it).resolve(relative.path()));
-        if( check_file.exists() )
-        {
-          valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
-          break;
-        }
-        check_file = Poco::File(Poco::Path(*it).resolve(relative_diffext.path()));
-        if( check_file.exists() )
-        {
-          valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
-          break;
-        }
+  return match;
+}
 
-      }
+/**
+ * Handles the filename if this is a load property
+ * @param propValue The filename to treat as a filepath to be loaded
+ * @returns A string contain the result of the operation, empty if successful.
+ */
+std::string FileProperty::setLoadProperty(const std::string & propValue)
+{
+  std::string foundFile("");
+  if( m_runFileProp )
+  {
+    foundFile = FileFinder::Instance().findRun(propValue);
+  }
+  else
+  {
+    foundFile = FileFinder::Instance().getFullPath(propValue);
+  }
+  if( foundFile.empty() )
+  {
+    return PropertyWithValue<std::string>::setValue(propValue);
+  }
+  else
+  {
+    return PropertyWithValue<std::string>::setValue(foundFile);
+  }
+}
+
+/**
+ * Handles the filename if this is a save property
+ * @param propValue The filename to treat as a filepath to be saved
+ * @returns A string contain the result of the operation, empty if successful.
+ */
+std::string FileProperty::setSaveProperty(const std::string & propValue)
+{
+  if( propValue.empty() )
+  {
+    if ( m_action == OptionalSave )
+    {
+      return PropertyWithValue<std::string>::setValue("");
+    }
+    else return "Empty filename not allowed.";
+  }
+  std::string errorMsg("");
+  // We have a relative save path so just prepend the path that is in the 'defaultsave.directory'
+  // Note that this catches the Poco::NotFoundException and returns an empty string in that case
+  std::string save_path =  ConfigService::Instance().getString("defaultsave.directory");
+  Poco::Path save_dir;
+  if( save_path.empty() )
+  {
+    save_dir = Poco::Path(propValue).parent();
+    // If we only have a stem filename, parent() will make save_dir empty and then Poco::File throws
+    if( save_dir.toString().empty() )
+    {
+      save_dir = Poco::Path::current();
     }
   }
   else
   {
-    if( filename.empty() )
-    {
-      if ( m_action == OptionalSave )
-      {
-        return PropertyWithValue<std::string>::setValue("");
-      }
-      else return "Empty filename not allowed.";
-    }
-
-    // We have a relative save path so just prepend the path that is in the 'defaultsave.directory'
-    // Note that this catches the Poco::NotFoundException and returns an empty string in that case
-    std::string save_path =  ConfigService::Instance().getString("defaultsave.directory");
-    Poco::Path save_dir;
-    if( save_path.empty() )
-    {
-      save_dir = Poco::Path(filename).parent();
-      // If we only have a stem filename, parent() will make save_dir empty and then Poco::File throws
-      if( save_dir.toString().empty() )
-      {
-	      save_dir = Poco::Path::current();
-      }
-    }
-    else
-    {
-      save_dir = Poco::Path(save_path).makeDirectory();
-    }
-    valid_string = checkDirectory(save_dir.toString());
-    if( valid_string.empty() )
-    {
-      std::string fullpath = save_dir.resolve(filename).toString();
-      valid_string = PropertyWithValue<std::string>::setValue(fullpath);
-    }
-
+    save_dir = Poco::Path(save_path).makeDirectory();
   }
-  return valid_string;
+  errorMsg = createDirectory(save_dir.toString());
+  if( errorMsg.empty() )
+  {
+    std::string fullpath = save_dir.resolve(propValue).toString();
+    errorMsg = PropertyWithValue<std::string>::setValue(fullpath);
+  }
+  return errorMsg;
 }
 
 /**
- * Check whether a given directory exists and create it if it does not.
- * @param fullpath The path to the directory, which can include file stem
+ * Create a given directory if it does not already exist.
+ * @param path The path to the directory, which can include file stem
  * @returns A string indicating a problem if one occurred
  */
-std::string FileProperty::checkDirectory(const std::string & fullpath) const
+std::string FileProperty::createDirectory(const std::string & path) const
 {
-  Poco::Path stempath(fullpath);
+  Poco::Path stempath(path);
   if( stempath.isFile() )
   {
     stempath.makeParent();
@@ -203,22 +252,20 @@ std::string FileProperty::convertExtension(const std::string & filepath) const
 {
   Poco::Path fullpath(filepath);
   std::string ext = fullpath.getExtension();
-  if( ext.empty() ) return "";
+  if( ext.empty() ) return filepath;
   int nchars = ext.size();
   for( int i = 0; i < nchars; ++i )
   {
     int c = static_cast<int>(ext[i]);
-    if( c >= 65 && c <= 90 )
+    if( std::islower(c) )
     {
-      ext[i] = static_cast<char>(c + 32);
+      ext[i] = std::toupper(c);
     }
-    else if( c >= 97 && c <= 122 )
+    else if( std::isupper(c) )
     {
-      ext[i] = static_cast<char>(c - 32);
+      ext[i] = std::tolower(c);
     }
-    else
-    {
-    }
+    else {}
   }
   fullpath.setExtension(ext);
   return fullpath.toString();  

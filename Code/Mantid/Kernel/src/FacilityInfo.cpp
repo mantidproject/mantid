@@ -24,8 +24,9 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   * @elem The Poco::XML::Element to read the data from
   * @throws std::runtime_error if name or file extensions are not defined
   */
-FacilityInfo::FacilityInfo(const Poco::XML::Element* elem)
-:m_name(elem->getAttribute("name"))
+FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
+  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_extensions(), m_archiveSearch(), 
+  m_instruments()
 {
   if (m_name.empty())
   {
@@ -59,7 +60,6 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem)
   }
   else if (pNL_archives->length() == 1)
   {
-    Poco::XML::Element* elemArch = dynamic_cast<Poco::XML::Element*>(pNL_archives->item(0));
     Poco::XML::NodeList* pNL_interfaces = elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i)
     {
@@ -98,15 +98,19 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem)
 }
 
 /**
-  * Add new extension
-  * @param ext File extension without the dot, e.g. "nxs" or "raw"
+  * Add new extension. Adds both a lowercase and uppercase version
+  * @param ext File extension, including the dot, e.g. ".nxs" or ".raw"
   */
 void FacilityInfo::addExtension(const std::string& ext)
 {
-  std::vector<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),ext);
+  std::string casedExt(ext); 
+  std::transform(ext.begin(), ext.end(), casedExt.begin(), tolower);
+  std::vector<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),casedExt);
   if (it == m_extensions.end())
   {
-    m_extensions.push_back(ext);
+    m_extensions.push_back(casedExt);
+    std::transform(ext.begin(), ext.end(), casedExt.begin(), toupper);
+    m_extensions.push_back(casedExt);
   }
 }
 

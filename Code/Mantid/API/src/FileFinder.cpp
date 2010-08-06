@@ -104,7 +104,7 @@ namespace Mantid
       }
 
       Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().Facility().Instrument(instrPart);
-      int nZero = instr.zeroPadding();
+      size_t nZero = instr.zeroPadding();
       // remove any leading zeros in case there are too many of them
       std::string::size_type i = runPart.find_first_not_of('0');
       runPart.erase(0,i);
@@ -137,19 +137,24 @@ namespace Mantid
     }
 
     /**
-      * Find the file given a hint. Calls makeFileName internally.
+      * Find the file given a hint. If the name contains a dot(.) then it is assumed that it is already a file stem
+      * otherwise calls makeFileName internally.
       * @param hint The name hint
       * @return The full path to the file or empty string if not found
       */
-    std::string FileFinderImpl::findFile(const std::string& hint)const
+    std::string FileFinderImpl::findRun(const std::string& hint)const
     {
+      if( hint.find(".") != std::string::npos )
+      {
+	return getFullPath(hint);
+      }	
       std::string fName = makeFileName(hint);
       const std::vector<std::string> exts = Kernel::ConfigService::Instance().Facility().extensions();
       std::vector<std::string>::const_iterator ext = exts.begin();
       for(;ext != exts.end(); ++ext)
       {
-        std::string path = getFullPath(fName + "." + *ext);
-        if ( !path.empty() ) return path;
+	std::string path = getFullPath(fName + *ext);
+	if ( !path.empty() ) return path;
       }
 
       // Search the archive of the default facility
@@ -168,7 +173,7 @@ namespace Mantid
             std::vector<std::string>::const_iterator ext = exts.begin();
             for(;ext != exts.end(); ++ext)
             {
-              Poco::Path pathPattern(path + "." + *ext);
+              Poco::Path pathPattern(path + *ext);
               if (ext->find("*") != std::string::npos)
               {
                 continue;
@@ -193,14 +198,14 @@ namespace Mantid
     }
 
     /**
-      * Find a list of files file given a hint. Calls findFile internally.
-      * @param hint Comma separated list of hints to findFile method. 
+      * Find a list of files file given a hint. Calls findRun internally.
+      * @param hint Comma separated list of hints to findRun method. 
       *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
       *  Only the beginning of a range can contain an instrument name.
       * @return A vector of full paths or empty vector
       * @thorws std::invalid_argument if the argument is malformed 
       */
-    std::vector<std::string> FileFinderImpl::findFiles(const std::string& hint)const
+    std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint)const
     {
       std::vector<std::string> res;
       Poco::StringTokenizer hints(hint, ",", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
@@ -217,7 +222,7 @@ namespace Mantid
         {
           std::pair<std::string,std::string> p1 = toInstrumentAndNumber(range[0]);
           std::string run = p1.second;
-          int nZero = run.size(); // zero padding
+          size_t nZero = run.size(); // zero padding
           if (range[1].size() > nZero)
           {
             ("Malformed range of runs: "+*h + 
@@ -235,7 +240,7 @@ namespace Mantid
           {
             run = boost::lexical_cast<std::string>(irun);
             while(run.size() < nZero) run.insert(0,"0");
-            std::string path = findFile(p1.first + run);
+            std::string path = findRun(p1.first + run);
             if ( !path.empty() )
             {
               res.push_back(path);
@@ -244,7 +249,7 @@ namespace Mantid
         }
         else
         {
-          std::string path = findFile(*h);
+          std::string path = findRun(*h);
           if ( !path.empty() )
           {
             res.push_back(path);

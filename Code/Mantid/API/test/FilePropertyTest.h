@@ -5,19 +5,53 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include <Poco/Path.h>
+#include <Poco/File.h>
+#include <fstream>
+
+using namespace Mantid::Kernel;
 
 class FilePropertyTest : public CxxTest::TestSuite
 {
 public:
+  
+  void setUp()
+  {
+    ConfigService::Instance().updateConfig("Mantid.properties");
+        // Ensure we have the correct facility set up
+        const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<facilities>"
+      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
+      "    <archive>"
+      "      <archiveSearch plugin=\"ISISDataSearch\" />"
+      "    </archive>"
+      "    <instrument name=\"GEM\" shortname=\"GEM\">"
+      "      <technique>technique</technique>"
+      "    </instrument>"
+      "    <instrument name=\"ALF\" shortname=\"ALF\">"
+      "      <technique>technique</technique>"
+      "    </instrument>"
+
+      "  </facility>"
+      "</facilities>";
+
+    const std::string facilityFilePath("FilePropertyTest_Facilities.xml");
+    std::ofstream facilityFile(facilityFilePath.c_str());
+    facilityFile << xmlStr;
+    facilityFile.close();
+
+    ConfigService::Instance().updateFacilities(facilityFilePath);
+    ConfigService::Instance().setString("default.instrument","GEM");
+    ConfigService::Instance().setString("default.facility","ISIS");
+    
+    Poco::File(facilityFilePath).remove();
+  }
 
   void testSearchDirs()
   {
-    // It wasn't happy having this in the constructor as I think all of the objects in the test
-    //get created first and then all of the tests run
-    Mantid::Kernel::ConfigService::Instance().updateConfig("Mantid.properties");
-    TS_ASSERT_DIFFERS(Mantid::Kernel::ConfigService::Instance().getDataSearchDirs().size(), 0);
+    TS_ASSERT_DIFFERS(ConfigService::Instance().getDataSearchDirs().size(), 0);
   }
-  
+
   void testLoadPropertyNoExtension()
   {
     Mantid::API::FileProperty *fp = 
@@ -28,8 +62,15 @@ public:
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "")
 
     ///Test a GEM file in the test directory
-    std::string msg = fp->setValue("GEM38370.raw");
+    const std::string test_file = "GEM38370.raw";
+    std::string msg = fp->setValue(test_file);
+    TS_ASSERT_EQUALS(msg, "")
+
+    // Absolute path
+    Poco::Path test_dir = Poco::Path("../../../../Test/Data/").absolute();
+    msg = fp->setValue(test_dir.resolve(Poco::Path(test_file)).toString());
     TS_ASSERT_EQUALS(msg, "")    
+
     delete fp;
   }
 
@@ -45,8 +86,6 @@ public:
     ///Test a GEM file in the test directory
     std::string msg = fp->setValue("GEM38370.raw");
     TS_ASSERT_EQUALS(msg, "")    
-
-    // Test case-insensitivity
     msg = fp->setValue("ALF15739.RAW");
     TS_ASSERT_EQUALS(msg, "")    
 
@@ -89,6 +128,27 @@ public:
     TS_ASSERT_EQUALS(msg, "")
     
     delete fp;
+  }
+  
+  void testThatRunNumberReturnsFileWithCorrectPrefix()
+  {
+    Poco::Path test_dir = Poco::Path("../../../../Test/Data/").absolute();
+    Poco::Path test_file = test_dir.resolve("GEM38370.raw");
+    
+
+    Mantid::API::FileProperty *fp = 
+      new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, 
+				    std::vector<std::string>(1, ".raw"));
+    std::string error = fp->setValue("38370");
+    TS_ASSERT_EQUALS(error, "");
+    TS_ASSERT_EQUALS(test_file.toString(), fp->value());
+    
+    // Now test one with an upper case extension
+    ConfigService::Instance().setString("default.instrument","ALF");
+    error = fp->setValue("15739");
+    TS_ASSERT_EQUALS(error, "");
+    test_file = test_dir.resolve("ALF15739.RAW");
+    TS_ASSERT_EQUALS(test_file.toString(), fp->value());
   }
 
 };

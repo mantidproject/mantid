@@ -24,7 +24,7 @@ public:
 
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
-      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,N*,s*,S*\">"
+      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
       "    <archive>"
       "      <archiveSearch plugin=\"ISISDataSearch\" />"
       "    </archive>"
@@ -50,10 +50,13 @@ public:
     fil << xmlStr;
     fil.close();
 
+ }
+
+  void setUp()
+  {
     ConfigService::Instance().updateFacilities(m_facFile.path());
     ConfigService::Instance().setString("default.instrument","HRPD");
     ConfigService::Instance().setString("default.facility","ISIS");
-
   }
 
   ~FileFinderTest()
@@ -89,27 +92,27 @@ public:
     TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123"));
   }
 
-  void testFindFile()
+  void testFindRun()
   {
     ConfigService::Instance().setString("datasearch.searcharchive","Off");
-    std::string path = FileFinder::Instance().findFile("CSP78173");
+    std::string path = FileFinder::Instance().findRun("CSP78173");
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    path = FileFinder::Instance().findFile("HRP37129");
+    path = FileFinder::Instance().findRun("HRP37129");
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size()-3),"S02");
 
     //ConfigService::Instance().setString("datasearch.searcharchive","On");
-    //path = FileFinder::Instance().findFile("CSP77374");
+    //path = FileFinder::Instance().findRun("CSP77374");
     //std::cerr<<"Path: "<<path<<'\n';
-    //path = FileFinder::Instance().findFile("CSP78174");
+    //path = FileFinder::Instance().findRun("CSP78174");
     //std::cerr<<"Path: "<<path<<'\n';
   }
 
   void testFindFiles()
   {
-    std::vector<std::string> files = FileFinder::Instance().findFiles("MUSR15189-99");
+    std::vector<std::string> files = FileFinder::Instance().findRuns("MUSR15189-99");
     TS_ASSERT_EQUALS(files.size(),11);
     std::vector<std::string>::iterator it = files.begin();
     for(; it != files.end(); ++it)

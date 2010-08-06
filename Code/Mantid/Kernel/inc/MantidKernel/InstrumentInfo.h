@@ -65,7 +65,7 @@ public:
   /// Return the short name of the instrument
   const std::string shortName()const{return m_shortName;}
   /// Returns zero padding for this instrument
-  const int zeroPadding()const{return m_zeroPadding;}
+  int zeroPadding()const{return m_zeroPadding;}
   /// Return list of techniques
   const std::set<std::string>& techniques()const{return m_technique;}
 private:
