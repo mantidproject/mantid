@@ -5,24 +5,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
+
 namespace Mantid
 {
 namespace Algorithms
 {
-/** Takes   group workspaces as input and ungroups the workspaces.
+/** Takes the name of a group workspace as input and ungroups the workspaces.
 
-    Required Properties:
+    Required Property:
     <UL>
-    <LI> InputWorkspaces - The name of the workspaces  to group as input </LI>
+    <LI> InputWorkspace- The name of the workspace to ungroup </LI>
      </UL>
 
     @author Sofia Antony
-    @date 21/07/2008
+    @date 21/07/2009
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -67,4 +65,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_REGROUP_H_*/
+#endif /*MANTID_ALGORITHM_UNGROUP_H_*/

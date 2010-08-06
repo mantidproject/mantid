@@ -221,7 +221,7 @@ public:
   }
 
   /// Get a shared pointer to a stored data object
-  boost::shared_ptr<T> retrieve( const std::string& name)
+  boost::shared_ptr<T> retrieve( const std::string& name) const
   {
     svc_constit it = datamap.find(name);
     if (it!=datamap.end())

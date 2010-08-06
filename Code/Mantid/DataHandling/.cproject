@@ -56,6 +56,7 @@
 									<listOptionValue builtIn="false" value="MantidGeometry"/>
 									<listOptionValue builtIn="false" value="MantidAPI"/>
 									<listOptionValue builtIn="false" value="MantidDataObjects"/>
+									<listOptionValue builtIn="false" value="PocoNetd"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.2056530203" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="../../debug"/>

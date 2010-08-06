@@ -2,12 +2,12 @@
 #define MANTID_ICAT_LISTINSTRUMENTS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 
-/**  CListInstruments class is responsible for loading  instruments list from ICat DB .
-     This class written as a Mantid algorithm. This algorithm is used to poulate the 
-	 ICat Search Interface instrument box  
+/** CListInstruments class is responsible for loading  instruments list from ICat DB .
+    This class written as a Mantid algorithm. This algorithm is used to poulate the
+    ICat Search Interface instrument box
       
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 09/07/2010

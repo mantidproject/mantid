@@ -1,7 +1,6 @@
 #include "MantidICat/ListInstruments.h"
 #include "MantidICat/SearchHelper.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
 
 
 namespace Mantid

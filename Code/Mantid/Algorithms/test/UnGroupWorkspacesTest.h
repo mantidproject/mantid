@@ -92,9 +92,9 @@ public:
 		/*std::vector<std::string >input;
 		input.push_back("LOQ48098");*/
 		std::string input="LOQ48098";
-		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.setProperty("InputWorkspace",input));
+		TS_ASSERT_THROWS( ungrpwsalg.setProperty("InputWorkspace",input), std::invalid_argument );
 		//this throws exception as selcted workspace is not a group ws
-		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.execute());
+		TS_ASSERT_THROWS( ungrpwsalg.execute(), std::runtime_error );
 		TS_ASSERT(! ungrpwsalg.isExecuted() );
 							
 	}
