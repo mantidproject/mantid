@@ -288,24 +288,7 @@ void AlignDetectors::execEvent()
   const Geometry::V3D beamline = samplePos-sourcePos;
   const double beamline_norm=2.0*beamline.norm();
 
-//  for (std::map<int,double>::const_iterator iter = offsets.begin(); iter != offsets.end(); ++iter)
-//  {
-//    int pixel_id = iter->first;
-//    double offset = iter->second;
-//
-//    // Get the spectrum number for this histogram
-//    const int spec = inputWS->getAxis(1)->spectraNo(i);
-//    double factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
-//                                   specMap.getDetectors(spec), offsets);
-//
-//    // this should do the wonderful calculation of the geometric position as
-//    // done in the histogram case
-//    conversions[pixel_id] = factor;
-//  }
-
   const int numberOfSpectra = inputWS->getNumberHistograms();
-  // Conversion map: key = spectrum #; value = factor
-  std::map<int,double> conversions;
 
   // generate map of the tof->d conversion factors
   int spec;
@@ -316,10 +299,6 @@ void AlignDetectors::execEvent()
     spec = inputWS->getAxis(1)->spectraNo(i);
     factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
                                    specMap.getDetectors(spec), offsets);
-
-    // this should do the wonderful calculation of the geometric position as
-    // done in the histogram case
-    conversions[spec] = factor;
 
     //Perform the multiplication on all events
     outputWS->getEventListAtWorkspaceIndex(i).convertTof(factor);

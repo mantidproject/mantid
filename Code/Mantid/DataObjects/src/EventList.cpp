@@ -462,9 +462,24 @@ namespace DataObjects
     }
 
     // iterate through all events
-    std::vector<TofEvent>::iterator iter;
-    for (iter = this->events.begin(); iter != this->events.end(); iter++)
+    for (std::vector<TofEvent>::iterator iter = this->events.begin();
+         iter != this->events.end(); iter++)
       iter->time_of_flight = iter->time_of_flight * factor + offset;
+
+    // fix the histogram parameter
+    StorageType x = this->refX.access();
+    for (StorageType::iterator iter = x.begin(); iter != x.end(); ++iter)
+      *iter = (*iter) * factor + offset;
+
+    // fix the order if necessary
+    if (factor < 0.)
+    {
+      std::reverse(this->events.begin(), this->events.end());
+      std::reverse(x.begin(), x.end());
+    }
+
+    // replace the existing histogram vector
+    this->refX.access() = x;
   }
 
   /**
@@ -480,13 +495,23 @@ namespace DataObjects
     if (this->events.empty())
       return;
 
+    StorageType x = this->refX.access();
+    std::transform(x.begin(), x.end(), x.begin(),
+                   std::bind2nd(std::multiplies<double>(), factor));
+
     //Iterate through all events
-    std::vector<TofEvent>::iterator itev;
-    for (itev= this->events.begin(); itev != this->events.end(); itev++)
+    for (std::vector<TofEvent>::iterator iter = this->events.begin();
+         iter != this->events.end(); iter++)
+      iter->time_of_flight *= factor;
+
+    if (factor < 0.)
     {
-      itev->time_of_flight *= factor;
+      std::reverse(this->events.begin(), this->events.end());
+      std::reverse(x.begin(), x.end());
     }
-    //The sorting of the list will be unchanged, since it is just a multiplicative factor.
+
+    // replace the existing histogram vector
+    this->refX.access() = x;
   }
 
   void EventList::addTof(const double offset)
@@ -498,6 +523,12 @@ namespace DataObjects
     std::vector<TofEvent>::iterator iter;
     for (iter = this->events.begin(); iter != this->events.end(); iter++)
       iter->time_of_flight += offset;
+
+    // fix the histogram vector
+    StorageType x = this->refX.access();
+    std::transform(x.begin(), x.end(), x.begin(),
+                   std::bind2nd(std::plus<double>(), offset));
+    this->refX.access() = x;
   }
 
 } /// namespace DataObjects
