@@ -74,6 +74,10 @@ if int(debug) == 1:
 #Get paths
 if os.name == 'nt': 
 	print "* COMMENCING WINDOWS BUILD *"
+	
+	# Get the version of Visual Studio
+	vsversion = env['MSVS_VERSION']
+	
 	boost_path = third_party + '/include/'
 	
 	python_path = 'C:/Python25/'
@@ -106,9 +110,10 @@ if os.name == 'nt':
 
 	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser', third_party+'/include/zlib123']
 	
-	#set up scons to embed manifest files
-	env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
-	env['SHLINKCOM'] = [env['SHLINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2']
+	#set up scons to embed manifest files on compilers prior to VS2010
+	if vsversion != '10.0':
+		env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
+		env['SHLINKCOM'] = [env['SHLINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2']
 
 else:
 
@@ -147,7 +152,11 @@ if os.name == 'nt':
     else :
         cflags = ['/Ox','/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP']
         cflags.extend(['/wd4251', '/wd4275', '/wd4996'])
-        env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
+        env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/ltcg'])
+        # WIN98 optimisation no longer available in VS2010 so option removed
+        if vsversion != '10.0':
+          env.Append(LINKFLAGS=['/OPT:NOWIN98'])
+        
 elif platform.system() == 'Linux':
 	if not rpmBuild:
 		cppPaths.append(poco_path)
