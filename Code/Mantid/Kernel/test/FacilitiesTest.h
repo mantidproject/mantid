@@ -32,7 +32,7 @@ public:
   {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
-      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,s*\">"
+      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
       "    <archive>"
       "      <archiveSearch plugin=\"ADataSearch\" />"
       "      <archiveSearch plugin=\"BDataSearch\" />"
@@ -54,12 +54,12 @@ public:
     TS_ASSERT_EQUALS(fac->name(),"ISIS");
     TS_ASSERT_EQUALS(fac->zeroPadding(),5);
     const std::vector<std::string> exts = fac->extensions();
-    TS_ASSERT_EQUALS(exts.size(),5);
+    TS_ASSERT_EQUALS(exts.size(), 10); // Automatically get the upper case versions as well
     TS_ASSERT_EQUALS(exts[0],"nxs");
-    TS_ASSERT_EQUALS(exts[1],"raw");
-    TS_ASSERT_EQUALS(exts[2],"sav");
-    TS_ASSERT_EQUALS(exts[3],"n*");
-    TS_ASSERT_EQUALS(exts[4],"s*");
+    TS_ASSERT_EQUALS(exts[2],"raw");
+    TS_ASSERT_EQUALS(exts[4],"sav");
+    TS_ASSERT_EQUALS(exts[6],"n*");
+    TS_ASSERT_EQUALS(exts[8],"s*");
     TS_ASSERT_EQUALS(fac->preferredExtension(),"nxs");
 
     TS_ASSERT_EQUALS(fac->archiveSearch().size(),2);
@@ -127,7 +127,7 @@ public:
   {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<facilities>"
-      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\"nxs,raw,sav,n*,s*\">"
+      "  <facility name=\"ISIS\" zeropadding=\"5\" FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
       "    <instrument name=\"HRPD\" shortname=\"HRP\">"
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"

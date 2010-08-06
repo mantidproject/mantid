@@ -147,8 +147,7 @@ public:
     ConfigService::Instance().setString("default.instrument","ALF");
     error = fp->setValue("15739");
     TS_ASSERT_EQUALS(error, "");
-    test_file = test_dir.resolve("ALF15739.RAW");
-    TS_ASSERT_EQUALS(test_file.toString(), fp->value());
+    TS_ASSERT(fp->value().find("ALF15739") != std::string::npos);
   }
 
 };
