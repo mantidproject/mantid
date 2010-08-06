@@ -1,6 +1,7 @@
 """
     Unit tests for SANS reduction command set
 """
+from __future__ import with_statement
 import math
 import sys
 import unittest
@@ -109,11 +110,13 @@ class TestCommands(unittest.TestCase):
                 
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
-        DataPath("/tmp")
-        self.assertEqual(ReductionSingleton()._data_path, '/tmp')
+        #any path that definitely exists on a computer with Mantid installed
+        test_path = mtd.getConfigProperty('instrumentDefinition.directory')
+        DataPath(test_path)
+        self.assertEqual(ReductionSingleton()._data_path, test_path)
         
     def test_direct_beam_center(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         Reduce1D()
@@ -129,7 +132,7 @@ class TestCommands(unittest.TestCase):
         self.assertAlmostEqual(center[1], 2.2, 0.0001)
         
     def test_load_run(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         self.assertEqual(len(ReductionSingleton()._data_files), 0)
         AppendDataFile("BioSANS_test_data.xml")
@@ -143,7 +146,7 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._normalizer._normalization_spectrum, 1)
         
     def test_to_steps(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -158,7 +161,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_calculated.txt"))
     
     def skip_test_reduction_1(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -174,7 +177,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
 
     def skip_test_reduction_2(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -190,7 +193,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
 
     def skip_test_straight_Q1D(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -205,7 +208,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
 
     def test_transmission(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
     
@@ -223,7 +226,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
         
     def skip_test_spreader_transmission(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AzimuthalAverage(error_weighting=True)
@@ -242,7 +245,7 @@ class TestCommands(unittest.TestCase):
         self.assertAlmostEqual(data[10], 0.0042193, 0.00001)
 
     def skip_test_transmission_by_hand(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -255,7 +258,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_transmission.txt", 0.0001))
             
     def test_center_by_hand(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
@@ -267,7 +270,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_by_hand.txt", 0.0001))
             
     def test_background(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
@@ -283,7 +286,7 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(data[20], 0.0)
             
     def skip_test_transmission_by_hand_w_sensitivity(self):
-        DataPath("../../../Test/Data/SANS2D/")
+        DataPath(TEST_DIR)
         HFIRSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
