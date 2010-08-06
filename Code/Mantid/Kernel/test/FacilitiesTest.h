@@ -55,11 +55,11 @@ public:
     TS_ASSERT_EQUALS(fac->zeroPadding(),5);
     const std::vector<std::string> exts = fac->extensions();
     TS_ASSERT_EQUALS(exts.size(), 10); // Automatically get the upper case versions as well
-    TS_ASSERT_EQUALS(exts[0],"nxs");
-    TS_ASSERT_EQUALS(exts[2],"raw");
-    TS_ASSERT_EQUALS(exts[4],"sav");
-    TS_ASSERT_EQUALS(exts[6],"n*");
-    TS_ASSERT_EQUALS(exts[8],"s*");
+    TS_ASSERT_EQUALS(exts[0],".nxs");
+    TS_ASSERT_EQUALS(exts[2],".raw");
+    TS_ASSERT_EQUALS(exts[4],".sav");
+    TS_ASSERT_EQUALS(exts[6],".n*");
+    TS_ASSERT_EQUALS(exts[8],".s*");
     TS_ASSERT_EQUALS(fac->preferredExtension(),"nxs");
 
     TS_ASSERT_EQUALS(fac->archiveSearch().size(),2);
