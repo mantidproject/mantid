@@ -191,11 +191,11 @@ m_decimals(-1)
   QPushButton* btnClear = new QPushButton("Clear all");
   connect(btnClear,SIGNAL(clicked()),this,SLOT(clear()));
 
-  QPushButton* btnSeqFit = new QPushButton("Sequential fit");
-  connect(btnSeqFit,SIGNAL(clicked()),this,SLOT(sequentialFit()));
+  m_btnSeqFit = new QPushButton("Sequential fit");
+  connect(m_btnSeqFit,SIGNAL(clicked()),this,SLOT(sequentialFit()));
 
-  QPushButton* btnFindPeaks = new QPushButton("Find peaks");
-  connect(btnFindPeaks,SIGNAL(clicked()),this,SLOT(findPeaks()));
+  m_btnFindPeaks = new QPushButton("Find peaks");
+  connect(m_btnFindPeaks,SIGNAL(clicked()),this,SLOT(findPeaks()));
 
   m_btnPlotGuess = new QPushButton("Plot guess");
   connect(m_btnPlotGuess,SIGNAL(clicked()),this,SLOT(plotOrRemoveGuessAll()));
@@ -206,8 +206,8 @@ m_decimals(-1)
   buttonsLayout->addWidget(m_btnFit,0,0);
   buttonsLayout->addWidget(m_btnUnFit,0,1);
   buttonsLayout->addWidget(btnClear,0,2);
-  buttonsLayout->addWidget(btnSeqFit,1,0);
-  buttonsLayout->addWidget(btnFindPeaks,1,1);
+  buttonsLayout->addWidget(m_btnSeqFit,1,0);
+  buttonsLayout->addWidget(m_btnFindPeaks,1,1);
   buttonsLayout->addWidget(m_btnPlotGuess,1,2);
 
   layout->addLayout(buttonsLayout);
@@ -589,6 +589,7 @@ void FitPropertyBrowser::setDefaultPeakType(const std::string& fnType)
 {
   m_defaultPeak = fnType;
   setDefaultFunctionType(fnType);
+  Mantid::Kernel::ConfigService::Instance().setString("curvefitting.defaultPeak", fnType);
 }
 /// Get the default background type
 std::string FitPropertyBrowser::defaultBackgroundType()const
@@ -1350,6 +1351,8 @@ bool FitPropertyBrowser::isUndoEnabled()const
 void FitPropertyBrowser::setFitEnabled(bool yes)
 {
   m_btnFit->setEnabled(yes);
+  m_btnSeqFit->setEnabled(yes);
+  m_btnFindPeaks->setEnabled(yes);
 }
 
 /// Returns true if the function is ready for a fit

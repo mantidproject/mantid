@@ -1811,7 +1811,8 @@ void ConfigDialog::updateCurveFitSettings()
   app->mantidUI->fitFunctionBrowser()->setAutoBackgroundName(QString::fromStdString(setting));
 
   setting = defaultPeakShape->currentText().toStdString();
-  mantid_config.setString("curvefitting.defaultPeak", setting);
+  //mantid_config.setString("curvefitting.defaultPeak", setting);
+  app->mantidUI->fitFunctionBrowser()->setDefaultPeakType(setting);
 
   setting = QString::number(findPeaksFWHM->value()).toStdString();
   mantid_config.setString("curvefitting.findPeaksFWHM", setting);

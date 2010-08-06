@@ -279,6 +279,10 @@ private:
   QPushButton* m_btnUnFit;
   /// Button for plotting the overall function
   QPushButton* m_btnPlotGuess;
+  /// Button for the sequential fit
+  QPushButton* m_btnSeqFit;
+  /// Button for FindPeaks algorithm
+  QPushButton* m_btnFindPeaks;
   /// To display a tip text
   QLabel* m_tip;
 
