@@ -170,57 +170,6 @@ public:
     TS_ASSERT_EQUALS(count,size*histogramCount);
   }
 
-  void testIteratorCopy()
-  {
-    int size = 10;
-    W1D workA = Create1DWorkspaceFib(size);
-    W1D workB = Create1DWorkspace(size);
-
-
-    Workspace1D::const_iterator IA(*workA);
-    Workspace1D::iterator IB(*workB);
-
-    std::copy(IA.begin(),IA.end(),IB.begin());
-    const MantidVec& x1 = workA->dataX();
-    const MantidVec& y1 = workA->dataY();
-    const MantidVec& e1 = workA->dataE();
-
-    const MantidVec& x2 = workB->dataX();
-    const MantidVec& y2 = workB->dataY();
-    const MantidVec& e2 = workB->dataE();
-
-
-    for (int i = 0; i < size; i++)
-    {
-      TS_ASSERT_EQUALS(x1[i],x2[i]);
-      TS_ASSERT_EQUALS(y1[i],y2[i]);
-      TS_ASSERT_EQUALS(e1[i],e2[i]);
-    }
-  }
-
-  // Disable this test until it uses cxxtest instead of cerr output
-  void xtestIteratorSort()
-  {
-    int size = 10;
-    W1D workA = Create1DWorkspaceFib(size);
-    Workspace1D::iterator IA(*workA);
-
-    // Note: this used boost lambda since I am being lazy.
-    //      sort(IA.begin(),IA.end(), (boost::bind(&LocatedDataRef::first,_1)() >
-    // 				 boost::bind(&LocatedDataRef::first,_2)() );
-
-    const MantidVec& x1 = workA->dataX();
-    const MantidVec& y1 = workA->dataY();
-    const MantidVec& e1 = workA->dataE();
-
-
-    for (int i = 0; i < size; i++)
-    {
-      std::cerr<<x1[i]<<std::endl;
-    }
-    return;
-  }
-
   void testHorizontalLoopIteratorWorkspace1D()
   {
     int size = 13;
