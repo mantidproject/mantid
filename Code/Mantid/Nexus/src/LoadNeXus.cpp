@@ -10,7 +10,7 @@
 #include "MantidNexus/NeXusUtils.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <cmath>

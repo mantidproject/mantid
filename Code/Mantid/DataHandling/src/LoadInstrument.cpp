@@ -14,7 +14,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"

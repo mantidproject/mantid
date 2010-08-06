@@ -7,7 +7,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/Component.h"

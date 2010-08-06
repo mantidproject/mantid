@@ -25,7 +25,7 @@
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <fstream>  // used to get ofstream
 #include <iomanip>  // setw() used below

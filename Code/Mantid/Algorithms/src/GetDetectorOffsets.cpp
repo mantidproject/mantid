@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include <fstream>
 #include <ostream>
 #include <iomanip>

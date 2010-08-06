@@ -3,7 +3,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include <QDir>
 #include <vector>

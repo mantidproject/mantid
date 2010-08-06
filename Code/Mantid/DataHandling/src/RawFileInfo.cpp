@@ -2,7 +2,7 @@
 // Includes
 //----------------------------
 #include "MantidDataHandling/RawFileInfo.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/TableRow.h"
 #include <cstdio>

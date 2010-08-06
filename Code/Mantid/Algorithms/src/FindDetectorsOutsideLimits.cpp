@@ -1,5 +1,5 @@
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <fstream>

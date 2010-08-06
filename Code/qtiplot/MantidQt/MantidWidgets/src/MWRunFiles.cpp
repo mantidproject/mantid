@@ -1,5 +1,5 @@
 #include "MantidQtMantidWidgets/MWRunFiles.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include <QStringList>
 #include <QFileDialog>
@@ -8,6 +8,7 @@
 #include "Poco/StringTokenizer.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 static const int MAX_FILE_NOT_FOUND_DISP = 3;

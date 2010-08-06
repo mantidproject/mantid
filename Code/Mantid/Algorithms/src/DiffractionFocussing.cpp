@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <map>
 #include <fstream>
@@ -19,6 +19,7 @@ using namespace Kernel;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace;
+using API::FileProperty;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

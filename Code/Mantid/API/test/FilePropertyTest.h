@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 
 class FilePropertyTest : public CxxTest::TestSuite
@@ -20,8 +20,8 @@ public:
   
   void testLoadPropertyNoExtension()
   {
-    Mantid::Kernel::FileProperty *fp = 
-      new Mantid::Kernel::FileProperty("Filename","", Mantid::Kernel::FileProperty::Load);
+    Mantid::API::FileProperty *fp = 
+      new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load);
 
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
@@ -36,8 +36,8 @@ public:
   void testLoadPropertyWithExtension()
   {
     std::vector<std::string> exts(1, "raw");
-    Mantid::Kernel::FileProperty *fp = 
-      new Mantid::Kernel::FileProperty("Filename","", Mantid::Kernel::FileProperty::Load, exts);
+    Mantid::API::FileProperty *fp = 
+      new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, exts);
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw")
@@ -60,8 +60,8 @@ public:
   void testOptionalLoadProperty()
   {
     std::vector<std::string> exts(1, "raw");
-    Mantid::Kernel::FileProperty *fp = 
-      new Mantid::Kernel::FileProperty("Filename","", Mantid::Kernel::FileProperty::OptionalLoad, exts);
+    Mantid::API::FileProperty *fp = 
+      new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::OptionalLoad, exts);
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
     std::string msg = fp->setValue("GEM38370.raw");
@@ -79,8 +79,8 @@ public:
 
   void testSaveProperty()
   {
-    Mantid::Kernel::FileProperty *fp = 
-      new Mantid::Kernel::FileProperty("Filename","", Mantid::Kernel::FileProperty::Save);
+    Mantid::API::FileProperty *fp = 
+      new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Save);
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), false)
 

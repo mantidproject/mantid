@@ -5,7 +5,7 @@
 #include "MantidAPI/Instrument.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"

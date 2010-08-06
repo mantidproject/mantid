@@ -2,7 +2,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveGSS.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "Poco/File.h"
 #include <fstream>
@@ -26,7 +26,7 @@ void SaveGSS::init()
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
     new API::WorkspaceUnitValidator<>("TOF")),
     "The input workspace, which must be in time-of-flight");
-  declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
     "The filename to use for the saved data");
   std::vector<std::string> Split(2);
   Split[0] = "True";

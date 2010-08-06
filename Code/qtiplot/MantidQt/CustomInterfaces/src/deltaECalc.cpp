@@ -2,7 +2,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include <QDir>
 #include "boost/lexical_cast.hpp"
 #include <cmath>

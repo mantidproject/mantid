@@ -9,7 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NeXusUtils.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>

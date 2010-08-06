@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace1D.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <fstream>
 #include <iomanip>
@@ -52,9 +52,9 @@ void MaskDetectorsIf::init()
 	  declareProperty("Operator", "Equal", new Kernel::ListValidator(select_operator),
 	  	    "Unary operator to compare to given values" );
 	  declareProperty("Value",0.0);
-	  declareProperty(new FileProperty("InputCalFile","", FileProperty::Load, ".cal"),
+	  declareProperty(new API::FileProperty("InputCalFile","", API::FileProperty::Load, ".cal"),
 			  "The name of the CalFile with grouping data" );
-	  declareProperty(new FileProperty("OutputCalFile","", FileProperty::Save, ".cal"),
+	  declareProperty(new API::FileProperty("OutputCalFile","", API::FileProperty::Save, ".cal"),
 			  "The name of the CalFile with grouping data" );
 }
 

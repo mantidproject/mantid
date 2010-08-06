@@ -1,7 +1,7 @@
 #include "MantidDataHandling/LoadMappingTable.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 namespace Mantid
 {

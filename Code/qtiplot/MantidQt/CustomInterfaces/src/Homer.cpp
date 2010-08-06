@@ -5,7 +5,7 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -26,6 +26,7 @@
 #include <QMessageBox>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 

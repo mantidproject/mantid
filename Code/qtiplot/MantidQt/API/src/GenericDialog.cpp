@@ -5,7 +5,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 
 #include <QGridLayout>
@@ -103,7 +103,7 @@ void GenericDialog::initLayout()
       bool isEnabled = isWidgetEnabled(propName);
 
       //check if there are only certain allowed values for the property
-      Mantid::Kernel::FileProperty* fileType = dynamic_cast<Mantid::Kernel::FileProperty*>(prop);
+      Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(prop);
       if( dynamic_cast<PropertyWithValue<bool>* >(prop) ) 
       {
         QCheckBox *checkBox = new QCheckBox(propName);

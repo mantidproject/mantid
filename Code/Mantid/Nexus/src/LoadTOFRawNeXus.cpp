@@ -1,7 +1,7 @@
 // Includes
 
 #include "MantidNexus/LoadTOFRawNeXus.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 

@@ -4,7 +4,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_statistics.h>

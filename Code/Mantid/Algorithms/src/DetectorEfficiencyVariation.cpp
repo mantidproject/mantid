@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include <boost/shared_ptr.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>

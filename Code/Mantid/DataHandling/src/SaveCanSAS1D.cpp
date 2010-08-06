@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCanSAS1D.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -38,7 +38,7 @@ namespace Mantid
       declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
         new API::WorkspaceUnitValidator<>("MomentumTransfer")),
         "The input workspace, which must be in units of Q");
-      declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save, ".xml"),
+      declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save, ".xml"),
         "The name of the xml file to save");
 
       std::vector<std::string> radiation_source;

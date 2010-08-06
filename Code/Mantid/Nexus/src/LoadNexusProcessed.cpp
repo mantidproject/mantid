@@ -6,7 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/WorkspaceGroup.h"

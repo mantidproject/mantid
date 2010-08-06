@@ -4,7 +4,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <QIcon>
 #include <QLabel>
@@ -246,8 +246,8 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
 QString AlgorithmDialog::openFileDialog(const QString & propName)
 {
   if( propName.isEmpty() ) return "";
-  Mantid::Kernel::FileProperty* prop = 
-    dynamic_cast< Mantid::Kernel::FileProperty* >( getAlgorithmProperty(propName) );
+  Mantid::API::FileProperty* prop = 
+    dynamic_cast< Mantid::API::FileProperty* >( getAlgorithmProperty(propName) );
   if( !prop ) return "";
 
   //The allowed values in this context are file extensions

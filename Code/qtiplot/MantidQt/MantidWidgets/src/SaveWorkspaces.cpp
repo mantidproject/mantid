@@ -7,7 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>

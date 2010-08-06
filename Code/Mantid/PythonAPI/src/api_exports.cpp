@@ -14,6 +14,7 @@
 #include <MantidAPI/ParInstrument.h>
 #include <MantidAPI/Sample.h>
 #include <MantidAPI/WorkspaceProperty.h>
+#include <MantidAPI/FileProperty.h>
 #include <MantidAPI/WorkspaceValidators.h>
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
 
@@ -325,6 +326,17 @@ namespace PythonAPI
       ;
 
   }
+  
+  void export_fileproperty()
+  {
+    //FileProperty enum
+    enum_<FileProperty::FileAction>("FileAction")
+      .value("Save", FileProperty::Save)
+      .value("OptionalSave", FileProperty::OptionalSave)
+      .value("Load", FileProperty::Load)
+      .value("OptionalLoad", FileProperty::OptionalLoad)
+      ;
+  }
 
  void export_workspacefactory()
   {
@@ -372,6 +384,7 @@ namespace PythonAPI
     export_run();
     export_instrument();
     export_workspace_property();
+    export_fileproperty();
     export_workspacefactory();
     export_apivalidators();
   }

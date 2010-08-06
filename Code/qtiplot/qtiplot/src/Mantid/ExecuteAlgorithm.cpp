@@ -16,7 +16,7 @@
 #include "LoadRawDlg.h"
 #include "ImportWorkspaceDlg.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "InputHistory.h"
 
 using Mantid::Kernel::PropertyWithValue;
@@ -61,7 +61,7 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::IAlgorithm_sptr alg, const QStr
       validLbl->setPalette(pal);
       validators[prop->name()] = validLbl;
       
-      if (dynamic_cast<Mantid::Kernel::FileProperty*>(prop))
+      if (dynamic_cast<Mantid::API::FileProperty*>(prop))
 	{
 	  QLineEdit *tempEdit = new QLineEdit;
 	  QPushButton *tempBtn = new QPushButton(tr("Browse"));

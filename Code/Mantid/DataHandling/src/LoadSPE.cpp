@@ -3,7 +3,7 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidDataHandling/SaveSPE.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Histogram1D.h"

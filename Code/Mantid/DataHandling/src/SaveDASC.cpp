@@ -1,5 +1,5 @@
 #include "MantidDataHandling/SaveDASC.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <boost/shared_ptr.hpp>

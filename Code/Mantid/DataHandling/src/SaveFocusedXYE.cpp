@@ -2,7 +2,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "Poco/File.h"
 #include <fstream>
 #include <iomanip>
@@ -23,7 +23,7 @@ void SaveFocusedXYE::init()
   declareProperty(
     new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace containing the data you wish to save" );
-  declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
     "The filename to use when saving data");
   std::vector<std::string> Split(2);
   Split[0] = "True";

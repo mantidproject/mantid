@@ -4,7 +4,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/IInstrument.h"
@@ -24,6 +24,7 @@ namespace Mantid
 
     using namespace Kernel;
     using API::Progress;
+    using API::FileProperty;
 
     CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
     {

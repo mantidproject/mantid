@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_FILEPROPERTY_H_
-#define MANTID_KERNEL_FILEPROPERTY_H_
+#ifndef MANTID_API_FILEPROPERTY_H_
+#define MANTID_API_FILEPROPERTY_H_
 
 //-----------------------------------------------------------------
 // Includes
@@ -8,7 +8,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
   /**
      A specialized class for dealing with file properties. Mantid allows multiple
@@ -19,7 +19,7 @@ namespace Kernel
      if found, the <code>value()</code> method returns the full path to the file. For 
      saving, Mantid's default save directory is used when a relative path is encountered.
    */
-class DLLExport FileProperty : public PropertyWithValue<std::string>
+class DLLExport FileProperty : public Kernel::PropertyWithValue<std::string>
 {
 public:
   /// An enumeration for load/save types. This is passed on to the FileValidator as a constructor parameter.
@@ -34,13 +34,13 @@ public:
 
   ///Constructor
   FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
-      const std::vector<std::string> & exts = std::vector<std::string>(), 
-      unsigned int direction = Direction::Input);
+	       const std::vector<std::string> & exts = std::vector<std::string>(), 
+	       unsigned int direction = Kernel::Direction::Input);
   FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
-      const std::string & ext, unsigned int direction = Direction::Input);
+	       const std::string & ext, unsigned int direction = Kernel::Direction::Input);
 
   /// 'Virtual copy constructor
-  Property* clone() { return new FileProperty(*this); }
+  Kernel::Property* clone() { return new FileProperty(*this); }
 
   /// Check if this is a load type property.
   bool isLoadProperty() const;
@@ -64,4 +64,4 @@ private:
 }
 }
 
-#endif //MANTID_KERNEL_FILEPROPERTY_H_
+#endif //MANTID_API_FILEPROPERTY_H_

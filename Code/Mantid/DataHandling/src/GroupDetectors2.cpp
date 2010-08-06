@@ -6,7 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>

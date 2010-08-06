@@ -4,7 +4,7 @@
 
 
 #include <fstream>
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/IInstrument.h"
@@ -26,6 +26,7 @@ using namespace Kernel;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace;
+using API::FileProperty;
 
 ReadGroupsFromFile::ReadGroupsFromFile():API::Algorithm(),calibration()
 {

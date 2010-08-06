@@ -5,7 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include "Poco/Path.h"
 #include <cmath>

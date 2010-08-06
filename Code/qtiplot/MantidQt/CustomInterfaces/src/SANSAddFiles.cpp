@@ -1,6 +1,6 @@
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
 
@@ -13,6 +13,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 // Initialize the logger
 Logger& SANSAddFiles::g_log = Logger::get("SANSAddFiles");

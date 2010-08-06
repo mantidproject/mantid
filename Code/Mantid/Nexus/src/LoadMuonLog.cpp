@@ -4,7 +4,7 @@
 #include "MantidNexus/LoadMuonLog.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/LogParser.h"
 
@@ -22,6 +22,7 @@ using namespace Kernel;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
+using API::FileProperty;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 using API::Progress;

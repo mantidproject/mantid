@@ -3,7 +3,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <QSignalMapper>
 #include <QFileInfo>
@@ -17,6 +17,7 @@
 #include <string>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 

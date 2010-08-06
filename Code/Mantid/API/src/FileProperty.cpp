@@ -1,11 +1,17 @@
 //-----------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
+
+namespace Mantid
+{
+
+namespace API
+{
 
 using namespace Mantid::Kernel;
 
@@ -216,4 +222,7 @@ std::string FileProperty::convertExtension(const std::string & filepath) const
   }
   fullpath.setExtension(ext);
   return fullpath.toString();  
+}
+
+}
 }

@@ -10,7 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 //#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidAPI/Progress.h"

@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/GetEi.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"

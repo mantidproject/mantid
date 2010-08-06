@@ -6,7 +6,7 @@
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/ITableWorkspace.h>
 
-#include <MantidKernel/FileProperty.h>
+#include <MantidAPI/FileProperty.h>
 #include <MantidKernel/NullValidator.h>
 
 #include <MantidPythonAPI/PythonInterfaceFunctions.h>
@@ -179,7 +179,7 @@ public:
   void _declareFileProperty(const std::string & prop_name, const std::string & default_value, const unsigned int type, 
 			    boost::python::list exts, const std::string & description, const unsigned int direction)
   {
-    this->Algorithm::declareProperty(new Kernel::FileProperty(prop_name, default_value, type, Conversions::convertToStdVector<std::string>(exts), direction), description);
+    this->Algorithm::declareProperty(new API::FileProperty(prop_name, default_value, type, Conversions::convertToStdVector<std::string>(exts), direction), description);
   }
   
   /**

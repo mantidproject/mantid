@@ -7,7 +7,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/Path.h"

@@ -4,7 +4,7 @@
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <set>
 #include <fstream>

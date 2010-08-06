@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"

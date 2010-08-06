@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
@@ -96,7 +96,7 @@ namespace Mantid
     /// Overwrites Algorithm Init method.
     void LoadSpice2D::init()
     {
-      declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Load, ".xml"),
+      declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
           "The name of the input xml file to load");
       declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
           Kernel::Direction::Output), "The name of the Output workspace");

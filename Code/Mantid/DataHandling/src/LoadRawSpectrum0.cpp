@@ -5,7 +5,7 @@
 #include "MantidDataHandling/LoadRawSpectrum0.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"

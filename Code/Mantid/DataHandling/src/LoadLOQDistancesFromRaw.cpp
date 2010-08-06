@@ -3,7 +3,7 @@
 //------------------------------------------------------
 #include "MantidDataHandling/LoadLOQDistancesFromRaw.h"
 
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/IComponent.h"

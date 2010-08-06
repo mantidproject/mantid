@@ -2,7 +2,7 @@
 // Includes
 //------------------------------------------------------
 #include "MantidDataHandling/LoadSampleDetailsFromRaw.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
 
 // The isis RAW data structure

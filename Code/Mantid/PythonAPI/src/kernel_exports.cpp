@@ -5,7 +5,6 @@
 #include <boost/python.hpp>
 //Kernel
 #include<MantidKernel/Property.h>
-#include<MantidKernel/FileProperty.h>
 #include<MantidKernel/BoundedValidator.h>
 #include<MantidKernel/MandatoryValidator.h>
 #include<MantidKernel/ListValidator.h>
@@ -44,13 +43,6 @@ namespace PythonAPI
       .def("direction", &Mantid::Kernel::Property::direction)
       ;
 
-    //FileProperty enum
-    enum_<FileProperty::FileAction>("FileAction")
-      .value("Save", FileProperty::Save)
-      .value("OptionalSave", FileProperty::OptionalSave)
-      .value("Load", FileProperty::Load)
-      .value("OptionalLoad", FileProperty::OptionalLoad)
-      ;
   }
   
   void export_validators()

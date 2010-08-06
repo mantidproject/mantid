@@ -7,7 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Glob.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 
 #include "Poco/File.h"
@@ -32,6 +32,7 @@ using namespace Kernel;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
+using API::FileProperty;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 

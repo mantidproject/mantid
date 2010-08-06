@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadCanSAS1D.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
@@ -47,7 +47,7 @@ LoadCanSAS1D::~LoadCanSAS1D()
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init()
 {
-  declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Load, ".xml"),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
       "The name of the input  xml file to load");
   declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
       Kernel::Direction::Output), "The name of the Output workspace");

@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cmath>
