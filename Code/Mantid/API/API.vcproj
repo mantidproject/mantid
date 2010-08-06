@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FileProperty.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
@@ -492,6 +496,14 @@
 			</File>
 			<File
 				RelativePath=".\test\FileFinderTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\FileProperty.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FilePropertyTest.h"
 				>
 			</File>
 			<File

@@ -102,7 +102,6 @@
     <ClCompile Include="src\EnvironmentHistory.cpp" />
     <ClCompile Include="src\Exception.cpp" />
     <ClCompile Include="src\FacilityInfo.cpp" />
-    <ClCompile Include="src\FileProperty.cpp" />
     <ClCompile Include="src\FileValidator.cpp" />
     <ClCompile Include="src\FilterChannel.cpp" />
     <ClCompile Include="src\Glob.cpp" />
@@ -156,7 +155,6 @@
     <ClInclude Include="inc\MantidKernel\EnvironmentHistory.h" />
     <ClInclude Include="inc\MantidKernel\Exception.h" />
     <ClInclude Include="inc\MantidKernel\Fast_Exponential.h" />
-    <ClInclude Include="inc\MantidKernel\FileProperty.h" />
     <ClInclude Include="inc\MantidKernel\FileValidator.h" />
     <ClInclude Include="test\FileValidatorTest.h" />
     <ClInclude Include="inc\MantidKernel\FilterChannel.h" />

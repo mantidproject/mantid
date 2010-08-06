@@ -100,6 +100,7 @@
     <ClCompile Include="src\ConstraintFactory.cpp" />
     <ClCompile Include="src\Expression.cpp" />
     <ClCompile Include="src\FileFinder.cpp" />
+    <ClCompile Include="src\FileProperty.cpp" />
     <ClCompile Include="src\FrameworkManager.cpp" />
     <ClCompile Include="src\Function.cpp" />
     <ClCompile Include="src\FunctionFactory.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="inc\MantidAPI\AlgorithmHistory.h" />
     <ClInclude Include="inc\mantidapi\archivesearchfactory.h" />
     <ClInclude Include="inc\mantidapi\filefinder.h" />
+    <ClInclude Include="inc\MantidAPI\FileProperty.h" />
     <ClInclude Include="inc\mantidapi\iarchivesearch.h" />
     <ClInclude Include="inc\mantidapi\run.h" />
     <ClInclude Include="test\AlgorithmHistoryTest.h" />
