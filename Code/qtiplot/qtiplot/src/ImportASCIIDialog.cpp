@@ -521,6 +521,16 @@ void ImportASCIIDialog::changePreviewFile(const QString& path)
 		return;
 	}
 
+  if (fi.suffix().toLower() == "csv")
+  {
+    int index = d_column_separator->findText("CSV",Qt::MatchExactly);
+    if (index < 0) index = d_column_separator->findText(",",Qt::MatchExactly);
+    if (index >= 0)
+    {
+      d_column_separator->setCurrentIndex(index);
+    }
+  }
+
 	d_current_path = path;
 	preview();
 }

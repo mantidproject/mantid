@@ -3835,7 +3835,7 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
 						if(index==-1) return;
 						QString wsName=temp.right(temp.size()-(index+1));
 						alg->setPropertyValue("Filename",sorted_files[i].toStdString());
-						alg->setPropertyValue("Workspace",wsName.toStdString());
+						alg->setPropertyValue("OutputWorkspace",wsName.toStdString());
 						std::string sep;
 						alg->setPropertyValue("Separator",sepforloadAscii.toStdString());
 						alg->execute();
