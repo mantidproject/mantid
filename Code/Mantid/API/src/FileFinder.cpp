@@ -46,6 +46,9 @@ namespace Mantid
       */
     std::string FileFinderImpl::getFullPath(const std::string& fName)const
     {
+      // If this is already a full path, nothing to do
+      if( Poco::Path(fName).isAbsolute() ) return fName;
+
       const std::vector<std::string>& searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
       std::vector<std::string>::const_iterator it = searchPaths.begin();
       for(;it != searchPaths.end(); ++it)
