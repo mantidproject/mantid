@@ -57,8 +57,8 @@ public:
   void test_file_not_found()
   {
     TS_ASSERT_THROWS(
-        eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data") ,
-        std::invalid_argument );
+        eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data")
+       , std::invalid_argument);
     //Execut fails since the properties aren't set correctly.
     TS_ASSERT_THROWS( eventLoader->execute() , std::runtime_error);
 
@@ -191,6 +191,9 @@ public:
     int numpixels_with_events = 42515;
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
+    //This seems to be the size of the spectra map.
+    TS_ASSERT_EQUALS( ew->mutableSpectraMap().nElements(), 50172);
+
     //Check if the instrument was loaded correctly
     boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
     TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
@@ -227,6 +230,10 @@ public:
     //Only some of the pixels weretof loaded, because of lot of them are empty
     int numpixels = 50*8*128; //50 8-packs; monitors are ignored
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
+
+    //This time, the max pixel ID is higher since we padded them.
+    TS_ASSERT_EQUALS( ew->mutableSpectraMap().nElements(), numpixels);
+
 
     //Check if the instrument was loaded correctly
     boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();

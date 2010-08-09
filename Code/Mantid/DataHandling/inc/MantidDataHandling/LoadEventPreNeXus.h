@@ -115,6 +115,9 @@ private:
   std::size_t num_good_events; ///<the number of good events
   std::size_t num_error_events; ///<the number of error events
 
+  ///Set to true if a valid Mapping file was provided.
+  bool using_mapping_file;
+
   bool instrument_loaded_correctly; /// Set to true when instrument geometry was loaded.
 
   void loadPixelMap(const std::string &filename);

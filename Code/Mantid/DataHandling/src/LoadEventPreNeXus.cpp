@@ -218,7 +218,7 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &filename, MatrixWor
  */
 void LoadEventPreNeXus::fixPixelId(PixelType &pixel, uint32_t &period) const
 {
-  if (this->pixelmap.empty()) { // nothing to do here
+  if (!this->using_mapping_file) { // nothing to do here
     period = 0;
     return;
   }
@@ -687,6 +687,7 @@ static size_t getBufferSize(const size_t num_items)
  */
 void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
 {
+  this->using_mapping_file = false;
   this->pixelmap.clear();
 
   // check that there is a mapping file
@@ -698,6 +699,8 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   // actually deal with the file
   this->g_log.debug("Using mapping file \"" + filename + "\"");
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
+
+  //TODO: Something here needs to be able to tell if a bad file is being fed!
 
   size_t file_size = getFileSize<PixelType>(handle);
   //std::cout << "file is " << file_size << std::endl;
@@ -726,6 +729,9 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   delete buffer;
   handle->close();
   delete handle;
+
+  //If we got here, the mapping file was loaded correctly and we'll use it
+  this->using_mapping_file = true;
 }
 
 //-----------------------------------------------------------------------------
