@@ -1402,7 +1402,7 @@ double MantidMatrixModel::data(int row, int col) const
 QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation, int role ) const
 {
   if (role != Qt::DisplayRole) return QVariant();
-  if (orientation == Qt::Vertical)
+  if (orientation == Qt::Vertical && m_workspace->axes() > 1)
   {
     Mantid::API::TextAxis* xAxis = dynamic_cast<Mantid::API::TextAxis*>(m_workspace->getAxis(1));
     if (xAxis)
