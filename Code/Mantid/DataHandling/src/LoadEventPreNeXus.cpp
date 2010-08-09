@@ -152,12 +152,12 @@ void LoadEventPreNeXus::exec()
   //Process the events into pixels
   this->procEvents(localWorkspace);
 
-  std::cout << "LoadEventPreNeXus::procEvents() has completed.\n";
+  //std::cout << "LoadEventPreNeXus::procEvents() has completed.\n";
 
   //Save output
   this->setProperty(OUT_PARAM, localWorkspace);
 
-  std::cout << "LoadEventPreNeXus::output Workspace property has been set.\n";
+  //std::cout << "LoadEventPreNeXus::output Workspace property has been set.\n";
 }
 
 
