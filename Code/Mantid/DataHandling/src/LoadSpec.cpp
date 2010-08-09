@@ -4,7 +4,7 @@
 #include "MantidDataHandling/LoadSpec.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <fstream>
 #include <cstring>
