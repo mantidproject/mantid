@@ -90,6 +90,7 @@
     <ClCompile Include="src\GroupDetectors.cpp" />
     <ClCompile Include="src\GroupDetectors2.cpp" />
     <ClCompile Include="src\ISISDataArchive.cpp" />
+    <ClCompile Include="src\Load.cpp" />
     <ClCompile Include="src\LoadAscii.cpp" />
     <ClCompile Include="src\LoadCanSAS1D.cpp" />
     <ClCompile Include="src\LoadDAE.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h" />
     <ClInclude Include="inc\mantiddatahandling\getmaskeddetectors.h" />
     <ClInclude Include="inc\mantiddatahandling\isisdataarchive.h" />
+    <ClInclude Include="inc\mantiddatahandling\load.h" />
     <ClInclude Include="inc\mantiddatahandling\loadrawspectrum0.h" />
     <ClInclude Include="test\AlignDetectorsTest.h" />
     <ClInclude Include="src\LoadRaw\byte_rel_comp.h" />

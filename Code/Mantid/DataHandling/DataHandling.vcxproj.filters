@@ -174,6 +174,9 @@
     <ClCompile Include="src\ISISDataArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Load.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h">
@@ -426,6 +429,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\mantiddatahandling\loadrawspectrum0.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\mantiddatahandling\load.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -317,7 +317,7 @@ double MedianDetectorTest::getMedian(API::MatrixWorkspace_sptr input)
     {
       det = input->getDetector(i);
     }
-    catch (Exception::NotFoundError & e)
+    catch (Exception::NotFoundError&)
     {
       badIndices.push_back(i);
       continue;
@@ -437,7 +437,7 @@ void MedianDetectorTest::FindDetects(API::MatrixWorkspace_sptr responses, const 
     {
       det = responses->getDetector(i);
     }
-    catch (Exception::NotFoundError & e)
+    catch (Exception::NotFoundError&)
     {
       responses->dataY(i)[0] = BadVal;
       PARALLEL_CRITICAL(MedianDetectorTest_missa)

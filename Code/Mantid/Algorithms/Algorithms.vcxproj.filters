@@ -291,6 +291,9 @@
     <ClCompile Include="src\CalculateEfficiency.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CalculateTransmissionBeamSpreader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h">
@@ -732,6 +735,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\mantidalgorithms\calculateefficiency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\mantidalgorithms\calculatetransmissionbeamspreader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

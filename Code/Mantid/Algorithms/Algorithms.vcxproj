@@ -92,6 +92,7 @@
     <ClCompile Include="src\BinaryOperation.cpp" />
     <ClCompile Include="src\CalculateEfficiency.cpp" />
     <ClCompile Include="src\CalculateTransmission.cpp" />
+    <ClCompile Include="src\CalculateTransmissionBeamSpreader.cpp" />
     <ClCompile Include="src\ChangeBinOffset.cpp" />
     <ClCompile Include="src\CheckWorkspacesMatch.cpp" />
     <ClCompile Include="src\CloneWorkspace.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="inc\MantidAlgorithms\AddSampleLog.h" />
     <ClInclude Include="inc\mantidalgorithms\applytransmissioncorrection.h" />
     <ClInclude Include="inc\mantidalgorithms\calculateefficiency.h" />
+    <ClInclude Include="inc\mantidalgorithms\calculatetransmissionbeamspreader.h" />
     <ClInclude Include="test\AddSampleLogTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\AnyShapeAbsorption.h" />
     <ClInclude Include="test\AnyShapeAbsorptionTest.h" />

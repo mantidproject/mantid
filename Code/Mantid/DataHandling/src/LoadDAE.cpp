@@ -130,7 +130,7 @@ namespace Mantid
             loadDAE();
             m_firstRun = false;
           }
-          catch(CancelException& ex)
+          catch(CancelException&)
           {// it is the normal way of ending this algorithm
             try
             {
