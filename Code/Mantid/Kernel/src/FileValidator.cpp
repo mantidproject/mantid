@@ -76,7 +76,14 @@ std::string FileValidator::checkValidity(const std::string &value) const
   {
     if (!(this->endswith(value)))
     {
-      g_log.warning() << "Unrecognised extension in file \"" << value  << "\"."  << std::endl;
+      g_log.warning() << "Unrecognised extension in file \"" << value << "\"";
+      if (!this->m_extensions.empty()) {
+        this->g_log.warning() << " [ ";
+        for (std::set<std::string>::const_iterator it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
+          g_log.warning() << *it << " ";
+        this->g_log.warning() << "]";
+      }
+      g_log.warning() << "\"."  << std::endl;
     }
   }
 
@@ -121,7 +128,9 @@ bool FileValidator::endswith(const std::string &value) const
   // check for the ending
   for (std::set<std::string>::const_iterator it = m_extensions.begin();
        it != m_extensions.end(); it++) {
-    if (has_ending(value_copy, *it))
+    if (has_ending(value, *it)) // original case
+      return true;
+    if (has_ending(value_copy, *it)) // lower case
       return true;
   }
   return false;
