@@ -202,7 +202,7 @@ namespace Mantid
       int pixelcount = pixels.count();
       if( pixelcount != numberXPixels*numberYPixels )
       {
-        throw Kernel::Exception::FileError("Inconsitent data set: "
+        throw Kernel::Exception::FileError("Inconsistent data set: "
             "There were more data pixels found than declared in the Spice XML meta-data.", fileName);
       }
       if( numSpectra == 0 )
@@ -247,6 +247,14 @@ namespace Mantid
       // run load instrument
       runLoadInstrument(instrument, ws);
       runLoadMappingTable(ws, numberXPixels, numberYPixels);
+
+      // Set the sample-detector distance
+      boost::shared_ptr<Mantid::API::IInstrument> i = ws->getInstrument();
+      boost::shared_ptr<Mantid::Geometry::IComponent> sample = i->getSample();
+
+      Geometry::ParameterMap &pmap = ws->instrumentParameters();
+      pmap.add("double", sample.get(), "sample-detector-distance", distance);
+
     }
 
     /** Run the sub-algorithm LoadInstrument (as for LoadRaw)

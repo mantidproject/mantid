@@ -32,7 +32,7 @@ class BaseBeamFinder(ReductionStep):
         """
         # Load the file to extract the beam center from, and process it.
         filepath = reducer._full_file_path(self._datafile)
-        LoadSpice2D(filepath, "beam_center")
+        Load(filepath, "beam_center")
         
         beam_center = FindCenterOfMassPosition("beam_center",
                                                Output = None,
@@ -130,19 +130,19 @@ class BeamSpreaderTransmission(BaseTransmission):
             
             sample_spreader_ws = "_trans_sample_spreader"
             filepath = reducer._full_file_path(self._sample_spreader)
-            LoadSpice2D(filepath, sample_spreader_ws)
+            Load(filepath, sample_spreader_ws)
             
             direct_spreader_ws = "_trans_direct_spreader"
             filepath = reducer._full_file_path(self._direct_spreader)
-            LoadSpice2D(filepath, direct_spreader_ws)
+            Load(filepath, direct_spreader_ws)
             
             sample_scatt_ws = "_trans_sample_scatt"
             filepath = reducer._full_file_path(self._sample_scattering)
-            LoadSpice2D(filepath, sample_scatt_ws)
+            Load(filepath, sample_scatt_ws)
             
             direct_scatt_ws = "_trans_direct_scatt"
             filepath = reducer._full_file_path(self._direct_scattering)
-            LoadSpice2D(filepath, direct_scatt_ws)
+            Load(filepath, direct_scatt_ws)
             
             # Subtract dark current
             if reducer._dark_current_subtracter is not None:
@@ -199,11 +199,11 @@ class DirectBeamTransmission(BaseTransmission):
 
             sample_ws = "_transmission_sample"
             filepath = reducer._full_file_path(self._sample_file)
-            LoadSpice2D(filepath, sample_ws)
+            Load(filepath, sample_ws)
             
             empty_ws = "_transmission_empty"
             filepath = reducer._full_file_path(self._empty_file)
-            LoadSpice2D(filepath, empty_ws)
+            Load(filepath, empty_ws)
             
             # Subtract dark current
             if reducer._dark_current_subtracter is not None:
@@ -281,7 +281,7 @@ class SubtractDarkCurrent(ReductionStep):
         if self._dark_current_ws is None:
             filepath = reducer._full_file_path(self._dark_current_file)
             self._dark_current_ws = extract_workspace_name(filepath)
-            LoadSpice2D(filepath, self._dark_current_ws)
+            Load(filepath, self._dark_current_ws)
             
             # Normalize the dark current data to counting time
             darktimer_ws = self._dark_current_ws+"_timer"
@@ -333,8 +333,8 @@ class LoadRun(ReductionStep):
         
         # Load data
         filepath = reducer._full_file_path(self._data_file)
-        loader = LoadSpice2D(filepath, workspace)
-        reducer.instrument.sample_detector_distance = float(loader.getPropertyValue("SampleDetectorDistance"))
+        loader = Load(filepath, workspace)
+        reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getSample().getNumberParameter("sample-detector-distance")[0]        
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         
         # Move detector array to correct position

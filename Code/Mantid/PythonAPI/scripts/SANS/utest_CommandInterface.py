@@ -56,30 +56,28 @@ def _check_result(ws, test_file, tolerance=1e-6):
     
     # Utility methods for manipulating the lists
     def _diff_chi2(x,y): return (x[1]-y[1])*(x[1]-y[1])/(x[2]*x[2])
-    def _diff_iq(x,y): 
-        #print x[1], y[1]
-        return x[1]-y[1]
+    def _diff_iq(x,y): return x[1]-y[1]
     def _diff_err(x,y): return x[2]-y[2]
     def _add(x,y): return x+y
     
     # Check that I(q) is the same for both data sets
     deltas = map(_diff_iq, data_mantid, data_igor)
     delta  = reduce(_add, deltas)/len(deltas)
-    if math.fabs(delta)>tolerance:
+    if math.fabs(delta)>tolerance or math.isnan(delta):
         passed = False
         print "Sum of I(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta), tolerance)
     
     # Then compare the errors
     deltas = map(_diff_err, data_mantid, data_igor)
     delta_err  = reduce(_add, deltas)/len(deltas)
-    if math.fabs(delta_err)>tolerance:
+    if math.fabs(delta_err)>tolerance or math.isnan(delta):
         passed = False
         print "Sum of dI(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta_err), tolerance)
     
     # Compute chi2 of our result relative to IGOR 
     deltas = map(_diff_chi2, data_mantid, data_igor)
     chi2  = reduce(_add, deltas)/len(data_igor)
-    if chi2>10.0*tolerance:
+    if chi2>10.0*tolerance or math.isnan(delta):
         passed= False
         print "Chi2 is outside tolerance: %g > %g" % (chi2, 10.0*tolerance)
  
