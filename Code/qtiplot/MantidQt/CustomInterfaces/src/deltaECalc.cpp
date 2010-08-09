@@ -27,8 +27,8 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &use
 * @param inputFiles a coma separated list of data file names
 * @param whiteB The filename of the white beam run
 */
-void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles, const QString &whiteBeam,
-					const std::vector<std::string> &absRunFiles, const QString &absWhiteBeam,
+void deltaECalc::createProcessingScript(const QStringList &runFiles, const QString &whiteBeam,
+					const QStringList &absRunFiles, const QString &absWhiteBeam,
 					const QString & saveName)
 { 
   QString pyCode = "import DirectEnergyConversion as direct\n";
@@ -47,12 +47,11 @@ void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles
     pyCode += ",'.nxs'";
   }
   pyCode += "]\n\n";
-  
-  QString runFilesList = vectorToPyList(runFiles);
+
+  QString runFilesList = createPyListAsString(runFiles);
   if( m_sets.ckSumSpecs->isChecked() )
   {
-    pyCode += QString("mono_sample.convert_to_energy(%1, '%2', %3, %4, %5, %6, '%7')");
-
+    pyCode += QString("mono_sample.convert_to_energy(%1, r'%2', %3, %4, %5, %6, r'%7')");
     pyCode = pyCode.arg(runFilesList, whiteBeam, m_sets.leEGuess->text());
     if( absRunFiles.empty() )
     {
@@ -60,8 +59,8 @@ void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles
     }
     else
     {
-      runFilesList = vectorToPyList(absRunFiles);
-      pyCode = pyCode.arg(runFilesList, "'" + absWhiteBeam + "'");
+      runFilesList = createPyListAsString(absRunFiles);
+      pyCode = pyCode.arg(runFilesList, "r'" + absWhiteBeam + "'");
     }
     pyCode = pyCode.arg(m_sets.leVanEi->text(), saveName);
   }
@@ -72,20 +71,19 @@ void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles
       pyCode += 
         "rfiles = " + runFilesList + "\n"
         "for f in rfiles:\n"
-        "  mono_sample.convert_to_energy(f,'%1', %2, None, None, None)\n";
+        "  mono_sample.convert_to_energy(f,r'%1', %2, None, None, None)\n";
       pyCode = pyCode.arg(whiteBeam, m_sets.leEGuess->text());
     }
     else
     {
       pyCode += "rfiles = " + runFilesList + "\n";
-      pyCode += "abs_rfiles = " + vectorToPyList(absRunFiles) + "\n";
+      pyCode += "abs_rfiles = " + createPyListAsString(absRunFiles) + "\n";
       pyCode += 
         "for run, abs in zip(rfiles, abs_rfiles):\n"
-        "  mono_sample.convert_to_energy(run, '%1', %2, abs, '%3', %4)\n";
+        "  mono_sample.convert_to_energy(run, r'%1', %2, abs, r'%3', %4)\n";
       pyCode = pyCode.arg(whiteBeam, m_sets.leEGuess->text(), absWhiteBeam, m_sets.leVanEi->text());
     }
   }
-
   m_pyScript = pyCode;
 }
 
@@ -121,10 +119,10 @@ void deltaECalc::createProcessingScript(const std::vector<std::string> &runFiles
     pyCode = pyCode.arg("False");
   }
   pyCode += QString("mono_sample.energy_bins = '%1,%2,%3'\n").arg(m_sets.leELow->text(), m_sets.leEWidth->text(), m_sets.leEHigh->text());
-  pyCode += QString("mono_sample.map_file = '%1'\n").arg(m_sets.map_fileInput_leName->text());
+  pyCode += QString("mono_sample.map_file = r'%1'\n").arg(m_sets.mapFile->getFirstFilename());
   if( m_sets.ckRunAbsol->isChecked() )
   {
-    pyCode += QString("mono_sample.abs_map_file = '%1'\n").arg(m_sets.leVanMap->text());
+    pyCode += QString("mono_sample.abs_map_file = r'%1'\n").arg(m_sets.absMapFile->getFirstFilename());
   }
 }
 
@@ -145,22 +143,13 @@ void deltaECalc::addMaskingCommands(QString & analysisScript)
   analysisScript = analysisScript.arg(m_diagnosedWS).arg(tmpWS);
 }
 
-QString deltaECalc::vectorToPyList(const std::vector<std::string> & names) const
+QString deltaECalc::createPyListAsString(const QStringList & names) const
 {
-  QString asString = "[";
-  const size_t nFiles = names.size(); 
-  for( size_t i = 0; i < nFiles; )
-  {
-    asString += "'" + QString::fromStdString(names[i]) + "'";
-    if( ++i != nFiles )
-    {
-      asString += ",";
-    }
-  }
-  asString += "]";
+  QString asString = "[r'";
+  asString += names.join("',r'");
+  asString += "']";
   return asString;
 }
-
 
 /** Use the detector masking present in the workspace whose name was passed in
 *  the input workspace/s

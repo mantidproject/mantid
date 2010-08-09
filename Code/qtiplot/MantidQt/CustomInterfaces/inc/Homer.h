@@ -24,8 +24,6 @@ namespace MantidQt
     //-----------------------------------------------------
     // Forward declarations
     //-----------------------------------------------------
-    class MWRunFiles;
-    class MWRunFile;
     class MWDiag;
   }
 
@@ -111,16 +109,14 @@ namespace MantidQt
       // these signals send data to the find bad detectors (diag) widget
       void MWDiag_updateWBV(const QString &);
       void MWDiag_updateTOFs(const double &, const double &);
-      void MWDiag_sendRuns(const std::vector<std::string> &);
+      void MWDiag_sendRuns(const QStringList&);
 
     private slots:
       void validateAbsEi(const QString &);
       void validateRunEi(const QString &);
       void validateRebinBox(const QString &);
-      void validateMapFile();
 
-      //get rid of this one, no?
-      void browseClicked(const QString buttonDis);
+      void browseSaveFile();
 
       void runFilesChanged();
       void updateSaveName();
@@ -134,10 +130,6 @@ namespace MantidQt
 
     private:
       Ui::ConvertToEnergy m_uiForm;
-      MantidWidgets::MWRunFiles *m_runFilesWid;
-      MantidWidgets::MWRunFile *m_WBVWid;
-      MantidWidgets::MWRunFiles *m_absRunFilesWid;
-      MantidWidgets::MWRunFile *m_absWhiteWid;
       Background *m_backgroundDialog;
       /// A pointer to the widget with the user controls for finding bad detectors
       MantidWidgets::MWDiag *m_diagPage;

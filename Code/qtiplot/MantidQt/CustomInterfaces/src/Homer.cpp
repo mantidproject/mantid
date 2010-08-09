@@ -1,7 +1,6 @@
 #include "MantidQtCustomInterfaces/Homer.h"
 #include "MantidQtCustomInterfaces/Background.h"
 #include "MantidQtCustomInterfaces/deltaECalc.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -35,29 +34,18 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 Homer::Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
-  UserSubWindow(parent), m_uiForm(uiForm), m_runFilesWid(NULL), m_WBVWid(NULL),
-  m_absRunFilesWid(NULL), m_absWhiteWid(NULL), m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
+  UserSubWindow(parent), m_uiForm(uiForm),
+  m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
   m_isPyInitialized(false), m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")
 {}
 
 /// Set up the dialog layout
 void Homer::initLayout()
 {
-
   setUpPage1();
   setUpPage2();
   setUpPage3();
   
-  // the signal mapper is used to link both browse buttons on the form on to a load file dialog
-  QSignalMapper *signalMapper = new QSignalMapper(this);
-  signalMapper->setMapping(m_uiForm.map_fileInput_pbBrowse, QString("map_fileInput_pbBrowse"));
-  signalMapper->setMapping(m_uiForm.pbBrowseSPE, QString("pbBrowseSPE"));
-  signalMapper->setMapping(m_uiForm.pbAbsMapFileBrowse, QString("pbAbsMapFileBrowse"));
-  connect(m_uiForm.map_fileInput_pbBrowse, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbAbsMapFileBrowse, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(signalMapper, SIGNAL(mapped(const QString)), this, SLOT(browseClicked(const QString)));
-
   m_uiForm.pbRun->setToolTip("Process run files");
   m_uiForm.pbHelp->setToolTip("Online documentation (loads in a browser)");
 
@@ -135,34 +123,17 @@ void Homer::setUpPage1()
   // SIGNALS and SLOTS that deal with coping the text from one edit box to another 
   connect(m_uiForm.ckSumSpecs, SIGNAL(stateChanged(int)), this, SLOT(updateSaveName()));
   connect(m_uiForm.leNameSPE, SIGNAL(editingFinished()), this, SLOT(saveNameUpd()));
-
+  connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), this, SLOT(browseSaveFile()));
 }
+
 /// put default values into the controls in the first tab
 void Homer::page1FileWidgs()
 {
-  QStringList fileExts(".raw");
-  fileExts.append(".nxs");
+  connect(m_uiForm.runFiles, SIGNAL(fileEditingFinished()), this, SLOT(runFilesChanged()));
+  
+  m_uiForm.whiteBeamFile = m_uiForm.whiteBeamFile;
+  connect(m_uiForm.whiteBeamFile, SIGNAL(fileEditingFinished()), this, SLOT(updateWBV()));
 
-  m_runFilesWid = new MWRunFiles(this);
-  m_uiForm.runFilesLay->insertWidget(0, m_runFilesWid);
-  m_runFilesWid->setLabelText("Run Files");
-  m_runFilesWid->setExtensionList(fileExts);
-  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_runFilesWid, SLOT(instrumentChange(const QString &)));
-  connect(m_runFilesWid, SIGNAL(fileChanged()), this, SLOT(runFilesChanged()));
-  QString instrName = m_uiForm.loadRun_cbInst->currentText();
-  m_runFilesWid->instrumentChange(instrName);
-
-  m_WBVWid = new MWRunFile(this);
-  m_WBVWid->setLabelText("White Beam");
-  m_WBVWid->setExtensionList(fileExts);
-  m_uiForm.whiteFileLay->insertWidget(0, m_WBVWid);
-  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_WBVWid, SLOT(instrumentChange(const QString &)));
-  connect(m_WBVWid, SIGNAL(fileChanged()), this, SLOT(updateWBV()));
-  m_WBVWid->instrumentChange(instrName);
-
-  // Monitor the map file changes
-  connect(m_uiForm.map_fileInput_leName, SIGNAL(editingFinished()), this, SLOT(validateMapFile()));
-    
   // Add the save buttons to a button group
   m_saveChecksGroup = new QButtonGroup();
   m_saveChecksGroup->addButton(m_uiForm.save_ckSPE);
@@ -211,6 +182,7 @@ void Homer::setUpPage2()
   diagLayout->addWidget(m_diagPage);
 
   connect(m_uiForm.ckRunDiag, SIGNAL(toggled(bool)), m_diagPage, SLOT(setEnabled(bool)));
+  connect(m_diagPage, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
   m_uiForm.ckRunDiag->setChecked(true);
 }
 
@@ -218,39 +190,8 @@ void Homer::setUpPage3()
 {
   m_uiForm.ckRunAbsol->setToolTip("Normalise to calibration run(s)");
 
-  QGridLayout *mapLay = qobject_cast<QGridLayout*>(m_uiForm.gbCalRuns->layout()); 
-  if ( ! mapLay )
-  { 
-    throw Exception::NullPointerException("Problem with the layout in the first tab", "mapLay");
-  }
-  QWidget *item = mapLay->itemAtPosition(0,1)->widget();
-  mapLay->takeAt(mapLay->indexOf(item));
-  delete item;
-
-  QStringList fileExts(".raw");
-  fileExts.append(".nxs");
-  m_absRunFilesWid = new MWRunFiles(this);
-  m_absRunFilesWid->setLabelText("Mono Van");
-  m_absRunFilesWid->setExtensionList(fileExts);
-  mapLay->addWidget(m_absRunFilesWid, 0, 0, 1, 3);
-  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_absRunFilesWid, SLOT(instrumentChange(const QString &)));
-  QString instrName = m_uiForm.loadRun_cbInst->currentText();
-  m_absRunFilesWid->instrumentChange(instrName);
-
-  m_absWhiteWid = new MWRunFile(this);
-  m_absWhiteWid->setLabelText("White Beam");
-  m_absWhiteWid->setExtensionList(fileExts);
-
-  item = mapLay->itemAtPosition(2,1)->widget();
-  mapLay->takeAt(mapLay->indexOf(item));
-  delete item;
-  mapLay->addWidget(m_absWhiteWid, 2, 0, 1, 3);
-  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString &)), m_absWhiteWid, SLOT(instrumentChange(const QString &)));
-  m_absWhiteWid->instrumentChange(instrName);
-
   // Update values on absolute tab with those from vanadium tab
-  connect(m_uiForm.map_fileInput_leName, SIGNAL(textChanged(const QString&)), 
-	  m_uiForm.leVanMap, SLOT(setText(const QString &)));
+  connect(m_uiForm.mapFile, SIGNAL(fileTextChanged(const QString&)), m_uiForm.absMapFile, SLOT(setFileText(const QString &)));
 
   connect(m_uiForm.leEGuess, SIGNAL(textChanged(const QString &)), this, SLOT(updateAbsEi(const QString &)));
   connect(m_uiForm.leVanEi, SIGNAL(textChanged(const QString&)), this, SLOT(validateAbsEi(const QString &)));
@@ -279,25 +220,19 @@ bool Homer::isInputValid() const
  */
 bool Homer::isFileInputValid() const
 {
-  bool valid = m_runFilesWid->isValid();
+  bool valid = m_uiForm.runFiles->isValid();
   int error_index(-1);
-  valid &= m_WBVWid->isValid();
-  if( m_uiForm.valMap->isVisible() )
-  {
-    valid &= false;
-  }
-  else
-  {
-    valid &= true;
-  }
+  valid &= m_uiForm.whiteBeamFile->isValid();
+  valid &= m_uiForm.mapFile->isValid();
   if( !valid )
   {
     error_index = 0;
   }
   if( m_uiForm.ckRunAbsol->isChecked() )
   {
-    valid &= m_absRunFilesWid->isValid();
-    valid &= m_absWhiteWid->isValid();
+    valid &= m_uiForm.absRunFiles->isValid();
+    valid &= m_uiForm.absWhiteFile->isValid();
+    valid &= m_uiForm.absMapFile->isValid();
     if( !valid && error_index < 0 )
     {
       error_index = 2;
@@ -396,17 +331,16 @@ void Homer::readSettings()
  
   m_uiForm.ckFixEi->setChecked(settings.value("fixei", false).toBool());
   m_uiForm.ckSumSpecs->setChecked(settings.value("sumsps", false).toBool());
-  m_uiForm.map_fileInput_leName->setText(settings.value("map", "").toString()); 
-  validateMapFile();
-  
+  m_uiForm.mapFile->setFileText(settings.value("map", "").toString()); 
+    
   m_lastSaveDir = settings.value("save file dir", "").toString();
   m_lastLoadDir = settings.value("load file dir", "").toString();
 
   //File widget settings
-  m_runFilesWid->readSettings(currentGroup  + "/RunFilesFinder");
-  m_WBVWid->readSettings(currentGroup  + "/WhiteBeamFileFinder");
-  m_absRunFilesWid->readSettings(currentGroup  + "/AbsRunFilesFinder");
-  m_absWhiteWid->readSettings(currentGroup  + "/AbsWhiteBeamFileFinder");
+  m_uiForm.runFiles->readSettings(currentGroup  + "/RunFilesFinder");
+  m_uiForm.whiteBeamFile->readSettings(currentGroup  + "/WhiteBeamFileFinder");
+  m_uiForm.absRunFiles->readSettings(currentGroup  + "/AbsRunFilesFinder");
+  m_uiForm.absWhiteFile->readSettings(currentGroup  + "/AbsWhiteBeamFileFinder");
   
   settings.endGroup();
 }
@@ -423,16 +357,16 @@ void Homer::saveSettings()
   settings.beginGroup(currentGroup);
   settings.setValue("fixei", m_uiForm.ckFixEi->isChecked());
   settings.setValue("sumsps", m_uiForm.ckSumSpecs->isChecked());
-  settings.setValue("map", m_uiForm.map_fileInput_leName->text());
+  settings.setValue("map", m_uiForm.mapFile->getFirstFilename());
 
   settings.setValue("save file dir", m_lastSaveDir);
   settings.setValue("load file dir", m_lastLoadDir);
 
   //File widget settings
-  m_runFilesWid->saveSettings(currentGroup  + "/RunFilesFinder");
-  m_WBVWid->saveSettings(currentGroup  + "/WhiteBeamFileFinder");
-  m_absRunFilesWid->saveSettings(currentGroup  + "/AbsRunFilesFinder");
-  m_absWhiteWid->saveSettings(currentGroup  + "/AbsWhiteBeamFileFinder");
+  m_uiForm.runFiles->saveSettings(currentGroup  + "/RunFilesFinder");
+  m_uiForm.whiteBeamFile->saveSettings(currentGroup  + "/WhiteBeamFileFinder");
+  m_uiForm.absRunFiles->saveSettings(currentGroup  + "/AbsRunFilesFinder");
+  m_uiForm.absWhiteFile->saveSettings(currentGroup  + "/AbsWhiteBeamFileFinder");
   
   settings.endGroup();
 }
@@ -618,25 +552,6 @@ void Homer::validateRebinBox(const QString & text)
   }
 }
 
-/**
- * Validate the text in the map file box
- */
-void Homer::validateMapFile()
-{
-  FileProperty *validateMapFile = new FileProperty("UnusedName", "",FileProperty::Load);
-  std::string value = m_uiForm.map_fileInput_leName->text().toStdString();
-  QString error = QString::fromStdString(validateMapFile->setValue(value));
-  if( error.isEmpty() )
-  {
-    m_uiForm.valMap->hide();
-  }
-  else
-  {
-    m_uiForm.valMap->show();
-  }
-  m_uiForm.valMap->setToolTip(error);
-}
-
 /** this runs after the run button was clicked. It runs runScripts()
 *  and saves the settings on the form
 */
@@ -682,7 +597,8 @@ bool Homer::runScripts()
   m_uiForm.tabWidget->setCurrentIndex(0);
   // constructing this builds the Python script, it is executed below
   deltaECalc unitsConv( this, m_uiForm, m_backgroundDialog->removeBackground(),m_backgroundDialog->getRange().first, m_backgroundDialog->getRange().second);
-    
+  connect(&unitsConv, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
+  
   // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
   if (m_uiForm.ckRunDiag->isChecked())
   {
@@ -690,7 +606,7 @@ bool Homer::runScripts()
     pythonIsRunning(true);
     // display the second page in case errors occur in processing the user settings here
     m_uiForm.tabWidget->setCurrentIndex(1);
-    QString maskOutWS = "mask_"+QString::fromStdString(Poco::Path(m_runFilesWid->getFile1().toStdString()).getBaseName());
+    QString maskOutWS = "mask_"+QString::fromStdString(Poco::Path(m_uiForm.runFiles->getFirstFilename().toStdString()).getBaseName());
     QString errors = m_diagPage->run(maskOutWS, true);
     if ( ! errors.isEmpty() )
     {
@@ -705,17 +621,15 @@ bool Homer::runScripts()
     unitsConv.setDiagnosedWorkspaceName("");
   }
 
+  QStringList absRunFiles;
+  QString absWhiteFile;
   if( m_uiForm.ckRunAbsol->isChecked() )
   {
-    unitsConv.createProcessingScript(m_runFilesWid->getFileNames(), m_WBVWid->getFileName(),
-      m_absRunFilesWid->getFileNames(), m_absWhiteWid->getFileName(),
-	    m_uiForm.leNameSPE->text());
+    absRunFiles = m_uiForm.absRunFiles->getFilenames();
+    absWhiteFile = m_uiForm.absWhiteFile->getFirstFilename();
   }
-  else
-  {
-    unitsConv.createProcessingScript(m_runFilesWid->getFileNames(), m_WBVWid->getFileName(),
-      std::vector<std::string>(), "", m_uiForm.leNameSPE->text());
-  }
+  unitsConv.createProcessingScript(m_uiForm.runFiles->getFilenames(), m_uiForm.whiteBeamFile->getFirstFilename(),
+      absRunFiles, absWhiteFile, m_uiForm.leNameSPE->text());
 
   pythonIsRunning(true);
   // we're back to processing the settings on the first page
@@ -731,38 +645,16 @@ bool Homer::runScripts()
   return errors.isEmpty();
 }
 //this function will be replaced a function in a widget
-void Homer::browseClicked(const QString buttonDis)
+void Homer::browseSaveFile()
 {
-  QLineEdit *editBox = NULL;
   QStringList extensions;
-  bool toSave = false;
+  extensions << "spe";
 
-  if ( buttonDis == "map_fileInput_pbBrowse" )
-  {
-    editBox = m_uiForm.map_fileInput_leName;
-    extensions << "MAP"<< "map";
-  }
-  else if( buttonDis == "pbAbsMapFileBrowse" )
-  {
-    editBox = m_uiForm.leVanMap;
-    extensions << "MAP"<< "map";
-  }
-  else if ( buttonDis == "pbBrowseSPE")
-  {
-    editBox = m_uiForm.leNameSPE;
-    extensions << "spe";
-    toSave = true;
-  }
-  else
-  {
-    return;
-  }
-
-  QString filepath = this->openFileDia(toSave, extensions);
+  QString filepath = this->openFileDia(true, extensions);
   if( filepath.isEmpty() ) return;
   QWidget *focus = QApplication::focusWidget();
-  editBox->setFocus();
-  editBox->setText(filepath);
+  m_uiForm.leNameSPE->setFocus();
+  m_uiForm.leNameSPE->setText(filepath);
   if( focus )
   {
     focus->setFocus();
@@ -784,18 +676,13 @@ void Homer::helpClicked()
 * names of the files the user has just chosen
 */
 void Homer::runFilesChanged()
-{// this signal to the diag GUI allows the run files we choose here to be the default for its background correction
-  try
-  {
-    const std::vector<std::string> &names = m_runFilesWid->getFileNames();
-    emit MWDiag_sendRuns(names);
-    // the output file's default name is based on the input file names
-    updateSaveName();
-  }
-  catch (std::invalid_argument&)
-  {
-  }
+{
+  if( !m_uiForm.runFiles->isValid() ) return;
+  emit MWDiag_sendRuns(m_uiForm.runFiles->getFilenames());
+  // the output file's default name is based on the input file names
+  updateSaveName();
 }
+
 /** Check if the user has specified a name for the output SPE file,
 * if not insert a name based on the name of the input files
 */
@@ -820,14 +707,9 @@ void Homer::saveNameUpd()
  */
 void Homer::updateWBV()
 {
-  try
-  {  
-    emit MWDiag_updateWBV(m_WBVWid->getFileName());
-  }
-  catch (std::invalid_argument &)
+  if( m_uiForm.whiteBeamFile->isValid() )
   {
-    // nothing is sent if there is an invalid filename
-    //the problem is displayed by the file widget's validator
+    emit MWDiag_updateWBV(m_uiForm.whiteBeamFile->getFirstFilename());
   }
 }
 
@@ -838,7 +720,7 @@ QString Homer::defaultName()
 {
   try
   {//this will trhow if there is an invalid filename
-    const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
+    QStringList fileList = m_uiForm.runFiles->getFilenames();
     if ( fileList.size() == 0 )
     {// no input files we can't say anything about the output files
       return "";

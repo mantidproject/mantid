@@ -3,7 +3,7 @@
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtCustomInterfaces/ui_ConvertToEnergy.h"
-#include <vector>
+#include <QFileInfo>
 
 namespace MantidQt
 {
@@ -15,17 +15,18 @@ namespace MantidQt
       deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &userSettings, const bool removalBg, 
 		 const double TOFWinSt, const double TOFWinEnd);
       void setDiagnosedWorkspaceName(const QString &maskWS);
-      void createProcessingScript(const std::vector<std::string> &inFiles, const QString &whiteB,
-				  const std::vector<std::string> &absInFiles, const QString &absWhiteB,
+      void createProcessingScript(const QStringList & inFiles, const QString &whiteB,
+				  const QStringList &absInFiles, const QString &absWhiteB,
 				  const QString & saveName);
  
       /** Removes the path from the filename passed and replaces extensions with .spe
       * @param inputFilename name of the file that the .SPE file is based on
       */
-      static QString SPEFileName(const std::string &inputFilename)
+      static QString SPEFileName(const QString &inputFilename)
       {
-        std::string root = Poco::Path(inputFilename).getBaseName();
-        return root.empty() ? "" : QString::fromStdString(root)+".spe";
+        QString root = QFileInfo(inputFilename).baseName();
+        if( root.isEmpty() ) return "";
+        return root + ".spe";
       }
       std::string insertNumber(const std::string &filename, const int number) const;
     private:
@@ -41,7 +42,7 @@ namespace MantidQt
       QString m_diagnosedWS;
       void addAnalysisOptions(QString & analysisScript);
       void addMaskingCommands(QString & analysisScript);
-      QString vectorToPyList(const std::vector<std::string> & names) const;
+      QString createPyListAsString(const QStringList & names) const;
   
       // holds the prefix that we give to output workspaces that will be deleted in the Python
       static const QString tempWS;

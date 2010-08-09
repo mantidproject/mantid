@@ -1,11 +1,14 @@
 #include "MantidQtMantidWidgets/MWRunFiles.h"
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/AlgorithmManager.h"
+
 #include <QStringList>
 #include <QFileDialog>
 #include <QFileInfo>
-#include "boost/lexical_cast.hpp"
-#include "Poco/StringTokenizer.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -13,21 +16,37 @@ using namespace MantidQt::MantidWidgets;
 
 static const int MAX_FILE_NOT_FOUND_DISP = 3;
 
-MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent), m_allowMultipleFiles(false), 
-  m_isOptional(false), m_fileFilter("")
+MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(true), 
+  m_isOptional(false), m_algorithmProperty(""), m_fileFilter("")
 {
   m_uiForm.setupUi(this);
-  
-  const std::vector<std::string>& searchDirs = ConfigService::Instance().getDataSearchDirs();
-  if ( searchDirs.size() > 0 )
-  {
-    m_defDir = QString::fromStdString(searchDirs.front());
-  }
 
-  setupInstrumentNameIndex();
-  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SLOT(readEntries()));
+  connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString&)));
+  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SLOT(findFiles()));
+  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   m_uiForm.fileEditor->clear();
+
+  setFocusPolicy(Qt::StrongFocus);
+  setFocusProxy(m_uiForm.fileEditor);
+}
+
+/**
+ * Returns if this widget is for run file searching or not
+ * @returns True if this widget searches for run files, false otherwise
+ */
+bool MWRunFiles::isForRunFiles() const
+{
+  return m_findRunFiles;
+}
+
+/**
+ * Sets whether this widget is for run file searching or not
+ * @param True if this widget searches for run files, false otherwise
+ */
+void MWRunFiles::isForRunFiles(const bool mode)
+{
+  m_findRunFiles = mode;
 }
 
 /**
@@ -64,7 +83,7 @@ bool MWRunFiles::allowMultipleFiles() const
 void MWRunFiles::allowMultipleFiles(const bool allow)
 {
   m_allowMultipleFiles = allow;
-  readEntries();
+  findFiles();
 }
 
 /**
@@ -75,31 +94,32 @@ bool MWRunFiles::isOptional() const
   return m_isOptional;
 }
 
+/**
+ * Sets if the text field is optional
+ * @param optional Set the optional status of the text field
+ */
 void MWRunFiles::isOptional(const bool optional)
 {
   m_isOptional = optional;
-  readEntries();
+  findFiles();
 }
 
 /**
- * Set a new file filter for the file dialog based on the given extensions
- * @param fileExts A list of file extensions with with to create the filter
+ * Returns the algorithm name
+ * @returns The algorithm name
  */
-void MWRunFiles::setExtensionList(const QStringList & fileExts)
+QString MWRunFiles::getAlgorithmProperty() const
 {
-  m_fileFilter = "Files (";
-  QStringListIterator itr(fileExts);
-  while( itr.hasNext() )
-  {
-    QString ext = itr.next();
-    m_fileFilter += "*" + ext.toLower() + " ";
-    m_fileFilter += "*" + ext.toUpper();
-    if( itr.hasNext() )
-    {
-      m_fileFilter += " ";
-    }
-  }
-  m_fileFilter += ");; All Files (*.*)";
+  return m_algorithmProperty;
+}
+
+/**
+ * Sets an algorithm name that can be tied to this widget
+ * @param name The name of the algorithm and property in the form [AlgorithmName|PropertyName]
+ */
+void MWRunFiles::setAlgorithmProperty(const QString & text)
+{
+  m_algorithmProperty = text;
 }
 
 /**
@@ -118,27 +138,25 @@ bool MWRunFiles::isValid() const
   }
 }
 
-/** Returns the user entered filenames as a comma seperated list (integers are expanded to
-*  filenames)
-*  @return an array of filenames entered in the box
+/** 
+* Returns the names of the files found
+* @return an array of filenames entered in the box
 */
-const std::vector<std::string>& MWRunFiles::getFileNames() const
+QStringList MWRunFiles::getFilenames() const
 {
-  return m_files;
+  return m_foundFiles;
 }
 
 /** Safer than using getRunFiles()[0] in the situation were there are no files
 *  @return an empty string is returned if no input files have been defined or one of the files can't be found, otherwise it's the name of the first input file
 *  @throw invalid_argument if one of the files couldn't be found it then no filenames are returned
 */
-QString MWRunFiles::getFile1() const
+QString MWRunFiles::getFirstFilename() const
 {
-  const std::vector<std::string>& fileList = getFileNames();
-  if ( fileList.begin() != fileList.end() )
-  {
-    return QString::fromStdString(*(fileList.begin()));
-  }
-  return "";
+  if( m_foundFiles.isEmpty() )
+    return "";
+  else
+    return m_foundFiles[0];
 }
 
 /**
@@ -155,6 +173,17 @@ void MWRunFiles::saveSettings(const QString & group)
   settings.endGroup();
 }
 
+/** 
+ * Set the file text
+ * @param text The text string to set
+ */
+void MWRunFiles::setFileText(const QString & text)
+{
+  m_uiForm.fileEditor->setText(text);
+  findFiles();
+}
+
+
 /**
  * Read settings from the given group
  * @param group The name of the group key to retrieve data from
@@ -169,6 +198,79 @@ void MWRunFiles::readSettings(const QString & group)
   settings.endGroup();
 }
 
+/**
+ * Set a new file filter for the file dialog based on the given extensions
+ * @returns A string containing the file filter
+ */
+QString MWRunFiles::createFileFilter()
+{
+  QStringList fileExts;
+  if( m_algorithmProperty.isEmpty() )
+  {
+    std::vector<std::string> exts = ConfigService::Instance().Facility().extensions();
+    for( size_t i = 0; i < exts.size(); ++i )
+    {
+      fileExts.append(QString::fromStdString(exts[i]));
+    }
+  }
+  else
+  {
+    QStringList elements = m_algorithmProperty.split("|");
+    if( elements.size() == 2 )
+    {
+      fileExts = getFileExtensionsFromAlgorithm(elements[0], elements[1]);
+    }
+  }
+  QString fileFilter = "Files (";
+  QStringListIterator itr(fileExts);
+  while( itr.hasNext() )
+  {
+    QString ext = itr.next();
+    fileFilter += "*" + ext.toLower() + " ";
+    fileFilter += "*" + ext.toUpper();
+    if( itr.hasNext() )
+    {
+      fileFilter += " ";
+    }
+  }
+  fileFilter += ");;All Files (*.*)";
+  return fileFilter;
+}
+
+/**
+ * Create a list of file extensions from the given algorithm
+ * @param algName The name of the algorithm
+ * @param propName The name of the property
+ * @returns A list of file extensions
+ */
+QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName)
+{
+  Mantid::API::IAlgorithm_sptr algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName.toStdString());
+  QStringList fileExts;
+  if(!algorithm) return fileExts;
+  algorithm->initialize();
+  Property *prop = algorithm->getProperty(propName.toStdString());
+  FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
+  if( fileProp )
+  {
+    std::set<std::string> allowed = fileProp->allowedValues();
+    std::set<std::string>::const_iterator iend = allowed.end();
+    QString preferredExt = QString::fromStdString(fileProp->getDefaultExt());
+    size_t index(0);
+    for(std::set<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
+    {
+      QString ext = QString::fromStdString(*it);
+      fileExts.append(ext);
+      if( ext == preferredExt )
+      {
+        fileExts.move(index, 0);
+      }
+      ++index;
+    }
+  }
+  return fileExts;
+}
+
 /** Lauches a load file browser allowing a user to select multiple
 *  files
 *  @return the names of the selected files as a comma separated list
@@ -177,7 +279,12 @@ QString MWRunFiles::openFileDia()
 {
   QStringList filenames;
   QString dir = m_lastDir;
-  
+
+  if( m_fileFilter.isEmpty() )
+  {
+    m_fileFilter = createFileFilter();
+  }
+ 
   filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter);
   if(filenames.isEmpty())
   {
@@ -187,297 +294,106 @@ QString MWRunFiles::openFileDia()
   // turns the QStringList into a coma separated list inside a QString
   return filenames.join(", ");
 }
-/// Convert integers from the LineEdit box into filenames but leaves all non-integer values untouched
-void MWRunFiles::readRunNumAndRanges()
+
+/**
+ * Mark an error on the form
+ * @param A message to include (default: "")
+ */
+void MWRunFiles::showError(const QString & message)
 {
-  readCommasAndHyphens(m_uiForm.fileEditor->text().toStdString(), m_files);
-  // only show the validator if errors are found below
-  m_uiForm.valid->hide();
-  QStringList errors;
-
-  // set up the object we use for validation
-  std::vector<std::string> exts;
-  exts.push_back("raw"); exts.push_back("RAW");
-  exts.push_back("NXS"); exts.push_back("nxs");
-  FileProperty loadData("Filename", "", FileProperty::Load, exts);
-
-  if ( m_files.empty() && !isOptional() )
-  {
-    errors << "A filename is required.";
-  }
-  
-  std::vector<std::string>::iterator i = m_files.begin(), end = m_files.end();
-  //
-  // @todo MG: There was no padding originally so this was added to work for TS1 and TS2 at ISIS
-  // but a uch more general solution is necessary.
-  //
-  for ( ; i != end; ++i )
-  {
-    std::string run_str = *i;
-    bool num_only(true);
-  try
-	{
-    boost::lexical_cast<unsigned int>(*i);
-	}
-	catch ( boost::bad_lexical_cast &)
-	{// the entry doesn't read as a run number
-    num_only = false;
-	}// the alternative is that they entered a filename and we leave that as it is
-
-  if( num_only )
-  {
-    // First pad to 5
-    int ndigits = static_cast<int>(run_str.size());
-    if( ndigits != 5 )
-    {
-      run_str.insert(0, 5 - ndigits, '0');
-    }
-    std::string problem = loadData.setValue(m_instrPrefix.toStdString() + run_str + ".raw");
-    if( !problem.empty() )
-    {
-      //Try 8
-      run_str.insert(0, 3, '0');
-    }
-    *i = m_instrPrefix.toStdString() + run_str + ".raw"; 
-  }
-  if ( errors.size() < MAX_FILE_NOT_FOUND_DISP )
-	{
-    std::string problem = loadData.setValue(*i);
-	  if ( !problem.empty() )
-	  {
-	    errors << QString::fromStdString(problem);
-	  }
-	}
-  }
-  if ( errors.size() > 0 )
-  {
-    if ( m_files.size() > 0 )
-	{
-      m_uiForm.valid->setToolTip(errors.join(",\n")+"\nHas the path been entered into your Mantid.user.properties file?");
-	}
-	else
-	{
-      m_uiForm.valid->setToolTip(errors.front());
-	}
-	m_uiForm.valid->show();
-	m_files.clear();
-  }
+  m_uiForm.valid->setToolTip(message);
+  m_uiForm.valid->show();
 }
-void MWRunFiles::readCommasAndHyphens(const std::string &in, std::vector<std::string> &out)
-{
-  out.clear();
-  if ( in.empty() )
-  {// it is not an error to have an empty line but it would cause problems with an error check a the end of this function
-    return;
-  }
-  
-  Poco::StringTokenizer ranges(in, "-");
-  Poco::StringTokenizer::Iterator aList = ranges.begin();
 
-  do
-  {
-    Poco::StringTokenizer preHyp(*aList, ",", Poco::StringTokenizer::TOK_TRIM);
-    Poco::StringTokenizer::Iterator readPos = preHyp.begin();
-    if ( readPos == preHyp.end() )
-    {// can only mean that there was only an empty string or white space the '-'
-      throw std::invalid_argument("'-' found at the start of a list, can't interpret range specification");
-    }
-	  out.reserve(out.size()+preHyp.count());
-    for ( ; readPos != preHyp.end(); ++readPos )
-    {
-      out.push_back(*readPos);
-    }
-    if (aList == ranges.end()-1)
-    {// there is no more input
-      break;
-    }
-
-    Poco::StringTokenizer postHy(*(aList+1),",",Poco::StringTokenizer::TOK_TRIM);
-    readPos = postHy.begin();
-    if ( readPos == postHy.end() )
-    {
-      throw std::invalid_argument("A '-' follows straight after another '-', can't interpret range specification");
-    }
-	
-    try
-    {//we've got the point in the string where there was a hyphen, first get the stuff that is after it
-      // the tokenizer will always return at least on string
-      const int rangeEnd = boost::lexical_cast<int>(*readPos);
-      // the last string before the hyphen should be an int, here we get the it
-      const int rangeStart = boost::lexical_cast<int>(out.back()); 
-      // counting down isn't supported
-      if ( rangeStart > rangeEnd )
-      {
-        throw std::invalid_argument("A range where the first integer is larger than the second is not allowed");
-      }
-      // expand the range
-      for ( int j = rangeStart+1; j < rangeEnd; j++ )
-      {
-        out.push_back(boost::lexical_cast<std::string>(j));
-      }
-	  }
-	  catch (boost::bad_lexical_cast)
-	  {// the hyphen wasn't between two numbers, don't intepret it as a range instaed reconstruct the hyphenated string and add it to the list
-	    out.back() += "-" + *readPos;
-	  }
-  }
-  while( ++aList != ranges.end() );
-
-  if ( *(in.end()-1) == '-' )
-  {
-    throw std::invalid_argument("'-' found at the end of a list, can't interpret range specification");
-  }
-}
-/** This slot opens a file browser, then adds any selected file to the
-*  fileEditor LineEdit and emits fileChanged()
+/** This slot opens a file browser
 */
 void MWRunFiles::browseClicked()
 {
   QString uFile = openFileDia();
   if( uFile.trimmed().isEmpty() ) return;
 
-  if ( ! m_uiForm.fileEditor->text().isEmpty() )
+  if( this->allowMultipleFiles() )
   {
-    m_uiForm.fileEditor->setText(
-	  m_uiForm.fileEditor->text()+", " + uFile);
-  }
-  else m_uiForm.fileEditor->setText(uFile);
-  
-  readEntries();
-}
-void MWRunFiles::instrumentChange(const QString & instrName)
-{
-  //Lookup for a prefix from a name.
-  if( m_instrNameIndex.contains(instrName) )
-  {
-    m_instrPrefix = m_instrNameIndex.value(instrName);
-  }
-  //Use the name as-is if no name is mapped to it
-  else
-  {
-    m_instrPrefix = instrName;
-  }
-  
-  // the tooltip will tell users which instrument, if any, if associated with this control
-  if (m_instrPrefix.isEmpty())
-  {
-    setToolTip("(no intrument selected)");
+   if ( !m_uiForm.fileEditor->text().isEmpty() )
+   {
+     m_uiForm.fileEditor->setText(m_uiForm.fileEditor->text()+", " + uFile);
+   }
+   else
+   {
+     m_uiForm.fileEditor->setText(uFile);
+   }
   }
   else
   {
-    setToolTip("Searching for files using prefix " + m_instrPrefix);
+    m_uiForm.fileEditor->setText(uFile);
   }
-  
-  readEntries();
+  findFiles();
 }
 
 /** 
  * Puts the comma separated string in the fileEditor into the m_files array
 */
-void MWRunFiles::readEntries()
+void MWRunFiles::findFiles()
 {
-  readRunNumAndRanges();
-  emit fileChanged();
-}
-
-/**
- * Setup the instrument name->prefix lookup index
- */
-void MWRunFiles::setupInstrumentNameIndex()
-{
-  m_instrNameIndex.clear();
- 	Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
-	// get instrument names from config file
-	std::string key_name = std::string("instrument.names.") + mtd_config.getString("default.facility");
-	QString names = QString::fromStdString(mtd_config.getString(key_name));
-	QStringList nameList = names.split(";", QString::SkipEmptyParts);
-	// get instrument prefixes from config file
-	std::string key_pref = std::string("instrument.prefixes.") + mtd_config.getString("default.facility");
-	QString prefixes = QString::fromStdString(mtd_config.getString(key_pref));
-	QStringList prefList = prefixes.split(";", QString::SkipEmptyParts);
-
-  int nameCount = nameList.count();
-  if( nameCount != prefList.count() )
+  std::string text = this->m_uiForm.fileEditor->text().toStdString();
+  if( text.empty() )
   {
-    throw std::runtime_error("Size mismatch with name/prefix lists. Check that the instrument.names.[facility] and instrument.prefixes.[facility] have the same length.");
+    if( this->isOptional() )
+    {
+      m_uiForm.valid->hide();
+      return;
+    }
+    else
+    {
+      showError("No files specified.");
+      return;
+    }
   }
 
-  for( int i = 0; i < nameCount; ++i )
-  {
-    m_instrNameIndex.insert(nameList[i], prefList[i]);
-  }
-}
-
-//****************************************************************************
-//    MWRunFile
-//****************************************************************************
-
-MWRunFile::MWRunFile(QWidget *parent):
-  MWRunFiles(parent), m_userChange(false)
-{
-}
-/** Lauches a load file browser where a user can select only
-*  a single file
-*  @return the name of the file that was selected
-*/
-QString MWRunFile::openFileDia()
-{
-  QString filename;
-  QString dir = m_lastDir;
-  
-  filename = QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter);
-  if( ! filename.isEmpty() )
-  {
-  	m_lastDir = QFileInfo(filename).absoluteDir().path();
-  }
-  return filename;
-}
-
-/** 
-* Slot changes the filename only if it has not already been changed by
-* user
-*/
-void MWRunFile::suggestFilename(const QString &newName)
-{
+  Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
+  std::vector<std::string> filenames;
+  QString error("");
   try
-  {// check if the user has entered another value (other than the default) into the box
-    m_userChange =
-      m_userChange || (m_suggestedName != m_uiForm.fileEditor->text());
-  }
-  catch (std::invalid_argument&)
-  {// its possible that the old value was a bad value and caused an exception, ignore that
-  }
-  //only set the filename to the default if the user hadn't changed it
-  if ( ! m_userChange )
   {
-    m_suggestedName = newName;
-    m_uiForm.fileEditor->setText(newName);
-    readEntries();
+    if( isForRunFiles() )
+    {
+      filenames = fileSearcher.findRuns(text);
+    }
+    else
+    {
+      std::string result = fileSearcher.getFullPath(text);
+      if( !result.empty() ) filenames.push_back(text);
+    }
   }
-}
-/** Slot opens a file browser, writing the selected file to fileEditor
-*  LineEdit and emits fileChanged()
-*/
-void MWRunFile::browseClicked()
-{
-  QString uFile = openFileDia();
-  if( uFile.trimmed().isEmpty() ) return;
-
-  m_uiForm.fileEditor->setText(uFile);
-  
-  readEntries();
-}
-
-void MWRunFile::readEntries()
-{
-  MWRunFiles::readEntries();
-
-  if ( m_files.size() > 1 )
+  catch(Exception::NotFoundError& exc)
   {
-    m_uiForm.valid->setToolTip("Only one file is allowed here (, and - are not\nallowed in filenames)");
-	m_uiForm.valid->show();
-	m_files.clear();
+    error = QString::fromStdString(exc.what());
   }
-  
-  emit fileChanged();
+  catch(std::invalid_argument& exc)
+  {
+    error = QString::fromStdString(exc.what());
+  }
+  if( !error.isEmpty() )
+  {
+    showError(error);
+    return;
+  }
+
+  m_foundFiles.clear();
+  for( size_t i = 0; i < filenames.size(); ++i)
+  {
+    m_foundFiles.append(QString::fromStdString(filenames[i]));
+  }
+  if( m_foundFiles.isEmpty() )
+  {
+    showError("Error: No files found. Check search paths.");
+  }
+  else if( m_foundFiles.count() > 1 && this->allowMultipleFiles() == false )
+  {
+    showError("Error: Multiple files specified.");
+  }
+  else
+  {
+    m_uiForm.valid->hide();
+  }
 }

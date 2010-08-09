@@ -4,7 +4,6 @@
 #include "MantidQtMantidWidgets/ui_MWDiag.h"
 #include "MantidQtMantidWidgets/MWDiagCalcs.h"
 #include "MantidQtMantidWidgets/DiagResults.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtMantidWidgets/MantidWidget.h"
 #include "WidgetDllOption.h"
 #include <QSettings>
@@ -16,7 +15,12 @@ namespace MantidQt
 {
   namespace MantidWidgets
   {
-	  class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWDiag : public MantidWidget
+    //-----------------------------------------------
+    // Forward declarations
+    //------------------------------------------------
+    class MWRunFiles;
+    
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWDiag : public MantidWidget
     {
       Q_OBJECT
 
@@ -35,9 +39,9 @@ namespace MantidQt
   	  /// points to the control with the user selected instrument
 	    const QComboBox * const m_instru;
 	    /// points to the RunFile object used to specify the first white beam vanadium file
-  	  MWRunFile *m_WBV1;
+  	  MWRunFiles *m_WBV1;
 	    /// points to the RunFile object used to specify a possible second white beam vanadium file
-	    MWRunFile *m_WBV2;
+	    MWRunFiles *m_WBV2;
   	  /// true if either of the TOF windows have been changed by the user, otherwise false
 	    bool m_TOFChanged;
   	  /// time of flight value for the start of the background window that was set through the update??? or -1 if no value was sent through
@@ -47,7 +51,7 @@ namespace MantidQt
       /// the name of the output workspace that contains many of the results from these tests
 	    QString m_outputWS;
 	    /// the run files that will be loaded to do the background test
-  	  std::vector<std::string> m_monoFiles;
+  	  QStringList m_monoFiles;
       /// the values on the form the last time it was SUCCESSFULLY run accessed through this object
 	    QSettings m_prevSets;
 
@@ -73,7 +77,7 @@ namespace MantidQt
   	private slots:
 	    void browseClicked(const QString &buttonDis);
 	    void updateTOFs(const double &start, const double &end);
-  	  void specifyRuns(const std::vector<std::string> &runFileNames);
+  	  void specifyRuns(const QStringList &runFileNames);
 	    void TOFUpd();
 	    void noDispDialog() {m_dispDialog = NULL;}
       void validateHardMaskFile();

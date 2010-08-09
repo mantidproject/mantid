@@ -43,7 +43,6 @@ namespace MantidQt
       std::string replaceErrsFind(QString pythonMark, const QString &setting, Mantid::Kernel::Property * const check);
 
       void appendChk(const QLineEdit * const userVal, Mantid::Kernel::Property * const check);
-      std::string vectorToCommaSep(const std::vector<std::string> &vec) const;
     };
   }
 }

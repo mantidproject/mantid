@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidQtMantidWidgets/MWDiagCalcs.h"
+#include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
@@ -54,22 +55,17 @@ MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const 
 
 void MWDiag::insertFileWidgs()
 {
-  QStringList fileExts(".raw");
-  fileExts.append(".nxs");
-
-  m_WBV1 = new MWRunFile(this);
+  m_WBV1 = new MWRunFiles(this);
   m_designWidg.indivTestWhiteLay->addWidget(m_WBV1);
   m_WBV1->setLabelText("White Beam Van 1");
-  m_WBV1->setExtensionList(fileExts);
   m_WBV1->isOptional(false);
-  connect(m_instru, SIGNAL(currentIndexChanged(const QString &)), m_WBV1, SLOT(instrumentChange(const QString &)));
+  m_WBV1->allowMultipleFiles(false);
 
-  m_WBV2 = new MWRunFile(this);
+  m_WBV2 = new MWRunFiles(this);
   m_designWidg.effVarTestWhiteLay->addWidget(m_WBV2);
   m_WBV2->setLabelText("White Beam Van 2");
-  m_WBV2->setExtensionList(fileExts);
   m_WBV2->isOptional(true);
-  connect(m_instru, SIGNAL(currentIndexChanged(const QString &)), m_WBV2, SLOT(instrumentChange(const QString &)));
+  m_WBV2->allowMultipleFiles(false);
 
   connect(m_designWidg.leIFile, SIGNAL(editingFinished()), this, SLOT(validateHardMaskFile()));
   validateHardMaskFile();
@@ -223,19 +219,17 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
   // signals connected to the interface that this form is on
   if ( parentInterface != NULL )
   {
-    connect(this, SIGNAL(runAsPythonScript(const QString&)),
-            parentInterface, SIGNAL(runAsPythonScript(const QString&)));
 
-	// controls that copy the text from other controls
+    // controls that copy the text from other controls
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
-      m_WBV1, SLOT(suggestFilename(const QString&)));
+      m_WBV1, SLOT(setFileText(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
 	        this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
     connect(m_designWidg.leEndTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
 
-    connect(parentInterface, SIGNAL(MWDiag_sendRuns(const std::vector<std::string> &)),
-	  this, SLOT(specifyRuns(const std::vector<std::string> &)));
+    connect(parentInterface, SIGNAL(MWDiag_sendRuns(const QStringList&)),
+	  this, SLOT(specifyRuns(const QStringList &)));
   }
 }
 void MWDiag::setUpValidators()
@@ -383,7 +377,6 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
 {
   // close any result window that is still there from a previous run, there might be nothing
   closeDialog();
-  hideValidators();
   // prepare to remove any intermediate workspaces used only during the calculations
   std::vector<std::string> tempOutputWS;
   QString prob1;
@@ -392,17 +385,18 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
   {
     throw std::invalid_argument("Invalid input detected. Errors are marked with a red star.");
   }
-
   try
   {
     // these objects read the user settings in the GUI on construction
-    whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFileName(), m_instru->currentText(), outWS);
+    whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFirstFilename(), m_instru->currentText(), outWS);
+    connect(&firstTest, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
   
     // the two tests below are optional, dependent on the information supplied by the user
     boost::shared_ptr<whiteBeam2> optional1;
     QString prob2 = possibleSecondTest(optional1, outWS);
     boost::shared_ptr<backTest> optional2;
     QString prob3 = possibleThirdTest(optional2, outWS);
+    
   
     //if were errors return a description of the first error
     //stars have already been placed next to any problem input
@@ -430,14 +424,16 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
       DiagResults::TestSummary sumOption2("");
       tempOutputWS.push_back(sumFirst.inputWS.toStdString());
 
-      if ( optional1.use_count() > 0 )
+      if ( optional1 )
       {
+        connect(optional1.get(), SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
         sumOption1 = whiteBeamCompTest(sumFirst, optional1);
         tempOutputWS.push_back(sumOption1.inputWS.toStdString());
       }
 
-      if ( optional2.use_count() > 0 )
+      if ( optional2 )
       {
+        connect(optional2.get(), SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString &)));
         sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
       }	
     }
@@ -485,11 +481,16 @@ void MWDiag::blockPython(const bool block)
 */
 QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp, const QString &WSName)
 {  
-  if ( ! m_WBV2->getFileName().isEmpty() )
+  QString whiteBeamFile2 = m_WBV2->getFirstFilename();
+  if ( ! whiteBeamFile2.isEmpty() )
   {// the user has supplied an input file for the second test so fill the shared_ptr with the script
     whiteBeamComp.reset(
-	    new whiteBeam2(this, m_designWidg, m_WBV2->getFileName(), m_instru->currentText(), WSName));
+	    new whiteBeam2(this, m_designWidg, whiteBeamFile2, m_instru->currentText(), WSName));
 	  return "";
+  }
+  else
+  {
+    whiteBeamComp = boost::shared_ptr<whiteBeam2>();
   }
   return "";
 }
@@ -505,6 +506,10 @@ QString MWDiag::possibleThirdTest(boost::shared_ptr<backTest> &backCheck, const 
     backCheck.reset(new backTest(this, m_designWidg, m_monoFiles, m_instru->currentText(), WSName));
 	//report any problems trying to construct it, likely to be problems with the values suggested by the user
 	return "";
+  }
+  else
+  {
+    backCheck = boost::shared_ptr<backTest>();
   }
   return "";
 }
@@ -620,7 +625,7 @@ void MWDiag::updateTOFs(const double &start, const double &end)
 *  passed to it
 *  @param runFileNames names of the files that will be used in the background test
 */
-void MWDiag::specifyRuns(const std::vector<std::string> &runFileNames)
+void MWDiag::specifyRuns(const QStringList & runFileNames)
 {
   m_monoFiles = runFileNames;
 }

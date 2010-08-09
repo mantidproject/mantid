@@ -18,28 +18,48 @@
 namespace MantidQt
 {
   namespace MantidWidgets
-  {    
+  {
+    /** 
+    This is the base class all customised user interfaces that do not wish to be tied
+    to a specific Mantid algorithm but rather customised for user's requirements
+
+    @author Martyn Gigg, Tessella Support Services plc
+    @date 18/03/2009
+
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    */
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWidget : public QWidget
     {
-      Q_OBJECT
-	  public:
-      signals:
-        /// this signal should be connected to Qtiplot to run python scripts 
-        void runAsPythonScript(const QString& code);
+    Q_OBJECT
+
+    public:
+      //
+    signals:
+      void runAsPythonScript(const QString& code);
+
     protected:
-	    /// A list of labels to use as validation markers
-      QHash<const QWidget * const, QLabel *> m_validators;
-      ///to stop MantidPlot from being terminated need to check that this is false before a script is run, then set it to true and return it to false once the script has terminated
-      static bool g_pythonRunning;
-	  
-      MantidWidget(QWidget *parent);
-  	  void renameWorkspace(const QString &oldName, const QString &newName);
-      void setupValidator(QLabel *star);
-	    QLabel* newStar(const QGroupBox * const UI, int valRow, int valCol);
-      QLabel* newStar(QGridLayout * const lay, int valRow, int valCol);
-	    void hideValidators();
+      /// Default constructor
+      MantidWidget(QWidget *parent = NULL);
+      /// Run python code
       QString runPythonCode(const QString & code, bool no_output = false);
-      void runPython(const QString &code);
     };
   }
 }

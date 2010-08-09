@@ -1,5 +1,5 @@
 #--------------------------------
-# The API library MantidQtAPI
+# MantidWidgets library
 #--------------------------------
 TEMPLATE = lib
 
@@ -10,10 +10,9 @@ include(../mantidqt.pri)
   system(mkdir \"$$MANTIDQTINCLUDES/MantidQtMantidWidgets\")
 }
 
-
 # Need to link with the API
-unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI
-win32:LIBS += "$$DESTDIR\MantidQtAPI.lib"
+unix:LIBS += -lMantidQtAPI
+win32:LIBS += "$$DESTDIR/MantidQtAPI.lib"
 
 DEFINES += IN_MANTIDQT_MANTIDWIDGETS
 
@@ -34,7 +33,7 @@ SOURCES = \
   $$SRCDIR/SaveWorkspaces.cpp \
   $$SRCDIR/ICatSearch.cpp  \
   $$SRCDIR/ICatInvestigation.cpp
-
+ 
 HEADERS = \
   $$HEADERDIR/MantidWidget.h \
   $$HEADERDIR/MWRunFiles.h \
@@ -45,7 +44,7 @@ HEADERS = \
   $$HEADERDIR/MWDiagCalcs.h \
   $$HEADERDIR/SaveWorkspaces.h \
   $$HEADERDIR/ICatSearch.h  \
-  $$HEADERDIR/ICatInvestigation.h
+  $$HEADERDIR/ICatInvestigation.h 
   
 UI_DIR = $$HEADERDIR
 
@@ -55,17 +54,15 @@ FORMS = \
   $$HEADERDIR/ICatSearch.ui \
   $$HEADERDIR/ICatInvestigation.ui 
 
-  
-
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"
   
 #-----------------------------
 # Target and dependancies
 #-----------------------------
 
-
 unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtMantidWidgets"'
 win32:headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtMantidWidgets"'
 PRE_TARGETDEPS = headercopy
 
 QMAKE_EXTRA_TARGETS += headercopy
+

@@ -95,7 +95,7 @@
    <item row="0" column="0" >
     <widget class="QLabel" name="textLabel" >
      <property name="text" >
-      <string>Files</string>
+      <string>TextLabel</string>
      </property>
     </widget>
    </item>

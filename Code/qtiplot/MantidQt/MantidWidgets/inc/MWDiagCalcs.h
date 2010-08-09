@@ -39,8 +39,8 @@ namespace MantidQt
     class backTest : public pythonCalc
     {
     public:
-      backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const std::vector<std::string> &runs, const QString &instru, const QString &WSName);
-      void addDiagnoseFunc(const Ui::MWDiag &userSettings, const std::vector<std::string> &runs, const QString &instru, const QString &WSName);
+      backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const QStringList &runs, const QString &instru, const QString &WSName);
+      void addDiagnoseFunc(const Ui::MWDiag &userSettings, const QStringList& runs, const QString &instru, const QString &WSName);
       void incFirstTest(const DiagResults::TestSummary &results);
       void incSecondTest(const DiagResults::TestSummary &results, const QString &WS);
     private:

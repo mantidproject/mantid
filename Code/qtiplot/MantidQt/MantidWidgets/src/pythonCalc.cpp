@@ -153,24 +153,8 @@ void pythonCalc::appendChk(const QLineEdit * const userVal, Property * const che
 */
 QString pythonCalc::run()
 {
-  return runPythonCode(m_pyScript, false);
-}
-/** Creates a string with entries separated by commas
-*  @param vec the array of strings
-*  @return the members of the array inserted into a Python tupple
-*/
-std::string pythonCalc::vectorToCommaSep(const std::vector<std::string> &vec) const
-{
-  std::string fileList;
-  std::vector<std::string>::const_iterator inFile = vec.begin(), end=vec.end();
-  for( ; inFile != end; ++inFile)
-  {//create a list with a comma after each entry except the last entry
-	  fileList += *inFile;
-    if (inFile == end-1)
-    {
-      break;
-    }
-    fileList += ",";
-  }
-  return fileList;
+ QString tests = runPythonCode(m_pyScript, false);
+ //std::cerr << "results\n";
+ //std::cerr << tests.toStdString() << "\n";
+ return tests;
 }

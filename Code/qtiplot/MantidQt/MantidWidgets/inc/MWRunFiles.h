@@ -44,96 +44,82 @@ namespace MantidQt
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFiles : public MantidWidget
     {
       Q_OBJECT
+      Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
       Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
       Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
       Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
+      Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
 
     public:
-      MWRunFiles(QWidget *parent=NULL);
 
+      ///Default constructor
+      MWRunFiles(QWidget *parent=NULL);
       // property accessors/modifiers
+      bool isForRunFiles() const;
+      void isForRunFiles(const bool);
       QString getLabelText() const;
       void setLabelText(const QString & text);
       bool allowMultipleFiles() const;
       void allowMultipleFiles(const bool);
       bool isOptional() const;
       void isOptional(const bool);
+      QString getAlgorithmProperty() const;
+      void setAlgorithmProperty(const QString & name);
 
       // Standard setters/getters
-      void setExtensionList(const QStringList & exts);
       bool isValid() const;
-      const std::vector<std::string>& getFileNames() const;
-      virtual QString getFile1() const;
+      QStringList getFilenames() const;
+      QString getFirstFilename() const;
+
       /// Read settings from the given group
       void readSettings(const QString & group);
       /// Save settings in the given group
       void saveSettings(const QString & group);
 
-
     signals:
-      void fileChanged();
+      /// Emitted when the file text changes
+      void fileTextChanged(const QString &);
+      /// Emitted when the editing has finished
+      void fileEditingFinished();
 
     public slots:
-      virtual void instrumentChange(const QString & instrName);
-
-    protected:
-      virtual QString openFileDia();
-
-    protected:
-      Ui::MWRunFiles m_uiForm;
-      ///constains the name of the instrument that the runs files are for
-      QString m_instrPrefix;
-      /// the first directory listed in the users save path, or empty if none are defined in the Mantid*properties files
-      QString m_defDir;
-      /// An array of valid file names derived from the entries in the leNumber LineEdit
-      std::vector<std::string> m_files;
-      QString m_lastDir;
-      QString m_fileFilter;
-
-    protected slots:
-      virtual void browseClicked();
-      virtual void readEntries();
-      
-    
-    private:
-      void readRunNumAndRanges();
-      void readCommasAndHyphens(const std::string &in, std::vector<std::string> &out);
-      void setupInstrumentNameIndex();
+      /// Set the file text
+      void setFileText(const QString & text);
 
     private:
+      /// Create a file filter from a list of extensions
+      QString createFileFilter();
+      /// Create an extension list from the name algorithm and property
+      QStringList getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName);
+      /// Open a file dialog
+      QString openFileDia();
+      ///Show an error
+      void showError(const QString & message = "");
+
+    private slots:
+      /// Browse clicked slot
+      void browseClicked();
+      /// Find the files within the text edit field
+      void findFiles();
+
+    private:
+      /// Is the widget for run files or standard files
+      bool m_findRunFiles;
+      /// Allow multiple files
       bool m_allowMultipleFiles;
+      /// Whether the widget can be empty
       bool m_isOptional;
+      /// The algorithm name and property (can be empty)
+      QString m_algorithmProperty;
 
-      QHash<QString, QString> m_instrNameIndex;
-    };
-
-    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFile : public MWRunFiles
-    {
-      Q_OBJECT
-
-    public:
-      MWRunFile(QWidget *parent=NULL);
-
-      /** Returns the user entered filename, throws if the file is not found or mulitiple
-      *  files were entered
-      *  @return a filename validated against a FileProperty
-      *  @throw invalid_argument if the file couldn't be found or multiple files were entered
-      */
-      QString getFileName() const {return getFile1();}
-    signals:
-      void fileChanged();
-      public slots:
-      void suggestFilename(const QString &newName);
-    protected:
-      /// it is possible to set and change the default value for this widget, this stores the last default value given to it
-      QString m_suggestedName;
-      /// stores if the widget has been changed by the user away from its default value
-      bool m_userChange;
-      virtual QString openFileDia();
-
-      private slots:
-        void browseClicked();
-        void readEntries();
+      /// The Ui form
+      Ui::MWRunFiles m_uiForm;
+      /// An array of valid file names derived from the entries in the leNumber LineEdit
+      QStringList m_foundFiles;
+      /// The last directory viewed by the browse dialog
+      QString m_lastDir;
+      /// A file filter for the file browser
+      QString m_fileFilter;
     };
   }
 }

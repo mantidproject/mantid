@@ -6,7 +6,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include <QDir>
-#include <vector>
+
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -71,8 +71,8 @@ void whiteBeam1::addDiagnoseFunc(const Ui::MWDiag &userSettings, const QString &
   m_pyScript.append(", maskFile = '"+userSettings.leIFile->text()+"'");
 
   // the validation on WBVFile should have already happened before now
-  m_pyScript.append(", wbrf = '"+WBVFile+"'");
-  m_pyScript.append(", out_asc = '"+userSettings.leOFile->text()+"'");
+  m_pyScript.append(", wbrf = r'"+WBVFile+"'");
+  m_pyScript.append(", out_asc = r'"+userSettings.leOFile->text()+"'");
   m_pyScript.append(", tiny = '"+userSettings.leLowAbs->text()+"'");
   m_pyScript.append(", huge = '"+userSettings.leHighAbs->text()+"'");
   m_pyScript.append(", median_hi = '"+userSettings.leHighMed->text()+"'");
@@ -114,8 +114,8 @@ void whiteBeam2::addDiagnoseFunc(const Ui::MWDiag &userSettings, const QString &
 
   //the following user settings should already have been validated by the previous function
   m_pyScript.append("'"+instru+"'");
-  m_pyScript.append(", wbrf2 = '"+inFile+"'");
-  m_pyScript.append(", out_asc = '"+userSettings.leOFile->text()+"'");
+  m_pyScript.append(", wbrf2 = r'"+inFile+"'");
+  m_pyScript.append(", out_asc = r'"+userSettings.leOFile->text()+"'");
   m_pyScript.append(", tiny = '"+userSettings.leLowAbs->text()+"'");
   m_pyScript.append(", huge = '"+userSettings.leHighAbs->text()+"'");
   m_pyScript.append(", median_hi = '"+userSettings.leHighMed->text()+"'");
@@ -139,10 +139,10 @@ const QString backTest::tempWS = "_Diag_temporyWS_back_";
 /** Read the data the user supplied to create Python code to do their calculation
 * @param userSettings the form that the user filled in
 */
-backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const std::vector<std::string> &runs, const QString &instru, const QString &WSName) :
+backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const QStringList & runs, const QString &instru, const QString &WSName) :
   pythonCalc(interface), m_settings(userSettings)
 {
-  if (runs.size() == 0)
+  if (runs.count() == 0)
   {
     throw std::invalid_argument("No input files have been specified, uncheck \"Check run backgrounds\" to continue");
   }
@@ -172,13 +172,13 @@ backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, co
   m_pyScript.append("\nprint ");
   addDiagnoseFunc(userSettings, runs, instru, WSName);
 }
-void backTest::addDiagnoseFunc(const Ui::MWDiag &userSettings, const std::vector<std::string> &runs, const QString &instru, const QString &WSName)
+void backTest::addDiagnoseFunc(const Ui::MWDiag &userSettings, const QStringList &runs, const QString &instru, const QString &WSName)
 {  m_pyScript.append("diagnose(");
 
   //the following user settings should already have been validated by the previous function
   m_pyScript.append("'"+instru+"'");  
 
-  m_pyScript.append(", runs = '"+QString::fromStdString(vectorToCommaSep(runs))+"'");
+  m_pyScript.append(", runs = r'" + runs.join(",")+"'");
   m_pyScript.append(", zero = ");
   if ( userSettings.ckZeroCounts->isChecked() )
   {
@@ -188,7 +188,7 @@ void backTest::addDiagnoseFunc(const Ui::MWDiag &userSettings, const std::vector
   {
     m_pyScript.append("False");
   }
-  m_pyScript.append(", out_asc = '"+userSettings.leOFile->text()+"'");
+  m_pyScript.append(", out_asc = r'"+userSettings.leOFile->text()+"'");
   m_pyScript.append(", bmin = '"+m_settings.leStartTime->text()+"'");
   m_pyScript.append(", bmax = '"+m_settings.leEndTime->text()+"'");
   m_pyScript.append(", tiny = '"+userSettings.leLowAbs->text()+"'");
