@@ -255,6 +255,30 @@ namespace Mantid
       Geometry::ParameterMap &pmap = ws->instrumentParameters();
       pmap.add("double", sample.get(), "sample-detector-distance", distance);
 
+      // Move the detector to the right position
+      API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
+
+      // Finding the name of the detector object.
+      // The detector bank is the parent of the first non-monitor detector.
+      Geometry::IDetector_const_sptr det_pixel = ws->getDetector(LoadSpice2D::nMonitors);
+      boost::shared_ptr<const Mantid::Geometry::IComponent> detector_bank = det_pixel->getParent();
+      std::string detID = detector_bank->getName();
+      try
+      {
+        mover->setProperty<API::MatrixWorkspace_sptr> ("Workspace", ws);
+        mover->setProperty("ComponentName", detID);
+        mover->setProperty("Z", distance/1000.0);
+        mover->execute();
+      } catch (std::invalid_argument& e)
+      {
+        g_log.error("Invalid argument to MoveInstrumentComponent sub-algorithm");
+        g_log.error(e.what());
+      } catch (std::runtime_error& e)
+      {
+        g_log.error("Unable to successfully run MoveInstrumentComponent sub-algorithm");
+        g_log.error(e.what());
+      }
+
     }
 
     /** Run the sub-algorithm LoadInstrument (as for LoadRaw)

@@ -5,7 +5,6 @@
 """
 from Reducer import Reducer
 from Reducer import ReductionStep
-from Reducer import extract_workspace_name
 import SANSReductionSteps
 from mantidsimple import *
 

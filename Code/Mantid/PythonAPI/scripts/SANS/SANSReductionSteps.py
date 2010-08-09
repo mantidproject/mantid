@@ -333,15 +333,17 @@ class LoadRun(ReductionStep):
         
         # Load data
         filepath = reducer._full_file_path(self._data_file)
-        loader = Load(filepath, workspace)
+        Load(filepath, workspace)
+        
+        # Store the sample-detector distance
         reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getSample().getNumberParameter("sample-detector-distance")[0]        
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         
         # Move detector array to correct position
+        # Note: the position of the detector in Z is now part of the load
         MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
                                 X = -(reducer.get_beam_center()[0]-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
                                 Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
-                                Z = reducer.instrument.sample_detector_distance/1000.0,
                                 RelativePosition="1")
         
 class Normalize(ReductionStep):
@@ -418,7 +420,7 @@ class SensitivityCorrection(ReductionStep):
             filepath = reducer._full_file_path(self._flood_data)
             flood_ws = extract_workspace_name(filepath)
             
-            LoadRun(self._flood_data).execute(reducer, flood_ws)
+            Load(filepath, flood_ws)
 
             # Subtract dark current
             if reducer._dark_current_subtracter is not None:
@@ -426,6 +428,13 @@ class SensitivityCorrection(ReductionStep):
             
             # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
             if reducer._solid_angle_correcter is not None:
+                # Move detector array to correct position, necessary to apply solid angle correction
+                # Note: the position of the detector in Z is now part of the load
+                MoveInstrumentComponent(flood_ws, reducer.instrument.detector_ID, 
+                                        X = -(reducer.get_beam_center()[0]-reducer.instrument.nx_pixels/2.0+0.5) * reducer.instrument.pixel_size_x/1000.0, 
+                                        Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
+                                        RelativePosition="1")
+                        
                 reducer._solid_angle_correcter.execute(reducer, flood_ws)
         
             # Create efficiency profile: 
