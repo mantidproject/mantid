@@ -256,6 +256,12 @@ using Kernel::Exception::NotImplementedError;
 
     if (makeSpectraMap)
     {
+      g_log.information() << "About to populate spectra map with a 1:1 map up to " << max_pixel_id << "\n";
+      if (max_pixel_id > 10e6)
+      {
+        g_log.warning() << "Warning! The maximum pixel ID counted, " << max_pixel_id << ", is so large that it might be in error. The spectra map will only be made up to 10e6 pixels.\n";
+        max_pixel_id = 10e6;
+      }
       //Make the mapping between spectrum # and pixel id (aka detector id)
       //  In this case, it is a simple 1-1 map.
       mutableSpectraMap().populateSimple(0, max_pixel_id+1); //Go to max_pixel_id+1 to make sure you catch that one too

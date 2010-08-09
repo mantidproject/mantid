@@ -45,7 +45,7 @@ namespace Mantid
       {
         g_log.error("populateSimple : end should be > start");
         throw std::invalid_argument("populateSimple : end should be > start");
-      }
+      }//TODO: Check for end-start too big = some annoying bug!
       for (int i=start; i<end; ++i)
       {
         // Uncomment the line below to get a print out of the mapping as it's loaded

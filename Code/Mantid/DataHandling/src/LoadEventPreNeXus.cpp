@@ -152,8 +152,12 @@ void LoadEventPreNeXus::exec()
   //Process the events into pixels
   this->procEvents(localWorkspace);
 
+  std::cout << "LoadEventPreNeXus::procEvents() has completed.\n";
+
   //Save output
   this->setProperty(OUT_PARAM, localWorkspace);
+
+  std::cout << "LoadEventPreNeXus::output Workspace property has been set.\n";
 }
 
 
@@ -342,7 +346,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   this->setProtonCharge(workspace);
 
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
-  workspace->doneLoadingData();
+  workspace->doneLoadingData(1);
 
   //Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
