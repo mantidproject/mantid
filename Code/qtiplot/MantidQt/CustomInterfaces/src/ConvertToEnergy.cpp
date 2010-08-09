@@ -276,6 +276,8 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 	m_curInterfaceSetup = name;
 	m_curEmodeType = desired;
   m_uiForm.pbRun->setEnabled(true);
+  //Inform Mantid of the current instrument
+  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",name.toStdString());
 }
 
 /**
