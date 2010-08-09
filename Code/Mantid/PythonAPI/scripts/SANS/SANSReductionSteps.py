@@ -1,7 +1,7 @@
 """
     Implementation of reduction steps for SANS
 """
-
+import os
 from Reducer import ReductionStep
 from Reducer import extract_workspace_name
 
@@ -472,7 +472,8 @@ class SaveIqAscii(ReductionStep):
     def execute(self, reducer, workspace):
         if reducer._azimuthal_averager is not None:
             output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
-            SaveAscii(Filename=output_ws+'.txt', Workspace=output_ws)
+            filename = os.path.join(reducer._data_path, output_ws+'.txt')
+            SaveAscii(Filename=filename, Workspace=output_ws)
             
             
 class SubtractBackground(ReductionStep):
