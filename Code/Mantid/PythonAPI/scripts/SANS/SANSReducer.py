@@ -52,6 +52,9 @@ class SANSReducer(Reducer):
     ## Background subtracter
     _background_subtracter = None
     
+    ## Data loader
+    _data_loader = None
+    
     def __init__(self):
         super(SANSReducer, self).__init__()
         
@@ -66,6 +69,9 @@ class SANSReducer(Reducer):
         
         # By default, use the weighted azimuthal averaging
         self._azimuthal_averager = SANSReductionSteps.WeightedAzimuthalAverage() 
+        
+        # Default data loader
+        self._data_loader = SANSReductionSteps.LoadRun()
     
     def set_normalizer(self, option):
         """
@@ -118,6 +124,16 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
     
+    def set_data_loader(self, loader):
+        """
+            Set the loader for all data files
+            @param loader: ReductionStep object
+        """
+        if issubclass(loader.__class__, ReductionStep):
+            self._data_loader = loader
+        else:
+            raise RuntimeError, "Reducer.set_data_loader expects an object of class ReductionStep"
+        
     def set_sensitivity_correcter(self, correcter):
         """
             Set the ReductionStep object that applies the sensitivity correction.
@@ -210,7 +226,7 @@ class SANSReducer(Reducer):
         reduction_steps = []
         
         # Load file
-        reduction_steps.append(SANSReductionSteps.LoadRun())
+        reduction_steps.append(self._data_loader)
         
         # Dark current subtraction
         if self._dark_current_subtracter is not None:
