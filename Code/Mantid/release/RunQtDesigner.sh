@@ -4,6 +4,6 @@
 #
 
 export QT_PLUGIN_PATH=$PWD
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD 
+export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
 
 designer
