@@ -146,7 +146,6 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
     }
     return;
   }
-
   QTreeWidgetItem *ws_item = createEntry(ws_name, workspace);
   setItemIcon(ws_item, workspace);
   m_tree->addTopLevelItem(ws_item);
@@ -286,7 +285,7 @@ QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid:
 {
   QTreeWidgetItem *ws_item = new QTreeWidgetItem(QStringList(ws_name));
   // Need to add a child so that it becomes expandable. Using the correct ID is needed when plotting from non-expanded groups.
-  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList(AnalysisDataService::Instance().retrieve(ws_name.toStdString())->id().c_str()));
+  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList(workspace->id().c_str()));
   wsid_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(wsid_item);
   return ws_item;
