@@ -52,7 +52,7 @@ namespace Mantid
       const double& X2() const;
       double& X2();
 
-      const bool isHistogram() const; ///<Returns true if the data point is hastogram data and therefore has an X2.
+      bool isHistogram() const; ///<Returns true if the data point is hastogram data and therefore has an X2.
 
       double x2Value;        ///< value of X2
 

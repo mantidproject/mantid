@@ -201,7 +201,7 @@ namespace Mantid
      * @param alg the Algrorithm to use
      * @returns the version of the algroithm
      */
-    const int AlgorithmFactoryImpl::extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const
+    int AlgorithmFactoryImpl::extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const
     {
       return alg->version();
     }

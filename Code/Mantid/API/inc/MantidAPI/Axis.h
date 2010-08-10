@@ -61,9 +61,9 @@ public:
   Kernel::Unit_sptr& unit();
 
   /// Returns true is the axis is a Spectra axis
-  virtual const bool isSpectra() const{return false;}
+  virtual bool isSpectra() const{return false;}
   /// Returns true if the axis is numeric
-  virtual const bool isNumeric() const{return false;}
+  virtual bool isNumeric() const{return false;}
 
   /// Returns the value at a specified index
   /// @param index the index

@@ -42,7 +42,7 @@ namespace API
   virtual const double& X2() const =0; ///< Returns the X value of the end of the histogram bin
   virtual double& X2() =0;             ///< Returns the X value of the end of the histogram bin
 
-  virtual const bool isHistogram() const =0; ///<Returns true if the data point is hastogram data and therefore has an X2.
+  virtual bool isHistogram() const =0; ///<Returns true if the data point is hastogram data and therefore has an X2.
 
   virtual ~ILocatedData()
   {}

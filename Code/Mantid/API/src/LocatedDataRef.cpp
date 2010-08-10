@@ -207,7 +207,7 @@ namespace Mantid
     /** Returns true if the data point is hastogram data and therefore has an X2.
     @returns true if the X2 value is present
     */
-    const bool LocatedDataRef::isHistogram() const
+    bool LocatedDataRef::isHistogram() const
     {
       return (x2Pointer!=0);
     }

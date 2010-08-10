@@ -223,7 +223,7 @@ namespace Mantid
       return eValue; 
     }
 
-    const bool LocatedDataValue::isHistogram() const
+    bool LocatedDataValue::isHistogram() const
     {
       return _isHistogram;
     }
