@@ -4,6 +4,8 @@
     only for SANS instruments. The SANS-specific commands will likely only work 
     with the SANSReducer. 
 """
+#TODO: pull HFIR-specific commands in a separate module.
+
 import SANSInsts
 from SANSReducer import SANSReducer
 import SANSReductionSteps
@@ -48,6 +50,8 @@ def DataPath(path):
 
 def HFIRSANS():
     ReductionSingleton().set_instrument(SANSInsts.HFIRSANS())
+    SolidAngle()
+    AzimuthalAverage()
 
 def DirectBeamCenter(datafile, beam_radius=3.0):
     ReductionSingleton().set_beam_finder(SANSReductionSteps.DirectBeamCenter(datafile, beam_radius=beam_radius))

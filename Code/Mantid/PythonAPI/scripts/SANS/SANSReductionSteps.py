@@ -322,6 +322,7 @@ class LoadRun(ReductionStep):
         Load a data file, move its detector to the right position according
         to the beam center and normalize the data.
     """
+    #TODO: Move this to HFIR-specific module 
     def __init__(self, datafile=None):
         super(LoadRun, self).__init__()
         self._data_file = datafile
@@ -351,24 +352,22 @@ class LoadRun(ReductionStep):
         
 class Normalize(ReductionStep):
     """
-        Normalize the data to
-              time ???is this implemented??
-        or a spectrum, typically a monitor, with in the workspace.
-        By default the normalization is done with respect to the Instrument's
-        incident monitor
-        TODO: Maintain HFIR-ISIS compatibility
+        Normalize the data to timer or a spectrum, typically a monitor, 
+        with in the workspace. By default the normalization is done with 
+        respect to the Instrument's incident monitor
+        TODO: Move the HFIR-specific code to its own module
     """
-    def __init__(self, normalization_spectrum=-1):
+    def __init__(self, normalization_spectrum=None):
         super(Normalize, self).__init__()
-        if normalization_spectrum == -1:
-            self._normalization_spectrum = reducer.instrument.get_incident_mon()
-        else:
-            self._normalization_spectrum = normalization_spectrum
+        self._normalization_spectrum = normalization_spectrum
         
     def get_normalization_spectrum(self):
         return self._normalization_spectrum
         
     def execute(self, reducer, workspace):
+        if self._normalization_spectrum is None:
+            self._normalization_spectrum = reducer.instrument.get_incident_mon()
+        
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
         CropWorkspace(workspace, norm_ws,

@@ -65,12 +65,6 @@ class SANSReducer(Reducer):
         # Default normalization
         self._normalizer = SANSReductionSteps.Normalize(SANSReducer.NORMALIZATION_TIME)
         
-        # By default, we want the solid angle correction
-        self._solid_angle_correcter = SANSReductionSteps.SolidAngle()
-        
-        # By default, use the weighted azimuthal averaging
-        self._azimuthal_averager = SANSReductionSteps.WeightedAzimuthalAverage() 
-        
         # Default data loader
         self._data_loader = SANSReductionSteps.LoadRun()
     
@@ -250,6 +244,7 @@ class SANSReducer(Reducer):
             reduction_steps.append(self._solid_angle_correcter)
         
         # Calculate transmission correction
+        #TODO: Background needs its own transmission calculation
         if self._transmission_calculator is not None:
             reduction_steps.append(self._transmission_calculator) 
             
