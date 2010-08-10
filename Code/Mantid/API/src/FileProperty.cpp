@@ -64,12 +64,35 @@ bool FileProperty::isLoadProperty() const
 }
 
 /**
+* Check if this property is optional
+* @returns True if the property is optinal, false otherwise
+*/
+bool FileProperty::isOptional() const
+{
+  return (m_action == OptionalLoad || m_action == OptionalSave);
+}
+
+/**
  * Set the value of the property
  * @param propValue The value here is treated as relating to a filename
  * @returns A string indicating the outcome of the attempt to set the property. An empty string indicates success.
  */
 std::string FileProperty::setValue(const std::string & propValue)
 {
+  // Empty value is allowed if optional
+  if( propValue.empty() )
+  {
+    PropertyWithValue<std::string>::setValue("");
+    if( isOptional() )
+    {
+      return "";
+    }
+    else
+    { 
+      return "No file specified.";
+    }
+  }
+
   // If this looks like an absolute path then don't do any searching but make sure the 
   // directory exists for a Save property
   if( Poco::Path(propValue).isAbsolute() )

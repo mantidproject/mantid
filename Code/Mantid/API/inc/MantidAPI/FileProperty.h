@@ -44,7 +44,8 @@ public:
 
   /// Check if this is a load type property.
   bool isLoadProperty() const;
-
+  /// Check if this property is optional
+  bool isOptional() const;
   ///Overridden setValue method
   virtual std::string setValue(const std::string & propValue);
   /// Returns the main file extension that's used 

@@ -81,6 +81,7 @@ public:
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, exts);
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
+    TS_ASSERT_EQUALS(fp->isOptional(), false)
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw")
 
     ///Test a GEM file in the test directory
@@ -91,7 +92,14 @@ public:
 
     //Check different extension
     msg = fp->setValue("48098.Q");
-    TS_ASSERT_EQUALS(msg, ""); 
+    TS_ASSERT_EQUALS(msg, "");
+    
+    delete fp;
+    fp = new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, exts);
+    //Check empty value
+    msg = fp->setValue("");
+    TS_ASSERT_EQUALS(fp->value(), "");
+    TS_ASSERT_EQUALS(msg, "No file specified.");
 
     delete fp;
   }
@@ -103,6 +111,8 @@ public:
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::OptionalLoad, exts);
     // Check type
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
+    TS_ASSERT_EQUALS(fp->isOptional(), true)
+
     std::string msg = fp->setValue("GEM38370.raw");
     TS_ASSERT_EQUALS(msg, "")    
     // I'm using part of the file's path to check that the property really has found the file, with OptionalLoad the property returns valid whether it finds the file or not
@@ -111,7 +121,11 @@ public:
     TS_ASSERT(fp->value().find("Test") != std::string::npos)
 
     msg = fp->setValue("GEM38371.raw");
-    TS_ASSERT_EQUALS(msg, "")    
+    TS_ASSERT_EQUALS(msg, "")
+
+    msg = fp->setValue("");
+    TS_ASSERT_EQUALS(msg, "")
+    TS_ASSERT_EQUALS(fp->value(), "");
 
     delete fp;
   }
