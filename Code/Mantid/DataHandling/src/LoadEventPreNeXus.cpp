@@ -42,7 +42,6 @@ static const string MAP_PARAM("MappingFilename");
 static const string INSTRUMENT_PARAM("InstrumentFilename");
 static const string PID_PARAM("SpectrumList");
 static const string PAD_PIXELS_PARAM("PadEmptyPixels");
-static const string PERIOD_PARAM("PeriodList");
 static const string OUT_PARAM("OutputWorkspace");
 
 /// Default number of items to read in from any of the files.
@@ -100,9 +99,7 @@ void LoadEventPreNeXus::init()
   // which pixels to load
   this->declareProperty(new ArrayProperty<int>(PID_PARAM),
                         "A list of individual spectra to read. Only used if set.");
-  // which states to load
-  this->declareProperty(new ArrayProperty<int>(PERIOD_PARAM),
-                        "A list of periods to read. Only used if set.");
+
   // Pad out empty pixels?
   this->declareProperty(new PropertyWithValue<bool>(PAD_PIXELS_PARAM, false, Direction::Input) );
 //                        "Set to True to pad empty pixels, loaded from the instrument geometry file. Nothing is done if no geometry file was specified.");
@@ -118,7 +115,6 @@ void LoadEventPreNeXus::exec()
 {
   // what to load
   this->spectra_list = this->getProperty(PID_PARAM);
-  this->period_list = this->getProperty(PERIOD_PARAM);
 
   // load the mapping file
   string mapping_filename = this->getPropertyValue(MAP_PARAM);

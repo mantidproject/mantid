@@ -96,7 +96,6 @@ private:
   void exec();
 
   std::vector<int> spectra_list; ///<the list of Spectra
-  std::vector<int> period_list; ///< the list of periods
 
   /// The times for each pulse.
   std::vector<boost::posix_time::ptime> pulsetimes;
