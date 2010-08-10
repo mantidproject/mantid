@@ -145,7 +145,7 @@ public:
   //----------------------------------------------------------------------
 
   int axes() const;
-  Axis* const getAxis(const int& axisIndex) const;
+  Axis* getAxis(const int& axisIndex) const;
   void replaceAxis(const int& axisIndex, Axis* const newAxis);
 
   /// Returns true if the workspace contains data in histogram form (as opposed to point-like)

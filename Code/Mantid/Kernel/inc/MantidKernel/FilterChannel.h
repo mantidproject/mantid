@@ -65,7 +65,7 @@ public:
   const FilterChannel& setPriority(const std::string& priority);
 
   /// Returns the integer representation of the priority
-  const unsigned int getPriority() const { return _priority; }
+  unsigned int getPriority() const { return _priority; }
 		
 	/// Sends the given Message to the attached channel. 
 	void log(const Message& msg);

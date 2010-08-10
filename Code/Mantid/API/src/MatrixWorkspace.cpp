@@ -240,7 +240,7 @@ int MatrixWorkspace::axes() const
  *  @param axisIndex The index of the axis required
  *  @throw IndexError If the argument given is outside the range of axes held by this workspace
  */
-Axis* const MatrixWorkspace::getAxis(const int& axisIndex) const
+Axis* MatrixWorkspace::getAxis(const int& axisIndex) const
 {
   if ( axisIndex < 0 || axisIndex >= static_cast<int>(m_axes.size()) )
   {
