@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/AlignDetectors.h"
@@ -80,10 +81,10 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
 	}
 
-	void testEventWorkspaceSameOutputWS()
-	{
+  void testEventWorkspaceSameOutputWS()
+  {
     //----- Load some event data --------
-	  LoadEventPreNeXus * eventLoader;
+    LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat" );
@@ -117,17 +118,6 @@ public:
       inputW->setX(pix, axis);
     }
 
-    /*
-    // Have to align because diffraction focussing wants d-spacing
-    Mantid::DataHandling::AlignDetectors align;
-    align.initialize();
-    align.setPropertyValue("InputWorkspace", "refl");
-    align.setPropertyValue("OutputWorkspace", "refl");
-    align.setPropertyValue("CalibrationFile","../../../../Test/Data/refl_fake.cal");
-    TS_ASSERT_THROWS_NOTHING( align.execute() );
-    TS_ASSERT( align.isExecuted() );
-    */
-
     focus.setPropertyValue("InputWorkspace", "refl");
     std::string outputws( "refl" );
     focus.setPropertyValue("OutputWorkspace", outputws);
@@ -141,6 +131,7 @@ public:
 
     EventWorkspace_const_sptr output;
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+
     //The fake grouping file has 100 groups, starting at 1, so there'll be 100 histograms
     int numgroups = 100;
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
@@ -151,6 +142,9 @@ public:
 
     //Because no pixels are rejected or anything, the total # of events should stay the same.
     TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
+
+    //List of the expected total # of events in each group
+    int expected_total_events[numgroups];
 
     //Now let's test the grouping of detector UDETS to groups
     for (int group=1; group<numgroups; group++)
@@ -182,11 +176,224 @@ public:
       int workspaceindex_in_output = group-1;
       TS_ASSERT( (*output->refX(workspaceindex_in_output)).size() > 0);
       TS_ASSERT_EQUALS((*output->refX(workspaceindex_in_output))[0], mymap[ mylist[0] ]);
+      //Save the # of events for later
+      expected_total_events[workspaceindex_in_output] = numevents;
+
+    }
+
+    //Now let's try to rebin using log parameters
+    SimpleRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    // Check it fails if "Params" property not set
+    rebin.setPropertyValue("Params", "1.0,-1.0,32768");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+
+    /* Get the output ws again */
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+
+
+    for (int workspace_index=0; workspace_index<numgroups-1; workspace_index++)
+    {
+      //should be 16 bins
+      TS_ASSERT_EQUALS( output->refX(workspace_index)->size(), 16);
+
+      //There should be some data in the bins
+      int events_after_binning = 0;
+      for (int i=0; i<15; i++)
+        events_after_binning += output->dataY(workspace_index)[i];
+      TS_ASSERT_EQUALS( events_after_binning, expected_total_events[workspace_index]);
     }
 
 
+  }
 
-	}
+
+  void xtestEventWorkspace_PG3_very_SLOW()
+  {
+    std::string outputws( "pg3" );
+
+    //----- Load some event data --------
+    LoadEventPreNeXus * eventLoader;
+    eventLoader = new LoadEventPreNeXus();
+    eventLoader->initialize();
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/PG3_732_pulseid.dat" );
+
+    eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setProperty("PulseidFilename", pulsefile);
+    eventLoader->setPropertyValue("MappingFilename","");
+    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/PG3_Definition.xml");
+    eventLoader->setPropertyValue("OutputWorkspace", outputws);
+    TS_ASSERT( eventLoader->execute() );
+
+    //Check on the input workspace
+    EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>
+            (AnalysisDataService::Instance().retrieve(outputws));
+    int numpixels_with_events = 14616;
+    TS_ASSERT_EQUALS( inputW->getNumberHistograms(), numpixels_with_events);
+
+    // Have to align because diffraction focussing wants d-spacing
+    Mantid::DataHandling::AlignDetectors align;
+    align.initialize();
+    align.setPropertyValue("InputWorkspace", outputws);
+    align.setPropertyValue("OutputWorkspace", outputws);
+    align.setPropertyValue("CalibrationFile","../../../../Test/Data/sns_event_prenexus/pg3_mantid_det.cal");
+    TS_ASSERT_THROWS_NOTHING( align.execute() );
+    TS_ASSERT( align.isExecuted() );
+
+    // Now do the focussing
+    focus.setPropertyValue("InputWorkspace", outputws);
+    focus.setPropertyValue("OutputWorkspace", outputws);
+    focus.setPropertyValue("GroupingFileName","../../../../Test/Data/sns_event_prenexus/pg3_mantid_det.cal");
+    focus.execute();
+    TS_ASSERT( focus.isExecuted() );
+
+    std::cout << "---\n-------- ATTEMPT 1 --------\n\n";
+    //Now let's try to rebin using log parameters
+    SimpleRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    // Check it fails if "Params" property not set
+    rebin.setPropertyValue("Params", "0.0001,-1.0,3.2768");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+
+
+    EventWorkspace_const_sptr output;
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+
+    //There should be 4 groups
+    int numgroups = 3;
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
+
+    //Because no pixels are rejected or anything, the total # of events should stay the same.
+    TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
+
+    //List of the expected total # of events in each group
+    int expected_total_events[numgroups];
+
+    //Now let's test the grouping of detector UDETS to groups
+    for ( int wi=0; wi<numgroups; wi++)
+    {
+      //should be 16 bins
+      TS_ASSERT_EQUALS( output->refX(wi)->size(), 16);
+      //There should be some data in the bins
+      int events_after_binning = 0;
+      const MantidVec thisY = output->dataY(wi);
+      std::cout << "index " << wi << ":";
+      for (int i=0; i<15; i++)
+      {
+        events_after_binning += thisY[i];
+        std::cout << (*output->refX(wi))[i] << "=" << thisY[i] << ", ";
+      }
+      std::cout << "index " << wi << " has " << events_after_binning << " events.\n";
+      TS_ASSERT_LESS_THAN(0, events_after_binning);
+    }
+
+
+    std::cout << "---\n-------- ATTEMPT 2 --------\n\n";
+    //Now let's try to rebin using log parameters
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    // Check it fails if "Params" property not set
+    rebin.setPropertyValue("Params", "0.001,-1.0,32.768");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+
+    //Because no pixels are rejected or anything, the total # of events should stay the same.
+    TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
+
+    //Now let's test the grouping of detector UDETS to groups
+    for ( int wi=0; wi<numgroups; wi++)
+    {
+      //should be 16 bins
+      TS_ASSERT_EQUALS( output->refX(wi)->size(), 16);
+      //There should be some data in the bins
+      int events_after_binning = 0;
+      const MantidVec thisY = output->dataY(wi);
+      std::cout << "index " << wi << ":";
+      for (int i=0; i<15; i++)
+      {
+        events_after_binning += thisY[i];
+        std::cout << (*output->refX(wi))[i] << "=" << thisY[i] << ", ";
+      }
+      std::cout << "index " << wi << " has " << events_after_binning << " events.\n";
+      TS_ASSERT_LESS_THAN(0, events_after_binning);
+    }
+
+
+    std::cout << "---\n-------- ATTEMPT 3 --------\n\n";
+    //Now let's try to rebin using log parameters
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    // Check it fails if "Params" property not set
+    rebin.setPropertyValue("Params", "0.01,-1.0,327.68");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+
+    //Because no pixels are rejected or anything, the total # of events should stay the same.
+    TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
+
+    //Now let's test the grouping of detector UDETS to groups
+    for ( int wi=0; wi<numgroups; wi++)
+    {
+      //should be 16 bins
+      TS_ASSERT_EQUALS( output->refX(wi)->size(), 16);
+      //There should be some data in the bins
+      int events_after_binning = 0;
+      const MantidVec thisY = output->dataY(wi);
+      std::cout << "index " << wi << ":";
+      for (int i=0; i<15; i++)
+      {
+        events_after_binning += thisY[i];
+        std::cout << (*output->refX(wi))[i] << "=" << thisY[i] << ", ";
+      }
+      std::cout << "index " << wi << " has " << events_after_binning << " events.\n";
+      TS_ASSERT_LESS_THAN(0, events_after_binning);
+    }
+
+
+    std::cout << "---\n-------- ATTEMPT 4 --------\n\n";
+    //Now let's try to rebin using log parameters
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    // Check it fails if "Params" property not set
+    rebin.setPropertyValue("Params", "0.1,-0.5,6.0");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+
+    //Because no pixels are rejected or anything, the total # of events should stay the same.
+    TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
+
+    //Now let's test the grouping of detector UDETS to groups
+    for ( int wi=0; wi<numgroups; wi++)
+    {
+      //There should be some data in the bins
+      int events_after_binning = 0;
+      const MantidVec thisY = output->dataY(wi);
+      std::cout << "index " << wi << ":";
+      for (int i=0; i<thisY.size(); i++)
+      {
+        events_after_binning += thisY[i];
+        std::cout << (*output->refX(wi))[i] << "=" << thisY[i] << ", ";
+      }
+      std::cout << "index " << wi << " has " << events_after_binning << " events.\n";
+      TS_ASSERT_LESS_THAN(0, events_after_binning);
+    }
+
+  }
+
+
 
 private:
   DiffractionFocussing2 focus;
