@@ -144,7 +144,7 @@ public:
     TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
 
     //List of the expected total # of events in each group
-    int expected_total_events[numgroups];
+    int * expected_total_events = new int[numgroups];
 
     //Now let's test the grouping of detector UDETS to groups
     for (int group=1; group<numgroups; group++)
@@ -208,6 +208,7 @@ public:
     }
 
 
+    delete [] expected_total_events;
   }
 
 
@@ -272,9 +273,6 @@ public:
 
     //Because no pixels are rejected or anything, the total # of events should stay the same.
     TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
-
-    //List of the expected total # of events in each group
-    int expected_total_events[numgroups];
 
     //Now let's test the grouping of detector UDETS to groups
     for ( int wi=0; wi<numgroups; wi++)

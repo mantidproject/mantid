@@ -304,6 +304,33 @@ public:
 
   }
 
+  void test_histogram_with_first_bin_higher_than_first_event()
+  {
+    //Make sure the algorithm handles it if the first bin > then the first event tof
+    this->fake_uniform_data();
+
+    //Generate the histrogram bins starting at 1000
+    EventList::StorageType shared_x;
+    for (double tof=1000; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
+      shared_x.push_back(tof);
+    el.setX(shared_x);
+
+    //Get them back
+    EventList::StorageType X, Y;
+    const EventList el3(el); //need to copy to a const method in order to access the data directly.
+    X = el3.dataX();
+    Y = *el3.dataY();
+    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+
+    //The data was created so that there should be exactly 2 events per bin
+    // The last bin entry will be 0 since we use it as the top boundary of i-1.
+    for (int i=0; i<Y.size(); i++)
+    {
+      TS_ASSERT_EQUALS(Y[i], 2.0);
+    }
+
+  }
+
   void test_random_histogram()
   {
     this->fake_data();

@@ -389,8 +389,14 @@ namespace DataObjects
       //Iterate through all events (sorted by tof)
       std::vector<TofEvent>::iterator itev = this->events.begin();
 
+      //if tof < X[0], that means that you need to skip some events
+      while ((itev != this->events.end()) && (itev->tof() < X[0]))
+        itev++;
+
       //Find the first bin
       size_t bin=0;
+
+      //The tof is greater the first bin boundary, so we need to find the first bin
       double tof = itev->tof();
       while (bin < x_size-1)
       {
@@ -402,7 +408,7 @@ namespace DataObjects
         }
         ++bin;
       }
-      //Go to the next event, we've alreadyconversions Map with key = pixel ID, and value =  binned this first one.
+      //Go to the next event, we've already binned this first one.
       ++itev;
 
       //Keep going through all the events
