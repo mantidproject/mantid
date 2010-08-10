@@ -452,7 +452,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 
 
     PARALLEL_FOR1(workspace)
-    for (size_t block_num=0; block_num < num_cpus; block_num++)
+    for (int block_num=0; block_num < num_cpus; block_num++)
     {
       std::cout << "Starting iterating through block " << block_num << "\n";
       //Make an iterator into the map
