@@ -1,26 +1,20 @@
-#ifndef MANTID_ICAT_CSEARCHBYRUNNUMBER_H_
-#define MANTID_ICAT_CSEARCHBYRUNNUMBER_H_
+#ifndef MANTID_ICAT_CMYDATASEARCH_H_
+#define MANTID_ICAT_CMYDATASEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 
-/** CSearchByRunNumber is a class responsible for SearchByRunNumber algorithm.
-  * This algorithm does the basic search and returns the investigations record
+/** CMyDataSearch is a class responsible for searching investigations of the logged in user.
+  * This algorithm does Icat search and returns the investigations record
 
     Required Properties:
-    <UL>
-    <LI> StartRun - The the start run number for search </LI>
-    <LI> EndRun - The end run number for search </LI>
-	<LI> Instruments - The list of instruments used for search </LI>
-	<LI> StartDate - The start date used for search </LI>
-	<LI> EndDate - The end date used for search </LI>
-	<LI> Keywords - The keyswords used for search </LI>
-	<LI> Case Sensitive - The case ensitive boolean flag used for search </LI>
+    <UL> OutputWorkspace - name of the OutputWorkspace which contains myinvestigations search
+    <LI> 
     </UL>
    
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-    @date 07/07/2010
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
+    @date 04/08/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -48,17 +42,17 @@ namespace Mantid
 {
 	namespace ICat
 	{
-		class DLLExport CSearchByRunNumber: public API::Algorithm
+		class DLLExport CMyDataSearch: public API::Algorithm
 		{
 		public:
 			///constructor
-			CSearchByRunNumber():API::Algorithm(){}
+			CMyDataSearch():API::Algorithm(){}
 			///destructor
-			~CSearchByRunNumber()
+			~CMyDataSearch()
 			{
 			}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "SearchByRunNumber"; }
+			virtual const std::string name() const { return "MyDataSearch"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual const int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method
@@ -70,14 +64,8 @@ namespace Mantid
 			void exec();
 			
 			/// Search method 
-			API::ITableWorkspace_sptr  doSearchByRunNumber();
-
-			 /// saves components in DD/MM/YYYY to struct tm
-			 time_t getTimevalue(const std::string& sDate);
-             /// this method validates the format of date properties
-			 void validateTimeFormat(const struct tm& timeinfo);
-
-									
+			API::ITableWorkspace_sptr  doMyDataSearch();
+												
 		};
 	}
 }

@@ -90,6 +90,12 @@ namespace Mantid
 			/// This method saves downloaded file to local disk
 			void doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
 
+			/// This method replaces backwardslash with forward slashes - for linux
+			void replaceBackwardSlash(std::string& inputString);
+
+            /// This method checks the file is already downled by looking at the file name in downlaoded file list.
+			bool isFileDownloaded(const std::string& fileName,std::vector<std::string>& downloadedList );
+
 		   
 
 		};

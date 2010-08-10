@@ -59,7 +59,7 @@ public:
 		clock_t start=clock();
 		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
 
-		downloadobj.setPropertyValue("Filename","HET00097.RAW");
+		downloadobj.setPropertyValue("Filenames","HET00097.RAW");
 		downloadobj.setPropertyValue("InputWorkspace","investigation");
 		
 		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
@@ -75,7 +75,7 @@ public:
 		{
 			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
 		}
-		ofs<<"Time taken for http download over internet from isis data server for files with investigation id 12576918 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+		ofs<<"Time taken to  download files with investigation id 12576918 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 		
 						
 		TS_ASSERT( downloadobj.isExecuted() );
@@ -124,7 +124,7 @@ public:
 		clock_t start=clock();
 		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
 
-		downloadobj.setPropertyValue("Filename","EMU00017452.nxs");
+		downloadobj.setPropertyValue("Filenames","EMU00017452.nxs");
 		downloadobj.setPropertyValue("InputWorkspace","investigation");
 		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
 
@@ -139,7 +139,7 @@ public:
 		{
 			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
 		}
-		ofs<<"Time taken for http download  from isis data server over internet for files with investigation id 24070400 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+		ofs<<"Time taken to download files with investigation id 24070400 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 		//ofs.close();
 		
 		TS_ASSERT( downloadobj.isExecuted() );
@@ -148,7 +148,66 @@ public:
 		AnalysisDataService::Instance().remove("investigations");
 		AnalysisDataService::Instance().remove("investigation");
 	}
+	void testDownLoadDataFile_Merlin()
+	{
+		//std::string str;
+		//std::getline(std::cin,str);
+		Session::Instance();
+		if ( !loginobj.isInitialized() ) loginobj.initialize();
+
+		loginobj.setPropertyValue("Username", "mantid_test");
+		loginobj.setPropertyValue("Password", "mantidtestuser");
 	
+		
+		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
+		TS_ASSERT( loginobj.isExecuted() );
+
+				
+		if ( !searchobj.isInitialized() ) searchobj.initialize();
+		searchobj.setPropertyValue("StartRun", "600.0");
+		searchobj.setPropertyValue("EndRun", "601.0");
+		searchobj.setPropertyValue("Instrument","MERLIN");
+		searchobj.setPropertyValue("OutputWorkspace","investigations");
+				
+		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
+		TS_ASSERT( searchobj.isExecuted() );
+
+		if ( !invstObj.isInitialized() ) invstObj.initialize();
+		invstObj.setPropertyValue("InvestigationId","24022007");
+		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
+		//		
+		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
+		TS_ASSERT( invstObj.isExecuted() );
+		
+		clock_t start=clock();
+		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
+
+		downloadobj.setPropertyValue("Filenames","MER00599.raw");
+		downloadobj.setPropertyValue("InputWorkspace","investigation");
+		
+		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
+
+		clock_t end=clock();
+		float diff = float(end - start)/CLOCKS_PER_SEC;
+
+		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
+		filepath += "download_time.txt";
+
+		std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
+		if ( ofs.rdstate() & std::ios::failbit )
+		{
+			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
+		}
+		ofs<<"Time taken to download files with investigation id 24022007 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+		
+						
+		TS_ASSERT( downloadobj.isExecuted() );
+		//delete the file after execution
+		//remove("MER00599.RAW");
+		AnalysisDataService::Instance().remove("investigations");
+		AnalysisDataService::Instance().remove("investigation");
+
+	}
 	void testDownloaddataFile1()
 	{	
 		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");

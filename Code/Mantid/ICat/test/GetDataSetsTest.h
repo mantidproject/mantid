@@ -1,8 +1,8 @@
-#ifndef GETINVESTIGATION_H_
-#define GETINVESTIGATION_H_
+#ifndef GETIDATASETS_H_
+#define GETIDATASETS_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/GetDataFiles.h"
+#include "MantidICat/GetDataSets.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
 #include "MantidICat/SearchByRunNumber.h"
@@ -11,13 +11,13 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class CGetDataFilesTest: public CxxTest::TestSuite
+class CGetDataSetsTest: public CxxTest::TestSuite
 {
 public:
 	void testInit()
 	{
-		TS_ASSERT_THROWS_NOTHING( invstObj.initialize());
-		TS_ASSERT( invstObj.isInitialized() );
+		TS_ASSERT_THROWS_NOTHING( datasets.initialize());
+		TS_ASSERT( datasets.isInitialized() );
 	}
 
 	void testgetDataFiles()
@@ -44,17 +44,17 @@ public:
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
 
-		if (!invstObj.isInitialized() ) invstObj.initialize();
-		invstObj.setPropertyValue("InvestigationId","12576918");
-		//invstObj.setPropertyValue("InputWorkspace", "investigations");//records of investigations
-		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation data files
+		if(!datasets.isInitialized()) datasets.initialize();
+		datasets.setPropertyValue("InvestigationId","12576918");
+		datasets.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
 		//		
-		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
-		TS_ASSERT( invstObj.isExecuted() );
+		TS_ASSERT_THROWS_NOTHING(datasets.execute());
+		TS_ASSERT( datasets.isExecuted() );
 	}
 private:
 	Login loginobj;
 	CSearchByRunNumber searchobj;
-	CGetDataFiles invstObj;
+	//CGetDataFiles datafiles;
+	CGetDataSets datasets;
 };
 #endif

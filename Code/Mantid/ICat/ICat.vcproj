@@ -211,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MyDataSearch.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SearchByRunNumber.cpp"
 				>
 			</File>
@@ -281,6 +285,10 @@
 				</File>
 				<File
 					RelativePath=".\inc\MantidICat\Logout.h"
+					>
+				</File>
+				<File
+					RelativePath=".\inc\MantidICat\MyDataSearch.h"
 					>
 				</File>
 				<File
