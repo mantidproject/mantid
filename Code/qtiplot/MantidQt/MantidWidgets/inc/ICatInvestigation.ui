@@ -5,177 +5,169 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>679</width>
+    <width>698</width>
     <height>501</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Investigation Data</string>
   </property>
-  <widget class="QTreeWidget" name="invsttreeWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>11</x>
-     <y>35</y>
-     <width>241</width>
-     <height>411</height>
-    </rect>
-   </property>
-   <property name="horizontalScrollBarPolicy" >
-    <enum>Qt::ScrollBarAsNeeded</enum>
-   </property>
-   <property name="autoScrollMargin" >
-    <number>9</number>
-   </property>
-   <property name="alternatingRowColors" >
-    <bool>false</bool>
-   </property>
-   <column>
-    <property name="text" >
-     <string>Data</string>
-    </property>
-   </column>
-  </widget>
-  <widget class="QTableWidget" name="invsttableWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>255</x>
-     <y>35</y>
-     <width>413</width>
-     <height>411</height>
-    </rect>
-   </property>
-   <property name="font" >
-    <font>
-     <weight>50</weight>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="alternatingRowColors" >
-    <bool>true</bool>
-   </property>
-   <property name="selectionMode" >
-    <enum>QAbstractItemView::SingleSelection</enum>
-   </property>
-   <property name="selectionBehavior" >
-    <enum>QAbstractItemView::SelectRows</enum>
-   </property>
-   <property name="sortingEnabled" >
-    <bool>true</bool>
-   </property>
-   <column>
-    <property name="text" >
-     <string>Name</string>
-    </property>
-   </column>
-   <column>
-    <property name="text" >
-     <string>File Size</string>
-    </property>
-   </column>
-   <column>
-    <property name="text" >
-     <string>File Id</string>
-    </property>
-   </column>
-   <column>
-    <property name="text" >
-     <string>Format</string>
-    </property>
-   </column>
-   <column>
-    <property name="text" >
-     <string>Format Version</string>
-    </property>
-   </column>
-   <column>
-    <property name="text" >
-     <string>Format Type</string>
-    </property>
-   </column>
-   <column>
-    <property name="text" >
-     <string>Create Time</string>
-    </property>
-   </column>
-  </widget>
-  <widget class="QLabel" name="invstlabel" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>14</y>
-     <width>658</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="frameShape" >
-    <enum>QFrame::Box</enum>
-   </property>
-   <property name="frameShadow" >
-    <enum>QFrame::Sunken</enum>
-   </property>
-   <property name="text" >
-    <string/>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="loadcheckBox" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>460</y>
-     <width>151</width>
-     <height>18</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Controlled loading of data</string>
-   </property>
-  </widget>
-  <widget class="QWidget" name="layoutWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>348</x>
-     <y>460</y>
-     <width>320</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2" >
-    <item>
-     <widget class="QPushButton" name="okButton" >
+  <layout class="QGridLayout" name="gridLayout" >
+   <item row="0" column="0" colspan="5" >
+    <widget class="QLabel" name="invstlabel" >
+     <property name="frameShape" >
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="text" >
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3" >
+    <widget class="QTreeWidget" name="invsttreeWidget" >
+     <property name="horizontalScrollBarPolicy" >
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="autoScrollMargin" >
+      <number>9</number>
+     </property>
+     <property name="alternatingRowColors" >
+      <bool>false</bool>
+     </property>
+     <column>
       <property name="text" >
-       <string>Ok</string>
+       <string>Data</string>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="cancelButton" >
+     </column>
+    </widget>
+   </item>
+   <item row="1" column="3" colspan="2" >
+    <widget class="QTableWidget" name="invsttableWidget" >
+     <property name="font" >
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet" >
+      <string notr="true" >alternate-background-color: rgb(216, 225, 255);</string>
+     </property>
+     <property name="alternatingRowColors" >
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="sortingEnabled" >
+      <bool>false</bool>
+     </property>
+     <property name="cornerButtonEnabled" >
+      <bool>true</bool>
+     </property>
+     <column>
       <property name="text" >
-       <string>Cancel</string>
+       <string>Name</string>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="downloadButton" >
+     </column>
+     <column>
       <property name="text" >
-       <string>Download</string>
+       <string>File Size (B)</string>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="LoadButton" >
+     </column>
+     <column>
       <property name="text" >
-       <string>Load</string>
+       <string>File Id</string>
       </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <zorder>layoutWidget</zorder>
-  <zorder>invsttreeWidget</zorder>
-  <zorder>invsttableWidget</zorder>
-  <zorder>invstlabel</zorder>
-  <zorder>loadcheckBox</zorder>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Format</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Format Version</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Format Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Create Time</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="2" column="0" >
+    <widget class="QPushButton" name="pushButton" >
+     <property name="text" >
+      <string>Help</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" >
+    <widget class="QCheckBox" name="loadcheckBox" >
+     <property name="text" >
+      <string>Controlled loading </string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="2" >
+    <widget class="QCheckBox" name="dataFilescheckBox" >
+     <property name="text" >
+      <string> DataFiles</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4" >
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <item>
+      <widget class="QPushButton" name="selectallButton" >
+       <property name="text" >
+        <string>Select All Files</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="downloadButton" >
+       <property name="text" >
+        <string>Download</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="LoadButton" >
+       <property name="text" >
+        <string>Load</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton" >
+       <property name="text" >
+        <string>Ok</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton" >
+       <property name="text" >
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <tabstops>
   <tabstop>invsttreeWidget</tabstop>

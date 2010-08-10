@@ -179,6 +179,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtMantidWidgets/ICatSearch.h"
+#include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 
 
 using namespace Qwt3D;
@@ -1159,6 +1160,7 @@ void ApplicationWindow::initMainMenu()
 	icat->setObjectName("ICatMenu");
 	icat->addAction(actionICatLogin);
 	icat->addAction(actionICatSearch);
+	icat->addAction(actionMydataSearch);
 	icat->addAction(actionICatLogout);
 	disableActions();
 }
@@ -12555,8 +12557,12 @@ void ApplicationWindow::createActions()
 	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
 	actionICatSearch->setToolTip(tr("ICat Search"));
 	connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatSearch()));
-	//connect(actionICatSearch, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
 
+	actionMydataSearch=new QAction("MyData Search",this);
+	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
+	actionMydataSearch->setToolTip(tr("ICat Search"));
+	connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
+	
 	actionICatLogout=new QAction("Logout",this);
 	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
 	actionICatLogout->setToolTip(tr("ICat Logout"));
@@ -16452,13 +16458,28 @@ void ApplicationWindow::ICatSearch()
 		delete usr_win;
 	}
 }
+void ApplicationWindow::ICatMyDataSearch()
+{	
+	QMdiSubWindow* usr_win = new QMdiSubWindow(this);
+	usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
+	//QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch1(usr_win);
+	QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
+	if(icatsearch_interface)
+	{
+		setGeometry(usr_win,icatsearch_interface);
+	}
+	else
+	{
+		delete usr_win;
+	}
+}
 void ApplicationWindow::setGeometry(QMdiSubWindow* usr_win,QWidget* user_interface)
 {   
       QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(), 
 		  usr_win->geometry().bottomRight() - usr_win->geometry().bottomRight());
       usr_win->setWidget(user_interface);
       QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(), 
-			       frame.bottomRight() + user_interface->geometry().bottomRight()+QPoint(15,35));
+			       frame.bottomRight() + user_interface->geometry().bottomRight());
       usr_win->setGeometry(iface_geom);
       d_workspace->addSubWindow(usr_win);
       usr_win->show();
@@ -16468,7 +16489,7 @@ void ApplicationWindow::setGeometry(QMdiSubWindow* usr_win,QWidget* user_interfa
 }
 void ApplicationWindow::ICatLogout()
 {
-	mantidUI->executeICatLogout(1);
+	mantidUI->executeICatLogout(-1);
 }
 
 ///slot for writing to log window

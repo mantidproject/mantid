@@ -1081,6 +1081,8 @@ private slots:
   void ICatLogin();
   /// Handler for ICat search menu
   void ICatSearch();
+  /// Handler for ICatMyData serch menu
+  void ICatMyDataSearch();
 
   void ICatLogout();
 
@@ -1278,7 +1280,7 @@ private:
     QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
     QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
     QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
-	QAction *actionICatLogin,*actionICatSearch,*actionICatLogout;
+	QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout;
 #ifdef SCRIPTING_CONSOLE
     QAction *actionShowConsole;
 #endif

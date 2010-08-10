@@ -32,7 +32,9 @@ SOURCES = \
   $$SRCDIR/MWDiagCalcs.cpp \
   $$SRCDIR/SaveWorkspaces.cpp \
   $$SRCDIR/ICatSearch.cpp  \
-  $$SRCDIR/ICatInvestigation.cpp
+  $$SRCDIR/ICatInvestigation.cpp \
+  $$SRCDIR/ICatMyDataSearch.cpp
+  
  
 HEADERS = \
   $$HEADERDIR/MantidWidget.h \
@@ -44,7 +46,8 @@ HEADERS = \
   $$HEADERDIR/MWDiagCalcs.h \
   $$HEADERDIR/SaveWorkspaces.h \
   $$HEADERDIR/ICatSearch.h  \
-  $$HEADERDIR/ICatInvestigation.h 
+  $$HEADERDIR/ICatInvestigation.h \
+  $$HEADERDIR/ICatMyDataSearch.h
   
 UI_DIR = $$HEADERDIR
 
@@ -52,7 +55,8 @@ FORMS = \
   $$HEADERDIR/MWRunFiles.ui \
   $$HEADERDIR/MWDiag.ui \
   $$HEADERDIR/ICatSearch.ui \
-  $$HEADERDIR/ICatInvestigation.ui 
+  $$HEADERDIR/ICatInvestigation.ui \
+  $$HEADERDIR/ICatMyDataSearch.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"
   

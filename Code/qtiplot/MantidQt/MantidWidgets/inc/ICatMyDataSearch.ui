@@ -1,0 +1,97 @@
+<ui version="4.0" >
+ <class>Form</class>
+ <widget class="QWidget" name="Form" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>780</width>
+    <height>223</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout" >
+   <item row="0" column="0" >
+    <widget class="QLabel" name="mydatalabel" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="text" >
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" >
+    <widget class="QTableWidget" name="myDatatableWidget" >
+     <property name="alternatingRowColors" >
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text" >
+       <string>InvestigationId</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>RbNumber</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Title</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Instrument</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Investigator</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>RunRange</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Year</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Abstract</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Investigators First Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Investigators Second Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Samples Name</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

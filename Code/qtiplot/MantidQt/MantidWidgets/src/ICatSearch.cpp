@@ -12,13 +12,12 @@
 #include<QTreeWidget>
 #include<QTreeWidgetItem>
 #include<QFont>
-#include<QPainter>
 #include<QHeaderView>
-#include<QPen>
 #include <QTableWidgetItem>
 #include <QSettings>
-#include <QBrush>
 #include <QMdiSubWindow>
+
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,7 +29,8 @@ using namespace MantidQt::MantidWidgets;
 //----------------------
 ///Constructor
 ICatSearch::ICatSearch(QWidget *par) :
-QWidget(par)
+QWidget(par),m_sender(NULL),m_invstWidget(NULL),
+m_calendarWidget(NULL)
 {
 	initLayout();
 //	 getting the application window pointer and setting it 
@@ -41,7 +41,6 @@ QWidget(par)
 	{
 		setparentWidget(parent);
 	}
-
 }
 QWidget* ICatSearch::getParentWidget()
 {
@@ -56,72 +55,70 @@ void ICatSearch::setparentWidget(QWidget* par)
 /// Set up the dialog layout
 void ICatSearch::initLayout()
 {
- // 
-	m_uiForm.setupUi(this);
+ 	m_uiForm.setupUi(this);
 
-	m_invstWidget=NULL;
-	
-	setToolTips();
 	//disable the table widget's vertical header
 	m_uiForm.searchtableWidget->verticalHeader()->setVisible(false);
 	
 	populateInstrumentBox();
 	
+	//m_uiForm.calendarWidget->hide();
+
+	
 	//getting last saved input data from registry
 	readSettings();
 
 	connect(m_uiForm.searchButton,SIGNAL(clicked()),this,SLOT(onSearch()));
-	connect(m_uiForm.cancelButton,SIGNAL(clicked()),this,SLOT(onCancel()));
-	connect(m_uiForm.searchtableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem * )),
+	connect(m_uiForm.closeButton,SIGNAL(clicked()),this,SLOT(onClose()));
+	//connect(m_uiForm.okButton,SIGNAL(clicked()),this,SLOT(onOK()));
+	connect(m_uiForm.searchtableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
 		this,SLOT(investigationSelected(QTableWidgetItem* )));
 	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
+	connect(m_uiForm.startdatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalender()));
+	connect(m_uiForm.enddatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalender()));
+	//connect(m_uiForm.calendarWidget,SIGNAL(clicked(const QDate&)) ,this,SLOT(getstartDate(const QDate&)));
+	
 }
 /// This method gets called  when the widget is closed
 void ICatSearch::closeEvent(QCloseEvent*)
 {
 	saveSettings();
 }
-/// This method sets the tool tips search input controls
-void ICatSearch::setToolTips()
-{
-	m_uiForm.startRunEdit->setToolTip("The start run number for the range of investigations to be searched");
-	m_uiForm.endRunEdit->setToolTip("The end run number for the range of investigations to be searched");
-}
+
 /// This method is the handler for search button
 void ICatSearch::onSearch()
 {
 	double startRun=0,endRun=0;
 	//get start and end run values 
 	getRunValues(startRun,endRun);
-
-	if(startRun==0 || endRun==0)
-	{
-		emit error("Run number cannot be zero.Enter valid strat and end run numbers to do Search.");
-		return;
-	}
+	
 	//try to validate the UI level.
 	if(startRun> endRun)
 	{
 		emit error("Run end number cannot be lower than run start number.");
 		return;
 	}
-	QString instrName;
 	// get the selected instrument
+	QString instrName;
 	getSelectedInstrument(instrName);
-
 	std::string instr(instrName.toStdString());
+
+	QString startDate,endDate;
+	getDates(startDate,endDate);
 
 	// execute the search by run number algorithm
 	ITableWorkspace_sptr ws_sptr = executeSearchByRunNumber(startRun,endRun,isCaseSensitiveSearch(),instr);
-	if(!ws_sptr)
-	{
+	if(!ws_sptr || ws_sptr->rowCount()==0)
+	{		
 		return;
 	}
 	updatesearchResults(ws_sptr);
 	//setting the label string
 	QFont font;
 	font.setBold(true);
-	m_uiForm.searchlabel->setText("Investigations Search Results");
+	std::stringstream rowcount;
+	rowcount<<ws_sptr->rowCount();
+	m_uiForm.searchlabel->setText("Investigations Search Results : "+QString::fromStdString(rowcount.str()) + " Investigations Found");
 	m_uiForm.searchlabel->setAlignment(Qt::AlignHCenter);
 	m_uiForm.searchlabel->setFont(font);
 }
@@ -136,54 +133,13 @@ bool ICatSearch::isCaseSensitiveSearch()
 */ 
 void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 {
-	
-	//int rows = ws_sptr->rowCount();
-	//int columns = ws_sptr->columnCount();
+	if(!ws_sptr)
+	{
+		return ;
+	}
 
-	//long  long invstId=0;
-	//std::string stringValue;
-	//QStringList qlist;
-
-	//QFont font;
-	//font.setBold(true);
-
-	////loop through table workspace rows
-	//for (int i=0;i<rows;++i)
-	//{
-	//	TableRow row =ws_sptr->getRow(i);
-	//	row>>invstId;
-	//	QString qinvstId=QString::number(invstId);
-	//	m_uiForm.searchtableWidget->insertRow(i);
-
-	//	QTableWidgetItem *newItem  = new QTableWidgetItem(qinvstId);
-	//	m_uiForm.searchtableWidget->setItem(i, 0, newItem);
-	//	newItem->setToolTip(qinvstId);
-	//
-	//	// loop through columns
-	//	for (int j=1;j<columns;++j)
-	//	{
-	//		row>>stringValue;
-	//		QTableWidgetItem *newItem1  = new QTableWidgetItem(QString::fromStdString(stringValue));
-	//		//below if loop not working,look into it again later sometime.
-	//		if(j==2)
-	//		{
-	//			QSize qsize;
-	//			qsize.setWidth(400);
-	//			newItem1->setSizeHint(qsize);
-	//		}
-	//		
-	//        m_uiForm.searchtableWidget->setItem(i, j, newItem1);
-	//		newItem1->setToolTip(QString::fromStdString(stringValue));
-	//	}
- //     
-	//}
-	////setting the row height of tableWidget 
-	//rows=m_uiForm.searchtableWidget->rowCount();
-	//for (int i=0;i<rows;++i)
-	//{
-	//	m_uiForm.searchtableWidget->setRowHeight(i,20);
-	//}
-	//
+	//disable  sorting as per QT documentation.otherwise  setitem will give undesired results
+	m_uiForm.searchtableWidget->setSortingEnabled(false);
 
 	//below for loop is for clearing the table widget on search button click.Bcoz Each click on search button to load data,rows were getting appended.
 	// table widget clear() method is clearing only the tablewidgetitem text,not removing the rows,columns
@@ -201,33 +157,34 @@ void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 		m_uiForm.searchtableWidget->setRowHeight(i,20);
 	}
 
-	QStringList qlabelList;//QBrush brush;
-	//QColor color("red");
+	QStringList qlabelList;
+	//QBrush brush;
+	//QColor color(255,0,0);
 	//brush.setColor(color);
-	for(int i=0;i<ws_sptr->columnCount();i++)
+	for(int i=0;i<ws_sptr->columnCount()-4;i++)
 	{
 		Column_sptr col_sptr = ws_sptr->getColumn(i);
 		//get the column name to display as the header of table widget
 		QString colTitle = QString::fromStdString(col_sptr->name());
 		qlabelList.push_back(colTitle);
-
+	
 		for(int j=0;j<ws_sptr->rowCount();++j)
 		{
 		    std::ostringstream ostr;
 		     col_sptr->print(ostr,j);
-			 
+						 
 			 QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
 			 newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
 			 m_uiForm.searchtableWidget->setItem(j,i, newItem);
 			 newItem->setToolTip(QString::fromStdString(ostr.str()));
-			  //newItem->setBackground(brush);
+			// newItem->setBackground(QBrush(QColor(Qt::blue))); 
 		}
 	}
-	//setting table widget header labels from table workspace
-	m_uiForm.searchtableWidget->setHorizontalHeaderLabels(qlabelList);
 	QFont font;
 	font.setBold(true);
-	for (int i=0;i<m_uiForm.searchtableWidget->columnCount();++i)
+	//setting table widget header labels from table workspace
+	m_uiForm.searchtableWidget->setHorizontalHeaderLabels(qlabelList);
+	for (int i=0;i<m_uiForm.searchtableWidget->columnCount()-4;++i)
 	{
 		m_uiForm.searchtableWidget->horizontalHeaderItem(i)->setFont(font);;
 	}
@@ -235,6 +192,9 @@ void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 	m_uiForm.searchtableWidget->sortByColumn(2,Qt::AscendingOrder);
 	// resizing the coulmn based on data size
 	m_uiForm.searchtableWidget->resizeColumnsToContents ();
+	//enable sorting
+	m_uiForm.searchtableWidget->setSortingEnabled(true);
+
 }
 /** This method populates the instrument box
 */
@@ -256,6 +216,7 @@ void ICatSearch::populateInstrumentBox(){
 	}
 	//sorting the combo by instrument name;
 	m_uiForm.instrmentBox->model()->sort(0);
+	m_uiForm.instrmentBox->insertItem(-1,"");
 }
 /** This method executes the ListInstruments algorithm
   * and fills the instrument box with instrument lists returned by ICat API
@@ -284,16 +245,24 @@ ITableWorkspace_sptr  ICatSearch::executeListInstruments()
 		emit error(e.what());
 		return ws_sptr;
 	}
-	alg->execute();
-	
-	if(!alg->isExecuted())
+	try
 	{
+		Poco::ActiveResult<bool> result(alg->executeAsync());
+		while( !result.available() )
+		{
+			QCoreApplication::processEvents();
+		}
+		//result.wait();
+	}
+	catch(...)
+	{     	
 		return ws_sptr;
 	}
-	
-	ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
-		(AnalysisDataService::Instance().retrieve("instruments"));
-
+	if(AnalysisDataService::Instance().doesExist("instruments"))
+	{
+		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
+			(AnalysisDataService::Instance().retrieve("instruments"));
+	}
 	return ws_sptr;
 }
 /**This method gets run numbers from the start and end run boxes.
@@ -304,6 +273,47 @@ void ICatSearch::getRunValues(double& startRun,double& endRun)
 {
 	endRun = m_uiForm.endRunEdit->text().toDouble();
 	startRun = m_uiForm.startRunEdit->text().toDouble();
+}
+/**This method gets start and end dates from the start and end date boxes.
+  *@param startDate - start date  
+  *@param endDate - end date
+*/
+void ICatSearch::getDates(QString& startDate,QString& endDate)
+{
+//startDate = m_uiForm.startdateEdit->date().toString();
+//endDate =  m_uiForm.enddateEdit->date().toString();
+}
+///popup DateTime calender to select date
+void ICatSearch:: popupCalender()
+{
+	//m_uiForm.calendarWidget->show();
+	m_calendarWidget = new QCalendarWidget(this);
+    m_calendarWidget->setObjectName(QString::fromUtf8("calendarWidget"));
+    m_calendarWidget->setGeometry(QRect(386, 64, 211, 148));
+    m_calendarWidget->setGridVisible(true);
+	connect(m_calendarWidget,SIGNAL(clicked(const QDate&)) ,this,SLOT(getstartDate(const QDate&)));
+	m_calendarWidget->show();
+	
+	QObject * qsender= sender();
+	if(!qsender) return;
+	 m_sender=qsender;
+	
+}
+///date changed
+void ICatSearch::getstartDate(const QDate& date  )
+{
+	//m_uiForm.calendarWidget->close();
+	m_calendarWidget->close();
+	if(!m_sender) return;
+
+	if(!m_sender->objectName().compare("startdatetoolButton"))
+	{
+	m_uiForm.startdateLineEdit->setText(date.toString("dd/MM/yyyy"));
+	}
+	if(!m_sender->objectName().compare("enddatetoolButton"))
+	{
+	m_uiForm.enddateLineEdit->setText(date.toString("dd/MM/yyyy"));
+	}
 }
 /**This method gets the selected instrument
   *@param instrName name of the selected instrument
@@ -320,6 +330,19 @@ ITableWorkspace_sptr  ICatSearch::executeSearchByRunNumber(const double &startRu
 {
 	QString algName("SearchByRunNumber");
 	const int version=1;
+
+	QString startDate = m_uiForm.startdateLineEdit->text();
+	QString endDate =m_uiForm.enddateLineEdit->text();
+	QString keywords= m_uiForm.keywordslineEdit->text();
+	if(!startDate.compare("DD/MM/YYYY",Qt::CaseInsensitive))
+	{
+		startDate="";
+	}
+	if(!endDate.compare("DD/MM/YYYY",Qt::CaseInsensitive))
+	{
+		endDate="";
+	}
+
 	ITableWorkspace_sptr  ws_sptr;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
@@ -335,7 +358,11 @@ ITableWorkspace_sptr  ICatSearch::executeSearchByRunNumber(const double &startRu
 		alg->setProperty("StartRun",startRun);
 		alg->setProperty("EndRun",endRun);
 		alg->setProperty("Instrument",instrName);
+		alg->setProperty("StartDate",startDate.toStdString());
+		alg->setProperty("EndDate",endDate.toStdString());
+		//alg->setProperty("Keywords",m_uiForm.enddateLineEdit->setText);
 		alg->setProperty("Case Sensitive",bCase);
+		alg->setProperty("Keywords",keywords.toStdString());
 		alg->setProperty("OutputWorkspace","investigations");
 	}
 	catch(std::invalid_argument& e)
@@ -343,21 +370,42 @@ ITableWorkspace_sptr  ICatSearch::executeSearchByRunNumber(const double &startRu
 		emit error(e.what());
 		return ws_sptr;
 	}
-	alg->execute();
-	
-	if(!alg->isExecuted())
+	try
 	{
-		return ws_sptr;
+		Poco::ActiveResult<bool> result(alg->executeAsync());
+		while( !result.available() )
+		{
+			QCoreApplication::processEvents();
+		}
+		//result.wait();
 	}
-
-	ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
-		(AnalysisDataService::Instance().retrieve("investigations"));
+	catch(...)
+    {     	
+		return ws_sptr;
+    }
+	if(AnalysisDataService::Instance().doesExist("investigations"))
+	{
+		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
+			(AnalysisDataService::Instance().retrieve("investigations"));
+	}
 	return ws_sptr;
 
 }
 /** This method cancels the search widget.
 */
-void ICatSearch::onCancel()
+void ICatSearch::onClose()
+{
+	this->close();
+	QObject* qobj=parent();
+	QWidget* parent=qobject_cast<QWidget*>(qobj);
+	if(parent)
+	{
+		parent->close();
+	}
+}
+/** This method cancels the search widget.
+*/
+void ICatSearch::onOK()
 {
 	this->close();
 	QObject* qobj=parent();
@@ -372,6 +420,7 @@ void ICatSearch::onCancel()
 */
 void ICatSearch::investigationSelected(QTableWidgetItem * item )
 {
+	if(!item) return ;
 	int row=item->row();
 
 	// column zero is investigation id
@@ -381,17 +430,22 @@ void ICatSearch::investigationSelected(QTableWidgetItem * item )
     
 	//column one is RbNumber
 	QTableWidgetItem* rbNumberItem = m_uiForm.searchtableWidget->item(row,1);
+	if(!rbNumberItem) return;
     QString qRbNumber = rbNumberItem->text();
 	///column two is Title
 	QTableWidgetItem* titleItem = m_uiForm.searchtableWidget->item(row,2);
+	if(!titleItem)return ;
 	QString qTitle = titleItem->text();
     //column 4 is Instrument
 	QTableWidgetItem* instrumentItem = m_uiForm.searchtableWidget->item(row,3);
+	if(!instrumentItem)return;
 	QString qInstrument = instrumentItem->text();
 		
 	//parent of user_win is application window;
 	QMdiSubWindow* usr_win = new QMdiSubWindow(m_applicationWindow);
+	if(!usr_win) return;
 	usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
+
 	m_invstWidget= new MantidQt::MantidWidgets::ICatInvestigation(invstId,qRbNumber,qTitle,qInstrument,usr_win);
 	if( m_invstWidget )
 	{ 
@@ -404,10 +458,6 @@ void ICatSearch::investigationSelected(QTableWidgetItem * item )
 		usr_win->move(QPoint(600, 400));
 		usr_win->show();
 	}
-	//// create investigation widget
-	//m_invstWidget= new MantidQt::MantidWidgets::ICatInvestigation(invstId,qRbNumber,qTitle,qInstrument,NULL);
-	//m_invstWidget->show();
-
 }
 
 /** This method saves search settings
