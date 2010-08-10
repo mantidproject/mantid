@@ -12,7 +12,9 @@ from mantidsimple import *
 class BaseBeamFinder(ReductionStep):
     """
         Base beam finder. Holds the position of the beam center
-        as well as the algorithm for finding it.
+        and the algorithm for calculates it using the beam's
+        displacement under gravity
+        TODO: Maintain HFIR-ISIS compatibility
     """
     def __init__(self, beam_center_x=0.0, beam_center_y=0.0):
         super(BaseBeamFinder, self).__init__()
@@ -85,6 +87,7 @@ class BaseTransmission(ReductionStep):
     """
         Base transmission. Holds the transmission value
         as well as the algorithm for calculating it.
+        TODO: ISIS doesn't use ApplyTransmissionCorrection, perhaps it's in Q1D, can we remove it from here?
     """
     def __init__(self, trans=0.0, error=0.0):
         super(BaseTransmission, self).__init__()
@@ -348,11 +351,19 @@ class LoadRun(ReductionStep):
         
 class Normalize(ReductionStep):
     """
-        Normalize the data to time or monitor
+        Normalize the data to
+              time ???is this implemented??
+        or a spectrum, typically a monitor, with in the workspace.
+        By default the normalization is done with respect to the Instrument's
+        incident monitor
+        TODO: Maintain HFIR-ISIS compatibility
     """
-    def __init__(self, normalization_spectrum=0):
+    def __init__(self, normalization_spectrum=-1):
         super(Normalize, self).__init__()
-        self._normalization_spectrum = normalization_spectrum
+        if normalization_spectrum == -1:
+            self._normalization_spectrum = reducer.instrument.get_incident_mon()
+        else:
+            self._normalization_spectrum = normalization_spectrum
         
     def get_normalization_spectrum(self):
         return self._normalization_spectrum
@@ -365,6 +376,8 @@ class Normalize(ReductionStep):
                       EndWorkspaceIndex   = str(self._normalization_spectrum))      
 
         Divide(workspace, norm_ws, workspace)
+        
+        mtd.deleteWorkspace(norm_ws)
         
         # HFIR-specific: If we count for monitor we need to multiply by 1e8
         if self._normalization_spectrum == reducer.NORMALIZATION_MONITOR:         
@@ -452,9 +465,19 @@ class SensitivityCorrection(ReductionStep):
 
 class Mask(ReductionStep):
     """
-        Apply mask to workspace
+        Marks some spectra so that they are not included in the analysis
+        TODO: Maintain HFIR-ISIS compatibility
+        TODO: ISIS to add a xml string data member and a MaskDetectorsInShape call
     """
     def __init__(self, nx_low=0, nx_high=0, ny_low=0, ny_high=0):
+        """
+            Initalize masking and optionally define a "picture frame" outside of
+            which the spectra from all detectors are to be masked.
+            @param nx_low: number of pixels to mask on the lower-x side of the detector
+            @param nx_high: number of pixels to mask on the higher-x side of the detector
+            @param ny_low: number of pixels to mask on the lower-y side of the detector
+            @param ny_high: number of pixels to mask on the higher-y side of the detector
+        """
         super(Mask, self).__init__()
         self._nx_low = nx_low
         self._nx_high = nx_high

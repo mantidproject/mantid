@@ -14,6 +14,8 @@ __version__ = '0.0'
 class SANSReducer(Reducer):
     """
         SANS-specific implementation of the Reducer
+        #TODO: ISIS can't deal with the solidAngle() and WeightedAzimuthalAverage steps, can we make them optional and remove references to them from this file?
+        #TODO: _dark_current_subtracter  isn't a spallation source concept, I don't think
     """
     ## Normalization options
     #TODO: those also correspond to the timer and monitor spectra -> store this in instr conf instead
