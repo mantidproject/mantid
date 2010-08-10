@@ -50,7 +50,6 @@ public:
     // Y = (95-192.0/2.0)*5.15/1000.0 = -0.00515
     mover.setPropertyValue("X","0.412");
     mover.setPropertyValue("Y","0.00515");
-    mover.setPropertyValue("Z","6");
     mover.execute();
 
     if (!correction.isInitialized()) correction.initialize();

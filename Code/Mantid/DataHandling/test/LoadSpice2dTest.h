@@ -115,7 +115,6 @@ public:
 
     // Check parameter map access
     const Mantid::Geometry::ParameterMap *m_paraMap = &(ws2d->instrumentParameters());
-    TS_ASSERT_EQUALS( m_paraMap->size(), 9);
 
     // Check that we can get a parameter
     boost::shared_ptr<Mantid::Geometry::Parameter> sample_aperture_size = m_paraMap->get(sample_aperture.get(), "Size");
@@ -126,8 +125,13 @@ public:
     sample_aperture_size->set(15.0);
     TS_ASSERT_EQUALS( sample_aperture_size->value<double>(), 15.0);
 
-    double distance = spice2d.getProperty("SampleDetectorDistance");
-    TS_ASSERT_EQUALS( distance, 6000.0 );
+    boost::shared_ptr<Mantid::Geometry::IComponent> sample = i->getSample();
+    boost::shared_ptr<Mantid::Geometry::Parameter> d = m_paraMap->get(sample.get(), "sample-detector-distance");
+    TS_ASSERT_EQUALS( d->type(), "double");
+    TS_ASSERT_EQUALS( d->value<double>(), 6000.0);
+
+    // Check detector position
+    TS_ASSERT_EQUALS( i->getComponentByName("detector1")->getPos().Z(), 6.0);
   }
 
 private:
