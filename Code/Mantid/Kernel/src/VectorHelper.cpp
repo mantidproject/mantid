@@ -37,6 +37,13 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
       xs = params[istep];
     else
       xs = xcurr * fabs(params[istep]);
+
+    if (fabs(xs) == 0.0)
+    {
+      //Someone gave a 0-sized step! What a dope.
+      throw std::runtime_error("Invalid binning step provided! Can't creating binning axis.");
+    }
+
     /* continue stepping unless we get to almost where we want to */
     // Ensure that last bin in a range is not smaller than 25% of previous bin
     if ( (xcurr + xs*1.25) <= params[ibound] )
@@ -51,6 +58,13 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
     }
     xnew.push_back(xcurr);
     inew++;
+
+    if (xnew.size() > 10000000)
+    {
+      //Max out at 1 million bins
+      throw std::runtime_error("Over ten million binning steps created. Exiting to avoid infinite loops.");
+      return inew;
+    }
   }
 
   return inew;

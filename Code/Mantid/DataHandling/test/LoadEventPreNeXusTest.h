@@ -64,7 +64,6 @@ public:
 
   }
 
-
   void test_LoadPreNeXus_TOPAZ()
   {
     //std::string eventfile( "/home/janik/data/TOPAZ_1241/preNeXus/TOPAZ_1241_neutron_event.dat" );

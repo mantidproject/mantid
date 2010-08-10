@@ -189,7 +189,7 @@ namespace Mantid
       if (wsg)
       {
         std::vector<std::string> names = wsg->getNames();
-        for(int i = 1; i < names.size(); ++i)
+        for(size_t i = 1; i < names.size(); ++i)
         {
           std::ostringstream propName;
           propName << "OutputWorkspace_" << i;

@@ -32,6 +32,10 @@ std::string RebinParamsValidator::checkValidity( const std::vector<double>& valu
   double previous = value[0];
   for(size_t i=2; i < value.size(); i+=2)
   {
+    if ((value[i-1] < 0) && (previous==0))
+    {
+      return "Logarithmic bins cannot start at 0.0";
+    }
     if (value[i] <= previous)
     {
       return "Bin boundary values must be given in order of increasing value";

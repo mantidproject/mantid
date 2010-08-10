@@ -13,8 +13,8 @@ public:
   {
     IValidator<std::vector<double> > *v = new RebinParamsValidator;
     IValidator<std::vector<double> > *vv = v->clone();
-    TS_ASSERT_DIFFERS( v, vv )
-    TS_ASSERT( dynamic_cast<RebinParamsValidator*>(vv) )
+    TS_ASSERT_DIFFERS( v, vv );
+    TS_ASSERT( dynamic_cast<RebinParamsValidator*>(vv) );
     delete v;
     delete vv;
   }
@@ -22,19 +22,19 @@ public:
   void testCast()
   {
     RebinParamsValidator *d = new RebinParamsValidator;
-    TS_ASSERT( dynamic_cast<IValidator<std::vector<double> >*>(d) )    
+    TS_ASSERT( dynamic_cast<IValidator<std::vector<double> >*>(d) );
     delete d;
   }
 
   void testFailEmpty()
   {
-    TS_ASSERT( ! v.isValid(std::vector<double>()).empty() )
+    TS_ASSERT( ! v.isValid(std::vector<double>()).empty() );
   }
 
   void testFailWrongLength()
   {
     const std::vector<double> vec(6,1.0);
-    TS_ASSERT( ! v.isValid(vec).empty() )    
+    TS_ASSERT( ! v.isValid(vec).empty() );
   }
 
   void testFailOutOfOrder()
@@ -45,7 +45,22 @@ public:
     vec[2] = 2.0;
     vec[3] = 0.2;
     vec[4] = 1.5;
-    TS_ASSERT( ! v.isValid(vec).empty() )    
+    TS_ASSERT( ! v.isValid(vec).empty() );
+  }
+
+  void testFailZeroBin_or_bad_log()
+  {
+    //Don't give a 0 bin
+    std::vector<double> vec(3);
+    vec[0] = 1.0;
+    vec[1] = 0.0;
+    vec[2] = 2.0;
+    TS_ASSERT( ! v.isValid(vec).empty() );
+    //Logarithmic bin starts at 0
+    vec[0] = 0.0;
+    vec[1] = -1.0;
+    vec[2] = 200.0;
+    TS_ASSERT( ! v.isValid(vec).empty() );
   }
 
   void testCorrect()
@@ -56,7 +71,7 @@ public:
     vec[2] = 2.0;
     vec[3] = 0.2;
     vec[4] = 2.5;
-    TS_ASSERT( v.isValid(vec).empty() )    
+    TS_ASSERT( v.isValid(vec).empty() );
   }
 
 private:

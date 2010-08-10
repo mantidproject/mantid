@@ -70,6 +70,29 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
+
+
+  void testworkspace1D_dist_stupid_bins()
+  {
+    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->isDistribution(true);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    SimpleRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace","test_in1D");
+    rebin.setPropertyValue("OutputWorkspace","test_out");
+    // Check it fails if "Params" property not set
+    TS_ASSERT_THROWS( rebin.execute(), std::runtime_error );
+    TS_ASSERT( ! rebin.isExecuted() );
+    // Way too many bins
+    rebin.setPropertyValue("Params", "0.0,1e-8,10");
+    // Fails to execute
+    TS_ASSERT(!rebin.execute());
+    TS_ASSERT(!rebin.isExecuted());
+    AnalysisDataService::Instance().remove("test_in1D");
+  }
+
   void testworkspace1D_nondist()
   {
     Workspace1D_sptr test_in1D = Create1DWorkspace(50);
@@ -99,6 +122,41 @@ public:
     TS_ASSERT_DELTA(outE[17],sqrt(4.0)  ,0.000001);
     bool dist=rebindata->isDistribution();
     TS_ASSERT(!dist);
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out");
+  }
+
+
+  void testworkspace1D_logarithmic_binning()
+  {
+    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->isDistribution(true);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    SimpleRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace","test_in1D");
+    rebin.setPropertyValue("OutputWorkspace","test_out");
+    // Check it fails if "Params" property not set
+    TS_ASSERT_THROWS( rebin.execute(), std::runtime_error );
+    TS_ASSERT( ! rebin.isExecuted() );
+    // Now set the property
+    rebin.setPropertyValue("Params", "1.0,-1.0,1000.0");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    const Mantid::MantidVec outX=rebindata->readX(0);
+    const Mantid::MantidVec outY=rebindata->readY(0);
+    const Mantid::MantidVec outE=rebindata->readE(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 11);
+    TS_ASSERT_DELTA(outX[0], 1.0  , 1e-5);
+    TS_ASSERT_DELTA(outX[1], 2.0  , 1e-5);
+    TS_ASSERT_DELTA(outX[2], 4.0  , 1e-5); //and so on...
+    TS_ASSERT_DELTA(outX[10], 1000.0  , 1e-5);
+
+    bool dist=rebindata->isDistribution();
+    TS_ASSERT(dist);
     AnalysisDataService::Instance().remove("test_in1D");
     AnalysisDataService::Instance().remove("test_out");
   }

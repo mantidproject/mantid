@@ -423,7 +423,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
     std::cout << "# of unique pixels = " << num_unique_pixels << "\n";
 
     //Will split in blocks of this size.
-    int num_cpus = 4;
+    size_t num_cpus = 4;
     //Size of block is 1/num_cpus, rounded up
     PixelType block_size = (num_unique_pixels + (num_cpus-1)) / num_cpus;
 
@@ -452,7 +452,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 
 
     PARALLEL_FOR1(workspace)
-    for (int block_num=0; block_num < num_cpus; block_num++)
+    for (size_t block_num=0; block_num < num_cpus; block_num++)
     {
       std::cout << "Starting iterating through block " << block_num << "\n";
       //Make an iterator into the map
@@ -700,8 +700,6 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   this->g_log.debug("Using mapping file \"" + filename + "\"");
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
 
-  //TODO: Something here needs to be able to tell if a bad file is being fed!
-
   size_t file_size = getFileSize<PixelType>(handle);
   //std::cout << "file is " << file_size << std::endl;
   size_t offset = 0;
@@ -709,6 +707,7 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   PixelType * buffer = new PixelType[buffer_size];
 
   size_t obj_size = sizeof(PixelType);
+
   while (offset < file_size) {
     // read a section and put it into the object
     handle->read(reinterpret_cast<char *>(buffer), buffer_size * obj_size);
