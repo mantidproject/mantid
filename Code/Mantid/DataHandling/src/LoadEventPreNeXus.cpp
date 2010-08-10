@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <sstream>
 #include <stdexcept>
+#include <functional>
 #include <iostream>
 #include <vector>
 #include "MantidDataHandling/LoadEventPreNeXus.h"
@@ -574,11 +576,6 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 
 }
 
-
-
-
-
-
 static std::time_t to_time_t(ptime t)
 {
   if (t.is_special())
@@ -697,16 +694,24 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
 
   size_t file_size = getFileSize<PixelType>(handle);
+  PixelType max_pid = static_cast<PixelType>(file_size);
   //std::cout << "file is " << file_size << std::endl;
   size_t offset = 0;
   size_t buffer_size = getBufferSize(file_size);
   PixelType * buffer = new PixelType[buffer_size];
 
   size_t obj_size = sizeof(PixelType);
+  bool success = true; // see if something wierd went on
 
   while (offset < file_size) {
     // read a section and put it into the object
     handle->read(reinterpret_cast<char *>(buffer), buffer_size * obj_size);
+    if (std::find_if(buffer, (buffer+buffer_size), std::bind2nd(std::greater<PixelType>(), file_size))
+        != (buffer+buffer_size))
+    {
+      success = false;
+      break;
+    }
     this->pixelmap.insert(this->pixelmap.end(), buffer, (buffer + buffer_size));
     offset += buffer_size;
 
@@ -724,6 +729,14 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   delete buffer;
   handle->close();
   delete handle;
+
+  if (!success)
+  {
+    this->g_log.warning("Pixel id in mapping file was out of bounds. Loading without mapping file");
+    this->numpixel = 0;
+    this->pixelmap.clear();
+    this->using_mapping_file = false;
+  }
 
   //If we got here, the mapping file was loaded correctly and we'll use it
   this->using_mapping_file = true;
