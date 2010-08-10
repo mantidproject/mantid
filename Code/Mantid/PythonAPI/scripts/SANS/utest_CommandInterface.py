@@ -5,7 +5,7 @@ from __future__ import with_statement
 import math
 import sys
 import unittest
-from CommandInterface import *
+from HFIRCommandInterface import *
 from mantidsimple import *
 
 # Set directory containg the test data, relative to the Mantid release directory.

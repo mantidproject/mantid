@@ -48,11 +48,6 @@ def Clear():
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
 
-def HFIRSANS():
-    ReductionSingleton().set_instrument(SANSInsts.HFIRSANS())
-    SolidAngle()
-    AzimuthalAverage()
-
 def DirectBeamCenter(datafile, beam_radius=3.0):
     ReductionSingleton().set_beam_finder(SANSReductionSteps.DirectBeamCenter(datafile, beam_radius=beam_radius))
 
