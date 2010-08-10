@@ -35,10 +35,10 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("OutputWorkspace",
         "",Direction::Output), "The name of the workspace that will be created.");
 
-      //std::vector<std::string> units = UnitFactory::Instance().getKeys();
-      //units.insert(units.begin(),"Dimensionless");
-      //declareProperty("Unit","Energy",new Kernel::ListValidator(units),
-      //"The unit to assign to the X axis (default: Energy)");
+      std::vector<std::string> units = UnitFactory::Instance().getKeys();
+      units.insert(units.begin(),"MomemtumTransfer");
+      declareProperty("Unit","Energy",new Kernel::ListValidator(units),
+        "The unit to assign to the X axis (default: Energy)");
     }
 
     /** 
@@ -90,12 +90,15 @@ namespace Mantid
 	      //std::cout << d << std::endl;
 	      input.push_back(d);
 	    }
-	  } else {
+	  } 
+	  /*
+	  else {
 	    //if the second character is L, we need to keep that line that gives
 	    //infos about axes labels and units
 	    if (!str.empty() && str[1] == 'L') { 
 	      axes_infos = str;}
 	  }
+	  */
 	  
 	} //end of read file
       
@@ -112,9 +115,9 @@ namespace Mantid
       MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
       try {
-	//localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
+	localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
       } catch (Exception::NotFoundError) {
-        // Asked for dimensionless workspace (obviously not in unit factory)
+	// Asked for dimensionless workspace (obviously not in unit factory)
       }
       
       for(unsigned int i=0;i<nSpectra;i++)
