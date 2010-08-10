@@ -56,7 +56,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "ConvertSpectrumAxis"; }
   /// Algorithm's version
-  virtual const int version() const { return (1); }
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Units"; }
 

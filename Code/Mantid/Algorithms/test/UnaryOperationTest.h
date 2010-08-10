@@ -19,7 +19,7 @@ public:
   virtual ~UnaryOpHelper() {};
   
   const std::string name() const { return "None"; }
-  const int version() const { return 0; }
+  int version() const  { return 0; }
   
   // Pass-throughs to UnaryOperation methods
   const std::string inputPropName() const { return UnaryOperation::inputPropName(); }

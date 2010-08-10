@@ -50,7 +50,7 @@ namespace Mantid
       LoadAscii();
       ~LoadAscii() {}
       virtual const std::string name() const { return "LoadAscii"; }
-      virtual const int version() const { return 1; }
+      virtual int version() const { return 1; }
       virtual const std::string category() const { return "DataHandling"; }
 
     private:

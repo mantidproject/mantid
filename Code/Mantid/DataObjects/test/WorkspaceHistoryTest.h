@@ -21,7 +21,7 @@ public:
   fill2d() : Algorithm() {}
   virtual ~fill2d() {}
   const std::string name() const { return "fill2d";}
-  const int version() const { return 1;}
+  int version() const  { return 1;}
   dateAndTime executionDate() const 
   {   dateAndTime dt;
 	  time(&dt);
@@ -61,7 +61,7 @@ public:
   add2d() : Algorithm() {}
   virtual ~add2d() {}
   const std::string name() const { return "add2d";}
-  const int version() const { return 1;}
+  int version() const  { return 1;}
   dateAndTime executionDate() const
   {
 	  dateAndTime dt;

@@ -64,7 +64,7 @@ const std::string PyAlgorithmCallback::name() const
  * Call the version method on the Python object
  * @returns The version number of the algorithm
  */
-const int PyAlgorithmCallback::version() const 
+int PyAlgorithmCallback::version() const
 {
   return PyCall_NoArg<const int>::dispatch(m_self, "version");
 }

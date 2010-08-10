@@ -265,7 +265,7 @@ public:
   ///Overridden name method
   const std::string name() const; 
   ///Overridden version method
-  const int version() const;
+  int version() const ;
   /// Overridden category method
   const std::string category() const;
 

@@ -43,7 +43,7 @@ namespace Mantid
       Load(){}
       ~Load() {}
       virtual const std::string name() const { return "Load"; }
-      virtual const int version() const { return 1; }
+      virtual int version() const { return 1; }
       virtual const std::string category() const { return "DataHandling"; }
 
     private:

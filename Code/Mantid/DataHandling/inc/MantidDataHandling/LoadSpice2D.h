@@ -58,7 +58,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadSpice2D"; }
       /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return 1; }
+      virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
       /// Number of monitors

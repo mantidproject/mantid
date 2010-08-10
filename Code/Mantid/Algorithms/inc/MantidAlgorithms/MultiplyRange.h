@@ -53,7 +53,7 @@ public:
   virtual ~MultiplyRange() {}
 
   virtual const std::string name() const { return "MultiplyRange";}
-  virtual const int version() const { return (1);}
+  virtual int version() const { return (1);}
   virtual const std::string category() const { return "CorrectionFunctions";}
 
 private:

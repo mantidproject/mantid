@@ -63,7 +63,7 @@ public:
   virtual const std::string name() const = 0;
 
   /// function to return a version of the algorithm, must be overridden in all algorithms
-  virtual const int version() const = 0;
+  virtual int version() const = 0;
   
   /// function to return a category of the algorithm.
   virtual const std::string category() const = 0;

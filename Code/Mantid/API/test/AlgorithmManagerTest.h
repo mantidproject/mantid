@@ -20,7 +20,7 @@ public:
   void init() { }
   void exec() { }
   virtual const std::string name() const {return "AlgTest";}
-  virtual const int version() const {return(1);}
+  virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
 
 };
@@ -34,7 +34,7 @@ public:
   void init() { }
   void exec() { }
   virtual const std::string name() const {return "AlgTest";}
-  virtual const int version() const {return(1);}
+  virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat2");}
 
 };
@@ -48,7 +48,7 @@ public:
   void init() { }
   void exec() { }
   virtual const std::string name() const {return "AlgTest";}
-  virtual const int version() const {return(2);}
+  virtual int version() const {return(2);}
   virtual const std::string category() const {return("Cat4");}
 
 };
@@ -62,7 +62,7 @@ public:
   void init() { }
   void exec() { }
   virtual const std::string name() const {return "AlgTestSecond";}
-  virtual const int version() const {return(1);}
+  virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat3");}
 
 };

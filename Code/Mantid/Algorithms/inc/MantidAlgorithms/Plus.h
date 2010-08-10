@@ -55,7 +55,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Plus";}
       /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return 1;}
+      virtual int version() const { return 1;}
 
     private:
       // Overridden BinaryOperation methods

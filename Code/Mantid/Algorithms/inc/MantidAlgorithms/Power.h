@@ -65,7 +65,7 @@ public:
     return "Power";
   }
   /// Algorithm's version for identification
-  virtual const int version() const
+  virtual int version() const
   {
     return 1;
   }

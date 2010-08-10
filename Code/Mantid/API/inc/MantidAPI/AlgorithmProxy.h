@@ -67,7 +67,7 @@ namespace Mantid
       ///The name of the algorithm
       const std::string name() const {return m_name;}
       /// The version of the algorithm
-      const int version() const {return m_version;}
+      int version() const  {return m_version;}
       /// The category of the algorithm
       const std::string category() const {return m_category;}
 

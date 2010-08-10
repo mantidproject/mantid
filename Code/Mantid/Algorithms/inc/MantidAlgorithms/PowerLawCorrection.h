@@ -55,7 +55,7 @@ namespace Mantid
       /// Algorithm's name for identification
       virtual const std::string name() const { return "PowerLawCorrection";}
       /// Algorithm's version for identification
-      virtual const int version() const { return 1;}
+      virtual int version() const { return 1;}
 
     private:
       // Overridden UnaryOperation methods

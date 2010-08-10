@@ -42,7 +42,7 @@ public:
     setProperty("OutputWorkspace",out_work);
   }
   virtual const std::string name() const {return "ComplexOpTest";}
-  virtual const int version() const {return(1);}
+  virtual int version() const {return(1);}
 
 };
 

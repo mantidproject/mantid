@@ -19,7 +19,7 @@ public:
   ToyAlgorithmProxy() : Algorithm() {}
   virtual ~ToyAlgorithmProxy() {}
   const std::string name() const { return "ToyAlgorithmProxy";} ///< Algorithm's name for identification
-  const int version() const { return 1;}                        ///< Algorithm's version for identification
+  int version() const  { return 1;}                        ///< Algorithm's version for identification
   const std::string category() const { return "Cat";}           ///< Algorithm's category for identification
 
   void init()

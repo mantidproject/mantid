@@ -62,7 +62,7 @@ namespace DataHandling
     /// Algorithm's name 
     virtual const std::string name() const { return "SaveVTK";};
     /// Algorithm's version 
-    virtual const int version() const { return 1;};
+    virtual int version() const { return 1;};
     /// Algorithm's category 
     virtual const std::string category() const { return "DataHandling";}
 

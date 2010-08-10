@@ -51,7 +51,7 @@ public:
   virtual ~WeightedMean() {}
 
   virtual const std::string name() const { return "WeightedMean"; }
-  virtual const int version() const { return (1); }
+  virtual int version() const { return (1); }
 
 private:
   // Overridden BinaryOperation methods

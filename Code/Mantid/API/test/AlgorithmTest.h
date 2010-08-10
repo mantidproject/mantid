@@ -16,7 +16,7 @@ public:
   ToyAlgorithm() : Algorithm() {}
   virtual ~ToyAlgorithm() {}
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
-  const int version() const { return 1;} ///< Algorithm's version for identification
+  int version() const  { return 1;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
 
   void init()
