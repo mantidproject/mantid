@@ -4,6 +4,7 @@
 #include <functional>
 #include <iostream>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <vector>
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -11,6 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -43,7 +45,6 @@ using std::vector;
 static const string EVENT_PARAM("EventFilename");
 static const string PULSEID_PARAM("PulseidFilename");
 static const string MAP_PARAM("MappingFilename");
-static const string INSTRUMENT_PARAM("InstrumentFilename");
 static const string PID_PARAM("SpectrumList");
 static const string PAD_PIXELS_PARAM("PadEmptyPixels");
 static const string OUT_PARAM("OutputWorkspace");
@@ -100,9 +101,6 @@ void LoadEventPreNeXus::init()
   this->declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
                         "TS mapping file converting detector id to pixel id. Used only if specified.");
 
-  this->declareProperty(new FileProperty(INSTRUMENT_PARAM, "", FileProperty::OptionalLoad, "Definition.xml"),
-                        "Instrument Geometry file to load. Used only if specified.");
-
   // which pixels to load
   this->declareProperty(new ArrayProperty<int>(PID_PARAM),
                         "A list of individual spectra to read. Only used if set.");
@@ -116,7 +114,7 @@ void LoadEventPreNeXus::init()
 
 }
 
-static string generatPulseidName(string &eventfile)
+static string generatPulseidName(string eventfile)
 {
   size_t start;
   string ending;
@@ -183,11 +181,7 @@ void LoadEventPreNeXus::exec()
   localWorkspace->setYUnit("Counts");
   // TODO localWorkspace->setTitle(title);
 
-  // load the instrument geometry file
-  string instrument_filename = this->getPropertyValue(INSTRUMENT_PARAM);
-  //TODO: Auto-find the instrument file if not specified
-  if (instrument_filename.length() > 0)
-    this->runLoadInstrument(instrument_filename, localWorkspace);
+  this->runLoadInstrument(event_filename, localWorkspace);
 
   //Process the events into pixels
   this->procEvents(localWorkspace);
@@ -202,11 +196,21 @@ void LoadEventPreNeXus::exec()
 
 //-----------------------------------------------------------------------------
 /** Load the instrument geometry File
- *  @param filename file to open.
+ *  @param eventfilename Used to pick the instrument.
  *  @param localWorkspace MatrixWorkspace in which to put the instrument geometry
  */
-void LoadEventPreNeXus::runLoadInstrument(const std::string &filename, MatrixWorkspace_sptr localWorkspace)
+void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace)
 {
+  // determine the instrument parameter file
+  string instrument = Poco::Path(eventfilename).getFileName();
+  size_t pos = instrument.rfind("_"); // get rid of 'event.dat'
+  pos = instrument.rfind("_", pos-1); // get rid of 'neutron'
+  pos = instrument.rfind("_", pos-1); // get rid of the run number
+  instrument = instrument.substr(0, pos);
+
+  string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument);
+
+  // do the actual work
   IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.

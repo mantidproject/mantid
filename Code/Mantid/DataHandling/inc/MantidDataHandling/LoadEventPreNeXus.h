@@ -125,7 +125,7 @@ private:
 
   void readPulseidFile(const std::string &filename);
 
-  void runLoadInstrument(const std::string &filename, API::MatrixWorkspace_sptr localWorkspace);
+  void runLoadInstrument(const std::string &eventfilename, API::MatrixWorkspace_sptr localWorkspace);
 
   void fixPixelId(PixelType &pixel, uint32_t &period) const;
 
