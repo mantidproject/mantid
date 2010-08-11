@@ -9,28 +9,27 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidAPI/Run.h"
 #include <boost/shared_ptr.hpp>
-#include <fstream>  
 
 //-----------------------------------------------------------------------------
-using namespace Poco::XML;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace Mantid::API;
 
 namespace Mantid
 {
-  namespace DataHandling
-  {
+namespace DataHandling
+{
 
-    // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(SaveCanSAS1D)
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(SaveCanSAS1D)
 
-    /// constructor
-    SaveCanSAS1D::SaveCanSAS1D()
-    {}
+/// constructor
+SaveCanSAS1D::SaveCanSAS1D()
+{}
 
-    /// destructor
-    SaveCanSAS1D::~SaveCanSAS1D()
-    {}
+/// destructor
+SaveCanSAS1D::~SaveCanSAS1D()
+{}
 
     /// Overwrites Algorithm method.
     void SaveCanSAS1D::init()
@@ -41,127 +40,233 @@ namespace Mantid
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save, ".xml"),
         "The name of the xml file to save");
 
-      std::vector<std::string> radiation_source;
-      radiation_source.push_back("Spallation Neutron Source");
-      radiation_source.push_back("Pulsed Reactor Neutron Source");
-      radiation_source.push_back("Reactor Neutron Source");
-      radiation_source.push_back("Synchrotron X-ray Source");
-      radiation_source.push_back("Pulsed Muon Source");
-      radiation_source.push_back("Rotating Anode X-ray");
-      radiation_source.push_back("Fixed Tube X-ray");
-      radiation_source.push_back("neutron");
-      radiation_source.push_back("x-ray");
-      radiation_source.push_back("muon");
-      radiation_source.push_back("electron");
-      declareProperty("Radiation Source", "Spallation Neutron Source", new Kernel::ListValidator(
-        radiation_source));
-    }
+  std::vector<std::string> radiation_source;
+  radiation_source.push_back("Spallation Neutron Source");
+  radiation_source.push_back("Pulsed Reactor Neutron Source");
+  radiation_source.push_back("Reactor Neutron Source");
+  radiation_source.push_back("Synchrotron X-ray Source");
+  radiation_source.push_back("Pulsed Muon Source");
+  radiation_source.push_back("Rotating Anode X-ray");
+  radiation_source.push_back("Fixed Tube X-ray");
+  radiation_source.push_back("neutron");
+  radiation_source.push_back("x-ray");
+  radiation_source.push_back("muon");
+  radiation_source.push_back("electron");
+  declareProperty("Radiation Source", "Spallation Neutron Source", new Kernel::ListValidator(
+    radiation_source));
+  declareProperty("Append", false, "If true the output file is not overwritten but appended to"); 
+}
+/** Is called when the input workspace was actually a group, it sets the
+*  for all group members after the first so that the whole group is saved
+*  @param alg pointer to the algorithm
+*  @param propertyName name of the property
+*  @param propertyValue value  of the property
+*  @param perioidNum period number
+*/
+void SaveCanSAS1D::setOtherProperties(API::IAlgorithm* alg, const std::string & propertyName,const std::string& propertyValue, int perioidNum)
+{	
+  // call the base class method
+  Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
 
-    /// Overwrites Algorithm method
-    void SaveCanSAS1D::exec()
+  if( ( propertyName == "Append") && ( perioidNum > 1 ) )
+	{
+    alg->setPropertyValue(propertyName, "1");
+	}
+}
+/// Overwrites Algorithm method
+void SaveCanSAS1D::exec()
+{
+  m_workspace = getProperty("InputWorkspace");
+  if( ! m_workspace )
+  {
+    throw std::invalid_argument("Invalid inputworkspace ,Error in  SaveCanSAS1D");
+  }
+
+  if (m_workspace->getNumberHistograms() > 1)
+{
+throw std::invalid_argument("Error in  SaveCanSAS1D");
+}
+
+  // write xml manually as the user requires a specific format were the placement of new line characters is controled
+  //and this can't be done in using the stylesheet part in Poco or libXML 
+  prepareFileToWriteEntry();
+
+  m_outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
+
+  std::string sasTitle;
+  createSASTitleElement(sasTitle);
+  m_outFile<<sasTitle;
+
+  std::string sasRun;
+  createSASRunElement(sasRun);
+  m_outFile<<sasRun;
+
+  std::string dataUnit = m_workspace->YUnitLabel();
+  //look for xml special characters and replace with entity refrence
+  searchandreplaceSpecialChars(dataUnit);
+
+
+  std::string sasData;
+  createSASDataElement(sasData);
+  m_outFile<<sasData;
+
+  std::string sasSample;
+  createSASSampleElement(sasSample);
+  m_outFile<<sasSample;
+
+  std::string sasInstr="\n\t\t<SASinstrument>";
+  m_outFile<<sasInstr;
+  std::string sasInstrName="\n\t\t\t<name>";
+  std::string instrname=m_workspace->getInstrument()->getName();
+  //look for xml special characters and replace with entity refrence
+  searchandreplaceSpecialChars(instrname);
+  sasInstrName+=instrname;
+  sasInstrName+="</name>";
+  m_outFile<<sasInstrName;
+
+  std::string sasSource;
+  createSASSourceElement(sasSource);
+  m_outFile<<sasSource;
+
+  std::string sasCollimation="\n\t\t\t<SAScollimation/>";
+  m_outFile<<sasCollimation;
+
+
+  try
+  {
+    std::string sasDet;
+    createSASDetectorElement(sasDet);
+    m_outFile<<sasDet;
+  }
+  catch(Kernel::Exception::NotFoundError&)
+  {
+    m_outFile.close();
+    throw;
+  }
+  catch(std::runtime_error& )
+  {
+    m_outFile.close();
+    throw ;
+  }
+
+  sasInstr="\n\t\t</SASinstrument>";
+  m_outFile<<sasInstr;
+
+  std::string sasProcess;
+  createSASProcessElement(sasProcess);
+  m_outFile<<sasProcess;
+
+  std::string sasNote="\n\t\t<SASnote>";
+  sasNote+="\n\t\t</SASnote>";
+  m_outFile<<sasNote;
+
+  m_outFile << "\n\t</SASentry>";
+  m_outFile << "\n</SASroot>";
+  m_outFile.close();
+}
+/** Opens the output file and either moves the file pointer to beyond the last
+*  entry or blanks the file and writes a header
+*  @throw FileError if append was selected but end of an entry tag couldn't be found
+*/
+void SaveCanSAS1D::prepareFileToWriteEntry()
+{
+  //reduce error handling code by making file access errors throw
+  m_outFile.exceptions(std::ios::eofbit|std::ios::failbit|std::ios::badbit);
+
+  const std::string fileName = getPropertyValue("FileName");
+  bool append(getProperty("Append"));
+
+  // write xml manually as the user requires a specific format were the placement of new line characters is controled
+  //and this can't be done in using the stylesheet part in Poco or libXML 
+  try
+  {
+    if (append)
     {
-      m_workspace = getProperty("InputWorkspace");
-      if(!m_workspace)
+      m_outFile.open(fileName.c_str(), std::ios::out | std::ios::in);
+      //check if the file already has data
+      m_outFile.seekg(0, std::ios::end);
+      if ( static_cast<int>(m_outFile.tellg()) == 0 )
       {
-        throw std::invalid_argument("Invalid inputworkspace ,Error in  SaveCanSAS1D");
+        //it's a new file, we're not really appending
+        append = false;
+        m_outFile.close();
       }
-      if (m_workspace->getNumberHistograms() > 1)
-      {
-        throw std::invalid_argument("Error in  SaveCanSAS1D");
-      }
-      std::string fileName = getPropertyValue("FileName");
-      std::ofstream outFile(fileName.c_str());
-      if (!outFile)
-      {
-        throw Kernel::Exception::FileError("Unable to open file:", fileName);
-      }
-
-      // Just write out header manually the user require as specific format were the placement of new line characters is controled
-      //and this can't be done in using the stylesheet part in Poco or libXML 
-      outFile << "<?xml version=\"1.0\"?>\n"
-        << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>\n";
-
-
-      std::string sasroot="";
-      createSASRootElement(sasroot);
-      outFile<<sasroot;
-
-      outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
-
-      std::string sasTitle;
-      createSASTitleElement(sasTitle);
-      outFile<<sasTitle;
-
-      std::string sasRun;
-      createSASRunElement(sasRun);
-      outFile<<sasRun;
-
-      std::string dataUnit = m_workspace->YUnitLabel();
-      //look for xml special characters and replace with entity refrence
-      searchandreplaceSpecialChars(dataUnit);
-
-
-      std::string sasData;
-      createSASDataElement(sasData);
-      outFile<<sasData;
-
-      std::string sasSample;
-      createSASSampleElement(sasSample);
-      outFile<<sasSample;
-
-      std::string sasInstr="\n\t\t<SASinstrument>";
-      outFile<<sasInstr;
-      std::string sasInstrName="\n\t\t\t<name>";
-      std::string instrname=m_workspace->getInstrument()->getName();
-      //look for xml special characters and replace with entity refrence
-      searchandreplaceSpecialChars(instrname);
-      sasInstrName+=instrname;
-      sasInstrName+="</name>";
-      outFile<<sasInstrName;
-
-      std::string sasSource;
-      createSASSourceElement(sasSource);
-      outFile<<sasSource;
-
-      std::string sasCollimation="\n\t\t\t<SAScollimation/>";
-      outFile<<sasCollimation;
-
-
-      try
-      {
-        std::string sasDet;
-        createSASDetectorElement(sasDet);
-        outFile<<sasDet;
-      }
-      catch(Kernel::Exception::NotFoundError&)
-      {
-        outFile.close();
-        throw;
-      }
-      catch(std::runtime_error& )
-      {
-        outFile.close();
-        throw ;
-      }
-
-      sasInstr="\n\t\t</SASinstrument>";
-      outFile<<sasInstr;
-
-      std::string sasProcess;
-      createSASProcessElement(sasProcess);
-      outFile<<sasProcess;
-
-      std::string sasNote="\n\t\t<SASnote>";
-      sasNote+="\n\t\t</SASnote>";
-      outFile<<sasNote;
-
-      outFile << "\n\t</SASentry>";
-      sasroot="\n</SASroot>";
-      outFile<<sasroot;
-      outFile.close();
     }
 
-
+    if (append)
+    {
+      findEndofLastEntry();
+    }
+    else
+    {
+      writeHeader(fileName);
+    }
+  }
+  catch (std::logic_error &e)
+  {
+    throw Exception::FileError(e.what(), fileName);
+  }
+  catch (std::fstream::failure)
+  {
+    // give users more explaination about no being able to read their files
+    throw Exception::FileError("Trouble reading existing data in the output file, are you appending to an invalid CanSAS1D file?", fileName);
+  }
+}
+/** Moves to the end of the last entry in the file, after &ltSASentry&gt
+*  before &lt/SASroot&gt
+*  @throw fstream::failure if the read or write commands couldn't complete
+*  @throw logic_error if append was selected but end of an entry tag couldn't be found
+*/
+void SaveCanSAS1D::findEndofLastEntry()
+{
+  static const int LAST_TAG_LEN = 11;
+  static const char LAST_TAG[LAST_TAG_LEN+1] = "</SASentry>";
+  const int rootTagLen = static_cast<int>(std::string("</SASroot>").length());
+  //move to the place _near_ the end of the file where the data will be appended to
+  m_outFile.seekg(-LAST_TAG_LEN-rootTagLen, std::ios::end);
+  char test_tag[LAST_TAG_LEN+1];
+  m_outFile.read(test_tag, LAST_TAG_LEN);
+  //check we're in the correct place in the file
+  if ( std::string(test_tag,LAST_TAG_LEN)!=std::string(LAST_TAG,LAST_TAG_LEN) )
+  {
+    //we'll allow some extra charaters so there is some variablity in where the tag might be found
+    bool tagFound(false);
+    // UNCERT should be less than the length of an entry
+    static const int UNCERT = 20;
+    for ( int i = 1; i < UNCERT; ++i )
+    {
+      //together this seek and read move the file pointer back on byte at a time and read
+      m_outFile.seekg( -i-LAST_TAG_LEN-rootTagLen, std::ios::end);
+      m_outFile.read(test_tag, LAST_TAG_LEN);
+      std::string del = std::string(test_tag, LAST_TAG_LEN);
+      if(std::string(test_tag,LAST_TAG_LEN)==std::string(LAST_TAG,LAST_TAG_LEN))
+      {
+        tagFound = true;
+        break;
+      }
+    }
+    if ( ! tagFound )
+    {
+      throw std::logic_error("Couldn't find the end of the existing data, missing </SASentry> tag");
+    }
+  }
+  // prepare to write to the place found by reading
+  m_outFile.seekp(m_outFile.tellg(), std::ios::beg);
+}
+/** Write xml header tags including the root element and starting the SASentry
+*  element
+*  @param fileName the name of the file to write to
+*/
+void SaveCanSAS1D::writeHeader(const std::string & fileName)
+{
+  m_outFile.open(fileName.c_str(), std::ofstream::out | std::ios::trunc);
+  //write the file header
+  m_outFile << "<?xml version=\"1.0\"?>\n"
+    << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>\n";
+  std::string sasroot="";
+  createSASRootElement(sasroot);
+  m_outFile<<sasroot;
+}
     /** This method search for xml special characters in the input string
     * and  replaces this with xml entity reference
     *@param input -input string 

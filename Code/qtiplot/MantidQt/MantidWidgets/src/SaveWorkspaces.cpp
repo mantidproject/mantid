@@ -252,8 +252,8 @@ void SaveWorkspaces::saveSel()
       
       bool toAppend = m_append->isChecked();
       if (toAppend)
-      {//there are two algorithms that don't support appending, check for those
-        if ( i.value() == "SaveCanSAS1D" ||  i.value() == "SaveCSV" )
+      {//SaveCSV doesn't support appending
+        if ( i.value() == "SaveCSV" )
         {
           toAppend = false;
         }

@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "Poco/DOM/Element.h"
+#include "Poco/DOM/Node.h"
 //----------------------------------------------------------------------
 
 namespace Poco {
@@ -67,16 +68,26 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling"; }
 
     private:
+      /// If a workspace group is created this is set from empty to the root name of the members, the name of the workspace group members up to and including the _
+      std::string m_groupMembersBase;
+      /// When a workspace group is being written this is the number of the last member that was written
+      int m_groupNumber;
+
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
       void exec();
 
-      /// This method throws not found error if a element is not found in the xml file
-      void throwException(Poco::XML::Element* elem,const std::string & name,const std::string& fileName);
+      /// Loads an individual SASentry element into a new workspace
+      API::MatrixWorkspace_sptr loadEntry(Poco::XML::Node * const workspaceData, std::string & runName);
+      /// Checks if the pointer to the loaded data is not null or throws if it is
+      void check(const Poco::XML::Element* const toCheck, const std::string & name) const;
+      /// Appends the new data workspace creating a workspace group if there was existing data
+      void appendDataToOutput(API::MatrixWorkspace_sptr newWork, const std::string & newWorkName, API::WorkspaceGroup_sptr container);
       /// Run LoadInstrument sub algorithm
-      void runLoadInstrument(const std::string & inst_name,DataObjects::Workspace2D_sptr localWorkspace);
-      void createRunNumLog(const Poco::XML::Element * const sasEntry, const std::string& elemName, DataObjects::Workspace2D_sptr wSpace, const std::string& fileName);
+      void runLoadInstrument(const std::string & inst_name, API::MatrixWorkspace_sptr localWorkspace);
+      /// Loads data into the run log
+      void createLogs(const Poco::XML::Element * const sasEntry, API::MatrixWorkspace_sptr wSpace) const;
     };
     
   }

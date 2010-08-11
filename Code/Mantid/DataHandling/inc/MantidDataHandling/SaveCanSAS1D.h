@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include <fstream>  
 
 namespace Poco{
   namespace XML{
@@ -108,15 +109,21 @@ namespace Mantid
 	 private:
       /// Overwrites Algorithm method.
       void init();
+      /// overriden method sets appending for workspace groups
+      void setOtherProperties(API::IAlgorithm* alg, const std::string & propertyName,const std::string& propertyValue, int perioidNum);
       /// Overwrites Algorithm method
       void exec();
-
+      
+      /// Opens the output file and, as necessary blanks it, writes the file header and moves the file pointer
+      void prepareFileToWriteEntry();
+      /// Moves to the end of the last entry in the file
+      void findEndofLastEntry();
+      /// Write xml header tags
+      void writeHeader(const std::string & fileName);
       /// this method searches for xml special characters and replace with entity references
       void searchandreplaceSpecialChars(std::string &input);
-
       /// replaces the charcter at index in the input string with xml entity reference(eg.replace '&' with "&amp;")
       void replacewithEntityReference(std::string& input, const std::string::size_type& index);
-
       /// sasroot element
       void createSASRootElement(std::string& rootElem);
 
@@ -141,7 +148,10 @@ namespace Mantid
       ///this method creates sasProcess element
       void createSASProcessElement(std::string& sasProcess);
 
-      API::MatrixWorkspace_sptr m_workspace; ///<workspace
+      ///points to the workspace that will be written to file
+      API::MatrixWorkspace_const_sptr m_workspace;
+      /// an fstream object is used to write the xml manually as the user requires a specific format with new line characters and this can't be done in using the stylesheet part in Poco or libXML
+      std::fstream m_outFile;
     };
     
   }

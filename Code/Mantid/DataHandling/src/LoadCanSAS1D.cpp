@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -13,7 +13,6 @@
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/Node.h"
 #include "Poco/DOM/Text.h"
 
 #include <boost/lexical_cast.hpp>
@@ -27,6 +26,8 @@ using Poco::XML::Node;
 using Poco::XML::Text;
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -37,7 +38,7 @@ namespace DataHandling
 DECLARE_ALGORITHM(LoadCanSAS1D)
 
 /// constructor
-LoadCanSAS1D::LoadCanSAS1D()
+LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0)
 {}
 
 /// destructor
@@ -49,15 +50,18 @@ void LoadCanSAS1D::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
       "The name of the input  xml file to load");
-  declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
       Kernel::Direction::Output), "The name of the Output workspace");
-
 }
 
-/// Overwrites Algorithm exec method
+/** Overwrites Algorithm exec method
+* @throw FileError if the file isn't valid xml
+* @throw NotFoundError if any expected elements couldn't be read
+* @throw NotImplementedError if any SASentry doesn't contain exactly one run
+*/
 void LoadCanSAS1D::exec()
 {
-  std::string fileName = getPropertyValue("Filename");
+  const std::string fileName = getPropertyValue("Filename");
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
   Document* pDoc;
@@ -66,7 +70,7 @@ void LoadCanSAS1D::exec()
     pDoc = pParser.parse(fileName);
   } catch (...)
   {
-    throw Kernel::Exception::FileError("Unable to parse File:", fileName);
+    throw Exception::FileError("Unable to parse File:", fileName);
   }
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
@@ -74,39 +78,78 @@ void LoadCanSAS1D::exec()
   {
     throw Kernel::Exception::NotFoundError("No root element in CanSAS1D XML file", fileName);
   }
-  Element* sasEntryElem = pRootElem->getChildElement("SASentry");
-  throwException(sasEntryElem, "SASentry", fileName);
-  Element*titleElem = sasEntryElem->getChildElement("Title");
-  throwException(titleElem, "Title", fileName);
-  std::string wsTitle = titleElem->innerText();
+  // there can be multiple <SASentry> elements, each one contains a period which will go into a workspace group if there are more than one of them
+  NodeList* entryList = pRootElem->getElementsByTagName("SASentry");
+  unsigned int numEntries = entryList->length();
+  Workspace_sptr outputWork;
+  std::string runName;
+  switch(numEntries)
+  {
+    case 0:
+      Exception::NotFoundError("No <SASentry>s were found in the file", fileName);
+    case 1:
+      //the value of the string runName is unused in this case
+      outputWork = loadEntry(entryList->item(0), runName);
+      break;
+    default:
+      WorkspaceGroup_sptr group(new WorkspaceGroup);
+      group->add(getPropertyValue("OutputWorkspace"));
+      for (unsigned int i = 0; i < numEntries; ++i)
+      {
+        std::string runName;
+        MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), runName);
+        appendDataToOutput(newWork, runName, group);
+      }
+      outputWork = group;
+  }
+  entryList->release();
 
-  Element* sasDataElem = sasEntryElem->getChildElement("SASdata");
-  throwException(sasDataElem, "SASdata", fileName);
+  setProperty("OutputWorkspace", outputWork);
+}
+/** Load an individual "<SASentry>" element into a new workspace
+* @param[in] workspaceData points to a "<SASentry>" element
+* @param[out] runName the name this workspace should take
+* @return dataWS this workspace will be filled with data
+* @throw NotFoundError if any expected elements couldn't be read
+* @throw NotImplementedError if the entry doesn't contain exactly one run
+*/
+MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceData, std::string & runName)
+{
+  Element *workspaceElem = dynamic_cast<Element*>(workspaceData);
+  check(workspaceElem, "<SASentry>");
+  runName = workspaceElem->getAttribute("name");
+
+  NodeList* runs = workspaceElem->getElementsByTagName("Run");
+  if ( runs->length() != 1 )
+  {
+    throw Exception::NotImplementedError("<SASentry>s containing multiple runs, or no runs, are not currently supported");
+  }
+
+  Element* sasDataElem = workspaceElem->getChildElement("SASdata");
+  check(sasDataElem, "<SASdata>");
   // getting number of Idata elements in the xml file
   NodeList* idataElemList = sasDataElem->getElementsByTagName("Idata");
-  unsigned long idataCount = idataElemList->length();
-  //no.of bins
-  int nBins = idataCount;
-  const int numSpectra = 1;
-  // Create the output workspace
-  DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, nBins, nBins));
-  ws->setTitle(wsTitle);
-  ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  ws->setYUnit("");
-  API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(ws);
-  setProperty("OutputWorkspace", workspace);
+  unsigned int nBins = idataElemList->length();
 
-  createRunNumLog(sasEntryElem, "Run", ws, fileName);
+  MatrixWorkspace_sptr dataWS =
+    WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
 
+  createLogs(workspaceElem, dataWS);
+
+  Element *titleElem = workspaceElem->getChildElement("Title");
+  check(titleElem, "<Title>");
+  dataWS->setTitle(titleElem->innerText());
+  dataWS->isDistribution(true);
+  dataWS->setYUnit("");
+  
   //load workspace data
-  MantidVec& X = ws->dataX(0);
-  MantidVec& Y = ws->dataY(0);
-  MantidVec& E = ws->dataE(0);
+  MantidVec& X = dataWS->dataX(0);
+  MantidVec& Y = dataWS->dataY(0);
+  MantidVec& E = dataWS->dataE(0);
   int vecindex = 0;
   //iterate through each Idata element  and get the values of "Q",
   //"I" and "Idev" text nodes and fill X,Y,E vectors
-  for (unsigned long index = 0; index < idataCount; ++index)
+  for (unsigned long index = 0; index < nBins; ++index)
   {
     Node* idataElem = idataElemList->item(index);
     Element* elem = dynamic_cast<Element*> (idataElem);
@@ -115,51 +158,81 @@ void LoadCanSAS1D::exec()
       //setting X vector
       std::string nodeVal;
       Element*qElem = elem->getChildElement("Q");
-      throwException(qElem, "Q", fileName);
+      check(qElem, "Q");
       nodeVal = qElem->innerText();
       std::stringstream x(nodeVal);
       double d;
       x >> d;
       X[vecindex] = d;
-
+      
       //setting Y vector
       Element*iElem = elem->getChildElement("I");
-      throwException(qElem, "I", fileName);
+      check(qElem, "I");
       nodeVal = iElem->innerText();
       std::stringstream y(nodeVal);
       y >> d;
       Y[vecindex] = d;
-
+      
       //setting the error vector
       Element*idevElem = elem->getChildElement("Idev");
-      throwException(qElem, "Idev", fileName);
+      check(qElem, "Idev");
       nodeVal = idevElem->innerText();
       std::stringstream e(nodeVal);
       e >> d;
       E[vecindex] = d;
       ++vecindex;
     }
-
   }
-  idataElemList->release();
 
-  Element * instrElem = sasEntryElem->getChildElement("SASinstrument");
-  throwException(instrElem, "SASinstrument", fileName);
+  Element * instrElem = workspaceElem->getChildElement("SASinstrument");
+  check(instrElem, "SASinstrument");
   std::string instname;
   Element*nameElem = instrElem->getChildElement("name");
-  throwException(nameElem, "name", fileName);
+  check(nameElem, "name");
   instname = nameElem->innerText();
   // run load instrument
-  runLoadInstrument(instname, ws);
+  runLoadInstrument(instname, dataWS);
 
+  idataElemList->release();
+  return dataWS;
 }
-
+/* This method throws not found error if a element is not found in the xml file
+ * @param[in] toCheck pointer to  element
+ * @param[in] name element name
+*  @throws NotFoundError if the pointer is NULL
+ */
+void LoadCanSAS1D::check(const Poco::XML::Element* const toCheck, const std::string & name) const
+{
+  if( !toCheck )
+  {
+    std::string fileName = getPropertyValue("Filename");
+    throw Kernel::Exception::NotFoundError("<"+name+"> element not found in CanSAS1D XML file", fileName);
+  }
+}
+/** Appends the first workspace to the second workspace. The second workspace will became a group unless
+*  it was initially empty, in that situation it becames a copy of the first workspace
+* @param[in] newWork the new data to add
+* @param[in] newWorkName the name that the new workspace will take
+* @param[out] container the data will be added to this group
+* @throw ExistsError if a workspace with this name had already been added
+*/
+void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork, const std::string & newWorkName, API::WorkspaceGroup_sptr container)
+{  
+  //the name of the property, like the workspace name must be different for each workspace. Add "_run" at the end to stop problems with names like "outputworkspace"
+  std::string propName = newWorkName+"_run";
+  
+  //the following code registers the workspace with the AnalysisDataService and with the workspace group, I'm taking this oone trust I don't know why it's done this way sorry, Steve
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>(propName, newWorkName,
+                                                         Direction::Output));
+  container->add(newWorkName);
+  setProperty(propName, newWork);
+}
 /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
  * @param inst_name The name written in the Nexus file
  * @param localWorkspace The workspace to insert the instrument into
  */
 void LoadCanSAS1D::runLoadInstrument(const std::string & inst_name,
-    DataObjects::Workspace2D_sptr localWorkspace)
+    API::MatrixWorkspace_sptr localWorkspace)
 {
   // Determine the search directory for XML instrument definition files (IDFs)
   std::string directoryName = Kernel::ConfigService::Instance().getString(
@@ -195,35 +268,38 @@ void LoadCanSAS1D::runLoadInstrument(const std::string & inst_name,
   }
 
 }
-
-/* This method throws not found error if a element is not found in the xml file
- * @param elem pointer to  element
- * @param name  element name
- * @param fileName xml file name
- */
-void LoadCanSAS1D::throwException(Poco::XML::Element* elem, const std::string & name,
-    const std::string& fileName)
-{
-  if (!elem)
-  {
-    throw Kernel::Exception::NotFoundError(name + " element not found in CanSAS1D XML file", fileName);
-  }
-}
-/** Reads in an element from the xml file and stores it in the samples log
-*  @param[in] sasEntry the data in loaded from the SASentry element
-*  @param[in] elemName the name of the element that holds the run number, normally "Run"
-*  @param[out] wSpace the log will be created in this workspace
-*  @param[in] fileName name of the file from which the run number was read, only used for error reporting
-*  @throw NotFoundError if there is no xml element with the name eleName
+/** Loads data into the run log
+*  @param[in] sasEntry the entry corresponding to the passed workspace
+*  @param[in] wSpace the log will be created in this workspace
 */
-void LoadCanSAS1D::createRunNumLog(const Poco::XML::Element * const sasEntry, const std::string& elemName, DataObjects::Workspace2D_sptr wSpace, const std::string& fileName)
+void LoadCanSAS1D::createLogs(const Poco::XML::Element * const sasEntry, API::MatrixWorkspace_sptr wSpace) const
 {
-  Element * runText = sasEntry->getChildElement(elemName);
-
-  throwException(runText, elemName, fileName);
-
   API::Run &run = wSpace->mutableRun();
-  run.addLogData(new PropertyWithValue<std::string>("run_number", runText->innerText()));
+  Element * runText = sasEntry->getChildElement("Run");
+  check(runText, "Run");
+  run.addLogData(new PropertyWithValue<std::string>(
+                                      "run_number", runText->innerText()));
+
+  Element * process = sasEntry->getChildElement("SASprocess");
+  if (process)
+  {
+    NodeList* terms = process->getElementsByTagName("term");
+    for ( int i = 0; i < terms->length(); ++i )
+    {
+      Node* term = terms->item(i);
+      Element* elem = dynamic_cast<Element*>(term);
+      if (elem)
+      {
+        const std::string termName = elem->getAttribute("name");
+        if ( termName == "user_file" )
+        {
+          std::string file = elem->innerText();
+          run.addLogData(new PropertyWithValue<std::string>("UserFile", file));
+          break;
+        }
+      }
+    }
+  }
 }
 
 }

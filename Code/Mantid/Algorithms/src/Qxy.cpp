@@ -117,6 +117,7 @@ void Qxy::exec()
 
   // Divide the output data by the solid angles
   outputWorkspace /= solidAngles;
+  outputWorkspace->isDistribution(true);
   
   // Count of the number of empty cells
   MatrixWorkspace::const_iterator wsIt(*outputWorkspace);

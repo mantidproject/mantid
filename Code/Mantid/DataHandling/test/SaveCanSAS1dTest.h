@@ -4,6 +4,7 @@
 
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D.h"
+#include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "Poco/Path.h"
 
@@ -14,12 +15,13 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class SaveCAnSAS1DTest : public CxxTest::TestSuite
+class SaveCanSAS1DTest : public CxxTest::TestSuite
 {
 public:
 
   //set up the workspace that will be loaded
-  SaveCAnSAS1DTest() : m_rawoutws("SaveCAnSAS1DTest_inWS"),
+  SaveCanSAS1DTest() : m_workspace1("SaveCanSAS1DTest_in1"),
+    m_workspace2("SaveCanSAS1DTest_in2"),
     m_filename("../../../../Test/Data/savecansas1d.xml")
 
   {
@@ -32,16 +34,35 @@ public:
     m_runNum = "15869";
 
     loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("OutputWorkspace", m_rawoutws);
+    loader.setPropertyValue("OutputWorkspace", m_workspace1);
     loader.setPropertyValue("SpectrumList", "1");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
 
     // Change the unit to Q
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>
-      (AnalysisDataService::Instance().retrieve(m_rawoutws));
+      (AnalysisDataService::Instance().retrieve(m_workspace1));
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
+    WorkspaceGroup_sptr group(new WorkspaceGroup);
+    AnalysisDataService::Instance().addOrReplace("SaveCanSAS1DTest_group", group);
+    group->add("SaveCanSAS1DTest_group");
+    group->add(m_workspace1);
+
+    LoadRaw3 load;
+    load.initialize();
+    load.setPropertyValue("Filename", "../../../../Test/Data/irs26173.raw");
+    load.setPropertyValue("OutputWorkspace", m_workspace2);
+    load.setPropertyValue("SpectrumList", "30");
+    TS_ASSERT_THROWS_NOTHING(load.execute());
+    TS_ASSERT( load.isExecuted() );
+
+    // Change the unit to Q
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve(m_workspace2));
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
+
+    group->add(m_workspace2);
   }
   //saving is required by all the following test so, if this test fails so will all the others!
   void testExecute()
@@ -50,7 +71,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( savealg.initialize() )
     TS_ASSERT( savealg.isInitialized() )
-    savealg.setPropertyValue("InputWorkspace", m_rawoutws);
+    savealg.setPropertyValue("InputWorkspace", m_workspace1);
     savealg.setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(savealg.execute());
     TS_ASSERT( savealg.isExecuted() );
@@ -88,7 +109,7 @@ public:
     std::getline( testFile, fileLine );
     {
       std::ostringstream correctLine;
-      correctLine << "\t<SASentry name=\"" << m_rawoutws << "\">";
+      correctLine << "\t<SASentry name=\"" << m_workspace1 << "\">";
       TS_ASSERT_EQUALS ( fileLine, correctLine.str());
     }
 
@@ -116,8 +137,68 @@ public:
     remove(m_filename.c_str());
   }
 
+  void testGroup()
+  {
+    //do the save, the results of which we'll test
+    SaveCanSAS1D savealg;
+    TS_ASSERT_THROWS_NOTHING( savealg.initialize() )
+    TS_ASSERT( savealg.isInitialized() )
+    savealg.setPropertyValue("InputWorkspace", "SaveCanSAS1DTest_group");
+    savealg.setPropertyValue("Filename", m_filename);
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    TS_ASSERT( savealg.isExecuted() );
+    
+    //retrieve the data that we saved to check it
+    LoadCanSAS1D lAlg;
+    TS_ASSERT_THROWS_NOTHING( lAlg.initialize() )
+    TS_ASSERT( lAlg.isInitialized() )
+    lAlg.setPropertyValue("OutputWorkspace", "newgroup");
+    lAlg.setPropertyValue("Filename", m_filename);
+    TS_ASSERT_THROWS_NOTHING(lAlg.execute());
+    TS_ASSERT( lAlg.isExecuted() );
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve("newgroup");
+    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    
+    //we have the data now the tests begin
+    TS_ASSERT(group)
+    std::vector<std::string> wNames = group->getNames();
+    
+    TS_ASSERT_EQUALS(wNames.size(), 3)//change this and the lines below when group workspace names change
+    TS_ASSERT_EQUALS(wNames[1], m_workspace1);
+    TS_ASSERT_EQUALS(wNames[2], m_workspace2);
+    
+    //check the second workspace in more detail
+    ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[2]);
+	Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+  TS_ASSERT(ws2d)
+
+  Run run = ws2d->run();
+  Mantid::Kernel::Property *logP =run.getLogData("run_number");
+  TS_ASSERT_EQUALS( logP->value(), "26173")
+  TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "IRIS")
+
+  TS_ASSERT_EQUALS( ws2d->getNumberHistograms(), 1 );
+  TS_ASSERT_EQUALS( ws2d->dataX(0).size(), 2000 );
+
+  //some of the data is only stored to 3 decimal places
+  double tolerance(1e-04);
+  TS_ASSERT_DELTA( ws2d->dataX(0).front(), 56005, tolerance );
+  TS_ASSERT_DELTA( ws2d->dataX(0)[1000], 66005, tolerance );
+  TS_ASSERT_DELTA( ws2d->dataX(0).back(), 75995, tolerance );
+
+  TS_ASSERT_DELTA( ws2d->dataY(0).front(), 0, tolerance );
+  TS_ASSERT_DELTA( ws2d->dataY(0)[1000], 1.0, tolerance );
+  TS_ASSERT_DELTA( ws2d->dataY(0).back(), 0, tolerance );
+
+  TS_ASSERT_DELTA( ws2d->dataE(0).front(), 0, tolerance );
+  TS_ASSERT_DELTA( ws2d->dataE(0)[1000], 1.0, tolerance );
+  TS_ASSERT_DELTA( ws2d->dataE(0).back(), 0, tolerance );
+  }
+
+
+
 private :
-  const std::string m_rawoutws, m_filename;
+  const std::string m_workspace1, m_workspace2, m_filename;
   std::string m_runNum;
   MatrixWorkspace_sptr ws;
 };
