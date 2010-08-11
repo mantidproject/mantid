@@ -102,7 +102,7 @@ std::string FileValidator::checkValidity(const std::string &value) const
  * @param value The string to check the ending for.
  * @param ending The ending the string should have.
  */
-static bool has_ending(const std::string &value, const std::string & ending)
+bool has_ending(const std::string &value, const std::string & ending)
 {
   if (ending.empty()) // always match against an empty extension
     return true;

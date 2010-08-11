@@ -11,6 +11,9 @@ namespace Mantid
 {
 namespace Kernel
 {
+
+bool has_ending(const std::string &value, const std::string & ending);
+
 /** FileValidator is a validator that checks that a filepath is valid.
 
     @author Matt Clarke, ISIS.
@@ -44,7 +47,7 @@ public:
   virtual ~FileValidator();
   std::set<std::string> allowedValues() const;
   IValidator<std::string>* clone();
-  
+
 private:
   /// The list of permitted extensions
   const std::set<std::string> m_extensions;
