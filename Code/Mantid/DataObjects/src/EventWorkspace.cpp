@@ -74,6 +74,18 @@ using Kernel::Exception::NotImplementedError;
 
   }
 
+  //-----------------------------------------------------------------------------
+  /**
+   * Copy all of the data (event lists) from the source workspace to this workspace.
+   */
+  void EventWorkspace::copyDataFrom(EventWorkspace * source)
+  {
+    //Copy the vector of EventLists
+    this->data.assign( source->data.begin(), source->data.end() );
+    this->clearMRU();
+
+  }
+
 
   //-----------------------------------------------------------------------------
   /// The total size of the workspace

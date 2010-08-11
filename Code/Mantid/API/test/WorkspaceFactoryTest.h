@@ -119,30 +119,30 @@ public:
   {
     MatrixWorkspace_sptr ws1D(new Workspace1DTest);
     MatrixWorkspace_sptr child;
-    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws1D) )
-    TS_ASSERT( ! child->id().compare("Workspace1DTest") )
+    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws1D) );
+    TS_ASSERT( ! child->id().compare("Workspace1DTest") );
 
     MatrixWorkspace_sptr ws2D(new Workspace2DTest);
-    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws2D) )
-        TS_ASSERT( child->id().find("2D") != std::string::npos )
+    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws2D) );
+        TS_ASSERT( child->id().find("2D") != std::string::npos );
 
     //Workspace_sptr mws2D(new ManagedWorkspace2DTest);
-    //TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(mws2D) )
-    //TS_ASSERT_EQUALS( child->id(), "ManagedWorkspace2D")
+    //TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(mws2D) );
+    //TS_ASSERT_EQUALS( child->id(), "ManagedWorkspace2D");
 
     MatrixWorkspace_sptr nif(new NotInFactory);
-    TS_ASSERT_THROWS( child = WorkspaceFactory::Instance().create(nif), std::runtime_error )
+    TS_ASSERT_THROWS( child = WorkspaceFactory::Instance().create(nif), std::runtime_error );
   }
 
   void testAccordingToSize()
   {
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",1,2,3) )
-    TS_ASSERT( ! ws->id().compare("Workspace2DTest") )
+    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",1,2,3) );
+    TS_ASSERT( ! ws->id().compare("Workspace2DTest") );
     Workspace2DTest& space = dynamic_cast<Workspace2DTest&>(*ws);
-    TS_ASSERT_EQUALS( space.size[0], 1 )
-    TS_ASSERT_EQUALS( space.size[1], 2 )
-    TS_ASSERT_EQUALS( space.size[2], 3 )
+    TS_ASSERT_EQUALS( space.size[0], 1 );
+    TS_ASSERT_EQUALS( space.size[1], 2 );
+    TS_ASSERT_EQUALS( space.size[2], 3 );
 
     // ManagedWorkspace.LowerMemoryLimit should be set to 1 in MantidTest.properties file
     MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
@@ -150,14 +150,14 @@ public:
     //TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",nHist,100,100) )
     //TS_ASSERT_EQUALS( ws->id(), "Workspace2D")
 
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",1,1,1) )
-    TS_ASSERT( ! ws->id().compare("Workspace1DTest") )
+    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",1,1,1) );
+    TS_ASSERT( ! ws->id().compare("Workspace1DTest") );
 
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",nHist,100,100) )
-    TS_ASSERT( ! ws->id().compare("Workspace1DTest") )
+    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",nHist,100,100) );
+    TS_ASSERT( ! ws->id().compare("Workspace1DTest") );
 
-    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error )
-    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",10,10,10), std::runtime_error )
+    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error );
+    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",10,10,10), std::runtime_error );
 
     ConfigService::Instance().updateConfig("Mantid.properties");
   }

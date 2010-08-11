@@ -135,6 +135,8 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   long int getMemorySize() const;
 
+  void copyDataFrom(EventWorkspace * source);
+
   //------------------------------------------------------------
 
   /// Return the data X vector at a given workspace index

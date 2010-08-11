@@ -69,8 +69,7 @@ public:
     //std::string eventfile( "/home/janik/data/TOPAZ_1241/preNeXus/TOPAZ_1241_neutron_event.dat" );
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename",
-          "../../../../Test/Data/sns_event_prenexus/TOPAZ_TS_2010_04_16.dat");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/TOPAZ_TS_2010_04_16.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
 
     //Get the event file size
@@ -98,11 +97,6 @@ public:
     //And the spectra # grow monotonically
     TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
     TS_ASSERT( ew->getAxis(1)->spectraNo(numpixels_with_events-1) < 15*256*256);
-
-//    //Check if the instrument was loaded correctly
-//    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
-//    TS_ASSERT_EQUALS (  inst->getName(), "TOPAZ" );
-
   }
 
 
@@ -160,7 +154,13 @@ public:
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(2)[0], 2);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(256)[0], 256);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(61661)[0], 61661);
-
+//
+//    //Now let's test if a copy works too
+//    EventWorkspace_sptr ew2;
+//    MatrixWorkspace_sptr outputMatrixWS;
+//    outputMatrixWS = WorkspaceFactory::Instance().create(ew);
+//    ew2 = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
+//    TS_ASSERT (ew2) ; //non-null pointer
   }
 
 
@@ -168,7 +168,7 @@ public:
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+//    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
     eventLoader->setProperty<bool>("PadEmptyPixels", false);
 
@@ -208,7 +208,7 @@ public:
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+//    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
     eventLoader->setProperty("PadEmptyPixels", true);
 

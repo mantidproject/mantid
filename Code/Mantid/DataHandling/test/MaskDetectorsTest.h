@@ -62,41 +62,41 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( marker.name(), "MaskDetectors" )
+    TS_ASSERT_EQUALS( marker.name(), "MaskDetectors" );
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( marker.version(), 1 )
+    TS_ASSERT_EQUALS( marker.version(), 1 );
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( marker.initialize() )
+    TS_ASSERT_THROWS_NOTHING( marker.initialize() );
     TS_ASSERT( marker.isInitialized() );
 
     MaskDetectors mdd;
-    TS_ASSERT_THROWS_NOTHING( mdd.initialize() )
+    TS_ASSERT_THROWS_NOTHING( mdd.initialize() );
     TS_ASSERT( mdd.isInitialized() );
 
     std::vector<Property*> props = mdd.getProperties();
-    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 )
+    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 );
 
-    TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
-    TS_ASSERT( props[0]->isDefault() )
-    TS_ASSERT( dynamic_cast<WorkspaceProperty<>* >(props[0]) )
+    TS_ASSERT_EQUALS( props[0]->name(), "Workspace" );
+    TS_ASSERT( props[0]->isDefault() );
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<>* >(props[0]) );
 
-    TS_ASSERT_EQUALS( props[1]->name(), "SpectraList" )
-    TS_ASSERT( props[1]->isDefault() )
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) )
+    TS_ASSERT_EQUALS( props[1]->name(), "SpectraList" );
+    TS_ASSERT( props[1]->isDefault() );
+    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) );
 
-    TS_ASSERT_EQUALS( props[2]->name(), "DetectorList" )
-    TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) )
+    TS_ASSERT_EQUALS( props[2]->name(), "DetectorList" );
+    TS_ASSERT( props[2]->isDefault() );
+    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) );
 
-    TS_ASSERT_EQUALS( props[3]->name(), "WorkspaceIndexList" )
-    TS_ASSERT( props[3]->isDefault() )
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) )
+    TS_ASSERT_EQUALS( props[3]->name(), "WorkspaceIndexList" );
+    TS_ASSERT( props[3]->isDefault() );
+    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) );
   }
 
   void testExec()
@@ -122,27 +122,27 @@ public:
     std::vector<double> tens(6,10.0);
     std::vector<double> ones(5,1.0);
     std::vector<double> zeroes(5,0.0);
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(0), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(1), ones )
-    TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
-    TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(2), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(2), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataX(3), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
-    TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(0), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(0), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(1), ones );
+    TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
+    TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(2), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(2), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataX(3), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataX(4), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(4), ones );
+    TS_ASSERT_EQUALS( outputWS->dataE(4), ones );
     boost::shared_ptr<IInstrument> i = outputWS->getInstrument();
-    TS_ASSERT( i->getDetector(0)->isMasked() )
-    TS_ASSERT( ! i->getDetector(1)->isMasked() )
-    TS_ASSERT( i->getDetector(2)->isMasked() )
-    TS_ASSERT( i->getDetector(3)->isMasked() )
-    TS_ASSERT( ! i->getDetector(4)->isMasked() )
+    TS_ASSERT( i->getDetector(0)->isMasked() );
+    TS_ASSERT( ! i->getDetector(1)->isMasked() );
+    TS_ASSERT( i->getDetector(2)->isMasked() );
+    TS_ASSERT( i->getDetector(3)->isMasked() );
+    TS_ASSERT( ! i->getDetector(4)->isMasked() );
 
 	AnalysisDataService::Instance().remove("testSpace");
   }
