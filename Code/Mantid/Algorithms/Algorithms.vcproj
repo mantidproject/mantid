@@ -207,6 +207,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CalculateTransmissionBeamSpreader.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ChangeBinOffset.cpp"
 				>
 			</File>
@@ -344,6 +348,10 @@
 			</File>
 			<File
 				RelativePath=".\src\GetEi2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GroupWorkspaces.cpp"
 				>
 			</File>
 			<File
@@ -589,6 +597,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\CalculateTransmissionBeamSpreader.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\CalculateTransmissionTest.h"
 				>
 			</File>
@@ -830,10 +842,6 @@
 			</File>
 			<File
 				RelativePath=".\test\getEitest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\GroupWorkspaces.cpp"
 				>
 			</File>
 			<File
