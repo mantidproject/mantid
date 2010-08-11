@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>620</height>
+    <width>491</width>
+    <height>604</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -18,6 +18,12 @@
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="styleSheet" >
       <string notr="true" />
      </property>
@@ -36,90 +42,100 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2" >
        <item>
-        <widget class="QStackedWidget" name="swInstrument" >
-         <property name="lineWidth" >
+        <layout class="QHBoxLayout" name="horizontalLayout_27" >
+         <property name="topMargin" >
           <number>0</number>
          </property>
-         <property name="currentIndex" >
-          <number>0</number>
-         </property>
-         <widget class="QWidget" name="page" >
-          <layout class="QHBoxLayout" name="horizontalLayout_16" >
-           <item>
-            <widget class="QLabel" name="lbPrefix" >
-             <property name="enabled" >
-              <bool>true</bool>
-             </property>
-             <property name="text" >
-              <string>Instrument</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="loadRun_cbInst" />
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_3" >
-             <property name="orientation" >
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0" >
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="page_2" >
-          <layout class="QHBoxLayout" name="horizontalLayout" >
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_2" >
+         <item>
+          <widget class="QLabel" name="label_2" >
+           <property name="text" >
+            <string>Instrument</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst" >
+           <property name="techniques" >
+            <stringlist>
+             <string>TOF Direct Geometry Spectroscopy</string>
+             <string>TOF Indirect Geometry Spectroscopy</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="swInstrument" >
+           <property name="lineWidth" >
+            <number>0</number>
+           </property>
+           <property name="currentIndex" >
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page" >
+            <layout class="QHBoxLayout" name="horizontalLayout_16" >
              <item>
-              <widget class="QLabel" name="lbInst" >
-               <property name="text" >
-                <string>Instrument</string>
+              <spacer name="horizontalSpacer_3" >
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst" />
-             </item>
-             <item>
-              <widget class="QLabel" name="lbAnalyser" >
-               <property name="text" >
-                <string>Analyser</string>
+               <property name="sizeType" >
+                <enum>QSizePolicy::Expanding</enum>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="cbAnalyser" >
-               <property name="toolTip" >
-                <string>Select Analyser bank to use.</string>
+               <property name="sizeHint" stdset="0" >
+                <size>
+                 <width>40</width>
+                 <height>10</height>
+                </size>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="lbReflection" >
-               <property name="text" >
-                <string>Reflection</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="cbReflection" >
-               <property name="toolTip" >
-                <string>Select Reflection used for experiment(s).</string>
-               </property>
-              </widget>
+              </spacer>
              </item>
             </layout>
-           </item>
-          </layout>
-         </widget>
-        </widget>
+           </widget>
+           <widget class="QWidget" name="page_2" >
+            <layout class="QHBoxLayout" name="horizontalLayout" >
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_2" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="sizeConstraint" >
+                <enum>QLayout::SetDefaultConstraint</enum>
+               </property>
+               <item>
+                <widget class="QLabel" name="lbAnalyser" >
+                 <property name="text" >
+                  <string>Analyser</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cbAnalyser" >
+                 <property name="toolTip" >
+                  <string>Select Analyser bank to use.</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lbReflection" >
+                 <property name="text" >
+                  <string>Reflection</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cbReflection" >
+                 <property name="toolTip" >
+                  <string>Select Reflection used for experiment(s).</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QGroupBox" name="gbExperiment" >
@@ -1356,6 +1372,12 @@ p, li { white-space: pre-wrap; }
           <string>Save</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8" >
+          <property name="topMargin" >
+           <number>0</number>
+          </property>
+          <property name="bottomMargin" >
+           <number>0</number>
+          </property>
           <item row="2" column="0" >
            <layout class="QHBoxLayout" name="horizontalLayout_8" >
             <item>

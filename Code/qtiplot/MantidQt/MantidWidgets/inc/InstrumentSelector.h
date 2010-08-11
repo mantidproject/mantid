@@ -3,6 +3,18 @@
 
 #include "WidgetDllOption.h"
 #include <QComboBox>
+#include <QStringList>
+
+//----------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------
+namespace Mantid
+{
+  namespace Kernel
+  {
+    class FacilityInfo;
+  }
+}
 
 namespace MantidQt
 {
@@ -37,14 +49,19 @@ namespace MantidQt
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentSelector : public QComboBox
     {
       Q_OBJECT
+      Q_PROPERTY(QStringList techniques READ getTechniques WRITE setTechniques)
 
     public:
       /// Default Constructor
       InstrumentSelector(QWidget *parent = NULL, bool init = true);
+      /// Return the list of techniques
+      QStringList getTechniques() const;
+      /// Set the list of techniques
+      void setTechniques(const QStringList & techniques);
 
     public slots:
       /// Update list for a new facility
-      void fillFromFacility(const QString & name = QString());
+      void fillWithInstrumentsFromFacility(const QString & name = QString());
 
     signals:
       /// Indicate that the instrument selection has changed. The parameter will contain the new name
@@ -53,6 +70,15 @@ namespace MantidQt
     private slots:
       /// Update Mantid's default instrument
       void updateDefaultInstrument(const QString & name) const;
+
+    private:
+      /// Filter the list to only show those supporting the given technique
+      void filterByTechniquesAtFacility(const QStringList & techniques, const Mantid::Kernel::FacilityInfo & facility);
+
+      /// A list of technqiues. Only those instruments supporting these techniques are shown.
+      QStringList m_techniques;
+      /// The current facility
+      const Mantid::Kernel::FacilityInfo *m_currentFacility;
     };
 
   }

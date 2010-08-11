@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 
 namespace MantidQt
 {
@@ -20,14 +21,36 @@ namespace MantidQt
      * @param parent A widget to act as this widget's parent (default = NULL)
      * @param init If true then the widget will be populated with the instrument list (default = true)
      */
-    InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) : QComboBox(parent)
+    InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) : QComboBox(parent), m_techniques(), m_currentFacility(NULL)
     {
       if( init )
       {
-        fillFromFacility();
         connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateDefaultInstrument(const QString &)));
+        fillWithInstrumentsFromFacility();
         connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SIGNAL(instrumentSelectionChanged(const QString &)));
       }
+    }
+
+    /**
+     * Return the list of techniques that are supported by the instruments in the widget
+     * @returns A list of supported techniques
+     */
+    QStringList InstrumentSelector::getTechniques() const
+    {
+      return m_techniques;
+    }
+
+    /**
+     * Set the list of techniques
+     * @param techniques Only those instruments that support these techniques will be shown
+     */
+    void InstrumentSelector::setTechniques(const QStringList & techniques)
+    {
+      m_techniques = techniques;
+      if( count() > 0 && m_currentFacility ) 
+      {
+        filterByTechniquesAtFacility(techniques, *m_currentFacility);
+      }      
     }
 
     //------------------------------------------------------
@@ -39,12 +62,21 @@ namespace MantidQt
       * @param name The name of the facility whose instruments should be placed in the list. An empty string uses the default
       * facility defined in Mantid.
       */
-    void InstrumentSelector::fillFromFacility(const QString & name)
+    void InstrumentSelector::fillWithInstrumentsFromFacility(const QString & name)
     {
       ConfigServiceImpl & mantidSettings = ConfigService::Instance(); 
       
       clear();
-      const std::vector<InstrumentInfo> & instruments = mantidSettings.Facility(name.toStdString()).Instruments();
+      if( name.isEmpty() )
+      {
+        m_currentFacility = &(mantidSettings.Facility());
+      }
+      else
+      {
+        m_currentFacility = &(mantidSettings.Facility(name.toStdString()));
+      }
+
+      const std::vector<InstrumentInfo> & instruments = m_currentFacility->Instruments();
       std::vector<InstrumentInfo>::const_iterator iend = instruments.end();
       for( std::vector<InstrumentInfo>::const_iterator itr = instruments.begin(); itr != iend; ++itr )
       {
@@ -53,13 +85,15 @@ namespace MantidQt
         this->addItem(name, QVariant(shortName));
       }
 
-      // Set the correct default
-      QString defaultName = QString::fromStdString(mantidSettings.Facility().Instrument().name());
+      filterByTechniquesAtFacility(m_techniques, *m_currentFacility);
+
+      QString defaultName = QString::fromStdString(m_currentFacility->Instrument().name());
       int index = this->findText(defaultName);
-      if( index >= 0 )
+      if( index < 0 )
       {
-        this->setCurrentIndex(index);
+        index = 0;
       }
+      this->setCurrentIndex(index);
     }
 
     //------------------------------------------------------
@@ -74,6 +108,45 @@ namespace MantidQt
       if( !name.isEmpty() )
       {
         ConfigService::Instance().setString("default.instrument", name.toStdString());
+      }
+    }
+
+    //------------------------------------------------------
+    // Privte non-slot member functions
+    //------------------------------------------------------
+
+    /**
+     * Filter the list to only show those supporting the given technique
+     * @param techniques A string list containing the names of a techniques to filter the instrument list by
+     * @param facility A FacilityInfo object
+     */
+    void InstrumentSelector::filterByTechniquesAtFacility(const QStringList & techniques, const Mantid::Kernel::FacilityInfo & facility)
+    {
+      if( techniques.isEmpty() ) return;
+
+      QStringList supportedInstruments;
+      QStringListIterator techItr(techniques);
+      while( techItr.hasNext() )
+      {
+        const std::vector<InstrumentInfo> instruments = facility.Instruments(techItr.next().toStdString());
+        const size_t nInstrs = instruments.size();
+        for( size_t i = 0; i < nInstrs; ++i )
+        {
+          supportedInstruments.append(QString::fromStdString(instruments[i].name()));
+        }
+      }
+
+      // Remove those not supported
+      for( int i = 0 ; i < this->count(); )
+      {
+        if( !supportedInstruments.contains(itemText(i)) )
+        {
+          removeItem(i);
+        }
+        else
+        {
+          ++i;
+        }
       }
     }
 

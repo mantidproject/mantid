@@ -176,7 +176,7 @@ void Homer::setUpPage2()
      second argument, depends on the instrument and the detector diagnostic settings are 
      kept separate in "diag/"*/
 
-  m_diagPage = new MWDiag(this, getInstrumentSettingsGroup() + "/diag", m_uiForm.loadRun_cbInst);
+  m_diagPage = new MWDiag(this, getInstrumentSettingsGroup() + "/diag", m_uiForm.cbInst);
 	
   QLayout *diagLayout = m_uiForm.tabDiagnoseDetectors->layout();
   diagLayout->addWidget(m_diagPage);
@@ -391,7 +391,7 @@ QString Homer::getInstrumentSettingsGroup() const
   {
     currentGroup += "/";
   }
-  QString prefix = m_uiForm.loadRun_cbInst->itemData(m_uiForm.loadRun_cbInst->currentIndex()).toString();
+  QString prefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
   currentGroup += QString("in instrument %1").arg(prefix);
   return currentGroup;
 }
@@ -768,7 +768,7 @@ void Homer::setIDFValues(const QString & name)
 {
   if( !m_isPyInitialized ) return;
 
-  QString prefix = m_uiForm.loadRun_cbInst->itemData(m_uiForm.loadRun_cbInst->currentIndex()).toString();
+  QString prefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
 
   // Fill in default values for tab
   QString param_defs = 

@@ -32,21 +32,21 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
 					const QString & saveName)
 { 
   QString pyCode = "import DirectEnergyConversion as direct\n";
-  pyCode += QString("mono_sample = direct.DirectEnergyConversion('%1')\n").arg(m_sets.loadRun_cbInst->currentText());
+  pyCode += QString("mono_sample = direct.DirectEnergyConversion('%1')\n").arg(m_sets.cbInst->currentText());
 
   addAnalysisOptions(pyCode);
   addMaskingCommands(pyCode);
   // Check save formats
-  pyCode += "mono_sample.save_formats = [";
+  QStringList fileExts;
   if( m_sets.save_ckSPE->isChecked() )
   {
-    pyCode += "'.spe'";
+    fileExts.append("'.spe'");
   }
   if( m_sets.save_ckNexus->isChecked() )
   {
-    pyCode += ",'.nxs'";
+    fileExts.append("'.nxs'");
   }
-  pyCode += "]\n\n";
+  pyCode += "mono_sample.save_formats = [" + fileExts.join(",") + "]\n\n";
 
   QString runFilesList = createPyListAsString(runFiles);
   if( m_sets.ckSumSpecs->isChecked() )

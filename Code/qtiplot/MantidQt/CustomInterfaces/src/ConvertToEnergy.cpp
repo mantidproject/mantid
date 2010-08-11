@@ -87,7 +87,7 @@ void ConvertToEnergy::runClicked()
 }
 
 /**
-* Sets up Qt UI file and connects signals, slots, etc. Calls setupCbInst(), etc.
+* Sets up Qt UI file and connects signals, slots. 
 */
 void ConvertToEnergy::initLayout()
 {
@@ -95,25 +95,19 @@ void ConvertToEnergy::initLayout()
 	m_curInterfaceSetup = "";
 	m_curEmodeType = Undefined;
 
-	// set up the Instrument combo boxes
-	setupCbInst();
+	// Assume we get a incompatiable instrument to start with
+  m_uiForm.pbRun->setEnabled(false);
 
 	// Signal / Slot Connections Set Up Here
 
 	// signal/slot connections to respond to changes in instrument selection combo boxes
-	connect(m_uiForm.loadRun_cbInst, SIGNAL(activated(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
-	connect(m_uiForm.cbInst, SIGNAL(activated(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
-
-	// and to ensure that the two combo boxes display the same thing
-	connect(m_uiForm.loadRun_cbInst, SIGNAL(activated(int)), m_uiForm.cbInst, SLOT(setCurrentIndex(int)));
-	connect(m_uiForm.cbInst, SIGNAL(activated(int)), m_uiForm.loadRun_cbInst, SLOT(setCurrentIndex(int)));
+	connect(m_uiForm.cbInst, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
 
 	// connect "?" (Help) Button
 	connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
 	// connect the "Run" button
 	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-
-  
+ 
 }
 
 /**
@@ -125,43 +119,6 @@ void ConvertToEnergy::initLocalPython()
 {
 	// select starting instrument
   readSettings();
-}
-
-
-
-/**
-* Populates the "Instrument" combo boxes for the direct and indirect interfaces.
-* Uses the Mantid.properties file to get the name (displayed as ComboBox's Text), and
-* the instrument prefix (used as the accompanying 'data' field).
-*/
-void ConvertToEnergy::setupCbInst()
-{
-	// Populate Instrument Selection Boxes
-	Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
-
-	// get instrument names from config file
-	std::string key_name = std::string("instrument.names.") + mtd_config.getString("default.facility");
-	QString names = QString::fromStdString(mtd_config.getString(key_name));
-	QStringList name_list = names.split(";", QString::SkipEmptyParts);
-	// get instrument prefixes from config file
-	std::string key_pref = std::string("instrument.prefixes.") + mtd_config.getString("default.facility");
-	QString prefixes = QString::fromStdString(mtd_config.getString(key_pref));
-	QStringList pref_list = prefixes.split(";", QString::SkipEmptyParts);
-
-	// clear any previous contents of the comboBoxes
-	m_uiForm.loadRun_cbInst->clear();
-	m_uiForm.cbInst->clear();
-
-  assert(name_list.size() == pref_list.size());
-
-	// iterate through the two QStringLists adding text (name) and data (prefix) to the ComboBox
-	for ( int i = 0; i < pref_list.size() ; i++ )
-	{
-		m_uiForm.loadRun_cbInst->addItem(name_list[i], QVariant(pref_list[i]));
-		m_uiForm.cbInst->addItem(name_list[i], QVariant(pref_list[i]));
-	}
-
-  m_uiForm.pbRun->setEnabled(false);
 }
 
 /**
@@ -185,20 +142,16 @@ void ConvertToEnergy::saveSettings()
   QSettings settings;
   settings.beginGroup(m_settingsGroup);
   QString instrName;
-  if( m_curEmodeType == Direct )
-  {
-    instrName = m_uiForm.loadRun_cbInst->currentText();
-  }
-  else if( m_curEmodeType == InDirect )
-  {
-    instrName = m_uiForm.cbInst->currentText();
-  }
-  else
+  if( m_curEmodeType == Undefined )
   {
     instrName = "";
   }
-  settings.setValue("instrument-name", instrName);
+  else
+  {
+    instrName = m_uiForm.cbInst->currentText();
+  }
 
+  settings.setValue("instrument-name", instrName);
   settings.endGroup();
 }
 
@@ -209,23 +162,12 @@ void ConvertToEnergy::saveSettings()
 */
 void ConvertToEnergy::setDefaultInstrument(const QString & name)
 {
-  int index(-1);
-  if( name.isEmpty() )
+  if( name.isEmpty() ) return;
+  
+  int index = m_uiForm.cbInst->findText(name);
+  if( index >= 0 )
   {
-  	Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
-  	QString curInstru = QString::fromStdString(mtd_config.getString("default.instrument"));
-  	index = m_uiForm.loadRun_cbInst->findData(QVariant(curInstru));
-  }
-  else
-  {
-    index = m_uiForm.loadRun_cbInst->findText(name);
-  }
-	m_uiForm.loadRun_cbInst->setCurrentIndex(index);
-	m_uiForm.cbInst->setCurrentIndex(index);
-	
-  if( index >= 0 ) 
-  {
-    instrumentSelectChanged(name);
+	  m_uiForm.cbInst->setCurrentIndex(index);
   }
 }
 
@@ -251,9 +193,9 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 	{
 		m_curEmodeType = Undefined;
 		QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + name + ") does not have a parameter to signify it's deltaE-mode");
-    m_uiForm.loadRun_cbInst->blockSignals(true);
-    m_uiForm.loadRun_cbInst->setCurrentIndex(m_uiForm.loadRun_cbInst->findText(m_curInterfaceSetup));
-		m_uiForm.loadRun_cbInst->blockSignals(false);
+    m_uiForm.cbInst->blockSignals(true);
+    m_uiForm.cbInst->setCurrentIndex(m_uiForm.cbInst->findText(m_curInterfaceSetup));
+		m_uiForm.cbInst->blockSignals(false);
     return;
 	}
 
@@ -276,8 +218,6 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 	m_curInterfaceSetup = name;
 	m_curEmodeType = desired;
   m_uiForm.pbRun->setEnabled(true);
-  //Inform Mantid of the current instrument
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",name.toStdString());
 }
 
 /**
@@ -300,9 +240,9 @@ QString ConvertToEnergy::getIDFPath(const QString& prefix)
 	if( entries.isEmpty() )
 	{
 		QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + prefix + ") does not have a parameter file.\nCannot run analysis");
-    m_uiForm.loadRun_cbInst->blockSignals(true);
-    m_uiForm.loadRun_cbInst->setCurrentIndex(m_uiForm.loadRun_cbInst->findText(m_curInterfaceSetup));
-		m_uiForm.loadRun_cbInst->blockSignals(false);
+    m_uiForm.cbInst->blockSignals(true);
+    m_uiForm.cbInst->setCurrentIndex(m_uiForm.cbInst->findText(m_curInterfaceSetup));
+		m_uiForm.cbInst->blockSignals(false);
 		return "";
 	}
 	else
