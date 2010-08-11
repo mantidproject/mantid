@@ -171,7 +171,7 @@
                  <number>6</number>
                 </property>
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" >
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="runFiles" >
                   <property name="label" stdset="0" >
                    <string>Runs          </string>
                   </property>
@@ -187,7 +187,7 @@
                </layout>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="mapFile" >
                 <property name="findRunFiles" stdset="0" >
                  <bool>false</bool>
                 </property>
@@ -203,7 +203,7 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="whiteBeamFile" >
                 <property name="label" stdset="0" >
                  <string>White beam</string>
                 </property>
@@ -615,17 +615,7 @@
             </widget>
             <widget class="QWidget" name="page_6" >
              <layout class="QGridLayout" name="gridLayout_10" >
-              <item row="0" column="2" >
-               <widget class="QCheckBox" name="ckMonEff" >
-                <property name="text" >
-                 <string>Monitor Efficiency</string>
-                </property>
-                <property name="checked" >
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="7" >
+              <item row="0" column="6" >
                <spacer name="horizontalSpacer_10" >
                 <property name="orientation" >
                  <enum>Qt::Horizontal</enum>
@@ -651,14 +641,14 @@
                 </property>
                </spacer>
               </item>
-              <item row="0" column="3" >
+              <item row="0" column="2" >
                <widget class="QCheckBox" name="ckDetailedBalance" >
                 <property name="text" >
                  <string>Detailed Balance</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="4" >
+              <item row="0" column="3" >
                <widget class="QLineEdit" name="leDetailedBalance" >
                 <property name="sizePolicy" >
                  <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
@@ -680,7 +670,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="6" >
+              <item row="0" column="5" >
                <widget class="QLabel" name="lbDBKelvin" >
                 <property name="text" >
                  <string>Kelvin</string>
@@ -690,7 +680,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="5" >
+              <item row="0" column="4" >
                <widget class="QLabel" name="valDetailedBalance" >
                 <property name="styleSheet" >
                  <string notr="true" >color: rgb(255, 0, 4)</string>
@@ -2378,14 +2368,14 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_31" >
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absRunFiles" >
             <property name="label" stdset="0" >
              <string>Mono Van</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absMapFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -2398,7 +2388,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absWhiteFile" >
             <property name="label" stdset="0" >
              <string>White Beam</string>
             </property>
@@ -2833,7 +2823,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>cal_leEHigh</tabstop>
   <tabstop>cal_ckPlotResult</tabstop>
   <tabstop>cal_pbCreate</tabstop>
-  <tabstop>ckMonEff</tabstop>
   <tabstop>ckSumFiles</tabstop>
   <tabstop>cbMappingOptions</tabstop>
   <tabstop>pbRunFilesBrowse</tabstop>

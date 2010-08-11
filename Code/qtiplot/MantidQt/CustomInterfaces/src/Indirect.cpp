@@ -51,7 +51,6 @@ void Indirect::initLayout()
     connect(m_uiForm.leEfixed, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
-    connect(m_uiForm.ckMonEff, SIGNAL(pressed()), this, SLOT(setasDirty()));
     connect(m_uiForm.ckSumFiles, SIGNAL(pressed()), this, SLOT(setasDirty()));
     connect(m_uiForm.ckUseCalib, SIGNAL(pressed()), this, SLOT(setasDirty()));
     connect(m_uiForm.ckCleanUp, SIGNAL(pressed()), this, SLOT(setasDirty()));
@@ -892,8 +891,8 @@ bool Indirect::validateCalib()
         if ( m_uiForm.cal_leStartX->text().toInt() > m_uiForm.cal_leEndX->text().toInt() )
         {
             valid = false;
-        m_uiForm.valStartX->setText("*");
-        m_uiForm.valEndX->setText("*");
+            m_uiForm.valStartX->setText("*");
+            m_uiForm.valEndX->setText("*");
         }
 
         // rebinning (res)
@@ -1217,16 +1216,23 @@ void Indirect::plotRaw()
         return;
     }
 
+    QString pyInput =
+        "from mantidsimple import *\n"
+        "from mantidplot import *\n"
+        "try:\n";
+
     QStringList specList = spectraRange.split("-");
-    if ( specList.size() > 2 )
+    if ( (specList.size() > 2) || ( specList.size() < 1) )
     {
         showInformationBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
         return;
     }
-    else
+    if ( specList.size() == 1 )
     {
-        spectraRange = "range("+specList[0]+","+specList[1]+"+1)";
+        specList.append(specList[0]);
     }
+
+    spectraRange = "range("+specList[0]+","+specList[1]+"+1)";
 
     QString rawFile = m_uiForm.leRunFiles->text();
     if ( rawFile == "" )
@@ -1234,17 +1240,15 @@ void Indirect::plotRaw()
         showInformationBox("Please enter the path for the .raw file.");
         return;
     }
-
-    QString pyInput =
-        "from mantidsimple import *\n"
-        "from mantidplot import *\n"
-        "try:\n"
-        "   LoadRaw(r'" + rawFile + "', 'RawTime')\n"
+    pyInput +=
+        "   LoadRaw(r'"+rawFile+"', 'RawTime', SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
         "except SystemExit:\n"
-        "   print 'Could not open .raw file. Please check file path.'\n"
-        "   sys.exit('Could not open .raw file.')\n"
+        "   message = 'Plot Time: Could not open .raw file. Please check file path.'\n"
+        "   print message\n"
+        "   sys.exit(message)\n"
         "GroupDetectors('RawTime', 'RawTime', SpectraList="+spectraRange+")\n"
         "graph = plotSpectrum('RawTime', 0)\n";
+    // Run and catch any Python errors
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
     if ( pyOutput != "" )

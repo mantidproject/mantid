@@ -61,7 +61,7 @@ def getFirstMonFirstDet(workspace):
 			break
 	return FirstMon, FirstDet
 
-def timeRegime(inWS, inWS_n='Rawfile', outWS_n='MonWS'):
+def timeRegime(inWS, inWS_n='Rawfile', outWS_n='MonWS', Smooth=True):
 	FirstMon, FirstDet = getFirstMonFirstDet(inWS)
 	LRef = getReferenceLength(inWS, FirstDet)
 	SpecMon = inWS.readX(FirstMon)[0]
@@ -71,7 +71,8 @@ def timeRegime(inWS, inWS_n='Rawfile', outWS_n='MonWS'):
 		alg = Unwrap('MonIn', outWS_n, LRef = LRef)
 		join = float(alg.getPropertyValue('JoinWavelength'))
 		RemoveBins(outWS_n, outWS_n, join-0.001, join+0.001, Interpolation='Linear')
-		FFTSmooth(outWS_n, outWS_n, 0)
+		if Smooth:
+			FFTSmooth(outWS_n, outWS_n, 0)
 	else:
 		ConvertUnits('MonIn', outWS_n, 'Wavelength')
 	mantid.deleteWorkspace('MonIn')
@@ -136,9 +137,9 @@ def detailedBalance(tempK, inWS_n = 'Energy', outWS_n = 'Energy'):
 	return outWS_n
 
 def scaleAndGroup(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
-	CreateSingleValuedWorkspace('scale', 1e9)
-	Multiply(inWS_n, 'scale', inWS_n)
-	mantid.deleteWorkspace('scale')
+	#CreateSingleValuedWorkspace('scale', 1e9)
+	#Multiply(inWS_n, 'scale', inWS_n)
+	#mantid.deleteWorkspace('scale')
 	GroupDetectors(inWS_n, outWS_n, MapFile = mapfile)
 	mantid.deleteWorkspace(inWS_n)
 	return outWS_n
@@ -178,6 +179,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', ref
 			calibrated = useCalib(calib)
 		normalised = normToMon()
 		cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
+		# 
 		if ( rebinParam != ''):
 			rebin = rebinData(rebinParam, inWS_n=cte)
 			if CleanUp:
@@ -298,7 +300,7 @@ def saveItems(workspaces, runNos, fileFormats, ins, suffix, directory = ''):
 				print 'Save: unknown file type.'
 				system.exit('Save: unknown file type.')
 
-def demon(rawFiles, calFile, first, last, SumFiles=False, CleanUp=True, plotOpt=False):
+def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, plotOpt=False):
 	'''
 	DEMON function for unit conversion on diffraction backs of IRIS/OSIRIS.
 	MANDATORY PARAMS:
@@ -315,20 +317,21 @@ def demon(rawFiles, calFile, first, last, SumFiles=False, CleanUp=True, plotOpt=
 	ws_list, ws_names = loadData(rawFiles, Sum=SumFiles)
 	runNos = []
 	workspaces = []
+	(direct, filename) = os.path.split(rawFiles[0])
+	(root, ext) = os.path.splitext(filename)
 	for i in range(0, len(ws_names)):
 		# Get Monitor WS
-		MonitorWS = timeRegime(ws_list[i], inWS_n=ws_names[i])
+		MonitorWS = timeRegime(ws_list[i], inWS_n=ws_names[i], Smooth=Smooth)
 		monitorEfficiency(inWS_n=MonitorWS)
 		# Get Run no, crop file
 		runNo = ws_list[i].getRun().getLogData("run_number").value()
 		runNos.append(runNo)
-		savefile = rawFiles[0][:3] + runNo + '_dem'
+		savefile = root[:3] + runNo + '_dem'
 		CropWorkspace(ws_names[i], ws_names[i], StartWorkspaceIndex = (first-1), EndWorkspaceIndex = (last-1) )
 		# Normalise to Monitor
 		normalised = normToMon(inWS_n=ws_names[i], outWS_n=ws_names[i], monWS_n=MonitorWS)
 		# Convert to dSpacing
 		ConvertUnits(ws_names[i], savefile, 'dSpacing')
-		# DiffractionFocussing(ws_names[i], savefile, calFile) -- not needed?
 		workspaces.append(savefile)
 		if CleanUp:
 			mantid.deleteWorkspace(ws_names[i])
