@@ -16,6 +16,8 @@
 #include <MantidAPI/WorkspaceProperty.h>
 #include <MantidAPI/FileProperty.h>
 #include <MantidAPI/WorkspaceValidators.h>
+#include <MantidAPI/FileFinder.h>
+
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
 
 namespace Mantid
@@ -372,6 +374,16 @@ namespace PythonAPI
 	
   }
 
+  void export_file_finder()
+  {
+    class_<PythonAPI::FileFinderWrapper, boost::noncopyable>("FileFinder", no_init)
+      .def("getFullPath", &PythonAPI::FileFinderWrapper::getFullPath)
+      .staticmethod("getFullPath")
+      .def("findRuns", &PythonAPI::FileFinderWrapper::findRuns)
+      .staticmethod("findRuns")
+      ;
+  }
+
   void export_api_namespace()
   {
     export_frameworkmanager();
@@ -387,6 +399,7 @@ namespace PythonAPI
     export_fileproperty();
     export_workspacefactory();
     export_apivalidators();
+    export_file_finder();
   }
   //@endcond
 }

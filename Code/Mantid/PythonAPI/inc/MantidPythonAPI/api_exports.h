@@ -10,6 +10,7 @@
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/IAlgorithm.h>
+#include <MantidAPI/FileFinder.h>
 #include <boost/python.hpp>
 #include <iostream>
 
@@ -101,6 +102,36 @@ namespace PythonAPI
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload2)(const std::string&, const int&);
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload3)(const std::string&, const std::string&);
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload4)(const std::string&, const std::string&, const int&);
+
+  /**
+   * FileFinder singleton wrapper
+   *
+   * This class is the type that is actually instantiated within Python.
+   */
+  struct FileFinderWrapper
+  {
+  public:
+    /**
+     * Call the corresponding FileFinder method
+     * @param input The input for the function
+     * @returns A string containing either the full path or nothing if the file could not be found
+     */
+    static std::string getFullPath(const std::string & input)
+    {
+      return API::FileFinder::Instance().getFullPath(input);
+    }
+
+    /**
+     * Call the corresponding FileFinder method
+     * @param input The input for the function
+     * @returns A list of runs that have been found
+     */
+    static std::vector<std::string> findRuns(const std::string & input)
+    {
+      return API::FileFinder::Instance().findRuns(input);
+    }
+
+  };
 
   //@endcond
 }
