@@ -59,12 +59,12 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
     xnew.push_back(xcurr);
     inew++;
 
-    if (xnew.size() > 10000000)
-    {
-      //Max out at 1 million bins
-      throw std::runtime_error("Over ten million binning steps created. Exiting to avoid infinite loops.");
-      return inew;
-    }
+//    if (xnew.size() > 10000000)
+//    {
+//      //Max out at 1 million bins
+//      throw std::runtime_error("Over ten million binning steps created. Exiting to avoid infinite loops.");
+//      return inew;
+//    }
   }
 
   return inew;

@@ -72,26 +72,26 @@ public:
 
 
 
-  void testworkspace1D_dist_stupid_bins()
-  {
-    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
-    test_in1D->isDistribution(true);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
-
-    SimpleRebin rebin;
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace","test_in1D");
-    rebin.setPropertyValue("OutputWorkspace","test_out");
-    // Check it fails if "Params" property not set
-    TS_ASSERT_THROWS( rebin.execute(), std::runtime_error );
-    TS_ASSERT( ! rebin.isExecuted() );
-    // Way too many bins
-    rebin.setPropertyValue("Params", "0.0,1e-8,10");
-    // Fails to execute
-    TS_ASSERT(!rebin.execute());
-    TS_ASSERT(!rebin.isExecuted());
-    AnalysisDataService::Instance().remove("test_in1D");
-  }
+//  void testworkspace1D_dist_stupid_bins()
+//  {
+//    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+//    test_in1D->isDistribution(true);
+//    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+//
+//    SimpleRebin rebin;
+//    rebin.initialize();
+//    rebin.setPropertyValue("InputWorkspace","test_in1D");
+//    rebin.setPropertyValue("OutputWorkspace","test_out");
+//    // Check it fails if "Params" property not set
+//    TS_ASSERT_THROWS( rebin.execute(), std::runtime_error );
+//    TS_ASSERT( ! rebin.isExecuted() );
+//    // Way too many bins
+//    rebin.setPropertyValue("Params", "0.0,1e-8,10");
+//    // Fails to execute
+//    TS_ASSERT(!rebin.execute());
+//    TS_ASSERT(!rebin.isExecuted());
+//    AnalysisDataService::Instance().remove("test_in1D");
+//  }
 
   void testworkspace1D_nondist()
   {
@@ -159,6 +159,7 @@ public:
     TS_ASSERT(dist);
     AnalysisDataService::Instance().remove("test_in1D");
     AnalysisDataService::Instance().remove("test_out");
+
   }
 
   void testworkspace2D_dist()
