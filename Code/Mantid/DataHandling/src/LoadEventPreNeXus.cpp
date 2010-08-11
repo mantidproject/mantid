@@ -8,6 +8,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FileValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -45,6 +46,9 @@ static const string INSTRUMENT_PARAM("InstrumentFilename");
 static const string PID_PARAM("SpectrumList");
 static const string PAD_PIXELS_PARAM("PadEmptyPixels");
 static const string OUT_PARAM("OutputWorkspace");
+
+static const string PULSE_EXT("pulseid.dat");
+static const string EVENT_EXT("event.dat");
 
 /// Default number of items to read in from any of the files.
 static const size_t DEFAULT_BLOCK_SIZE = 1000000; // 100,000
@@ -88,9 +92,9 @@ void LoadEventPreNeXus::init()
   this->g_log.setName("DataHandling::LoadEventPreNeXus");
 
   // which files to use
-  this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, "event.dat"),
+  this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
                         "A preNeXus neutron event file");
-  this->declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, "pulseid.dat"),
+  this->declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, PULSE_EXT),
                         "A preNeXus pulseid file. Used only if specified.");
   this->declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
                         "TS mapping file converting detector id to pixel id. Used only if specified.");
@@ -111,6 +115,31 @@ void LoadEventPreNeXus::init()
 
 }
 
+static string generatPulseidName(string &eventfile)
+{
+  size_t start;
+  string ending;
+
+  // normal ending
+  ending = "neutron_event.dat";
+  start = eventfile.find(ending);
+  if (start != string::npos)
+    return eventfile.replace(start, ending.size(), "pulseid.dat");
+
+  // split up event files - yes this is copy and pasted code
+  ending = "neutron0_event.dat";
+  start = eventfile.find(ending);
+  if (start != string::npos)
+    return eventfile.replace(start, ending.size(), "pulseid0.dat");
+
+  ending = "neutron1_event.dat";
+  start = eventfile.find(ending);
+  if (start != string::npos)
+    return eventfile.replace(start, ending.size(), "pulseid1.dat");
+
+  return "";
+}
+
 //-----------------------------------------------------------------------------
 /** Execute the algorithm */
 void LoadEventPreNeXus::exec()
@@ -122,12 +151,18 @@ void LoadEventPreNeXus::exec()
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
   this->loadPixelMap(mapping_filename);
 
-  // open the pulseid file
+  // the event file is needed in case the pulseid fileanme is empty
+  string event_filename = this->getPropertyValue(EVENT_PARAM);
   string pulseid_filename = this->getPropertyValue(PULSEID_PARAM);
+  if (pulseid_filename.empty())
+  {
+    pulseid_filename = generatPulseidName(event_filename);
+    if (!pulseid_filename.empty())
+      this->g_log.information() << "Found pulseid file " << pulseid_filename;
+  }
+
   this->readPulseidFile(pulseid_filename);
 
-  // open the event file
-  string event_filename = this->getPropertyValue(EVENT_PARAM);
   this->openEventFile(event_filename);
 
   // prep the output workspace
@@ -157,7 +192,6 @@ void LoadEventPreNeXus::exec()
 
   //std::cout << "LoadEventPreNeXus::output Workspace property has been set.\n";
 }
-
 
 //-----------------------------------------------------------------------------
 /** Load the instrument geometry File
@@ -262,7 +296,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     current_event_buffer_size = event_buffer_size;
     if (event_offset + current_event_buffer_size > this->num_events)
       current_event_buffer_size = this->num_events - event_offset;
-    
+
     // read in the data
     this->eventfile->read(reinterpret_cast<char *>(event_buffer),
         current_event_buffer_size * sizeof(DasEvent));
@@ -310,7 +344,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     prog.report();
   }
 
-
   //--------- Pad Empty Pixels -----------
   if (this->getProperty(PAD_PIXELS_PARAM))
   {
@@ -335,7 +368,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
     }
   }
-
 
   // add the frame information to the event workspace
   for (size_t i = 0; i < this->num_pulses; i++)
@@ -448,7 +480,6 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
     //The ending iterator
     start_map_it[num_cpus] = das_pixel_map.end();
 
-
     PARALLEL_FOR1(workspace)
     for (int block_num=0; block_num < num_cpus; block_num++)
     {
@@ -480,7 +511,6 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
     }
 
     delete [] start_map_it;
-
 
 //
 //    // process the individual events
@@ -567,7 +597,6 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
   xRef[1] = longest_tof + 1;
   workspace->setAllX(axis);
 
-
   stringstream msg;
   msg << "Read " << this->num_good_events << " events + "
       << this->num_error_events << " errors";
@@ -593,7 +622,7 @@ static std::time_t to_time_t(ptime t)
 void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & workspace)
 {
   if (this->proton_charge.empty()) // nothing to do
-    return; 
+    return;
   Run& run = workspace->mutableRun();
   run.setProtonCharge(this->proton_charge_tot);
 
@@ -661,7 +690,6 @@ static size_t getFileSize(ifstream * handle)
   return filesize / sizeof(T);
 }
 
-
 //-----------------------------------------------------------------------------
 /** Get a buffer size for loading blocks of data.
  * @param num_items
@@ -670,7 +698,7 @@ static size_t getBufferSize(const size_t num_items)
 {
   if (num_items < DEFAULT_BLOCK_SIZE)
     return num_items;
-  else 
+  else
     return DEFAULT_BLOCK_SIZE;
 }
 
@@ -834,7 +862,5 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
   delete handle;
 }
 
-
 } // namespace DataHandling
 } // namespace Mantid
-
