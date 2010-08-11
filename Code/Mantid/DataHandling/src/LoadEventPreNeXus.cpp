@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <functional>
 #include <iostream>
+#include <Poco/File.h>
 #include <vector>
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -158,7 +159,13 @@ void LoadEventPreNeXus::exec()
   {
     pulseid_filename = generatPulseidName(event_filename);
     if (!pulseid_filename.empty())
-      this->g_log.information() << "Found pulseid file " << pulseid_filename;
+    {
+      if (Poco::File(pulseid_filename).exists())
+        this->g_log.information() << "Found pulseid file " << pulseid_filename;
+      else
+        pulseid_filename = "";
+
+    }
   }
 
   this->readPulseidFile(pulseid_filename);
