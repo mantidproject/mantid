@@ -74,7 +74,7 @@ bool TextAxis::operator==(const Axis& axis2) const
  */
 std::string TextAxis::label(const int& index)const
 {
-  return m_values[index];
+  return m_values.at(index);
 }
 
 /**

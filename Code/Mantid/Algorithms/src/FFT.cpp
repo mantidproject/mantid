@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -119,6 +120,7 @@ void FFT::exec()
   // at point with index i = ySize/2. If shift == false the zero is at i = 0
   bool shift = true;
 
+  API::TextAxis* tAxis = new API::TextAxis(nOut);
   int iRe = 0;
   int iIm = 1;
   int iAbs = 2;
@@ -127,7 +129,14 @@ void FFT::exec()
     iRe = 3;
     iIm = 4;
     iAbs = 5;
+    tAxis->setLabel(0,"Real Positive");
+    tAxis->setLabel(1,"Imag Positive");
+    tAxis->setLabel(2,"Modulus Positive");
   }
+  tAxis->setLabel(iRe,"Real");
+  tAxis->setLabel(iIm,"Imag");
+  tAxis->setLabel(iAbs,"Modulus");
+  outWS->replaceAxis(1,tAxis);
 
   const int dys = ySize % 2;
   if (transform == "Forward")
