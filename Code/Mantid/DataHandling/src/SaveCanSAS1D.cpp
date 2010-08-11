@@ -238,8 +238,8 @@ void SaveCanSAS1D::findEndofLastEntry()
       //together this seek and read move the file pointer back on byte at a time and read
       m_outFile.seekg( -i-LAST_TAG_LEN-rootTagLen, std::ios::end);
       m_outFile.read(test_tag, LAST_TAG_LEN);
-      std::string del = std::string(test_tag, LAST_TAG_LEN);
-      if(std::string(test_tag,LAST_TAG_LEN)==std::string(LAST_TAG,LAST_TAG_LEN))
+      std::string read = std::string(test_tag, LAST_TAG_LEN);
+      if ( read == std::string(LAST_TAG,LAST_TAG_LEN) )
       {
         tagFound = true;
         break;

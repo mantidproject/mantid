@@ -284,7 +284,7 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element * const sasEntry, API::Ma
   if (process)
   {
     NodeList* terms = process->getElementsByTagName("term");
-    for ( int i = 0; i < terms->length(); ++i )
+    for ( unsigned int i = 0; i < terms->length(); ++i )
     {
       Node* term = terms->item(i);
       Element* elem = dynamic_cast<Element*>(term);
