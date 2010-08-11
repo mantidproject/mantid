@@ -96,6 +96,8 @@ namespace Mantid
       const std::vector<std::string>& getDataSearchDirs() const;
       /// Get the list of known instrument prefixes for the given facility
       const std::vector<std::string>& getInstrumentPrefixes(const std::string& facility) const;
+      /// Gets the instrument geometry filename
+      const std::string getInstrumentFilename(const std::string& instrument) const;
 
       /// Load facility information from instrumentDir/Facilities.xml file 
       void updateFacilities(const std::string& fName = "");
