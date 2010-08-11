@@ -56,26 +56,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="loadRun_cbInst" >
-             <property name="enabled" >
-              <bool>true</bool>
-             </property>
-             <property name="sizePolicy" >
-              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize" >
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="editable" >
-              <bool>true</bool>
-             </property>
-            </widget>
+            <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="loadRun_cbInst" />
            </item>
            <item>
             <spacer name="horizontalSpacer_3" >
@@ -104,11 +85,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="cbInst" >
-               <property name="toolTip" >
-                <string>Select instrument experiment(s) were run on.</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst" />
              </item>
              <item>
               <widget class="QLabel" name="lbAnalyser" >
@@ -2781,10 +2758,14 @@ p, li { white-space: pre-wrap; }
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>loadRun_cbInst</tabstop>
   <tabstop>runFiles</tabstop>
   <tabstop>ckSumSpecs</tabstop>
   <tabstop>mapFile</tabstop>
@@ -2840,7 +2821,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>leCalibrationFile</tabstop>
   <tabstop>leRunFiles</tabstop>
   <tabstop>pbCalibrationFilesBrowse</tabstop>
-  <tabstop>cbInst</tabstop>
   <tabstop>ckRunDiag</tabstop>
   <tabstop>ckRunAbsol</tabstop>
   <tabstop>leDetailedBalance</tabstop>

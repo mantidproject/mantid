@@ -2,15 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_MANTIDWIDGETS_H_
 
 #include <QWidget>
-#include "Poco/Path.h"
 #include "WidgetDllOption.h"
-#include <QGroupBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QString>
-#include <QHash>
-#include <string>
-#include <map>
 
 /** The ase class from which mantid custom widgets are derived it contains
 *  some useful functions

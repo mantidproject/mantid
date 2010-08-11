@@ -1,13 +1,13 @@
-#ifndef FILEFINDERPLUGIN_H
-#define FILEFINDERPLUGIN_H
+#ifndef INSTRUMENTSELETORPLUGIN_H
+#define INSTRUMENTSELETORPLUGIN_H
 
 #include <QDesignerCustomWidgetInterface>
 
 /** 
-The FileFinderPlugin creates a Qt designer plugin of the FileFinder.
+The InstrumentSelectorPlugin creates a Qt designer plugin out of the InstrumentSelector widget.
 
 @author Martyn Gigg, Tessella plc
-@date 03/08/2009
+@date 10/08/2009
 
 Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -28,14 +28,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class FileFinderPlugin : public QObject, public QDesignerCustomWidgetInterface
+class InstrumentSelectorPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
   Q_OBJECT
   Q_INTERFACES(QDesignerCustomWidgetInterface)
 
 public:
   /// Default constructor
-  FileFinderPlugin(QObject *parent = 0);
+  InstrumentSelectorPlugin(QObject *parent = 0);
   /// Initialize the plugin
   void initialize(QDesignerFormEditorInterface *core);
   /// Returns a pointer to a newly constructed widget for this plugin wraps
@@ -64,4 +64,5 @@ private:
   bool m_initialized;
 };
 
-#endif
+
+#endif //MANTIDQT_DESIGNERPLUGINS_INSTRUMENTSELETORPLUGIN_H

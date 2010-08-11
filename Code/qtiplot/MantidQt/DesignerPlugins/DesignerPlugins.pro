@@ -24,10 +24,14 @@ HEADERDIR = inc/MantidQtDesignerPlugins
 SRCDIR = src
 
 SOURCES = \
-  $$SRCDIR/FileFinderPlugin.cpp
+  $$SRCDIR/PluginCollectionInterface.cpp\
+  $$SRCDIR/FileFinderPlugin.cpp \
+  $$SRCDIR/InstrumentSelectorPlugin.cpp
  
 HEADERS = \
-  $$HEADERDIR/FileFinderPlugin.h
+  $$HEADERDIR/PluginCollectionInterface.h\
+  $$HEADERDIR/FileFinderPlugin.h \
+  $$HEADERDIR/InstrumentSelectorPlugin.h
 
 INCLUDEPATH += inc
   
