@@ -200,6 +200,8 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   int MRUSize() const;
 
+  void clearMRU() const;
+
 private:
   /// NO COPY ALLOWED
   EventWorkspace(const EventWorkspace&);

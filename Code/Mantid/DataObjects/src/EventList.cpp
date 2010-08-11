@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Exception.h"
+#include <functional>
 
 using std::ostream;
 using std::runtime_error;
@@ -100,6 +101,45 @@ namespace DataObjects
   {
     return (e1.frame() < e2.frame());
   }
+
+  //==========================================================================
+  /** Unary function for searching the event list.
+   * Returns true if the event's TOF is >= a value
+   * @param event the event being checked.
+   */
+  class tofGreaterOrEqual: std::unary_function<TofEvent, double>
+  {
+    double m_value;
+  public:
+    /// Constructor: save the value
+    tofGreaterOrEqual(double value): m_value(value)
+    {  }
+    /// () operator: return true if event.tof >= value
+    bool operator()(TofEvent event)
+    {
+        return event.time_of_flight >= m_value;
+    }
+  };
+
+  //==========================================================================
+  /** Unary function for searching the event list.
+   * Returns true if the event's TOF is > a value
+   * @param event the event being checked.
+   */
+  class tofGreater: std::unary_function<TofEvent, double>
+  {
+    double m_value;
+  public:
+    /// Constructor: save the value
+    tofGreater(double value): m_value(value)
+    {  }
+    /// () operator: return true if event.tof > value
+    bool operator()(TofEvent event)
+    {
+        return event.time_of_flight > m_value;
+    }
+  };
+
 
 
 
@@ -520,6 +560,9 @@ namespace DataObjects
     this->refX.access() = x;
   }
 
+  /** Add an offset to the TOF of each event in the list.
+   *
+   */
   void EventList::addTof(const double offset)
   {
     if (this->events.empty())
@@ -535,6 +578,37 @@ namespace DataObjects
     std::transform(x.begin(), x.end(), x.begin(),
                    std::bind2nd(std::plus<double>(), offset));
     this->refX.access() = x;
+  }
+
+
+
+  /**
+   * Mask out events that have a tof between tofMin and tofMax (inclusively).
+   * Events are removed from the list.
+   * @param tofMin lower bound of TOF to filter out
+   * @param tofMax upper bound of TOF to filter out
+   */
+  void EventList::maskTof(const double tofMin, const double tofMax)
+  {
+    if (tofMax <= tofMin)
+      throw std::runtime_error("EventList::maskTof: tofMax must be > tofMin");
+
+    //Start by sorting by tof
+    this->sortTof();
+
+    //Find the index of the first tofMin
+    std::vector<TofEvent>::iterator it_first = std::find_if(this->events.begin(), this->events.end(), tofGreaterOrEqual(tofMin));
+    if (it_first != events.end())
+    {
+      //Something was found
+      //Look for the first one > tofMax
+      std::vector<TofEvent>::iterator it_last = std::find_if(it_first, this->events.end(), tofGreater(tofMax));
+      //it_last will either be at the end (if not found) or before it.
+      //Erase this range from the vector
+      events.erase(it_first, it_last);
+      //Done! Sorting is still valid, no need to redo.
+    }
+
   }
 
 } /// namespace DataObjects

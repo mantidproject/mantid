@@ -137,6 +137,13 @@ using Kernel::Exception::NotImplementedError;
     return this->m_bufferedDataY.size();
   }
 
+  /** Clear the MRU list */
+  void EventWorkspace::clearMRU() const
+  {
+    this->m_bufferedDataY.clear();
+    this->m_bufferedDataE.clear();
+  }
+
   //-----------------------------------------------------------------------------
   /// Returns the amount of memory used in KB
   long int EventWorkspace::getMemorySize() const

@@ -394,12 +394,23 @@ public:
 
   }
 
-  //==================================================================================
-  //--- Unit unittests ---
 
-  void test_units()
+  void testMaskTOF()
   {
-    //TODO!
+    //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+    this->fake_uniform_data();
+    //Start with 4000 events
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 4000);
+    //Mask out 5-10 milliseconds
+    el.maskTof( 5e6, 10e6);
+    vector<TofEvent> rel = el.getEvents();
+    int i;
+    for (i=0; i<rel.size(); i++)
+    {
+      //No tofs in that range
+      TS_ASSERT((rel[i].tof() < 5e6) || (rel[i].tof() > 10e6));
+    }
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 3000);
   }
 
 

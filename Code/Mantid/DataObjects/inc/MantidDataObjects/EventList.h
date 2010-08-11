@@ -58,6 +58,8 @@ class DLLExport TofEvent {
 
   /// EventList has the right to mess with TofEvent.
   friend class EventList;
+  friend class tofGreaterOrEqual;
+  friend class tofGreater;
 
 private:
   /** The units of the time of flight index in nanoseconds.
@@ -94,7 +96,11 @@ private:
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
+
+
 };
+
+
 
 //==========================================================================================
 /** A list of TofEvent objects, corresponding to all the events that were measured on a pixel.
@@ -166,6 +172,8 @@ public:
   void scaleTof(const double factor);
 
   void addTof(const double offset);
+
+  void maskTof(const double tofMin, const double tofMax);
 
 private:
   ///List of events.

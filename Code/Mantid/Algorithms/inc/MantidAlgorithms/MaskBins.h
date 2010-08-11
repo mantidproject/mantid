@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -65,6 +67,7 @@ private:
   void init();
   /// Execution code
   void exec();
+  void execEvent();
   
   void findIndices(const MantidVec& X, MantidVec::difference_type& startBin, MantidVec::difference_type& endBin);
 
