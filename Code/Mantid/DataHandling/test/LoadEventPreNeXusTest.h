@@ -219,6 +219,12 @@ public:
     //It should be possible to change an event list and not affect the other one
     outputWS->getEventListAtWorkspaceIndex(0).convertTof(1.5, 0.2);
     TS_ASSERT_DIFFERS( outputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(), inputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof() );
+
+    //Setting X should still be possible
+    Kernel::cow_ptr<MantidVec> x;
+    TS_ASSERT_THROWS_NOTHING( outputWS->setX(0, x) );
+    //Accessing Y is still possible
+    const MantidVec Y = boost::dynamic_pointer_cast<const EventWorkspace>(outputWS)->dataY(0);
   }
 
 
