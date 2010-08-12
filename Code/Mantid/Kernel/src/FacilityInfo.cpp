@@ -119,7 +119,7 @@ void FacilityInfo::addExtension(const std::string& ext)
   * @param  iName Instrument name
   * @throws NotFoundError if iName was not found
   */
-const InstrumentInfo FacilityInfo::Instrument(const std::string& iName)const
+const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
 {
   std::string iname;
   if (iName.empty())
@@ -159,7 +159,7 @@ const InstrumentInfo FacilityInfo::Instrument(const std::string& iName)const
   * Returns a list of instruments of given technique
   * @param tech Technique name
   */
-const std::vector<InstrumentInfo> FacilityInfo::Instruments(const std::string& tech)const
+std::vector<InstrumentInfo> FacilityInfo::Instruments(const std::string& tech)const
 {
   std::vector<InstrumentInfo> out;
   std::vector<InstrumentInfo>::const_iterator it = m_instruments.begin();

@@ -59,7 +59,10 @@ class FacilityInfo;
 class EXPORT_OPT_MANTID_KERNEL InstrumentInfo
 {
 public:
+  /// Constructor
   InstrumentInfo(FacilityInfo* f,const Poco::XML::Element* elem);
+  /// Equality operator
+  bool operator==(const InstrumentInfo & rhs) const;
   /// Return the name of the instrument
   const std::string name()const{return m_name;}
   /// Return the short name of the instrument

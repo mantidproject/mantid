@@ -1,8 +1,8 @@
 //
 // Wrappers for classes in the Mantid::Kernel namespace
 //
-
 #include <boost/python.hpp>
+#include <MantidPythonAPI/kernel_exports.h>
 //Kernel
 #include<MantidKernel/Property.h>
 #include<MantidKernel/BoundedValidator.h>
@@ -78,7 +78,6 @@ namespace PythonAPI
 
     //List validator
     class_<Kernel::ListValidator, bases<Kernel::IValidator<std::string> > >("ListValidator_str", init<std::vector<std::string> >())
-//      .def(init<std::vector<std::string> >())
       .def("addAllowedValue", &Kernel::ListValidator::addAllowedValue)
       ;
   }
@@ -92,11 +91,58 @@ namespace PythonAPI
       ;
   }
 
+  void export_instrumentinfo()
+  {
+    // Inform Python about a vector of such objects
+    vector_proxy<InstrumentInfo>::wrap("stl_vector_instrumentinfo");
+
+    class_<InstrumentInfo>("InstrumentInfo",no_init)
+      //special methods
+      .def("__str__", &InstrumentInfo::name)
+      //standard methods
+      .def("name", &InstrumentInfo::name)
+      .def("shortName", &InstrumentInfo::shortName)
+      .def("zeroPadding", &InstrumentInfo::zeroPadding)
+      .def("techniques", &InstrumentInfo::techniques, return_value_policy<copy_const_reference>())
+      ;
+   }
+
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FacilityInfo_instrumentOverloads, Mantid::Kernel::FacilityInfo::Instrument, 0, 1)
+
+  void export_facilityinfo()
+  {
+    class_<FacilityInfo>("FacilityInfo",no_init)
+      .def("name", &FacilityInfo::name)
+      .def("zeroPadding", &FacilityInfo::zeroPadding)
+      .def("extensions", &FacilityInfo::extensions)
+      .def("preferredExt", &FacilityInfo::preferredExtension)
+      .def("instrument", &FacilityInfo::Instrument, FacilityInfo_instrumentOverloads()[return_value_policy<copy_const_reference>()])
+      .def("instruments", (const std::vector<InstrumentInfo>& (FacilityInfo::*)() const)&FacilityInfo::Instruments, return_value_policy<copy_const_reference>())
+      .def("instruments", (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string &) const)&FacilityInfo::Instruments)
+      ;
+  }
+
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ConfigService_facilityOverloads, Mantid::PythonAPI::ConfigServiceWrapper::facility, 0, 1)
+
+  void export_configservice()
+  {
+    class_<ConfigServiceWrapper>("ConfigService")
+      // Special methods
+      .def("__getitem__", &ConfigServiceWrapper::getProperty)
+      .def("__setitem__", &ConfigServiceWrapper::setProperty)
+      // Standard methods
+      .def("facility", &ConfigServiceWrapper::facility, ConfigService_facilityOverloads())
+      ;
+  }
+
   void export_kernel_namespace()
   {
     export_property();
     export_validators();
     export_logger();
+    export_instrumentinfo();
+    export_facilityinfo();
+    export_configservice();
   }
   
   //@endcond

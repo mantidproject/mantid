@@ -25,7 +25,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="copy &quot;$(SolutionDir)\PythonAPI\MantidFramework.py&quot; &quot;$(SolutionDir)\debug&quot; /Y"
+				CommandLine="copy &quot;$(SolutionDir)\PythonAPI\MantidFramework.py&quot; &quot;$(SolutionDir)\debug&quot; /Y&#x0D;&#x0A;"
 				Outputs="$(SolutionDir)\debug\MantidFramework.py"
 			/>
 			<Tool
@@ -226,11 +226,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidPythonAPI\kernel_exports.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidPythonAPI\PyAlgorithmWrapper.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidPythonAPI\PythonInterfaceFunctions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\std_operator_definitions.h"
 				>
 			</File>
 			<File

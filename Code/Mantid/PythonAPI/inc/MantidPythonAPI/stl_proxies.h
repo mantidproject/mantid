@@ -9,11 +9,14 @@
 #include <set>
 #include <sstream>
 
+#include "std_operator_definitions.h"
+
 namespace Mantid
 {
 namespace PythonAPI
 {
-//@cond Disable Doxygen for Python bindings
+
+  //@cond Disable Doxygen for Python bindings
   /// std::vector wrapper
   template <typename ElementType>
   struct vector_proxy
@@ -82,8 +85,8 @@ namespace PythonAPI
     {
       if (i >= self.size()) 
       {
-	PyErr_SetString(PyExc_IndexError, "Index out of range");
-	boost::python::throw_error_already_set();
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
+        boost::python::throw_error_already_set();
       }
       typename w_t::const_iterator p = self.begin();
       while (i > 0) { p++; i--; }
@@ -96,23 +99,47 @@ namespace PythonAPI
       return boost::python::make_tuple(boost::python::tuple(self));
     }
 
+    static std::string to_string(const w_t & values)
+    {
+      if( values.empty() ) return "set()";
+      std::string retval("set(");
+      typename w_t::const_iterator iend = values.end();
+      std::ostringstream os;
+      for( typename w_t::const_iterator itr = values.begin(); itr != iend; )
+      {
+        os << *itr;
+        retval += os.str();
+        os.str("");
+        if( ++itr != iend )
+        {
+          retval += ",";
+        }
+      }
+      retval += ")";
+      return retval;
+    }
+
     static void
     wrap(std::string const& python_name)
     {
       boost::python::class_<w_t, std::auto_ptr<w_t> >(python_name.c_str())
         .def(boost::python::init<w_t const&>())
-        .def("size", &w_t::size)
+        //special methods
+        .def("__str__", &set_proxy::to_string)
         .def("__len__", &w_t::size)
+        .def("__contains__", contains)
+        .def("__getitem__", getitem)
+        .def("__getinitargs__", getinitargs)
+        // Standard methods
+        .def("size", &w_t::size)
         .def("insert", insert_element)
         .def("append", insert_element)
         .def("insert", insert_set)
         .def("extend", insert_set)
         .def("erase", (std::size_t(w_t::*)(e_t const&)) &w_t::erase)
         .def("clear", &w_t::clear)
-        .def("__contains__", contains)
-        .def("__getitem__", getitem)
         .enable_pickling()
-        .def("__getinitargs__", getinitargs)
+        
       ;
     }
   };

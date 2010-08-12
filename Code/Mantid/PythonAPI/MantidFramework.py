@@ -62,23 +62,23 @@ class ProxyObject(object):
         return self.__obj
 
     def _kill_object(self):
-        '''
+        """
         Release the stored instance
-        '''
+        """
         self.__obj = None
 
     def _swap(self, obj):
-        '''
+        """
         Swap an object so that the proxy now refers to this object
-        '''
+        """
         self.__obj = obj
 
 
 class WorkspaceProxy(ProxyObject):
-    '''
+    """
     A proxy object that stores a workspace instance. When the workspace is deleted
     from the ADS in Mantid, the object reference held here is set to "None"
-    '''
+    """
 
     def __init__(self, obj, factory):
         """
@@ -88,9 +88,9 @@ class WorkspaceProxy(ProxyObject):
         self.__factory = factory
 
     def isGroup(self):
-        '''
+        """
         Is the data object a WorkspaceGroup or not
-        '''
+        """
         if isinstance(self._getHeldObject(), WorkspaceGroup):
             return True
         else:
@@ -110,36 +110,36 @@ class WorkspaceProxy(ProxyObject):
 
 
     def __str__(self):
-        '''
+        """
         Return a string representation of the proxied object
-        '''
+        """
         return str(self._getHeldObject())
 
     def __repr__(self):
-        '''
+        """
         Return a string representation of the proxied object
-        '''
+        """
         return `self._getHeldObject()`
 
     def __add__(self, rhs):
-        '''
+        """
         Sum the proxied objects and return a new proxy managing that object
-        '''
+        """
         if isinstance(rhs, WorkspaceProxy) :
             return self.__factory.create(self._getHeldObject() + rhs._getHeldObject())
         else:
             return self.__factory.create(self._getHeldObject() + rhs)
 
     def __radd__(self, rhs):
-        '''
+        """
         Sum the proxied objects and return a new proxy managing that object
-        '''
+        """
         return self.__factory.create(rhs + self._getHeldObject())
 
     def __iadd__(self, rhs):
-        '''
+        """
         In-place ssum the proxied objects and return a new proxy managing that object
-        '''
+        """
         result = self._getHeldObject()
         if isinstance(rhs, WorkspaceProxy):
             rhs = rhs._getHeldObject()
@@ -147,24 +147,24 @@ class WorkspaceProxy(ProxyObject):
         return self
 
     def __sub__(self, rhs):
-        '''
+        """
         Subtract the proxied objects and return a new proxy managing that object
-        '''
+        """
         if isinstance(rhs, WorkspaceProxy) :
             return self.__factory.create(self._getHeldObject() - rhs._getHeldObject())
         else:
             return self.__factory.create(self._getHeldObject() - rhs)
 
     def __rsub__(self, rhs):
-        '''
+        """
         Subtract the proxied objects and return a new proxy managing that object
-        '''
+        """
         return self.__factory.create(rhs - self._getHeldObject())
 
     def __isub__(self, rhs):
-        '''
+        """
         In-place subtract the proxied objects and return a new proxy managing that object
-        '''
+        """
         result = self._getHeldObject()
         if isinstance(rhs, WorkspaceProxy):
             rhs = rhs._getHeldObject()
@@ -172,24 +172,24 @@ class WorkspaceProxy(ProxyObject):
         return self
 
     def __mul__(self, rhs):
-        '''
+        """
         Multiply the proxied objects and return a new proxy managing that object
-        '''
+        """
         if isinstance(rhs, WorkspaceProxy) :
             return self.__factory.create(self._getHeldObject() * rhs._getHeldObject())
         else:
             return self.__factory.create(self._getHeldObject() * rhs)
 
     def __rmul__(self, rhs):
-        '''
+        """
         Multiply the proxied objects and return a new proxy managing that object
-        '''
+        """
         return self.__factory.create(rhs * self._getHeldObject())
 
     def __imul__(self, rhs):
-        '''
+        """
         In-place multiply the proxied objects and return a new proxy managing that object
-        '''
+        """
         result = self._getHeldObject()
         if isinstance(rhs, WorkspaceProxy):
             rhs = rhs._getHeldObject()
@@ -197,24 +197,24 @@ class WorkspaceProxy(ProxyObject):
         return self
 
     def __div__(self, rhs):
-        '''
+        """
         Divide the proxied objects and return a new proxy managing that object
-        '''
+        """
         if isinstance(rhs, WorkspaceProxy) :
             return self.__factory.create(self._getHeldObject() / rhs._getHeldObject())
         else:
             return self.__factory.create(self._getHeldObject() / rhs)
 
     def __rdiv__(self, rhs):
-        '''
+        """
         Divide the proxied objects and return a new proxy managing that object
-        '''
+        """
         return self.__factory.create(rhs / self._getHeldObject())
 
     def __idiv__(self, rhs):
-        '''
+        """
         In-place divide the proxied objects and return a new proxy managing that object
-        '''
+        """
         result = self._getHeldObject()
         if isinstance(rhs, WorkspaceProxy):
             rhs = rhs._getHeldObject()
@@ -243,39 +243,39 @@ class WorkspaceProxyFactory(object):
 #-------------------------------------------------------------------------------
 
 class WorkspaceGarbageCollector(object):
-    '''
+    """
     A register of workspaces that have been retrieved from Mantid
-    '''
+    """
     
     def __init__(self):
         self._refs = {}
 
     def register(self, name, proxy):
-        '''
+        """
         Register a name and reference to the store
-        '''
+        """
         self._refs[name] = proxy
 
     def replace(self, name, wksp):
-        '''
+        """
         Replace an object reference within a proxy
-        '''
+        """
         if name in self._refs:
             self._refs[name]._swap(wksp)
 
     def kill_object(self, name):
-        '''
+        """
         Signal the proxy to nullify its stored reference
-        '''
+        """
         if name in self._refs:
             self._refs[name]._kill_object()
             # Remove the key as we don't want to keep the reference around
             del self._refs[name]
 
     def kill_all(self):
-        '''
+        """
         Kill all references to data objects
-        '''
+        """
         # Note here that a simple clear won't do as it won't set the object reference to None 
         for w in self._refs:
             self._refs[w]._kill_object()
@@ -283,9 +283,9 @@ class WorkspaceGarbageCollector(object):
 #---------------------------------------------------------------------------------------
 
 class IAlgorithmProxy(ProxyObject):
-    '''
+    """
     A proxy object for IAlgorithm returns
-    '''
+    """
     
     def __init__(self, ialg, framework):
         super(IAlgorithmProxy, self).__init__(ialg)
@@ -330,10 +330,16 @@ class IAlgorithmProxy(ProxyObject):
 #---------------------------------------------------------------------------------------
 
 class MantidPyFramework(FrameworkManager):
-    '''
-    The main Mantid Framework object. It mostly forwards its calls to the 
-    C++ manager but some workspace related things are captured here first
-    '''
+    """
+    The Mantid framework object.
+    
+    Provides access to Mantid.
+    """
+    #### special methods ######################################################
+    
+    __is_initialized = False
+    __config_service = None
+    
     def __init__(self):
         # Call base class constructor
         super(MantidPyFramework, self).__init__()
@@ -341,11 +347,36 @@ class MantidPyFramework(FrameworkManager):
         self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector, self)
         self._pyalg_loader = PyAlgLoader(self)
         self._pyalg_objs = {}
+
+    def __getitem__(self, key):
+        """
+        Enables the framework to be used in a dictionary like manner.
+        It returns the MatrixWorkspace proxy for the given name
+        """
+        return self._proxyfactory.create(self._retrieveWorkspace(key))
+
+    ###########################################################################
+    # Framework interface
+    ###########################################################################
         
+    #### properties ###########################################################
+            
+    def getSettings(self):
+        """
+        Returns an object that accesses Mantid's configuration settings
+        """
+        if self.__config_service is None:
+            self.__config_service = ConfigService()
+        return self.__config_service
+        
+    settings = property(getSettings)
+    
+    #### methods ###########################################################
+
     def list(self):
-        '''
+        """
         Print a list of the workspaces stored in Mantid along with their type
-        '''
+        """
         names = self.getWorkspaceNames()
         n_names = names.size()
         output = []
@@ -368,31 +399,27 @@ class MantidPyFramework(FrameworkManager):
 
         print output_table
 
-    def __getitem__(self, key):
-        '''
-        Enables the framework to be used in a dictionary like manner.
-        It returns the MatrixWorkspace proxy for the given name
-        '''
-        return self._proxyfactory.create(self._retrieveWorkspace(key))
-
     def registerPyAlgorithm(self, algorithm):
-        '''
+        """
         Register an algorithm into the framework
-        '''
+        """
         # Keep the original object alive
         self._pyalg_objs[algorithm.name()] = algorithm
         super(MantidPyFramework, self).registerPyAlgorithm(algorithm)
 
-##                     ##
-## "Private functions" ##
-##                     ##
     def initialise(self, GUI = False):
         """
         Initialise the framework
         """
+        if self.__is_initialized == True:
+            return
         self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToGlobal()
+        
+        self.__is_initialized = True
+        
+    #### private methods ###########################################################
 
     def _importSimpleAPIToGlobal(self):
         simpleapi = 'mantidsimple'
@@ -410,9 +437,9 @@ class MantidPyFramework(FrameworkManager):
         self._pyalg_loader.load_modules(refresh=True)
         
     def _retrieveWorkspace(self, name):
-        '''
+        """
         Use the appropriate function to return the workspace that has that name
-        '''
+        """
         # 99% of the time people are using matrix workspaces but we still need to check
         try:
             return self._getRawMatrixWorkspacePointer(name)
@@ -426,29 +453,29 @@ class MantidPyFramework(FrameworkManager):
                     return None
 
     def _workspaceRemoved(self, name):
-        '''
+        """
         Called when a workspace has been removed from the Mantid ADS
-        '''
+        """
         self._garbage_collector.kill_object(name);
 
     def _workspaceReplaced(self, name):
-        '''
+        """
         Called when a workspace has been removed from the Mantid ADS
-        '''
+        """
         wksp = self._retrieveWorkspace(name)
         if wksp != None:
             self._garbage_collector.replace(name, wksp)
 
     def _workspaceStoreCleared(self):
-        '''
+        """
         Called when the ADS is cleared
-        '''
+        """
         self._garbage_collector.kill_all()
 
     def _algorithmFactoryUpdated(self):
-        '''
+        """
         Called in reponse to an algorithm factory update
-        '''
+        """
         # Reload the simple api
         self._importSimpleAPIToGlobal()
 
@@ -459,21 +486,21 @@ class MantidPyFramework(FrameworkManager):
 # *** Legacy functions ***
 
     def getMatrixWorkspace(self, name):
-        '''
+        """
         Get a matrix workspace by name. Returns a proxy object
-        '''
+        """
         return self._proxyfactory.create(self._getRawMatrixWorkspacePointer(name))
     
     def getTableWorkspace(self, name):
-        '''
+        """
         Get a table workspace by name. Returns a proxy object
-        '''
+        """
         return self._proxyfactory.create(self._getRawTableWorkspacePointer(name))
         
     def getMatrixWorkspaceGroup(self, name):
-        '''
+        """
         Get a list of matrix workspaces
-        '''
+        """
         wksp_grp = self._getRawWorkspaceGroupPointer(name)
         # Build a list of proxy objects
         names = wksp_grp.getNames()
@@ -494,9 +521,9 @@ class PyAlgLoader(object):
 
 
     def load_modules(self, refresh=False):
-        '''
+        """
         Import Python modules containing Python algorithms
-        '''
+        """
         dir_list = mtd.getConfigProperty("pythonalgorithms.directories").split(';')
         if len(dir_list) == 0: 
             return
@@ -580,9 +607,9 @@ class PyAlgLoader(object):
 ##
 
 class PythonAlgorithm(PyAlgorithmBase):
-    '''
+    """
     Base class for all Mantid Python algorithms
-    '''
+    """
     # Dictionary of property names/types
     _proptypes = {}
     
@@ -609,9 +636,9 @@ class PythonAlgorithm(PyAlgorithmBase):
 
     # declareProperty "wrapper" function so that we don't need separate named functions for each type
     def declareProperty(self, Name, DefaultValue, Validator = None, Description = '', Direction = Direction.Input):
-        '''
+        """
         Declare a property for this algorithm
-        '''
+        """
         # Test default value type and call the relevant function
         if isinstance(DefaultValue, float):
             decl_func = self.declareProperty_dbl
@@ -695,9 +722,9 @@ class PythonAlgorithm(PyAlgorithmBase):
 
     # getProperty method  wrapper
     def getProperty(self, Name):
-        '''
+        """
         Retrieve a property value for the given name
-        '''
+        """
         try:
             prop_type = self._proptypes[Name]
         except KeyError:

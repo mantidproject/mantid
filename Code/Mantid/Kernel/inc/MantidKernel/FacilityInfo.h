@@ -69,9 +69,9 @@ public:
   /// Returns a list of instruments of this facility
   const std::vector<InstrumentInfo>& Instruments()const{return m_instruments;}
   /// Returns a list of instruments of given technique
-  const std::vector<InstrumentInfo> Instruments(const std::string& tech)const;
+  std::vector<InstrumentInfo> Instruments(const std::string& tech)const;
   /// Returns instruments with given name
-  const InstrumentInfo Instrument(const std::string& iName = "")const;
+  const InstrumentInfo & Instrument(const std::string& iName = "")const;
 private:
   ///Default constructor
   FacilityInfo();
