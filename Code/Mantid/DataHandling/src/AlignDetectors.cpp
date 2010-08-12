@@ -185,8 +185,6 @@ void AlignDetectors::exec()
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
-  //std::cout << "About to start the looping\n";
-
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numberOfSpectra; ++i)
@@ -214,7 +212,6 @@ void AlignDetectors::exec()
       outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
       outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
     }
-    
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -301,8 +298,14 @@ void AlignDetectors::execEvent()
   // generate map of the tof->d conversion factors
   int spec;
   double factor;
+
+  // Initialise the progress reporting object
+  Progress progress(this,0.0,1.0,numberOfSpectra);
+
+  PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numberOfSpectra; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
     // Get the spectrum number for this histogram
     spec = inputWS->getAxis(1)->spectraNo(i);
     factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
@@ -310,8 +313,11 @@ void AlignDetectors::execEvent()
 
     //Perform the multiplication on all events
     outputWS->getEventListAtWorkspaceIndex(i).convertTof(factor);
-    //std::cout << "converting " << spec << " with factor " << factor << ".\n";
+
+    progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
 }
 
