@@ -245,7 +245,7 @@ void AlignDetectors::execEvent()
   {
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    //API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
     outputWS->mutableSpectraMap().clear();
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
