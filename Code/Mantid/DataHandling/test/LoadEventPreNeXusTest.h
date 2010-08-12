@@ -63,41 +63,41 @@ public:
     TS_ASSERT_THROWS( eventLoader->execute() , std::runtime_error);
 
   }
-
-  void test_LoadPreNeXus_TOPAZ()
-  {
-    //std::string eventfile( "/home/janik/data/TOPAZ_1241/preNeXus/TOPAZ_1241_neutron_event.dat" );
-    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
-    eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/TOPAZ_TS_2010_04_16.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
-
-    //Get the event file size
-    struct stat filestatus;
-    stat(eventfile.c_str(), &filestatus);
-
-    //std::cout << "***** executing *****" << std::endl;
-    TS_ASSERT( eventLoader->execute() );
-
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
-
-    //The # of events = size of the file / 8 bytes (per event)
-    TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
-
-    //Only some of the pixels were loaded, because of lot of them are empty
-    int numpixels_with_events = 199824;
-    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
-
-    //Mapping between workspace index and spectrum number
-    //Is the length good?
-    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
-    //Depends on which was the first pixel with events. BUT it has to be
-    // more than 65536, because the 0th detector has no events (does not exist).
-    TS_ASSERT( ew->getAxis(1)->spectraNo(0) >= 65536);
-    //And the spectra # grow monotonically
-    TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
-    TS_ASSERT( ew->getAxis(1)->spectraNo(numpixels_with_events-1) < 15*256*256);
-  }
+//
+//  void test_LoadPreNeXus_TOPAZ()
+//  {
+//    //std::string eventfile( "/home/janik/data/TOPAZ_1241/preNeXus/TOPAZ_1241_neutron_event.dat" );
+//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
+//    eventLoader->setPropertyValue("EventFilename", eventfile);
+//    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/TOPAZ_TS_2010_04_16.dat");
+//    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
+//
+//    //Get the event file size
+//    struct stat filestatus;
+//    stat(eventfile.c_str(), &filestatus);
+//
+//    //std::cout << "***** executing *****" << std::endl;
+//    TS_ASSERT( eventLoader->execute() );
+//
+//    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
+//
+//    //The # of events = size of the file / 8 bytes (per event)
+//    TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
+//
+//    //Only some of the pixels were loaded, because of lot of them are empty
+//    int numpixels_with_events = 199824;
+//    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
+//
+//    //Mapping between workspace index and spectrum number
+//    //Is the length good?
+//    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
+//    //Depends on which was the first pixel with events. BUT it has to be
+//    // more than 65536, because the 0th detector has no events (does not exist).
+//    TS_ASSERT( ew->getAxis(1)->spectraNo(0) >= 65536);
+//    //And the spectra # grow monotonically
+//    TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
+//    TS_ASSERT( ew->getAxis(1)->spectraNo(numpixels_with_events-1) < 15*256*256);
+//  }
 
 
   void test_LoadPreNeXus_REFL()
@@ -106,8 +106,7 @@ public:
     std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setProperty("PulseidFilename", pulsefile);
-    eventLoader->setPropertyValue("MappingFilename",
-          "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
 
     //Get the event file size
@@ -154,13 +153,7 @@ public:
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(2)[0], 2);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(256)[0], 256);
     TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(61661)[0], 61661);
-//
-//    //Now let's test if a copy works too
-//    EventWorkspace_sptr ew2;
-//    MatrixWorkspace_sptr outputMatrixWS;
-//    outputMatrixWS = WorkspaceFactory::Instance().create(ew);
-//    ew2 = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
-//    TS_ASSERT (ew2) ; //non-null pointer
+
   }
 
 
@@ -201,48 +194,73 @@ public:
     //Is the length good?
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
 
+    //--------------------------------------------------------
+    //Now let's test if a copy works too
+    EventWorkspace_sptr inputWS = ew;
+    TS_ASSERT_EQUALS( inputWS->getInstrument()->getName(), "CNCS");
+
+    //Create a new one
+    EventWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<EventWorkspace>(API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+    TS_ASSERT (outputWS) ; //non-null pointer
+
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    outputWS->mutableSpectraMap().clear();
+    //You need to copy over the data as well.
+    outputWS->copyDataFrom(*inputWS);
+
+    //Bunch of checks
+    TS_ASSERT_EQUALS( outputWS->getNumberEvents(), inputWS->getNumberEvents() );
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), inputWS->getNumberHistograms() );
+    TS_ASSERT_EQUALS( outputWS->getInstrument()->getName(), "CNCS");
+
+    TS_ASSERT_EQUALS( outputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(), inputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof() );
+    //It should be possible to change an event list and not affect the other one
+    outputWS->getEventListAtWorkspaceIndex(0).convertTof(1.5, 0.2);
+    TS_ASSERT_DIFFERS( outputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(), inputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof() );
   }
 
 
-  void test_LoadPreNeXus_CNCS_PadPixels()
-  {
-    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
-    eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
-    eventLoader->setProperty("PadEmptyPixels", true);
-
-    //Get the event file size
-    struct stat filestatus;
-    stat(eventfile.c_str(), &filestatus);
-
-    //std::cout << "***** executing *****" << std::endl;
-    TS_ASSERT( eventLoader->execute() );
-
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("cncs"));
-
-    //The # of events = size of the file / 8 bytes (per event)
-    //This fails cause of errors in events
-    //TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
-
-    //Only some of the pixels weretof loaded, because of lot of them are empty
-    int numpixels = 50*8*128; //50 8-packs; monitors are ignored
-    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
-
-    //This time, the max pixel ID is higher since we padded them.
-    TS_ASSERT_EQUALS( ew->mutableSpectraMap().nElements(), numpixels);
-
-
-    //Check if the instrument was loaded correctly
-    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
-    TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
-
-    //Mapping between workspace index and spectrum number
-    //Is the length good?
-    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels);
-
-  }
+//  void test_LoadPreNeXus_CNCS_PadPixels()
+//  {
+//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+//    eventLoader->setPropertyValue("EventFilename", eventfile);
+////    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+//    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
+//    eventLoader->setProperty("PadEmptyPixels", true);
+//
+//    //Get the event file size
+//    struct stat filestatus;
+//    stat(eventfile.c_str(), &filestatus);
+//
+//    //std::cout << "***** executing *****" << std::endl;
+//    TS_ASSERT( eventLoader->execute() );
+//
+//    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
+//            (AnalysisDataService::Instance().retrieve("cncs"));
+//
+//    //The # of events = size of the file / 8 bytes (per event)
+//    //This fails cause of errors in events
+//    //TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
+//
+//    //Only some of the pixels weretof loaded, because of lot of them are empty
+//    int numpixels = 50*8*128; //50 8-packs; monitors are ignored
+//    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
+//
+//    //This time, the max pixel ID is higher since we padded them.
+//    TS_ASSERT_EQUALS( ew->mutableSpectraMap().nElements(), numpixels);
+//
+//
+//    //Check if the instrument was loaded correctly
+//    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
+//    TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
+//
+//    //Mapping between workspace index and spectrum number
+//    //Is the length good?
+//    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels);
+//
+//  }
 
 
 

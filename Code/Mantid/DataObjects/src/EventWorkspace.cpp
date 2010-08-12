@@ -78,12 +78,23 @@ using Kernel::Exception::NotImplementedError;
   /**
    * Copy all of the data (event lists) from the source workspace to this workspace.
    */
-  void EventWorkspace::copyDataFrom(EventWorkspace * source)
+  void EventWorkspace::copyDataFrom(EventWorkspace& source)
   {
-    //Copy the vector of EventLists
-    this->data.assign( source->data.begin(), source->data.end() );
-    this->clearMRU();
+    //Start with nothing.
+    this->data.clear();
 
+    //Copy the vector of EventLists
+    EventListVector::iterator it;
+    for (it = source.data.begin(); it != source.data.end(); it++ )
+    {
+      //Create a new event list, copying over the events
+      EventList * newel = new EventList( **it );
+      this->data.push_back(newel);
+      //std::cout << "newel has " << newel->getNumberEvents() << " ; old one has " << (*it)->getNumberEvents() << "\n";
+    }
+    this->clearMRU();
+    //The data map is useless now
+    this->data_map.clear();
   }
 
 

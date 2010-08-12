@@ -734,7 +734,7 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
 
   size_t file_size = getFileSize<PixelType>(handle);
-  PixelType max_pid = static_cast<PixelType>(file_size);
+  //PixelType max_pid = static_cast<PixelType>(file_size);
   //std::cout << "file is " << file_size << std::endl;
   size_t offset = 0;
   size_t buffer_size = getBufferSize(file_size);
