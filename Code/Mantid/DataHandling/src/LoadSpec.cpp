@@ -59,20 +59,32 @@ namespace Mantid
       std::vector<DataObjects::Histogram1D> spectra;
       size_t iLine=0;    // line number
       size_t ncols = 3;  // number of columns
-      size_t nSpectra = 0; //only 3 columns, so only 1 here
+      size_t nSpectra = 0;
       size_t nBins = 0; //number of rows
       std::string first_character;
       std::string axes_infos;
 
-      spectra.resize(ncols);
-
       bool numeric = true;
       std::vector<double> input;
 
+      //determine the number of lines starting by #L 
+      //as there is one per set of data
+      int spectra_nbr = 0;
+      while(getline(file,str))
+	{
+	  if (str[0] == '#' && str[1] == 'L') {
+	    spectra_nbr++;
+	  }
+	}
+
+      spectra.resize(spectra_nbr);
+      file.clear(); //end of file has been reached so we need to clear file state
+      file.seekg (0, std::ios::beg); //go back to beginning of file
+
+      int working_with_spectrum_nbr = -1; //spectrum number
       while(getline(file,str))
 	{   
 	  progress.report(file.tellg());
-	  first_character = str[0];
 	  
 	  //line with data, need to be parsed by white spaces
 	  if (!str.empty() && str[0] != '#') {
@@ -90,28 +102,38 @@ namespace Mantid
 	      //std::cout << d << std::endl;
 	      input.push_back(d);
 	    }
-	  } 
-	  /*
-	  else {
-	    //if the second character is L, we need to keep that line that gives
-	    //infos about axes labels and units
-	    if (!str.empty() && str[1] == 'L') { 
-	      axes_infos = str;}
 	  }
-	  */
-	  
+
+	  if (str.empty()) {
+	    if (working_with_spectrum_nbr != -1) {
+	      for(int j=0; j<(input.size()-1); j++) {
+		spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
+		j++;
+		spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
+		j++;
+		spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
+		nBins = j/3;
+	      }
+	    }
+	    working_with_spectrum_nbr++;
+	    input.clear();
+	  }
+ 
 	} //end of read file
       
-      for(int j=0; j<(input.size()-1); j++) {
-	spectra[0].dataX().push_back(input[j]);
-	j++;
-	spectra[0].dataY().push_back(input[j]);
-	j++;
-	spectra[0].dataE().push_back(input[j]);
-	nBins = j/3;
+      //consider case where the file does not end with empty line
+      if (working_with_spectrum_nbr == (spectra_nbr-1)) {
+	for(int j=0; j<(input.size()-1); j++) {
+	  spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
+	  j++;
+	  spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
+	  j++;
+	  spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
+	  nBins = j/3;
+	}
       }
       
-      nSpectra = 1;
+      nSpectra = spectra_nbr;
       MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
       try {
