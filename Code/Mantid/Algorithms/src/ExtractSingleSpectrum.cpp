@@ -44,8 +44,12 @@ void ExtractSingleSpectrum::exec()
   outputWorkspace->dataX(0) = inputWorkspace->readX(desiredSpectrum);
   outputWorkspace->dataY(0) = inputWorkspace->readY(desiredSpectrum);
   outputWorkspace->dataE(0) = inputWorkspace->readE(desiredSpectrum);
-  outputWorkspace->getAxis(1)->spectraNo(0) = inputWorkspace->getAxis(1)->spectraNo(desiredSpectrum);
-  
+  // If Axis 1 on the original is a spectra axis copy over the correct spectrum number
+  const Axis * axisOne = inputWorkspace->getAxis(1);
+  if( axisOne->isSpectra() )
+  {
+    outputWorkspace->getAxis(1)->spectraNo(0) = inputWorkspace->getAxis(1)->spectraNo(desiredSpectrum);
+  }
   setProperty("OutputWorkspace",outputWorkspace);
   progress(1.0);
 }
