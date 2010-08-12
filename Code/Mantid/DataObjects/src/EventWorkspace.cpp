@@ -95,6 +95,8 @@ using Kernel::Exception::NotImplementedError;
     this->clearMRU();
     //The data map is useless now
     this->data_map.clear();
+    //This marker needs to be set.
+    this->done_loading_data = true;
   }
 
 
