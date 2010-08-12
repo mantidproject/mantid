@@ -146,11 +146,15 @@ void MaskBins::execEvent()
   const int numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
+  PARALLEL_FOR1(outputWS)
   for (int i = 0; i < numHists; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
     outputWS->getEventListAtWorkspaceIndex(i).maskTof(m_startX, m_endX);
     progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   //Clear the MRU
   outputWS->clearMRU();
