@@ -115,22 +115,32 @@ void MaskBins::exec()
  */
 void MaskBins::execEvent()
 {
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  MatrixWorkspace_const_sptr inputMatrixWS = getProperty("InputWorkspace");
+  EventWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<const EventWorkspace>( inputMatrixWS );
+  EventWorkspace_sptr outputWS;
 
   // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputMatrixWS = getProperty("OutputWorkspace");
   if ( outputMatrixWS != inputWS )
   {
-    outputMatrixWS = WorkspaceFactory::Instance().create(eventW);
-    setProperty("OutputWorkspace",outputMatrixWS);
+    //Make a brand new EventWorkspace
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    //outputWS->mutableSpectraMap().clear();
+    //You need to copy over the data as well.
+    outputWS->copyDataFrom( (*inputWS) );
+
+    //Cast to the matrixOutputWS and save it
+    MatrixWorkspace_sptr matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    this->setProperty("OutputWorkspace", matrixOutputWS);
   }
-
-  //This is the event output workspace
-  EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
-
-//  std::cout << outputWS->getNumberHistograms() << " histograms.\n";
-//  std::cout << outputWS->getEventListAtWorkspaceIndex(0).getNumberEvents() << " events in spectrum 0.\n";
+  else
+  {
+    //Output is same as input
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
+  }
 
   //Go through all histograms
   const int numHists = inputWS->getNumberHistograms();

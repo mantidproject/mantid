@@ -177,7 +177,7 @@ public:
   }
 
 
-  void xtestEventWorkspace_CopiedOutput()
+  void testEventWorkspace_CopiedOutput()
   {
     std::string workspaceName("refl");
 
