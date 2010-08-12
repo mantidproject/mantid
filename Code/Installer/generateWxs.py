@@ -426,6 +426,10 @@ py_lookup['Id'] = 'Python25Registry2'
 py_lookup['Root'] = 'HKCU'
 addTo(PyProp,'RegistrySearch',py_lookup)
 
+# Just in case these completely fail but Python.exe exists on the standard location check for that
+py25dir_search = addTo(PyProp, 'DirectorySearch', {'Id':'CheckPy25Dir', 'Path':'C:\\Python25', 'Depth':'0'})
+addTo(py25dir_search, 'FileSearch', {'Id':'CheckPy25Exe', 'Name' : 'python.exe'})
+
 Cond = doc.createElement('Condition')
 Cond.setAttribute('Message','Mantid requires Python 2.5 to be installed on your machine. It can be downloaded and installed from http://www.python.org/download/')
 Cond.appendChild(doc.createTextNode('PYTHON25DIR'))
