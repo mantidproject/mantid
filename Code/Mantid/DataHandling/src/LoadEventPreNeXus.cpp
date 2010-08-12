@@ -146,10 +146,6 @@ void LoadEventPreNeXus::exec()
   // what to load
   this->spectra_list = this->getProperty(PID_PARAM);
 
-  // load the mapping file
-  string mapping_filename = this->getPropertyValue(MAP_PARAM);
-  this->loadPixelMap(mapping_filename);
-
   // the event file is needed in case the pulseid fileanme is empty
   string event_filename = this->getPropertyValue(EVENT_PARAM);
   string pulseid_filename = this->getPropertyValue(PULSEID_PARAM);
@@ -159,7 +155,7 @@ void LoadEventPreNeXus::exec()
     if (!pulseid_filename.empty())
     {
       if (Poco::File(pulseid_filename).exists())
-        this->g_log.information() << "Found pulseid file " << pulseid_filename;
+        this->g_log.information() << "Found pulseid file " << pulseid_filename << std::endl;
       else
         pulseid_filename = "";
 
@@ -182,6 +178,10 @@ void LoadEventPreNeXus::exec()
   // TODO localWorkspace->setTitle(title);
 
   this->runLoadInstrument(event_filename, localWorkspace);
+
+  // load the mapping file
+  string mapping_filename = this->getPropertyValue(MAP_PARAM);
+  this->loadPixelMap(mapping_filename);
 
   //Process the events into pixels
   this->procEvents(localWorkspace);
@@ -399,7 +399,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
   g_log.information() << "Read " << this->num_good_events << " events + "
       << this->num_error_events << " errors"
-      << ". Shortest TOF: " << shortest_tof << " microsec; longest TOF: " << longest_tof << " microsec.";
+      << ". Shortest TOF: " << shortest_tof << " microsec; longest TOF: "
+      << longest_tof << " microsec." << std::endl;
 
 }
 
