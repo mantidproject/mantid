@@ -243,10 +243,17 @@ void AlignDetectors::execEvent()
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
   else
   {
+    //Make a brand new EventWorkspace
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
-    outputWS->mutableSpectraMap().clear();
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    //outputWS->mutableSpectraMap().clear();
+    //You need to copy over the data as well.
+    outputWS->copyDataFrom( (*inputWS) );
+
+    //Cast to the matrixOutputWS and save it
+    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
 

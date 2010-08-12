@@ -7,8 +7,10 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -86,6 +88,7 @@ public:
   /** Setup for loading raw data */
   void setUp_Event()
   {
+    inputWS = "eventWS";
     LoadEventPreNeXus loader;
     loader.initialize();
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
@@ -93,49 +96,88 @@ public:
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
-    loader.setPropertyValue("OutputWorkspace", "eventWS");
-    loader.setPropertyValue("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+    loader.setPropertyValue("OutputWorkspace", inputWS);
+//    loader.setPropertyValue("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
     loader.execute();
+    TS_ASSERT (loader.isExecuted() );
   }
 
 
-  void xtestExecEventWorkspace_sameOutputWS()
+  void testExecEventWorkspace_sameOutputWS()
   {
     this->setUp_Event();
+
+    //Retrieve Workspace
+    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    TS_ASSERT( WS ); //workspace is loaded
+    size_t start_blocksize = WS->blocksize();
+    size_t num_events = WS->getNumberEvents();
+    double a_tof = WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof();
 
     //Start by init'ing the algorithm
     TS_ASSERT_THROWS_NOTHING( align.initialize() );
     TS_ASSERT( align.isInitialized() );
 
     //Set all the properties
-    align.setPropertyValue("InputWorkspace", "eventWS");
-    const std::string outputWS = "eventWS";
+    align.setPropertyValue("InputWorkspace", inputWS);
+    const std::string outputWS = inputWS;
     align.setPropertyValue("OutputWorkspace", outputWS);
     align.setPropertyValue("CalibrationFile", "../../../../Test/Data/refl_fake.cal");
 
-    align.execute();
+    TS_ASSERT_THROWS_NOTHING( align.execute() );
+    TS_ASSERT( align.isExecuted() );
+
+    // WS hasn;t changed
+
+    //Things that haven't changed
+    TS_ASSERT_EQUALS( start_blocksize, WS->blocksize());
+    TS_ASSERT_EQUALS( num_events, WS->getNumberEvents() );
+    //But a TOF changed.
+    TS_ASSERT_DIFFERS(a_tof, WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
   }
 
-  void xtestExecEventWorkspace_differentOutputWS()
+
+  void testExecEventWorkspace_differentOutputWS()
   {
     this->setUp_Event();
+
+    //Retrieve Workspace
+    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    TS_ASSERT( WS ); //workspace is loaded
+    size_t start_blocksize = WS->blocksize();
+    size_t num_events = WS->getNumberEvents();
+    double a_tof = WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof();
 
     //Start by init'ing the algorithm
     TS_ASSERT_THROWS_NOTHING( align.initialize() );
     TS_ASSERT( align.isInitialized() );
 
     //Set all the properties
-    align.setPropertyValue("InputWorkspace", "eventWS");
-    const std::string outputWS = "alignedWS";
+    align.setPropertyValue("InputWorkspace", inputWS);
+    const std::string outputWS = "eventWS_changed";
     align.setPropertyValue("OutputWorkspace", outputWS);
     align.setPropertyValue("CalibrationFile", "../../../../Test/Data/refl_fake.cal");
 
-    align.execute();
+    TS_ASSERT_THROWS_NOTHING( align.execute() );
+    TS_ASSERT( align.isExecuted() );
+
+    //Retrieve Workspace changed
+    EventWorkspace_sptr outWS;
+    outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    TS_ASSERT( outWS ); //workspace is loaded
+
+    //Things that haven't changed
+    TS_ASSERT_EQUALS( outWS->blocksize(), WS->blocksize());
+    TS_ASSERT_EQUALS( outWS->getNumberEvents(), WS->getNumberEvents() );
+    //But a TOF changed.
+    TS_ASSERT_DIFFERS( outWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(), WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
   }
 
 private:
   AlignDetectors align;
   std::string inputWS;
+  EventWorkspace_sptr WS;
+
 
 };
 
