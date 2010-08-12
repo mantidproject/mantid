@@ -15,7 +15,7 @@ if platform.system() == 'Windows':
 		buildargs.append("win64=1")
 elif platform.system() == 'Linux':
     buildargs.append('gcc44=1')
-sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
+#sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
 buildlog.close()
 builderr.close()
 
@@ -48,8 +48,11 @@ for test in testsToRun:
         runlog += test+"\n"
         if os.name == 'posix':
             test = "./" + test
-        proc = sp.Popen(test,stdout=sp.PIPE,stderr=runerr,shell=True,cwd=testDir)
+	print 'Running "%s"' % test
+        #proc = sp.Popen(test,stdout=sp.PIPE,stderr=runerr,shell=True,cwd=testDir)
+	proc = sp.Popen(test,shell=True,cwd=testDir)
         stdout = proc.communicate()[0]
+	stdout = ''
         # The standard out seems to get lost if the process aborted unexpectedly so assume a fatal error occurred.
         if stdout == '':
             runlog += "A fatal error occurred.\n"
