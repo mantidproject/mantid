@@ -1,5 +1,5 @@
 //
-// Wrappers for classes in the Mantid::API namespace
+// Wrappers for classes in the API namespace
 //
 #include <MantidPythonAPI/api_exports.h>
 #include <MantidPythonAPI/stl_proxies.h>
@@ -10,6 +10,7 @@
 // API
 #include <MantidAPI/ITableWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
+#include <MantidAPI/IEventWorkspace.h>
 #include <MantidAPI/Instrument.h>
 #include <MantidAPI/ParInstrument.h>
 #include <MantidAPI/Sample.h>
@@ -24,7 +25,7 @@ namespace Mantid
 {
 namespace PythonAPI
 {
-  using namespace Mantid::API;
+  using namespace API;
   using namespace boost::python;
 
   //@cond
@@ -35,7 +36,7 @@ namespace PythonAPI
   void export_frameworkmanager()
   {
     /** 
-     * Python Framework class (note that this is not the Mantid::API::FrameworkManager, there is another in 
+     * Python Framework class (note that this is not the API::FrameworkManager, there is another in 
      * PythonAPI::FrameworkManager)
      * This is the main class through which Python interacts with Mantid and with the exception of PyAlgorithm and V3D, 
      * is the only one directly instantiable in Python
@@ -79,25 +80,26 @@ namespace PythonAPI
   void export_ialgorithm()
   {
     
-    register_ptr_to_python<Mantid::API::IAlgorithm*>();
+    register_ptr_to_python<API::IAlgorithm*>();
 
-    class_< Mantid::API::IAlgorithm, boost::noncopyable>("IAlgorithm", no_init)
-      .def("initialize", &Mantid::API::IAlgorithm::initialize)
-      .def("execute", &Mantid::API::IAlgorithm::execute)
-      .def("executeAsync", &Mantid::API::IAlgorithm::executeAsync)
-      .def("isRunningAsync", &Mantid::API::IAlgorithm::isRunningAsync)
-      .def("isInitialized", &Mantid::API::IAlgorithm::isInitialized)
-      .def("isExecuted", &Mantid::API::IAlgorithm::isExecuted)
-      .def("setRethrows", &Mantid::API::IAlgorithm::setRethrows)
-      .def("setPropertyValue", &Mantid::API::IAlgorithm::setPropertyValue)
-      .def("getPropertyValue", &Mantid::API::IAlgorithm::getPropertyValue)
-      .def("getProperties", &Mantid::API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
+    class_< API::IAlgorithm, boost::noncopyable>("IAlgorithm", no_init)
+      .def("name", &API::IAlgorithm::name)
+      .def("initialize", &API::IAlgorithm::initialize)
+      .def("execute", &API::IAlgorithm::execute)
+      .def("executeAsync", &API::IAlgorithm::executeAsync)
+      .def("isRunningAsync", &API::IAlgorithm::isRunningAsync)
+      .def("isInitialized", &API::IAlgorithm::isInitialized)
+      .def("isExecuted", &API::IAlgorithm::isExecuted)
+      .def("setRethrows", &API::IAlgorithm::setRethrows)
+      .def("setPropertyValue", &API::IAlgorithm::setPropertyValue)
+      .def("getPropertyValue", &API::IAlgorithm::getPropertyValue)
+      .def("getProperties", &API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
       ;
 
-    class_< Mantid::API::Algorithm, bases<Mantid::API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
+    class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
       ;
 
-    class_< Mantid::API::CloneableAlgorithm, bases<Mantid::API::Algorithm>, boost::noncopyable>("CloneableAlgorithm", no_init)
+    class_< API::CloneableAlgorithm, bases<API::Algorithm>, boost::noncopyable>("CloneableAlgorithm", no_init)
       ;
     
     //PyAlgorithmBase
@@ -114,7 +116,7 @@ namespace PythonAPI
 #define EXPORT_GETLISTPROPERTY(type, suffix)\
     .def("getListProperty_"#suffix,(std::vector<type>(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getListProperty<type>)
     
-    class_< PyAlgorithmBase, boost::shared_ptr<PyAlgorithmCallback>, bases<Mantid::API::CloneableAlgorithm>, 
+    class_< PyAlgorithmBase, boost::shared_ptr<PyAlgorithmCallback>, bases<API::CloneableAlgorithm>, 
       boost::noncopyable >("PyAlgorithmBase")
       .enable_pickling()
       .def("_setMatrixWorkspaceProperty", &PyAlgorithmBase::_setMatrixWorkspaceProperty)
@@ -146,19 +148,19 @@ namespace PythonAPI
     /// Shared pointer registration
     register_ptr_to_python<boost::shared_ptr<Workspace> >();
     
-    class_<Mantid::API::Workspace, boost::noncopyable>("Workspace", no_init)
-      .def("getTitle", &Mantid::API::Workspace::getTitle, 
+    class_<API::Workspace, boost::noncopyable>("Workspace", no_init)
+      .def("getTitle", &API::Workspace::getTitle, 
          return_value_policy< copy_const_reference >())
-      .def("getComment", &Mantid::API::MatrixWorkspace::getComment, 
+      .def("getComment", &API::MatrixWorkspace::getComment, 
          return_value_policy< copy_const_reference >() )
-      .def("getMemorySize", &Mantid::API::Workspace::getMemorySize)
-      .def("getName", &Mantid::API::Workspace::getName, return_value_policy< copy_const_reference >())
-      .def("__str__", &Mantid::API::Workspace::getName, return_value_policy< copy_const_reference >())
+      .def("getMemorySize", &API::Workspace::getMemorySize)
+      .def("getName", &API::Workspace::getName, return_value_policy< copy_const_reference >())
+      .def("__str__", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       ;
   }
 
   // Overloads for binIndexOf function which has 1 optional argument
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads, Mantid::API::MatrixWorkspace::binIndexOf, 1, 2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads, API::MatrixWorkspace::binIndexOf, 1, 2)
     
   void export_matrixworkspace()
   {
@@ -173,26 +175,26 @@ namespace PythonAPI
     typedef WorkspaceAlgebraProxy::wraptype_ptr(*binary_fn2)(const WorkspaceAlgebraProxy::wraptype_ptr, double);
 
     /// Typedef for data access
-    typedef Mantid::MantidVec&(Mantid::API::MatrixWorkspace::*data_access)(int const);
+    typedef MantidVec&(API::MatrixWorkspace::*data_access)(int const);
 
     //MatrixWorkspace class
-    class_< Mantid::API::MatrixWorkspace, bases<Mantid::API::Workspace>, MatrixWorkspaceCallback, 
+    class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceCallback, 
       boost::noncopyable >("MatrixWorkspace", no_init)
-      .def("getNumberHistograms", &Mantid::API::MatrixWorkspace::getNumberHistograms)
-      .def("getNumberBins", &Mantid::API::MatrixWorkspace::blocksize)
-      .def("binIndexOf", &Mantid::API::MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads() )
-      .def("readX", &Mantid::API::MatrixWorkspace::readX, return_value_policy<return_by_value>() )
-      .def("readY", &Mantid::API::MatrixWorkspace::readY, return_value_policy<return_by_value>() )
-      .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy<return_by_value>() )
-      .def("dataX", (data_access)&Mantid::API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
-      .def("dataY", (data_access)&Mantid::API::MatrixWorkspace::dataY, return_internal_reference<>() )
-      .def("dataE", (data_access)&Mantid::API::MatrixWorkspace::dataE, return_internal_reference<>() )
-      .def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, 
+      .def("getNumberHistograms", &API::MatrixWorkspace::getNumberHistograms)
+      .def("getNumberBins", &API::MatrixWorkspace::blocksize)
+      .def("binIndexOf", &API::MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads() )
+      .def("readX", &API::MatrixWorkspace::readX, return_value_policy<return_by_value>() )
+      .def("readY", &API::MatrixWorkspace::readY, return_value_policy<return_by_value>() )
+      .def("readE", &API::MatrixWorkspace::readE, return_value_policy<return_by_value>() )
+      .def("dataX", (data_access)&API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
+      .def("dataY", (data_access)&API::MatrixWorkspace::dataY, return_internal_reference<>() )
+      .def("dataE", (data_access)&API::MatrixWorkspace::dataE, return_internal_reference<>() )
+      .def("isDistribution", (const bool& (API::MatrixWorkspace::*)() const)&API::MatrixWorkspace::isDistribution, 
          return_value_policy< copy_const_reference >() )
-      .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
-      .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
-      .def("getRun", &Mantid::API::MatrixWorkspace::run, return_internal_reference<>() )
-      .def("getSampleInfo", &Mantid::API::MatrixWorkspace::sample, return_internal_reference<>() )
+      .def("getInstrument", &API::MatrixWorkspace::getInstrument)
+      .def("getDetector", &API::MatrixWorkspace::getDetector)
+      .def("getRun", &API::MatrixWorkspace::run, return_internal_reference<>() )
+      .def("getSampleInfo", &API::MatrixWorkspace::sample, return_internal_reference<>() )
       .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
       .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
       .def("__radd__",(binary_fn2)&WorkspaceAlgebraProxy::rplus)
@@ -214,15 +216,15 @@ namespace PythonAPI
       .def("__idiv__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_divide)
       .def("__idiv__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_divide)
       // Deprecated, here for backwards compatability
-      .def("blocksize", &Mantid::API::MatrixWorkspace::blocksize)
-      .def("getSampleDetails", &Mantid::API::MatrixWorkspace::run, return_internal_reference<>() )
+      .def("blocksize", &API::MatrixWorkspace::blocksize)
+      .def("getSampleDetails", &API::MatrixWorkspace::run, return_internal_reference<>() )
       ;
   }
 
   void export_tableworkspace()
   {
     // Declare the pointer
-    register_ptr_to_python<Mantid::API::ITableWorkspace_sptr>();
+    register_ptr_to_python<API::ITableWorkspace_sptr>();
     
     // Table workspace
     // Some function pointers since MSVC can't figure out the function to call when 
@@ -232,7 +234,7 @@ namespace PythonAPI
     typedef std::string&(ITableWorkspace::*get_string_ptr)(const std::string &, int);
 
     // TableWorkspace class
-    class_< ITableWorkspace, bases<Mantid::API::Workspace>, boost::noncopyable >("ITableWorkspace", no_init)
+    class_< ITableWorkspace, bases<API::Workspace>, boost::noncopyable >("ITableWorkspace", no_init)
       .def("getColumnCount", &ITableWorkspace::columnCount)
       .def("getRowCount", &ITableWorkspace::rowCount)
       .def("getColumnNames",&ITableWorkspace::getColumnNames)
@@ -246,71 +248,71 @@ namespace PythonAPI
   void export_workspacegroup()
   {
     // Pointer
-    register_ptr_to_python<Mantid::API::WorkspaceGroup_sptr>();
+    register_ptr_to_python<API::WorkspaceGroup_sptr>();
     
-    class_< Mantid::API::WorkspaceGroup, bases<Mantid::API::Workspace>, 
+    class_< API::WorkspaceGroup, bases<API::Workspace>, 
       boost::noncopyable >("WorkspaceGroup", no_init)
-      .def("size", &Mantid::API::WorkspaceGroup::getNumberOfEntries)
-      .def("getNames", &Mantid::API::WorkspaceGroup::getNames)
-      .def("add", &Mantid::API::WorkspaceGroup::add)
-      .def("remove", &Mantid::API::WorkspaceGroup::remove)
+      .def("size", &API::WorkspaceGroup::getNumberOfEntries)
+      .def("getNames", &API::WorkspaceGroup::getNames)
+      .def("add", &API::WorkspaceGroup::add)
+      .def("remove", &API::WorkspaceGroup::remove)
       ;
   }
   
   void export_sample()
   {
     //Pointer
-    register_ptr_to_python<Mantid::API::Sample*>();
+    register_ptr_to_python<API::Sample*>();
 
     //Sample class
-    class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
-      .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
-      .def("getGeometryFlag", &Mantid::API::Sample::getGeometryFlag)
-      .def("getThickness", &Mantid::API::Sample::getThickness)
-      .def("getHeight", &Mantid::API::Sample::getHeight)
-      .def("getWidth", &Mantid::API::Sample::getWidth)
+    class_< API::Sample, boost::noncopyable >("Sample", no_init)
+      .def("getName", &API::Sample::getName, return_value_policy<copy_const_reference>())
+      .def("getGeometryFlag", &API::Sample::getGeometryFlag)
+      .def("getThickness", &API::Sample::getThickness)
+      .def("getHeight", &API::Sample::getHeight)
+      .def("getWidth", &API::Sample::getWidth)
      ;
   }
 
   void export_run()
   {
     //Pointer
-    register_ptr_to_python<Mantid::API::Run*>();
+    register_ptr_to_python<API::Run*>();
 
     //Run class
-    class_< Mantid::API::Run,  boost::noncopyable >("Run", no_init)
-      .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Run::*)(const std::string&) const)&Run::getLogData, 
+    class_< API::Run,  boost::noncopyable >("Run", no_init)
+      .def("getLogData", (Kernel::Property* (API::Run::*)(const std::string&) const)&Run::getLogData, 
         return_internal_reference<>())
-      .def("getLogData", (const std::vector<Mantid::Kernel::Property*> & (Mantid::API::Run::*)() const)&Run::getLogData, 
+      .def("getLogData", (const std::vector<Kernel::Property*> & (API::Run::*)() const)&Run::getLogData, 
         return_internal_reference<>())
-      .def("getProtonCharge", &Mantid::API::Run::getProtonCharge)
-      .def("hasProperty", &Mantid::API::Run::hasProperty)
-      .def("getProperty", &Mantid::API::Run::getProperty, return_value_policy<return_by_value>())
-      .def("getProperties", &Mantid::API::Run::getProperties, return_internal_reference<>())
+      .def("getProtonCharge", &API::Run::getProtonCharge)
+      .def("hasProperty", &API::Run::hasProperty)
+      .def("getProperty", &API::Run::getProperty, return_value_policy<return_by_value>())
+      .def("getProperties", &API::Run::getProperties, return_internal_reference<>())
      ;
   }
 
   void export_instrument()
   {
     //Pointer to the interface
-    register_ptr_to_python<boost::shared_ptr<Mantid::API::IInstrument> >();
+    register_ptr_to_python<boost::shared_ptr<API::IInstrument> >();
     
     //IInstrument class
-    class_< Mantid::API::IInstrument, boost::python::bases<Mantid::Geometry::ICompAssembly>, 
+    class_< API::IInstrument, boost::python::bases<Geometry::ICompAssembly>, 
       boost::noncopyable>("IInstrument", no_init)
-      .def("getSample", &Mantid::API::IInstrument::getSample)
-      .def("getSource", &Mantid::API::IInstrument::getSource)
-      .def("getComponentByName", &Mantid::API::IInstrument::getComponentByName)
+      .def("getSample", &API::IInstrument::getSample)
+      .def("getSource", &API::IInstrument::getSource)
+      .def("getComponentByName", &API::IInstrument::getComponentByName)
       ;
 
     /** Concrete implementations so that Python knows about them */
     
     //Instrument class
-    class_< Mantid::API::Instrument, boost::python::bases<Mantid::API::IInstrument>, 
+    class_< API::Instrument, boost::python::bases<API::IInstrument>, 
 	    boost::noncopyable>("Instrument", no_init)
       ;
     //Instrument class
-    class_< Mantid::API::ParInstrument, boost::python::bases<Mantid::API::IInstrument>, 
+    class_< API::ParInstrument, boost::python::bases<API::IInstrument>, 
 	    boost::noncopyable>("ParInstrument", no_init)
       ;
   }
@@ -318,13 +320,16 @@ namespace PythonAPI
   void export_workspace_property()
   {
     // Tell python about this so I can check if a property is a workspace
-    class_< WorkspaceProperty<Workspace>, bases<Mantid::Kernel::Property>, boost::noncopyable>("WorkspaceProperty", no_init)
+    class_< WorkspaceProperty<Workspace>, bases<Kernel::Property>, boost::noncopyable>("WorkspaceProperty", no_init)
       ;
-    // Tell python about this so I can check if a property is a workspace
-    class_< WorkspaceProperty<MatrixWorkspace>, bases<Mantid::Kernel::Property>, boost::noncopyable>("MatrixWorkspaceProperty", no_init)
+    // Tell python about a MatrixWorkspace property
+    class_< WorkspaceProperty<MatrixWorkspace>, bases<Kernel::Property>, boost::noncopyable>("MatrixWorkspaceProperty", no_init)
       ;
-    // Tell python about this so I can check if a property is a workspace
-    class_< WorkspaceProperty<ITableWorkspace>, bases<Mantid::Kernel::Property>, boost::noncopyable>("TableWorkspaceProperty", no_init)
+    // Tell python about a TableWorkspace property
+    class_< WorkspaceProperty<ITableWorkspace>, bases<Kernel::Property>, boost::noncopyable>("TableWorkspaceProperty", no_init)
+      ;
+    // Tell python about an EventWorkspace
+    class_< WorkspaceProperty<IEventWorkspace>, bases<Kernel::Property>, boost::noncopyable>("EventWorkspaceProperty", no_init)
       ;
 
   }

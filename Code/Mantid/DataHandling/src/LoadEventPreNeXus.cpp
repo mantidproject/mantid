@@ -110,7 +110,7 @@ void LoadEventPreNeXus::init()
 //                        "Set to True to pad empty pixels, loaded from the instrument geometry file. Nothing is done if no geometry file was specified.");
 
   // the output workspace name
-  this->declareProperty(new WorkspaceProperty<EventWorkspace>(OUT_PARAM,"",Direction::Output));
+  this->declareProperty(new WorkspaceProperty<IEventWorkspace>(OUT_PARAM,"",Direction::Output));
 
 }
 
@@ -191,7 +191,7 @@ void LoadEventPreNeXus::exec()
   //std::cout << "LoadEventPreNeXus::procEvents() has completed.\n";
 
   //Save output
-  this->setProperty(OUT_PARAM, localWorkspace);
+  this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);
 
   //std::cout << "LoadEventPreNeXus::output Workspace property has been set.\n";
 }

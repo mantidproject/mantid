@@ -9,7 +9,7 @@
 #include "MantidKernel/MRUList.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -104,7 +104,7 @@ typedef std::vector<EventList*> EventListVector;
     <https://svn.mantidproject.org/mantid/trunk/Documents/Design/Event WorkspaceDetailed Design Document.doc>
  */
 
-class DLLExport EventWorkspace : public API::MatrixWorkspace
+class DLLExport EventWorkspace : public API::IEventWorkspace
 {
  public:
   /// Typedef for a Most-Recently-Used list of Data objects.

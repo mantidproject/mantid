@@ -309,22 +309,20 @@ class IAlgorithmProxy(ProxyObject):
         if self.__havelist == False:
             self._createWorkspaceList()
 
-        if len(self.__wkspnames[index]) > 0:
+        if len(self.__wkspnames) > 0:
             return self.__framework[self.__wkspnames[index]]
         else:
-            return None
+            raise RuntimeError("'%s' has no output workspaces." % self._getHeldObject().name())
 
     def _createWorkspaceList(self):
         # Create a list for the output workspaces
         props = self._getHeldObject().getProperties()
-  
         for p in props:
             if p.direction() != 1:
                 continue
-            if isinstance(p, MatrixWorkspaceProperty) or \
-                    isinstance(p, TableWorkspaceProperty) or \
-                    isinstance(p, WorkspaceProperty):
-                self.__wkspnames.append(p.value())
+            if isinstance(p, MatrixWorkspaceProperty) or isinstance(p, TableWorkspaceProperty) or \
+              isinstance(p, EventWorkspaceProperty) or isinstance(p, WorkspaceProperty):
+               self.__wkspnames.append(p.value())
         self.__havelist = True
 
 #---------------------------------------------------------------------------------------
