@@ -5,12 +5,14 @@
 #include <iostream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <set>
 #include <vector>
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Glob.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
@@ -139,6 +141,35 @@ static string generatPulseidName(string eventfile)
   return "";
 }
 
+static string generateMappingfileName(EventWorkspace_sptr &wksp)
+{
+  std::vector<string> temp
+                      = wksp->getInstrument()->getStringParameter("TS_mapping_file");
+  if (temp.empty())
+    return "";
+  string mapping = temp[0];
+  string instrument = wksp->getInstrument()->getName();
+  std::cout << "***********************LOOKING FOR MAPPING FILE " << mapping << std::endl; // REMOVE
+
+  string base("/SNS/" + instrument + "/");
+  mapping = "*_CAL/calibrations/" + mapping;
+  std::cout << base << " " << mapping << std::endl;
+  std::set<string> files;
+  Mantid::Kernel::Glob::glob(base, mapping, files);
+  std::cout << "done!" << std::endl;
+  if (files.empty())
+    return "";
+  else
+    std::cout << "found files!" <<std::endl;
+
+  for (std::set<string>::iterator it = files.begin(); it != files.end(); ++it)
+  {
+    std::cout << *it <<std::endl; // REMOVE
+  }
+
+  return mapping;
+}
+
 //-----------------------------------------------------------------------------
 /** Execute the algorithm */
 void LoadEventPreNeXus::exec()
@@ -178,11 +209,11 @@ void LoadEventPreNeXus::exec()
   // TODO localWorkspace->setTitle(title);
 
   this->runLoadInstrument(event_filename, localWorkspace);
-  // Populate the instrument parameters in this workspace
-  localWorkspace->populateInstrumentParameters();
 
   // load the mapping file
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
+  if (mapping_filename.empty())
+    generateMappingfileName(localWorkspace);
   this->loadPixelMap(mapping_filename);
 
   //Process the events into pixels
@@ -222,6 +253,9 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
     loadInst->setPropertyValue("Filename", filename);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
     loadInst->execute();
+
+    // Populate the instrument parameters in this workspace - this works around a bug
+    localWorkspace->populateInstrumentParameters();
   } catch (std::invalid_argument& e)
   {
     stringstream msg;
@@ -837,7 +871,14 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
   // set up for reading
   this->g_log.debug("Using pulseid file \"" + filename + "\"");
   ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
-  this->num_pulses = getFileSize<Pulse>(handle);
+  try {
+    this->num_pulses = getFileSize<Pulse>(handle);
+  } catch (runtime_error &e) {
+    this->g_log.warning() << "Failed to load pulseid file:" << e.what() << std::endl;
+    this->num_pulses = 0;
+    delete handle;
+    return;
+  }
   size_t buffer_size = getBufferSize(this->num_pulses);
   size_t offset = 0;
   Pulse* buffer = new Pulse[buffer_size];
