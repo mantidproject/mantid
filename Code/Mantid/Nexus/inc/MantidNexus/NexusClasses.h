@@ -538,6 +538,8 @@ namespace Mantid
 
       /// Returns a list of all classes (or groups) in this NXClass
       std::vector<NXClassInfo>& groups()const{return *m_groups.get();}
+      /// Returns whether an individual group (or group) is present
+      bool containsGroup(const std::string & query) const;
       /// Returns a list of all datasets in this NXClass
       std::vector<NXInfo>& datasets()const{return *m_datasets.get();}
       /** Returns NXInfo for a dataset

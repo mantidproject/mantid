@@ -282,6 +282,22 @@ int NXClass::getInt(const std::string& name)const
     number.load();
     return *number();
 }
+/** Returns whether an individual group (or group) is present
+*  @param query the class name to search for
+*  @return true if the name is found and false otherwise
+*/
+bool NXClass::containsGroup(const std::string & query) const
+{
+  std::vector<NXClassInfo>::const_iterator end = m_groups->end();
+  for(std::vector<NXClassInfo>::const_iterator i=m_groups->begin(); i!=end;++i)
+  {
+    if ( i->nxname == query )
+    {
+      return true;
+    }
+  }
+  return false;
+}
 
 NXInfo NXClass::getDataSetInfo(const std::string& name)const
 {

@@ -63,6 +63,15 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling";}
 
     private:
+      /// specifies the order that algorithm data is listed in workspaces' histories
+      enum AlgorithmHist
+      {
+        NAME = 0,                          //< algorithms name
+        EXEC_TIME = 1,                     //< when the algorithm was run
+        EXEC_DUR = 2,                      //< execution time for the algorithm
+        PARAMS = 3                     //< the algorithm's parameters
+      };
+
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
@@ -78,6 +87,10 @@ namespace Mantid
       void readInstrumentGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
       /// Read the algorithm history
       void readAlgorithmHistory(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      /// Splits a string of exactly three words into the separate words
+      void getWordsInString(const std::string & words3, std::string & w1, std::string & w2, std::string & w3);
+      /// Splits a string of exactly four words into the separate words
+      void getWordsInString(const std::string & words3, std::string & w1, std::string & w2, std::string & w3, std::string & w4);
       ///Read the instrument parameter map
       void readParameterMap(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
       ///Read the bin masking information
