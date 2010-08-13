@@ -18,6 +18,9 @@
      <property name="frameShape" >
       <enum>QFrame::StyledPanel</enum>
      </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Sunken</enum>
+     </property>
      <property name="text" >
       <string/>
      </property>
@@ -25,8 +28,17 @@
    </item>
    <item row="1" column="0" >
     <widget class="QTableWidget" name="myDatatableWidget" >
+     <property name="toolTip" >
+      <string/>
+     </property>
      <property name="alternatingRowColors" >
       <bool>true</bool>
+     </property>
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
      </property>
      <column>
       <property name="text" >
@@ -75,12 +87,7 @@
      </column>
      <column>
       <property name="text" >
-       <string>Investigators First Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Investigators Second Name</string>
+       <string>Investigators Name</string>
       </property>
      </column>
      <column>

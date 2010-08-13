@@ -160,6 +160,9 @@ public:
 
 	/// This method executes loadnexus algorithm from ICatInterface
 	void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
+	
+	/// This method is to execute download data files algorithm from ICat
+	void executeDownloadDataFiles(const std::vector<std::string>& fileNames);
 
 public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
@@ -247,6 +250,8 @@ signals:
   void showPropertyInputDialog(const QString & algName);
   // Broadcast that an algorithm is about to be created
   void algorithmAboutToBeCreated();
+  // a signal for getting the file locations from ICat downloaddatafiles algorithm
+  void fileLocations(const std::vector<std::string>&);
 private:
   Mantid::API::IAlgorithm_sptr findAlgorithmPointer(const QString & algName);
   
@@ -434,7 +439,7 @@ private:
 	 MantidQt::API::AlgorithmDialog * createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
 
 	 /// This method accepts user inputs and executes loadraw/load nexus algorithm
-	 void acceptLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
+	 void acceptLoadInputs(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
 	
 
     // Private variables

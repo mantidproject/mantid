@@ -1,6 +1,8 @@
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtMantidWidgets/ICatUtils.h"
+
 #include<QStringList>
 #include<QTreeWidget>
 #include<QTreeWidgetItem>
@@ -11,77 +13,54 @@ using namespace MantidQt::MantidWidgets;
 
 ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par)
 {
-	 m_uiForm.setupUi(this);
+	m_uiForm.setupUi(this);
 
-	 connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
-	 
-	Mantid::API::ITableWorkspace_sptr  ws_sptr = executeMyDataSearch();
+	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
+	connect(m_uiForm.myDatatableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
+		this,SLOT(investigationSelected(QTableWidgetItem* )));
+
+	QObject* qobj=parent();
+	QWidget* parent=qobject_cast<QWidget*>(qobj->parent());
+	if(parent)
+	{
+		setparentWidget(parent);
+	}
+	
+	Mantid::API::ITableWorkspace_sptr  ws_sptr ;
+	executeMyDataSearch(ws_sptr);
 	if(!ws_sptr)
 	{
 		emit error("MyData search completed,No results to display.");
 		return;
 	}
+	ICatUtils utils;
+	utils.updatesearchResults(ws_sptr,m_uiForm.myDatatableWidget);
 
-	for (int i=m_uiForm.myDatatableWidget->rowCount()-1;i>=0;--i)
-	{
-		m_uiForm.myDatatableWidget->removeRow(i);
-	}
-	m_uiForm.myDatatableWidget->setRowCount(ws_sptr->rowCount());
-	for (int i=0;i<ws_sptr->rowCount();++i)
-	{
-		//setting the row height of tableWidget 
-		m_uiForm.myDatatableWidget->setRowHeight(i,20);
-	}
-	
-	QStringList qlabelList;
-	for(int i=0;i<ws_sptr->columnCount();i++)
-	{
-		Column_sptr col_sptr = ws_sptr->getColumn(i);
-		//get the column name to display as the header of table widget
-		qlabelList.push_back(QString::fromStdString(col_sptr->name()));
-
-		for(int j=0;j<ws_sptr->rowCount();++j)
-		{
-		    std::ostringstream ostr;
-		     col_sptr->print(ostr,j);
-			 QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
-			 newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-			 m_uiForm.myDatatableWidget->setItem(j,i,newItem);
-			 newItem->setToolTip(QString::fromStdString(ostr.str()));
-			// newItem->setBackground(QBrush(QColor(Qt::blue))); 
-		}
-		m_uiForm.myDatatableWidget->resizeColumnToContents(i);
-	}
-	//setting table widget header labels from table workspace
-	m_uiForm.myDatatableWidget->setHorizontalHeaderLabels(qlabelList);
+	//setting the label string
 	QFont font;
 	font.setBold(true);
-	for (int i=0;i<m_uiForm.myDatatableWidget->columnCount();++i)
-	{
-		m_uiForm.myDatatableWidget->horizontalHeaderItem(i)->setFont(font);;
-	}
-	//resizing the coluns based on data size
-	m_uiForm.myDatatableWidget->resizeColumnsToContents();
-		
+	
 	QString labelText;
 	std::stringstream totalCount;
 	totalCount<<ws_sptr->rowCount();
 	labelText="Data: "+QString::fromStdString(totalCount.str())+" Investigations "+" found";
-	
-	m_uiForm.mydatalabel->clear();
+
 	m_uiForm.mydatalabel->setText(labelText);
 	m_uiForm.mydatalabel->setAlignment(Qt::AlignHCenter);
 	m_uiForm.mydatalabel->setFont(font);
 
-	m_uiForm.myDatatableWidget->setSortingEnabled(true);
-	m_uiForm.myDatatableWidget->sortByColumn(2,Qt::AscendingOrder);
 	
-
 }
-Mantid::API::ITableWorkspace_sptr ICatMyDataSearch::executeMyDataSearch()
+/* this method sets the parent widget as application window
+*/
+void ICatMyDataSearch::setparentWidget(QWidget* par)
+{
+	m_applicationWindow= par;
+}
+bool ICatMyDataSearch::executeMyDataSearch(ITableWorkspace_sptr& ws_sptr)
 {
 	Mantid::API::IAlgorithm_sptr alg;
-	Mantid::API::ITableWorkspace_sptr ws_sptr;
+	//Mantid::API::ITableWorkspace_sptr ws_sptr;
 	try
 	{
 		alg = Mantid::API::AlgorithmManager::Instance().create("MyDataSearch",1);
@@ -93,11 +72,17 @@ Mantid::API::ITableWorkspace_sptr ICatMyDataSearch::executeMyDataSearch()
 	try
 	{
 		alg->setPropertyValue("OutputWorkspace","MyInvestigations");
+		
 	}
 	catch(std::invalid_argument& e)
 	{		
 		emit error(e.what());
-		return ws_sptr;
+		return false;
+	}
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
+	{
+		emit error(e.what());
+		return false;
 	}
 	
 	try
@@ -111,25 +96,22 @@ Mantid::API::ITableWorkspace_sptr ICatMyDataSearch::executeMyDataSearch()
 	}
 	catch(...)
     {   
-	  return ws_sptr;
+	  return false;
     }
 	if(AnalysisDataService::Instance().doesExist("MyInvestigations"))
 	{
 		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
 			(AnalysisDataService::Instance().retrieve("MyInvestigations"));
+
 	}
-	return ws_sptr;
+	
+	return true;
+
+}
+void ICatMyDataSearch::investigationSelected(QTableWidgetItem* item)
+{
+	ICatUtils utils;
+	utils.investigationSelected(m_uiForm.myDatatableWidget,item,m_applicationWindow,m_ws2_sptr);
 
 }
 
-//void MyTreeWidget::drawRow(QPainter* p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const
-//{ QTreeWidget::drawRow(p, opt, idx);
-//for (int col = 0; col < columnCount(); ++col)
-//{  QModelIndex s = idx.sibling(idx.row(), col);
-//if (s.isValid()) 
-//{
-//	QRect rect = visualRect(s);
-//	p->setPen(Qt::DotLine);
-//	p->drawRect(rect); }
-//}
-//}

@@ -16514,3 +16514,12 @@ void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QSt
 	mantidUI->loadnexusfromICatInterface(fileName,wsName);
 }
 
+void ApplicationWindow::executeDownloadDataFiles(std::vector<std::string>& filenames)
+{
+	QObject * qsender= sender();
+	if(!qsender) return;
+
+	connect(mantidUI,SIGNAL(fileLocations(const std::vector<std::string>&)),qsender,SLOT(setfileLocations(const std::vector<std::string>&)));
+	mantidUI->executeDownloadDataFiles(filenames);
+}
+

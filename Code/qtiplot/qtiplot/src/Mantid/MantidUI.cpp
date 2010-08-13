@@ -27,6 +27,7 @@
 #include "MantidKernel/ConfigService.h"
 
 
+
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
@@ -841,7 +842,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
     if( !alg ) return;
 	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
-	acceptLoadAlgorithm(dlg,alg);
+	acceptLoadInputs(dlg,alg);
 	
 }
 /** This method is to execute loadraw from ICat Interface
@@ -866,7 +867,7 @@ void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& 
 			list[1]->setText(wsName);
 		}
 	}
-	acceptLoadAlgorithm(dlg,alg);
+	acceptLoadInputs(dlg,alg);
 
 	
 }
@@ -886,7 +887,7 @@ void MantidUI::loadnexusfromICatInterface(const QString& fileName,const QString&
 			list[1]->setText(wsName);
 		}
 	}
-    acceptLoadAlgorithm(dlg,alg);
+    acceptLoadInputs(dlg,alg);
 }
 
 MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
@@ -906,7 +907,7 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API
 		MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
 	return dlg;
 }
-void MantidUI::acceptLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
+void MantidUI::acceptLoadInputs(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
 {
 	if( !dlg ) return;
 	if ( dlg->exec() == QDialog::Accepted)
@@ -1022,6 +1023,7 @@ void MantidUI::renameWorkspace(QString wsName)
 				count=combo->count();
 			}
 			index=index-1;
+	
 		}
 	}//end of if loop for combo
 	if ( dlg->exec() == QDialog::Accepted)
@@ -1155,7 +1157,6 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
     {
         QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
     }
-	
 }
 bool MantidUI::executeICatLogout(int version)
 {
@@ -1165,6 +1166,65 @@ bool MantidUI::executeICatLogout(int version)
 	return result.failed();
 
 }
+/// This method is to execute download data files algorithm from ICat
+void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& fileNames)
+{
+	std::vector<std::string> fileLocs;
+	Mantid::API::IAlgorithm_sptr alg;
+	try
+	{
+		alg = Mantid::API::AlgorithmManager::Instance().create("GetDataFile",-1);
+	}
+	catch(...)
+	{
+		m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server ");
+		return;
+	}
+	try
+	{		
+		alg->setProperty("Filenames",fileNames);
+		alg->setPropertyValue("InputWorkspace","insvestigation");
+	}
+	catch(std::invalid_argument& e)
+	{	
+	   m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+	   return;
+		
+	}
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
+	{
+		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+		return;
+	}
+	m_algMonitor->add(alg);
+
+	try
+	{
+		Poco::ActiveResult<bool> result(alg->executeAsync());
+		while( !result.available() )
+		{
+			QCoreApplication::processEvents();
+		}
+	}
+	catch(...)
+	{
+		m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server");
+		return;
+	}
+	try
+	{
+		fileLocs = alg->getProperty("FileLocations");
+	}
+	catch (Mantid::Kernel::Exception::NotFoundError&e)
+	{
+		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+		return;
+	}
+	
+	emit fileLocations(fileLocs);
+
+}
+
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {

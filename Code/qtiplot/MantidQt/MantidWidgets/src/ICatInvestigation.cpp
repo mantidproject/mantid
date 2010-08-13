@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtMantidWidgets/ICatInvestigation.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Column.h"
@@ -19,15 +18,15 @@ using namespace MantidQt::MantidWidgets;
 // Public member functions
 //----------------------
 ///Constructor
-ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,const QString &Title,
-				    const QString &Instrument,QWidget *par) :QWidget(par),m_invstId(investId),
-					m_RbNumber(RbNumber),m_Title(Title),m_Instrument(Instrument),m_downloadedFileList()
+ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,
+									 const QString &Title,const QString &Instrument,ITableWorkspace_sptr& ws2_sptr,QWidget *par) :
+                                     QWidget(par),m_invstId(investId),m_RbNumber(RbNumber),m_Title(Title),
+									 m_Instrument(Instrument),m_downloadedFileList()
 {
 	initLayout();
 	m_uiForm.invsttableWidget->verticalHeader()->setVisible(false);
-	//m_uiForm.LoadButton->setEnabled(false);
-	//m_uiForm.downloadButton->setEnabled(false);
-	
+	m_investws_sptr=ws2_sptr;
+		
 	populateInvestigationTreeWidget();//Tree on LHS of the display
 
 	connect(m_uiForm.invsttreeWidget,SIGNAL(itemClicked (QTreeWidgetItem*, int )),this,SLOT(investigationClicked(QTreeWidgetItem*, int)));
@@ -44,7 +43,8 @@ ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,
 	connect(this,SIGNAL(loadRawAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadRawAsynch(const QString&,const QString& )));
 	connect(this,SIGNAL(loadNexusAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadNexusAsynch(const QString&,const QString& )));
 	connect(m_uiForm.selectallButton,SIGNAL(clicked()),this,SLOT(onSelectAllFiles()));
-
+	connect(this,SIGNAL(executeDownload(std::vector<std::string>&)),
+		parent()->parent(),SLOT(executeDownloadDataFiles(std::vector<std::string>&)));
 }
 
 /// Set up the dialog layout
@@ -68,7 +68,6 @@ void ICatInvestigation::populateInvestigationTreeWidget(){
 	QTreeWidgetItem *item2 = new QTreeWidgetItem(qlist);
 	item2->setToolTip(0,rbNumber);
 	item1->addChild(item2);
-
 
 	qlist.clear();
 	QString instrument("Instrument: ");
@@ -136,6 +135,11 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataFiles()
 		emit error(e.what());
 		return ws_sptr;
 	}
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
+	{
+		emit error(e.what());
+		return ws_sptr;
+	}
 	
 	try
 	{
@@ -182,6 +186,11 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataSets()
 		emit error(e.what());
 		return ws_sptr;
 	}
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
+	{
+		emit error(e.what());
+		return ws_sptr;
+	}
 	
 	try
 	{
@@ -207,18 +216,11 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataSets()
   *@param fileName -name of the file to download
   *@param fileLocs -archive location of the file
 */
-//bool ICatInvestigation::executeDownloadDataFile(const QString& fileName,QString& fileLoc)
 bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>& fileNames,std::vector<std::string>& fileLocs)
 {
 	//
 	QString algName("GetDataFile");
-	const int version=1;
-
-	if(!AnalysisDataService::Instance().doesExist("insvestigation"))
-	{
-		return false;
-	}
-
+	const int version=-1;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
 	{
@@ -232,7 +234,6 @@ bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>&
 	{
 		
 		alg->setProperty("Filenames",fileNames);
-		//alg->setProperty("InputWorkspace",m_datafilesws_sptr);
 		alg->setPropertyValue("InputWorkspace","insvestigation");
 	}
 	catch(std::invalid_argument& e)
@@ -240,12 +241,12 @@ bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>&
 		emit error(e.what());
 		return false;
 	}
-	/*alg->execute();
-	
-	if(!alg->isExecuted())
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
 	{
-			return false;
-	}*/
+		emit error(e.what());
+		return false;
+	}
+	
 	try
 	{
 		Poco::ActiveResult<bool> result(alg->executeAsync());
@@ -271,6 +272,7 @@ bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>&
 	
 	
 }
+
 /** this method gets called when an item on the investigation tree widget is  clicked
   *@param item - selected item
   *@param int 
@@ -283,14 +285,14 @@ void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 	//QString labelText;
 	//std::stringstream totalCount;
 	if(!item->text(0).compare("Default"))
-	{		
+	{			
 		if(isDataFilesChecked())
 		{
 			if(!m_filteredws_sptr)
 			{
 				m_filteredws_sptr=executeGetdataFiles();
 			}
-			populateinvestigationWidget(m_filteredws_sptr,"DataFiles");
+			populateinvestigationWidget(m_filteredws_sptr,"DataFiles",true);
 		}
 		else
 		{
@@ -299,7 +301,7 @@ void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 				m_datafilesws_sptr = executeGetdataFiles();
 			}
 			if(!m_datafilesws_sptr) return;
-			populateinvestigationWidget(m_datafilesws_sptr,"DataFiles");
+			populateinvestigationWidget(m_datafilesws_sptr,"DataFiles",true);
 		}
 	}
 	else if(!item->text(0).compare("DataSets"))
@@ -309,21 +311,21 @@ void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 
 		}
 		if(!m_datasetsws_sptr)return;
-		populateinvestigationWidget(m_datasetsws_sptr,"DataSets");
-	}
-	else if (item->text(0).compare(m_Title))
-	{
+		populateinvestigationWidget(m_datasetsws_sptr,"DataSets",false);
 	}
 	
 }
 /**This method populates the investigation table widget
   *@param bdataFiles -shared pointer to data files
   *@param ws_sptr - shared pointer to workspace
+  *@param bEnable - flag to enable sorting
 */
-void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace_sptr dataws_sptr,const QString& type)
+void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace_sptr dataws_sptr,const QString& type,bool bEnable)
 {	
 	if(!dataws_sptr){return;}
+
 	Mantid::API::ITableWorkspace_sptr ws_sptr(dataws_sptr);
+
 	//turn off sorting as per QT documentation
 	m_uiForm.invsttableWidget->setSortingEnabled(false);
 	
@@ -336,6 +338,8 @@ void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace
 		m_uiForm.invsttableWidget->removeRow(i);
 	}
 	m_uiForm.invsttableWidget->setRowCount(ws_sptr->rowCount());
+	m_uiForm.invsttableWidget->setColumnCount(ws_sptr->columnCount());
+	 
 	for (int i=0;i<ws_sptr->rowCount();++i)
 	{
 		//m_uiForm.invsttableWidget->insertRow(i);
@@ -384,8 +388,13 @@ void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace
 	m_uiForm.invstlabel->setAlignment(Qt::AlignHCenter);
 	m_uiForm.invstlabel->setFont(font);
 
-	m_uiForm.invsttableWidget->setSortingEnabled(true);
-	m_uiForm.invsttableWidget->sortByColumn(0,Qt::AscendingOrder);
+	
+	//if flag is set sort by first column
+	if(bEnable)
+	{   
+		m_uiForm.invsttableWidget->setSortingEnabled(true);
+		m_uiForm.invsttableWidget->sortByColumn(0,Qt::AscendingOrder);
+	}
  }
 /** Cancel button clicked
 */
@@ -452,41 +461,15 @@ void  ICatInvestigation::onDownload()
 		emit error(msg);
 		return;
 	}
-	if(executeDownloadDataFiles(fileNames,fileLocs))
-	{
-		//set file location.
-		setICatFileLocation(fileLocs);
-	}
-	else
-	{
-		emit error("Downloading failed for data file ");
-	}
-
-	//for(itr=fileNames.begin();itr!=fileNames.end();++itr)
-	//{
-	//	if(executeDownloadDataFile((*itr),fileLoc))
-	//	{
-	//		//set file location.
-	//		setICatFileLocation(fileLoc);
-	//		emit error(fileLoc);
-
-	//	}
-	//	else
-	//	{
-	//		emit error("Downloading failed for data file "+ fileName);
-	//	}
-	//}
-
+	emit executeDownload(fileNames);
+	
 }
-/**This method sets the isis archive location
-  *@fileLoc - isis archive location 
- */ 
-void ICatInvestigation::setICatFileLocation(const std::vector<std::string>& fileLocs)
-{
-	//m_downloadedFileListVec.push_back(fileLoc);
+void ICatInvestigation::setfileLocations(const std::vector<std::string>& fileLocs)
+{	
 	m_downloadedFileList.assign(fileLocs.begin(),fileLocs.end());
-
+	
 }
+
 /**This method gets called when Treewidget item defaults expanded
   *@param item - treewidget item 
 */
@@ -541,32 +524,7 @@ void ICatInvestigation::onLoad()
 		
 	std::vector<std::string>::const_iterator citr;
 	for(citr=sfileNames.begin();citr!=sfileNames.end();++citr)
-	{
-		//std::basic_string <char>::size_type npos = -1;
-		//std::basic_string <char>::size_type index;
-		//std::string filenamePart;
-
-		//std::vector<std::string>::const_iterator cditr;
-		//for(cditr=m_downloadedFileList.begin();cditr!=m_downloadedFileList.end();++cditr)
-		//{
-		//	// the selected file name UI contains only file names,but the downloaded filelist returned
-		//	// by downlaod algorithm contains filename with full path
-		//	// so below code extarcts the file name part and checks file exists in the downloaded list
-		//	index=(*cditr).find_last_of("/");
-		//	if(index!=npos)
-		//	{
-		//		filenamePart=(*cditr).substr(index+1,(*cditr).length()-index);
-		//		//emit error("fileNamepart is "+QString::fromStdString(filenamePart) );
-		//		QString temp=QString::fromStdString(filenamePart);
-		//		QString temp1=QString::fromStdString(*citr);
-		//		if(!temp.compare(temp1,Qt::CaseInsensitive))
-		//		{
-		//			//call load raw/nexus
-		//			loadData(QString::fromStdString(*cditr));
-		//		}
-		//						
-		//	}
-		//}
+	{		
 		std::string loadPath;
 		if(isFileExistsInDownlodedList(*citr,loadPath ))
 		{
@@ -625,7 +583,7 @@ bool ICatInvestigation::loadData( const QString& filePath)
 	int index1 = filePath.lastIndexOf("/");
 	if(index!=-1 && index1!=-1)
 	{
-		wsName=filePath.mid(index1+1,index-index1);
+		wsName=filePath.mid(index1+1,index-index1-1);
 	}
 
 	if (isRawFile(filePath))
@@ -751,8 +709,12 @@ bool ICatInvestigation::execute(const QString& algName,const int& version,const 
 		emit error(e.what());
 		return false;
 	}
-	/*alg->execute();
-	return (alg->isExecuted());*/
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
+	{
+		emit error(e.what());
+		return false;
+	}
+		
 	try
 	{
 		Poco::ActiveResult<bool> result(alg->executeAsync());

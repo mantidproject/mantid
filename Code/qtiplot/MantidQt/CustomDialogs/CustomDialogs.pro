@@ -9,6 +9,7 @@ include(../mantidqt.pri)
 CONFIG += qt
 QT += opengl
 
+
 !exists(\"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\") {
   system(mkdir \"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\")
 }
@@ -30,7 +31,8 @@ SOURCES = $$SRCDIR/LoadRawDialog.cpp \
     $$SRCDIR/MantidGLWidget.cpp \
     $$SRCDIR/PlotAsymmetryByLogValueDialog.cpp \
     $$SRCDIR/LoadDAEDialog.cpp \
-    $$SRCDIR/LoadAsciiDialog.cpp
+    $$SRCDIR/LoadAsciiDialog.cpp \
+    $$SRCDIR/LoginDialog.cpp
     
 HEADERS = $$HEADERDIR/LoadRawDialog.h \
     $$HEADERDIR/LOQScriptInputDialog.h \
@@ -39,13 +41,16 @@ HEADERS = $$HEADERDIR/LoadRawDialog.h \
     $$HEADERDIR/MantidGLWidget.h \
     $$HEADERDIR/PlotAsymmetryByLogValueDialog.h \
     $$HEADERDIR/LoadDAEDialog.h \
-    $$HEADERDIR/LoadAsciiDialog.h
+    $$HEADERDIR/LoadAsciiDialog.h \
+    $$HEADERDIR/LoginDialog.h
+    
     
 UI_DIR = $$HEADERDIR
 
 FORMS = $$HEADERDIR/LOQScriptInputDialog.ui \
     $$HEADERDIR/CreateSampleShapeDialog.ui \
-    $$HEADERDIR/PlotAsymmetryByLogValueDialog.ui
+    $$HEADERDIR/PlotAsymmetryByLogValueDialog.ui \
+    $$HEADERDIR/LoginDialog.ui
     
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomDialogs"
 

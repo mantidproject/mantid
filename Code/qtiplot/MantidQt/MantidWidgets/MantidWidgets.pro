@@ -34,8 +34,10 @@ SOURCES = \
   $$SRCDIR/ICatSearch.cpp  \
   $$SRCDIR/ICatInvestigation.cpp \
   $$SRCDIR/ICatMyDataSearch.cpp \
-  $$SRCDIR/InstrumentSelector.cpp
-   
+  $$SRCDIR/InstrumentSelector.cpp  \
+  $$SRCDIR/ICatUtils.cpp
+  
+ 
 HEADERS = \
   $$HEADERDIR/MantidWidget.h \
   $$HEADERDIR/MWRunFiles.h \
@@ -48,7 +50,8 @@ HEADERS = \
   $$HEADERDIR/ICatSearch.h  \
   $$HEADERDIR/ICatInvestigation.h \
   $$HEADERDIR/ICatMyDataSearch.h \
-  $$HEADERDIR/InstrumentSelector.h
+  $$HEADERDIR/InstrumentSelector.h   \
+  $$HEADERDIR/ICatUtils.h
   
 UI_DIR = $$HEADERDIR
 

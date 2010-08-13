@@ -18,10 +18,25 @@ public:
 signals:
 	 ///this signal prints error messge to log window
    void error(const QString&);
+
+   private slots:
+	   /// Thsi method gets called when an investigation from list of investigations cliked.
+	   void investigationSelected(QTableWidgetItem* );
+
 private:
-	Mantid::API::ITableWorkspace_sptr executeMyDataSearch();
+   /// execute mydatsesrch algorithm
+	bool executeMyDataSearch(Mantid::API::ITableWorkspace_sptr& ws_sptr);
+	/// setting the parent widget
+	void setparentWidget(QWidget* par);
+
 private:
 	Ui::Form m_uiForm;
+
+	///parent widget
+	QWidget* m_applicationWindow;
+
+	/// workspace which contains investigation data like abstrct,facility user names,sample names etc.
+	Mantid::API::ITableWorkspace_sptr  m_ws2_sptr ;
 
 };
 }

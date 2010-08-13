@@ -993,6 +993,9 @@ public slots:
   
   /// execute loadnexus asynchronously
   void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
+
+  /// execute download data files from ICat interface
+  void executeDownloadDataFiles(std::vector<std::string>&);
  
 signals:
 	void modified();
