@@ -220,13 +220,10 @@ public:
     LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
-    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/PG3_732_pulseid.dat" );
-
-    eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setProperty("PulseidFilename", pulsefile);
+    eventLoader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
+    eventLoader->setProperty("PulseidFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_pulseid.dat");
     eventLoader->setPropertyValue("MappingFilename","");
-    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/PG3_Definition.xml");
+//    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/PG3_Definition.xml");
     eventLoader->setPropertyValue("OutputWorkspace", outputws);
     TS_ASSERT( eventLoader->execute() );
 
@@ -252,18 +249,7 @@ public:
     focus.execute();
     TS_ASSERT( focus.isExecuted() );
 
-    std::cout << "---\n-------- ATTEMPT 1 --------\n\n";
-    //Now let's try to rebin using log parameters
-    SimpleRebin rebin;
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", outputws);
-    rebin.setPropertyValue("OutputWorkspace", outputws);
-    // Check it fails if "Params" property not set
-    rebin.setPropertyValue("Params", "0.0001,-1.0,3.2768");
-    TS_ASSERT(rebin.execute());
-    TS_ASSERT(rebin.isExecuted());
-
-
+    //Checks on the output workspace
     EventWorkspace_const_sptr output;
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
 
@@ -274,6 +260,18 @@ public:
     //Because no pixels are rejected or anything, the total # of events should stay the same.
     TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
 
+
+    std::cout << "---\n-------- ATTEMPT 1 --------\n\n";
+    //Now let's try to rebin using log parameters
+    SimpleRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    rebin.setPropertyValue("Params", "0.0001,-1.0,3.2768");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+
+
     //Now let's test the grouping of detector UDETS to groups
     for ( int wi=0; wi<numgroups; wi++)
     {
@@ -282,15 +280,55 @@ public:
       //There should be some data in the bins
       int events_after_binning = 0;
       const MantidVec thisY = output->dataY(wi);
-      std::cout << "index " << wi << ":";
+//      std::cout << "index " << wi << ":";
       for (int i=0; i<15; i++)
       {
         events_after_binning += thisY[i];
-        std::cout << (*output->refX(wi))[i] << "=" << thisY[i] << ", ";
+//        std::cout << (*output->refX(wi))[i] << "=" << thisY[i] << ", ";
       }
-      std::cout << "index " << wi << " has " << events_after_binning << " events.\n";
+//      std::cout << "index " << wi << " has " << events_after_binning << " events.\n";
       TS_ASSERT_LESS_THAN(0, events_after_binning);
     }
+
+    std::cout << "---\n-------- ATTEMPT 2 --------\n\n";
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    rebin.setPropertyValue("Params", "1,1e-4,1.1");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    for ( int wi=0; wi<numgroups; wi++)
+      const MantidVec thisY = output->dataY(wi);
+
+    std::cout << "---\n-------- ATTEMPT 3 --------\n\n";
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    rebin.setPropertyValue("Params", "1,1e-5,1.1");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    for ( int wi=0; wi<numgroups; wi++)
+      const MantidVec thisY = output->dataY(wi);
+
+    std::cout << "---\n-------- ATTEMPT 4 --------\n\n";
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    rebin.setPropertyValue("Params", "1.04,1e-6,1.07");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    for ( int wi=0; wi<numgroups; wi++)
+      const MantidVec thisY = output->dataY(wi);
+
+    std::cout << "---\n-------- ATTEMPT 5 --------\n\n";
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", outputws);
+    rebin.setPropertyValue("OutputWorkspace", outputws);
+    rebin.setPropertyValue("Params", "-8,0.01,3");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    for ( int wi=0; wi<numgroups; wi++)
+      const MantidVec thisY = output->dataY(wi);
 
 
   }

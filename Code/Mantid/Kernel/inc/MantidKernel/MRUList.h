@@ -8,6 +8,7 @@
  */
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
@@ -24,7 +25,7 @@ namespace Kernel
 {
 
   using namespace boost::multi_index;
-  using Kernel::Exception::NotImplementedError;
+  using Mantid::Kernel::Exception::NotImplementedError;
 
   /** An MRU (most recently used) list keeps record of the last n
   *  inserted items, listing first the newer ones. Care has to be

@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -16,9 +17,10 @@ namespace Mantid
 namespace API
 {
 
+//===============================================================================================
 /** A validator for workspaces which can contain a number of individual validators,
     all of which must pass for the overall validator to do so.
-
+Workspace
     @author Russell Taylor, Tessella Support Services plc
     @date 16/09/2008
 
@@ -105,6 +107,7 @@ private:
 };
 
 
+//===============================================================================================
 /** A validator which checks that the unit of the workspace referred to
  *  by a WorkspaceProperty is the expected one.
  *
@@ -158,6 +161,7 @@ private:
 };
 
 
+//===============================================================================================
 /** A validator which checks that a workspace contains histogram data (the default)
  *  or point data as required.
  *
@@ -189,22 +193,77 @@ private:
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
-	  if (m_mustBeHistogram)
-	  {
-		  if ( value->isHistogramData() ) return "";
-		  else return "The workspace must contain histogram data";
-	  }
-	  else
-	  {
-		  if ( !value->isHistogramData() ) return "";
-		  else return "The workspace must not contain histogram data";
-	  }
+    if (m_mustBeHistogram)
+    {
+      if ( value->isHistogramData() ) return "";
+      else return "The workspace must contain histogram data";
+    }
+    else
+    {
+      if ( !value->isHistogramData() ) return "";
+      else return "The workspace must not contain histogram data";
+    }
   }
 
   /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
   const bool m_mustBeHistogram;
 };
 
+
+
+//===============================================================================================
+/** A validator which checks that a workspace is an EventWorkspace.
+ *
+ *  @author Janik Zikovsky, SNS
+ *  @date 13/08/2010
+ */
+template <typename TYPE = MatrixWorkspace>
+class DLLExport EventWorkspaceValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+{
+public:
+  /** Constructor
+   *  @param mustBeHistogram Flag indicating whether the check is that a workspace should
+   *                         be EventWorkspace (true, default) or shouldn't (false).
+   */
+  explicit EventWorkspaceValidator(const bool& mustBeEvent = true) :
+    m_mustBeEvent(mustBeEvent) {}
+
+  virtual ~EventWorkspaceValidator() {}
+
+  ///Gets the type of the validator
+  std::string getType() const { return "eventworkspace"; }
+
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new EventWorkspaceValidator(*this); }
+
+private:
+  /** Checks if the workspace contains a histogram when it shouldn't and vice-versa
+   *  @param value The workspace to test
+   *  @return A user level description if a problem exists or ""
+   */
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  {
+    //Try to cast to EventWorkspace
+    IEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<IEventWorkspace>(value);
+
+    if (m_mustBeEvent)
+    {
+      if ( eventWS ) return "";
+      else return "The workspace must be an EventWorkspace";
+    }
+    else
+    {
+      if ( !eventWS ) return "";
+      else return "The workspace must be not be an EventWorkspace";
+    }
+  }
+
+  /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
+  const bool m_mustBeEvent;
+};
+
+
+
+//===============================================================================================
 /** A validator which checks that a workspace contains raw counts in its bins
  *
  *  @author Russell Taylor, Tessella Support Services plc
@@ -251,6 +310,7 @@ private:
   const bool m_mustNotBeDistribution;
 };
 
+//===============================================================================================
 /** A validator which provides a <I>TENTATIVE</I> check that a workspace contains
  *  common bins in each spectrum.
  *  For efficiency reasons, it only checks that the first and last spectra have

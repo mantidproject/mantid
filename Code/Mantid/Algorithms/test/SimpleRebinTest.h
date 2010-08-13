@@ -240,7 +240,20 @@ public:
     rebin.setPropertyValue("OutputWorkspace","test_inEvent");
     rebin.setPropertyValue("Params", "0.0,4.0,100");
     TS_ASSERT(rebin.execute());
-    TS_ASSERT_EQUALS(el2.dataX().size(), 26);
+    const EventList el3(test_in->getEventListAtWorkspaceIndex(2));
+    TS_ASSERT_EQUALS(el3.dataX().size(), 26);
+
+
+    //Now do it a third time
+    rebin.setPropertyValue("InputWorkspace","test_inEvent");
+    rebin.setPropertyValue("OutputWorkspace","test_inEvent");
+    rebin.setPropertyValue("Params", "-100.0,4.0,100");
+    TS_ASSERT(rebin.execute());
+    const EventList el4(test_in->getEventListAtWorkspaceIndex(2));
+    TS_ASSERT_EQUALS(el4.dataX().size(), 51);
+
+    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve("test_inEvent"));
+    TS_ASSERT_EQUALS(outWS->dataY(0).size(), 50);
 
   }
 

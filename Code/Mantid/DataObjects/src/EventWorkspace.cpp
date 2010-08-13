@@ -482,9 +482,7 @@ using Kernel::Exception::NotImplementedError;
     }
 
     //Clear MRU lists now, free up memory
-    this->m_bufferedDataY.clear();
-    this->m_bufferedDataE.clear();
-
+    this->clearMRU();
   }
 
 
