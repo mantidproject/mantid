@@ -32,8 +32,9 @@ public:
 
   void testSortByTof()
   {
+    std::string wsName("test_inEvent3");
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    AnalysisDataService::Instance().add("test_inEvent", test_in);
+    AnalysisDataService::Instance().add(wsName, test_in);
 
     Workspace2D_sptr test_in_ws2d = Create2DWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("workspace2d", test_in_ws2d);
@@ -43,38 +44,46 @@ public:
     //Not an event workspace
     TS_ASSERT_THROWS( sort.setPropertyValue("InputWorkspace","workspace2d"), std::invalid_argument);
     //This one will be ok
-    sort.setPropertyValue("InputWorkspace","test_inEvent");
+    sort.setPropertyValue("InputWorkspace",wsName);
     sort.setPropertyValue("SortByTof", "1");
 
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
 
-    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve("test_inEvent"));
+    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
     std::vector<TofEvent> ve = outWS->getEventListAtWorkspaceIndex(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
       TS_ASSERT_LESS_THAN( ve[i].tof(), ve[i+1].tof());
+
+    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().remove("workspace2d");
+
   }
 
 
   void testSortByFrame()
   {
+    std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    AnalysisDataService::Instance().add("test_inEvent2", test_in);
+    AnalysisDataService::Instance().add(wsName, test_in);
 
     Sort sort;
     sort.initialize();
-    sort.setPropertyValue("InputWorkspace","test_inEvent2");
+    sort.setPropertyValue("InputWorkspace",wsName);
     sort.setPropertyValue("SortByTof", "0");
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
 
-    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve("test_inEvent2"));
+    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     std::vector<TofEvent> ve = outWS->getEventListAtWorkspaceIndex(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
       TS_ASSERT_LESS_THAN( ve[i].frame(), ve[i+1].frame());
+
+    AnalysisDataService::Instance().remove(wsName);
+
   }
 
 

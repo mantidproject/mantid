@@ -255,6 +255,7 @@ public:
     EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve("test_inEvent"));
     TS_ASSERT_EQUALS(outWS->dataY(0).size(), 50);
 
+    AnalysisDataService::Instance().remove("test_inEvent");
   }
 
 
@@ -311,6 +312,9 @@ public:
     //Match the workspace index->spectraNo map.
     for (int i=0; i<NUMPIXELS; i++)
       TS_ASSERT_EQUALS(test_in->getAxis(1)->spectraNo(i), test_out->getAxis(1)->spectraNo(i));
+
+    AnalysisDataService::Instance().remove("test_inEvent2");
+
   }
     
 
