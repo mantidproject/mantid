@@ -79,38 +79,110 @@ namespace Mantid
 			 */
 			void setKeywords(const std::string& keywords){m_keywords=keywords;}
 
+			/** This method  sets investigationName used for searching
+           	 *  @param investigation name
+			 */
+			void  setInvestigationName(const std::string& instName){ m_investigationName = instName;}
+
+			/** This method  sets investigationAbstract used for searching
+           	 *  @param investigation abstract
+			 */
+			 void setInvestigationAbstract(const std::string& invstabstract){ m_investigationAbstract=invstabstract;}
+
+			/** This method  sets sample used for searching
+           	 *  @param samplename
+			 */
+			void setSampleName(const std::string& sampleName){ m_sampleName = sampleName;}
+
+			/** This method  sets Investigator surname
+           	 *@param surname of the investigator
+			 */
+			void  setInvestigatorSurName(const std::string& investigatorName){m_investigatorSurname = investigatorName;}
+
+			/** This method  sets Rb Number
+           	 *@param Rb number
+			 */
+			 void setRbNumber(const std::string& RbNumber){m_RbNumber = RbNumber;}
+
+			/** This method  sets Investigation Type
+           	 *@param Rb number
+			 */
+			 void setInvestigationType(const std::string& invstType){m_investigationType = invstType;}
+
+			/** This method  sets datafileName
+           	 *@param m_datafileName
+			 */
+			void setDatafileName(const std::string& datafileName ){ m_datafileName =datafileName;}
+
 			/** This method  returns the start run number
-           	 *  @param returns  run start number
+           	 *  @returns  run start number
 			 */
 			const double& getRunStart(){return m_startRun; }
 			/** This method  returns the end run number
-           	 *  @param returns  run end number
+           	 *  @returns  run end number
 			 */
 			const double& getRunEnd(){return m_endRun;}
 			/** This method  returns the instrument name
-           	 *  @param returns  instrument name
+           	 *  @returns  instrument name
 			 */
 			const std::string& getInstrument(){return m_instrName;}
-			/** This method  returns the start date
-           	 *  @param returns  start date
+			/**This method  returns the start date
+           	 * @returns  start date
 			 */
+           
 			const time_t& getStartDate(){return m_startDate;}
 			/** This method  returns the end date
-           	 *  @param returns end date for investigations serch
+           	 *  @returns end date for investigations serch
 			 */
 			const time_t& getEndDate(){return m_endDate;}
 			/** This method  returns case sensitive flag
-           	 *  @param returns  case sensitive flag
+           	 *  @returns  case sensitive flag
 			 */
 			bool getCaseSensitive(){return m_caseSensitive;}
 			/** This method  returns the enum for data search in icat db
-           	 *  @param returns  investigation include
+           	 *  @returns  investigation include
 			 */
 			const ns1__investigationInclude& getInvestigationInclude(){return m_include;}
 			/** This method  returns keywords used for searching
-           	 *  @param returns keywords
+           	 *  @returns keywords
 			 */
 			const std::string& getKeywords(){return m_keywords;}
+
+			/** This method  returns investigationName used for searching
+           	 *  @ returns investigation name
+			 */
+			const std::string& getInvestigationName(){return m_investigationName;}
+
+			/** This method  returns investigationAbstract used for searching
+           	 *  @returns investigation abstract
+			 */
+			const std::string& getInvestigationAbstract(){return m_investigationAbstract;}
+
+			/** This method  returns sample used for searching
+           	 *  @returns samplename
+			 */
+			const std::string& getSampleName(){return m_sampleName;}
+
+			/** This method  returns Investigator surname
+           	 *@returns surname of the investigator
+			 */
+			const std::string& getInvestigatorSurName(){return m_investigatorSurname;}
+
+			/** This method  returns Rb Number
+           	 *@returns Rb number
+			 */
+			const std::string& getRbNumber(){return m_RbNumber;}
+
+			/** This method  returns Investigation Type
+           	 *@returns Rb number
+			 */
+			const std::string& getInvestigationType(){return m_investigationType;}
+
+			/** This method  returns datafileName
+           	 *@returns m_datafileName
+			 */
+			const std::string& getDatafileName(){return m_datafileName;}
+
 		private:
 			double m_startRun;
 			double m_endRun;
@@ -120,6 +192,14 @@ namespace Mantid
 			time_t m_startDate;
 			time_t m_endDate;
 			ns1__investigationInclude m_include;
+
+			std::string m_investigationName;
+			std::string m_investigationAbstract;
+			std::string m_sampleName;
+			std::string m_investigatorSurname;
+			std::string m_RbNumber;
+			std::string m_investigationType;
+			std::string m_datafileName;
 
 		};
 		class CSearchHelper
@@ -139,7 +219,7 @@ namespace Mantid
 			//int doSearchByRunNumber(const double& dstartRun,const double& dendRun,bool bCase,const std::string& instrName,const time_t& startDate,const time_t& endDate, ns1__investigationInclude einclude,
 			//	API::ITableWorkspace_sptr& responsews_sptr);
 			/// method to search isis basic search
-			int doIsisSearch(CSearchInput& input,API::ITableWorkspace_sptr& responsews_sptr);
+			int doISISSearch(CSearchInput& input,API::ITableWorkspace_sptr &outputws);
 
 			/// calls getInvestigationIncludes api's
 			int getDataFiles(long long invId,bool bDataFiles,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
@@ -148,15 +228,18 @@ namespace Mantid
 			int doDataSetsSearch(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
 
 			/// This method lists the isntruments
-			API::ITableWorkspace_sptr listInstruments();
+			void  listInstruments(API::ITableWorkspace_sptr & ws_sptr);
+
+			/// This method lists the investigation types
+			void listInvestigationTypes(API::ITableWorkspace_sptr & ws_sptr);
 
 			/// This method disconnects last connected  session from icat DB
 			int doLogout();
 
 			/// This method does investigations data search for logged in user
-			void doMyDataSearch(API::ITableWorkspace_sptr & ws_sptr);
-			
-			
+			void doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr);
+
+				
 		private:
 			
 			/// This method sets the request parameters for investigation includes.
@@ -172,7 +255,7 @@ namespace Mantid
 			API::ITableWorkspace_sptr saveFileSearchResponse(const ns1__searchByAdvancedResponse& response);
 
 			/// This method saves the response data of search by run number to table workspace
-			void saveSearchResponse(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws);
+			void saveSearchRessults(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws);
 
 			/// this method saves investigation include response to a table workspace
 			void  saveInvestigationIncludesResponse(bool bDataFiles,
@@ -186,7 +269,10 @@ namespace Mantid
 			void setReqparamforlistInstruments(ns1__listInstruments& request);
 
 			/// This method saves Instrument List to a table workspace
-			API::ITableWorkspace_sptr saveInstrumentList(const ns1__listInstrumentsResponse& response);
+			void  saveInstrumentList(const ns1__listInstrumentsResponse& response,API::ITableWorkspace_sptr & ws_sptr);
+
+			/// This method saves the investigations types to a table workspace
+			void saveInvestigationsTypesList(const ns1__listInvestigationTypesResponse& response,API::ITableWorkspace_sptr &outputws);
 
 			/// This method creates table workspace
 			API::ITableWorkspace_sptr createTableWorkspace();
@@ -199,6 +285,9 @@ namespace Mantid
 
 			///save investigations
 			void saveInvestigations(const std::vector<ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws);
+
+			///saves 
+			void saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t);
 		       
 
 			/* This is a template method to save data to table workspace

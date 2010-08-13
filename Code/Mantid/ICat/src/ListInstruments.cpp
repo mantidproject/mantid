@@ -20,14 +20,19 @@ namespace Mantid
 		/// exec method
 		void CListInstruments::exec()
 		{
-			API::ITableWorkspace_sptr ws_sptr=listInstruments();
+			//API::ITableWorkspace_sptr ws_sptr=
+			ITableWorkspace_sptr ws_sptr= WorkspaceFactory::Instance().createTable("TableWorkspace");
+			listInstruments(ws_sptr); 
 			setProperty("OutputWorkspace",ws_sptr);
 		}
-		/// List instruments
-		API::ITableWorkspace_sptr CListInstruments::listInstruments()
+
+		/**This method returns list of instruments from ICat DB
+		 *@param ws_sptr - shared pointer to table workspace
+		 */
+		void CListInstruments::listInstruments(ITableWorkspace_sptr& ws_sptr)
 		{
 			CSearchHelper searchObj;
-			return searchObj.listInstruments();
+			searchObj.listInstruments(ws_sptr);
 		}
 
 	}

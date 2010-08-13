@@ -42,8 +42,8 @@ public:
 		searchobj.setPropertyValue("StartRun", "100.0");
 		searchobj.setPropertyValue("EndRun", "109.0");
 		searchobj.setPropertyValue("Instrument","LOQ");
-		searchobj.setPropertyValue("OutputWorkspace","SearchBy_RunNumber");
-				
+		searchobj.setPropertyValue("OutputWorkspace","Investigations");
+					
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
 
@@ -70,7 +70,7 @@ public:
 				
 		searchobj.setPropertyValue("Keywords","000117");
 		searchobj.setPropertyValue("Instrument","HRPD");
-		searchobj.setPropertyValue("OutputWorkspace","SearchBy_RunNumber");
+		searchobj.setPropertyValue("OutputWorkspace","Investigations");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
@@ -78,9 +78,6 @@ public:
 	}
 	void testSearchBybyStartDate()
 	{
-		/*std::string s;
-		std::getline(std::cin,s);*/
-
 		CSearchByRunNumber searchobj;
 		Login loginobj;
 		Session::Instance();
@@ -95,12 +92,12 @@ public:
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
-		//searchobj.setPropertyValue("StartRun", "100.0");
-		//searchobj.setPropertyValue("EndRun", "109.0");
-		searchobj.setPropertyValue("Instrument","MERLIN");
-		searchobj.setPropertyValue("StartDate","10/08/2008");
-		searchobj.setPropertyValue("EndDate","22/08/2008");
-		searchobj.setPropertyValue("OutputWorkspace","SearchBy_RunNumber");
+		searchobj.setPropertyValue("StartRun", "100.0");
+		searchobj.setPropertyValue("EndRun", "105.0");
+		searchobj.setPropertyValue("Instrument","LOQ");
+		//searchobj.setPropertyValue("StartDate","10/08/2008");
+		//searchobj.setPropertyValue("EndDate","22/08/2008");
+		searchobj.setPropertyValue("OutputWorkspace","Investigations");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
@@ -127,7 +124,7 @@ public:
 		searchobj.setPropertyValue("EndRun", "102.0");
 		searchobj.setPropertyValue("Instrument","LOQ");
 				
-    	searchobj.setPropertyValue("OutputWorkspace","SearchBy_RunNumber");
+    	searchobj.setPropertyValue("OutputWorkspace","Investigations");
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		//should fail
 		TS_ASSERT( !searchobj.isExecuted() );

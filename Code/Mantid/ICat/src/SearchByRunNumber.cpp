@@ -1,10 +1,7 @@
 #include "MantidICat/SearchByRunNumber.h"
-#include"MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include"MantidICat/SearchHelper.h"
-
 #include <time.h>
 #include <iomanip>
 
@@ -34,20 +31,32 @@ namespace Mantid
 
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
 				"The name of the workspace that will be created to store the ICat investigations search result.");
+			
 		}
 		/// Execution method.
 		void CSearchByRunNumber::exec()
 		{			
-			API::ITableWorkspace_sptr ws_sptr=doSearchByRunNumber();
+			//API::ITableWorkspace_sptr ws_sptr=doSearchByRunNumber();
+			ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
+			doSearchByRunNumber(ws_sptr);
 			setProperty("OutputWorkspace",ws_sptr);
+			
 		}
 
-		/* This method does search by run number and instrument name.
-		 * @returns shared pointer to table workspace which stores the data
+		/**This method does search by run number and instrument name.
+		 * @param outputws shared pointer to table workspace which stores the data
 		 */
-		API::ITableWorkspace_sptr  CSearchByRunNumber::doSearchByRunNumber()
-		{	
+		void  CSearchByRunNumber::doSearchByRunNumber(ITableWorkspace_sptr &outputws)
+		{				
 			CSearchInput inputs;
+			getInputProperties(inputs);
+			CSearchHelper searchobj;
+			searchobj.doISISSearch(inputs,outputws);
+	
+		}
+
+		void CSearchByRunNumber::getInputProperties(CSearchInput& inputs)
+		{
 			double dstartRun=getProperty("StartRun");
 			if(dstartRun<0)
 			{
@@ -77,9 +86,8 @@ namespace Mantid
 			{
 				throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
 			}
-			
 			inputs.setStartDate(startDate);
-		
+
 			date = getPropertyValue("EndDate");
 			time_t endDate = getTimevalue(date);
 			if(endDate==-1)
@@ -87,26 +95,19 @@ namespace Mantid
 				throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
 			}
 			inputs.setEndDate(endDate);
-			
+
 			std::string keyWords=getPropertyValue("Keywords");
 			inputs.setKeywords(keyWords);
-			
+
 			bool bCase=getProperty("Case Sensitive");
 			inputs.setCaseSensitive(bCase);
-			
-			inputs.setInvestigationInclude(ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES);
-	
-			API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
-			CSearchHelper searchobj;
-			//int ret_advsearch=searchobj.doSearchByRunNumber(dstartRun,dendRun,bCase,instrument,
-			//	ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,outputws);
-			int ret_search=searchobj.doIsisSearch(inputs,outputws);
-			return outputws;
-		
+
+			inputs.setInvestigationInclude(ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES);
 		}
+
 		/**This method saves the date components to C library struct tm
-		  *@param sDate
-		  *@return time_t 
+		 *@param sDate string containing the date 
+		 *@return time_t value of date 
 		*/
 		time_t CSearchByRunNumber::getTimevalue(const std::string& sDate)
 		{
@@ -159,7 +160,7 @@ namespace Mantid
 			 return std::mktime (&timeinfo );
 		}
 		/**This method validates the date properties
-		  *@param timeinfo
+		 *@param timeinfo refrence to structure containing time information
 		 */
 		void CSearchByRunNumber::validateTimeFormat(const struct tm &timeinfo)
 		{

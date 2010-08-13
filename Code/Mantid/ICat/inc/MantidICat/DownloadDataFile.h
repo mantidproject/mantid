@@ -9,7 +9,7 @@
   * If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
   * Then uses POCO http methods to download over internet.
        
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -40,7 +40,7 @@ namespace Mantid
 		{
 		public:
 			/// Constructor
-			CDownloadDataFile():API::Algorithm(){}
+			CDownloadDataFile():API::Algorithm(),m_prog(0.0){}
 			/// Destructor
 			~CDownloadDataFile(){}
 			/// Algorithm's name for identification overriding a virtual method
@@ -82,7 +82,7 @@ namespace Mantid
 			void getRunNumberfromFileName(const std::string& fileName, std::string& runNumber);
 
 			/// If the extn of the file .raw it returns true
-			bool isBinaryFile(const std::string & fileName);
+			bool isDataFile(const std::string& fileName);
 
 			/// This method saves the downloaded file to disc
 			void saveFiletoDisk(std::istream& rs,const std::string &fileName);
@@ -95,6 +95,10 @@ namespace Mantid
 
             /// This method checks the file is already downled by looking at the file name in downlaoded file list.
 			bool isFileDownloaded(const std::string& fileName,std::vector<std::string>& downloadedList );
+		
+		private:
+			/// progree indicator
+			double m_prog;
 
 		   
 

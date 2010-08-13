@@ -64,7 +64,7 @@ namespace Mantid
 			void exec();
 			
 			/// Search method 
-			API::ITableWorkspace_sptr  doMyDataSearch();
+			void doMyDataSearch(API::ITableWorkspace_sptr& outputws);
 												
 		};
 	}

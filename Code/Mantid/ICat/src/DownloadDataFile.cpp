@@ -78,7 +78,7 @@ namespace Mantid
 
 			}
 			//get file name
-			//std::string inputfile = getPropertyValue("Filename");
+		
 			std::vector<std::string> inputfiles = getProperty("Filenames");
 			//get input workspace
 			API::ITableWorkspace_sptr ws_sptr = getProperty("InputWorkspace");
@@ -88,6 +88,7 @@ namespace Mantid
 			}
 			std::vector<std::string> fileLocations;
             int ret=0;
+			double counter=0.0;
 			std::vector<std::string>::const_iterator citr;
 			for(citr=inputfiles.begin();citr!=inputfiles.end();++citr)
 			{
@@ -104,11 +105,17 @@ namespace Mantid
 				boost::shared_ptr<LONG64>fileId_sptr(new LONG64 );
 				request.datafileId=fileId_sptr.get();
 
+				//m_prog=0.10;
+				//progress(m_prog, "setting input params...");
+
 				setRequestParameters(inputfile,ws_sptr,request);
 
 				ns1__getDatafileResponse response;
 
 				ret=icat.getDatafile(&request,&response);
+				m_prog =(double(++counter)/double(inputfiles.size()))/2.0;
+				
+				progress(m_prog, "getting the location string from isis archive...");
 				if(ret==0)
 				{
 					if(response.return_->location)
@@ -146,8 +153,7 @@ namespace Mantid
 				}
 				if(!isis_archive)
 				{
-					g_log.information()<<"File can not be opened from isis archive,calling ICat API to download from data server"<<std::endl;
-
+					g_log.information()<<"File can not be opened from isis archive,calling ICat API to download from data.isis server"<<std::endl;
 					std::vector<std::string> fileList;
 					std::string runNumber;
 					//if the file is already downloded don't down load it again.
@@ -159,7 +165,7 @@ namespace Mantid
 					}
 					
 					//get the name of all files associated with raw/nexus file to download
-					if(isBinaryFile(inputfile))
+					if(isDataFile(inputfile))
 					{
 						getRunNumberfromFileName(inputfile,runNumber);
 
@@ -180,10 +186,11 @@ namespace Mantid
 					//set the filelocation property
 					//setProperty("FileLocation",downloadFileName);
 					fileLocations.push_back(downloadedFName);
-					
 					setProperty("FileLocations",fileLocations);
 				}
 			}
+			m_prog =1.0;
+			progress(m_prog,"saving the location string to mantid...");
 			return ret;
 
 		}
@@ -208,7 +215,8 @@ namespace Mantid
 		*/
 		void CDownloadDataFile::downloadFileOverInternet(ICATPortBindingProxy &icat,const std::vector<std::string>& fileList,
 			API::ITableWorkspace_sptr ws_sptr)
-		{						
+		{	
+			double counter =0.0;
 			std::vector<std::string>::const_iterator citr;
 			for(citr=fileList.begin();citr!=fileList.end();++citr)
 			{
@@ -227,6 +235,9 @@ namespace Mantid
 				ns1__downloadDatafileResponse response;
 				// get the URL using ICAT API
 				int ret=icat.downloadDatafile(&request,&response);
+				
+				m_prog +=(double(++counter)/double(fileList.size()))/2.0;
+				progress(m_prog, "downloading the file from data.isis server...");
 				if(ret!=0)
 				{
 					CErrorHandling::throwErrorMessages(icat);
@@ -369,7 +380,7 @@ namespace Mantid
 		* to open the file in binary or ascii mode
 		* @param fileName  file name
 		*/
-		bool CDownloadDataFile::isBinaryFile(const std::string & fileName)
+		bool CDownloadDataFile::isDataFile(const std::string & fileName)
 		{			
 			std::basic_string <char>::size_type dotIndex;
 			const std::basic_string <char>::size_type npos = -1;
@@ -379,7 +390,6 @@ namespace Mantid
 
 			bool binary;
 			(!fextn.compare("raw")|| !fextn.compare("RAW")|| !fextn.compare("nxs")|| !fextn.compare("NXS")) ? binary = true : binary = false;
-			//std::cout<<"file opening mode  for filename "<<fileName<<"is "<<binary<<std::endl;
 			return binary;
 
 		}
@@ -410,7 +420,7 @@ namespace Mantid
 				std::istream& rs = session.receiveResponse(res);
 				clock_t end=clock();
 		        float diff = float(end - start)/CLOCKS_PER_SEC;
-				g_log.information()<<"Time taken to download file "<< fileName<<"  is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+				g_log.information()<<"Time taken to download file "<< fileName<<" is "<<std::fixed << std::setprecision(2) << diff <<" seconds" << std::endl;
 				//save file to local disk
 				saveFiletoDisk(rs,fileName);
 
@@ -438,7 +448,7 @@ namespace Mantid
 			
 			std::ios_base::openmode mode;
 			//if raw/nexus file open it in binary mode else ascii 
-			isBinaryFile(fileName)? mode = std::ios_base::binary : mode = std::ios_base::out;
+			isDataFile(fileName)? mode = std::ios_base::binary : mode = std::ios_base::out;
 			std::ofstream ofs(filepath.c_str(), mode);
 			if ( ofs.rdstate() & std::ios::failbit )
 			{

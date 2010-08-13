@@ -8,7 +8,7 @@
 /**  SessionImpl is a singleton class responsible for saving the session id. 
      This class is used across all Mantid-ICat algorithms to get the session id 
 		
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

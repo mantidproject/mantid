@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-
+#include"MantidICat/SearchHelper.h"
 
 /** CSearchByRunNumber is a class responsible for SearchByRunNumber algorithm.
   * This algorithm does the basic search and returns the investigations record
@@ -19,7 +19,7 @@
 	<LI> Case Sensitive - The case ensitive boolean flag used for search </LI>
     </UL>
    
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -70,12 +70,14 @@ namespace Mantid
 			void exec();
 			
 			/// Search method 
-			API::ITableWorkspace_sptr  doSearchByRunNumber();
+			void  doSearchByRunNumber(API::ITableWorkspace_sptr &outputws);
 
 			 /// saves components in DD/MM/YYYY to struct tm
 			 time_t getTimevalue(const std::string& sDate);
              /// this method validates the format of date properties
 			 void validateTimeFormat(const struct tm& timeinfo);
+             /// get all inputs for the algorithm
+			 void getInputProperties(CSearchInput& inputs);
 
 									
 		};

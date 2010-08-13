@@ -6,7 +6,7 @@
 /** CErrorHandling class responsible for handling errors in Mantid-ICat Algorithms.
   * This algorithm  gives the datsets for a given investigations record
        
-    @author Sofia Antony, ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

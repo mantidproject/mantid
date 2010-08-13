@@ -11,7 +11,7 @@
       
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 09/07/2010
-    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -56,8 +56,8 @@ namespace Mantid
 			/// Overwrites Algorithm exec method
 			void exec();
 
-			/// Search method 
-			API::ITableWorkspace_sptr  listInstruments();
+			/// List instruments method 
+			void  listInstruments(API::ITableWorkspace_sptr& ws_sptr);
 		};
 	}
 }

@@ -14,22 +14,24 @@ namespace Mantid
 		{
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
                             "The name of the workspace to store the result of MyData search ");
+			
 		}
 		/// Execution method.
 		void CMyDataSearch::exec()
-		{			
-			API::ITableWorkspace_sptr ws_sptr=doMyDataSearch();
-			setProperty("OutputWorkspace",ws_sptr);
+		{	
+			API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
+			doMyDataSearch(outputws);
+			setProperty("OutputWorkspace",outputws);
+		
 		}
-		/* This method does looged in users investigations search.
-		 * @returns shared pointer to table workspace which stores the data
+		/* This method does logged in users investigations search.
+		 * @param outputws pointer to table workspace which stores the data
 		 */
-		API::ITableWorkspace_sptr  CMyDataSearch::doMyDataSearch()
-		{
-			API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
+		void  CMyDataSearch::doMyDataSearch(API::ITableWorkspace_sptr& outputws)
+		{			 
 			CSearchHelper searchobj;
 			searchobj.doMyDataSearch(outputws);
-			return outputws;
+			
 		}
 	}
 }

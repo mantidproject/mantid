@@ -41,7 +41,7 @@ namespace Mantid
 			m_prog=0.2;
 			std::string username=getProperty("Username");
 			std::string password=getProperty("Password");
-			progress(m_prog, "User Name and Password...");
+			progress(m_prog, "Getting username and password ...");
 
 			// Define ssl authentication scheme
 			if (soap_ssl_client_context(&icat,
