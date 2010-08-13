@@ -178,6 +178,8 @@ void LoadEventPreNeXus::exec()
   // TODO localWorkspace->setTitle(title);
 
   this->runLoadInstrument(event_filename, localWorkspace);
+  // Populate the instrument parameters in this workspace
+  localWorkspace->populateInstrumentParameters();
 
   // load the mapping file
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
