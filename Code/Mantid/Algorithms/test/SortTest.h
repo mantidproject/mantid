@@ -30,7 +30,7 @@ public:
   }
 
 
-  void testSortByTof()
+  void xtestSortByTof()
   {
     std::string wsName("test_inEvent3");
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
@@ -63,7 +63,7 @@ public:
   }
 
 
-  void testSortByFrame()
+  void xtestSortByFrame()
   {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);

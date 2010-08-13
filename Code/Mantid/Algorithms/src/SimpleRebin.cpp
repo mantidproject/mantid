@@ -40,7 +40,8 @@ namespace Mantid
       declareProperty(
         new ArrayProperty<double>("Params", new RebinParamsValidator),
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-        "this can be followed by a comma and more widths and last boundary pairs");
+        "this can be followed by a comma and more widths and last boundary pairs.\n"
+        "Negative width values indicate logarithmic binning.");
     }
 
 

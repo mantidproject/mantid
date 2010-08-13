@@ -21,8 +21,8 @@ namespace Algorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The name of the workspace to take as input. Must contain histogram data. </LI>
-    <LI> SortType - The new bin boundaries in the form X1,deltaX1,X2,deltaX2,X3,... </LI>
+    <LI> InputWorkspace  - The name of the workspace to take as input. Must contain event data. </LI>
+    <LI> SortByTof - check to sort by Time of Flight; uncheck to sort by frame index.</LI>
     </UL>
 
     @author Janik Zikovsky, SNS
@@ -60,7 +60,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Sort";}
+  virtual const std::string category() const { return "General";}
 
 protected:
   // Overridden Algorithm methods
