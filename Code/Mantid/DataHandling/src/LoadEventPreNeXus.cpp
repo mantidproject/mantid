@@ -16,6 +16,7 @@
 #include "MantidKernel/Glob.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -525,7 +526,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
     //--- Find out where the iterators need to be ----
     PixelMapType::iterator it_counter;
     PixelMapType::iterator * start_map_it = new PixelMapType::iterator[num_cpus+1];
-    start_map_it[0] = das_pixel_map.begin();LoadEventPreNeXus
+    start_map_it[0] = das_pixel_map.begin();
     size_t counter = 0;
     size_t block_counter = 0;
     for (it_counter = das_pixel_map.begin(); it_counter != das_pixel_map.end(); it_counter++)
