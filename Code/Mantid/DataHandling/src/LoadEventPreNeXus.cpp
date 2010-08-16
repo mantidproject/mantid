@@ -254,6 +254,10 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
   instrument = instrument.substr(0, pos);
 
   string filename = Mantid::Kernel::ConfigService::Instance().getInstrumentFilename(instrument);
+  if (filename.empty())
+    return;
+  if (!Poco::File(filename).exists())
+    return;
 
   // do the actual work
   IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
