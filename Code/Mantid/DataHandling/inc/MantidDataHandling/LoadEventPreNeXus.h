@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 
@@ -106,7 +107,7 @@ private:
   /// The total proton charge for the run.
   double proton_charge_tot;
 
-  std::ifstream * eventfile; ///<File stream to the event file
+  Mantid::Kernel::BinaryFile<DasEvent> * eventfile; /// Handles loading from the event file
   std::size_t num_events; ///<the number of events
   std::size_t num_pulses; ///<the number of pulses
   uint32_t numpixel; ///<the number of pixels

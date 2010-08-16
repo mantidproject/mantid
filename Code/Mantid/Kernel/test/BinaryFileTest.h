@@ -4,8 +4,14 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/System.h"
-#include <stdint.h>
 #include <sys/stat.h>
+
+#ifdef _WIN32 /* _WIN32 */
+typedef unsigned uint32_t;
+#include <time.h>
+#else
+#include <stdint.h> //MG 15/09/09: Required for gcc4.4
+#endif
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -64,6 +70,24 @@ public:
     TS_ASSERT_EQUALS( data->at(num-1).pid, 0x9883);
 
     delete data;
+  }
+
+  void testLoadAllInto()
+  {
+    TS_ASSERT_THROWS_NOTHING( file.open("../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat"));
+    //Right size?
+    size_t num = 400104/8;
+    TS_ASSERT_EQUALS(file.getNumElements(), num);
+    //Get it
+    std::vector<DasEvent> data;
+    TS_ASSERT_THROWS_NOTHING( file.loadAllInto(data) );
+    TS_ASSERT_EQUALS(data.size(), num);
+    //Check the first event
+    TS_ASSERT_EQUALS( data.at(0).tof, 0x25781);
+    TS_ASSERT_EQUALS( data.at(0).pid, 0x8d82);
+    //Check the last event
+    TS_ASSERT_EQUALS( data.at(num-1).tof, 0x3163f);
+    TS_ASSERT_EQUALS( data.at(num-1).pid, 0x9883);
   }
 
   void testLoadInBlocks()

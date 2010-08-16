@@ -76,8 +76,6 @@ static const uint32_t NANO_TO_SEC = 1000000000;
 static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
-/// Determine the size of the buffer for reading in binary files.
-static size_t getBufferSize(const size_t num_items);
 
 LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::Algorithm()
 {
@@ -119,7 +117,7 @@ void LoadEventPreNeXus::init()
 }
 
 //-----------------------------------------------------------------------------
-static string generatPulseidName(string eventfile)
+static string generatePulseidName(string eventfile)
 {
   size_t start;
   string ending;
@@ -196,7 +194,7 @@ void LoadEventPreNeXus::exec()
   string pulseid_filename = this->getPropertyValue(PULSEID_PARAM);
   if (pulseid_filename.empty())
   {
-    pulseid_filename = generatPulseidName(event_filename);
+    pulseid_filename = generatePulseidName(event_filename);
     if (!pulseid_filename.empty())
     {
       if (Poco::File(pulseid_filename).exists())
@@ -334,36 +332,26 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   this->num_error_events = 0;
   this->num_good_events = 0;
 
-  size_t event_offset = 0;
-  size_t event_buffer_size = getBufferSize(this->num_events);
-
   double shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
   double longest_tof = 0.;
 
   //Initialize progress reporting.
+  size_t event_buffer_size = Mantid::Kernel::DEFAULT_BLOCK_SIZE;
   Progress prog(this,0.0,1.0, this->num_events/event_buffer_size);
 
-  //Try to parallelize the code - commented out because it actually makes the code slower!
-  size_t frame_index = 0;
-  for (event_offset = 0; event_offset  < this->num_events; event_offset += event_buffer_size)
+  //Allocate the buffer
+  DasEvent * event_buffer = new DasEvent[event_buffer_size];
+
+  while (eventfile->getOffset() < this->num_events)
   {
-    //Variables are defined
-    DasEvent * event_buffer = new DasEvent[event_buffer_size];
+    //Load a block into the buffer directly
+    size_t current_event_buffer_size = eventfile->loadBlock(event_buffer, event_buffer_size);
+
     DasEvent temp;
     uint32_t period;
-    size_t current_event_buffer_size;
-    //Local incremented variables
-    size_t my_errors = 0;
-    size_t my_events = 0;
+    size_t frame_index;
 
-    // adjust the buffer size
-    current_event_buffer_size = event_buffer_size;
-    if (event_offset + current_event_buffer_size > this->num_events)
-      current_event_buffer_size = this->num_events - event_offset;
-
-    // read in the data
-    this->eventfile->read(reinterpret_cast<char *>(event_buffer),
-        current_event_buffer_size * sizeof(DasEvent));
+    size_t event_offset = eventfile->getOffset();
 
     // process the individual events
     for (size_t i = 0; i < current_event_buffer_size; i++) {
@@ -371,7 +359,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
       if ((temp.pid & ERROR_PID) == ERROR_PID) // marked as bad
       {
-        my_errors++;
+        this->num_error_events++;
         continue;
       }
 
@@ -395,18 +383,16 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
       // TODO work with period
       // TODO filter based on pixel ids
-      my_events++;
+      this->num_good_events++;
     }
 
-    //Fold back the counters into the main one
-    this->num_error_events += my_errors;
-    this->num_good_events += my_events;
-
-    delete event_buffer;
 
     //Report progress
     prog.report();
   }
+
+  delete [] event_buffer;
+
 
   //--------- Pad Empty Pixels -----------
   if (this->getProperty(PAD_PIXELS_PARAM))
@@ -463,210 +449,210 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
  */
 void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & workspace)
 {
-  std::cout << "--- procEventsParallel starting ----\n";
-
-  // do the actual loading
-  this->num_error_events = 0;
-  this->num_good_events = 0;
-
-  size_t event_offset = 0;
-  size_t event_buffer_size = getBufferSize(this->num_events);
-
-  double shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
-  double longest_tof = 0.;
-
-  //Initialize progress reporting.
-  Progress prog(this,0.0,1.0, this->num_events/event_buffer_size);
-
-  //Try to parallelize the code - commented out because it actually makes the code slower!
-  size_t frame_index = 0;
-  for (event_offset = 0; event_offset  < this->num_events; event_offset += event_buffer_size)
-  {
-    //Variables are defined
-    DasEvent * event_buffer = new DasEvent[event_buffer_size];
-    DasEvent temp;
-    size_t current_event_buffer_size;
-    //Local incremented variables
-    size_t my_errors = 0;
-    size_t my_events = 0;
-
-    // adjust the buffer size
-    current_event_buffer_size = event_buffer_size;
-    if (event_offset + current_event_buffer_size > this->num_events)
-      current_event_buffer_size = this->num_events - event_offset;
-
-    // read in the data
-    std::cout << "--- Loading from File ----\n";
-    this->eventfile->read(reinterpret_cast<char *>(event_buffer),
-        current_event_buffer_size * sizeof(DasEvent));
-
-    //This is a map, with the DAS pixel ID as the index
-    typedef std::map<int, std::vector<DasTofType> > PixelMapType;
-    PixelMapType das_pixel_map;
-
-    std::cout << "--- Process (serially) the entire list of DAS events ----\n";
-    //--- Process (serially) the entire list of DAS events ----
-    for (size_t i=0; i < current_event_buffer_size; i++)
-    {
-      temp = *(event_buffer + i);
-      //Add this time of flight to this das pixelid entry.
-      das_pixel_map[temp.pid].push_back(temp.tof);
-    }
-
-    //# of unique DAS pixel IDs
-    PixelType num_unique_pixels = das_pixel_map.size();
-    std::cout << "# of unique pixels = " << num_unique_pixels << "\n";
-
-    //Will split in blocks of this size.
-    size_t num_cpus = 4;
-    //Size of block is 1/num_cpus, rounded up
-    PixelType block_size = (num_unique_pixels + (num_cpus-1)) / num_cpus;
-
-    std::cout << "--- Find out where the iterators need to be ----\n";
-    //--- Find out where the iterators need to be ----
-    PixelMapType::iterator it_counter;
-    PixelMapType::iterator * start_map_it = new PixelMapType::iterator[num_cpus+1];
-    start_map_it[0] = das_pixel_map.begin();
-    size_t counter = 0;
-    size_t block_counter = 0;
-    for (it_counter = das_pixel_map.begin(); it_counter != das_pixel_map.end(); it_counter++)
-    {
-      if ((counter % block_size) == 0)
-      {
-        //This is where you need to start iterating
-        start_map_it[block_counter] = it_counter;
-        //No need to iterate to the end
-        if (block_counter == num_cpus - 1)
-          break;
-        block_counter++;
-      }
-      counter++;
-    }
-    //The ending iterator
-    start_map_it[num_cpus] = das_pixel_map.end();
-
-    PARALLEL_FOR1(workspace)
-    for (int block_num=0; block_num < num_cpus; block_num++)
-    {
-      std::cout << "Starting iterating through block " << block_num << "\n";
-      //Make an iterator into the map
-      PixelMapType::iterator it;
-
-      //Iterate through this chunk of the map
-      for (it = start_map_it[block_num]; it != start_map_it[block_num+1]; it++)
-      {
-        //Get the pixel id of it
-        PixelType pid = it->first;
-        //std::cout << "pixelid is " << pid << "\n";
-        //This is the vector of tof values
-        std::vector<DasTofType> tof_vector = das_pixel_map[pid];
-        std::vector<DasTofType>::iterator it2;
-
-        for (it2 = tof_vector.begin(); it2 != tof_vector.end(); it2++)
-        {
-          //The time of flight
-          DasTofType tof = *it2;
-          //Make a TofEvent here
-          TofEvent event = TofEvent(tof, frame_index);
-          //TODO: Fix the PID here
-          //Add it to the list
-          workspace->getEventList(pid).addEventQuickly(event);
-        }
-      }
-    }
-
-    delete [] start_map_it;
-
+//  std::cout << "--- procEventsParallel starting ----\n";
 //
-//    // process the individual events
-//    for (size_t i = 0; i < current_event_buffer_size; i++) {
+//  // do the actual loading
+//  this->num_error_events = 0;
+//  this->num_good_events = 0;
+//
+//  size_t event_offset = 0;
+//  size_t event_buffer_size = getBufferSize(this->num_events);
+//
+//  double shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
+//  double longest_tof = 0.;
+//
+//  //Initialize progress reporting.
+//  Progress prog(this,0.0,1.0, this->num_events/event_buffer_size);
+//
+//  //Try to parallelize the code - commented out because it actually makes the code slower!
+//  size_t frame_index = 0;
+//  for (event_offset = 0; event_offset  < this->num_events; event_offset += event_buffer_size)
+//  {
+//    //Variables are defined
+//    DasEvent * event_buffer = new DasEvent[event_buffer_size];
+//    DasEvent temp;
+//    size_t current_event_buffer_size;
+//    //Local incremented variables
+//    size_t my_errors = 0;
+//    size_t my_events = 0;
+//
+//    // adjust the buffer size
+//    current_event_buffer_size = event_buffer_size;
+//    if (event_offset + current_event_buffer_size > this->num_events)
+//      current_event_buffer_size = this->num_events - event_offset;
+//
+//    // read in the data
+//    std::cout << "--- Loading from File ----\n";
+////    this->eventfile->read(reinterpret_cast<char *>(event_buffer),
+////        current_event_buffer_size * sizeof(DasEvent));
+//
+//    //This is a map, with the DAS pixel ID as the index
+//    typedef std::map<int, std::vector<DasTofType> > PixelMapType;
+//    PixelMapType das_pixel_map;
+//
+//    std::cout << "--- Process (serially) the entire list of DAS events ----\n";
+//    //--- Process (serially) the entire list of DAS events ----
+//    for (size_t i=0; i < current_event_buffer_size; i++)
+//    {
 //      temp = *(event_buffer + i);
-//
-//      if ((temp.pid & ERROR_PID) == ERROR_PID) // marked as bad
-//      {
-//        my_errors++;
-//        continue;
-//      }
-//
-//      // work with the good guys
-//      frame_index = this->getFrameIndex(event_offset + i, frame_index);
-//      double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
-//      TofEvent event;
-//      event = TofEvent(tof, frame_index);
-//
-//      //Find the overall max/min tof
-//      if (tof < shortest_tof)
-//        shortest_tof = tof;
-//      if (tof > longest_tof)
-//        longest_tof = tof;
-//
-//      //Covert the pixel ID from DAS pixel to our pixel ID
-//      this->fixPixelId(temp.pid, period);
-//
-//      //Parallel: this critical block is almost certainly killing parallel efficiency.
-//      //workspace->getEventList(temp.pid) += event;
-//
-//      //The addEventQuickly method does not clear the cache, making things slightly faster.
-//      workspace->getEventList(temp.pid).addEventQuickly(event);
-//
-//            // TODO work with period
-//            // TODO filter based on pixel ids
-//      my_events++;
+//      //Add this time of flight to this das pixelid entry.
+//      das_pixel_map[temp.pid].push_back(temp.tof);
 //    }
-
-    //Fold back the counters into the main one
-    //PARALLEL_CRITICAL(num_error_events)
-    {
-      this->num_error_events += my_errors;
-      this->num_good_events += my_events;
-    }
-
-    delete event_buffer;
-
-    //Report progress
-    prog.report();
-    //PARALLEL_END_INTERUPT_REGION
-  }
-  //PARALLEL_CHECK_INTERUPT_REGION
-
-  /*
-  //OK, you've done all the events; but if some pixels got no events, their
-  //  EventList wasn't initialized.
-  std::vector<PixelType>::iterator pix;
-  for (pix = this->pixelmap.begin(); pix < this->pixelmap.end(); pix++)
-  {
-    //Go through each pixel in the map
-    // and simply get the event list. It will be created if empty.
-    workspace->getEventList(*pix);
-  }
-   */
-
-  // add the frame information to the event workspace
-  for (size_t i = 0; i < this->num_pulses; i++)
-    workspace->addTime(i, this->pulsetimes[i]);
-
-  this->setProtonCharge(workspace);
-
-  std::cout << "About to finalize with doneLoadingData()\n";
-
-  //finalize loading; this condenses the pixels into a 0-based, dense vector.
-  workspace->doneLoadingData();
-
-  //std::cout << "Shortest tof " << shortest_tof << " longest was " << longest_tof << "\n";
-
-  //Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec& xRef = axis.access();
-  xRef.resize(2);
-  xRef[0] = shortest_tof - 1; //Just to make sure the bins hold it all
-  xRef[1] = longest_tof + 1;
-  workspace->setAllX(axis);
-
-  stringstream msg;
-  msg << "Read " << this->num_good_events << " events + "
-      << this->num_error_events << " errors";
-  msg << ". Shortest tof: " << shortest_tof << " microsec; longest tof: " << longest_tof << " microsec.";
-  this->g_log.information(msg.str());
+//
+//    //# of unique DAS pixel IDs
+//    PixelType num_unique_pixels = das_pixel_map.size();
+//    std::cout << "# of unique pixels = " << num_unique_pixels << "\n";
+//
+//    //Will split in blocks of this size.
+//    size_t num_cpus = 4;
+//    //Size of block is 1/num_cpus, rounded up
+//    PixelType block_size = (num_unique_pixels + (num_cpus-1)) / num_cpus;
+//
+//    std::cout << "--- Find out where the iterators need to be ----\n";
+//    //--- Find out where the iterators need to be ----
+//    PixelMapType::iterator it_counter;
+//    PixelMapType::iterator * start_map_it = new PixelMapType::iterator[num_cpus+1];
+//    start_map_it[0] = das_pixel_map.begin();
+//    size_t counter = 0;
+//    size_t block_counter = 0;
+//    for (it_counter = das_pixel_map.begin(); it_counter != das_pixel_map.end(); it_counter++)
+//    {
+//      if ((counter % block_size) == 0)
+//      {
+//        //This is where you need to start iterating
+//        start_map_it[block_counter] = it_counter;
+//        //No need to iterate to the end
+//        if (block_counter == num_cpus - 1)
+//          break;
+//        block_counter++;
+//      }
+//      counter++;
+//    }
+//    //The ending iterator
+//    start_map_it[num_cpus] = das_pixel_map.end();
+//
+//    PARALLEL_FOR1(workspace)
+//    for (int block_num=0; block_num < num_cpus; block_num++)
+//    {
+//      std::cout << "Starting iterating through block " << block_num << "\n";
+//      //Make an iterator into the map
+//      PixelMapType::iterator it;
+//
+//      //Iterate through this chunk of the map
+//      for (it = start_map_it[block_num]; it != start_map_it[block_num+1]; it++)
+//      {
+//        //Get the pixel id of it
+//        PixelType pid = it->first;
+//        //std::cout << "pixelid is " << pid << "\n";
+//        //This is the vector of tof values
+//        std::vector<DasTofType> tof_vector = das_pixel_map[pid];
+//        std::vector<DasTofType>::iterator it2;
+//
+//        for (it2 = tof_vector.begin(); it2 != tof_vector.end(); it2++)
+//        {
+//          //The time of flight
+//          DasTofType tof = *it2;
+//          //Make a TofEvent here
+//          TofEvent event = TofEvent(tof, frame_index);
+//          //TODO: Fix the PID here
+//          //Add it to the list
+//          workspace->getEventList(pid).addEventQuickly(event);
+//        }
+//      }
+//    }
+//
+//    delete [] start_map_it;
+//
+////
+////    // process the individual events
+////    for (size_t i = 0; i < current_event_buffer_size; i++) {
+////      temp = *(event_buffer + i);
+////
+////      if ((temp.pid & ERROR_PID) == ERROR_PID) // marked as bad
+////      {
+////        my_errors++;
+////        continue;
+////      }
+////
+////      // work with the good guys
+////      frame_index = this->getFrameIndex(event_offset + i, frame_index);
+////      double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
+////      TofEvent event;
+////      event = TofEvent(tof, frame_index);
+////
+////      //Find the overall max/min tof
+////      if (tof < shortest_tof)
+////        shortest_tof = tof;
+////      if (tof > longest_tof)
+////        longest_tof = tof;
+////
+////      //Covert the pixel ID from DAS pixel to our pixel ID
+////      this->fixPixelId(temp.pid, period);
+////
+////      //Parallel: this critical block is almost certainly killing parallel efficiency.
+////      //workspace->getEventList(temp.pid) += event;
+////
+////      //The addEventQuickly method does not clear the cache, making things slightly faster.
+////      workspace->getEventList(temp.pid).addEventQuickly(event);
+////
+////            // TODO work with period
+////            // TODO filter based on pixel ids
+////      my_events++;
+////    }
+//
+//    //Fold back the counters into the main one
+//    //PARALLEL_CRITICAL(num_error_events)
+//    {
+//      this->num_error_events += my_errors;
+//      this->num_good_events += my_events;
+//    }
+//
+//    delete event_buffer;
+//
+//    //Report progress
+//    prog.report();
+//    //PARALLEL_END_INTERUPT_REGION
+//  }
+//  //PARALLEL_CHECK_INTERUPT_REGION
+//
+//  /*
+//  //OK, you've done all the events; but if some pixels got no events, their
+//  //  EventList wasn't initialized.
+//  std::vector<PixelType>::iterator pix;
+//  for (pix = this->pixelmap.begin(); pix < this->pixelmap.end(); pix++)
+//  {
+//    //Go through each pixel in the map
+//    // and simply get the event list. It will be created if empty.
+//    workspace->getEventList(*pix);
+//  }
+//   */
+//
+//  // add the frame information to the event workspace
+//  for (size_t i = 0; i < this->num_pulses; i++)
+//    workspace->addTime(i, this->pulsetimes[i]);
+//
+//  this->setProtonCharge(workspace);
+//
+//  std::cout << "About to finalize with doneLoadingData()\n";
+//
+//  //finalize loading; this condenses the pixels into a 0-based, dense vector.
+//  workspace->doneLoadingData();
+//
+//  //std::cout << "Shortest tof " << shortest_tof << " longest was " << longest_tof << "\n";
+//
+//  //Now, create a default X-vector for histogramming, with just 2 bins.
+//  Kernel::cow_ptr<MantidVec> axis;
+//  MantidVec& xRef = axis.access();
+//  xRef.resize(2);
+//  xRef[0] = shortest_tof - 1; //Just to make sure the bins hold it all
+//  xRef[1] = longest_tof + 1;
+//  workspace->setAllX(axis);
+//
+//  stringstream msg;
+//  msg << "Read " << this->num_good_events << " events + "
+//      << this->num_error_events << " errors";
+//  msg << ". Shortest tof: " << shortest_tof << " microsec; longest tof: " << longest_tof << " microsec.";
+//  this->g_log.information(msg.str());
 
 }
 
@@ -728,46 +714,6 @@ size_t LoadEventPreNeXus::getFrameIndex(const std::size_t event_index, const std
     return last_frame_index;
 }
 
-//-----------------------------------------------------------------------------
-/** Get the size of a file as a multiple of a particular data type
- * @tparam T type to load in the file
- * @param handle Handle to the file stream
- * */
-template<typename T>
-static size_t getFileSize(ifstream * handle)
-{
-  if (!handle) {
-    throw runtime_error("Cannot find the size of a file from a null handle");
-  }
-
-  // get the size of the file in bytes and reset the handle back to the beginning
-  handle->seekg(0, std::ios::end);
-  size_t filesize = handle->tellg();
-  handle->seekg(0, std::ios::beg);
-
-  // check the file is a compatible size
-  if (filesize % sizeof(T) != 0) {
-    stringstream msg;
-    msg << "File size is not compatible with data size ";
-    msg << filesize << "%" << sizeof(T) << "=";
-    msg << filesize % sizeof(T);
-    throw runtime_error(msg.str());
-  }
-
-  return filesize / sizeof(T);
-}
-
-//-----------------------------------------------------------------------------
-/** Get a buffer size for loading blocks of data.
- * @param num_items
- */
-static size_t getBufferSize(const size_t num_items)
-{
-  if (num_items < DEFAULT_BLOCK_SIZE)
-    return num_items;
-  else
-    return DEFAULT_BLOCK_SIZE;
-}
 
 //-----------------------------------------------------------------------------
 /** Load a pixel mapping file
@@ -786,46 +732,16 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
 
   // actually deal with the file
   this->g_log.debug("Using mapping file \"" + filename + "\"");
-  ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
 
-  size_t file_size = getFileSize<PixelType>(handle);
-  //PixelType max_pid = static_cast<PixelType>(file_size);
-  //std::cout << "file is " << file_size << std::endl;
-  size_t offset = 0;
-  size_t buffer_size = getBufferSize(file_size);
-  PixelType * buffer = new PixelType[buffer_size];
+  //Open the file; will throw if there is any problem
+  BinaryFile<PixelType> pixelmapFile(filename);
+  PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
+  //Load all the data
+  pixelmapFile.loadAllInto( this->pixelmap );
 
-  size_t obj_size = sizeof(PixelType);
-  bool success = true; // see if something wierd went on
-
-  while (offset < file_size) {
-    // read a section and put it into the object
-    handle->read(reinterpret_cast<char *>(buffer), buffer_size * obj_size);
-    if (std::find_if(buffer, (buffer+buffer_size), std::bind2nd(std::greater<PixelType>(), file_size))
-        != (buffer+buffer_size))
-    {
-      success = false;
-      break;
-    }
-    this->pixelmap.insert(this->pixelmap.end(), buffer, (buffer + buffer_size));
-    offset += buffer_size;
-
-    // make sure not to read past EOF
-    if (offset + buffer_size > file_size)
-    {
-      buffer_size = file_size - offset;
-    }
-  }
-
-  //Let's assume that the # of pixels in the instrument matches the mapping file length.
-  this->numpixel = file_size;
-
-  // cleanup
-  delete buffer;
-  handle->close();
-  delete handle;
-
-  if (!success)
+  //Check for funky file
+  if (std::find_if(pixelmap.begin(), pixelmap.end(), std::bind2nd(std::greater<PixelType>(), max_pid))
+          != pixelmap.end())
   {
     this->g_log.warning("Pixel id in mapping file was out of bounds. Loading without mapping file");
     this->numpixel = 0;
@@ -843,11 +759,10 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
  */
 void LoadEventPreNeXus::openEventFile(const std::string &filename)
 {
-  this->eventfile = new ifstream(filename.c_str(), std::ios::binary);
-  this->num_events = getFileSize<DasEvent>(this->eventfile);
-  stringstream msg;
-  msg << "Reading " <<  this->num_events << " event records";
-  this->g_log.information(msg.str());
+  //Open the file
+  this->eventfile = new BinaryFile<DasEvent>(filename);
+  this->num_events = eventfile->getNumElements();
+  this->g_log.information()<< "Reading " <<  this->num_events << " event records\n";
 }
 
 //-----------------------------------------------------------------------------
@@ -879,61 +794,45 @@ static ptime getTime(uint32_t sec, uint32_t nano)
 void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
 {
   this->proton_charge_tot = 0.;
+  this->num_pulses = 0;
 
   // jump out early if there isn't a filename
   if (filename.empty()) {
     this->g_log.information("NOT using a pulseid file");
-    this->num_pulses = 0;
     return;
   }
 
   // set up for reading
   this->g_log.debug("Using pulseid file \"" + filename + "\"");
-  ifstream * handle = new ifstream(filename.c_str(), std::ios::binary);
-  try {
-    this->num_pulses = getFileSize<Pulse>(handle);
-  } catch (runtime_error &e) {
-    this->g_log.warning() << "Failed to load pulseid file:" << e.what() << std::endl;
-    this->num_pulses = 0;
-    delete handle;
-    return;
-  }
-  size_t buffer_size = getBufferSize(this->num_pulses);
-  size_t offset = 0;
-  Pulse* buffer = new Pulse[buffer_size];
-  size_t obj_size = sizeof(Pulse);
+
+  //Open the file; will throw if there is any problem
+  BinaryFile<Pulse> pulseFile(filename);
+  //Get the # of pulse
+  this->num_pulses = pulseFile.getNumElements();
+
+  //Load all the data
+  std::vector<Pulse> * pulses;
+  pulses = pulseFile.loadAll();
+
   double temp;
-
-  // go through the file
-  while (offset < this->num_pulses)
+  for (std::vector<Pulse>::iterator it = pulses->begin(); it != pulses->end(); it++)
   {
-    handle->read(reinterpret_cast<char *>(buffer), buffer_size * obj_size);
-    for (size_t i = 0; i < buffer_size; i++)
-    {
-      this->pulsetimes.push_back(getTime(buffer[i].seconds, buffer[i].nanoseconds));
-      this->event_indices.push_back(buffer[i].event_index);
-      temp = buffer[i].pCurrent; // * CURRENT_CONVERSION;
-      this->proton_charge.push_back(temp);
-      //std::cout << (offset + i) << " " << *(this->pulsetimes.rbegin()) << " " << *(this->proton_charge.rbegin())<< std::endl; // REMOVE
-      if (temp < 0.)
-        this->g_log.warning("Individiual proton charge < 0 being ignored");
-      else
-        this->proton_charge_tot += temp;
-    }
-    offset += buffer_size;
-
-    // make sure not to read past EOF
-    if (offset + buffer_size > this->num_pulses)
-      buffer_size = this->num_pulses - offset;
+    this->pulsetimes.push_back(getTime((*it).seconds, (*it).nanoseconds));
+    this->event_indices.push_back((*it).event_index);
+    temp = (*it).pCurrent; // * CURRENT_CONVERSION;
+    this->proton_charge.push_back(temp);
+    if (temp < 0.)
+      this->g_log.warning("Individiual proton charge < 0 being ignored");
+    else
+      this->proton_charge_tot += temp;
   }
-  this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
-  stringstream msg;
-  msg << "Total proton charge of " << this->proton_charge_tot << " microAmp*hours";
-  this->g_log.information(msg.str());
 
-  delete buffer;
-  handle->close();
-  delete handle;
+  this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
+  this->g_log.information() << "Total proton charge of " << this->proton_charge_tot << " microAmp*hours.\n";
+
+  //Clear the vector
+  delete pulses;
+
 }
 
 } // namespace DataHandling

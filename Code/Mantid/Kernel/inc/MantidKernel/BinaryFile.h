@@ -46,6 +46,12 @@ public:
     this->open(filename);
   }
 
+  /// Destructor, close the file if needed
+  ~BinaryFile()
+  {
+    this->close();
+  }
+
   //------------------------------------------------------------------------------------
   /** Open a file and keep a handle to the file
    * @param filename full path to open
@@ -74,7 +80,11 @@ public:
    * */
   void close()
   {
-    delete handle;
+    if (handle)
+    {
+      delete handle;
+      handle = NULL;
+    }
   }
 
 
@@ -115,6 +125,12 @@ public:
     return this->num_elements;
   }
 
+  /// Returns the current offset into the file.
+  size_t getOffset()
+  {
+    return this->offset;
+  }
+
 
   //-----------------------------------------------------------------------------
   /** Get a buffer size for loading blocks of data.
@@ -131,6 +147,7 @@ public:
   //-----------------------------------------------------------------------------
   /**
    * Loads the entire contents of the file into a pointer to a std::vector.
+   * The file is closed once done.
    */
   std::vector<T> * loadAll()
   {
@@ -154,21 +171,42 @@ public:
       data->insert(data->end(), buffer, (buffer + loaded_size));
     }
 
-//    while (offset < num_elements) {
-//      // read a section and put it into the object
-//      handle->read(reinterpret_cast<char *>(buffer), buffer_size * obj_size);
-//      //Insert into the data
-//      data->insert(data->end(), buffer, (buffer + buffer_size));
-//      //We are further along
-//      offset += buffer_size;
-//
-//      // make sure not to read past EOF
-//      if (offset + buffer_size > num_elements)
-//        buffer_size = num_elements - offset;
-//    }
+    //Close the file, since we are done.
+    this->close();
 
     //Here's your vector!
     return data;
+  }
+
+  //-----------------------------------------------------------------------------
+  /**
+   * Loads the entire contents of the file into a std::vector.
+   * The file is closed once done.
+   */
+  void loadAllInto(std::vector<T> &data)
+  {
+    //Clear the vector
+    data.clear();
+
+    //A buffer to load from
+    size_t buffer_size = getBufferSize(num_elements);
+    T * buffer = new T[buffer_size];
+
+    //Make sure we are at the beginning
+    offset = 0;
+    handle->seekg(0, std::ios::beg);
+
+    size_t loaded_size;
+    while (offset < num_elements)
+    {
+      //Load that block of data
+      loaded_size = loadBlock(buffer, buffer_size);
+      // Insert into the data
+      data.insert(data.end(), buffer, (buffer + loaded_size));
+    }
+
+    //Close the file, since we are done.
+    this->close();
   }
 
 
