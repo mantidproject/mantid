@@ -143,29 +143,18 @@ static string generatPulseidName(string eventfile)
 
 static string generateMappingfileName(EventWorkspace_sptr &wksp)
 {
-  std::vector<string> temp
-                      = wksp->getInstrument()->getStringParameter("TS_mapping_file");
+  std::vector<string> temp = wksp->getInstrument()->getStringParameter("TS_mapping_file");
   if (temp.empty())
     return "";
   string mapping = temp[0];
   string instrument = wksp->getInstrument()->getName();
-  std::cout << "***********************LOOKING FOR MAPPING FILE " << mapping << std::endl; // REMOVE
 
   string base("/SNS/" + instrument + "/");
   mapping = "*_CAL/calibrations/" + mapping;
-  std::cout << base << " " << mapping << std::endl;
   std::set<string> files;
   Mantid::Kernel::Glob::glob(base, mapping, files);
-  std::cout << "done!" << std::endl;
   if (files.empty())
     return "";
-  else
-    std::cout << "found files!" <<std::endl;
-
-  for (std::set<string>::iterator it = files.begin(); it != files.end(); ++it)
-  {
-    std::cout << *it <<std::endl; // REMOVE
-  }
 
   return mapping;
 }
