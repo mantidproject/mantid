@@ -6,13 +6,6 @@
 #include "MantidKernel/System.h"
 #include <sys/stat.h>
 
-#ifdef _WIN32 /* _WIN32 */
-typedef unsigned uint32_t;
-#include <time.h>
-#else
-#include <stdint.h> //MG 15/09/09: Required for gcc4.4
-#endif
-
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
