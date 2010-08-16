@@ -754,10 +754,13 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
     this->numpixel = 0;
     this->pixelmap.clear();
     this->using_mapping_file = false;
+    return;
   }
 
   //If we got here, the mapping file was loaded correctly and we'll use it
   this->using_mapping_file = true;
+  //Let's assume that the # of pixels in the instrument matches the mapping file length.
+  this->numpixel = pixelmapFile.getNumElements();
 }
 
 //-----------------------------------------------------------------------------
