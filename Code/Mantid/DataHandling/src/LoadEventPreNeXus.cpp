@@ -158,6 +158,8 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
   // get a list of all proposal directories
   string instrument = wksp->getInstrument()->getName();
   Poco::File base("/SNS/" + instrument + "/");
+  if (!base.exists())
+    return "";
   vector<string> dirs; // poco won't let me reuse temp
   base.list(dirs);
 
