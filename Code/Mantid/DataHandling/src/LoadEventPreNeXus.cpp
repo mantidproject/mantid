@@ -117,6 +117,7 @@ void LoadEventPreNeXus::init()
 
 }
 
+//-----------------------------------------------------------------------------
 static string generatPulseidName(string eventfile)
 {
   size_t start;
@@ -142,6 +143,7 @@ static string generatPulseidName(string eventfile)
   return "";
 }
 
+//-----------------------------------------------------------------------------
 static string generateMappingfileName(EventWorkspace_sptr &wksp)
 {
   // get the name of the mapping file as set in the parameter files
@@ -523,7 +525,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
     //--- Find out where the iterators need to be ----
     PixelMapType::iterator it_counter;
     PixelMapType::iterator * start_map_it = new PixelMapType::iterator[num_cpus+1];
-    start_map_it[0] = das_pixel_map.begin();
+    start_map_it[0] = das_pixel_map.begin();LoadEventPreNeXus
     size_t counter = 0;
     size_t block_counter = 0;
     for (it_counter = das_pixel_map.begin(); it_counter != das_pixel_map.end(); it_counter++)
@@ -667,6 +669,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 
 }
 
+//-----------------------------------------------------------------------------
 static std::time_t to_time_t(ptime t)
 {
   if (t.is_special())
@@ -677,6 +680,7 @@ static std::time_t to_time_t(ptime t)
   return static_cast<std::time_t>(duration.total_seconds());
 }
 
+//-----------------------------------------------------------------------------
 /**
  * Add a sample environment log for the proton chage and set the scalar 
  * value on the sample.
