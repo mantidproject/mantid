@@ -80,6 +80,7 @@ static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::Algorithm()
 {
   this->eventfile = NULL;
+  this->max_events = 0;
 }
 
 LoadEventPreNeXus::~LoadEventPreNeXus()
@@ -317,6 +318,16 @@ void LoadEventPreNeXus::fixPixelId(PixelType &pixel, uint32_t &period) const
   period = (pixel - unmapped_pid) / this->numpixel;
   pixel = this->pixelmap[unmapped_pid];
 }
+
+//-----------------------------------------------------------------------------
+/** Special function to reduce the number of loaded events.
+ *
+ */
+void LoadEventPreNeXus::setMaxEventsToLoad(std::size_t max_events_to_load)
+{
+  this->max_events = max_events_to_load;
+}
+
 
 //-----------------------------------------------------------------------------
 /** Process the event file properly.
@@ -758,7 +769,11 @@ void LoadEventPreNeXus::openEventFile(const std::string &filename)
   //Open the file
   this->eventfile = new BinaryFile<DasEvent>(filename);
   this->num_events = eventfile->getNumElements();
+  //Limit the # of events to load?
+  if (this->max_events > 0)
+    this->num_events = this->max_events;
   this->g_log.information()<< "Reading " <<  this->num_events << " event records\n";
+
 }
 
 //-----------------------------------------------------------------------------

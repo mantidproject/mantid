@@ -90,6 +90,9 @@ public:
   /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
   std::vector<PixelType> pixelmap;
 
+  void setMaxEventsToLoad(std::size_t max_events_to_load);
+
+
 private:
   /// Initialisation code
   void init();
@@ -114,6 +117,7 @@ private:
 
   std::size_t num_good_events; ///<the number of good events
   std::size_t num_error_events; ///<the number of error events
+  std::size_t max_events; /// max events to load
 
   ///Set to true if a valid Mapping file was provided.
   bool using_mapping_file;
