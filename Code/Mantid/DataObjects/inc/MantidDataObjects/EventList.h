@@ -2,11 +2,7 @@
 #define MANTID_DATAOBJECTS_EVENTLIST_H_ 1
 
 #ifdef _WIN32 /* _WIN32 */
-typedef unsigned uint32_t;
-typedef unsigned long long uint64_t;
 #include <time.h>
-#else
-#include <stdint.h> //MG 15/09/09: Required for gcc4.4
 #endif
 #include <cstddef>
 #include <iostream>

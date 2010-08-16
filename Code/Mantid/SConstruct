@@ -261,6 +261,8 @@ if not conf.CheckCXXHeader('napi.h'):
 if not conf.CheckCXXHeader('ssl.h') and not conf.CheckCXXHeader('openssl/ssl.h'):
    print "Failed to find 'openssl/ssl.h'"
    Exit(-1)
+if conf.CheckCXXHeader("stdint.h"):
+   conf.env.Append(CPPDEFINES = ['HAVE_STDINT_H'])
 env = conf.Finish()
 
 #Collect the includes into a single directory 

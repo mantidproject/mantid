@@ -12,12 +12,9 @@ struct ISISCRPT_STRUCT;
 #include <string.h>
 #include "item_struct.h"
 #ifdef _WIN32 /* _WIN32 */
-typedef unsigned uint32_t;
 #include <time.h>
-#else
-#include <stdint.h> //MG 15/09/09: Required for gcc4.4
 #endif 
-
+#include "MantidKernel/System.h"
 
 /// Run header (80 bytes)
 struct HDR_STRUCT
