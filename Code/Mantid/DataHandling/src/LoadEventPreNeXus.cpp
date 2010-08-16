@@ -7,6 +7,7 @@
 #include <Poco/Path.h>
 #include <set>
 #include <vector>
+#include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -143,20 +144,39 @@ static string generatPulseidName(string eventfile)
 
 static string generateMappingfileName(EventWorkspace_sptr &wksp)
 {
+  // get the name of the mapping file as set in the parameter files
   std::vector<string> temp = wksp->getInstrument()->getStringParameter("TS_mapping_file");
   if (temp.empty())
     return "";
   string mapping = temp[0];
-  string instrument = wksp->getInstrument()->getName();
 
-  string base("/SNS/" + instrument + "/");
-  mapping = "*_CAL/calibrations/" + mapping;
-  std::set<string> files;
-  Mantid::Kernel::Glob::glob(base, mapping, files);
+  // Try to get it from the data directories
+  string dataversion = Mantid::API::FileFinder::Instance().getFullPath(mapping);
+  if (!dataversion.empty())
+    return dataversion;
+
+  // get a list of all proposal directories
+  string instrument = wksp->getInstrument()->getName();
+  Poco::File base("/SNS/" + instrument + "/");
+  vector<string> dirs; // poco won't let me reuse temp
+  base.list(dirs);
+
+  // check all of the proposals for the mapping file in the canonical place
+  const string CAL("_CAL");
+  vector<string> files;
+  for (size_t i = 0; i < dirs.size(); ++i) {
+    if (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) == 0) {
+      if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping).exists())
+        files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" + mapping);
+    }
+  }
+
   if (files.empty())
     return "";
-
-  return mapping;
+  else if (files.size() == 1)
+    return files[0];
+  else // just assume that the last one is the right one, this should never be fired
+    return *(files.rbegin());
 }
 
 //-----------------------------------------------------------------------------
@@ -201,8 +221,11 @@ void LoadEventPreNeXus::exec()
 
   // load the mapping file
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
-  if (mapping_filename.empty())
-    generateMappingfileName(localWorkspace);
+  if (mapping_filename.empty()) {
+    mapping_filename = generateMappingfileName(localWorkspace);
+    if (!mapping_filename.empty())
+      this->g_log.information() << "Found mapping file \"" << mapping_filename << "\"" << std::endl;
+  }
   this->loadPixelMap(mapping_filename);
 
   //Process the events into pixels
