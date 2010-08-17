@@ -152,9 +152,11 @@ Graph *MultiLayer::layer(int num)
 void MultiLayer::insertCurve(MultiLayer* ml, int i)
 {
   if( ml== this ) return;
-  if( !activeGraph() ) return;
+  Graph *current = activeGraph();
+  if( !current ) return;
   
-  activeGraph()->insertCurve(ml->activeGraph(), i);
+  current->insertCurve(ml->activeGraph(), i);
+  current->updatePlot();
 }
 
 LayerButton* MultiLayer::addLayerButton()

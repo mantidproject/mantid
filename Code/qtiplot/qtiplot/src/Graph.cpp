@@ -3280,10 +3280,10 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 /**  Insert a curve with its own data source. It doesnot have to be 
  *   a Table or a Function. The Graph takes ownership of the curve.
  */
-PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth)
+PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
 {
 	c_type.resize(++n_curves);
-	c_type[n_curves - 1] = User;	
+	c_type[n_curves - 1] = curveType;	
 	c_keys.resize(n_curves);
 	c_keys[n_curves - 1] = d_plot->insertCurve(c);
 
@@ -3301,10 +3301,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth)
 void Graph::insertCurve(Graph* g, int i)
 {
   if( g == this || !g ) return;
-  if( PlotCurve *pc = dynamic_cast<PlotCurve*>(g->curve(i)) )
-  {
-    this->insertCurve(pc);
-  }
+  PlotCurve *plotCurve = dynamic_cast<PlotCurve*>(g->curve(i));
+  if( !plotCurve ) return;
+  int curveType = g->curveType(i);
+  this->insertCurve(plotCurve, -1, curveType);
 }
 
 
@@ -3614,6 +3614,8 @@ void Graph::removeLegendItem(int index)
 
 void Graph::addLegendItem()
 {
+  const int curveIndex = n_curves - 1;
+  if( c_type[curveIndex] == ErrorBars ) return;
   if (d_legend){
     QString text = d_legend->text();
     if ( !text.endsWith ("\n") && !text.isEmpty() )
@@ -3621,11 +3623,11 @@ void Graph::addLegendItem()
     text.append("\\l("+QString::number(n_curves)+")");//+"%("+QString::number(n_curves)+")");
 
     // RJT (23/09/09): Insert actual text directly into legend rather than a 'code' for later parsing
-    PlotCurve *c = (PlotCurve *)d_plot->curve(c_keys[n_curves-1]);
-    if (c)
+    PlotCurve *c = (PlotCurve *)d_plot->curve(c_keys[curveIndex]);
+    if (c )
       text.append(c->title().text());
     else
-      text.append("%("+QString::number(c_keys[n_curves-1])+")");
+      text.append("%("+QString::number(c_keys[curveIndex])+")");
 
     d_legend->setText(text);
     d_legend->repaint();
