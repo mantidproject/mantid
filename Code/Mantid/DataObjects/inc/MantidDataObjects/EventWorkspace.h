@@ -210,7 +210,9 @@ private:
   /// NO ASSIGNMENT ALLOWED
   EventWorkspace& operator=(const EventWorkspace&);
 
-  /// A map that holds the event list for each pixel; the key is the pixelid.
+  /** A map that holds the event list for each pixel; the key is the pixelid.
+   * This is NOT guaranteed to be ok after DoneLoadingData. Don't use it!
+   */
   EventListMap data_map;
 
   /// Set to true when loading data is finished.
