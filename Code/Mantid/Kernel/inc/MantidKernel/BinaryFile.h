@@ -28,6 +28,13 @@ static const size_t DEFAULT_BLOCK_SIZE = 1000000; // 100,000
 /**
  * The BinaryFile template is a helper function for loading simple binary files.
  *  - The file format must be a simple sequence of objects of type T.
+ *  - To load, first create an object of type BinaryFile<T>
+ *  - The file provided when opening is checked so that its size is an even multiple
+ *    of sizeof(T); an error is thrown otherwise.
+ *
+ * NOTE: Data saving and loading is little-endian (on Win, Linux, and Intel Mac).
+ *       Converting from a byte buffer loaded from disk to
+ *       the T type is done with a reinterpret_cast<T>.
  *
  */
 template<typename T>
