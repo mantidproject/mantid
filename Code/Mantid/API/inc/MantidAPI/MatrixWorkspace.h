@@ -86,10 +86,10 @@ public:
   SpectraDetectorMap& mutableSpectraMap();
 
   // More mapping
-  IndexToIndexMap * getWorkspaceIndexToSpectrumMap();
-  IndexToIndexMap * getSpectrumToWorkspaceIndexMap();
-  IndexToIndexMap * getWorkspaceIndexToDetectorIDMap();
-  IndexToIndexMap * getDetectorIDToWorkspaceIndexMap();
+  IndexToIndexMap * getWorkspaceIndexToSpectrumMap() const;
+  IndexToIndexMap * getSpectrumToWorkspaceIndexMap() const;
+  IndexToIndexMap * getWorkspaceIndexToDetectorIDMap() const;
+  IndexToIndexMap * getDetectorIDToWorkspaceIndexMap() const;
 
 
   /// Sample accessors

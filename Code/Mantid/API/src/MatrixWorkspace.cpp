@@ -121,7 +121,7 @@ SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
  *    KEY is the Workspace Index
  *    VALUE is the Spectrum #
  */
-IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToSpectrumMap()
+IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToSpectrumMap() const
 {
   SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
   if (!ax)
@@ -144,7 +144,7 @@ IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToSpectrumMap()
  *    KEY is the Spectrum #
  *    VALUE is the Workspace Index
  */
-IndexToIndexMap * MatrixWorkspace::getSpectrumToWorkspaceIndexMap()
+IndexToIndexMap * MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
 {
   SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
   if (!ax)
@@ -168,7 +168,7 @@ IndexToIndexMap * MatrixWorkspace::getSpectrumToWorkspaceIndexMap()
  *    VALUE is the Workspace Index
  *  @throws runtime_error if there is more than one detector per spectrum, or other incompatibilities.
  */
-IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap()
+IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap() const
 {
   SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
   if (!ax)
@@ -205,7 +205,7 @@ IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap()
  *    VALUE is the DetectorID (pixel ID)
  *  @throws runtime_error if there is more than one detector per spectrum, or other incompatibilities.
  */
-IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap()
+IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap() const
 {
   SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
   if (!ax)

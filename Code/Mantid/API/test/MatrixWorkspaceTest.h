@@ -301,22 +301,22 @@ public:
 
     m = wsm->getWorkspaceIndexToSpectrumMap();
     for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS(m->at(i), 20+i);
+      TS_ASSERT_EQUALS((*m)[i], 20+i);
     delete m;
 
     m = wsm->getSpectrumToWorkspaceIndexMap();
     for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS(m->at(i+20), i);
+      TS_ASSERT_EQUALS((*m)[i+20], i);
     delete m;
 
     m = wsm->getWorkspaceIndexToDetectorIDMap();
     for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS(m->at(i), i+100);
+      TS_ASSERT_EQUALS((*m)[i], i+100);
     delete m;
 
     m = wsm->getDetectorIDToWorkspaceIndexMap();
     for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS(m->at(i+100), i);
+      TS_ASSERT_EQUALS((*m)[i+100], i);
     delete m;
 
   }
