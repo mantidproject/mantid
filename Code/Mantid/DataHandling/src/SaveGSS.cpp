@@ -119,9 +119,11 @@ void SaveGSS::exec()
         << " FXYE"<<std::endl;
       for (int j = 0; j < datasize; j++)
       {
+        double Epos=E[j]*X[j]*bc4;
+        if(Epos<0) Epos=0; //Negative counts cannot be read by GSAS
         out << std::fixed << std::setprecision(5) << std::setw(15) << 0.5*(X[j]+X[j+1])
           << std::fixed << std::setprecision(8) << std::setw(18) << Y[j]*X[j]*bc4
-          << std::fixed << std::setprecision(8) << std::setw(18) << E[j]*X[j]*bc4 << "\n";
+          << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
       }
     } // End separate scope
 
