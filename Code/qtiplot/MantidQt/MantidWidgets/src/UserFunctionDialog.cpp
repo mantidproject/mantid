@@ -215,7 +215,7 @@ QSet<QString> UserFunctionDialog::names(const QString& cat)const
   QSet<QString> out;
   if (cat.isEmpty())
   {
-    QMap<QString,QString>::iterator it = m_funs.begin();
+    QMap<QString,QString>::const_iterator it = m_funs.begin();
     for(; it != m_funs.end(); ++it)
     {
       QStringList cn = it.key().split('.');
@@ -224,7 +224,7 @@ QSet<QString> UserFunctionDialog::names(const QString& cat)const
   }
   else
   {
-    QMap<QString,QString>::iterator it = m_funs.begin();
+    QMap<QString,QString>::const_iterator it = m_funs.begin();
     for(; it != m_funs.end(); ++it)
     {
       QStringList cn = it.key().split('.');
