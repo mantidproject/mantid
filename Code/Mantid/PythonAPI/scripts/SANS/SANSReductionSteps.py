@@ -512,16 +512,42 @@ class SubtractBackground(ReductionStep):
         Subtracts background from a sample data workspace.
         The processed background workspace is stored for later use.
     """
-    def __init__(self, background_file):
+    def __init__(self, background_file, transmission=None):
+        """
+            @param background_file: file name of background data set
+            @param transmission: ReductionStep object to compute the background transmission
+        """
         super(SubtractBackground, self).__init__()
         self._background_file = background_file
         self._background_ws = None
+        self._transmission = transmission
+        
+    def set_transmission(self, trans):
+        """
+             Set the reduction step that will apply the transmission correction
+             @param trans: ReductionStep object
+        """
+        if issubclass(trans.__class__, BaseTransmission) or trans is None:
+            self._transmission = trans
+        else:
+            raise RuntimeError, "SubtractBackground.set_transmission expects an object of class ReductionStep"
+        
+    def get_transmission(self):
+        if self._transmission is not None:
+            return self._transmission.get_transmission()
+        else:
+            return None
         
     def execute(self, reducer, workspace):
         if self._background_ws is None:
+            # Apply the reduction steps that we normally apply to the data
             self._background_ws = extract_workspace_name(self._background_file)
             for item in reducer._2D_steps():
                 item.execute(reducer, self._background_ws)
+        
+            # The transmission correction is set separately
+            if self._transmission is not None:
+                self._transmission.execute(reducer, self._background_ws) 
         
         Minus(workspace, self._background_ws, workspace)
         

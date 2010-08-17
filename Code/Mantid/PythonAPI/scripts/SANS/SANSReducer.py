@@ -84,9 +84,8 @@ class SANSReducer(Reducer):
         
     def set_transmission(self, trans):
         """
-             Set the transmission
-             @param trans: transmission value
-             @param error: uncertainty on the transmission
+             Set the reduction step that will apply the transmission correction
+             @param trans: ReductionStep object
         """
         if issubclass(trans.__class__, SANSReductionSteps.BaseTransmission) or trans is None:
             self._transmission_calculator = trans
@@ -197,6 +196,16 @@ class SANSReducer(Reducer):
             self._full_file_path(data_file)
             self._background_subtracter = SANSReductionSteps.SubtractBackground(data_file)
     
+    def set_bck_transmission(self, trans):
+        """
+             Set the reduction step that will apply the transmission correction
+             @param trans: ReductionStep object
+        """
+        if issubclass(trans.__class__, SANSReductionSteps.BaseTransmission) or trans is None:
+            self._background_subtracter.set_transmission(trans)
+        else:
+            raise RuntimeError, "Reducer.set_bck_transmission expects an object of class ReductionStep"
+    
     def pre_process(self): 
         """
             Reduction steps that are meant to be executed only once per set
@@ -243,11 +252,6 @@ class SANSReducer(Reducer):
         if self._solid_angle_correcter is not None:
             reduction_steps.append(self._solid_angle_correcter)
         
-        # Calculate transmission correction
-        #TODO: Background needs its own transmission calculation
-        if self._transmission_calculator is not None:
-            reduction_steps.append(self._transmission_calculator) 
-            
         return reduction_steps
     
     def _to_steps(self):
@@ -260,6 +264,10 @@ class SANSReducer(Reducer):
         """
         # Get the basic 2D steps
         self._reduction_steps = self._2D_steps()
+        
+        # Apply transmission correction
+        if self._transmission_calculator is not None:
+            self._reduction_steps.append(self._transmission_calculator) 
         
         # Subtract the background
         if self._background_subtracter is not None:

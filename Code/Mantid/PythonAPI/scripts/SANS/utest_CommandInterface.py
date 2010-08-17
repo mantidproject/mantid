@@ -4,6 +4,7 @@
 from __future__ import with_statement
 import math
 import sys
+import os
 import unittest
 from HFIRCommandInterface import *
 from mantidsimple import *
@@ -294,6 +295,24 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
                 
         data = mtd["BioSANS_test_data_Iq"].dataY(0)
+        self.assertEqual(data[0], 0.0)
+        self.assertEqual(data[10], 0.0)
+        self.assertEqual(data[20], 0.0)
+            
+    def test_bck_w_transmission(self):
+        DataPath(TEST_DIR)
+        HFIRSANS()
+        SetBeamCenter(16, 95)
+        AppendDataFile("BioSANS_test_data.xml", "test_data")
+        SensitivityCorrection("BioSANS_flood_data.xml")
+        DarkCurrent("BioSANS_dark_current.xml")
+        Background("BioSANS_test_data.xml")
+        SetTransmission(0.6,0.1)
+        SetBckTransmission(0.6,0.1)
+        AzimuthalAverage(error_weighting=True)
+        Reduce1D()
+                
+        data = mtd["test_data_Iq"].dataY(0)
         self.assertEqual(data[0], 0.0)
         self.assertEqual(data[10], 0.0)
         self.assertEqual(data[20], 0.0)
