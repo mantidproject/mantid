@@ -1,4 +1,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
@@ -66,6 +68,7 @@ void MatrixWorkspace::initialize(const int &NVectors, const int &XLength, const 
   m_isInitialized = true;
 }
 
+//---------------------------------------------------------------------------------------
 /** Set the instrument
  *
  * \param instr Shared pointer to an instrument.
@@ -88,6 +91,7 @@ void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
   }
 }
 
+//---------------------------------------------------------------------------------------
 /** Get a const reference to the SpectraDetectorMap associated with this workspace.
  *  Can ONLY be taken as a const reference!
  *
@@ -98,6 +102,7 @@ const SpectraDetectorMap& MatrixWorkspace::spectraMap() const
   return *m_spectramap;
 }
 
+//---------------------------------------------------------------------------------------
 /** Get a reference to the SpectraDetectorMap associated with this workspace.
  *  This non-const method will copy the map if it is shared between more than one workspace,
  *  and the reference returned will be to the copy.
@@ -110,6 +115,130 @@ SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
   return m_spectramap.access();
 }
 
+
+//---------------------------------------------------------------------------------------
+/** Return a map where:
+ *    KEY is the Workspace Index
+ *    VALUE is the Spectrum #
+ */
+IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToSpectrumMap()
+{
+  SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
+  if (!ax)
+    throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToSpectrumMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+  IndexToIndexMap * map = new IndexToIndexMap();
+  try
+  {
+    ax->getIndexSpectraMap(*map);
+  }
+  catch (std::runtime_error err)
+  {
+    delete map;
+    throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToSpectrumMap: no elements!");
+  }
+  return map;
+}
+
+//---------------------------------------------------------------------------------------
+/** Return a map where:
+ *    KEY is the Spectrum #
+ *    VALUE is the Workspace Index
+ */
+IndexToIndexMap * MatrixWorkspace::getSpectrumToWorkspaceIndexMap()
+{
+  SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
+  if (!ax)
+    throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+  IndexToIndexMap * map = new IndexToIndexMap();
+  try
+  {
+    ax->getSpectraIndexMap(*map);
+  }
+  catch (std::runtime_error err)
+  {
+    delete map;
+    throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!");
+  }
+  return map;
+}
+
+//---------------------------------------------------------------------------------------
+/** Return a map where:
+ *    KEY is the DetectorID (pixel ID)
+ *    VALUE is the Workspace Index
+ *  @throws runtime_error if there is more than one detector per spectrum, or other incompatibilities.
+ */
+IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap()
+{
+  SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
+  if (!ax)
+    throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+
+  IndexToIndexMap * map = new IndexToIndexMap();
+  //Loop through the workspace index
+  for (int ws=0; ws < this->getNumberHistograms(); ws++)
+  {
+    //Get the spectrum # from the WS index
+    int specNo = ax->spectraNo(ws);
+
+    //Now the list of detectors
+    std::vector<int> detList = this->m_spectramap->getDetectors(specNo);
+    if (detList.size() > 1)
+    {
+      delete map;
+      throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
+    }
+
+    //Set the KEY to the detector ID and the VALUE to the workspace index.
+    if (detList.size() == 1)
+      (*map)[ detList[0] ] = ws;
+
+    //Ignore if the detector list is empty.
+  }
+  return map;
+}
+
+
+//---------------------------------------------------------------------------------------
+/** Return a map where:
+ *    KEY is the Workspace Index
+ *    VALUE is the DetectorID (pixel ID)
+ *  @throws runtime_error if there is more than one detector per spectrum, or other incompatibilities.
+ */
+IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap()
+{
+  SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
+  if (!ax)
+    throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToDetectorIDMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+
+  IndexToIndexMap * map = new IndexToIndexMap();
+  //Loop through the workspace index
+  for (int ws=0; ws < this->getNumberHistograms(); ws++)
+  {
+    //Get the spectrum # from the WS index
+    int specNo = ax->spectraNo(ws);
+
+    //Now the list of detectors
+    std::vector<int> detList = this->m_spectramap->getDetectors(specNo);
+    if (detList.size() > 1)
+    {
+      delete map;
+      throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToDetectorIDMap(): more than 1 detector for one histogram! I cannot generate a map of workspace index to detector ID.");
+    }
+
+    //Set the KEY to the detector ID and the VALUE to the workspace index.
+    if (detList.size() == 1)
+      (*map)[ws] = detList[0];
+
+    //Ignore if the detector list is empty.
+  }
+  return map;
+}
+
+
+
+
+//---------------------------------------------------------------------------------------
 /** Get a constant reference to the Sample associated with this workspace.
  */
 const  Sample& MatrixWorkspace::sample() const

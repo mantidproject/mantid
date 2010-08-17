@@ -89,22 +89,42 @@ int& SpectraAxis::spectraNo(const int& index)
   return m_values[index];
 }
 
+/** Returns a map where index is the key and spectra is the value
+ *  This is used for efficient search of spectra number within a workspace
+ *  @param  map Reference to the map
+ */
+void SpectraAxis::getIndexSpectraMap(spec2index_map& map)const
+{
+  std::size_t nel=m_values.size();
+
+  if (nel==0)
+    throw std::runtime_error("getSpectraIndexMap(),  zero elements");
+  map.clear();
+  for (int i=nel-1;i>=0;--i)
+  {
+    map.insert(std::make_pair<int,int>(i, m_values[i]));
+  }
+}
+
+
 /** Returns a map where spectra is the key and index is the value
  *  This is used for efficient search of spectra number within a workspace
  *  @param  map Reference to the map
  */
 void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
 {
-	std::size_t nel=m_values.size();
+  std::size_t nel=m_values.size();
 
-	if (nel==0)
-		throw std::runtime_error("getSpectraIndexMap(),  zero elements");
-	map.clear();
-	for (int i=nel-1;i>=0;--i)
-	{
-		map.insert(std::make_pair<int,int>(m_values[i],i));
-	}
+  if (nel==0)
+    throw std::runtime_error("getSpectraIndexMap(),  zero elements");
+  map.clear();
+  for (int i=nel-1;i>=0;--i)
+  {
+    map.insert(std::make_pair<int,int>(m_values[i],i));
+  }
 }
+
+
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 Reference to the axis to compare to

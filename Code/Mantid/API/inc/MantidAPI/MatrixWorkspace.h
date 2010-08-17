@@ -28,6 +28,12 @@ typedef Kernel::cow_ptr<MantidVec> MantidVecPtr;
 
 namespace API
 {
+
+/** Map from one type of index (e.g. workspace index) to another type (e.g. spectrum # or detector id #).
+ * Used by MatrixWorkspace to return maps.
+ */
+typedef std::map<int, int> IndexToIndexMap;
+
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
@@ -78,6 +84,13 @@ public:
   // SpectraDetectorMap accessors
   const SpectraDetectorMap& spectraMap() const;
   SpectraDetectorMap& mutableSpectraMap();
+
+  // More mapping
+  IndexToIndexMap * getWorkspaceIndexToSpectrumMap();
+  IndexToIndexMap * getSpectrumToWorkspaceIndexMap();
+  IndexToIndexMap * getWorkspaceIndexToDetectorIDMap();
+  IndexToIndexMap * getDetectorIDToWorkspaceIndexMap();
+
 
   /// Sample accessors
   const  Sample& sample() const;

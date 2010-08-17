@@ -74,7 +74,8 @@ public:
   const int& spectraNo(const int& index) const;
   int& spectraNo(const int& index);
   // Get a map that contains the spectra index as the key and the index in the array as teh value
-  void getSpectraIndexMap(spec2index_map&)const;
+  void getSpectraIndexMap(spec2index_map&) const;
+  void getIndexSpectraMap(spec2index_map& map) const;
 
 private:
   /// Private, undefined copy assignment operator

@@ -44,7 +44,62 @@ private:
   MantidVec vec;
   int spec;
 };
-}} // namespace
+}}// namespace
+
+
+
+namespace Mantid { namespace DataObjects {
+class WorkspaceTesterWithMaps : public MatrixWorkspace
+{
+public:
+  WorkspaceTesterWithMaps() : MatrixWorkspace() {}
+  virtual ~WorkspaceTesterWithMaps() {}
+
+  // Empty overrides of virtual methods
+  virtual int getNumberHistograms() const { return m_NVectors;}
+  const std::string id() const {return "WorkspaceTester";}
+  void init(const int& NVectors, const int& j, const int& k)
+  {
+    m_NVectors = NVectors;
+    vec.resize(j,1.0);
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new NumericAxis(1);
+
+    //Spectrum # = 20 + workspace index.
+    SpectraAxis * ax =  new SpectraAxis(m_NVectors);
+    for (int i=0; i<m_NVectors; i++)
+      ax->setValue(i, i+20);
+    m_axes[1] = ax;
+
+    //Detector id is 100 + workspace index = 80 + spectrum #
+    for (int i=20; i<20+m_NVectors; i++)
+    {
+      std::vector<int> vec;
+      vec.push_back(i+80);
+      this->mutableSpectraMap().addSpectrumEntries(i, vec);
+    }
+
+  }
+  int size() const {return vec.size();}
+  int blocksize() const {return vec.size();}
+  MantidVec& dataX(int const ) {return vec;}
+  MantidVec& dataY(int const ) {return vec;}
+  MantidVec& dataE(int const ) {return vec;}
+  const MantidVec& dataX(int const) const {return vec;}
+  const MantidVec& dataY(int const) const {return vec;}
+  const MantidVec& dataE(int const) const {return vec;}
+  Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
+  void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
+
+private:
+  MantidVec vec;
+  int spec;
+  int m_NVectors;
+};
+}}// namespace
+
+
 
 DECLARE_WORKSPACE(WorkspaceTester)
 
@@ -141,9 +196,9 @@ public:
 
   void testGetSetYUnit()
   {
-    TS_ASSERT_EQUALS( ws->YUnit(), "" )
-    TS_ASSERT_THROWS_NOTHING( ws->setYUnit("something") )
-    TS_ASSERT_EQUALS( ws->YUnit(), "something" )
+    TS_ASSERT_EQUALS( ws->YUnit(), "" );
+    TS_ASSERT_THROWS_NOTHING( ws->setYUnit("something") );
+    TS_ASSERT_EQUALS( ws->YUnit(), "something" );
   }
 
   void testMasking()
@@ -235,6 +290,39 @@ public:
     TS_ASSERT_THROWS(wkspace->binIndexOf(0.), std::out_of_range);
   }
   
+  void testMappingFunctions()
+  {
+    MatrixWorkspace * wsm = new Mantid::DataObjects::WorkspaceTesterWithMaps();
+    //WS index = 0 to 9
+    //Spectrum = WS + 20
+    //Detector ID = WS + 100
+    wsm->initialize(10, 4, 2);
+    IndexToIndexMap * m;
+
+    m = wsm->getWorkspaceIndexToSpectrumMap();
+    for (int i=0; i < 10; i++)
+      TS_ASSERT_EQUALS(m->at(i), 20+i);
+    delete m;
+
+    m = wsm->getSpectrumToWorkspaceIndexMap();
+    for (int i=0; i < 10; i++)
+      TS_ASSERT_EQUALS(m->at(i+20), i);
+    delete m;
+
+    m = wsm->getWorkspaceIndexToDetectorIDMap();
+    for (int i=0; i < 10; i++)
+      TS_ASSERT_EQUALS(m->at(i), i+100);
+    delete m;
+
+    m = wsm->getDetectorIDToWorkspaceIndexMap();
+    for (int i=0; i < 10; i++)
+      TS_ASSERT_EQUALS(m->at(i+100), i);
+    delete m;
+
+  }
+
+
+
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 
