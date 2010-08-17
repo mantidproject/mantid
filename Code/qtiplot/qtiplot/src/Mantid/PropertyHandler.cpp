@@ -148,16 +148,8 @@ protected:
   QtProperty* apply(const std::string& str)const
   {
     QtProperty* prop = NULL;
-    if (m_name.toLower() == "filename")
-    {
-      prop = m_browser->m_filenameManager->addProperty(m_name);
-      m_browser->m_filenameManager->setValue(prop,QString::fromStdString(str));
-    }
-    else
-    {
-      prop = m_browser->m_stringManager->addProperty(m_name);
-      m_browser->m_stringManager->setValue(prop,QString::fromStdString(str));
-    }
+    prop = m_browser->addStringProperty(m_name);
+    m_browser->setStringPropertyValue(prop,QString::fromStdString(str));
     return prop;
   }
   /// Create double property
@@ -604,14 +596,7 @@ protected:
   void apply(std::string& str)const
   {
     QString attName = m_prop->propertyName();
-    if (attName.toLower() == "filename")
-    {
-      str = m_browser->m_filenameManager->value(m_prop).toStdString();
-    }
-    else
-    {
-      str = m_browser->m_stringManager->value(m_prop).toStdString();
-    }
+    str = m_browser->getStringPropertyValue(m_prop).toStdString();
   }
   /// Create double property
   void apply(double& d)const
@@ -643,14 +628,7 @@ protected:
   {
     m_browser->m_changeSlotsEnabled = false;
     QString attName = m_prop->propertyName();
-    if (attName.toLower() == "filename")
-    {
-       m_browser->m_filenameManager->setValue(m_prop,QString::fromStdString(str));
-    }
-    else
-    {
-      m_browser->m_stringManager->setValue(m_prop,QString::fromStdString(str));
-    }
+    m_browser->setStringPropertyValue(m_prop,QString::fromStdString(str));
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set double property

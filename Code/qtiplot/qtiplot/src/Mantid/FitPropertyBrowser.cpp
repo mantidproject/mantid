@@ -16,7 +16,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 
-#include "FilenameEditorFactory.h"
+#include "MantidQtMantidWidgets/UserFunctionDialog.h"
+
+#include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
@@ -38,6 +40,34 @@
 #include <QClipboard>
 
 #include <algorithm>
+
+class FormulaDialogEditor: public StringDialogEditor
+{
+public:
+  FormulaDialogEditor(QtProperty *property, QWidget *parent)
+    :StringDialogEditor(property,parent){}
+protected slots:
+  void runDialog()
+  {
+    MantidQt::MantidWidgets::UserFunctionDialog *dlg = new MantidQt::MantidWidgets::UserFunctionDialog((QWidget*)parent(),getText());
+    if (dlg->exec() == QDialog::Accepted)
+    {
+      setText(dlg->getFormula());
+      updateProperty();
+    };
+  }
+};
+
+class FormulaDialogEditorFactory: public StringDialogEditorFactory
+{
+public:
+  FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
+protected:
+  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
+  {
+    return new FormulaDialogEditor(property,parent);
+  }
+};
 
 /**
  * Constructor
@@ -108,6 +138,7 @@ m_decimals(-1)
   m_intManager =    new QtIntPropertyManager(w);
   m_boolManager = new QtBoolPropertyManager(w);
   m_filenameManager = new QtStringPropertyManager(w);
+  m_formulaManager = new QtStringPropertyManager(w);
 
     /* Create the top level group */
 
@@ -118,7 +149,8 @@ m_decimals(-1)
   connect(m_intManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(intChanged(QtProperty*)));
   connect(m_doubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(doubleChanged(QtProperty*)));
   connect(m_stringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
-  connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(filenameChanged(QtProperty*)));
+  connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
+  connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
     /* Create function group */
 
@@ -163,7 +195,8 @@ m_decimals(-1)
   QtDoubleSpinBoxFactory *doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(w);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
-  FilenameEditorFactory* filenameEditFactory = new FilenameEditorFactory(w);
+  StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
+  FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
 
   m_browser = new QtTreePropertyBrowser();
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
@@ -172,7 +205,8 @@ m_decimals(-1)
   //m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
-  m_browser->setFactoryForManager(m_filenameManager, filenameEditFactory);
+  m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
+  m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
 
   updateDecimals();
 
@@ -998,6 +1032,7 @@ void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFunction* f)cons
   setCurrentFunction(getHandler()->findHandler(f));
 }
 
+#include "../FitDialog.h"
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
@@ -1679,6 +1714,54 @@ QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name)const
   m_doubleManager->setDecimals(prop,m_decimals);
   m_doubleManager->setRange(prop,-DBL_MAX,DBL_MAX);
   return prop;
+}
+
+/** Create a string property and selects a property manager for it
+ * based on the property name
+ * @param name The name of the new property
+ * @return Pointer to the created property
+ */
+QtProperty* FitPropertyBrowser::addStringProperty(const QString& name)const
+{
+  QtProperty* prop;
+  QString propName = name.toLower();
+  if (propName == "filename")
+  {
+    prop = m_filenameManager->addProperty(name);
+  }
+  else if (propName == "formula")
+  {
+    //!!! dont forget to change the manager !!!
+    prop = m_formulaManager->addProperty(name);
+  }
+  else
+  {
+    prop = m_stringManager->addProperty(name);
+  }
+  return prop;
+}
+
+/**
+ * Set a value to a string property.
+ * @param prop A pointer to the property
+ * @param value New value for the property
+ */
+void FitPropertyBrowser::setStringPropertyValue(QtProperty* prop,const QString& value)const
+{
+  QtStringPropertyManager* manager = dynamic_cast<QtStringPropertyManager*>(prop->propertyManager());
+  if (manager)
+  {
+    manager->setValue(prop,value);
+  }
+}
+
+QString FitPropertyBrowser::getStringPropertyValue(QtProperty* prop)const
+{
+  QtStringPropertyManager* manager = dynamic_cast<QtStringPropertyManager*>(prop->propertyManager());
+  if (manager)
+  {
+    return manager->value(prop);
+  }
 }
 
 const Mantid::API::IFunction* FitPropertyBrowser::theFunction()const

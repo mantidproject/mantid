@@ -533,5 +533,55 @@ const Expression& Expression::bracketsRemoved()const
   return *e;
 }
 
+/**
+ * Return a list of all variable names in this expression
+ */
+std::set<std::string> Expression::getVariables()const
+{
+  std::set<std::string> out;
+  if ( !isFunct() )
+  {
+    out.insert(name());
+  }
+  else
+  {
+    for(iterator e = begin(); e != end(); ++e)
+    {
+      if ( e->isFunct() )
+      {
+        std::set<std::string> tout = e->getVariables();
+        out.insert(tout.begin(),tout.end());
+      }
+      else
+      {
+        out.insert(e->name());
+      }
+    }
+  }
+  return out;
+}
+
+void Expression::rename(const std::string& newName)
+{
+  m_funct = newName;
+}
+
+void Expression::renameAll(const std::string& oldName,const std::string& newName)
+{
+  if ( !isFunct() && name() == oldName)
+  {
+    rename(newName);
+  }
+  else
+  {
+    std::vector<Expression>::iterator e = m_terms.begin();
+    for(; e != m_terms.end(); ++e)
+    {
+      e->renameAll(oldName,newName);
+    }
+  }
+}
+
+
 }//API
 }//Mantid

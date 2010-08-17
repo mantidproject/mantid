@@ -31,6 +31,8 @@ SOURCES = \
   $$SRCDIR/MWDiag.cpp \
   $$SRCDIR/MWDiagCalcs.cpp \
   $$SRCDIR/SaveWorkspaces.cpp \
+  $$SRCDIR/UserFunctionDialog.cpp \
+  $$SRCDIR/RenameParDialog.cpp \
   $$SRCDIR/ICatSearch.cpp  \
   $$SRCDIR/ICatInvestigation.cpp \
   $$SRCDIR/ICatMyDataSearch.cpp \
@@ -47,6 +49,8 @@ HEADERS = \
   $$HEADERDIR/MWDiag.h \
   $$HEADERDIR/MWDiagCalcs.h \
   $$HEADERDIR/SaveWorkspaces.h \
+  $$HEADERDIR/UserFunctionDialog.h \
+  $$HEADERDIR/RenameParDialog.h \
   $$HEADERDIR/ICatSearch.h  \
   $$HEADERDIR/ICatInvestigation.h \
   $$HEADERDIR/ICatMyDataSearch.h \
@@ -58,6 +62,8 @@ UI_DIR = $$HEADERDIR
 FORMS = \
   $$HEADERDIR/MWRunFiles.ui \
   $$HEADERDIR/MWDiag.ui \
+  $$HEADERDIR/UserFunctionDialog.ui \
+  $$HEADERDIR/RenameParDialog.ui \
   $$HEADERDIR/ICatSearch.ui \
   $$HEADERDIR/ICatInvestigation.ui \
   $$HEADERDIR/ICatMyDataSearch.ui

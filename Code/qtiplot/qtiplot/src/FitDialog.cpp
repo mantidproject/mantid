@@ -186,7 +186,7 @@ void FitDialog::initFitPage()
     gl2->addWidget(new QLabel(tr("From x=")), 0, 0);
 
 	boxFrom = new DoubleSpinBox();
-    boxFrom->setLocale(app->locale());
+//    boxFrom->setLocale(app->locale());
     boxFrom->setDecimals(app->d_decimal_digits);
     connect(boxFrom, SIGNAL(valueChanged(double)), this, SLOT(updatePreview()));
     gl2->addWidget(boxFrom, 0, 1);
@@ -194,7 +194,7 @@ void FitDialog::initFitPage()
 	gl2->addWidget(new QLabel( tr("To x=")), 1, 0);
 
 	boxTo = new DoubleSpinBox();
-    boxTo->setLocale(app->locale());
+//    boxTo->setLocale(app->locale());
     boxTo->setDecimals(app->d_decimal_digits);
     connect(boxTo, SIGNAL(valueChanged(double)), this, SLOT(updatePreview()));
     gl2->addWidget(boxTo, 1, 1);
@@ -214,7 +214,7 @@ void FitDialog::initFitPage()
 	boxTolerance = new DoubleSpinBox();
 	boxTolerance->setRange(0.0, 1.0);
 	boxTolerance->setSingleStep(1e-4);
-    boxTolerance->setLocale(app->locale());
+//    boxTolerance->setLocale(app->locale());
     boxTolerance->setDecimals(13);
     boxTolerance->setValue(1e-4);
 	gl3->addWidget(boxTolerance, 1, 1);
@@ -766,18 +766,18 @@ void FitDialog::showFitPage()
 
 		if (d_current_fit->type() != Fit::BuiltIn){
 			RangeLimitBox *rbl = new RangeLimitBox(RangeLimitBox::LeftLimit);
-			rbl->setLocale(locale);
+//			rbl->setLocale(locale);
 			rbl->setDecimals(prec);
 			boxParams->setCellWidget(i, 1, rbl);
 			
 			RangeLimitBox *rbr = new RangeLimitBox(RangeLimitBox::RightLimit);
-			rbr->setLocale(locale);
+//			rbr->setLocale(locale);
 			rbr->setDecimals(prec);
 			boxParams->setCellWidget(i, 3, rbr);
 		}
 
 		DoubleSpinBox *sb = new DoubleSpinBox();
-		sb->setLocale(locale);
+//		sb->setLocale(locale);
 		sb->setDecimals(prec);
 		sb->setValue(d_current_fit->initialGuess(i));
         connect(sb, SIGNAL(valueChanged(double)), this, SLOT(updatePreview()));

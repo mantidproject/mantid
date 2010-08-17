@@ -1,4 +1,4 @@
-#include "FilenameEditorFactory.h"
+#include "StringDialogEditorFactory.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -10,20 +10,20 @@
 
 #include <iostream>
 
-void FilenameEditorFactory::connectPropertyManager(QtStringPropertyManager *manager)
+void StringDialogEditorFactory::connectPropertyManager(QtStringPropertyManager *manager)
 {
 }
 
-QWidget* FilenameEditorFactory::createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
+QWidget* StringDialogEditorFactory::createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
 {
-  return new FilenameEditor(property,parent);
+  return new StringDialogEditor(property,parent);
 }
 
-void FilenameEditorFactory::disconnectPropertyManager(QtStringPropertyManager *manager)
+void StringDialogEditorFactory::disconnectPropertyManager(QtStringPropertyManager *manager)
 {
 }
 
-FilenameEditor::FilenameEditor(QtProperty *property, QWidget *parent):QWidget(parent),m_property(property)
+StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent):QWidget(parent),m_property(property)
 {
   QHBoxLayout *layout = new QHBoxLayout;
   m_lineEdit = new QLineEdit(this);
@@ -47,23 +47,33 @@ FilenameEditor::FilenameEditor(QtProperty *property, QWidget *parent):QWidget(pa
   this->setLayout(layout);
 }
 
-void FilenameEditor::runDialog()
+void StringDialogEditor::runDialog()
 {
   QSettings settings;
   QString dir = settings.value("Mantid/FitBrowser/ResolutionDir").toString();
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),dir);
-  if (!fileName.isEmpty())
+  QString StringDialog = QFileDialog::getOpenFileName(this, tr("Open File"),dir);
+  if (!StringDialog.isEmpty())
   {
-    m_lineEdit->setText(fileName);
+    m_lineEdit->setText(StringDialog);
     updateProperty();
   }
 }
 
-FilenameEditor::~FilenameEditor()
+void StringDialogEditor::setText(const QString& txt)
+{
+  m_lineEdit->setText(txt);
+}
+
+QString StringDialogEditor::getText()const
+{
+  return m_lineEdit->text();
+}
+
+StringDialogEditor::~StringDialogEditor()
 {
 }
 
-void FilenameEditor::updateProperty()
+void StringDialogEditor::updateProperty()
 {
   QtStringPropertyManager* mgr = dynamic_cast<QtStringPropertyManager*>(m_property->propertyManager());
   if (mgr)

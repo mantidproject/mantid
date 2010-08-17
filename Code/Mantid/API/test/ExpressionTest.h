@@ -367,6 +367,18 @@ public:
     TS_ASSERT_EQUALS(e.str(),"2*(a+b)+(1-sin(x-y))");
   }
 
+  void testGetVariables()
+  {
+    Expression e;
+    e.parse("a+b*sin(x)*fun1(fun2(a+c))");
+    std::set<std::string> vars = e.getVariables();
+    TS_ASSERT_EQUALS(vars.size(),4);
+    TS_ASSERT(vars.find("a")!=vars.end());
+    TS_ASSERT(vars.find("b")!=vars.end());
+    TS_ASSERT(vars.find("c")!=vars.end());
+    TS_ASSERT(vars.find("x")!=vars.end());
+  }
+
 };
 
 #endif /*EXPRESSIONTEST_H_*/

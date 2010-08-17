@@ -93,6 +93,19 @@ namespace Mantid
       /// If the expression has 1 argument and empty function name it means it is wrapped in brackets
       /// This method returns first sub-expression without brackets
       const Expression& bracketsRemoved()const;
+      /// Return a list of all variable names in this expression
+      std::set<std::string> getVariables()const;
+      /**
+       * Rename all variables with a given name 
+       * @param oldName The old name
+       * @param newName The new name
+       */
+      void renameAll(const std::string& oldName,const std::string& newName);
+      /**
+       * Rename this expression 
+       * @param newName The new name
+       */
+      void rename(const std::string& newName);
     private:
 
       /// copy contructor

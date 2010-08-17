@@ -258,6 +258,10 @@ private:
   void setFitEnabled(bool yes);
   /// Create a double property and set some settings
   QtProperty* addDoubleProperty(const QString& name)const;
+  /// Create a string property and set some settings
+  QtProperty* addStringProperty(const QString& name)const;
+  void setStringPropertyValue(QtProperty* prop,const QString& value)const;
+  QString getStringPropertyValue(QtProperty* prop)const;
   /// Check that the properties match the function
   void checkFunction();
   /// Sets the workspace to a function
@@ -290,12 +294,15 @@ private:
   /// Property managers:
   QtGroupPropertyManager  *m_groupManager;
   QtDoublePropertyManager *m_doubleManager;
-  QtStringPropertyManager *m_stringManager;
   QtEnumPropertyManager *m_enumManager;
   QtIntPropertyManager *m_intManager;
   QtBoolPropertyManager *m_boolManager;
+  QtStringPropertyManager *m_stringManager;
   QtStringPropertyManager *m_filenameManager;
-  /// Properties:
+  QtStringPropertyManager *m_formulaManager;
+  /// String property managers for special case attributes such as Filename or Formula
+  /// <attribute_name,string_manager>
+  QMap<QString,QtStringPropertyManager*> m_stringManagers;
 
   // The main application window
   ApplicationWindow* m_appWindow;

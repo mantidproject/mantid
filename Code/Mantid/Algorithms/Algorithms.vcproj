@@ -311,6 +311,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FFTSmooth2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FindCenterOfMassPosition.cpp"
 				>
 			</File>
@@ -782,6 +786,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\FFTSmooth.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FFTSmooth2.h"
 				>
 			</File>
 			<File

@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../CurveFitting/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../CurveFitting/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../Nexus/inc;../PythonAPI/inc;C:\Python25\include;../../Third_Party/include;../../Third_Party/include/muParser;..\Nexus\test;."
 				PreprocessorDefinitions="_DEBUG;IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -54,9 +54,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib ws2_32.lib $(SolutionName)Nexus.lib $(SolutionName)CurveFitting.lib muparser_d.lib libnexus-0.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;..\Debug"
+				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;..\Debug;C:\Python25\libs"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -113,7 +113,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../CurveFitting/inc;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="../CurveFitting/inc;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../Nexus\inc;../../Third_Party/include;../../Third_Party/include/muParser;."
 				PreprocessorDefinitions="IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 			/>
@@ -128,7 +128,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib $(SolutionName)UserAlgorithms.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib $(SolutionName)CurveFitting.lib $(SolutionName)Nexus.lib ws2_32.lib muparser.lib libnexus-0.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\Release;..\..\Third_Party\lib\win32"
 				OptimizeReferences="2"
