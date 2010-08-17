@@ -31,7 +31,9 @@ SOURCES = \
   $$SRCDIR/deltaECalc.cpp \
   $$SRCDIR/Background.cpp \
   $$SRCDIR/ConvertToEnergy.cpp \
-  $$SRCDIR/Indirect.cpp
+  $$SRCDIR/Indirect.cpp \
+  $$SRCDIR/MuonAnalysis.cpp \
+  $$SRCDIR/IO_MuonGrouping.cpp
 
 HEADERS = \
   $$HEADERDIR/SANSRunWindow.h \
@@ -41,13 +43,16 @@ HEADERS = \
   $$HEADERDIR/deltaECalc.h \
   $$HEADERDIR/Background.h \
   $$HEADERDIR/ConvertToEnergy.h \
-  $$HEADERDIR/Indirect.h
+  $$HEADERDIR/Indirect.h \
+  $$HEADERDIR/MuonAnalysis.h \
+  $$HEADERDIR/IO_MuonGrouping.h
   
 UI_DIR = $$HEADERDIR
 
 FORMS = \
   $$HEADERDIR/SANSRunWindow.ui \
-  $$HEADERDIR/ConvertToEnergy.ui
+  $$HEADERDIR/ConvertToEnergy.ui \
+  $$HEADERDIR/MuonAnalysis.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"
 
