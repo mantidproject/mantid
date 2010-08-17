@@ -10,6 +10,13 @@ CONFIG += qt warn_on exceptions debug_and_release
 
 win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS WIN32 BOOST_ALL_DYN_LINK
 
+# Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function
+# to check system header paths and worse still no way of accessing what they are!
+# For simplicity we'll assume existence on Unix and Mac
+unix|macx {
+   DEFINES += HAVE_STDINT_H
+}
+
 #-------------------------------
 # Paths, libraries and resources
 #-------------------------------

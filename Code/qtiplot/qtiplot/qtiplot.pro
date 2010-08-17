@@ -11,6 +11,10 @@ QMAKE_LFLAGS_RELEASE += -g
 # could also be linux-g++-64 so maybe best left to the system to determine
 # QMAKESPEC=linux-g++
  }
+ # Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function
+ # to check system header paths and worse still no way of accessing what they are!
+ # For simplicity we'll assume existence on Unix and Mac
+ DEFINES += HAVE_STDINT_H
 }
 
 # building without muParser doesn't work yet
