@@ -545,7 +545,7 @@ void MuonAnalysis::inputFileChanged()
 {
   // create Python string to load muon Nexus file
   QString pyString = "LoadMuonNexus('";
-  pyString.append(m_uiForm.mwRunFiles->getFileName());
+  pyString.append(m_uiForm.mwRunFiles->getFirstFilename());
   pyString.append("','");
   pyString.append(m_workspace_name.c_str());
 

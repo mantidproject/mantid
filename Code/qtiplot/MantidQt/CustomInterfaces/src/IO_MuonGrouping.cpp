@@ -4,8 +4,6 @@
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 
-#include "MantidKernel/FileProperty.h"
-
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/DOMWriter.h"
 #include "Poco/DOM/Element.h"
