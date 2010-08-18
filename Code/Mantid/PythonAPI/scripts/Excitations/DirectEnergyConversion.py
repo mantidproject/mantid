@@ -25,6 +25,12 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
 #        self.normalise_method = 'current'
         self.map_file = None
         
+        if (self.file_prefix == "CNCS" or "ARCS" or "SEQUOIA"):
+            self.facility = "SNS"
+            self.normalise_method  = 'current'
+            self.file_ext = '.dat'
+        
+        self.time_bins = None
                 
         # Detector diagnosis
         self.spectra_masks = None
@@ -34,6 +40,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         self.abs_spectra_masks = None
         self.abs_mass = 1.0
         self.abs_rmm = 1.0
+        self.applyDetectorEfficiency = True
      
     def init_idf_params(self):
         '''
@@ -117,16 +124,20 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             
         # Special load monitor stuff.    
         if (self.file_prefix == "CNCS"):
-            det_info_file = "CNCS_detector.sca"
+            self.log("--- CNCS ---")
             self.fix_ei = True
+            ei_value = ei_guess
+            tzero = 0.1982*(1+ei_value)**(-0.84098)
+            ChangeBinOffset(result_ws, result_ws, tzero)
+            mon1_peak = 0.0
+            self.applyDetectorEfficiency = False
         elif (self.file_prefix == "ARCS" or "SEQUOIA"):
             self.log("***** ARCS/SEQUOIA *****")
+            #print "You aren't gonna see much at the moment!"
         else:
             # Do ISIS stuff for Ei
-            pass          
-
+            ei_value, mon1_peak = self.get_ei(result_ws, ei_guess)
             
-        ei_value, mon1_peak = self.get_ei(result_ws, ei_guess)
         bin_offset = -mon1_peak
         
         if self.background == True:
@@ -142,7 +153,9 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         if not self.energy_bins is None:
             Rebin(result_ws, result_ws, self.energy_bins)
         
-        DetectorEfficiencyCor(result_ws, result_ws, ei_value)
+        if self.applyDetectorEfficiency:
+            DetectorEfficiencyCor(result_ws, result_ws, ei_value)
+        
         self.apply_masking(result_ws, spectra_masks, map_file)
 
         ConvertToDistribution(result_ws)
@@ -159,7 +172,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         '''
         Load a run number or sum a set of run numbers
         '''
-        data = common.load_run(self.file_prefix, run_num,output_name, self.file_ext)
+        data = common.load_run(self.file_prefix, run_num, output_name, self.file_ext, time_bins=self.time_bins)
         self.setup_mtd_instrument(data[0])
         return data
        

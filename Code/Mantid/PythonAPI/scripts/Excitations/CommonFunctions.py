@@ -8,11 +8,15 @@ def create_outputname(prefix, run_number, suffix=''):
     if type(run_number) == int:
         name = prefix + str(run_number) + '.spe' + suffix
     else:
+        print "run_number %s " % run_number
         name = os.path.basename(run_number)
-        name = os.path.splitext(name)[0] + '.spe' + suffix
+        if (suffix is None):
+            name = os.path.splitext(name)[0] + '.spe'
+        else:
+            name = os.path.splitext(name)[0] + '.spe' + suffix
     return name
 
-def load_run(prefix, run_number, output_name, ext='', name_suffix=''):
+def load_run(prefix, run_number, output_name, ext='', name_suffix='', time_bins=None):
     '''
     Load a single run into the given workspace
     '''
@@ -28,14 +32,16 @@ def load_run(prefix, run_number, output_name, ext='', name_suffix=''):
     if ext.startswith(".n"):
         loader = LoadNexus(filename, output_name)
     elif ext.startswith(".dat"):
-        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)
-        #det_info_file = "/home/scu/Desktop/cncs_detector.dat"
-       
-       # 
-#       loader = Rebin(output_name + "_event", output_name, "43000,10,63000")
-#        mtd.deleteWorkspace(output_name + "_event")
-        
-#        return loader.workspace(), det_info_file
+        if time_bins is None:
+            raise ValueError("No Time-of-Flight bins defined.")
+        # load the events
+        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name+"_event", PadEmptyPixels=True)
+        # Create a histogram workspace
+        loader = Rebin(output_name + "_event", output_name, time_bins)
+        # Delete the event workspace
+        mtd.deleteWorkspace(output_name + "_event")
+        det_info_file = prefix + "_detector.sca"        
+        return loader.workspace(), det_info_file
     else:
         loader = LoadRaw(filename, output_name)
     
