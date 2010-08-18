@@ -25,6 +25,10 @@ public:
 
   ConvertUnitsTest()
   {
+  }
+
+  void setup_WS()
+  {
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",256,11,10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
@@ -50,7 +54,7 @@ public:
     }
 
     // Register the workspace in the data service
-    inputSpace = "testWorkspace";
+    this->inputSpace = "testWorkspace";
     AnalysisDataService::Instance().add(inputSpace, space);
 
     // Load the instrument data
@@ -59,7 +63,7 @@ public:
     // Path to test input file assumes Test directory checked out from SVN
     std::string inputFile = "../../../../Test/Instrument/HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("Workspace", inputSpace);
+    loader.setPropertyValue("Workspace", this->inputSpace);
     loader.execute();
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
@@ -72,6 +76,12 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
+  }
+
+  void testExec()
+  {
+    this->setup_WS();
+    if ( !alg.isInitialized() ) alg.initialize();
 
     // Set the properties
     alg.setPropertyValue("InputWorkspace",inputSpace);
@@ -79,11 +89,7 @@ public:
     alg.setPropertyValue("OutputWorkspace",outputSpace);
     alg.setPropertyValue("Target","Wavelength");
     alg.setPropertyValue("AlignBins","1");
-  }
 
-  void testExec()
-  {
-    if ( !alg.isInitialized() ) alg.initialize();
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
