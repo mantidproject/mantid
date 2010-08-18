@@ -96,7 +96,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
     // Check that the output unit is correct
-    TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "Wavelength")
+    TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "Wavelength");
     // Test that y & e data is unchanged
     Mantid::MantidVec y = output2D->dataY(101);
     Mantid::MantidVec e = output2D->dataE(101);
@@ -139,17 +139,17 @@ public:
   {
     ConvertUnits quickly;
     quickly.initialize();
-    TS_ASSERT( quickly.isInitialized() )
+    TS_ASSERT( quickly.isInitialized() );
     quickly.setPropertyValue("InputWorkspace",outputSpace);
     quickly.setPropertyValue("OutputWorkspace","quickOut2");
     quickly.setPropertyValue("Target","Energy");
-    TS_ASSERT_THROWS_NOTHING( quickly.execute() )
-    TS_ASSERT( quickly.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( quickly.execute() );
+    TS_ASSERT( quickly.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut2")) )
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Energy")
-    TS_ASSERT_DELTA( output->dataX(1)[1], 10.10, 0.01 )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut2")) );
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Energy");
+    TS_ASSERT_DELTA( output->dataX(1)[1], 10.10, 0.01 );
 
     AnalysisDataService::Instance().remove("quickOut2");
   }
@@ -161,20 +161,20 @@ public:
     AnalysisDataService::Instance().add("quickIn", input);
     ConvertUnits quickly;
     quickly.initialize();
-    TS_ASSERT( quickly.isInitialized() )
+    TS_ASSERT( quickly.isInitialized() );
     quickly.setPropertyValue("InputWorkspace","quickIn");
     quickly.setPropertyValue("OutputWorkspace","quickOut");
     quickly.setPropertyValue("Target","dSpacing");
-    TS_ASSERT_THROWS_NOTHING( quickly.execute() )
-    TS_ASSERT( quickly.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( quickly.execute() );
+    TS_ASSERT( quickly.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut")) )
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "dSpacing")
-    TS_ASSERT_EQUALS( &(output->dataX(0)[0]), &(output->dataX(0)[0]) )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut")) );
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "dSpacing");
+    TS_ASSERT_EQUALS( &(output->dataX(0)[0]), &(output->dataX(0)[0]) );
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it)
     {
-      TS_ASSERT_EQUALS( it->X(), 2.0*M_PI )
+      TS_ASSERT_EQUALS( it->X(), 2.0*M_PI );
     }
 
     AnalysisDataService::Instance().remove("quickIn");
@@ -189,8 +189,8 @@ public:
     loader->setPropertyValue("SpectrumList", "900");
     std::string ws = "mar";
     loader->setPropertyValue("OutputWorkspace", ws);
-    TS_ASSERT_THROWS_NOTHING( loader->execute() )
-    TS_ASSERT( loader->isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( loader->execute() );
+    TS_ASSERT( loader->isExecuted() );
 
  ConvertUnits conv;
     conv.initialize();
@@ -203,9 +203,9 @@ public:
     conv.execute();
 
  MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) )
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE")
-    TS_ASSERT_EQUALS( output->blocksize(), 472 )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
+    TS_ASSERT_EQUALS( output->blocksize(), 472 );
 
     AnalysisDataService::Instance().remove(outputSpace);
 
@@ -218,9 +218,9 @@ public:
     conv.setPropertyValue("Efixed","10");
     conv.execute();
 
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) )
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber")
-    TS_ASSERT_EQUALS( output->blocksize(), 965 )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber");
+    TS_ASSERT_EQUALS( output->blocksize(), 965 );
 
     AnalysisDataService::Instance().remove(ws);
     AnalysisDataService::Instance().remove(outputSpace);
