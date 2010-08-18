@@ -79,9 +79,6 @@ namespace MantidQt
             void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
             void reflectionSelected(int index); ///< set up parameter file values based on reflection
             void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
-            void browseRun(); ///< show openFileDialog for run file
-            void browseCalib(); ///< show openFileDialog for calibration file
-            void browseMap(); ///< show openFileDialog for mapping file
             void browseSave(); ///< show saveFileDialog for save file
             void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
             void backgroundRemoval(); ///< handles data from BG

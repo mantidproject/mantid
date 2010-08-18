@@ -46,8 +46,8 @@ void Indirect::initLayout()
     connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
     // line edits,etc (for isDirty)
-    connect(m_uiForm.leRunFiles, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
-    connect(m_uiForm.leRunFiles, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
+    connect(m_uiForm.ind_runFiles, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
+    connect(m_uiForm.ind_calibFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.leEfixed, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
@@ -60,12 +60,9 @@ void Indirect::initLayout()
     connect(m_uiForm.rebin_leEWidth, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
     connect(m_uiForm.rebin_leEHigh, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
     connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
-    connect(m_uiForm.leMappingFile, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
+    connect(m_uiForm.ind_mapFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirtyRebin()));
 
     // "Browse" buttons
-    connect(m_uiForm.pbRunFilesBrowse, SIGNAL(clicked()), this, SLOT(browseRun()));
-    connect(m_uiForm.pbCalibrationFilesBrowse, SIGNAL(clicked()), this, SLOT(browseCalib()));
-    connect(m_uiForm.pbMappingFileBrowse, SIGNAL(clicked()), this, SLOT(browseMap()));
     connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), this, SLOT(browseSave()));
 
     // "Calibration" tab
@@ -155,8 +152,8 @@ void Indirect::runClicked(bool tryToSave)
     pyInput += "ref = '"+m_uiForm.cbReflection->currentText()+"'\n";
 
 
-    QString runFiles = m_uiForm.leRunFiles->text();
-    runFiles.replace(";", "', r'");
+    QStringList runFiles_list = m_uiForm.ind_runFiles->getFilenames();
+    QString runFiles = runFiles_list.join("', r'");
 
     pyInput += "rawfiles = [r'"+runFiles+"']\n"
         "Sum=";
@@ -186,7 +183,8 @@ void Indirect::runClicked(bool tryToSave)
 
     if ( m_uiForm.ckUseCalib->isChecked() )
     {
-        pyInput += "calib = r'"+m_uiForm.leCalibrationFile->text()+"'\n";
+        QString calib = m_uiForm.ind_calibFile->getFirstFilename();
+        pyInput += "calib = r'"+calib+"'\n";
     }
     else
     {
@@ -307,31 +305,9 @@ void Indirect::setIDFValues(const QString & prefix)
 
     // Get list of analysers and populate cbAnalyser
     QString pyInput = 
-        "from mantidsimple import *\n"
-        "LoadEmptyInstrument(r'%1', 'ins')\n"
-        "workspace = mtd['ins']\n"
-        "instrument = workspace.getInstrument()\n"
-        "ana_list_split = instrument.getStringParameter('analysers')[0].split(\",\")\n"
-        "reflections = []\n"
-        "for i in range(0,len(ana_list_split)):\n"
-        "   list = []\n"
-        "   name = 'refl-' + ana_list_split[i]\n"
-        "   list.append( ana_list_split[i] )\n"
-        "   try:\n"
-        "      item = instrument.getStringParameter(name)[0]\n"
-        "   except IndexError:\n"
-        "      item = ''\n"
-        "   refl = item.split(',')\n"
-        "   list.append( refl )\n"
-        "   reflections.append(list)\n"
-        "for i in range(0, len(reflections)):\n"
-        "   message = reflections[i][0] + '-'\n"
-        "   for j in range(0,len(reflections[i][1])):\n"
-        "      message += str(reflections[i][1][j])\n"
-        "      if j < ( len(reflections[i][1]) -1 ):\n"
-        "         message += ','\n"
-        "   print message\n"
-        "mtd.deleteWorkspace('ins')\n";
+        "from IndirectEnergyConversion import getInstrumentDetails\n"
+        "result = getInstrumentDetails('" + m_uiForm.cbInst->currentText() + "')\n"
+        "print result\n";
 
     QString defFile = getIDFPath(m_uiForm.cbInst->currentText());
     if ( defFile == "" )
@@ -342,7 +318,6 @@ void Indirect::setIDFValues(const QString & prefix)
 
     getSpectraRanges(defFile);
 
-    pyInput = pyInput.arg(defFile);
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
     if ( pyOutput == "" )
@@ -514,7 +489,7 @@ QString Indirect::createMapFile(const QString& groupType)
 
     if ( groupType == "File" )
     {
-        groupFile = m_uiForm.leMappingFile->text();
+        groupFile = m_uiForm.ind_mapFile->getFirstFilename();
         if ( groupFile == "" )
         {
             showInformationBox("You must enter a path to the .map file.");
@@ -632,42 +607,31 @@ bool Indirect::validateInput()
 {
     bool valid = true;
     // run files input
-    if ( m_uiForm.leRunFiles->text() == "" )
+    if ( ! m_uiForm.ind_runFiles->isValid() )
     {
         valid = false;
-        m_uiForm.valRunFiles->setText("*");
-    }
-    else
-    {
-        m_uiForm.valRunFiles->setText("");
     }
 
     // calib file input
-    if ( m_uiForm.leCalibrationFile->text() == "" && m_uiForm.ckUseCalib->isChecked() )
+    
+    if ( m_uiForm.ckUseCalib->isChecked() && !m_uiForm.ind_calibFile->isValid() )
     {
         valid = false;
-        m_uiForm.valCalibration->setText("*");
-    }
-    else
-    {
-        m_uiForm.valCalibration->setText("");
     }
 
     // mapping selection
     if (
         ( m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "" ) 
         ||
-        ( m_uiForm.cbMappingOptions->currentText() == "File" && m_uiForm.leMappingFile->text() == "" )
+        ( m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.ind_mapFile->isValid() )
         )
     {
         valid = false;
         m_uiForm.valNoGroups->setText("*");
-        m_uiForm.valMapFile->setText("*");
     }
     else
     {
         m_uiForm.valNoGroups->setText("");
-        m_uiForm.valMapFile->setText("");
     }
 
     // detailed balance
@@ -1029,29 +993,13 @@ void Indirect::reflectionSelected(int index)
     // first, clear values in assosciated boxes:
     clearReflectionInfo();
 
-    QString defFile = getIDFPath(m_uiForm.cbInst->currentText());
-    QString paramFile = defFile;
-    paramFile.chop(14);
-    paramFile +=
-        m_uiForm.cbAnalyser->currentText() + "_" +
-        m_uiForm.cbReflection->currentText() + "_Parameters.xml";
-
     QString pyInput =
-        "from mantidsimple import *\n"
-        "LoadEmptyInstrument(r'%1', 'ins')\n"
-        "LoadParameterFile('ins', r'%2')\n"
-        "instrument = mtd['ins'].getInstrument()\n"
-        "print int(instrument.getNumberParameter('spectra-min')[0])\n"
-        "print int(instrument.getNumberParameter('spectra-max')[0])\n"
-        "print instrument.getNumberParameter('efixed-val')[0]\n"
-        "print int(instrument.getNumberParameter('peak-start')[0])\n"
-        "print int(instrument.getNumberParameter('peak-end')[0])\n"
-        "print int(instrument.getNumberParameter('back-start')[0])\n"
-        "print int(instrument.getNumberParameter('back-end')[0])\n"
+        "from IndirectEnergyConversion import getReflectionDetails\n"
+        "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
+        "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
+        "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
+        "print getReflectionDetails(instrument, analyser, reflection)\n";
         "mtd.deleteWorkspace('ins')\n";
-
-    pyInput = pyInput.arg(defFile);
-    pyInput = pyInput.arg(paramFile);
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1107,44 +1055,6 @@ void Indirect::mappingOptionSelected(const QString& groupType)
         m_uiForm.swMapping->setEnabled(true);
     }
 
-    isDirtyRebin(true);
-}
-
-/**
-* This function is called when a user clicks on the "Browse" button assosciated with
-* the "Run Files" section.
-*/
-void Indirect::browseRun()
-{
-    QStringList runFiles = QFileDialog::getOpenFileNames(this, "Select RAW Data Files",
-        m_dataDir, "ISIS Raw Files (*.raw)");
-    QString runFile = runFiles.join(";");
-    m_uiForm.leRunFiles->setText(runFile);
-    isDirty(true);
-}
-
-/**
-* As above, but for the Calibration file.
-*/
-void Indirect::browseCalib()
-{
-    QString calFile = QFileDialog::getOpenFileName(this, "Select Calibration File",
-        m_dataDir, "Calib Files (*calib.nxs)");
-    m_uiForm.leCalibrationFile->setText(calFile);
-    if ( calFile != "" )
-    {
-        m_uiForm.ckUseCalib->setChecked(true);
-    }
-    isDirty(true);
-}
-/**
-* Again, as above but for the Mapping File.
-*/
-void Indirect::browseMap()
-{
-    QString mapFile = QFileDialog::getOpenFileName(this, "Select Mapping / Grouping File",
-        m_dataDir, "Spectra Mapping File (*.map)");
-    m_uiForm.leMappingFile->setText(mapFile);
     isDirtyRebin(true);
 }
 
@@ -1234,7 +1144,7 @@ void Indirect::plotRaw()
 
     spectraRange = "range("+specList[0]+","+specList[1]+"+1)";
 
-    QString rawFile = m_uiForm.leRunFiles->text();
+    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
     if ( rawFile == "" )
     {
         showInformationBox("Please enter the path for the .raw file.");
@@ -1429,7 +1339,7 @@ void Indirect::calibCreate()
         }
     }
 
-    m_uiForm.leCalibrationFile->setText(output_path);
+    m_uiForm.ind_calibFile->setFileText(output_path);
     m_uiForm.ckUseCalib->setChecked(true);
 
 }

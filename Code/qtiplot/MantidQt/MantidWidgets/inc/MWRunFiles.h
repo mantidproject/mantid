@@ -49,6 +49,7 @@ namespace MantidQt
       Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
       Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
       Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
+      Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
 
     public:
 
@@ -65,6 +66,8 @@ namespace MantidQt
       void isOptional(const bool);
       QString getAlgorithmProperty() const;
       void setAlgorithmProperty(const QString & name);
+      QStringList getFileExtensions() const;
+      void setFileExtensions(const QStringList & extensions);
 
       // Standard setters/getters
       bool isValid() const;
@@ -111,6 +114,8 @@ namespace MantidQt
       bool m_isOptional;
       /// The algorithm name and property (can be empty)
       QString m_algorithmProperty;
+      /// The file extensions to look for
+      QStringList m_fileExtensions;
 
       /// The Ui form
       Ui::MWRunFiles m_uiForm;

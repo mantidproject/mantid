@@ -171,7 +171,7 @@
                  <number>6</number>
                 </property>
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="runFiles" >
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" >
                   <property name="label" stdset="0" >
                    <string>Runs          </string>
                   </property>
@@ -187,7 +187,7 @@
                </layout>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="mapFile" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" >
                 <property name="findRunFiles" stdset="0" >
                  <bool>false</bool>
                 </property>
@@ -203,7 +203,7 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="whiteBeamFile" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" >
                 <property name="label" stdset="0" >
                  <string>White beam</string>
                 </property>
@@ -221,82 +221,27 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_6" >
                   <item>
-                   <widget class="QLabel" name="lbRunFiles" >
-                    <property name="text" >
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" >
+                    <property name="label" stdset="0" >
                      <string>Run Files</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="lbCalibration" >
-                    <property name="text" >
-                     <string>Calibration</string>
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" >
+                    <property name="findRunFiles" stdset="0" >
+                     <bool>false</bool>
                     </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_5" >
-                  <item>
-                   <widget class="QLineEdit" name="leRunFiles" >
-                    <property name="toolTip" >
-                     <string>Path to raw data files, seperated by a semicolon.</string>
+                    <property name="label" stdset="0" >
+                     <string>Calibration File</string>
                     </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLineEdit" name="leCalibrationFile" >
-                    <property name="toolTip" >
-                     <string>Path to calibration file.</string>
+                    <property name="multipleFiles" stdset="0" >
+                     <bool>false</bool>
                     </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_28" >
-                  <item>
-                   <widget class="QLabel" name="valRunFiles" >
-                    <property name="styleSheet" >
-                     <string notr="true" >color: rgb(255, 0, 4)</string>
-                    </property>
-                    <property name="text" >
-                     <string>*</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="valCalibration" >
-                    <property name="styleSheet" >
-                     <string notr="true" >color: rgb(255, 0, 4)</string>
-                    </property>
-                    <property name="text" >
-                     <string>*</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_7" >
-                  <item>
-                   <widget class="QPushButton" name="pbRunFilesBrowse" >
-                    <property name="toolTip" >
-                     <string>Browse for Run Files.</string>
-                    </property>
-                    <property name="text" >
-                     <string>Browse</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pbCalibrationFilesBrowse" >
-                    <property name="toolTip" >
-                     <string>Browse for Calibration file.</string>
-                    </property>
-                    <property name="text" >
-                     <string>Browse</string>
+                    <property name="fileExtensions" >
+                     <stringlist>
+                      <string>_calib.nxs</string>
+                     </stringlist>
                     </property>
                    </widget>
                   </item>
@@ -390,29 +335,23 @@
                   <widget class="QWidget" name="page_11" >
                    <layout class="QHBoxLayout" name="horizontalLayout_5" >
                     <item>
-                     <widget class="QLineEdit" name="leMappingFile" >
-                      <property name="toolTip" >
-                       <string>Path to custom mapping file.</string>
+                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" >
+                      <property name="findRunFiles" stdset="0" >
+                       <bool>false</bool>
                       </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="valMapFile" >
-                      <property name="styleSheet" >
-                       <string notr="true" >color: rgb(255, 0, 4)</string>
+                      <property name="label" stdset="0" >
+                       <string/>
                       </property>
-                      <property name="text" >
-                       <string>*</string>
+                      <property name="multipleFiles" stdset="0" >
+                       <bool>false</bool>
                       </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pbMappingFileBrowse" >
-                      <property name="toolTip" >
-                       <string>Browse for custom mapping file.</string>
+                      <property name="algorithmAndProperty" stdset="0" >
+                       <string>GroupDetectors|MapFile</string>
                       </property>
-                      <property name="text" >
-                       <string>Browse</string>
+                      <property name="fileExtensions" >
+                       <stringlist>
+                        <string>.map</string>
+                       </stringlist>
                       </property>
                      </widget>
                     </item>
@@ -2368,14 +2307,14 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_31" >
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absRunFiles" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" >
             <property name="label" stdset="0" >
              <string>Mono Van</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absMapFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -2388,7 +2327,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="absWhiteFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" >
             <property name="label" stdset="0" >
              <string>White Beam</string>
             </property>
@@ -2803,8 +2742,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>rebin_leEWidth</tabstop>
   <tabstop>rebin_leEHigh</tabstop>
   <tabstop>rebin_pbRebin</tabstop>
-  <tabstop>leMappingFile</tabstop>
-  <tabstop>pbMappingFileBrowse</tabstop>
   <tabstop>pbBack_2</tabstop>
   <tabstop>pbPlotRaw</tabstop>
   <tabstop>cal_leRunNo</tabstop>
@@ -2825,13 +2762,9 @@ p, li { white-space: pre-wrap; }
   <tabstop>cal_pbCreate</tabstop>
   <tabstop>ckSumFiles</tabstop>
   <tabstop>cbMappingOptions</tabstop>
-  <tabstop>pbRunFilesBrowse</tabstop>
   <tabstop>cbReflection</tabstop>
   <tabstop>leNoGroups</tabstop>
   <tabstop>ckUseCalib</tabstop>
-  <tabstop>leCalibrationFile</tabstop>
-  <tabstop>leRunFiles</tabstop>
-  <tabstop>pbCalibrationFilesBrowse</tabstop>
   <tabstop>ckRunDiag</tabstop>
   <tabstop>ckRunAbsol</tabstop>
   <tabstop>leDetailedBalance</tabstop>

@@ -121,6 +121,22 @@ void MWRunFiles::setAlgorithmProperty(const QString & text)
 {
   m_algorithmProperty = text;
 }
+/**
+* Returns the list of file extensions the widget will search for.
+* @return list of file extensions
+*/
+QStringList MWRunFiles::getFileExtensions() const
+{
+    return m_fileExtensions;
+}
+/**
+* Sets the list of file extensions the dialog will search for. Only taken notice of if AlgorithmProperty not set.
+* @param extensions list of file extensions
+*/
+void MWRunFiles::setFileExtensions(const QStringList & extensions)
+{
+    m_fileExtensions = extensions;
+}
 
 /**
  * Is the input within the widget valid?
@@ -207,11 +223,18 @@ QString MWRunFiles::createFileFilter()
   QStringList fileExts;
   if( m_algorithmProperty.isEmpty() )
   {
-    std::vector<std::string> exts = ConfigService::Instance().Facility().extensions();
-    for( size_t i = 0; i < exts.size(); ++i )
-    {
-      fileExts.append(QString::fromStdString(exts[i]));
-    }
+      if ( !m_fileExtensions.isEmpty() )
+      {
+          fileExts = m_fileExtensions;
+      }
+      else
+      {
+          std::vector<std::string> exts = ConfigService::Instance().Facility().extensions();
+          for( size_t i = 0; i < exts.size(); ++i )
+          {
+              fileExts.append(QString::fromStdString(exts[i]));
+          }
+      }
   }
   else
   {
