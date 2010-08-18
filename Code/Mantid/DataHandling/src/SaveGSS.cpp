@@ -4,6 +4,7 @@
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 #include "Poco/File.h"
 #include <fstream>
 #include <iomanip>
@@ -106,6 +107,7 @@ void SaveGSS::exec()
       double bc2=(X[1]-X[0])*32;
       // Logarithmic step
       double bc4=(X[1]-X[0])/X[0];
+      if(isnan(fabs(bc4)) || isinf(bc4)) bc4=0; //If X is zero for BANK
       out << "# Data for spectrum :"<< i << std::endl;
       out << "BANK "
         << std::fixed << std::setprecision(0) << bank+i // First bank should be 1 for GSAS
@@ -120,7 +122,7 @@ void SaveGSS::exec()
       for (int j = 0; j < datasize; j++)
       {
         double Epos=E[j]*X[j]*bc4;
-        if(Epos<0) Epos=0; //Negative counts cannot be read by GSAS
+        if(Epos<0 || isnan(Epos) || isinf(Epos)) Epos=0; //Negative counts cannot be read by GSAS
         out << std::fixed << std::setprecision(5) << std::setw(15) << 0.5*(X[j]+X[j+1])
           << std::fixed << std::setprecision(8) << std::setw(18) << Y[j]*X[j]*bc4
           << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
