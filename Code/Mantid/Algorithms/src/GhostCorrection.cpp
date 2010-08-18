@@ -25,6 +25,10 @@ namespace Mantid
     using namespace DataObjects;
     using std::string;
 
+    //Ghost pixels per input pixel. Should this be a parameter?
+    const int NUM_GHOSTS = 16;
+
+
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */
@@ -59,6 +63,10 @@ namespace Mantid
       declareProperty(new FileProperty("GhostCorrectionFileName", "", FileProperty::Load, "dat"),
           "The name of the file containing the ghost correction mapping." );
 
+      declareProperty(
+        new PropertyWithValue<bool>("UseParallelAlgorithm", false),
+        "Check to use the parallelized algorithm; unchecked uses a simpler direct one.");
+
     }
 
 
@@ -69,6 +77,14 @@ namespace Mantid
     */
     void GhostCorrection::exec()
     {
+      //Silly option
+      bool parallel = this->getProperty("UseParallelAlgorithm");
+      if (!parallel)
+      {
+        this->execSerial();
+        return;
+      }
+
       // Get the input workspace
       this->inputW = getProperty("InputWorkspace");
 
@@ -126,6 +142,7 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
 
         //TODO: Convert between group # and workspace index. Sigh.
+        //Groups normally start at 1 and so the workspace index will be one below that.
         int outputWorkspaceIndex = gr-1;
 
         //Start by making sure the Y and E values are 0.
@@ -170,6 +187,125 @@ namespace Mantid
     }
 
 
+
+
+
+    //---------------------------------------------------------------------------------
+    /**  Version of the exec function
+     * that does thing in a direct way (no parallelism)
+    */
+    void GhostCorrection::execSerial()
+    {
+      // Get the input workspace
+      this->inputW = getProperty("InputWorkspace");
+
+      //Now, determine if the input workspace is actually an EventWorkspace
+      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      if (eventW == NULL)
+        throw std::runtime_error("Invalid workspace type provided to GhostCorrection. Only EventWorkspaces work with this algorithm.");
+
+      //Load the grouping file
+      this->readGroupingFile( getProperty("GroupingFileName") );
+      if (this->nGroups <= 0)
+        throw std::runtime_error("The # of groups found in the Grouping file is 0.");
+
+      //Make the X axis to bin to.
+      MantidVecPtr XValues_new;
+      // create new output X axis
+      const int numbins = VectorHelper::createAxisFromRebinParams(getProperty("BinParams"), XValues_new.access());
+
+      //Create an output Workspace2D with group # of output spectra
+      MatrixWorkspace_sptr outputW = WorkspaceFactory::Instance().create("Workspace2D", this->nGroups-1, numbins, numbins-1);
+      WorkspaceFactory::Instance().initializeFromParent(inputW, outputW,  true);
+
+      //Set the X bins and clear the Y/E bins in the output WS.
+      Workspace2D_sptr outputWS2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
+      for (int i=0; i < outputWS2D->getNumberHistograms(); i++)
+      {
+        outputWS2D->setX(i, XValues_new);
+        MantidVec& Y = outputW->dataY(i);
+        MantidVec& E = outputW->dataE(i);
+        Y.assign(Y.size(), 0.0);
+        E.assign(E.size(), 0.0);
+      }
+
+
+      //Load the ghostmapping file
+      BinaryFile<GhostDestinationValue> ghostFile(  getProperty("GhostCorrectionFileName")  );
+      std::vector<GhostDestinationValue> * rawMap = ghostFile.loadAll();
+
+      //Get necessary maps
+//      IndexToIndexMap * input_detectorIDToWorkspaceIndexMap = inputW->getDetectorIDToWorkspaceIndexMap();
+      IndexToIndexMap * input_WorkspaceIndextodetectorIDMap = inputW->getWorkspaceIndexToDetectorIDMap();
+
+      Progress prog(this, 0.0, 1.0, inputW->getNumberHistograms());
+
+      //Go through all the workspace indices
+      for (int wi=0; wi < inputW->getNumberHistograms(); wi++)
+      {
+        //The detector ID CAUSING the ghost.
+        int inputDetectorID;
+        inputDetectorID = (*input_WorkspaceIndextodetectorIDMap)[wi];
+
+        //Go through the 16 ghosts
+        for (int g = 0; g < NUM_GHOSTS; g++)
+        {
+          //Calculate the index into the ghost map file
+          int fileIndex = inputDetectorID * NUM_GHOSTS + g;
+          //This is where the ghost goes
+          GhostDestinationValue ghostVal = (*rawMap)[fileIndex];
+
+          if (ghostVal.weight > 0)
+          {
+
+            //What group is that ID in?
+            int group = udet2group[ghostVal.pixelId];
+
+            //Adjustment for groups starting at 1.
+            int outputWorkspaceIndex = group-1;
+
+            if ((outputWorkspaceIndex <0) || (outputWorkspaceIndex >= outputW->getNumberHistograms()))
+            {
+  //            std::cout << "Bad outputWorkspaceIndex " << outputWorkspaceIndex << "\n";
+            }
+            else
+            {
+              //This is the histogram of the pixel CAUSING the ghost.
+              EventList sourceEvents = eventW->getEventListAtWorkspaceIndex(wi);
+
+              //Histogram it using the binning parameters of the output workspace.
+              MantidVec sourceY;
+              sourceEvents.generateCountsHistogram(*XValues_new, sourceY);
+
+              //Get ref to the Y data in the output
+              MantidVec& Y = outputW->dataY(outputWorkspaceIndex);
+
+              //Now add it, but multiply the input WS histogram by this weight.
+              for (int bin=0; bin<numbins-1; bin++)
+                Y[bin] += sourceY[bin] * ghostVal.weight;
+            }
+
+          } //strictly positive weight
+
+          if (ghostVal.weight > 1.0)
+          {
+            std::cout << "Weight at inputDetectorID " << inputDetectorID << " > 1 = " << ghostVal.weight << "\n";
+          }
+
+        }
+
+        //Report progress
+        prog.report();
+      }
+
+      // Assign the workspace to the output workspace property
+      setProperty("OutputWorkspace", outputW);
+
+    }
+
+
+
+
     //-----------------------------------------------------------------------------
     /*
      * Loads a ghost mapping file from disk. Does a lot of the
@@ -182,13 +318,10 @@ namespace Mantid
       //Open the file
       BinaryFile<GhostDestinationValue> ghostFile(ghostMapFile);
 
-      //Ghost pixels per input pixel. Should this be a parameter?
-      const int num_ghosts = 16;
-
       //Load all the ghost corrections
       std::vector<GhostDestinationValue> * rawMap = ghostFile.loadAll();
 
-      if (rawMap->size() % num_ghosts != 0)
+      if (rawMap->size() % NUM_GHOSTS != 0)
       {
         delete rawMap;
         throw std::runtime_error("The ghost correction file specified is not of the expected size.");
@@ -202,7 +335,7 @@ namespace Mantid
       //Prepare the maps you need
       IndexToIndexMap * detectorIDToWorkspaceIndexMap = inputW->getDetectorIDToWorkspaceIndexMap();
 
-      size_t numInPixels = rawMap->size() / num_ghosts;
+      size_t numInPixels = rawMap->size() / NUM_GHOSTS;
       size_t fileIndex = 0;
 
       for (size_t inPixelId = 0; inPixelId < numInPixels; inPixelId++)
@@ -216,10 +349,10 @@ namespace Mantid
           int inputWorkspaceIndex = it->second;
 //          std::cout << "inputWorkspaceIndex " << inputWorkspaceIndex << " for inPixelId " << inPixelId << "\n";
 
-          for (int g = 0; g < num_ghosts; g++)
+          for (int g = 0; g < NUM_GHOSTS; g++)
           {
             //Calculate the index into the file
-            fileIndex = inPixelId * num_ghosts + g;
+            fileIndex = inPixelId * NUM_GHOSTS + g;
 
             //This is where the ghost ends up
             GhostDestinationValue ghostVal = (*rawMap)[fileIndex];

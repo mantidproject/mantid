@@ -162,8 +162,11 @@ namespace Mantid
       Workspace2D::dataY(const int index) const
     {
       if (index<0 || index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataY, histogram number out of range");
-
+      {
+        std::stringstream msg;
+        msg << "Workspace2D::dataY, histogram number " << index << " out of range.";
+        throw std::range_error(msg.str());
+      }
       return data[index].dataY();
     }
 
@@ -206,8 +209,11 @@ namespace Mantid
     MantidVec& Workspace2D::dataY(int const index)
     {
       if (index<0 || index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataY, histogram number out of range");
-
+      {
+        std::stringstream msg;
+        msg << "Workspace2D::dataY, histogram number " << index << " out of range.";
+        throw std::range_error(msg.str());
+      }
       return data[index].dataY();
     }
 
