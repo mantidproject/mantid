@@ -14,7 +14,9 @@ include(../mantidqt.pri)
 
 # Link with the libraries it is CustomInterfaces uses
 unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI -lMantidWidgets
-win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib" 
+win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib"
+
+LIBS += -lPocoXML 
 
 #------------------------
 # Source fies

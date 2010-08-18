@@ -22,10 +22,10 @@ namespace CustomInterfaces
 {
 
   /// save XML grouping file
-  void saveGroupingTabletoXML(QTableWidget* table, std::string& filename);
+  void saveGroupingTabletoXML(QTableWidget* table, const std::string& filename);
 
   /// load XML grouping file
-  void loadGroupingXMLtoTable(QTableWidget* table, std::string& filename);
+  void loadGroupingXMLtoTable(QTableWidget* table, const std::string& filename);
 }
 }
 

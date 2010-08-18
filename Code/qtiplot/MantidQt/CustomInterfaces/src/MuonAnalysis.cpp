@@ -61,8 +61,8 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_workspace_name("MuonAnalysis"), m_groupTableRowInFocus(-1), m_pairTableRowInFocus(-1),
-    m_period(0), m_groupTablePlotChoice("Counts"), m_pairTablePlotChoice("Asymmetry"), m_groupingTempFilename("c:/tempMuonAnalysisGrouping.xml")
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_period(0), m_groupTableRowInFocus(-1), m_pairTableRowInFocus(-1),
+  m_groupTablePlotChoice("Counts"), m_pairTablePlotChoice("Asymmetry"), m_groupNames(), m_groupingTempFilename("c:/tempMuonAnalysisGrouping.xml")
 {
 }
 
@@ -495,7 +495,7 @@ bool MuonAnalysis::isGroupingSet()
  * Apply grouping to workspace. If no 2nd argument try to use whatever grouping
  * is currently specified
  */
-void MuonAnalysis::applyGroupingToWS( std::string& wsName, std::string filename)
+void MuonAnalysis::applyGroupingToWS( const std::string& wsName, std::string filename)
 {
   if ( filename.compare("") == 0 )
   {

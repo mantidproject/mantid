@@ -77,7 +77,7 @@ private:
   bool isGroupingSet();
 
   ///
-  void applyGroupingToWS( std::string& wsName, std::string filename="" );
+  void applyGroupingToWS( const std::string& wsName, std::string filename="" );
 
   ///
   void saveGrouping( std::string filename="" );

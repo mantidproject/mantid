@@ -33,7 +33,7 @@ namespace CustomInterfaces
 /**
  * save XML grouping file
  */
-void saveGroupingTabletoXML(QTableWidget* gTable, std::string& filename)
+void saveGroupingTabletoXML(QTableWidget* gTable, const std::string& filename)
 {
   std::ofstream outFile(filename.c_str());
   if (!outFile)
@@ -74,7 +74,7 @@ void saveGroupingTabletoXML(QTableWidget* gTable, std::string& filename)
 /**
  * load XML grouping file
  */
-void loadGroupingXMLtoTable(QTableWidget* gTable, std::string& filename)
+void loadGroupingXMLtoTable(QTableWidget* gTable, const std::string& filename)
 {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
