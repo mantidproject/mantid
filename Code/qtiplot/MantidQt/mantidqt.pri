@@ -74,8 +74,10 @@ unix {
 
   CONFIG(debug, debug|release) {
   LIBS	+= -lPocoFoundationd
+  LIBS  += -lPocoXMLd
   } else {
   LIBS	+= -lPocoFoundation
+  LIBS  += -lPocoXML
  }
 
   macx{
