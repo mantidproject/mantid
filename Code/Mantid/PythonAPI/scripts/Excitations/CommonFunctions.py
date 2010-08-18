@@ -21,12 +21,21 @@ def load_run(prefix, run_number, output_name, ext='', name_suffix=''):
     else:
         filename = run_number
     if output_name is None:
-        output_name = create_outputname(prefix, run_number,name_suffix)
+        output_name = create_outputname(prefix, run_number, name_suffix)
     else:
         # strip any possible file paths
         output_name = os.path.basename(output_name)
     if ext.startswith(".n"):
         loader = LoadNexus(filename, output_name)
+    elif ext.startswith(".dat"):
+        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)
+        #det_info_file = "/home/scu/Desktop/cncs_detector.dat"
+       
+       # 
+#       loader = Rebin(output_name + "_event", output_name, "43000,10,63000")
+#        mtd.deleteWorkspace(output_name + "_event")
+        
+#        return loader.workspace(), det_info_file
     else:
         loader = LoadRaw(filename, output_name)
     
@@ -50,7 +59,7 @@ def listToString(list):
   if stringIt == '' : return ''
   if stringIt[0] == '[' or stringIt[0] == '(' :
     stringIt = stringIt[1:]
-    lastInd = len(stringIt)-1
+    lastInd = len(stringIt) - 1
     if stringIt[lastInd] == ']' or stringIt[lastInd] == ')':
       stringIt = stringIt[0:lastInd]
   return stringIt
@@ -60,8 +69,8 @@ def stringToList(commaSeparated):
   #remove any leading or trailing ','
   if commaSeparated[0] == ',':
     commaSeparated = commaSeparated[1:]
-  if commaSeparated[len(commaSeparated)-1] == ',':
-    commaSeparated = commaSeparated[0:len(commaSeparated)-1]
+  if commaSeparated[len(commaSeparated) - 1] == ',':
+    commaSeparated = commaSeparated[0:len(commaSeparated) - 1]
 
   theList = []
   numbers = commaSeparated.split(',')
@@ -90,8 +99,8 @@ def LoadNexRaw(filename, workspace):
     #return the first property from the algorithm, which for LoadNexus is the output workspace
     loader = LoadNexus(filename, workspace)
   else:
-    raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")
-  return loader.workspace(),loader.getPropertyValue("Filename")
+    raise Exception("Could not find a load function for file " + filename + ", *.raw and *.nxs accepted")
+  return loader.workspace(), loader.getPropertyValue("Filename")
 
 # guess the filename from run number using the instrument code
 def getFileName(instrumentPref, runNumber):
@@ -116,38 +125,38 @@ def loadMask(MaskFilename):
       if numbers[0][0].isdigit() :                                # any non-numeric character at the start of the line marks a comment, check the first character of the first word
         for specNumber in numbers :
           if specNumber == '-' :
-            spectraList[len(spectraList)-1] = spectraList + '-'   #if there is a hyphen we don't need commas 
+            spectraList[len(spectraList) - 1] = spectraList + '-'   #if there is a hyphen we don't need commas 
           else : spectraList = spectraList + "," + specNumber
 
   if len(spectraList) < 1 :
-    mantid.sendLogMessage('Only comment lines found in mask file '+MaskFilename)
+    mantid.sendLogMessage('Only comment lines found in mask file ' + MaskFilename)
     return ''
   return spectraList[1:]                                          #return everything after the very first comma we added in the line above
 
 def getRunName(path):
   # get the string after the last /
   filename = path.split('/')
-  filename = filename[len(filename)-1]
+  filename = filename[len(filename) - 1]
   # and the last \
   filename = filename.split('\\')
-  filename = filename[len(filename)-1]
+  filename = filename[len(filename) - 1]
   # remove the last '.' and everything after it i.e. the extension. If there is not extension this just returns the whole thing
   return filename.rpartition('.')[0]
-  
+
 def loadRun(prefix, runNum, workspace):
     return LoadNexRaw(getFileName(prefix,runNum), workspace)
 
 #-- Holds data about the defaults used for diferent instruments (MARI, MAPS ...)
 class defaults:
   # set the defaults for a default machine. These default values for defaults won't work and so they must be overriden by the correct values for the machine when this is run
-  def __init__(self, background_range=(-1.0,-1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0,-1.0), \
-                scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5), white_beam_scale = 1.0, getei_monitors = (-1,-1)):
-    self.background_range=background_range
-    self.normalization=normalization
-    self.instrument_pref=instrument_pref
-    self.white_beam_integr=white_beam_integr
-    self.scale_factor=scale_factor
-    self.monitor1_integr=monitor1_integr
+  def __init__(self, background_range=(-1.0, -1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0, -1.0), \
+                scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5), white_beam_scale=1.0, getei_monitors=(-1, -1)):
+    self.background_range = background_range
+    self.normalization = normalization
+    self.instrument_pref = instrument_pref
+    self.white_beam_integr = white_beam_integr
+    self.scale_factor = scale_factor
+    self.monitor1_integr = monitor1_integr
     self.white_beam_scale = white_beam_scale
     self.getei_monitors = getei_monitors
       
