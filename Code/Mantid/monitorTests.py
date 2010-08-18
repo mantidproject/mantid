@@ -49,7 +49,7 @@ def getSharedObjExt():
 def getTestDir(direc):
     import os
     if direc is None:
-        direc = os.path.getcwd()
+        direc = os.getcwd()
     
     direc = os.path.abspath(direc)
     direc = os.path.normpath(direc)
