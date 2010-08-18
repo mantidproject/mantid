@@ -89,6 +89,7 @@ namespace MantidQt
             void calibCreate(); ///< create calibration file
             void setasDirty(); ///< sets m_isDirty(true)
             void setasDirtyRebin(); ///< sets m_isDirtyRebin(true)
+            void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
 
         private:
             // member variables

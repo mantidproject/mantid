@@ -48,6 +48,7 @@ void Indirect::initLayout()
     // line edits,etc (for isDirty)
     connect(m_uiForm.ind_runFiles, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.ind_calibFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
+    connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
     connect(m_uiForm.leEfixed, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
     connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
@@ -1301,4 +1302,19 @@ void Indirect::setasDirty()
 void Indirect::setasDirtyRebin()
 {
     isDirtyRebin(true);
+}
+/**
+* Controls the ckUseCalib checkbox to automatically check it when a user inputs a file from clicking on 'browse'.
+* @param calib path to calib file
+*/
+void Indirect::calibFileChanged(const QString & calib)
+{
+    if ( calib == "" )
+    {
+        m_uiForm.ckUseCalib->setChecked(false);
+    }
+    else
+    {
+        m_uiForm.ckUseCalib->setChecked(true);
+    }
 }
