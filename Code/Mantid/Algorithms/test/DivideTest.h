@@ -124,7 +124,7 @@ public:
     perfomTest(work_in1,work_in2);
   }
 
-  void testExecEventEvent1D()
+  void xtestExecEventEvent1D()
   {
     int sizex = 20,sizey=10;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(sizex,sizey,100,0.0,1.0,2);
