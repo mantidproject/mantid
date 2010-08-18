@@ -35,7 +35,7 @@ using DataObjects::EventWorkspace_const_sptr;
 
 /// Constructor
 DiffractionFocussing2::DiffractionFocussing2() : 
-  API::Algorithm(), inputW(), udet2group(), spectra_group(), group2xvector(),
+  API::Algorithm(), inputW(), udet2group(), groupAtWorkspaceIndex(), group2xvector(),
   group2wgtvector(), nGroups(0), nHist(0), nPoints(0)
 {}
 
@@ -116,7 +116,7 @@ void DiffractionFocussing2::exec()
     progress.report();
 
     //Check whether this spectra is in a valid group
-    const int group=spectra_group[i];
+    const int group=groupAtWorkspaceIndex[i];
     if (group==-1) // Not in a group
       continue;
     //Get reference to its old X,Y,and E.
@@ -233,7 +233,7 @@ void DiffractionFocussing2::exec()
     std::transform(Yout.begin(),Yout.end(),wgt.begin(),Yout.begin(),std::divides<double>());
     std::transform(Eout.begin(),Eout.end(),wgt.begin(),Eout.begin(),std::divides<double>());
     // Now multiply by the number of spectra in the group
-    const int groupSize = std::count(spectra_group.begin(),spectra_group.end(),(*wit).first);
+    const int groupSize = std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first);
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
 
@@ -241,7 +241,7 @@ void DiffractionFocussing2::exec()
   }
   
   //Do some cleanup
-  spectra_group.clear();
+  groupAtWorkspaceIndex.clear();
   group2xvector.clear();
 
   setProperty("OutputWorkspace",out);
@@ -276,7 +276,7 @@ void DiffractionFocussing2::execEvent()
   std::vector<bool> flags(nGroups,true);
 
   //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
-  std::vector< MantidVec > original_X_to_use(nGroups);
+  std::vector< MantidVec > original_X_to_use(nGroups+1);
 
   //Shortcup to the spectra Map (maps spectrum # to a [list of] detector ID #s
   const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
@@ -293,7 +293,7 @@ void DiffractionFocussing2::execEvent()
     std::vector<int> detlist = inSpecMap.getDetectors(spectrum_no);
 
     //Check whether this spectra is in a valid group
-    const int group=spectra_group[i];
+    const int group=groupAtWorkspaceIndex[i];
     //std::cout << "Workspace index " << i << ", which is spectrum # " << spectrum_no << ", goes to group " << group << "; this spectrum has " << detlist.size() << " detectors" << "\n";
     if (group==-1) // Not in a group
       continue;
@@ -313,8 +313,23 @@ void DiffractionFocussing2::execEvent()
 
     //In workspace index Group, but what was in the OLD workspace index i
     out->getEventList(group) += eventW->getEventListAtWorkspaceIndex(i);
-
   }
+
+  //Now, we want to make sure that all groups are listed in the output workspace,
+  //  even those with no events at all
+  for (int group=1; group<this->nGroups+1; group++)
+  {
+    //Flags still true = this group was not touched yet
+    if (flags[group])
+    {
+      //Simply getting the event list will create it, if not already there.
+      EventList& emptyEventList = out->getEventList(group);
+      emptyEventList.clear();
+      //If the X axis hasn't been set, just use the one from workspace index 0.
+      original_X_to_use[group].assign( eventW->refX(0)->begin(), eventW->refX(0)->end())  ;
+    }
+  }
+
   //Clean up the workspace index but don't change the spectraMap, since we made that manually
   out->doneLoadingData(0);
 
@@ -325,7 +340,7 @@ void DiffractionFocussing2::execEvent()
   Mantid::API::SpectraAxis::spec2index_map mymap;
   axis->getSpectraIndexMap(mymap);
 
-  for (int g=0; g < nGroups; g++)
+  for (int g=1; g < nGroups+1; g++)
   {
     //First look in the map to see if you find the group #
     Mantid::API::SpectraAxis::spec2index_map::iterator it = mymap.find(g);
@@ -366,14 +381,14 @@ void DiffractionFocussing2::execEvent()
  */
 void DiffractionFocussing2::initializeGroups()
 {
-  spectra_group.resize(nHist);
+  groupAtWorkspaceIndex.resize(nHist);
   const API::Axis* const spectra_Axis = inputW->getAxis(1);
   int maxGroup = 0;
 
   for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
     const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
-    spectra_group[i] = group;
+    groupAtWorkspaceIndex[i] = group;
     if (group > maxGroup)
       maxGroup = group;
   }
@@ -461,13 +476,13 @@ void DiffractionFocussing2::determineRebinParameters()
   group2minmaxmap group2minmax;
   group2minmaxmap::iterator gpit;
 
-  spectra_group.resize(nHist);
+  groupAtWorkspaceIndex.resize(nHist);
   const API::Axis* const spectra_Axis = inputW->getAxis(1);
 
   for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
     const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
-    spectra_group[i] = group;
+    groupAtWorkspaceIndex[i] = group;
     if (group == -1)
       continue;
     gpit = group2minmax.find(group);

@@ -124,7 +124,7 @@ private:
   /// Map from udet to group
   udet2groupmap udet2group;
   /// The list of group numbers
-  std::vector<int> spectra_group;
+  std::vector<int> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector
   group2vectormap group2xvector;
   /// Map from the group number to the group's summed weight vector

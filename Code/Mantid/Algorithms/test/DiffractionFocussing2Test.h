@@ -131,9 +131,9 @@ public:
 
     //The fake grouping file has 100 groups, starting at 1, so there'll be 100 histograms
     int numgroups = 100;
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups+1);
     //This means that the map between workspace index and spectrum # is just off by 1
-    TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups);
+    TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups+1);
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups);
 
@@ -141,13 +141,12 @@ public:
     TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
 
     //List of the expected total # of events in each group
-    int * expected_total_events = new int[numgroups];
+    int * expected_total_events = new int[numgroups+1];
 
     //Now let's test the grouping of detector UDETS to groups
-    for (int group=1; group<numgroups; group++)
+    for (int group=1; group<numgroups+1; group++)
     {
       std::vector<int> mylist = output->spectraMap().getDetectors(group);
-      //std::cout << mylist.size() << " group " << group << "\n";
       //Each group has around 47 detectors, but there is some variation. They are all above 35 though
       TS_ASSERT_LESS_THAN(35, mylist.size());
       int numevents = 0;
@@ -192,15 +191,15 @@ public:
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
 
 
-    for (int workspace_index=0; workspace_index<numgroups-1; workspace_index++)
+    for (int workspace_index=0; workspace_index<output->getNumberHistograms()-1; workspace_index++)
     {
       //should be 16 bins
       TS_ASSERT_EQUALS( output->refX(workspace_index)->size(), 16);
-
       //There should be some data in the bins
       int events_after_binning = 0;
       for (int i=0; i<15; i++)
         events_after_binning += output->dataY(workspace_index)[i];
+//      std::cout << workspace_index << " workspace_index \n";
       TS_ASSERT_EQUALS( events_after_binning, expected_total_events[workspace_index]);
     }
 
@@ -209,7 +208,8 @@ public:
   }
 
 
-  void xtestEventWorkspace_PG3_very_SLOW()
+  //Warning: can be a slow test.
+  void xtestEventWorkspace_PG3()
   {
     std::string outputws( "pg3" );
 
@@ -221,6 +221,7 @@ public:
     eventLoader->setProperty("PulseidFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_pulseid.dat");
     eventLoader->setPropertyValue("MappingFilename","");
 //    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/PG3_Definition.xml");
+    eventLoader->setMaxEventsToLoad(100000); //This makes loading events faster.
     eventLoader->setPropertyValue("OutputWorkspace", outputws);
     TS_ASSERT( eventLoader->execute() );
 
@@ -251,14 +252,13 @@ public:
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
 
     //There should be 4 groups
-    int numgroups = 3;
+    int numgroups = 4;
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
 
     //Because no pixels are rejected or anything, the total # of events should stay the same.
     TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
 
 
-    std::cout << "---\n-------- ATTEMPT 1 --------\n\n";
     //Now let's try to rebin using log parameters
     SimpleRebin rebin;
     rebin.initialize();
@@ -269,64 +269,23 @@ public:
     TS_ASSERT(rebin.isExecuted());
 
 
-    //Now let's test the grouping of detector UDETS to groups
-    for ( int wi=0; wi<numgroups; wi++)
+    //Now let's test rebinning
+    for ( int wi=0; wi<output->getNumberHistograms(); wi++)
     {
       //should be 16 bins
       TS_ASSERT_EQUALS( output->refX(wi)->size(), 16);
       //There should be some data in the bins
       int events_after_binning = 0;
       const MantidVec thisY = output->dataY(wi);
-//      std::cout << "index " << wi << ":";
       for (int i=0; i<15; i++)
-      {
         events_after_binning += thisY[i];
-//        std::cout << (*output->refX(wi))[i] << "=" << thisY[i] << ", ";
+
+      //Don't test the last workspace - it is empty
+      if (wi < 3)
+      {
+        TS_ASSERT_LESS_THAN(0, events_after_binning);
       }
-//      std::cout << "index " << wi << " has " << events_after_binning << " events.\n";
-      TS_ASSERT_LESS_THAN(0, events_after_binning);
     }
-
-    std::cout << "---\n-------- ATTEMPT 2 --------\n\n";
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", outputws);
-    rebin.setPropertyValue("OutputWorkspace", outputws);
-    rebin.setPropertyValue("Params", "1,1e-4,1.1");
-    TS_ASSERT(rebin.execute());
-    TS_ASSERT(rebin.isExecuted());
-    for ( int wi=0; wi<numgroups; wi++)
-      const MantidVec thisY = output->dataY(wi);
-
-    std::cout << "---\n-------- ATTEMPT 3 --------\n\n";
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", outputws);
-    rebin.setPropertyValue("OutputWorkspace", outputws);
-    rebin.setPropertyValue("Params", "1,1e-5,1.1");
-    TS_ASSERT(rebin.execute());
-    TS_ASSERT(rebin.isExecuted());
-    for ( int wi=0; wi<numgroups; wi++)
-      const MantidVec thisY = output->dataY(wi);
-
-    std::cout << "---\n-------- ATTEMPT 4 --------\n\n";
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", outputws);
-    rebin.setPropertyValue("OutputWorkspace", outputws);
-    rebin.setPropertyValue("Params", "1.04,1e-6,1.07");
-    TS_ASSERT(rebin.execute());
-    TS_ASSERT(rebin.isExecuted());
-    for ( int wi=0; wi<numgroups; wi++)
-      const MantidVec thisY = output->dataY(wi);
-
-    std::cout << "---\n-------- ATTEMPT 5 --------\n\n";
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", outputws);
-    rebin.setPropertyValue("OutputWorkspace", outputws);
-    rebin.setPropertyValue("Params", "-8,0.01,3");
-    TS_ASSERT(rebin.execute());
-    TS_ASSERT(rebin.isExecuted());
-    for ( int wi=0; wi<numgroups; wi++)
-      const MantidVec thisY = output->dataY(wi);
-
 
   }
 
