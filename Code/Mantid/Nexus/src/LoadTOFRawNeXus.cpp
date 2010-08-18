@@ -10,7 +10,7 @@ namespace Mantid
 namespace NeXus
 {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM( LoadTOFRawNeXus)
+//DECLARE_ALGORITHM( LoadTOFRawNeXus)
 
 using namespace Kernel;
 using namespace API;
