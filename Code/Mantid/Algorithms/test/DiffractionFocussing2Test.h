@@ -81,7 +81,7 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
 	}
 
-  void testEventWorkspaceSameOutputWS()
+  void xtestEventWorkspaceSameOutputWS()
   {
     //----- Load some event data --------
     LoadEventPreNeXus * eventLoader;
