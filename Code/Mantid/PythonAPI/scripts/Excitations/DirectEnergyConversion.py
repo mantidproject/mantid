@@ -120,7 +120,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             det_info_file = "CNCS_detector.sca"
             self.fix_ei = True
         elif (self.file_prefix == "ARCS" or "SEQUOIA"):
-            print "***** ARCS/SEQUOIA *****" 
+            self.log("***** ARCS/SEQUOIA *****")
         else:
             # Do ISIS stuff for Ei
             pass          
@@ -329,5 +329,5 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             elif ext == '.nxs':
                 SaveNexus(workspace, filename)
             else:
-                print 'Unknown file format "%s" encountered while saving results.'
+                self.log('Unknown file format "%s" encountered while saving results.')
 #-----------------------------------------------------------------

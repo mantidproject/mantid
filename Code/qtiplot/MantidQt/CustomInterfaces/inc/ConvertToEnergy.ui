@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>491</width>
-    <height>604</height>
+    <width>503</width>
+    <height>703</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -197,6 +197,9 @@
                 <property name="multipleFiles" stdset="0" >
                  <bool>false</bool>
                 </property>
+                <property name="optional" stdset="0" >
+                 <bool>true</bool>
+                </property>
                 <property name="algorithmAndProperty" stdset="0" >
                  <string>GroupDetectors|MapFile</string>
                 </property>
@@ -209,6 +212,9 @@
                 </property>
                 <property name="multipleFiles" stdset="0" >
                  <bool>false</bool>
+                </property>
+                <property name="optional" stdset="0" >
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>

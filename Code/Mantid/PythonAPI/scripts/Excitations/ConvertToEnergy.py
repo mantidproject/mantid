@@ -14,6 +14,9 @@ class EnergyConversion(object):
         if self.__class__.__base__ == object:
             raise NotImplementedError('Cannot create object of type "%s". Use one of the different types of energy converter' % self.__class__.__name__)
 
+        self._to_stdout = True
+        self._log_to_mantid = False
+
         self.initialise(file_prefix)
 
     def initialise(self, file_prefix):
@@ -59,6 +62,14 @@ class EnergyConversion(object):
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % self.file_prefix)
         # Initialise IDF parameters
         self.init_idf_params()
+
+    def log(self, msg):
+        """Send a log message to the location defined
+        """
+        if self._to_stdout:
+            print msg
+        if self._log_to_mantid:
+            mtd.sendLogMessage(msg)
             
     def convert_to_energy(self):
         raise NotImplementedError('Object does not define a "convert_to_energy" function, cannot continue.')

@@ -33,6 +33,8 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
 { 
   QString pyCode = "import DirectEnergyConversion as direct\n";
   pyCode += QString("mono_sample = direct.DirectEnergyConversion('%1')\n").arg(m_sets.cbInst->currentText());
+  //Turn off printing to stdout
+  pyCode += QString("mono_sample._to_stdout = False\n");
 
   addAnalysisOptions(pyCode);
   addMaskingCommands(pyCode);
@@ -48,40 +50,38 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   }
   pyCode += "mono_sample.save_formats = [" + fileExts.join(",") + "]\n\n";
 
-  QString runFilesList = createPyListAsString(runFiles);
+  // Create the python variables. The strings are wrapped with r'' for slash safety
+  QString pyRunFiles = createPyListAsString(runFiles);
+  QString eiGuess = m_sets.leEGuess->text();
+  QString pyWhiteBeam = (whiteBeam.isEmpty()) ? "None" : QString("r'" + whiteBeam + "'");
+  // Absolute values
+  QString pyAbsRunFiles = createPyListAsString(absRunFiles);
+  QString absEiGuess = m_sets.leVanEi->text();
+  QString pyAbsWhiteBeam = (absWhiteBeam.isEmpty()) ? "None" : QString("r'" + absWhiteBeam + "'");
+
   if( m_sets.ckSumSpecs->isChecked() )
   {
-    pyCode += QString("mono_sample.convert_to_energy(%1, r'%2', %3, %4, %5, %6, r'%7')");
-    pyCode = pyCode.arg(runFilesList, whiteBeam, m_sets.leEGuess->text());
-    if( absRunFiles.empty() )
-    {
-      pyCode = pyCode.arg("None","None");
-    }
-    else
-    {
-      runFilesList = createPyListAsString(absRunFiles);
-      pyCode = pyCode.arg(runFilesList, "r'" + absWhiteBeam + "'");
-    }
-    pyCode = pyCode.arg(m_sets.leVanEi->text(), saveName);
+    QString pySaveName = "r'" + saveName + "'";
+    pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7)");
+    pyCode = pyCode.arg(pyRunFiles, eiGuess,pyWhiteBeam,pyAbsRunFiles,absEiGuess, pyAbsWhiteBeam, pySaveName);
   }
   else
   {
-    if( absRunFiles.empty() )
+    pyCode += "rfiles = " + pyRunFiles + "\n";
+    if( absRunFiles.isEmpty() )
     {
-      pyCode += 
-        "rfiles = " + runFilesList + "\n"
-        "for f in rfiles:\n"
-        "  mono_sample.convert_to_energy(f,r'%1', %2, None, None, None)\n";
-      pyCode = pyCode.arg(whiteBeam, m_sets.leEGuess->text());
+      pyCode +=
+        "for run in rfiles:\n"
+        "  mono_sample.convert_to_energy(run, %1, %2)\n";
+      pyCode = pyCode.arg(eiGuess, pyWhiteBeam);
     }
     else
     {
-      pyCode += "rfiles = " + runFilesList + "\n";
-      pyCode += "abs_rfiles = " + createPyListAsString(absRunFiles) + "\n";
-      pyCode += 
+      pyCode += "abs_rfiles = " + pyAbsRunFiles + "\n";
+      pyCode +=
         "for run, abs in zip(rfiles, abs_rfiles):\n"
-        "  mono_sample.convert_to_energy(run, r'%1', %2, abs, r'%3', %4)\n";
-      pyCode = pyCode.arg(whiteBeam, m_sets.leEGuess->text(), absWhiteBeam, m_sets.leVanEi->text());
+        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4)\n";
+      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, absEiGuess, pyAbsWhiteBeam);
     }
   }
   m_pyScript = pyCode;
@@ -145,6 +145,10 @@ void deltaECalc::addMaskingCommands(QString & analysisScript)
 
 QString deltaECalc::createPyListAsString(const QStringList & names) const
 {
+  if( names.isEmpty() )
+  {
+    return "None";
+  }
   QString asString = "[r'";
   asString += names.join("',r'");
   asString += "']";
