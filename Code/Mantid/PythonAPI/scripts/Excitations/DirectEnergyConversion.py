@@ -22,6 +22,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         self.energy_bins = None
         self.background = False
         self.normalise_method = 'monitor-1'
+#        self.normalise_method = 'current'
         self.map_file = None
         
                 
@@ -65,7 +66,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
         return values[0]
     
-    def convert_to_energy(self, mono_run, white_run, ei, abs_mono_run=None, abs_white_run=None, abs_ei=None, save_filename=None):
+    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_white_run=None, abs_ei=None, save_filename=None):
         '''
         Convert mono-chromatic run to deltaE
         '''
@@ -88,7 +89,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         else:
             absnorm_factor = None
         # Main run file conversion
-        sample_wkspace = self.do_conversion(mono_run, white_run, ei, self.map_file, self.spectra_masks, save_filename)
+        sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file, self.spectra_masks, save_filename)
         if not absnorm_factor is None:
             absnorm_factor *= (self.abs_mass/self.abs_rmm)
             sample_wkspace /= absnorm_factor
@@ -99,7 +100,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         self.save_results(sample_wkspace, save_filename)
         return sample_wkspace
         
-    def do_conversion(self, mono_run, white_run, ei_guess, map_file=None, spectra_masks=None, resultws_name = None):
+    def do_conversion(self, mono_run, ei_guess, white_run=None, map_file=None, spectra_masks=None, resultws_name = None):
         """
         Convert units of a mono-chromatic run to deltaE, including normalisation to a white-beam vanadium run.
         If multiple run files are passed to this function, they are summed into a run and then processed
@@ -113,6 +114,17 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             result_ws, det_info_file = self.load_data(mono_run, resultws_name)
         else:
             raise TypeError("Run number must be a list or a string")
+            
+        # Special load monitor stuff.    
+        if (self.file_prefix == "CNCS"):
+            det_info_file = "CNCS_detector.sca"
+            self.fix_ei = True
+        elif (self.file_prefix == "ARCS" or "SEQUOIA"):
+            print "***** ARCS/SEQUOIA *****" 
+        else:
+            # Do ISIS stuff for Ei
+            pass          
+
             
         ei_value, mon1_peak = self.get_ei(result_ws, ei_guess)
         bin_offset = -mon1_peak
@@ -134,9 +146,10 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         self.apply_masking(result_ws, spectra_masks, map_file)
 
         ConvertToDistribution(result_ws)
-        white_ws = self.convert_white(white_run, spectra_masks, map_file)
-        result_ws /= white_ws
-        mtd.deleteWorkspace(white_ws.getName())
+        if white_run != None:
+            white_ws = self.convert_white(white_run, spectra_masks, map_file)
+            result_ws /= white_ws
+            mtd.deleteWorkspace(white_ws.getName())
         
         # Overall scale factor
         result_ws *= self.scale_factor
@@ -160,7 +173,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         elif fix_ei == 'false':
             fix_ei = False
         elif fix_ei == 'fixei':
-            fix_ei = 'true'
+            fix_ei = True
         else:
             raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
 
