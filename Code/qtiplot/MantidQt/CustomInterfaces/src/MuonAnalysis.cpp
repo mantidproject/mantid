@@ -114,9 +114,10 @@ void MuonAnalysis::initLayout()
   filter.append("Files (*.NXS *.nxs)");
   filter.append(";;All Files (*.*)");
 
-  m_GetFileWidget = new MWRunFile(this); 
-  m_uiForm.fileInputLayout->insertWidget(0, m_GetFileWidget);
-  connect(m_GetFileWidget, SIGNAL(fileChanged()), this, SLOT(inputFileChanged()));
+  //m_uiForm.mwRunFiles = new MWRunFile; 
+  //m_uiForm.mwRunFiles->allowMultipleFiles(false);
+  //m_uiForm.fileInputLayout->insertWidget(0, m_uiForm.mwRunFiles);
+  connect(m_uiForm.mwRunFiles, SIGNAL(fileChanged()), this, SLOT(inputFileChanged()));
 }
 
 
@@ -544,7 +545,7 @@ void MuonAnalysis::inputFileChanged()
 {
   // create Python string to load muon Nexus file
   QString pyString = "LoadMuonNexus('";
-  pyString.append(m_GetFileWidget->getFileName());
+  pyString.append(m_uiForm.mwRunFiles->getFileName());
   pyString.append("','");
   pyString.append(m_workspace_name.c_str());
 

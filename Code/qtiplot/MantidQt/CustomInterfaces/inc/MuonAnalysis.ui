@@ -222,20 +222,14 @@
         </property>
         <layout class="QHBoxLayout" name="fileInputLayout" >
          <item>
-          <spacer name="horizontalSpacer_3" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" >
+           <property name="label" stdset="0" >
+            <string>TextLabel</string>
            </property>
-           <property name="sizeType" >
-            <enum>QSizePolicy::MinimumExpanding</enum>
+           <property name="multipleFiles" stdset="0" >
+            <bool>false</bool>
            </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -714,6 +708,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

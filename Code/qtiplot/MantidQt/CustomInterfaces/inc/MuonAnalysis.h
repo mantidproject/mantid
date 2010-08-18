@@ -8,7 +8,6 @@
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -94,9 +93,6 @@ private:
 
   /// The last directory that was viewed
   QString m_last_dir;
-
-  /// points to the file list widget that contains the White Beam Vanadium run
-  MantidWidgets::MWRunFile *m_GetFileWidget;
 
   /// name of workspace
   std::string m_workspace_name;
