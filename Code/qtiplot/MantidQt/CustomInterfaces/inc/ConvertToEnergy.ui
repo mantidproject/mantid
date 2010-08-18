@@ -346,7 +346,7 @@
                        <bool>false</bool>
                       </property>
                       <property name="algorithmAndProperty" stdset="0" >
-                       <string>GroupDetectors|MapFile</string>
+                       <string/>
                       </property>
                       <property name="fileExtensions" >
                        <stringlist>
@@ -1417,70 +1417,50 @@ p, li { white-space: pre-wrap; }
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_18" >
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_12" >
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_7" >
-                <item>
-                 <widget class="QLabel" name="cal_lbRunNo" >
-                  <property name="text" >
-                   <string>Run Number:</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>cal_leRunNo</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="cal_leRunNo" >
-                  <property name="toolTip" >
-                   <string>Run number of White Beam Vanadium run.</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valRunNo" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_23" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </item>
-             </layout>
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" >
+              <property name="label" stdset="0" >
+               <string>Run No</string>
+              </property>
+              <property name="multipleFiles" stdset="0" >
+               <bool>false</bool>
+              </property>
+              <property name="algorithmAndProperty" stdset="0" >
+               <string/>
+              </property>
+              <property name="fileExtensions" >
+               <stringlist>
+                <string>.raw</string>
+               </stringlist>
+              </property>
+             </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_21" >
-              <item>
-               <widget class="QPushButton" name="cal_pbPlot" >
-                <property name="toolTip" >
-                 <string>Plot first detector spectra</string>
-                </property>
-                <property name="text" >
-                 <string>Plot Raw</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <spacer name="horizontalSpacer_23" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="cal_pbPlot" >
+              <property name="toolTip" >
+               <string>Plot first detector spectra</string>
+              </property>
+              <property name="text" >
+               <string>Plot Raw</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
          </layout>
+         <zorder></zorder>
         </widget>
        </item>
        <item>
@@ -1823,40 +1803,40 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_29" >
+         <item>
+          <widget class="QCheckBox" name="cal_ckRES" >
+           <property name="toolTip" >
+            <string>Create RES file</string>
+           </property>
+           <property name="text" >
+            <string>Create RES File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_37" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="cal_gbRES" >
          <property name="title" >
           <string>RES Options</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_22" >
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_29" >
-            <item>
-             <widget class="QCheckBox" name="cal_ckRES" >
-              <property name="toolTip" >
-               <string>Create RES file</string>
-              </property>
-              <property name="text" >
-               <string>Create RES File</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_37" >
-              <property name="orientation" >
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0" >
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_31" >
+           <layout class="QHBoxLayout" name="cal_layoutRES" >
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_27" >
               <property name="spacing" >
@@ -2744,8 +2724,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>rebin_pbRebin</tabstop>
   <tabstop>pbBack_2</tabstop>
   <tabstop>pbPlotRaw</tabstop>
-  <tabstop>cal_leRunNo</tabstop>
-  <tabstop>cal_pbPlot</tabstop>
   <tabstop>cal_lePeakMin</tabstop>
   <tabstop>cal_lePeakMax</tabstop>
   <tabstop>cal_leBackMin</tabstop>

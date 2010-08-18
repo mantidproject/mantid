@@ -87,7 +87,6 @@ void Indirect::initLayout()
     m_uiForm.rebin_leELow->setValidator(m_valDbl);
     m_uiForm.rebin_leEWidth->setValidator(m_valDbl);
     m_uiForm.rebin_leEHigh->setValidator(m_valDbl);
-    m_uiForm.cal_leRunNo->setValidator(m_valInt);
     m_uiForm.cal_lePeakMin->setValidator(m_valInt);
     m_uiForm.cal_lePeakMax->setValidator(m_valInt);
     m_uiForm.cal_leBackMin->setValidator(m_valInt);
@@ -103,7 +102,6 @@ void Indirect::initLayout()
     // set default values for save formats
     m_uiForm.save_ckSPE->setChecked(false);
     m_uiForm.save_ckNexus->setChecked(true);
-
 }
 
 /**
@@ -111,7 +109,7 @@ void Indirect::initLayout()
 */
 void Indirect::initLocalPython()
 {
-    //
+    // Nothing to do at this stage.
 }
 
 /**
@@ -315,34 +313,35 @@ void Indirect::setIDFValues(const QString & prefix)
     if ( pyOutput == "" )
     {
         showInformationBox("Could not get list of analysers from Instrument Parameter file.");
-        return;
     }
-
-    QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
-
-    for (int i = 0; i< analysers.count(); i++ )
+    else
     {
-        QString text; // holds Text field of combo box (name of analyser)
-        QVariant data; // holds Data field of combo box (list of reflections)
+        QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
 
-        QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
-
-        text = analyser[0];
-
-        if ( analyser.count() > 1 )
+        for (int i = 0; i< analysers.count(); i++ )
         {
-            QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
-            data = QVariant(reflections);
-            m_uiForm.cbAnalyser->addItem(text, data);
+            QString text; // holds Text field of combo box (name of analyser)
+            QVariant data; // holds Data field of combo box (list of reflections)
+
+            QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
+
+            text = analyser[0];
+
+            if ( analyser.count() > 1 )
+            {
+                QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
+                data = QVariant(reflections);
+                m_uiForm.cbAnalyser->addItem(text, data);
+            }
+            else
+            {
+                m_uiForm.cbAnalyser->addItem(text);
+            }
         }
-        else
-        {
-            m_uiForm.cbAnalyser->addItem(text);
-        }
+        getSpectraRanges();
+
+        analyserSelected(m_uiForm.cbAnalyser->currentIndex());
     }
-    getSpectraRanges();
-
-    analyserSelected(m_uiForm.cbAnalyser->currentIndex());
 }
 
 /**
@@ -360,44 +359,45 @@ void Indirect::getSpectraRanges()
 
     if ( pyOutput == "" )
     {
-        showInformationBox("Could not gather Spectral Ranges from IDF.");
-        return;
+        showInformationBox("Could not retrieve Spectral Ranges from IDF.");
     }
-
-    QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
-
-    QLabel* lbPGMin = m_uiForm.cal_lbGraphiteMin;
-    QLabel* lbPGMax = m_uiForm.cal_lbGraphiteMax;
-    QLabel* lbMiMin = m_uiForm.cal_lbMicaMin;
-    QLabel* lbMiMax = m_uiForm.cal_lbMicaMax;
-    QLabel* lbDifMin = m_uiForm.cal_lbDiffractionMin;
-    QLabel* lbDifMax = m_uiForm.cal_lbDiffractionMax;
-
-    lbPGMin->setText("");
-    lbPGMax->setText("");
-    lbMiMin->setText("");
-    lbMiMax->setText("");
-    lbDifMin->setText("");
-    lbDifMax->setText("");
-
-    for ( int i = 0 ; i < analysers.count() ; i++ )
+    else
     {
-        QStringList analyser_spectra = analysers[i].split("-", QString::SkipEmptyParts);
-        QStringList first_last = analyser_spectra[1].split(",", QString::SkipEmptyParts);
-        if(  analyser_spectra[0] == "graphite" )
+        QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
+
+        QLabel* lbPGMin = m_uiForm.cal_lbGraphiteMin;
+        QLabel* lbPGMax = m_uiForm.cal_lbGraphiteMax;
+        QLabel* lbMiMin = m_uiForm.cal_lbMicaMin;
+        QLabel* lbMiMax = m_uiForm.cal_lbMicaMax;
+        QLabel* lbDifMin = m_uiForm.cal_lbDiffractionMin;
+        QLabel* lbDifMax = m_uiForm.cal_lbDiffractionMax;
+
+        lbPGMin->clear();
+        lbPGMax->clear();
+        lbMiMin->clear();
+        lbMiMax->clear();
+        lbDifMin->clear();
+        lbDifMax->clear();
+
+        for ( int i = 0 ; i < analysers.count() ; i++ )
         {
-            lbPGMin->setText(first_last[0]);
-            lbPGMax->setText(first_last[1]);
-        }
-        else if ( analyser_spectra[0] == "mica" )
-        {
-            lbMiMin->setText(first_last[0]);
-            lbMiMax->setText(first_last[1]);
-        }
-        else if ( analyser_spectra[0] == "diffraction" )
-        {
-            lbDifMin->setText(first_last[0]);
-            lbDifMax->setText(first_last[1]);
+            QStringList analyser_spectra = analysers[i].split("-", QString::SkipEmptyParts);
+            QStringList first_last = analyser_spectra[1].split(",", QString::SkipEmptyParts);
+            if(  analyser_spectra[0] == "graphite" )
+            {
+                lbPGMin->setText(first_last[0]);
+                lbPGMax->setText(first_last[1]);
+            }
+            else if ( analyser_spectra[0] == "mica" )
+            {
+                lbMiMin->setText(first_last[0]);
+                lbMiMax->setText(first_last[1]);
+            }
+            else if ( analyser_spectra[0] == "diffraction" )
+            {
+                lbDifMin->setText(first_last[0]);
+                lbDifMax->setText(first_last[1]);
+            }
         }
     }
 }
@@ -535,13 +535,14 @@ void Indirect::createRESfile(const QString& file)
         "background = " + background + "\n"
         "rebinParam = '" + rebinParam + "'\n"
         "file = r'" + file + "'\n"
-
         "outWS = ind.res(file, nspec, iconOpt, rebinParam, background)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
     if ( pyOutput != "" )
-        showInformationBox("Unable to create RES file.");
+    {
+        showInformationBox("Unable to create RES file: \n" + pyOutput);
+    }
 }
 
 /**
@@ -558,7 +559,7 @@ bool Indirect::validateInput()
     }
 
     // calib file input
-    
+
     if ( m_uiForm.ckUseCalib->isChecked() && !m_uiForm.ind_calibFile->isValid() )
     {
         valid = false;
@@ -675,21 +676,16 @@ bool Indirect::validateInput()
 }
 
 /**
-*
+* Validates user input on the calibration tab.
 */
 bool Indirect::validateCalib()
 {
     bool valid = true;
 
     // run number
-    if ( m_uiForm.cal_leRunNo->text() == "" )
+    if ( ! m_uiForm.cal_leRunNo->isValid() )
     {
         valid = false;
-        m_uiForm.valRunNo->setText("*");
-    }
-    else
-    {
-        m_uiForm.valRunNo->setText("");
     }
 
     // peak min/max, back min/max (calib)
@@ -944,7 +940,6 @@ void Indirect::reflectionSelected(int index)
         "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
         "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
         "print getReflectionDetails(instrument, analyser, reflection)\n";
-        "mtd.deleteWorkspace('ins')\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1061,54 +1056,44 @@ void Indirect::backgroundRemoval()
 void Indirect::plotRaw()
 {
     bool ok;
-
-    QString spectraRange = QInputDialog::getText(this, "Insert Spectra Ranges",
-        "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(),
-        &ok);
-
-    if ( !ok || spectraRange.isEmpty() )
-    {
-        return;
-    }
-
-    QString pyInput =
-        "from mantidsimple import *\n"
-        "from mantidplot import *\n"
-        "try:\n";
-
-    QStringList specList = spectraRange.split("-");
-    if ( (specList.size() > 2) || ( specList.size() < 1) )
-    {
-        showInformationBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
-        return;
-    }
-    if ( specList.size() == 1 )
-    {
-        specList.append(specList[0]);
-    }
-
-    spectraRange = "range("+specList[0]+","+specList[1]+"+1)";
-
     QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
-    if ( rawFile == "" )
-    {
-        showInformationBox("Please enter the path for the .raw file.");
-        return;
-    }
-    pyInput +=
-        "   LoadRaw(r'"+rawFile+"', 'RawTime', SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
-        "except SystemExit:\n"
-        "   message = 'Plot Time: Could not open .raw file. Please check file path.'\n"
-        "   print message\n"
-        "   sys.exit(message)\n"
-        "GroupDetectors('RawTime', 'RawTime', SpectraList="+spectraRange+")\n"
-        "graph = plotSpectrum('RawTime', 0)\n";
-    // Run and catch any Python errors
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QString spectraRange = QInputDialog::getText(this, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
 
-    if ( pyOutput != "" )
+    if ( !ok || rawFile.isEmpty() || spectraRange.isEmpty() )
     {
-        showInformationBox(pyOutput);
+    }
+    else
+    {
+        QStringList specList = spectraRange.split("-");
+        if ( (specList.size() > 2) || ( specList.size() < 1) )
+        {
+            showInformationBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
+            return;
+        }
+        if ( specList.size() == 1 )
+        {
+            specList.append(specList[0]);
+        }
+
+        QString pyInput =
+            "from mantidsimple import *\n"
+            "from mantidplot import *\n"
+            "spectraRange = range("+specList[0]+","+specList[1]+"+1)\n"
+            "try:\n"
+            "   LoadRaw(r'"+rawFile+"', 'RawTime', SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
+            "except SystemExit:\n"
+            "   message = 'Plot Time: Could not open .raw file. Please check file path.'\n"
+            "   print message\n"
+            "   sys.exit(message)\n"
+            "GroupDetectors('RawTime', 'RawTime', SpectraList=spectraRange)\n"
+            "graph = plotSpectrum('RawTime', 0)\n";
+        
+        QString pyOutput = runPythonCode(pyInput).trimmed();
+
+        if ( pyOutput != "" )
+        {
+            showInformationBox(pyOutput);
+        }
     }
 }
 /**
@@ -1141,33 +1126,16 @@ void Indirect::detailedBalanceCheck(bool state)
     isDirtyRebin(true);
 }
 /**
+* This function enables/disables the display of the options involved in creating the RES file.
 * @param state whether checkbox is checked or unchecked
 */
 void Indirect::resCheck(bool state)
 {
-    // line edits
-    m_uiForm.cal_leResSpecMin->setEnabled(state);
-    m_uiForm.cal_leResSpecMax->setEnabled(state);
-    m_uiForm.cal_leStartX->setEnabled(state);
-    m_uiForm.cal_leEndX->setEnabled(state);
-    m_uiForm.cal_leELow->setEnabled(state);
-    m_uiForm.cal_leEWidth->setEnabled(state);
-    m_uiForm.cal_leEHigh->setEnabled(state);
-
-    // labels
-    m_uiForm.cal_lbResSpecMin->setEnabled(state);
-    m_uiForm.cal_lbResSpecMax->setEnabled(state);
-    m_uiForm.cal_lbResBG->setEnabled(state);
-    m_uiForm.cal_lbStartX->setEnabled(state);
-    m_uiForm.cal_lbEndX->setEnabled(state);
-    m_uiForm.cal_lbELow->setEnabled(state);
-    m_uiForm.cal_lbEWidth->setEnabled(state);
-    m_uiForm.cal_lbEHigh->setEnabled(state);
-    m_uiForm.cal_lbSpecSelect->setEnabled(state);
+    m_uiForm.cal_gbRES->setEnabled(state);
 }
 
 /**
-* //
+* This function just calls the runClicked slot, but with tryToSave being 'false'
 */
 void Indirect::rebinData()
 {
@@ -1180,35 +1148,32 @@ void Indirect::rebinData()
 */
 void Indirect::calibPlot()
 {
-    QString runNo = m_uiForm.cal_leRunNo->displayText();
-    if ( runNo == "" )
+    QString file = m_uiForm.cal_leRunNo->getFirstFilename();
+    if ( file == "" )
     {
         showInformationBox("Please enter a run number.");
     }
-
-    QString prefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
-    QString input_path = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getDataSearchDirs()[0]);
-    input_path += prefix + runNo + ".raw";
-
-    QString pyInput =
-        "from mantidsimple import *\n"
-        "from mantidplot import *\n"
-        "try:\n"
-        "   LoadRaw(r'%1', 'Raw', SpectrumMin=%2, SpectrumMax=%3)\n"
-        "except:\n"
-        "   print 'Could not load .raw file. Please check run number.'\n"
-        "   sys.exit('Could not load .raw file.')\n"
-        "graph = plotSpectrum(\"Raw\", 0)\n";
-
-    pyInput = pyInput.arg(input_path); // %1 = path to data search directory
-    pyInput = pyInput.arg(m_uiForm.leSpectraMin->text()); // %2 = spectra min value
-    pyInput = pyInput.arg(m_uiForm.leSpectraMax->text()); // %3 = spectra max value
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-
-    if ( pyOutput != "" )
+    else
     {
-        showInformationBox("Could not load .raw file. Please check run number.");
+        QString pyInput =
+            "from mantidsimple import *\n"
+            "from mantidplot import *\n"
+            "try:\n"
+            "   LoadRaw(r'"+file+"', 'Raw', SpectrumMin=%0, SpectrumMax=%1)\n"
+            "except:\n"
+            "   print 'Could not load .raw file. Please check run number.'\n"
+            "   sys.exit('Could not load .raw file.')\n"
+            "graph = plotSpectrum('Raw', 0)\n";
+
+        pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
+        pyInput = pyInput.arg(m_uiForm.leSpectraMax->text());
+
+        QString pyOutput = runPythonCode(pyInput).trimmed();
+
+        if ( pyOutput != "" )
+        {
+            showInformationBox(pyOutput);
+        }
     }
 }
 
@@ -1218,75 +1183,50 @@ void Indirect::calibPlot()
 */
 void Indirect::calibCreate()
 {
-
-    if ( ! validateCalib() )
+    QString file = m_uiForm.cal_leRunNo->getFirstFilename();
+    if ( ! validateCalib() || file == "" )
     {
-        showInformationBox("Please check input highlighted in red.");
-        return;
-    }
-
-    QString runNo = m_uiForm.cal_leRunNo->text();
-    if ( runNo == "" )
-    {
-        showInformationBox("Please input a run number.");
-        return;
-    }
-
-    QString prefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
-
-    QString output_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir());
-
-    std::vector<std::string> dataDirs = Mantid::Kernel::ConfigService::Instance().getDataSearchDirs();
-    QStringList dataSearchDirs;
-
-    for ( int i = 0; i < dataDirs.size() ; i++ )
-    {
-        dataSearchDirs.append(QString::fromStdString(dataDirs[i]));
-    }
-
-    QString input_path = dataSearchDirs[0] + prefix + runNo + ".raw";
-    QString output_path = output_dir + prefix.toLower() + runNo + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
-
-    QString pyInput =
-        "import IndirectEnergyConversion as ind\n"
-        "calibration = ind.createCalibFile(r'%0', r'%1', %2, %3, %4, %5, %6, %7)\n";
-
-    if ( m_uiForm.cal_ckPlotResult->isChecked() )
-    { // plot graph of Calibration result if requested by user.
-        pyInput +=	"graph = plotTimeBin(calibration, 0)\n";
-    }
-    else
-    { // if graph is not wanted, remove the workspace
-        pyInput += "mantid.deleteWorkspace(calibration)\n";
-    }
-
-    pyInput = pyInput.arg(input_path); // %0 = path to raw file
-    pyInput = pyInput.arg(output_path); // %1 = path to output directory (where to save the file)
-    pyInput = pyInput.arg(m_uiForm.cal_lePeakMin->text());
-    pyInput = pyInput.arg(m_uiForm.cal_lePeakMax->text());
-    pyInput = pyInput.arg(m_uiForm.cal_leBackMin->text());
-    pyInput = pyInput.arg(m_uiForm.cal_leBackMax->text());
-    pyInput = pyInput.arg(m_uiForm.leSpectraMin->text()); // %6 = spectra min value
-    pyInput = pyInput.arg(m_uiForm.leSpectraMax->text()); // %7 = spectra max value
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-
-    if ( pyOutput != "" )
-    {
-        showInformationBox("Errors:\n" + pyOutput);
-        return;
+        showInformationBox("Please check your input.");
     }
     else
     {
-        if ( m_uiForm.cal_ckRES->isChecked() )
+        QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
+        QString pyInput =
+            "from IndirectEnergyConversion import createCalibFile\n"
+            "plot = ";
+
+        if ( m_uiForm.cal_ckPlotResult->isChecked() )
+            pyInput +=	"True\n";
+        else
+            pyInput += "False\n";
+        
+        pyInput +=
+            "file = createCalibFile(r'"+file+"', '"+suffix+"', %0, %1, %2, %3, %4, %5, PlotOpt=plot)\n"
+            "print file\n";
+
+        pyInput = pyInput.arg(m_uiForm.cal_lePeakMin->text());
+        pyInput = pyInput.arg(m_uiForm.cal_lePeakMax->text());
+        pyInput = pyInput.arg(m_uiForm.cal_leBackMin->text());
+        pyInput = pyInput.arg(m_uiForm.cal_leBackMax->text());
+        pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
+        pyInput = pyInput.arg(m_uiForm.leSpectraMax->text());
+
+        QString pyOutput = runPythonCode(pyInput).trimmed();
+
+        if ( pyOutput == "" )
         {
-            createRESfile(input_path);
+            showInformationBox("An error occurred creating the calib file.\n");
+        }
+        else
+        {
+            if ( m_uiForm.cal_ckRES->isChecked() )
+            {
+                createRESfile(file);
+            }
+            m_uiForm.ind_calibFile->setFileText(pyOutput);
+            m_uiForm.ckUseCalib->setChecked(true);
         }
     }
-
-    m_uiForm.ind_calibFile->setFileText(output_path);
-    m_uiForm.ckUseCalib->setChecked(true);
-
 }
 
 /**
@@ -1309,7 +1249,7 @@ void Indirect::setasDirtyRebin()
 */
 void Indirect::calibFileChanged(const QString & calib)
 {
-    if ( calib == "" )
+    if ( calib.isEmpty() )
     {
         m_uiForm.ckUseCalib->setChecked(false);
     }

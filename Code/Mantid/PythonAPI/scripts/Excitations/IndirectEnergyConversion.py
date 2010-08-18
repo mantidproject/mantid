@@ -232,11 +232,11 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 	handle.close()
 	return filename
 
-def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specMin, specMax, outWS_n = 'Calibration'):
+def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax, specMin, specMax, outWS_n = 'Calibration', PlotOpt=False):
+	savefile = rawfile[:-4] + suffix
 	try:
 		LoadRaw(rawfile, 'Raw', SpectrumMin = specMin, SpectrumMax = specMax)
 	except:
-		print "Could not load .raw file."
 		sys.exit('Calib: Could not load raw file.')
 	tmp = mantid.getMatrixWorkspace('Raw')
 	nhist = tmp.getNumberHistograms()
@@ -255,7 +255,11 @@ def createCalibFile(rawfile, savefile, peakMin, peakMax, backMin, backMax, specM
 	Divide(outWS_n, 'avg', outWS_n)
 	mantid.deleteWorkspace('avg')	
 	SaveNexusProcessed(outWS_n, savefile, 'Vanadium')
-	return outWS_n
+	if PlotOpt:
+		graph = plotTimeBin(outWS_n, 0)
+	else:
+		mantid.deleteWorkspace(outWS_n)
+	return savefile
 
 def res(file, nspec, iconOpt, rebinParam, background):
 	(direct, filename) = os.path.split(file)
