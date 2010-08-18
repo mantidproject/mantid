@@ -16,8 +16,6 @@ include(../mantidqt.pri)
 unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI -lMantidWidgets
 win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib"
 
-LIBS += -lPocoXML 
-
 #------------------------
 # Source fies
 #------------------------

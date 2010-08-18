@@ -101,9 +101,11 @@ CONFIG(build64)  {
   LIBS += "MantidAPI.lib"
   build_pass:CONFIG(release, debug|release) {
     LIBS += "PocoFoundation.lib"
+    LIBS += "PocoXML.lib"
   }
   build_pass:CONFIG(debug, debug|release) {
     LIBS += "PocoFoundationd.lib"
+    LIBS += "PocoXMLd.lib"
   }
 }
 
