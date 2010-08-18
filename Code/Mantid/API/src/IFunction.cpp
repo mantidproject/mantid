@@ -112,52 +112,27 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
             else
             {
               double centreValue = testWithLocation->centre();
-              Kernel::Unit_sptr targetUnit;
+              Kernel::Unit_sptr centreUnit;  // unit of value used in formula or to look up value in lookup table
               if ( fitParam.getFormula().compare("") == 0 )
-                targetUnit = fitParam.getLookUpTable().getXUnit();  // from table
+                centreUnit = fitParam.getLookUpTable().getXUnit();  // from table
               else
-                targetUnit =  Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit());  // from formula
+                centreUnit =  Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit());  // from formula
 
-              Kernel::Unit_sptr wsUnit = m_workspace->getAxis(0)->unit();
+              centreValue = convertValue(centreValue, centreUnit, m_workspace, wi);
 
-              // if units are different first convert centre value into unit of look up table
-              if ( targetUnit->unitID().compare(wsUnit->unitID()) != 0 )
+              double paramValue = fitParam.getValue(centreValue);
+              // this returned param value by say a formula or a look-up-table may have
+              // a unit of its own. If this is specified, try the following
+              Kernel::Unit_sptr convertUnit;  // unit of value returned by lookup table or part of output formula unit
+              if ( fitParam.getResultUnit().compare("") == 0 )
+                convertUnit = fitParam.getLookUpTable().getYUnit();  // from table
+              else
               {
-                double factor,power;
-                if (wsUnit->quickConversion(*targetUnit,factor,power) )
-                {
-                  centreValue = factor * std::pow(centreValue,power);
-                }
-                else
-                {
-                  double l1,l2,twoTheta;
+                // Formula output unit may be directly 
+                //convertUnit =  Kernel::UnitFactory::Instance().create(fitParam.getResultUnit());  // from formula
+              }
 
-                  // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-                  IInstrument_const_sptr instrument = m_workspace->getInstrument();
-                  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-                  l1 = instrument->getSource()->getDistance(*sample);
-                  Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
-                  if ( ! det->isMonitor() )
-                  {
-                    l2 = det->getDistance(*sample);
-                    twoTheta = m_workspace->detectorTwoTheta(det);
-                  }
-                  else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
-                  {
-                    l2 = det->getDistance(*(instrument->getSource()));
-                    l2 = l2 - l1;
-                    twoTheta = 0.0;
-                  }
-
-                  std::vector<double> endPoint;
-                  endPoint.push_back(centreValue);
-                  std::vector<double> emptyVec;
-                  wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-                  targetUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-                  centreValue = endPoint[0];
-                }
-              }  // end of: lookUpUnit->unitID().compare(wsUnit->unitID()) != 0
-              setParameter(i, fitParam.getValue(centreValue));
+              setParameter(i, paramValue);
             }  // end of update parameter value
 
             // add tie if specified for this parameter in instrument definition file
@@ -195,6 +170,61 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
   catch(...)
   {
   }
+}
+
+/** Convert a value from one unit (inUnit) to unit defined in workspace (ws)
+ *
+ *  @param value
+ *  @param inUnit
+ *  @param ws
+ *  @return converted value
+ */
+double IFunction::convertValue(const double& value, Kernel::Unit_sptr& inUnit, 
+                               boost::shared_ptr<const API::MatrixWorkspace> ws,
+                               const int& wsIndex)
+{
+  double retVal = value;
+  Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
+
+  // if unit required by formula or look-up-table different from ws-unit then 
+  if ( inUnit->unitID().compare(wsUnit->unitID()) != 0 )
+  {
+    // first check if it is possible to do a quick convertion convert
+    double factor,power;
+    if (wsUnit->quickConversion(*inUnit,factor,power) )
+    {
+      retVal = factor * std::pow(retVal,power);
+    }
+    else
+    {
+      double l1,l2,twoTheta;
+
+      // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
+      IInstrument_const_sptr instrument = ws->getInstrument();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      l1 = instrument->getSource()->getDistance(*sample);
+      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+      if ( ! det->isMonitor() )
+      {
+        l2 = det->getDistance(*sample);
+        twoTheta = ws->detectorTwoTheta(det);
+      }
+      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+      {
+        l2 = det->getDistance(*(instrument->getSource()));
+        l2 = l2 - l1;
+        twoTheta = 0.0;
+      }
+
+      std::vector<double> endPoint;
+      endPoint.push_back(retVal);
+      std::vector<double> emptyVec;
+      wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      inUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      retVal = endPoint[0];
+    }
+  }  
+  return retVal;
 }
 
 /** Update active parameters. Ties are applied.

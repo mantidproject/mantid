@@ -347,6 +347,11 @@ protected:
   /// Add a new tie
   virtual void addTie(ParameterTie* tie) = 0;
 
+  /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
+  double convertValue(const double& value, Kernel::Unit_sptr& inUnit, 
+                      boost::shared_ptr<const API::MatrixWorkspace> ws,
+                      const int& wsIndex);
+
   friend class ParameterTie;
   friend class CompositeFunction;
 
