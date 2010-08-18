@@ -49,7 +49,6 @@ namespace MantidQt
         public:
             /// explicit constructor, not to allow any implicit conversion of types
             explicit Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm);
-
             /// Initialize the layout
             virtual void initLayout();
             /// run Python-based initialisation commands
@@ -62,8 +61,7 @@ namespace MantidQt
             virtual void setIDFValues(const QString & prefix);
 
         private:
-            QString getIDFPath(const QString& name); ///< get path to instrument definition file
-            void getSpectraRanges(const QString& defFile); ///< populate the spectra ranges for the "Calibration" tab.
+            void getSpectraRanges(); ///< populate the spectra ranges for the "Calibration" tab.
             void clearReflectionInfo(); ///< clear various line edit boxes
             QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
             QString savePyCode(); ///< create python code as string to save files

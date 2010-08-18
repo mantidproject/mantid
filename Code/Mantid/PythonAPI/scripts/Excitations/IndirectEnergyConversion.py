@@ -1,7 +1,3 @@
-"""Conversion module defined for 'indirect' excitations conversions. Better as a module than a class, cleaner to access.
-"""
-
-import ConvertToEnergy
 from mantidsimple import *
 from mantidplot import *
 
@@ -39,7 +35,6 @@ def loadData(rawfiles, outWS='RawFile', Sum=False):
 		for i in ws_name_list:
 			workspace_list.append(mtd.getMatrixWorkspace(i))
 		return workspace_list, ws_name_list
-		
 
 def getFirstMonFirstDet(workspace):
 	FirstDet = FirstMon = -1
@@ -221,7 +216,6 @@ def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, save
 	if ( saveFormats != [] ):
 		saveItems(output_workspace_names, runNos, saveFormats, instrument, savesuffix, directory = savedir)
 
-
 def createMappingFile(groupFile, ngroup, nspec, first):
 	filename = mtd.getConfigProperty('defaultsave.directory')
 	filename += groupFile
@@ -339,4 +333,33 @@ def getReflectionDetails(instrument, analyser, reflection):
 	result += str( int(instrument.getNumberParameter('back-start')[0]) ) + '\n'
 	result += str( int(instrument.getNumberParameter('back-end')[0]) )
 	mantid.deleteWorkspace('ins')
+	return result
+
+def getSpectraRanges(instrument):
+	idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+	idf = idf_dir + instrument + '_Definition.xml'
+	LoadEmptyInstrument(idf, 'ins')
+	workspace = mtd['ins']
+	instrument = workspace.getInstrument()
+	analyser = []
+	analyser_final = []
+	result = ''
+	for i in range(0, instrument.nElements() ):
+		if instrument[i].type() == 'ParCompAssembly':
+			analyser.append(instrument[i])
+	for i in range(0, len(analyser) ):
+		analyser_final.append(analyser[i])
+		for j in range(0, analyser[i].nElements() ):
+			if analyser[i][j].type() == 'ParCompAssembly':
+				try:
+					analyser_final.remove(analyser[i])
+				except ValueError:
+					pass
+				analyser_final.append(analyser[i][j])
+	for i in range(0, len(analyser_final)):
+		message = analyser_final[i].getName() + '-'
+		message += str(analyser_final[i][0].getID()) + ','
+		message += str(analyser_final[i][analyser_final[i].nElements()-1].getID())
+		result += message + '\n'
+	mtd.deleteWorkspace('ins')
 	return result

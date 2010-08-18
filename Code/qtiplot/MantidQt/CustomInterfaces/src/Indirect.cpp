@@ -309,15 +309,6 @@ void Indirect::setIDFValues(const QString & prefix)
         "result = getInstrumentDetails('" + m_uiForm.cbInst->currentText() + "')\n"
         "print result\n";
 
-    QString defFile = getIDFPath(m_uiForm.cbInst->currentText());
-    if ( defFile == "" )
-    {
-        showInformationBox("Could not locate IDF.");
-        return;
-    }
-
-    getSpectraRanges(defFile);
-
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
     if ( pyOutput == "" )
@@ -348,74 +339,21 @@ void Indirect::setIDFValues(const QString & prefix)
             m_uiForm.cbAnalyser->addItem(text);
         }
     }
+    getSpectraRanges();
 
     analyserSelected(m_uiForm.cbAnalyser->currentIndex());
 }
 
 /**
-* Gets the path to the selected instrument's Instrument Definition File (IDF), if the instrument has a parameter file.
-* @param name the instrument's name from the QComboBox
-* @return A string containing the path to the IDF, or an empty string if no parameter file exists.
-*/
-QString Indirect::getIDFPath(const QString& name)
-{
-    QString paramfile_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory"));
-    QDir paramdir(paramfile_dir);
-    paramdir.setFilter(QDir::Files);
-    QStringList filters;
-    filters << name + "*_Definition.xml";
-    paramdir.setNameFilters(filters);
-
-    QStringList entries = paramdir.entryList();
-    QString defFilePrefix;
-
-    if( entries.isEmpty() )
-    {
-        return "";
-    }
-    else
-    {
-        defFilePrefix = entries[0];
-    }
-
-    QString defFile = paramdir.filePath(defFilePrefix);
-    return defFile;
-}
-
-/**
 * This function loads the min and max values for the analysers spectra and
 * displays this in the "Calibration" tab.
-* @param defFile path to instrument definition file.
 */
-void Indirect::getSpectraRanges(const QString& defFile)
+void Indirect::getSpectraRanges()
 {
     QString pyInput =
-        "from mantidsimple import *\n"
-        "LoadEmptyInstrument(r'%1', 'ins')\n"
-        "workspace = mtd['ins']\n"
-        "instrument = workspace.getInstrument()\n"
-        "analyser = []\n"
-        "analyser_final = []\n"
-        "for i in range(0, instrument.nElements() ):\n"
-        "	if instrument[i].type() == 'ParCompAssembly':\n"
-        "		analyser.append(instrument[i])\n"
-        "for i in range(0, len(analyser) ):\n"
-        "	analyser_final.append(analyser[i])\n"
-        "	for j in range(0, analyser[i].nElements() ):\n"
-        "		if analyser[i][j].type() == 'ParCompAssembly':\n"
-        "			try:\n"
-        "				analyser_final.remove(analyser[i])\n"
-        "			except ValueError:\n"
-        "				pass\n"
-        "			analyser_final.append(analyser[i][j])\n"
-        "for i in range(0, len(analyser_final)):\n"
-        "	message = analyser_final[i].getName() + '-'\n"
-        "	message += str(analyser_final[i][0].getID()) + ','\n"
-        "	message += str(analyser_final[i][analyser_final[i].nElements()-1].getID())\n"
-        "	print message\n"
-        "mtd.deleteWorkspace('ins')\n";
-
-    pyInput = pyInput.arg(defFile);
+        "from IndirectEnergyConversion import getSpectraRanges\n"
+        "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
+        "print getSpectraRanges(instrument)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -433,6 +371,13 @@ void Indirect::getSpectraRanges(const QString& defFile)
     QLabel* lbMiMax = m_uiForm.cal_lbMicaMax;
     QLabel* lbDifMin = m_uiForm.cal_lbDiffractionMin;
     QLabel* lbDifMax = m_uiForm.cal_lbDiffractionMax;
+
+    lbPGMin->setText("");
+    lbPGMax->setText("");
+    lbMiMin->setText("");
+    lbMiMax->setText("");
+    lbDifMin->setText("");
+    lbDifMax->setText("");
 
     for ( int i = 0 ; i < analysers.count() ; i++ )
     {
@@ -453,7 +398,6 @@ void Indirect::getSpectraRanges(const QString& defFile)
             lbDifMin->setText(first_last[0]);
             lbDifMax->setText(first_last[1]);
         }
-
     }
 }
 
