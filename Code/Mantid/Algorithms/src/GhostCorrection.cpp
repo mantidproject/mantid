@@ -289,7 +289,7 @@ namespace Mantid
 
           if (ghostVal.weight > 1.0)
           {
-            std::cout << "Weight at inputDetectorID " << inputDetectorID << " > 1 = " << ghostVal.weight << "\n";
+//            std::cout << "Weight at inputDetectorID " << inputDetectorID << " > 1 = " << ghostVal.weight << "\n";
           }
 
         }
