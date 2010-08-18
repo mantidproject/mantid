@@ -29,8 +29,8 @@ echo
 mantid_libpath=../../debug
 echo "Compiling the test executable... Libraries in $mantid_libpath"
 g++ -O0 -g3 -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
-    -I../../DataObjects/inc -I ../inc -I ../../../Third_Party/src/cxxtest \
-    -L$mantid_libpath -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
+    -I../../DataObjects/inc -I ../inc -I ../../../Third_Party/src/cxxtest -I../../Nexus/inc \
+    -L$mantid_libpath -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidNexus \
     -lboost_date_time -lPocoFoundationd -lPocoNetd
 echo
 
