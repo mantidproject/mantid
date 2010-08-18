@@ -72,41 +72,6 @@
        <property name="title" >
         <string>Instrument</string>
        </property>
-       <widget class="QComboBox" name="instrumentComboBox" >
-        <property name="geometry" >
-         <rect>
-          <x>20</x>
-          <y>20</y>
-          <width>71</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <item>
-         <property name="text" >
-          <string>Argus</string>
-         </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>Deva</string>
-         </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>Emu</string>
-         </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>Hifi</string>
-         </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>MuSR</string>
-         </property>
-        </item>
-       </widget>
        <widget class="QLabel" name="label_3" >
         <property name="geometry" >
          <rect>
@@ -185,6 +150,21 @@
          <string>?</string>
         </property>
        </widget>
+       <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="instrSelector" >
+        <property name="geometry" >
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>74</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="techniques" >
+         <stringlist>
+          <string>Muon spectroscopy</string>
+         </stringlist>
+        </property>
+       </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_2" >
        <property name="geometry" >
@@ -223,8 +203,11 @@
         <layout class="QHBoxLayout" name="fileInputLayout" >
          <item>
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" >
+           <property name="findRunFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
            <property name="label" stdset="0" >
-            <string>TextLabel</string>
+            <string>Load run</string>
            </property>
            <property name="multipleFiles" stdset="0" >
             <bool>false</bool>
@@ -713,6 +696,11 @@
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

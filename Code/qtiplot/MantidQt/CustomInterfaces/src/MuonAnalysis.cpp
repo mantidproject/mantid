@@ -74,6 +74,9 @@ void MuonAnalysis::initLayout()
   // connect exit button
   connect(m_uiForm.runButton, SIGNAL(clicked()), this, SLOT(runClicked())); 
 
+	// signal/slot connections to respond to changes in instrument selection combo boxes
+	//connect(m_uiForm.cbInst, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
+
   // If group table change
   connect(m_uiForm.groupTable, SIGNAL(cellChanged(int, int)), this, SLOT(groupTableChanged(int, int))); 
   connect(m_uiForm.groupTable, SIGNAL(cellClicked(int, int)), this, SLOT(groupTableClicked(int, int))); 
@@ -114,11 +117,74 @@ void MuonAnalysis::initLayout()
   filter.append("Files (*.NXS *.nxs)");
   filter.append(";;All Files (*.*)");
 
-  //m_uiForm.mwRunFiles = new MWRunFile; 
-  //m_uiForm.mwRunFiles->allowMultipleFiles(false);
-  //m_uiForm.fileInputLayout->insertWidget(0, m_uiForm.mwRunFiles);
-  connect(m_uiForm.mwRunFiles, SIGNAL(fileChanged()), this, SLOT(inputFileChanged()));
+
+  connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged()));
+
+  //m_uiForm.mwRunFiles->setI
 }
+
+
+/**
+* If the instrument selection has changed, calls instrumentSelectChanged
+* @param prefix instrument name from QComboBox object
+*/
+/*void ConvertToEnergy::userSelectInstrument(const QString& prefix) 
+{
+	if ( prefix != m_curInterfaceSetup )
+	{
+		instrumentSelectChanged(prefix);
+	}
+}*/
+
+/**
+* This function: 1. loads the instrument and gets the value of deltaE-mode parameter
+*				 2. Based on this value, makes the necessary changes to the form setup (direct or indirect).
+* @param name name of the instrument from the QComboBox
+*/
+/*void ConvertToEnergy::instrumentSelectChanged(const QString& name)
+{
+	QString defFile = getIDFPath(name);
+
+	if ( defFile == "" )
+	{
+		m_curEmodeType = Undefined;
+		return;
+	}
+
+	DeltaEMode desired = instrumentDeltaEMode(defFile);
+
+	if ( desired == Undefined )
+	{
+		m_curEmodeType = Undefined;
+		QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + name + ") does not have a parameter to signify it's deltaE-mode");
+    m_uiForm.cbInst->blockSignals(true);
+    m_uiForm.cbInst->setCurrentIndex(m_uiForm.cbInst->findText(m_curInterfaceSetup));
+		m_uiForm.cbInst->blockSignals(false);
+    return;
+	}
+
+	DeltaEMode current;
+
+	if ( m_curInterfaceSetup == "" )
+	{
+		current = Undefined;
+	}
+	else
+	{
+		current = DeltaEMode(m_uiForm.swInstrument->currentIndex());
+	}
+
+	if ( desired != current || m_curInterfaceSetup != name )
+	{
+		changeInterface(desired);
+	}
+
+	m_curInterfaceSetup = name;
+	m_curEmodeType = desired;
+  m_uiForm.pbRun->setEnabled(true);
+}*/
+
+
 
 
 /**
@@ -543,6 +609,16 @@ void MuonAnalysis::saveGrouping( std::string filename )
  */
 void MuonAnalysis::inputFileChanged()
 {
+  if ( !m_uiForm.mwRunFiles->isValid() )
+    return;
+
+  QString m_previousFsdafilename = m_uiForm.mwRunFiles->getFirstFilename();
+
+  if ( m_previousFilename.compare(m_uiForm.mwRunFiles->getFirstFilename()) == 0 )
+    return;
+
+  m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
+
   // create Python string to load muon Nexus file
   QString pyString = "LoadMuonNexus('";
   pyString.append(m_uiForm.mwRunFiles->getFirstFilename());
@@ -558,6 +634,7 @@ void MuonAnalysis::inputFileChanged()
   runPythonCode( pyString ).trimmed();
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
+  //AnalysisDataService::Instance().doExist(m_workspace_name);
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
   WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
   MatrixWorkspace_sptr matrix_workspace;

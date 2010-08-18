@@ -351,6 +351,7 @@ void MWRunFiles::browseClicked()
     m_uiForm.fileEditor->setText(uFile);
   }
   findFiles();
+  emit fileEditingFinished();
 }
 
 /** 

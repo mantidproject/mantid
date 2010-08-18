@@ -107,6 +107,9 @@ private:
   /// which pair table row has the user last clicked on
   int m_pairTableRowInFocus;
 
+  /// used to test that a new filename has been entered 
+  QString m_previousFilename;
+
   /// convert int to string
   std::string iToString(int i);
 
