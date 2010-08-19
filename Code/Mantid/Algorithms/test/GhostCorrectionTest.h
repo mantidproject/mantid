@@ -182,7 +182,7 @@ public:
 
 
   //--------------------------------------------------------------------------------------------------------
-  void xtestExecPG3()
+  void testExecPG3()
   {
     std::string wsName("pg3_732");
     std::string outwsName("ghost_correction");
@@ -208,7 +208,7 @@ public:
     gc.setPropertyValue("GroupingFileName", groupingFile);
     gc.setPropertyValue("GhostCorrectionFileName", "../../../../Test/Data/sns_event_prenexus/PG3_D664_ghostmap_2010_03_17.dat");
 
-    TS_ASSERT(gc.execute());
+    gc.execute();
     TS_ASSERT(gc.isExecuted());
 
     //Get the output workspace and check it
@@ -218,8 +218,11 @@ public:
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 4);
     MantidVec Y = outWS->dataY(1);
     TS_ASSERT_EQUALS( Y.size(), 50 ); //Proper size
+    double total = 0;
     for (int i=0; i<50; i++)
-      std::cout << i << ": " << Y[i] << "\n";
+      total += Y[i];
+
+    TS_ASSERT(total > 0);
 
 
     AnalysisDataService::Instance().remove(wsName);

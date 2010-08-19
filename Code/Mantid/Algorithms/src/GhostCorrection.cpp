@@ -38,6 +38,8 @@ namespace Mantid
     {
       this->tof_to_d = NULL;
       this->groupedGhostMaps.clear();
+      this->rawGhostMap = NULL;
+      this->input_detectorIDToWorkspaceIndexMap = NULL;
     }
 
     //=============================================================================
@@ -45,6 +47,8 @@ namespace Mantid
     GhostCorrection::~GhostCorrection()
     {
       delete this->tof_to_d;
+      delete this->rawGhostMap;
+      delete this->input_detectorIDToWorkspaceIndexMap;
       for (size_t i=0; i < this->groupedGhostMaps.size(); i++)
         delete this->groupedGhostMaps[i];
     }
@@ -83,10 +87,10 @@ namespace Mantid
 
       declareProperty(new FileProperty("GhostCorrectionFileName", "", FileProperty::Load, "dat"),
           "The name of the file containing the ghost correction mapping." );
-
-      declareProperty(
-        new PropertyWithValue<bool>("UseParallelAlgorithm", false),
-        "Check to use the parallelized algorithm; unchecked uses a simpler direct one.");
+//
+//      declareProperty(
+//        new PropertyWithValue<bool>("UseParallelAlgorithm", false),
+//        "Check to use the parallelized algorithm; unchecked uses a simpler direct one.");
 
     }
 
@@ -154,7 +158,7 @@ namespace Mantid
 
       if (rawGhostMap->size() % NUM_GHOSTS != 0)
       {
-        delete rawGhostMap;
+        delete rawGhostMap; rawGhostMap=NULL;
         throw std::runtime_error("The ghost correction file specified is not of the expected size.");
       }
 
@@ -274,7 +278,13 @@ namespace Mantid
 
       //Prepare the binfinder class
       BinFinder binner( getProperty("BinParams") );
-      //TODO: check that the # of bins found matches.
+      if (binner.lastBinIndex() != XValues_new.access().size()-1)
+      {
+        std::stringstream msg;
+        msg << "GhostCorrection: The binner found " << binner.lastBinIndex()+1 << " bins, but the X axis has "
+            << XValues_new.access().size() << ". Try different binning parameters.";
+        throw std::runtime_error(msg.str());
+      }
 
       //Create an output Workspace2D with group # of output spectra
       MatrixWorkspace_sptr outputW = WorkspaceFactory::Instance().create("Workspace2D", this->nGroups-1, numbins, numbins-1);
@@ -302,10 +312,10 @@ namespace Mantid
 
 
       //Go through the groups, starting at #1!
-//      PARALLEL_FOR2(eventW, outputW)
+      PARALLEL_FOR2(eventW, outputW)
       for (int gr=1; gr < this->nGroups; ++gr)
       {
-//        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
 
         //TODO: Convert between group # and workspace index. Sigh.
         //Groups normally start at 1 and so the workspace index will be one below that.
@@ -368,11 +378,13 @@ namespace Mantid
         }
 
 
-//        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
 
-      std::cout <<"Done with exec event \n";
-//      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
+
+      // Assign the workspace to the output workspace property
+      setProperty("OutputWorkspace", outputW);
 
 
     }
