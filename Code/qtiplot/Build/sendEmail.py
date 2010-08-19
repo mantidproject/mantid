@@ -73,6 +73,19 @@ if 'failed' in buildResult:
 fileBuildErr = localLogDir+'error.log'
 notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
+# SVN Log
+fileSVN = localLogDir+'svn.log'
+try:
+	f = open(fileSVN, 'r')
+	msg_svn = ''
+	for line in f:
+		msg_svn += line
+	f.close()
+	notifier.moveToArchive(fileSVN, remoteArchiveDir)
+except IOError:
+	msg_svn = 'Could not open SVN Log file.'
+
+
 mtdtests = localBaseLog + 'Mantid' + '/MantidTests.txt'
 f = open(mtdtests, 'r')
 for line in f:
@@ -132,6 +145,9 @@ httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replac
 
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'MantidPlot Build Passed: ' + str(buildSuccess) + "\n\n"
+message += '-----------------------------------------------------------------------\n'
+message += 'Subversion Log:, Revision = '+ str(SvnID) +'\n'
+message += msg_svn + '\n'
 message += '-----------------------------------------------------------------------\n'
 message += 'MANTIDPLOT BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'

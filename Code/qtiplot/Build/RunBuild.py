@@ -37,6 +37,10 @@ retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-
 if retcode != 0:
     sys.exit(1)
 
+svnlog = open("../../../../logs/qtiplot/svn.log","w")
+sp.call("svn log -v -rBASE",stdout=svnlog,shell=True)
+svnlog.close()
+
 # Update the header containing the revision number
 sp.call("python release_date.py",shell=True)
 
