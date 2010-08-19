@@ -33,7 +33,7 @@ namespace CustomInterfaces
 /**
  * save XML grouping file
  */
-void saveGroupingTabletoXML(QTableWidget* gTable, const std::string& filename)
+void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filename)
 {
   std::ofstream outFile(filename.c_str());
   if (!outFile)
@@ -51,22 +51,52 @@ void saveGroupingTabletoXML(QTableWidget* gTable, const std::string& filename)
 
   // loop over groups in table
 
-  int numRows = gTable->rowCount();
+  int numRows = m_uiForm.groupTable->rowCount();
   for (int i = 0; i < numRows; i++)
   {
-    QTableWidgetItem *item = gTable->item(i,1);
+    QTableWidgetItem *item = m_uiForm.groupTable->item(i,1);
     if (!item)
       break;
     if ( item->text().isEmpty() )
       break;
 
     Element* gElem = mDoc->createElement("group");
-    gElem->setAttribute("name", gTable->item(i,0)->text().toStdString());
+    gElem->setAttribute("name", m_uiForm.groupTable->item(i,0)->text().toStdString());
     rootElem->appendChild(gElem);
     Element* idsElem = mDoc->createElement("ids");
-    idsElem->setAttribute("val", gTable->item(i,1)->text().toStdString());
+    idsElem->setAttribute("val", m_uiForm.groupTable->item(i,1)->text().toStdString());
     gElem->appendChild(idsElem);
   }
+
+  // loop over pairs in pair table
+
+  numRows = m_uiForm.pairTable->rowCount();
+  for (int i = 0; i < numRows; i++)
+  {
+    QTableWidgetItem *itemName = m_uiForm.pairTable->item(i,0);
+    if (!itemName)
+      break;
+    if ( itemName->text().isEmpty() )
+      break;
+    QTableWidgetItem *itemAlpha = m_uiForm.pairTable->item(i,3);
+    if (!itemAlpha)
+      break;
+    if ( itemAlpha->text().isEmpty() )
+      break;
+
+    Element* gElem = mDoc->createElement("pair");
+    gElem->setAttribute("name", itemName->text().toStdString());
+    rootElem->appendChild(gElem);
+    Element* fwElem = mDoc->createElement("forward-group");
+    fwElem->setAttribute("name", m_uiForm.pairTable->item(i,1)->text().toStdString());
+    gElem->appendChild(fwElem);
+    Element* bwElem = mDoc->createElement("backward-group");
+    bwElem->setAttribute("name", m_uiForm.pairTable->item(i,2)->text().toStdString());
+    gElem->appendChild(bwElem);
+    Element* alphaElem = mDoc->createElement("alpha");
+    alphaElem->setAttribute("val", itemAlpha->text().toStdString());
+    gElem->appendChild(alphaElem);
+  } 
 
   writer.writeNode(outFile, mDoc);
 }
@@ -74,7 +104,7 @@ void saveGroupingTabletoXML(QTableWidget* gTable, const std::string& filename)
 /**
  * load XML grouping file
  */
-void loadGroupingXMLtoTable(QTableWidget* gTable, const std::string& filename)
+void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filename)
 {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -85,35 +115,41 @@ void loadGroupingXMLtoTable(QTableWidget* gTable, const std::string& filename)
   }
   catch(...)
   {
-    //g_log.error("Unable to parse file " + filename);
     throw Mantid::Kernel::Exception::FileError("Unable to parse File:" , filename);
   }
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )
   {
-    //g_log.error("XML file: " + filename + "contains no root element.");
     throw Mantid::Kernel::Exception::FileError("No root element in XML grouping file:" , filename);
   }  
 
   NodeList* pNL_group = pRootElem->getElementsByTagName("group");
   if ( pNL_group->length() == 0 )
   {
-    //g_log.error("XML group file: " + filename + "contains no group elements.");
     throw Mantid::Kernel::Exception::FileError("XML group file contains no group elements:" , filename);
   }
 
-  // Clear content of table
-  gTable->clearContents();
+  // Clear content of tables table
+  m_uiForm.groupTable->clearContents();
+  m_uiForm.pairTable->clearContents();
+  m_uiForm.frontGroupGroupPairComboBox->clear();
+
+  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
+  {
+    m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
+    m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
+  }
 
 
+  // add content to group table
   unsigned int numberGroups = pNL_group->length();
   for (unsigned int iGroup = 0; iGroup < numberGroups; iGroup++)
   {
     Element* pGroupElem = static_cast<Element*>(pNL_group->item(iGroup));
 
     if ( !pGroupElem->hasAttribute("name") )
-      throw Mantid::Kernel::Exception::FileError("Group element with name" , filename);
+      throw Mantid::Kernel::Exception::FileError("Group element without name" , filename);
     std::string gName = pGroupElem->getAttribute("name");
 
 
@@ -123,8 +159,8 @@ void loadGroupingXMLtoTable(QTableWidget* gTable, const std::string& filename)
       std::string ids = idlistElement->getAttribute("val");
 
       // add info to table
-      gTable->setItem(iGroup,0, new QTableWidgetItem(gName.c_str()) );
-      gTable->setItem(iGroup,1, new QTableWidgetItem(ids.c_str()) );
+      m_uiForm.groupTable->setItem(iGroup,0, new QTableWidgetItem(gName.c_str()) );
+      m_uiForm.groupTable->setItem(iGroup,1, new QTableWidgetItem(ids.c_str()) );
     }
     else
     {
@@ -134,6 +170,40 @@ void loadGroupingXMLtoTable(QTableWidget* gTable, const std::string& filename)
   }
   pNL_group->release();
   
+
+
+  // add content to pair table
+
+/*  NodeList* pNL_pair = pRootElem->getElementsByTagName("pair");
+  if ( pNL_pair->length() == 0 )
+
+  numberGroups = pNL_pair->length();
+  for (unsigned int iGroup = 0; iGroup < numberGroups; iGroup++)
+  {
+    Element* pGroupElem = static_cast<Element*>(pNL_pair->item(iGroup));
+
+    if ( !pGroupElem->hasAttribute("name") )
+      throw Mantid::Kernel::Exception::FileError("pair element without name" , filename);
+    std::string gName = pGroupElem->getAttribute("name");
+
+
+    Element* fwElement = pGroupElem->getChildElement("forward-group");
+    if (fwElement)
+    {
+      std::string ids = fwElement->getAttribute("val");
+
+      // add info to table
+      m_uiForm.groupTable->setItem(iGroup,0, new QTableWidgetItem(gName.c_str()) );
+      m_uiForm.groupTable->setItem(iGroup,1, new QTableWidgetItem(ids.c_str()) );
+    }
+    else
+    {
+      throw Mantid::Kernel::Exception::FileError("XML pair group contains no <forward-group> elements:" , filename);
+    }   
+  }
+  pNL_group->release(); */
+
+
 }
 
 }

@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>682</width>
-    <height>814</height>
+    <width>658</width>
+    <height>671</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -28,8 +28,8 @@
       <widget class="QWidget" name="horizontalLayoutWidget_4" >
        <property name="geometry" >
         <rect>
-         <x>470</x>
-         <y>660</y>
+         <x>510</x>
+         <y>600</y>
          <width>123</width>
          <height>26</height>
         </rect>
@@ -194,10 +194,10 @@
        <widget class="QWidget" name="horizontalLayoutWidget_2" >
         <property name="geometry" >
          <rect>
-          <x>150</x>
-          <y>20</y>
-          <width>341</width>
-          <height>71</height>
+          <x>10</x>
+          <y>50</y>
+          <width>501</width>
+          <height>51</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="fileInputLayout" >
@@ -229,6 +229,10 @@
          <string>?</string>
         </property>
        </widget>
+       <zorder>pushButton</zorder>
+       <zorder>horizontalLayoutWidget_2</zorder>
+       <zorder>pushButton_4</zorder>
+       <zorder>mwRunFiles</zorder>
       </widget>
       <widget class="QGroupBox" name="groupBox_3" >
        <property name="geometry" >
@@ -444,8 +448,8 @@
       <widget class="QPushButton" name="loadGroupButton" >
        <property name="geometry" >
         <rect>
-         <x>30</x>
-         <y>50</y>
+         <x>20</x>
+         <y>20</y>
          <width>111</width>
          <height>24</height>
         </rect>
@@ -457,8 +461,8 @@
       <widget class="QPushButton" name="saveGroupButton" >
        <property name="geometry" >
         <rect>
-         <x>160</x>
-         <y>50</y>
+         <x>150</x>
+         <y>20</y>
          <width>111</width>
          <height>24</height>
         </rect>
@@ -470,10 +474,10 @@
       <widget class="QTableWidget" name="pairTable" >
        <property name="geometry" >
         <rect>
-         <x>40</x>
-         <y>471</y>
+         <x>20</x>
+         <y>400</y>
          <width>611</width>
-         <height>131</height>
+         <height>161</height>
         </rect>
        </property>
        <property name="rowCount" >
@@ -513,24 +517,11 @@
         </property>
        </column>
       </widget>
-      <widget class="QPushButton" name="selectGroupButton" >
-       <property name="geometry" >
-        <rect>
-         <x>40</x>
-         <y>120</y>
-         <width>251</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Make selected Group (or Group Pair) active</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="clearGroupingButton" >
        <property name="geometry" >
         <rect>
-         <x>290</x>
-         <y>50</y>
+         <x>280</x>
+         <y>20</y>
          <width>101</width>
          <height>24</height>
         </rect>
@@ -542,8 +533,8 @@
       <widget class="QLabel" name="label_5" >
        <property name="geometry" >
         <rect>
-         <x>320</x>
-         <y>370</y>
+         <x>370</x>
+         <y>330</y>
          <width>46</width>
          <height>14</height>
         </rect>
@@ -555,8 +546,8 @@
       <widget class="QLabel" name="label_6" >
        <property name="geometry" >
         <rect>
-         <x>270</x>
-         <y>620</y>
+         <x>330</x>
+         <y>570</y>
          <width>101</width>
          <height>16</height>
         </rect>
@@ -568,8 +559,8 @@
       <widget class="QPushButton" name="groupTablePlotButton" >
        <property name="geometry" >
         <rect>
-         <x>510</x>
-         <y>370</y>
+         <x>550</x>
+         <y>330</y>
          <width>75</width>
          <height>24</height>
         </rect>
@@ -581,8 +572,8 @@
       <widget class="QPushButton" name="pairTablePlotButton" >
        <property name="geometry" >
         <rect>
-         <x>510</x>
-         <y>620</y>
+         <x>550</x>
+         <y>570</y>
          <width>75</width>
          <height>24</height>
         </rect>
@@ -594,8 +585,8 @@
       <widget class="QPushButton" name="pushButton_11" >
        <property name="geometry" >
         <rect>
-         <x>50</x>
-         <y>620</y>
+         <x>20</x>
+         <y>570</y>
          <width>75</width>
          <height>24</height>
         </rect>
@@ -607,8 +598,8 @@
       <widget class="QComboBox" name="groupTablePlotChoice" >
        <property name="geometry" >
         <rect>
-         <x>380</x>
-         <y>370</y>
+         <x>430</x>
+         <y>330</y>
          <width>111</width>
          <height>22</height>
         </rect>
@@ -632,8 +623,8 @@
       <widget class="QComboBox" name="comboBox_4" >
        <property name="geometry" >
         <rect>
-         <x>383</x>
-         <y>620</y>
+         <x>430</x>
+         <y>570</y>
          <width>111</width>
          <height>22</height>
         </rect>
@@ -647,10 +638,10 @@
       <widget class="QTableWidget" name="groupTable" >
        <property name="geometry" >
         <rect>
-         <x>40</x>
-         <y>160</y>
+         <x>20</x>
+         <y>100</y>
          <width>611</width>
-         <height>181</height>
+         <height>221</height>
         </rect>
        </property>
        <property name="rowCount" >
@@ -685,6 +676,44 @@
          <string>Ndet</string>
         </property>
        </column>
+      </widget>
+      <widget class="QLabel" name="label_7" >
+       <property name="geometry" >
+        <rect>
+         <x>20</x>
+         <y>70</y>
+         <width>71</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font" >
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text" >
+        <string>Group Table</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8" >
+       <property name="geometry" >
+        <rect>
+         <x>20</x>
+         <y>370</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font" >
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text" >
+        <string>Pair Table</string>
+       </property>
       </widget>
      </widget>
     </widget>

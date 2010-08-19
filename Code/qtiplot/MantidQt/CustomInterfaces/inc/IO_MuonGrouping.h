@@ -5,6 +5,7 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/ui_MuonAnalysis.h"
+#include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
@@ -22,10 +23,10 @@ namespace CustomInterfaces
 {
 
   /// save XML grouping file
-  void saveGroupingTabletoXML(QTableWidget* table, const std::string& filename);
+  void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filename);
 
   /// load XML grouping file
-  void loadGroupingXMLtoTable(QTableWidget* table, const std::string& filename);
+  void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filename);
 }
 }
 

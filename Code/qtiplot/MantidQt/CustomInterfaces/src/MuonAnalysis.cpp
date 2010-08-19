@@ -102,7 +102,7 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.clearGroupingButton, SIGNAL(clicked()), this, SLOT(runClearGroupingButton())); 
 
   // make as selected   
-  connect(m_uiForm.selectGroupButton, SIGNAL(clicked()), this, SLOT(runSelectGroupButton())); 
+  //connect(m_uiForm.selectGroupButton, SIGNAL(clicked()), this, SLOT(runSelectGroupButton())); 
 
 
 
@@ -189,7 +189,7 @@ void MuonAnalysis::initLayout()
 
 /**
  * Make selected group
- */
+ 
 void MuonAnalysis::runSelectGroupButton()
 {
   QList<QTableWidgetItem *> items = m_uiForm.groupTable->selectedItems();
@@ -198,7 +198,7 @@ void MuonAnalysis::runSelectGroupButton()
   {
     int row = items.at(0)->row();
   }
-}
+}*/
 
 
 /**
@@ -250,7 +250,39 @@ void MuonAnalysis::updateFrontGroupComboBox()
  */
 void MuonAnalysis::runSaveGroupButton()
 {
-  saveGroupingTabletoXML(m_uiForm.groupTable, m_groupingTempFilename);
+  QString filter;
+  filter.append("Files (*.XML *.xml)");
+  filter += ";;AllFiles (*.*)";
+  QString groupingFile = QFileDialog::getSaveFileName(this, "Save Grouping file as", "",filter);    
+  if( groupingFile.isEmpty() || QFileInfo(groupingFile).isDir() ) 
+    return;
+
+  saveGroupingTabletoXML(m_uiForm, groupingFile.toStdString());
+
+/*
+  QString title = "Save output workspace as";
+
+  QSettings prevValues;
+  prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
+  //use their previous directory first and go to their default if that fails
+  QString prevPath = prevValues.value("dir", QString::fromStdString(
+    ConfigService::Instance().getString("defaultsave.directory"))).toString();
+
+  QString filter = ";;AllFiles (*.*)";
+  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter);
+
+  if( ! oFile.isEmpty() )
+  {
+    m_uiForm.outfile_edit->setText(oFile);
+    
+    QString directory = QFileInfo(oFile).path();
+    prevValues.setValue("dir", directory);
+  }
+*/
+
+
+
+
 }
 
 
@@ -264,22 +296,20 @@ void MuonAnalysis::runLoadGroupButton()
   QString filter;
   filter.append("Files (*.XML *.xml)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = QFileDialog::getOpenFileName(this, "blah", "",filter);    
+  QString groupingFile = QFileDialog::getOpenFileName(this, "Load Grouping file", "",filter);    
   if( groupingFile.isEmpty() || QFileInfo(groupingFile).isDir() ) 
     return;
 
-  std::cout << groupingFile.toStdString() << std::endl;
-
-  saveGroupingTabletoXML(m_uiForm.groupTable, m_groupingTempFilename);
+  saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
   try
   {
-    loadGroupingXMLtoTable(m_uiForm.groupTable, groupingFile.toStdString());
+    loadGroupingXMLtoTable(m_uiForm, groupingFile.toStdString());
   }
   catch (Exception::FileError& e)
   {
     g_log.error(e.what());
     g_log.error("Revert to previous grouping");
-    loadGroupingXMLtoTable(m_uiForm.groupTable, m_groupingTempFilename);
+    loadGroupingXMLtoTable(m_uiForm, m_groupingTempFilename);
   }
 
   int numRows = m_uiForm.groupTable->rowCount();
@@ -307,7 +337,7 @@ void MuonAnalysis::runLoadGroupButton()
 }
 
 /**
- * Clear grouping button
+ * Clear grouping button  (slot)
  */
 void MuonAnalysis::runClearGroupingButton()
 {

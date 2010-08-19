@@ -66,9 +66,6 @@ private slots:
   ///
   void runClearGroupingButton(); 
 
-  ///
-  void runSelectGroupButton();
-
 private:
   /// Initialize the layout
   virtual void initLayout();
