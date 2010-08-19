@@ -187,7 +187,9 @@ double calcConversionFromMap(std::map<int, double> * tofToDmap, const std::vecto
 //========================================================================
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors()
-{}
+{
+  this->tofToDmap = NULL;
+}
 
 /// Destructor
 AlignDetectors::~AlignDetectors()
