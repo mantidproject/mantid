@@ -108,7 +108,7 @@ public:
 
 
   //--------------------------------------------------------------------------------------------------------
-  void testExecDummy()
+  void xtestExecDummy()
   {
     std::string wsName("dummy");
     std::string outwsName("ghost_correction");

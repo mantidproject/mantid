@@ -131,6 +131,7 @@ protected:
   // Overridden Algorithm methods
   void init();
   virtual void exec();
+  void execEvents();
   void execSerial();
   void loadGhostMap(std::string ghostMapFile);
   void readGroupingFile(const std::string& groupingFileName);

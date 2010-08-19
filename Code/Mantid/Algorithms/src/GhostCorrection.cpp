@@ -10,6 +10,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BinFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid
@@ -68,12 +69,46 @@ namespace Mantid
         "Check to use the parallelized algorithm; unchecked uses a simpler direct one.");
 
     }
-
+//
+//    //---------------------------------------------------------------------------------
+//    /** Execute the ghost correction on all events in the input workspace **/
+//    void GhostCorrection::execEvents()
+//    {
+//
+//      // Get the input workspace
+//      this->inputW = getProperty("InputWorkspace");
+//
+//      //Now, determine if the input workspace is actually an EventWorkspace
+//      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+//      if (eventW == NULL)
+//        throw std::runtime_error("Invalid workspace type provided to GhostCorrection. Only EventWorkspaces work with this algorithm.");
+//
+//      //Load the grouping (and offsets) file
+//      this->readGroupingFile( getProperty("GroupingFileName") );
+//      if (this->nGroups <= 0)
+//        throw std::runtime_error("The # of groups found in the Grouping file is 0.");
+//
+//      //Make the X axis to bin to.
+//      MantidVecPtr XValues_new;
+//      const int numbins = VectorHelper::createAxisFromRebinParams(getProperty("BinParams"), XValues_new.access());
+//
+//      //Create an output Workspace2D with group # of output spectra
+//      MatrixWorkspace_sptr outputW = WorkspaceFactory::Instance().create("Workspace2D", this->nGroups-1, numbins, numbins-1);
+//      WorkspaceFactory::Instance().initializeFromParent(inputW, outputW,  true);
+//
+//      //Set the X bins in the output WS.
+//      Workspace2D_sptr outputWS2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
+//      for (int i=0; i < outputWS2D->getNumberHistograms(); i++)
+//        outputWS2D->setX(i, XValues_new);
+//
+//      //Load the ghostmapping file
+//      this->loadGhostMap( getProperty("GhostCorrectionFileName") );
+//
+//    }
 
     //---------------------------------------------------------------------------------
-    /** Executes the rebin algorithm
-    *
-    *  @throw runtime_error Thrown if the bin range does not intersect the range of the input workspace
+    /** Old ghost correction method that gives the
+     * wrong result.
     */
     void GhostCorrection::exec()
     {
@@ -114,7 +149,6 @@ namespace Mantid
 
       //Load the ghostmapping file
       this->loadGhostMap( getProperty("GhostCorrectionFileName") );
-
 
       //Initialize progress reporting.
       int numsteps = 0; //count how many steps
