@@ -137,6 +137,9 @@ public:
 
   void sortFrame() const;
 
+  bool isSortedByTof() const;
+
+
   void setX(const RCtype::ptr_type& X);
 
   void setX(const RCtype& X);

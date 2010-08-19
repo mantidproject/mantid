@@ -122,6 +122,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Initialize the pixels */
   void init(const int&, const int&, const int&);
 
+  virtual bool threadSafe() const;
+
   //------------------------------------------------------------
 
   /// Returns the number of single indexable items in the workspace

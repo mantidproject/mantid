@@ -85,7 +85,7 @@ LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::Algorithm()
 
 LoadEventPreNeXus::~LoadEventPreNeXus()
 {
-  if (this->eventfile != NULL)
+  if (this->eventfile)
     delete this->eventfile;
 }
 

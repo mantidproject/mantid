@@ -44,6 +44,19 @@ using Kernel::Exception::NotImplementedError;
   }
 
   //-----------------------------------------------------------------------------
+  /** Returns true if the EventWorkspace is safe for multithreaded operations.
+   */
+  bool EventWorkspace::threadSafe() const
+  {
+    //Return false if ANY event list is not sorted.
+    for (int i=0; i<data.size(); i++)
+      if (!data[i]->isSortedByTof())
+        return false;
+    return true;
+  }
+
+
+  //-----------------------------------------------------------------------------
   /** Initialize the pixels
     *  @param NVectors The number of vectors/histograms/detectors in the workspace. Does not need
     *         to be set, but needs to be > 0

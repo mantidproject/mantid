@@ -300,6 +300,12 @@ namespace DataObjects
     this->order = FRAME_SORT;
   }
 
+  /** Return true if the event list is sorted by TOF */
+  bool EventList::isSortedByTof() const
+  {
+    return (this->order == TOF_SORT);
+  }
+
 
   // --------------------------------------------------------------------------
   /** Return the number of events in the list. */
