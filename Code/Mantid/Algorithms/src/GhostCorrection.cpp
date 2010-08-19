@@ -82,10 +82,10 @@ namespace Mantid
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
 
-      declareProperty(new FileProperty("GroupingFileName", "", FileProperty::Load, ".cal"),
+      declareProperty(new FileProperty("GroupingFilename", "", FileProperty::Load, ".cal"),
           "The name of the CalFile with grouping data" );
 
-      declareProperty(new FileProperty("GhostCorrectionFileName", "", FileProperty::Load, "dat"),
+      declareProperty(new FileProperty("GhostCorrectionFilename", "", FileProperty::Load, "dat"),
           "The name of the file containing the ghost correction mapping." );
 //
 //      declareProperty(
@@ -98,16 +98,16 @@ namespace Mantid
 
     //=============================================================================
     /** Reads in the file with the grouping information
-     * @param groupingFileName The file that contains the group information
+     * @param groupingFilename The file that contains the group information
      * TODO: Abstract this out into its own class, to reuse code better.
      */
-    void GhostCorrection::readGroupingFile(const std::string& groupingFileName)
+    void GhostCorrection::readGroupingFile(const std::string& groupingFilename)
     {
-      std::ifstream grFile(groupingFileName.c_str());
+      std::ifstream grFile(groupingFilename.c_str());
       if (!grFile.is_open())
       {
-        g_log.error() << "Unable to open grouping file " << groupingFileName << std::endl;
-        throw Exception::FileError("Error reading .cal file",groupingFileName);
+        g_log.error() << "Unable to open grouping file " << groupingFilename << std::endl;
+        throw Exception::FileError("Error reading .cal file",groupingFilename);
       }
 
       int maxGroup = -1;
@@ -268,7 +268,7 @@ namespace Mantid
         throw std::runtime_error("Invalid workspace type provided to GhostCorrection. Only EventWorkspaces work with this algorithm.");
 
       //Load the grouping (and offsets) file
-      this->readGroupingFile( getProperty("GroupingFileName") );
+      this->readGroupingFile( getProperty("GroupingFilename") );
       if (this->nGroups <= 0)
         throw std::runtime_error("The # of groups found in the Grouping file is 0.");
 
@@ -299,7 +299,7 @@ namespace Mantid
       input_detectorIDToWorkspaceIndexMap = inputW->getDetectorIDToWorkspaceIndexMap();
 
       //Load the ghostmapping file
-      this->loadGhostMap( getProperty("GhostCorrectionFileName") );
+      this->loadGhostMap( getProperty("GhostCorrectionFilename") );
 
       //Initialize progress reporting.
       int numsteps = 0; //count how many steps
@@ -424,7 +424,7 @@ namespace Mantid
 //        throw std::runtime_error("Invalid workspace type provided to GhostCorrection. Only EventWorkspaces work with this algorithm.");
 //
 //      //Load the grouping file
-//      this->readGroupingFile( getProperty("GroupingFileName") );
+//      this->readGroupingFile( getProperty("GroupingFilename") );
 //      if (this->nGroups <= 0)
 //        throw std::runtime_error("The # of groups found in the Grouping file is 0.");
 //
@@ -443,7 +443,7 @@ namespace Mantid
 //        outputWS2D->setX(i, XValues_new);
 //
 //      //Load the ghostmapping file
-//      this->loadGhostMap( getProperty("GhostCorrectionFileName") );
+//      this->loadGhostMap( getProperty("GhostCorrectionFilename") );
 //
 //      //Initialize progress reporting.
 //      int numsteps = 0; //count how many steps
@@ -533,7 +533,7 @@ namespace Mantid
 //        throw std::runtime_error("Invalid workspace type provided to GhostCorrection. Only EventWorkspaces work with this algorithm.");
 //
 //      //Load the grouping file
-//      this->readGroupingFile( getProperty("GroupingFileName") );
+//      this->readGroupingFile( getProperty("GroupingFilename") );
 //      if (this->nGroups <= 0)
 //        throw std::runtime_error("The # of groups found in the Grouping file is 0.");
 //
@@ -559,7 +559,7 @@ namespace Mantid
 //
 //
 //      //Load the ghostmapping file
-//      BinaryFile<GhostDestinationValue> ghostFile(  getProperty("GhostCorrectionFileName")  );
+//      BinaryFile<GhostDestinationValue> ghostFile(  getProperty("GhostCorrectionFilename")  );
 //      std::vector<GhostDestinationValue> * rawMap = ghostFile.loadAll();
 //
 //      //Get necessary maps

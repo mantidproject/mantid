@@ -70,10 +70,10 @@ public:
 
   //--------------------------------------------------------------------------------------------------------
   /** Generate a fake ghost correction file **/
-  void makeFakeGhostFile(std::string ghostFileName)
+  void makeFakeGhostFile(std::string ghostFilename)
   {
     //Open new file
-    std::ofstream * handle = new std::ofstream(ghostFileName.c_str(), std::ios::binary);
+    std::ofstream * handle = new std::ofstream(ghostFilename.c_str(), std::ios::binary);
 
     GhostDestinationValue ghost;
     for (int pix=0; pix < NUMPIXELS; pix++)
@@ -112,14 +112,14 @@ public:
   {
     std::string wsName("dummy");
     std::string outwsName("ghost_correction");
-    std::string ghostFileName("FakeGhostMapFile.dat");
+    std::string ghostFilename("FakeGhostMapFile.dat");
     std::string groupingFile("FakeGroupingFile.cal");
 
     //Make up event workspace in d-spacing units
     this->makeFakeEventWorkspace(wsName);
 
     //Make the ghost file
-    makeFakeGhostFile(ghostFileName);
+    makeFakeGhostFile(ghostFilename);
     //And grouping file
     makeFakeGroupingFile(groupingFile);
 
@@ -141,8 +141,8 @@ public:
     std::stringstream params;
     params << "0.0," << BIN_DELTA << "," << BIN_DELTA*NUMBINS;
     gc.setPropertyValue("BinParams", params.str());
-    gc.setPropertyValue("GroupingFileName", groupingFile);
-    gc.setPropertyValue("GhostCorrectionFileName", ghostFileName);
+    gc.setPropertyValue("GroupingFilename", groupingFile);
+    gc.setPropertyValue("GhostCorrectionFilename", ghostFilename);
 
     TS_ASSERT(gc.execute());
     TS_ASSERT(gc.isExecuted());
@@ -205,8 +205,8 @@ public:
     gc.setPropertyValue("InputWorkspace",wsName);
     gc.setPropertyValue("OutputWorkspace",outwsName);
     gc.setPropertyValue("BinParams", "0.0, 0.1, 5.0");
-    gc.setPropertyValue("GroupingFileName", groupingFile);
-    gc.setPropertyValue("GhostCorrectionFileName", "../../../../Test/Data/sns_event_prenexus/PG3_D664_ghostmap_2010_03_17.dat");
+    gc.setPropertyValue("GroupingFilename", groupingFile);
+    gc.setPropertyValue("GhostCorrectionFilename", "../../../../Test/Data/sns_event_prenexus/PG3_D664_ghostmap_2010_03_17.dat");
 
     gc.execute();
     TS_ASSERT(gc.isExecuted());

@@ -135,7 +135,7 @@ protected:
   void execWrong();
 //  void execSerial();
   void loadGhostMap(std::string ghostMapFile);
-  void readGroupingFile(const std::string& groupingFileName);
+  void readGroupingFile(const std::string& groupingFilename);
   void initializeTofToD();
 
   // --- For grouping ---
