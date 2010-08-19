@@ -14,6 +14,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
 {

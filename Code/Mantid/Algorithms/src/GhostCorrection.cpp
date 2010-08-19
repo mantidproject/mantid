@@ -310,6 +310,8 @@ namespace Mantid
       //Set up the tof-to-d_spacing map for all pixel ids.
       this->tof_to_d = Mantid::Algorithms::calcTofToD_ConversionMap(inputW, this->detId_to_offset);
 
+      // Set the final unit that our output workspace will have
+      outputW->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
       //Go through the groups, starting at #1!
       PARALLEL_FOR2(eventW, outputW)
