@@ -150,7 +150,7 @@ private:
     {
       if ( (!unit) || ( unit->unitID().compare(m_unitID) ) )
 	  {
-		  return "The workspace must have units of " + m_unitID + "; its unit is: " + unit->caption();
+		  return "The workspace must have units of " + m_unitID; //+ "; its unit is: " + unit->caption();
 	  }
 	  else return "";
     }
