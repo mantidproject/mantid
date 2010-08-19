@@ -19,7 +19,7 @@ namespace Algorithms
 {
 
 //Forward declaration
-std::map<int, double> * DLLExport calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+DLLExport std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   const std::map<int,double> &offsets);
 
 
