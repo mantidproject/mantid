@@ -415,7 +415,13 @@ class MantidPyFramework(FrameworkManager):
         self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToGlobal()
-        # Update directories
+        
+        # Update search path
+        if os.name == 'posix':
+            outputdir = os.path.expanduser('~/.mantid')
+            if not outputdir in sys.path:
+                sys.path.append(outputdir)
+
         # Required directories (config service has changed them to absolute paths)
         self._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
         # Now additional user specified directories
@@ -955,23 +961,23 @@ def _cppListValidator(prop_type, options):
 # Startup code
 ########################################################################################
 
-def FrameworkSingleton():
-    try:
-        getattr(__main__, '__mantid__')
-    except AttributeError:
-        setattr(__main__, '__mantid__', MantidPyFramework())
-    return getattr(__main__, '__mantid__')
+if __name__ != "__main__":
+    
+    def FrameworkSingleton():
+        try:
+            getattr(__main__, '__mantid__')
+        except AttributeError:
+            setattr(__main__, '__mantid__', MantidPyFramework())
+        return getattr(__main__, '__mantid__')
 
-if os.name == 'posix':
-    outputdir = os.path.expanduser('~/.mantid')
-    if not outputdir in sys.path:
-        sys.path.append(outputdir)
+    mtd = FrameworkSingleton()
+    #Aliases
+    mantid = mtd
+    Mantid = mtd
+    Mtd = mtd
 
-mtd = FrameworkSingleton()
-mtd.initialise()
-#Aliases
-mantid = mtd
-Mantid = mtd
-Mtd = mtd
-
-
+    #####################################################################################
+    # Initialize the framework. 
+    # MUST be the last thing in the file 
+    #####################################################################################
+    mtd.initialise()
