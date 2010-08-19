@@ -413,7 +413,27 @@ public:
     TS_ASSERT_EQUALS( el.getNumberEvents(), 3000);
   }
 
+  void testSetTofs()
+  {
+    this->fake_data();
 
+    // Grab original data as it will become "new" data
+    EventList::StorageType T;
+    T = *el.getTofs();
+
+    // Convert to make values something different
+    this->el.convertTof(4.0, 2.0);
+    double old_value = this->el.getEvents()[0].tof();
+    size_t old_size = this->el.getEvents().size();
+
+    // Set "new" data
+    this->el.setTofs(T);
+    double new_value = this->el.getEvents()[0].tof();
+    size_t new_size = this->el.getEvents().size();
+
+    TS_ASSERT_EQUALS(old_size, new_size);
+    TS_ASSERT_DIFFERS(old_value, new_value);
+  }
 };
 
 

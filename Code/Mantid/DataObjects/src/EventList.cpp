@@ -601,5 +601,38 @@ namespace DataObjects
 
   }
 
+  /**
+   * Get a list of the TOFs
+   */
+  EventList::StorageType * EventList::getTofs() const
+  {
+    StorageType * tofs = new StorageType();
+    // iterate through all events
+    std::vector<TofEvent>::iterator iter;
+    for (iter = this->events.begin(); iter != this->events.end(); iter++)
+      tofs->push_back(iter->time_of_flight);
+    return tofs;
+  }
+
+  /**
+   * Set a list of TOFs to the current event list. Modify the units if necessary.
+   * NOTE: This function does not check if the list sizes are the same.
+   *
+   * @param T The vector of doubles to set the tofs to.
+   * @param set_xUnit [Optional] pointer to the Unit of the X data.
+   */
+  void EventList::setTofs(const StorageType &T)
+  {
+    size_t x_size = T.size();
+    if (! T.empty())
+    {
+      for (size_t i = 0; i < x_size; ++i)
+      {
+        events[0].time_of_flight = T[0];
+      }
+    }
+  }
+
+
 } /// namespace DataObjects
 } /// namespace Mantid

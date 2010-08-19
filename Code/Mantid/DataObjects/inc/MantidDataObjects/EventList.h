@@ -167,6 +167,10 @@ public:
 
   void maskTof(const double tofMin, const double tofMax);
 
+  virtual StorageType * getTofs() const;
+
+  void setTofs(const StorageType& T);
+
 private:
   ///List of events.
   mutable std::vector<TofEvent> events;
