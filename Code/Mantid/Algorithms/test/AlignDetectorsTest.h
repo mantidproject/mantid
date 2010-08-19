@@ -9,6 +9,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
+using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
@@ -38,7 +39,7 @@ public:
   {
     TS_ASSERT_EQUALS( align.name(), "AlignDetectors" );
     TS_ASSERT_EQUALS( align.version(), 1 );
-    TS_ASSERT_EQUALS( align.category(), "DataHandling\\Detectors" );
+    TS_ASSERT_EQUALS( align.category(), "Diffraction" );
   }
 
   void testInit()

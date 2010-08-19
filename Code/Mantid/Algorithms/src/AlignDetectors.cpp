@@ -198,7 +198,7 @@ AlignDetectors::~AlignDetectors()
 //-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
-  this->g_log.setName("DataHandling::AlignDetectors");
+  this->g_log.setName("Algorithms::AlignDetectors");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace unit must be TOF.
@@ -386,5 +386,5 @@ bool AlignDetectors::readCalFile(const std::string& calFileName, std::map<int,do
 }
 
 
-} // namespace DataHandling
+} // namespace Algorithms
 } // namespace Mantid
