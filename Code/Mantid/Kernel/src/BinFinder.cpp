@@ -28,7 +28,8 @@ namespace Kernel
       //The boundaries
       double min = binParams[i*2];
       double max = binParams[i*2+2];
-      boundaries.push_back( min );
+      //Only the first bin needs the min boundary
+      if (i==0) boundaries.push_back( min );
       boundaries.push_back( max );
       //The step
       double step = binParams[i*2+1];
@@ -40,20 +41,32 @@ namespace Kernel
       if (max <= min)
         throw std::invalid_argument("BinFinder: final bin must be > starting bin boundary.");
 
+      int numBins = 0;
+
       //Pre-do some calculations for log binning.
       if (step < 0)
       {
-        logSteps.push_back( log(1.0 + fabs(step)) );
-        logBoundaries.push_back( log(min) );
+        double log_step = log(1.0 + fabs(step));
+        logSteps.push_back( log_step );
+        if (i==0) logBoundaries.push_back( log(min) );
         logBoundaries.push_back( log(max) );
+        //How many bins is that?
+        numBins = ceil (  (log(max) - log(min)) / log_step );
       }
       else
       {
         //Empty log values; these won't be used
         logSteps.push_back( 0 );
+        if (i==0) logBoundaries.push_back( 0 );
         logBoundaries.push_back( 0 );
-        logBoundaries.push_back( 0 );
+        //# of linear bins
+        numBins = ceil( (max-min) / step );
       }
+
+      //Find the end bin index
+      int startBinIndex = 0;
+      if (i > 0) startBinIndex = this->endBinIndex[i-1];
+      endBinIndex.push_back( numBins + startBinIndex );
     }
     //How many binning regions?
     numRegions = stepSizes.size();
@@ -97,6 +110,9 @@ namespace Kernel
     {
       //Linear binning. Truncate when you divide by the step size
       index = (x - min) / step;
+      //Add bin index offset if not in the first region
+      if (i > 0)
+        index += endBinIndex[i-1];
       return index;
     }
     else
@@ -112,6 +128,9 @@ namespace Kernel
       double log_step = logSteps[i];
       double log_min = logBoundaries[i];
       index = (log_x - log_min) / log_step;
+      //Add bin index offset if not in the first region
+      if (i > 0)
+        index += endBinIndex[i-1];
       return index;
     }
 

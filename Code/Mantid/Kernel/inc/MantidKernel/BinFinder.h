@@ -46,6 +46,8 @@ namespace Kernel
     std::vector<double> logSteps;
     /// Log of the boundary (used by log binning)
     std::vector<double> logBoundaries;
+    /// Index of the last boundary in the bins
+    std::vector<int> endBinIndex;
     //How many regions?
     int numRegions;
 
