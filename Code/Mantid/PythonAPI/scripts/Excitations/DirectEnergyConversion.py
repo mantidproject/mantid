@@ -127,8 +127,8 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             self.log("--- CNCS ---")
             self.fix_ei = True
             ei_value = ei_guess
-            tzero = 0.1982*(1+ei_value)**(-0.84098)
-            ChangeBinOffset(result_ws, result_ws, tzero)
+            tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
+            ChangeBinOffset(result_ws, result_ws, -tzero)
             mon1_peak = 0.0
             self.applyDetectorEfficiency = False
         elif (self.file_prefix == "ARCS" or "SEQUOIA"):
