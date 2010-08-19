@@ -8,7 +8,6 @@ def create_outputname(prefix, run_number, suffix=''):
     if type(run_number) == int:
         name = prefix + str(run_number) + '.spe' + suffix
     else:
-        print "run_number %s " % run_number
         name = os.path.basename(run_number)
         if (suffix is None):
             name = os.path.splitext(name)[0] + '.spe'
