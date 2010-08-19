@@ -4,6 +4,7 @@
 #include "MantidICat/Session.h"
 #include "MantidICat/ErrorHandling.h" 
 #include <iomanip>
+#include <time.h>
 
 namespace Mantid
 {
@@ -57,6 +58,8 @@ namespace Mantid
 			ICATPortBindingProxy icat;
 			// request object
 			boost::shared_ptr<ns1__searchByAdvanced> req_sptr(new ns1__searchByAdvanced );
+
+			//session id
 			boost::shared_ptr<std::string > sessionId_sptr(new std::string);
 			req_sptr->sessionId=sessionId_sptr.get();
 			//get the sessionid which is cached in session class during login
@@ -93,12 +96,19 @@ namespace Mantid
 				*req_sptr->advancedSearchDetails->dateRangeEnd =inputs.getEndDate();
 			}
 			req_sptr->advancedSearchDetails->caseSensitive=inputs.getCaseSensitive();
+			
 			// investigation include
             boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
 			req_sptr->advancedSearchDetails->investigationInclude=invstInculde_sptr.get();
-			// investigation include
 			*req_sptr->advancedSearchDetails->investigationInclude=inputs.getInvestigationInclude();
+         
+			//instrument name
+			if(!inputs.getInstrument().empty())
+			{
+				req_sptr->advancedSearchDetails->instruments.push_back(inputs.getInstrument());
+			}
 
+			// keywords
 			if(!inputs.getKeywords().empty())
 			{
 				req_sptr->advancedSearchDetails->keywords.push_back(inputs.getKeywords());
@@ -240,21 +250,20 @@ namespace Mantid
 					savetoTableWorkspace((*citr)->invParamValue,t);
 								
 					//year
-					std::string *sInvEndtime=new std::string ;
+					std::string *sInvEndtime=NULL ;
 					if((*citr)->invEndDate!=NULL)
 					{
+						sInvEndtime=new std::string;
 						time_t  invEndtime=*(*citr)->invEndDate;
 						char temp [25];
 						strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&invEndtime));
 						std::string ftime(temp);
 						
 						sInvEndtime->assign(ftime);
-						savetoTableWorkspace(sInvEndtime,t);
+						
 					}
-					else
-					{
-						savetoTableWorkspace(sInvEndtime,t);//this is to write empty value to table workspace.
-					}
+					savetoTableWorkspace(sInvEndtime,t);
+
 					saveInvestigatorsNameandSample(*citr,t);
      //              
 				}
@@ -517,8 +526,6 @@ namespace Mantid
 			//create table workspace
 			//API::ITableWorkspace_sptr outputws =createTableWorkspace();
 
-			//outputws->addColumn("str","Instrument");//Instrument name
-			//outputws->addColumn("long64","InvestigationId");//investigation id
 			outputws->addColumn("str","Name");//File name
 			outputws->addColumn("int","File Size");//File Size
 			outputws->addColumn("long64","File Id");//File id
@@ -532,7 +539,7 @@ namespace Mantid
 					datasetVec.assign((response.return_)->datasetCollection.begin(),(response.return_)->datasetCollection.end());
 					if(datasetVec.empty())
 					{
-						throw std::runtime_error("No data files exists in the database for the selected investigation");
+						throw std::runtime_error("No data files exists in the ICAT database for the selected investigation");
 					}
 					std::vector<ns1__dataset*>::const_iterator dataset_citr;
 					for(dataset_citr=datasetVec.begin();dataset_citr!=datasetVec.end();++dataset_citr)
@@ -541,7 +548,7 @@ namespace Mantid
 						datafileVec.assign((*dataset_citr)->datafileCollection.begin(),(*dataset_citr)->datafileCollection.end());
 						if(datafileVec.empty())
 						{
-							throw std::runtime_error("No data files exists in the database for the selected  investigation ");
+							throw std::runtime_error("No data files exists in the ICAT database for the selected  investigation ");
 						}
 
 						std::vector<ns1__datafile * >::const_iterator datafile_citr;
@@ -691,7 +698,7 @@ namespace Mantid
 			if(!(response.return_)|| (response.return_)->datasetCollection.empty())
 			{
 				//throw std::runtime_error("No datasets  exists in the ICat database for the inestigation id "+ stream.str());
-				g_log.information()<<"No datasets  exists in the ICat database for the inestigation id "+ stream.str()<<std::endl;
+				g_log.information()<<"No datasets  exists in the ICat database for the inevstigation id "+ stream.str()<<std::endl;
 				return -1 ;
 			}
 			try
@@ -702,7 +709,7 @@ namespace Mantid
 			catch(std::runtime_error)
 			{
 				
-				throw std::runtime_error("Error when loading the datasets for the inestigation id "+ stream.str());
+				throw std::runtime_error("Error when loading the datasets for the investigation id "+ stream.str());
 			}
 
 			return ret_advsearch;
@@ -1034,7 +1041,215 @@ namespace Mantid
 		}
 
 
+		/* This method does advanced search and returns investigation data
+		 * @param inputs reference to class containing search inputs
+		 * @param outputws shared pointer to output workspace
+		 */
+		void CSearchHelper::doAdvancedSearch(CSearchInput& inputs,API::ITableWorkspace_sptr &outputws)
+		{
+
+			//ICAt proxy object
+			ICATPortBindingProxy icat;
+			// request object
+			boost::shared_ptr<ns1__searchByAdvanced> req_sptr(new ns1__searchByAdvanced );
+
+			//session id
+			boost::shared_ptr<std::string > sessionId_sptr(new std::string);
+			req_sptr->sessionId=sessionId_sptr.get();
+			//get the sessionid which is cached in session class during login
+			*req_sptr->sessionId=Session::Instance().getSessionId();
+
+			boost::shared_ptr<ns1__advancedSearchDetails>adv_sptr(new ns1__advancedSearchDetails);
+			req_sptr->advancedSearchDetails=adv_sptr.get();
+			//run start
+			boost::shared_ptr<double>runstart_sptr(new double);
+			if(inputs.getRunStart()>0)
+			{
+				req_sptr->advancedSearchDetails->runStart = runstart_sptr.get();
+			   *req_sptr->advancedSearchDetails->runStart = inputs.getRunStart();
+			}
+			//run end
+			boost::shared_ptr<double>runend_sptr(new double);
+			if(inputs.getRunEnd()>0)
+			{
+				req_sptr->advancedSearchDetails->runEnd = runend_sptr.get();
+			    *req_sptr->advancedSearchDetails->runEnd = inputs.getRunEnd();
+			}
+            //start date
+			boost::shared_ptr<time_t> startdate_sptr(new time_t);
+			if(inputs.getStartDate()!=0)
+			{				
+				req_sptr->advancedSearchDetails->dateRangeStart = startdate_sptr.get();
+				*req_sptr->advancedSearchDetails->dateRangeStart = inputs.getStartDate();
+			}
+			//end date
+            boost::shared_ptr<time_t> enddate_sptr(new time_t);
+			if(inputs.getEndDate()!=0)
+			{				
+				req_sptr->advancedSearchDetails->dateRangeEnd =  enddate_sptr.get();
+				*req_sptr->advancedSearchDetails->dateRangeEnd = inputs.getEndDate();
+			}
+
+			req_sptr->advancedSearchDetails->caseSensitive=inputs.getCaseSensitive();
+
+			// investigation include
+            boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
+			req_sptr->advancedSearchDetails->investigationInclude = invstInculde_sptr.get();
+			*req_sptr->advancedSearchDetails->investigationInclude = inputs.getInvestigationInclude();
+
+			//instrument name
+			if(!inputs.getInstrument().empty())
+			{
+				req_sptr->advancedSearchDetails->instruments.push_back(inputs.getInstrument());
+			}
+			// keywords
+			if(!inputs.getKeywords().empty())
+			{
+				req_sptr->advancedSearchDetails->keywords.push_back(inputs.getKeywords());
+			}
+
+			//invetigation name
+			boost::shared_ptr<std::string > investName_sptr(new std::string);
+			if(!inputs.getInvestigationName().empty())
+			{
+				req_sptr->advancedSearchDetails->investigationName = investName_sptr.get();
+				*req_sptr->advancedSearchDetails->investigationName = inputs.getInvestigationName();
+			}
+
+			//invetigation abstarct
+			boost::shared_ptr<std::string > investAbstract_sptr(new std::string);
+			if(!inputs.getInvestigationAbstract().empty())
+			{
+				req_sptr->advancedSearchDetails->investigationAbstract = investAbstract_sptr.get();
+				*req_sptr->advancedSearchDetails->investigationAbstract = inputs.getInvestigationAbstract();
+			}
+
+			//sample name
+			boost::shared_ptr<std::string > sample_sptr(new std::string);
+			if(!inputs.getSampleName().empty())
+			{
+				req_sptr->advancedSearchDetails->sampleName = sample_sptr.get();
+				*req_sptr->advancedSearchDetails->sampleName = inputs.getSampleName();
+			}
+
+			//investigator's surname
+			boost::shared_ptr<std::string > investigator_sptr(new std::string);
+			if(!inputs.getInvestigatorSurName().empty())
+			{
+				req_sptr->advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
+			}
+
+			//datafile name
+			boost::shared_ptr<std::string > datafilename_sptr(new std::string);
+			if(!inputs.getDatafileName().empty())
+			{
+				req_sptr->advancedSearchDetails->datafileName = datafilename_sptr.get();
+				*req_sptr->advancedSearchDetails->datafileName = inputs.getDatafileName();
+			}
+
+			//rb number 
+			boost::shared_ptr<std::string > RbNumber_sptr(new std::string);
+			if(!inputs.getRbNumber().empty())
+			{
+				req_sptr->advancedSearchDetails->experimentNumber = RbNumber_sptr.get();
+				*req_sptr->advancedSearchDetails->experimentNumber = inputs.getRbNumber();
+			}
 
 
+			//response object
+			ns1__searchByAdvancedResponse response;
+			// do  search
+			int ret_search=doSearch(icat,req_sptr,response);
+			if(ret_search!=0)
+			{
+				//replace with mantid error routine
+				CErrorHandling::throwErrorMessages(icat);
+			}
+			if(response.return_.empty())
+			{	
+				g_log.information()<<"ICat investigations search is complete.There are no results to display"<<std::endl;
+				return ;
+        	}
+			//save response to a table workspace
+			saveSearchRessults(response,outputws);
+	
+		}
+
+	   /**This method saves the date components to C library struct tm
+		 *@param sDate string containing the date 
+		 *@return time_t value of date 
+		 */
+		time_t CSearchHelper::getTimevalue(const std::string& sDate)
+		{
+			if((!sDate.compare("DD/MM/YYYY")) || (!sDate.compare("dd/mm/yyyy")) )
+			{
+				return 0;
+			}
+			if(!sDate.compare(""))
+			{
+				return 0;
+			}
+			//struct tm * timeinfo =new tm;;
+			std::basic_string <char>::size_type index,off=0;
+			int day,month,year;
+		
+			//timeinfo
+			struct tm  timeinfo;
+			//get the day 
+		    day=atoi(sDate.substr(off,2).c_str());
+			
+			timeinfo.tm_mday=day;
+			
+			//getting teh month
+			index=sDate.find('/',off);
+			if(index!=std::string::npos)
+			{
+			off=index+1;
+			}
+			else
+			{
+				throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
+			}
+			month=atoi(sDate.substr(off,2).c_str());
+			timeinfo.tm_mon=month-1;
+			
+			//getting the year
+			index=sDate.find('/',off);
+			if(index!=std::string::npos)
+			{
+				off=index+1;
+			}
+			else
+			{
+				throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
+			}
+			year=atoi(sDate.substr(off,4).c_str());
+						
+			timeinfo.tm_year=year-1900;
+			validateTimeFormat(timeinfo);
+			timeinfo.tm_min=0;
+			timeinfo.tm_sec=0;
+			timeinfo.tm_hour=0;
+			//timeinfo->tm_isdst=-1;
+			 return std::mktime (&timeinfo );
+		}
+
+
+	  /**This method validates the date properties
+		*@param timeinfo refrence to structure containing time information
+		*/
+		void CSearchHelper::validateTimeFormat(const struct tm &timeinfo)
+		{
+			if (timeinfo.tm_mday<1 || timeinfo.tm_mday>31)
+			{
+				throw std::runtime_error("Invalid Date:Day part of search parameter Date must be between 1 and 31 ");
+			}
+			if (timeinfo.tm_mon<0 || timeinfo.tm_mon>11)
+			{
+				throw std::runtime_error("Invalid Date:Month part of search parameter Date must be between 1 and 12 ");
+			}
+		}
+
+		
 	}
 }

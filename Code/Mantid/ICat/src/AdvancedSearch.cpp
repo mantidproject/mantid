@@ -1,8 +1,7 @@
-#include "MantidICat/SearchByRunNumber.h"
+#include "MantidICat/AdvancedSearch.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include<limits>
 
 namespace Mantid
 {
@@ -10,56 +9,57 @@ namespace Mantid
 	{
 		using namespace Kernel;
 		using namespace API;
-
-		DECLARE_ALGORITHM(CSearchByRunNumber)
+		DECLARE_ALGORITHM(CAdvancedSearch)
+				
 		/// Initialisation method.
-		void CSearchByRunNumber::init()
+		void CAdvancedSearch::init()
 		{
 			BoundedValidator<double>* mustBePositive = new BoundedValidator<double>();
 			mustBePositive->setLower(0.0);
 
 			declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
-			
 			declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");
 			
 			declareProperty("Instrument","","The list of instruments used in ISIS nuetron scattering experiments.");
 			declareProperty("StartDate","","The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("EndDate","","The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-			declareProperty("Keywords","","An option to search investigations data");
-			declareProperty("Case Sensitive", false, "Boolean option to do case sensitive ICat investigations search.");
+			declareProperty("Keywords","","The keywords used for the  investigations search");
+			declareProperty("Case Sensitive",false,"Bolean option to do case senistive investigations search.");
+			
+			declareProperty("Investigation Name", "", "The name of the investigation to search.");
+			declareProperty("Investigation Type", "", "The type  of the investigation to search.");
+			declareProperty("Investigation Abstract", "", "The abstract of the investigation to search.");
+			declareProperty("Sample Name", "", "The name of the sample used in the investigation to search.");
+			declareProperty("Investigator SurName", "", "The sur name of the investigation to search.");
+			declareProperty("DataFile Name","", "The name of the data file to search.");
 
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
 				"The name of the workspace that will be created to store the ICat investigations search result.");
 			
 		}
 		/// Execution method.
-		void CSearchByRunNumber::exec()
-		{			
-			//API::ITableWorkspace_sptr ws_sptr=doSearchByRunNumber();
+		void CAdvancedSearch::exec()
+		{				
 			ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
-			doSearchByRunNumber(ws_sptr);
+			doAdvancedSearch(ws_sptr);
 			setProperty("OutputWorkspace",ws_sptr);
 			
 		}
-
-		/**This method does search by run number and instrument name.
-		 * @param outputws shared pointer to table workspace which stores the data
-		 */
-		void  CSearchByRunNumber::doSearchByRunNumber(ITableWorkspace_sptr &outputws)
-		{				
-			CSearchInput inputs;
-			CSearchHelper searchobj;
+		/** This method does advanced search by calling icat api
+		  *@param outputws shared pointer to output workspace
+		*/
+		void CAdvancedSearch::doAdvancedSearch(ITableWorkspace_sptr& outputws)
+		{
+			CSearchInput inputs;CSearchHelper searchobj;
 			getInputProperties(searchobj,inputs);
 			
-			searchobj.doISISSearch(inputs,outputws);
-	
+			searchobj.doAdvancedSearch(inputs,outputws);
 		}
 
-		/**This method gets the input properties for the algorithm.
-		 * @param helper reference to helper object used for searching
-		 * @param inputs - reference to inputs object
-		 */
-		void CSearchByRunNumber::getInputProperties( CSearchHelper& helper,CSearchInput& inputs)
+		/** This method gets the input properties of the algorithm
+		  *@param inputs reference to searchinput class.
+		*/
+		void CAdvancedSearch::getInputProperties(CSearchHelper& helper,CSearchInput& inputs)
 		{
 			double dstartRun=getProperty("StartRun");
 			if(dstartRun<0)
@@ -81,7 +81,6 @@ namespace Mantid
 			std::string instrument = getPropertyValue("Instrument");
 			// as ICat API is expecting instrument name in uppercase 
 			std::transform(instrument.begin(),instrument.end(),instrument.begin(),toupper);
-			
 			if(!instrument.empty())
 			{
 				inputs.setInstrument(instrument);
@@ -93,21 +92,22 @@ namespace Mantid
 			{
 				throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
 			}
+			
+
 			date = getPropertyValue("EndDate");
 			time_t endDate = helper.getTimevalue(date);
 			if(endDate==-1)
 			{
 				throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
 			}
-
+			
 			if(startDate>endDate)
 			{
 				throw std::runtime_error("End date cannot be lower than Start date");
 			}
 			
-			inputs.setStartDate(startDate);
-
 			inputs.setEndDate(endDate);
+			inputs.setStartDate(startDate);
 
 			std::string keyWords=getPropertyValue("Keywords");
 			inputs.setKeywords(keyWords);
@@ -115,13 +115,27 @@ namespace Mantid
 			bool bCase=getProperty("Case Sensitive");
 			inputs.setCaseSensitive(bCase);
 
+
+			std::string invstName=getPropertyValue("Investigation Name");
+			inputs.setInvestigationName(invstName);
+
+			std::string invstType=getPropertyValue("Investigation Type");
+			inputs.setInvestigationType(invstType);
+
+			std::string invstAbstarct=getPropertyValue("Investigation Abstract");
+			inputs.setInvestigationAbstract(invstAbstarct);
+
+			std::string sampleName=getPropertyValue("Sample Name");
+			inputs.setSampleName(sampleName);
+
+			std::string invstSurname=getPropertyValue("Investigator SurName");
+			inputs.setInvestigatorSurName(invstSurname);
+
+			std::string dataFileName=getPropertyValue("DataFile Name");
+			inputs.setDatafileName(dataFileName);
+
 			inputs.setInvestigationInclude(ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES);
 		}
 
-
-	
-
-	
 	}
 }
-

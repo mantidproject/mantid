@@ -1,21 +1,21 @@
-#ifndef SEARCHBYADVANCED_H_
-#define SEARCHBYADVANCED_H_
+#ifndef ADVANCEDSEARCH_H_
+#define ADVANCEDSEARCH_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/SearchByRunNumber.h"
+#include "MantidICat/AdvancedSearch.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid;
 using namespace Mantid::ICat;
-class CSearchByAdvancedTest: public CxxTest::TestSuite
+class CAdvancedSearchTest: public CxxTest::TestSuite
 {
 public:
 	
 	void testInit()
 	{
-		CSearchByRunNumber searchobj;
+		CAdvancedSearch searchobj;
 		Login loginobj;
 		TS_ASSERT_THROWS_NOTHING( searchobj.initialize());
 		TS_ASSERT( searchobj.isInitialized() );
@@ -25,7 +25,7 @@ public:
 		/*std::string s;
 		std::getline(std::cin,s);*/
 
-		CSearchByRunNumber searchobj;
+		CAdvancedSearch searchobj;
 		Login loginobj;
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
@@ -54,7 +54,7 @@ public:
 		/*std::string s;
 		std::getline(std::cin,s);*/
 		
-		CSearchByRunNumber searchobj;
+		CAdvancedSearch searchobj;
 		Login loginobj;
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
@@ -78,7 +78,7 @@ public:
 	}
 	void testSearchByStartDateEndDate()
 	{
-		CSearchByRunNumber searchobj;
+		CAdvancedSearch searchobj;
 		Login loginobj;
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
@@ -113,7 +113,7 @@ public:
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
-		CSearchByRunNumber searchobj;
+		CAdvancedSearch searchobj;
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
 		// start run number > end run number
@@ -131,7 +131,7 @@ public:
 	void testSearchByInvalidDates()
 	{
 
-		CSearchByRunNumber searchobj;
+		CAdvancedSearch searchobj;
 		Login loginobj;
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
@@ -145,7 +145,7 @@ public:
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 				
 		searchobj.setPropertyValue("StartDate","sssss");
-		searchobj.setPropertyValue("EndDate","aaaaa");
+		searchobj.setPropertyValue("EndDate","sofia");
 		searchobj.setPropertyValue("OutputWorkspace","Investigations");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());

@@ -183,6 +183,7 @@ namespace Mantid
 			 */
 			const std::string& getDatafileName(){return m_datafileName;}
 
+
 		private:
 			double m_startRun;
 			double m_endRun;
@@ -239,7 +240,14 @@ namespace Mantid
 			/// This method does investigations data search for logged in user
 			void doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr);
 
-				
+            /// do advanced search 
+			void doAdvancedSearch(CSearchInput& inputs,API::ITableWorkspace_sptr &outputws);
+
+			
+			/// Thsi method returns the time_t value for a Date which is in "DD/MM/YYYY" format
+			time_t getTimevalue(const std::string& sDate);
+
+							
 		private:
 			
 			/// This method sets the request parameters for investigation includes.
@@ -288,6 +296,10 @@ namespace Mantid
 
 			///saves 
 			void saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t);
+
+
+			/// this method validates the format of date properties
+			 void validateTimeFormat(const struct tm& timeinfo);
 		       
 
 			/* This is a template method to save data to table workspace

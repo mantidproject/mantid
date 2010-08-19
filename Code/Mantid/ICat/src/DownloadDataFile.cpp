@@ -45,10 +45,6 @@ namespace Mantid
 			
 			declareProperty(new ArrayProperty<std::string> ("FileLocations",new NullValidator<std::vector<std::string> >,
 				Direction::Output),"List of filenames downloaded from ISIS data server");
-
-			//declareProperty("Filename","","Name of the file to download");
-			//declareProperty("Select All",false,"Boolean option to select all the files and down load");
-			//declareProperty("FileLocation","",Direction::Output);
 		}
 		/// Execute the algorithm
 		void CDownloadDataFile::exec()

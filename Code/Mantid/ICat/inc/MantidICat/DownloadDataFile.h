@@ -8,7 +8,14 @@
   * This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
   * If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
   * Then uses POCO http methods to download over internet.
-       
+     
+	 Required Properties:
+    <UL>
+    <LI> Filenames - List of files to download </LI>
+    <LI> InputWorkspace - The name of the workspace whioch stored the last investigation search results </LI>
+	<LI> FileLocations - List of files with location which is downloaded </LI>
+	</UL>
+
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

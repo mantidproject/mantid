@@ -1,17 +1,26 @@
-#ifndef MANTID_ICAT_CSEARCHBYRUNNUMBER_H_
-#define MANTID_ICAT_CSEARCHBYRUNNUMBER_H_
+#ifndef MANTID_ICAT_ADVANCEDSEARCH_H_
+#define MANTID_ICAT_ADVANCEDSEARCH_H_
+
+
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include"MantidICat/SearchHelper.h"
 
-/** CSearchByRunNumber is a class responsible for SearchByRunNumber algorithm.
-  * This algorithm does the basic search and returns the investigations record
+/** CAdvancedSearch is a class responsible for searching investigatiosns.
+  * This algorithm does the adavanced  search and returns the investigations record
 
     Required Properties:
     <UL>
+	<LI> Investigation name -The name of the investigation to search
+	<LI> Investigation Abstract - The abstract of the investigation to be searched
+	<LI> Sample - The name of the sample 
+	<LI> Investigators surname Investigators name
+	<LI> DataFile Name -The name of teh data file
     <LI> StartRun - The the start run number for search </LI>
     <LI> EndRun - The end run number for search </LI>
+	<LI> Rb Number - The RB number of the investigation
+	<LI> Investigation Type - The tye of the investigation
 	<LI> Instruments - The list of instruments used for search </LI>
 	<LI> StartDate - The start date used for search </LI>
 	<LI> EndDate - The end date used for search </LI>
@@ -20,7 +29,7 @@
     </UL>
    
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
-    @date 07/07/2010
+    @date 12/08/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -48,19 +57,15 @@ namespace Mantid
 {
 	namespace ICat
 	{
-		class DLLExport CSearchByRunNumber: public API::Algorithm
+		class DLLExport CAdvancedSearch: public API::Algorithm
 		{
 		public:
-			///constructor
-			CSearchByRunNumber():API::Algorithm(){}
-			///destructor
-			~CSearchByRunNumber()
-			{
-			}
-			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "SearchByRunNumber"; }
+			CAdvancedSearch():API::Algorithm(){}
+			~CAdvancedSearch(){}
+				/// Algorithm's name for identification overriding a virtual method
+			virtual const std::string name() const { return "AdvancedSearch"; }
 			/// Algorithm's version for identification overriding a virtual method
-			virtual int version() const { return 1; }
+			virtual  int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method
 			virtual const std::string category() const { return "ICat"; }
 		private:
@@ -70,14 +75,13 @@ namespace Mantid
 			void exec();
 			
 			/// Search method 
-			void  doSearchByRunNumber(API::ITableWorkspace_sptr &outputws);
-		
-             /// get all inputs for the algorithm
-			 void getInputProperties(CSearchHelper& helper,CSearchInput& inputs);
+			void  doAdvancedSearch(API::ITableWorkspace_sptr &outputws);
 
-											
+			/// method to get input properties for the algorithm and setting to Csearch input class.
+			void getInputProperties(CSearchHelper& helper,CSearchInput& inputs);
+
+
 		};
 	}
 }
-
 #endif
