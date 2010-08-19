@@ -48,15 +48,7 @@ namespace Mantid
     {
       std::ofstream module(getModuleFilename().c_str());
 
-      // Need to import definitions from main Python API
-#ifdef _WIN32
-      module << "from MantidPythonAPI import *\n";
-#else
-      module << "from libMantidPythonAPI import *\n";
-#endif
-
       module << "from MantidFramework import *\n";
-
       //If in gui mode also need sys and qti module
       if( gui )
       {

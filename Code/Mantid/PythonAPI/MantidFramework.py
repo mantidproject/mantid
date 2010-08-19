@@ -968,6 +968,8 @@ if os.name == 'posix':
         sys.path.append(outputdir)
 
 mtd = FrameworkSingleton()
+mtd.initialise()
+#Aliases
 mantid = mtd
 Mantid = mtd
 Mtd = mtd
