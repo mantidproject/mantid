@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -71,11 +72,15 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  void execEvent();
 
   /// Convert the workspace units according to a simple output = a * (input^b) relationship
   void convertQuickly(const int& numberOfSpectra, API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power);
   /// Convert the workspace units using TOF as an intermediate step in the conversion
   void convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS);
+
+  /// Convert the workspace units using TOF as an intermediate step in the conversion
+  void convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS);
 
   // Calls Rebin as a sub-algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr alignBins(const API::MatrixWorkspace_sptr workspace);

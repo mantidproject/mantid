@@ -11,8 +11,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadEventPreNeXus.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -230,6 +232,54 @@ public:
 
     AnalysisDataService::Instance().remove(ws);
     AnalysisDataService::Instance().remove(outputSpace);
+  }
+
+  void setup_Event()
+  {
+    this->inputSpace = "eventWS";
+    Mantid::DataHandling::LoadEventPreNeXus loader;
+    loader.initialize();
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_11514/CNCS_11514_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/CNCS_11514/CNCS_11514_pulseid.dat" );
+    loader.setPropertyValue("EventFilename", eventfile);
+    loader.setProperty("PulseidFilename", pulsefile);
+    loader.setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
+    loader.setPropertyValue("OutputWorkspace", this->inputSpace);
+//    loader.setPropertyValue("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+    loader.execute();
+    TS_ASSERT (loader.isExecuted() );
+  }
+
+  void testExecEvent_sameOutputWS()
+  {
+    this->setup_Event();
+
+    //Retrieve Workspace
+    EventWorkspace_sptr WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputSpace));
+    TS_ASSERT( WS ); //workspace is loaded
+    size_t start_blocksize = WS->blocksize();
+    size_t num_events = WS->getNumberEvents();
+    double a_tof = WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof();
+
+    if ( !alg.isInitialized() ) alg.initialize();
+    TS_ASSERT( alg.isInitialized() );
+
+    //Set all the properties
+    alg.setPropertyValue("InputWorkspace", inputSpace);
+    alg.setPropertyValue("Target", "DeltaE");
+    alg.setPropertyValue("EMode", "Direct");
+    alg.setPropertyValue("Efixed", "15.0");
+    this->outputSpace = inputSpace;
+    alg.setPropertyValue("OutputWorkspace", outputSpace);
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    //Things that haven't changed
+    TS_ASSERT_EQUALS( start_blocksize, WS->blocksize());
+    TS_ASSERT_EQUALS( num_events, WS->getNumberEvents() );
+    //But a TOF changed.
+    TS_ASSERT_DIFFERS(a_tof, WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
   }
 
 private:

@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include <cfloat>
 #include <iostream>
 #include <limits>
@@ -74,6 +75,15 @@ void ConvertUnits::exec()
 {
   // Get the workspaces
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+  //Check if its an event workspace
+  EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  if (eventW != NULL)
+  {
+    this->execEvent();
+    return;
+  }
+
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Check that the input workspace doesn't already have the desired unit.
@@ -184,6 +194,161 @@ void ConvertUnits::exec()
 
   setProperty("OutputWorkspace",outputWS);
   return;
+}
+
+/**
+ * Execute ConvertUnits for event workspaces
+ *
+ */
+void ConvertUnits::execEvent()
+{
+  g_log.information("Processing event workspace");
+
+  const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
+  EventWorkspace_const_sptr inputWS
+                 = boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+
+  // generate the output workspace pointer
+  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
+  EventWorkspace_sptr outputWS;
+  if (matrixOutputWS == matrixInputWS)
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  else
+  {
+    //Make a brand new EventWorkspace
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    //outputWS->mutableSpectraMap().clear();
+    //You need to copy over the data as well.
+    outputWS->copyDataFrom( (*inputWS) );
+
+    //Cast to the matrixOutputWS and save it
+    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    this->setProperty("OutputWorkspace", matrixOutputWS);
+  }
+
+  Kernel::Unit_sptr inputUnit = inputWS->getAxis(0)->unit();
+  const std::string targetUnit = getPropertyValue("Target");
+
+  // Set the final unit that our output workspace will have
+  Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(targetUnit);
+
+  const int numberOfSpectra = inputWS->getNumberHistograms();
+  this->convertViaEventsTOF(numberOfSpectra, inputUnit, outputWS);
+}
+
+/** Convert the workspace units using TOF as an intermediate step in the conversion
+ * @param numberOfSpectra The number of Spectra
+ * @param fromUnit The unit of the input workspace
+ * @param outputWS The output workspace
+ */
+void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS)
+{
+  using namespace Geometry;
+
+  // Get a pointer to the instrument contained in the workspace
+  IInstrument_const_sptr instrument = outputWS->getInstrument();
+  // Get the parameter map
+  const ParameterMap& pmap = outputWS->constInstrumentParameters();
+
+  // Get the unit object for each workspace
+  Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
+
+  // Get the distance between the source and the sample (assume in metres)
+  IObjComponent_const_sptr source = instrument->getSource();
+  IObjComponent_const_sptr sample = instrument->getSample();
+  double l1;
+  try
+  {
+    l1 = source->getDistance(*sample);
+    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
+  }
+  catch (Exception::NotFoundError &e)
+  {
+    g_log.error("Unable to calculate source-sample distance");
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
+  }
+
+  int failedDetectorCount = 0;
+
+  /// @todo No implementation for any of these in the geometry yet so using properties
+  const std::string emodeStr = getProperty("EMode");
+  // Convert back to an integer representation
+  int emode = 0;
+  if (emodeStr == "Direct") emode=1;
+  else if (emodeStr == "Indirect") emode=2;
+
+  // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
+  std::vector<double> emptyVec;
+  Progress prog(this,0.5,1.0,numberOfSpectra);
+  // Loop over the histograms (detector spectra)
+  PARALLEL_FOR1(outputWS)
+  for (int i = 0; i < numberOfSpectra; ++i)
+  {
+    PARALLEL_START_INTERUPT_REGION
+    double efixed = getProperty("Efixed");
+    /// @todo Don't yet consider hold-off (delta)
+    const double delta = 0.0;
+
+    try {
+      // Now get the detector object for this histogram
+      IDetector_sptr det = outputWS->getDetector(i);
+      // Get the sample-detector distance for this detector (in metres)
+      double l2, twoTheta;
+      if ( ! det->isMonitor() )
+      {
+        l2 = det->getDistance(*sample);
+        // The scattering angle for this detector (in radians).
+        twoTheta = outputWS->detectorTwoTheta(det);
+        // If an indirect instrument, try getting Efixed from the geometry
+        if (emode==2)
+        {
+          try {
+            Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
+            if (par)
+            {
+              efixed = par->value<double>();
+              g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
+            }
+          } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
+        }
+      }
+      else  // If this is a monitor then make l2 = source-detector distance, l1=0 and twoTheta=0
+      {
+        l2 = det->getDistance(*source);
+        l2 = l2-l1;
+        twoTheta = 0.0;
+        // Energy transfer is meaningless for a monitor, so set l2 to 0.
+        if (outputUnit->unitID().find("Delta")==0)
+        {
+          l2 = 0.0;
+          efixed = DBL_MIN;
+        }
+      }
+
+      // Convert from time-of-flight to the desired unit
+      EventList::StorageType tofs = *outputWS->getEventListAtWorkspaceIndex(i).getTofs();
+      outputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      outputWS->getEventListAtWorkspaceIndex(i).setTofs(tofs);
+
+    } catch (Exception::NotFoundError &e) {
+      // Get to here if exception thrown when calculating distance to detector
+      failedDetectorCount++;
+      outputWS->getEventListAtWorkspaceIndex(i).clear();
+    }
+
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  } // loop over spectra
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  if (failedDetectorCount != 0)
+  {
+    g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount << " spectra. Zeroing spectrum." << std::endl;
+  }
+
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b) relationship
