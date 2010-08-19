@@ -5,21 +5,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>214</width>
-    <height>142</height>
+    <width>208</width>
+    <height>132</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Logon to ICat</string>
   </property>
   <property name="toolTip" >
-   <string>Logon dialog for ICat DB</string>
+   <string/>
   </property>
   <widget class="QDialogButtonBox" name="okBox" >
    <property name="geometry" >
     <rect>
      <x>70</x>
-     <y>100</y>
+     <y>93</y>
      <width>131</width>
      <height>32</height>
     </rect>
@@ -34,13 +34,27 @@
   <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
-     <x>10</x>
-     <y>20</y>
+     <x>8</x>
+     <y>9</y>
      <width>191</width>
      <height>68</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout" >
+    <item row="0" column="0" >
+     <widget class="QLabel" name="label" >
+      <property name="text" >
+       <string>Federal Id:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" >
+     <widget class="QLineEdit" name="fedIdEdit" >
+      <property name="toolTip" >
+       <string/>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0" >
      <widget class="QLabel" name="label_2" >
       <property name="text" >
@@ -51,24 +65,10 @@
     <item row="1" column="1" >
      <widget class="QLineEdit" name="passwordEdit" >
       <property name="toolTip" >
-       <string>Password of the Logged in User</string>
+       <string/>
       </property>
       <property name="echoMode" >
        <enum>QLineEdit::Password</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" >
-     <widget class="QLineEdit" name="fedIdEdit" >
-      <property name="toolTip" >
-       <string>Federal Id of the logged in user</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" >
-     <widget class="QLabel" name="label" >
-      <property name="text" >
-       <string>Federal Id:</string>
       </property>
      </widget>
     </item>
@@ -78,7 +78,7 @@
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>106</y>
+     <y>99</y>
      <width>31</width>
      <height>21</height>
     </rect>

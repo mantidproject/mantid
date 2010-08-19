@@ -180,6 +180,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
+#include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 
 
 using namespace Qwt3D;
@@ -1158,10 +1159,11 @@ void ApplicationWindow::initMainMenu()
 	
 	icat = new QMenu(this);
 	icat->setObjectName("ICatMenu");
-	icat->addAction(actionICatLogin);
-	icat->addAction(actionICatSearch);
-	icat->addAction(actionMydataSearch);
-	icat->addAction(actionICatLogout);
+	icat->addAction(actionICatLogin);//Login menu item
+	icat->addAction(actionICatSearch);//search menu item
+	icat->addAction(actionMydataSearch);// my data search menu item
+	icat->addAction(actionAdvancedSearch); //advanced search menu item
+	icat->addAction(actionICatLogout);//logout menu item
 	disableActions();
 }
 
@@ -12555,12 +12557,12 @@ void ApplicationWindow::createActions()
 
 	actionICatSearch=new QAction("Search",this);
 	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
-	actionICatSearch->setToolTip(tr("ICat Search"));
-	connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatSearch()));
+	actionICatSearch->setToolTip(tr("ICat ISIS Search"));
+	connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
 
 	actionMydataSearch=new QAction("MyData Search",this);
 	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
-	actionMydataSearch->setToolTip(tr("ICat Search"));
+	actionMydataSearch->setToolTip(tr("ICat MyData Search"));
 	connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
 	
 	actionICatLogout=new QAction("Logout",this);
@@ -12568,7 +12570,10 @@ void ApplicationWindow::createActions()
 	actionICatLogout->setToolTip(tr("ICat Logout"));
 	connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
 
-	
+	actionAdvancedSearch = new QAction("AdvancedSearch",this);
+	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
+	actionAdvancedSearch->setToolTip(tr("ICat Advanced Search"));
+	connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));
 }
 
 void ApplicationWindow::translateActionsStrings()
@@ -16444,7 +16449,7 @@ void ApplicationWindow::ICatLogin()
 	mantidUI->executeAlgorithm("Login",1);
 }
 
-void ApplicationWindow::ICatSearch()
+void ApplicationWindow::ICatIsisSearch()
 {	
 	QMdiSubWindow* usr_win = new QMdiSubWindow(this);
 	usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
@@ -16463,10 +16468,24 @@ void ApplicationWindow::ICatMyDataSearch()
 	QMdiSubWindow* usr_win = new QMdiSubWindow(this);
 	usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
 	//QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch1(usr_win);
-	QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
-	if(icatsearch_interface)
+	QWidget* mydatsearch = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
+	if(mydatsearch)
 	{
-		setGeometry(usr_win,icatsearch_interface);
+		setGeometry(usr_win,mydatsearch);
+	}
+	else
+	{
+		delete usr_win;
+	}
+}
+void ApplicationWindow ::ICatAdvancedSearch()
+{
+	QMdiSubWindow* usr_win = new QMdiSubWindow(this);
+	usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
+	QWidget* advanced_search = new MantidQt::MantidWidgets::ICatAdvancedSearch(usr_win);
+	if(advanced_search)
+	{
+		setGeometry(usr_win,advanced_search);
 	}
 	else
 	{
@@ -16501,7 +16520,7 @@ void ApplicationWindow::writetoLogWindow(const QString& error)
     cur.movePosition(QTextCursor::End);
     results->setTextCursor(cur);
 }
-/* This method executes load raw asynchrnously
+/* This method executes loadraw asynchrnously
  * @param  fileName - name of the file to load
  * @param wsName -name of the workspace to store data
 */
@@ -16509,17 +16528,34 @@ void ApplicationWindow::executeLoadRawAsynch(const QString& fileName,const QStri
 {
 	mantidUI->loadrawfromICatInterface(fileName,wsName);
 }
+
+/* This method executes loadnexus asynchrnously
+ * @param  fileName - name of the file to load
+ * @param wsName -name of the workspace to store data
+*/
 void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QString& wsName)
 {
 	mantidUI->loadnexusfromICatInterface(fileName,wsName);
 }
 
+/* This method executes Download data files algorithm
+ * @param  filenames - list of the file names to download
+ */
 void ApplicationWindow::executeDownloadDataFiles(std::vector<std::string>& filenames)
 {
-	QObject * qsender= sender();
+	//getting the sender of the signal(it's ICatInvestigation object)
+	QObject* qsender= sender();
 	if(!qsender) return;
 
+	// connecting  filelocations signal to ICatInvestigation slot setfileLocations
+	// This is to send the filelocations vector  after  algorithm execution to ICatInvestigation object(which is MnatidQt) for further processing
 	connect(mantidUI,SIGNAL(fileLocations(const std::vector<std::string>&)),qsender,SLOT(setfileLocations(const std::vector<std::string>&)));
+	/// execute the algorithm
 	mantidUI->executeDownloadDataFiles(filenames);
+}
+
+void  ApplicationWindow::executeloadAlgorithm(const QString& algName,const QString& fileName, const QString& wsName)
+{
+	mantidUI->executeloadAlgorithm(algName,fileName,wsName);
 }
 

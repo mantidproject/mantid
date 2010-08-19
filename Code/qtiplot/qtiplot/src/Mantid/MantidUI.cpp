@@ -842,7 +842,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
     if( !alg ) return;
 	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
-	acceptLoadInputs(dlg,alg);
+	executeLoadAlgorithm(dlg,alg);
 	
 }
 /** This method is to execute loadraw from ICat Interface
@@ -867,7 +867,7 @@ void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& 
 			list[1]->setText(wsName);
 		}
 	}
-	acceptLoadInputs(dlg,alg);
+	executeLoadAlgorithm(dlg,alg);
 
 	
 }
@@ -887,9 +887,43 @@ void MantidUI::loadnexusfromICatInterface(const QString& fileName,const QString&
 			list[1]->setText(wsName);
 		}
 	}
-    acceptLoadInputs(dlg,alg);
+    executeLoadAlgorithm(dlg,alg);
 }
 
+void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& fileName, const QString& wsName)
+{
+
+	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+    if( !alg ) return;
+	try
+	{
+		alg->setProperty("Filename",fileName.toStdString());
+		alg->setPropertyValue("OutputWorkspace",wsName.toStdString());
+	}
+	catch(std::invalid_argument& e)
+	{		
+		//emit error(e.what());
+		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+		return ;
+	}
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
+	{
+		//emit error(e.what());
+		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+		return ;
+	}
+	
+	/*Poco::ActiveResult<bool> result(alg->executeAsync());
+	while( !result.available() )
+	{
+		QCoreApplication::processEvents();
+	}*/
+
+	executeAlgorithmAsync(alg);
+
+	
+
+}
 MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
 {
 	
@@ -907,7 +941,7 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API
 		MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
 	return dlg;
 }
-void MantidUI::acceptLoadInputs(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
+void MantidUI::executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
 {
 	if( !dlg ) return;
 	if ( dlg->exec() == QDialog::Accepted)

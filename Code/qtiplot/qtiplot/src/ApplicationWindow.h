@@ -994,7 +994,10 @@ public slots:
   /// execute loadnexus asynchronously
   void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
 
-  /// execute download data files from ICat interface
+  /// execute loadraw/nexus without popingup load dialogs.
+  void executeloadAlgorithm(const QString&, const QString&, const QString&);
+
+  /// execute download data files - called  from ICat interface
   void executeDownloadDataFiles(std::vector<std::string>&);
  
 signals:
@@ -1083,11 +1086,13 @@ private slots:
   /// Handler for ICat login menu 
   void ICatLogin();
   /// Handler for ICat search menu
-  void ICatSearch();
+  void ICatIsisSearch();
   /// Handler for ICatMyData serch menu
   void ICatMyDataSearch();
-
+// Handler for ICat Logout
   void ICatLogout();
+
+  void ICatAdvancedSearch();
 
   /// method to create widgets from mantid qt;
   void setGeometry(QMdiSubWindow* usr_win,QWidget* user_interface);
@@ -1283,7 +1288,7 @@ private:
     QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
     QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
     QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
-	QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout;
+	QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
 #ifdef SCRIPTING_CONSOLE
     QAction *actionShowConsole;
 #endif

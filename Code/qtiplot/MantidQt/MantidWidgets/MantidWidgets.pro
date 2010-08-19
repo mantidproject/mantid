@@ -37,7 +37,8 @@ SOURCES = \
   $$SRCDIR/ICatInvestigation.cpp \
   $$SRCDIR/ICatMyDataSearch.cpp \
   $$SRCDIR/InstrumentSelector.cpp  \
-  $$SRCDIR/ICatUtils.cpp
+  $$SRCDIR/ICatUtils.cpp  \
+  $$SRCDIR/ICatAdvancedSearch.cpp
   
  
 HEADERS = \
@@ -55,7 +56,8 @@ HEADERS = \
   $$HEADERDIR/ICatInvestigation.h \
   $$HEADERDIR/ICatMyDataSearch.h \
   $$HEADERDIR/InstrumentSelector.h   \
-  $$HEADERDIR/ICatUtils.h
+  $$HEADERDIR/ICatUtils.h  \
+  $$HEADERDIR/ICatAdvancedSearch.h
   
 UI_DIR = $$HEADERDIR
 
@@ -66,7 +68,8 @@ FORMS = \
   $$HEADERDIR/RenameParDialog.ui \
   $$HEADERDIR/ICatSearch.ui \
   $$HEADERDIR/ICatInvestigation.ui \
-  $$HEADERDIR/ICatMyDataSearch.ui
+  $$HEADERDIR/ICatMyDataSearch.ui  \
+  $$HEADERDIR/ICatAdvancedSearch.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"
   

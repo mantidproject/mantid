@@ -241,6 +241,9 @@ public:
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
 
+  //This is anoverloaded method toexecute load raw/nexus and  called from Icat interface
+  void executeloadAlgorithm(const QString&, const QString&, const QString&);
+
 					      
 public slots:
   void cancelAllRunningAlgorithms();
@@ -439,7 +442,7 @@ private:
 	 MantidQt::API::AlgorithmDialog * createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
 
 	 /// This method accepts user inputs and executes loadraw/load nexus algorithm
-	 void acceptLoadInputs(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
+	 void executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
 	
 
     // Private variables

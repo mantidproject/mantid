@@ -9,6 +9,8 @@
 #include "MantidKernel/ConfigService.h"
 
 #include<QHeaderView>
+#include <QDesktopServices>
+#include <QUrl>
 
 
 using namespace Mantid::API;
@@ -38,13 +40,15 @@ ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,
 	connect(m_uiForm.downloadButton,SIGNAL(clicked()),this,SLOT(onDownload()));
 	//load button clikced
 	connect(m_uiForm.LoadButton,SIGNAL(clicked()),this,SLOT(onLoad()));
-    
-	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
+ 	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
 	connect(this,SIGNAL(loadRawAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadRawAsynch(const QString&,const QString& )));
 	connect(this,SIGNAL(loadNexusAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadNexusAsynch(const QString&,const QString& )));
 	connect(m_uiForm.selectallButton,SIGNAL(clicked()),this,SLOT(onSelectAllFiles()));
 	connect(this,SIGNAL(executeDownload(std::vector<std::string>&)),
 		parent()->parent(),SLOT(executeDownloadDataFiles(std::vector<std::string>&)));
+	connect(this,SIGNAL(executeLoadAlgorithm(const QString&, const QString&, const QString&)),parent()->parent(),
+		SLOT(executeloadAlgorithm(const QString&, const QString&, const QString&)));
+	connect(m_uiForm.helpButton,SIGNAL(clicked()),this,SLOT(helpButtonClicked()));
 }
 
 /// Set up the dialog layout
@@ -247,28 +251,31 @@ bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>&
 		return false;
 	}
 	
-	try
+
+	Poco::ActiveResult<bool> result(alg->executeAsync());
+	while( !result.available() )
 	{
-		Poco::ActiveResult<bool> result(alg->executeAsync());
-		while( !result.available() )
+		QCoreApplication::processEvents();
+	}
+	if(result.available())
+	{
+
+		try
 		{
-			QCoreApplication::processEvents();
+			fileLocs = alg->getProperty("FileLocations");
 		}
+		catch (Mantid::Kernel::Exception::NotFoundError&e)
+		{
+			emit error(e.what());
+			return false;
+		}
+		return true;
 	}
-	catch(...)
-	{     
+	else
+	{
 		return false;
 	}
-	try
-	{
-		fileLocs = alg->getProperty("FileLocations");
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError&e)
-	{
-		emit error(e.what());
-		return false;
-	}
-	return true;
+	
 	
 	
 }
@@ -575,7 +582,7 @@ bool ICatInvestigation::isFileExistsInDownlodedList(const std::string& selectedF
   *@param filePath name of the file
   *@return  boolean
 */
-bool ICatInvestigation::loadData( const QString& filePath)
+void ICatInvestigation::loadData( const QString& filePath)
 {
 
 	QString wsName;
@@ -590,11 +597,8 @@ bool ICatInvestigation::loadData( const QString& filePath)
 	{		
 		if(!isLoadingControlled())
 		{
-			if(!executeLoadRaw(filePath,wsName))
-			{
-				return false;
-			}
-
+			executeLoadRaw(filePath,wsName);
+		
 		}
 		else
 		{		
@@ -606,10 +610,7 @@ bool ICatInvestigation::loadData( const QString& filePath)
 
 		if(!isLoadingControlled())
 		{
-			if(!executeLoadNexus(filePath,wsName))
-			{
-				return false;
-			}
+			executeLoadNexus(filePath,wsName);
 		}
 		else
 		{			
@@ -619,10 +620,9 @@ bool ICatInvestigation::loadData( const QString& filePath)
 	}
 	else
 	{
-		emit error("ICat interface is not currently supporting the loading of log files ");
-		return false;
+		emit error("ICat interface is not supporting the loading of log files.");
+		
 	}
-   return true;
 }
 /// If user selected controlled loading of data check box
 bool ICatInvestigation::isLoadingControlled()
@@ -670,17 +670,19 @@ bool ICatInvestigation::isNexusFile(const QString& fileName)
 /** This method executes loadRaw algorithm
   * @param fileName name of the raw file
 */
-bool ICatInvestigation::executeLoadRaw(const QString& fileName,const QString& wsName)
+void ICatInvestigation::executeLoadRaw(const QString& fileName,const QString& wsName)
 {	
-	return execute("LoadRaw",-1,fileName,wsName);
+	//return execute("LoadRaw",-1,fileName,wsName);
+	emit executeLoadAlgorithm("LoadRaw",fileName,wsName);
 }
 
 /** This method executes loadNexus algorithm
   * @param fileName name of the nexus file
 */
-bool ICatInvestigation::executeLoadNexus(const QString& fileName,const QString& wsName)
+void ICatInvestigation::executeLoadNexus(const QString& fileName,const QString& wsName)
 {
-	return execute("LoadNexus",-1,fileName,wsName);
+	//return execute("LoadNexus",-1,fileName,wsName);
+	executeLoadAlgorithm("LoadNexus",fileName,wsName);
 
 }
 /**This method executes loadraw/loadnexus algorithm
@@ -729,5 +731,12 @@ bool ICatInvestigation::execute(const QString& algName,const int& version,const 
 	  return false;
     }
 	
+
+}
+
+//handler for helpbutton
+void ICatInvestigation::helpButtonClicked()
+{
+	//QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 
 }
