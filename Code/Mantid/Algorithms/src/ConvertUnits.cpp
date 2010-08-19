@@ -282,7 +282,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
-  Progress prog(this,0.5,1.0,numberOfSpectra);
+  Progress prog(this,0.0,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < numberOfSpectra; ++i)
