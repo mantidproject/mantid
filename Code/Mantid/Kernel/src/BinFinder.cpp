@@ -43,7 +43,7 @@ namespace Kernel
       //Pre-do some calculations for log binning.
       if (step < 0)
       {
-        logSteps.push_back( log(1.0 + abs(step)) );
+        logSteps.push_back( log(1.0 + fabs(step)) );
         logBoundaries.push_back( log(min) );
         logBoundaries.push_back( log(max) );
       }

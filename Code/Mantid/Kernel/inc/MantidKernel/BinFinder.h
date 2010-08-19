@@ -8,6 +8,9 @@
 #include <vector>
 #include <functional>
 #include <cmath>
+#include <stdio.h>
+#include <math.h>
+#include <numeric>
 
 namespace Mantid
 {
