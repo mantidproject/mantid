@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <locale>
 
 namespace Mantid
 {
@@ -541,7 +542,11 @@ std::set<std::string> Expression::getVariables()const
   std::set<std::string> out;
   if ( !isFunct() )
   {
-    out.insert(name());
+    std::string s = name();
+    if ( !s.empty() && !isdigit(s[0]) )
+    {
+      out.insert(s);
+    }
   }
   else
   {
@@ -554,7 +559,11 @@ std::set<std::string> Expression::getVariables()const
       }
       else
       {
-        out.insert(e->name());
+        std::string s = e->name();
+        if ( !s.empty() && !isdigit(s[0]) )
+        {
+          out.insert(s);
+        }
       }
     }
   }

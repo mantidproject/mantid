@@ -5,7 +5,6 @@
 #include "WidgetDllOption.h"
 
 #include <vector>
-#include <set>
 #include <string>
 
 namespace MantidQt
@@ -24,7 +23,7 @@ namespace MantidQt
       RenameParDialog(const std::vector<std::string>& old_params,
         const std::vector<std::string>& new_params,
         QWidget *parent=NULL);
-      void setOutput(std::set<std::string>& out)const;
+      void setOutput(std::vector<std::string>& out)const;
     protected slots:
       void uniqueIndexedNames(bool);
       void doNotRename(bool);

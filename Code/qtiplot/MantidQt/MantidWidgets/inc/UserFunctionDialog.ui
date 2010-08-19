@@ -123,6 +123,16 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btnRemove" >
+         <property name="text" >
+          <string>Remove</string>
+         </property>
+         <property name="autoDefault" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btnUse" >
          <property name="text" >
           <string>Use</string>

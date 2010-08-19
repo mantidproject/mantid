@@ -9,6 +9,7 @@
 
 class QComboBox;
 class QLineEdit;
+class QTextEdit;
 
 namespace MantidQt
 {
@@ -23,6 +24,7 @@ namespace MantidQt
 
     public:
       UserFunctionDialog(QWidget *parent=NULL,const QString& formula = "");
+      ~UserFunctionDialog();
       QStringList categories()const;
       QString getFormula()const{return m_uiForm.teUserFunction->toPlainText();}
     public slots:
@@ -30,15 +32,21 @@ namespace MantidQt
       void selectFunction(const QString& fun);
       void addExpression();
       void saveFunction();
+      void removeCurrentFunction();
       void updateCategories();
+      void updateFunction();
     protected:
       /// User interface elements
       Ui::UserFunctionDialog m_uiForm;
 
       void loadFunctions();
       void checkParameters(QString& expr);
-      void updateFunction();
       QSet<QString> names(const QString& key = "")const;
+      bool eventFilter(QObject *obj, QEvent *ev);
+      QString getFunction(const QString& cat,const QString& fun)const;
+      QString getComment(const QString& cat,const QString& fun)const;
+      void setFunction(const QString& cat,const QString& fun,const QString& expr,const QString& comment = "");
+      bool isBuiltin(const QString& cat)const;
     private:
 
       /// Container for prerecorded functions: key = category.name, value = formula
@@ -55,10 +63,11 @@ namespace MantidQt
       Q_OBJECT
     public:
       InputFunctionNameDialog(QWidget *parent,const QString& category);
-      void getFunctionName(QString& category,QString& name);
+      void getFunctionName(QString& category,QString& name,QString& comment);
     private:
       QComboBox* m_category;
       QLineEdit* m_name;
+      QTextEdit* m_comment;
     };
 
   }
