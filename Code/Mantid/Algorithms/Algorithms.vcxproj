@@ -87,6 +87,7 @@
   <ItemGroup>
     <ClCompile Include="src\AbsorptionCorrection.cpp" />
     <ClCompile Include="src\AddSampleLog.cpp" />
+    <ClCompile Include="src\AlignDetectors.cpp" />
     <ClCompile Include="src\AnyShapeAbsorption.cpp" />
     <ClCompile Include="src\ApplyTransmissionCorrection.cpp" />
     <ClCompile Include="src\BinaryOperation.cpp" />
@@ -182,6 +183,7 @@
   <ItemGroup>
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\AddSampleLog.h" />
+    <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h" />
     <ClInclude Include="inc\mantidalgorithms\applytransmissioncorrection.h" />
     <ClInclude Include="inc\mantidalgorithms\calculateefficiency.h" />
     <ClInclude Include="inc\mantidalgorithms\calculatetransmissionbeamspreader.h" />

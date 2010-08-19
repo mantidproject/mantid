@@ -83,7 +83,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\AlignDetectors.cpp" />
     <ClCompile Include="src\CreateSampleShape.cpp" />
     <ClCompile Include="src\FindDetectorsInShape.cpp" />
     <ClCompile Include="src\GetMaskedDetectors.cpp" />
@@ -139,7 +138,6 @@
     <ClCompile Include="src\UpdateInstrumentFromRaw.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h" />
     <ClInclude Include="inc\mantiddatahandling\getmaskeddetectors.h" />
     <ClInclude Include="inc\mantiddatahandling\isisdataarchive.h" />
     <ClInclude Include="inc\mantiddatahandling\load.h" />

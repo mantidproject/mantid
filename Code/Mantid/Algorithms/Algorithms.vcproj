@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\AlignDetectors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\AnyShapeAbsorption.cpp"
 				>
 			</File>
@@ -355,6 +359,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GhostCorrection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GroupWorkspaces.cpp"
 				>
 			</File>
@@ -396,6 +404,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Minus.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\MultipleScatteringAbsorption.cpp"
 				>
 			</File>
 			<File
@@ -527,6 +539,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Sort.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\StripPeaks.cpp"
 				>
 			</File>
@@ -570,6 +586,10 @@
 			</File>
 			<File
 				RelativePath=".\test\AddSampleLogTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\AlignDetectors.h"
 				>
 			</File>
 			<File
@@ -853,6 +873,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\GhostCorrection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\GroupWorkspaces.h"
 				>
 			</File>
@@ -910,6 +934,10 @@
 			</File>
 			<File
 				RelativePath=".\test\MinusTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\MultipleScatteringAbsorption.h"
 				>
 			</File>
 			<File
@@ -1114,6 +1142,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SolidAngleTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Sort.h"
 				>
 			</File>
 			<File
