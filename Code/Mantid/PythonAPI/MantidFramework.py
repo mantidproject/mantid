@@ -9,6 +9,13 @@ import sets
 import __builtin__
 import __main__
 
+#See if numpy is available
+# try:
+    # import numpy.core.multiarray
+    # __have_numpy = True
+# except ImportError:
+    # __have_numpy = False
+
 # --- Import the Mantid API ---
 if os.name == 'nt':
     from MantidPythonAPI import *
@@ -38,6 +45,9 @@ else:
     from libMantidPythonAPI import *
     sys.setdlopenflags(saved_dlopenflags)
 # --- End of library load ---
+
+# Inform module of numpy availablilty
+#__use_numpy_bindings(__have_numpy)
 
 #-------------------------------------------------------------------------------
 def makeString(value):
@@ -411,16 +421,16 @@ class MantidPyFramework(FrameworkManager):
         """
         if self.__is_initialized == True:
             return
-            
-        self._pyalg_loader.load_modules(refresh=False)
-        self.createPythonSimpleAPI(GUI)
-        self._importSimpleAPIToGlobal()
         
-        # Update search path
+        # Update search path on posix machines where mantidsimple.py goes to the user directory
         if os.name == 'posix':
             outputdir = os.path.expanduser('~/.mantid')
             if not outputdir in sys.path:
                 sys.path.append(outputdir)
+        
+        self._pyalg_loader.load_modules(refresh=False)
+        self.createPythonSimpleAPI(GUI)
+        self._importSimpleAPIToGlobal()     
 
         # Required directories (config service has changed them to absolute paths)
         self._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
