@@ -603,6 +603,8 @@ namespace DataObjects
 
   /**
    * Get a list of the TOFs
+   *
+   * @return A list of the current TOFs
    */
   EventList::StorageType * EventList::getTofs() const
   {
@@ -619,7 +621,6 @@ namespace DataObjects
    * NOTE: This function does not check if the list sizes are the same.
    *
    * @param T The vector of doubles to set the tofs to.
-   * @param set_xUnit [Optional] pointer to the Unit of the X data.
    */
   void EventList::setTofs(const StorageType &T)
   {
