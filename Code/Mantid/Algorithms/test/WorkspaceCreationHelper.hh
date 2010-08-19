@@ -190,6 +190,7 @@ public:
       const int numHists = ws->getNumberHistograms();
       for (int i = 0; i < numHists; ++i)
       {
+        std::cout << "Histogram " << i << " = ";
         for (int j = 0; j < ws->blocksize(); ++j)
         {  
           std::cout <<ws->readY(i)[j]<<" ";
@@ -207,6 +208,7 @@ public:
       const int numHists = ws->getNumberHistograms();
       for (int i = 0; i < numHists; ++i)
       {
+        std::cout << "Histogram " << i << " = ";
         for (int j = 0; j < ws->blocksize(); ++j)
         {  
           std::cout <<ws->readX(i)[j]<<" ";
@@ -220,6 +222,7 @@ public:
       const int numHists = ws->getNumberHistograms();
       for (int i = 0; i < numHists; ++i)
       {
+        std::cout << "Histogram " << i << " = ";
         for (int j = 0; j < ws->blocksize(); ++j)
         {  
           std::cout <<ws->readE(i)[j]<<" ";

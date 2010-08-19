@@ -48,7 +48,8 @@ using Kernel::Exception::NotImplementedError;
    */
   bool EventWorkspace::threadSafe() const
   {
-    //Return false if ANY event list is not sorted.
+    //Return false if ANY event list is not sorted. You can't have 2 threads trying to sort the
+    //  same event list simultaneously.
     for (int i=0; i<data.size(); i++)
       if (!data[i]->isSortedByTof())
         return false;
@@ -431,7 +432,7 @@ using Kernel::Exception::NotImplementedError;
       this->data[index]->generateErrorsHistogram( Y, data->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * oldData = m_bufferedDataY.insert(data);
+      MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);
 
       //And clear up the memory of the old one, if it is dropping out.
       if (oldData)

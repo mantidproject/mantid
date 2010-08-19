@@ -71,26 +71,28 @@ public:
     {
       for (int i=0; i<NUMEVENTS; i++)
       {
+        //Two events per bin
+        retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
         retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
       }
     }
     retVal->doneLoadingData();
 
     if (setX)
-      {
-        //Create the x-axis for histogramming.
-        Kernel::cow_ptr<MantidVec> axis;
-        MantidVec& xRef = axis.access();
-        xRef.resize(NUMBINS);
-        for (int i = 0; i < NUMBINS; ++i)
-          xRef[i] = i*BIN_DELTA;
+    {
+      //Create the x-axis for histogramming.
+      Kernel::cow_ptr<MantidVec> axis;
+      MantidVec& xRef = axis.access();
+      xRef.resize(NUMBINS);
+      for (int i = 0; i < NUMBINS; ++i)
+        xRef[i] = i*BIN_DELTA;
 
-        //Try setting a single axis, make sure it doesn't throw
-        retVal->setX(2, axis);
+      //Try setting a single axis, make sure it doesn't throw
+      retVal->setX(2, axis);
 
-        //Set all the histograms at once.
-        retVal->setAllX(axis);
-      }
+      //Set all the histograms at once.
+      retVal->setAllX(axis);
+    }
 
     return retVal;
   }
@@ -211,10 +213,14 @@ public:
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
     TS_ASSERT_EQUALS( (*el.dataY())[0], 0);
-    TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
-    TS_ASSERT_EQUALS( (*el.dataY())[2], 1);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS], 1);
+    TS_ASSERT_EQUALS( (*el.dataY())[1], 2);
+    TS_ASSERT_EQUALS( (*el.dataY())[2], 2);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS], 2);
     TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS+1], 0);
+    //And some errors
+    TS_ASSERT_DELTA( (*el.dataE())[0], 0, 1e-6);
+    TS_ASSERT_DELTA( (*el.dataE())[1], sqrt(2), 1e-6);
+    TS_ASSERT_DELTA( (*el.dataE())[2], sqrt(2), 1e-6);
   }
 
   //------------------------------------------------------------------------------
@@ -269,15 +275,15 @@ public:
     TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS/2-1);
     TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS/2-1);
 
-    //Now there are 2 events in each bin
-    TS_ASSERT_EQUALS( (*el.dataY())[0], 2);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2-1], 2);
+    //Now there are 4 events in each bin
+    TS_ASSERT_EQUALS( (*el.dataY())[0], 4);
+    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2-1], 4);
     TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2], 0);
 
-    //But pixel 1 is the same
+    //But pixel 1 is the same, 2 events in the bin
     const EventList el1(ew->getEventListAtWorkspaceIndex(1));
     TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
-    TS_ASSERT_EQUALS( (*el1.dataY())[1], 1);
+    TS_ASSERT_EQUALS( (*el1.dataY())[1], 2);
   }
 
   //------------------------------------------------------------------------------
@@ -326,7 +332,7 @@ public:
   void test_histogram_cache()
   {
     //Try caching and most-recently-used MRU list.
-    EventWorkspace_const_sptr ew2 = ew;
+    EventWorkspace_const_sptr ew2 = boost::dynamic_pointer_cast<const EventWorkspace>(ew);
     //Are the returned arrays the right size?
     MantidVec data1 = ew2->dataY(1);
     TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
@@ -340,6 +346,11 @@ public:
     //Now test the caching. The first 100 will load in memory
     for (int i=0; i<100;i++)
       data1 = ew2->dataY(i);
+
+    //Check the bins contain 2
+    data1 = ew2->dataY(0);
+    TS_ASSERT_DELTA( ew2->dataY(0)[1], 2.0, 1e-6);
+    TS_ASSERT_DELTA( data1[1], 2.0, 1e-6);
 
     int mem1, mem2;
     mem1 = memory_usage();
@@ -408,6 +419,14 @@ public:
     //Now test the caching. The first 100 will load in memory
     for (int i=0; i<100;i++)
       data1 = ew2->dataE(i);
+
+    //Check the bins contain 2
+    data1 = ew2->dataE(0);
+    TS_ASSERT_DELTA( ew2->dataE(0)[1], sqrt(2.0), 1e-6);
+    TS_ASSERT_DELTA( data1[1], sqrt(2.0), 1e-6);
+    //But the Y is still 2.0
+    TS_ASSERT_DELTA( ew2->dataY(0)[1], 2.0, 1e-6);
+
 
     int mem1, mem2;
     mem1 = memory_usage();

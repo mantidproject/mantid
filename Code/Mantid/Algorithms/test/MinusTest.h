@@ -6,6 +6,7 @@
 
 #include "WorkspaceCreationHelper.hh"
 #include "MantidAlgorithms/Minus.h"
+#include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -27,12 +28,9 @@ public:
     Minus alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-    alg.setPropertyValue("LHSWorkspace","test_in21");
-    alg.setPropertyValue("RHSWorkspace","test_in22");    
-    alg.setPropertyValue("OutputWorkspace","test_out2");
-    );
-
+    TS_ASSERT_THROWS_NOTHING(    alg.setPropertyValue("LHSWorkspace","test_in21") );
+    TS_ASSERT_THROWS_NOTHING(    alg.setPropertyValue("RHSWorkspace","test_in22") );
+    TS_ASSERT_THROWS_NOTHING(    alg.setPropertyValue("OutputWorkspace","test_out2") );
   }
 
   void testExec1D1D()
@@ -48,7 +46,7 @@ public:
 
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace","test_in11");
-    alg.setPropertyValue("RHSWorkspace","test_in12");    
+    alg.setPropertyValue("RHSWorkspace","test_in12");
     alg.setPropertyValue("OutputWorkspace","test_out1");
     alg.execute();
 
@@ -76,7 +74,7 @@ public:
 
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace","test_in11");
-    alg.setPropertyValue("RHSWorkspace","test_in12");    
+    alg.setPropertyValue("RHSWorkspace","test_in12");
     alg.setPropertyValue("OutputWorkspace","test_out1");
     alg.execute();
 
@@ -105,7 +103,7 @@ public:
     AnalysisDataService::Instance().add("test_in22", work_in2);
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace","test_in21");
-    alg.setPropertyValue("RHSWorkspace","test_in22");    
+    alg.setPropertyValue("RHSWorkspace","test_in22");
     alg.setPropertyValue("OutputWorkspace","test_out2");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -128,7 +126,6 @@ public:
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
 
     Minus alg;
-
     std::string wsName1 = "test_in1D2D21";
     std::string wsName2 = "test_in1D2D22";
     std::string wsNameOut = "test_out1D2D";
@@ -136,7 +133,7 @@ public:
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);    
+    alg.setPropertyValue("RHSWorkspace",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -148,7 +145,7 @@ public:
     AnalysisDataService::Instance().remove(wsName1);
     AnalysisDataService::Instance().remove(wsName2);
     AnalysisDataService::Instance().remove(wsNameOut);
-   
+
   }
 
   void testExec1DRand2D()
@@ -167,7 +164,7 @@ public:
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);    
+    alg.setPropertyValue("RHSWorkspace",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -180,7 +177,7 @@ public:
     AnalysisDataService::Instance().remove(wsName2);
     AnalysisDataService::Instance().remove(wsNameOut);
   }
-  
+
   void testExec2D1DVertical()
   {
     int sizex = 10,sizey=20;
@@ -208,7 +205,7 @@ public:
 
     AnalysisDataService::Instance().remove(wsName1);
     AnalysisDataService::Instance().remove(wsName2);
-    AnalysisDataService::Instance().remove(wsNameOut);    
+    AnalysisDataService::Instance().remove(wsNameOut);
   }
 
   void testExec2D2DbyOperatorOverload()
@@ -217,7 +214,7 @@ public:
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-    
+
     MatrixWorkspace_sptr work_out1 = work_in1 - work_in2;
 
     checkData(work_in1, work_in2, work_out1);
@@ -237,7 +234,7 @@ public:
 
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace","test_in11");
-    alg.setPropertyValue("RHSWorkspace","test_in12");    
+    alg.setPropertyValue("RHSWorkspace","test_in12");
     alg.setPropertyValue("OutputWorkspace","test_out1");
     alg.execute();
 
@@ -250,8 +247,8 @@ public:
     AnalysisDataService::Instance().remove("test_in11");
     AnalysisDataService::Instance().remove("test_in12");
 
-  } 
-  
+  }
+
   void testExec2DSingleValue()
   {
     int sizex = 5,sizey=300;
@@ -268,7 +265,7 @@ public:
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace",wsName1);
-    alg.setPropertyValue("RHSWorkspace",wsName2);    
+    alg.setPropertyValue("RHSWorkspace",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -280,7 +277,7 @@ public:
     AnalysisDataService::Instance().remove(wsName1);
     AnalysisDataService::Instance().remove(wsName2);
     AnalysisDataService::Instance().remove(wsNameOut);
-   
+
   }
 
   void testCompoundAssignment()
@@ -295,7 +292,75 @@ public:
     TS_ASSERT_EQUALS(a->readY(0)[0],-4);
     TS_ASSERT_EQUALS(a,b);
   }
-  
+
+
+  void testEventWorkspace()
+  {
+    int numBins = 100;
+    int numPixels = 500;
+    //Workspace with 2 events per bin; 100 bins from 0 to 100
+    EventWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+
+    //2D workspace with 1.0 in each bin.
+    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(numPixels, numBins, 0.0, 1.0);
+    for (int pix=0; pix < numPixels; pix++)
+    {
+      work_in2->dataY(pix).assign(numBins, 0.5);
+      work_in2->dataE(pix).assign(numBins, sqrt(0.5));
+    }
+
+    //Put the stuff in the data service
+    std::string wsName1 = "test_inA";
+    std::string wsName2 = "test_inB";
+    std::string wsNameOut = "test_out";
+    AnalysisDataService::Instance().add(wsName1, work_in1);
+    AnalysisDataService::Instance().add(wsName2, work_in2);
+
+    //Rebin the input event workspace
+    SimpleRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", wsName1);
+    rebin.setPropertyValue("OutputWorkspace", wsName1);
+    rebin.setPropertyValue("Params", "0.0,1.0,100.0");
+    rebin.execute();
+    TS_ASSERT( rebin.isExecuted() );
+
+    //Do the minus
+    Minus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",wsName1);
+    alg.setPropertyValue("RHSWorkspace",wsName2);
+    alg.setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    //The output!
+    MatrixWorkspace_const_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    MatrixWorkspace_const_sptr work_in1_const;
+    TS_ASSERT_THROWS_NOTHING(work_in1_const = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName1)));
+
+    //Compare
+    for (int pix=0; pix < numPixels; pix+=499)
+      for (int i=0; i < numBins; i++)
+      {
+        //Output should be 1.5 everywhere
+        TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 1.50, 1e-5);
+        //And the error is the sum of the square of the incoming errors
+        TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(2.50), 1e-5);
+        //Incoming event workspace should still have 2.0 for values
+        TS_ASSERT_DELTA(  work_in1_const->dataY(pix)[i], 2.00, 1e-5);
+        //And error
+        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2), 1e-5);
+      }
+
+    AnalysisDataService::Instance().remove(wsName1);
+    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsNameOut);
+
+  }
+
+
 private:
   void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1)
   {
