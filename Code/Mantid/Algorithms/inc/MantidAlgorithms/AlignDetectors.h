@@ -1,9 +1,10 @@
-#ifndef MANTID_DATAHANDLING_ALIGNDETECTORS_H_
-#define MANTID_DATAHANDLING_ALIGNDETECTORS_H_
+#ifndef MANTID_ALGORITHMS_ALIGNDETECTORS_H_
+#define MANTID_ALGORITHMS_ALIGNDETECTORS_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -14,11 +15,11 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
 
-namespace DataHandling
+namespace Algorithms
 {
 
 //Forward declaration
-std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+std::map<int, double> * DLLExport calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   const std::map<int,double> &offsets);
 
 
@@ -87,4 +88,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_ALIGNDETECTORS_H_ */
+#endif /* MANTID_ALGORITHMS_ALIGNDETECTORS_H_ */

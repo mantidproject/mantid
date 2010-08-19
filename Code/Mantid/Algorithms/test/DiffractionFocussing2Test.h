@@ -6,7 +6,7 @@
 #include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidDataHandling/LoadRaw.h"
-#include "MantidDataHandling/AlignDetectors.h"
+#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -56,7 +56,7 @@ public:
     TS_ASSERT( loader.isExecuted() );
     
     // Have to align because diffraction focussing wants d-spacing
-    Mantid::DataHandling::AlignDetectors align;
+    Mantid::Algorithms::AlignDetectors align;
     align.initialize();
     align.setPropertyValue("InputWorkspace",outputSpace);
     align.setPropertyValue("OutputWorkspace",outputSpace);
@@ -232,7 +232,7 @@ public:
     TS_ASSERT_EQUALS( inputW->getNumberHistograms(), numpixels_with_events);
 
     // Have to align because diffraction focussing wants d-spacing
-    Mantid::DataHandling::AlignDetectors align;
+    Mantid::Algorithms::AlignDetectors align;
     align.initialize();
     align.setPropertyValue("InputWorkspace", outputws);
     align.setPropertyValue("OutputWorkspace", outputws);

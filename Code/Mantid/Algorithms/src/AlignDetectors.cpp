@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/AlignDetectors.h"
+#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -14,7 +14,7 @@
 
 namespace Mantid
 {
-namespace DataHandling
+namespace Algorithms
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(AlignDetectors)
@@ -191,7 +191,9 @@ AlignDetectors::AlignDetectors()
 
 /// Destructor
 AlignDetectors::~AlignDetectors()
-{}
+{
+  delete this->tofToDmap;
+}
 
 //-----------------------------------------------------------------------
 void AlignDetectors::init()

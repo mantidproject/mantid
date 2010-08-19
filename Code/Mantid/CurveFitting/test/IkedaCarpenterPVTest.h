@@ -21,7 +21,7 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidDataHandling/AlignDetectors.h"
+#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/ConfigService.h"

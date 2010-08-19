@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/AlignDetectors.h"
+#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/SpectraDetectorMap.h"
