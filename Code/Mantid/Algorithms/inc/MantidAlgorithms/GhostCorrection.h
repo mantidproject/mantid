@@ -46,9 +46,9 @@ struct GhostDestinationValue
 
 /** Map of the pixels that are CAUSING a ghost in a given (grouped) pixel.
  * KEY = the workspace Index in the input workspace that is causing the ghost.
- * VALUE = the TOTAL ghost weight (if more than one pixel's ghost is grouped here, they are to be added together)
+ * VALUE = corresponding input detector ID (saved to speed up a bit)
  */
-typedef std::map<int, double> GhostSourcesMap;
+typedef std::map<int, int> GhostSourcesMap;
 
 
 /** Takes an EventWorkspace and performs Ghost correction for ghost peaks in
@@ -117,9 +117,9 @@ class DLLExport GhostCorrection : public API::Algorithm
 {
 public:
   /// Default constructor
-  GhostCorrection() : API::Algorithm() {};
+  GhostCorrection();
   /// Destructor
-  virtual ~GhostCorrection() {};
+  virtual ~GhostCorrection();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "GhostCorrection";}
   /// Algorithm's version for identification overriding a virtual method
@@ -131,10 +131,11 @@ protected:
   // Overridden Algorithm methods
   void init();
   virtual void exec();
-  void execEvents();
-  void execSerial();
+  void execWrong();
+//  void execSerial();
   void loadGhostMap(std::string ghostMapFile);
   void readGroupingFile(const std::string& groupingFileName);
+  void initializeTofToD();
 
   // --- For grouping ---
 // This map does not need to be ordered, just a lookup for udet
@@ -145,16 +146,28 @@ protected:
   typedef std::tr1::unordered_map<int,int> udet2groupmap;
 #endif
   /// Map from udet (detector ID) to group
-  udet2groupmap udet2group;
+  udet2groupmap detId_to_group;
+
+  /// Map from detector ID to the offset (used in alignment)
+  std::map<int, double> detId_to_offset;
+
+  /// Pointer to the raw ghost map info
+  std::vector<GhostDestinationValue> * rawGhostMap;
 
   /// Number of groups (max group # + 1)
   int nGroups;
 
-  /// List of lists of ghost correction amounts. The group # is the index in the vector.
+  /// List of lists of ghost correction sources.
   std::vector< GhostSourcesMap * > groupedGhostMaps;
 
-  //Workspaces we are working with.
+  /// Workspaces we are working with.
   Mantid::API::MatrixWorkspace_const_sptr inputW;
+
+  /// Mapping between indices
+  Mantid::API::IndexToIndexMap * input_detectorIDToWorkspaceIndexMap;
+
+  /// Map where KEY = pixel ID; value = tof to D conversion factor (tof * factor = d).
+  std::map<int, double> * tof_to_d;
 };
 
 } // namespace Algorithms

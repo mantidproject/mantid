@@ -9,7 +9,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
-#include "MantidDataHandling/AlignDetectors.h"
+#include "MantidAlgorithms/AlignDetectors.h"
 #include "WorkspaceCreationHelper.hh"
 
 using namespace Mantid;
@@ -196,19 +196,8 @@ public:
     eventLoader->setPropertyValue("OutputWorkspace", wsName);
     eventLoader->setMaxEventsToLoad(1000000);
     TS_ASSERT( eventLoader->execute() );
-    std::cout << "Event loading complete.\n";
 
     std::string groupingFile("../../../../Test/Data/sns_event_prenexus/pg3_mantid_det.cal");
-
-    //----- Align them using fake calib --------
-    Mantid::DataHandling::AlignDetectors align;
-    align.initialize();
-    align.setPropertyValue("InputWorkspace", wsName);
-    align.setPropertyValue("OutputWorkspace", wsName);
-    align.setPropertyValue("CalibrationFile", groupingFile);
-    TS_ASSERT_THROWS_NOTHING( align.execute() );
-    TS_ASSERT( align.isExecuted() );
-    std::cout << "AlignDetectors complete.\n";
 
     //----- Now do ghost correction ------
     GhostCorrection gc;
