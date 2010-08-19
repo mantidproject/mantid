@@ -52,6 +52,17 @@ namespace Kernel
         logBoundaries.push_back( log(max) );
         //How many bins is that?
         numBins = ceil (  (log(max) - log(min)) / log_step );
+
+        //Check that the last bin is at least .25 x the previous step
+        //This is because the VectorHelper removes that final bin. Annoying!
+        double nextToLastValue = min * pow( 1.0 + fabs(step), numBins-1);
+        double nextToNextToLastValue = min * pow( 1.0 + fabs(step), numBins-2);
+        double lastBinSize = max - nextToLastValue;
+        double nextToLastBinSize = nextToLastValue - nextToNextToLastValue;
+        if (lastBinSize < nextToLastBinSize*0.25)
+          numBins--;
+        if (numBins < 1) numBins = 1;
+
       }
       else
       {
@@ -61,6 +72,13 @@ namespace Kernel
         logBoundaries.push_back( 0 );
         //# of linear bins
         numBins = ceil( (max-min) / step );
+
+        //Check that the last bin is at least .25 x the previous step
+        //This is because the VectorHelper removes that final bin. Annoying!
+        double lastBinSize = max - ((numBins-1)*step + min);
+        if (lastBinSize < step*0.25)
+          numBins--;
+        if (numBins < 1) numBins = 1;
       }
 
       //Find the end bin index
@@ -125,6 +143,8 @@ namespace Kernel
       //Add bin index offset if not in the first region
       if (i > 0)
         index += endBinIndex[i-1];
+      //In the event that a final bin was skipped, cap to the max
+      if (index >= endBinIndex[i]) index = endBinIndex[i]-1;
       return index;
     }
     else
@@ -143,6 +163,8 @@ namespace Kernel
       //Add bin index offset if not in the first region
       if (i > 0)
         index += endBinIndex[i-1];
+      //In the event that a final bin was skipped, cap to the max
+      if (index >= endBinIndex[i]) index = endBinIndex[i]-1;
       return index;
     }
 

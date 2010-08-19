@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/BinFinder.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/VectorHelper.h"
 #include <sys/stat.h>
 
 using namespace Mantid;
@@ -71,7 +72,7 @@ public:
     std::vector<double> bp;
     bp.push_back(-10.0);
     bp.push_back(10.0);
-    bp.push_back(100.0);
+    bp.push_back(102.0);
     bp.push_back(100.0); //now step in 100
     bp.push_back(1000.0);
     bp.push_back(1000.0); //now step in 100
@@ -84,6 +85,7 @@ public:
     TS_ASSERT_EQUALS( bf.bin(5), 1);
     TS_ASSERT_EQUALS( bf.bin(15), 2);
     TS_ASSERT_EQUALS( bf.bin(95), 10);
+    TS_ASSERT_EQUALS( bf.bin(101), 10); //Last tiny bin of size 2 is folded into the one before
     TS_ASSERT_EQUALS( bf.bin(105), 11);
     TS_ASSERT_EQUALS( bf.bin(195), 11);
     TS_ASSERT_EQUALS( bf.bin(205), 12);
@@ -107,12 +109,32 @@ public:
     TS_ASSERT_EQUALS( bf.bin(2001), -1);
     TS_ASSERT_EQUALS( bf.bin(2.1), 0);
     TS_ASSERT_EQUALS( bf.bin(512.1), 8);
-    TS_ASSERT_EQUALS( bf.bin(1025), 9);
-    TS_ASSERT_EQUALS( bf.bin(1101), 10);
-    TS_ASSERT_EQUALS( bf.bin(1201), 11);
-    TS_ASSERT_EQUALS( bf.lastBinIndex(), 19);
+    TS_ASSERT_EQUALS( bf.bin(1025), 8); //The last log bin is too small, folded into bin 8
+    TS_ASSERT_EQUALS( bf.bin(1101), 9);
+    TS_ASSERT_EQUALS( bf.bin(1201), 10);
+    TS_ASSERT_EQUALS( bf.lastBinIndex(), 18);
   }
 
+  /// Compare the # of bins that the BinFinder computes to the # found by the vector helper.
+  void compareBin(double x1, double step, double x2)
+  {
+    std::vector<double> bp;
+    bp.push_back(x1);
+    bp.push_back(step);
+    bp.push_back(x2);
+    BinFinder bf(bp);
+    std::vector<double> X;
+    VectorHelper::createAxisFromRebinParams(bp, X);
+    TS_ASSERT_EQUALS( bf.lastBinIndex()+1, X.size());
+  }
+
+  void testNumberOfBinMatchesVectorHelper()
+  {
+    compareBin(1., 1, 2.1);
+    compareBin(-2., 100, 2);
+    compareBin(1.0, -1, 16.);
+    compareBin(1.0, -1, 16.1);
+  }
 
 };
 
