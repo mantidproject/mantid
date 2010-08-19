@@ -17,6 +17,11 @@ using DataObjects::EventWorkspace_const_sptr;
 namespace DataHandling
 {
 
+//Forward declaration
+std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+                                  const std::map<int,double> &offsets);
+
+
 /** Performs a unit change from TOF to dSpacing, correcting the X values to account for small
     errors in the detector positions.
 
@@ -73,7 +78,11 @@ private:
   bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets);
 
   EventWorkspace_const_sptr eventW;
+
+  std::map<int, double> * tofToDmap;
 };
+
+
 
 } // namespace DataHandling
 } // namespace Mantid

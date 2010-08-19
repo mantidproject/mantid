@@ -28,6 +28,7 @@ using DataObjects::EventWorkspace_const_sptr;
 
 const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
+//-----------------------------------------------------------------------
 /** Calculate the conversion factor for a single pixel. The result still needs
  * to be multiplied by CONSTANT.
  *
@@ -53,9 +54,11 @@ double calcConversion(const double l1,
   double sinTheta=sqrt(0.5-halfcosTheta);
   const double numerator = (1.0+offset);
   sinTheta*= (l1+l2);
-  return numerator / sinTheta;
+  return (numerator * CONSTANT) / sinTheta;
 }
 
+
+//-----------------------------------------------------------------------
 /**
  * Calculate the conversion factor (tof -> d-spacing)
  * for a LIST of detectors assigned to a single spectrum.
@@ -84,9 +87,104 @@ double calcConversion(const double l1,
     factor += calcConversion(l1, beamline, beamline_norm, samplePos,
                              instrument->getDetector(*iter), offset);
   }
-  return factor * CONSTANT / static_cast<double>(detectors.size());
+  return factor / static_cast<double>(detectors.size());
 }
 
+
+//-----------------------------------------------------------------------
+/**
+ * Make a map of the conversion factors between tof and D-spacing
+ * for all pixel IDs in a workspace.
+ * @params: inputWS: the workspace containing the instrument geometry
+ *    of interest.
+ * @params: offsets: map between pixelID and offset (from the calibration file)
+ */
+std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+                                  const std::map<int,double> &offsets)
+{
+  std::map<int, double> * myMap = new std::map<int, double>();
+
+  // Get a pointer to the instrument contained in the workspace
+  IInstrument_const_sptr instrument = inputWS->getInstrument();
+
+  // Get some positions
+  const Geometry::V3D sourcePos = instrument->getSource()->getPos();
+  const Geometry::V3D samplePos = instrument->getSample()->getPos();
+  const Geometry::V3D beamline = samplePos-sourcePos;
+  const double beamline_norm=2.0*beamline.norm();
+
+  // Get the distance between the source and the sample (assume in metres)
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  double l1;
+  try
+  {
+    l1 = instrument->getSource()->getDistance(*sample);
+  }
+  catch (Exception::NotFoundError e)
+  {
+    delete myMap;
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
+  }
+
+  //To get all the detector ID's
+  std::map<int, Geometry::IDetector_sptr> allDetectors = instrument->getDetectors();
+
+  //Now go through all
+  std::map<int, Geometry::IDetector_sptr>::iterator it;
+  for (it = allDetectors.begin(); it != allDetectors.end(); it++)
+  {
+    int detectorID = it->first;
+    Geometry::IDetector_sptr det = it->second;
+
+    //Find the offset, if any
+    double offset;
+    std::map<int,double>::const_iterator off_iter = offsets.find(detectorID);
+    if( off_iter != offsets.end() )
+      offset = off_iter->second;
+    else
+      offset = 0.;
+
+    //Compute the factor
+    double factor = calcConversion(l1, beamline, beamline_norm, samplePos, det, offset);
+
+    //Save in map
+    (*myMap)[detectorID] = factor;
+  }
+
+  //Give back the map.
+  return myMap;
+}
+
+
+//-----------------------------------------------------------------------
+/** Compute a conversion factor for a LIST of detectors.
+ * Averages out the conversion factors if there are several.
+ */
+double calcConversionFromMap(std::map<int, double> * tofToDmap, const std::vector<int> &detectors)
+{
+  double factor = 0.;
+  int numDetectors = 0;
+  for (std::vector<int>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
+  {
+    int detectorID = *iter;
+    std::map<int, double>::iterator it;
+    it = tofToDmap->find(detectorID);
+    if (it != tofToDmap->end())
+    {
+      factor += it->second; //The factor for that ID
+      numDetectors++;
+    }
+  }
+  if (numDetectors > 0)
+    return factor / static_cast<double>(numDetectors);
+  else
+    return 0;
+}
+
+
+
+//========================================================================
+//========================================================================
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors()
 {}
@@ -125,23 +223,26 @@ void AlignDetectors::exec()
   // Get the input workspace
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
+  // Read in the calibration data
+  const std::string calFileName = getProperty("CalibrationFile");
+  std::map<int,double> offsets;
+  progress(0.0,"Reading calibration file");
+  if ( ! this->readCalFile(calFileName, offsets) )
+    throw Exception::FileError("Problem reading calibration file", calFileName);
+
+  // Ref. to the SpectraDetectorMap
+  const SpectraDetectorMap& specMap = inputWS->spectraMap();
+  const int numberOfSpectra = inputWS->getNumberHistograms();
+
+  // generate map of the tof->d conversion factors
+  this->tofToDmap = calcTofToD_ConversionMap(inputWS, offsets);
+
   //Check if its an event workspace
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != NULL)
   {
     this->execEvent();
     return;
-  }
-
-  // Read in the calibration data
-  const std::string calFileName = getProperty("CalibrationFile");
-  std::map<int,double> offsets;
-
-  progress(0.0,"Reading calibration file");
-
-  if ( ! this->readCalFile(calFileName, offsets) )
-  {
-    throw Exception::FileError("Problem reading calibration file", calFileName);
   }
 
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -151,36 +252,9 @@ void AlignDetectors::exec()
     outputWS = WorkspaceFactory::Instance().create(inputWS);
     setProperty("OutputWorkspace",outputWS);
   }
+
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
-
-  // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = inputWS->getInstrument();
-  // And one to the SpectraDetectorMap
-  const SpectraDetectorMap& specMap = inputWS->spectraMap();
-
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-  double l1;
-  try
-  {
-    l1 = instrument->getSource()->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
-  }
-  catch (Exception::NotFoundError e)
-  {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
-  }
-
-  // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = inputWS->getNumberHistograms();
-
-  // Get some positions
-  const Geometry::V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
-  const Geometry::V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
-  const Geometry::V3D beamline = samplePos-sourcePos;
-  const double beamline_norm=2.0*beamline.norm();
 
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
@@ -193,8 +267,7 @@ void AlignDetectors::exec()
     try {
       // Get the spectrum number for this histogram
       const int spec = inputWS->getAxis(1)->spectraNo(i);
-      double factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
-                                     specMap.getDetectors(spec), offsets);
+      double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
 
       // Get references to the x data
       MantidVec& xOut = outputWS->dataX(i);
@@ -255,49 +328,12 @@ void AlignDetectors::execEvent()
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
 
-  // Read in the calibration data
-  const std::string calFileName = this->getProperty("CalibrationFile");
-  std::map<int,double> offsets;
-  progress(0.0,"Reading calibration file");
-
-  if ( ! this->readCalFile(calFileName, offsets) )
-  {
-    throw Exception::FileError("Problem reading calibration file", calFileName);
-  }
-
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
-  // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = inputWS->getInstrument();
-  // And one to the SpectraDetectorMap
+  // Ref. to the SpectraDetectorMap
   const SpectraDetectorMap& specMap = inputWS->spectraMap();
-
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-  double l1;
-  try
-  {
-    l1 = instrument->getSource()->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
-  }
-  catch (Exception::NotFoundError e)
-  {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
-  }
-
-  // Get some positions
-  const Geometry::V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
-  const Geometry::V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
-  const Geometry::V3D beamline = samplePos-sourcePos;
-  const double beamline_norm=2.0*beamline.norm();
-
   const int numberOfSpectra = inputWS->getNumberHistograms();
-
-  // generate map of the tof->d conversion factors
-  int spec;
-  double factor;
 
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
@@ -307,9 +343,8 @@ void AlignDetectors::execEvent()
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the spectrum number for this histogram
-    spec = inputWS->getAxis(1)->spectraNo(i);
-    factor = calcConversion(l1, beamline, beamline_norm, samplePos, instrument,
-                                   specMap.getDetectors(spec), offsets);
+    int spec = inputWS->getAxis(1)->spectraNo(i);
+    double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
 
     //Perform the multiplication on all events
     outputWS->getEventListAtWorkspaceIndex(i).convertTof(factor);
