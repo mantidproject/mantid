@@ -35,6 +35,7 @@ public:
     TS_ASSERT_EQUALS( bf.bin(1.999), 0);
     TS_ASSERT_EQUALS( bf.bin(2.0), 1);
     TS_ASSERT_EQUALS( bf.bin(99), 49);
+    TS_ASSERT_EQUALS( bf.lastBinIndex(), 50);
   }
 
   void testLogBins()
@@ -61,6 +62,7 @@ public:
     TS_ASSERT_EQUALS( bf.bin(256.1), 7);
     TS_ASSERT_EQUALS( bf.bin(512.1), 8);
     TS_ASSERT_EQUALS( bf.bin(1023.9), 8);
+    TS_ASSERT_EQUALS( bf.lastBinIndex(), 9);
   }
 
   void testCompoundBins()
@@ -88,6 +90,7 @@ public:
     TS_ASSERT_EQUALS( bf.bin(995), 19);
     TS_ASSERT_EQUALS( bf.bin(1005), 20);
     TS_ASSERT_EQUALS( bf.bin(2005), 21);
+    TS_ASSERT_EQUALS( bf.lastBinIndex(), 29);
   }
 
   void testCompoundBinsWithLog()
@@ -107,6 +110,7 @@ public:
     TS_ASSERT_EQUALS( bf.bin(1025), 9);
     TS_ASSERT_EQUALS( bf.bin(1101), 10);
     TS_ASSERT_EQUALS( bf.bin(1201), 11);
+    TS_ASSERT_EQUALS( bf.lastBinIndex(), 19);
   }
 
 

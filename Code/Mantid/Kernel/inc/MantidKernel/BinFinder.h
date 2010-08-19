@@ -37,6 +37,8 @@ namespace Kernel
 
     int bin(double value);
 
+    int lastBinIndex();
+
   private:
     /// Boundaries between binning regions
     std::vector<double> boundaries;

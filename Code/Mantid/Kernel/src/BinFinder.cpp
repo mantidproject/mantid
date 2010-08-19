@@ -78,6 +78,18 @@ namespace Kernel
 
   }
 
+
+  /** Returns the last bin boundary index,
+   * which should be == to the size of the X axis.
+   */
+  int BinFinder::lastBinIndex()
+  {
+    if (endBinIndex.size() > 0)
+      return endBinIndex[endBinIndex.size()-1];
+    else
+      return -1;
+  }
+
   /** Find the bin index for a value.
    * @param x: x-value to histogram
    * @return an int corresponding to the bin index to use, or -1 if out of bounds.
