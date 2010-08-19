@@ -351,7 +351,7 @@ public:
         //Incoming event workspace should still have 2.0 for values
         TS_ASSERT_DELTA(  work_in1_const->dataY(pix)[i], 2.00, 1e-5);
         //And error
-        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2), 1e-5);
+        TS_ASSERT_DELTA(  work_in1_const->dataE(pix)[i], sqrt(2.0), 1e-5);
       }
 
     AnalysisDataService::Instance().remove(wsName1);
