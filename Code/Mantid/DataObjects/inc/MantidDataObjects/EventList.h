@@ -10,10 +10,6 @@
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
-
-using Mantid::Kernel::Unit;
 
 namespace Mantid
 {
@@ -141,11 +137,11 @@ public:
 
   void sortFrame() const;
 
-  void setX(const RCtype::ptr_type& X, Unit* set_xUnit = NULL);
+  void setX(const RCtype::ptr_type& X);
 
-  void setX(const RCtype& X, Unit* set_xUnit = NULL);
+  void setX(const RCtype& X);
 
-  void setX(const StorageType& X, Unit* set_xUnit = NULL);
+  void setX(const StorageType& X);
 
   virtual const StorageType& dataX() const;
 
@@ -174,9 +170,6 @@ public:
 private:
   ///List of events.
   mutable std::vector<TofEvent> events;
-
-  /** Pointer to unit of the x-axis of the histogram */
-  Mantid::Kernel::Unit *xUnit;
 
   /// Last sorting order
   mutable EventSortType order;

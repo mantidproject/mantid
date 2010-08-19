@@ -322,35 +322,26 @@ namespace DataObjects
   // --- Setting the Histrogram X axis, without recalculating the histogram -------------------------
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
-   * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void EventList::setX(const RCtype::ptr_type& X, Unit* set_xUnit)
+  void EventList::setX(const RCtype::ptr_type& X)
   {
     this->refX = X;
-    if (!(set_xUnit == NULL))
-      this->xUnit = set_xUnit;
   }
 
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
-   * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void EventList::setX(const RCtype& X, Unit* set_xUnit)
+  void EventList::setX(const RCtype& X)
   {
     this->refX = X;
-    if (!(set_xUnit == NULL))
-      this->xUnit = set_xUnit;
   }
 
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
-   * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void EventList::setX(const StorageType& X, Unit* set_xUnit)
+  void EventList::setX(const StorageType& X)
   {
     this->refX.access()=X;
-    if (!(set_xUnit == NULL))
-      this->xUnit = set_xUnit;
   }
 
 
@@ -529,10 +520,9 @@ namespace DataObjects
   }
 
   /**
-   * Convert the units in the TofEvent's contained to d-spacing.
-   * WARNING: There is no check to see if you did this before! Don't be dumb
-   *          and do it twice!
-   * @param factor: conversion factor (multiply TOF by this to get d-spacing)
+   * Convert the units in the TofEvent's time_of_flight field to
+   *  some other value, by scaling by a multiplier.
+   * @param factor: conversion factor (e.g. multiply TOF by this to get d-spacing)
    */
   void EventList::scaleTof(const double factor)
   {
