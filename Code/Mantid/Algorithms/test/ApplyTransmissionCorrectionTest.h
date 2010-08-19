@@ -7,6 +7,7 @@
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "WorkspaceCreationHelper.hh"
 #include "MantidAlgorithms/SolidAngleCorrection.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
