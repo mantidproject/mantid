@@ -189,6 +189,7 @@ public:
   /**
    * Loads the entire contents of the file into a std::vector.
    * The file is closed once done.
+   * @param data The contents to load into the file
    */
   void loadAllInto(std::vector<T> &data)
   {
@@ -225,7 +226,7 @@ public:
    * @param block_size: how many elements to load in the block. If there are not enough elements,
    *  the vector returned is smaller than block_size
    * @param buffer: array of block_size[] of T; must have been allocated before.
-   * @retrun loaded_size, actually how many elements were loaded.
+   * @return loaded_size, actually how many elements were loaded.
    */
   size_t loadBlock(T * buffer, size_t block_size)
   {
@@ -244,7 +245,7 @@ public:
 private:
   /// File stream
   std::ifstream * handle;
-  //Size of each object.
+  /// Size of each object.
   size_t obj_size;
   /// Number of elements of size T in the file
   size_t num_elements;

@@ -879,7 +879,7 @@ const std::vector<std::string>& ConfigServiceImpl::getInstrumentPrefixes(const s
 
 /**
  * Return the filename of the instrument geometry definition file.
- * @param instrument A string giving the instrument name
+ * @param instrumentName A string giving the instrument name
  * @returns A string containing the full qualified filename of the instrument file.
  */
 const std::string ConfigServiceImpl::getInstrumentFilename(const std::string& instrumentName) const
