@@ -15,6 +15,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/UnitFactory.h"
+#include <muParser.h>
 
 #include "boost/lexical_cast.hpp"
 
@@ -121,16 +122,49 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
               centreValue = convertValue(centreValue, centreUnit, m_workspace, wi);
 
               double paramValue = fitParam.getValue(centreValue);
+
               // this returned param value by say a formula or a look-up-table may have
               // a unit of its own. If this is specified, try the following
-              Kernel::Unit_sptr convertUnit;  // unit of value returned by lookup table or part of output formula unit
-              if ( fitParam.getResultUnit().compare("") == 0 )
-                convertUnit = fitParam.getLookUpTable().getYUnit();  // from table
+              if ( fitParam.getFormula().compare("") == 0 )
+              {
+                // so from look up table
+                Kernel::Unit_sptr resultUnit = fitParam.getLookUpTable().getYUnit();  // from table
+                paramValue /= convertValue(1.0, resultUnit, m_workspace, wi);
+              }
               else
               {
-                // Formula output unit may be directly 
-                //convertUnit =  Kernel::UnitFactory::Instance().create(fitParam.getResultUnit());  // from formula
-              }
+                // so from formula 
+
+                std::string resultUnitStr = fitParam.getResultUnit();
+
+                std::vector<std::string> allUnitStr = Kernel::UnitFactory::Instance().getKeys();
+                for (unsigned iUnit = 0; iUnit < allUnitStr.size(); iUnit++)
+                {
+                  size_t found = resultUnitStr.find(allUnitStr[iUnit]);
+                  if ( found != std::string::npos )
+                  {
+                    size_t len = allUnitStr[iUnit].size();
+                    std::stringstream readDouble;
+                    readDouble << 1.0 / 
+                      convertValue(1.0, Kernel::UnitFactory::Instance().create(allUnitStr[iUnit]), m_workspace, wi);
+                    resultUnitStr.replace(found, len, readDouble.str());
+                  }
+                }  // end for
+
+                try
+                {
+                  mu::Parser p;
+                  p.SetExpr(resultUnitStr);
+                  paramValue *= p.Eval();
+                }
+                catch (mu::Parser::exception_type &e)
+                {
+                  g_log.error() << "Cannot convert formula unit to workspace unit"
+                    << " Formula unit which cannot be passed is " << resultUnitStr 
+                    << ". Muparser error message is: " << e.GetMsg() << std::endl;
+                }
+              } // end else
+              
 
               setParameter(i, paramValue);
             }  // end of update parameter value
@@ -139,7 +173,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
             if ( fitParam.getTie().compare("") )
             {  
               std::ostringstream str;
-              str << fitParam.getValue();
+              str << getParameter(i);
               tie(parameterName(i), str.str());
             }
 
@@ -172,14 +206,15 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
   }
 }
 
-/** Convert a value from one unit (inUnit) to unit defined in workspace (ws)
+/** Convert a value from unit defined in workspace (ws) to outUnit
  *
- *  @param value
- *  @param inUnit
- *  @param ws
+ *  @param value   assumed to be in unit of workspace
+ *  @param outUnit  unit to convert to
+ *  @param ws      workspace
+ *  @param wsIndex workspace index
  *  @return converted value
  */
-double IFunction::convertValue(const double& value, Kernel::Unit_sptr& inUnit, 
+double IFunction::convertValue(const double& value, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const API::MatrixWorkspace> ws,
                                const int& wsIndex)
 {
@@ -187,11 +222,11 @@ double IFunction::convertValue(const double& value, Kernel::Unit_sptr& inUnit,
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
 
   // if unit required by formula or look-up-table different from ws-unit then 
-  if ( inUnit->unitID().compare(wsUnit->unitID()) != 0 )
+  if ( outUnit->unitID().compare(wsUnit->unitID()) != 0 )
   {
     // first check if it is possible to do a quick convertion convert
     double factor,power;
-    if (wsUnit->quickConversion(*inUnit,factor,power) )
+    if (wsUnit->quickConversion(*outUnit,factor,power) )
     {
       retVal = factor * std::pow(retVal,power);
     }
@@ -220,7 +255,7 @@ double IFunction::convertValue(const double& value, Kernel::Unit_sptr& inUnit,
       endPoint.push_back(retVal);
       std::vector<double> emptyVec;
       wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      inUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      outUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
       retVal = endPoint[0];
     }
   }  
