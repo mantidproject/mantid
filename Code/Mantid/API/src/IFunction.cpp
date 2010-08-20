@@ -145,8 +145,9 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
                   {
                     size_t len = allUnitStr[iUnit].size();
                     std::stringstream readDouble;
+                    Kernel::Unit_sptr unt = Kernel::UnitFactory::Instance().create(allUnitStr[iUnit]);
                     readDouble << 1.0 / 
-                      convertValue(1.0, Kernel::UnitFactory::Instance().create(allUnitStr[iUnit]), m_workspace, wi);
+                      convertValue(1.0, unt, m_workspace, wi);
                     resultUnitStr.replace(found, len, readDouble.str());
                   }
                 }  // end for
