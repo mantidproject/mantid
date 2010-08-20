@@ -4,6 +4,7 @@
 // Boost
 #include <boost/python/module.hpp>
 #include "MantidPythonAPI/stl_proxies.h"
+#include "MantidPythonAPI/MantidVecHelper.h"
 
 namespace Mantid 
 {
@@ -31,19 +32,15 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 {
   using namespace Mantid::PythonAPI;
 
-  // Standard containers first
-  // A vector of ints
+  MantidVecHelper::initializeDependencies();
+  // Export some frequently used stl containers
   vector_proxy<int>::wrap("cpp_list_int");
-  // A vector of doubles
   vector_proxy<double>::wrap("cpp_list_dbl");
-  // A vector of bool
   vector_proxy<bool>::wrap("cpp_list_bool");
-  // A vector of strings
   vector_proxy<std::string>::wrap("cpp_list_str");
-  // A set of strings
   set_proxy<std::string>::wrap("cpp_set_string");
 
-  // Export functions
+  // Export Mantid API
   export_kernel_namespace();
   export_geometry_namespace();
   export_api_namespace();

@@ -93,6 +93,7 @@
     <ClCompile Include="src\FrameworkManagerProxy.cpp" />
     <ClCompile Include="src\geometry_exports.cpp" />
     <ClCompile Include="src\kernel_exports.cpp" />
+    <ClCompile Include="src\MantidVecHelper.cpp" />
     <ClCompile Include="src\PyAlgorithmWrapper.cpp" />
     <ClCompile Include="src\PythonInterfaceFunctions.cpp" />
     <ClCompile Include="src\PythonWrapper.cpp" />
@@ -102,6 +103,7 @@
   <ItemGroup>
     <ClInclude Include="inc\MantidPythonAPI\api_exports.h" />
     <ClInclude Include="inc\MantidPythonAPI\FrameworkManagerProxy.h" />
+    <ClInclude Include="inc\MantidPythonAPI\MantidVecHelper.h" />
     <ClInclude Include="inc\MantidPythonAPI\PyAlgorithmWrapper.h" />
     <ClInclude Include="inc\MantidPythonAPI\PythonInterfaceFunctions.h" />
     <ClInclude Include="inc\MantidPythonAPI\stl_proxies.h" />

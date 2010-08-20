@@ -175,26 +175,27 @@ namespace PythonAPI
     typedef WorkspaceAlgebraProxy::wraptype_ptr(*binary_fn2)(const WorkspaceAlgebraProxy::wraptype_ptr, double);
 
     /// Typedef for data access
-    typedef MantidVec&(API::MatrixWorkspace::*data_access)(int const);
+    typedef MantidVec&(API::MatrixWorkspace::*data_modifier)(int const);
 
     //MatrixWorkspace class
-    class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceCallback, 
+    class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceWrapper, 
       boost::noncopyable >("MatrixWorkspace", no_init)
       .def("getNumberHistograms", &API::MatrixWorkspace::getNumberHistograms)
       .def("getNumberBins", &API::MatrixWorkspace::blocksize)
       .def("binIndexOf", &API::MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads() )
-      .def("readX", &API::MatrixWorkspace::readX, return_value_policy<return_by_value>() )
-      .def("readY", &API::MatrixWorkspace::readY, return_value_policy<return_by_value>() )
-      .def("readE", &API::MatrixWorkspace::readE, return_value_policy<return_by_value>() )
-      .def("dataX", (data_access)&API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
-      .def("dataY", (data_access)&API::MatrixWorkspace::dataY, return_internal_reference<>() )
-      .def("dataE", (data_access)&API::MatrixWorkspace::dataE, return_internal_reference<>() )
+      .def("readX", &PythonAPI::MatrixWorkspaceWrapper::readX)
+      .def("readY", &PythonAPI::MatrixWorkspaceWrapper::readY)
+      .def("readE", &PythonAPI::MatrixWorkspaceWrapper::readE)
+      .def("dataX", (data_modifier)&API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
+      .def("dataY", (data_modifier)&API::MatrixWorkspace::dataY, return_internal_reference<>() )
+      .def("dataE", (data_modifier)&API::MatrixWorkspace::dataE, return_internal_reference<>() )
       .def("isDistribution", (const bool& (API::MatrixWorkspace::*)() const)&API::MatrixWorkspace::isDistribution, 
          return_value_policy< copy_const_reference >() )
       .def("getInstrument", &API::MatrixWorkspace::getInstrument)
       .def("getDetector", &API::MatrixWorkspace::getDetector)
       .def("getRun", &API::MatrixWorkspace::run, return_internal_reference<>() )
       .def("getSampleInfo", &API::MatrixWorkspace::sample, return_internal_reference<>() )
+      //Special methods
       .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
       .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
       .def("__radd__",(binary_fn2)&WorkspaceAlgebraProxy::rplus)

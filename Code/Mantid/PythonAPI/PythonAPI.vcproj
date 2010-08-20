@@ -192,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MantidVecHelper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PyAlgorithmWrapper.cpp"
 				>
 			</File>
@@ -227,6 +231,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidPythonAPI\kernel_exports.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\MantidVecHelper.h"
 				>
 			</File>
 			<File
