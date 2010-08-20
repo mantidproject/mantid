@@ -349,7 +349,7 @@ protected:
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(const double& value, Kernel::Unit_sptr& inUnit, 
-                      boost::shared_ptr<const API::MatrixWorkspace> ws,
+                      boost::shared_ptr<const MatrixWorkspace> ws,
                       const int& wsIndex);
 
   friend class ParameterTie;

@@ -215,7 +215,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
  *  @return converted value
  */
 double IFunction::convertValue(const double& value, Kernel::Unit_sptr& outUnit, 
-                               boost::shared_ptr<const API::MatrixWorkspace> ws,
+                               boost::shared_ptr<const MatrixWorkspace> ws,
                                const int& wsIndex)
 {
   double retVal = value;
