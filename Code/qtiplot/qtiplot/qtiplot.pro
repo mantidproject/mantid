@@ -464,7 +464,6 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/MantidAbout.h \
 	    src/Mantid/InputHistory.h \
 	    src/Mantid/Preferences.h \
-        src/Mantid/MantidCustomActionDialog.h \
         src/Mantid/MantidSampleLogDialog.h \
         src/Mantid/AlgorithmHistoryWindow.h\
         src/Mantid/MantidMatrixDialog.h \
@@ -496,7 +495,8 @@ HEADERS  += src/ApplicationWindow.h \
 		src/Mantid/InstrumentWidget/CompAssemblyActor.h \
 		src/Mantid/InstrumentWidget/ObjComponentActor.h \
 		src/Mantid/InstrumentWidget/InstrumentActor.h \
-		src/Mantid/InstrumentWidget/MantidColorMap.h
+		src/Mantid/InstrumentWidget/MantidColorMap.h \
+		src/Mantid/ManageCustomMenus.h
 
 ###################### FORMS ##############################################
 
@@ -505,6 +505,7 @@ FORMS += src/Mantid/UserFitFunctionDialog.ui
 FORMS += src/Mantid/MantidAbout.ui
 FORMS += src/Mantid/RemoveErrorsDialog.ui
 FORMS += src/Mantid/SequentialFitDialog.ui
+FORMS += src/Mantid/ManageCustomMenus.ui
 
 ###################### SOURCES ##############################################
 
@@ -643,7 +644,6 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/MantidAbout.cpp \
 	    src/Mantid/InputHistory.cpp \
 	    src/Mantid/Preferences.cpp \
-        src/Mantid/MantidCustomActionDialog.cpp \
         src/Mantid/MantidSampleLogDialog.cpp \
         src/Mantid/AlgorithmHistoryWindow.cpp\
         src/Mantid/MantidMatrixDialog.cpp \
@@ -675,7 +675,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/CompAssemblyActor.cpp	\
 		src/Mantid/InstrumentWidget/ObjComponentActor.cpp	\	
 		src/Mantid/InstrumentWidget/InstrumentActor.cpp \
-		src/Mantid/InstrumentWidget/MantidColorMap.cpp
+		src/Mantid/InstrumentWidget/MantidColorMap.cpp \
+		src/Mantid/ManageCustomMenus.cpp
 
 
 ###############################################################

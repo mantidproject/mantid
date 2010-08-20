@@ -172,8 +172,8 @@
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
-#include "Mantid/MantidCustomActionDialog.h"
 #include "Mantid/PeakPickerTool.h"
+#include "Mantid/ManageCustomMenus.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -16008,8 +16008,7 @@ void ApplicationWindow::insertMathSymbol()
 
 void ApplicationWindow::showCustomActionDialog()
 {
-  //CustomActionDialog *ad = new CustomActionDialog(this);
-  MantidCustomActionDialog *ad = new MantidCustomActionDialog(this);
+  ManageCustomMenus *ad = new ManageCustomMenus(this);
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
