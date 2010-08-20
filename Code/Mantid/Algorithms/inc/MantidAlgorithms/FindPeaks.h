@@ -65,9 +65,7 @@ public:
   virtual const std::string category() const { return "General"; }
 
 private:
-  /// Initialisation code
   void init();
-  /// Execution code
   void exec();
 
   API::MatrixWorkspace_sptr calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
@@ -76,6 +74,9 @@ private:
   long long computePhi(const int& w) const;
 
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const double FWHM_guess);
+  void findPeaksUsingMariscotti();
+  void findPeaksGivenStartingPoints(std::vector<double> peakCenters);
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
@@ -84,6 +85,12 @@ private:
   API::ITableWorkspace_sptr m_peaks;
   /// Progress reporting
   API::Progress* m_progress;
+
+  //Properties saved in the algo.
+  API::MatrixWorkspace_sptr inputWS;
+  int fwhm;
+  int index;
+  bool singleSpectrum;
 };
 
 } // namespace Algorithms

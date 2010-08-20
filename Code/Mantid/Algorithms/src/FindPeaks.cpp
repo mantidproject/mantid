@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/VectorHelper.h"
+#include <boost/algorithm/string.hpp>
 #include <numeric>
 
 namespace Mantid
@@ -20,27 +21,38 @@ using namespace API;
 /// Constructor
 FindPeaks::FindPeaks() : API::Algorithm(),m_progress(NULL) {}
 
+
+//=================================================================================================
+/** Initialize and declare properties.
+ *
+ */
 void FindPeaks::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "Name of the workspace to search" );
+
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
   declareProperty("FWHM",7,min,
     "Estimated number of points covered by the fwhm of a peak (default 7)" );
+
   // The tolerance allowed in meeting the conditions
   declareProperty("Tolerance", 4, min->clone(),
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
     "Mariscotti recommends 2 (default 4)");
   
+  declareProperty("PeakPositions", "",
+    "Optional: enter a comma-separated list of expected of the centre of the peaks." );
+
+
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
     "If set, only this spectrum will be searched for peaks (otherwise all are)");  
   
-  // Temporary so that I can look at the smoothed data
-  declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
+//  // Temporary so that I can look at the smoothed data
+//  declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
 
   // The found peaks in a table
   declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
@@ -56,14 +68,19 @@ void FindPeaks::init()
   m_peaks->addColumn("double","backgroundslope");
 }
 
+
+//=================================================================================================
+/** Execute the findPeaks algorithm.
+ *
+ */
 void FindPeaks::exec()
 {
   // Retrieve the input workspace
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  inputWS = getProperty("InputWorkspace");
   
   // If WorkspaceIndex has been set it must be valid
-  const int index = getProperty("WorkspaceIndex");
-  const bool singleSpectrum = !isEmpty(index);
+  index = getProperty("WorkspaceIndex");
+  singleSpectrum = !isEmpty(index);
   if ( singleSpectrum && index >= inputWS->getNumberHistograms() )
   {
     g_log.error() << "The value of WorkspaceIndex provided (" << index << 
@@ -73,10 +90,81 @@ void FindPeaks::exec()
       "FindPeaks WorkspaceIndex property");
   }
 
+  //Get some properties
+  this->fwhm = getProperty("FWHM");
+
+  //Get the specified peak positions, which is optional
+  std::string peakPositions = getProperty("PeakPositions");
+
+  if (peakPositions.size() > 0)
+  {
+    //Split the string and turn it into a vector.
+    std::vector<double> centers;
+    std::vector<std::string> strs;
+    boost::split(strs, peakPositions, boost::is_any_of(", "));
+    for (std::vector<std::string>::iterator it= strs.begin(); it != strs.end(); it++)
+    {
+      std::stringstream oneNumber(*it);
+      double num;
+      oneNumber >> num;
+      centers.push_back(num);
+    }
+
+    //Perform fit with fixed start positions.
+    this->findPeaksGivenStartingPoints(centers);
+  }
+  else
+  {
+    //Use Mariscotti's method to find the peak centers
+    this->findPeaksUsingMariscotti();
+  }
+
+  g_log.information() << "Total of " << m_peaks->rowCount() << " peaks found and successfully fitted." << std::endl;
+  setProperty("PeaksList",m_peaks);
+}
+
+
+//=================================================================================================
+/** Use the Mariscotti method to find the start positions to fit gaussian peaks
+ * @param peakCenters: vector of the center x-positions specified to perform fits.
+ */
+void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
+{
+  std::vector<double>::iterator it;
+
+  // Loop over the spectra searching for peaks
+  const int start = singleSpectrum ? index : 0;
+  const int end = singleSpectrum ? index+1 : inputWS->getNumberHistograms();
+  m_progress = new Progress(this,0.0,1.0,end-start);
+
+  for (int spec = start; spec < end; ++spec)
+  {
+    for (it = peakCenters.begin(); it != peakCenters.end(); it++)
+    {
+      //Try to fit at this center
+      double x_center = *it;
+      this->fitPeak(inputWS, spec, x_center, this->fwhm);
+
+    } // loop through the peaks specified
+
+  m_progress->report();
+
+  } // loop over spectra
+
+}
+
+
+//=================================================================================================
+/** Use the Mariscotti method to find the start positions to fit gaussian peaks
+ *
+ */
+void FindPeaks::findPeaksUsingMariscotti()
+{
+
+  //At this point the data has not been smoothed yet.
   MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(inputWS);
 
   // The optimum number of points in the smoothing, according to Mariscotti, is 0.6*fwhm
-  const int fwhm = getProperty("FWHM");
   int w = static_cast<int>(0.6 * fwhm);
   // w must be odd
   if (!(w%2)) ++w;
@@ -95,8 +183,8 @@ void FindPeaks::exec()
   // Can't calculate n2 or n3 yet because they need i0
   const int tolerance = getProperty("Tolerance");
 
-  // Temporary - to allow me to look at smoothed data
-  setProperty("SmoothedData",smoothedData);
+//  // Temporary - to allow me to look at smoothed data
+//  setProperty("SmoothedData",smoothedData);
 
   // Loop over the spectra searching for peaks
   const int start = singleSpectrum ? index : 0;
@@ -108,12 +196,12 @@ void FindPeaks::exec()
   {
     const MantidVec &S = smoothedData->readY(k);
     const MantidVec &F = smoothedData->readE(k);
- 	
+
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
     for ( int i = 1; i < blocksize; ++i)
     {
-		
+
       int M = 0;
       if ( S[i] > F[i] ) M = 1;
       else { S[i] > 0 ? M = 2 : M = 3; }
@@ -235,14 +323,13 @@ void FindPeaks::exec()
 
     } // loop through a single spectrum
 
-	m_progress->report();
-	
+  m_progress->report();
+
   } // loop over spectra
 
-  g_log.information() << "Total of " << m_peaks->rowCount() << " peaks found and successfully fitted." << std::endl;
-  setProperty("PeaksList",m_peaks);
 }
 
+//=================================================================================================
 /** Calculates the second difference of the data (Y values) in a workspace.
  *  Done according to equation (3) in Mariscotti: \f$ S_i = N_{i+1} - 2N_i + N_{i+1} \f$.
  *  In the output workspace, the 2nd difference is in Y, X is unchanged and E is zero.
@@ -276,6 +363,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
   return diffed;
 }
 
+//=================================================================================================
 /** Calls the SmoothData algorithm as a sub-algorithm on a workspace
  *  @param WS The workspace containing the data to be smoothed. The smoothed result will be stored in this pointer.
  *  @param w  The number of data points which should contribute to each smoothed point
@@ -303,6 +391,8 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
   WS = smooth->getProperty("OutputWorkspace");
 }
 
+
+//=================================================================================================
 /** Calculates the statistical error on the smoothed data.
  *  Uses Mariscotti equation (11), amended to use errors of input data rather than sqrt(Y).
  *  @param input    The input data to the algorithm
@@ -333,6 +423,7 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
   }
 }
 
+//=================================================================================================
 /** Calculates the coefficient phi which goes into the calculation of the error on the smoothed data
  *  Uses Mariscotti equation (11). Pinched from the GeneralisedSecondDifference code.
  *  Can return a very big number, hence the type.
@@ -382,13 +473,14 @@ long long FindPeaks::computePhi(const int& w) const
   return retval;
 }
 
+//=================================================================================================
 /** Attempts to fit a candidate peak
  * 
  *  @param input    The input workspace
- *  @param spectrum The spectrum index of the peak
- *  @param i0       Channel number of peak candidate i0
- *  @param i2       Channel number of peak candidate i2
- *  @param i4       Channel number of peak candidate i4
+ *  @param spectrum The spectrum index of the peak (is actually the WorkspaceIndex)
+ *  @param i0       Channel number of peak candidate i0 - the higher side of the peak (right side)
+ *  @param i2       Channel number of peak candidate i2 - the lower side of the peak (left side)
+ *  @param i4       Channel number of peak candidate i4 - the center of the peak
  */
 void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4)
 {
@@ -409,7 +501,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
   
-  // Get the initial estimate of the width
+  // Get the initial estimate of the width, in # of bins
   const int fitWidth = i0-i2;
 
   // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
@@ -465,11 +557,49 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
                     << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
       API::TableRow t = m_peaks->appendRow();
       t << spectrum << centre << width << height << bgintercept << bgslope;
+
+//      std::cout << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height
+//                    << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
       break;
     }
   }
 
 }
+
+//=================================================================================================
+/** Attempts to fit a candidate peak given a center and width guess.
+ *
+ *  @param input    The input workspace
+ *  @param spectrum The spectrum index of the peak (is actually the WorkspaceIndex)
+ *  @param center_guess: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
+ *  @param FWHM_guess: A guess of the full-width-half-max of the peak, in # of bins.
+*/
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const double FWHM_guess)
+{
+  //The indices
+  int i_left, i_right, i_center;
+
+  //The X axis you are looking at
+  const MantidVec &X = input->readX(spectrum);
+
+  //find i_center - the index of the center
+  i_center = 0;
+  //The guess is within the X axis?
+  if (X[0] < center_guess)
+    for (i_center=0; i_center<X.size()-1; i_center++)
+    {
+      if ((center_guess >= X[i_center]) && (center_guess < X[i_center+1]))
+        break;
+    }
+  //else, bin 0 is closest to it by default;
+
+  i_left = i_center - FWHM_guess / 2;
+  i_right = i_left + FWHM_guess;
+
+  this->fitPeak(input, spectrum, i_right, i_left, i_center);
+
+}
+
 
 } // namespace Algorithms
 } // namespace Mantid
