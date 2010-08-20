@@ -15,7 +15,7 @@
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-#ifndef WIN32
+#ifndef _WIN32
   #include <sys/resource.h>
 #endif
 
@@ -219,8 +219,8 @@ public:
     TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS+1], 0);
     //And some errors
     TS_ASSERT_DELTA( (*el.dataE())[0], 0, 1e-6);
-    TS_ASSERT_DELTA( (*el.dataE())[1], sqrt(2), 1e-6);
-    TS_ASSERT_DELTA( (*el.dataE())[2], sqrt(2), 1e-6);
+    TS_ASSERT_DELTA( (*el.dataE())[1], sqrt(2.0), 1e-6);
+    TS_ASSERT_DELTA( (*el.dataE())[2], sqrt(2.0), 1e-6);
   }
 
   //------------------------------------------------------------------------------
@@ -311,7 +311,7 @@ public:
   int memory_usage()
   {
     // Linux only memory test
-#ifdef WIN32
+#ifdef _WIN32
     //Temporarily disabled for non-linux OSs
 #else
     char buf[30];

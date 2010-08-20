@@ -360,7 +360,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
     DasEvent temp;
     uint32_t period;
-    size_t frame_index;
+    size_t frame_index(0);
 
     size_t event_offset = eventfile->getOffset();
 

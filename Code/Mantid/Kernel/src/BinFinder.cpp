@@ -51,7 +51,7 @@ namespace Kernel
         if (i==0) logBoundaries.push_back( log(min) );
         logBoundaries.push_back( log(max) );
         //How many bins is that?
-        numBins = ceil (  (log(max) - log(min)) / log_step );
+        numBins = static_cast<int>(ceil (  (log(max) - log(min)) / log_step ));
 
         //Check that the last bin is at least .25 x the previous step
         //This is because the VectorHelper removes that final bin. Annoying!
@@ -71,7 +71,7 @@ namespace Kernel
         if (i==0) logBoundaries.push_back( 0 );
         logBoundaries.push_back( 0 );
         //# of linear bins
-        numBins = ceil( (max-min) / step );
+        numBins = static_cast<int>(ceil( (max-min) / step ));
 
         //Check that the last bin is at least .25 x the previous step
         //This is because the VectorHelper removes that final bin. Annoying!
@@ -139,7 +139,7 @@ namespace Kernel
     if (step > 0)
     {
       //Linear binning. Truncate when you divide by the step size
-      index = (x - min) / step;
+      index = static_cast<int>((x - min) / step);
       //Add bin index offset if not in the first region
       if (i > 0)
         index += endBinIndex[i-1];
@@ -159,7 +159,7 @@ namespace Kernel
       double log_x = log(x); //Just one log to call per event!
       double log_step = logSteps[i];
       double log_min = logBoundaries[i];
-      index = (log_x - log_min) / log_step;
+      index = static_cast<int>((log_x - log_min) / log_step);
       //Add bin index offset if not in the first region
       if (i > 0)
         index += endBinIndex[i-1];
