@@ -223,7 +223,7 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataSets()
 bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>& fileNames,std::vector<std::string>& fileLocs)
 {
 	//
-	QString algName("GetDataFile");
+	QString algName("GetDataFiles");
 	const int version=-1;
 	Mantid::API::IAlgorithm_sptr alg;
 	try

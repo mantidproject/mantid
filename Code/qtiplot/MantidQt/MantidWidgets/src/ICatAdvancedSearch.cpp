@@ -19,6 +19,8 @@ QWidget(par),m_utils_sptr( new ICatUtils)
 
 	initLayout();
 
+	readSettings();
+
 	connect(m_uiForm.searchButton,SIGNAL(clicked()),this,SLOT(onSearch()));
 	connect(m_uiForm.closeButton,SIGNAL(clicked()),this,SLOT(onClose()));
 	connect(m_uiForm.advSearchtableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
@@ -356,6 +358,7 @@ void ICatAdvancedSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 */
 void ICatAdvancedSearch::onClose()
 {
+	saveSettings();
 	this->close();
 	QObject* qobj=parent();
 	QWidget* parent=qobject_cast<QWidget*>(qobj);

@@ -1160,8 +1160,8 @@ void ApplicationWindow::initMainMenu()
 	icat = new QMenu(this);
 	icat->setObjectName("ICatMenu");
 	icat->addAction(actionICatLogin);//Login menu item
-	icat->addAction(actionICatSearch);//search menu item
 	icat->addAction(actionMydataSearch);// my data search menu item
+	icat->addAction(actionICatSearch);//search menu item
 	icat->addAction(actionAdvancedSearch); //advanced search menu item
 	icat->addAction(actionICatLogout);//logout menu item
 	disableActions();
@@ -12560,7 +12560,7 @@ void ApplicationWindow::createActions()
 	actionICatSearch->setToolTip(tr("ICat ISIS Search"));
 	connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
 
-	actionMydataSearch=new QAction("MyData Search",this);
+	actionMydataSearch=new QAction("My Data Search",this);
 	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
 	actionMydataSearch->setToolTip(tr("ICat MyData Search"));
 	connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
@@ -12570,7 +12570,7 @@ void ApplicationWindow::createActions()
 	actionICatLogout->setToolTip(tr("ICat Logout"));
 	connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
 
-	actionAdvancedSearch = new QAction("AdvancedSearch",this);
+	actionAdvancedSearch = new QAction("Advanced Search",this);
 	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
 	actionAdvancedSearch->setToolTip(tr("ICat Advanced Search"));
 	connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));

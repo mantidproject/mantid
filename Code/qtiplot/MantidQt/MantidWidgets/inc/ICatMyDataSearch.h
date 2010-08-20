@@ -30,7 +30,7 @@ private:
 	void setparentWidget(QWidget* par);
 
 private:
-	Ui::Form m_uiForm;
+	Ui::MyData m_uiForm;
 
 	///parent widget
 	QWidget* m_applicationWindow;

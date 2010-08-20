@@ -1207,7 +1207,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& fileName
 	Mantid::API::IAlgorithm_sptr alg;
 	try
 	{
-		alg = Mantid::API::AlgorithmManager::Instance().create("GetDataFile",-1);
+		alg = Mantid::API::AlgorithmManager::Instance().create("GetDataFiles",-1);
 	}
 	catch(...)
 	{

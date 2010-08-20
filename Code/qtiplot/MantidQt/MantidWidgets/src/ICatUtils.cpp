@@ -174,9 +174,8 @@ ITableWorkspace_sptr  ICatUtils::executeListInstruments()
 	}
 	catch(...)
 	{
-		//throw std::runtime_error("Error when Populating the instrument list box"); 
-		throw;
-		
+		throw std::runtime_error("Error when Populating the instrument list box"); 
+			
 	}
 	try
 	{
@@ -218,13 +217,11 @@ void ICatUtils::populateInstrumentBox(QComboBox* instrumentBox)
 {
 	
 	//// execute the algorithm ListInstruments
-
 	ITableWorkspace_sptr ws_sptr=executeListInstruments();
 
 	if(!ws_sptr)
 	{
-		//throw std::runtime_error("Instruments list is empty,can not load instrument box.");
-		throw;
+		throw std::runtime_error("Instruments list is empty,can not load instrument box.");
 	}
 		
 	// loop through values
@@ -233,13 +230,14 @@ void ICatUtils::populateInstrumentBox(QComboBox* instrumentBox)
 		//retrieving the  instrument name from table workspace
 		std::string instName(ws_sptr->String(row,0));
 		//populate the instrument box  
-		instrumentBox->insertItem(row,QString::fromStdString(instName));
+		instrumentBox->addItem(QString::fromStdString(instName));
 
 	}
 	//sorting the combo by instrument name;
 	instrumentBox->model()->sort(0);
 	instrumentBox->insertItem(-1,"");
 }
+
 
 /// for displaying the investigatiosn count 
 void ICatUtils::updateSearchLabel(const Mantid::API::ITableWorkspace_sptr& ws_sptr,QLabel* label)
@@ -276,7 +274,11 @@ void  ICatUtils::popupCalendar(QWidget* parent)
 /// close calendarwidget
 void ICatUtils::closeCalendarWidget()
 {
-	m_calendarWidget->close();
+	//m_calendarWidget->close();
+	if(m_calendarWidget->isVisible())
+	{
+		m_calendarWidget->hide();
+	}
 }
 
 
@@ -285,7 +287,7 @@ SearchCalendar::SearchCalendar(QWidget* par):QCalendarWidget(par)
 }
 void SearchCalendar::leaveEvent(QEvent*)
 {
-	this->close();
+	//this->hide();
 }
 
 

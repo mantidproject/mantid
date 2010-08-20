@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>Form</class>
- <widget class="QWidget" name="Form" >
+ <class>MyData</class>
+ <widget class="QWidget" name="MyData" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Form</string>
+   <string>My Data Search Results</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" >
    <item row="0" column="0" >

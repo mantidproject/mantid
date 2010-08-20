@@ -256,7 +256,8 @@ namespace Mantid
 						sInvEndtime=new std::string;
 						time_t  invEndtime=*(*citr)->invEndDate;
 						char temp [25];
-						strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&invEndtime));
+						//strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&invEndtime));
+						strftime (temp,25,"%Y",localtime(&invEndtime));
 						std::string ftime(temp);
 						
 						sInvEndtime->assign(ftime);
