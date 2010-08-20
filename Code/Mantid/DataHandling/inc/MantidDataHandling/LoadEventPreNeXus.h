@@ -110,19 +110,22 @@ private:
   /// The total proton charge for the run.
   double proton_charge_tot;
 
-  Mantid::Kernel::BinaryFile<DasEvent> * eventfile; /// Handles loading from the event file
+  ///Handles loading from the event file
+  Mantid::Kernel::BinaryFile<DasEvent> * eventfile;
   std::size_t num_events; ///<the number of events
   std::size_t num_pulses; ///<the number of pulses
   uint32_t numpixel; ///<the number of pixels
 
   std::size_t num_good_events; ///<the number of good events
   std::size_t num_error_events; ///<the number of error events
-  std::size_t max_events; /// max events to load
+  /// max events to load
+  std::size_t max_events;
 
   ///Set to true if a valid Mapping file was provided.
   bool using_mapping_file;
 
-  bool instrument_loaded_correctly; /// Set to true when instrument geometry was loaded.
+  /// Set to true when instrument geometry was loaded.
+  bool instrument_loaded_correctly;
 
   void loadPixelMap(const std::string &filename);
 

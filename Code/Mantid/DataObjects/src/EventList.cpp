@@ -374,7 +374,7 @@ namespace DataObjects
 
   /** Calculates and returns a pointer to the Y histogrammed data.
    * Remember to delete your pointer after use!
-   * */
+   */
   EventList::StorageType * EventList::dataY() const
   {
     StorageType * Y = new StorageType();
@@ -384,7 +384,7 @@ namespace DataObjects
 
   /** Calculates and returns a pointer to the E histogrammed data.
    * Remember to delete your pointer after use!
-   * */
+   */
   EventList::StorageType * EventList::dataE() const
   {
     StorageType Y;
@@ -469,9 +469,11 @@ namespace DataObjects
   }
 
   // --------------------------------------------------------------------------
-  ///Generate the Error histogram for the provided counts histogram
-  ///@param Y The counts histogram
-  ///@param E The generated error histogram
+  /**
+   * Generate the Error histogram for the provided counts histogram
+   * @param Y The counts histogram
+   * @param E The generated error histogram
+   */
   void EventList::generateErrorsHistogram(const StorageType& Y, StorageType& E) const
   {
       // Fill the vector for the errors, containing sqrt(count)
@@ -488,6 +490,8 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /**
    * Convert the time of flight by tof'=tof*factor+offset
+   * @param factor The value to scale the time-of-flight by
+   * @param offset The value to shift the time-of-flight by
    */
   void EventList::convertTof(const double factor, const double offset)
   {
@@ -528,7 +532,7 @@ namespace DataObjects
   /**
    * Convert the units in the TofEvent's time_of_flight field to
    *  some other value, by scaling by a multiplier.
-   * @param factor: conversion factor (e.g. multiply TOF by this to get d-spacing)
+   * @param factor conversion factor (e.g. multiply TOF by this to get d-spacing)
    */
   void EventList::scaleTof(const double factor)
   {
@@ -557,7 +561,7 @@ namespace DataObjects
   }
 
   /** Add an offset to the TOF of each event in the list.
-   *
+   * @param offset The value to shift the time-of-flight by
    */
   void EventList::addTof(const double offset)
   {

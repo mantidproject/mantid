@@ -129,7 +129,7 @@ namespace Mantid
       * @param hint The name hint
       * @return The file name
       * @throws NotFoundError if a required default is not set
-      * @thorws std::invalid_argument if the argument is malformed or run number is too long
+      * @throws std::invalid_argument if the argument is malformed or run number is too long
       */
     std::string FileFinderImpl::makeFileName(const std::string& hint)const
     {
@@ -206,7 +206,7 @@ namespace Mantid
       *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
       *  Only the beginning of a range can contain an instrument name.
       * @return A vector of full paths or empty vector
-      * @thorws std::invalid_argument if the argument is malformed 
+      * @throws std::invalid_argument if the argument is malformed
       */
     std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint)const
     {

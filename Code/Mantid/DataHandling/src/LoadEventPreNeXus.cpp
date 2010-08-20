@@ -682,6 +682,7 @@ static std::time_t to_time_t(ptime t)
 /**
  * Add a sample environment log for the proton chage and set the scalar 
  * value on the sample.
+ * @param workspace Event workspace to set the proton charge on
  */
 void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & workspace)
 {
