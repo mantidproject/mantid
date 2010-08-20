@@ -182,10 +182,6 @@ private:
   mutable EventSortType order;
   /** Cached version of the x axis. */
   mutable RCtype refX;
-
-  void generateCountsHistogram() const;
-  void generateErrorsHistogram() const;
-
 };
 
 } // DataObjects
