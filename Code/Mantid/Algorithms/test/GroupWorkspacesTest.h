@@ -230,7 +230,7 @@ public:
 		Mantid::Algorithms::FindPeaks finder;
 		finder.initialize();
 		TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace","peaksWS"));
-		TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("SmoothedData","smoothed"));
+		//TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("SmoothedData","smoothed"));
 		TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList","foundpeaks"));
 		TS_ASSERT_THROWS_NOTHING( finder.execute());
 		ITableWorkspace_sptr result1;
