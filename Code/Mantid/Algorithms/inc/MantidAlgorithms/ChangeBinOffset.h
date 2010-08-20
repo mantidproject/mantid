@@ -61,6 +61,8 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+
+      /// Execute algorithm for EventWorkspaces
       void execEvent();
     
       /// Create output workspace
