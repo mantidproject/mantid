@@ -43,7 +43,7 @@ void FindPeaks::init()
     "Mariscotti recommends 2 (default 4)");
   
   declareProperty("PeakPositions", "",
-    "Optional: enter a comma-separated list of expected of the centre of the peaks." );
+    "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();

@@ -33,6 +33,9 @@ void StripPeaks::init()
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
     "Mariscotti recommends 2 (default 4)");
   
+  declareProperty("PeakPositions", "",
+    "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
+
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
@@ -77,6 +80,9 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
   // FindPeaks will do the checking on the validity of WorkspaceIndex
   findpeaks->setProperty<int>("WorkspaceIndex",getProperty("WorkspaceIndex"));
+
+  //Get the specified peak positions, which is optional
+  findpeaks->setProperty<std::string>("PeakPositions", getProperty("PeakPositions"));
 
   // Now execute the sub-algorithm. Catch and log any error
   try
