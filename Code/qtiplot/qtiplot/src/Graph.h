@@ -519,6 +519,8 @@ public slots:
 
   void setAxisMargin(int axis, int margin);
 
+  bool isColorBarEnabled(int axis) const;
+
   void setMajorTicksType(const QList<int>& lst);
   void setMajorTicksType(const QStringList& lst);
 

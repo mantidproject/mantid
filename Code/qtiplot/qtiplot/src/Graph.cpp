@@ -407,6 +407,16 @@ void Graph::setAxisMargin(int axis, int margin)
 		scale->setMargin(margin);
 }
 
+bool Graph::isColorBarEnabled(int axis) const
+{
+	QwtScaleWidget *scale = (QwtScaleWidget *)d_plot->axisWidget(axis);
+	if (scale)
+  {
+    return scale->isColorBarEnabled();
+  }
+  return false;
+}
+
 ScaleDraw::ScaleType Graph::axisType(int axis)
 {
 	if (!d_plot->axisEnabled(axis))

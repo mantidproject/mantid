@@ -1280,7 +1280,6 @@ void AxesDialog::initScalesPage()
 	boxAxesBreaks = new QGroupBox(tr("Show Axis &Break"));
 	boxAxesBreaks->setCheckable(true);
 	boxAxesBreaks->setChecked(false);
-	//boxAxesBreaks->setEnabled (false);
 
 	QGridLayout * breaksLayout = new QGridLayout(boxAxesBreaks);
 	boxBreakDecoration = new QCheckBox(tr("Draw Break &Decoration"));
@@ -2777,10 +2776,19 @@ void AxesDialog::updateScale()
         boxMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
 
     boxMinorValue->setEditText(QString::number(d_plot->axisMaxMinor(a)));
+
+    bool isColorMap = d_graph->isColorBarEnabled(mapToQwtAxis(axis));
+    boxAxesBreaks->setEnabled (!isColorMap);
+    if (isColorMap)
+    {
+      boxAxesBreaks->setChecked (false);
+    }
+	
 	}
 	else 
-	{	boxAxesBreaks->setChecked(false);
-	    boxAxesBreaks->setEnabled (false);
+	{	
+    boxAxesBreaks->setChecked(false);
+	  boxAxesBreaks->setEnabled (false);
 	}
 
  	QwtValueList lst = scDiv->ticks (QwtScaleDiv::MajorTick);
@@ -2801,7 +2809,6 @@ void AxesDialog::updateScale()
 		boxMajorValue->setEnabled(true);
 	}
    
-	
 	//}
 		       
 }
