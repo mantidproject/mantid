@@ -21,7 +21,7 @@ namespace Mantid
 
     /** Constructor.
     * @param f The facility
-    * @elem The Poco::XML::Element to read the data from
+    * @param elem The Poco::XML::Element to read the data from
     * @throws std::runtime_error if name or at least one technique are not defined
     */
     InstrumentInfo::InstrumentInfo(FacilityInfo* f,const Poco::XML::Element* elem)

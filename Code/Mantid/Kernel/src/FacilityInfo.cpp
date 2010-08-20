@@ -21,7 +21,7 @@ namespace Kernel
 Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
 
 /** Constructor.
-  * @elem The Poco::XML::Element to read the data from
+  * @param elem The Poco::XML::Element to read the data from
   * @throws std::runtime_error if name or file extensions are not defined
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
