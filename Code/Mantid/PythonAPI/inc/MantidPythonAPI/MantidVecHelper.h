@@ -45,9 +45,9 @@ namespace Mantid
       /// Intialize external module dependencies
       static void initializeDependencies();
       /// Choose an appropriate wrapping for a MantidVec
-      static PyObject * createPythonWrapper(const MantidVec & values);
+      static PyObject * createPythonWrapper(const MantidVec & values, bool readonly);
       /// Create a numpy array using the already allocated data
-      static PyObject * createNumPyArray(const MantidVec & values);
+      static PyObject * createNumPyArray(const MantidVec & values, bool readonly);
       /// Create a standard Python list from the exising data
       static PyObject * createPythonList(const MantidVec & values);
       /// A flag marking if numpy should be used when wrapping the vector

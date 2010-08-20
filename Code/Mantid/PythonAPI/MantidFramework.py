@@ -9,12 +9,6 @@ import sets
 import __builtin__
 import __main__
 
-#See if numpy is available
-# try:
-    # import numpy.core.multiarray
-    # __have_numpy = True
-# except ImportError:
-    # __have_numpy = False
 
 # --- Import the Mantid API ---
 if os.name == 'nt':
@@ -46,8 +40,6 @@ else:
     sys.setdlopenflags(saved_dlopenflags)
 # --- End of library load ---
 
-# Inform module of numpy availablilty
-#__use_numpy_bindings(__have_numpy)
 
 #-------------------------------------------------------------------------------
 def makeString(value):
@@ -107,17 +99,19 @@ class WorkspaceProxy(ProxyObject):
             return False
 
     def __getitem__(self, index):
+        """
+        If we are a group then return a member, else return self
+        """
         if self.isGroup():
             return self.__factory.create(self._getHeldObject().getNames()[index])
         else:
-            return self
+            raise AttributeError('Index invalid, object is not a group.')
 
     def __getattr__(self, attr):
         """
         Reroute a method call to the the stored object
         """
         return getattr(self._getHeldObject(), attr)
-
 
     def __str__(self):
         """
@@ -347,6 +341,7 @@ class MantidPyFramework(FrameworkManager):
     
     __is_initialized = False
     __config_service = None
+    __currentGUIFlag = None
     
     def __init__(self):
         # Call base class constructor
@@ -419,9 +414,10 @@ class MantidPyFramework(FrameworkManager):
         """
         Initialise the framework
         """
-        if self.__is_initialized == True:
+        if self.__is_initialized == True and GUI == self.__currentGUIFlag:
             return
-        
+        __currentGUIFlag = GUI
+
         # Update search path on posix machines where mantidsimple.py goes to the user directory
         if os.name == 'posix':
             outputdir = os.path.expanduser('~/.mantid')
@@ -879,7 +875,7 @@ class WorkspaceFactory(WorkspaceFactoryProxy):
     @staticmethod
     def createMatrixWorkspace(NVectors, XLength, YLength):
         return WorkspaceFactoryProxy.createMatrixWorkspace(NVectors, XLength, YLength)
-
+    
     @staticmethod
     def createMatrixWorkspaceFromCopy(Copy, NVectors = -1, XLength = -1, YLength = -1):
         if isinstance(Copy, WorkspaceProxy):

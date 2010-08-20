@@ -43,13 +43,13 @@ namespace Mantid
     */
 
     /**
-    * A Wrapper class for MatrixWorkspace objects. These objects are actually instaniated 
+    * A Wrapper class for MatrixWorkspace objects. These objects are actually instantiated
     * in Python. Some method calls are routed through here.
     */
     class MatrixWorkspaceWrapper: public API::MatrixWorkspace
     {
     public:
-      ///Default constructor
+      /// Constructor
       MatrixWorkspaceWrapper(PyObject *self) : m_self(self)
       {
         Py_INCREF(m_self);
@@ -59,13 +59,20 @@ namespace Mantid
       {
         Py_DECREF(m_self);
       }
-      /// Read X values from a spectra in a workspace and return it as a numpy array
+      /// Read X values from a spectra in a workspace and return it as a read-only numpy array
       static PyObject * readX(API::MatrixWorkspace& self, int index);
-      /// Read Y values from a spectra in a workspace and return it as a numpy array
+      /// Read Y values from a spectra in a workspace and return it as a read-only numpy array
       static PyObject * readY(API::MatrixWorkspace& self, int index);
-      /// Read E values from a spectra in a workspace and return it as a numpy array
+      /// Read E values from a spectra in a workspace and return it as a read-only numpy array
       static PyObject * readE(API::MatrixWorkspace& self, int index);
+      /// Read X values from a spectra in a workspace and return it as a read-write numpy array
+      static PyObject * dataX(API::MatrixWorkspace& self, int index);
+      /// Read Y values from a spectra in a workspace and return it as a read-write numpy array
+      static PyObject * dataY(API::MatrixWorkspace& self, int index);
+      /// Read E values from a spectra in a workspace and return it as a read-write numpy array
+      static PyObject * dataE(API::MatrixWorkspace& self, int index);
 
+    private:
       /// Stored Python object
       PyObject *m_self;
     };

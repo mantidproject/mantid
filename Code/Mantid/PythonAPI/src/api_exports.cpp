@@ -186,9 +186,9 @@ namespace PythonAPI
       .def("readX", &PythonAPI::MatrixWorkspaceWrapper::readX)
       .def("readY", &PythonAPI::MatrixWorkspaceWrapper::readY)
       .def("readE", &PythonAPI::MatrixWorkspaceWrapper::readE)
-      .def("dataX", (data_modifier)&API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
-      .def("dataY", (data_modifier)&API::MatrixWorkspace::dataY, return_internal_reference<>() )
-      .def("dataE", (data_modifier)&API::MatrixWorkspace::dataE, return_internal_reference<>() )
+      .def("dataX", &PythonAPI::MatrixWorkspaceWrapper::dataX)
+      .def("dataY", &PythonAPI::MatrixWorkspaceWrapper::dataY)
+      .def("dataE", &PythonAPI::MatrixWorkspaceWrapper::dataE)
       .def("isDistribution", (const bool& (API::MatrixWorkspace::*)() const)&API::MatrixWorkspace::isDistribution, 
          return_value_policy< copy_const_reference >() )
       .def("getInstrument", &API::MatrixWorkspace::getInstrument)

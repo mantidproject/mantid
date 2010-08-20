@@ -38,13 +38,14 @@ namespace Mantid
     /**
     * Creates an approriate wrapper for the MantidVec array, i.e. numpy array if it is available or Python list if not
     * @param values A reference to the MantidVec
+    * @param readonly If true the array is flagged as read only (only used for numpy arrays)
     * @returns A pointer to a PyObject that contains the data
     */
-    PyObject * MantidVecHelper::createPythonWrapper(const MantidVec & values)
+    PyObject * MantidVecHelper::createPythonWrapper(const MantidVec & values, bool readonly)
     {
       if( g_useNumPy )
       {
-        return MantidVecHelper::createNumPyArray(values);
+        return MantidVecHelper::createNumPyArray(values, readonly);
       }
       else
       {
@@ -55,14 +56,18 @@ namespace Mantid
     /**
     * Create a NumPy wrapper around the given values and marks it as read only
     * @param values A reference to the array of values that will be wrapped by NumPy
+    * @param readonly If true the array is flagged as read only
     * @returns A numpy wrapped array C-array
     */
-    PyObject * MantidVecHelper::createNumPyArray(const MantidVec & values)
+    PyObject * MantidVecHelper::createNumPyArray(const MantidVec & values, bool readonly)
     {
       npy_intp dims[1] = { values.size() };
       PyArrayObject * ndarray = 
         (PyArrayObject*)PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE,(void*)&(values[0]));
-      ndarray->flags &= ~NPY_WRITEABLE;
+      if( readonly )
+      {
+        ndarray->flags &= ~NPY_WRITEABLE;
+      }
       return (PyObject*)ndarray;
     }
 

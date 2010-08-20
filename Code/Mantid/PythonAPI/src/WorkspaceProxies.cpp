@@ -17,36 +17,69 @@ namespace Mantid
     //
     //****************************************
     /**
-    * Returns the X values from the spectra at the given index wrapped in a numpy array
+    * Returns the X values from the spectra at the given index wrapped in a read-only numpy array
     * @param self A reference to the workspace
     * @param index The index of the workspace
     * @returns A numpy array for the given index
     */
     PyObject * MatrixWorkspaceWrapper::readX(API::MatrixWorkspace& self, int index)
     {
-      return MantidVecHelper::createPythonWrapper(self.readX(index));
+      return MantidVecHelper::createPythonWrapper(self.readX(index), true);
     }
 
     /**
-    * Returns the Y values from the spectra at the given index wrapped in a numpy array
+    * Returns the Y values from the spectra at the given index wrapped in a read-only numpy array
     * @param self A reference to the workspace
     * @param index The index of the workspace
     * @returns A numpy array for the given index
     */
     PyObject * MatrixWorkspaceWrapper::readY(API::MatrixWorkspace& self, int index)
     {
-      return MantidVecHelper::createPythonWrapper(self.readY(index));
+      return MantidVecHelper::createPythonWrapper(self.readY(index), true);
     }
 
     /**
-    * Returns the E values from the spectra at the given index wrapped in a numpy array
+    * Returns the E values from the spectra at the given index wrapped in a read-only numpy array
     * @param self A reference to the workspace
     * @param index The index of the workspace
     * @returns A numpy array for the given index
     */
     PyObject * MatrixWorkspaceWrapper::readE(API::MatrixWorkspace& self, int index)
     {
-      return MantidVecHelper::createPythonWrapper(self.readE(index));
+      return MantidVecHelper::createPythonWrapper(self.readE(index), true);
+    }
+
+    /**
+    * Returns the X values from the spectra at the given index wrapped in a read-write numpy array
+    * @param self A reference to the workspace
+    * @param index The index of the workspace
+    * @returns A numpy array for the given index
+    */
+    PyObject * MatrixWorkspaceWrapper::dataX(API::MatrixWorkspace& self, int index)
+    {
+      return MantidVecHelper::createPythonWrapper(self.readX(index), false);
+    }
+
+    /**
+    * Returns the Y values from the spectra at the given index wrapped in a read-write numpy array
+    * @param self A reference to the workspace
+    * @param index The index of the workspace
+    * @returns A numpy array for the given index
+    */
+    PyObject * MatrixWorkspaceWrapper::dataY(API::MatrixWorkspace& self, int index)
+    {
+      return MantidVecHelper::createPythonWrapper(self.readY(index), false);
+    }
+
+    /**
+    * Returns the E values from the spectra at the given index wrapped in a read-write numpy array
+    * @param self A reference to the workspace
+    * @param index The index of the workspace
+    * @returns A numpy array for the given index
+    */
+    PyObject * MatrixWorkspaceWrapper::dataE(API::MatrixWorkspace& self, int index)
+    {
+      return MantidVecHelper::createPythonWrapper(self.readE(index), false);
     }
 
     //*********************************************************************************
