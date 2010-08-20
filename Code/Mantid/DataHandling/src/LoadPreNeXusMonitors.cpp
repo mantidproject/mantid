@@ -64,10 +64,10 @@ void LoadPreNeXusMonitors::init()
 void LoadPreNeXusMonitors::exec()
 {
   // time of flight channel parameters
-  double_t tmin = -1;
-  double_t tmax = -1;
-  double_t tstep = -1;
-  int tchannels = -1;
+  double tmin = 0.0;
+  double tmax = 0.0;
+  double tstep = 0.0;
+  int tchannels = 0;
   std::string instrumentName;
 
   // Vectors to store monitor parameters
@@ -120,9 +120,9 @@ void LoadPreNeXusMonitors::exec()
 
       // Now lets get the tof binning settings
       Poco::XML::Element* pTimeChannels = pE->getChildElement("NumTimeChannels");
-      tmin = boost::lexical_cast<double_t>(pTimeChannels->getAttribute("startbin"));
-      tmax = boost::lexical_cast<double_t>(pTimeChannels->getAttribute("endbin"));
-      tstep = boost::lexical_cast<double_t>(pTimeChannels->getAttribute("width"));
+      tmin = boost::lexical_cast<double>(pTimeChannels->getAttribute("startbin"));
+      tmax = boost::lexical_cast<double>(pTimeChannels->getAttribute("endbin"));
+      tstep = boost::lexical_cast<double>(pTimeChannels->getAttribute("width"));
 
     }
 
