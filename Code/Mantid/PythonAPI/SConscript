@@ -31,6 +31,17 @@ else:
    myenv.Replace(SHLIBSUFFIX='.pyd')
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
+# Numpy bindings
+try:
+    print "Checking for numpy...",
+    from numpy import get_include as get_numpy_include
+    print 'yes'
+except ImportError:
+    print "no"
+    Exit(-1)
+
+myenv.Append(CPPPATH=[get_numpy_include()])
+    
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidPythonAPI', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidPythonAPI.pdb')
 retval = { 'shared': shared, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidPythonAPI' ] }
