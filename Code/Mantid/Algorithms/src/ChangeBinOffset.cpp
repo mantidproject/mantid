@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ChangeBinOffset.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -10,6 +11,7 @@ namespace Mantid
 
    using namespace Kernel;
    using namespace API;
+   using namespace DataObjects;
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(ChangeBinOffset)
@@ -51,6 +53,14 @@ namespace Mantid
     {
 	    //Get input workspace and offset
 	    const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
+	    //Check if its an event workspace
+	    EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+	    if (eventWS != NULL)
+	    {
+	      this->execEvent();
+	      return;
+	    }
+
 	    double offset = getProperty("Offset");
 	    
 	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
@@ -111,6 +121,53 @@ namespace Mantid
 	    }
     }	
     
+    void ChangeBinOffset::execEvent()
+    {
+      g_log.information("Processing event workspace");
+
+      const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
+      EventWorkspace_const_sptr inputWS
+                     = boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+
+      // generate the output workspace pointer
+      API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
+      EventWorkspace_sptr outputWS;
+      if (matrixOutputWS == matrixInputWS)
+        outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+      else
+      {
+        //Make a brand new EventWorkspace
+        outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+            API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+        //Copy geometry over.
+        API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+        //outputWS->mutableSpectraMap().clear();
+        //You need to copy over the data as well.
+        outputWS->copyDataFrom( (*inputWS) );
+
+        //Cast to the matrixOutputWS and save it
+        matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+        this->setProperty("OutputWorkspace", matrixOutputWS);
+      }
+
+      double offset = getProperty("Offset");
+      const int numberOfSpectra = inputWS->getNumberHistograms();
+
+      m_progress = new API::Progress(this, 0.0, 1.0, numberOfSpectra);
+
+      PARALLEL_FOR1(outputWS)
+      for (int i=0; i < numberOfSpectra; ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        //Do the offsetting
+        outputWS->getEventListAtWorkspaceIndex(i).convertTof(1.0, offset);
+        m_progress->report();
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+
+    }
+
   } // namespace Algorithm
 } // namespace Mantid
 

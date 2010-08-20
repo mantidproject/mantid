@@ -61,6 +61,7 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+      void execEvent();
     
       /// Create output workspace
       API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);

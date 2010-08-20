@@ -9,6 +9,8 @@
 
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
 
@@ -33,16 +35,16 @@ public:
 
 		ChangeBinOffset alg1D;
 		TS_ASSERT_THROWS_NOTHING(alg1D.initialize());
-		TS_ASSERT( alg1D.isInitialized() )
+		TS_ASSERT( alg1D.isInitialized() );
 
 		alg1D.setPropertyValue("InputWorkspace", "input1D");
 		alg1D.setPropertyValue("OutputWorkspace", "output1D");
 		alg1D.setPropertyValue("Offset", offsetStr.str());
 
 		TS_ASSERT_THROWS_NOTHING(alg1D.execute());
-		TS_ASSERT( alg1D.isExecuted() )
+		TS_ASSERT( alg1D.isExecuted() );
 
-            MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance(). retrieve(alg1D.getProperty("OutputWorkspace")));
+    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance(). retrieve(alg1D.getProperty("OutputWorkspace")));
 
 		Mantid::MantidVec& Xold = input->dataX(0);
 		Mantid::MantidVec& Xnew = output->dataX(0);
@@ -71,14 +73,14 @@ public:
 
 		ChangeBinOffset alg2D;
 		TS_ASSERT_THROWS_NOTHING(alg2D.initialize());
-		TS_ASSERT( alg2D.isInitialized() )
+		TS_ASSERT( alg2D.isInitialized() );
 
 		alg2D.setPropertyValue("InputWorkspace", "input2D");
 		alg2D.setPropertyValue("OutputWorkspace", "output2D");
 		alg2D.setPropertyValue("Offset", offsetStr.str());
 
 		TS_ASSERT_THROWS_NOTHING(alg2D.execute());
-		TS_ASSERT( alg2D.isExecuted() )
+		TS_ASSERT( alg2D.isExecuted() );
 
 		MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(alg2D.getProperty("OutputWorkspace")));
 
@@ -129,8 +131,49 @@ public:
 		return testWorkspace;
 	}
 
-private:
+  void setup_Event()
+  {
+    this->inputSpace = "eventWS";
+    Mantid::DataHandling::LoadEventPreNeXus loader;
+    loader.initialize();
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_11514/CNCS_11514_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/Data/sns_event_prenexus/CNCS_11514/CNCS_11514_pulseid.dat" );
+    loader.setPropertyValue("EventFilename", eventfile);
+    loader.setProperty("PulseidFilename", pulsefile);
+    loader.setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
+    loader.setPropertyValue("OutputWorkspace", this->inputSpace);
+    loader.execute();
+    TS_ASSERT (loader.isExecuted() );
+  }
 
+	void testExecEvents()
+	{
+	  this->setup_Event();
+	  std::string outputSpace = "eventWS_out";
+
+	  ChangeBinOffset alg;
+    if ( !alg.isInitialized() ) alg.initialize();
+    TS_ASSERT( alg.isInitialized() );
+
+    //Set all the properties
+    alg.setPropertyValue("InputWorkspace", this->inputSpace);
+    alg.setPropertyValue("Offset", "100.0");
+    alg.setPropertyValue("OutputWorkspace", outputSpace);
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    EventWorkspace_sptr WSI = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(this->inputSpace));
+    TS_ASSERT(WSI);
+    EventWorkspace_sptr WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT(WSO);
+
+    TS_ASSERT_DIFFERS(WSI->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(),
+        WSO->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
+	}
+
+private:
+	std::string inputSpace;
 
 };
 
