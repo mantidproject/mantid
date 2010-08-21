@@ -20,6 +20,7 @@
 #include <boost/shared_array.hpp>
 
 #include <fstream>
+#include <cmath>
 #include <iostream>
 #include <cstdlib>
 #include <iterator>
@@ -114,9 +115,9 @@ void LoadPreNeXusMonitors::exec()
       ++nMonitors;
 
       Poco::XML::Element* pE = static_cast<Poco::XML::Element*> (pNode);
-      g_log.information() << "Beam Monitor " << pE->getAttribute("id") << std::endl;
-      g_log.information() << "\tname: " << pE->getAttribute("name") << std::endl;
-      g_log.information() << "\tdescription: " << pE->getAttribute("description") << std::endl;
+      g_log.debug() << "Beam Monitor " << pE->getAttribute("id") << std::endl;
+      g_log.debug() << "\tname: " << pE->getAttribute("name") << std::endl;
+      g_log.debug() << "\tdescription: " << pE->getAttribute("description") << std::endl;
 
       // Now lets get the tof binning settings
       Poco::XML::Element* pTimeChannels = pE->getChildElement("NumTimeChannels");
@@ -172,8 +173,7 @@ void LoadPreNeXusMonitors::exec()
   g_log.information() << "Found " << nMonitors << " beam monitors." << std::endl;
 
   //tchannels = static_cast<size_t> ((tmax - tmin) / tstep);
-
-  std::cout << "tchannels = " << tchannels << std::endl;
+  //std::cout << "tchannels = " << tchannels << std::endl;
 
   // Now lets create the time of flight array.
   MantidVec time_bins(tchannels + 1);
@@ -182,31 +182,14 @@ void LoadPreNeXusMonitors::exec()
     time_bins[i] = tmin + (i) * tstep;
   }
 
-  std::cout << "Finished generating TCBs." << std::endl;
-
-  std::cout << "Making fake data..." << std::endl;
-
-  // FIXME: temp hack to get some counts into an array!
-  MantidVec counts(tchannels);
-  MantidVec error(tchannels);
-  for (int i = 0; i < tchannels + 1; ++i)
-  {
-    counts[i] = i;
-    error[i] = sqrt(i);
-  }
-
-  std::cout << "Finished making fake data..." << std::endl;
-
-  std::cout << "Creating workspace..." << std::endl;
   // Create the new workspace
   MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nMonitors,
       tchannels + 1, tchannels);
 
-  std::cout << "Finished!" << std::endl;
-
   // a temporary place to put the spectra/detector numbers
   boost::shared_array<int> spectra_numbers(new int[nMonitors]);
 
+  // temp buffer for file reading
   std::vector<uint32_t> buffer;
 
   for (size_t i = 0; i < nMonitors; i++)
@@ -214,36 +197,13 @@ void LoadPreNeXusMonitors::exec()
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
 
-    //Kernel::BinaryFile<uint32_t> monitorFile();
     Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.toString());
     monitorFile.loadAllInto(buffer);
 
     MantidVec intensity(buffer.begin(), buffer.end());
+    // TODO: Do something properly with the errors.
+    MantidVec error(buffer.begin(), buffer.end());
 
-   // std::ifstream fileHandle(pMonitorFilename.toString().c_str(), std::ios::in | std::ios::binary);
-   // if (!(fileHandle.is_open()))
-   // {
-   //   g_log.error() << "Cannot open monitor file: " << monitorFilenames[i] << std::endl;
-   // }
-
-    // Make sure we are at the beginning
-    //fileHandle.seekg(std::ios::beg);
-
-  //  std::vector<double> monitorCounts;
-    //    std::istream_iterator<double> numbers(fileHandle);
-    //    std::copy(numbers, std::istream_iterator<double>(), counts.begin());
-
-    // Actually read the data
-    //fileHandle.read(reinterpret_cast<char *> (&counts[0]), tchannels * sizeof(uint32_t));
-
-    for (int j = 46000; j < 46050; j++)
-    {
-      std::cout << intensity[j] << std::endl;
-    }
-
-//    fileHandle.close();
-
-    //    counts.assign(buffer, buffer+sizeof(buffer));
 
     localWorkspace->dataX(i) = time_bins;
     localWorkspace->dataY(i) = intensity;
@@ -259,8 +219,6 @@ void LoadPreNeXusMonitors::exec()
   localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   localWorkspace->setYUnit("Counts");
   // TODO localWorkspace->setTitle(title);
-
-  std::cout << "Loading instrument" << std::endl;
 
   // Actually load the instrument
   this->runLoadInstrument(instrumentName, localWorkspace);
