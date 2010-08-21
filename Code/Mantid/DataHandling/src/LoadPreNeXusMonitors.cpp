@@ -201,9 +201,10 @@ void LoadPreNeXusMonitors::exec()
     monitorFile.loadAllInto(buffer);
 
     MantidVec intensity(buffer.begin(), buffer.end());
-    // TODO: Do something properly with the errors.
+    // Copy the same data into the error array
     MantidVec error(buffer.begin(), buffer.end());
-
+    // Now take the sqrt()
+    std::transform(error.begin(), error.end(), error.begin(), (double(*)(double)) sqrt);
 
     localWorkspace->dataX(i) = time_bins;
     localWorkspace->dataY(i) = intensity;
