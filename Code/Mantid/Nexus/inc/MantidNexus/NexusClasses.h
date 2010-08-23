@@ -718,6 +718,7 @@ namespace Mantid
       *   @param name The name of the NXClass relative to its parent
       */
       NXBinary(const NXClass& parent,const std::string& name):NXNote(parent,name){}
+      /// Return the binary data associated with the note
       std::vector< char >& binary();
     private:
       std::vector< char > m_binary;   ///< content

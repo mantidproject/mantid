@@ -494,6 +494,7 @@ void GroupDetectors2::readFile(std::map<int,int> &specs2index, std::ifstream &Fi
 *  @param specs2index a map with spectra numbers as indexes and index numbers as values
 *  @param output the list of integers, with any ranges expanded
 *  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
+*  @param seperator the symbol for the index range separator
 *  @throws invalid_argument when a number couldn't be found or the number is not in the spectra map
 */
 void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &specs2index, std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator)

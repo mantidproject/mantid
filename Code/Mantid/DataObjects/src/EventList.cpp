@@ -109,6 +109,7 @@ namespace DataObjects
    */
   class tofGreaterOrEqual: std::unary_function<TofEvent, double>
   {
+    /// Comparison variable
     double m_value;
   public:
     /// Constructor: save the value
@@ -128,6 +129,7 @@ namespace DataObjects
    */
   class tofGreater: std::unary_function<TofEvent, double>
   {
+    /// Comparison variable
     double m_value;
   public:
     /// Constructor: save the value
@@ -306,6 +308,7 @@ namespace DataObjects
     return (this->order == TOF_SORT);
   }
 
+  /** Reverse the histogram boundaries and the associated events if they are sorted */
   void EventList::reverse()
   {
     // reverse the histogram bin parameters

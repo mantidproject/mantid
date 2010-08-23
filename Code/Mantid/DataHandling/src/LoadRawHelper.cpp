@@ -680,6 +680,7 @@ namespace Mantid
     * Pulls the run parameters from the ISIS Raw RPB structure and stores them as log entries on the 
     * workspace run object
     * @param localWorkspace The workspace to attach the information to
+    * @param rawFile The handle to an ISIS Raw file
     */
     void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const rawFile) const
     {
