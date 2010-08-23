@@ -170,6 +170,9 @@ public:
 
     TS_ASSERT_DIFFERS(WSI->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(),
         WSO->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
+
+    TS_ASSERT_DIFFERS(WSI->getEventListAtWorkspaceIndex(0).dataX()[1],
+        WSO->getEventListAtWorkspaceIndex(0).dataX()[1]);
 	}
 
 private:
