@@ -78,8 +78,10 @@ private:
 
   bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets);
 
+  /// Pointer for an event workspace
   EventWorkspace_const_sptr eventW;
 
+  /// Map of conversion factors for TOF to d-Spacing conversion
   std::map<int, double> * tofToDmap;
 };
 

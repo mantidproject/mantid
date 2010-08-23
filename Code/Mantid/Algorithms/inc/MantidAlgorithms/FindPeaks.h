@@ -87,10 +87,10 @@ private:
   API::Progress* m_progress;
 
   //Properties saved in the algo.
-  API::MatrixWorkspace_sptr inputWS;
-  int fwhm;
-  int index;
-  bool singleSpectrum;
+  API::MatrixWorkspace_sptr inputWS; ///<workspace to check for peaks
+  int fwhm; ///<holder for the requested peak FWHM
+  int index; ///<list of workspace indicies to check
+  bool singleSpectrum; ///<flag for if only a single spectrum is present
 };
 
 } // namespace Algorithms
