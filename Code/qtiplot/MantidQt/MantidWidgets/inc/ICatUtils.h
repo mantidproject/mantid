@@ -19,8 +19,6 @@ namespace MantidQt
 		{
 		public:
 			SearchCalendar(QWidget* parent=0);
-			virtual void leaveEvent(QEvent* qevent);
-
 		};
 
 
@@ -54,9 +52,12 @@ namespace MantidQt
 			void popupCalendar(QWidget* parent);
 
 			/// close calendarwidget
-			void closeCalendarWidget();
+			void closeCalendarWidget(); 
 
-
+			/// returns the calendar widget
+			QCalendarWidget* calendarWidget();
+			
+			
 		private:
 
 			Mantid::API::ITableWorkspace_sptr  executeListInstruments();
@@ -66,8 +67,10 @@ namespace MantidQt
 			ICatInvestigation* m_invstWidget;
 			///parent widget
 			QWidget* m_applicationWindow;
-			 ///pointer to calender object
+			
+			///pointer to calender object
 			QCalendarWidget* m_calendarWidget ;
+			
 
 		};
 

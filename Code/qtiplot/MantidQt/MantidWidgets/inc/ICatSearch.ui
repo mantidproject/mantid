@@ -52,12 +52,6 @@
        <height>131</height>
       </size>
      </property>
-     <property name="toolTip" >
-      <string/>
-     </property>
-     <property name="statusTip" >
-      <string/>
-     </property>
      <property name="styleSheet" >
       <string notr="true" >background-color: rgb(216, 225, 255);</string>
      </property>

@@ -522,7 +522,7 @@ void ICatInvestigation::onLoad()
 	if(sfileNames.empty())
 	{
 		QString msg="Select the files  to load using 'Select All files' button provided or "
-			 "\n mouse left button and Shift/Ctrl Key and download the files using Download button.";
+			 "\n mouse left button and Shift/Ctrl Key and download the files using Download button before trying to load.";
 		emit error( msg);
 	}
 

@@ -1124,6 +1124,9 @@ namespace Mantid
 				req_sptr->advancedSearchDetails->investigationAbstract = investAbstract_sptr.get();
 				*req_sptr->advancedSearchDetails->investigationAbstract = inputs.getInvestigationAbstract();
 			}
+			std::string invstType=inputs.getInvestigationType();
+			req_sptr->advancedSearchDetails->investigationType = &invstType;
+			
 
 			//sample name
 			boost::shared_ptr<std::string > sample_sptr(new std::string);

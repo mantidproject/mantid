@@ -16,7 +16,6 @@
 #include <QMdiSubWindow>
 #include <QDesktopServices>
 #include <QUrl>
-#include<QIntValidator>
 
 
 using namespace Mantid::Kernel;
@@ -30,7 +29,7 @@ using namespace MantidQt::MantidWidgets;
 ///Constructor
 ICatSearch::ICatSearch(QWidget *par) :
 QWidget(par),m_sender(NULL),m_invstWidget(NULL),
-m_calendarWidget(NULL),m_utils_sptr( new ICatUtils)
+m_utils_sptr( new ICatUtils)
 {
 	initLayout();
 //	 getting the application window pointer and setting it 
@@ -41,6 +40,11 @@ m_calendarWidget(NULL),m_utils_sptr( new ICatUtils)
 	{
 		setparentWidget(parent);
 	}
+
+	
+}
+ICatSearch::~ICatSearch()
+{
 }
 QWidget* ICatSearch::getParentWidget()
 {
@@ -55,13 +59,8 @@ void ICatSearch::setparentWidget(QWidget* par)
 /// Set up the dialog layout
 void ICatSearch::initLayout()
 {
-	
-
  	m_uiForm.setupUi(this);
-    /*QValidator * val= new QIntValidator(0,100000000,m_uiForm.startRunEdit);
-	m_uiForm.startRunEdit->setValidator(val);
-	m_uiForm.endRunEdit->setValidator(val);*/
-	
+    	
 	populateInstrumentBox();
 		
 	//getting last saved input data from registry
@@ -75,7 +74,12 @@ void ICatSearch::initLayout()
 	connect(m_uiForm.startdatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.enddatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.helpButton,SIGNAL(clicked()),this,SLOT(helpButtonClicked()));
-	
+
+	m_uiForm.startRunEdit->installEventFilter(this);
+	m_uiForm.endRunEdit->installEventFilter(this);
+	m_uiForm.keywordslineEdit->installEventFilter(this);
+	m_uiForm.searchtreeWidget->installEventFilter(this);
+		
 }
 /// This method gets called  when the widget is closed
 void ICatSearch::closeEvent(QCloseEvent*)
@@ -90,7 +94,6 @@ void ICatSearch::onSearch()
 	m_ws_sptr.reset();
 	// execute the search by run number algorithm
 	executeSearchByRunNumber(m_ws_sptr);
-	//updatesearchResults(m_ws_sptr);
 }
 
 /** Is case sensitive search
@@ -117,29 +120,8 @@ void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 /** This method populates the instrument box
 */
 void ICatSearch::populateInstrumentBox(){
-	
-	//// execute the algorithm ListInstruments
-	//ITableWorkspace_sptr ws_sptr=executeListInstruments();
-	//if(!ws_sptr)
-	//{
-	//	emit error("Instruments list is empty,can not load instrument box.");
-	//	return ;
-	//}
-	//
-	//// loop through values
-	//for(int row=0;row<ws_sptr->rowCount();++row)
-	//{
-	//	//retrieving the  instrument name from table workspace
-	//	std::string instName(ws_sptr->String(row,0));
-	//	//populate the instrument box  
-	//	m_uiForm.instrumentBox->insertItem(row,QString::fromStdString(instName));
 
-	//}
-	////sorting the combo by instrument name;
-	//m_uiForm.instrumentBox->model()->sort(0);
-	//m_uiForm.instrumentBox->insertItem(-1,"");
-
-		try{
+	try{
 
 		//ICatUtils utils;
 		if(!m_utils_sptr)
@@ -155,7 +137,7 @@ void ICatSearch::populateInstrumentBox(){
 	{
 		emit error(e.what());
 		return;
-	
+
 	}
 	catch(...)
 	{
@@ -247,18 +229,6 @@ void ICatSearch::getDates(QString& startDate,QString& endDate)
 ///popup DateTime calender to select date
 void ICatSearch:: popupCalendar()
 {
-
-	/*m_calendarWidget = new SearchCalendar(this);
-    m_calendarWidget->setObjectName(QString::fromUtf8("calendarWidget"));
-    m_calendarWidget->setGeometry(QRect(386, 64, 211, 148));
-    m_calendarWidget->setGridVisible(true);
-	connect(m_calendarWidget,SIGNAL(clicked(const QDate&)) ,this,SLOT(getDate(const QDate&)));
-	m_calendarWidget->show();
-	
-	QObject * qsender= sender();
-	if(!qsender) return;
-	 m_sender=qsender;*/
-
 	if(!m_utils_sptr)
 		return;
 
@@ -272,7 +242,7 @@ void ICatSearch:: popupCalendar()
 ///date changed
 void ICatSearch::getDate(const QDate& date  )
 {
-	//m_calendarWidget->close();
+	//calendarWidget()->close();
 	m_utils_sptr->closeCalendarWidget();//close the calendar widget
 	if(!m_sender) return;
 
@@ -454,8 +424,53 @@ void ICatSearch::readSettings()
 //handler for helpbutton
 void ICatSearch::helpButtonClicked()
 {
-	//QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ISIS_Search"));
 
+}
+
+void ICatSearch::mousePressEvent (QMouseEvent* )
+{
+	/*if(m_uiForm.startRunEdit->underMouse())
+	{
+		emit error("mousePressEvent:undermouse");
+		if(event->button()==Qt::LeftButton )
+		{
+			if(m_utils_sptr->calendarWidget())
+			{		
+				m_utils_sptr->calendarWidget()->hide();
+			}
+		}
+	}
+	else
+	{
+		emit error("mousePressEvent:not undermouse");
+	}*/
+
+}
+bool ICatSearch::eventFilter(QObject *obj, QEvent *event)
+{
+	if (event->type() ==QEvent::FocusIn && obj==m_uiForm.searchtreeWidget)
+	{		
+		if(m_utils_sptr->calendarWidget())
+		{
+			m_utils_sptr->calendarWidget()->hide();
+		}
+	
+	}
+	else if (event->type()==QEvent::MouseButtonPress)
+	{
+		if(m_utils_sptr->calendarWidget())
+		{
+			m_utils_sptr->calendarWidget()->hide();
+		}
+
+	}
+	else
+	{
+		// standard event processing
+		return QWidget::eventFilter(obj, event);
+	}
+	return true;
 }
 
 

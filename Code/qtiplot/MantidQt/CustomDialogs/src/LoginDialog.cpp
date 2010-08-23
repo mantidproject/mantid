@@ -47,5 +47,5 @@ void LoginDialog::parseInput()
 /// handler for help button click
 void LoginDialog::helpButtonClicked()
 {
-	//QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_The_ICat_Menu#ICat-.3E_Login"));
 }

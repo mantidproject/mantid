@@ -21,6 +21,7 @@ namespace MantidQt
 			void error(const QString&);
 		public:
 			ICatAdvancedSearch(QWidget*parent =0 );
+			~ICatAdvancedSearch();
 			void initLayout();
 
 		private slots:
@@ -60,6 +61,8 @@ namespace MantidQt
 			 void saveSettings();
 			 /// read settings from registry
              void readSettings();
+			  //event filtering
+			bool eventFilter(QObject *obj, QEvent *event);
 
 		private:
 			Ui::ICatAdvancedSearch m_uiForm;

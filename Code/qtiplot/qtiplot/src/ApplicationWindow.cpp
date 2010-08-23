@@ -12555,7 +12555,7 @@ void ApplicationWindow::createActions()
 	actionICatLogin->setToolTip(tr("ICat Login"));
 	connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
 
-	actionICatSearch=new QAction("Search",this);
+	actionICatSearch=new QAction("ISIS Search",this);
 	//actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
 	actionICatSearch->setToolTip(tr("ICat ISIS Search"));
 	connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));

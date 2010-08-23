@@ -16,11 +16,8 @@ using namespace MantidQt::MantidWidgets;
 ICatAdvancedSearch::ICatAdvancedSearch(QWidget* par):
 QWidget(par),m_utils_sptr( new ICatUtils)
 {
-
 	initLayout();
-
 	readSettings();
-
 	connect(m_uiForm.searchButton,SIGNAL(clicked()),this,SLOT(onSearch()));
 	connect(m_uiForm.closeButton,SIGNAL(clicked()),this,SLOT(onClose()));
 	connect(m_uiForm.advSearchtableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
@@ -29,7 +26,6 @@ QWidget(par),m_utils_sptr( new ICatUtils)
 	connect(m_uiForm.startdatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.enddatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.helpButton,SIGNAL(clicked()),this,SLOT(helpButtonClicked()));
-
 
 	//	 getting the application window pointer and setting it 
 	//this is bcoz parent()->parent() is not working in some slots as I expected 
@@ -40,7 +36,20 @@ QWidget(par),m_utils_sptr( new ICatUtils)
 		setparentWidget(parent);
 	}
 
+	m_uiForm.startRunEdit->installEventFilter(this);
+	m_uiForm.endRunEdit->installEventFilter(this);
+	m_uiForm.keywordsEdit->installEventFilter(this);
+	m_uiForm.treeWidget->installEventFilter(this);
+	m_uiForm.investigatonNameEdit->installEventFilter(this);
+	m_uiForm.invstAbstractEdit->installEventFilter(this);
+	m_uiForm.sampleEdit->installEventFilter(this);
+	m_uiForm.invstsurnameEdit->installEventFilter(this);
+	m_uiForm.datafilenameEdit->installEventFilter(this);
 
+
+}
+ICatAdvancedSearch::~ICatAdvancedSearch()
+{
 }
 /* this method sets the parent widget as application window
 */
@@ -52,9 +61,9 @@ void ICatAdvancedSearch::initLayout()
 {
 	m_uiForm.setupUi(this);
 
-	/* QValidator * val= new QIntValidator(0,100000000,m_uiForm.startRunEdit);
+	QValidator * val= new QIntValidator(0,100000000,m_uiForm.startRunEdit);
 	m_uiForm.startRunEdit->setValidator(val);
-	m_uiForm.endRunEdit->setValidator(val);*/
+	m_uiForm.endRunEdit->setValidator(val);
 
 	populateInstrumentBox();
 	populateInvestigationType();
@@ -63,8 +72,6 @@ void ICatAdvancedSearch::initLayout()
 void ICatAdvancedSearch::populateInstrumentBox()
 {	
 	try{
-
-		//ICatUtils utils;
 		if(!m_utils_sptr)
 			return;
 		m_utils_sptr->populateInstrumentBox(m_uiForm.instrumentBox);
@@ -414,7 +421,7 @@ void ICatAdvancedSearch::getDate(const QDate& date  )
 //handler for helpbutton
 void ICatAdvancedSearch::helpButtonClicked()
 {
-	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Advanced_Search"));
 
 }
 
@@ -473,6 +480,32 @@ void ICatAdvancedSearch::readSettings()
 
 	searchsettings.endGroup();
 }
+bool ICatAdvancedSearch::eventFilter(QObject *obj, QEvent *event)
+{
+	if (event->type() ==QEvent::FocusIn && obj==m_uiForm.treeWidget)
+	{		
+		if(m_utils_sptr->calendarWidget())
+		{
+			m_utils_sptr->calendarWidget()->hide();
+		}
+	
+	}
+	else if (event->type()==QEvent::MouseButtonPress)
+	{
+		if(m_utils_sptr->calendarWidget())
+		{
+			m_utils_sptr->calendarWidget()->hide();
+		}
+
+	}
+	else
+	{
+		// standard event processing
+		return QWidget::eventFilter(obj, event);
+	}
+	return true;
+}
+
 
 
 

@@ -12,7 +12,7 @@ using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
 
-ICatUtils::ICatUtils()
+ICatUtils::ICatUtils():m_calendarWidget(NULL)
 {
 	
 	
@@ -269,26 +269,32 @@ void  ICatUtils::popupCalendar(QWidget* parent)
     m_calendarWidget->setGeometry(QRect(386, 64, 211, 148));
     m_calendarWidget->setGridVisible(true);
 	m_calendarWidget->show();
+	/*m_calendarWidget->setMouseTracking(true);
+	m_calendarWidget->setFocus();
+	m_calendarWidget->setFocusPolicy(Qt::WheelFocus);
+	m_calendarWidget->installEventFilter(parent);*/
 }
 
 /// close calendarwidget
 void ICatUtils::closeCalendarWidget()
 {
-	//m_calendarWidget->close();
-	if(m_calendarWidget->isVisible())
+	if(m_calendarWidget)
 	{
 		m_calendarWidget->hide();
 	}
+}
+/// This method returns the calendar widget
+QCalendarWidget* ICatUtils::calendarWidget()
+{
+	return m_calendarWidget;
 }
 
 
 SearchCalendar::SearchCalendar(QWidget* par):QCalendarWidget(par)
 {
 }
-void SearchCalendar::leaveEvent(QEvent*)
-{
-	//this->hide();
-}
+
+
 
 
 
