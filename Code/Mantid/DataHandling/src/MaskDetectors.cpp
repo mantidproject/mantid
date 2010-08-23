@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <set>
@@ -16,6 +17,7 @@ DECLARE_ALGORITHM(MaskDetectors)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// (Empty) Constructor
 MaskDetectors::MaskDetectors() {}
@@ -30,14 +32,14 @@ void MaskDetectors::init()
     "The name of the workspace that will be used as input and\n"
     "output for the algorithm" );
   declareProperty(new ArrayProperty<int>("SpectraList"),
-    "A coma separated list or array containing a list of spectra to\n"
+    "A comma separated list or array containing a list of spectra to\n"
     "mask (DetectorList and WorkspaceIndexList are ignored if this\n"
     "is set)" );
   declareProperty(new ArrayProperty<int>("DetectorList"),
-    "A coma separated list or array containing a list of detector ID's\n"
+    "A comma separated list or array containing a list of detector ID's\n"
     "to mask (WorkspaceIndexList is ignored if this is set)" );
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-    "A coma separated list or array containing the workspace indices\n"
+    "A comma separated list or array containing the workspace indices\n"
     "to mask" );
 }
 
@@ -47,6 +49,9 @@ void MaskDetectors::exec()
   const MatrixWorkspace_sptr WS = getProperty("Workspace");
   // Get the size of the vectors
   const int vectorSize = WS->blocksize();
+
+  //Is it an event workspace?
+  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
 
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
   std::vector<int> spectraList = getProperty("SpectraList");
@@ -132,13 +137,27 @@ void MaskDetectors::exec()
       }
     }
     
-    // Zero the workspace spectra (data and errors, not X values)
-    WS->dataY(*it).assign(vectorSize,0.0);
-    WS->dataE(*it).assign(vectorSize,0.0);
+    if (eventWS)
+    {
+      //Valid event workspace - clear the event list.
+      eventWS->getEventListAtWorkspaceIndex(*it).clear();
+    }
+    else
+    {
+      // Zero the workspace spectra (data and errors, not X values)
+      WS->dataY(*it).assign(vectorSize,0.0);
+      WS->dataE(*it).assign(vectorSize,0.0);
+    }
 
-	prog+=(double( 1)/indexList.size());
-//	g_log.error()<<" progress = "<<prog<<std::endl;
-	progress(prog);
+    //Progress
+    prog+=(double( 1)/indexList.size());
+    progress(prog);
+  }
+
+  if (eventWS)
+  {
+    //Also clear the MRU for event workspaces.
+    eventWS->clearMRU();
   }
 
 }

@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -23,20 +24,64 @@ class MaskDetectorsTest : public CxxTest::TestSuite
 public:
   MaskDetectorsTest()
   {
-    // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Histogram1D::RCtype x,vec;
-    x.access().resize(6,10.0);
-    vec.access().resize(5,1.0);
+  }
+
+  void testName()
+  {
+    TS_ASSERT_EQUALS( marker.name(), "MaskDetectors" );
+  }
+
+  void testVersion()
+  {
+    TS_ASSERT_EQUALS( marker.version(), 1 );
+  }
+
+
+  void setUpWS(bool event)
+  {
+    MatrixWorkspace_sptr space;
     int forSpecDetMap[5];
-    for (int j = 0; j < 5; ++j)
+
+    // Set up a small workspace for testing
+    if (event)
     {
-      space2D->setX(j,x);
-      space2D->setData(j,vec,vec);
-      space2D->getAxis(1)->spectraNo(j) = j;
-      forSpecDetMap[j] = j;
+      space = WorkspaceFactory::Instance().create("EventWorkspace",5,6,5);
+      EventWorkspace_sptr spaceEvent = boost::dynamic_pointer_cast<EventWorkspace>(space);
+
+      Histogram1D::RCtype x,vec;
+      vec.access().resize(5,1.0);
+      for (int j = 0; j < 5; ++j)
+      {
+        //Just one event per pixel
+        TofEvent event(1.23, 4.56);
+        spaceEvent->getEventList(j).addEventQuickly(event);
+        spaceEvent->getAxis(1)->spectraNo(j) = j;
+        forSpecDetMap[j] = j;
+      }
+
+      spaceEvent->doneLoadingData();
+      x.access().push_back(0.0);
+      x.access().push_back(10.0);
+      spaceEvent->setAllX(x);
+
     }
+    else
+    {
+      space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
+      Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+
+      Histogram1D::RCtype x,vec;
+      x.access().resize(6,10.0);
+      vec.access().resize(5,1.0);
+      for (int j = 0; j < 5; ++j)
+      {
+        space2D->setX(j,x);
+        space2D->setData(j,vec,vec);
+        space2D->getAxis(1)->spectraNo(j) = j;
+        forSpecDetMap[j] = j;
+      }
+    }
+
     Detector *d = new Detector("det",0);
     d->setID(0);
     boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d);
@@ -58,18 +103,10 @@ public:
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
+
   }
 
-  void testName()
-  {
-    TS_ASSERT_EQUALS( marker.name(), "MaskDetectors" );
-  }
-
-  void testVersion()
-  {
-    TS_ASSERT_EQUALS( marker.version(), 1 );
-  }
-
+  //---------------------------------------------------------------------------------------------
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( marker.initialize() );
@@ -99,8 +136,11 @@ public:
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) );
   }
 
+  //---------------------------------------------------------------------------------------------
   void testExec()
   {
+    setUpWS(false);
+
     if ( !marker.isInitialized() ) marker.initialize();
 
     marker.setPropertyValue("Workspace","testSpace");
@@ -144,7 +184,63 @@ public:
     TS_ASSERT( i->getDetector(3)->isMasked() );
     TS_ASSERT( ! i->getDetector(4)->isMasked() );
 
-	AnalysisDataService::Instance().remove("testSpace");
+  AnalysisDataService::Instance().remove("testSpace");
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  void testExecEventWorkspace()
+  {
+    setUpWS(true);
+
+    if ( !marker.isInitialized() ) marker.initialize();
+
+    marker.setPropertyValue("Workspace","testSpace");
+
+    TS_ASSERT_THROWS_NOTHING( marker.execute());
+    TS_ASSERT( marker.isExecuted() );
+
+    marker.setPropertyValue("WorkspaceIndexList","0,3");
+    TS_ASSERT_THROWS_NOTHING( marker.execute());
+
+    MaskDetectors marker2;
+    marker2.initialize();
+    marker2.setPropertyValue("Workspace","testSpace");
+    marker2.setPropertyValue("SpectraList","2");
+    TS_ASSERT_THROWS_NOTHING( marker2.execute());
+    TS_ASSERT( marker2.isExecuted() );
+
+    MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testSpace"));
+    std::vector<double> tens;
+    tens.push_back(0.0);
+    tens.push_back(10.0);
+    std::vector<double> ones(1,1.0);
+    std::vector<double> zeroes(1,0.0);
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(0), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(0), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(1), ones );
+    TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
+    TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(2), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(2), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataX(3), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataX(4), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(4), ones );
+    TS_ASSERT_EQUALS( outputWS->dataE(4), ones );
+    boost::shared_ptr<IInstrument> i = outputWS->getInstrument();
+    TS_ASSERT( i->getDetector(0)->isMasked() );
+    TS_ASSERT( ! i->getDetector(1)->isMasked() );
+    TS_ASSERT( i->getDetector(2)->isMasked() );
+    TS_ASSERT( i->getDetector(3)->isMasked() );
+    TS_ASSERT( ! i->getDetector(4)->isMasked() );
+
+  AnalysisDataService::Instance().remove("testSpace");
+
+
   }
 
 private:
