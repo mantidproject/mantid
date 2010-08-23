@@ -546,17 +546,25 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
  
     std::string fitStatus = fit->getProperty("Output Status");
     const double height = fit->getProperty("height");
-    if ( height < 0 ) fitStatus.clear();              // Height must be positive
+    if ( height <= 0 ) fitStatus.clear();              // Height must be strictly positive
     if ( ! fitStatus.compare("success") ) 
     {
       const double centre = fit->getProperty("peakCentre");
       const double width = fit->getProperty("sigma");
       const double bgintercept = fit->getProperty("bg0");
       const double bgslope = fit->getProperty("bg1");
-      g_log.information() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height 
-                    << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
-      API::TableRow t = m_peaks->appendRow();
-      t << spectrum << centre << width << height << bgintercept << bgslope;
+
+      if (isnan(centre) || isnan(width) || isnan(bgintercept) || isnan(bgslope))
+      {
+        g_log.information() << "NaN detected in the results of peak fitting. Peak ignored." << std::endl;
+      }
+      else
+      {
+        g_log.information() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height
+                      << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
+        API::TableRow t = m_peaks->appendRow();
+        t << spectrum << centre << width << height << bgintercept << bgslope;
+      }
 
 //      std::cout << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height
 //                    << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
