@@ -14,10 +14,12 @@ myenv.Append(CPPDEFINES=[('IN_MANTID_DATA_HANDLING',1)])
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 # Link to the appropriate version of Poco
-if bool(env['debug']) == True:
+if int(myenv['debug']) == 1:
     myenv.Append(MYLIBLIST='PocoNetd')
 else:
     myenv.Append(MYLIBLIST='PocoNet')
+
+print myenv['MYLIBLIST']
 
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidDataHandling.pdb')

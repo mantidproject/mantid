@@ -15,7 +15,7 @@ myenv.Append(CPPDEFINES=[('IN_MANTID_ICAT',1),'WITH_NONAMESPACES','WITH_OPENSSL'
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 # Link to the appropriate version of Poco
-if bool(env['debug']) == True:
+if int(env['debug']) == 1:
     myenv.Append(MYLIBLIST='PocoNetd')
 else:
     myenv.Append(MYLIBLIST='PocoNet')
