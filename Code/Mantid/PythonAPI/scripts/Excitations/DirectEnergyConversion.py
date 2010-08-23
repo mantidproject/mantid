@@ -25,7 +25,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
 #        self.normalise_method = 'current'
         self.map_file = None
         
-        if (self.file_prefix == "CNCS" or "ARCS" or "SEQUOIA"):
+        if (self.file_prefix == "CNCS" or self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
             self.facility = "SNS"
             self.normalise_method  = 'current'
             self.file_ext = '.dat'
@@ -131,7 +131,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             ChangeBinOffset(result_ws, result_ws, -tzero)
             mon1_peak = 0.0
             self.applyDetectorEfficiency = False
-        elif (self.file_prefix == "ARCS" or "SEQUOIA"):
+        elif (self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
             #self.log("***** ARCS/SEQUOIA *****")
             InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
             loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
@@ -144,7 +144,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             ei_value, mon1_peak = self.get_ei(result_ws, ei_guess)
             
         # For event mode, we are going to histogram in energy first, then go back to TOF
-        if (self.file_prefix == "ARCS" or "SEQUOIA" or "CNCS"):
+        if (self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA" or self.file_prefix == "CNCS"):
             # Convert to Et
             ConvertUnits(result_ws, "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
             RenameWorkspace("_tmp_energy_ws", result_ws)
