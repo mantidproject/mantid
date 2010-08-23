@@ -30,7 +30,7 @@ public:
   }
 
 
-  void xtestSortByTof()
+  void testSortByTof()
   {
     std::string wsName("test_inEvent3");
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
@@ -45,7 +45,7 @@ public:
     TS_ASSERT_THROWS( sort.setPropertyValue("InputWorkspace","workspace2d"), std::invalid_argument);
     //This one will be ok
     sort.setPropertyValue("InputWorkspace",wsName);
-    sort.setPropertyValue("SortByTof", "1");
+    sort.setPropertyValue("SortBy", "Time of Flight");
 
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
@@ -63,7 +63,7 @@ public:
   }
 
 
-  void xtestSortByFrame()
+  void testSortByFrame()
   {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
@@ -72,7 +72,7 @@ public:
     Sort sort;
     sort.initialize();
     sort.setPropertyValue("InputWorkspace",wsName);
-    sort.setPropertyValue("SortByTof", "0");
+    sort.setPropertyValue("SortBy", "Frame Index");
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
 

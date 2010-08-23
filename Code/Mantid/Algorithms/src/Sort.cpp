@@ -30,14 +30,14 @@ namespace Mantid
 
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "",Direction::InOut,new EventWorkspaceValidator<>),
-        "Workspace to be sorted.");
+        "EventWorkspace to be sorted.");
 
-      //TODO: Invent a "choice" property and put it here
+      std::vector<std::string> propOptions;
+      propOptions.push_back("Time of Flight");
+      propOptions.push_back("Frame Index");
+      declareProperty("SortBy", "Time of Flight",new ListValidator(propOptions),
+        "How to sort the events.");
 
-      //Sort by TOF, defaults to TRUE
-      declareProperty(
-        new PropertyWithValue<bool>("SortByTOF", true),
-        "Check to sort by TOF; otherwise, will sort by frame index.");
     }
 
 
@@ -50,7 +50,7 @@ namespace Mantid
       // Get the input workspace
       MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
       //And other properties
-      bool sortByTof = getProperty("SortByTOF");
+      bool sortByTof = (getPropertyValue("SortBy") == "Time of Flight");
 
       //---------------------------------------------------------------------------------
       //Now, determine if the input workspace is actually an EventWorkspace
