@@ -247,6 +247,9 @@ namespace Mantid
 
     /**
      * Write the help text for the function definitions that look more pythonic.
+     * @param os The stream to use to write the help
+     * @param properties This list of properties
+     * @param names The names associated with the properties
      *
      */
     void SimplePythonAPI::writeFunctionPyHelp(std::ostream& os, const PropertyVector& properties,

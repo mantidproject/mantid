@@ -75,10 +75,20 @@ namespace Kernel
     }
 
   private:
+    /**
+     * Private copy constructor plus it's not implemented
+     * @param other The MRUList you'd like to copy but can't
+     * @throw NotImplementedError You can't use this function!
+     */
     MRUList(MRUList& other)
     {
       throw NotImplementedError("Can't copy a MRU List.");
     }
+    /**
+     * Private equals operator plus it's not implemented
+     * @param other The MRUList you'd like to copy but can't
+     * @throw NotImplementedError You can't use this function!
+     */
     MRUList& operator=(MRUList& other)
     {
       throw NotImplementedError("Can't copy a MRU List.");
