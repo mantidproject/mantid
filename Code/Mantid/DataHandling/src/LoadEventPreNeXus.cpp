@@ -106,7 +106,7 @@ void LoadEventPreNeXus::init()
 
   // which pixels to load
   this->declareProperty(new ArrayProperty<int>(PID_PARAM),
-                        "A list of individual spectra to read. Only used if set.");
+                        "A list of individual spectra (pixel IDs) to read. Only used if set.");
 
   // Pad out empty pixels?
   this->declareProperty(new PropertyWithValue<bool>(PAD_PIXELS_PARAM, false, Direction::Input) );
@@ -187,7 +187,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
 /** Execute the algorithm */
 void LoadEventPreNeXus::exec()
 {
-  // what to load
+  // what spectra (pixel ID's) to load
   this->spectra_list = this->getProperty(PID_PARAM);
 
   // the event file is needed in case the pulseid fileanme is empty
@@ -342,6 +342,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   // do the actual loading
   this->num_error_events = 0;
   this->num_good_events = 0;
+  this->num_ignored_events = 0;
 
   double shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
   double longest_tof = 0.;
@@ -352,6 +353,13 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
   //Allocate the buffer
   DasEvent * event_buffer = new DasEvent[event_buffer_size];
+
+  //For slight speed up
+  bool loadOnlySomeSpectra = (this->spectra_list.size() > 0);
+  //Turn the spectra list into a map, for speed
+  std::map<int, bool> spectraLoadMap;
+  for (std::vector<int>::iterator it = spectra_list.begin(); it != spectra_list.end(); it++)
+    spectraLoadMap[*it] = true;
 
   while (eventfile->getOffset() < this->num_events)
   {
@@ -374,11 +382,28 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
         continue;
       }
 
+      //Covert the pixel ID from DAS pixel to our pixel ID
+      this->fixPixelId(temp.pid, period);
+
+      //Now check if this pid we want to load.
+      if (loadOnlySomeSpectra)
+      {
+        std::map<int, bool>::iterator it;
+        it = spectraLoadMap.find(temp.pid);
+        if (it == spectraLoadMap.end())
+        {
+          //Pixel ID was not found, so the event is being ignored.
+          this->num_ignored_events++;
+          continue;
+        }
+      }
+
       // work with the good guys
       frame_index = this->getFrameIndex(event_offset + i, frame_index);
       double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
       TofEvent event;
       event = TofEvent(tof, frame_index);
+
 
       //Find the overall max/min tof
       if (tof < shortest_tof)
@@ -386,14 +411,10 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
       if (tof > longest_tof)
         longest_tof = tof;
 
-      //Covert the pixel ID from DAS pixel to our pixel ID
-      this->fixPixelId(temp.pid, period);
-
       //The addEventQuickly method does not clear the cache, making things slightly faster.
       workspace->getEventList(temp.pid).addEventQuickly(event);
 
       // TODO work with period
-      // TODO filter based on pixel ids
       this->num_good_events++;
     }
 

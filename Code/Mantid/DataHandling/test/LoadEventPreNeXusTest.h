@@ -270,6 +270,33 @@ public:
   }
 
 
+  void test_LoadPreNeXus_CNCS_SkipPixels()
+  {
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
+    //Load just 2 pixels
+    eventLoader->setProperty("SpectrumList", "45, 110");
+    eventLoader->setProperty("PadEmptyPixels", false);
+
+    TS_ASSERT( eventLoader->execute() );
+
+    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
+            (AnalysisDataService::Instance().retrieve("cncs"));
+
+    //Only some of the pixels weretof loaded, because of lot of them are empty
+    int numpixels = 2;
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
+
+    //Mapping between workspace index and spectrum number
+    //Is the length good?
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 45);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 110);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 2);
+
+  }
+
+
 
 };
 
