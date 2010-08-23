@@ -20,6 +20,7 @@ class BaseBeamFinder(ReductionStep):
         super(BaseBeamFinder, self).__init__()
         self._beam_center_x = beam_center_x
         self._beam_center_y = beam_center_y
+        self._beam_radius = None
         
     def get_beam_center(self):
         return [self._beam_center_x, self._beam_center_y]

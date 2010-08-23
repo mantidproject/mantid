@@ -49,7 +49,7 @@ def DataPath(path):
     ReductionSingleton().set_data_path(path)
 
 def DirectBeamCenter(datafile):
-    ReductionSingleton().set_beam_finder(SANSReductionSteps.DirectBeamCenter(datafile, beam_radius=beam_radius))
+    ReductionSingleton().set_beam_finder(SANSReductionSteps.DirectBeamCenter(datafile))
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
     ReductionSingleton().set_beam_finder(SANSReductionSteps.ScatteringBeamCenter(datafile, beam_radius=beam_radius))
