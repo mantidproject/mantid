@@ -33,5 +33,16 @@ namespace Mantid
 		{
 			m_ScaleFactor=V3D(xFactor,yFactor,zFactor);
 		}
+
+	  /**
+	  * Set the geometry handler for IObjComponent
+	  * @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
+	  */
+	  void IObjComponent::setGeometryHandler(GeometryHandler *h)
+	  {
+	      if(h==NULL)return;
+	      this->handle=h;
+	  }
+
 	} // namespace Geometry
 } // namespace Mantid

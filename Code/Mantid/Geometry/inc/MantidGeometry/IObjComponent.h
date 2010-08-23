@@ -123,15 +123,7 @@ private:
   /// Geometry Handle for rendering
   GeometryHandler* handle;
 
-  /**
-  * Set the geometry handler for IObjComponent
-  * @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
-  */
-  void setGeometryHandler(GeometryHandler *h)
-  {
-      if(handle==NULL)return;
-      this->handle=handle;
-  }
+  void setGeometryHandler(GeometryHandler *h);
 
   friend class GeometryHandler;
 };
