@@ -84,14 +84,17 @@ void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filen
     if ( itemAlpha->text().isEmpty() )
       break;
 
+    QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
+    QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+
     Element* gElem = mDoc->createElement("pair");
     gElem->setAttribute("name", itemName->text().toStdString());
     rootElem->appendChild(gElem);
     Element* fwElem = mDoc->createElement("forward-group");
-    fwElem->setAttribute("name", m_uiForm.pairTable->item(i,1)->text().toStdString());
+    fwElem->setAttribute("val", qw1->currentText().toStdString());
     gElem->appendChild(fwElem);
     Element* bwElem = mDoc->createElement("backward-group");
-    bwElem->setAttribute("name", m_uiForm.pairTable->item(i,2)->text().toStdString());
+    bwElem->setAttribute("val", qw2->currentText().toStdString());
     gElem->appendChild(bwElem);
     Element* alphaElem = mDoc->createElement("alpha");
     alphaElem->setAttribute("val", itemAlpha->text().toStdString());
@@ -102,7 +105,7 @@ void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 }
 
 /**
- * load XML grouping file
+ * load XML grouping file. It is assumed that tables and combo box cleared before this method is called
  */
 void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filename)
 {
@@ -130,19 +133,10 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
     throw Mantid::Kernel::Exception::FileError("XML group file contains no group elements:" , filename);
   }
 
-  // Clear content of tables table
-  m_uiForm.groupTable->clearContents();
-  m_uiForm.pairTable->clearContents();
-  m_uiForm.frontGroupGroupPairComboBox->clear();
-
-  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-  {
-    m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
-    m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
-  }
-
 
   // add content to group table
+
+  QStringList allGroupNames;  // used to populate combo boxes 
   unsigned int numberGroups = pNL_group->length();
   for (unsigned int iGroup = 0; iGroup < numberGroups; iGroup++)
   {
@@ -161,48 +155,119 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
       // add info to table
       m_uiForm.groupTable->setItem(iGroup,0, new QTableWidgetItem(gName.c_str()) );
       m_uiForm.groupTable->setItem(iGroup,1, new QTableWidgetItem(ids.c_str()) );
+      allGroupNames.push_back( m_uiForm.groupTable->item(iGroup,0)->text() );
     }
     else
     {
-      //g_log.error("XML group file: " + filename + "contains no <ids> elements.");
       throw Mantid::Kernel::Exception::FileError("XML group file contains no <ids> elements:" , filename);
     }   
   }
   pNL_group->release();
   
 
+  // populate pair table combo boxes
+
+  int rowNum = m_uiForm.pairTable->rowCount();
+  for (int i = 0; i < rowNum; i++)
+  {
+    QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
+    QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+
+    for (int ii = 0; ii < allGroupNames.size(); ii++)
+    {
+
+      qw1->addItem( allGroupNames[ii] );
+      qw2->addItem( allGroupNames[ii] );
+    }
+    
+    if ( qw2->count() > 1 )
+      qw2->setCurrentIndex(1);
+  }
+
+
+
 
   // add content to pair table
 
-/*  NodeList* pNL_pair = pRootElem->getElementsByTagName("pair");
-  if ( pNL_pair->length() == 0 )
-
-  numberGroups = pNL_pair->length();
-  for (unsigned int iGroup = 0; iGroup < numberGroups; iGroup++)
+  QStringList allPairNames;  
+  NodeList* pNL_pair = pRootElem->getElementsByTagName("pair");
+  int nPairs = pNL_pair->length();
+  if ( pNL_pair->length() > 0 )
   {
-    Element* pGroupElem = static_cast<Element*>(pNL_pair->item(iGroup));
-
-    if ( !pGroupElem->hasAttribute("name") )
-      throw Mantid::Kernel::Exception::FileError("pair element without name" , filename);
-    std::string gName = pGroupElem->getAttribute("name");
-
-
-    Element* fwElement = pGroupElem->getChildElement("forward-group");
-    if (fwElement)
+    for (int iPair = 0; iPair < nPairs; iPair++)
     {
-      std::string ids = fwElement->getAttribute("val");
+      Element* pGroupElem = static_cast<Element*>(pNL_pair->item(iPair));
 
-      // add info to table
-      m_uiForm.groupTable->setItem(iGroup,0, new QTableWidgetItem(gName.c_str()) );
-      m_uiForm.groupTable->setItem(iGroup,1, new QTableWidgetItem(ids.c_str()) );
+      if ( !pGroupElem->hasAttribute("name") )
+        throw Mantid::Kernel::Exception::FileError("pair element without name" , filename);
+      std::string gName = pGroupElem->getAttribute("name");
+      m_uiForm.pairTable->setItem(iPair,0, new QTableWidgetItem(gName.c_str()) );
+      allPairNames.push_back(gName.c_str());
+
+      Element* fwElement = pGroupElem->getChildElement("forward-group");
+      if (fwElement)
+      {
+        std::string ids = fwElement->getAttribute("val");
+        QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(iPair,1));
+        int comboIndex = qw1->findText(ids.c_str());
+        if ( comboIndex < 0 )
+          throw Mantid::Kernel::Exception::FileError("XML pair group contains forward-group with unrecognised group name" , filename);
+        qw1->setCurrentIndex(comboIndex);
+      }
+      else
+      {
+        throw Mantid::Kernel::Exception::FileError("XML pair group contains no <forward-group> elements:" , filename);
+      }   
+
+      Element* bwElement = pGroupElem->getChildElement("backward-group");
+      if (bwElement)
+      {
+        std::string ids = bwElement->getAttribute("val");
+        QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(iPair,2));
+        int comboIndex = qw2->findText(ids.c_str());
+        if ( comboIndex < 0 )
+          throw Mantid::Kernel::Exception::FileError("XML pair group contains backward-group with unrecognised group name" , filename);
+        qw2->setCurrentIndex(comboIndex);
+      }
+      else
+      {
+        throw Mantid::Kernel::Exception::FileError("XML pair group contains no <backward-group> elements:" , filename);
+      }
+
+      Element* element = pGroupElem->getChildElement("alpha");
+      if (element)
+      {
+        if ( element->hasAttribute("val") )
+        {
+          m_uiForm.pairTable->setItem(iPair,3, new QTableWidgetItem(element->getAttribute("val").c_str()));
+        }
+      }
+      else
+      {
+        // for now accept that alpha is not specified
+        //throw Mantid::Kernel::Exception::FileError("XML pair group contains no <backward-group> elements:" , filename);
+      } 
+
     }
-    else
-    {
-      throw Mantid::Kernel::Exception::FileError("XML pair group contains no <forward-group> elements:" , filename);
-    }   
   }
-  pNL_group->release(); */
+  pNL_pair->release(); 
 
+
+  // populate front combobox
+
+  m_uiForm.frontGroupGroupPairComboBox->addItems(allGroupNames);
+  m_uiForm.frontGroupGroupPairComboBox->addItems(allPairNames);
+
+  /*
+  Element* element = pGroupElem->getChildElement("default");
+  if (element)
+  {
+    if ( element->hasAttribute("name") )
+    {
+          m_uiForm.pairTable->setItem(iPair,3, new QTableWidgetItem(element->getAttribute("val").c_str()));
+        }
+      }
+*/
 
 }
 

@@ -85,7 +85,10 @@
          <string>Time Zero (mu-s):</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit" >
+       <widget class="QLineEdit" name="timeZeroFront" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>230</x>
@@ -111,7 +114,7 @@
          <string>First Good Data (mu-s):</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_2" >
+       <widget class="QLineEdit" name="firstGoodBinFront" >
         <property name="geometry" >
          <rect>
           <x>230</x>
@@ -229,10 +232,6 @@
          <string>?</string>
         </property>
        </widget>
-       <zorder>pushButton</zorder>
-       <zorder>horizontalLayoutWidget_2</zorder>
-       <zorder>pushButton_4</zorder>
-       <zorder>mwRunFiles</zorder>
       </widget>
       <widget class="QGroupBox" name="groupBox_3" >
        <property name="geometry" >
@@ -282,17 +281,17 @@
          </rect>
         </property>
        </widget>
-       <widget class="QLabel" name="homeWithAlphaLabel" >
+       <widget class="QLabel" name="frontAlphaLabel" >
         <property name="geometry" >
          <rect>
           <x>330</x>
           <y>30</y>
-          <width>131</width>
+          <width>71</width>
           <height>16</height>
          </rect>
         </property>
         <property name="text" >
-         <string/>
+         <string>with alpha:</string>
         </property>
        </widget>
        <widget class="QComboBox" name="homePeriodBox1" >
@@ -306,6 +305,9 @@
         </property>
        </widget>
        <widget class="QComboBox" name="homePeriodBoxMath" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>350</x>
@@ -326,6 +328,9 @@
         </item>
        </widget>
        <widget class="QComboBox" name="homePeriodBox2" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>410</x>
@@ -348,6 +353,16 @@
          <string>?</string>
         </property>
        </widget>
+       <widget class="QLineEdit" name="frontAlphaNumber" >
+        <property name="geometry" >
+         <rect>
+          <x>390</x>
+          <y>30</y>
+          <width>71</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_4" >
        <property name="geometry" >
@@ -361,7 +376,7 @@
        <property name="title" >
         <string>Plot Data</string>
        </property>
-       <widget class="QPushButton" name="pushButton_2" >
+       <widget class="QPushButton" name="frontPlotButton" >
         <property name="geometry" >
          <rect>
           <x>240</x>
@@ -393,7 +408,7 @@
          <string>Plot type:</string>
         </property>
        </widget>
-       <widget class="QComboBox" name="comboBox_2" >
+       <widget class="QComboBox" name="frontPlotFuncs" >
         <property name="geometry" >
          <rect>
           <x>100</x>
@@ -583,6 +598,9 @@
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_11" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
        <property name="geometry" >
         <rect>
          <x>20</x>
@@ -620,7 +638,7 @@
         </property>
        </item>
       </widget>
-      <widget class="QComboBox" name="comboBox_4" >
+      <widget class="QComboBox" name="pairTablePlotChoice" >
        <property name="geometry" >
         <rect>
          <x>430</x>
