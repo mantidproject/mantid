@@ -341,7 +341,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
       outputWS->getEventListAtWorkspaceIndex(i).setX(x);
 
       // reverse the data if appropriate
-      if ((!x.empty()) && (x.begin() > x.end()))
+      if ((!x.empty()) && (*(x.begin()) > *(x.end())))
           outputWS->getEventListAtWorkspaceIndex(i).reverse();
 
     } catch (Exception::NotFoundError &e) {
