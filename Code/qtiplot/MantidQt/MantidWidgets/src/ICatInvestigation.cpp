@@ -86,11 +86,13 @@ void ICatInvestigation::populateInvestigationTreeWidget(){
 	qlist.push_back("DataSets");
 	QTreeWidgetItem *item4 = new QTreeWidgetItem(qlist);
 	item1->addChild(item4);
+	item4->setToolTip(0,"View investigations datasets");
 
 	qlist.clear();
 	qlist.push_back("Default");
 	QTreeWidgetItem *item5 = new QTreeWidgetItem(qlist);
 	item4->addChild(item5);
+	item5->setToolTip(0,"View default's datafiles");
 
 	qlist.clear();
 	qlist.push_back("Status:");
