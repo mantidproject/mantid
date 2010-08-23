@@ -31,14 +31,8 @@ def load_run(prefix, run_number, output_name, ext='', name_suffix='', time_bins=
     if ext.startswith(".n"):
         loader = LoadNexus(filename, output_name)
     elif ext.startswith(".dat"):
-        if time_bins is None:
-            raise ValueError("No Time-of-Flight bins defined.")
         # load the events
-        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name+"_event", PadEmptyPixels=True)
-        # Create a histogram workspace
-        loader = Rebin(output_name + "_event", output_name, time_bins)
-        # Delete the event workspace
-        mtd.deleteWorkspace(output_name + "_event")
+        loader = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)
         det_info_file = prefix + "_detector.sca"        
         return loader.workspace(), det_info_file
     else:

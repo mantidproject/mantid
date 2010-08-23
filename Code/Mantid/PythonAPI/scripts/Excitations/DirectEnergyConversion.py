@@ -124,7 +124,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             
         # Special load monitor stuff.    
         if (self.file_prefix == "CNCS"):
-            self.log("--- CNCS ---")
+            #self.log("--- CNCS ---")
             self.fix_ei = True
             ei_value = ei_guess
             tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
@@ -132,12 +132,31 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             mon1_peak = 0.0
             self.applyDetectorEfficiency = False
         elif (self.file_prefix == "ARCS" or "SEQUOIA"):
-            self.log("***** ARCS/SEQUOIA *****")
-            #print "You aren't gonna see much at the moment!"
+            #self.log("***** ARCS/SEQUOIA *****")
+            InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
+            loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
+            monitor_ws = loader.workspace()
+            ei_value, tzero = self.get_ei(monitor_ws, ei_guess)
+            ChangeBinOffset(result_ws, result_ws, -tzero)
+            self.applyDetectorEfficiency = False
         else:
             # Do ISIS stuff for Ei
             ei_value, mon1_peak = self.get_ei(result_ws, ei_guess)
             
+        # For event mode, we are going to histogram in energy first, then go back to TOF
+        if (self.file_prefix == "ARCS" or "SEQUOIA" or "CNCS"):
+            # Convert to Et
+            ConvertUnits(result_ws, "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
+            RenameWorkspace("_tmp_energy_ws", result_ws)
+            mtd.deleteWorkspace("_tmp_energy_ws")
+            # Histogram
+            Rebin(result_ws, "_tmp_rebin_ws", self.energy_bins)
+            RenameWorkspace("_tmp_rebin_ws", result_ws)
+            mtd.deleteWorkspace("_tmp_rebin_ws")
+            # Convert back to TOF
+            ConvertUnits(result_ws, result_ws, Target="TOF",EMode="Direct", EFixed=ei_value)
+                
+        
         bin_offset = -mon1_peak
         
         if self.background == True:
@@ -145,7 +164,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             ConvertToDistribution(result_ws)                                             
             FlatBackground(result_ws, result_ws, self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Mean')
             ConvertFromDistribution(result_ws)  
-        
+    
         self.normalise(result_ws, self.normalise_method, range_offset=bin_offset)
         
         LoadDetectorInfo(result_ws, det_info_file)
@@ -172,7 +191,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         '''
         Load a run number or sum a set of run numbers
         '''
-        data = common.load_run(self.file_prefix, run_num, output_name, self.file_ext, time_bins=self.time_bins)
+        data = common.load_run(self.file_prefix, run_num, output_name, self.file_ext)
         self.setup_mtd_instrument(data[0])
         return data
        
