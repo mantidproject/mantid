@@ -188,6 +188,7 @@ void LoadPreNeXusMonitors::exec()
 
   // a temporary place to put the spectra/detector numbers
   boost::shared_array<int> spectra_numbers(new int[nMonitors]);
+  boost::shared_array<int> detector_numbers(new int[nMonitors]);
 
   // temp buffer for file reading
   std::vector<uint32_t> buffer;
@@ -210,8 +211,9 @@ void LoadPreNeXusMonitors::exec()
     localWorkspace->dataY(i) = intensity;
     localWorkspace->dataE(i) = error;
     // Just have spectrum number be the same as the monitor number but -ve.
-    spectra_numbers[i] = -(i + 1);
-    localWorkspace->getAxis(1)->spectraNo(i) = -(i + 1);
+    detector_numbers[i] = -(i + 1);
+    spectra_numbers[i] = (i + 1);
+    localWorkspace->getAxis(1)->spectraNo(i) = (i + 1);
   }
 
   std::cout << "Setting Units" << std::endl;
@@ -225,7 +227,7 @@ void LoadPreNeXusMonitors::exec()
   this->runLoadInstrument(instrumentName, localWorkspace);
 
   // Populate the Spectra Map
-  localWorkspace->mutableSpectraMap().populate(spectra_numbers.get(), spectra_numbers.get(),
+  localWorkspace->mutableSpectraMap().populate(spectra_numbers.get(), detector_numbers.get(),
       static_cast<int> (nMonitors));
 
   // Set the property
