@@ -341,7 +341,6 @@ class MantidPyFramework(FrameworkManager):
     
     __is_initialized = False
     __config_service = None
-    __currentGUIFlag = None
     
     def __init__(self):
         # Call base class constructor
@@ -414,45 +413,25 @@ class MantidPyFramework(FrameworkManager):
         """
         Initialise the framework
         """
-        if self.__is_initialized == True and GUI == self.__currentGUIFlag:
+        if self.__is_initialized == True:
             return
-        __currentGUIFlag = GUI
 
         # Update search path on posix machines where mantidsimple.py goes to the user directory
         if os.name == 'posix':
             outputdir = os.path.expanduser('~/.mantid')
             if not outputdir in sys.path:
                 sys.path.append(outputdir)
-        
-        self._pyalg_loader.load_modules(refresh=False)
+
         self.createPythonSimpleAPI(GUI)
+        self._pyalg_loader.load_modules(refresh=False)
         self._importSimpleAPIToGlobal()     
 
-        # Required directories (config service has changed them to absolute paths)
-        self._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
-        # Now additional user specified directories
-        self._addToPySearchPath(mtd.settings['pythonscripts.directories'])
-        # Finally old scripts key; For backwards compatability add all directories that are one-level below this
-        direcs = mtd.settings['pythonscripts.directory']
-        self._addToPySearchPath(direcs)
-        if direcs == '':
-            files = []
-        else:
-            try:
-                files = os.listdir(direcs)
-            except:
-                files = []
-
-        for file in files:
-            fullpath = os.path.join(direcs,file)
-            if not 'svn' in file and os.path.isdir(fullpath):
-                self._addToPySearchPath(fullpath)
-        
         self.__is_initialized = True
         
     #### private methods ###########################################################
     
-    def _addToPySearchPath(self, dirs):
+    @staticmethod
+    def _addToPySearchPath(dirs):
         """
         Add the given directories to Python's search path
         """
@@ -981,9 +960,23 @@ if __name__ != "__main__":
     mantid = mtd
     Mantid = mtd
     Mtd = mtd
+    
+    # Required directories (config service has changed them to absolute paths)
+    MantidPyFramework._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
+    # Now additional user specified directories
+    MantidPyFramework._addToPySearchPath(mtd.settings['pythonscripts.directories'])
+    # Finally old scripts key; For backwards compatability add all directories that are one-level below this
+    _script_dirs = mtd.settings['pythonscripts.directory']
+    MantidPyFramework._addToPySearchPath(_script_dirs)
+    if _script_dirs == '':
+        _files = []
+    else:
+        try:
+            _files = os.listdir(_script_dirs)
+        except:
+            _files = []
 
-    #####################################################################################
-    # Initialize the framework. 
-    # MUST be the last thing in the file 
-    #####################################################################################
-    mtd.initialise()
+    for _file in _files:
+        _fullpath = os.path.join(_script_dirs,_file)
+        if not 'svn' in _file and os.path.isdir(_fullpath):
+            MantidPyFramework._addToPySearchPath(_fullpath)
