@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\BinFinder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfigService.cpp"
 				>
 			</File>
@@ -342,6 +346,10 @@
 			</File>
 			<File
 				RelativePath=".\test\ArrayPropertyTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\BinFinder.h"
 				>
 			</File>
 			<File
