@@ -23,6 +23,7 @@ BuildRequires:  boost-devel >= 1.34.1
 BuildRequires:  glibc-devel
 BuildRequires:  gsl-devel
 BuildRequires: 	poco-devel
+BuildRequires:  numpy
 #required for mantidplot
 BuildRequires:	qt4-devel >= 4.2 
 BuildRequires:	qwt-devel
@@ -33,6 +34,7 @@ BuildRequires: 	nexus
 BuildRequires: 	sip-devel
 BuildRequires: 	qscintilla-devel
 BuildRequires: 	OpenCASCADE-devel
+
 
 Requires: 	boost >= 1.34.1
 Requires: 	qt4 >= 4.2
@@ -45,6 +47,7 @@ Requires:	glibc
 Requires:	qwtplot3d-qt4
 Requires:	OpenCASCADE
 Requires:	muParser
+Requires:	numpy
 
 %define mantiddir		/opt/%{name}
 %define mantidlibdir		%{mantiddir}/bin
