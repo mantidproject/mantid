@@ -222,8 +222,8 @@ class DLLExport EventWorkspaceValidator : public Kernel::IValidator<boost::share
 {
 public:
   /** Constructor
-   *  @param mustBeHistogram Flag indicating whether the check is that a workspace should
-   *                         be EventWorkspace (true, default) or shouldn't (false).
+   *  @param mustBeEvent Flag indicating whether the check is that a workspace should
+   *                     be EventWorkspace (true, default) or shouldn't (false).
    */
   explicit EventWorkspaceValidator(const bool& mustBeEvent = true) :
     m_mustBeEvent(mustBeEvent) {}
