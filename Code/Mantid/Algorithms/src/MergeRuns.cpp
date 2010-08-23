@@ -21,6 +21,7 @@ MergeRuns::MergeRuns() : Algorithm(),m_progress(NULL) {}
 /// Destructor
 MergeRuns::~MergeRuns() {if(m_progress) delete m_progress;m_progress=NULL;}
 
+//------------------------------------------------------------------------------------------------
 /// Initialisation method
 void MergeRuns::init()
 {
@@ -32,6 +33,7 @@ void MergeRuns::init()
     "Name of the output workspace" );
 }
 
+//------------------------------------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::NotFoundError If an input workspace doesn't exist
  *  @throw std::invalid_argument If the input workspaces are not compatible
@@ -83,6 +85,16 @@ void MergeRuns::exec()
   setProperty("OutputWorkspace",outWS);
 }
 
+//------------------------------------------------------------------------------------------------
+/** Executes the algorithm for EventWorkspaces
+ */
+void MergeRuns::execEvent()
+{
+
+}
+
+
+//------------------------------------------------------------------------------------------------
 /// @cond
 // Local function used within validateInputs() below in a call to std::list::sort(compare)
 // to order the input workspaces by the start of their frame (i.e. the first X value).
@@ -92,6 +104,7 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
 }
 /// @endcond
 
+//------------------------------------------------------------------------------------------------
 /** Checks that the input workspace all exist, that they are the same size, have the same units
  *  and the same instrument name. Will throw if they don't.
  *  @param  inputWorkspaces The names of the input workspaces
@@ -159,6 +172,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
   return inWS;
 }
 
+//------------------------------------------------------------------------------------------------
 /** Calculates the parameters to hand to the Rebin algorithm. Specifies the new binning, bin-by-bin,
  *  to cover the full range covered by the two input workspaces. In regions of overlap, the bins from
  *  the workspace having the wider bins are taken. Note that because the list of input workspaces
@@ -203,6 +217,7 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1,
   }
 }
 
+//------------------------------------------------------------------------------------------------
 /** Calculates the rebin paramters in the case where the two input workspaces do not overlap at all.
  *  @param X1     The bin boundaries from the first workspace
  *  @param X2     The bin boundaries from the second workspace
@@ -231,6 +246,7 @@ void MergeRuns::noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::v
   params.push_back(X2.back());
 }
 
+//------------------------------------------------------------------------------------------------
 /** Calculates the rebin parameters in the case where the bins of the two workspaces intersect.
  *  'Intersect' is used in the sense of two intersecting sets.
  *  @param X1     The bin boundaries from the first workspace
@@ -276,6 +292,7 @@ void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec&
 
 }
 
+//------------------------------------------------------------------------------------------------
 /** Calculates the rebin parameters in the case where the range of the second workspace is
  *  entirely within that of the first workspace.
  *  'Inclusion' is used in the sense of a set being included in anothre.
@@ -322,6 +339,7 @@ void MergeRuns::inclusionParams(const MantidVec& X1, int& i, const MantidVec& X2
 
 }
 
+//------------------------------------------------------------------------------------------------
 /** Calls the Rebin algorithm as a subalgorithm.
  *  @param  workspace The workspace to use as input to the Rebin algorithms
  *  @param  params    The rebin parameters

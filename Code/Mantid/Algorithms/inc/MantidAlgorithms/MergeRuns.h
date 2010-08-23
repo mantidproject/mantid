@@ -65,6 +65,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  void execEvent();
 
   // Methods called by exec()
   std::list<API::MatrixWorkspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces) const;
