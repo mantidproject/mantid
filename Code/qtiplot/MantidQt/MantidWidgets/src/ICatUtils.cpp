@@ -80,7 +80,7 @@ void ICatUtils::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr,Q
 	//sorting by title
 	tablewidget->sortByColumn(2,Qt::AscendingOrder);
 	// resizing the coulmn based on data size
-	tablewidget->resizeColumnsToContents ();
+	//tablewidget->resizeColumnsToContents ();
 	//enable sorting
 	tablewidget->setSortingEnabled(true);
 
