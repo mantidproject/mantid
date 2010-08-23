@@ -107,7 +107,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         self.save_results(sample_wkspace, save_filename)
         return sample_wkspace
         
-    def do_conversion(self, mono_run, ei_guess, white_run=None, map_file=None, spectra_masks=None, resultws_name = None):
+    def do_conversion(self, mono_run, ei_guess, white_run=None, map_file=None, spectra_masks=None, resultws_name = None, Tzero=None):
         """
         Convert units of a mono-chromatic run to deltaE, including normalisation to a white-beam vanadium run.
         If multiple run files are passed to this function, they are summed into a run and then processed
@@ -136,7 +136,15 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
             loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
             monitor_ws = loader.workspace()
-            ei_value, tzero = self.get_ei(monitor_ws, ei_guess)
+            alg = GetEi(monitor_ws, int(self.ei_mon_spectra[0]), int(self.ei_mon_spectra[1]), ei_guess, False)
+            ei_value = float(monitor_ws.getSampleDetails().getLogData("Ei").value())
+            if (self.fix_ei):
+                ei_value = ei_guess
+            if (Tzero is None):
+                # TODO: Calculate T0
+                #tzero = float(alg.getPropertyValue("Tzero"))
+                tzero = 0.0
+            mon1_peak = 0.0
             ChangeBinOffset(result_ws, result_ws, -tzero)
             self.applyDetectorEfficiency = False
         else:
@@ -155,7 +163,6 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             mtd.deleteWorkspace("_tmp_rebin_ws")
             # Convert back to TOF
             ConvertUnits(result_ws, result_ws, Target="TOF",EMode="Direct", EFixed=ei_value)
-                
         
         bin_offset = -mon1_peak
         
