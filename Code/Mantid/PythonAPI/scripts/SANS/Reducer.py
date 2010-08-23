@@ -56,7 +56,7 @@ class Reducer(object):
         if os.path.isdir(path):
             self._data_path = path
         else:
-            raise RuntimeError, "Reducer.set_data_path: provided path is not a file (%s)" % path
+            raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
         
     def _full_file_path(self, filename):
         """

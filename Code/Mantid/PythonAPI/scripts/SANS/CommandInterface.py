@@ -48,7 +48,7 @@ def Clear():
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
 
-def DirectBeamCenter(datafile, beam_radius=3.0):
+def DirectBeamCenter(datafile):
     ReductionSingleton().set_beam_finder(SANSReductionSteps.DirectBeamCenter(datafile, beam_radius=beam_radius))
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
@@ -101,6 +101,9 @@ def AzimuthalAverage(binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=Fa
                                                                                             suffix=suffix,
                                                                                             error_weighting=error_weighting))
 
+def NoTransmission():
+    ReductionSingleton().set_transmission(None)
+    
 def SetTransmission(trans, error):
     ReductionSingleton().set_transmission(SANSReductionSteps.BaseTransmission(trans, error))
 
@@ -122,8 +125,8 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     ReductionSingleton().set_mask(SANSReductionSteps.Mask(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high))
 
-def Background(filename):
-    ReductionSingleton().set_background(filename) 
+def Background(datafile):
+    ReductionSingleton().set_background(datafile) 
 
 def NoBackground():
     ReductionSingleton().set_background(None) 

@@ -70,11 +70,10 @@ class DirectBeamCenter(BaseBeamFinder):
     """
         Find the beam center using the direct beam
     """  
-    def __init__(self, datafile, beam_radius=3):
+    def __init__(self, datafile):
         super(DirectBeamCenter, self).__init__()
         ## Location of the data file used to find the beam center
         self._datafile = datafile
-        self._beam_radius = beam_radius
         
     def execute(self, reducer, workspace=None):
         """
