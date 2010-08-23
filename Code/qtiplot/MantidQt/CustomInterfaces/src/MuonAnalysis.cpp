@@ -161,11 +161,13 @@ void MuonAnalysis::runFrontPlotButton()
   {
     // i.e. index points to a pair
 
-    plotPair(m_uiForm.frontPlotFuncs->currentText().toStdString());
+    std::string str = m_uiForm.frontPlotFuncs->currentText().toStdString();
+    plotPair(str);
   }
   else
   {
-    plotGroup(m_uiForm.frontPlotFuncs->currentText().toStdString());
+    std::string str = m_uiForm.frontPlotFuncs->currentText().toStdString();
+    plotGroup(str);
   }
 }
 
