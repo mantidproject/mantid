@@ -21,6 +21,9 @@
         <layout class="QHBoxLayout" name="horizontalLayout_3" >
          <item>
           <widget class="QPushButton" name="pbAddScript" >
+           <property name="toolTip" >
+            <string>Add Python Script file to menu.</string>
+           </property>
            <property name="text" >
             <string>Add Script</string>
            </property>
@@ -28,6 +31,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="pbRemoveScript" >
+           <property name="toolTip" >
+            <string>Remove selected Python script(s).</string>
+           </property>
            <property name="text" >
             <string>Remove Script</string>
            </property>
@@ -158,6 +164,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="pbAddMenu" >
+           <property name="toolTip" >
+            <string>Add new top-level menu.</string>
+           </property>
            <property name="text" >
             <string>Add Menu</string>
            </property>
@@ -191,6 +200,9 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip" >
+        <string>Open "Help" page in web browser.</string>
+       </property>
        <property name="text" >
         <string>?</string>
        </property>
@@ -211,6 +223,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="pbConfirm" >
+       <property name="toolTip" >
+        <string>Close this dialog.</string>
+       </property>
        <property name="text" >
         <string>Ok</string>
        </property>
@@ -221,14 +236,14 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>twScripts</tabstop>
   <tabstop>pbAddScript</tabstop>
   <tabstop>pbRemoveScript</tabstop>
+  <tabstop>twScripts</tabstop>
   <tabstop>twCustomInterfaces</tabstop>
   <tabstop>pbAddItem</tabstop>
-  <tabstop>twMenus</tabstop>
   <tabstop>pbRemoveItem</tabstop>
   <tabstop>pbAddMenu</tabstop>
+  <tabstop>twMenus</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbConfirm</tabstop>
  </tabstops>
