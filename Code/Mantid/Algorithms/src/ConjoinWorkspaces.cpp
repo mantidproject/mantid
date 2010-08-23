@@ -11,13 +11,16 @@ namespace Algorithms
 {
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConjoinWorkspaces)
 
+//----------------------------------------------------------------------------------------------
 /// Default constructor
   ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL) {}
 
+//----------------------------------------------------------------------------------------------
 /// Destructor
 ConjoinWorkspaces::~ConjoinWorkspaces() 
 {
@@ -27,6 +30,8 @@ ConjoinWorkspaces::~ConjoinWorkspaces()
   }
 }
 
+//----------------------------------------------------------------------------------------------
+/** Initialize the properties */
 void ConjoinWorkspaces::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace1",
@@ -37,6 +42,7 @@ void ConjoinWorkspaces::init()
     "The name of the second input workspace");
 }
 
+//----------------------------------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw std::invalid_argument If the input workspaces do not meet the requirements of this algorithm
  */
@@ -45,6 +51,23 @@ void ConjoinWorkspaces::exec()
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
+  event_ws1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  event_ws2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+
+  //Make sure that we are not mis-matching EventWorkspaces and other types of workspaces
+  if (((event_ws1) && (!event_ws2)) || ((!event_ws1) && (event_ws2)))
+  {
+    const std::string message("Only one of the input workspaces are of type EventWorkspace; please use matching workspace types (both EventWorkspace's or both Workspace2D's).");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  if (event_ws1 && event_ws2)
+  {
+    //Both are event workspaces. Use the special method
+    this->execEvent();
+    return;
+  }
 
   // Check that the input workspaces meet the requirements for this algorithm
   this->validateInputs(ws1,ws2);
@@ -126,6 +149,83 @@ void ConjoinWorkspaces::exec()
   setProperty("Output",output);
 }
 
+
+//----------------------------------------------------------------------------------------------
+/** Executes the algorithm
+ *  @throw std::invalid_argument If the input workspaces do not meet the requirements of this algorithm
+ */
+void ConjoinWorkspaces::execEvent()
+{
+  //We do not need to check that binning is compatible, just that there is no overlap
+  this->checkForOverlap(event_ws1, event_ws2);
+
+  // Create the output workspace
+  const int totalHists = event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
+  EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
+      WorkspaceFactory::Instance().create("EventWorkspace",
+          totalHists, event_ws1->readX(0).size(), event_ws1->readY(0).size())
+      );
+  // Copy over stuff from first input workspace
+  WorkspaceFactory::Instance().initializeFromParent(event_ws1,output,true);
+
+  // Create the X values inside a cow pointer - they will be shared in the output workspace
+  cow_ptr<MantidVec> XValues;
+  XValues.access() = event_ws1->readX(0);
+
+  // Initialize the progress reporting object
+  m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
+
+  const int& nhist1 = event_ws1->getNumberHistograms();
+  const Axis* axis1 = event_ws1->getAxis(1);
+//  PARALLEL_FOR2(event_ws1, output)
+  for (int i = 0; i < nhist1; ++i)
+  {
+//    PARALLEL_START_INTERUPT_REGION
+    //This is the spectrum # at the input
+    int specNo = axis1->spectraNo(i);
+    //Copy the events over
+    output->getEventList(specNo).clear();
+    output->getEventList(specNo) += event_ws1->getEventListAtWorkspaceIndex(i).getEvents();
+    m_progress->report();
+//    PARALLEL_END_INTERUPT_REGION
+  }
+//  PARALLEL_CHECK_INTERUPT_REGION
+
+  //For second loop we use the offset from the first
+  const int& nhist2 = event_ws2->getNumberHistograms();
+  const Axis* axis2 = event_ws2->getAxis(1);
+
+//  PARALLEL_FOR2(event_ws2, output)
+  for (int j = 0; j < nhist2; ++j)
+  {
+//    PARALLEL_START_INTERUPT_REGION
+    //This is the spectrum # at the input
+    int specNo = axis2->spectraNo(j);
+    //Copy the events over
+    output->getEventList(specNo).clear();
+    output->getEventList(specNo) += event_ws2->getEventListAtWorkspaceIndex(j).getEvents();
+    m_progress->report();
+//    PARALLEL_END_INTERUPT_REGION
+  }
+//  PARALLEL_CHECK_INTERUPT_REGION
+
+  //This will make the spectramap axis.
+  output->doneLoadingData();
+
+  //Set the same bins for all output pixels
+  output->setAllX(XValues);
+
+  // Delete the input workspaces from the ADS
+  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));
+  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+
+  // Create & assign an output workspace property with the workspace name the same as the first input
+  declareProperty(new WorkspaceProperty<>("Output",getPropertyValue("InputWorkspace1"),Direction::Output));
+  setProperty("Output", boost::dynamic_pointer_cast<MatrixWorkspace>(output) );
+}
+
+
+//----------------------------------------------------------------------------------------------
 /** Checks that the two input workspace have common binning & size, the same instrument & unit.
  *  Also calls the checkForOverlap method.
  *  @param ws1 The first input workspace
@@ -177,6 +277,7 @@ void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API:
   this->checkForOverlap(ws1,ws2);
 }
 
+//----------------------------------------------------------------------------------------------
 /** Checks that the two input workspaces have non-overlapping spectra numbers and contributing detectors
  *  @param ws1 The first input workspace
  *  @param ws2 The second input workspace

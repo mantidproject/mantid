@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -65,12 +66,15 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  void execEvent();
 
   void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
   void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
 
   /// Progress reporting object
   API::Progress *m_progress;
+  /// Event workspace inputs.
+  DataObjects::EventWorkspace_const_sptr event_ws1, event_ws2;
 
 };
 

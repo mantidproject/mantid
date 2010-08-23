@@ -5,100 +5,178 @@
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadEventPreNeXus.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
 
 class ConjoinWorkspacesTest : public CxxTest::TestSuite
 {
 public:
   ConjoinWorkspacesTest()
+  {}
+
+  void setUp()
   {
-    IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
+    IAlgorithm* loader;
+    loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
     loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
     loader->setPropertyValue("OutputWorkspace", "top");
     loader->setPropertyValue("SpectrumMin","1");
     loader->setPropertyValue("SpectrumMax","10");
-    TS_ASSERT_THROWS_NOTHING( loader->execute() )
-    TS_ASSERT( loader->isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( loader->execute() );
+    TS_ASSERT( loader->isExecuted() );
     delete loader;
 
-    IAlgorithm* loader2 = new Mantid::DataHandling::LoadRaw;
-    loader2->initialize();
-    loader2->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
-    loader2->setPropertyValue("OutputWorkspace", "bottom");
-    loader2->setPropertyValue("SpectrumMin","11");
-    loader2->setPropertyValue("SpectrumMax","25");
-    TS_ASSERT_THROWS_NOTHING( loader2->execute() )
-    TS_ASSERT( loader2->isExecuted() )
-    delete loader2;
+    loader = new Mantid::DataHandling::LoadRaw;
+    loader->initialize();
+    loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
+    loader->setPropertyValue("OutputWorkspace", "bottom");
+    loader->setPropertyValue("SpectrumMin","11");
+    loader->setPropertyValue("SpectrumMax","25");
+    TS_ASSERT_THROWS_NOTHING( loader->execute() );
+    TS_ASSERT( loader->isExecuted() );
+    delete loader;
+
+    //Now some event workspaces
+    loader = new Mantid::DataHandling::LoadEventPreNeXus;
+    loader->initialize();
+    loader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/VULCAN_2916_neutron0_event.dat");
+    loader->setPropertyValue("OutputWorkspace", "vulcan0");
+    TS_ASSERT_THROWS_NOTHING( loader->execute() );
+    TS_ASSERT( loader->isExecuted() );
+    delete loader;
+
+    loader = new Mantid::DataHandling::LoadEventPreNeXus;
+    loader->initialize();
+    loader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/VULCAN_2916_neutron1_event.dat");
+    loader->setPropertyValue("OutputWorkspace", "vulcan1");
+    TS_ASSERT_THROWS_NOTHING( loader->execute() );
+    TS_ASSERT( loader->isExecuted() );
+    delete loader;
+
+
   }
 
-  void testName()
+  void testTheBasics()
   {
-    TS_ASSERT_EQUALS( conj.name(), "ConjoinWorkspaces" )
-  }
-
-  void testVersion()
-  {
-    TS_ASSERT_EQUALS( conj.version(), 1 )
-  }
-
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( conj.category(), "General" )
+    conj = new ConjoinWorkspaces();
+    TS_ASSERT_EQUALS( conj->name(), "ConjoinWorkspaces" );
+    TS_ASSERT_EQUALS( conj->version(), 1 );
+    TS_ASSERT_EQUALS( conj->category(), "General" );
+    delete conj;
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( conj.initialize() )
-    TS_ASSERT( conj.isInitialized() )
+    conj = new ConjoinWorkspaces();
+    TS_ASSERT_THROWS_NOTHING( conj->initialize() );
+    TS_ASSERT( conj->isInitialized() );
+    delete conj;
   }
 
+  //----------------------------------------------------------------------------------------------
   void testExec()
   {
-    if ( !conj.isInitialized() ) conj.initialize();
+    conj = new ConjoinWorkspaces();
+    if ( !conj->isInitialized() ) conj->initialize();
 
     // Get the two input workspaces for later
     MatrixWorkspace_const_sptr in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top"));
     MatrixWorkspace_const_sptr in2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("bottom"));
 
     // Check it fails if properties haven't been set
-    TS_ASSERT_THROWS( conj.execute(), std::runtime_error )
-    TS_ASSERT( ! conj.isExecuted() )
+    TS_ASSERT_THROWS( conj->execute(), std::runtime_error );
+    TS_ASSERT( ! conj->isExecuted() );
 
     // Check it fails if input overlap
-    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace1","top") )
-    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace2","top") )
-    TS_ASSERT_THROWS_NOTHING( conj.execute() )
-    TS_ASSERT( ! conj.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","top") );
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","top") );
+    TS_ASSERT_THROWS_NOTHING( conj->execute() );
+    TS_ASSERT( ! conj->isExecuted() );
 
     // Now it should succeed
-    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace2","bottom") )
-    TS_ASSERT_THROWS_NOTHING( conj.execute() )
-    TS_ASSERT( conj.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","bottom") );
+    TS_ASSERT_THROWS_NOTHING( conj->execute() );
+    TS_ASSERT( conj->isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top")) )
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), 25 )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top")) );
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 25 );
     // Check a few values
-    TS_ASSERT_EQUALS( output->readX(0)[0], in1->readX(0)[0] )
-    TS_ASSERT_EQUALS( output->readX(15)[444], in2->readX(5)[444] )
-    TS_ASSERT_EQUALS( output->readY(3)[99], in1->readY(3)[99] )
-    TS_ASSERT_EQUALS( output->readE(7)[700], in1->readE(7)[700] )
-    TS_ASSERT_EQUALS( output->readY(19)[55], in2->readY(9)[55] )
-    TS_ASSERT_EQUALS( output->readE(10)[321], in2->readE(0)[321] )
-    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(5), in1->getAxis(1)->spectraNo(5) )
-    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(12), in2->getAxis(1)->spectraNo(2) )
+    TS_ASSERT_EQUALS( output->readX(0)[0], in1->readX(0)[0] );
+    TS_ASSERT_EQUALS( output->readX(15)[444], in2->readX(5)[444] );
+    TS_ASSERT_EQUALS( output->readY(3)[99], in1->readY(3)[99] );
+    TS_ASSERT_EQUALS( output->readE(7)[700], in1->readE(7)[700] );
+    TS_ASSERT_EQUALS( output->readY(19)[55], in2->readY(9)[55] );
+    TS_ASSERT_EQUALS( output->readE(10)[321], in2->readE(0)[321] );
+    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(5), in1->getAxis(1)->spectraNo(5) );
+    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(12), in2->getAxis(1)->spectraNo(2) );
 
     // Check that 2nd input workspace no longer exists
-    TS_ASSERT_THROWS( AnalysisDataService::Instance().retrieve("bottom"), Exception::NotFoundError )
+    TS_ASSERT_THROWS( AnalysisDataService::Instance().retrieve("bottom"), Exception::NotFoundError );
+    delete conj;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  void testExecMismatchedWorkspaces()
+  {
+    // Check it fails if input overlap
+    conj = new ConjoinWorkspaces();
+    conj->initialize();
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","vulcan1") );
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","vulcan1") );
+    conj->execute();
+    TS_ASSERT( ! conj->isExecuted() );
+    delete conj;
+
+    // Check it fails if mixing event workspaces and workspace 2Ds
+    conj = new ConjoinWorkspaces();
+    conj->initialize();
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","vulcan1") );
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","bottom") );
+    conj->execute();
+    TS_ASSERT( ! conj->isExecuted() );
+  }
+
+  //----------------------------------------------------------------------------------------------
+  void testExecEvent()
+  {
+    //Save some initial data
+    EventWorkspace_sptr in1, in2, out;
+    in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
+    in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan1"));
+    int nHist1 = in1->getNumberHistograms();
+    int nEvents1 = in1->getNumberEvents();
+    int nHist2 = in2->getNumberHistograms();
+    int nEvents2 = in2->getNumberEvents();
+
+    // Check it runs with the two separate ones
+    conj = new ConjoinWorkspaces();
+    conj->initialize();
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","vulcan0") );
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","vulcan1") );
+    TS_ASSERT_THROWS_NOTHING( conj->execute() );
+    TS_ASSERT( conj->isExecuted() );
+    delete conj;
+
+    // Get the two input workspaces for later
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
+
+    int nHist = out->getNumberHistograms();
+    int nEvents = out->getNumberEvents();
+
+    TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
+    TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
+
+
   }
 
 private:
-  ConjoinWorkspaces conj;
+  ConjoinWorkspaces * conj;
 };
 
 #endif /*CONJOINWORKSPACESTEST_H_*/
