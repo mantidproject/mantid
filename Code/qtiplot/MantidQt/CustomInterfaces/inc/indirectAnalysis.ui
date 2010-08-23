@@ -1,0 +1,1313 @@
+<ui version="4.0" >
+ <class>indirectAnalysis</class>
+ <widget class="QWidget" name="indirectAnalysis" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>367</width>
+    <height>288</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Indirect Data Analysis</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <property name="spacing" >
+    <number>0</number>
+   </property>
+   <property name="margin" >
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="enabled" >
+      <bool>true</bool>
+     </property>
+     <property name="tabShape" >
+      <enum>QTabWidget::Rounded</enum>
+     </property>
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabSettings" >
+      <attribute name="title" >
+       <string>Initial Settings</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9" >
+       <item>
+        <layout class="QGridLayout" name="gridLayout_3" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="set_lbInst" >
+           <property name="text" >
+            <string>Instrument</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="set_lbAnalyser" >
+           <property name="text" >
+            <string>Analyser</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" >
+          <widget class="QComboBox" name="set_cbAnalyser" />
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="set_lbReflection" >
+           <property name="text" >
+            <string>Reflection</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QComboBox" name="set_cbReflection" />
+         </item>
+         <item row="0" column="1" >
+          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="set_cbInst" >
+           <property name="techniques" >
+            <stringlist>
+             <string>TOF Indirect Geometry Spectroscopy</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_5" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_2" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="set_lbSpecMin" >
+           <property name="text" >
+            <string>Spectra Min</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QLineEdit" name="set_leSpecMin" />
+         </item>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="set_lbSpecMax" >
+           <property name="text" >
+            <string>Spectra Max</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" >
+          <widget class="QLineEdit" name="set_leSpecMax" />
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="set_lbEFixed" >
+           <property name="text" >
+            <string>EFixed</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLineEdit" name="set_leEFixed" />
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_6" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabFury" >
+      <attribute name="title" >
+       <string>Fury</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2" >
+       <item>
+        <layout class="QGridLayout" name="fury_layoutFiles" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="fury_lbIcon" >
+           <property name="text" >
+            <string>ICON File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="fury_lbRes" >
+           <property name="text" >
+            <string>RES File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QLineEdit" name="fury_leIconFile" />
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLineEdit" name="fury_leResFile" />
+         </item>
+         <item row="0" column="3" >
+          <widget class="QPushButton" name="fury_pbBrowseIcon" >
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3" >
+          <widget class="QPushButton" name="fury_pbBrowseRes" >
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="fury_valIconFile" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2" >
+          <widget class="QLabel" name="fury_valResFile" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="fury_layoutRebin" >
+         <item>
+          <widget class="QLabel" name="fury_lbELow" >
+           <property name="text" >
+            <string>ELow</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="fury_leELow" />
+         </item>
+         <item>
+          <widget class="QLabel" name="fury_valELow" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="fury_lbEWidth" >
+           <property name="text" >
+            <string>EWidth</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="fury_leEWidth" />
+         </item>
+         <item>
+          <widget class="QLabel" name="fury_valEWidth" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="fury_lbEHigh" >
+           <property name="text" >
+            <string>EHigh</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="fury_leEHigh" />
+         </item>
+         <item>
+          <widget class="QLabel" name="fury_valEHigh" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="fury_layoutSpacer" >
+         <item>
+          <spacer name="horizontalSpacer" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="fury_layoutSaveRun" >
+           <item>
+            <widget class="QCheckBox" name="fury_ckSave" >
+             <property name="text" >
+              <string>Save Output</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="fury_pbRun" >
+             <property name="text" >
+              <string>Run Fury</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabElwin" >
+      <attribute name="title" >
+       <string>Elwin</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2" >
+         <item>
+          <widget class="QLabel" name="elwin_lbInput" >
+           <property name="text" >
+            <string>Input File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leInputFile" />
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valFile" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="elwin_pbBrowse" >
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+         <item>
+          <widget class="QLabel" name="elwin_lbStart" >
+           <property name="text" >
+            <string>Window Start:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leEStart" />
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeStart" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_lbEnd" >
+           <property name="text" >
+            <string>End:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leEEnd" />
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeEnd" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout" >
+         <item>
+          <spacer name="horizontalSpacer_4" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_4" >
+           <item>
+            <widget class="QCheckBox" name="elwin_ckSave" >
+             <property name="text" >
+              <string>Save Result</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="elwin_pbRun" >
+             <property name="text" >
+              <string>Run Elwin</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabSlice" >
+      <attribute name="title" >
+       <string>Slice</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_7" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10" >
+         <item>
+          <widget class="QLabel" name="slice_lbInput" >
+           <property name="text" >
+            <string>Input File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="slice_leInputFile" />
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_valInputFile" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="slice_pbBrowse" >
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_12" >
+         <item>
+          <widget class="QLabel" name="slice_lbCalib" >
+           <property name="text" >
+            <string>Calibration File:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="slice_leCalib" />
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_valCalib" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="slice_pbBrowseCalib" >
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout" >
+         <item row="0" column="1" >
+          <widget class="QLineEdit" name="slice_leRange0" />
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLineEdit" name="slice_leRange2" />
+         </item>
+         <item row="0" column="4" >
+          <widget class="QLineEdit" name="slice_leRange1" />
+         </item>
+         <item row="1" column="4" >
+          <widget class="QLineEdit" name="slice_leRange3" />
+         </item>
+         <item row="1" column="2" >
+          <widget class="QLabel" name="slice_valRange2" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="slice_valRange0" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" >
+          <widget class="QLabel" name="slice_lbTo1" >
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3" >
+          <widget class="QLabel" name="slice_lbTo2" >
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" >
+          <widget class="QLabel" name="slice_lbRange1" >
+           <property name="text" >
+            <string>TOF Range 1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="slice_lbRange2" >
+           <property name="text" >
+            <string>TOF Range 2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5" >
+          <widget class="QLabel" name="slice_valRange1" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="5" >
+          <widget class="QLabel" name="slice_valRange3" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_11" >
+         <item>
+          <spacer name="horizontalSpacer_10" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_8" >
+           <item>
+            <widget class="QCheckBox" name="slice_ckSave" >
+             <property name="text" >
+              <string>Save Output</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_4" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="slice_pbRun" >
+             <property name="text" >
+              <string>Run Slice</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_11" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabMSD" >
+      <attribute name="title" >
+       <string>MSD Fit</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5" >
+         <item>
+          <widget class="QLabel" name="msd_lbInputFile" >
+           <property name="text" >
+            <string>Input File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="msd_leInputFile" />
+         </item>
+         <item>
+          <widget class="QLabel" name="msd_valInputFile" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="msd_pbBrowse" >
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6" >
+         <item>
+          <widget class="QLabel" name="msd_lbStartX" >
+           <property name="text" >
+            <string>Start X</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="msd_leStartX" />
+         </item>
+         <item>
+          <widget class="QLabel" name="msd_valStartX" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="msd_lbEndX" >
+           <property name="text" >
+            <string>End X</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="msd_leEndX" />
+         </item>
+         <item>
+          <widget class="QLabel" name="msd_valEndX" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7" >
+         <item>
+          <spacer name="horizontalSpacer_6" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_6" >
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8" >
+             <item>
+              <widget class="QCheckBox" name="msd_ckSave" >
+               <property name="text" >
+                <string>Save Output</string>
+               </property>
+               <property name="checked" >
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="msd_ckPlot" >
+               <property name="text" >
+                <string>Plot Output</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_9" >
+             <item>
+              <spacer name="horizontalSpacer_8" >
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0" >
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="msd_pbRun" >
+               <property name="text" >
+                <string>Run MSD Fit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_9" >
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0" >
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_7" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabAbsorption" >
+      <attribute name="title" >
+       <string>Absorption</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_10" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_13" >
+         <item>
+          <widget class="QLabel" name="abs_lbFile" >
+           <property name="text" >
+            <string>Input File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="abs_leFile" />
+         </item>
+         <item>
+          <widget class="QLabel" name="abs_valFile" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="abs_pbBrowse" >
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4" >
+         <item>
+          <widget class="QLabel" name="abs_lbSampleShape" >
+           <property name="text" >
+            <string>Sample Shape</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="abs_cbShape" >
+           <item>
+            <property name="text" >
+             <string>Flat Plate</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Cylinder</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_5" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="abs_lbAttenuation" >
+           <property name="text" >
+            <string>Attenuation</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" >
+          <widget class="QLabel" name="abs_lbScatter" >
+           <property name="text" >
+            <string>Scattering</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QLineEdit" name="abs_leAttenuation" />
+         </item>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="abs_valAttenuation" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4" >
+          <widget class="QLineEdit" name="abs_leScatter" />
+         </item>
+         <item row="0" column="5" >
+          <widget class="QLabel" name="abs_valScatter" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLineEdit" name="abs_leDensity" />
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="abs_lbDensity" >
+           <property name="text" >
+            <string>Density</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2" >
+          <widget class="QLabel" name="abs_valDensity" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="abs_swDetails" >
+         <property name="lineWidth" >
+          <number>0</number>
+         </property>
+         <property name="currentIndex" >
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="FlatPlate" >
+          <layout class="QVBoxLayout" name="verticalLayout_12" >
+           <item>
+            <layout class="QGridLayout" name="gridLayout_6" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <item row="0" column="0" >
+              <widget class="QLabel" name="abs_lbFlatHeight" >
+               <property name="text" >
+                <string>Height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1" >
+              <widget class="QLineEdit" name="abs_leFlatHeight" />
+             </item>
+             <item row="0" column="2" >
+              <widget class="QLabel" name="abs_valFlatHeight" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3" >
+              <widget class="QLabel" name="abs_lbWidth" >
+               <property name="text" >
+                <string>Width</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4" >
+              <widget class="QLineEdit" name="abs_leWidth" />
+             </item>
+             <item row="0" column="5" >
+              <widget class="QLabel" name="abs_valWidth" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" >
+              <widget class="QLabel" name="abs_lbThickness" >
+               <property name="text" >
+                <string>Thickness</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1" >
+              <widget class="QLineEdit" name="abs_leThickness" />
+             </item>
+             <item row="1" column="2" >
+              <widget class="QLabel" name="abs_valThickness" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3" >
+              <widget class="QLabel" name="abs_lbElementSize" >
+               <property name="text" >
+                <string>Element Size</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4" >
+              <widget class="QLineEdit" name="abs_leElementSize" />
+             </item>
+             <item row="1" column="5" >
+              <widget class="QLabel" name="abs_valElementSize" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="Cylinder" >
+          <layout class="QVBoxLayout" name="verticalLayout_13" >
+           <item>
+            <layout class="QGridLayout" name="gridLayout_4" >
+             <item row="0" column="0" >
+              <widget class="QLabel" name="abs_lbCylHeight" >
+               <property name="text" >
+                <string>Height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" >
+              <widget class="QLabel" name="abs_lbSlices" >
+               <property name="text" >
+                <string>NSlice</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="5" >
+              <widget class="QLabel" name="abs_valAnnuli" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="5" >
+              <widget class="QLabel" name="abs_valRadius" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3" >
+              <widget class="QLabel" name="abs_lbAnnuli" >
+               <property name="text" >
+                <string>NAnn</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3" >
+              <widget class="QLabel" name="abs_lbRadius" >
+               <property name="text" >
+                <string>Radius</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2" >
+              <widget class="QLabel" name="abs_valSlices" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2" >
+              <widget class="QLabel" name="abs_valCylHeight" >
+               <property name="styleSheet" >
+                <string notr="true" >color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text" >
+                <string>*</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1" >
+              <widget class="QLineEdit" name="abs_leSlices" />
+             </item>
+             <item row="0" column="1" >
+              <widget class="QLineEdit" name="abs_leCylHeight" />
+             </item>
+             <item row="1" column="4" >
+              <widget class="QLineEdit" name="abs_leAnnuli" />
+             </item>
+             <item row="0" column="4" >
+              <widget class="QLineEdit" name="abs_leRadius" />
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_14" >
+         <item>
+          <spacer name="horizontalSpacer_5" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_11" >
+           <item>
+            <widget class="QCheckBox" name="abs_ckSave" >
+             <property name="text" >
+              <string>Save Output</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_8" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="abs_pbRun" >
+             <property name="text" >
+              <string>Run Absorption</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_12" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>fury_leIconFile</tabstop>
+  <tabstop>fury_pbBrowseIcon</tabstop>
+  <tabstop>fury_leResFile</tabstop>
+  <tabstop>fury_pbBrowseRes</tabstop>
+  <tabstop>fury_leELow</tabstop>
+  <tabstop>fury_leEWidth</tabstop>
+  <tabstop>fury_leEHigh</tabstop>
+  <tabstop>fury_ckSave</tabstop>
+  <tabstop>fury_pbRun</tabstop>
+  <tabstop>elwin_leInputFile</tabstop>
+  <tabstop>elwin_pbBrowse</tabstop>
+  <tabstop>elwin_leEStart</tabstop>
+  <tabstop>elwin_leEEnd</tabstop>
+  <tabstop>elwin_ckSave</tabstop>
+  <tabstop>elwin_pbRun</tabstop>
+  <tabstop>slice_leInputFile</tabstop>
+  <tabstop>slice_pbBrowse</tabstop>
+  <tabstop>slice_leCalib</tabstop>
+  <tabstop>slice_pbBrowseCalib</tabstop>
+  <tabstop>slice_leRange0</tabstop>
+  <tabstop>slice_leRange1</tabstop>
+  <tabstop>slice_leRange2</tabstop>
+  <tabstop>slice_leRange3</tabstop>
+  <tabstop>slice_ckSave</tabstop>
+  <tabstop>slice_pbRun</tabstop>
+  <tabstop>msd_leInputFile</tabstop>
+  <tabstop>msd_pbBrowse</tabstop>
+  <tabstop>msd_leStartX</tabstop>
+  <tabstop>msd_leEndX</tabstop>
+  <tabstop>msd_ckSave</tabstop>
+  <tabstop>msd_ckPlot</tabstop>
+  <tabstop>msd_pbRun</tabstop>
+  <tabstop>set_cbAnalyser</tabstop>
+  <tabstop>set_cbReflection</tabstop>
+  <tabstop>set_leSpecMin</tabstop>
+  <tabstop>set_leSpecMax</tabstop>
+  <tabstop>set_leEFixed</tabstop>
+  <tabstop>tabWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
