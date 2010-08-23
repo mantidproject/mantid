@@ -554,7 +554,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
       const double bgintercept = fit->getProperty("bg0");
       const double bgslope = fit->getProperty("bg1");
 
-      if (isnan(centre) || isnan(width) || isnan(bgintercept) || isnan(bgslope))
+      if ((centre != centre) || (width != width) || (bgintercept != bgintercept) || (bgslope != bgslope))
       {
         g_log.information() << "NaN detected in the results of peak fitting. Peak ignored." << std::endl;
       }
