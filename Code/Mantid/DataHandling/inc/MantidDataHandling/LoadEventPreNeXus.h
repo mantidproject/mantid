@@ -118,7 +118,8 @@ private:
 
   std::size_t num_good_events; ///<the number of good events
   std::size_t num_error_events; ///<the number of error events
-  std::size_t num_ignored_events; /// the number of events that were ignored (not loaded) because, e.g. of only loading some spectra.
+  /// the number of events that were ignored (not loaded) because, e.g. of only loading some spectra.
+  std::size_t num_ignored_events;
   /// max events to load
   std::size_t max_events;
 

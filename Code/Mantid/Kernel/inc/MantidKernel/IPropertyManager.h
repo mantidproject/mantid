@@ -238,16 +238,26 @@ protected:
     // (it has problems with the string one). This operator is needed to convert a TypedValue
     // into what we actually want. It can't even handle just having a specialization for strings.
     // So we have to explicitly define an operator for each type of property that we have.
+
+    /// explicit specialization for int()
     operator int ();
+    /// explicit specialization for long long()
     operator long long ();
+    /// explicit specialization for bool()
     operator bool ();
+    /// explicit specialization for double()
     operator double ();
+    /// explicit specialization for std::string()
     operator std::string ();
+    /// explicit specialization for Property*()
     operator Property* ();
 
     // We can have some partial specialisation for Array and Workspace properties
+
+    /// explicit specialization for std::vector
     template<typename T>
     operator std::vector<T> () { return pm.getValue<std::vector<T> >(prop);}
+    /// explicit specialization for boost::shared_ptr
     template<typename T>
     operator boost::shared_ptr<T> () { return pm.getValue<boost::shared_ptr<T> >(prop); }
   };

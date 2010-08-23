@@ -50,7 +50,7 @@ namespace Kernel
     std::vector<double> logBoundaries;
     /// Index of the last boundary in the bins
     std::vector<int> endBinIndex;
-    //How many regions?
+    /// How many regions?
     int numRegions;
 
 
