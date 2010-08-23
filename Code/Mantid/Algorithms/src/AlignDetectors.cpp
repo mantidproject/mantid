@@ -29,10 +29,15 @@ using DataObjects::EventWorkspace_const_sptr;
 const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
 //-----------------------------------------------------------------------
-/** Calculate the conversion factor for a single pixel. The result still needs
- * to be multiplied by CONSTANT.
+/** Calculate the conversion factor for a single pixel.
  *
  * @param l1 Primary flight path.
+ * @param beamline: vector = samplePos-sourcePos = a vector pointing from the source to the sample,
+ *        the length of the distance between the two.
+ * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
+ * @param samplePos: position of the sample
+ * @param det: Geometry object representing the detector (position of the pixel)
+ * @param offset: value (close to zero) that changes the factor := factor * (1+offset).
  */
 double calcConversion(const double l1,
                       const Geometry::V3D &beamline,
@@ -46,14 +51,14 @@ double calcConversion(const double l1,
   // The scattering angle for this detector (in radians).
   Geometry::V3D detPos = det->getPos();
   // Now detPos will be set with respect to samplePos
-  detPos-=samplePos;
+  detPos -= samplePos;
   // 0.5*cos(2theta)
   double l2=detPos.norm();
-  double halfcosTheta=detPos.scalar_prod(beamline)/(l2*beamline_norm);
+  double halfcosTwoTheta=detPos.scalar_prod(beamline)/(l2*beamline_norm);
   // This is sin(theta)
-  double sinTheta=sqrt(0.5-halfcosTheta);
+  double sinTheta=sqrt(0.5-halfcosTwoTheta);
   const double numerator = (1.0+offset);
-  sinTheta*= (l1+l2);
+  sinTheta *= (l1+l2);
   return (numerator * CONSTANT) / sinTheta;
 }
 
