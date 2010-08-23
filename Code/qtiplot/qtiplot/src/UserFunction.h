@@ -9,6 +9,7 @@ class UserHelperFunction
 {
 public:
     virtual double operator()(double x, double y)=0;
+    virtual double getMinPositiveValue()const = 0;
 };
 
 

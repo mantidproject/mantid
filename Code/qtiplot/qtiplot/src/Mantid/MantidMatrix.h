@@ -50,6 +50,7 @@ class MantidMatrixFunction: public UserHelperFunction
 public:
   MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
   double operator()(double x, double y);
+  double getMinPositiveValue()const;
   void init();
   int numRows()const;
   int numCols()const;

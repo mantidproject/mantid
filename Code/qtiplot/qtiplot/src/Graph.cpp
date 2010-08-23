@@ -1259,19 +1259,18 @@ void Graph::setScale(int axis, double start, double end, double step,
 	//}
 
 	setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);	
-	
-	for (int i=0; i<n_curves; i++){
-		QwtPlotItem *it = plotItem(i);
-		if (!it)
-			continue;
-		if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-            Spectrogram *sp = (Spectrogram *)it;
-			if(sp)
-			{	updatedaxis[axis]=1;
-			}
-           
-        }
-	}
+
+  for (int i=0; i<n_curves; i++){
+    QwtPlotItem *it = plotItem(i);
+    if (!it)
+      continue;
+    if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+      Spectrogram *sp = (Spectrogram *)it;
+      if(sp)
+      {	updatedaxis[axis]=1;
+      }
+    }
+  }
 	
 	
 // 	if (type == Graph::Log10)
@@ -1464,26 +1463,33 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 		sc_engine->setType(QwtScaleTransformation::Linear);
 	}
 
-	for (int i=0; i<n_curves; i++){
-		QwtPlotItem *it = plotItem(i);
-		if (!it)
-			continue;
-		if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-			Spectrogram *sp = (Spectrogram *)it;
-			if(sp)
-			{
-				QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
-				if(rightAxis)
-				{
-					sp->mutableColorMap().changeScaleType((GraphOptions::ScaleType)type);
-					rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
-					sp->setColorMap(sp->getColorMap());
-          // we could check if(sp->isIntensityChanged()) but this doesn't work when one value is changing from zero to say 10^-10, which is a big problem for log plots
-					sp->changeIntensity( start,end);
-				}
-			}
-		}
-	}
+  if (axis == QwtPlot::yRight)
+  {
+    for (int i=0; i<n_curves; i++){
+      QwtPlotItem *it = plotItem(i);
+      if (!it)
+        continue;
+      if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+        Spectrogram *sp = (Spectrogram *)it;
+        if(sp)
+        {
+          QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
+          if(rightAxis)
+          {
+            if (type == QwtScaleTransformation::Log10 && (start <= 0 || start == DBL_MAX))
+            {
+              start = sp->getMinPositiveValue();
+            }
+            sp->mutableColorMap().changeScaleType((GraphOptions::ScaleType)type);
+            rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
+            sp->setColorMap(sp->getColorMap());
+            // we could check if(sp->isIntensityChanged()) but this doesn't work when one value is changing from zero to say 10^-10, which is a big problem for log plots
+            sp->changeIntensity( start,end);
+          }
+        }
+      }
+    }
+  }
 
 	int max_min_intervals = minorTicks;
 	if (minorTicks == 1) max_min_intervals = 3;

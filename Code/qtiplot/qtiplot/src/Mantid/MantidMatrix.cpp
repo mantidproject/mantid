@@ -702,6 +702,24 @@ double MantidMatrixFunction::operator()(double x, double y)
   else
     return m_outside;
 }
+
+double MantidMatrixFunction::getMinPositiveValue()const
+{
+  double zmin = DBL_MAX;
+  for(int i=0;i<numRows();++i)
+  {
+    for(int j=0;j<numCols();++j)
+    {
+      double tmp = value(i,j);
+      if (tmp > 0 && tmp < zmin)
+      {
+        zmin = tmp;
+      }
+    }
+  }
+  return zmin;
+}
+
 int MantidMatrixFunction::numRows()const
 {
   return m_matrix->m_rows;

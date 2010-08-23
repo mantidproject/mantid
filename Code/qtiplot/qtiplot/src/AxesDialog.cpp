@@ -2431,68 +2431,69 @@ void AxesDialog::changeBaselineDist(int baseline)
 bool AxesDialog::updatePlot()
 {
 	if (generalDialog->currentWidget()==(QWidget*)scalesPage)
-	{		
-        int a = mapToQwtAxis(axesList->currentRow());
-        ScaleDraw::ScaleType type = d_graph->axisType(a);
+  {		
 
-		double start = 0.0, end = 0.0;
-		if (type == ScaleDraw::Date){
-	         ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
-            QDateTime origin = sclDraw->dateTimeOrigin();
-            start = (double)origin.secsTo(boxStartDateTime->dateTime());
-            end = (double)origin.secsTo(boxEndDateTime->dateTime());
-		} else if (type == ScaleDraw::Time){
-		    ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
-            QTime origin = sclDraw->dateTimeOrigin().time();
-            start = (double)origin.msecsTo(boxStartTime->time());
-            end = (double)origin.msecsTo(boxEndTime->time());
-		} else {
-		    start = boxStart->value();
-            end = boxEnd->value();
-			}
-        
-		double step = 0.0;
-        if (btnStep->isChecked()){
-			step = boxStep->value();
-        	if (type == ScaleDraw::Time){
-		      switch (boxUnit->currentIndex())
-                 {
-			     case 0:
-			     break;
-			     case 1:
-				 	step *= 1e3;
-			     break;
-			     case 2:
-				 	step *= 6e4;
-                 break;
-			     case 3:
-				     step *= 36e5;
-		         break;
-			     }
-		   } else if (type == ScaleDraw::Date){
-		        switch (boxUnit->currentIndex())
-                    {
-                    case 0:
-						step *= 86400;
-                    break;
-                    case 1:
-                         step *= 604800;
-                    break;
-                    }
-	            }
-          	}
+    int a = mapToQwtAxis(axesList->currentRow());
+    ScaleDraw::ScaleType type = d_graph->axisType(a);
 
-		double breakLeft = -DBL_MAX, breakRight = DBL_MAX;
-		if (boxAxesBreaks->isChecked()){
-			breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
-			breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
-		}
-		d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
-				boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
-				boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
-				boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
-				boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
-			d_graph->notifyChanges();
+    double start = 0.0, end = 0.0;
+    if (type == ScaleDraw::Date){
+      ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
+      QDateTime origin = sclDraw->dateTimeOrigin();
+      start = (double)origin.secsTo(boxStartDateTime->dateTime());
+      end = (double)origin.secsTo(boxEndDateTime->dateTime());
+    } else if (type == ScaleDraw::Time){
+      ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
+      QTime origin = sclDraw->dateTimeOrigin().time();
+      start = (double)origin.msecsTo(boxStartTime->time());
+      end = (double)origin.msecsTo(boxEndTime->time());
+    } else {
+      start = boxStart->value();
+      end = boxEnd->value();
+    }
+
+    double step = 0.0;
+    if (btnStep->isChecked()){
+      step = boxStep->value();
+      if (type == ScaleDraw::Time){
+        switch (boxUnit->currentIndex())
+        {
+        case 0:
+          break;
+        case 1:
+          step *= 1e3;
+          break;
+        case 2:
+          step *= 6e4;
+          break;
+        case 3:
+          step *= 36e5;
+          break;
+        }
+      } else if (type == ScaleDraw::Date){
+        switch (boxUnit->currentIndex())
+        {
+        case 0:
+          step *= 86400;
+          break;
+        case 1:
+          step *= 604800;
+          break;
+        }
+      }
+    }
+
+    double breakLeft = -DBL_MAX, breakRight = DBL_MAX;
+    if (boxAxesBreaks->isChecked()){
+      breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
+      breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
+    }
+    d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
+      boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
+      boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
+      boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
+      boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
+    d_graph->notifyChanges();
 	}
 	else if (generalDialog->currentWidget() == gridPage)
 		updateGrid();

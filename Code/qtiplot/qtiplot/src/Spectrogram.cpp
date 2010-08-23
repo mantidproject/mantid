@@ -595,6 +595,14 @@ QwtDoubleRect Spectrogram::boundingRect() const
 {
     return d_matrix?d_matrix->boundingRect() : data().boundingRect();
 }
+
+double Spectrogram::getMinPositiveValue()const
+{
+  const QwtRasterData* r = &data();
+  const SpectrogramData* d = dynamic_cast<const SpectrogramData*>(&data());
+  return d ? d->getMinPositiveValue() : 1e-10;
+}
+
 void Spectrogram::setContourPenList(QList<QPen> lst)
 {
 	d_pen_list = lst;
@@ -615,6 +623,24 @@ if (d_m && i >= 0 && i < n_rows && j >=0 && j < n_cols)
 else
 	return 0.0;
 }
+
+double MatrixData::getMinPositiveValue()const
+{
+  double zmin = DBL_MAX;
+  for(int i=0;i<n_rows;++i)
+  {
+    for(int j=0;i<n_cols;++j)
+    {
+      double tmp = d_m[i][j];
+      if (tmp > 0 && tmp < zmin)
+      {
+        zmin = tmp;
+      }
+    }
+  }
+  return zmin;
+}
+
 void Spectrogram::setLabelsRotation(double angle)
 {
     if (angle == d_labels_angle)

@@ -103,6 +103,7 @@ public:
 	ColorMapPolicy colorMapPolicy(){return color_map_policy;};
 
 	virtual QwtDoubleRect boundingRect() const;
+  double getMinPositiveValue()const;
 	void setContourPenList(QList<QPen> lst);
 	QList<QPen> contourPenList(){return d_pen_list;};
 	//! Flag telling if we use the color map to calculate the pen (QwtPlotSpectrogram::contourPen()).
@@ -196,12 +197,19 @@ protected:
   //static Mantid::Kernel::Logger &g_log;
 };
 
+class SpectrogramData: public QwtRasterData
+{
+public:
+  SpectrogramData(const QwtDoubleRect &rect):QwtRasterData(rect){}
+  virtual double getMinPositiveValue()const = 0;
+};
 
-class MatrixData: public QwtRasterData
+
+class MatrixData: public SpectrogramData
 {
 public:
     MatrixData(Matrix *m):
-        QwtRasterData(m->boundingRect()),
+    SpectrogramData(m->boundingRect()),
 		d_matrix(m)
     {
 	n_rows = d_matrix->numRows();
@@ -248,6 +256,8 @@ public:
 
     virtual double value(double x, double y) const;
 
+    double getMinPositiveValue()const;
+
 private:
 	//! Pointer to the source data matrix
 	Matrix *d_matrix;
@@ -272,17 +282,17 @@ private:
 	 
 };
 
-class FunctionData: public QwtRasterData
+class FunctionData: public SpectrogramData
 {
 public:
     FunctionData(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz):
-        QwtRasterData(QwtDoubleRect(left, top, width, height)),
+        SpectrogramData(QwtDoubleRect(left, top, width, height)),
 		d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
     {
     }
 
     FunctionData(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz):
-        QwtRasterData(bRect),
+        SpectrogramData(bRect),
 		d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
     {
     }
@@ -312,6 +322,8 @@ public:
         //f<<x<<' '<<y<<' '<<d_funct->operator()(x,y)<<'\n';
         return d_funct->operator()(x,y);
     }
+
+    double getMinPositiveValue()const{return d_funct->getMinPositiveValue();}
 
 private:
 	UserHelperFunction *d_funct;
