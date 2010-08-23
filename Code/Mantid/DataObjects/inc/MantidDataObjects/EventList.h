@@ -174,6 +174,8 @@ public:
 
   void setTofs(const StorageType& T);
 
+  void reverse();
+
 private:
   ///List of events.
   mutable std::vector<TofEvent> events;

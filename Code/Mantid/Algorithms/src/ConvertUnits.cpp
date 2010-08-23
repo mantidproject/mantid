@@ -334,10 +334,15 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
       outputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputWS->getEventListAtWorkspaceIndex(i).setTofs(tofs);
 
+      // convert the cached x-values to the desired unit
       EventList::StorageType x = (outputWS->getEventListAtWorkspaceIndex(i).getRefX()).access();
       fromUnit->toTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputUnit->fromTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputWS->getEventListAtWorkspaceIndex(i).setX(x);
+
+      // reverse the data if appropriate
+      if ((!x.empty()) && (x.begin() > x.end()))
+          outputWS->getEventListAtWorkspaceIndex(i).reverse();
 
     } catch (Exception::NotFoundError &e) {
       // Get to here if exception thrown when calculating distance to detector

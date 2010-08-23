@@ -306,6 +306,19 @@ namespace DataObjects
     return (this->order == TOF_SORT);
   }
 
+  void EventList::reverse()
+  {
+    // reverse the histogram bin parameters
+    StorageType x = this->refX.access();
+    std::reverse(x.begin(), x.end());
+    this->refX.access() = x;
+
+    // flip the events if they are tof sorted
+    if (this->isSortedByTof())
+      std::reverse(this->events.begin(), this->events.end());
+    else
+      this->order = UNSORTED;
+  }
 
   // --------------------------------------------------------------------------
   /** Return the number of events in the list. */
@@ -517,16 +530,10 @@ namespace DataObjects
     StorageType x = this->refX.access();
     for (StorageType::iterator iter = x.begin(); iter != x.end(); ++iter)
       *iter = (*iter) * factor + offset;
-
-    // fix the order if necessary
-    if (factor < 0.)
-    {
-      std::reverse(this->events.begin(), this->events.end());
-      std::reverse(x.begin(), x.end());
-    }
-
-    // replace the existing histogram vector
     this->refX.access() = x;
+
+    if (factor < 0.)
+      this->reverse();
   }
 
   /**
@@ -549,15 +556,11 @@ namespace DataObjects
     for (std::vector<TofEvent>::iterator iter = this->events.begin();
          iter != this->events.end(); iter++)
       iter->time_of_flight *= factor;
+    this->refX.access() = x;
 
     if (factor < 0.)
-    {
-      std::reverse(this->events.begin(), this->events.end());
-      std::reverse(x.begin(), x.end());
-    }
+      this->reverse();
 
-    // replace the existing histogram vector
-    this->refX.access() = x;
   }
 
   /** Add an offset to the TOF of each event in the list.
@@ -634,16 +637,12 @@ namespace DataObjects
    */
   void EventList::setTofs(const StorageType &T)
   {
+    if (T.empty())
+      return;
     size_t x_size = T.size();
-    if (! T.empty())
-    {
-      for (size_t i = 0; i < x_size; ++i)
-      {
-        events[0].time_of_flight = T[0];
-      }
-    }
+    for (size_t i = 0; i < x_size; ++i)
+        events[i].time_of_flight = T[i];
   }
-
 
 } /// namespace DataObjects
 } /// namespace Mantid
