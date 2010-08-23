@@ -541,25 +541,13 @@ namespace Mantid
     {
       g_log.debug("Loading the instrument definition...");
       progress(m_prog, "Loading the instrument geometry...");
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString(
-        "instrumentDefinition.directory");
-      if (directoryName.empty())
-      {
-        // This is the assumed deployment directory for IDFs, where we need to be relative to the
-        // directory of the executable, not the current working directory.
-        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve(
-          "../Instrument").toString();
-      }
 
       std::string instrumentID = isisRaw->i_inst; // get the instrument name
       size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
       if (i != std::string::npos)
         instrumentID.erase(i);
 
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
+      std::string fullPathIDF = Kernel::ConfigService::Instance().getInstrumentFilename(instrumentID);
 
       IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
 
