@@ -625,7 +625,9 @@ namespace DataObjects
     // iterate through all events
     std::vector<TofEvent>::iterator iter;
     for (iter = this->events.begin(); iter != this->events.end(); iter++)
+    {
       tofs->push_back(iter->time_of_flight);
+    }
     return tofs;
   }
 
@@ -638,10 +640,14 @@ namespace DataObjects
   void EventList::setTofs(const StorageType &T)
   {
     if (T.empty())
+    {
       return;
+    }
     size_t x_size = T.size();
     for (size_t i = 0; i < x_size; ++i)
-        events[i].time_of_flight = T[i];
+    {
+      events[i].time_of_flight = T[i];
+    }
   }
 
 } /// namespace DataObjects
