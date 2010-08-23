@@ -369,7 +369,7 @@ void DiffractionFocussing2::execEvent()
     else
       g_log.warning() << "Warning! No X histogram bins were found for group # " << g << ". Histogram will be empty.\n";
   }
-
+  out->clearMRU();
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out));
   return;
 }

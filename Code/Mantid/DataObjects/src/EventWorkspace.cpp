@@ -424,12 +424,8 @@ using Kernel::Exception::NotImplementedError;
       //Create the MRU object
       data = new MantidVecWithMarker(index);
 
-      //First you need to calculate Y
-      MantidVec Y;
-      this->data[index]->generateCountsHistogram( *el->getRefX(), Y);
-
-      //Now use that to get E
-      this->data[index]->generateErrorsHistogram( Y, data->m_data);
+      //Now use that to get E -- Y values are generated from another function
+      this->data[index]->generateErrorsHistogram( this->dataY(index), data->m_data);
 
       //Lets save it in the MRU
       MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);
