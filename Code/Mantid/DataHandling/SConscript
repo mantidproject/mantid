@@ -19,8 +19,6 @@ if int(myenv['debug']) == 1:
 else:
     myenv.Append(MYLIBLIST='PocoNet')
 
-print myenv['MYLIBLIST']
-
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidDataHandling.pdb')
 retval = { 'shared': shared, 'sharedobjs' : listSharedObjects, 'libs': ['MantidDataHandling'] }
