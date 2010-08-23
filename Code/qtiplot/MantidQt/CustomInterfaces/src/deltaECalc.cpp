@@ -119,7 +119,11 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     pyCode = pyCode.arg("False");
   }
   pyCode += QString("mono_sample.energy_bins = '%1,%2,%3'\n").arg(m_sets.leELow->text(), m_sets.leEWidth->text(), m_sets.leEHigh->text());
-  pyCode += QString("mono_sample.map_file = r'%1'\n").arg(m_sets.mapFile->getFirstFilename());
+  QString mapFile = m_sets.mapFile->getFirstFilename();
+  if( !mapFile.isEmpty() )
+  {
+    pyCode += QString("mono_sample.map_file = r'%1'\n").arg(mapFile);
+  }
   if( m_sets.ckRunAbsol->isChecked() )
   {
     pyCode += QString("mono_sample.abs_map_file = r'%1'\n").arg(m_sets.absMapFile->getFirstFilename());
