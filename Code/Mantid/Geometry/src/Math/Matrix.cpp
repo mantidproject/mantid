@@ -663,7 +663,7 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
   std::vector<int> pivoted(nx);
   fill(pivoted.begin(),pivoted.end(),0);
 
-  std::vector<int> indxcol(nx);   // Colunm index
+  std::vector<int> indxcol(nx);   // Column index
   std::vector<int> indxrow(nx);   // row index
 
   int irow(0),icol(0);
