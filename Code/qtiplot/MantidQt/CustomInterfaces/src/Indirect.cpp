@@ -125,6 +125,7 @@ void Indirect::helpClicked()
 /**
 * This function will control the actions needed for the Indirect interface when the
 * "Run" button is clicked by the user.
+* @param tryToSave whether to try and save the output. Generally true, false when user has clicked on the "Rebin" button instead of "Run"
 */
 void Indirect::runClicked(bool tryToSave)
 {
@@ -150,7 +151,6 @@ void Indirect::runClicked(bool tryToSave)
     pyInput += "ana = '"+m_uiForm.cbAnalyser->currentText()+"'\n";
     pyInput += "ref = '"+m_uiForm.cbReflection->currentText()+"'\n";
 
-
     QStringList runFiles_list = m_uiForm.ind_runFiles->getFilenames();
     QString runFiles = runFiles_list.join("', r'");
 
@@ -171,9 +171,7 @@ void Indirect::runClicked(bool tryToSave)
         QString startTOF, endTOF;
         startTOF.setNum(bgRange.first, 'e');
         endTOF.setNum(bgRange.second, 'e');
-        pyInput += "bgRemove = [%1, %2]\n";
-        pyInput = pyInput.arg(startTOF);
-        pyInput = pyInput.arg(endTOF);
+        pyInput += "bgRemove = ["+startTOF+", "+endTOF+"]\n";
     }
     else
     {
@@ -191,8 +189,6 @@ void Indirect::runClicked(bool tryToSave)
     }
 
     pyInput += "efixed = "+m_uiForm.leEfixed->text()+"\n";
-
-
 
     if ( ! m_uiForm.rebin_ckDNR->isChecked() )
     { 
@@ -212,8 +208,6 @@ void Indirect::runClicked(bool tryToSave)
         pyInput += "tempK = -1\n";
 
     pyInput += "mapfile = r'"+groupFile+"'\n";
-
-
 
     if (tryToSave)
     {
@@ -249,7 +243,7 @@ void Indirect::runClicked(bool tryToSave)
         pyInput += "ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
             "fileFormats, directory, CleanUp = clean)\n";
     }
-    else
+    else if ( tryToSave )
     {
         pyInput +=
             "import re\n"
@@ -260,7 +254,7 @@ void Indirect::runClicked(bool tryToSave)
             "for workspace in wslist:\n"
             "   if save_ws.search(workspace):\n"
             "      ws_list.append(workspace)\n"
-            "      runNos.append(mantid.getMatrixWorkspace(workspace).getRun().getLogData(\"run_number\").value())\n"
+            "      runNos.append(mantid.getMatrixWorkspace(workspace).getRun().getLogData('run_number').value())\n"
             "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix, directory)\n";
     }
 
@@ -268,21 +262,21 @@ void Indirect::runClicked(bool tryToSave)
 
     if ( pyOutput != "" )
     {
-
         if ( pyOutput == "No intermediate workspaces were found. Run with 'Keep Intermediate Workspaces' checked." )
         {
             isDirty(true);
             runClicked(tryToSave=tryToSave);
-            return;
         }
-
-        showInformationBox("The following error occurred:\n" + pyOutput
-            + "\n\nAnalysis did not complete.");
-        return;
+        else
+        {
+            showInformationBox("The following error occurred:\n" + pyOutput + "\n\nAnalysis did not complete.");
+        }
     }
-
-    isDirty(false);
-    isDirtyRebin(false);
+    else
+    {
+        isDirty(false);
+        isDirtyRebin(false);
+    }
 
 }
 
