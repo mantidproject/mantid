@@ -175,7 +175,7 @@ namespace Mantid
 					downloadFileOverInternet(icat,fileList,ws_sptr);
 
 					//get the download directory name
-					std::string downloadedFName( Kernel::ConfigService::Instance().getString("icatDownload.directory"));
+					std::string downloadedFName( Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 					downloadedFName+=inputfile;
 					//replace "\" with "/"
 					replaceBackwardSlash(downloadedFName);
@@ -439,7 +439,7 @@ namespace Mantid
 		*/
 		void CDownloadDataFile::saveFiletoDisk(std::istream& rs,const std::string& fileName)
 		{			
-			std::string filepath ( Kernel::ConfigService::Instance().getString("icatDownload.directory"));
+			std::string filepath ( Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 			filepath += fileName;
 			
 			std::ios_base::openmode mode;
