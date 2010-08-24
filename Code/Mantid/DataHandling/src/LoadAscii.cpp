@@ -90,6 +90,7 @@ namespace Mantid
         ++iLine;
         progress.report(file.tellg());
         if (str.empty()) continue;
+        if (str[0] == '#') continue;
         typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
         boost::char_separator<char> sep(ch);
         boost::tokenizer<boost::char_separator<char> > values(str, sep);
