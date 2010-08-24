@@ -24,6 +24,14 @@ m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL)
     // Constructor
 }
 
+Indirect::~Indirect()
+{
+    m_uiForm.ind_runFiles->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
+    m_uiForm.ind_calibFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
+    m_uiForm.ind_mapFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
+    m_uiForm.cal_leRunNo->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
+}
+
 /**
 * This function performs any one-time actions needed when the Inelastic interface
 * is first selected, such as connecting signals to slots.
@@ -43,7 +51,6 @@ void Indirect::initLayout()
     // check boxes
     connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinCheck(bool)));
     connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
-    connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
     // line edits,etc (for isDirty)
     connect(m_uiForm.ind_runFiles, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
@@ -69,6 +76,7 @@ void Indirect::initLayout()
     // "Calibration" tab
     connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calibPlot()));
     connect(m_uiForm.cal_pbCreate, SIGNAL(clicked()), this, SLOT(calibCreate()));
+    connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
     // set values of m_dataDir and m_saveDir
     m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
@@ -102,6 +110,13 @@ void Indirect::initLayout()
     // set default values for save formats
     m_uiForm.save_ckSPE->setChecked(false);
     m_uiForm.save_ckNexus->setChecked(true);
+
+    // Load settings for MWRunFile widgets
+    
+    m_uiForm.ind_runFiles->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
+    m_uiForm.ind_calibFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
+    m_uiForm.ind_mapFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
+    m_uiForm.cal_leRunNo->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
 }
 
 /**
@@ -1126,6 +1141,14 @@ void Indirect::detailedBalanceCheck(bool state)
 void Indirect::resCheck(bool state)
 {
     m_uiForm.cal_gbRES->setEnabled(state);
+    if ( state )
+    {
+        m_uiForm.cal_pbCreate->setText("Create Calibration && Res files");
+    }
+    else
+    {
+        m_uiForm.cal_pbCreate->setText("Create Calibration File");
+    }
 }
 
 /**

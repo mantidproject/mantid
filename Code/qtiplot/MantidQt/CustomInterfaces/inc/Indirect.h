@@ -49,6 +49,7 @@ namespace MantidQt
         public:
             /// explicit constructor, not to allow any implicit conversion of types
             explicit Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm);
+            ~Indirect();
             /// Initialize the layout
             virtual void initLayout();
             /// run Python-based initialisation commands

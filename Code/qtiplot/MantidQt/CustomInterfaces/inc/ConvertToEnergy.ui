@@ -2193,24 +2193,88 @@ p, li { white-space: pre-wrap; }
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="cal_ckPlotResult" >
-              <property name="toolTip" >
-               <string>Plot resulting calibration file when created.</string>
-              </property>
-              <property name="text" >
-               <string>Plot Result</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="cal_pbCreate" >
-              <property name="toolTip" >
-               <string>Create calibration file and RES file is applicable</string>
-              </property>
-              <property name="text" >
-               <string>Create Calibration</string>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_5" >
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7" >
+                <item>
+                 <spacer name="horizontalSpacer_34" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cal_ckPlotResult" >
+                  <property name="toolTip" >
+                   <string>Plot resulting calibration file when created.</string>
+                  </property>
+                  <property name="text" >
+                   <string>Plot Result</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_35" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_28" >
+                <item>
+                 <spacer name="horizontalSpacer_36" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="cal_pbCreate" >
+                  <property name="toolTip" >
+                   <string>Create calibration file and RES file is applicable</string>
+                  </property>
+                  <property name="text" >
+                   <string>Create Calibration</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_38" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </item>
             <item>
              <spacer name="horizontalSpacer_21" >
@@ -2742,8 +2806,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>cal_leELow</tabstop>
   <tabstop>cal_leEWidth</tabstop>
   <tabstop>cal_leEHigh</tabstop>
-  <tabstop>cal_ckPlotResult</tabstop>
-  <tabstop>cal_pbCreate</tabstop>
   <tabstop>ckSumFiles</tabstop>
   <tabstop>cbMappingOptions</tabstop>
   <tabstop>cbReflection</tabstop>

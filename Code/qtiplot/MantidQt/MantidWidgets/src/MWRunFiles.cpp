@@ -210,6 +210,13 @@ void MWRunFiles::readSettings(const QString & group)
   settings.beginGroup(group);
   
   m_lastDir = settings.value("last_directory", "").toString();
+
+  if ( m_lastDir == "" )
+  {
+          // set to default data directory
+          QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
+          m_lastDir = datadirs[0];
+  }
   
   settings.endGroup();
 }

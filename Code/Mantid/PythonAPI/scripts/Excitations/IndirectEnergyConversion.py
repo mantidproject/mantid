@@ -233,7 +233,9 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 	return filename
 
 def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax, specMin, specMax, outWS_n = 'Calibration', PlotOpt=False):
-	savefile = rawfile[:-4] + suffix
+	savepath = mantid.getConfigProperty('datasearch.directories')
+	savesuffix = rawfile[:-4] + suffix
+	savefile = os.path.join(savepath, savesuffix)
 	try:
 		LoadRaw(rawfile, 'Raw', SpectrumMin = specMin, SpectrumMax = specMax)
 	except:
