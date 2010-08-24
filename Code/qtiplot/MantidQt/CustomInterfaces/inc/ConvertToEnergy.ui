@@ -2374,6 +2374,9 @@ p, li { white-space: pre-wrap; }
             <property name="multipleFiles" stdset="0" >
              <bool>false</bool>
             </property>
+            <property name="algorithmAndProperty" stdset="0" >
+             <string>GroupDetectors|MapFile</string>
+            </property>
            </widget>
           </item>
           <item>

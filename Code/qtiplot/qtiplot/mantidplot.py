@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 # Grab a few Mantid things so that we can recognise workspace variables
-from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, FrameworkSingleton
+from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
@@ -72,7 +72,7 @@ def __getWorkspaceNames(source):
         else:
             pass
     elif isinstance(source,str):
-        w = FrameworkSingleton()[source]
+        w = mtd[source]
         if w != None:
             names = __getWorkspaceNames(w)
             for n in names:

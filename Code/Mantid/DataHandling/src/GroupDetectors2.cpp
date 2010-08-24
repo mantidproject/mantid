@@ -64,7 +64,10 @@ void GroupDetectors2::init()
     new CommonBinsValidator<>),"The name of the input 2D workspace");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the output workspace");
-  declareProperty(new FileProperty("MapFile", "", FileProperty::OptionalLoad),
+  std::vector<std::string> fileExts(2);
+  fileExts[0] = ".map";
+  fileExts[1] = ".xml";
+  declareProperty(new FileProperty("MapFile", "", FileProperty::OptionalLoad, fileExts),
     "A file that consists of lists of spectra numbers to group. See the help\n"
     "for the file format");
   declareProperty(new ArrayProperty<int>("SpectraList"),

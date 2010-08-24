@@ -28,7 +28,6 @@ def load_run(prefix, run_number, output_name, ext='', name_suffix='', time_bins=
     else:
         # strip any possible file paths
         output_name = os.path.basename(output_name)
-    print 'testing extension',ext
     if ext.startswith(".n"):
         loader = LoadNexus(filename, output_name)
     elif ext.startswith(".dat"):
