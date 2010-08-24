@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QMessageBox>
+#include <QVariant>
 
 #include <Poco/Path.h>
 
@@ -126,10 +127,11 @@ void SANSAddFiles::add2Runs2Add()
 
     for(QStringList::const_iterator k = ranges.begin(); k != ranges.end(); ++k)
     {
-      //Don't display the full file path in the box, its too long
+      //Don't display the full file path in the box, it's too long
       QListWidgetItem *newL = insertListFront(QFileInfo(*k).fileName());
-      //but put it in the tooltip so people can see it if they want to
-      //Use the file finding functionality of the FileProperty
+      newL->setData(Qt::WhatsThisRole, QVariant(*k));
+      //Put the full path in the tooltip so people can see it if they want to
+      //do this with the file finding functionality of the FileProperty
       FileProperty search("dummy", k->toStdString(), FileProperty::Load,
         std::vector<std::string>(), Direction::Input);
       if ( search.isValid() == "" )
@@ -155,9 +157,11 @@ void SANSAddFiles::runPythonAddFiles()
   //there are multiple file list inputs that can be filled in loop through them
   for(int i = 0; i < m_SANSForm->toAdd_List->count(); ++i )
   {
-    const QString filename = m_SANSForm->toAdd_List->item(i)->text();
+    const QString filename =
+      m_SANSForm->toAdd_List->item(i)->data(Qt::WhatsThisRole).toString();
+    //allow but do nothing with empty entries
     if ( ! filename.isEmpty() )
-    {//allow but do nothing with empty entries
+    {
       code_torun += "'"+filename+"',";
     }
   }
@@ -263,9 +267,12 @@ void SANSAddFiles::new2AddBrowse()
     QFileDialog::getOpenFileNames(parForm, "Select files", dir, fileFilter);
 
   if( ! files.isEmpty() )
-  {//join turns the list into a single string with the entries seperated, in this case, by ,
+  {
+    // next time the user clicks browse they will see the directory that they last loaded a file from
+    QFileInfo defPath(files[0]);
+    prevVals.setValue("InPath", defPath.absoluteDir().absolutePath());
+    //join turns the list into a single string with the entries seperated, in this case, by ,
     m_SANSForm->new2Add_edit->setText(files.join(", "));
-    prevVals.setValue("InPath", dir);
   }
 }
 /**Removes the tool tip from the given widget, normally in responce

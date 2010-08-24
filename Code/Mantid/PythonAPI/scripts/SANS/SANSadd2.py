@@ -13,8 +13,9 @@ def _padZero(runNum, inst='SANS2D'):
 # returns true if ext is in the tuple allTypes, ext
 # is intended to be a file extension and allTypes a
 # list of allowed extensions. '*' at the end is supported
-def _isType(ext, allTypes) :
-  for oneType in allTypes :
+def _isType(ext, allTypes):
+  for oneType in allTypes:
+    oneType = str(oneType)
     if oneType.endswith('*') :
       oneType = oneType[0:len(oneType)-1]
       if ext.startswith(oneType) :
@@ -49,7 +50,10 @@ def add_runs(pathout, runs, inst='sans2d', defType='.nxs', nexusTypes=('.nxs', '
   pathout += '/'+inst+'/'
   if not defType.startswith('.') : defType = '.'+defType
 
+  #these input arguments need to be arrays of strings, inforce this
   if type(runs) == str : runs = (runs, )
+  if type(nexusTypes) == str : nexusTypes = (nexusTypes, )
+  if type(rawTypes) == str : rawTypes = (rawTypes, )
 
   indices=range(len(runs)-1)
 
