@@ -8,6 +8,7 @@
 #include "../../Algorithms/test/WorkspaceCreationHelper.hh"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "Poco/File.h"
 #include <boost/lexical_cast.hpp>
@@ -125,10 +126,55 @@ public:
     AnalysisDataService::Instance().remove(WSName);
     Poco::File(outputFile).remove();
   }
+
+  // MG: 24/08/2010 - The non-spectra axis case was never tested and does not work. Ticket #1514 will deal with this
+  // issue and should reenable this test (and remove this comment).
+  void xtestThatOutputIsValidFromWorkspaceWithNumericAxis()
+  {
+    // Create a small test workspace
+    std::string WSName = "saveSPETestB_input";
+    MatrixWorkspace_sptr input = makeWorkspaceWithNumericAxis(WSName);
+    
+    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) )
+    const std::string outputFile("testSPE_Axis.spe");
+    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) )
+    saver->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(saver->execute());
+    TS_ASSERT( saver->isExecuted() )
+    
+    TS_ASSERT( Poco::File(outputFile).exists() )
+    Poco::File(outputFile).remove();  
+  }
+
+private:
   
-  MatrixWorkspace_sptr makeWorkspace(const std::string input)
-  {// all the Y values in this new workspace are set to DEFAU_Y, which currently = 2
+  MatrixWorkspace_sptr makeWorkspace(const std::string & input)
+  {
+    // all the Y values in this new workspace are set to DEFAU_Y, which currently = 2
     MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
+    return setUpWorkspace(input, inputWS);
+  }
+
+  MatrixWorkspace_sptr makeWorkspaceWithNumericAxis(const std::string & input)
+  {
+    // all the Y values in this new workspace are set to DEFAU_Y, which currently = 2
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
+    inputWS = setUpWorkspace(input, inputWS);
+    API::Axis * axisOne = inputWS->getAxis(1);
+    API::NumericAxis *newAxisOne = new NumericAxis(axisOne->length());
+    for( int i = 0; i < axisOne->length(); ++i)
+    {
+      newAxisOne->setValue(i, axisOne->operator()((i)));
+    }
+    // Set the units
+    inputWS->replaceAxis(1, newAxisOne);
+    inputWS->getAxis(1)->unit() = UnitFactory::Instance().create("Energy");
+    inputWS->setYUnit("MyCaption");
+    return inputWS;
+  }
+  
+  MatrixWorkspace_sptr setUpWorkspace(const std::string & input, MatrixWorkspace_sptr inputWS)
+  {
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
         
     // the following is largely about associating detectors with the workspace

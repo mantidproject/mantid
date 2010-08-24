@@ -88,18 +88,19 @@ void SaveSPE::exec()
   fprintf(outSPE_File,"%8u%8u\n",nHist, m_nBins);
 
   // Write the angle grid (dummy if no 'vertical' axis)
+  int phiPoints(0);
   if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )
   {
     const Axis& axis = *inputWS->getAxis(1);
     const std::string commentLine = "### " + axis.unit()->caption() + " Grid\n";
     fprintf(outSPE_File,commentLine.c_str());
     const int axisLength = axis.length();
-    const int phiPoints = (axisLength==nHist) ? axisLength+1 : axisLength;
+    phiPoints = (axisLength==nHist) ? axisLength+1 : axisLength;
     for (int i = 0; i < phiPoints; i++)
     {
       const double value = (i < axisLength) ? axis(i) : axis(axisLength-1)+1;
       fprintf(outSPE_File,NUM_FORM,value);
-      if ( (i > 0) && ((i + 1) % 8 == 0) )
+      if ( (i + 1) % 8 == 0 )
       {
         fprintf(outSPE_File,"\n");
       }
@@ -108,20 +109,23 @@ void SaveSPE::exec()
   else
   {
     fprintf(outSPE_File,"### Phi Grid\n");
-    const int phiPoints = nHist + 1; // Pretend this is binned
+    phiPoints = nHist + 1; // Pretend this is binned
     for (int i = 0; i < phiPoints; i++)
     {
       const double value = i + 0.5;
       fprintf(outSPE_File,NUM_FORM,value);
-      if ( (i > 0) && ((i + 1) % 8 == 0) )
+      if ( (i + 1) % 8 == 0 )
       {
         fprintf(outSPE_File,"\n");
       }
     }
   }
 
-  // If the number of angles isn't a factor of 8 then we need to add an extra CR/LF
-  if (nHist % 8 != 0) fprintf(outSPE_File,"\n");
+  // If the number of points written isn't a factor of 8 then we need to add an extra newline
+  if (phiPoints % 8 != 0)
+  {
+    fprintf(outSPE_File,"\n");
+  }
 
   // Get the Energy Axis (X) of the first spectra (they are all the same - checked above)
   const MantidVec& X = inputWS->readX(0);
