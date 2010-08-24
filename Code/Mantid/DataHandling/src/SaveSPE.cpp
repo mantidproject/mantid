@@ -46,8 +46,6 @@ void SaveSPE::init()
   wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
   wsValidator->add(new API::CommonBinsValidator<>);
   wsValidator->add(new API::HistogramValidator<>);
-  // the SPE file specification states that values following ### S(Phi,w) are "intensities" (www.mantidproject.org/images/3/3d/Spe_file_format.pdf) so to be accuarate the dependence on bin boundary widths should be removed (i.e. numbers of counts should have been divided by a number that is proporational to the bin width)
-  wsValidator->add(new API::RawCountValidator<>(false));
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsValidator),
     "The input workspace, which must be in Energy Transfer");
   declareProperty(new FileProperty("Filename","", FileProperty::Save),
