@@ -47,6 +47,7 @@ typedef uint32_t PixelType;
 typedef uint32_t DasTofType;
 
 /// Structure that matches the form in the binary event list.
+#pragma pack(push, 4) //Make sure the structure is 8 bytes.
 struct DasEvent
 {
   /// Time of flight.
@@ -54,8 +55,10 @@ struct DasEvent
   /// Pixel identifier as published by the DAS/DAE/DAQ.
   PixelType pid;
 };
+#pragma pack(pop)
 
 /// Structure that matches the form in the new pulseid files.
+#pragma pack(push, 4) //Make sure the structure is 16 bytes.
 struct Pulse
 {
   /// The number of nanoseconds since the seconds field. This is not
@@ -71,6 +74,7 @@ struct Pulse
   /// The proton charge for the pulse.
   double pCurrent;
 };
+#pragma pack(pop)
 
 
 class DLLExport LoadEventPreNeXus : public Mantid::API::Algorithm

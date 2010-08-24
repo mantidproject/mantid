@@ -63,6 +63,13 @@ public:
     TS_ASSERT_THROWS( eventLoader->execute() , std::runtime_error);
 
   }
+
+  void test_data_sizes()
+  {
+    //Make sure the structs are the right size
+    TS_ASSERT_EQUALS( sizeof(Pulse), 24);
+    TS_ASSERT_EQUALS( sizeof(DasEvent), 8);
+  }
 //
 //  void test_LoadPreNeXus_TOPAZ()
 //  {
