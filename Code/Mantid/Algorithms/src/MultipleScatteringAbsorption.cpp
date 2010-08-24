@@ -63,12 +63,12 @@ void MultipleScatteringAbsorption::init()
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "Spectrum index for Multiple Scattering Absorption Corrections");
 
-  declareProperty("total_path", 62.602, "Total Flight Path Length(m)" );
-  declareProperty("angle_deg", 129.824, "Scattering angle, two theta, in degrees" );
-  declareProperty("radius",     0.3175, "Sample radius, in cm" );
-  declareProperty("coeff1",        2.8, "Coefficient 1, absorption cross section / 1.81" );
-  declareProperty("coeff2",     0.0721, "Coefficient 2, density" );
-  declareProperty("coeff3",        5.1, "Coefficient 3, total scattering cross section" );
+  declareProperty("AttenuationXSection", 2.8, "Coefficient 1, absorption cross section / 1.81" );
+  declareProperty("ScatteringXSection", 5.1, "Coefficient 3, total scattering cross section" );
+  declareProperty("SampleNumberDensity", 0.0721, "Coefficient 2, density" );
+  declareProperty("TotalFlightPath", 62.602, "Total Flight Path Length in meters" );
+  declareProperty("ScatteringAngle", 129.824, "Scattering angle, two theta, in degrees" );
+  declareProperty("CylinderSampleRadius", 0.3175, "Sample radius, in cm" );
 }
 
 
@@ -82,12 +82,12 @@ void MultipleScatteringAbsorption::exec()
   int index         = getProperty("WorkspaceIndex");
   int num_tofs      = in_WS->readX(index).size();
   int num_ys        = in_WS->readY(index).size();
-  double total_path = getProperty("total_path");
-  double angle_deg  = getProperty("angle_deg");
-  double radius     = getProperty("radius");
-  double coeff1     = getProperty("coeff1");
-  double coeff2     = getProperty("coeff2");
-  double coeff3     = getProperty("coeff3");
+  double total_path = getProperty("TotalFlightPath");
+  double angle_deg  = getProperty("ScatteringAngle");
+  double radius     = getProperty("CylinderSampleRadius");
+  double coeff1     = getProperty("AttenuationXSection");
+  double coeff2     = getProperty("SampleNumberDensity");
+  double coeff3     = getProperty("ScatteringXSection");
 
   MantidVec tof_vec = in_WS->readX(index);
   MantidVec y_vec   = in_WS->readY(index);

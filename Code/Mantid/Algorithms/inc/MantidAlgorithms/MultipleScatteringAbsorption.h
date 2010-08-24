@@ -19,7 +19,8 @@ namespace Algorithms
     @author Dennis Mikkelson 
     @date 17/08/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & 
+    NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -36,7 +37,8 @@ namespace Algorithms
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at:
+                  <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport MultipleScatteringAbsorption : public API::Algorithm
@@ -50,7 +52,8 @@ public:
   virtual ~MultipleScatteringAbsorption() {};
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MultipleScatteringAbsorption";}
+  virtual const std::string name() const {
+          return "MultipleScatteringCylinderAbsorption";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}

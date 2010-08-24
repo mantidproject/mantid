@@ -16,7 +16,7 @@ class MultipleScatteringAbsorptionTest : public CxxTest::TestSuite
 public:
   void testName()
   {
-    TS_ASSERT_EQUALS( algorithm.name(), "MultipleScatteringAbsorption" )
+    TS_ASSERT_EQUALS( algorithm.name(), "MultipleScatteringCylinderAbsorption" )
   }
   
   void testVersion()
@@ -50,32 +50,33 @@ public:
     TS_ASSERT( props[2]->isDefault() )
     TS_ASSERT( dynamic_cast<PropertyWithValue<int>* >(props[2]) )
 
-    TS_ASSERT_EQUALS( props[3]->name(), "total_path")
-    TS_ASSERT( props[2]->isDefault() )
+    TS_ASSERT_EQUALS( props[3]->name(), "AttenuationXSection")
+    TS_ASSERT( props[3]->isDefault() )
     TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[3]) )
 
-    TS_ASSERT_EQUALS( props[4]->name(), "angle_deg")
-    TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[3]) )
+    TS_ASSERT_EQUALS( props[4]->name(), "ScatteringXSection")
+    TS_ASSERT( props[4]->isDefault() )
+    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[4]) )
 
-    TS_ASSERT_EQUALS( props[5]->name(), "radius")
-    TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[3]) )
+    TS_ASSERT_EQUALS( props[5]->name(), "SampleNumberDensity")
+    TS_ASSERT( props[5]->isDefault() )
+    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[5]) )
 
-    TS_ASSERT_EQUALS( props[6]->name(), "coeff1")
-    TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[3]) )
+    TS_ASSERT_EQUALS( props[6]->name(), "TotalFlightPath")
+    TS_ASSERT( props[6]->isDefault() )
+    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[6]) )
 
-    TS_ASSERT_EQUALS( props[7]->name(), "coeff2")
-    TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[3]) )
+    TS_ASSERT_EQUALS( props[7]->name(), "ScatteringAngle")
+    TS_ASSERT( props[7]->isDefault() )
+    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[7]) )
 
-    TS_ASSERT_EQUALS( props[8]->name(), "coeff3")
-    TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[3]) )
+    TS_ASSERT_EQUALS( props[8]->name(), "CylinderSampleRadius")
+    TS_ASSERT( props[8]->isDefault() )
+    TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[8]) )
+
   }
 
-  void testZeroing()
+  void testCalculation()
   {                                               // load input and "Gold" result workspaces
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
@@ -95,12 +96,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "InputWorkspace","TestInputWS" ) );
     TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "OutputWorkspace","TestOutputWS" ) );
     TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "WorkspaceIndex", "0" ) );
-    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "total_path", "62.602" ) );
-    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "angle_deg", "129.824" ) );
-    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "radius", "0.3175" ) );
-    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "coeff1", "2.8" ) );
-    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "coeff2", "0.0721" ) );
-    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "coeff3", "5.1" ) );
+    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "TotalFlightPath", "62.602" ) );
+    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "ScatteringAngle", "129.824" ) );
+    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "CylinderSampleRadius", "0.3175" ) );
+    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "AttenuationXSection", "2.8" ) );
+    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "SampleNumberDensity", "0.0721" ) );
+    TS_ASSERT_THROWS_NOTHING( algorithm_c.setPropertyValue( "ScatteringXSection", "5.1" ) );
 
     TS_ASSERT_THROWS_NOTHING( algorithm_c.execute() );
     TS_ASSERT( algorithm_c.isExecuted() );
