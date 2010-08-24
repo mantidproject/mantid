@@ -326,5 +326,17 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   }
 }
 
+/// Appends the removal of the empty group after execution to the PairedGroupAlgorithm::processGroups method
+bool ConjoinWorkspaces::processGroups(API::WorkspaceGroup_sptr wsPt, const std::vector<Kernel::Property*>& prop)
+{
+  // Call the base class method for most of the functionality
+  const bool retval = PairedGroupAlgorithm::processGroups(wsPt,prop);
+
+  // If that was successful, remove the now empty group in the second input workspace property
+  if (retval) AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+
+  return retval;
+}
+
 } // namespace Algorithm
 } // namespace Mantid

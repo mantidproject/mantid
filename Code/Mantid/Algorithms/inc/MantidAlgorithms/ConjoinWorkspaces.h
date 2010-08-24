@@ -70,6 +70,7 @@ private:
 
   void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
   void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
+  bool processGroups(API::WorkspaceGroup_sptr wsPt, const std::vector<Kernel::Property*>& prop);
 
   /// Progress reporting object
   API::Progress *m_progress;
