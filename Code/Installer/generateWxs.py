@@ -527,9 +527,10 @@ addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll','../Mantid/release
 addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll','../Mantid/release/MantidDataHandling.dll',Plugins)
 addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll','../Mantid/release/MantidDataObjects.dll',Plugins)
 addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll','../Mantid/release/MantidCurveFitting.dll',Plugins)
-
+addFileV('MantidICat','MIC.dll','MantidICat.dll','../Mantid/release/MantidICat.dll',Plugins)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/release/MantidNexus.dll',Plugins)
 addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
+
 #Add hdf4 for 32bit systems
 if ARCH == '32':
     addFileV('hd421mdll','hd421m.dll','hd421m.dll','../Third_Party/lib/win32/hd421m.dll',Plugins)
