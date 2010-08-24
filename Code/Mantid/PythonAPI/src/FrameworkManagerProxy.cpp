@@ -5,6 +5,7 @@
 
 #include <boost/python/handle.hpp>
 #include <boost/python/extract.hpp>
+#include <fstream>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -45,6 +46,11 @@ FrameworkManagerProxy::FrameworkManagerProxy()
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clear_observer);
+
+  // Create a blank module to satisfy Python algorithm dependencies on startup so that we don't have to create the
+  // actual module twice on startup
+  std::string simpleapi = SimplePythonAPI::getModuleFilename();
+  std::ofstream file(simpleapi.c_str(), std::ios_base::out);
 }
 
 ///Destructor

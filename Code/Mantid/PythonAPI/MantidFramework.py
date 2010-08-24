@@ -416,14 +416,8 @@ class MantidPyFramework(FrameworkManager):
         if self.__is_initialized == True:
             return
 
-        # Update search path on posix machines where mantidsimple.py goes to the user directory
-        if os.name == 'posix':
-            outputdir = os.path.expanduser('~/.mantid')
-            if not outputdir in sys.path:
-                sys.path.append(outputdir)
-
-        self.createPythonSimpleAPI(GUI)
         self._pyalg_loader.load_modules(refresh=False)
+        self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToGlobal()     
 
         self.__is_initialized = True
@@ -450,18 +444,25 @@ class MantidPyFramework(FrameworkManager):
     def _importSimpleAPIToGlobal(self):
         simpleapi = 'mantidsimple'
         if simpleapi in sys.modules:
+            mod = sys.modules[simpleapi]
+            # At startup the pyc file is created too close to the creation of the module itself and successful reloads require that
+            # it be removed first
+            pyc_file = mod.__file__
+            if pyc_file.endswith('.py'):
+                pyc_file += 'c'
+            os.remove(pyc_file)
             mod = reload(sys.modules[simpleapi])
         else:
             mod = __import__(simpleapi)
         for name in dir(mod):
-            if name.startswith('__'):
+            if name.startswith('_'):
                 continue
             setattr(__main__, name, getattr(mod, name))
             
     def _refreshPyAlgorithms(self):
         # Reload the modules that have been loaded
         self._pyalg_loader.load_modules(refresh=True)
-        
+                
     def _retrieveWorkspace(self, name):
         """
         Use the appropriate function to return the workspace that has that name
@@ -960,6 +961,12 @@ if __name__ != "__main__":
     mantid = mtd
     Mantid = mtd
     Mtd = mtd
+    
+    # Update search path on posix machines where mantidsimple.py goes to the user directory
+    if os.name == 'posix':
+        outputdir = os.path.expanduser('~/.mantid')
+        if not outputdir in sys.path:
+            sys.path.append(outputdir)
     
     # Required directories (config service has changed them to absolute paths)
     MantidPyFramework._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
