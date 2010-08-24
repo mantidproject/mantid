@@ -874,7 +874,8 @@ public:
     loader.execute();
 
     //This test will not make sense if the configuration peakRadius is not set correctly.
-    TS_ASSERT_EQUALS( Mantid::Kernel::ConfigService::Instance().getString("curvefitting.peakRadius"), "5");
+    const std::string priorRadius = ConfigService::Instance().getString("curvefitting.peakRadius");
+    ConfigService::Instance().setString("curvefitting.peakRadius","5");
 
     Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -955,6 +956,8 @@ public:
     //TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
 
     AnalysisDataService::Instance().remove(outputSpace);
+    // Be nice and set back to what it was before
+    ConfigService::Instance().setString("curvefitting.peakRadius",priorRadius);
   }
 
 
