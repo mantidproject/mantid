@@ -16,6 +16,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 
@@ -872,6 +873,8 @@ public:
     loader.setPropertyValue("OutputWorkspace", outputSpace);
     loader.execute();
 
+    //This test will not make sense if the configuration peakRadius is not set correctly.
+    TS_ASSERT_EQUALS( Mantid::Kernel::ConfigService::Instance().getString("curvefitting.peakRadius"), "5");
 
     Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
