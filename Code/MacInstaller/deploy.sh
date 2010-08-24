@@ -13,12 +13,12 @@ update_lib_paths() {
     do
       for m in $macoslibs
       do
-        install_name_tool -change @loader_path/./$m @loader_path/../Contents/MacOS/$m $lib
-        install_name_tool -change $m @loader_path/../Contents/MacOS/$m $lib
+        install_name_tool -change @loader_path/./$m @loader_path/$4/Contents/MacOS/$m $lib
+        install_name_tool -change $m @loader_path/$4/Contents/MacOS/$m $lib
       done
       for qt in $qtlibs
       do
-        install_name_tool -change $qt @loader_path/../Contents/Frameworks/$qt $lib
+        install_name_tool -change $qt @loader_path/$4/Contents/Frameworks/$qt $lib
       done
     done
 }
@@ -127,6 +127,6 @@ cp ../Mantid/release/libMantidQtCustomInterfaces.dylib MantidPlot.app/plugins/qt
 cp ../Mantid/PythonAPI/PythonAlgorithms/Squares.py MantidPlot.app/plugins/PythonAlgs/Examples/
 
 PLUGINLIBS='MantidPlot.app/plugins/*.dylib'
-update_lib_paths $PLUGINLIBS $MACOSLIBS $QTLIBS
+update_lib_paths "$PLUGINLIBS" "$MACOSLIBS" "$QTLIBS" ".."
 PLUGINSLIBS='MantidPlot.app/plugins/qtplugins/mantid/*.dylib'
-update_lib_paths $PLUGINLIBS $MACOSLIBS $QTLIBS
+update_lib_paths "$PLUGINSLIBS" "$MACOSLIBS" "$QTLIBS" "../../.."
