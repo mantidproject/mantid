@@ -1,6 +1,6 @@
 from mantidsimple import *
 from mantidplot import *
-from IndirectEnergyConversion *
+from IndirectEnergyConversion import *
 import math
 
 def abscyl(inWS_n, outWS_n, efixed, sample, can):
