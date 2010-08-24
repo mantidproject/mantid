@@ -9,6 +9,7 @@ namespace Mantid
 {
 namespace Algorithms
 {
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -18,7 +19,7 @@ DECLARE_ALGORITHM(ConjoinWorkspaces)
 
 //----------------------------------------------------------------------------------------------
 /// Default constructor
-  ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL) {}
+ConjoinWorkspaces::ConjoinWorkspaces() : PairedGroupAlgorithm(), m_progress(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
@@ -35,7 +36,7 @@ ConjoinWorkspaces::~ConjoinWorkspaces()
 void ConjoinWorkspaces::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace1",
-    "", Direction::Input, new CommonBinsValidator<>),
+    "", Direction::InOut, new CommonBinsValidator<>),
     "The name of the first input workspace");
   declareProperty(new WorkspaceProperty<>("InputWorkspace2",
     "", Direction::Input, new CommonBinsValidator<>),
@@ -141,12 +142,10 @@ void ConjoinWorkspaces::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // Delete the input workspaces from the ADS
-  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));
+  // Delete the second input workspace from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
-  // Create & assign an output workspace property with the workspace name the same as the first input
-  declareProperty(new WorkspaceProperty<>("Output",getPropertyValue("InputWorkspace1"),Direction::Output));
-  setProperty("Output",output);
+  // Set the result workspace to the first input
+  setProperty("InputWorkspace1",output);
 }
 
 

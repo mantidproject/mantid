@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/PairedGroupAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
@@ -25,10 +25,10 @@ namespace Algorithms
 
     The output will be stored in the first named input workspace, the second will be deleted.
 
-    @author Russell Taylor, Tessella Support Services plc
+    @author Russell Taylor, Tessella
     @date 25/08/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -48,7 +48,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConjoinWorkspaces : public API::Algorithm
+class DLLExport ConjoinWorkspaces : public API::PairedGroupAlgorithm
 {
 public:
   /// Empty constructor
