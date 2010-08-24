@@ -83,10 +83,13 @@ private:
   bool isGroupingSet();
 
   ///
-  void applyGroupingToWS( const std::string& wsName, std::string filename="" );
+  void applyGroupingToWS( const std::string& wsName, std::string filename);
 
   ///
-  void saveGrouping( std::string filename="" );
+  void applyGroupingToWS( const std::string& wsName);
+
+  ///
+  //void saveGrouping( std::string filename="" );
 
   ///
   void updateFront();
