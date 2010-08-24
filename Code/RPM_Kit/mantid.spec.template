@@ -137,6 +137,7 @@ echo %{mantidpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.con
 echo %{mantidqtpluginsdir} >> $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 install -m644 Code/Mantid/Properties/Mantid.properties $RPM_BUILD_ROOT/%{mantidbindir}
 sed -i -e "s!plugins\.directory.*!plugins.directory = %{mantidpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s!mantidqt\.plugins\.directory.*!mantidqt.plugins.directory = %{mantidqtpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscriptsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!instrumentDefinition\.directory.*!instrumentDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!parameterDefinition\.directory.*!parameterDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
