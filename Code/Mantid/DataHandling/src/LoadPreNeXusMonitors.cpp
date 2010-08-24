@@ -25,7 +25,6 @@
 #include <cstdlib>
 #include <iterator>
 
-
 namespace Mantid
 {
 namespace DataHandling
@@ -175,6 +174,8 @@ void LoadPreNeXusMonitors::exec()
   //tchannels = static_cast<size_t> ((tmax - tmin) / tstep);
   //std::cout << "tchannels = " << tchannels << std::endl;
 
+  g_log.information() << "Number of Time Channels = " << tchannels << std::endl;
+
   // Now lets create the time of flight array.
   MantidVec time_bins(tchannels + 1);
   for (int i = 0; i < tchannels + 2; ++i)
@@ -191,7 +192,7 @@ void LoadPreNeXusMonitors::exec()
   boost::shared_array<int> detector_numbers(new int[nMonitors]);
 
   // temp buffer for file reading
-  std::vector<uint32_t> buffer;
+  std::vector < uint32_t > buffer;
 
   for (size_t i = 0; i < nMonitors; i++)
   {
