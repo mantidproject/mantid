@@ -51,7 +51,8 @@ public:
   SequentialFitDialog(FitPropertyBrowser* fitBrowser);
 
   /// Add a list of workspace names to the data list
-  void addWorkspaces(const QStringList wsNames);
+  /// Returns false if neither of the workspaces can be loaded
+  bool addWorkspaces(const QStringList wsNames);
 
 private:
 
@@ -93,7 +94,7 @@ private:
 
   /// Checks that the logs in workspace wsName are consistent
   /// with logs of other workspaces
-  void validateLogs(const QString wsName);
+  bool validateLogs(const QString wsName);
 
   /// Populate parameter combo box with possible parameter names
   void populateParameters();

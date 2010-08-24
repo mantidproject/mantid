@@ -47,7 +47,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output));
       declareProperty("Function","",new MandatoryValidator<std::string>(),
         "The fitting function, common for all workspaces");
-      declareProperty("LogValue","","Name of the log value to plot the parameters against");
+      declareProperty("LogValue","","Name of the log value to plot the parameters against",new MandatoryValidator<std::string>());
       declareProperty("StartX", EMPTY_DBL(),
         "A value of x in, or on the low x boundary of, the first bin to include in\n"
         "the fit (default lowest value of x)" );

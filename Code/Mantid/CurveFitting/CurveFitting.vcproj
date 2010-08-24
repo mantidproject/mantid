@@ -505,6 +505,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\PlotPeakByLogValueTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\PRConjugateGradientMinimizer.h"
 				>
 			</File>

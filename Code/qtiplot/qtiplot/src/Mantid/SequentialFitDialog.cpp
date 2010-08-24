@@ -55,15 +55,23 @@ void SequentialFitDialog::addWorkspace()
   }
 }
 
-void SequentialFitDialog::addWorkspaces(const QStringList wsNames)
+bool SequentialFitDialog::addWorkspaces(const QStringList wsNames)
 {
-  if (wsNames.isEmpty()) return;
+  if (wsNames.isEmpty()) return false;
   int row = ui.tWorkspaces->rowCount();
   ui.tWorkspaces->model()->insertRows(row,wsNames.size());
   int wi = m_fitBrowser->workspaceIndex();
   QAbstractItemModel* model = ui.tWorkspaces->model();
   foreach(QString name,wsNames)
   {
+    if (!validateLogs(name))
+    {
+      QMessageBox::critical((QWidget*)parent(),"Mantid - Error","Workspace "+name+" was not included because it does not have any logs");
+      ui.tWorkspaces->model()->removeRow(row);
+      if (row == 0) return false;
+      continue;
+    }
+      
     model->setData(model->index(row,0,QModelIndex()),name);
     // disable the period cell
     model->setData(model->index(row,1,QModelIndex()),"");
@@ -96,11 +104,11 @@ void SequentialFitDialog::addWorkspaces(const QStringList wsNames)
 
     // set workspace index
     model->setData(model->index(row,3,QModelIndex()),wi);
-    validateLogs(name);
     ++row;
   }
   ui.tWorkspaces->resizeRowsToContents();
   ui.tWorkspaces->resizeColumnsToContents();
+  return true;
 }
 
 void SequentialFitDialog::addFile()
@@ -159,7 +167,7 @@ void SequentialFitDialog::removeItem()
   }
 }
 
-void SequentialFitDialog::validateLogs(const QString wsName)
+bool SequentialFitDialog::validateLogs(const QString wsName)
 {
   Mantid::API::MatrixWorkspace_sptr ws = 
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -177,17 +185,15 @@ void SequentialFitDialog::validateLogs(const QString wsName)
       logNames << QString::fromStdString(logs[i]->name());
     }
     int n = ui.cbLogValue->count();
+    // if the ws has no logs - do not include it
+    if (logNames.empty())
+    {
+      return false;
+    }
     // if the log value combo box is empty fill it in with the log names from ws
     if (n == 0)
     {
-      if (!logNames.empty())
-      {
-        ui.cbLogValue->insertItems(0,logNames);
-      }
-      else
-      {
-        ui.cbLogValue->insertItem(0,"");
-      }
+      ui.cbLogValue->insertItems(0,logNames);
     }
     else
     {// keep only those logs which are included in both ui.cbLogValue and logNames
@@ -212,9 +218,11 @@ void SequentialFitDialog::validateLogs(const QString wsName)
       {
         QMessageBox::warning(m_fitBrowser->m_appWindow,"MantidPlot - Warning","The list of the log names is empty:\n"
           "The selected workspaces do not have common logs");
+        return false;
       }
     }
   }
+  return true;
 }
 
 void SequentialFitDialog::accept()

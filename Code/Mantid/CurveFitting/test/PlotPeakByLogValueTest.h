@@ -185,6 +185,22 @@ public:
     AnalysisDataService::Instance().remove("PlotPeakResult");
   }
 
+  void testEmptyLog()
+  {
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input",
+      "../../../../Test/Data/HET15958.RAW,sp6;"
+      "../../../../Test/Data/HET15958.RAW,sp7");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    //alg.setPropertyValue("WorkspaceIndex","1");
+    alg.setPropertyValue("StartX","2912");
+    alg.setPropertyValue("EndX","3104");
+    TS_ASSERT_THROWS(alg.setPropertyValue("LogValue",""),std::invalid_argument);
+    alg.setPropertyValue("Function","name=Gaussian");
+    TS_ASSERT_THROWS(alg.execute(),std::runtime_error);
+  }
+
   
 
 private:

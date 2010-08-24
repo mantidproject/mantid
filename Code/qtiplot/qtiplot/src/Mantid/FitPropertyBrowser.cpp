@@ -2037,11 +2037,11 @@ void FitPropertyBrowser::sequentialFit()
   }
   SequentialFitDialog* dlg = new SequentialFitDialog(this);
   std::string wsName = workspaceName();
-  if (!wsName.empty())
+  if (!wsName.empty() && dlg->addWorkspaces(QStringList(QString::fromStdString(wsName))))
   {
-    dlg->addWorkspaces(QStringList(QString::fromStdString(wsName)));
+    dlg->show();
   }
-  dlg->show();
+  
 }
 
 void FitPropertyBrowser::findPeaks()
