@@ -118,6 +118,7 @@ cp ../Mantid/release/libMantidCurveFitting.dylib MantidPlot.app/plugins/
 cp ../Mantid/release/libMantidDataHandling.dylib MantidPlot.app/plugins/
 cp ../Mantid/release/libMantidDataObjects.dylib MantidPlot.app/plugins/
 cp ../Mantid/release/libMantidNexus.dylib MantidPlot.app/plugins/
+cp ../Mantid/release/libMantidICat.dylib MantidPlot.app/plugins/
 install_name_tool -change /usr/local/lib/libNeXus.0.dylib @loader_path/../Contents/Frameworks/libNeXus.0.dylib MantidPlot.app/plugins/libMantidNexus.dylib
 # Mantid Qt plugins
 cp ../Mantid/release/libMantidQtCustomDialogs.dylib MantidPlot.app/plugins/qtplugins/mantid
