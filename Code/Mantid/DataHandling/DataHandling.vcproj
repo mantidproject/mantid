@@ -277,6 +277,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadPreNeXusMonitors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw.cpp"
 				>
 			</File>
@@ -548,6 +552,10 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadParameterFileTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadPreNeXusMonitors.h"
 				>
 			</File>
 			<File
