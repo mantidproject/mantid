@@ -537,7 +537,7 @@ if ARCH == '32':
 addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
 
 # Python algorithms
-pyalgsList = addCompList("PyAlgsDir","../Mantid/PythonAPI/PythonAlgorithms","PythonAlgorithms",InstallDir)[0]
+pyalgsList = addCompList("PyAlgsDir","../Mantid/PythonAPI/PythonAlgorithms","plugins/PythonAlgs",InstallDir)[0]
 
 
 ##
