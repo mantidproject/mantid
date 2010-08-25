@@ -23,70 +23,7 @@ void test();
 
 int main()
 {
-
   FrameworkManagerImpl& fm = FrameworkManager::Instance();
-
-//  UserAlgorithmTest userTest;
- // userTest.RunAllTests();
-  
- // Benchmark b;
- // b.RunPlusTest(10584,2000);
-  //b.RunPlusTest(15584,2000);
-  //b.RunPlusTest(2584,2000);
-
-//#if defined _DEBUG
-  //NOTE:  Any code in here is temporary for debugging purposes only, nothing is safe!
-  //load a raw file
-
-  IAlgorithm* loader;
-  loader = fm.createAlgorithm("LoadEventPreNeXus");
-  loader->setPropertyValue("EventFilename", "../../../Test/Data/sns_event_prenexus/CNCS_7850_neutron_event.dat");
-  loader->setPropertyValue("OutputWorkspace", "outerA");
-  loader->execute();
-
-  IAlgorithm* rebin;
-  rebin = fm.createAlgorithm("Rebin");
-  rebin->setPropertyValue("InputWorkspace", "outerA");
-  rebin->setPropertyValue("OutputWorkspace", "outer1");
-  rebin->setPropertyValue("Params", "0, 1e3, 100e3");
-  rebin->execute();
-
-  MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<const MatrixWorkspace>
-          (AnalysisDataService::Instance().retrieve("outer1"));
-
-  loader = fm.createAlgorithm("LoadEventPreNeXus");
-  loader->setPropertyValue("EventFilename", "../../../Test/Data/sns_event_prenexus/CNCS_7850_neutron_event.dat");
-  loader->setPropertyValue("OutputWorkspace", "outerB");
-  loader->execute();
-
-  rebin = fm.createAlgorithm("Rebin");
-  rebin->setPropertyValue("InputWorkspace", "outerB");
-  rebin->setPropertyValue("OutputWorkspace", "outer2");
-  rebin->setPropertyValue("Params", "0, 1e2, 100e3");
-  rebin->execute();
-
-  MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>
-          (AnalysisDataService::Instance().retrieve("outer2"));
-
-  const int numberOfSpectra = input->getNumberHistograms();
-
-  PARALLEL_FOR2(input, output)
-  for (int j = 0; j < numberOfSpectra; ++j)
-	{
-    PARALLEL_START_INTERUPT_REGION
-    std::cout << "Copying X "<< j << ".\n";
-    for (int dumb=0; dumb<1000; dumb++)
-    {
-    output->dataX(j) = input->readX(j);
-    for (int i=0; i<output->dataX(j).size(); i++)
-      output->dataX(j)[i] = input->readX(j)[i]*1.2345;
-    }
-
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  std::cout << "DONE!\n";
 
   fm.clear();
   exit(0);
