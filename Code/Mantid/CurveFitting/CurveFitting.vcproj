@@ -239,10 +239,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FitMultispectral.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\FRConjugateGradientMinimizer.cpp"
 				>
 			</File>
@@ -398,14 +394,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\Fit1D.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidCurveFitting\FitMultispectral.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\FitMultispectralTest.h"
 				>
 			</File>
 			<File
