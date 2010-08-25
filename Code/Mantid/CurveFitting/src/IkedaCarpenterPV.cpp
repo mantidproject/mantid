@@ -104,7 +104,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
 
       if ( m_workspace->getAxis(0)->unit()->unitID().compare("TOF") != 0 )
       {
-        g_log.warning() << "IkedaCarpenterPV function should ONLY be used when working with x-axis unit = TOF\n";
+        g_log.information() << "IkedaCarpenterPV function is perhaps best used when working with x-axis unit = TOF\n";
       }
 
       m_waveLength.resize(nData);
