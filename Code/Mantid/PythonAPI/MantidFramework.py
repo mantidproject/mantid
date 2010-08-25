@@ -416,9 +416,10 @@ class MantidPyFramework(FrameworkManager):
         if self.__is_initialized == True:
             return
 
+        self.createPythonSimpleAPI(GUI)
         self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI)
-        self._importSimpleAPIToGlobal()     
+        self._importSimpleAPIToMain()     
 
         self.__is_initialized = True
         
@@ -441,7 +442,7 @@ class MantidPyFramework(FrameworkManager):
                 sys.path.append(path)
 
 
-    def _importSimpleAPIToGlobal(self):
+    def _importSimpleAPIToMain(self):
         simpleapi = 'mantidsimple'
         if simpleapi in sys.modules:
             mod = sys.modules[simpleapi]
@@ -947,43 +948,42 @@ def _cppListValidator(prop_type, options):
 # Startup code
 ########################################################################################
 
-if __name__ != "__main__":
-    
-    def FrameworkSingleton():
-        try:
-            getattr(__main__, '__mantid__')
-        except AttributeError:
-            setattr(__main__, '__mantid__', MantidPyFramework())
-        return getattr(__main__, '__mantid__')
+ 
+def FrameworkSingleton():
+    try:
+        getattr(__main__, '__mantid__')
+    except AttributeError:
+        setattr(__main__, '__mantid__', MantidPyFramework())
+    return getattr(__main__, '__mantid__')
 
-    mtd = FrameworkSingleton()
-    #Aliases
-    mantid = mtd
-    Mantid = mtd
-    Mtd = mtd
-    
-    # Update search path on posix machines where mantidsimple.py goes to the user directory
-    if os.name == 'posix':
-        outputdir = os.path.expanduser('~/.mantid')
-        if not outputdir in sys.path:
-            sys.path.append(outputdir)
-    
-    # Required directories (config service has changed them to absolute paths)
-    MantidPyFramework._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
-    # Now additional user specified directories
-    MantidPyFramework._addToPySearchPath(mtd.settings['pythonscripts.directories'])
-    # Finally old scripts key; For backwards compatability add all directories that are one-level below this
-    _script_dirs = mtd.settings['pythonscripts.directory']
-    MantidPyFramework._addToPySearchPath(_script_dirs)
-    if _script_dirs == '':
+mtd = FrameworkSingleton()
+#Aliases
+mantid = mtd
+Mantid = mtd
+Mtd = mtd
+
+# Update search path on posix machines where mantidsimple.py goes to the user directory
+if os.name == 'posix':
+    outputdir = os.path.expanduser('~/.mantid')
+    if not outputdir in sys.path:
+        sys.path.append(outputdir)
+
+# Required directories (config service has changed them to absolute paths)
+MantidPyFramework._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
+# Now additional user specified directories
+MantidPyFramework._addToPySearchPath(mtd.settings['pythonscripts.directories'])
+# Finally old scripts key; For backwards compatability add all directories that are one-level below this
+_script_dirs = mtd.settings['pythonscripts.directory']
+MantidPyFramework._addToPySearchPath(_script_dirs)
+if _script_dirs == '':
+    _files = []
+else:
+    try:
+        _files = os.listdir(_script_dirs)
+    except:
         _files = []
-    else:
-        try:
-            _files = os.listdir(_script_dirs)
-        except:
-            _files = []
 
-    for _file in _files:
-        _fullpath = os.path.join(_script_dirs,_file)
-        if not 'svn' in _file and os.path.isdir(_fullpath):
-            MantidPyFramework._addToPySearchPath(_fullpath)
+for _file in _files:
+    _fullpath = os.path.join(_script_dirs,_file)
+    if not 'svn' in _file and os.path.isdir(_fullpath):
+        MantidPyFramework._addToPySearchPath(_fullpath)
