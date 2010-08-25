@@ -58,7 +58,7 @@ Requires:	numpy
 %define mantidincludesdir	%{mantiddir}/include
 %define mantidimagesdir		%{mantiddir}/images
 %define mantidinstrumentdir	%{mantiddir}/instrument
-%define mantidpythonalgdir	%{mantiddir}/PythonAlgorithms
+%define mantidpythonalgdir	%{mantiddir}/plugins/PythonAlgs
 %define pythonsitepackages	PYTHON_SITEPACKAGES
 
 %description
@@ -91,6 +91,7 @@ mkdir -p $RPM_BUILD_ROOT/%{mantidimagesdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidinstrumentdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidincludesdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidpythonalgdir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidpythonalgdir}/Examples
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 install -m755 Code/Mantid/release/libMantidWidgets.so $RPM_BUILD_ROOT/%{mantidlibdir}
@@ -115,6 +116,16 @@ for i in qtiplotrc.py qtiUtil.py mantidplotrc.py mantidplot.py; do
 done
 install -m755 Code/Mantid/PythonAPI/MantidFramework.py $RPM_BUILD_ROOT/%{mantidbindir}
 
+# Real Python algorithms
+for i in Code/Mantid/PythonAPI/PythonAlgorithms/*.py; do
+    install -m755 $i $RPM_BUILD_ROOT/%{mantidpythonalgdir}
+done
+
+# Example Python algorithms
+for i in Code/Mantid/PythonAPI/PythonAlgorithms/Examples/*.py; do
+    install -m755 $i $RPM_BUILD_ROOT/%{mantidpythonalgdir}/Examples
+done
+    
 # on ubuntu sip goes into /usr/lib/pyshared etc
 # not sure why this is needed
 %if %{is_debian}
@@ -139,6 +150,7 @@ install -m644 Code/Mantid/Properties/Mantid.properties $RPM_BUILD_ROOT/%{mantidb
 sed -i -e "s!plugins\.directory.*!plugins.directory = %{mantidpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!mantidqt\.plugins\.directory.*!mantidqt.plugins.directory = %{mantidqtpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscriptsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s!pythonalgorithms\.directories.*!pythonalgorithms.directories = %{mantidpythonalgdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!instrumentDefinition\.directory.*!instrumentDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!parameterDefinition\.directory.*!parameterDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!ManagedWorkspace\.FilePath.*!ManagedWorkspace.FilePath = /tmp!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
