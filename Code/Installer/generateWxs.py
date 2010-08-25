@@ -57,7 +57,6 @@ if ARCH == '32':
     comp_guid['MantidDLLs'] = '{FABC0481-C18D-415e-A0B1-CCB76C35FBE8}'
     comp_guid['QTIPlot'] = '{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}'
     comp_guid['Plugins'] = '{EEF0B4C9-DE52-4f99-A8D0-9D3C3941FA73}'
-    comp_guid['PyAlgsEx'] = '{4ac60beb-e2bc-4bbb-836b-347bb923ba43}'
     comp_guid['Documents'] = '{C16B2B59-17C8-4cc9-8A7F-16254EB8B2F4}'
     comp_guid['Logs'] = '{0918C9A4-3481-4f21-B941-983BE21F9674}'
     comp_guid['IncludeMantidAlgorithms'] = '{EDB85D81-1CED-459a-BF87-E148CEE6F9F6}'
@@ -80,7 +79,6 @@ else:
     comp_guid['MantidDLLs'] = '{c9748bae-5934-44ab-b144-420589db1623}'
     comp_guid['QTIPlot'] = '{bfe90c00-9f39-4fde-8dbc-17f419210e12}'
     comp_guid['Plugins'] = '{8ef1c4db-c54d-4bb1-8b66-a9421db24faf}'
-    comp_guid['PyAlgsEx'] = '{a84ac311-8554-43e6-b92a-0a2b73c7fcc2}'
     comp_guid['Documents'] = '{bb774537-d0c6-4541-93f2-7aa5f5132d21}'
     comp_guid['Logs'] = '{0cdce87e-976a-40a5-a3d5-73dd8bce9e2e}'
     comp_guid['IncludeMantidAlgorithms'] = '{e21ee699-be01-419c-8e9a-2678c4da1e6a}'
@@ -539,10 +537,7 @@ if ARCH == '32':
 addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
 
 # Python algorithms
-pyalgsDir = addDirectory('PyAlgsDir','Python.Alg','PythonAlgs',pluginsDir)
-pyalgsExampleDir = addDirectory('PyAlgsExampleDir','Examples','Examples',pyalgsDir)
-pyalgsExamples = addComponent('PyAlgsEx',comp_guid['PyAlgsEx'],pyalgsExampleDir)
-addAllFiles('../Mantid/PythonAPI/PythonAlgorithms','PyAlEx',pyalgsExamples)
+pyalgsList = addCompList("PyAlgsDir","../Mantid/PythonAPI/PythonAlgorithms","PythonAlgorithms",InstallDir)[0]
 
 
 ##
@@ -737,7 +732,7 @@ addCRefs(instrument_ids,MantidExec)
 addCRefs(sconsList,MantidExec)
 addCRef('PyQt',MantidExec)
 addCRef('Sip',MantidExec)
-addCRef('PyAlgsEx',MantidExec)
+addCRefs(pyalgsList,MantidExec)
 addCRef('QtImagePlugins', MantidExec)
 addCRef('MantidQtPlugins', MantidExec)
 
