@@ -44,7 +44,7 @@ class GL3DWidget : public QGLWidget
 {
 	Q_OBJECT
 public:
-        enum InteractionMode {MoveMode = 0, PickMode = 1};
+  enum InteractionMode {MoveMode = 0, PickMode = 1};
 	enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
 	GL3DWidget(QWidget* parent=0); ///< Constructor
 	virtual ~GL3DWidget();         ///< Destructor
@@ -54,8 +54,8 @@ public:
 	GLActor* getPickedActor();
 	void setViewDirection(AxisDirection);
 	void setBackgroundColor(QColor);
-        QColor currentBackgroundColor() const;
-        void saveToFile(const QString & filename);
+  QColor currentBackgroundColor() const;
+  void saveToFile(const QString & filename);
 
 signals:
 	void actorsPicked(const std::set<QRgb>& );
@@ -63,19 +63,19 @@ signals:
 protected:
 	void initializeGL();
 	void resetWidget();
-    void MakeObject();
+  void MakeObject();
 	void paintEvent(QPaintEvent *event);
 	void resizeGL(int,int);
 	void mousePressEvent(QMouseEvent*);
   void contextMenuEvent(QContextMenuEvent*);
 	void mouseMoveEvent(QMouseEvent*);
-    void mouseReleaseEvent(QMouseEvent*);
+  void mouseReleaseEvent(QMouseEvent*);
 	void wheelEvent(QWheelEvent *);
 	void keyPressEvent(QKeyEvent *);
 	void keyReleaseEvent(QKeyEvent *);
 	void defaultProjection();
   
-        virtual void drawSceneUsingColorID()=0;
+  virtual void drawSceneUsingColorID()=0;
 	virtual void setSceneLowResolution()=0;
 	virtual void setSceneHighResolution()=0;
 	virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)=0;
@@ -85,11 +85,12 @@ protected:
   GLViewport* _viewport;         ///< Opengl View port [World -> Window]
 	
 protected slots:
-        void setLightingState(int);
+  void set3DAxesState(int state);
+  void setLightingState(int);
 	
 private:
-        void setRenderingOptions();
-        void setLightingModel(int);
+  void setRenderingOptions();
+  void setLightingModel(int);
   void drawAxes();
 	void drawDisplayScene();
 	void drawPickingScene();
@@ -101,6 +102,7 @@ private:
 	GLActor* mPickedActor;
 	bool isKeyPressed;
   int mLightingState;
+  int m3DAxesShown; //true when the 3D axes are to be shown
 };
 
 #endif /*GL3DWIDGET_H_*/

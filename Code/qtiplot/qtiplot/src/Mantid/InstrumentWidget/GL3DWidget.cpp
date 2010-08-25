@@ -36,6 +36,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):
   setAutoFillBackground(false);
   bgColor=QColor(0,0,0,1);
   mLightingState = 0;
+  m3DAxesShown = 1;
   
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
@@ -143,11 +144,15 @@ void GL3DWidget::setLightingModel(int state)
   update();
 }
 
-/** Draw 3D axes centered at the origin.
+/** Draw 3D axes centered at the origin (if the option is selected)
  *
  */
 void GL3DWidget::drawAxes()
 {
+  //Don't do anything if the checkbox is unchecked.
+  if (!m3DAxesShown)
+    return;
+
   glPointSize(3.0);
   glLineWidth(3.0);
 
@@ -689,6 +694,19 @@ void GL3DWidget::setLightingState(int state)
   mLightingState = state;
   setLightingModel(state);
 }
+
+
+/**
+ * Sets the flag indicating the current lighting model
+ *
+ */
+void GL3DWidget::set3DAxesState(int state)
+{
+  m3DAxesShown = state;
+  // Update the display
+  update();
+}
+
 
 
 /**

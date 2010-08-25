@@ -112,13 +112,19 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	//Pick background color
 	QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
 
-	//Check box to toggle high resolution lighting
-	mLightingToggle = new QCheckBox("High resolution &lighting", this);
-	mLightingToggle->setToolTip("Toggle the use of a high resolution lighting and shading model.\n"
-				    "This option is best used with a high-end graphics card."
-				    "Note: Shading will alter the colours and hence accuracy of the image.");
-	mLightingToggle->setCheckState(Qt::Unchecked);
-	connect(mLightingToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(setLightingState(int)));
+  //Check box to toggle high resolution lighting
+  mLightingToggle = new QCheckBox("High resolution &lighting", this);
+  mLightingToggle->setToolTip("Toggle the use of a high resolution lighting and shading model.\n"
+            "This option is best used with a high-end graphics card."
+            "Note: Shading will alter the colours and hence accuracy of the image.");
+  mLightingToggle->setCheckState(Qt::Unchecked);
+  connect(mLightingToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(setLightingState(int)));
+
+  //Check box to toggle high resolution lighting
+  m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
+  m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
+  m3DAxesToggle->setCheckState(Qt::Checked);
+  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(set3DAxesState(int)));
 
 	renderControlsLayout->addWidget(mSelectButton);
 	renderControlsLayout->addWidget(mSelectBin);
@@ -127,7 +133,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	renderControlsLayout->addWidget(axisViewFrame);
 	renderControlsLayout->addWidget(btnBackgroundColor);
 	renderControlsLayout->addWidget(lColormapFrame);
-	renderControlsLayout->addWidget(mLightingToggle);
+  renderControlsLayout->addWidget(mLightingToggle);
+  renderControlsLayout->addWidget(m3DAxesToggle);
 
 	//Set the main frame to the window
 	frame->setLayout(mainLayout);
