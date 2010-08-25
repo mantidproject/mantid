@@ -93,12 +93,19 @@ void SumSpectra::exec()
   // Loop over spectra
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
-    // Get the detector object for this spectrum
-    Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
-    // Skip monitors, if the property is set to do so
-    if ( !keepMonitors && det->isMonitor() ) continue;
-    // Skip masked detectors
-    if ( det->isMasked() ) continue;
+    try
+    {
+      // Get the detector object for this spectrum
+      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+      // Skip monitors, if the property is set to do so
+      if ( !keepMonitors && det->isMonitor() ) continue;
+      // Skip masked detectors
+      if ( det->isMasked() ) continue;
+    }
+    catch(...)
+    {
+      // if the detector not found just carry on
+    }
 
     // Retrieve the spectrum into a vector
     const MantidVec& YValues = localworkspace->readY(i);
