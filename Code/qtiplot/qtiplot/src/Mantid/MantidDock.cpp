@@ -555,12 +555,18 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     Mantid::API::Workspace_const_sptr grpWSPstr;
     bool singleValueWS = false;
     bool bDisable = false;
+	bool disableTableWS =false;
     try
     {
       Mantid::API::Workspace_const_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(selectedWsName.toStdString());
       grpWSPstr = boost::dynamic_pointer_cast<const WorkspaceGroup>(ws);
       // Check for single-valued workspaces because they don't like to be plotted!
       if ( ws->id() == "WorkspaceSingleValue" ) singleValueWS = true;
+	  Mantid::API::ITableWorkspace_const_sptr tablews = boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(ws);
+	  if(tablews)
+	  {
+		  disableTableWS=true;
+	  }
     }
     catch(Mantid::Kernel::Exception::NotFoundError &)//if not a valid object in analysis data service
     {
@@ -577,14 +583,14 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     action = new QAction("Show instrument",this);
     connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
     menu->addAction(action);
-    if(grpWSPstr||bDisable)
+    if(grpWSPstr||bDisable||disableTableWS)
     {action->setEnabled(false);
     }
 
     action = new QAction("Plot spectrum...",this);
     connect(action,SIGNAL(triggered()),this,SLOT(plotSpectra()));
     menu->addAction(action);
-    if( bDisable || singleValueWS )
+    if( bDisable || singleValueWS || disableTableWS)
     {
       action->setEnabled(false);
     }
@@ -592,7 +598,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     action = new QAction("Sample Logs...", this);
     connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
     menu->addAction(action);
-    if(grpWSPstr||bDisable)
+    if(grpWSPstr||bDisable || disableTableWS)
     {action->setEnabled(false);
     }
 
@@ -606,7 +612,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     action = new QAction("Save Nexus",this);
     connect(action,SIGNAL(activated()),m_mantidUI,SLOT(saveNexusWorkspace()));
     menu->addAction(action);
-    if(bDisable)
+    if(bDisable||disableTableWS)
     {action->setEnabled(false);
     }
 
@@ -824,7 +830,7 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
     spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,maxHists-1,1,&goAhead);
     if (!goAhead) return toPlot;
   }
-
+ 
   // Now need to go around inserting workspace-spectrum pairs into a map
   // and checking whether the requested spectrum is too large for any workspaces
   for ( int i = 0; i < wsNames.size(); ++i )
