@@ -24,14 +24,6 @@ m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL)
     // Constructor
 }
 
-Indirect::~Indirect()
-{
-    m_uiForm.ind_runFiles->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
-    m_uiForm.ind_calibFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
-    m_uiForm.ind_mapFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
-    m_uiForm.cal_leRunNo->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
-}
-
 /**
 * This function performs any one-time actions needed when the Inelastic interface
 * is first selected, such as connecting signals to slots.
@@ -291,6 +283,7 @@ void Indirect::runClicked(bool tryToSave)
     {
         isDirty(false);
         isDirtyRebin(false);
+        saveSettings();
     }
 
 }
@@ -897,6 +890,13 @@ bool Indirect::isDirtyRebin()
 void Indirect::isDirtyRebin(bool state)
 {
     m_isDirtyRebin = state;
+}
+
+void Indirect::saveSettings()
+{
+    m_uiForm.ind_runFiles->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
+    m_uiForm.ind_calibFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
+    m_uiForm.ind_mapFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
 }
 
 /**

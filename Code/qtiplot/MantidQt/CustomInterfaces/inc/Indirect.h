@@ -49,7 +49,6 @@ namespace MantidQt
         public:
             /// explicit constructor, not to allow any implicit conversion of types
             explicit Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm);
-            ~Indirect();
             /// Initialize the layout
             virtual void initLayout();
             /// run Python-based initialisation commands
@@ -73,6 +72,7 @@ namespace MantidQt
             void isDirty(bool state); ///< signify changes to interface
             bool isDirtyRebin(); ///< state whether post-rebin interface has had any changes
             void isDirtyRebin(bool state); ///< set value for above
+            void saveSettings();
 
         private slots:
             void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
