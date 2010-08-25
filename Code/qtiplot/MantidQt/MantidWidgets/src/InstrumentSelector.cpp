@@ -5,6 +5,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Exception.h"
 
 namespace MantidQt
 {
@@ -23,10 +24,11 @@ namespace MantidQt
      */
     InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) : QComboBox(parent), m_techniques(), m_currentFacility(NULL)
     {
+      setEditable(false);
       if( init )
       {
-        connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateDefaultInstrument(const QString &)));
         fillWithInstrumentsFromFacility();
+        connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateDefaultInstrument(const QString &)));
         connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SIGNAL(instrumentSelectionChanged(const QString &)));
       }
     }
@@ -78,26 +80,43 @@ namespace MantidQt
 
       const std::vector<InstrumentInfo> & instruments = m_currentFacility->Instruments();
       std::vector<InstrumentInfo>::const_iterator iend = instruments.end();
+      std::set<std::string> alphabetizedNames;
       for( std::vector<InstrumentInfo>::const_iterator itr = instruments.begin(); itr != iend; ++itr )
       {
-        QString name = QString::fromStdString(itr->name());
-        QString shortName = QString::fromStdString(itr->shortName());
+        alphabetizedNames.insert(itr->name());
+      }
+      std::set<std::string>::const_iterator namesEnd = alphabetizedNames.end();
+      for( std::set<std::string>::const_iterator itr = alphabetizedNames.begin(); itr != namesEnd; ++itr )
+      {
+        QString name = QString::fromStdString(*itr);
+        std::string prefix = m_currentFacility->Instrument(*itr).shortName();
+        QString shortName = QString::fromStdString(prefix);
         this->addItem(name, QVariant(shortName));
       }
-
       filterByTechniquesAtFacility(m_techniques, *m_currentFacility);
 
-      QString defaultName = QString::fromStdString(m_currentFacility->Instrument().name());
+      QString defaultName;
+      try
+      {
+        defaultName = QString::fromStdString(m_currentFacility->Instrument().name());
+      }
+      catch( Exception::NotFoundError &)
+      {
+        defaultName = "";
+      }
       int index = this->findText(defaultName);
       if( index < 0 )
       {
         index = 0;
       }
+      // Don't affect the default instrument
+      this->blockSignals(true);
       this->setCurrentIndex(index);
+      this->blockSignals(false);
     }
 
     //------------------------------------------------------
-    // Privte slot member functions
+    // Private slot member functions
     //------------------------------------------------------
     /**
      * Set the named instrument as the default for Mantid  
@@ -112,7 +131,7 @@ namespace MantidQt
     }
 
     //------------------------------------------------------
-    // Privte non-slot member functions
+    // Private non-slot member functions
     //------------------------------------------------------
 
     /**

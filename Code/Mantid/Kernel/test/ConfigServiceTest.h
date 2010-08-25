@@ -173,25 +173,6 @@ public:
 
 	}
 
-  void testInstrumentPrefixes()
-  {
-    //Test properties file contains a facility and some prefixes
-    const std::string test_facility("NewThing");
-    ConfigServiceImpl& settings = ConfigService::Instance();
-    std::vector<std::string> prefs;
-    TS_ASSERT_THROWS_NOTHING( prefs = settings.getInstrumentPrefixes(test_facility) );
-    TS_ASSERT_EQUALS(prefs.size(), 2);
-
-    if( prefs.size() == 2 )
-    {
-      TS_ASSERT_EQUALS(prefs[0], "ABC");
-      TS_ASSERT_EQUALS(prefs[1], "DEF");
-    }
-    
-    TS_ASSERT_THROWS(prefs = settings.getInstrumentPrefixes(test_facility + "IsRubbish"),std::runtime_error );
-
-  }
-
   void testSaveConfigCleanFile()
   {
     const std::string filename("user.settings");

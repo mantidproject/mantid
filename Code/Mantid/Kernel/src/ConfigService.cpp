@@ -430,44 +430,6 @@ void ConfigServiceImpl::cacheDataSearchPaths()
 }
 
 /**
- * Create the map of facility to known instrument prefixes from the property file. The prefix list is specified using
- * instrument.prefixes.[facility] key where [facility] is replaced with a facility from the "supported.facilities" list
- */
-void ConfigServiceImpl::cacheInstrumentPrefixes()
-{
-  m_instr_prefixes.clear();
-
-  std::string facilities = getString("supported.facilities");
-  if (facilities.empty())
-  {
-    g_log.error() << "No supported facilties defined within the \"supported.facilities\" key.\n";
-    return;
-  }
-  int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  Poco::StringTokenizer fac_tokens(facilities, ";", options);
-  Poco::StringTokenizer::Iterator iend = fac_tokens.end();
-  for (Poco::StringTokenizer::Iterator itr = fac_tokens.begin(); itr != iend; ++itr)
-  {
-    // For each facility find the corresponding instrument list
-    std::string prefix_key = "instrument.prefixes." + *itr;
-    std::string prefixes = getString(prefix_key);
-    Poco::StringTokenizer instr_tokens(prefixes, ";", options);
-    std::vector<std::string> prefs;
-    if (instr_tokens.count() > 0)
-    {
-      prefs.reserve(instr_tokens.count());
-      Poco::StringTokenizer::Iterator pref_end = instr_tokens.end();
-      for (Poco::StringTokenizer::Iterator pref_itr = instr_tokens.begin(); pref_itr != pref_end; ++pref_itr)
-      {
-        prefs.push_back(*pref_itr);
-      }
-    }
-    m_instr_prefixes[*itr] = prefs;
-  }
-
-}
-
-/**
  * writes a basic placeholder user.properties file to disk
  * any errors are caught and logged, but not propagated
  */
@@ -557,7 +519,6 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
     convertRelativeToAbsolute();
     //Configure search paths into a specially saved store as they will be used frequently
     cacheDataSearchPaths();
-    cacheInstrumentPrefixes();
   }
 }
 
@@ -851,31 +812,6 @@ std::string ConfigServiceImpl::getOutputDir() const
 const std::vector<std::string>& ConfigServiceImpl::getDataSearchDirs() const
 {
   return m_DataSearchDirs;
-}
-
-/**
- * Return the list of instrument prefixes for the given facility. If the facility if unknown then a NotFoundError is thrown.
- * @param facility A string giving a facility name
- * @returns A vector of strings containing the instrument prefixes
- */
-const std::vector<std::string>& ConfigServiceImpl::getInstrumentPrefixes(const std::string& facility) const
-{
-  std::map<std::string, std::vector<std::string> >::const_iterator itr = m_instr_prefixes.find(facility);
-  if (itr != m_instr_prefixes.end())
-  {
-    if (itr->second.empty())
-    {
-      g_log.warning() << "Facility \"" << facility
-          << "\" has no instruments defined. Check instrument.prefixes." << facility
-          << " key in properties file.\n";
-    }
-    return itr->second;
-  }
-  else
-  {
-    g_log.error() << "Unknown facility \"" << facility << "\". No instrument prefixes defined.\n";
-    throw Exception::NotFoundError("Unknown facility name. No instrument prefixes defined.", facility);
-  }
 }
 
 /**

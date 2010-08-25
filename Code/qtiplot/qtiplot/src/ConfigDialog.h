@@ -48,6 +48,14 @@ class ColorBox;
 class DoubleSpinBox;
 class QMouseEvent;
 
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+  class InstrumentSelector;
+}
+}
+
 //! Preferences dialog
 class ConfigDialog : public QDialog
 {
@@ -105,7 +113,6 @@ private slots:
 // #endif
 
   //Mantid
-  void updateDefInstrList();
   void addDataSearchDirs();
   void addDefaultSaveDir();
   void addPythonScriptsDirs();
@@ -149,8 +156,8 @@ private:
 	QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage;
   //Mantid
   QWidget *instrumentPage;
-  QComboBox *facility, *instrPrefix;
-  QLineEdit *knownInstruments;
+  QComboBox *facility;
+  MantidQt::MantidWidgets::InstrumentSelector  *defInstr;
 
   /// Mantid tab for setting directories
   QWidget *directoriesPage;

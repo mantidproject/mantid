@@ -68,9 +68,11 @@
 #include <QMouseEvent>
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidQtMantidWidgets/InstrumentSelector.h"
 
 static const char* choose_folder_xpm[]={
     "16 16 11 1",
@@ -637,15 +639,12 @@ void ConfigDialog::initMantidPage()
   grid->addWidget(new QLabel("Facility"), 0, 0);
   grid->addWidget(facility, 0, 1);
 
-  knownInstruments = new QLineEdit();
-  connect(knownInstruments, SIGNAL(textChanged(const QString&)), this, SLOT(updateDefInstrList()));
-  grid->addWidget(new QLabel("Instrument Prefixes"), 1, 0);
-  grid->addWidget(knownInstruments, 1, 1);
-
-  instrPrefix = new QComboBox();
-  grid->addWidget(new QLabel("Default Prefix"), 2, 0);
-  grid->addWidget(instrPrefix, 2, 1);
+  defInstr = new MantidQt::MantidWidgets::InstrumentSelector();
+  grid->addWidget(new QLabel("Default Instrument"), 2, 0);
+  grid->addWidget(defInstr, 2, 1);
   grid->setRowStretch(3,1);
+  //Here we only want the default instrument updated if the user clicks Ok/Apply
+  disconnect(defInstr, SIGNAL(currentIndexChanged(const QString&)), defInstr, SLOT(updateDefaultInstrument(const QString &)));
 
   // Populate boxes
   Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
@@ -655,25 +654,16 @@ void ConfigDialog::initMantidPage()
   facility->addItems(prop_list);
 
   // Set default property
-  property = QString::fromStdString(mantid_config.getString("default.facility"));
+  property = QString::fromStdString(mantid_config.Facility().name());
   int index = facility->findText(property);
   if( index < 0 )
   {
     index = 0;
   }
   facility->setCurrentIndex(index);
+  // Ensure update of instrument box with facility change
+  connect(facility, SIGNAL(currentIndexChanged(const QString&)), defInstr, SLOT(fillWithInstrumentsFromFacility(const QString &)));
 
-  property = QString::fromStdString(mantid_config.getString("instrument.prefixes." + property.toStdString()));
-  knownInstruments->setText(property);
-    
-  property = QString::fromStdString(mantid_config.getString("default.instrument"));
-  index = instrPrefix->findText(property);
-  if( index < 0 )
-  {
-    index = 0;
-  }
-  instrPrefix->setCurrentIndex(index);    
-  
   initDirSearchTab();
   initCurveFittingTab();
 
@@ -1734,14 +1724,10 @@ void ConfigDialog::apply()
 	itemsList->resize(itemsList->maximumWidth(),itemsList->height());
 
 	//Mantid 
-	QString setting = instrPrefix->currentText();
 	Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
-	mantid_config.setString("default.instrument", setting.toStdString());
-  std::string cur_facility = facility->currentText().toStdString();
-  mantid_config.setString("default.facility", cur_facility);
-  setting = knownInstruments->text();
-  setting.replace(QRegExp("\\W+"), QString(";"));
-  mantid_config.setString("instrument.prefixes." + cur_facility, setting.toStdString());
+
+  mantid_config.setString("default.facility", facility->currentText().toStdString());
+  mantid_config.setString("default.instrument", defInstr->currentText().toStdString());
 
   updateDirSearchSettings();
   updateCurveFitSettings();
@@ -2106,16 +2092,6 @@ void ConfigDialog::chooseHelpFolder()
 // 	}
 // }
 // #endif
-
-/**
- * Update the default instrument combo box in response to changes within the known instrument list
- */
-void ConfigDialog::updateDefInstrList()
-{
-  QStringList instruments = knownInstruments->text().split(QRegExp("\\W+"), QString::SkipEmptyParts);
-  instrPrefix->clear();
-  instrPrefix->addItems(instruments);
-}
 
 void ConfigDialog::addDataSearchDirs()
 {

@@ -94,8 +94,6 @@ namespace Mantid
 
       /// Get the list of search paths
       const std::vector<std::string>& getDataSearchDirs() const;
-      /// Get the list of known instrument prefixes for the given facility
-      const std::vector<std::string>& getInstrumentPrefixes(const std::string& facility) const;
       /// Gets the instrument geometry filename
       const std::string getInstrumentFilename(const std::string& instrument) const;
 
@@ -133,8 +131,6 @@ namespace Mantid
       std::string makeAbsolute(const std::string & dir, const std::string & key) const;
       /// Create the storage of the data search directories
       void cacheDataSearchPaths();
-      /// Create the map of facility name to instrument prefix list
-      void cacheInstrumentPrefixes();
 
       // Forward declaration of inner class
       template <class T>

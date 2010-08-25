@@ -336,7 +336,11 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
  */
 void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Histograms: "+QString::number(workspace->getNumberHistograms())));
+  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
+  data_item->setFlags(Qt::NoItemFlags);
+  ws_item->addChild(data_item);
+
+  data_item = new QTreeWidgetItem(QStringList("Histograms: "+QString::number(workspace->getNumberHistograms())));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
  

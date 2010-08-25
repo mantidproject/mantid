@@ -25,8 +25,7 @@
 
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/ConfigService.h"
-
-
+#include "MantidKernel/FacilityInfo.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -50,6 +49,7 @@
 using namespace std;
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -133,21 +133,17 @@ m_appWindow(aw)
 // Should it be moved to the constructor?
 void MantidUI::init()
 {
-  Mantid::Kernel::ConfigService::Instance();
+    Mantid::Kernel::ConfigService::Instance();
     MantidLog::connect(this);
     FrameworkManager::Instance();
 
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
-
-    // Check facility and instrument so that a log message appears if they aren't defined properly
-    std::string prop = Mantid::Kernel::ConfigService::Instance().getString("default.facility");
-    Mantid::Kernel::ConfigService::Instance().getInstrumentPrefixes(prop);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
 
     // Now that the framework is initialized we need to populate the algorithm tree
     m_exploreAlgorithms->update();
