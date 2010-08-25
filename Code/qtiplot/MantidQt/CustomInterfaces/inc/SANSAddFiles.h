@@ -28,10 +28,10 @@ private:
   QWidget *parForm;
   //set to true when execution of the python scripts starts and false on completion
   bool m_pythonRunning;
-  //this is set to the extensions supported by LoadRaw, happens after the user selects
-  std::set<std::string> m_rExts;
-  //this is set to the extensions supported by LoadNexus, happens after the user selects
-  std::set<std::string> m_nExts;
+  //this is set to the extensions supported by the Load algorithm
+  std::set<std::string> m_exts;
+  //this is set to the extensions supported by LoadRaw
+  std::set<std::string> m_rawExts;
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 
@@ -49,8 +49,8 @@ private slots:
   void summedPathBrowse();
   ///this slot opens a browser to select a new file to add
   void new2AddBrowse();
-  ///removes the tool tip from a row
-  void remToolTip(const QString & newText);
+  ///sets data associated with the cell
+  void setCellData(QListWidgetItem *);
   ///clears the table that contains the names of the files to add
   void clearClicked();
   ///clears the contents of the selected row

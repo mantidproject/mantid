@@ -23,6 +23,15 @@ SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false)
 {
   initLayout();
+  
+  //get lists of suported extentions
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+  Property *prop = alg->getProperty("Filename");
+  m_exts = prop->allowedValues();
+  //a log file must be copied across if it was a raw file, find out from the extention if a raw file was selected
+  alg = AlgorithmManager::Instance().create("LoadRaw");
+  prop = alg->getProperty("Filename");
+  m_rawExts = prop->allowedValues();
 }
 SANSAddFiles::~SANSAddFiles()
 {
@@ -40,8 +49,8 @@ void SANSAddFiles::initLayout()
 
   insertListFront("");
 
-  connect(m_SANSForm->toAdd_List, SIGNAL(currentTextChanged(const QString &)),
-    this, SLOT(remToolTip(const QString &)));
+  connect(m_SANSForm->toAdd_List, SIGNAL(itemChanged(QListWidgetItem *)),
+    this, SLOT(setCellData(QListWidgetItem *)));
 
   //buttons on the Add Runs tab
   connect(m_SANSForm->add_Btn, SIGNAL(clicked()), this, SLOT(add2Runs2Add()));
@@ -151,6 +160,8 @@ void SANSAddFiles::runPythonAddFiles()
     return;
   }
 
+  add2Runs2Add();
+
   QString code_torun = "import SANSadd2\n";
   code_torun += "print SANSadd2.add_runs('";
   code_torun += m_SANSForm->summedPath_edit->text()+"', (";
@@ -175,24 +186,16 @@ void SANSAddFiles::runPythonAddFiles()
     m_SANSForm->file_opt->currentIndex()).toString();
   code_torun += ext+"'";
   
-  //pass the list of extensions that are supported by our two load algorithms
-  QStringList loads;
-  loads << "nexusTypes" << "rawTypes";
-  for(int i = 0; i < 2; ++i)
+  code_torun += ", rawTypes=(";
+  std::set<std::string>::const_iterator end = m_rawExts.end();
+  for(std::set<std::string>::const_iterator j=m_rawExts.begin(); j != end; ++j)
   {
-    const std::set<std::string> &exts = loads[i] == "rawTypes" ? m_rExts : m_nExts;
-    code_torun += ","+loads[i]+"=(";
-    for(std::set<std::string>::const_iterator j=exts.begin();j!=exts.end();++j)
-    {
-      code_torun += "'"+QString::fromStdString(*j)+"',";
-    }
-    //the list may be an empty
-    if (code_torun.endsWith(","))
-    {
-      code_torun.truncate(code_torun.length()-1);
-    }
-    code_torun += ")";
+    code_torun += "'"+QString::fromStdString(*j)+"',";
   }
+  //remove the comma that would remain at the end of the list
+  code_torun.truncate(code_torun.length()-1);
+  code_torun += ")";
+
   code_torun += ")\n";
 
   g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << std::endl;
@@ -244,22 +247,11 @@ void SANSAddFiles::new2AddBrowse()
     prevVals.value("InPath", m_SANSForm->datadir_edit->text()).toString();
   
 	QString fileFilter = "Files (";
-  //get the file extensions supported by load algorithms, first LoadRaw and then LoadNexus
-  QStringList loadAlgs;
-  loadAlgs << "LoadRaw" << "LoadNexus";
-  for(int j = 0; j < loadAlgs.count(); ++j )
+
+  std::set<std::string>::const_iterator end = m_exts.end();
+  for(std::set<std::string>::const_iterator i = m_exts.begin(); i != end; ++i)
   {
-    using namespace Mantid::API;
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
-      loadAlgs[j].toStdString());
-    Property *prop = alg->getProperty("Filename");
-    std::set<std::string> &exts = loadAlgs[j] == "LoadRaw" ? m_rExts : m_nExts;
-    exts = prop->allowedValues();
-    std::set<std::string>::const_iterator i = exts.begin();
-    for( ; i != exts.end(); ++i)
-    {
-      fileFilter += " *"+QString::fromStdString(*i);
-    }
+    fileFilter += " *"+QString::fromStdString(*i);
   }
 
   fileFilter += ")";
@@ -275,14 +267,15 @@ void SANSAddFiles::new2AddBrowse()
     m_SANSForm->new2Add_edit->setText(files.join(", "));
   }
 }
-/**Removes the tool tip from the given widget, normally in responce
-*  to an edit
+/** Normally in responce to an edit this sets data associated with the cell
+*  to the cells text and removes the tooltip
 */
-void SANSAddFiles::remToolTip(const QString &)
+void SANSAddFiles::setCellData(QListWidgetItem *)
 {
   QListWidgetItem* editting = m_SANSForm->toAdd_List->currentItem();
   if (editting)
   {
+    editting->setData(Qt::WhatsThisRole, QVariant(editting->text()));
     editting->setToolTip("");
   }
 }

@@ -25,7 +25,7 @@ def _isType(ext, allTypes):
         return True
   return False
 
-def _loadWS(entry, ext, inst, wsName, nexusTypes, rawTypes) :
+def _loadWS(entry, ext, inst, wsName, rawTypes) :
   try :
     runNum = int(entry)                          #the user entered something that translates to a run number, convert it to a file 
     filename=inst+_padZero(runNum, inst)+ext
@@ -35,24 +35,33 @@ def _loadWS(entry, ext, inst, wsName, nexusTypes, rawTypes) :
 
   mantid.sendLogMessage('reading file:   '+filename)
 
-  if _isType(ext, nexusTypes) :
-    props = LoadNexus(Filename=filename,OutputWorkspace=wsName)
-  elif _isType(ext, rawTypes) :
-    props = LoadRaw(Filename=filename,OutputWorkspace=wsName)
-  else : raise NotImplementedError('Unrecognized extension ' + ext)
+  props = Load(Filename=filename,OutputWorkspace=wsName)
 
   path = props.getPropertyValue('FileName')
-
   path, fName = os.path.split(path)
-  return path, fName
 
-def add_runs(pathout, runs, inst='sans2d', defType='.nxs', nexusTypes=('.nxs', '.nx5', '.xml', '.n*'), rawTypes=('.raw', '.s*', 'add')):
+  logFile = None
+  #file types of .raw need their log files to be copied too
+  if _isType(ext, rawTypes):
+    logFile = fName.rpartition('.')[0]+'.log'
+  
+  return path, fName, logFile
+
+def _copyLog(lastPath, logFile, pathout):
+  try :
+    logFile = lastPath+'/'+logFile
+    copyfile(logFile, pathout+os.path.basename(logFile))
+  except Exception, reason:
+    error = 'Error copying log file ' + logFile + ' to directory' + pathout
+    print error
+    mantid.sendLogMessage(error)
+
+def add_runs(pathout, runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add')):
   pathout += '/'+inst+'/'
   if not defType.startswith('.') : defType = '.'+defType
 
   #these input arguments need to be arrays of strings, inforce this
   if type(runs) == str : runs = (runs, )
-  if type(nexusTypes) == str : nexusTypes = (nexusTypes, )
   if type(rawTypes) == str : rawTypes = (rawTypes, )
 
   indices=range(len(runs)-1)
@@ -62,11 +71,11 @@ def add_runs(pathout, runs, inst='sans2d', defType='.nxs', nexusTypes=('.nxs', '
   userEntry = runs[0]
   #we need to catch all exceptions to ensure that a dialog box is raised with the error
   try :
-    lastPath, lastFile = _loadWS(userEntry, defType, inst, 'AddFilesSumTempory', nexusTypes, rawTypes)
+    lastPath, lastFile, logFile = _loadWS(userEntry, defType, inst, 'AddFilesSumTempory', rawTypes)
 
     for i in indices:
       userEntry = runs[i+1]
-      lastPath, lastFile = _loadWS(userEntry, defType, inst,'AddFilesNewTempory', nexusTypes, rawTypes)
+      lastPath, lastFile, logFile = _loadWS(userEntry, defType, inst,'AddFilesNewTempory', rawTypes)
       Plus('AddFilesSumTempory', 'AddFilesNewTempory', 'AddFilesSumTempory')
       mantid.deleteWorkspace("AddFilesNewTempory")
 
@@ -90,13 +99,8 @@ def add_runs(pathout, runs, inst='sans2d', defType='.nxs', nexusTypes=('.nxs', '
   mantid.sendLogMessage('writing file:   '+outFile)
   SaveNexusProcessed("AddFilesSumTempory", outFile)
   mantid.deleteWorkspace("AddFilesSumTempory")
-  lastFile += '.log'
-  try :
-    copyfile(lastPath+'/'+lastFile, pathout+os.path.basename(lastFile))
-  except Exception, reason:
-    error = 'Error copying log file ' + lastFile
-    print error
-    mantid.sendLogMessage(error)
-    return
+  
+  if not logFile is None:
+    _copyLog(lastPath, logFile, pathout)
 
   return 'The following file has been created:\n'+outFile
