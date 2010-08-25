@@ -112,6 +112,7 @@ signals:
 
 private slots:
         void scaleTypeChanged(int);
+        void updateInteractionInfoText();
 private:
 
 	QFrame * const setupAxisFrame();
@@ -142,7 +143,6 @@ private:
   QComboBox *mAxisCombo;           ///< the user can select an axis to view the instrument from, this combo box stores the list of axis names and (behind the scenes) the coordinates of the different axises
 	BinDialog*   mBinMapDialog;
 	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
-  QCheckBox *mLightingToggle; ///< A tick box to toggle the lighting
   QCheckBox *m3DAxesToggle; ///< A tick box to toggle the 3D axes in the instrument view
 
   std::string mWorkspaceName; ///< The name of workpace that this window is associated with

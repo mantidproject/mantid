@@ -184,15 +184,19 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
     return 1.0;
   }
   double ratio(0.0);
-  switch(m_scale_type)
+  if( m_scale_type == GraphOptions::Linear)
   {
-  case GraphOptions::Log10:
-  default:
-    //the line below is equivalent to the following  ratio = ( std::log10(value) - std::log10(interval.minValue()) )/ ( std::log10(interval.maxValue())  - std::log10(interval.minValue()) );
-    ratio = std::log10(value/interval.minValue())/std::log10(interval.maxValue()/interval.minValue());
-    break;
-  case GraphOptions::Linear:
     ratio = (value - interval.minValue()) / width;
+  }
+  else
+  {
+    // Have to deal with the possibility that a user has entered 0 as a minimum
+    double minValue = interval.minValue();
+    if( minValue < 1e-08 )
+    {
+      minValue = 1.0;
+    }
+    ratio = std::log10(value/minValue)/std::log10(interval.maxValue()/minValue);
   }
   return ratio;
 }

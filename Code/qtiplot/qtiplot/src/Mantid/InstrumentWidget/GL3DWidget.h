@@ -86,7 +86,6 @@ protected:
 	
 protected slots:
   void set3DAxesState(int state);
-  void setLightingState(int);
 	
 private:
   void setRenderingOptions();
@@ -101,7 +100,6 @@ private:
 	GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
 	GLActor* mPickedActor;
 	bool isKeyPressed;
-  int mLightingState;
   int m3DAxesShown; //true when the 3D axes are to be shown
 };
 

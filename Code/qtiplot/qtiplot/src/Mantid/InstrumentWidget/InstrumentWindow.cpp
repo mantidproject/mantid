@@ -112,19 +112,12 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	//Pick background color
 	QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
 
-  //Check box to toggle high resolution lighting
-  mLightingToggle = new QCheckBox("High resolution &lighting", this);
-  mLightingToggle->setToolTip("Toggle the use of a high resolution lighting and shading model.\n"
-            "This option is best used with a high-end graphics card."
-            "Note: Shading will alter the colours and hence accuracy of the image.");
-  mLightingToggle->setCheckState(Qt::Unchecked);
-  connect(mLightingToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(setLightingState(int)));
-
-  //Check box to toggle high resolution lighting
+  //Check box to toggle orientation axes
   m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
   m3DAxesToggle->setToolTip("Toggle the display of 3D axes (X=Red; Y=Green; Z=Blue).");
   m3DAxesToggle->setCheckState(Qt::Checked);
   connect(m3DAxesToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(set3DAxesState(int)));
+  connect(m3DAxesToggle, SIGNAL(stateChanged(int)), this, SLOT(updateInteractionInfoText()));
 
 	renderControlsLayout->addWidget(mSelectButton);
 	renderControlsLayout->addWidget(mSelectBin);
@@ -133,7 +126,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	renderControlsLayout->addWidget(axisViewFrame);
 	renderControlsLayout->addWidget(btnBackgroundColor);
 	renderControlsLayout->addWidget(lColormapFrame);
-  renderControlsLayout->addWidget(mLightingToggle);
   renderControlsLayout->addWidget(m3DAxesToggle);
 
 	//Set the main frame to the window
@@ -141,9 +133,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	setWidget(frame);
 
 	//Set the mouse/keyboard operation info
-	mInteractionInfo=new QLabel(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
-	mInteractionInfo->setMaximumHeight(30);
+	mInteractionInfo = new QLabel();
 	mainLayout->addWidget(mInteractionInfo);
+  updateInteractionInfoText();  
 	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
 	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
 	connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
@@ -186,6 +178,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	observeDelete();
 	observeAfterReplace();
 	observeADSClear();
+
 }
 
 /**
@@ -197,15 +190,13 @@ void InstrumentWindow::modeSelectButtonClicked()
 	{
 		mSelectButton->setText("Normal");
 		mInstrumentDisplay->setInteractionModePick();
-		mInteractionInfo->setText(tr("Use Mouse Left Button to Pick an detector\n Click on 'Normal' button to get into interactive mode"));
 	}
 	else
 	{
 		mSelectButton->setText("Pick");
 		mInstrumentDisplay->setInteractionModeNormal();
-		mInteractionInfo->setText(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
 	}
-
+  updateInteractionInfoText();
 }
 
 void InstrumentWindow::selectBinButtonClicked()
@@ -709,6 +700,28 @@ void InstrumentWindow::scaleTypeChanged(int index)
     mInstrumentDisplay->recount();
   }
 }
+
+/**
+ * Update the text display that informs the user of the current mode and details about it
+ */
+void InstrumentWindow::updateInteractionInfoText()
+{
+  QString text;  
+	if(mSelectButton->text()=="Pick")
+	{
+    text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
+    if( m3DAxesToggle->isChecked() )
+    {
+      text += "\nAxes: X = Red; Y = Green; Z = Blue";
+    }
+  }
+  else
+  {
+   text = tr("Use Mouse Left Button to Pick an detector\n Click on 'Normal' button to get into interactive mode");
+  }
+  mInteractionInfo->setText(text);
+}
+
 /** Sets up the controls and surrounding layout that allows uses to view the instrument
 *  from an axis that they select
 *  @return the QFrame that will be inserted on the main instrument view form

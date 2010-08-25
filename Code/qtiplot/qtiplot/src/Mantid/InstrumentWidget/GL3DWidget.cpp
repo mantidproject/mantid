@@ -35,7 +35,6 @@ GL3DWidget::GL3DWidget(QWidget* parent):
   setFocusPolicy(Qt::StrongFocus);
   setAutoFillBackground(false);
   bgColor=QColor(0,0,0,1);
-  mLightingState = 0;
   m3DAxesShown = 1;
   
   //Enable right-click in pick mode
@@ -62,8 +61,6 @@ void GL3DWidget::setInteractionModeNormal()
   iInteractionMode = GL3DWidget::MoveMode;//Normal mode
   setMouseTracking(false);
   setCursor(Qt::PointingHandCursor);
-  //Revert the lighting model if necessary
-  setLightingModel(mLightingState); 
   glEnable(GL_NORMALIZE);
   update();
 }
@@ -81,11 +78,8 @@ void GL3DWidget::initializeGL()
 {
   setCursor(Qt::PointingHandCursor); // This is to set the initial window mouse cursor to Hand icon
   
-  // Set the relevant OpenGL rendering options (not lighting)
+  // Set the relevant OpenGL rendering options
   setRenderingOptions();
-  
-  // Set lighting mode
-  setLightingModel(mLightingState);
   
   // Clear the memory buffers
   glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
@@ -96,12 +90,16 @@ void GL3DWidget::setRenderingOptions()
 {
   // Enable depth testing. This only draws points that are not hidden by other objects
   glEnable(GL_DEPTH_TEST);
-
   // Depth function for testing is Less than or equal                        
   glDepthFunc(GL_LEQUAL);
-
   // Disable colour blending
   glDisable(GL_BLEND);
+
+  //Set a simple flat lighting model
+  glShadeModel(GL_FLAT);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_LIGHT0);
+  glDisable(GL_LINE_SMOOTH);
 }
 
 /**
@@ -686,18 +684,7 @@ void GL3DWidget::defaultProjection()
 }
 
 /**
- * Sets the flag indicating the current lighting model
- * 
- */
-void GL3DWidget::setLightingState(int state)
-{
-  mLightingState = state;
-  setLightingModel(state);
-}
-
-
-/**
- * Sets the flag indicating the current lighting model
+ * Sets the flag indicating the visibility of the orientation axes
  *
  */
 void GL3DWidget::set3DAxesState(int state)
