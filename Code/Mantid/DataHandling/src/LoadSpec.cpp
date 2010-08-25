@@ -15,7 +15,7 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadSpec)
+    //    DECLARE_ALGORITHM(LoadSpec)
 
     using namespace Kernel;
     using namespace API;
