@@ -18,7 +18,7 @@ void testVectorConstructor()
   vec.push_back("raw");
   vec.push_back("RAW");
   FileValidator v(vec);
-  TS_ASSERT_EQUALS  ( v.allowedValues().size(), 2 )
+  TS_ASSERT_EQUALS  ( v.allowedValues().size(), 2 );
 }
 
 void testPassesOnExistentFile()
@@ -54,6 +54,36 @@ void testPassesOnExistentFile()
   raw_file.remove();
 }
 
+void testPassesForMoreComplicatedExtensions()
+{
+  //More general test cases (Refs #1302)
+  const std::string file_stub = "scratch";
+  const std::string ext1 = ".tar.gz";
+  const std::string ext2 = "_event.dat";
+  Poco::File txt_file(file_stub + ext1);
+  Poco::File raw_file(file_stub + ext2);
+  try
+  {
+    txt_file.createFile();
+    raw_file.createFile();
+  }
+  catch(std::exception & )
+  {
+    TS_FAIL("Error creating test file for \"testPassesForMoreComplicatedExtensions\" test.");
+  }
+
+  //FileValidator will suggest txt files as correct extension
+  std::vector<std::string> vec(1, ".tar.gz");
+  FileValidator v1(vec);
+
+  TS_ASSERT_EQUALS( v1.isValid(txt_file.path()), "" );
+  // Not correct extension but the file exists so we allow it
+  TS_ASSERT_EQUALS( v1.isValid(raw_file.path()), "" );
+
+  txt_file.remove();
+  raw_file.remove();
+}
+
 void testFailsOnNonexistentFile()
 {
   std::string NoFile("myJunkFile_hgfvj.cpp");
@@ -61,7 +91,7 @@ void testFailsOnNonexistentFile()
   vec.push_back("cpp");
   FileValidator v(vec);
   TS_ASSERT_EQUALS( v.isValid(NoFile),
-      "File \"" + NoFile + "\" not found" )
+      "File \"" + NoFile + "\" not found" );
 }
 
 void testPassesOnNonexistentFile()
@@ -76,7 +106,7 @@ void testPassesOnNonexistentFile()
 void testFailsOnEmptyFileString()
 {
   FileValidator file_val;
-  TS_ASSERT_EQUALS( file_val.isValid(""), "File \"\" not found" )
+  TS_ASSERT_EQUALS( file_val.isValid(""), "File \"\" not found" );
 }
 
 };
