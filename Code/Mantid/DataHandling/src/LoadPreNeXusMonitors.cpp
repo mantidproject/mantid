@@ -177,15 +177,16 @@ void LoadPreNeXusMonitors::exec()
   g_log.information() << "Number of Time Channels = " << tchannels << std::endl;
 
   // Now lets create the time of flight array.
-  MantidVec time_bins(tchannels + 1);
-  for (int i = 0; i < tchannels + 2; ++i)
+  const int numberTimeBins = tchannels + 1;
+  MantidVec time_bins(numberTimeBins);
+  for (int i = 0; i < numberTimeBins; ++i)
   {
     time_bins[i] = tmin + (i) * tstep;
   }
 
   // Create the new workspace
   MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nMonitors,
-      tchannels + 1, tchannels);
+      numberTimeBins, tchannels);
 
   // a temporary place to put the spectra/detector numbers
   boost::shared_array<int> spectra_numbers(new int[nMonitors]);
@@ -212,12 +213,12 @@ void LoadPreNeXusMonitors::exec()
     localWorkspace->dataY(i) = intensity;
     localWorkspace->dataE(i) = error;
     // Just have spectrum number be the same as the monitor number but -ve.
-    detector_numbers[i] = -(i + 1);
+    detector_numbers[i] = -static_cast<int>(i + 1);
     spectra_numbers[i] = (i + 1);
     localWorkspace->getAxis(1)->spectraNo(i) = (i + 1);
   }
 
-  std::cout << "Setting Units" << std::endl;
+  g_log.debug() << "Setting axis zero to TOF" << std::endl;
 
   // Set the units
   localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
