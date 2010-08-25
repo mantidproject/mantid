@@ -60,6 +60,10 @@ void ICatSearch::setparentWidget(QWidget* par)
 void ICatSearch::initLayout()
 {
  	m_uiForm.setupUi(this);
+
+	QValidator * val= new QIntValidator(0,100000000,m_uiForm.startRunEdit);
+	m_uiForm.startRunEdit->setValidator(val);
+	m_uiForm.endRunEdit->setValidator(val);
     	
 	populateInstrumentBox();
 		
