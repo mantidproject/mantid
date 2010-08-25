@@ -75,6 +75,9 @@ private slots:
   ///
   void runFrontGroupGroupPairComboBox();
 
+  ///
+  void muonAnalysisHelpClicked();
+
 private:
   /// Initialize the layout
   virtual void initLayout();

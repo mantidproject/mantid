@@ -36,6 +36,9 @@
 #include <QTemporaryFile>
 #include <QDateTime>
 
+#include <QDesktopServices>
+#include <QUrl>
+
 #include "boost/lexical_cast.hpp"
 
 //Add this class to the list of specialised dialogs in this namespace
@@ -84,6 +87,9 @@ void MuonAnalysis::initLayout()
   m_uiForm.frontAlphaNumber->setVisible(false);
   m_uiForm.frontAlphaNumber->setEnabled(false);
 
+  m_uiForm.homePeriodBox2->setEditable(false);
+  m_uiForm.homePeriodBox2->setEnabled(false);
+
 
   // connect exit button
   connect(m_uiForm.runButton, SIGNAL(clicked()), this, SLOT(runClicked())); 
@@ -121,7 +127,8 @@ void MuonAnalysis::initLayout()
   // front group/ group pair combobox
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(clicked()), this, SLOT(runFrontGroupGroupPairComboBox()));
 
-
+    // connect "?" (Help) Button
+    connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
 
 
   // add combo boxes to pairTable
@@ -137,6 +144,16 @@ void MuonAnalysis::initLayout()
 
 
   connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged()));
+}
+
+
+/**
+* Muon Analysis help (slot)
+*/
+void MuonAnalysis::muonAnalysisHelpClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+            "MuonAnalysis"));
 }
 
 
@@ -774,8 +791,8 @@ void MuonAnalysis::inputFileChanged()
 
   while ( m_uiForm.homePeriodBox1->count() != 0 )
     m_uiForm.homePeriodBox1->removeItem(0);
-  while ( m_uiForm.homePeriodBox2->count() != 0 )
-    m_uiForm.homePeriodBox2->removeItem(0);
+  //while ( m_uiForm.homePeriodBox2->count() != 0 )
+  //  m_uiForm.homePeriodBox2->removeItem(0);
 
   for ( int i = 1; i <= numPeriods; i++ )
   {
@@ -784,7 +801,7 @@ void MuonAnalysis::inputFileChanged()
     m_uiForm.homePeriodBox1->addItem(strInt.str().c_str());
   }
 
-  if ( numPeriods == 1 )
+  /* if ( numPeriods == 1 )
   {
     m_uiForm.homePeriodBox2->setEnabled(false);
   }
@@ -799,7 +816,7 @@ void MuonAnalysis::inputFileChanged()
       strInt << i;
       m_uiForm.homePeriodBox2->addItem(strInt.str().c_str());
     }
-  }
+  }*/
 
   // Populate grouping table and front combobox
 
