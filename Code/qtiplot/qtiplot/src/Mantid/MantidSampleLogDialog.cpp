@@ -142,7 +142,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
                                      item->data(0, Qt::UserRole).toString());
       break;
     default :
-      throw std::invalid_argument("Error importing log entry, wrong dataa type"); 
+      throw std::invalid_argument("Error importing log entry, wrong data type");
   }
 }
 

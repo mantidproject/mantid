@@ -16,6 +16,7 @@
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -49,7 +50,7 @@
 using namespace std;
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
+using Mantid::Kernel::dateAndTime;
 
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -1824,7 +1825,10 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 	
     Mantid::Kernel::LogFilter flt(logData);
 
-    int rowcount = flt.data()->size();
+    //Get a map of time/value. This greatly speeds up display
+    std::map<dateAndTime, double> time_value_map = flt.data()->valueAsMap();
+    int rowcount = time_value_map.size();
+
     Table* t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
     if( !t ) return;
    // t->askOnCloseEvent(false);
@@ -1849,13 +1853,13 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
         {
             try
             {
-				f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
-                if (f) flt.addFilter(f);
-                else
-                {
-                    importNumSeriesLog(wsName,logname,0);
-                    return;
-                }
+              f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
+              if (f) flt.addFilter(f);
+              else
+              {
+                  importNumSeriesLog(wsName,logname,0);
+                  return;
+              }
             }
             catch(...)
             {
@@ -1919,19 +1923,41 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
     Mantid::Kernel::dateAndTime lastTime;
     double lastValue;
-    for(int i=0;i<flt.data()->size();i++)
+
+    //Iterate through the time-value map.
+    int i = 0;
+    std::map<dateAndTime, double>::iterator it;
+    for (it = time_value_map.begin(); it!=time_value_map.end(); it++)
     {
-        lastTime = flt.data()->nthInterval(i).begin();
-        lastValue = flt.data()->nthValue(i);
-        t->setText(i,0,QString::fromStdString(flt.data()->nthInterval(i).begin_str()));
-        t->setCell(i,1,lastValue);
+      lastTime = it->first;
+      lastValue = it->second;
+
+      //Convert time into string
+      //TODO: Make this a user-selectable option or something smarter.
+      struct tm * timeinfo;
+      timeinfo = localtime(&lastTime);
+      char buffer [25];
+      strftime (buffer,25,"%Y-%b-%d %H:%M:%S", timeinfo);
+      std::string time_string(buffer);
+
+      t->setText(i,0,QString::fromStdString(time_string));
+      t->setCell(i,1,lastValue);
+      i++;
     }
+
+//    for(int i=0;i<flt.data()->size();i++)
+//    {
+//        lastTime = flt.data()->nthInterval(i).begin();
+//        lastValue = flt.data()->nthValue(i);
+//        t->setText(i,0,QString::fromStdString(flt.data()->nthInterval(i).begin_str()));
+//        t->setCell(i,1,lastValue);
+//    }
 
 	try
 	{
     if (filter && lastTime < flt.filter()->lastTime())
     {
-        rowcount = flt.data()->size();
+        rowcount = time_value_map.size();
         if (rowcount == t->numRows()) t->addRows(1);
         t->setText(rowcount,0,QDateTime::fromTime_t(flt.filter()->lastTime()).toString("yyyy-MMM-dd HH:mm:ss"));
         //t->setText(rowcount,0,QString::fromStdString(flt.filter()->nthInterval(flt.filter()->size()-1).end_str()));

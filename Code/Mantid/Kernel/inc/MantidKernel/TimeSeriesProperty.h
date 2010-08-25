@@ -133,6 +133,7 @@ public:
     TYPE d = p->second;
     for (; p != m_propertySeries.end(); p++)
     {
+      //Skips any entries where the value was unchanged.
       if (p != m_propertySeries.begin() && p->second == d) continue;
       d = p->second;
       asMap[p->first] = d;
@@ -140,6 +141,8 @@ public:
 
     return asMap;
   }
+
+
 
   /** Not implemented in this class
    *  @throws Exception::NotImplementedError Not yet implemented
@@ -195,7 +198,7 @@ public:
     return m_size;
   }
 
-  /** Returns n-th value
+  /** Returns n-th value in an incredibly inefficient way.
    *  @param n index
    *  @return Value 
    */

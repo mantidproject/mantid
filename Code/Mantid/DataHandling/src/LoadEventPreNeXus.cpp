@@ -823,7 +823,8 @@ static ptime getTime(uint32_t sec, uint32_t nano)
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nano);
 #else
-  return GPS_EPOCH + boost::posix_time::seconds(sec);
+  //Use microseconds if you can't use nano.
+  return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::microseconds(nano / 1000);
 #endif
 }
 
