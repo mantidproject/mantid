@@ -71,11 +71,12 @@ namespace Mantid
       //as there is one per set of data
       int spectra_nbr = 0;
       while(getline(file,str))
-	{
-	  if (str[0] == '#' && str[1] == 'L') {
-	    spectra_nbr++;
-	  }
-	}
+      {
+        if (str[0] == '#' && str[1] == 'L')
+        {
+          spectra_nbr++;
+        }
+      }
 
       spectra.resize(spectra_nbr);
       file.clear(); //end of file has been reached so we need to clear file state
@@ -83,73 +84,81 @@ namespace Mantid
 
       int working_with_spectrum_nbr = -1; //spectrum number
       while(getline(file,str))
-	{   
-	  progress.report(file.tellg());
-	  
-	  //line with data, need to be parsed by white spaces
-	  if (!str.empty() && str[0] != '#') {
-	    
-	    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	    boost::char_separator<char> sep(" ");
-	    tokenizer tok(str, sep);
-	    ncols = 0;
-	    for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg) {
-	      
-	      std::stringstream ss;
-	      ss << *beg;
-	      double d;
-	      ss >> d;
-	      //std::cout << d << std::endl;
-	      input.push_back(d);
-	    }
-	  }
+      {
+        progress.report(file.tellg());
 
-	  if (str.empty()) {
-	    if (working_with_spectrum_nbr != -1) {
-	      for(int j=0; j<(input.size()-1); j++) {
-		spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
-		j++;
-		spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
-		j++;
-		spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
-		nBins = j/3;
-	      }
-	    }
-	    working_with_spectrum_nbr++;
-	    input.clear();
-	  }
- 
-	} //end of read file
+        //line with data, need to be parsed by white spaces
+        if (!str.empty() && str[0] != '#')
+        {
+          typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+          boost::char_separator<char> sep(" ");
+          tokenizer tok(str, sep);
+          ncols = 0;
+          for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+          {
+            std::stringstream ss;
+            ss << *beg;
+            double d;
+            ss >> d;
+            //std::cout << d << std::endl;
+            input.push_back(d);
+          }
+        }
+
+        if (str.empty())
+        {
+          if (working_with_spectrum_nbr != -1)
+          {
+            for(int j=0; j<(input.size()-1); j++)
+            {
+              spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
+              j++;
+              spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
+              j++;
+              spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
+              nBins = j/3;
+            }
+          }
+          working_with_spectrum_nbr++;
+          input.clear();
+        }
+
+      } //end of read file
       
       //consider case where the file does not end with empty line
-      if (working_with_spectrum_nbr == (spectra_nbr-1)) {
-	for(int j=0; j<(input.size()-1); j++) {
-	  spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
-	  j++;
-	  spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
-	  j++;
-	  spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
-	  nBins = j/3;
-	}
+      if (working_with_spectrum_nbr == (spectra_nbr-1))
+      {
+        for(int j=0; j<(input.size()-1); j++)
+        {
+          spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
+          j++;
+          spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
+          j++;
+          spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
+          nBins = j/3;
+        }
       }
       
       nSpectra = spectra_nbr;
       MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
-      try {
-	localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
-      } catch (Exception::NotFoundError) {
-	// Asked for dimensionless workspace (obviously not in unit factory)
+      try
+      {
+        localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
+      }
+      catch (Exception::NotFoundError)
+      {
+        // Asked for dimensionless workspace (obviously not in unit factory)
       }
       
       for(unsigned int i=0;i<nSpectra;i++)
-	{
-	  localWorkspace->dataX(i) = spectra[i].dataX();
-	  localWorkspace->dataY(i) = spectra[i].dataY();
-	  localWorkspace->dataE(i) = spectra[i].dataE();
-	  // Just have spectrum number start at 1 and count up
-	  localWorkspace->getAxis(1)->spectraNo(i) = i+1;
-	}
+      {
+        localWorkspace->dataX(i) = spectra[i].dataX();
+        localWorkspace->dataY(i) = spectra[i].dataY();
+        localWorkspace->dataE(i) = spectra[i].dataE();
+        // Just have spectrum number start at 1 and count up
+        localWorkspace->getAxis(1)->spectraNo(i) = i+1;
+      }
       
       setProperty("OutputWorkspace",localWorkspace);
       
