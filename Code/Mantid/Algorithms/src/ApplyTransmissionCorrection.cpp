@@ -88,6 +88,9 @@ void ApplyTransmissionCorrection::exec()
       continue;
     }
 
+    // Copy over the X data
+    outputWS->dataX(i) = inputWS->readX(i);
+
     // Skip if we have a monitor or if the detector is masked.
     if ( det->isMonitor() || det->isMasked() ) continue;
 
