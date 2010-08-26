@@ -182,6 +182,8 @@ public:
     EventWorkspace_sptr in1, in2, out;
     in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
     in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan1"));
+    AnalysisDataService::Instance().add("grp1_1", in1);
+    AnalysisDataService::Instance().add("grp2_1", in2);
     int nHist1 = in1->getNumberHistograms();
     int nEvents1 = in1->getNumberEvents();
     int nHist2 = in2->getNumberHistograms();
@@ -191,14 +193,18 @@ public:
     if (wsSptr1)
     {
       AnalysisDataService::Instance().add("grp1", wsSptr1);
-      wsSptr1->add("vulcan0");
+      // First member of group has to be group itself
+      wsSptr1->add("grp1");
+      // Group children expected to be parentName_1,2,3 etc. grrrr.
+      wsSptr1->add("grp1_1");
     }
 
     WorkspaceGroup_sptr wsSptr2 = WorkspaceGroup_sptr(new WorkspaceGroup);
     if (wsSptr2)
     {
       AnalysisDataService::Instance().add("grp2", wsSptr2);
-      wsSptr2->add("vulcan1");
+      wsSptr2->add("grp2");
+      wsSptr2->add("grp2_1");
     }
 
     // Check it runs with the two separate ones
@@ -211,7 +217,7 @@ public:
      delete conj;
 
      // Get the two input workspaces for later
-     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
+     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("grp1_1"));
 
      int nHist = out->getNumberHistograms();
      int nEvents = out->getNumberEvents();
@@ -219,9 +225,10 @@ public:
      TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
      TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
 
-     TS_ASSERT( !AnalysisDataService::Instance().doesExist("vulcan1") );
+     TS_ASSERT( !AnalysisDataService::Instance().doesExist("grp2") );
 
-
+     // Clean up
+     AnalysisDataService::Instance().remove("grp1");
   }
 
 private:
