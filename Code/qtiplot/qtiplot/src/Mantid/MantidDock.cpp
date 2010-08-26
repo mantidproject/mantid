@@ -59,7 +59,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   layout->addWidget(m_tree);
   //
 
-  QMenu *loadMenu = new QMenu(this);
+  m_loadMenu = new QMenu(this);
   QAction *loadRawAction = new QAction("Load RAW file",this);
   QAction *loadDAEAction = new QAction("Load from DAE",this);
   QAction *loadNexusAction = new QAction("Load Nexus",this);
@@ -75,11 +75,11 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(loadEventAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
 
   connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(executeAlgorithm(const QString&)));
-  loadMenu->addAction(loadRawAction);
-  loadMenu->addAction(loadDAEAction);
-  loadMenu->addAction(loadNexusAction);
-  loadMenu->addAction(loadEventAction);
-  m_loadButton->setMenu(loadMenu);
+  m_loadMenu->addAction(loadRawAction);
+  m_loadMenu->addAction(loadDAEAction);
+  m_loadMenu->addAction(loadNexusAction);
+  m_loadMenu->addAction(loadEventAction);
+  m_loadButton->setMenu(m_loadMenu);
 
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
   connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
@@ -543,27 +543,18 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
   QString selectedWsName("");
   if( treeItem ) selectedWsName = treeItem->text(0);
   else m_tree->selectionModel()->clear();
-  QMenu *menu = new QMenu(this);
+  QMenu *menu(NULL);
 
   //If no workspace is here then have load raw and dae
   if( selectedWsName.isEmpty() )
   {
-    QAction *action = new QAction("Load RAW file",this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadWorkspace()));
-    menu->addAction(action);
-
-    action = new QAction("Load from DAE",this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadDAEWorkspace()));
-    menu->addAction(action);
-
-    action = new QAction("Load Nexus",this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadNexusWorkspace()));
-    menu->addAction(action);
-
+    menu = m_loadMenu;
   }
   //else show instrument, sample logs and delete
   else
   {
+    // Fresh menu
+    menu = new QMenu(this);
     Mantid::API::Workspace_const_sptr grpWSPstr;
     bool singleValueWS = false;
     bool bDisable = false;

@@ -66,6 +66,7 @@ protected:
 private:
   MantidUI * const m_mantidUI;
   QPushButton *m_loadButton;
+  QMenu *m_loadMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QSignalMapper *m_loadMapper;
