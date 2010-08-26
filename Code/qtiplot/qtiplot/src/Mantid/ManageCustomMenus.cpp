@@ -138,7 +138,7 @@ void ManageCustomMenus::remScriptClicked()
 {
     if ( m_scriptsTree->selectedItems().isEmpty() )
     {
-        QMessageBox::information(this, "MantidPlot", "No item selected.");
+        QMessageBox::information(this, "MantidPlot", "No item selected - please select a script from the left-hand list.");
     }
     else
     {
@@ -158,11 +158,13 @@ void ManageCustomMenus::addItemClicked()
     QTreeWidgetItem* menu = getCurrentMenuSelection();
     if ( selection.isEmpty() )
     {
-        QMessageBox::information(this, "MantidPlot", "No item selected.");
+        QMessageBox::information(this, "MantidPlot", "No item selected - please select a script in the left-hand list of scripts.\n"
+                                                     "If none are listed, use the 'Add Script' button to add some files.");
     }
     else if ( menu == 0 )
     {
-        QMessageBox::information(this, "MantidPlot", "No menu selected.");
+        QMessageBox::information(this, "MantidPlot", "No menu selected - please select a menu on the right-hand side to which to add this script.\n"
+            "If no custom menus are present, use the 'Add Menu' button to create one.");
     }
     else
     {
@@ -199,7 +201,7 @@ void ManageCustomMenus::remItemClicked()
     QTreeWidgetItem* item = getCurrentMenuSelection();
     if ( item == 0 )
     {
-        QMessageBox::information(this, "MantidPlot", "No item selected.");
+        QMessageBox::information(this, "MantidPlot", "No item selected - please select a script or menu in the right-hand list.");
     }
     else
     {
@@ -224,7 +226,7 @@ void ManageCustomMenus::remItemClicked()
 void ManageCustomMenus::addMenuClicked()
 {
     bool ok(false);
-    QString name = QInputDialog::getText(this, "New menu", "Menu name:", QLineEdit::Normal, "", &ok);
+    QString name = QInputDialog::getText(this, "Create a Menu", "Menu name:", QLineEdit::Normal, "", &ok);
     if ( ok )
     {
         if( m_menusTree->findItems(name, Qt::MatchFixedString | Qt::MatchCaseSensitive ).isEmpty() )
