@@ -145,9 +145,9 @@ void FileProperty::setUp(const std::string & defExt)
 bool FileProperty::extsMatchRunFiles()
 {
   Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().Facility();
-  const std::set<std::string>  facilityExts = facilityInfo.extensions();
-  std::set<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
-  std::set<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
+  const std::vector<std::string>  facilityExts = facilityInfo.extensions();
+  std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
+  std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
   const std::set<std::string> allowedExts = this->allowedValues();
 
   bool match(false);

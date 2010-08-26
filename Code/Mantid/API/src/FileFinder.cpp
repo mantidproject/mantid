@@ -154,18 +154,19 @@ namespace Mantid
         return getFullPath(hint);
       }	
       std::string fName = makeFileName(hint);
-      const std::set<std::string> facility_extensions = Kernel::ConfigService::Instance().Facility().extensions();
+      const std::vector<std::string> facility_extensions = Kernel::ConfigService::Instance().Facility().extensions();
       // select allowed extensions
       std::vector<std::string> extensions;
       if (exts != NULL)
       {
-        extensions.resize(std::min(facility_extensions.size(),exts->size()));
-        std::set_intersection(facility_extensions.begin(),facility_extensions.end(),
-          exts->begin(),exts->end(),extensions.begin());
-        std::vector<std::string>::iterator last = std::find(extensions.begin(),extensions.end(),"");
-        if (last != extensions.end())
+        // find intersection of facility_extensions and exts, preserving the order of facility_extensions
+        std::vector<std::string>::const_iterator it = facility_extensions.begin();
+        for(; it != facility_extensions.end(); ++it)
         {
-          extensions.erase(last,extensions.end());
+          if (exts->find(*it) != exts->end())
+          {
+            extensions.push_back(*it);
+          }
         }
       }
       else
