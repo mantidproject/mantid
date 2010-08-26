@@ -290,12 +290,6 @@ public slots:
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
 
-    // Load a workspace from a raw file by running a LoadRaw algorithm with properties supplied through a dialog box.
-    void loadWorkspace();
-
-    // Load a workspace from a DAE by running a LoadDAE algorithm with properties supplied through a dialog box.
-    void loadDAEWorkspace();
-
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
 	// #539: For adding Workspace History display to MantidPlot
@@ -325,22 +319,16 @@ public slots:
 
     // Execute selected algorithm
     void executeAlgorithm();
-
     // Execute algorithm given name and version
-    void executeAlgorithm(QString algName, int version);
-
+    void executeAlgorithm(QString algName, int version = -1);
     //Execute an algorithm with the given parameter list
     void executeAlgorithm(const QString & algName, const QString & paramList);
-
     // Find the name of the first input workspace for an algorithm
     QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
-
     // Show Qt critical error message box
     void showCritical(const QString&);
-
     // Show the dialog monitoring currently running algorithms
     void showAlgMonitor();
-
     // Called from ApplicationWindow to customize the main menu
 	void mantidMenuAboutToShow();
 
@@ -380,8 +368,6 @@ public slots:
 	// Clear all Mantid related memory
 	void clearAllMemory();
 	// Ticket #672
-	//for loading and saving nexus workspace
-	void loadNexusWorkspace();
 	void saveNexusWorkspace();
 	QString saveToString(const std::string &workingDir);
 

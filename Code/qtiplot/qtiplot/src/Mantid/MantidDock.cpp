@@ -17,11 +17,11 @@
 #include <QPushButton>
 #include <QMutexLocker>
 #include <QProgressBar>
+#include <QSignalMapper>
 
 #include <map>
 #include <iostream>
 
-using namespace std;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -61,16 +61,24 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
 
   QMenu *loadMenu = new QMenu(this);
   QAction *loadRawAction = new QAction("Load RAW file",this);
-  connect(loadRawAction,SIGNAL(activated()),m_mantidUI,SLOT(loadWorkspace()));
   QAction *loadDAEAction = new QAction("Load from DAE",this);
-  connect(loadDAEAction,SIGNAL(activated()),m_mantidUI,SLOT(loadDAEWorkspace()));
-
   QAction *loadNexusAction = new QAction("Load Nexus",this);
-  connect(loadNexusAction,SIGNAL(activated()),m_mantidUI,SLOT(loadNexusWorkspace()));
+  QAction *loadEventAction = new QAction("Load Event file", this);
+  m_loadMapper = new QSignalMapper(this);
+  m_loadMapper->setMapping(loadRawAction,"LoadRaw");
+  m_loadMapper->setMapping(loadDAEAction,"LoadDAE");
+  m_loadMapper->setMapping(loadNexusAction,"LoadNexus");
+  m_loadMapper->setMapping(loadEventAction,"LoadEventPreNeXus");
+  connect(loadRawAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
+  connect(loadDAEAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
+  connect(loadNexusAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
+  connect(loadEventAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
 
+  connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(executeAlgorithm(const QString&)));
   loadMenu->addAction(loadRawAction);
   loadMenu->addAction(loadDAEAction);
   loadMenu->addAction(loadNexusAction);
+  loadMenu->addAction(loadEventAction);
   m_loadButton->setMenu(loadMenu);
 
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));

@@ -20,7 +20,7 @@ class QTreeWidget;
 class QProgressBar;
 class QVBoxLayout;
 class QHBoxLayout;
-
+class QSignalMapper;
 
 class MantidDockWidget: public QDockWidget
 {
@@ -68,6 +68,7 @@ private:
   QPushButton *m_loadButton;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
+  QSignalMapper *m_loadMapper;
 
   static Mantid::Kernel::Logger& logObject;
   QSet<QString> m_known_groups;

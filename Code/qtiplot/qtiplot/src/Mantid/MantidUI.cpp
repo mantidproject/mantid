@@ -262,50 +262,18 @@ IAlgorithm_sptr MantidUI::CreateAlgorithm(const QString& algName)
 
 	return alg;
 }
+
 /**
-     loadWorkspace.
-
-     Loads a workspace from a raw file. The LoadRaw's properties are set in loadRawDlg dialog.
-*/
-void MantidUI::loadWorkspace()
-{
-  //Just use the generic executeAlgorithm method which now uses specialised dialogs if they are
-  //available
-  executeAlgorithm("LoadRaw", -1);
-
- }
-/**
-    Ticket #678
-*/
-void MantidUI::loadNexusWorkspace()
-{
-	executeAlgorithm("LoadNexus", -1);
-
-}
-/**
-
-    Ticket #678
-*/
+ * Ticket #678
+ */
 void MantidUI::saveNexusWorkspace()
 {
 	executeSaveNexus("SaveNexus",-1);
 }
 
 /**
-    loadDAEWorkspace
-
-    Loads a workspace from DAE by executing LoadDAE algorithm.
-*/
-void MantidUI::loadDAEWorkspace()
-{
-
-  executeAlgorithm("LoadDAE", -1);
-}
-
-/**
-     deleteWorkspace
-
-     @param workspaceName Name of the workspace to delete
+ * DeleteWorkspace
+ @param workspaceName Name of the workspace to delete
 */
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
 {
@@ -910,20 +878,11 @@ void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& file
 		return ;
 	}
 	
-	/*Poco::ActiveResult<bool> result(alg->executeAsync());
-	while( !result.available() )
-	{
-		QCoreApplication::processEvents();
-	}*/
-
 	executeAlgorithmAsync(alg);
-
-	
-
 }
+
 MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
 {
-	
 	QString presets(""), enabled("");
 	//If a workspace is selected in the dock then set this as a preset for the dialog
 	QString selected = getSelectedWorkspaceName();
