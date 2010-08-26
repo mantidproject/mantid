@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -61,9 +62,9 @@ public:
   /// Returns default zero padding for this facility
   int zeroPadding()const{return m_zeroPadding;}
   /// Returns a list of file extensions
-  const std::vector<std::string> extensions()const{return m_extensions;}
+  const std::set<std::string> extensions()const{return m_extensions;}
   /// Returns the prefered file extension
-  const std::string preferredExtension()const{return m_extensions.front();}
+  const std::string preferredExtension()const{return m_extensions.empty() ? "" : *m_extensions.begin();}
   /// Return the archive search interface names
   const std::set<std::string>& archiveSearch()const{return m_archiveSearch;}
   /// Returns a list of instruments of this facility
@@ -80,7 +81,7 @@ private:
 
   const std::string m_name;                    ///< facility name
   int m_zeroPadding;                           ///< default zero padding for this facility
-  std::vector<std::string> m_extensions;       ///< file extensions in order of preference
+  std::set<std::string> m_extensions;       ///< file extensions in order of preference
   std::set<std::string> m_archiveSearch;       ///< names of the archive search interface
   std::vector<InstrumentInfo> m_instruments;   ///< list of istruments of thsi facility
   static Logger& g_log;                        ///< logger

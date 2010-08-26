@@ -143,21 +143,40 @@ namespace Mantid
       * Find the file given a hint. If the name contains a dot(.) then it is assumed that it is already a file stem
       * otherwise calls makeFileName internally.
       * @param hint The name hint
+      * @param exts Optional list of allowed extensions. Only those extensions found in both
+      *  facilities extension list and exts will be used in the search
       * @return The full path to the file or empty string if not found
       */
-    std::string FileFinderImpl::findRun(const std::string& hint)const
+    std::string FileFinderImpl::findRun(const std::string& hint,const std::set<std::string> *exts)const
     {
       if( hint.find(".") != std::string::npos )
       {
-	return getFullPath(hint);
+        return getFullPath(hint);
       }	
       std::string fName = makeFileName(hint);
-      const std::vector<std::string> exts = Kernel::ConfigService::Instance().Facility().extensions();
-      std::vector<std::string>::const_iterator ext = exts.begin();
-      for(;ext != exts.end(); ++ext)
+      const std::set<std::string> facility_extensions = Kernel::ConfigService::Instance().Facility().extensions();
+      // select allowed extensions
+      std::vector<std::string> extensions;
+      if (exts != NULL)
       {
-	std::string path = getFullPath(fName + *ext);
-	if ( !path.empty() ) return path;
+        extensions.resize(std::min(facility_extensions.size(),exts->size()));
+        std::set_intersection(facility_extensions.begin(),facility_extensions.end(),
+          exts->begin(),exts->end(),extensions.begin());
+        std::vector<std::string>::iterator last = std::find(extensions.begin(),extensions.end(),"");
+        if (last != extensions.end())
+        {
+          extensions.erase(last,extensions.end());
+        }
+      }
+      else
+      {
+        extensions.assign(facility_extensions.begin(),facility_extensions.end());
+      }
+      std::vector<std::string>::const_iterator ext = extensions.begin();
+      for(;ext != extensions.end(); ++ext)
+      {
+        std::string path = getFullPath(fName + *ext);
+        if ( !path.empty() ) return path;
       }
 
       // Search the archive of the default facility
@@ -173,8 +192,8 @@ namespace Mantid
           std::string path = arch->getPath(fName);
           if ( !path.empty() )
           {
-            std::vector<std::string>::const_iterator ext = exts.begin();
-            for(;ext != exts.end(); ++ext)
+            std::vector<std::string>::const_iterator ext = extensions.begin();
+            for(;ext != extensions.end(); ++ext)
             {
               Poco::Path pathPattern(path + *ext);
               if (ext->find("*") != std::string::npos)

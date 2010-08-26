@@ -105,12 +105,12 @@ void FacilityInfo::addExtension(const std::string& ext)
 {
   std::string casedExt(ext); 
   std::transform(ext.begin(), ext.end(), casedExt.begin(), tolower);
-  std::vector<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),casedExt);
+  std::set<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),casedExt);
   if (it == m_extensions.end())
   {
-    m_extensions.push_back(casedExt);
+    m_extensions.insert(casedExt);
     std::transform(ext.begin(), ext.end(), casedExt.begin(), toupper);
-    m_extensions.push_back(casedExt);
+    m_extensions.insert(casedExt);
   }
 }
 
@@ -127,7 +127,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
     iname = ConfigService::Instance().getString("default.instrument");
     if (iname.empty())
     {
-      return m_instruments.front();
+      return *m_instruments.begin();
     }
   }
   else
