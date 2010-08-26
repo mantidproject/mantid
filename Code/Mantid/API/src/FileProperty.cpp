@@ -174,6 +174,13 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
   if( m_runFileProp )
   {
     std::set<std::string> exts(allowedValues());
+    for(std::set<std::string>::iterator it = exts.begin();it!=exts.end();++it)
+    {
+      std::string casedExt(*it); 
+      std::transform(it->begin(), it->end(), it->begin(), tolower);
+      std::transform(it->begin(), it->end(), casedExt.begin(), toupper);
+      exts.insert(casedExt);
+    }
     foundFile = FileFinder::Instance().findRun(propValue,&exts);
   }
   else
