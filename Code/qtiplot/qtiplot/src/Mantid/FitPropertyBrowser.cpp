@@ -995,6 +995,10 @@ void FitPropertyBrowser::populateFunctionNames()
     {
       m_registeredBackgrounds << qfnName;
     }
+    else
+    {
+      m_registeredOther << qfnName;
+    }
   }
 }
 

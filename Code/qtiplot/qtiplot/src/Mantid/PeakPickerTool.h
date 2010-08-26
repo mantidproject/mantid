@@ -106,6 +106,7 @@ private slots:
 
   void addPeak();
   void addBackground();
+  void addOther();
   void deletePeak();
   void fit();
   void undoFit();

@@ -137,6 +137,8 @@ public:
   const QStringList& registeredPeaks()const{return m_registeredPeaks;}
   /// Return a list of registered backgrounds
   const QStringList& registeredBackgrounds()const{return m_registeredBackgrounds;}
+  /// Return a list of registered other functions
+  const QStringList& registeredOthers()const{return m_registeredOther;}
 
   /// Tells if undo can be done
   bool isUndoEnabled()const;
@@ -329,6 +331,8 @@ private:
   mutable QStringList m_registeredPeaks;
   /// A list of registered backgrounds
   mutable QStringList m_registeredBackgrounds;
+  /// A list of registered functions that are neither peaks nor backgrounds
+  mutable QStringList m_registeredOther;
   /// A list of available workspaces
   mutable QStringList m_workspaceNames;
   /// A list of available minimizers

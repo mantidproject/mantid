@@ -638,6 +638,11 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
   action = new QAction("Add background...",this);
   connect(action,SIGNAL(triggered()),this,SLOT(addBackground()));
   menu.addAction(action);
+
+  action = new QAction("Add other function...",this);
+  connect(action,SIGNAL(triggered()),this,SLOT(addOther()));
+  menu.addAction(action);
+
   menu.addSeparator();
 
   if (fitBrowser()->count()>0)
@@ -780,6 +785,23 @@ void PeakPickerTool::addBackground()
     {
       fitBrowser()->addFunction(fnName.toStdString());
     }
+  }
+}
+
+/**
+ * Slot. Add a function that is neither peak nor background
+ */
+void PeakPickerTool::addOther()
+{
+  bool ok = false;
+  QString fnName = 
+    QInputDialog::getItem(m_mantidUI->appWindow(), 
+         "MantidPlot - Fit", "Select function type", 
+         fitBrowser()->registeredOthers(),0,
+         false,&ok);
+  if (ok)
+  {
+    fitBrowser()->addFunction(fnName.toStdString());
   }
 }
 
