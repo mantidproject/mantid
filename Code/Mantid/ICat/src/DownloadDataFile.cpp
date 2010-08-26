@@ -48,7 +48,7 @@ namespace Mantid
 		}
 		/// Execute the algorithm
 		void CDownloadDataFile::exec()
-		{
+		{			
 			ICATPortBindingProxy icat;
 			int ret=doDownload(icat);
 		}
@@ -242,6 +242,7 @@ namespace Mantid
 				{
 					throw std::runtime_error("Empty URL returned from ICat databse");
 				}
+				//g_log.error()<<"URL returned  is "<<*response.URL<<std::endl;
 
 				//download using Poco HttpClient session and save to local disk
 				doDownloadandSavetoLocalDrive(*response.URL,*citr);
@@ -281,6 +282,11 @@ namespace Mantid
 				throw std::runtime_error("selected file "+fileName+" not exists in the the ICat search results workspace");;
 			}
 
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			}
+
 			//get the sessionid which is cached in session class during login
 			*request.sessionId=Session::Instance().getSessionId();
 			*request.datafileId=fileId;
@@ -312,6 +318,10 @@ namespace Mantid
 			catch(std::runtime_error&)
 			{
 				throw std::runtime_error("selected file "+fileName+" not exists in the input ICat search results workspace");
+			}
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
 			}
 			
 			*request.sessionId=Session::Instance().getSessionId();

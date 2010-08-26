@@ -40,7 +40,7 @@ ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,
 	connect(m_uiForm.downloadButton,SIGNAL(clicked()),this,SLOT(onDownload()));
 	//load button clikced
 	connect(m_uiForm.LoadButton,SIGNAL(clicked()),this,SLOT(onLoad()));
- 	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
+ 	connect(this,SIGNAL(error(const QString&,int) ),parent()->parent(),SLOT(writetoLogWindow(const QString& ,int )));
 	connect(this,SIGNAL(loadRawAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadRawAsynch(const QString&,const QString& )));
 	connect(this,SIGNAL(loadNexusAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadNexusAsynch(const QString&,const QString& )));
 	connect(m_uiForm.selectallButton,SIGNAL(clicked()),this,SLOT(onSelectAllFiles()));
@@ -465,8 +465,8 @@ void  ICatInvestigation::onDownload()
 	getSelectedFileNames(fileNames);
 	if(fileNames.empty())
 	{
-		QString msg="No files are selected to download.Use 'Select All Files' button provided"
-			"\n or mouse left button and shift/Ctrl key to select the files.";
+		QString msg="No files are selected to download.Click on any file to select it" 
+			"\n or Use the 'Select All Files' button provided or mouse left button shift/Ctrl key to select the files.";
 		emit error(msg);
 		return;
 	}
@@ -523,8 +523,8 @@ void ICatInvestigation::onLoad()
 	getSelectedFileNames(sfileNames);
 	if(sfileNames.empty())
 	{
-		QString msg="Select the files  to load using 'Select All files' button provided or "
-			 "\n mouse left button and Shift/Ctrl Key and download the files using Download button before trying to load.";
+		QString msg="Select the file by clicking on the file or use the 'Select All files' button provided to select all teh files or "
+			 "\n mouse left button and Shift/Ctrl Key and download the files using Download button provided before trying to load.";
 		emit error( msg);
 	}
 
@@ -622,7 +622,7 @@ void ICatInvestigation::loadData( const QString& filePath)
 	}
 	else
 	{
-		emit error("ICat interface is not supporting the loading of log files.");
+		emit error("ICat interface is not supporting the loading of log files.",1);
 		
 	}
 }
@@ -739,6 +739,6 @@ bool ICatInvestigation::execute(const QString& algName,const int& version,const 
 //handler for helpbutton
 void ICatInvestigation::helpButtonClicked()
 {
-	//QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Investigation"));
 
 }

@@ -27,28 +27,30 @@ ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par)
 	}
 	
 	Mantid::API::ITableWorkspace_sptr  ws_sptr ;
-	executeMyDataSearch(ws_sptr);
-	if(!ws_sptr)
+	if(executeMyDataSearch(ws_sptr))
 	{
-		emit error("MyData search completed,No results to display.");
-		return;
+		if(!ws_sptr)
+		{
+			emit error("MyData search completed,No results to display.");
+			return;
+		}
+		ICatUtils utils;
+		utils.updatesearchResults(ws_sptr,m_uiForm.myDatatableWidget);
+
+		//setting the label string
+		QFont font;
+		font.setBold(true);
+
+		QString labelText;
+		std::stringstream totalCount;
+		totalCount<<ws_sptr->rowCount();
+		labelText="Data: "+QString::fromStdString(totalCount.str())+" Investigations "+" found";
+
+		m_uiForm.mydatalabel->setText(labelText);
+		m_uiForm.mydatalabel->setAlignment(Qt::AlignHCenter);
+		m_uiForm.mydatalabel->setFont(font);
 	}
-	ICatUtils utils;
-	utils.updatesearchResults(ws_sptr,m_uiForm.myDatatableWidget);
-
-	//setting the label string
-	QFont font;
-	font.setBold(true);
 	
-	QString labelText;
-	std::stringstream totalCount;
-	totalCount<<ws_sptr->rowCount();
-	labelText="Data: "+QString::fromStdString(totalCount.str())+" Investigations "+" found";
-
-	m_uiForm.mydatalabel->setText(labelText);
-	m_uiForm.mydatalabel->setAlignment(Qt::AlignHCenter);
-	m_uiForm.mydatalabel->setFont(font);
-
 	
 }
 /* this method sets the parent widget as application window
@@ -85,19 +87,18 @@ bool ICatMyDataSearch::executeMyDataSearch(ITableWorkspace_sptr& ws_sptr)
 		return false;
 	}
 	
-	try
+	
+	Poco::ActiveResult<bool> result(alg->executeAsync());
+	while( !result.available() )
 	{
-		Poco::ActiveResult<bool> result(alg->executeAsync());
-		while( !result.available() )
-		{
-			QCoreApplication::processEvents();
-		}
-		//return (!result.failed());
+		QCoreApplication::processEvents();
 	}
-	catch(...)
-    {   
-	  return false;
-    }
+		//return (!result.failed());
+    if(!alg->isExecuted())
+	{		
+		return false;
+	}
+	
 	if(AnalysisDataService::Instance().doesExist("MyInvestigations"))
 	{
 		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>

@@ -28,7 +28,7 @@ public:
   ICatSearch(QWidget *parent = 0);
     ~ICatSearch();
  signals:
-  void error(const QString&);
+  void error(const QString&,int param=0);
 private:
   /// Initialize the layout
   virtual void initLayout();

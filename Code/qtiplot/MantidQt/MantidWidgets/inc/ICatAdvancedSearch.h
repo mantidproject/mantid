@@ -18,7 +18,7 @@ namespace MantidQt
 			Q_OBJECT
 		
         signals:
-			void error(const QString&);
+			void error(const QString&,int param=0);
 		public:
 			ICatAdvancedSearch(QWidget*parent =0 );
 			~ICatAdvancedSearch();

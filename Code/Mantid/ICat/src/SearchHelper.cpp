@@ -368,7 +368,7 @@ namespace Mantid
 			API::ITableWorkspace_sptr outputws =createTableWorkspace();
 			//add columns
 			outputws->addColumn("str","Name");
-			outputws->addColumn("int","File Size");
+			outputws->addColumn("int","File Size(B)");
 			outputws->addColumn("long64","FileId");
 			outputws->addColumn("str","Format");
 			outputws->addColumn("str","Format Version");

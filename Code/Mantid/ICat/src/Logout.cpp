@@ -1,5 +1,6 @@
 #include  "MantidICat/Logout.h"
 #include"MantidICat/SearchHelper.h"
+#include "MantidICat/Session.h"
 namespace Mantid
 {
 	namespace ICat
@@ -22,8 +23,13 @@ namespace Mantid
 		*/
 		void CLogout::doLogout()
 		{
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			}
 			CSearchHelper searchobj;
 			searchobj.doLogout();
+			Session::Instance().setSessionId("");//clearing the session id saved to Mnatid after log out
 		}
 	}
 }

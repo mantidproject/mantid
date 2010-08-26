@@ -1,5 +1,6 @@
 #include "MantidICat/MyDataSearch.h"
 #include "MantidICat/SearchHelper.h"
+#include "MantidICat/Session.h"
 
 namespace Mantid
 {
@@ -19,6 +20,10 @@ namespace Mantid
 		/// Execution method.
 		void CMyDataSearch::exec()
 		{	
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			}
 			API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
 			doMyDataSearch(outputws);
 			setProperty("OutputWorkspace",outputws);

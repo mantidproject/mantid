@@ -2,6 +2,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidICat/Session.h"
 
 namespace Mantid
 {
@@ -39,7 +40,11 @@ namespace Mantid
 		}
 		/// Execution method.
 		void CAdvancedSearch::exec()
-		{				
+		{	
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			}
 			ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
 			doAdvancedSearch(ws_sptr);
 			setProperty("OutputWorkspace",ws_sptr);

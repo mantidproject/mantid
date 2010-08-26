@@ -143,6 +143,11 @@ void ICatSearch::populateInstrumentBox(){
 		return;
 
 	}
+	catch(std::runtime_error & e)
+	{
+		emit error(e.what());
+		return;
+	}
 	catch(...)
 	{
 		emit error("Error when Populating the instruments box");

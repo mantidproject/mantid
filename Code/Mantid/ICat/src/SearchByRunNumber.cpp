@@ -2,6 +2,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidICat/Session.h"
 #include<limits>
 
 namespace Mantid
@@ -34,7 +35,11 @@ namespace Mantid
 		}
 		/// Execution method.
 		void CSearchByRunNumber::exec()
-		{			
+		{	
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			}
 			//API::ITableWorkspace_sptr ws_sptr=doSearchByRunNumber();
 			ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
 			doSearchByRunNumber(ws_sptr);

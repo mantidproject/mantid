@@ -25,7 +25,7 @@ public:
 signals:
    ///this signal prints error messge to log window
    
-void error(const QString&);
+void error(const QString&,int param=0);
    /// loadraw asynchronous execution.
    void loadRawAsynch(const QString&,const QString&);
   

@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/SearchHelper.h"
 #include "MantidICat/ErrorHandling.h" 
+#include "MantidICat/Session.h"
 
 namespace Mantid
 {
@@ -30,6 +31,10 @@ namespace Mantid
 		/// exec methods
 		void CGetDataSets::exec()
 		{
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			}
 		   API::ITableWorkspace_sptr ws_sptr = doDataSetsSearch();
 		   setProperty("OutputWorkspace",ws_sptr);
 		}

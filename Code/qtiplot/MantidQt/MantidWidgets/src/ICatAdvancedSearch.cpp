@@ -87,6 +87,11 @@ void ICatAdvancedSearch::populateInstrumentBox()
 		return;
 	
 	}
+	catch(std::runtime_error & e)
+	{
+		emit error(e.what());
+		return;
+	}
 	catch(...)
 	{
 		emit error("Error when Populating the instruments box");
@@ -146,6 +151,11 @@ ITableWorkspace_sptr ICatAdvancedSearch:: executeListInvestigationTypes()
 	}
 	catch (Mantid::Kernel::Exception::NotFoundError&)
 	{		
+		throw;
+	}
+	catch(std::runtime_error & e)
+	{
+		emit error(e.what());
 		throw;
 	}
 	

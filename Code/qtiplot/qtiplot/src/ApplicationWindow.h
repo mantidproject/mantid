@@ -986,7 +986,7 @@ public slots:
   void savetoNexusFile();
 
   //slot for writing to log window
-  void writetoLogWindow(const QString& );
+  void writetoLogWindow(const QString& ,int param =0);
 
   /// execute loadraw asynchronously
   void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;

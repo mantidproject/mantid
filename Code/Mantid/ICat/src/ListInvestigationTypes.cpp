@@ -2,6 +2,7 @@
 #include "MantidICat/SearchHelper.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidICat/Session.h"
 
 
 namespace Mantid
@@ -21,6 +22,10 @@ namespace Mantid
 		/// exec method
 		void CListInvestigationTypes::exec()
 		{
+			if(Session::Instance().getSessionId().empty())
+			{
+				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			}
 			ITableWorkspace_sptr ws_sptr= WorkspaceFactory::Instance().createTable("TableWorkspace");
 			listInvestigationTypes(ws_sptr);
 			setProperty("OutputWorkspace",ws_sptr);

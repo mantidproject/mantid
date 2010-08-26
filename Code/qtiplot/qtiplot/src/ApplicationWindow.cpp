@@ -16511,9 +16511,16 @@ void ApplicationWindow::ICatLogout()
 }
 
 ///slot for writing to log window
-void ApplicationWindow::writetoLogWindow(const QString& error)
-{	
-	results->setTextColor(Qt::red);
+void ApplicationWindow::writetoLogWindow(const QString& error,int param)
+{		
+	if(param==0)
+	{
+		results->setTextColor(Qt::red);
+	}
+	else if (param==1)
+	{
+		results->setTextColor(Qt::black);
+	}
   	results->insertPlainText(error+"\n");
 	QTextCursor cur = results->textCursor();
     cur.movePosition(QTextCursor::End);
