@@ -319,7 +319,10 @@ double MedianDetectorTest::getMedian(API::MatrixWorkspace_sptr input)
     }
     catch (Exception::NotFoundError&)
     {
-      badIndices.push_back(i);
+      PARALLEL_CRITICAL(MedianDetectorTest_mediana)
+      {
+	badIndices.push_back(i);
+      }
       continue;
     }
     double toCopy = input->readY(i)[0];
@@ -332,7 +335,7 @@ double MedianDetectorTest::getMedian(API::MatrixWorkspace_sptr input)
     //there has been a divide by zero, likely to be due to a detector with zero solid angle
     if ( toCopy == std::numeric_limits<double>::infinity() )
     {
-      PARALLEL_CRITICAL(MedianDetectorTest_mediana)
+      PARALLEL_CRITICAL(MedianDetectorTest_medianb)
       {
 	badIndices.push_back(i);
       }
@@ -340,13 +343,13 @@ double MedianDetectorTest::getMedian(API::MatrixWorkspace_sptr input)
     }
     if ( toCopy != toCopy )
     {
-      PARALLEL_CRITICAL(MedianDetectorTest_medianb)
+      PARALLEL_CRITICAL(MedianDetectorTest_medianc)
       {
       ++numUnusedDects;
       }
       continue;
     }
-    PARALLEL_CRITICAL(MedianDetectorTest_medianc)
+    PARALLEL_CRITICAL(MedianDetectorTest_mediand)
     {
       //if we get to here we have a good value, copy it over!
       goodValues.push_back( toCopy );
