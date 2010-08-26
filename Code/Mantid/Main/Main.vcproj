@@ -38,8 +38,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../CurveFitting/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
-				PreprocessorDefinitions="_DEBUG;IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="C:\Python25\include;C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../CurveFitting/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
+				PreprocessorDefinitions="_DEBUG;IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -56,7 +56,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;..\Debug"
+				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;$(OutDir)"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -113,8 +113,8 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../CurveFitting/inc;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
-				PreprocessorDefinitions="IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="C:\python25\include;../CurveFitting/inc;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
+				PreprocessorDefinitions="IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK"
 				RuntimeLibrary="2"
 			/>
 			<Tool
@@ -128,9 +128,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib $(SolutionName)UserAlgorithms.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib $(SolutionName)DataHandling.lib $(SolutionName)UserAlgorithms.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\Release;..\..\Third_Party\lib\win32"
+				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;$(OutDir)"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
