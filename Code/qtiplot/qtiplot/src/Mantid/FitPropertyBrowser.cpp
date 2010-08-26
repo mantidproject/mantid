@@ -1391,7 +1391,7 @@ void FitPropertyBrowser::setFitEnabled(bool yes)
 {
   m_btnFit->setEnabled(yes);
   m_btnSeqFit->setEnabled(yes);
-  m_btnFindPeaks->setEnabled(yes);
+  //m_btnFindPeaks->setEnabled(yes);
 }
 
 /// Returns true if the function is ready for a fit
@@ -2058,7 +2058,6 @@ void FitPropertyBrowser::findPeaks()
   }
 
   std::string peakListName = wsName + "_PeakList_tmp";
-  std::string smoothedName = wsName + "_SmoothedData_tmp";
 
   int FWHM,Tolerance;
   QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
@@ -2072,7 +2071,6 @@ void FitPropertyBrowser::findPeaks()
   alg->setPropertyValue("InputWorkspace",wsName);
   alg->setProperty("WorkspaceIndex",workspaceIndex());
   alg->setPropertyValue("PeaksList",peakListName);
-  alg->setPropertyValue("SmoothedData",smoothedName);
   alg->setProperty("FWHM",FWHM);
   alg->setProperty("Tolerance",Tolerance);
 
