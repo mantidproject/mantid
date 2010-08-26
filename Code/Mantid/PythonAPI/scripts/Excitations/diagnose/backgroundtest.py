@@ -24,84 +24,83 @@ if ( OMASKFILE != '' ) :
   MDTFile = OMASKFILE+'_mdt'
 else : MDTFile = ''
 
-try:#------------Calculations Start---
-  #--load in the experimental run data  
-  dataFiles = common.listToString('|EXPFILES|').split(',')
-  # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
-  LoadRaw(dataFiles[0], TEMPBIG)											#for usage see www.mantidproject.org/LoadRaw
-  # integrate the counts as soon as possible to reduce the size of the workspace
-  Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM, RangeLower=|TOF_WIN_LOW|, RangeUpper=|TOF_WIN_HIGH|)		#a Mantid algorithm
-  if len(dataFiles) > 1 :
-    for toAdd in dataFiles[ 1 : ] :
-      # save the memory by overwriting the old workspaces
-      LoadRaw(toAdd, "_FindBadDetects loading")
-      Integration("_FindBadDetects loading", "_FindBadDetects loading", |TOF_WIN_LOW|, |TOF_WIN_HIGH|)	#a Mantid algorithm
-      Plus(SUM, "_FindBadDetects loading", SUM)
-    mantid.deleteWorkspace(TEMPBIG)
-	  
-  #--pickup bad detectors from earlier tests, reusing a workspace again rather than spending more memory
-  downSoFar = "_FindBadDetects loading"
-  if ( DOWNSOFAR2 != "" ) : Plus(DOWNSOFAR1, DOWNSOFAR2, downSoFar)
-  else : downSoFar = DOWNSOFAR1
-  # good detectors were set to have a value of 0 and bad 100 so 10 works as discriminator
-  prevTest = FindDetectorsOutsideLimits(InputWorkspace=downSoFar, OutputWorkspace=downSoFar, HighThreshold=10, LowThreshold=-1)
-  downArray = prevTest.getPropertyValue('BadSpectraNums')
-  MaskDetectors(Workspace=SUM, SpectraList=downArray)
-  
-  #--prepare to normalise the spectra against the WBV runs
-  Integration(InputWorkspace=WBV1WS, OutputWorkspace=NORMA)					        #a Mantid algorithm
-  if ( WBV2WS != '' ) :
-    #--we have another white beam vanadium we'll combine it with the first white beam
-    Integration(InputWorkspace=WBV2WS, OutputWorkspace=WBV2WS)                #a Mantid algorithm
-    #--the equaton is (the harmonic mean) 1/av = (1/Iwbv1 + 1/Iwbv2)/2     av = 2*Iwbv1*Iwbv2/(Iwbv1 + Iwbv2)
-    #workspace reuse: NORMA is currently the integral of WBVanadium1
-    Multiply(WBV2WS, NORMA, NUMER)											#a Mantid algorithm
-    Plus(NORMA, WBV2WS, NORMA)												#for usage see www.mantidproject.org/Plus
-    Divide(NUMER, NORMA, NORMA)												#for usage see www.mantidproject.org/Divide
-    #--don't spend time on the factor of two in the harmonic as it will affect all histograms equally and so not affect the results
-    mantid.deleteWorkspace(WBV2WS)
-    mantid.deleteWorkspace(NUMER)
+# Python 2.4 does not support try...except...finally blocks so resort to nested try...except
+try:
+  try:
+    #--load in the experimental run data    
+    dataFiles = common.listToString('|EXPFILES|').split(',')
+    LoadRaw(dataFiles[0], TEMPBIG)											
+    # integrate the counts as soon as possible to reduce the size of the workspace
+    Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM, RangeLower=|TOF_WIN_LOW|, RangeUpper=|TOF_WIN_HIGH|)
+    if len(dataFiles) > 1 :
+        for toAdd in dataFiles[ 1 : ] :
+            # save the memory by overwriting the old workspaces
+            LoadRaw(toAdd, "_FindBadDetects loading")
+            Integration("_FindBadDetects loading", "_FindBadDetects loading", |TOF_WIN_LOW|, |TOF_WIN_HIGH|)	#a Mantid algorithm
+            Plus(SUM, "_FindBadDetects loading", SUM)
+        mantid.deleteWorkspace(TEMPBIG)
+	    
+    #--pickup bad detectors from earlier tests, reusing a workspace again rather than spending more memory
+    downSoFar = "_FindBadDetects loading"
+    if ( DOWNSOFAR2 != "" ) : Plus(DOWNSOFAR1, DOWNSOFAR2, downSoFar)
+    else : downSoFar = DOWNSOFAR1
+    # good detectors were set to have a value of 0 and bad 100 so 10 works as discriminator
+    prevTest = FindDetectorsOutsideLimits(InputWorkspace=downSoFar, OutputWorkspace=downSoFar, HighThreshold=10, LowThreshold=-1)
+    downArray = prevTest.getPropertyValue('BadSpectraNums')
+    MaskDetectors(Workspace=SUM, SpectraList=downArray)
     
-  #--we have an integral to normalise against, lets normalise
-  Divide(SUM, NORMA, SUM)
+    #--prepare to normalise the spectra against the WBV runs
+    Integration(InputWorkspace=WBV1WS, OutputWorkspace=NORMA)					                #a Mantid algorithm
+    if ( WBV2WS != '' ) :
+        #--we have another white beam vanadium we'll combine it with the first white beam
+        Integration(InputWorkspace=WBV2WS, OutputWorkspace=WBV2WS)                                #a Mantid algorithm
+        #--the equaton is (the harmonic mean) 1/av = (1/Iwbv1 + 1/Iwbv2)/2         av = 2*Iwbv1*Iwbv2/(Iwbv1 + Iwbv2)
+        #workspace reuse: NORMA is currently the integral of WBVanadium1
+        Multiply(WBV2WS, NORMA, NUMER)											#a Mantid algorithm
+        Plus(NORMA, WBV2WS, NORMA)												#for usage see www.mantidproject.org/Plus
+        Divide(NUMER, NORMA, NORMA)												#for usage see www.mantidproject.org/Divide
+        #--don't spend time on the factor of two in the harmonic as it will affect all histograms equally and so not affect the results
+        mantid.deleteWorkspace(WBV2WS)
+        mantid.deleteWorkspace(NUMER)
+        
+    #--we have an integral to normalise against, lets normalise
+    Divide(SUM, NORMA, SUM)
 
-  #the default is don't remove low count rates in this background test
-  lowThres = -1
-  if REMOVEZERO == 'true' :
-  # the counts are integer numbers of counts that have been normalised and prehaps have a rounding error (is that true?). A very low threshold should reject all zeros but allow anything that was 1 prior to normaliation to get through
-    lowThres = 1e-40
-  
-  #--finally find the detectors! again reusing those workspaces
-  MDT = MedianDetectorTest( InputWorkspace=SUM, OutputWorkspace=NORMA, SignificanceTest=NUMERRORBARS, LowThreshold=lowThres, HighThreshold=ACCEPT, OutputFile=MDTFile )#for usage see www.mantidproject.org/MedianDetectorTest
-  
-#----------------Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
-  if OMASKFILE != "" :
-    #--pick up the file output from one detector test that we did
-    functions.appendMaskFile(MDT.getPropertyValue("OutputFile"), outfile)
-    outfile.close()
+    #the default is don't remove low count rates in this background test
+    lowThres = -1
+    if REMOVEZERO == 'true' :
+    # the counts are integer numbers of counts that have been normalised and prehaps have a rounding error (is that true?). A very low threshold should reject all zeros but allow anything that was 1 prior to normaliation to get through
+        lowThres = 1e-40
+    
+    #--finally find the detectors! again reusing those workspaces
+    MDT = MedianDetectorTest( InputWorkspace=SUM, OutputWorkspace=NORMA, SignificanceTest=NUMERRORBARS, LowThreshold=lowThres, HighThreshold=ACCEPT, OutputFile=MDTFile )#for usage see www.mantidproject.org/MedianDetectorTest
+    
+    #----------------Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
+    if OMASKFILE != "" :
+        #--pick up the file output from one detector test that we did
+        functions.appendMaskFile(MDT.getPropertyValue("OutputFile"), outfile)
+        outfile.close()
 
-  #--How many were found in just this set of tests
-  numFound = functions.numberFromCommaSeparated(MDT.getPropertyValue('BadSpectraNums')) \
+    #--How many were found in just this set of tests
+    numFound = functions.numberFromCommaSeparated(MDT.getPropertyValue('BadSpectraNums')) \
 
-  #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
-  print 'success'
-  print THISTEST
-  print 'Tests on low flux background complete'
-  print NORMA
-  print numFound
-  print 'not applicable'
-  
-except Exception, reason:
-  print 'Error'
-  print 'Exception ', reason, ' caught'
-  print THISTEST	
-  for workspace in mantid.getWorkspaceNames() :
-    if (workspace == NORMA) : mantid.deleteWorkspace(NORMA)
-  if OMASKFILE != "" :
-    if not outfile.closed :
-      outfile.write('1 exception was rasied during execution')
- 
-  # the C++ that called this needs to look at the output from the print statements and deal with the fact that there was a problem
+    #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
+    print 'success'
+    print THISTEST
+    print 'Tests on low flux background complete'
+    print NORMA
+    print numFound
+    print 'not applicable'
+    
+  except Exception, reason:
+    print 'Error'
+    print 'Exception ', reason, ' caught'
+    print THISTEST	
+    for workspace in mantid.getWorkspaceNames() :
+        if (workspace == NORMA) : mantid.deleteWorkspace(NORMA)
+    if OMASKFILE != "" :
+        if not outfile.closed :
+            outfile.write('1 exception was rasied during execution')
 finally:
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == TEMPBIG) : mantid.deleteWorkspace(TEMPBIG)

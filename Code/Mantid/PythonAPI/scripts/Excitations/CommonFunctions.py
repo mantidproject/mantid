@@ -140,7 +140,11 @@ def getRunName(path):
   filename = filename.split('\\')
   filename = filename[len(filename) - 1]
   # remove the last '.' and everything after it i.e. the extension. If there is not extension this just returns the whole thing
-  return filename.rpartition('.')[0]
+  parts = filename.rsplit('.')
+  if len(parts) > 0:
+      return parts[0]
+  else:
+      return filename
 
 def loadRun(prefix, runNum, workspace):
     return LoadNexRaw(getFileName(prefix,runNum), workspace)
