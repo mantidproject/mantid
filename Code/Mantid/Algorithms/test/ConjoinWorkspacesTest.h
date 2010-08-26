@@ -172,6 +172,55 @@ public:
     TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
     TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
 
+    TS_ASSERT( !AnalysisDataService::Instance().doesExist("vulcan1") );
+  }
+
+  //----------------------------------------------------------------------------------------------
+  void testExecGroup()
+  {
+    //Save some initial data
+    EventWorkspace_sptr in1, in2, out;
+    in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
+    in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan1"));
+    int nHist1 = in1->getNumberHistograms();
+    int nEvents1 = in1->getNumberEvents();
+    int nHist2 = in2->getNumberHistograms();
+    int nEvents2 = in2->getNumberEvents();
+
+    WorkspaceGroup_sptr wsSptr1 = WorkspaceGroup_sptr(new WorkspaceGroup);
+    if (wsSptr1)
+    {
+      AnalysisDataService::Instance().add("grp1", wsSptr1);
+      wsSptr1->add("vulcan0");
+    }
+
+    WorkspaceGroup_sptr wsSptr2 = WorkspaceGroup_sptr(new WorkspaceGroup);
+    if (wsSptr2)
+    {
+      AnalysisDataService::Instance().add("grp2", wsSptr2);
+      wsSptr2->add("vulcan1");
+    }
+
+    // Check it runs with the two separate ones
+     conj = new ConjoinWorkspaces();
+     conj->initialize();
+     TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","grp1") );
+     TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","grp2") );
+     conj->execute();
+     TS_ASSERT( conj->isExecuted() );
+     delete conj;
+
+     // Get the two input workspaces for later
+     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
+
+     int nHist = out->getNumberHistograms();
+     int nEvents = out->getNumberEvents();
+
+     TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
+     TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
+
+     TS_ASSERT( !AnalysisDataService::Instance().doesExist("vulcan1") );
+
 
   }
 
