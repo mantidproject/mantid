@@ -1435,25 +1435,50 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     emit axisScaleChanged(axis,type == QwtScaleTransformation::Log10);
   }
 
-	if (type == GraphOptions::Log10)
-	{
-		sc_engine->setType(QwtScaleTransformation::Log10);
+  if (type == GraphOptions::Log10)
+  {
+    sc_engine->setType(QwtScaleTransformation::Log10);
     if (start <= 0)
     {
-      double y_min = DBL_MAX;
+      double s_min = DBL_MAX;
+      // for the y axis rely on the bounding rects
       for(int i=0;i<curves();++i)
       {
         QwtPlotCurve* c = curve(i);
         if (c)
         {
-          double y = c->boundingRect().y();
-          if (y > 0 && y < y_min)
+          double s;
+          if (axis == QwtPlot::yRight || axis == QwtPlot::yLeft)
           {
-            y_min = y;
+            s = c->boundingRect().y();
+          }
+          else
+          {
+            s = c->boundingRect().x();
+          }
+          if (s > 0 && s < s_min)
+          {
+            s_min = s;
           }
         }
       }
-      start = y_min;
+
+      if (s_min != DBL_MAX && s_min > 0)
+      {
+        start = s_min;
+      }
+      else
+      {
+        if (end <= 0)
+        {
+          start = 1;
+          end = 1000;
+        }
+        else
+        {
+          start = 0.01 * end;
+        }
+      }
     }
     // log scales can't represent zero or negative values, 1e-10 is a low number that I hope will be lower than most of the data but is still sensible for many color plots
 		//start = start < 1e-90 ? 1e-10 : start;
