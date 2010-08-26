@@ -540,13 +540,21 @@ void InstrumentWindow::minValueChanged()
   double old_value = mInstrumentDisplay->getDataMinValue();
   // If the new value is the same
   if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
+  //Check it is less than the max
+  if( updated_value < mInstrumentDisplay->getDataMaxValue() )
+  {
+    mInstrumentDisplay->setMinData(updated_value);
 
-  mInstrumentDisplay->setMinData(updated_value);
-
-  if( this->isVisible() )
-  { 
-    setupColorBarScaling();
-    mInstrumentDisplay->recount();
+    if( this->isVisible() )
+    { 
+      setupColorBarScaling();
+      mInstrumentDisplay->recount();
+    }
+  }
+  else
+  {
+    // Invalid. Reset value.
+    mMinValueBox->setText(QString::number(old_value));
   }
 }
 
@@ -559,12 +567,21 @@ void InstrumentWindow::maxValueChanged()
   double old_value = mInstrumentDisplay->getDataMaxValue();
   // If the new value is the same
   if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
-  mInstrumentDisplay->setMaxData(updated_value);
+  // Check that it is valid
+  if( updated_value > mInstrumentDisplay->getDataMinValue() )
+  {
+    mInstrumentDisplay->setMaxData(updated_value);
 
-  if( this->isVisible() )
-  { 
-    setupColorBarScaling();
-    mInstrumentDisplay->recount();
+    if( this->isVisible() )
+    { 
+      setupColorBarScaling();
+      mInstrumentDisplay->recount();
+    }
+  }
+  else
+  {
+    // Invalid. Reset
+    mMaxValueBox->setText(QString::number(old_value));
   }
 }
 
