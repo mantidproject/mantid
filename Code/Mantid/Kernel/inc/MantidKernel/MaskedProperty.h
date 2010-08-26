@@ -72,6 +72,12 @@ namespace Mantid
 				
 				  return Kernel::PropertyHistory(this->name(),this->getMaskedValue(),this->type(),this->isDefault(),Kernel::PropertyWithValue<TYPE >::direction());
 			  }
+
+        /**
+        * Do not remember the inputs from a masked property
+        * @return do not remember masked property values
+        */
+        virtual bool remember() const { return false; };
 		private:
 
 			/** This method creates masked value for a property

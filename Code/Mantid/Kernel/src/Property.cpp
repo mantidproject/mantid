@@ -88,6 +88,14 @@ std::string Property::isValid() const
   // the no error condition
   return "";
 }
+/**
+* Whether to remember this property input
+* @return whether to remember this property's input
+*/
+bool Property::remember() const
+{
+  return true;
+}
 
 /** Sets the property's (optional) documentation string
  *  @param documentation The string containing the descriptive comment

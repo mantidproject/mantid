@@ -646,18 +646,22 @@ bool AlgorithmDialog::setPropertyValues()
 }
 
 /**
- * Save the property values to the input history
- */
+* Save the property values to the input history
+*/
 void AlgorithmDialog::saveInput()
 {
   AlgorithmInputHistory::Instance().clearAlgorithmInput(m_algName);
   QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
+
   for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
-       pitr != pend; ++pitr )
+    pitr != pend; ++pitr )
   {
-    QString pName = pitr.key();
-    QString value = m_propertyValueMap.value(pName);
-    AlgorithmInputHistory::Instance().storeNewValue(m_algName, QPair<QString, QString>(pName, value));
+    if ( pitr.value()->remember() )
+    {
+      QString pName = pitr.key();
+      QString value = m_propertyValueMap.value(pName);
+      AlgorithmInputHistory::Instance().storeNewValue(m_algName, QPair<QString, QString>(pName, value));
+    }
   }
 }
 

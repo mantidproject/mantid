@@ -94,6 +94,8 @@ public:
   virtual std::string isValid() const;
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
+  ///Whether to save input values
+  virtual bool remember() const;
 
   /**Sets the user level description of the property
    *  @param documentation The string that the user will see
