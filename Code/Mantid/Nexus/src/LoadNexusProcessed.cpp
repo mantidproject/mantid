@@ -87,7 +87,7 @@ namespace Mantid
      */
     void LoadNexusProcessed::exec()
     {
-	  progress(0,"Opening file...");
+      progress(0,"Opening file...");
 
       //Throws an approriate exception if there is a problem with file access
       NXRoot root(getPropertyValue("Filename"));
@@ -116,7 +116,7 @@ namespace Mantid
       }
       else
       {
-        API::WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
+        WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
         //This forms the name of the group
         std::string base_name = getPropertyValue("OutputWorkspace");
         // First member of group should be the group itself, for some reason!
@@ -133,6 +133,7 @@ namespace Mantid
           wksp_group->add(base_name + os.str());
           setProperty(prop_name + os.str(), local_workspace);
         }
+
         // The group is the root property value
         setProperty("OutputWorkspace", boost::static_pointer_cast<Workspace>(wksp_group));
 
@@ -140,7 +141,6 @@ namespace Mantid
 
       m_axis1vals.clear();
     }
-
     /**
      * Load a single entry into a workspace
      * @param root The opened root node
@@ -197,7 +197,15 @@ namespace Mantid
 
 	  //// Create the 2D workspace for the output
 	  DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D", total_specs, xlength, nchannels));
+        (WorkspaceFactory::Instance().create("Workspace2D", total_specs, xlength, nchannels));  
+      try
+      {
+        local_workspace->setTitle(mtd_entry.getString("title"));
+      }
+      catch (std::runtime_error)
+      {
+        g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
+      }
 
       //Units
       try 
@@ -700,7 +708,6 @@ namespace Mantid
       {
         if( itr->nxname.find("MantidAlgorithm") != std::string::npos )
         {
-          //NXNote entry = history.openNXNote(itr->nxname);
           NXNote entry(history,itr->nxname);
           entry.openLocal();
           const std::vector<std::string> & info = entry.data();

@@ -221,7 +221,9 @@ namespace Mantid
 
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
       {
-        API::WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);      
+        WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
+        wksp_group->setTitle(m_wTitle);
+
         //This forms the name of the group
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
@@ -374,10 +376,7 @@ namespace Mantid
     {
       int hist_index = m_monitors.size();
       int period_index(period - 1);
-      
-      //here the title will be loaded into each member workspace but not the group workspace
-      local_workspace->setTitle(entry.getString("title"));
-      
+
       if( m_have_detector )
       {
         NXData nxdata = entry.openNXData("detector_1");
@@ -466,8 +465,16 @@ namespace Mantid
           hist_index++;
         }
       }
-
-
+      
+      try
+      {
+        m_wTitle = entry.getString("title");
+      }
+      catch (std::runtime_error)
+      {
+        g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
+      }
+      local_workspace->setTitle(m_wTitle);
     }
 
 

@@ -69,7 +69,7 @@ namespace Mantid
         NAME = 0,                          //< algorithms name
         EXEC_TIME = 1,                     //< when the algorithm was run
         EXEC_DUR = 2,                      //< execution time for the algorithm
-        PARAMS = 3                     //< the algorithm's parameters
+        PARAMS = 3                         //< the algorithm's parameters
       };
 
       /// Overwrites Algorithm method.
@@ -134,7 +134,6 @@ namespace Mantid
       int m_spec_min;
       /// The value of the spectrum_max property
       int m_spec_max;
-
     };
 	/// to sort the algorithmhistory vector
 	bool UDlesserExecCount(NXClassInfo elem1,NXClassInfo elem2);

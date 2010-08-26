@@ -151,6 +151,8 @@ namespace Mantid
 
       //g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+      wsGrpSptr->setTitle(entry.getString("title"));
+
       if(m_numberOfPeriods>1)
       {	
         if(wsGrpSptr)wsGrpSptr->add(localWSName);

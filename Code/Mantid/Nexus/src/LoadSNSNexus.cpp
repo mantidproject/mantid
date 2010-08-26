@@ -143,7 +143,7 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
     ws->setTitle(entry.name());
     
     std::string run_num = entry.getString("run_number");
-    //The sample is left to delete the property
+    //The run object is responsible for deleting the property
     ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");

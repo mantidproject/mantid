@@ -30,7 +30,6 @@ public:
 
   void testProcessedFile()
   {
-
     LoadNexusProcessed alg;
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -86,6 +85,7 @@ public:
     alg.setPropertyValue("SpectrumMax","4");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
     
     //Test some aspects of the file
     Workspace_sptr workspace;
@@ -134,6 +134,7 @@ public:
 	alg.setPropertyValue("SpectrumList","1,2,3,4");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
     
     //Test some aspects of the file
     Workspace_sptr workspace;
