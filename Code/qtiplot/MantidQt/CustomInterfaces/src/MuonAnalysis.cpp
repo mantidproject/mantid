@@ -879,8 +879,25 @@ void MuonAnalysis::inputFileChanged()
           m_uiForm.groupTable->setItem(wsIndex, 2, new QTableWidgetItem("Invalid"));
         }
         m_uiForm.groupTable->item(wsIndex,2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+
+       // populate pair table combo boxes
+       int rowNum = m_uiForm.pairTable->rowCount();
+       for (int i = 0; i < rowNum; i++)
+       {
+         QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
+         QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+
+          qw1->addItem( gName.str().c_str() );
+          qw2->addItem( gName.str().c_str() );
+       
+   
+        if ( qw2->count() > 1 )
+          qw2->setCurrentIndex(1);
+       }
       }
     }
+  
+
 
     m_groupTableRowInFocus = 0;
     updateFront();
