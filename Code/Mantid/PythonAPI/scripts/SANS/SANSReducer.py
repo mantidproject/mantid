@@ -232,13 +232,13 @@ class SANSReducer(Reducer):
         # Load file
         reduction_steps.append(self._data_loader)
         
-        # Dark current subtraction
-        if self._dark_current_subtracter is not None:
-            reduction_steps.append(self._dark_current_subtracter)
-        
         # Normalize
         if self._normalizer is not None:
             reduction_steps.append(self._normalizer)
+        
+        # Dark current subtraction
+        if self._dark_current_subtracter is not None:
+            reduction_steps.append(self._dark_current_subtracter)
         
         # Mask
         if self._mask is not None:
