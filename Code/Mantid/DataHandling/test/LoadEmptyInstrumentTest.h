@@ -398,6 +398,19 @@ void testCheckIfVariousInstrumentsLoad()
     TS_ASSERT( loaderPolRef.isExecuted() );
 
     AnalysisDataService::Instance().remove(wsName);
+
+    LoadEmptyInstrument loaderEMU;
+    loaderEMU.initialize();
+    loaderEMU.setPropertyValue("Filename", "../../../../Test/Instrument/EMU_Definition.xml");
+    inputFile = loaderEMU.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamEMUTest";
+    loaderEMU.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderEMU.execute());
+    TS_ASSERT( loaderEMU.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+
   }
 
 
