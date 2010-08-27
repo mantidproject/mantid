@@ -65,7 +65,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_period(0), m_groupTableRowInFocus(-1), m_pairTableRowInFocus(-1),
-  m_groupTablePlotChoice("Counts"), m_pairTablePlotChoice("Asymmetry"), m_groupNames(), m_groupingTempFilename("c:/tempMuonAnalysisGrouping.xml")
+  m_groupTablePlotChoice("Counts"), m_pairTablePlotChoice("Asymmetry"), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml")
 {
 }
 
