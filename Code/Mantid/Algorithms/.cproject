@@ -36,6 +36,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Geometry/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/API/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DataObjects/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DataHandling/inc}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.744625349" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC -fopenmp" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.66115927" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def"/>
