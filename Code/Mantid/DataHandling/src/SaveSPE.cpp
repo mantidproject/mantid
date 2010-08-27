@@ -131,15 +131,15 @@ void SaveSPE::exec()
   // Write the energy grid
   fprintf(outSPE_File,"### Energy Grid\n");
   const int energyPoints = m_nBins + 1; // Validator enforces binned data
-  int i = 7;
-  for (; i < energyPoints; i+=8)
+  int i = NUM_PER_LINE-1;
+  for (  ; i < energyPoints; i += NUM_PER_LINE)
   {// output a whole line of numbers at once
     fprintf(outSPE_File,NUMS_FORM,
             X[i-7],X[i-6],X[i-5],X[i-4],X[i-3],X[i-2],X[i-1],X[i]);
   }
   // if the last line is not a full line enter them individually
-  if ( i != energyPoints-1 )
-  {// the condition above means that the last line has fewer characters than the usual
+  if ( energyPoints % NUM_PER_LINE != 0 )
+  {// the condition above means that the last line has less than the maximum number of digits
     for (i-=7; i < energyPoints; ++i)
     {
       fprintf(outSPE_File,NUM_FORM,X[i]);
