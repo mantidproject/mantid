@@ -560,6 +560,11 @@ void CompositeFunction::replaceFunction(int i,IFunction* f)
         m_iFunction.insert(itFun,np_new - np_old,i);
       }
     }
+    else if (np_new > 0) // it could happen if the old function is an empty CompositeFunction
+    {
+      itFun = std::find_if(m_iFunction.begin(),m_iFunction.end(),std::bind2nd(std::greater<int>(),i));
+      m_iFunction.insert(itFun,np_new,i);
+    }
   }
 
   // Modify function indeces: The new function may have different number of active parameters
