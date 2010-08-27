@@ -127,6 +127,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
 
   switch (item->data(1, Qt::UserRole).toInt())
   {
+    case numeric :
     case string :
       m_mantidUI->importString(item->text(0),
         item->data(0, Qt::UserRole).toString());
@@ -211,6 +212,12 @@ void MantidSampleLogDialog::init()
     {
       treeItem->setText(1, "string");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(string));
+    }
+    else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(*pItr) ||
+             dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(*pItr))
+    {
+      treeItem->setText(1, "numeric");
+      treeItem->setData(1, Qt::UserRole, static_cast<int>(numeric));
     }
 
     //Add tree item

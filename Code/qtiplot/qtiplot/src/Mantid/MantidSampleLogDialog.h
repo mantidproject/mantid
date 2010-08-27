@@ -84,7 +84,8 @@ private:
   {
     string,                           ///< indicates the log is a string, no other known formating
     numTSeries,                       ///< for time series properties that contain numbers
-    stringTSeries                     ///< for logs that are string time series properties
+    stringTSeries,                    ///< for logs that are string time series properties
+    numeric                           ///< for logs that are single numeric values (int or double)
   };
 };
 
