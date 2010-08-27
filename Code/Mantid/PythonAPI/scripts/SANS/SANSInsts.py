@@ -209,8 +209,11 @@ class ISISInstrument(Instrument) :
         if self.otherDetector().isAlias(detName) :
             self.lowAngDetSet = not self.lowAngDetSet
             return True
-        
-        return self.cur_detector().isAlias(detName)
+        else:
+            if not self.cur_detector().isAlias(detName):
+                mantid.sendLogMessage("::SANS::setDetector: Detector not found")
+                mantid.sendLogMessage("::SANS::setDetector: Detector set to " + INSTRUMENT.cur_detector().name() + ' in ' + INSTRUMENT.name())
+                
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True

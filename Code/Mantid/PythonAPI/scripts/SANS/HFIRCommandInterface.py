@@ -8,6 +8,7 @@ import HFIRInstrument
 from CommandInterface import *
 
 def HFIRSANS():
+    Clear()
     ReductionSingleton().set_instrument(HFIRInstrument.HFIRSANS())
     SolidAngle()
     AzimuthalAverage()

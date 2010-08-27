@@ -27,8 +27,11 @@ class ReductionSingleton:
         self.__dict__['_ReductionSingleton__instance'] = ReductionSingleton.__instance
         
     @classmethod
-    def clean(cls):
-        ReductionSingleton.__instance = SANSReducer()
+    def clean(cls, reducer_cls=None):
+        if reducer_cls==None:
+            ReductionSingleton.__instance = SANSReducer()
+        else:
+            ReductionSingleton.__instance = reducer_cls()
         
     def __getattr__(self, attr):
         """ Delegate access to implementation """
@@ -39,11 +42,11 @@ class ReductionSingleton:
         return setattr(self.__instance, attr, value)
 
 ## List of user commands ######################################################
-def Clear():
+def Clear(reducer_cls=None):
     """
         Clears the Reducer of changes applied by all previous commands
     """
-    ReductionSingleton.clean()
+    ReductionSingleton.clean(reducer_cls)
 
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
