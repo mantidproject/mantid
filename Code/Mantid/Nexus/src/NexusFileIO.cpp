@@ -382,6 +382,8 @@ namespace Mantid
       return(true);
     }
 
+
+    //-------------------------------------------------------------------------------------
     //
     // Write sample related information to the nexus file
     //
@@ -406,17 +408,17 @@ namespace Mantid
       // some debate if this is appropriate. Hence for Mantid write it to the NXsample section as it is stored in Sample.
       if( !runProperties.hasProperty("proton_charge") )
       {
-	try
-	{
-	  double totalProtonCharge = runProperties.getProtonCharge();
-	  attributes.push_back("units");
-	  avalues.push_back("microAmps*hour");
-	  if( ! writeNxValue<double>( "proton_charge", totalProtonCharge, NX_FLOAT64, attributes, avalues) )
-	    return(4);
-	}
-	catch(Exception::NotFoundError&)
-	{
-	}
+        try
+        {
+          double totalProtonCharge = runProperties.getProtonCharge();
+          attributes.push_back("units");
+          avalues.push_back("microAmps*hour");
+          if( ! writeNxValue<double>( "proton_charge", totalProtonCharge, NX_FLOAT64, attributes, avalues) )
+            return(4);
+        }
+        catch(Exception::NotFoundError&)
+        {
+        }
       }
 
       // Examine (Log) data and call function to write double or string data
@@ -424,15 +426,15 @@ namespace Mantid
       size_t nlogs = sampleProps.size();
       for(unsigned int i=0; i < nlogs; i++)
       {
-	Kernel::Property *prop = sampleProps[i];
-	if( isTimeSeries(prop) )
-	{
-	  if( !writeTimeSeriesLog(prop) ) return 5;
-	}
-	else
-	{
-	  if( !writeSingleValueLog(prop) ) return 5;
-	}
+        Kernel::Property *prop = sampleProps[i];
+        if( isTimeSeries(prop) )
+        {
+          if( !writeTimeSeriesLog(prop) ) return 5;
+        }
+        else
+        {
+          if( !writeSingleValueLog(prop) ) return 5;
+        }
       }
 
       // Sample geometry
@@ -447,6 +449,8 @@ namespace Mantid
       return(0);
     }
 
+
+    //-------------------------------------------------------------------------------------
     void NexusFileIO::writeNumericTimeLog_String(const TimeSeriesProperty<std::string> *s_timeSeries) const
     {
       NXstatus status;
@@ -500,6 +504,8 @@ namespace Mantid
       status=NXclosegroup(fileID);
     }
 
+
+    //-------------------------------------------------------------------------------------
     int NexusFileIO::writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
       const bool& uniformSpectra, const std::vector<int>& spec) const
     {

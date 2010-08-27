@@ -149,23 +149,6 @@ namespace Mantid
       std::string m_filename;
       ///static reference to the logger class
       static Kernel::Logger& g_log;
-      // copied from TimesSeriesProperty.h
-      /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
-      std::time_t createTime_t_FromString(const std::string &str)
-      {
-          std::tm time_since_1900;
-          time_since_1900.tm_isdst = -1;
- 
-         // create tm struct
-         time_since_1900.tm_year = atoi(str.substr(0,4).c_str()) - 1900;
-         time_since_1900.tm_mon = atoi(str.substr(5,2).c_str()) - 1;
-         time_since_1900.tm_mday = atoi(str.substr(8,2).c_str());
-         time_since_1900.tm_hour = atoi(str.substr(11,2).c_str());
-         time_since_1900.tm_min = atoi(str.substr(14,2).c_str());
-         time_since_1900.tm_sec = atoi(str.substr(17,2).c_str());
-    
-         return std::mktime(&time_since_1900);
-      }
 
       /** Writes a numeric log to the Nexus file
        *  @tparam T A numeric type (double, int, bool)

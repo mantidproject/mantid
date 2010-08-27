@@ -74,8 +74,8 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.992,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-    TS_ASSERT( ! output-> isDistribution() )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT( ! output-> isDistribution() );
 
     /*
     //----------------------------------------------------------------------
@@ -372,7 +372,7 @@ public:
 #endif
   }
 
-  void testExec2()
+  void xtestExec2()
   {
 #ifndef _WIN64
     LoadMuonNexus2 nxLoad;
@@ -416,8 +416,8 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.992,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-    TS_ASSERT( ! output-> isDistribution() )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT( ! output-> isDistribution() );
 
     /*
     //----------------------------------------------------------------------
@@ -451,7 +451,7 @@ public:
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,25), "2009-Jul-08 10:23:50  10." );
     //check that sample name has been set correctly
-    TS_ASSERT_EQUALS(output->sample().getName(), "GaAs")
+    TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
     
 	
     //----------------------------------------------------------------------
