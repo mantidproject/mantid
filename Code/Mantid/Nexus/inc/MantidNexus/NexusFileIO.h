@@ -313,29 +313,30 @@ namespace Mantid
       std::string logName=timeSeries->name();
       size_t ipos=logName.find_last_of("/\\");
       if(ipos!=std::string::npos)
-	logName=logName.substr(ipos+1);
+        logName=logName.substr(ipos+1);
       // extract values from timeseries
-      std::map<time_t, T> dV=timeSeries->valueAsMap();
+      std::map<Kernel::dateAndTime, T> dV=timeSeries->valueAsMap();
       std::vector<double> values;
       std::vector<double> times;
-      time_t t0; // ,time;
+      Kernel::dateAndTime t0;
       bool first=true;
-      for(typename std::map<time_t, T>::const_iterator dv=dV.begin();dv!=dV.end();dv++)
+      for(typename std::map<Kernel::dateAndTime, T>::const_iterator dv=dV.begin();dv!=dV.end();dv++)
       {
-	T val = dv->second;
-	time_t time = dv->first;
-	values.push_back(val);
-	if(first)
-	{
-	  t0=time; // start time of log
-	  first=false;
-	}
-	times.push_back(static_cast<double>(time-t0));
+        T val = dv->second;
+        Kernel::dateAndTime time = dv->first;
+        values.push_back(val);
+        if(first)
+        {
+          t0=time; // start time of log
+          first=false;
+        }
+        times.push_back( Kernel::DateAndTime::durationInSeconds(time-t0));
       }
       // create log
       status=NXmakegroup(fileID,logName.c_str(),"NXlog");
       if(status==NX_ERROR)
-	return;
+        return;
+
       status=NXopengroup(fileID,logName.c_str(),"NXlog");
       // write log data
       std::vector<std::string> attributes,avalues;
@@ -344,23 +345,12 @@ namespace Mantid
       writeNxFloatArray("value", values,  attributes, avalues);
       attributes.clear();
       avalues.clear();
-      // get ISO time, if t0 valid
-      char buffer [25];
-      if(t0>0)
-      {
-	strftime (buffer,25,"%Y-%m-%dT%H:%M:%S",localtime(&t0));
-	attributes.push_back("start");
-	avalues.push_back(buffer);
-      }
-      else
-      {
-	g_log.warning("Bad start time in log file " + logName);
-      }
+      // get ISO time, and save it as an attribute
+      attributes.push_back("start");
+      avalues.push_back( Kernel::DateAndTime::create_ISO8601_String(t0) );
 
       writeNxFloatArray("time", times,  attributes, avalues);
-      //
       status=NXclosegroup(fileID);
-      //
     }
 
 

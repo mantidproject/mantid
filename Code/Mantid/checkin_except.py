@@ -29,8 +29,8 @@ def do_checkin(only_this):
                 (".project" in filename) or\
                 ("Mantid.properties" in filename) or\
                 ("Scons_Linux.conf" in filename) or\
-                (filename == ".") or\
-                ("test/runTests.sh" in filename) :
+                (filename == ".") :
+#                or ("test/runTests.sh" in filename) :
                     print "NOT CHECKING IN:", filename
             else:
                 if only_this is None:

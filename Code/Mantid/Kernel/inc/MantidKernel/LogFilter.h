@@ -21,7 +21,6 @@ class Property;
 template<class TYPE> class TimeSeriesProperty;
 
 /** 
-
     This class is for filtering TimeSeriesProperty data
     
     @author Roman Tolchenov, Tessella plc

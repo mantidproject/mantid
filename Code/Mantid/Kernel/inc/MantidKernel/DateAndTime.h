@@ -2,6 +2,7 @@
 #define DATE_AND_TIME_H
 
 #include "MantidKernel/System.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include <ctime>
 #include <ostream>
 
@@ -10,8 +11,27 @@ namespace Mantid
 namespace Kernel
 {
 
-/// The date-and-time is currently stored as a time_t
-typedef std::time_t dateAndTime;
+/// The date-and-time is currently stored as a boost::posix_time::ptime
+typedef boost::posix_time::ptime dateAndTime;
+
+/// Durations and time intervals
+typedef boost::posix_time::time_duration time_duration;
+
+namespace DateAndTime
+{
+/// Const of one second time duration
+static const time_duration oneSecond = boost::posix_time::time_duration(0,0,1,0);
+
+DLLExport double durationInSeconds(time_duration duration);
+
+DLLExport dateAndTime create_DateAndTime_FromISO8601_String(const std::string &str);
+
+DLLExport std::string create_ISO8601_String(const dateAndTime &time);
+
+
+}
+
+typedef boost::posix_time::ptime dateAndTime;
 
 /** Represents a time interval. 
 
@@ -51,8 +71,10 @@ public:
     dateAndTime end()const{return m_end;}
     /// True if the interval is not empty
     bool isValid()const{return m_end > m_begin;}
+
     /// Interval length (in seconds?)
-    dateAndTime length()const{return m_end - m_begin;}
+    time_duration length()const{return m_end - m_begin;}
+
     /// True if the interval contains \a t.
     bool contains(const dateAndTime& t)const{return t >= begin() && t < end();}
     /// Returns an intersection of two intervals

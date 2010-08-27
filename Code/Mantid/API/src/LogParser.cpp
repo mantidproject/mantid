@@ -37,8 +37,8 @@ LogParser::LogParser(const std::string& eventFName)
     std::ifstream file(eventFName.c_str());
     if (!file)
     {
-        periods->addValue(Kernel::dateAndTime()+1,1);
-        status->addValue(Kernel::dateAndTime()+1,true);
+        periods->addValue(Kernel::dateAndTime() + Kernel::DateAndTime::oneSecond, 1);
+        status->addValue(Kernel::dateAndTime() + Kernel::DateAndTime::oneSecond,true);
         g_log.warning()<<"Cannot open ICPevent file "<<eventFName<<". Period 1 assumed for all data.\n";
         return;
     }
@@ -291,7 +291,8 @@ Kernel::Property* LogParser::createRunningLog()const
 }
 
 
-/** Returns the mean value if the property is TimeSeriesProperty<double>. 
+/** Returns the mean value if the property is TimeSeriesProperty<double>.
+ * TODO: Make this more efficient!
     @param p Property with the data
     @return The mean value over time.
  */
@@ -304,17 +305,18 @@ double timeMean(const Kernel::Property* p)
     }
     
     double res = 0.;
-    Kernel::dateAndTime total = 0;
+    Kernel::time_duration total(0,0,0,0);
 
     for(int i=0;i<dp->size();i++)
     {
         Kernel::TimeInterval t = dp->nthInterval(i);
-        Kernel::dateAndTime dt = t.length();
+        Kernel::time_duration dt = t.length();
         total += dt;
-        res += dp->nthValue(i) * dt;
+        res += dp->nthValue(i) * Kernel::DateAndTime::durationInSeconds(dt);
     }
 
-    if (total > 0) res /= total;
+    double total_seconds = Kernel::DateAndTime::durationInSeconds(total);
+    if (total_seconds > 0) res /= total_seconds;
 
     return res;
 }

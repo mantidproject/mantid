@@ -689,17 +689,6 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 }
 
 //-----------------------------------------------------------------------------
-static std::time_t to_time_t(ptime t)
-{
-  if (t.is_special())
-  {
-    // TODO throw an exception
-  }
-  time_duration duration = t - UNIX_EPOCH;
-  return static_cast<std::time_t>(duration.total_seconds());
-}
-
-//-----------------------------------------------------------------------------
 /**
  * Add a sample environment log for the proton chage and set the scalar 
  * value on the sample.
@@ -715,7 +704,7 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
   TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("ProtonCharge");
   size_t num = this->proton_charge.size();
   for (size_t i = 0; i < num; i++)
-    log->addValue(to_time_t(this->pulsetimes[i]), this->proton_charge[i]);
+    log->addValue(this->pulsetimes[i], this->proton_charge[i]);
   /// TODO set the units for the log
   run.addLogData(log);
 }

@@ -44,29 +44,30 @@ public:
         mkGood();
         LogParser lp(icp_file.path());
         Property* p1 = lp.createLogProperty(log_num_good.path(),"good");
-        TS_ASSERT(p1)
+        TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
         std::map<dateAndTime, double> vmap = tp1->valueAsMap();
         std::map<dateAndTime, double>::iterator v= vmap.begin();
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 9);
         TS_ASSERT_EQUALS(v->second, 1);
-        tm* ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
+
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
         // time 5
         //TS_ASSERT(isNaN(v->second));
-        ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
         std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 9);
-        ti = localtime(&rv->first);
+        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
-        TS_ASSERT_DELTA(timeMean(p1),8.0756, 0.001);
+        TS_ASSERT_DELTA(timeMean(p1),8.4904, 0.001);
 
         TS_ASSERT_EQUALS(tp1->nthValue(0),1);
         TS_ASSERT_EQUALS(tp1->nthValue(1),2);
@@ -98,22 +99,23 @@ public:
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 8);
         TS_ASSERT_EQUALS(v->second, 2);
-        tm* ti = localtime(&v->first);
+
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
         // time 5
         //TS_ASSERT(isNaN(v->second));
-        ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
         std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 9);
-        ti = localtime(&rv->first);
+        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
-        TS_ASSERT_DELTA(timeMean(p1),8.0818, 0.001);
+        TS_ASSERT_DELTA(timeMean(p1),8.4941, 0.001);
         
         delete p1;
     }
@@ -132,22 +134,22 @@ public:
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 8);
         TS_ASSERT_EQUALS(v->second, 1);
-        tm* ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
         // time 5
         //TS_ASSERT(isNaN(v->second));
-        ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
         std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 8);
-        ti = localtime(&rv->first);
+        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 23);
-        TS_ASSERT_DELTA(timeMean(p1),4.7096, 0.001);
+        TS_ASSERT_DELTA(timeMean(p1),4.9090, 0.001);
 
         delete p1;
     }
@@ -166,10 +168,11 @@ public:
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 1);
         TS_ASSERT_EQUALS(v->second, 4);
-        tm* ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
-        TS_ASSERT_DELTA(timeMean(p1),4., 0.001);
+        //Can't get a valid mean with a single time and no intervals in it.
+        //TS_ASSERT_DELTA(timeMean(p1),4., 0.001);
 
         delete p1;
     }
@@ -187,19 +190,19 @@ public:
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 9);
         TS_ASSERT_EQUALS(v->second, "   line 1");
-        tm* ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;
         // time 4
         TS_ASSERT_EQUALS(v->second, "   line 4");
-        ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         // last time
         std::map<dateAndTime, std::string>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, "   line 9");
-        ti = localtime(&rv->first);
+        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         // assert_throws(timeMean(p1));
@@ -220,7 +223,7 @@ public:
         // time 1
         TS_ASSERT_EQUALS(vmap.size(), 9);
         TS_ASSERT_EQUALS(v->second, 1);
-        tm* ti = localtime(&v->first);
+        ti_data = boost::posix_time::to_tm( v->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 12);
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         v++;v++;v++;v++;
@@ -229,10 +232,10 @@ public:
         // last time
         std::map<dateAndTime, double>::reverse_iterator rv = vmap.rbegin();
         TS_ASSERT_EQUALS(rv->second, 9);
-        ti = localtime(&rv->first);
+        ti_data = boost::posix_time::to_tm( rv->first ); ti = &ti_data;
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
-        TS_ASSERT_DELTA(timeMean(p1),8.0756, 0.001);
+        TS_ASSERT_DELTA(timeMean(p1),8.4904, 0.001);
 
         delete p1;
     }
@@ -336,6 +339,8 @@ private:
     Poco::File log_num_single;// single value
     Poco::File log_str;// file of strings
     Poco::File icp_file;// icpevent file
+    tm ti_data;
+    tm * ti;
 
 };
   

@@ -14,11 +14,13 @@
 #include <sstream>
 #include <stdlib.h>
 #include <cctype>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 namespace Mantid
 {
 namespace Kernel
 {
+
 /** 
  A specialised Property class for holding a series of time-value pairs.
  Required by the LoadLog class.
@@ -77,7 +79,8 @@ public:
   /// 'Virtual copy constructor'
   Property* clone() { return new TimeSeriesProperty<TYPE>(*this); }
 
-  /* Overwrite Property method
+  //-----------------------------------------------------------------------------------------------
+  /* Get the time series property as a string of 'time  value'
    *
    * @return time series property as a string
    */
@@ -89,15 +92,14 @@ public:
 
     while (p != m_propertySeries.end())
     {
-      char buffer[25];
-      strftime(buffer, 25, "%Y-%b-%d %H:%M:%S", localtime(&(p->first)));
-      ins << buffer << "  " << p->second << std::endl;
+      ins << p->first << "  " << p->second << std::endl;
       p++;
     }
 
     return ins.str();
   }
 
+  //-----------------------------------------------------------------------------------------------
   /**  New method to return time series value pairs as std::vector<std::string>
    *
    * @return time series property values as a string vector "<time_t> value"
@@ -120,6 +122,7 @@ public:
     return values;
   }
 
+  //-----------------------------------------------------------------------------------------------
   /**  Return the time series as a C++ map<dateAndTime, TYPE>
    *
    * @return time series property values as map
@@ -144,6 +147,7 @@ public:
 
 
 
+  //-----------------------------------------------------------------------------------------------
   /** Not implemented in this class
    *  @throws Exception::NotImplementedError Not yet implemented
    * @return Nothing in this case
@@ -153,6 +157,20 @@ public:
     throw Exception::NotImplementedError("Not yet");
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a value to the map
+   *  @param time The time as a boost::posix_time::ptime value
+   *  @param value The associated value
+   *  @return True if insertion successful (i.e. identical time not already in map
+   */
+  bool addValue(const boost::posix_time::ptime &time, const TYPE value)
+  {
+    m_size++;
+    return m_propertySeries.insert(typename timeMap::value_type(time, value)) != m_propertySeries.end();
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
    *  @param time The time as a string in the format: (ISO 8601) yyyy-mm-ddThh:mm:ss
    *  @param value The associated value
@@ -160,11 +178,10 @@ public:
    */
   bool addValue(const std::string &time, const TYPE value)
   {
-    m_size++;
-    return m_propertySeries.insert(typename timeMap::value_type(createTime_t_FromString(time), value))
-        != m_propertySeries.end();
+    return addValue(Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(time), value);
   }
 
+  //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
    *  @param time The time as a time_t value
    *  @param value The associated value
@@ -172,10 +189,10 @@ public:
    */
   bool addValue(const std::time_t &time, const TYPE value)
   {
-    m_size++;
-    return m_propertySeries.insert(typename timeMap::value_type(time, value)) != m_propertySeries.end();
+    return addValue(boost::posix_time::from_time_t(time), value);
   }
 
+  //-----------------------------------------------------------------------------------------------
   /** Returns the value at a particular time
    *  @param t time
    *  @return Value at time \a t
@@ -192,12 +209,14 @@ public:
       return m_propertySeries.begin()->second;
   }
 
+  //-----------------------------------------------------------------------------------------------
   /// Returns the number of values (or time intervals) in the time series
   int size() const
   {
     return m_size;
   }
 
+  //-----------------------------------------------------------------------------------------------
   /** Returns n-th value in an incredibly inefficient way.
    *  @param n index
    *  @return Value 
@@ -220,6 +239,7 @@ public:
     return m_propertySeries.rbegin()->second;
   }
 
+  //-----------------------------------------------------------------------------------------------
   /** Returns the last value
    *  @return Value 
    */
@@ -230,6 +250,8 @@ public:
     return m_propertySeries.rbegin()->second;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the last time
    *  @return Value 
    */
@@ -240,6 +262,8 @@ public:
     return m_propertySeries.rbegin()->first;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the first value
    *  @return Value 
    */
@@ -250,6 +274,8 @@ public:
     return m_propertySeries.begin()->second;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the first time
    *  @return Value 
    */
@@ -260,7 +286,9 @@ public:
     return m_propertySeries.begin()->first;
   }
 
-  /** Returns n-th valid time interval
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns n-th valid time interval, in a very inefficient way.
    *  @param n index
    *  @return n-th time interval
    */
@@ -283,9 +311,16 @@ public:
           return TimeInterval(it->first, it1->first);
         else
         {
-          dateAndTime d = (m_propertySeries.rbegin()->first - m_propertySeries.begin()->first) / 10;
-          if (d == 0)
-            d = 1;
+          //We are at the end of the series
+          // ---> Previous functionality = use a d = 1/10th of the total time. Doesn't make sense to me!
+          // ----> time_duration d = (m_propertySeries.rbegin()->first - m_propertySeries.begin()->first) / 10;
+
+          //Use the previous interval instead
+          typename timeMap::const_iterator it2 = it;
+          it2--;
+          time_duration d = it->first - it2->first;
+
+          //Make up an end time.
           dateAndTime endTime = it->first + d;
           return TimeInterval(it->first, endTime);
         }
@@ -299,6 +334,8 @@ public:
     return TimeInterval();
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /** Divide the property into  allowed and disallowed time intervals according to \a filter.
    Repeated time-value pairs (two same time and value entries) mark the start of a gap in the values. 
    The gap ends and an allowed time interval starts when a single time-value is met.
@@ -400,6 +437,8 @@ public:
     countSize();
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /// Restores the property to the unsorted state
   void clearFilter()
   {
@@ -419,6 +458,8 @@ public:
     }
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /// Clones the property
   TimeSeriesProperty<TYPE>* clone() const
   {
@@ -428,6 +469,8 @@ public:
     return p;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /// Updates m_size
   void countSize()
   {
@@ -442,6 +485,8 @@ public:
     }
   }
 
+
+  //-----------------------------------------------------------------------------------------------
   /**  Check if str has the right time format 
    *   @param str The string to check
    *   @return True if the format is correct, false otherwise.
@@ -466,29 +511,15 @@ public:
       return true;
   }
   
+  //-----------------------------------------------------------------------------------------------
   /** This doesn't check anything -we assume these are always valid
    * 
    *  @returns an empty string ""
    */
   std::string isValid() const { return ""; }
 
-  /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
-  static std::time_t createTime_t_FromString(const std::string &str)
-  {
-    std::tm time_since_1900;
-    time_since_1900.tm_isdst = -1;
 
-    // create tm struct
-
-    time_since_1900.tm_year = atoi(str.substr(0, 4).c_str()) - 1900;
-    time_since_1900.tm_mon = atoi(str.substr(5, 2).c_str()) - 1;
-    time_since_1900.tm_mday = atoi(str.substr(8, 2).c_str());
-    time_since_1900.tm_hour = atoi(str.substr(11, 2).c_str());
-    time_since_1900.tm_min = atoi(str.substr(14, 2).c_str());
-    time_since_1900.tm_sec = atoi(str.substr(17, 2).c_str());
-
-    return std::mktime(&time_since_1900);
-  }
+  //-----------------------------------------------------------------------------------------------
   /* Not implemented in this class
    * @throws Exception::NotImplementedError Not yet implemented
    */
@@ -497,6 +528,7 @@ public:
     throw Exception::NotImplementedError("TimeSeries properties don't have defaults");
   }
 
+  //-----------------------------------------------------------------------------------------------
   ///Not used in this class and always returns false
   bool isDefault() const { return false; }
 

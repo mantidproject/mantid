@@ -15,6 +15,7 @@
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -458,18 +459,18 @@ namespace Mantid
       std::vector<std::string> dV=s_timeSeries->time_tValue();
       std::vector<std::string> values;
       std::vector<double> times;
-      time_t t0;
+      Kernel::dateAndTime t0;
       bool first=true;
       for(size_t i=0;i<dV.size();i++)
       {
         std::stringstream ins;
         std::string val;
-        time_t time;
+        Kernel::dateAndTime time;
         ins << dV[i];
         ins >> time;
-	/** MG 27/07/2010: The comment below was here when refactored. As the code is being used heavily and no bug has 
-	    been reported about chopped off entries, nothing was changed. */
-	// this is wrong, val only gets first word from string
+        /** MG 27/07/2010: The comment below was here when refactored. As the code is being used heavily and no bug has
+            been reported about chopped off entries, nothing was changed. */
+        // this is wrong, val only gets first word from string
         std::getline(ins,val); 
         size_t found;
         found=val.find_first_not_of(" \t");
@@ -482,7 +483,7 @@ namespace Mantid
           t0=time; // start time of log
           first=false;
         }
-        times.push_back(static_cast<double>(time-t0));
+        times.push_back(Kernel::DateAndTime::durationInSeconds(time-t0));
       }
       // create log
       status=NXmakegroup(fileID,logName.c_str(),"NXlog");
@@ -493,22 +494,10 @@ namespace Mantid
       std::vector<std::string> attributes,avalues;
       writeNxStringArray("value", values,  attributes, avalues);
       // get ISO time, if t0 valid
-      char buffer [25];
-      if(t0>0)
-      {
-        strftime (buffer,25,"%Y-%m-%dT%H:%M:%S",localtime(&t0));
-        attributes.push_back("start");
-        avalues.push_back(buffer);
-      }
-      else
-      {
-        g_log.warning("Bad start time in log file " + logName);
-      }
+      avalues.push_back(Kernel::DateAndTime::create_ISO8601_String(t0));
 
       writeNxFloatArray("time", times,  attributes, avalues);
-      //
       status=NXclosegroup(fileID);
-      //
     }
 
     int NexusFileIO::writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,

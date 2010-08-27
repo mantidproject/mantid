@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include <napi.h>
 
 #include <boost/shared_ptr.hpp>
@@ -598,7 +599,7 @@ namespace Mantid
         {
           start_time = "2000-01-01T00:00:00";
         }
-        time_t start_t = Kernel::TimeSeriesProperty<std::string>::createTime_t_FromString(start_time);
+        Kernel::dateAndTime start_t = Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(start_time);
         NXInfo vinfo = getDataSetInfo("value");
         if (!vinfo) return NULL;
 
@@ -613,7 +614,7 @@ namespace Mantid
           value.load();
           for(int i=0;i<value.dim0();i++)
           {
-            time_t t = start_t + int(times[i]);
+            Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
             for(int j=0;j<value.dim1();j++)
             {
               char* c = &value(i,j);
@@ -633,13 +634,13 @@ namespace Mantid
             value.load();
             for(int i = 0; i < value.dim0(); i++)
             {
-              time_t t = start_t + int(times[i]);
+              Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
               logv->addValue( t, (value[i] == 0 ? false : true) );
             }
             return logv;
           }
           NXDouble value(*this,"value");
-          return loadValues<NXDouble,TYPE>(logName,value,start_t,times);
+          return loadValues<NXDouble,TYPE>(logName,value, start_t,times);
         }
         else if (vinfo.type == NX_FLOAT32 )
         {
@@ -661,7 +662,7 @@ namespace Mantid
       ///@param times the array of time offsets
       ///@returns a property pointer
       template<class NX_TYPE,class TIME_TYPE>
-      Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, time_t start_t,TIME_TYPE times)
+      Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, Kernel::dateAndTime start_t,TIME_TYPE times)
       {
           value.openLocal();
           Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
@@ -671,7 +672,7 @@ namespace Mantid
           {
             if (i == 0 || value[i] != value[i-1] || times[i] != times[i-1])
             {
-              time_t t = start_t + int(times[i]);
+              Kernel::dateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
               logv->addValue(t,value[i]);
               prev_index = i;
             }

@@ -7,6 +7,7 @@ namespace Mantid
 namespace Kernel
 {
 
+//-------------------------------------------------------------------------------------------------
 /** Constructor
     @param tsp Pointer to property to be filtered. Its actual type must be TimeSeriesProperty<double>
  */
@@ -44,6 +45,8 @@ LogFilter::LogFilter(const Property* tsp)
     throw std::runtime_error("Cannot cast to TimeSeriesProperty<double>");
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /**  Filter using a TimeSeriesProperty<bool>. True values mark the allowed time intervals.
      @param filter Filtering mask
  */
@@ -69,7 +72,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
         {
             f2->addValue(t1.begin(),true);
         }
-        
+
         int i = 0;
         int j = 0;
 
@@ -89,7 +92,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
             f2->addValue(t1.begin(),!f2->nthValue(j));
             t2 = f2->nthInterval(j);
         }
-        
+
         for(;;)
         {
             TimeInterval t;
@@ -127,6 +130,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
 }
 
 
+//-------------------------------------------------------------------------------------------------
 /// Clears filters
 void LogFilter::clear()
 {

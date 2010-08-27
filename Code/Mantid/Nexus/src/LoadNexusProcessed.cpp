@@ -615,7 +615,9 @@ namespace Mantid
 
 	if( prop )
 	{
-	  double value = prop->getSingleValue(0);
+	  //TODO: This is not likely the right way to do this; time "0" does not mean much.
+	  //  However this is the way it was coded, so I am leaving as is
+	  double value = prop->getSingleValue( boost::posix_time::from_time_t( static_cast<std::time_t>(0) ) );
 	  if( entryName == "geom_id" )
 	  {
 	    sampleDetails.setGeometryFlag(static_cast<int>(value));
