@@ -5,15 +5,230 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>612</height>
+    <width>718</width>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>ICatSearch</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" >
-   <item row="3" column="0" >
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <item>
+    <widget class="QLabel" name="label" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="text" >
+      <string>ISIS Investigations Search</string>
+     </property>
+     <property name="indent" >
+      <number>339</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="searchframeWidget" >
+     <property name="styleSheet" >
+      <string notr="true" >background-image: url(:/BackGroundImage/ICatSearchBackGround.png);</string>
+     </property>
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4" >
+      <item row="0" column="0" >
+       <layout class="QGridLayout" name="gridLayout" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="runNumberLabel" >
+          <property name="text" >
+           <string>Run#:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="startRunEdit" >
+          <property name="toolTip" >
+           <string>Start Run Number</string>
+          </property>
+          <property name="statusTip" >
+           <string/>
+          </property>
+          <property name="inputMask" >
+           <string/>
+          </property>
+          <property name="cursorPosition" >
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="endRunEdit" >
+          <property name="toolTip" >
+           <string>End Run Number</string>
+          </property>
+          <property name="inputMask" >
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="instrumentLabel" >
+          <property name="text" >
+           <string>Instrument:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" >
+         <widget class="QComboBox" name="instrumentBox" >
+          <property name="toolTip" >
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="1" >
+       <layout class="QGridLayout" name="gridLayout_2" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="startdateLabel" >
+          <property name="text" >
+           <string>Start Date:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="startdateLineEdit" >
+          <property name="toolTip" >
+           <string>Start Date in DD/MM/YYYY format</string>
+          </property>
+          <property name="inputMask" >
+           <string>00/00/0000;_</string>
+          </property>
+          <property name="text" >
+           <string>//</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QToolButton" name="startdatetoolButton" >
+          <property name="text" >
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="enddateLabel" >
+          <property name="text" >
+           <string>End Date:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QLineEdit" name="enddateLineEdit" >
+          <property name="toolTip" >
+           <string>End Date in DD/MM/YYYY format</string>
+          </property>
+          <property name="inputMask" >
+           <string>00/00/0000;_</string>
+          </property>
+          <property name="text" >
+           <string>//</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" >
+         <widget class="QToolButton" name="enddatetoolButton" >
+          <property name="text" >
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="2" >
+       <layout class="QGridLayout" name="gridLayout_3" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="keywordsLabel" >
+          <property name="text" >
+           <string>KeyWord(s):</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="keywordslineEdit" />
+        </item>
+        <item row="1" column="1" >
+         <widget class="QCheckBox" name="casesensitiveBox" >
+          <property name="toolTip" >
+           <string/>
+          </property>
+          <property name="text" >
+           <string>Case Sensitive</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="3" >
+       <widget class="QPushButton" name="searchButton" >
+        <property name="toolTip" >
+         <string>Search Investigations</string>
+        </property>
+        <property name="text" >
+         <string>Search</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="searchlabel" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="text" >
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="searchtableWidget" >
+     <property name="toolTip" >
+      <string/>
+     </property>
+     <property name="styleSheet" >
+      <string notr="true" >background-color: rgb(216, 225, 255);</string>
+     </property>
+     <property name="horizontalScrollBarPolicy" >
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="autoScroll" >
+      <bool>true</bool>
+     </property>
+     <property name="alternatingRowColors" >
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="showGrid" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout" >
      <item>
       <widget class="QPushButton" name="helpButton" >
@@ -44,323 +259,15 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0" >
-    <widget class="QTreeWidget" name="searchtreeWidget" >
-     <property name="maximumSize" >
-      <size>
-       <width>16777215</width>
-       <height>131</height>
-      </size>
-     </property>
-     <property name="styleSheet" >
-      <string notr="true" >background-color: rgb(216, 225, 255);</string>
-     </property>
-     <column>
-      <property name="text" >
-       <string>                                                                                                                   ISIS Search </string>
-      </property>
-     </column>
-    </widget>
-   </item>
-   <item row="1" column="0" >
-    <widget class="QLabel" name="searchlabel" >
-     <property name="frameShape" >
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow" >
-      <enum>QFrame::Sunken</enum>
-     </property>
-     <property name="text" >
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" >
-    <widget class="QTableWidget" name="searchtableWidget" >
-     <property name="toolTip" >
-      <string/>
-     </property>
-     <property name="styleSheet" >
-      <string notr="true" >background-color: rgb(216, 225, 255);</string>
-     </property>
-     <property name="horizontalScrollBarPolicy" >
-      <enum>Qt::ScrollBarAsNeeded</enum>
-     </property>
-     <property name="autoScroll" >
-      <bool>true</bool>
-     </property>
-     <property name="alternatingRowColors" >
-      <bool>true</bool>
-     </property>
-     <property name="selectionMode" >
-      <enum>QAbstractItemView::SingleSelection</enum>
-     </property>
-     <property name="selectionBehavior" >
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
-     <property name="showGrid" >
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
   </layout>
-  <widget class="QLineEdit" name="endRunEdit" >
-   <property name="geometry" >
-    <rect>
-     <x>150</x>
-     <y>47</y>
-     <width>81</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="toolTip" >
-    <string>End Run Number</string>
-   </property>
-   <property name="inputMask" >
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="startRunEdit" >
-   <property name="geometry" >
-    <rect>
-     <x>59</x>
-     <y>47</y>
-     <width>81</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="toolTip" >
-    <string>Start Run Number</string>
-   </property>
-   <property name="statusTip" >
-    <string/>
-   </property>
-   <property name="inputMask" >
-    <string/>
-   </property>
-   <property name="cursorPosition" >
-    <number>0</number>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="casesensitiveBox" >
-   <property name="geometry" >
-    <rect>
-     <x>525</x>
-     <y>84</y>
-     <width>91</width>
-     <height>18</height>
-    </rect>
-   </property>
-   <property name="toolTip" >
-    <string/>
-   </property>
-   <property name="text" >
-    <string>Case Sensitive</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="runNumberLabel" >
-   <property name="geometry" >
-    <rect>
-     <x>14</x>
-     <y>48</y>
-     <width>31</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Run#:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="instrumentLabel" >
-   <property name="geometry" >
-    <rect>
-     <x>14</x>
-     <y>83</y>
-     <width>61</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Instrument:</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="instrumentBox" >
-   <property name="geometry" >
-    <rect>
-     <x>150</x>
-     <y>83</y>
-     <width>81</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="toolTip" >
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLabel" name="keywordsLabel" >
-   <property name="geometry" >
-    <rect>
-     <x>447</x>
-     <y>50</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>KeyWord(s):</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="keywordslineEdit" >
-   <property name="geometry" >
-    <rect>
-     <x>525</x>
-     <y>47</y>
-     <width>141</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="enddateLineEdit" >
-   <property name="geometry" >
-    <rect>
-     <x>311</x>
-     <y>84</y>
-     <width>81</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="toolTip" >
-    <string>Date in DD/MM/YYYY format</string>
-   </property>
-   <property name="inputMask" >
-    <string>00/00/0000;_</string>
-   </property>
-   <property name="text" >
-    <string>//</string>
-   </property>
-  </widget>
-  <widget class="QToolButton" name="startdatetoolButton" >
-   <property name="geometry" >
-    <rect>
-     <x>404</x>
-     <y>47</y>
-     <width>25</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>...</string>
-   </property>
-  </widget>
-  <widget class="QToolButton" name="enddatetoolButton" >
-   <property name="geometry" >
-    <rect>
-     <x>404</x>
-     <y>84</y>
-     <width>25</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>...</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="startdateLineEdit" >
-   <property name="geometry" >
-    <rect>
-     <x>310</x>
-     <y>47</y>
-     <width>81</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="toolTip" >
-    <string>Date in DD/MM/YYYY format</string>
-   </property>
-   <property name="inputMask" >
-    <string>00/00/0000;_</string>
-   </property>
-   <property name="text" >
-    <string>//</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="enddateLabel" >
-   <property name="geometry" >
-    <rect>
-     <x>246</x>
-     <y>84</y>
-     <width>48</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>End Date:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="startdateLabel" >
-   <property name="geometry" >
-    <rect>
-     <x>245</x>
-     <y>48</y>
-     <width>54</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Start Date:</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="searchButton" >
-   <property name="geometry" >
-    <rect>
-     <x>660</x>
-     <y>100</y>
-     <width>70</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="toolTip" >
-    <string>Search Investigations</string>
-   </property>
-   <property name="text" >
-    <string>Search</string>
-   </property>
-  </widget>
-  <zorder>searchtreeWidget</zorder>
-  <zorder>searchlabel</zorder>
-  <zorder>endRunEdit</zorder>
-  <zorder>startRunEdit</zorder>
-  <zorder>casesensitiveBox</zorder>
-  <zorder>runNumberLabel</zorder>
-  <zorder>instrumentLabel</zorder>
-  <zorder>instrumentBox</zorder>
-  <zorder>keywordsLabel</zorder>
-  <zorder>keywordslineEdit</zorder>
-  <zorder>startdateLabel</zorder>
-  <zorder>enddateLabel</zorder>
-  <zorder>searchtableWidget</zorder>
-  <zorder>startdateLineEdit</zorder>
-  <zorder>enddatetoolButton</zorder>
-  <zorder>startdatetoolButton</zorder>
-  <zorder>enddateLineEdit</zorder>
-  <zorder>searchButton</zorder>
  </widget>
  <tabstops>
-  <tabstop>startRunEdit</tabstop>
-  <tabstop>endRunEdit</tabstop>
-  <tabstop>startdateLineEdit</tabstop>
-  <tabstop>startdatetoolButton</tabstop>
-  <tabstop>keywordslineEdit</tabstop>
-  <tabstop>instrumentBox</tabstop>
-  <tabstop>enddateLineEdit</tabstop>
-  <tabstop>enddatetoolButton</tabstop>
-  <tabstop>casesensitiveBox</tabstop>
-  <tabstop>searchButton</tabstop>
   <tabstop>helpButton</tabstop>
   <tabstop>closeButton</tabstop>
-  <tabstop>searchtreeWidget</tabstop>
   <tabstop>searchtableWidget</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="ICatSearchBackGround.qrc" />
+ </resources>
  <connections/>
 </ui>

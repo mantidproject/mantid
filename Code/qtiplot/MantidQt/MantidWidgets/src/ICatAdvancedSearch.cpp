@@ -39,7 +39,7 @@ QWidget(par),m_utils_sptr( new ICatUtils)
 	m_uiForm.startRunEdit->installEventFilter(this);
 	m_uiForm.endRunEdit->installEventFilter(this);
 	m_uiForm.keywordsEdit->installEventFilter(this);
-	m_uiForm.treeWidget->installEventFilter(this);
+	m_uiForm.advframeWidget->installEventFilter(this);
 	m_uiForm.investigatonNameEdit->installEventFilter(this);
 	m_uiForm.invstAbstractEdit->installEventFilter(this);
 	m_uiForm.sampleEdit->installEventFilter(this);
@@ -492,7 +492,7 @@ void ICatAdvancedSearch::readSettings()
 }
 bool ICatAdvancedSearch::eventFilter(QObject *obj, QEvent *event)
 {
-	if (event->type() ==QEvent::FocusIn && obj==m_uiForm.treeWidget)
+	if (event->type() ==QEvent::FocusIn && obj==m_uiForm.advframeWidget)
 	{		
 		if(m_utils_sptr->calendarWidget())
 		{

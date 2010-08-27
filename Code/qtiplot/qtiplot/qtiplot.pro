@@ -32,6 +32,7 @@ win32:DEFINES   += _WIN32_WINNT=0x0400
 win32:DEFINES   += _WIN32
 win32:DEFINES   += BOOST_SIGNALS_DYN_LINK
 RESOURCES        = ../../../Images/images.qrc
+RESOURCES        += ../MantidQt/MantidWidgets/inc/ICatSearchBackGround.qrc
 
 # comment the following lines if you haven't subscribed for a QtiPlot binaries maintenance contract
 #RESTRICTED_MODULES += EMF

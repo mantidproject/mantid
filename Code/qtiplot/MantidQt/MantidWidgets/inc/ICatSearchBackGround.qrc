@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="BackGroundImage" >
+    <file>ICatSearchBackGround.png</file>
+  </qresource>
+</RCC>

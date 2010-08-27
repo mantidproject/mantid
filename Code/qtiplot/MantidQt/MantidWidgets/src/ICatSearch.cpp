@@ -82,7 +82,7 @@ void ICatSearch::initLayout()
 	m_uiForm.startRunEdit->installEventFilter(this);
 	m_uiForm.endRunEdit->installEventFilter(this);
 	m_uiForm.keywordslineEdit->installEventFilter(this);
-	m_uiForm.searchtreeWidget->installEventFilter(this);
+	m_uiForm.searchframeWidget->installEventFilter(this);
 		
 }
 /// This method gets called  when the widget is closed
@@ -458,7 +458,7 @@ void ICatSearch::mousePressEvent (QMouseEvent* )
 }
 bool ICatSearch::eventFilter(QObject *obj, QEvent *event)
 {
-	if (event->type() ==QEvent::FocusIn && obj==m_uiForm.searchtreeWidget)
+	if (event->type() ==QEvent::FocusIn && obj==m_uiForm.searchframeWidget)
 	{		
 		if(m_utils_sptr->calendarWidget())
 		{
