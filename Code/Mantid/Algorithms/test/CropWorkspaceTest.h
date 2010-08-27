@@ -40,112 +40,112 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( crop.name(), "CropWorkspace" )
+    TS_ASSERT_EQUALS( crop.name(), "CropWorkspace" );
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( crop.version(), 1 )
+    TS_ASSERT_EQUALS( crop.version(), 1 );
   }
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( crop.category(), "General" )
+    TS_ASSERT_EQUALS( crop.category(), "General" );
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( crop.initialize() )
-    TS_ASSERT( crop.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( crop.initialize() );
+    TS_ASSERT( crop.isInitialized() );
   }
 
   void testInvalidInputs()
   {
     if ( !crop.isInitialized() ) crop.initialize();
 
-    TS_ASSERT_THROWS( crop.execute(), std::runtime_error )
-    TS_ASSERT( !crop.isExecuted() )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("InputWorkspace","toCrop") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("OutputWorkspace","nothing") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMin","2") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","1") )
-    TS_ASSERT_THROWS_NOTHING( crop.execute() )
-    TS_ASSERT( !crop.isExecuted() )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","2.5") )
-    TS_ASSERT_THROWS_NOTHING( crop.execute() )
-    TS_ASSERT( !crop.isExecuted() )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","5") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("StartWorkspaceIndex","10") )
-    TS_ASSERT_THROWS_NOTHING( crop.execute() )
-    TS_ASSERT( !crop.isExecuted() )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("StartWorkspaceIndex","4") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("EndWorkspaceIndex","10") )
-    TS_ASSERT_THROWS_NOTHING( crop.execute() )
-    TS_ASSERT( !crop.isExecuted() )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("EndWorkspaceIndex","2") )
-    TS_ASSERT_THROWS_NOTHING( crop.execute() )
-    TS_ASSERT( !crop.isExecuted() )
+    TS_ASSERT_THROWS( crop.execute(), std::runtime_error );
+    TS_ASSERT( !crop.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("InputWorkspace","toCrop") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("OutputWorkspace","nothing") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMin","2") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","1") );
+    TS_ASSERT_THROWS_NOTHING( crop.execute() );
+    TS_ASSERT( !crop.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","2.5") );
+    TS_ASSERT_THROWS_NOTHING( crop.execute() );
+    TS_ASSERT( !crop.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","5") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("StartWorkspaceIndex","10") );
+    TS_ASSERT_THROWS_NOTHING( crop.execute() );
+    TS_ASSERT( !crop.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("StartWorkspaceIndex","4") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("EndWorkspaceIndex","10") );
+    TS_ASSERT_THROWS_NOTHING( crop.execute() );
+    TS_ASSERT( !crop.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("EndWorkspaceIndex","2") );
+    TS_ASSERT_THROWS_NOTHING( crop.execute() );
+    TS_ASSERT( !crop.isExecuted() );
   }
 
   void testExec()
   {
     if ( !crop.isInitialized() ) crop.initialize();
 
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("InputWorkspace","toCrop") )
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("InputWorkspace","toCrop") );
     std::string outputWS("cropped");
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("OutputWorkspace",outputWS) )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMin","0.1") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","4") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("StartWorkspaceIndex","2") )
-    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("EndWorkspaceIndex","4") )
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMin","0.1") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("XMax","4") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("StartWorkspaceIndex","2") );
+    TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("EndWorkspaceIndex","4") );
 
-    TS_ASSERT_THROWS_NOTHING( crop.execute() )
-    TS_ASSERT( crop.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( crop.execute() );
+    TS_ASSERT( crop.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
 
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), 3 )
-    TS_ASSERT_EQUALS( output->blocksize(), 3 )
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 3 );
+    TS_ASSERT_EQUALS( output->blocksize(), 3 );
 
     MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
     for (int i=0; i < 3; ++i)
     {
       for (int j = 0; j < 3; ++j)
       {
-        TS_ASSERT_EQUALS( output->readX(i)[j], input->readX(i+2)[j+1] )
-        TS_ASSERT_EQUALS( output->readY(i)[j], input->readY(i+2)[j+1] )
-        TS_ASSERT_EQUALS( output->readE(i)[j], input->readE(i+2)[j+1] )
+        TS_ASSERT_EQUALS( output->readX(i)[j], input->readX(i+2)[j+1] );
+        TS_ASSERT_EQUALS( output->readY(i)[j], input->readY(i+2)[j+1] );
+        TS_ASSERT_EQUALS( output->readE(i)[j], input->readE(i+2)[j+1] );
       }
-      TS_ASSERT_EQUALS( output->readX(i)[3], input->readX(i+2)[4] )
-      TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i+2) )
+      TS_ASSERT_EQUALS( output->readX(i)[3], input->readX(i+2)[4] );
+      TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i+2) );
     }
   }
 
   void testExecWithDefaults()
   {
 	  CropWorkspace crop2;
-	  TS_ASSERT_THROWS_NOTHING( crop2.initialize() )
-    TS_ASSERT_THROWS_NOTHING( crop2.setPropertyValue("InputWorkspace","toCrop") )
-    TS_ASSERT_THROWS_NOTHING( crop2.setPropertyValue("OutputWorkspace","unCropped") )
-    TS_ASSERT_THROWS_NOTHING( crop2.execute() )
-    TS_ASSERT( crop2.isExecuted() )
+	  TS_ASSERT_THROWS_NOTHING( crop2.initialize() );
+    TS_ASSERT_THROWS_NOTHING( crop2.setPropertyValue("InputWorkspace","toCrop") );
+    TS_ASSERT_THROWS_NOTHING( crop2.setPropertyValue("OutputWorkspace","unCropped") );
+    TS_ASSERT_THROWS_NOTHING( crop2.execute() );
+    TS_ASSERT( crop2.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unCropped")) )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unCropped")) );
     MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
 
     MatrixWorkspace::const_iterator inIt(*input);
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
-      TS_ASSERT_EQUALS( it->X(), inIt->X() )
-      TS_ASSERT_EQUALS( it->X2(), inIt->X2() )
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() )
-      TS_ASSERT_EQUALS( it->E(), inIt->E() )
+      TS_ASSERT_EQUALS( it->X(), inIt->X() );
+      TS_ASSERT_EQUALS( it->X2(), inIt->X2() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
     }
     for (int i = 0; i < 5; ++i)
     {
-      TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i) )
+      TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i) );
     }
   }
 
@@ -153,23 +153,23 @@ public:
   {
     AnalysisDataService::Instance().add("point",WorkspaceCreationHelper::Create2DWorkspace123(5,5));
     CropWorkspace crop3;
-    TS_ASSERT_THROWS_NOTHING( crop3.initialize() )
-    TS_ASSERT_THROWS_NOTHING( crop3.setPropertyValue("InputWorkspace","point") )
-    TS_ASSERT_THROWS_NOTHING( crop3.setPropertyValue("OutputWorkspace","pointOut") )
-    TS_ASSERT_THROWS_NOTHING( crop3.execute() )
-    TS_ASSERT( crop3.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( crop3.initialize() );
+    TS_ASSERT_THROWS_NOTHING( crop3.setPropertyValue("InputWorkspace","point") );
+    TS_ASSERT_THROWS_NOTHING( crop3.setPropertyValue("OutputWorkspace","pointOut") );
+    TS_ASSERT_THROWS_NOTHING( crop3.execute() );
+    TS_ASSERT( crop3.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("pointOut")) )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("pointOut")) );
     MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("point"));
 
     MatrixWorkspace::const_iterator inIt(*input);
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
-      TS_ASSERT_EQUALS( it->X(), inIt->X() )
-      TS_ASSERT_THROWS( it->X2(), Mantid::Kernel::Exception::NotFoundError )
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() )
-      TS_ASSERT_EQUALS( it->E(), inIt->E() )
+      TS_ASSERT_EQUALS( it->X(), inIt->X() );
+      TS_ASSERT_THROWS( it->X2(), Mantid::Kernel::Exception::NotFoundError );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
     }
   }
 
@@ -182,18 +182,18 @@ public:
     }
 
     CropWorkspace crop4;
-    TS_ASSERT_THROWS_NOTHING( crop4.initialize() )
-    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("InputWorkspace","toCrop") )
-    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("OutputWorkspace","raggedOut") )
-    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMin","2.9") )
-    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMax","4.1") )
-    TS_ASSERT_THROWS_NOTHING( crop4.execute() )
-    TS_ASSERT( crop4.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( crop4.initialize() );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("InputWorkspace","toCrop") );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("OutputWorkspace","raggedOut") );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMin","2.9") );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMax","4.1") );
+    TS_ASSERT_THROWS_NOTHING( crop4.execute() );
+    TS_ASSERT( crop4.isExecuted() );
     
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("raggedOut")) )
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("raggedOut")) );
 
-    TS_ASSERT_EQUALS( output->size(), input->size() )
+    TS_ASSERT_EQUALS( output->size(), input->size() );
 
     for (int i = 0; i < 5; ++i)
     {
@@ -201,11 +201,11 @@ public:
       {
         if ( (i == 0 && j == 0) || (i != 0 && j == 3) )
         {
-          TS_ASSERT_EQUALS( output->readY(i)[j], input->readY(i)[j] )
+          TS_ASSERT_EQUALS( output->readY(i)[j], input->readY(i)[j] );
         }
         else
         {
-          TS_ASSERT_EQUALS( output->readY(i)[j], 0.0 )
+          TS_ASSERT_EQUALS( output->readY(i)[j], 0.0 );
         }
       }
     }
