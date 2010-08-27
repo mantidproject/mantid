@@ -1191,6 +1191,25 @@ public:
     delete mfun;
   }
 
+  void testReplaceEmptyFunction()
+  {
+    CompositeFunction *mfun = new CompositeFunction();
+    Gauss *g = new Gauss();
+    CompositeFunction *cf = new CompositeFunction();
+    Linear *bk = new Linear();
+    Cubic *cub = new Cubic();
+
+    mfun->addFunction(bk);
+    mfun->addFunction(cf);
+    mfun->addFunction(cub);
+
+    mfun->replaceFunction(cf,g);
+
+    TS_ASSERT_EQUALS(mfun->asString(),"name=Linear,a=0,b=0;name=Gauss,c=0,h=1,s=1;name=Cubic,c0=0,c1=0,c2=0,c3=0");
+
+    delete mfun;
+  }
+
 private:
   bool isDeleted(CompositeFunctionTest_IFunction* f)
   {
