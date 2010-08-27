@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidAlgorithms/AlignDetectors.h"
@@ -81,7 +82,7 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
 	}
 
-  void xtestEventWorkspaceSameOutputWS()
+  void testEventWorkspaceSameOutputWS()
   {
     //----- Load some event data --------
     LoadEventPreNeXus * eventLoader;
@@ -209,7 +210,7 @@ public:
 
 
   //Warning: can be a slow test.
-  void xtestEventWorkspace_PG3()
+  void testEventWorkspace_PG3()
   {
     std::string outputws( "pg3" );
 
