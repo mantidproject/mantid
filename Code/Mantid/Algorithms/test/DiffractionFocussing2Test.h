@@ -82,7 +82,7 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
 	}
 
-  void testEventWorkspaceSameOutputWS()
+  void xtestEventWorkspaceSameOutputWS()
   {
     //----- Load some event data --------
     LoadEventPreNeXus * eventLoader;
@@ -210,7 +210,7 @@ public:
 
 
   //Warning: can be a slow test.
-  void testEventWorkspace_PG3()
+  void xtestEventWorkspace_PG3()
   {
     std::string outputws( "pg3" );
 
