@@ -125,10 +125,14 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontPlotButton, SIGNAL(clicked()), this, SLOT(runFrontPlotButton())); 
 
   // front group/ group pair combobox
-  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(clicked()), this, SLOT(runFrontGroupGroupPairComboBox()));
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this, 
+    SLOT(runFrontGroupGroupPairComboBox(int)));
 
-    // connect "?" (Help) Button
-    connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
+  // front select 1st period combobox
+  connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runHomePeriodBox1(const QString&)));
+
+  // connect "?" (Help) Button
+  connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
 
 
   // add combo boxes to pairTable
@@ -150,6 +154,16 @@ void MuonAnalysis::initLayout()
 /**
 * Muon Analysis help (slot)
 */
+void MuonAnalysis::runHomePeriodBox1(const QString& text)
+{
+  std::stringstream str(text.toStdString());
+  str >> m_period;
+}
+
+
+/**
+* Muon Analysis help (slot)
+*/
 void MuonAnalysis::muonAnalysisHelpClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
@@ -160,9 +174,10 @@ void MuonAnalysis::muonAnalysisHelpClicked()
 /**
 * Front group/ group pair combobox (slot)
 */
-void MuonAnalysis::runFrontGroupGroupPairComboBox()
+void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
 {
-  updateFront();
+  if ( index >= 0 )
+    updateFront();
 }
 
 
@@ -267,25 +282,28 @@ void MuonAnalysis::updateFront()
 
   m_uiForm.frontPlotFuncs->clear();
   int numG = numGroups();
-  if (index >= numG)
+  if (numG)
   {
-    // i.e. index points to a pair
-    m_uiForm.frontPlotFuncs->addItems(m_pairPlotFunc);
+    if (index >= numG && numG >= 2)
+    {
+      // i.e. index points to a pair
+      m_uiForm.frontPlotFuncs->addItems(m_pairPlotFunc);
 
-    m_uiForm.frontAlphaLabel->setVisible(true);
-    m_uiForm.frontAlphaNumber->setVisible(true);
+      m_uiForm.frontAlphaLabel->setVisible(true);
+      m_uiForm.frontAlphaNumber->setVisible(true);
 
-    m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(index-numG,3)->text());
-    m_pairTableRowInFocus = index-numG;
-  }
-  else
-  {
-    // i.e. index points to a group
-    m_uiForm.frontPlotFuncs->addItems(m_groupPlotFunc);
+      m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(index-numG,3)->text());
+      m_pairTableRowInFocus = index-numG;
+    }
+    else
+    {
+      // i.e. index points to a group
+      m_uiForm.frontPlotFuncs->addItems(m_groupPlotFunc);
 
-    m_uiForm.frontAlphaLabel->setVisible(false);
-    m_uiForm.frontAlphaNumber->setVisible(false);
-    m_groupTableRowInFocus = index;
+      m_uiForm.frontAlphaLabel->setVisible(false);
+      m_uiForm.frontAlphaNumber->setVisible(false);
+      m_groupTableRowInFocus = index;
+    }
   }
 }
 
@@ -444,25 +462,33 @@ void MuonAnalysis::plotGroup(std::string& plotType)
 {
   if ( m_groupTableRowInFocus >= 0 )
   {
-    // create cropped workspace
+    // only plot if group name available
+    QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
+    QString groupName;
+    if (!itemName)
+      return;
+    else
+      groupName = itemName->text();
 
-    QString cropStr = "CropWorkspace(\"";
-    cropStr += m_workspace_name.c_str();
+    // create cropped workspace of relevant workspace
+
+    QString periodStr = "";
     if (m_period > 0)
-    {
-      cropStr += "_";
-      cropStr += iToString(m_period).c_str();
-      cropStr += "\",\"";
-      cropStr += m_workspace_name.c_str();
-      cropStr += "_crop\"," + m_uiForm.firstGoodBinFront->text() + ");";
+    {    
+      periodStr += QString("_") + iToString(m_period).c_str();
     }
+    QString cropWS = m_workspace_name.c_str() + QString("_") + groupName + periodStr;
+    QString cropStr = "CropWorkspace(\"";
+    cropStr += m_workspace_name.c_str() + periodStr;
+    cropStr += "\",\"";
+    cropStr += cropWS;
+    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
     runPythonCode( cropStr ).trimmed();
 
 
-    QString cropWS = m_workspace_name.c_str() + QString("_crop");
-    QString rowNum = QString(iToString(m_groupTableRowInFocus).c_str());
+    // create plotting Python string 
 
-    // create Python string 
+    QString rowNum = QString(iToString(m_groupTableRowInFocus).c_str());
     QString pyString;
     if (plotType.compare("Counts") == 0)
     {
@@ -471,16 +497,18 @@ void MuonAnalysis::plotGroup(std::string& plotType)
     }
     else if (plotType.compare("Asymmetry") == 0)
     {
+      QString outputName = cropWS + "_asym";
       pyString += "RemoveExpDecay(\"" + cropWS + "\",\"" 
-        + m_workspace_name.c_str() + "_asym\","
-        + rowNum + "); plotSpectrum(\"" + m_workspace_name.c_str() + "_asym"
+        + outputName + "\","
+        + rowNum + "); plotSpectrum(\"" + outputName
         + "\"," + rowNum + ");";
     }
     else if (plotType.compare("Logorithm") == 0)
     {
+      QString outputName = cropWS + "_log";
       pyString += "Logarithm(\"" + cropWS + "\",\"" 
-        + m_workspace_name.c_str() + "_log\","
-        + rowNum + "); plotSpectrum(\"" + m_workspace_name.c_str() + "_log"
+        + outputName + "\","
+        + rowNum + "); plotSpectrum(\"" + outputName
         + "\"," + rowNum + ");";
     }
     else
@@ -516,33 +544,41 @@ void MuonAnalysis::plotPair(std::string& plotType)
     if (!item)
       return;
 
-    // create cropped workspace
+    // create cropped workspace of relevant workspace
 
-    QString cropStr = "CropWorkspace(\"";
-    cropStr += m_workspace_name.c_str();
+    QString periodStr = "";
     if (m_period > 0)
-    {
-      cropStr += "_";
-      cropStr += iToString(m_period).c_str();
-      cropStr += "\",\"";
-      cropStr += m_workspace_name.c_str();
-      cropStr += "_crop\"," + m_uiForm.firstGoodBinFront->text() + ");";
+    {    
+      periodStr += QString("_") + iToString(m_period).c_str();
     }
+    QString cropWS = m_workspace_name.c_str() + QString("_crop");
+    QString cropStr = "CropWorkspace(\"";
+    cropStr += m_workspace_name.c_str() + periodStr;
+    cropStr += "\",\"";
+    cropStr += cropWS;
+    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
     runPythonCode( cropStr ).trimmed();
 
-    QString cropWS = m_workspace_name.c_str() + QString("_crop");
 
-    // create Python string 
+    // create plotting Python string 
+
     QString pyString;
     if (plotType.compare("Asymmetry") == 0)
     {
       QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
       QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
 
+      QString pairName;
+      QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
+      if (itemName)
+        pairName = itemName->text();
+
+      QString outputWS_Name = m_workspace_name.c_str() + QString("_") + pairName + periodStr;
+
       pyString += "AsymmetryCalc(\"" + cropWS + "\",\"" 
-        + m_workspace_name.c_str() + "_pair_asym\","
+        + outputWS_Name + "\","
         + iToString(qw1->currentIndex()).c_str() + "," + iToString(qw2->currentIndex()).c_str()
-        + "," + item->text() + "); plotSpectrum(\"" + m_workspace_name.c_str() + "_pair_asym"
+        + "," + item->text() + "); plotSpectrum(\"" + outputWS_Name
         + "\",0);";
     }
     else
@@ -667,6 +703,8 @@ void MuonAnalysis::applyGroupingToWS( const std::string& wsName, std::string fil
   pyString.append(filename.c_str());
   pyString.append("');");
   
+  // run python script
+  QString pyOutput = runPythonCode( pyString ).trimmed();
 }
 
 /**

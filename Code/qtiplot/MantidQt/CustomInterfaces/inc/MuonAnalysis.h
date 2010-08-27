@@ -73,7 +73,10 @@ private slots:
   void runFrontPlotButton();
 
   ///
-  void runFrontGroupGroupPairComboBox();
+  void runFrontGroupGroupPairComboBox(int index);
+
+  ///
+  void runHomePeriodBox1(const QString& text);
 
   ///
   void muonAnalysisHelpClicked();
