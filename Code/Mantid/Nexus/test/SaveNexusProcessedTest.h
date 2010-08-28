@@ -203,7 +203,7 @@ void testExecOnLoadraw()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
-    if(clearfiles) Poco::File(outputFile).remove();
+    if(clearfiles) remove(outputFile.c_str());
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
 }

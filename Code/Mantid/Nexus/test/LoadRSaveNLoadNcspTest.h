@@ -96,7 +96,6 @@ void testExecOnLoadraw()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("OutputWorkspace", myOutputSpace));
     // file name to load
     inputFile = outputFile;
-    std::cout << "Loading " << inputFile << ".\n";
     entryNumber=1;
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", inputFile));
     algToBeTested.setProperty("EntryNumber", entryNumber);
