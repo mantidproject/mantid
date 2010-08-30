@@ -1,91 +1,72 @@
-#ifndef LOADSPECTEST_H
-#define LOADSPECTEST_H
-
-//------------------------------------------------
-// Includes
-//------------------------------------------------
+#ifndef LOADSNSSPECTEST_H_
+#define LOADSNSSPECTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidDataHandling/LoadSNSspec.h"
 
-#include "MantidDataHandling/LoadSpec.h"
-#include "MantidDataObjects/Workspace1D.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IInstrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/Parameter.h"
-#include "Poco/Path.h"
-#include <vector>
+using namespace Mantid::API;
 
-class LoadSpecTest : public CxxTest::TestSuite
+class LoadSNSPECTest : public CxxTest::TestSuite
 {
 public:
-  LoadSpecTest()
+  void testName()
   {
-     inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/spec_example.txt").toString();
+    TS_ASSERT_EQUALS( loader.name(), "LoadSNSspec" )
   }
+
+  void testVersion()
+  {
+    TS_ASSERT_EQUALS( loader.version(), 1 )
+  }
+
+  void testCategory()
+  {
+    TS_ASSERT_EQUALS( loader.category(), "DataHandling" )
+  }
+
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( loader.initialize());
-    TS_ASSERT( loader.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING( loader.initialize() )
+    TS_ASSERT( loader.isInitialized() )
   }
 
   void testExec()
   {
     if ( !loader.isInitialized() ) loader.initialize();
 
-    //No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(loader.execute(), std::runtime_error);
+    std::string outWS("outWS");
 
-    //Set the file name
-    loader.setPropertyValue("Filename", inputFile);
-    
-    std::string outputSpace = "out_spec_ws";
-    //Set an output workspace
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    
-    //check that retrieving the filename gets the correct value
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
-    TS_ASSERT( result.compare(inputFile) == 0 );
+    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("Filename","LoadSNSspec.txt") )
+    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("OutputWorkspace",outWS) )
 
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("OutputWorkspace") )
-    TS_ASSERT( result == outputSpace );
+    TS_ASSERT_THROWS_NOTHING( loader.execute() )
+    TS_ASSERT( loader.isExecuted() )
 
-    //Should now throw nothing
-    TS_ASSERT_THROWS_NOTHING( loader.execute() );
-    TS_ASSERT( loader.isExecuted() );
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MatrixWorkspace>
+                                (AnalysisDataService::Instance().retrieve(outWS)) )
 
-   //Now need to test the resultant workspace, first retrieve it
-    Mantid::API::Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace) );
-    Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 4 ) //number of spectrum
+    TS_ASSERT_EQUALS( ws->blocksize(), 39 )
+    //TS_ASSERT( ws->isDistribution() )
 
-    TS_ASSERT_EQUALS( ws2d->getNumberHistograms(), 1 );
+    TS_ASSERT_EQUALS( ws->readX(0)[1], 148.294676917 )
+    TS_ASSERT_EQUALS( ws->readX(2)[38], 314.564466187 )
+    TS_ASSERT_EQUALS( ws->readX(3)[10], 188.738679712 )
 
-    TS_ASSERT_EQUALS( (ws2d->dataX(0).size()), 51);
-    TS_ASSERT_EQUALS( (ws2d->dataY(0).size()), 51);
-    TS_ASSERT_EQUALS( (ws2d->dataE(0).size()), 51);
+    TS_ASSERT_EQUALS( ws->readY(0)[4], 2.63040177974e-5 )
+    TS_ASSERT_EQUALS( ws->readY(2)[10], 8.80816679672e-5 )
+    TS_ASSERT_EQUALS( ws->readY(3)[38], 1.85253847513e-5 )
 
+    TS_ASSERT_EQUALS( ws->readE(0)[14], 8.03084255786e-6)
+    TS_ASSERT_EQUALS( ws->readE(1)[5], 1.42117480748e-5 )
+    TS_ASSERT_EQUALS( ws->readE(3)[36], 5.76084468445e-5 )
 
-    double tolerance(1e-04);
-    TS_ASSERT_DELTA( ws2d->dataX(0)[0], 0.0323820562087, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataX(0)[10], 0.0376905900134, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataX(0)[50], 0.109482190039, tolerance );
-
-    TS_ASSERT_DELTA( ws2d->dataY(0)[0], 0.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataY(0)[10], 2.59507483034, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataY(0)[50], 0.0, tolerance );
-
-    TS_ASSERT_DELTA( ws2d->dataE(0)[0], 0.0, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataE(0)[10], 0.0124309835217, tolerance );
-    TS_ASSERT_DELTA( ws2d->dataE(0)[50], 0.0, tolerance );
-
-    Mantid::API::AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().remove(outWS);
   }
 
 private:
-  std::string inputFile;
-  Mantid::DataHandling::LoadSpec loader;
-
+  Mantid::DataHandling::LoadSNSspec loader;
 };
-#endif
+
+#endif /*LoadSNSSPECTEST_H_*/
