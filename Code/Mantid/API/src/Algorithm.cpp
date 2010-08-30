@@ -7,6 +7,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/DateAndTime.h"
 #include <iomanip>
 
 using namespace Mantid::Kernel;
@@ -90,7 +91,7 @@ void Algorithm::initialize()
 bool Algorithm::execute()
 {
   m_notificationCenter.postNotification(new StartedNotification(this));
-  time_t start_time;
+  Mantid::Kernel::dateAndTime start_time;
   // Return a failure if the algorithm hasn't been initialized
   if ( !isInitialized() )
   {
@@ -244,7 +245,7 @@ bool Algorithm::execute()
     try
     {
       if (!m_isChildAlgorithm) m_running = true;
-      time(&start_time);
+      start_time = Mantid::Kernel::DateAndTime::get_current_time();
       //count used for defining the algorithm execution order
       ++Algorithm::g_execCount;
       // Start a timer
@@ -482,7 +483,7 @@ void Algorithm::interruption_point()
  *  @param duration a double defining the length of duration of the algorithm
  *  @param  uexecCount an unsigned int for defining the excution order of algorithm
  */
-void Algorithm::fillHistory(AlgorithmHistory::dateAndTime start,double duration,unsigned int uexecCount)
+void Algorithm::fillHistory(Mantid::Kernel::dateAndTime start,double duration,unsigned int uexecCount)
 {
   // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
   std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;

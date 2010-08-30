@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -750,8 +751,13 @@ namespace Mantid
             return; 
           }
           //API::AlgorithmHistory alg_hist(algname, version, start_timedate.timestamp().epochTime(), dur);
-		  ++exeCount;
-		  API::AlgorithmHistory alg_hist(algName, version, start_timedate.timestamp().epochTime(), dur,exeCount);
+
+          ++exeCount;
+          //Convert the timestamp to time_t to dateAndTime
+          Mantid::Kernel::dateAndTime utc_start = Mantid::Kernel::DateAndTime::from_time_t( start_timedate.timestamp().epochTime() );
+          //Create the algorithm history
+          API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,exeCount);
+
           //Add property information
           for( int index = static_cast<int>(PARAMS)+1;index < nlines;++index )
           {

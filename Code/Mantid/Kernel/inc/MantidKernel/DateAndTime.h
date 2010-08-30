@@ -22,11 +22,24 @@ namespace DateAndTime
 /// Const of one second time duration
 static const time_duration oneSecond = boost::posix_time::time_duration(0,0,1,0);
 
+/// A default date and time to use when time is not specified
+static const dateAndTime defaultTime = boost::posix_time::ptime( boost::gregorian::date(1970,1,1) );
+
 DLLExport double durationInSeconds(time_duration duration);
+
+DLLExport time_t utc_mktime(struct tm *utctime);
 
 DLLExport dateAndTime create_DateAndTime_FromISO8601_String(const std::string &str);
 
 DLLExport std::string create_ISO8601_String(const dateAndTime &time);
+
+DLLExport std::time_t to_time_t(const dateAndTime &time);
+
+DLLExport dateAndTime from_time_t(const std::time_t &time);
+
+DLLExport std::tm to_tm(const dateAndTime &time);
+
+DLLExport dateAndTime get_current_time();
 
 
 }

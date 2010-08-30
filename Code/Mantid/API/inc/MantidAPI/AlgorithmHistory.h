@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/DateAndTime.h"
 #include <ctime>
 #include <vector>
 
@@ -44,15 +45,16 @@ class DLLExport AlgorithmHistory
 {
 public:
   /// The date-and-time will be stored as the ctime time_t type
-  typedef time_t dateAndTime;
 
-  explicit AlgorithmHistory(const Algorithm* const alg,const dateAndTime& start = 0, const double& duration = -1,unsigned int uexeccount=0);
+  explicit AlgorithmHistory(const Algorithm* const alg,const Mantid::Kernel::dateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime,
+                            const double& duration = -1,unsigned int uexeccount=0);
   virtual ~AlgorithmHistory();
   AlgorithmHistory& operator=(const AlgorithmHistory&);
   AlgorithmHistory(const AlgorithmHistory&);
-  AlgorithmHistory(const std::string& name, int vers, const dateAndTime& start = 0, const double& duration = -1,unsigned int uexeccount=0);
+  AlgorithmHistory(const std::string& name, int vers, const Mantid::Kernel::dateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime,
+                   const double& duration = -1,unsigned int uexeccount=0);
 
-  void addExecutionInfo(const dateAndTime& start, const double& duration);
+  void addExecutionInfo(const Mantid::Kernel::dateAndTime& start, const double& duration);
   void addProperty(const std::string& name,const std::string& value,bool isdefault, 
 		   const unsigned int& direction = 99);
 
@@ -64,7 +66,7 @@ public:
   /// get execution duration
   double executionDuration() const { return m_executionDuration;}
   /// get execution date 
-  dateAndTime executionDate() const {return m_executionDate;}
+  Mantid::Kernel::dateAndTime executionDate() const {return m_executionDate;}
   ///get the execution count
   const int& execCount() const {return m_execCount;}
   /// get parameter list of algorithm in history const
@@ -89,7 +91,7 @@ private:
   /// The version of the algorithm
   int m_version;
   /// The execution date of the algorithm
-  dateAndTime m_executionDate;
+  Mantid::Kernel::dateAndTime m_executionDate;
   /// The execution duration of the algorithm
   double m_executionDuration;
   /// The PropertyHistory's defined for the algorithm

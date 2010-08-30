@@ -60,15 +60,18 @@ public:
     timeinfo->tm_hour = 9;
     timeinfo->tm_min = 54;
     timeinfo->tm_sec = 49;
-    std::time_t execTime = mktime ( timeinfo );
+    //Convert to time_t but assuming the tm is specified in UTC time.
+    std::time_t execTime_t =  Mantid::Kernel::DateAndTime::utc_mktime ( timeinfo );
+    //Create a UTC datetime from it
+    Mantid::Kernel::dateAndTime execTime = Mantid::Kernel::DateAndTime::from_time_t( execTime_t );
 
     // Not really much to test
     Algorithm *alg = new testalg;
     alg->initialize();
     TS_ASSERT_THROWS( alg->setPropertyValue("arg1_param","20"),
-      std::invalid_argument )
+      std::invalid_argument );
 
-    AlgorithmHistory AH(alg,execTime,14.0);
+    AlgorithmHistory AH(alg, execTime, 14.0);
     //dump output to sting
     std::ostringstream output;
     output.exceptions( std::ios::failbit | std::ios::badbit );

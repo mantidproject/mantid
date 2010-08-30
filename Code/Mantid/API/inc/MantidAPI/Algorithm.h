@@ -292,7 +292,7 @@ namespace Mantid
 			Algorithm& operator=(const Algorithm&);
 
 			void store();
-			void fillHistory(AlgorithmHistory::dateAndTime, double,unsigned int);
+			void fillHistory(Mantid::Kernel::dateAndTime, double,unsigned int);
 			void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
 				std::vector<Workspace_sptr>& outputWorkspaces) const;
 			void algorithm_info() const;

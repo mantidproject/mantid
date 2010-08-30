@@ -10,6 +10,7 @@ namespace API
 {
 
 using Kernel::Property;
+using Kernel::dateAndTime;
 
 /** Constructor
  *  @param alg      A pointer to the algorithm for which the history should be constructed
@@ -87,10 +88,11 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 {
   os << std::string(indent,' ') << "Algorithm: " << m_name;
   os << std::string(indent,' ') << " v" << m_version << std::endl;
-  if (m_executionDate)
+  if (m_executionDate != Mantid::Kernel::DateAndTime::defaultTime)
   {
     char buffer [25];
-    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&m_executionDate));
+    std::tm date_as_tm = Mantid::Kernel::DateAndTime::to_tm( m_executionDate );
+    strftime (buffer,25,"%Y-%b-%d %H:%M:%S", &date_as_tm);
     os << std::string(indent,' ') << "Execution Date: " << buffer<<std::endl;
     os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
   }
