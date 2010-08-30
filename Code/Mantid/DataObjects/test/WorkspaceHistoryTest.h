@@ -14,7 +14,7 @@ using Mantid::MantidVec;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
- typedef time_t dateAndTime;
+
 class fill2d : public Algorithm
 {
 public:
@@ -23,8 +23,8 @@ public:
   const std::string name() const { return "fill2d";}
   int version() const  { return 1;}
   dateAndTime executionDate() const 
-  {   dateAndTime dt;
-	  time(&dt);
+  {
+    dateAndTime dt = Mantid::Kernel::DateAndTime::get_current_time();
 	  return dt;
   }
 
@@ -64,9 +64,9 @@ public:
   int version() const  { return 1;}
   dateAndTime executionDate() const
   {
-	  dateAndTime dt;
-	  time(&dt);
-	  return dt;}
+    dateAndTime dt = Mantid::Kernel::DateAndTime::get_current_time();
+	  return dt;
+  }
 
   void init()
   {
@@ -140,7 +140,7 @@ public:
 	// range of values is tested as execution duration,date is calculated
 	// inside the algorithm execute method using clock
 	TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
-	TS_ASSERT_DELTA(myAlg1.executionDate(), A_AH[0].executionDate(),5000);
+  TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::durationInSeconds( ( myAlg1.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
 
     TS_ASSERT_THROWS_NOTHING(const std::vector<PropertyHistory>& A_AP = A_AH[0].getProperties());
     const std::vector<PropertyHistory>& A_AP = A_AH[0].getProperties();
@@ -178,7 +178,7 @@ public:
 	// range of values is tested as execution duration,date is calculated
 	// inside the algorithm execute method using clock
 	TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
-	TS_ASSERT_DELTA(myAlg2.executionDate(), A_AH[0].executionDate(),5000);
+  TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::durationInSeconds( ( myAlg2.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
 
     TS_ASSERT_THROWS_NOTHING(const std::vector<PropertyHistory>& B_AP = B_AH[0].getProperties());
     const std::vector<PropertyHistory>& B_AP = B_AH[0].getProperties();
@@ -223,7 +223,7 @@ public:
 	// range of values is tested as execution duration,date is calculated
 	// inside the algorithm execute method using clock
 	TS_ASSERT_DELTA(1.0000, A_AH[0].executionDuration(),1.0);
-	TS_ASSERT_DELTA(myAlg3.executionDate(), A_AH[0].executionDate(),5000);
+  TS_ASSERT( fabs( Mantid::Kernel::DateAndTime::durationInSeconds( ( myAlg3.executionDate() - A_AH[0].executionDate() ) ) ) <= 5000 );
 	
     TS_ASSERT_THROWS_NOTHING(const std::vector<PropertyHistory>& C_AP = C_AH[0].getProperties());
     const std::vector<PropertyHistory>& C_AP = C_AH[3].getProperties();
