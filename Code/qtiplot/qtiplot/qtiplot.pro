@@ -161,6 +161,7 @@ macx {
 
   LIBS += -lMantidQtAPI
   LIBS += -lMantidWidgets
+  LIBS += -lboost_date_time
 
 CONFIG(debug, debug|release) {
   LIBS	+= -lPocoUtild

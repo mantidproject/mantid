@@ -1,4 +1,5 @@
 #include "MantidKernel/DateAndTime.h"
+#include <time.h>
 
 namespace Mantid
 {
@@ -9,6 +10,26 @@ namespace DateAndTime
 {
 
 //-----------------------------------------------------------------------------------------------
+/** Portable implementation of gmtime_r (re-entrant gmtime)
+ *
+ */
+std::tm * gmtime_r_portable( const std::time_t *clock, struct std::tm *result )
+{
+#ifdef _WIN32
+  if (gmtime_s(result, clock))
+  {
+    return result;
+  }
+  else
+  {
+    return NULL;
+  }
+#else
+  //Unix implementation
+  return gmtime_r(clock, result);
+#endif
+}
+
 /// utc_mktime() converts a struct tm that contains
 /// broken down time in utc to a time_t.  This function uses
 /// a brute-force method of conversion that does not require
@@ -45,7 +66,7 @@ time_t utc_mktime(struct tm *utctime)
   result = mktime(&tmp);
   if( result == (time_t)-1 )
     return (time_t)-1;
-  if( gmtime_r(&result, &check) == NULL )
+  if( gmtime_r_portable(&result, &check) == NULL )
     return (time_t)-1;
 
   // loop until match
@@ -64,8 +85,8 @@ time_t utc_mktime(struct tm *utctime)
     result = mktime(&tmp);
     if( result == (time_t)-1 )
       return (time_t)-1;
-    gmtime_r(&result, &check);
-    if( gmtime_r(&result, &check) == NULL )
+    gmtime_r_portable(&result, &check);
+    if( gmtime_r_portable(&result, &check) == NULL )
       return (time_t)-1;
   }
 

@@ -15,6 +15,7 @@
 #include "../ColorBox.h"
 
 #include "MantidKernel/Property.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidPlotReleaseDate.h"
@@ -39,6 +40,9 @@
 #include <QInputDialog>
 
 #include <qwt_plot_curve.h>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include <time.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -1890,15 +1894,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     {
       lastTime = it->first;
       lastValue = it->second;
-
       //Convert time into string
-      //TODO: Make this a user-selectable option or something smarter.
-      struct tm * timeinfo;
-      timeinfo = localtime(&lastTime);
-      char buffer [25];
-      strftime (buffer,25,"%Y-%b-%d %H:%M:%S", timeinfo);
-      std::string time_string(buffer);
-
+      std::string time_string = boost::posix_time::to_simple_string(lastTime);
       t->setText(i,0,QString::fromStdString(time_string));
       t->setCell(i,1,lastValue);
       i++;
@@ -1918,8 +1915,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     {
         rowcount = time_value_map.size();
         if (rowcount == t->numRows()) t->addRows(1);
-        t->setText(rowcount,0,QDateTime::fromTime_t(flt.filter()->lastTime()).toString("yyyy-MMM-dd HH:mm:ss"));
-        //t->setText(rowcount,0,QString::fromStdString(flt.filter()->nthInterval(flt.filter()->size()-1).end_str()));
+        std::string time_string = boost::posix_time::to_simple_string(flt.filter()->lastTime());
+        t->setText(rowcount,0,QString::fromStdString(time_string));
         t->setCell(rowcount,1,lastValue);
     }
 	}
@@ -1948,7 +1945,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   Graph* g = ml->activeGraph();
 
   // Set x-axis label format
-  QDateTime dt = QDateTime::fromTime_t(flt.data()->nthInterval(0).begin());
+  Mantid::Kernel::dateAndTime label_as_ptime = flt.data()->nthInterval(0).begin();
+  QDateTime dt = QDateTime::fromTime_t( Mantid::Kernel::DateAndTime::to_time_t( label_as_ptime ) );
   QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
   g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
 
