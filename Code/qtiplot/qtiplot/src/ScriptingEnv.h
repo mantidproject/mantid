@@ -68,7 +68,12 @@ class ScriptingEnv : public QObject
   void setIsRunning(bool running) { m_is_running = running; }
   /// Create a script object that is responsible for executing actual code
   virtual Script *newScript(const QString&, QObject*, bool interactive = true, 
-			    const QString &name="<input>"){ return NULL; }
+			    const QString &name="<input>")
+  {
+    (void)(interactive); //Stop compiler warning
+    (void)(name); //Stop compiler warning
+    return NULL;
+  }
   //! If an exception / error occured, return a nicely formated stack backtrace.
   virtual QString stackTraceString() { return QString::null; }
   /// Return a list of supported mathematical functions. These should be imported into the global namespace.

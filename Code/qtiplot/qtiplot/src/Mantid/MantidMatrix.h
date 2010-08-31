@@ -370,11 +370,19 @@ public:
              int start);
 
   /// Implementation of QAbstractTableModel::rowCount() -- number of rows (spectra) that can be shown
-  int rowCount(const QModelIndex &parent = QModelIndex()) const{return m_rows;}
+  int rowCount(const QModelIndex &parent = QModelIndex()) const
+  {
+    (void)parent; //To avoid compiler warning
+    return m_rows;
+  }
 
   /// Implementation of QAbstractTableModel::columnCount() -- number of columns. If type is X it is
   /// the numner of bin boundaries. If type is Y or E it is the number of data values.
-  int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_type == X? m_cols + m_colNumCorr : m_cols;}
+  int columnCount(const QModelIndex &parent = QModelIndex()) const
+  {
+    (void)parent; //To avoid compiler warning
+    return m_type == X? m_cols + m_colNumCorr : m_cols;
+  }
 
   double data(int row, int col) const;
 
