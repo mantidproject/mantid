@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <list>
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -68,7 +69,8 @@ private:
   void execEvent();
 
   // Methods called by exec()
-  std::list<API::MatrixWorkspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces) const;
+  std::list<API::MatrixWorkspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces);
+  bool validateInputsForEventWorkspaces(const std::vector<std::string>& inputWorkspaces);
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1, const API::MatrixWorkspace_const_sptr& ws2, std::vector<double>& params) const;
   void noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::vector<double>& params) const;
   void intersectionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const;
@@ -76,6 +78,11 @@ private:
   API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params);
   /// Progress reporting
   API::Progress* m_progress;
+
+  /// List of input workspaces
+  std::list<Mantid::API::MatrixWorkspace_sptr> inWS;
+  //List of input EVENT workspaces
+  std::list<Mantid::DataObjects::EventWorkspace_sptr> inEventWS;
 
 
 };

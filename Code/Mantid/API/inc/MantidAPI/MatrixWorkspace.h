@@ -39,6 +39,8 @@ typedef std::map<int, int> IndexToIndexMap;
 //----------------------------------------------------------------------
 class SpectraDetectorMap;
 
+
+//----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
 
     @author Laurent C Chapon, ISIS, RAL

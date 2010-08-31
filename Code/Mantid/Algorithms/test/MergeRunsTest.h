@@ -9,6 +9,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
 
 class MergeRunsTest : public CxxTest::TestSuite
 {
@@ -21,6 +22,11 @@ public:
     AnalysisDataService::Instance().add("in4",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,5,20));
     AnalysisDataService::Instance().add("in5",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,5,3.5,2));
     AnalysisDataService::Instance().add("in6",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,3,2,2));
+
+    //Event workspaces with 100 events
+    AnalysisDataService::Instance().add("ev1",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
+    AnalysisDataService::Instance().add("ev2",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
+    AnalysisDataService::Instance().add("ev3",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
   }
 
 	void testTheBasics()
@@ -36,12 +42,13 @@ public:
 	  TS_ASSERT( merge.isInitialized() );
 	}
 
-	void testExec()
-	{
-	  if ( !merge.isInitialized() ) merge.initialize();
+  //-----------------------------------------------------------------------------------------------
+  void testExec()
+  {
+    if ( !merge.isInitialized() ) merge.initialize();
 
-	  TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("InputWorkspaces","in1,in2,in3") );
-	  TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("OutputWorkspace","outWS") );
+    TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("InputWorkspaces","in1,in2,in3") );
+    TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("OutputWorkspace","outWS") );
 
     TS_ASSERT_THROWS_NOTHING( merge.execute() );
     TS_ASSERT( merge.isExecuted() );
@@ -58,8 +65,32 @@ public:
     }
 
     AnalysisDataService::Instance().remove("outWS");
-	}
+  }
 
+  //-----------------------------------------------------------------------------------------------
+  void xtestExecAllEvents()
+  {
+    if ( !merge.isInitialized() ) merge.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("InputWorkspaces","ev1,ev2,ev3") );
+    TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("OutputWorkspace","outWS") );
+
+    TS_ASSERT_THROWS_NOTHING( merge.execute() );
+    TS_ASSERT( merge.isExecuted() );
+
+    //Get the output event workspace
+    EventWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS")) );
+    //This checks that it is indeed an EW
+    TS_ASSERT( output  );
+
+    //Should have 300 total events
+    TS_ASSERT_EQUALS( output->getNumberEvents(), 300);
+
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  //-----------------------------------------------------------------------------------------------
 	void testInvalidInputs()
 	{
 	  MergeRuns merge2;
@@ -75,6 +106,7 @@ public:
     TS_ASSERT( ! merge2.isExecuted() );
 	}
 
+  //-----------------------------------------------------------------------------------------------
 	void testNonOverlapping()
 	{
 	  MergeRuns alg;
@@ -102,6 +134,7 @@ public:
     AnalysisDataService::Instance().remove("outer");
 	}
 
+  //-----------------------------------------------------------------------------------------------
 	void testIntersection()
 	{
     MergeRuns alg;
@@ -129,6 +162,7 @@ public:
     AnalysisDataService::Instance().remove("outer");
 	}
 
+  //-----------------------------------------------------------------------------------------------
   void testInclusion()
   {
     MergeRuns alg;

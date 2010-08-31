@@ -14,6 +14,7 @@ DECLARE_ALGORITHM(MergeRuns)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// Default constructor
 MergeRuns::MergeRuns() : Algorithm(),m_progress(NULL) {}
@@ -47,42 +48,57 @@ void MergeRuns::exec()
     g_log.error("Only one input workspace specified");
     throw std::invalid_argument("Only one input workspace specified");
   }
-  std::list<MatrixWorkspace_sptr> inWS = this->validateInputs(inputs);
 
-  // Iterate over the collection of input workspaces
-  std::list<MatrixWorkspace_sptr>::iterator it = inWS.begin();
-  // Take the first input workspace as the first argument to the addition
-  MatrixWorkspace_sptr outWS = inWS.front();
-  int n=inWS.size()-1;
-  m_progress=new Progress(this,0.0,1.0,n);
-  // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
-  for (++it; it != inWS.end(); ++it)
+  //First, try as event workspaces
+  if (this->validateInputsForEventWorkspaces(inputs))
   {
-    MatrixWorkspace_sptr addee;
-    // Only do a rebinning if the bins don't already match - otherwise can just add (see the 'else')
-    if ( ! WorkspaceHelpers::matchingBins(outWS,*it,true) )
-    {
-      std::vector<double> rebinParams;
-      this->calculateRebinParams(outWS,*it,rebinParams);
-
-      // Rebin the two workspaces in turn to the same set of bins
-      outWS = this->rebinInput(outWS,rebinParams);
-      addee = this->rebinInput(*it,rebinParams);
-    }
-    else
-    {
-      addee = *it;
-    }
-
-    // Add the current workspace to the total
-    outWS = outWS + addee;
-	m_progress->report();
+    //Yes, they are all event workspaces! ---------------------
+    this->execEvent();
   }
- // progress(++i/inWS.size()-1);
-  
+  else
+  {
+    //At least one is not event workspace ----------------
 
-  // Set the final workspace to the output property
-  setProperty("OutputWorkspace",outWS);
+    //This gets the list of workspaces
+    inWS = this->validateInputs(inputs);
+
+    // Iterate over the collection of input workspaces
+    std::list<MatrixWorkspace_sptr>::iterator it = inWS.begin();
+    // Take the first input workspace as the first argument to the addition
+    MatrixWorkspace_sptr outWS = inWS.front();
+    int n=inWS.size()-1;
+    m_progress=new Progress(this,0.0,1.0,n);
+    // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
+    for (++it; it != inWS.end(); ++it)
+    {
+      MatrixWorkspace_sptr addee;
+      // Only do a rebinning if the bins don't already match - otherwise can just add (see the 'else')
+      if ( ! WorkspaceHelpers::matchingBins(outWS,*it,true) )
+      {
+        std::vector<double> rebinParams;
+        this->calculateRebinParams(outWS,*it,rebinParams);
+
+        // Rebin the two workspaces in turn to the same set of bins
+        outWS = this->rebinInput(outWS,rebinParams);
+        addee = this->rebinInput(*it,rebinParams);
+      }
+      else
+      {
+        addee = *it;
+      }
+
+      // Add the current workspace to the total
+      outWS = outWS + addee;
+
+      m_progress->report();
+    }
+
+
+    // Set the final workspace to the output property
+    setProperty("OutputWorkspace",outWS);
+
+  }
+
 }
 
 //------------------------------------------------------------------------------------------------
@@ -90,6 +106,39 @@ void MergeRuns::exec()
  */
 void MergeRuns::execEvent()
 {
+  g_log.information() << "Creating an output EventWorkspace\n";
+
+  // Iterate over the collection of input workspaces
+  std::list<EventWorkspace_sptr>::iterator it = inEventWS.begin();
+
+  // Create a new output event workspace, by copying the first WS in the list
+  EventWorkspace_sptr inputWS = inEventWS.front();
+
+  //Make a brand new EventWorkspace
+  EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(
+      API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+  //Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outWS, false);
+  //You need to copy over the data as well.
+  outWS->copyDataFrom( (*inputWS) );
+
+  int n=inEventWS.size()-1;
+  m_progress=new Progress(this,0.0,1.0,n);
+  // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
+  for (++it; it != inEventWS.end(); ++it)
+  {
+    EventWorkspace_sptr addee;
+    addee = *it;
+
+    // Add the current workspace to the total - THIS doesn't work for EventWorkspaces
+//    outWS = outWS + addee;
+
+    m_progress->report();
+  }
+
+
+  // Set the final workspace to the output property
+  setProperty("OutputWorkspace",outWS);
 
 }
 
@@ -104,6 +153,63 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
 }
 /// @endcond
 
+
+//------------------------------------------------------------------------------------------------
+/** Validate the input event workspaces
+ *
+ *  @param  inputWorkspaces The names of the input workspaces
+ *  @throw invalid_argument if there is an incompatibility.
+ *  @return true if all workspaces are event workspaces and valid. False if any are not found,
+ */
+bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>& inputWorkspaces)
+{
+  int numSpec(0);
+  Unit_sptr unit;
+  bool dist(false);
+
+  inEventWS.clear();
+
+  // Going to check that name of instrument matches - think that's the best possible at the moment
+  //   because if instrument is created from raw file it'll be a different object
+  std::string instrument;
+
+  for ( unsigned int i = 0; i < inputWorkspaces.size(); ++i )
+  {
+    // Fetch the next input workspace as an - throw an error if it's not there
+    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
+    if (!ws)
+    { //Either it is not found, or it is not an EventWorkspace
+      return false;
+    }
+    inEventWS.push_back(ws);
+
+    // Check a few things are the same for all input workspaces
+    if ( i == 0 )
+    {
+      numSpec = inEventWS.back()->getNumberHistograms();
+      unit = inEventWS.back()->getAxis(0)->unit();
+      dist = inEventWS.back()->isDistribution();
+      instrument = inEventWS.back()->getInstrument()->getName();
+    }
+    else
+    {
+      if ( inEventWS.back()->getNumberHistograms() != numSpec
+           || inEventWS.back()->getAxis(0)->unit() != unit
+           || inEventWS.back()->isDistribution()   != dist
+           || inEventWS.back()->getInstrument()->getName() != instrument )
+      {
+        g_log.error("Input workspaces are not compatible");
+        throw std::invalid_argument("Input workspaces are not compatible");
+      }
+    }
+  } //for each input WS name
+
+  //We got here: all are event workspaces
+  return true;
+
+}
+
+
 //------------------------------------------------------------------------------------------------
 /** Checks that the input workspace all exist, that they are the same size, have the same units
  *  and the same instrument name. Will throw if they don't.
@@ -112,7 +218,7 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
  *  @throw  Exception::NotFoundError If an input workspace doesn't exist
  *  @throw  std::invalid_argument    If the input workspaces are not compatible
  */
-std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector<std::string>& inputWorkspaces) const
+std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector<std::string>& inputWorkspaces)
 {
   std::list<MatrixWorkspace_sptr> inWS;
 
