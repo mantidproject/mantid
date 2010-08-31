@@ -127,10 +127,7 @@ dateAndTime create_DateAndTime_FromISO8601_String(const std::string &str)
 /// Create a ISO 8601 yyyy-mm-ddThh:mm:ss string from a time
 std::string create_ISO8601_String(const dateAndTime &time)
 {
-  char buffer [25];
-  std::tm time_tm = boost::posix_time::to_tm(time); //turn into that struct
-  strftime (buffer,25,"%Y-%m-%dT%H:%M:%S", &time_tm); //Make into a string
-  return std::string(buffer);
+  return to_string(time, "%Y-%m-%dT%H:%M:%S");
 }
 
 
@@ -211,6 +208,21 @@ std::string to_simple_string(const dateAndTime &time)
 {
   return boost::posix_time::to_simple_string(time);
 }
+
+//-----------------------------------------------------------------------------------------------
+/** Return time as string in the specified format, using strftime().
+ * Note: Can't do fractional seconds!
+ * @param time dateAndTime to output
+ * @param format string for the format, e.g. "%Y-%m-%d %H:%M:%S"
+ */
+std::string to_string(const dateAndTime &time, const char *format)
+{
+  char buffer [100]; //max 100 characters in the format
+  std::tm time_tm = boost::posix_time::to_tm(time); //turn into that struct
+  strftime (buffer, 100, format, &time_tm); //Make into a string
+  return std::string(buffer);
+}
+
 
 } //namespace  DateAndTime
 

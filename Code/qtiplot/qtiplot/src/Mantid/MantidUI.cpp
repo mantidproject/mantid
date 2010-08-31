@@ -1859,7 +1859,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     t->addColumns(2);
     t->setColName(2, "FTime");
     t->setColumnType(2, Table::Date);
-    t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false);
+    t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false); //This is the format of the date column
     t->setColPlotDesignation(2,Table::X);
     t->setColName(3, "Filter");
 
@@ -1894,7 +1894,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     lastTime = it->first;
     lastValue = it->second;
     //Convert time into string
-    std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(lastTime);
+    std::string time_string = Mantid::Kernel::DateAndTime::to_string(lastTime, "%Y-%b-%d %H:%M:%S" );
     t->setText(i,0,QString::fromStdString(time_string));
     t->setCell(i,1,lastValue);
     i++;
