@@ -80,7 +80,7 @@ public:
     std::vector<TofEvent> ve = outWS->getEventListAtWorkspaceIndex(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
-      TS_ASSERT_LESS_THAN( ve[i].frame(), ve[i+1].frame());
+      TS_ASSERT_LESS_THAN_EQUALS( ve[i].frame(), ve[i+1].frame());
 
     AnalysisDataService::Instance().remove(wsName);
 
