@@ -73,7 +73,8 @@ void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kerne
 	QLineEdit* execDurationEdit=getAlgExecDurationCtrl();
 	if(execDurationEdit)execDurationEdit->setText(dur);
 	
-	std::tm t = Mantid::Kernel::DateAndTime::to_tm( execDate ) ;
+	//Get the timeinfo structure, but converting from UTC to local time
+	std::tm t = Mantid::Kernel::DateAndTime::to_localtime_tm( execDate ) ;
 	QTime qt(t.tm_hour,t.tm_min,t.tm_sec);
 	QDate qd(t.tm_year+1900,t.tm_mon+1,t.tm_mday);
 	QDateTime datetime(qd,qt,Qt::LocalTime );

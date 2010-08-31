@@ -56,116 +56,116 @@ using namespace Mantid::API;
 using Mantid::Kernel::dateAndTime;
 
 MantidUI::MantidUI(ApplicationWindow *aw):
-m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
-m_addObserver(*this,&MantidUI::handleAddWorkspace),
-m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
-m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
-m_clearADSObserver(*this,&MantidUI::handleClearADS),
-m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
-m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
-m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
-m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
-m_appWindow(aw)
+    m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
+    m_addObserver(*this,&MantidUI::handleAddWorkspace),
+    m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
+    m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
+    m_clearADSObserver(*this,&MantidUI::handleClearADS),
+    m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
+    m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
+    m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
+    m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
+    m_appWindow(aw)
 {
-    // To be able to use them in queued signals they need to be registered
-    static bool registered_addtional_types = false;
-    if( !registered_addtional_types )
-    {
-        registered_addtional_types = true;
-        qRegisterMetaType<Mantid::API::Workspace_sptr>();
-        qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
-	      //Register std::string as well as we use it alot
-	      qRegisterMetaType<std::string>();
-    }
+  // To be able to use them in queued signals they need to be registered
+  static bool registered_addtional_types = false;
+  if( !registered_addtional_types )
+  {
+    registered_addtional_types = true;
+    qRegisterMetaType<Mantid::API::Workspace_sptr>();
+    qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
+    //Register std::string as well as we use it alot
+    qRegisterMetaType<std::string>();
+  }
 
-    m_exploreMantid = new MantidDockWidget(this,aw);
-    m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
+  m_exploreMantid = new MantidDockWidget(this,aw);
+  m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
-    actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
-	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
-	connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
+  actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
+  actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
+  connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
 
-  	actionCopyRowToGraph = new QAction(tr("Plot spectra (values only)"), this);
-	actionCopyRowToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
-	connect(actionCopyRowToGraph, SIGNAL(activated()), this, SLOT(copyRowToGraph()));
+  actionCopyRowToGraph = new QAction(tr("Plot spectra (values only)"), this);
+  actionCopyRowToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
+  connect(actionCopyRowToGraph, SIGNAL(activated()), this, SLOT(copyRowToGraph()));
 
-  	actionCopyRowToGraphErr = new QAction(tr("Plot spectra (values + errors)"), this);
-	actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
-	connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
+  actionCopyRowToGraphErr = new QAction(tr("Plot spectra (values + errors)"), this);
+  actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
+  connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 
-    actionCopyDetectorsToTable = new QAction(tr("View detectors table"), this);
-	actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
-	connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
+  actionCopyDetectorsToTable = new QAction(tr("View detectors table"), this);
+  actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
+  connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
 
-  	actionCopyValues = new QAction(tr("Copy"), this);
-	actionCopyValues->setIcon(QIcon(QPixmap(copy_xpm)));
-	connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
+  actionCopyValues = new QAction(tr("Copy"), this);
+  actionCopyValues->setIcon(QIcon(QPixmap(copy_xpm)));
+  connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
 
-  	actionCopyColumnToTable = new QAction(tr("Copy bin to table"), this);
-	actionCopyColumnToTable->setIcon(QIcon(QPixmap(table_xpm)));
-	connect(actionCopyColumnToTable, SIGNAL(activated()), this, SLOT(copyColumnToTable()));
+  actionCopyColumnToTable = new QAction(tr("Copy bin to table"), this);
+  actionCopyColumnToTable->setIcon(QIcon(QPixmap(table_xpm)));
+  connect(actionCopyColumnToTable, SIGNAL(activated()), this, SLOT(copyColumnToTable()));
 
-  	actionCopyColumnToGraph = new QAction(tr("Plot bin (values only)"), this);
-	actionCopyColumnToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
-	connect(actionCopyColumnToGraph, SIGNAL(activated()), this, SLOT(copyColumnToGraph()));
+  actionCopyColumnToGraph = new QAction(tr("Plot bin (values only)"), this);
+  actionCopyColumnToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
+  connect(actionCopyColumnToGraph, SIGNAL(activated()), this, SLOT(copyColumnToGraph()));
 
-  	actionCopyColumnToGraphErr = new QAction(tr("Plot bin (values + errors)"), this);
-	actionCopyColumnToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
-	connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
+  actionCopyColumnToGraphErr = new QAction(tr("Plot bin (values + errors)"), this);
+  actionCopyColumnToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
+  connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
 
-    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const QString&)),this,SLOT(createLoadDAEMantidMatrix(const QString&)));
-    connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
+  connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const QString&)),this,SLOT(createLoadDAEMantidMatrix(const QString&)));
+  connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
 
-    m_algMonitor = new AlgorithmMonitor(this);
-    connect(m_algMonitor,SIGNAL(algorithmStarted(void*)),m_exploreAlgorithms,SLOT(algorithmStarted(void*)), Qt::QueuedConnection);
-    connect(m_algMonitor,SIGNAL(algorithmFinished(void*)),m_exploreAlgorithms,SLOT(algorithmFinished(void*)), Qt::QueuedConnection);
-    connect(m_algMonitor,SIGNAL(needUpdateProgress(void*,int, const QString&)),
+  m_algMonitor = new AlgorithmMonitor(this);
+  connect(m_algMonitor,SIGNAL(algorithmStarted(void*)),m_exploreAlgorithms,SLOT(algorithmStarted(void*)), Qt::QueuedConnection);
+  connect(m_algMonitor,SIGNAL(algorithmFinished(void*)),m_exploreAlgorithms,SLOT(algorithmFinished(void*)), Qt::QueuedConnection);
+  connect(m_algMonitor,SIGNAL(needUpdateProgress(void*,int, const QString&)),
       m_exploreAlgorithms,SLOT(updateProgress(void*,int, const QString&)), Qt::QueuedConnection);
-    m_algMonitor->start();
+  m_algMonitor->start();
 
-    mantidMenu = new QMenu(m_appWindow);
-    mantidMenu->setObjectName("mantidMenu");
-	// for activating the keyboard shortcut for Clear All Memory even if no clciking on Mantid Menu
-	// Ticket #672
-    //connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
-	mantidMenuAboutToShow();
+  mantidMenu = new QMenu(m_appWindow);
+  mantidMenu->setObjectName("mantidMenu");
+  // for activating the keyboard shortcut for Clear All Memory even if no clciking on Mantid Menu
+  // Ticket #672
+  //connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
+  mantidMenuAboutToShow();
 
-    menuMantidMatrix = new QMenu(m_appWindow);
-	connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
+  menuMantidMatrix = new QMenu(m_appWindow);
+  connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
 }
 
 // Should it be moved to the constructor?
 void MantidUI::init()
 {
-    Mantid::Kernel::ConfigService::Instance();
-    MantidLog::connect(this);
-    FrameworkManager::Instance();
+  Mantid::Kernel::ConfigService::Instance();
+  MantidLog::connect(this);
+  FrameworkManager::Instance();
 
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
 
-    // Now that the framework is initialized we need to populate the algorithm tree
-    m_exploreAlgorithms->update();
-    try
-    {
-      m_fitFunction = new FitPropertyBrowser(m_appWindow);
-      m_fitFunction->init();
-      m_fitFunction->hide();
-    }
-    catch(...)
-    {
-      m_fitFunction = NULL;
-      showCritical("The curve fitting plugin is missing");
-    }
+  // Now that the framework is initialized we need to populate the algorithm tree
+  m_exploreAlgorithms->update();
+  try
+  {
+    m_fitFunction = new FitPropertyBrowser(m_appWindow);
+    m_fitFunction->init();
+    m_fitFunction->hide();
+  }
+  catch(...)
+  {
+    m_fitFunction = NULL;
+    showCritical("The curve fitting plugin is missing");
+  }
 
-    //connect the signal from the algorithm factory to monitor updates
-    connect(this, SIGNAL(algorithms_updated()), m_exploreAlgorithms, SLOT(update()));
-    Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(m_algUpdatesObserver);
+  //connect the signal from the algorithm factory to monitor updates
+  connect(this, SIGNAL(algorithms_updated()), m_exploreAlgorithms, SLOT(update()));
+  Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(m_algUpdatesObserver);
 
 }
 
@@ -175,11 +175,11 @@ void MantidUI::addMenuItems(QMenu *menu)
   actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
   actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
   menu->addAction(actionToggleMantid);
-  
+
   actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
   actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
   menu->addAction(actionToggleAlgorithms);
-  
+
   if (m_fitFunction)
   {
     actionToggleFitFunction = m_fitFunction->toggleViewAction();
@@ -231,26 +231,26 @@ void MantidUI::saveSettings() const
 
 QString MantidUI::releaseDate()
 {
-    return MANTIDPLOT_RELEASE_DATE;
+  return MANTIDPLOT_RELEASE_DATE;
 }
 
 QStringList MantidUI::getWorkspaceNames()
 {
-    QStringList sl;
-    std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-    for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
-        sl<<QString::fromStdString(*it);
-    return sl;
+  QStringList sl;
+  std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
+    sl<<QString::fromStdString(*it);
+  return sl;
 }
 
 QStringList MantidUI::getAlgorithmNames()
 {
-    QStringList sl;
-    std::vector<std::string> sv;
-    sv = Mantid::API::AlgorithmFactory::Instance().getKeys();
-    for(size_t i=0;i<sv.size();i++)
-        sl<<QString::fromStdString(sv[i]);
-    return sl;
+  QStringList sl;
+  std::vector<std::string> sv;
+  sv = Mantid::API::AlgorithmFactory::Instance().getKeys();
+  for(size_t i=0;i<sv.size();i++)
+    sl<<QString::fromStdString(sv[i]);
+  return sl;
 }
 
 /**
@@ -258,12 +258,12 @@ QStringList MantidUI::getAlgorithmNames()
 
     @param algName Algorithm's name
     @return Pointer to the created algorithm
-*/
+ */
 IAlgorithm_sptr MantidUI::CreateAlgorithm(const QString& algName)
 {
-	IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName.toStdString());
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName.toStdString());
 
-	return alg;
+  return alg;
 }
 
 /**
@@ -271,13 +271,13 @@ IAlgorithm_sptr MantidUI::CreateAlgorithm(const QString& algName)
  */
 void MantidUI::saveNexusWorkspace()
 {
-	executeSaveNexus("SaveNexus",-1);
+  executeSaveNexus("SaveNexus",-1);
 }
 
 /**
  * DeleteWorkspace
  @param workspaceName Name of the workspace to delete
-*/
+ */
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
 {
   return FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
@@ -285,7 +285,7 @@ bool MantidUI::deleteWorkspace(const QString& workspaceName)
 
 /**
        getSelectedWorkspaceName
-*/
+ */
 QString MantidUI::getSelectedWorkspaceName()
 {
   QString str = m_exploreMantid->getSelectedWorkspaceName();
@@ -307,52 +307,52 @@ Mantid::API::Workspace_sptr MantidUI::getSelectedWorkspace()
 
 Mantid::API::Workspace_sptr MantidUI::getWorkspace(const QString& workspaceName)
 {
-	if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
-	{
-		return AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
-	}
+  if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
+  {
+    return AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
+  }
 
-	Workspace_sptr empty;
+  Workspace_sptr empty;
 
-	return empty;//??
+  return empty;//??
 }
 
 /**   Extension to ApplicationWindow::menuAboutToShow() to deal with Mantid.
-  */
+ */
 bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
 {
 
-    if (w && w->isA("MantidMatrix"))
-    {
-        appWindow()->menuBar()->insertItem(tr("3D &Plot"), appWindow()->plot3DMenu);
-        appWindow()->actionCopySelection->setEnabled(true);
-		appWindow()->actionPasteSelection->setEnabled(false);
-		appWindow()->actionClearSelection->setEnabled(false);
-        appWindow()->plotMatrixBar->setEnabled (true);
+  if (w && w->isA("MantidMatrix"))
+  {
+    appWindow()->menuBar()->insertItem(tr("3D &Plot"), appWindow()->plot3DMenu);
+    appWindow()->actionCopySelection->setEnabled(true);
+    appWindow()->actionPasteSelection->setEnabled(false);
+    appWindow()->actionClearSelection->setEnabled(false);
+    appWindow()->plotMatrixBar->setEnabled (true);
 
-        appWindow()->menuBar()->insertItem(tr("&Workspace"),menuMantidMatrix);
-        return true;
-    }
+    appWindow()->menuBar()->insertItem(tr("&Workspace"),menuMantidMatrix);
+    return true;
+  }
 
-    return false;
+  return false;
 }
 
 Graph3D *MantidUI::plot3DMatrix(int style)
 {	
-    QMdiSubWindow *w = appWindow()->activeWindow();
-	if (w->isA("MantidMatrix"))
-    {
-        return static_cast<MantidMatrix*>(w)->plotGraph3D(style);
-    }
+  QMdiSubWindow *w = appWindow()->activeWindow();
+  if (w->isA("MantidMatrix"))
+  {
+    return static_cast<MantidMatrix*>(w)->plotGraph3D(style);
+  }
 
-    return 0;
+  return 0;
 }
 
 MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 {
-    MantidMatrix *m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
-    if (m) return m->plotGraph2D(type);
-    return 0;
+  MantidMatrix *m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
+  if (m) return m->plotGraph2D(type);
+  return 0;
 
 }
 
@@ -366,43 +366,43 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
  */
 MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, int upper, bool showDlg, bool makeVisible)
 {
-    MatrixWorkspace_sptr ws;
-  	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-	{
-		ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-	}
+  MatrixWorkspace_sptr ws;
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  }
 
-    if (!ws.get()) return 0;
+  if (!ws.get()) return 0;
 
-    MantidMatrix* w = 0;
-    if (showDlg)
+  MantidMatrix* w = 0;
+  if (showDlg)
+  {
+    ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(appWindow(), ws->getNumberHistograms());
+    dlg->setModal(true);
+    if (dlg->exec() == QDialog::Accepted)
     {
-	    ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(appWindow(), ws->getNumberHistograms());
-	    dlg->setModal(true);
-	    if (dlg->exec() == QDialog::Accepted)
-	    {
-		    int start = dlg->getLowerLimit();
-		    int end = dlg->getUpperLimit();
+      int start = dlg->getLowerLimit();
+      int end = dlg->getUpperLimit();
 
-	        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
-            if (dlg->isFiltered())
-                w->setRange(0,dlg->getMaxValue());
-	    }
+      w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
+      if (dlg->isFiltered())
+        w->setRange(0,dlg->getMaxValue());
     }
-    else
-    {
-        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
-    }
-    if ( !w ) return 0;
+  }
+  else
+  {
+    w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
+  }
+  if ( !w ) return 0;
 
-    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-    connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-    connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
+  connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+  connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+  connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
 
-    appWindow()->d_workspace->addSubWindow(w);
-    if( makeVisible ) w->showNormal();
-    else w->showMinimized();
-    return w;
+  appWindow()->d_workspace->addSubWindow(w);
+  if( makeVisible ) w->showNormal();
+  else w->showMinimized();
+  return w;
 }
 
 /**  Import a Workspace into MantidPlot.
@@ -414,18 +414,18 @@ void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVis
 {
   MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
   appWindow()->addListViewItem(mm);
-    if (!mm) 
-	{Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
-	 appWindow()->addListViewItem(t);
-	}
+  if (!mm)
+  {Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
+  appWindow()->addListViewItem(t);
+  }
 }
 
 /**  Import the selected workspace, if any. Displays the import dialog.
  */
 void MantidUI::importWorkspace()
 {
-    QString wsName = getSelectedWorkspaceName();
-    importWorkspace(wsName,true,true);
+  QString wsName = getSelectedWorkspaceName();
+  importWorkspace(wsName,true,true);
 }
 
 /** #539: For adding Workspace History display to MantidPlot
@@ -433,26 +433,26 @@ void MantidUI::importWorkspace()
  */
 void MantidUI::showAlgorithmHistory()
 {
-	QString wsName=getSelectedWorkspaceName();
-	Mantid::API::Workspace_sptr wsptr=getWorkspace(wsName);
-	if(wsptr)
-	{
-		WorkspaceHistory wsHistory= wsptr->getHistory();
-		std::vector<AlgorithmHistory>algHistory=wsHistory.getAlgorithmHistories();
-		Mantid::Kernel::EnvironmentHistory envHistory=wsHistory.getEnvironmentHistory();
-		//create a  window to display Algorithmic History
-		if(!algHistory.empty())
-		{
-			AlgorithmHistoryWindow *palgHist= new AlgorithmHistoryWindow(m_appWindow,algHistory,envHistory);
-			if(palgHist)palgHist->show();
-		}
-	}
-	else
-	{
-		QMessageBox::information(appWindow(),"Mantid","Invalid WorkSpace");
-		return;
-	}
- }
+  QString wsName=getSelectedWorkspaceName();
+  Mantid::API::Workspace_sptr wsptr=getWorkspace(wsName);
+  if(wsptr)
+  {
+    WorkspaceHistory wsHistory= wsptr->getHistory();
+    std::vector<AlgorithmHistory>algHistory=wsHistory.getAlgorithmHistories();
+    Mantid::Kernel::EnvironmentHistory envHistory=wsHistory.getEnvironmentHistory();
+    //create a  window to display Algorithmic History
+    if(!algHistory.empty())
+    {
+      AlgorithmHistoryWindow *palgHist= new AlgorithmHistoryWindow(m_appWindow,algHistory,envHistory);
+      if(palgHist)palgHist->show();
+    }
+  }
+  else
+  {
+    QMessageBox::information(appWindow(),"Mantid","Invalid WorkSpace");
+    return;
+  }
+}
 
 /**  Create a new Table and fill it with the data from a Tableworkspace
      @param wsName Workspace name
@@ -462,148 +462,148 @@ void MantidUI::showAlgorithmHistory()
  */
 Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisible)
 {
-    ITableWorkspace_sptr ws;
-  	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-	{
-		ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-	}
+  ITableWorkspace_sptr ws;
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  }
 
-    if (!ws.get()) return 0;
+  if (!ws.get()) return 0;
 
-    if (ws->rowCount() == 0 || ws->columnCount() == 0)
-    {
-        showCritical("Cannot create an empty table");
-        return 0;
-    }
+  if (ws->rowCount() == 0 || ws->columnCount() == 0)
+  {
+    showCritical("Cannot create an empty table");
+    return 0;
+  }
 
-    // Create new Table
-    Table* t = new Table(appWindow()->scriptingEnv(), ws->rowCount(), ws->columnCount(), "", appWindow(), 0);
-    appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
+  // Create new Table
+  Table* t = new Table(appWindow()->scriptingEnv(), ws->rowCount(), ws->columnCount(), "", appWindow(), 0);
+  appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
   //  t->askOnCloseEvent(false);
-    if (makeVisible) t->showNormal();
-    else t->showMinimized();
+  if (makeVisible) t->showNormal();
+  else t->showMinimized();
 
-    for(int i=0;i<ws->columnCount();i++)
+  for(int i=0;i<ws->columnCount();i++)
+  {
+    Column_sptr c = ws->getColumn(i);
+    QString colName = QString::fromStdString(c->name());
+    t->setColName(i,colName);
+    t->setReadOnlyColumn(i);
+    if (colName.endsWith("_err",Qt::CaseInsensitive) ||
+        colName.endsWith("_error",Qt::CaseInsensitive))
     {
-        Column_sptr c = ws->getColumn(i);
-        QString colName = QString::fromStdString(c->name());
-        t->setColName(i,colName);
-        t->setReadOnlyColumn(i);
-        if (colName.endsWith("_err",Qt::CaseInsensitive) || 
-            colName.endsWith("_error",Qt::CaseInsensitive))
-        {
-          t->setColPlotDesignation(i,Table::yErr);
-        }
-        for(int j=0;j<ws->rowCount();j++)
-        {
-            std::ostringstream ostr;
-            c->print(ostr,j);
-            t->setText(j,i,QString::fromStdString(ostr.str()));
-        }
+      t->setColPlotDesignation(i,Table::yErr);
     }
-    return t;
+    for(int j=0;j<ws->rowCount();j++)
+    {
+      std::ostringstream ostr;
+      c->print(ostr,j);
+      t->setText(j,i,QString::fromStdString(ostr.str()));
+    }
+  }
+  return t;
 }
 
 void MantidUI::removeWindowFromLists(MdiSubWindow* m)
 {
-	if (!m)
-		return;
+  if (!m)
+    return;
 
-	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    if (m->isA("MantidMatrix")) 
-	{static_cast<MantidMatrix*>(m)->removeWindow();
-	}
+  if (m->isA("MantidMatrix"))
+  {static_cast<MantidMatrix*>(m)->removeWindow();
+  }
 
-	QApplication::restoreOverrideCursor();
+  QApplication::restoreOverrideCursor();
 }
 
 void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
-    if (w->isA("MantidMatrix"))
-    {
-        bool areSpectraSelected = static_cast<MantidMatrix*>(w)->setSelectedRows();
-        bool areColumnsSelected = static_cast<MantidMatrix*>(w)->setSelectedColumns();
-        cm.addAction(actionCopyValues);
-        if (areSpectraSelected) cm.addAction(actionCopyRowToTable);
-        if (areColumnsSelected) cm.addAction(actionCopyColumnToTable);
-		cm.addSeparator();
-        cm.addAction(actionCopyDetectorsToTable);
-        cm.addSeparator();
+  if (w->isA("MantidMatrix"))
+  {
+    bool areSpectraSelected = static_cast<MantidMatrix*>(w)->setSelectedRows();
+    bool areColumnsSelected = static_cast<MantidMatrix*>(w)->setSelectedColumns();
+    cm.addAction(actionCopyValues);
+    if (areSpectraSelected) cm.addAction(actionCopyRowToTable);
+    if (areColumnsSelected) cm.addAction(actionCopyColumnToTable);
+    cm.addSeparator();
+    cm.addAction(actionCopyDetectorsToTable);
+    cm.addSeparator();
 
-        if (areSpectraSelected)
-        {
-            cm.addAction(actionCopyRowToGraph);
-            cm.addAction(actionCopyRowToGraphErr);
-        }
-        if (areColumnsSelected)
-        {
-            cm.addAction(actionCopyColumnToGraph);
-            cm.addAction(actionCopyColumnToGraphErr);
-        }
+    if (areSpectraSelected)
+    {
+      cm.addAction(actionCopyRowToGraph);
+      cm.addAction(actionCopyRowToGraphErr);
     }
+    if (areColumnsSelected)
+    {
+      cm.addAction(actionCopyColumnToGraph);
+      cm.addAction(actionCopyColumnToGraphErr);
+    }
+  }
 }
 
 void MantidUI::copyRowToTable()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    Table* t = createTableFromSelectedRows(m,true,true);
-    t->showNormal();
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  Table* t = createTableFromSelectedRows(m,true,true);
+  t->showNormal();
 }
 
 void MantidUI::copyColumnToTable()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    Table* t = createTableFromSelectedColumns(m,true);
-    t->showNormal();
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  Table* t = createTableFromSelectedColumns(m,true);
+  t->showNormal();
 }
 
 void MantidUI::copyRowToGraph()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    plotSelectedRows(m,false);
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  plotSelectedRows(m,false);
 
 }
 
 void MantidUI::copyColumnToGraph()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    createGraphFromSelectedColumns(m,false);
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  createGraphFromSelectedColumns(m,false);
 
 }
 
 void MantidUI::copyColumnToGraphErr()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    createGraphFromSelectedColumns(m,true);
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  createGraphFromSelectedColumns(m,true);
 
 }
 
 void MantidUI::copyRowToGraphErr()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    plotSelectedRows(m,true);
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  plotSelectedRows(m,true);
 
 }
 
 void MantidUI::copyDetectorsToTable()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    createTableDetectors(m);
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  createTableDetectors(m);
 }
 
 void MantidUI::copyValues()
 {
-    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-    m->copySelection();
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  m->copySelection();
 }
 
 
@@ -643,7 +643,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   {
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   }
-  
+
   if( !ws ) 
   {
     delete t;
@@ -693,225 +693,225 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
 
 bool MantidUI::drop(QDropEvent* e)
 {
-    if (e->source() == m_exploreMantid->m_tree)
-    {
-      QString wsName = getSelectedWorkspaceName();
-      importWorkspace(wsName,false);
-      return true;
-    }
+  if (e->source() == m_exploreMantid->m_tree)
+  {
+    QString wsName = getSelectedWorkspaceName();
+    importWorkspace(wsName,false);
+    return true;
+  }
 
-    return false;
+  return false;
 }
 
 void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
 {
-    QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
-    if ( items.size() == 0 )
+  QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
+  if ( items.size() == 0 )
+  {
+    int i = m_exploreAlgorithms->m_findAlg->currentIndex();
+    QString itemText = m_exploreAlgorithms->m_findAlg->itemText(i);
+    if (i < 0 || itemText != m_exploreAlgorithms->m_findAlg->currentText())
     {
-        int i = m_exploreAlgorithms->m_findAlg->currentIndex();
-        QString itemText = m_exploreAlgorithms->m_findAlg->itemText(i);
-        if (i < 0 || itemText != m_exploreAlgorithms->m_findAlg->currentText())
-        {
-            algName = "";
-            version = 0;
-        }
-        else
-        {
-            algName = itemText;
-            version = -1;
-        }
-    }
-    else if ( items[0]->childCount() != 0 && !items[0]->text(0).contains(" v."))
-    {
-        algName = "";
-        version = 0;
+      algName = "";
+      version = 0;
     }
     else
     {
-        QString str = items[0]->text(0);
-        QStringList lst = str.split(" v.");
-        algName = lst[0];
-        version = lst[1].toInt();
+      algName = itemText;
+      version = -1;
     }
+  }
+  else if ( items[0]->childCount() != 0 && !items[0]->text(0).contains(" v."))
+  {
+    algName = "";
+    version = 0;
+  }
+  else
+  {
+    QString str = items[0]->text(0);
+    QStringList lst = str.split(" v.");
+    algName = lst[0];
+    version = lst[1].toInt();
+  }
 }
 
 void MantidUI::executeAlgorithm()
 {
-    QString algName;
-    int version;
-    getSelectedAlgorithm(algName,version);
-    if (algName.isEmpty())
-    {
-        QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
-        return;
-    }
-    executeAlgorithm(algName, version);
+  QString algName;
+  int version;
+  getSelectedAlgorithm(algName,version);
+  if (algName.isEmpty())
+  {
+    QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
+    return;
+  }
+  executeAlgorithm(algName, version);
 }
 /**
     executes Save Nexus
 	saveNexus Input Dialog is a generic dialog.Below code is added to remove
 	the workspaces except the selected workspace from the InputWorkspace combo
 
-*/
+ */
 void MantidUI::executeSaveNexus(QString algName,int version)
 {
-	QString selctedWsName = getSelectedWorkspaceName();
-	Mantid::API::IAlgorithm_sptr alg;
-	try
-	{
-		alg=Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+  QString selctedWsName = getSelectedWorkspaceName();
+  Mantid::API::IAlgorithm_sptr alg;
+  try
+  {
+    alg=Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
 
-	}
-	catch(...)
-	{
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
-		return;
-	}
-	if (alg)
-	{
-		MantidQt::API::AlgorithmDialog *dlg =
-		  MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
-		if( !dlg ) return;
-		//getting the combo box which has input workspaces and removing the workspaces except the selected one
-		QComboBox *combo = dlg->findChild<QComboBox*>();
-		if(combo)
-		{
-			int count=combo->count();
-			int index=count-1;
-			while(count>1)
-			{
-				int selectedIndex=combo->findText(selctedWsName,Qt::MatchExactly );
-				if(selectedIndex!=index)
-				{
-					combo->removeItem(index);
-					count=combo->count();
-				}
-				index=index-1;
+  }
+  catch(...)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
+    return;
+  }
+  if (alg)
+  {
+    MantidQt::API::AlgorithmDialog *dlg =
+        MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
+    if( !dlg ) return;
+    //getting the combo box which has input workspaces and removing the workspaces except the selected one
+    QComboBox *combo = dlg->findChild<QComboBox*>();
+    if(combo)
+    {
+      int count=combo->count();
+      int index=count-1;
+      while(count>1)
+      {
+        int selectedIndex=combo->findText(selctedWsName,Qt::MatchExactly );
+        if(selectedIndex!=index)
+        {
+          combo->removeItem(index);
+          count=combo->count();
+        }
+        index=index-1;
 
-			}
+      }
 
-		}//end of if loop for combo
-		if ( dlg->exec() == QDialog::Accepted)
-		{
-			delete dlg;
-			executeAlgorithmAsync(alg);
-		}
-		else
-		{
-			delete dlg;
-		}
-	}
+    }//end of if loop for combo
+    if ( dlg->exec() == QDialog::Accepted)
+    {
+      delete dlg;
+      executeAlgorithmAsync(alg);
+    }
+    else
+    {
+      delete dlg;
+    }
+  }
 
 
 
 }
 void MantidUI::executeAlgorithm(QString algName, int version)
 {
-	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
-    if( !alg ) return;
-	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
-	executeLoadAlgorithm(dlg,alg);
-	
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
+  if( !alg ) return;
+  MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+  executeLoadAlgorithm(dlg,alg);
+
 }
 /** This method is to execute loadraw from ICat Interface
-  *@param fileName - name of the file
-  *@param wsName - name of the workspace
-*/
+ *@param fileName - name of the file
+ *@param wsName - name of the workspace
+ */
 void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& wsName)
 {
 
-	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadRaw", -1);
-    if( !alg ) return;
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadRaw", -1);
+  if( !alg ) return;
 
-	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
-	QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
-	if(!list.empty())
-	{
-		//set the file name(including location) obtained from ICat API
-		list[0]->setText(fileName);
-		//set the workspace name 
-		if(list[1])
-		{
-			list[1]->setText(wsName);
-		}
-	}
-	executeLoadAlgorithm(dlg,alg);
+  MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+  QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
+  if(!list.empty())
+  {
+    //set the file name(including location) obtained from ICat API
+    list[0]->setText(fileName);
+    //set the workspace name
+    if(list[1])
+    {
+      list[1]->setText(wsName);
+    }
+  }
+  executeLoadAlgorithm(dlg,alg);
 
-	
+
 }
 void MantidUI::loadnexusfromICatInterface(const QString& fileName,const QString& wsName)
 {
-	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadNexus", -1);
-    if( !alg ) return;
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadNexus", -1);
+  if( !alg ) return;
 
-	MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
-	if(!dlg) return;
-	QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
-	if(!list.empty())
-	{
-		list[0]->setText(fileName);
-		if(list[1])
-		{
-			list[1]->setText(wsName);
-		}
-	}
-    executeLoadAlgorithm(dlg,alg);
+  MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+  if(!dlg) return;
+  QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
+  if(!list.empty())
+  {
+    list[0]->setText(fileName);
+    if(list[1])
+    {
+      list[1]->setText(wsName);
+    }
+  }
+  executeLoadAlgorithm(dlg,alg);
 }
 
 void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& fileName, const QString& wsName)
 {
 
-	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
-    if( !alg ) return;
-	try
-	{
-		alg->setProperty("Filename",fileName.toStdString());
-		alg->setPropertyValue("OutputWorkspace",wsName.toStdString());
-	}
-	catch(std::invalid_argument& e)
-	{		
-		//emit error(e.what());
-		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
-		return ;
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError& e)
-	{
-		//emit error(e.what());
-		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
-		return ;
-	}
-	
-	executeAlgorithmAsync(alg);
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  if( !alg ) return;
+  try
+  {
+    alg->setProperty("Filename",fileName.toStdString());
+    alg->setPropertyValue("OutputWorkspace",wsName.toStdString());
+  }
+  catch(std::invalid_argument& e)
+  {
+    //emit error(e.what());
+    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    return ;
+  }
+  catch (Mantid::Kernel::Exception::NotFoundError& e)
+  {
+    //emit error(e.what());
+    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    return ;
+  }
+
+  executeAlgorithmAsync(alg);
 }
 
 MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
 {
-	QString presets(""), enabled("");
-	//If a workspace is selected in the dock then set this as a preset for the dialog
-	QString selected = getSelectedWorkspaceName();
-	if( !selected.isEmpty() )
-	{
-		QString property_name = findInputWorkspaceProperty(alg);
-		presets = "|" + property_name + "=" + selected + "|";
-		enabled = property_name + ",";
-	}
-	//Check if a workspace is selected in the dock and set this as a preference for the input workspace
-	MantidQt::API::AlgorithmDialog *dlg = 
-		MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
-	return dlg;
+  QString presets(""), enabled("");
+  //If a workspace is selected in the dock then set this as a preset for the dialog
+  QString selected = getSelectedWorkspaceName();
+  if( !selected.isEmpty() )
+  {
+    QString property_name = findInputWorkspaceProperty(alg);
+    presets = "|" + property_name + "=" + selected + "|";
+    enabled = property_name + ",";
+  }
+  //Check if a workspace is selected in the dock and set this as a preference for the input workspace
+  MantidQt::API::AlgorithmDialog *dlg =
+      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
+  return dlg;
 }
 void MantidUI::executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
 {
-	if( !dlg ) return;
-	if ( dlg->exec() == QDialog::Accepted)
-	{
-		delete dlg;
-		executeAlgorithmAsync(alg);
-	}
-	else
-	{
-		delete dlg;
-	}
+  if( !dlg ) return;
+  if ( dlg->exec() == QDialog::Accepted)
+  {
+    delete dlg;
+    executeAlgorithmAsync(alg);
+  }
+  else
+  {
+    delete dlg;
+  }
 }
 
 void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList)
@@ -937,8 +937,8 @@ QString MantidUI::findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algori
   {
     Mantid::Kernel::Property *base_prop = *pitr;
     const Mantid::API::IWorkspaceProperty *ws_prop = dynamic_cast<Mantid::API::IWorkspaceProperty*>(base_prop);
-	  if(ws_prop)
-	  { 
+    if(ws_prop)
+    {
       unsigned int direction = base_prop->direction();
       if (direction == Mantid::Kernel::Direction::Input || direction == Mantid::Kernel::Direction::InOut)
       {
@@ -951,13 +951,13 @@ QString MantidUI::findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algori
 
 void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedItems,std::vector<std::string> &inputWSVec)
 {
-	//iterate through each of the selected workspaces
-	QList<QTreeWidgetItem*>::const_iterator itr;
-	for(itr=selectedItems.begin();itr!=selectedItems.end();itr++)
-	{
-		std::string inputWSName=(*itr)->text(0).toStdString();
-		inputWSVec.push_back(inputWSName);
-	}//end of for loop for input workspaces
+  //iterate through each of the selected workspaces
+  QList<QTreeWidgetItem*>::const_iterator itr;
+  for(itr=selectedItems.begin();itr!=selectedItems.end();itr++)
+  {
+    std::string inputWSName=(*itr)->text(0).toStdString();
+    inputWSVec.push_back(inputWSName);
+  }//end of for loop for input workspaces
 }
 
 /**
@@ -985,139 +985,139 @@ void MantidUI::renameWorkspace(QString wsName)
   std::string algName("RenameWorkspace");
   int version=-1;
   Mantid::API::IAlgorithm_sptr alg;
-    try
+  try
+  {
+    alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
+
+  }
+  catch(...)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+QString::fromStdString(algName)+" version "+QString::number(version));
+    return;
+  }
+  if (!alg)
+  {
+    return;
+  }
+  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
+  if( !dlg ) return;
+  //getting the combo box which has input workspaces and removing the workspaces except the selected one
+  QComboBox *combo = dlg->findChild<QComboBox*>();
+  if(combo)
+  {
+    int count=combo->count();
+    int index=count-1;
+    while(count>1)
     {
-        alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
+      int selectedIndex=combo->findText(wsName,Qt::MatchExactly );
+      if(selectedIndex!=index)
+      {
+        combo->removeItem(index);
+        count=combo->count();
+      }
+      index=index-1;
 
     }
-    catch(...)
-    {
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+QString::fromStdString(algName)+" version "+QString::number(version));
-        return;
-    }
-	if (!alg)
-	{
-		return;
-	}
-	MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
-	if( !dlg ) return;
-	//getting the combo box which has input workspaces and removing the workspaces except the selected one
-	QComboBox *combo = dlg->findChild<QComboBox*>();
-	if(combo)
-	{
-		int count=combo->count();
-		int index=count-1;
-		while(count>1)
-		{
-			int selectedIndex=combo->findText(wsName,Qt::MatchExactly );
-			if(selectedIndex!=index)
-			{
-				combo->removeItem(index);
-				count=combo->count();
-			}
-			index=index-1;
-	
-		}
-	}//end of if loop for combo
-	if ( dlg->exec() == QDialog::Accepted)
-	{
-		delete dlg;
-		alg->execute();
-	}
-	else
-	{
-		delete dlg;
-	}
-		
+  }//end of if loop for combo
+  if ( dlg->exec() == QDialog::Accepted)
+  {
+    delete dlg;
+    alg->execute();
+  }
+  else
+  {
+    delete dlg;
+  }
+
 }
 void MantidUI::groupWorkspaces()
 {
-	try
-	{
-		std::string sgrpName("NewGroup");
-		QString   qwsGrpName=QString::fromStdString(sgrpName);
-		std::vector<std::string> inputWSVec;
-		//get selected workspaces
-		QList<QTreeWidgetItem*>selectedItems=m_exploreMantid->m_tree->selectedItems();
-		if(selectedItems.size()<2)
-		{	throw std::runtime_error("Select atleast two workspaces to group ");
-		}
-		if(Mantid::API::AnalysisDataService::Instance().doesExist(sgrpName))
-		{
-			if ( QMessageBox::question(appWindow(),"","Workspace "+qwsGrpName+" already exists. Do you want to replace it?",
-				QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) return;
-		}
-		//
-		copyWorkspacestoVector(selectedItems,inputWSVec);
-		std::string algName("GroupWorkspaces");
-		Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(algName,1);
-		alg->initialize();
-		alg->setProperty("InputWorkspaces",inputWSVec);
-		alg->setPropertyValue("OutputWorkspace",sgrpName);
-		//execute the algorithm
-		bool bStatus =alg->execute();
-		if(!bStatus)
-		{
-			QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
-		}
+  try
+  {
+    std::string sgrpName("NewGroup");
+    QString   qwsGrpName=QString::fromStdString(sgrpName);
+    std::vector<std::string> inputWSVec;
+    //get selected workspaces
+    QList<QTreeWidgetItem*>selectedItems=m_exploreMantid->m_tree->selectedItems();
+    if(selectedItems.size()<2)
+    {	throw std::runtime_error("Select atleast two workspaces to group ");
+    }
+    if(Mantid::API::AnalysisDataService::Instance().doesExist(sgrpName))
+    {
+      if ( QMessageBox::question(appWindow(),"","Workspace "+qwsGrpName+" already exists. Do you want to replace it?",
+          QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) return;
+    }
+    //
+    copyWorkspacestoVector(selectedItems,inputWSVec);
+    std::string algName("GroupWorkspaces");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(algName,1);
+    alg->initialize();
+    alg->setProperty("InputWorkspaces",inputWSVec);
+    alg->setPropertyValue("OutputWorkspace",sgrpName);
+    //execute the algorithm
+    bool bStatus =alg->execute();
+    if(!bStatus)
+    {
+      QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
+    }
 
-	}
-	catch(std::invalid_argument &)
-	{
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
-	}
-	catch(Mantid::Kernel::Exception::NotFoundError&)//if not a valid object in analysis data service
-	{
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
-	}
-	catch(std::runtime_error& )
-	{
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
-	}
-	catch(std::exception& )
-	{
-	 QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
-	}
+  }
+  catch(std::invalid_argument &)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
+  }
+  catch(Mantid::Kernel::Exception::NotFoundError&)//if not a valid object in analysis data service
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
+  }
+  catch(std::runtime_error& )
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
+  }
+  catch(std::exception& )
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
+  }
 
 }
 void MantidUI::ungroupWorkspaces()
 {
-	try
-	{
-		QList<QTreeWidgetItem*>selectedItems=m_exploreMantid->m_tree->selectedItems();
-		if(selectedItems.isEmpty())
-		{
-			throw std::runtime_error("Select a group workspace to Ungroup.");
-		}
+  try
+  {
+    QList<QTreeWidgetItem*>selectedItems=m_exploreMantid->m_tree->selectedItems();
+    if(selectedItems.isEmpty())
+    {
+      throw std::runtime_error("Select a group workspace to Ungroup.");
+    }
 
-		//workspace name
-		std::string wsname=selectedItems[0]->text(0).toStdString();
+    //workspace name
+    std::string wsname=selectedItems[0]->text(0).toStdString();
 
-		std::string algName("UnGroupWorkspace");
-		Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(algName,1);
-		alg->initialize();
-		alg->setProperty("InputWorkspace",wsname);
+    std::string algName("UnGroupWorkspace");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(algName,1);
+    alg->initialize();
+    alg->setProperty("InputWorkspace",wsname);
 
-		//execute the algorithm
-		bool bStatus=alg->execute();
-		if(!bStatus)
-		{
-			QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
-		}
-	
-	}
-	catch(std::invalid_argument &)
-	{
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
-	}
-	catch(std::runtime_error & )
-	{
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
-	}
-	catch(std::exception & )
-	{
-		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
-	}
+    //execute the algorithm
+    bool bStatus=alg->execute();
+    if(!bStatus)
+    {
+      QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
+    }
+
+  }
+  catch(std::invalid_argument &)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
+  }
+  catch(std::runtime_error & )
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
+  }
+  catch(std::exception & )
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
+  }
 
 }
 
@@ -1132,7 +1132,7 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
   catch(...)
   {
     QMessageBox::critical(appWindow(),"MantidPlot",
-			  "Cannot create algorithm \""+ algName + "\" version "+QString::number(version));
+        "Cannot create algorithm \""+ algName + "\" version "+QString::number(version));
     alg = Mantid::API::IAlgorithm_sptr();
   }
   return alg;
@@ -1140,81 +1140,81 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
 
 void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
 {
-    m_algMonitor->add(alg);
+  m_algMonitor->add(alg);
 
-    try
-    {
-      alg->executeAsync();
-    }
-    catch(...)
-    {
-        QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
-    }
+  try
+  {
+    alg->executeAsync();
+  }
+  catch(...)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
+  }
 }
 bool MantidUI::executeICatLogout(int version)
 {
-	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("Logout", version);
-    if( !alg ) return false;
-	Poco::ActiveResult<bool> result(alg->executeAsync());
-	return result.failed();
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("Logout", version);
+  if( !alg ) return false;
+  Poco::ActiveResult<bool> result(alg->executeAsync());
+  return result.failed();
 
 }
 /// This method is to execute download data files algorithm from ICat
 void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& fileNames)
 {
-	std::vector<std::string> fileLocs;
-	Mantid::API::IAlgorithm_sptr alg;
-	try
-	{
-		alg = Mantid::API::AlgorithmManager::Instance().create("GetDataFiles",-1);
-	}
-	catch(...)
-	{
-		m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server ");
-		return;
-	}
-	try
-	{		
-		alg->setProperty("Filenames",fileNames);
-		alg->setPropertyValue("InputWorkspace","insvestigation");
-	}
-	catch(std::invalid_argument& e)
-	{	
-	   m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
-	   return;
-		
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError& e)
-	{
-		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
-		return;
-	}
-	m_algMonitor->add(alg);
+  std::vector<std::string> fileLocs;
+  Mantid::API::IAlgorithm_sptr alg;
+  try
+  {
+    alg = Mantid::API::AlgorithmManager::Instance().create("GetDataFiles",-1);
+  }
+  catch(...)
+  {
+    m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server ");
+    return;
+  }
+  try
+  {
+    alg->setProperty("Filenames",fileNames);
+    alg->setPropertyValue("InputWorkspace","insvestigation");
+  }
+  catch(std::invalid_argument& e)
+  {
+    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    return;
 
-	try
-	{
-		Poco::ActiveResult<bool> result(alg->executeAsync());
-		while( !result.available() )
-		{
-			QCoreApplication::processEvents();
-		}
-	}
-	catch(...)
-	{
-		m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server");
-		return;
-	}
-	try
-	{
-		fileLocs = alg->getProperty("FileLocations");
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError&e)
-	{
-		m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
-		return;
-	}
-	
-	emit fileLocations(fileLocs);
+  }
+  catch (Mantid::Kernel::Exception::NotFoundError& e)
+  {
+    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    return;
+  }
+  m_algMonitor->add(alg);
+
+  try
+  {
+    Poco::ActiveResult<bool> result(alg->executeAsync());
+    while( !result.available() )
+    {
+      QCoreApplication::processEvents();
+    }
+  }
+  catch(...)
+  {
+    m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server");
+    return;
+  }
+  try
+  {
+    fileLocs = alg->getProperty("FileLocations");
+  }
+  catch (Mantid::Kernel::Exception::NotFoundError&e)
+  {
+    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    return;
+  }
+
+  emit fileLocations(fileLocs);
 
 }
 
@@ -1228,36 +1228,36 @@ void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API
 void MantidUI::createLoadDAEMantidMatrix(const QString& wsQName)
 {
   std::string wsName = wsQName.toStdString();
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+  Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
 
-    if (ws.use_count() == 0)
-    {
-	    QMessageBox::warning(m_appWindow, tr("Mantid"),
-           		    tr("A workspace with this name already exists.\n")
-            		    , QMessageBox::Ok, QMessageBox::Ok);
-	    return;
-    }
+  if (ws.use_count() == 0)
+  {
+    QMessageBox::warning(m_appWindow, tr("Mantid"),
+        tr("A workspace with this name already exists.\n")
+        , QMessageBox::Ok, QMessageBox::Ok);
+    return;
+  }
 
-    importMatrixWorkspace(QString::fromStdString(wsName), -1, -1, false, true);
+  importMatrixWorkspace(QString::fromStdString(wsName), -1, -1, false, true);
 
-    int updateInterval = m_DAE_map[wsName];
-    if (updateInterval > 0)
-    {
-        IAlgorithm_sptr updater = CreateAlgorithm("UpdateDAE");
-        updater->setPropertyValue("Workspace",wsName);
-        updater->setPropertyValue("UpdateRate",QString::number(updateInterval).toStdString());
-        executeAlgorithmAsync(updater);
-    }
+  int updateInterval = m_DAE_map[wsName];
+  if (updateInterval > 0)
+  {
+    IAlgorithm_sptr updater = CreateAlgorithm("UpdateDAE");
+    updater->setPropertyValue("Workspace",wsName);
+    updater->setPropertyValue("UpdateRate",QString::number(updateInterval).toStdString());
+    executeAlgorithmAsync(updater);
+  }
 }
 
 void MantidUI::showCritical(const QString& text)
 {
-    QMessageBox::critical(appWindow(),"Mantid - Error",text);
+  QMessageBox::critical(appWindow(),"Mantid - Error",text);
 }
 
 void MantidUI::showAlgMonitor()
 {
-    m_algMonitor->showDialog();
+  m_algMonitor->showDialog();
 }
 
 void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
@@ -1294,9 +1294,9 @@ void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_
   QStringList wsList;
   std::vector<std::string>::const_iterator citr;
   for(citr=wsvec.begin();citr!=wsvec.end();++citr)
-    {
-      wsList.append(QString::fromStdString(*citr));
-    }
+  {
+    wsList.append(QString::fromStdString(*citr));
+  }
   emit workspaces_grouped(wsList);
 }
 void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf)
@@ -1306,32 +1306,32 @@ void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotificati
 
 void MantidUI::logMessage(const Poco::Message& msg)
 {
-    if (!appWindow()->results) return;
-    QString str = msg.getText().c_str();
-    //if (s_logEdit->document()->blockCount() > 1000) s_logEdit->document()->clear();
-	//Ticket #671
-	//to display the logwindow if there is ann error or higher log message
-	if (msg.getPriority() <= Poco::Message::PRIO_ERROR)
-	{
-		appWindow()->logWindow->show();
-	}
-    if (msg.getPriority() < Poco::Message::PRIO_WARNING)
-        appWindow()->results->setTextColor(Qt::red);
-    else
-        appWindow()->results->setTextColor(Qt::black);
-    appWindow()->results->insertPlainText(str+"\n");
-    //cerr<<":"<<appWindow()->results->document()->blockCount()<<'\n';
-    QTextCursor cur = appWindow()->results->textCursor();
-    cur.movePosition(QTextCursor::End);
-    appWindow()->results->setTextCursor(cur);
+  if (!appWindow()->results) return;
+  QString str = msg.getText().c_str();
+  //if (s_logEdit->document()->blockCount() > 1000) s_logEdit->document()->clear();
+  //Ticket #671
+  //to display the logwindow if there is ann error or higher log message
+  if (msg.getPriority() <= Poco::Message::PRIO_ERROR)
+  {
+    appWindow()->logWindow->show();
+  }
+  if (msg.getPriority() < Poco::Message::PRIO_WARNING)
+    appWindow()->results->setTextColor(Qt::red);
+  else
+    appWindow()->results->setTextColor(Qt::black);
+  appWindow()->results->insertPlainText(str+"\n");
+  //cerr<<":"<<appWindow()->results->document()->blockCount()<<'\n';
+  QTextCursor cur = appWindow()->results->textCursor();
+  cur.movePosition(QTextCursor::End);
+  appWindow()->results->setTextCursor(cur);
 }
 
 void MantidUI::manageMantidWorkspaces()
 {
 #ifdef _WIN32
-    memoryImage();
+  memoryImage();
 #else
-	QMessageBox::warning(appWindow(),tr("Mantid Workspace"),tr("Clicked on Managed Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
+  QMessageBox::warning(appWindow(),tr("Mantid Workspace"),tr("Clicked on Managed Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
 #endif
 }
 
@@ -1356,11 +1356,11 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
   connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
   connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
-	  SLOT(plotSpectraList(const QString&,const std::set<int>&)));
+      SLOT(plotSpectraList(const QString&,const std::set<int>&)));
   connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
-	  SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
+      SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
   connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&)), this,
-	  SLOT(executeAlgorithm(const QString&, const QString&)));
+      SLOT(executeAlgorithm(const QString&, const QString&)));
   return insWin;
 }
 
@@ -1373,43 +1373,43 @@ void MantidUI::showMantidInstrument(const QString& wsName)
 
 void MantidUI::showMantidInstrument()
 {
-	 MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-    if (!m || !m->isA("MantidMatrix")) return;
-	if(!m->workspaceName().isEmpty())
-	{showMantidInstrument(m->workspaceName());
-	}
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  if(!m->workspaceName().isEmpty())
+  {showMantidInstrument(m->workspaceName());
+  }
 }
 
 void MantidUI::showMantidInstrumentSelected()
 {
-    QString wsName = getSelectedWorkspaceName();
-    if (!wsName.isEmpty()) showMantidInstrument(wsName);
+  QString wsName = getSelectedWorkspaceName();
+  if (!wsName.isEmpty()) showMantidInstrument(wsName);
 }
 
 void MantidUI::mantidMenuAboutToShow()
 {
-	mantidMenu->clear();
-	// Ticket #672 Mantid Menu Improvements
+  mantidMenu->clear();
+  // Ticket #672 Mantid Menu Improvements
 
-	/*mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
+  /*mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
 	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
 	mantidMenu->insertItem(tr("&Plot Memory Usage"), this, SLOT(manageMantidWorkspaces() ));
-	*/
+   */
 
-	QAction* tstAction = new QAction("&Plot Memory Usage",this);
-	connect(tstAction,SIGNAL(triggered()), this, SLOT(manageMantidWorkspaces() ));
-	mantidMenu->addAction(tstAction);
+  QAction* tstAction = new QAction("&Plot Memory Usage",this);
+  connect(tstAction,SIGNAL(triggered()), this, SLOT(manageMantidWorkspaces() ));
+  mantidMenu->addAction(tstAction);
 }
 
 void MantidUI::insertMenu()
 {
-	appWindow()->menuBar()->insertItem(tr("Man&tid"), mantidMenu);
+  appWindow()->menuBar()->insertItem(tr("Man&tid"), mantidMenu);
 }
 
 void MantidUI::clearAllMemory()
 {
   QMessageBox::StandardButton pressed =
-    QMessageBox::question(appWindow(), "MantidPlot", "All workspaces and windows will be removed. Are you sure?", QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
+      QMessageBox::question(appWindow(), "MantidPlot", "All workspaces and windows will be removed. Are you sure?", QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
 
   if( pressed != QMessageBox::Ok ) return;
 
@@ -1419,103 +1419,103 @@ void MantidUI::clearAllMemory()
 }
 void MantidUI::saveProject(bool saved)
 {
-	if( !saved )
-	{
-		QString savemsg = tr("Save changes to project: <p><b> %1 </b> ?").arg("untitled");
-		int result = QMessageBox::information(appWindow(), tr("MantidPlot"), savemsg, tr("Yes"), tr("No"), 0, 2);
-		if( result == 0)
-		    appWindow()->saveProject();
-	}
-	//close all the windows opened
-	foreach( MdiSubWindow* sub_win, appWindow()->windowsList() )
-	{
-	     sub_win->setconfirmcloseFlag(false);
-	     sub_win->close();
-	}
-	Mantid::API::FrameworkManager::Instance().clear();
+  if( !saved )
+  {
+    QString savemsg = tr("Save changes to project: <p><b> %1 </b> ?").arg("untitled");
+    int result = QMessageBox::information(appWindow(), tr("MantidPlot"), savemsg, tr("Yes"), tr("No"), 0, 2);
+    if( result == 0)
+      appWindow()->saveProject();
+  }
+  //close all the windows opened
+  foreach( MdiSubWindow* sub_win, appWindow()->windowsList() )
+  {
+    sub_win->setconfirmcloseFlag(false);
+    sub_win->close();
+  }
+  Mantid::API::FrameworkManager::Instance().clear();
 }
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
-	appWindow()->enablesaveNexus(wsName);
+  appWindow()->enablesaveNexus(wsName);
 }
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
-  *  saves the names of all the workspaces loaded into mantid workspace tree
-  *  into a string and calls save nexus on each workspace to save the data to a nexus file.
-  * @param workingDir -working directory of teh current project
-  */
+ *  saves the names of all the workspaces loaded into mantid workspace tree
+ *  into a string and calls save nexus on each workspace to save the data to a nexus file.
+ * @param workingDir -working directory of teh current project
+ */
 QString MantidUI::saveToString(const std::string& workingDir)
 {
-	QString wsNames;
-	wsNames="<mantidworkspaces>\n";
-	wsNames+="WorkspaceNames";
-	QTreeWidget *tree=m_exploreMantid->m_tree;
-	int count=tree->topLevelItemCount();
-	for(int i=0;i<count;++i)
-	{ QTreeWidgetItem* item=tree->topLevelItem(i);
-	QString wsName=item->text(0);
-	wsNames+="\t";
-	wsNames+=wsName;
-	
-	std::string fileName(workingDir+"//"+wsName.toStdString()+".nxs");
-	//saving to  nexus file
-	try
-	{
-	savedatainNexusFormat(fileName,wsName.toStdString());
-	}
-	catch(...)
-	{
-	}
-	}
-	wsNames+="\n</mantidworkspaces>\n";
-	return wsNames;
+  QString wsNames;
+  wsNames="<mantidworkspaces>\n";
+  wsNames+="WorkspaceNames";
+  QTreeWidget *tree=m_exploreMantid->m_tree;
+  int count=tree->topLevelItemCount();
+  for(int i=0;i<count;++i)
+  { QTreeWidgetItem* item=tree->topLevelItem(i);
+  QString wsName=item->text(0);
+  wsNames+="\t";
+  wsNames+=wsName;
+
+  std::string fileName(workingDir+"//"+wsName.toStdString()+".nxs");
+  //saving to  nexus file
+  try
+  {
+    savedatainNexusFormat(fileName,wsName.toStdString());
+  }
+  catch(...)
+  {
+  }
+  }
+  wsNames+="\n</mantidworkspaces>\n";
+  return wsNames;
 }
 /**
-  *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
-  */
+ *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
+ */
 void MantidUI::menuMantidMatrixAboutToShow()
 {
-    menuMantidMatrix->clear();
-    MantidMatrix *w = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
-    //menuMantidMatrix->addAction(actionCopyValues);
-    menuMantidMatrix->addAction(actionCopyDetectorsToTable);
-    menuMantidMatrix->addSeparator();
-    menuMantidMatrix->insertItem(tr("Set &Properties..."), w, SLOT(setMatrixProperties() ) );
+  menuMantidMatrix->clear();
+  MantidMatrix *w = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
+  //menuMantidMatrix->addAction(actionCopyValues);
+  menuMantidMatrix->addAction(actionCopyDetectorsToTable);
+  menuMantidMatrix->addSeparator();
+  menuMantidMatrix->insertItem(tr("Set &Properties..."), w, SLOT(setMatrixProperties() ) );
 
-	/// 
-	menuMantidMatrix->addSeparator();
-    QAction * action = new QAction("Show instrument",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(showMantidInstrument()));
-    menuMantidMatrix->addAction(action);
-  
-	action = new QAction("Plot spectrum...",this);
-    connect(action,SIGNAL(triggered()),m_exploreMantid,SLOT(plotSpectra()));
-    menuMantidMatrix->addAction(action);
-  
-    action = new QAction("Sample Logs...", this);
-    connect(action,SIGNAL(triggered()),this,SLOT(showLogFileWindow()));
-    menuMantidMatrix->addAction(action);
-   
-    action = new QAction("Show History", this);
-    connect(action,SIGNAL(triggered()),this,SLOT(showAlgorithmHistory()));
-    menuMantidMatrix->addAction(action);
-    
-    action = new QAction("Save Nexus",this);
-    connect(action,SIGNAL(activated()),this,SLOT(saveNexusWorkspace()));
-    menuMantidMatrix->addAction(action);
-  
-    action = new QAction("Rename",this);
-    connect(action,SIGNAL(activated()),this,SLOT(renameWorkspace()));
-    menuMantidMatrix->addAction(action);
-   
+  ///
+  menuMantidMatrix->addSeparator();
+  QAction * action = new QAction("Show instrument",this);
+  connect(action,SIGNAL(triggered()),this,SLOT(showMantidInstrument()));
+  menuMantidMatrix->addAction(action);
 
-    //separate delete
-    menuMantidMatrix->addSeparator();
+  action = new QAction("Plot spectrum...",this);
+  connect(action,SIGNAL(triggered()),m_exploreMantid,SLOT(plotSpectra()));
+  menuMantidMatrix->addAction(action);
 
-    action = new QAction("Delete",this);
-    connect(action,SIGNAL(triggered()),m_exploreMantid,SLOT(deleteWorkspaces()));
-    menuMantidMatrix->addAction(action);
-     
+  action = new QAction("Sample Logs...", this);
+  connect(action,SIGNAL(triggered()),this,SLOT(showLogFileWindow()));
+  menuMantidMatrix->addAction(action);
+
+  action = new QAction("Show History", this);
+  connect(action,SIGNAL(triggered()),this,SLOT(showAlgorithmHistory()));
+  menuMantidMatrix->addAction(action);
+
+  action = new QAction("Save Nexus",this);
+  connect(action,SIGNAL(activated()),this,SLOT(saveNexusWorkspace()));
+  menuMantidMatrix->addAction(action);
+
+  action = new QAction("Rename",this);
+  connect(action,SIGNAL(activated()),this,SLOT(renameWorkspace()));
+  menuMantidMatrix->addAction(action);
+
+
+  //separate delete
+  menuMantidMatrix->addSeparator();
+
+  action = new QAction("Delete",this);
+  connect(action,SIGNAL(triggered()),m_exploreMantid,SLOT(deleteWorkspaces()));
+  menuMantidMatrix->addAction(action);
+
 }
 
 /// Catches the signal from InstrumentWindow to plot a spectrum.
@@ -1641,7 +1641,7 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
 bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name)
 {
   Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
-  
+
   if( !alg )
   {
     return false;
@@ -1673,7 +1673,7 @@ void MantidUI::cancelAllRunningAlgorithms()
 }
 
 bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
-					 const QString & optional_msg,  const QString & enabled_names)
+    const QString & optional_msg,  const QString & enabled_names)
 {
   Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
   if( !alg )
@@ -1682,8 +1682,8 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
   }
 
   MantidQt::API::AlgorithmDialog *dlg =
-    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
-							     true, preset_values, optional_msg, enabled_names);
+      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
+          true, preset_values, optional_msg, enabled_names);
   return (dlg->exec() == QDialog::Accepted);
 }
 
@@ -1693,7 +1693,7 @@ Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algN
   Mantid::API::IAlgorithm_sptr alg;
   deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
   for(  deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ;
-	aIter != aEnd; ++aIter )
+      aIter != aEnd; ++aIter )
   {
     if( !(*aIter)->isExecuted() && (*aIter)->name() == algName.toStdString()  )
     {
@@ -1704,9 +1704,9 @@ Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algN
   return alg;
 }
 /** Displays a string in a Qtiplot table
-*  @param logName the title of the table is based on this
-*  @param data the string to display
-*/
+ *  @param logName the title of the table is based on this
+ *  @param data the string to display
+ */
 void MantidUI::importString(const QString &logName, const QString &data)
 {
   Table* t = new Table(appWindow()->scriptingEnv(), 1, 1, "", appWindow(), 0);
@@ -1716,21 +1716,21 @@ void MantidUI::importString(const QString &logName, const QString &data)
   label.replace("_","-");
 
   appWindow()->initTable(t, 
-    appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
+      appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   t->setColName(0, "Log entry");
 
   t->setText(0, 0, data);
 
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
-	    (QMIN(10,1)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+      (QMIN(10,1)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
 }
 /** Displays a string in a Qtiplot table
-*  @param logName the title of the table is based on this
-*  @param data a formated string with the time series data to display
-*/
+ *  @param logName the title of the table is based on this
+ *  @param data a formated string with the time series data to display
+ */
 void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 {
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
@@ -1763,8 +1763,8 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
-	    (QMIN(10,rowcount)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
- // t->askOnCloseEvent(false);
+      (QMIN(10,rowcount)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+  // t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
 }
@@ -1779,146 +1779,146 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
  */
 void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname, int filter)
 {
-    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
-    if (!ws) return;
+  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+  if (!ws) return;
 
-	Mantid::Kernel::Property * logData =ws->run().getLogData(logname.toStdString()); 
-    if (!logData) return;
-	
-    Mantid::Kernel::LogFilter flt(logData);
+  Mantid::Kernel::Property * logData =ws->run().getLogData(logname.toStdString());
+  if (!logData) return;
 
-    //Get a map of time/value. This greatly speeds up display
-    std::map<dateAndTime, double> time_value_map = flt.data()->valueAsMap();
-    int rowcount = time_value_map.size();
+  Mantid::Kernel::LogFilter flt(logData);
 
-    Table* t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
-    if( !t ) return;
-   // t->askOnCloseEvent(false);
-    //Have to replace "_" since the legend widget uses them to separate things
-    QString label = logname;
-    label.replace("_","-");
+  //Get a map of time/value. This greatly speeds up display
+  std::map<dateAndTime, double> time_value_map = flt.data()->valueAsMap();
+  int rowcount = time_value_map.size();
 
-    appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
-    t->setColName(0, "Time");
-    t->setColumnType(0, Table::Date);
-    t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 0, false);
-    t->setColName(1, label.section("-",1));
+  Table* t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
+  if( !t ) return;
+  // t->askOnCloseEvent(false);
+  //Have to replace "_" since the legend widget uses them to separate things
+  QString label = logname;
+  label.replace("_","-");
 
-    int iValueCurve = 0;
-    int iFilterCurve = 1;
+  appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
+  t->setColName(0, "Time");
+  t->setColumnType(0, Table::Date);
+  t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 0, false);
+  t->setColName(1, label.section("-",1));
 
-    // Applying filters
-    if (filter > 0)
+  int iValueCurve = 0;
+  int iFilterCurve = 1;
+
+  // Applying filters
+  if (filter > 0)
+  {
+    Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
+    if (filter == 1 || filter ==3)
     {
-        Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
-        if (filter == 1 || filter ==3)
+      try
+      {
+        f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
+        if (f) flt.addFilter(f);
+        else
         {
-            try
-            {
-              f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
-              if (f) flt.addFilter(f);
-              else
-              {
-                  importNumSeriesLog(wsName,logname,0);
-                  return;
-              }
-            }
-            catch(...)
-            {
-                importNumSeriesLog(wsName,logname,0);
-                return;
-            }
+          importNumSeriesLog(wsName,logname,0);
+          return;
         }
-
-        if (filter == 2 || filter ==3)
-        {
-            std::vector<Mantid::Kernel::Property*> ps =ws->run().getLogData();
-            for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();it++)
-                if ((*it)->name().find("period ") == 0)
-                {
-                    try
-                    {
-                        f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
-                        if (f) flt.addFilter(f);
-                        else
-                        {
-                            importNumSeriesLog(wsName,logname,0);
-                            return;
-                        }
-                    }
-                    catch(...)
-                    {
-                        importNumSeriesLog(wsName,logname,0);
-                        return;
-                    }
-
-                    break;
-                }
-        }
-
-        t->addColumns(2);
-        t->setColName(2, "FTime");
-        t->setColumnType(2, Table::Date);
-        t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false);
-        t->setColPlotDesignation(2,Table::X);
-        t->setColName(3, "Filter");
-
-        if (flt.filter()->size() > rowcount)
-        {
-            t->addRows(flt.filter()->size() - rowcount);
-        }
-
-        if (flt.data()->size() > rowcount)
-        {
-            t->addRows(flt.data()->size() - rowcount);
-        }
-
-        for(int i=0;i<flt.filter()->size();i++)
-        {
-            t->setText(i,2,QString::fromStdString(flt.filter()->nthInterval(i).begin_str()));
-            t->setCell(i,3,!flt.filter()->nthValue(i));
-        }
-
-        iValueCurve = 1;
-        iFilterCurve = 0;
+      }
+      catch(...)
+      {
+        importNumSeriesLog(wsName,logname,0);
+        return;
+      }
     }
 
-    Mantid::Kernel::dateAndTime lastTime;
-    double lastValue;
-
-    //Iterate through the time-value map.
-    int i = 0;
-    std::map<dateAndTime, double>::iterator it;
-    for (it = time_value_map.begin(); it!=time_value_map.end(); it++)
+    if (filter == 2 || filter ==3)
     {
-      lastTime = it->first;
-      lastValue = it->second;
-      //Convert time into string
-      std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(lastTime);
-      t->setText(i,0,QString::fromStdString(time_string));
-      t->setCell(i,1,lastValue);
-      i++;
+      std::vector<Mantid::Kernel::Property*> ps =ws->run().getLogData();
+      for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();it++)
+        if ((*it)->name().find("period ") == 0)
+        {
+          try
+          {
+            f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
+            if (f) flt.addFilter(f);
+            else
+            {
+              importNumSeriesLog(wsName,logname,0);
+              return;
+            }
+          }
+          catch(...)
+          {
+            importNumSeriesLog(wsName,logname,0);
+            return;
+          }
+
+          break;
+        }
     }
 
-	try
-	{
+    t->addColumns(2);
+    t->setColName(2, "FTime");
+    t->setColumnType(2, Table::Date);
+    t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false);
+    t->setColPlotDesignation(2,Table::X);
+    t->setColName(3, "Filter");
+
+    if (flt.filter()->size() > rowcount)
+    {
+      t->addRows(flt.filter()->size() - rowcount);
+    }
+
+    if (flt.data()->size() > rowcount)
+    {
+      t->addRows(flt.data()->size() - rowcount);
+    }
+
+    for(int i=0;i<flt.filter()->size();i++)
+    {
+      t->setText(i,2,QString::fromStdString(flt.filter()->nthInterval(i).begin_str()));
+      t->setCell(i,3,!flt.filter()->nthValue(i));
+    }
+
+    iValueCurve = 1;
+    iFilterCurve = 0;
+  }
+
+  Mantid::Kernel::dateAndTime lastTime;
+  double lastValue;
+
+  //Iterate through the time-value map.
+  int i = 0;
+  std::map<dateAndTime, double>::iterator it;
+  for (it = time_value_map.begin(); it!=time_value_map.end(); it++)
+  {
+    lastTime = it->first;
+    lastValue = it->second;
+    //Convert time into string
+    std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(lastTime);
+    t->setText(i,0,QString::fromStdString(time_string));
+    t->setCell(i,1,lastValue);
+    i++;
+  }
+
+  try
+  {
     if (filter && lastTime < flt.filter()->lastTime())
     {
-        rowcount = time_value_map.size();
-        if (rowcount == t->numRows()) t->addRows(1);
-        std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(flt.filter()->lastTime());
-        t->setText(rowcount,0,QString::fromStdString(time_string));
-        t->setCell(rowcount,1,lastValue);
+      rowcount = time_value_map.size();
+      if (rowcount == t->numRows()) t->addRows(1);
+      std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(flt.filter()->lastTime());
+      t->setText(rowcount,0,QString::fromStdString(time_string));
+      t->setCell(rowcount,1,lastValue);
     }
-	}
-	catch(...)
-	{
-	}
+  }
+  catch(...)
+  {
+  }
 
   //Show table
 
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
-	    (QMIN(10,t->numRows())+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+      (QMIN(10,t->numRows())+1)*t->table()->verticalHeader()->sectionSize(0)+100);
   //t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
@@ -1930,7 +1930,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   }
   colNames << t->colName(1);
   MultiLayer *ml = appWindow()->multilayerPlot(t,colNames,Graph::Line);
- // ml->askOnCloseEvent(false);
+  // ml->askOnCloseEvent(false);
   ml->setAttribute(Qt::WA_DeleteOnClose);
 
   Graph* g = ml->activeGraph();
@@ -1948,19 +1948,19 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   if (filter)
   {
-      QwtPlotCurve *c = g->curve(iFilterCurve);
-      // Set the right axis as Y axis for the filter curve.
-      c->setAxis(2,1);
-      // Set style #3 (HorizontalSteps) for curve 1
-      g->setCurveStyle(iFilterCurve,3);
-      // Set scale of right Y-axis (#3) from 0 to 1
-      g->setScale(3,0,1);
-      // Fill area under the curve with a pattern
-      QBrush br = QBrush(Qt::gray, Qt::Dense5Pattern);
-      g->setCurveBrush(iFilterCurve, br);
-      // Set line colour
-      QPen pn = QPen(Qt::gray);
-      g->setCurvePen(iFilterCurve, pn);
+    QwtPlotCurve *c = g->curve(iFilterCurve);
+    // Set the right axis as Y axis for the filter curve.
+    c->setAxis(2,1);
+    // Set style #3 (HorizontalSteps) for curve 1
+    g->setCurveStyle(iFilterCurve,3);
+    // Set scale of right Y-axis (#3) from 0 to 1
+    g->setScale(3,0,1);
+    // Fill area under the curve with a pattern
+    QBrush br = QBrush(Qt::gray, Qt::Dense5Pattern);
+    g->setCurveBrush(iFilterCurve, br);
+    // Set line colour
+    QPen pn = QPen(Qt::gray);
+    g->setCurvePen(iFilterCurve, pn);
   }
   g->setXAxisTitle(t->colLabel(0));
   g->setYAxisTitle(t->colLabel(1).section(".",0,0));
@@ -1981,7 +1981,7 @@ void MantidUI::showLogFileWindow()
   dlg->setFocus();
 }
 
-    //  *****      Plotting Methods     *****  //
+//  *****      Plotting Methods     *****  //
 
 /** Create a Table form specified spectra in a MatrixWorkspace
     @param tableName Table name
@@ -1994,79 +1994,79 @@ void MantidUI::showLogFileWindow()
  */
 Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, QList<int> indexList, bool errs, bool binCentres)
 {
-	 int nspec = workspace->getNumberHistograms();
-	 //Loop through the list of index and remove all the indexes that are out of range
+  int nspec = workspace->getNumberHistograms();
+  //Loop through the list of index and remove all the indexes that are out of range
 
-   for(QList<int>::iterator it=indexList.begin();it!=indexList.end();it++)
-	 {
-     if ((*it) > nspec || (*it) < 0) indexList.erase(it);
-	 }
-	 if ( indexList.empty() ) return 0;
+  for(QList<int>::iterator it=indexList.begin();it!=indexList.end();it++)
+  {
+    if ((*it) > nspec || (*it) < 0) indexList.erase(it);
+  }
+  if ( indexList.empty() ) return 0;
 
-     int c = errs?2:1;
-     int numRows = workspace->blocksize();
-     bool isHistogram = workspace->isHistogramData();
-     int no_cols = static_cast<int>(indexList.size());
-     Table* t = new Table(appWindow()->scriptingEnv(), numRows, (1+c)*no_cols, "", appWindow(), 0);
-     appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
-    // t->askOnCloseEvent(false);
+  int c = errs?2:1;
+  int numRows = workspace->blocksize();
+  bool isHistogram = workspace->isHistogramData();
+  int no_cols = static_cast<int>(indexList.size());
+  Table* t = new Table(appWindow()->scriptingEnv(), numRows, (1+c)*no_cols, "", appWindow(), 0);
+  appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
+  // t->askOnCloseEvent(false);
 
-     int kX(0),kY(0),kErr(0);
-     for(int i=0;i < no_cols; i++)
-     {
-       const Mantid::MantidVec& dataX = workspace->readX(indexList[i]);
-       const Mantid::MantidVec& dataY = workspace->readY(indexList[i]);
-       const Mantid::MantidVec& dataE = workspace->readE(indexList[i]);
+  int kX(0),kY(0),kErr(0);
+  for(int i=0;i < no_cols; i++)
+  {
+    const Mantid::MantidVec& dataX = workspace->readX(indexList[i]);
+    const Mantid::MantidVec& dataY = workspace->readY(indexList[i]);
+    const Mantid::MantidVec& dataE = workspace->readE(indexList[i]);
 
-         kY =(c+1)*i+1;
-		 kX=(c+1)*i;
-		 t->setColName(kY,"YS"+QString::number(indexList[i]));
-		 t->setColName(kX,"XS"+QString::number(indexList[i]));
-         t->setColPlotDesignation(kX,Table::X);
-         if (errs)
-         {
-            // kErr = 2*i + 2;
-			 kErr=(c+1)*i+2;
-             t->setColPlotDesignation(kErr,Table::yErr);
-             t->setColName(kErr,"ES"+QString::number(indexList[i]));
-         }
-         for(int j=0;j<numRows;j++)
-         {
+    kY =(c+1)*i+1;
+    kX=(c+1)*i;
+    t->setColName(kY,"YS"+QString::number(indexList[i]));
+    t->setColName(kX,"XS"+QString::number(indexList[i]));
+    t->setColPlotDesignation(kX,Table::X);
+    if (errs)
+    {
+      // kErr = 2*i + 2;
+      kErr=(c+1)*i+2;
+      t->setColPlotDesignation(kErr,Table::yErr);
+      t->setColName(kErr,"ES"+QString::number(indexList[i]));
+    }
+    for(int j=0;j<numRows;j++)
+    {
 
-             //if (i == 0)
-             //{
-                 // in histograms the point is to be drawn in the centre of the bin.
-                 if (isHistogram && binCentres)
-				 {
-					// logObject.error()<<"inside isHistogram true= "<<j<< std::endl;
-					 t->setCell(j,kX,( dataX[j] + dataX[j+1] )/2);
-				 }
-                 else
-				 {//logObject.error()<<"inside isHistogram false= "<< std::endl;
-                     t->setCell(j,kX,dataX[j]);
-				 }
-    //         }
-			 //else
-			 //{
-				// t->setCell(j,kX,dataX[j]);
-			 //}
-		     t->setCell(j,kY,dataY[j]);
+      //if (i == 0)
+      //{
+      // in histograms the point is to be drawn in the centre of the bin.
+      if (isHistogram && binCentres)
+      {
+        // logObject.error()<<"inside isHistogram true= "<<j<< std::endl;
+        t->setCell(j,kX,( dataX[j] + dataX[j+1] )/2);
+      }
+      else
+      {//logObject.error()<<"inside isHistogram false= "<< std::endl;
+        t->setCell(j,kX,dataX[j]);
+      }
+      //         }
+      //else
+      //{
+      // t->setCell(j,kX,dataX[j]);
+      //}
+      t->setCell(j,kY,dataY[j]);
 
 
-             if (errs) t->setCell(j,kErr,dataE[j]);
-         }
-         if (isHistogram && (!binCentres))
-         {
-             int iRow = numRows;
-             t->addRows(1);
-	         if (i == 0) t->setCell(iRow,0,dataX[iRow]);
-             t->setCell(iRow,kY,0);
-             if (errs) t->setCell(iRow,kErr,0);
-         }
-     }
-    // t->askOnCloseEvent(false);
-     return t;
- }
+      if (errs) t->setCell(j,kErr,dataE[j]);
+    }
+    if (isHistogram && (!binCentres))
+    {
+      int iRow = numRows;
+      t->addRows(1);
+      if (i == 0) t->setCell(iRow,0,dataX[iRow]);
+      t->setCell(iRow,kY,0);
+      if (errs) t->setCell(iRow,kErr,0);
+    }
+  }
+  // t->askOnCloseEvent(false);
+  return t;
+}
 
 /** Creates a Qtiplot Table from selected spectra of MantidMatrix m.
     The columns are: 1st column is x-values from the first selected spectrum,
@@ -2079,14 +2079,14 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
     The name of a Y column is "Y"+QString::number(i), where i is the row in the MantidMatrix,
     not the spectrum index in the workspace.
 
-*/
+ */
 Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs, bool binCentres)
 {
-     const QList<int>& indexList = m->getSelectedRows();
-     if (indexList.empty()) return NULL;
+  const QList<int>& indexList = m->getSelectedRows();
+  if (indexList.empty()) return NULL;
 
-     return createTableFromSpectraList(m->name(), m->workspace(), indexList, errs, binCentres);
- }
+  return createTableFromSpectraList(m->name(), m->workspace(), indexList, errs, binCentres);
+}
 
 /**  Create a 1d graph from a Table.
      @param t Pointer to the Table.
@@ -2098,30 +2098,30 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs, bool bi
  */
 MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
 {
-    if (!t) return NULL;
-	QStringList  lst=t->colNames();
-	QStringList::const_iterator itr;
-	for (itr=lst.begin();itr!=lst.end();itr++)
-	{
-		//remove the X names from the column list and pass the X removed list
-		//to multilayerPlot
-		QString str=(*itr);
-		int index=0;
-		if(str.contains("XS",Qt::CaseInsensitive))
-		{
-			index=lst.indexOf(str);
-			lst.removeAt(index);
-		}
-	}
-	//MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-	MultiLayer* ml = appWindow()->multilayerPlot(t,lst,Graph::Line);
-	Graph *g = ml->activeGraph();
-	appWindow()->polishGraph(g,type);
-    for(int i=0;i<g->curves();i++)
-        g->setCurveStyle(i,type);
-	//ml->askOnCloseEvent(false);
+  if (!t) return NULL;
+  QStringList  lst=t->colNames();
+  QStringList::const_iterator itr;
+  for (itr=lst.begin();itr!=lst.end();itr++)
+  {
+    //remove the X names from the column list and pass the X removed list
+    //to multilayerPlot
+    QString str=(*itr);
+    int index=0;
+    if(str.contains("XS",Qt::CaseInsensitive))
+    {
+      index=lst.indexOf(str);
+      lst.removeAt(index);
+    }
+  }
+  //MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+  MultiLayer* ml = appWindow()->multilayerPlot(t,lst,Graph::Line);
+  Graph *g = ml->activeGraph();
+  appWindow()->polishGraph(g,type);
+  for(int i=0;i<g->curves();i++)
+    g->setCurveStyle(i,type);
+  //ml->askOnCloseEvent(false);
 
-    return ml;
+  return ml;
 }
 
 /** Set properties of a 1d graph which plots spectrum data from a workspace such as the title and axes captions.
@@ -2130,35 +2130,35 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
  */
 void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
 {
-    Mantid::API::MatrixWorkspace_sptr workspace = 
+  Mantid::API::MatrixWorkspace_sptr workspace =
       boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(wsName.toStdString())
+          AnalysisDataService::Instance().retrieve(wsName.toStdString())
       );
-    Graph* g = ml->activeGraph();
-    g->setTitle(tr("Workspace ")+wsName);
-    Mantid::API::Axis* ax;
-    ax = workspace->getAxis(0);
-    std::string s;
-    if (ax->unit() && ax->unit()->unitID() != "Empty" )
+  Graph* g = ml->activeGraph();
+  g->setTitle(tr("Workspace ")+wsName);
+  Mantid::API::Axis* ax;
+  ax = workspace->getAxis(0);
+  std::string s;
+  if (ax->unit() && ax->unit()->unitID() != "Empty" )
+  {
+    s = ax->unit()->caption();
+    if ( !ax->unit()->label().empty() )
     {
-      s = ax->unit()->caption();
-      if ( !ax->unit()->label().empty() )
-      {
-        s += " / " + ax->unit()->label();
-      }
+      s += " / " + ax->unit()->label();
     }
-    else if (!ax->title().empty())
-    {
-        s = ax->title();
-    }
-    else
-    {
-        s = "X axis";
-    }
-    g->setXAxisTitle(tr(s.c_str()));
-    g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-    g->setAntialiasing(false);
-    g->setAutoScale();
+  }
+  else if (!ax->title().empty())
+  {
+    s = ax->title();
+  }
+  else
+  {
+    s = "X axis";
+  }
+  g->setXAxisTitle(tr(s.c_str()));
+  g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
+  g->setAntialiasing(false);
+  g->setAutoScale();
 }
 
 /** Set properties of a 1d graph which plots bin data from a workspace.
@@ -2168,18 +2168,18 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
  */
 void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::MatrixWorkspace_sptr workspace)
 {
-    Graph* g = ml->activeGraph();
-    g->setTitle(tr("Workspace ")+Name);
-    std::string xtitle;
-    if (workspace->axes() > 1)   // Protection against calling this on 1D/single value workspaces
-    {
-      const Axis* const axis = workspace->getAxis(1);
-      if ( axis->isSpectra() ) xtitle = "Spectrum Number";
-      else if ( axis->unit() ) xtitle = axis->unit()->caption() + " / " + axis->unit()->label();
-    }
-    g->setXAxisTitle(tr(xtitle.c_str()));
-    g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-    g->setAntialiasing(false);
+  Graph* g = ml->activeGraph();
+  g->setTitle(tr("Workspace ")+Name);
+  std::string xtitle;
+  if (workspace->axes() > 1)   // Protection against calling this on 1D/single value workspaces
+  {
+    const Axis* const axis = workspace->getAxis(1);
+    if ( axis->isSpectra() ) xtitle = "Spectrum Number";
+    else if ( axis->unit() ) xtitle = axis->unit()->caption() + " / " + axis->unit()->label();
+  }
+  g->setXAxisTitle(tr(xtitle.c_str()));
+  g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
+  g->setAntialiasing(false);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
@@ -2210,11 +2210,11 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 {
   const QString& firstWorkspace = toPlot.constBegin().key();
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
-	//ml->askOnCloseEvent(false);
+  //ml->askOnCloseEvent(false);
   ml->setCloseOnEmpty(true);
-	Graph *g = ml->activeGraph();
-	if (!g)
-		return 0;
+  Graph *g = ml->activeGraph();
+  if (!g)
+    return 0;
 
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
   appWindow()->setPreferences(g);
@@ -2260,16 +2260,16 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
  */
 MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs)
 {
-     if (i0 < 0 || i1 < 0) return 0;
-     /** For instrument with one to many spectra-detector mapping,
-      * different pixels with correspond to the same specta so
-      * we need to remove doublons in this case.
-      */
-     std::set<int> indexList;
-     for(int i=i0;i<=i1;i++)
-         indexList.insert(i);
+  if (i0 < 0 || i1 < 0) return 0;
+  /** For instrument with one to many spectra-detector mapping,
+   * different pixels with correspond to the same specta so
+   * we need to remove doublons in this case.
+   */
+  std::set<int> indexList;
+  for(int i=i0;i<=i1;i++)
+    indexList.insert(i);
 
-    return plotSpectraList(wsName,indexList,errs);
+  return plotSpectraList(wsName,indexList,errs);
 }
 
 /**  Create a graph and plot the selected rows of a MantidMatrix
@@ -2298,7 +2298,7 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
 
   Table* t = new Table(appWindow()->scriptingEnv(), numRows, c*bins.size() + 1, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
- // t->askOnCloseEvent(false);
+  // t->askOnCloseEvent(false);
   int kY,kErr;
   for(int i = 0; i < bins.size(); i++)
   {
@@ -2342,95 +2342,95 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs)
 
 MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs, bool tableVisible)
 {
-    Table *t = createTableFromSelectedColumns(m,errs);
-    //t->askOnCloseEvent(false);
-    if (!t) return NULL;
-    if (tableVisible) t->showNormal();
+  Table *t = createTableFromSelectedColumns(m,errs);
+  //t->askOnCloseEvent(false);
+  if (!t) return NULL;
+  if (tableVisible) t->showNormal();
 
-    MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-    Graph *g = ml->activeGraph();
-    appWindow()->polishGraph(g,Graph::Line);
-    m->setBinGraph(ml,t);
-   // ml->askOnCloseEvent(false);
+  MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+  Graph *g = ml->activeGraph();
+  appWindow()->polishGraph(g,Graph::Line);
+  m->setBinGraph(ml,t);
+  // ml->askOnCloseEvent(false);
 
-    return ml;
+  return ml;
 }
 /** Saves data to  nexus file
-  * @param wsName Name of the workspace to be saved
-  * @param fileName name of the nexus file to created
-*/
+ * @param wsName Name of the workspace to be saved
+ * @param fileName name of the nexus file to created
+ */
 void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::string & wsName)
 { 
-	try
-	{
-	Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("SaveNexusProcessed");
-	alg->setPropertyValue("Filename",fileName);
-	alg->setPropertyValue("InputWorkspace",wsName);
-	alg->execute();
-	}
-	catch(...)
-	{
-	}
+  try
+  {
+    Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("SaveNexusProcessed");
+    alg->setPropertyValue("Filename",fileName);
+    alg->setPropertyValue("InputWorkspace",wsName);
+    alg->execute();
+  }
+  catch(...)
+  {
+  }
 }
 /** Loads data from nexus file
-  * @param wsName Name of the workspace to be created
-  * @param fileName name of the nexus file 
-*/
+ * @param wsName Name of the workspace to be created
+ * @param fileName name of the nexus file
+ */
 void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
 {
-	if(fileName.empty()) return ;
-	try
-	{
-		Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadNexus");
-		alg->setPropertyValue("Filename",fileName);
-		alg->setPropertyValue("OutputWorkspace",wsName);
-		if(project)alg->execute();
-		else executeAlgorithmAsync(alg);
-	}
-	catch(...)
-{
-}
+  if(fileName.empty()) return ;
+  try
+  {
+    Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadNexus");
+    alg->setPropertyValue("Filename",fileName);
+    alg->setPropertyValue("OutputWorkspace",wsName);
+    if(project)alg->execute();
+    else executeAlgorithmAsync(alg);
+  }
+  catch(...)
+  {
+  }
 }
 /** Loads data from raw file
-  * @param wsName Name of the workspace to be created
-  * @param fileName name of the raw file 
-*/
+ * @param wsName Name of the workspace to be created
+ * @param fileName name of the raw file
+ */
 void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
 {
-	if(fileName.empty()) return ;
-	try
-	{
-	Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadRaw");
-	alg->setPropertyValue("Filename",fileName);
-	alg->setPropertyValue("OutputWorkspace",wsName);
-	if(project)alg->execute();
-	else executeAlgorithmAsync(alg);
-	}
-	catch(...)
-	{
-	}
+  if(fileName.empty()) return ;
+  try
+  {
+    Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadRaw");
+    alg->setPropertyValue("Filename",fileName);
+    alg->setPropertyValue("OutputWorkspace",wsName);
+    if(project)alg->execute();
+    else executeAlgorithmAsync(alg);
+  }
+  catch(...)
+  {
+  }
 }
 MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper)
 {
-	 MatrixWorkspace_sptr ws;
-  	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-	{
-		ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-	}
+  MatrixWorkspace_sptr ws;
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  }
 
-	if (!ws.get())return 0 ;
+  if (!ws.get())return 0 ;
 
-	 MantidMatrix* w = 0;
-	 w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
-	 if ( !w ) return 0;
+  MantidMatrix* w = 0;
+  w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
+  if ( !w ) return 0;
 
-    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-    connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-    connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
+  connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+  connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+  connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
 
-    appWindow()->d_workspace->addSubWindow(w);
-    w->showNormal();
-	return w;
+  appWindow()->d_workspace->addSubWindow(w);
+  w->showNormal();
+  return w;
 }
 
 //=========================================================================
@@ -2442,62 +2442,62 @@ MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QStr
 
 struct mem_block
 {
-    int size;
-    int state;
+  int size;
+  int state;
 };
 
 ///  Assess the virtual memeory of the current process.
 void countVirtual(vector<mem_block>& mem, int& total)
 {
 
-    MEMORYSTATUSEX memStatus;
-    memStatus.dwLength = sizeof(MEMORYSTATUSEX);
-    GlobalMemoryStatusEx( &memStatus );
+  MEMORYSTATUSEX memStatus;
+  memStatus.dwLength = sizeof(MEMORYSTATUSEX);
+  GlobalMemoryStatusEx( &memStatus );
 
-    MEMORY_BASIC_INFORMATION info;
+  MEMORY_BASIC_INFORMATION info;
 
-    char *addr = 0;
-    size_t free = 0;      // total free space
-    size_t reserved = 0;  // total reserved space
-    size_t committed = 0; // total commited (used) space
-    size_t size = 0;
-    size_t free_max = 0;     // maximum contiguous block of free memory
-    size_t reserved_max = 0; // maximum contiguous block of reserved memory
-    size_t committed_max = 0;// maximum contiguous block of committed memory
+  char *addr = 0;
+  size_t free = 0;      // total free space
+  size_t reserved = 0;  // total reserved space
+  size_t committed = 0; // total commited (used) space
+  size_t size = 0;
+  size_t free_max = 0;     // maximum contiguous block of free memory
+  size_t reserved_max = 0; // maximum contiguous block of reserved memory
+  size_t committed_max = 0;// maximum contiguous block of committed memory
 
-    size_t GB2 = memStatus.ullTotalVirtual;// Maximum memeory available to the process
-    total = GB2;
+  size_t GB2 = memStatus.ullTotalVirtual;// Maximum memeory available to the process
+  total = GB2;
 
-    // Loop over all virtual memory to find out the status of every block.
-    do
+  // Loop over all virtual memory to find out the status of every block.
+  do
+  {
+    VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
+
+    int state;
+    if (info.State == MEM_FREE)
     {
-        VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
+      free += info.RegionSize;
+      if (info.RegionSize > free_max) free_max = info.RegionSize;
+      state = 0;
+    }
+    if (info.State == MEM_RESERVE)
+    {
+      reserved += info.RegionSize;
+      if (info.RegionSize > reserved_max) reserved_max = info.RegionSize;
+      state = 500;
+    }
+    if (info.State == MEM_COMMIT)
+    {
+      committed += info.RegionSize;
+      if (info.RegionSize > committed_max) committed_max = info.RegionSize;
+      state = 1000;
+    }
 
-        int state;
-        if (info.State == MEM_FREE)
-        {
-            free += info.RegionSize;
-            if (info.RegionSize > free_max) free_max = info.RegionSize;
-            state = 0;
-        }
-        if (info.State == MEM_RESERVE)
-        {
-            reserved += info.RegionSize;
-            if (info.RegionSize > reserved_max) reserved_max = info.RegionSize;
-            state = 500;
-        }
-        if (info.State == MEM_COMMIT)
-        {
-            committed += info.RegionSize;
-            if (info.RegionSize > committed_max) committed_max = info.RegionSize;
-            state = 1000;
-        }
+    addr += info.RegionSize;
+    size += info.RegionSize;
 
-        addr += info.RegionSize;
-        size += info.RegionSize;
-
-        mem_block b = {info.RegionSize, state};
-        mem.push_back(b);
+    mem_block b = {info.RegionSize, state};
+    mem.push_back(b);
 
     /*cerr<<"BaseAddress = "<< info.BaseAddress<<'\n';
     cerr<<"AllocationBase = "<< info.AllocationBase<<'\n';
@@ -2507,18 +2507,18 @@ void countVirtual(vector<mem_block>& mem, int& total)
     cerr<<"Protect = "<< hex << info.Protect <<' '<< protect_str(info.Protect)<<'\n';
     cerr<<"Type = "<< hex << info.Type<<'\n';*/
 
-    }
-    while(size < GB2);
+  }
+  while(size < GB2);
 
 
-    std::cerr<<"count FREE = "<<std::dec<<double(free)/1024/1024<<'\n';
-    std::cerr<<"count RESERVED = "<<double(reserved)/1024/1024<<'\n';
-    std::cerr<<"count COMMITTED = "<<double(committed)/1024/1024<<'\n';
+  std::cerr<<"count FREE = "<<std::dec<<double(free)/1024/1024<<'\n';
+  std::cerr<<"count RESERVED = "<<double(reserved)/1024/1024<<'\n';
+  std::cerr<<"count COMMITTED = "<<double(committed)/1024/1024<<'\n';
 
-    std::cerr<<"max FREE = "<<std::dec<<double(free_max)/1024/1024<<'\n';
-    std::cerr<<"max RESERVED = "<<double(reserved_max)/1024/1024<<'\n';
-    std::cerr<<"max COMMITTED = "<<double(committed_max)/1024/1024<<'\n';
-    std::cerr<<'\n';
+  std::cerr<<"max FREE = "<<std::dec<<double(free_max)/1024/1024<<'\n';
+  std::cerr<<"max RESERVED = "<<double(reserved_max)/1024/1024<<'\n';
+  std::cerr<<"max COMMITTED = "<<double(committed_max)/1024/1024<<'\n';
+  std::cerr<<'\n';
 }
 
 /// Shows 2D plot of current memory usage.
@@ -2526,67 +2526,67 @@ void countVirtual(vector<mem_block>& mem, int& total)
 /// Red - used memory block, blue - free, green - reserved.
 void MantidUI::memoryImage()
 {
-    //ofstream ofil("memory.txt");
-    vector<mem_block> mem;
-    int total;
-    countVirtual(mem,total);
-    int colNum = 1024;
-    int rowNum = total/1024/colNum;
-    Matrix *m = appWindow()->newMatrix(rowNum,colNum);
-    m->setCoordinates(0,colNum,0,rowNum);
-    int row = 0;
-    int col = 0;
-    QImage image(colNum,rowNum,QImage::Format_Mono);
-    for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  //ofstream ofil("memory.txt");
+  vector<mem_block> mem;
+  int total;
+  countVirtual(mem,total);
+  int colNum = 1024;
+  int rowNum = total/1024/colNum;
+  Matrix *m = appWindow()->newMatrix(rowNum,colNum);
+  m->setCoordinates(0,colNum,0,rowNum);
+  int row = 0;
+  int col = 0;
+  QImage image(colNum,rowNum,QImage::Format_Mono);
+  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  {
+    int n = b->size/1024;
+    for(int i=0;i<n;i++)
     {
-        int n = b->size/1024;
-        for(int i=0;i<n;i++)
-        {
-            m->setCell(row,col,b->state);
-            //ofil<<b->state<<'\t';
-            col++;
-            if (col >= colNum)
-            {
-                col = 0;
-                row++;
-                //ofil<<'\n';
-            }
-        }
+      m->setCell(row,col,b->state);
+      //ofil<<b->state<<'\t';
+      col++;
+      if (col >= colNum)
+      {
+        col = 0;
+        row++;
+        //ofil<<'\n';
+      }
     }
-    MultiLayer* g = appWindow()->plotSpectrogram(m, Graph::ColorMap);
+  }
+  MultiLayer* g = appWindow()->plotSpectrogram(m, Graph::ColorMap);
 }
 
 void MantidUI::memoryImage2()
 {
-    //ofstream ofil("memory.txt");
-    vector<mem_block> mem;
-    int total;
-    countVirtual(mem,total);
-    int colNum = 1024;
-    int rowNum = total/1024/colNum;
-    int row = 0;
-    int col = 0;
-    QImage image(colNum,rowNum,QImage::Format_Mono);
-    for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  //ofstream ofil("memory.txt");
+  vector<mem_block> mem;
+  int total;
+  countVirtual(mem,total);
+  int colNum = 1024;
+  int rowNum = total/1024/colNum;
+  int row = 0;
+  int col = 0;
+  QImage image(colNum,rowNum,QImage::Format_Mono);
+  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  {
+    int n = b->size/1024;
+    for(int i=0;i<n;i++)
     {
-        int n = b->size/1024;
-        for(int i=0;i<n;i++)
-        {
-          if (row < rowNum && col < colNum)
-          {
-            image.setPixel(col,row,b->state > 600);
-          }
-          //ofil<<b->state<<'\t';
-          col++;
-          if (col >= colNum)
-          {
-            col = 0;
-            row++;
-            //ofil<<'\n';
-          }
-        }
+      if (row < rowNum && col < colNum)
+      {
+        image.setPixel(col,row,b->state > 600);
+      }
+      //ofil<<b->state<<'\t';
+      col++;
+      if (col >= colNum)
+      {
+        col = 0;
+        row++;
+        //ofil<<'\n';
+      }
     }
-    image.save("memory_image.jpg");
+  }
+  image.save("memory_image.jpg");
 }
 
 #endif
@@ -2599,25 +2599,25 @@ void MantidUI::memoryImage2()
 
 void MantidUI::test()
 {
-    std::cerr<<"\nTest\n\n";
+  std::cerr<<"\nTest\n\n";
 
-    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getSelectedWorkspace());
-    if (ws)
+  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getSelectedWorkspace());
+  if (ws)
+  {
+    boost::shared_ptr<Mantid::API::Instrument> instr = ws->getBaseInstrument();
+    boost::shared_ptr<Mantid::Geometry::CompAssembly> both = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*instr)[3]);
+    if (both)
     {
-        boost::shared_ptr<Mantid::API::Instrument> instr = ws->getBaseInstrument();
-        boost::shared_ptr<Mantid::Geometry::CompAssembly> both = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*instr)[3]);
-        if (both)
-        {
-            boost::shared_ptr<Mantid::Geometry::CompAssembly> first = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*both)[0]);
-            if (first)
-            {
-                static int i = 0;
-                Mantid::Geometry::V3D u = i++ ? Mantid::Geometry::V3D(1,0,0) : Mantid::Geometry::V3D(0,1,0);
-                Mantid::Geometry::Quat q(30,u);
-                first->rotate(q);
-                return;
-            }
-        }
+      boost::shared_ptr<Mantid::Geometry::CompAssembly> first = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*both)[0]);
+      if (first)
+      {
+        static int i = 0;
+        Mantid::Geometry::V3D u = i++ ? Mantid::Geometry::V3D(1,0,0) : Mantid::Geometry::V3D(0,1,0);
+        Mantid::Geometry::Quat q(30,u);
+        first->rotate(q);
+        return;
+      }
     }
-    std::cerr<<"Failed...\n";
+  }
+  std::cerr<<"Failed...\n";
 }
