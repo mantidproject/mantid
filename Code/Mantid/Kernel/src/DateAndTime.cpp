@@ -167,6 +167,22 @@ std::time_t to_time_t(const dateAndTime &time)
   return as_time_t;
 }
 
+//-----------------------------------------------------------------------------------------------
+/** Convert a dateAndTime object (in UTC time) to std::time_t, in the LOCAL timezone.
+ */
+std::time_t to_localtime_t(const dateAndTime &time)
+{
+  std::tm as_tm = boost::posix_time::to_tm(time);
+  std::time_t as_time_t = mktime( &as_tm );
+  return as_time_t;
+}
+
+/** Return time as string in simple format CCYY-mmm-dd hh:mm:ss.fffffff
+ */
+std::string to_simple_string(const dateAndTime &time)
+{
+  return boost::posix_time::to_simple_string(time);
+}
 
 } //namespace  DateAndTime
 
@@ -206,21 +222,12 @@ TimeInterval TimeInterval::intersection(const TimeInterval& ti)const
 std::string TimeInterval::begin_str()const
 {
   return boost::posix_time::to_simple_string(this->m_begin);
-
-//    char buffer [25];
-//    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&m_begin));
-////    strftime (buffer,25,"%H:%M:%S",localtime(&m_begin));
-//    return std::string(buffer);
 }
 
 /// String representation of the end time
 std::string TimeInterval::end_str()const
 {
   return boost::posix_time::to_simple_string(this->m_end);
-
-//    char buffer [25];
-//    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&m_end));
-//    return std::string(buffer);
 }
 
 
@@ -231,12 +238,4 @@ std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t)
 {
   s << t.begin() << " - " << t.end();
   return s;
-//    char buffer [25];
-//    Mantid::Kernel::dateAndTime d = t.begin();
-//    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&d));
-//    s<<buffer<<" - ";
-//    d = t.end();
-//    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&d));
-//    s<<buffer;
-//    return s;
 }

@@ -41,7 +41,6 @@
 
 #include <qwt_plot_curve.h>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include <time.h>
 
 #ifdef _WIN32
@@ -1895,19 +1894,11 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
       lastTime = it->first;
       lastValue = it->second;
       //Convert time into string
-      std::string time_string = boost::posix_time::to_simple_string(lastTime);
+      std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(lastTime);
       t->setText(i,0,QString::fromStdString(time_string));
       t->setCell(i,1,lastValue);
       i++;
     }
-
-//    for(int i=0;i<flt.data()->size();i++)
-//    {
-//        lastTime = flt.data()->nthInterval(i).begin();
-//        lastValue = flt.data()->nthValue(i);
-//        t->setText(i,0,QString::fromStdString(flt.data()->nthInterval(i).begin_str()));
-//        t->setCell(i,1,lastValue);
-//    }
 
 	try
 	{
@@ -1915,7 +1906,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     {
         rowcount = time_value_map.size();
         if (rowcount == t->numRows()) t->addRows(1);
-        std::string time_string = boost::posix_time::to_simple_string(flt.filter()->lastTime());
+        std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(flt.filter()->lastTime());
         t->setText(rowcount,0,QString::fromStdString(time_string));
         t->setCell(rowcount,1,lastValue);
     }
@@ -1946,7 +1937,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   // Set x-axis label format
   Mantid::Kernel::dateAndTime label_as_ptime = flt.data()->nthInterval(0).begin();
-  QDateTime dt = QDateTime::fromTime_t( Mantid::Kernel::DateAndTime::to_time_t( label_as_ptime ) );
+  QDateTime dt = QDateTime::fromTime_t( Mantid::Kernel::DateAndTime::to_localtime_t( label_as_ptime ) );
   QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
   g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
 

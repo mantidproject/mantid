@@ -33,7 +33,11 @@ DLLExport dateAndTime create_DateAndTime_FromISO8601_String(const std::string &s
 
 DLLExport std::string create_ISO8601_String(const dateAndTime &time);
 
+DLLExport std::string to_simple_string(const dateAndTime &time);
+
 DLLExport std::time_t to_time_t(const dateAndTime &time);
+
+DLLExport std::time_t to_localtime_t(const dateAndTime &time);
 
 DLLExport dateAndTime from_time_t(const std::time_t &time);
 
