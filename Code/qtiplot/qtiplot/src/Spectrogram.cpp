@@ -101,8 +101,8 @@ Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRec
  	d_show_labels(true),
  	d_white_out_labels(false),
  	d_labels_angle(0.0),
- 	d_labels_color(Qt::black),
  	d_selected_label(NULL),
+  d_labels_color(Qt::black),
  	d_labels_x_offset(0), 	d_labels_y_offset(0),
  	d_labels_align(Qt::AlignHCenter),
  	d_labels_font(QFont()),
@@ -731,6 +731,10 @@ void Spectrogram::drawContourLines (QPainter *p, const QwtScaleMap &xMap, const 
 void Spectrogram::updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QwtRasterData::ContourLines &contourLines) const
 {
+  (void) p; //Avoid compiler warning
+  (void) xMap; //Avoid compiler warning
+  (void) yMap; //Avoid compiler warning
+
   QwtPlot *d_plot = plot();
   if (!d_plot)
     return;
@@ -876,7 +880,7 @@ QImage Spectrogram::renderImage(
 
     int imageWidth = rect.width();
     int row0 = -2;
-    for(int i=0;i<image2matrix_yMap.size();++i)
+    for(int i=0; i < static_cast<int>(image2matrix_yMap.size()) ;++i)
     {
       int row = image2matrix_yMap[i];
       if (row < 0)

@@ -22,7 +22,7 @@ namespace Mantid
 
 namespace API
 {
-  class MatrixWorkspace;
+class MatrixWorkspace;
 }
 
 }
@@ -65,10 +65,10 @@ class QComboBox;
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-*/
+ */
 class InstrumentWindow : public MdiSubWindow, public WorkspaceObserver
 {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
   InstrumentWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
@@ -88,21 +88,21 @@ public:
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
 
 public slots:
-	void modeSelectButtonClicked();
-	void selectBinButtonClicked();
-	void detectorHighlighted(int detectorId,int spectraid,int count);
-        void showPickOptions();
-        void spectraInfoDialog();
-        void plotSelectedSpectra();
-        void showDetectorTable();
-        void groupDetectors();
-        void maskDetectors();
-	void changeColormap(const QString & filename = "");
-	void minValueChanged();
-	void maxValueChanged();
-	void setViewDirection(const QString&);
-	void componentSelected(const QItemSelection&, const QItemSelection&);
-	void pickBackgroundColor();
+  void modeSelectButtonClicked();
+  void selectBinButtonClicked();
+  void detectorHighlighted(int detectorId,int spectraid,int count);
+  void showPickOptions();
+  void spectraInfoDialog();
+  void plotSelectedSpectra();
+  void showDetectorTable();
+  void groupDetectors();
+  void maskDetectors();
+  void changeColormap(const QString & filename = "");
+  void minValueChanged();
+  void maxValueChanged();
+  void setViewDirection(const QString&);
+  void componentSelected(const QItemSelection&, const QItemSelection&);
+  void pickBackgroundColor();
   void saveImage();
 
 signals:
@@ -111,38 +111,39 @@ signals:
   void execMantidAlgorithm(const QString&,const QString&);								  
 
 private slots:
-        void scaleTypeChanged(int);
-        void updateInteractionInfoText();
+  void scaleTypeChanged(int);
+  void updateInteractionInfoText();
+
 private:
 
-	QFrame * const setupAxisFrame();
+  QFrame * setupAxisFrame();
 
   void loadSettings();
-	void saveSettings();
-	void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
-        void setupColorBarScaling();
-        QString asString(const std::vector<int>& numbers) const;
+  void saveSettings();
+  void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
+  void setupColorBarScaling();
+  QString asString(const std::vector<int>& numbers) const;
   QString confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets);
-	QLabel*      mInteractionInfo;
-	QTabWidget*  mControlsTab;
+  QLabel*      mInteractionInfo;
+  QTabWidget*  mControlsTab;
   // Actions for the pick menu
   QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
 
-	QPushButton* mSelectButton; ///< Select the mode Pick/Normal
-	QPushButton* mSelectColormap; ///< Select colormap button
-        QPushButton* mSaveImage; ///< Save the currently displayed image
-	Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
-	int          mSpectraIDSelected; ///< spectra index id
-	int          mDetectorIDSelected; ///< detector id
-	std::set<int> mSpectraIDSelectedList;
-	std::vector<int> mDetectorIDSelectedList;
-	QwtScaleWidget* mColorMapWidget; ///< colormap display widget
-	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
-	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
+  QPushButton* mSelectButton; ///< Select the mode Pick/Normal
+  QPushButton* mSelectColormap; ///< Select colormap button
+  QPushButton* mSaveImage; ///< Save the currently displayed image
+  Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
+  int          mSpectraIDSelected; ///< spectra index id
+  int          mDetectorIDSelected; ///< detector id
+  std::set<int> mSpectraIDSelectedList;
+  std::vector<int> mDetectorIDSelectedList;
+  QwtScaleWidget* mColorMapWidget; ///< colormap display widget
+  QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
+  QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
   QComboBox *mScaleOptions;
   QComboBox *mAxisCombo;           ///< the user can select an axis to view the instrument from, this combo box stores the list of axis names and (behind the scenes) the coordinates of the different axises
-	BinDialog*   mBinMapDialog;
-	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
+  BinDialog*   mBinMapDialog;
+  InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
   QCheckBox *m3DAxesToggle; ///< A tick box to toggle the 3D axes in the instrument view
 
   std::string mWorkspaceName; ///< The name of workpace that this window is associated with

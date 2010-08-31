@@ -44,9 +44,16 @@ using namespace Mantid::API;
 
 //Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
-  : MdiSubWindow(label, parent, name, 0), WorkspaceObserver(), m_funct(this),m_histogram(false),
-  y_start(0.0),y_end(0.0),m_min(0),m_max(0),m_are_min_max_set(false),m_boundingRect(),
-  m_selectedRows(),m_selectedCols()
+  : MdiSubWindow(label, parent, name, 0),
+    WorkspaceObserver(),
+    y_start(0.0),y_end(0.0),
+    m_histogram(false),
+    m_min(0),m_max(0),
+    m_are_min_max_set(false),
+    m_funct(this),
+    m_boundingRect(),
+    m_selectedRows(),
+    m_selectedCols()
 {
   m_appWindow = parent;
   m_strName = name.toStdString();

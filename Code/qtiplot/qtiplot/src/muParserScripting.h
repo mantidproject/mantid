@@ -56,6 +56,8 @@ class muParserScripting: public ScriptingEnv
   Script *newScript(const QString &code, QObject *context, bool interactive = true,   
 		    const QString &name="<input>")
     {
+      (void)(interactive); //Stop compiler warning
+      (void)(name); //Stop compiler warning
       return new muParserScript(this, code, context, name);
     }
     

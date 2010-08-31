@@ -5578,15 +5578,18 @@ void ApplicationWindow::loadNexus()
 
   //look for the last "/ "in the file and . ,extract the string between these charcters to get the workspace name.
   std::string name(fileName.toStdString());
-  std::basic_string<char>::size_type index1,index2;
-  index1=name.find_last_of("//");
-  index2=name.find(".");
-  int count=index2-index1-1;
+  //std::basic_string<char>::size_type index1,index2;
+  int index1,index2;
+  index1=static_cast<int>( name.find_last_of("//") );
+  index2=static_cast<int>( name.find(".") );
+  int count= index2-index1-1;
   if(index1!=-1 && index2!=-1)
     wsName= name.substr(index1+1,count);
   if(mantidUI) mantidUI->loaddataFromNexusFile(wsName,fileName.toStdString());
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fileName).absoluteDir().path());
 }
+
+
 void ApplicationWindow::loadRaw()
 {
   QString filter = tr("Mantid Files")+" (*.raw *.s);;";
@@ -5601,9 +5604,10 @@ void ApplicationWindow::loadRaw()
 
   //look for the last / in the file and . ,extract the string between these charcters to get the workspace name.
   std::string name(fileName.toStdString());
-  std::basic_string<char>::size_type index1,index2;
-  index1=name.find_last_of("//");
-  index2=name.find(".");
+  //std::basic_string<char>::size_type index1,index2;
+  int index1,index2;
+  index1=static_cast<int>( name.find_last_of("//") );
+  index2=static_cast<int>( name.find(".") );
   int count=index2-index1-1;
   if(index1!=-1 && index2!=-1)
     wsName= name.substr(index1+1,count);

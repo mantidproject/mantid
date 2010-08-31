@@ -2481,6 +2481,8 @@ void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string&
 }
 MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper)
 {
+  (void) parent; //Avoid compiler warning
+
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {

@@ -80,7 +80,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mMinValueBox->setText("");
 	mMaxValueBox->setText("");
 
-	QFrame * const axisViewFrame = setupAxisFrame();
+	QFrame * axisViewFrame = setupAxisFrame();
 
 	//Colormap Frame widget
 	QFrame* lColormapFrame = new QFrame();
@@ -348,7 +348,10 @@ void InstrumentWindow::groupDetectors()
 void InstrumentWindow::maskDetectors()
 {
   const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
-  const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
+
+  //Following variable is unused:
+  //const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
+
   QString inputWS = mInstrumentDisplay->getWorkspaceName();
   // Masking can only replace the input workspace so no need to ask for confirmation
   QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
@@ -743,7 +746,7 @@ void InstrumentWindow::updateInteractionInfoText()
 *  from an axis that they select
 *  @return the QFrame that will be inserted on the main instrument view form
 */
-QFrame * const InstrumentWindow::setupAxisFrame()
+QFrame * InstrumentWindow::setupAxisFrame()
 {
   QFrame* axisViewFrame = new QFrame();
   QHBoxLayout* axisViewLayout = new QHBoxLayout();
