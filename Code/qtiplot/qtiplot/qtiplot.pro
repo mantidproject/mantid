@@ -678,7 +678,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/ObjComponentActor.cpp	\	
 		src/Mantid/InstrumentWidget/InstrumentActor.cpp \
 		src/Mantid/InstrumentWidget/MantidColorMap.cpp \
-		src/Mantid/ManageCustomMenus.cpp
+		src/Mantid/ManageCustomMenus.cpp \
+		src/pixmaps.cpp
 
 
 ###############################################################

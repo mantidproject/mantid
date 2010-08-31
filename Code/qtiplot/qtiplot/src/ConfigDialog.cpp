@@ -689,7 +689,7 @@ void ConfigDialog::initDirSearchTab()
 	grid->addWidget(leDataSearchDirs, 0, 1);
 
 	QPushButton *button = new QPushButton();
-	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	grid->addWidget(button, 0, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addDataSearchDirs()) );
@@ -711,7 +711,7 @@ void ConfigDialog::initDirSearchTab()
 	grid->addWidget(leDefaultSaveDir, 2, 1);
 
 	button = new QPushButton();
-	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	grid->addWidget(button, 2, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addDefaultSaveDir()) );
@@ -727,7 +727,7 @@ void ConfigDialog::initDirSearchTab()
 	grid->addWidget(lePythonScriptsDirs, 3, 1);
 
 	button = new QPushButton();
-	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	grid->addWidget(button, 3, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addPythonScriptsDirs()) );
@@ -743,7 +743,7 @@ void ConfigDialog::initDirSearchTab()
 	grid->addWidget(lePythonAlgorithmsDirs, 4, 1);
 
 	button = new QPushButton();
-	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	grid->addWidget(button, 4, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addPythonAlgorithmsDirs()) );
@@ -758,7 +758,7 @@ void ConfigDialog::initDirSearchTab()
 	grid->addWidget(leInstrumentDir, 5, 1);
 
 	button = new QPushButton();
-	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	grid->addWidget(button, 5, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addInstrumentDir()) );
@@ -773,7 +773,7 @@ void ConfigDialog::initDirSearchTab()
 	grid->addWidget(leParameterDir, 6, 1);
 
 	button = new QPushButton();
-	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	grid->addWidget(button, 6, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
@@ -1254,7 +1254,7 @@ void ConfigDialog::initFileLocationsPage()
 	gl->addWidget(translationsPathLine, 0, 1);
 
 	QPushButton *browseTranslationsBtn = new QPushButton();
-	browseTranslationsBtn->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	browseTranslationsBtn->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	gl->addWidget(browseTranslationsBtn, 0, 2);
 
 	lblHelpPath = new QLabel(tr("Help"));
@@ -1265,7 +1265,7 @@ void ConfigDialog::initFileLocationsPage()
 	gl->addWidget( helpPathLine, 1, 1);
 
 	QPushButton *browseHelpBtn = new QPushButton();
-	browseHelpBtn->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	browseHelpBtn->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	gl->addWidget(browseHelpBtn, 1, 2);
 	gl->setRowStretch(2, 1);
 
@@ -1277,7 +1277,7 @@ void ConfigDialog::initFileLocationsPage()
 // 	gl->addWidget(pythonConfigDirLine, 2, 1);
 
 // 	QPushButton *browsePythonConfigBtn = new QPushButton();
-// 	browsePythonConfigBtn->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+// 	browsePythonConfigBtn->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 // 	connect(browsePythonConfigBtn, SIGNAL(clicked()), this, SLOT(choosePythonConfigFolder()));
 // 	gl->addWidget(browsePythonConfigBtn, 2, 2);
 // 	gl->setRowStretch(3, 1);
@@ -1306,12 +1306,12 @@ void ConfigDialog::languageChange()
 	itemsList->addItem( tr( "3D Plots" ) );
 	itemsList->addItem( tr( "Fitting" ) );
 	itemsList->setCurrentRow(0);
-	itemsList->item(0)->setIcon(QIcon(QPixmap(general_xpm)));
+	itemsList->item(0)->setIcon(QIcon(getQPixmap("general_xpm")));
 	itemsList->item(1)->setIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
-	itemsList->item(2)->setIcon(QIcon(QPixmap(configTable_xpm)));
-	itemsList->item(3)->setIcon(QIcon(QPixmap(config_curves_xpm)));
-	itemsList->item(4)->setIcon(QIcon(QPixmap(logo_xpm)));
-	itemsList->item(5)->setIcon(QIcon(QPixmap(fit_xpm)));
+	itemsList->item(2)->setIcon(QIcon(getQPixmap("configTable_xpm")));
+	itemsList->item(3)->setIcon(QIcon(getQPixmap("config_curves_xpm")));
+	itemsList->item(4)->setIcon(QIcon(getQPixmap("logo_xpm")));
+	itemsList->item(5)->setIcon(QIcon(getQPixmap("fit_xpm")));
 	itemsList->setIconSize(QSize(32,32));
 	// calculate a sensible width for the items list
 	// (default QListWidget size is 256 which looks too big)
@@ -1478,16 +1478,16 @@ void ConfigDialog::languageChange()
 	lblSymbSize->setText(tr( "Symbol size" ));
 
 	boxCurveStyle->clear();
-	boxCurveStyle->addItem( QPixmap(lPlot_xpm), tr( " Line" ) );
-	boxCurveStyle->addItem( QPixmap(pPlot_xpm), tr( " Scatter" ) );
-	boxCurveStyle->addItem( QPixmap(lpPlot_xpm), tr( " Line + Symbol" ) );
-	boxCurveStyle->addItem( QPixmap(dropLines_xpm), tr( " Vertical drop lines" ) );
-	boxCurveStyle->addItem( QPixmap(spline_xpm), tr( " Spline" ) );
-	boxCurveStyle->addItem( QPixmap(hor_steps_xpm), tr( " Horizontal steps" ) );
-	boxCurveStyle->addItem( QPixmap(vert_steps_xpm), tr( " Vertical steps" ) );
-	boxCurveStyle->addItem( QPixmap(area_xpm), tr( " Area" ) );
-	boxCurveStyle->addItem( QPixmap(vertBars_xpm), tr( " Vertical Bars" ) );
-	boxCurveStyle->addItem( QPixmap(hBars_xpm), tr( " Horizontal Bars" ) );
+	boxCurveStyle->addItem( getQPixmap("lPlot_xpm"), tr( " Line" ) );
+	boxCurveStyle->addItem( getQPixmap("pPlot_xpm"), tr( " Scatter" ) );
+	boxCurveStyle->addItem( getQPixmap("lpPlot_xpm"), tr( " Line + Symbol" ) );
+	boxCurveStyle->addItem( getQPixmap("dropLines_xpm"), tr( " Vertical drop lines" ) );
+	boxCurveStyle->addItem( getQPixmap("spline_xpm"), tr( " Spline" ) );
+	boxCurveStyle->addItem( getQPixmap("hor_steps_xpm"), tr( " Horizontal steps" ) );
+	boxCurveStyle->addItem( getQPixmap("vert_steps_xpm"), tr( " Vertical steps" ) );
+	boxCurveStyle->addItem( getQPixmap("area_xpm"), tr( " Area" ) );
+	boxCurveStyle->addItem( getQPixmap("vertBars_xpm"), tr( " Vertical Bars" ) );
+	boxCurveStyle->addItem( getQPixmap("hBars_xpm"), tr( " Horizontal Bars" ) );
 
 	int style = app->defaultCurveStyle;
 	if (style == Graph::Line)

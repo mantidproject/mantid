@@ -47,7 +47,7 @@ TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app, Dir
 {
 	if (status_target)
 		connect(this, SIGNAL(statusText(const QString&)), status_target, status_slot);
-	//d_graph->plotWidget()->canvas()->setCursor(QCursor(QPixmap(vizor_xpm), -1, -1));
+	//d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
 	//emit statusText(tr("Double-click on plot to select a data point!"));
 
 	// Phase 1: select curve point

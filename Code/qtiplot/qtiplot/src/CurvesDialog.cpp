@@ -63,23 +63,23 @@ CurvesDialog::CurvesDialog( QWidget* parent, Qt::WFlags fl )
 
   hl->addWidget(new QLabel(tr("New curves style")));
   boxStyle = new QComboBox();
-  boxStyle->addItem( QPixmap(lPlot_xpm), tr( " Line" ) );
-  boxStyle->addItem( QPixmap(pPlot_xpm), tr( " Scatter" ) );
-  boxStyle->addItem( QPixmap(lpPlot_xpm), tr( " Line + Symbol" ) );
-  boxStyle->addItem( QPixmap(dropLines_xpm), tr( " Vertical drop lines" ) );
-  boxStyle->addItem( QPixmap(spline_xpm), tr( " Spline" ) );
-  boxStyle->addItem( QPixmap(hor_steps_xpm), tr( " Horizontal steps" ) );
-  boxStyle->addItem( QPixmap(vert_steps_xpm), tr( " Vertical steps" ) );
-  boxStyle->addItem( QPixmap(area_xpm), tr( " Area" ) );
-  boxStyle->addItem( QPixmap(vertBars_xpm), tr( " Vertical Bars" ) );
-  boxStyle->addItem( QPixmap(hBars_xpm), tr( " Horizontal Bars" ) );
+  boxStyle->addItem( getQPixmap("lPlot_xpm"), tr( " Line" ) );
+  boxStyle->addItem( getQPixmap("pPlot_xpm"), tr( " Scatter" ) );
+  boxStyle->addItem( getQPixmap("lpPlot_xpm"), tr( " Line + Symbol" ) );
+  boxStyle->addItem( getQPixmap("dropLines_xpm"), tr( " Vertical drop lines" ) );
+  boxStyle->addItem( getQPixmap("spline_xpm"), tr( " Spline" ) );
+  boxStyle->addItem( getQPixmap("hor_steps_xpm"), tr( " Horizontal steps" ) );
+  boxStyle->addItem( getQPixmap("vert_steps_xpm"), tr( " Vertical steps" ) );
+  boxStyle->addItem( getQPixmap("area_xpm"), tr( " Area" ) );
+  boxStyle->addItem( getQPixmap("vertBars_xpm"), tr( " Vertical Bars" ) );
+  boxStyle->addItem( getQPixmap("hBars_xpm"), tr( " Horizontal Bars" ) );
   hl->addWidget(boxStyle);
 
   boxMatrixStyle = new QComboBox();
-  boxMatrixStyle->addItem( QPixmap(color_map_xpm), tr("Contour - Color Fill"));
-  boxMatrixStyle->addItem( QPixmap(contour_map_xpm), tr("Contour Lines"));
-  boxMatrixStyle->addItem( QPixmap(gray_map_xpm), tr("Gray Scale Map"));
-  boxMatrixStyle->addItem( QPixmap(histogram_xpm), tr("Histogram"));
+  boxMatrixStyle->addItem( getQPixmap("color_map_xpm"), tr("Contour - Color Fill"));
+  boxMatrixStyle->addItem( getQPixmap("contour_map_xpm"), tr("Contour Lines"));
+  boxMatrixStyle->addItem( getQPixmap("gray_map_xpm"), tr("Gray Scale Map"));
+  boxMatrixStyle->addItem( getQPixmap("histogram_xpm"), tr("Histogram"));
   boxMatrixStyle->hide();
   hl->addWidget(boxMatrixStyle);
   hl->addStretch();
@@ -94,13 +94,13 @@ CurvesDialog::CurvesDialog( QWidget* parent, Qt::WFlags fl )
 
   QVBoxLayout* vl1 = new QVBoxLayout();
   btnAdd = new QPushButton();
-  btnAdd->setPixmap( QPixmap(next_xpm) );
+  btnAdd->setPixmap( getQPixmap("next_xpm") );
   btnAdd->setFixedWidth (35);
   btnAdd->setFixedHeight (30);
   vl1->addWidget(btnAdd);
 
   btnRemove = new QPushButton();
-  btnRemove->setPixmap( QPixmap(prev_xpm) );
+  btnRemove->setPixmap( getQPixmap("prev_xpm") );
   btnRemove->setFixedWidth (35);
   btnRemove->setFixedHeight(30);
   vl1->addWidget(btnRemove);

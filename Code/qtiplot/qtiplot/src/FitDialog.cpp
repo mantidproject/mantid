@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "FitDialog.h"
+#include "pixmaps.h"
 #include "MyParser.h"
 #include "ApplicationWindow.h"
 #include "ColorBox.h"
@@ -62,29 +63,6 @@
 #include <stdio.h>
 
 #include <qwt_plot_curve.h>
-
-/* XPM */
-static const char * param_range_btn_xpm[] = {
-"18 14 5 1",
-" 	c None",
-".	c #000000",
-"+	c #FFFFFF",
-"@	c #808000",
-"#	c #FFFF00",
-"..+            ..+",
-"..+            ..+",
-"..+  @@+  @@+  ..+",
-"..+ @#@+  @#@+ ..+",
-"..+@##@+  @##@+..+",
-"..@###@@@@@###@..+",
-"..#############..+",
-"..@###@@@@@###@..+",
-"..+@##@+  @##@+..+",
-"..++@#@+  @#@++..+",
-"..+ +@@+  @@++ ..+",
-"..+  +++  +++  ..+",
-"..+            ..+",
-"+++            +++"};
 
 FitDialog::FitDialog(Graph *g, QWidget* parent, Qt::WFlags fl )
 : QDialog( parent, fl )
@@ -141,7 +119,7 @@ void FitDialog::initFitPage()
     connect(btnSaveGuesses, SIGNAL(clicked()), this, SLOT(saveInitialGuesses()));
     vb->addWidget(btnSaveGuesses);
     btnParamRange = new QPushButton();
-    btnParamRange->setIcon(QIcon(QPixmap(param_range_btn_xpm)));
+    btnParamRange->setIcon(QIcon(getQPixmap("param_range_btn_xpm")));
     btnParamRange->setCheckable(true);
     connect(btnParamRange, SIGNAL(toggled(bool)), this, SLOT(showParameterRange(bool)));
     vb->addWidget(btnParamRange);

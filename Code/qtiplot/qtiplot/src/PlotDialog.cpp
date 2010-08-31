@@ -1420,7 +1420,7 @@ void PlotDialog::setMultiLayer(MultiLayer *ml)
 	boxPrintCrops->setChecked(d_ml->printCropmarksEnabled());
 
     QTreeWidgetItem *item = new QTreeWidgetItem(listBox, QStringList(ml->name()));
-    item->setIcon(0, QIcon(folder_open));
+    item->setIcon(0, QIcon(getQPixmap("folder_open")));
     listBox->addTopLevelItem(item);
     listBox->setCurrentItem(item);
 
@@ -2892,9 +2892,9 @@ void PlotDialog::updateTreeWidgetItem(QTreeWidgetItem *item)
         return;
 
     if (item->isExpanded())
-        item->setIcon(0, QIcon(folder_open));
+        item->setIcon(0, QIcon(getQPixmap("folder_open")));
     else
-        item->setIcon(0, QIcon(folder_closed));
+        item->setIcon(0, QIcon(getQPixmap("folder_closed")));
 }
 
 void PlotDialog::updateBackgroundTransparency(int alpha)
@@ -3200,7 +3200,7 @@ LayerItem::LayerItem(Graph *g, QTreeWidgetItem *parent, const QString& s)
     : QTreeWidgetItem( parent, QStringList(s), LayerTreeItem ),
       d_graph(g)
 {
-    setIcon(0, QPixmap(layer_disabled_xpm));
+    setIcon(0, getQPixmap("layer_disabled_xpm"));
     if (g)
         insertCurvesList();
 }
@@ -3208,9 +3208,9 @@ LayerItem::LayerItem(Graph *g, QTreeWidgetItem *parent, const QString& s)
 void LayerItem::setActive(bool on)
 {
     if (on)
-		setIcon(0, QPixmap(layer_enabled_xpm));
+		setIcon(0, getQPixmap("layer_enabled_xpm"));
     else
-		setIcon(0, QPixmap(layer_disabled_xpm));
+		setIcon(0, getQPixmap("layer_disabled_xpm"));
 }
 
 void LayerItem::insertCurvesList()
@@ -3247,15 +3247,15 @@ CurveTreeItem::CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QStrin
     : QTreeWidgetItem( parent, QStringList(s), PlotCurveTreeItem ),
       d_curve(curve)
 {
-    setIcon(0, QPixmap(graph_disabled_xpm));
+    setIcon(0, getQPixmap("graph_disabled_xpm"));
 }
 
 void CurveTreeItem::setActive(bool on)
 {
     if (on)
-		setIcon(0, QPixmap(graph_xpm));
+		setIcon(0, getQPixmap("graph_xpm"));
     else
-		setIcon(0, QPixmap(graph_disabled_xpm));
+		setIcon(0, getQPixmap("graph_disabled_xpm"));
 }
 
 int CurveTreeItem::plotItemIndex()

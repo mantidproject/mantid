@@ -5,6 +5,7 @@
 #include "../Spectrogram.h"
 #include "MantidMatrixDialog.h"
 #include "Preferences.h"
+#include "../pixmaps.h"
 
 #include "MantidAPI/TextAxis.h"
 
@@ -53,7 +54,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
   setup(ws,start,end);
   setWindowTitle(name);
   setName(name);
-  setIcon( QPixmap(matrixIcon()) );
+  setIcon( matrixIcon() );
 
   m_modelY = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
   m_table_viewY = new QTableView();
@@ -185,7 +186,7 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
 
 
   m_bk_color = QColor(128, 255, 255);
-  m_matrix_icon = mantid_matrix_xpm;
+  m_matrix_icon = getQPixmap("mantid_matrix_xpm");
   m_column_width = 100;
 
 }

@@ -72,19 +72,19 @@ TextFormatButtons::TextFormatButtons(QTextEdit * textEdit, QWidget * parent)
 	QFont font = this->font();
 	font.setPointSize(14);
 
-	buttonCurve = new QPushButton( QPixmap(lineSymbol_xpm), QString());
+	buttonCurve = new QPushButton( getQPixmap("lineSymbol_xpm"), QString());
 	buttonCurve->setMaximumWidth(40);
 	buttonCurve->setMinimumHeight(35);
 	buttonCurve->setFont(font);
 	layout->addWidget(buttonCurve);
 
-	buttonSubscript = new QPushButton(QPixmap(index_xpm), QString());
+	buttonSubscript = new QPushButton(getQPixmap("index_xpm"), QString());
 	buttonSubscript->setMaximumWidth(40);
 	buttonSubscript->setMinimumHeight(35);
 	buttonSubscript->setFont(font);
 	layout->addWidget(buttonSubscript);
 
-	buttonSuperscript = new QPushButton(QPixmap(exp_xpm), QString());
+	buttonSuperscript = new QPushButton(getQPixmap("exp_xpm"), QString());
 	buttonSuperscript->setMaximumWidth(40);
 	buttonSuperscript->setMinimumHeight(35);
 	buttonSuperscript->setFont(font);

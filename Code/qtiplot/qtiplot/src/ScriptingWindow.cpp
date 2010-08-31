@@ -160,7 +160,7 @@ void ScriptOutputDock::showContextMenu(const QPoint & pos)
 
   if( !m_text_display->document()->isEmpty() )
   {
-    QAction* print = new QAction(QPixmap(fileprint_xpm), "&Print", this);
+    QAction* print = new QAction(getQPixmap("fileprint_xpm"), "&Print", this);
     connect(print, SIGNAL(activated()), this, SLOT(print()));
     menu.addAction(print);
   }
@@ -225,7 +225,7 @@ void ScriptOutputDock::saveToFile()
 void ScriptOutputDock::initActions()
 {
   // Copy action
-  m_copy = new QAction(QPixmap(copy_xpm), "Copy", this);
+  m_copy = new QAction(getQPixmap("copy_xpm"), "Copy", this);
   m_copy->setShortcut(tr("Ctrl+C"));
   connect(m_copy, SIGNAL(activated()), m_text_display, SLOT(copy()));
 }

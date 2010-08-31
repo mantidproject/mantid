@@ -133,7 +133,7 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
 
   if( !text().isEmpty() )
   {
-    action = new QAction(QPixmap(fileprint_xpm), "Print", this);
+    action = new QAction(getQPixmap("fileprint_xpm"), "Print", this);
     connect(action, SIGNAL(activated()), this, SLOT(print()));
     menu.addAction(action);
   }

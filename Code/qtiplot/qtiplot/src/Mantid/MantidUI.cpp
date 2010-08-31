@@ -82,35 +82,35 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
   actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
-  actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
+  actionCopyRowToTable->setIcon(QIcon(getQPixmap("table_xpm")));
   connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
 
   actionCopyRowToGraph = new QAction(tr("Plot spectra (values only)"), this);
-  actionCopyRowToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
+  actionCopyRowToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyRowToGraph, SIGNAL(activated()), this, SLOT(copyRowToGraph()));
 
   actionCopyRowToGraphErr = new QAction(tr("Plot spectra (values + errors)"), this);
-  actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
+  actionCopyRowToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 
   actionCopyDetectorsToTable = new QAction(tr("View detectors table"), this);
-  actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
+  actionCopyDetectorsToTable->setIcon(QIcon(getQPixmap("table_xpm")));
   connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
 
   actionCopyValues = new QAction(tr("Copy"), this);
-  actionCopyValues->setIcon(QIcon(QPixmap(copy_xpm)));
+  actionCopyValues->setIcon(QIcon(getQPixmap("copy_xpm")));
   connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
 
   actionCopyColumnToTable = new QAction(tr("Copy bin to table"), this);
-  actionCopyColumnToTable->setIcon(QIcon(QPixmap(table_xpm)));
+  actionCopyColumnToTable->setIcon(QIcon(getQPixmap("table_xpm")));
   connect(actionCopyColumnToTable, SIGNAL(activated()), this, SLOT(copyColumnToTable()));
 
   actionCopyColumnToGraph = new QAction(tr("Plot bin (values only)"), this);
-  actionCopyColumnToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
+  actionCopyColumnToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyColumnToGraph, SIGNAL(activated()), this, SLOT(copyColumnToGraph()));
 
   actionCopyColumnToGraphErr = new QAction(tr("Plot bin (values + errors)"), this);
-  actionCopyColumnToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
+  actionCopyColumnToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
 
   connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const QString&)),this,SLOT(createLoadDAEMantidMatrix(const QString&)));
@@ -172,7 +172,7 @@ void MantidUI::init()
 void MantidUI::addMenuItems(QMenu *menu)
 {
   actionToggleMantid = m_exploreMantid->toggleViewAction();
-  actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
+  actionToggleMantid->setIcon(getQPixmap("mantid_matrix_xpm"));
   actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
   menu->addAction(actionToggleMantid);
 

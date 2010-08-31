@@ -268,16 +268,16 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
 {
   if( boost::dynamic_pointer_cast<MatrixWorkspace>(workspace) )
   {
-    ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
+    ws_item->setIcon(0,QIcon(getQPixmap("mantid_matrix_xpm")));
   }
   else if( boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace) )
   {
-    ws_item->setIcon(0,QIcon(QPixmap(mantid_wsgroup_xpm)));
+    ws_item->setIcon(0,QIcon(getQPixmap("mantid_wsgroup_xpm")));
   }
   // Assume it is a table workspace
   else if( boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace) )
   {
-    ws_item->setIcon(0,QIcon(QPixmap(worksheet_xpm)));
+    ws_item->setIcon(0,QIcon(getQPixmap("worksheet_xpm")));
   }
   else
   {

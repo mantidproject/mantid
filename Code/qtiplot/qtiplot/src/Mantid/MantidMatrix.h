@@ -122,7 +122,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr workspace(){return m_workspace;}
   QString workspaceName() const;
 
-  const char **matrixIcon(){return m_matrix_icon;}
+  QPixmap matrixIcon(){return m_matrix_icon;}
   //void copy(Matrix *m);
   ApplicationWindow *appWindow(){return m_appWindow;}
   Graph3D *plotGraph3D(int style);
@@ -261,7 +261,7 @@ protected:
   MantidMatrixModel *m_modelX;
   MantidMatrixModel *m_modelE;
   QColor m_bk_color;
-  const char **m_matrix_icon;
+  QPixmap m_matrix_icon;
   double x_start,             //!< X value corresponding to column 1
   x_end,                      //!< X value corresponding to the last column
   y_start,                    //!< Y value corresponding to row 1

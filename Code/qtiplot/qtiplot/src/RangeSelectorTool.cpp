@@ -82,7 +82,7 @@ RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target,
 
 	setTrackerMode(QwtPicker::AlwaysOn);
 	setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-	d_graph->plotWidget()->canvas()->setCursor(QCursor(QPixmap(vizor_xpm), -1, -1));
+	d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
 	d_graph->plotWidget()->canvas()->setFocus();
 	d_graph->plotWidget()->replot();
 
@@ -403,5 +403,5 @@ void RangeSelectorTool::setEnabled(bool on)
 {
     d_enabled = on;
     if (on)
-        d_graph->plotWidget()->canvas()->setCursor(QCursor(QPixmap(vizor_xpm), -1, -1));
+        d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
 }
