@@ -52,141 +52,141 @@ class MatrixData;
 class PlotMarker;
 namespace Mantid
 {
-  namespace API
-  {
-    class IInstrument;
-    class MatrixWorkspace;
-  }
+namespace API
+{
+class IInstrument;
+class MatrixWorkspace;
+}
 }
 class Spectrogram: public QwtPlotSpectrogram
 {
 public:
-	Spectrogram();
-    Spectrogram(Matrix *m);
-    Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
-    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
-	~Spectrogram();
+  Spectrogram();
+  Spectrogram(Matrix *m);
+  Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
+  Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
+  ~Spectrogram();
 
 
-	enum ColorMapPolicy{GrayScale, Default, Custom};
+  enum ColorMapPolicy{GrayScale, Default, Custom};
 
   virtual QImage renderImage(
-        const QwtScaleMap &xMap, const QwtScaleMap &yMap, 
-        const QwtDoubleRect &rect) const;
+      const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+      const QwtDoubleRect &rect) const;
 
 
-	Spectrogram* copy();
-	Matrix * matrix(){return d_matrix;};
-    UserHelperFunction *funct(){return d_funct;}
+  Spectrogram* copy();
+  Matrix * matrix(){return d_matrix;};
+  UserHelperFunction *funct(){return d_funct;}
 
-	int levels(){return (int)contourLevels().size() + 1;};
-	void setLevelsNumber(int levels);
+  int levels(){return (int)contourLevels().size() + 1;};
+  void setLevelsNumber(int levels);
 
-	bool hasColorScale();
-	int colorScaleAxis(){return color_axis;};
-	void showColorScale(int axis, bool on = true);
+  bool hasColorScale();
+  int colorScaleAxis(){return color_axis;};
+  void showColorScale(int axis, bool on = true);
 
-	int colorBarWidth();
-	void setColorBarWidth(int width);
+  int colorBarWidth();
+  void setColorBarWidth(int width);
 
-	void setGrayScale();
-	void setDefaultColorMap();
-	static QwtLinearColorMap defaultColorMap();
+  void setGrayScale();
+  void setDefaultColorMap();
+  static QwtLinearColorMap defaultColorMap();
 
-	void setCustomColorMap(const QwtLinearColorMap& map);
-	void setMantidColorMap(const MantidColorMap &map);
-	void updateData(Matrix *m);
+  void setCustomColorMap(const QwtLinearColorMap& map);
+  void setMantidColorMap(const MantidColorMap &map);
+  void updateData(Matrix *m);
 
-	//! Used when saving a project file
-	QString saveToString();
+  //! Used when saving a project file
+  QString saveToString();
 
-	ColorMapPolicy colorMapPolicy(){return color_map_policy;};
+  ColorMapPolicy colorMapPolicy(){return color_map_policy;};
 
-	virtual QwtDoubleRect boundingRect() const;
+  virtual QwtDoubleRect boundingRect() const;
   double getMinPositiveValue()const;
-	void setContourPenList(QList<QPen> lst);
-	QList<QPen> contourPenList(){return d_pen_list;};
-	//! Flag telling if we use the color map to calculate the pen (QwtPlotSpectrogram::contourPen()).
-	bool d_color_map_pen;
-	bool useColorMapPen(){return d_color_map_pen;};
-	void setColorMapPen(bool on = true);
-	void showContourLineLabels(bool show = true);
-	bool hasLabels(){return d_show_labels;};
-	QList <PlotMarker *> labelsList(){return d_labels_list;};
-	const MantidColorMap & getColorMap() const;
-    MantidColorMap & mutableColorMap();
-	void saveSettings();
-	void loadSettings();
-	void setColorMapFileName(QString colormapName);
-	double labelsRotation(){return d_labels_angle;};
-	void setLabelsRotation(double angle);
-	bool labelsWhiteOut(){return d_white_out_labels;};
-	void setLabelsWhiteOut(bool whiteOut);
-	void setLabelsOffset(double x, double y);
-	void setLabelOffset(int index, double x, double y);
-	QColor labelsColor(){return d_labels_color;};
-	void setLabelsColor(const QColor& c);
-//	void setLabelOffset(int index, double x, double y);
+  void setContourPenList(QList<QPen> lst);
+  QList<QPen> contourPenList(){return d_pen_list;};
+  //! Flag telling if we use the color map to calculate the pen (QwtPlotSpectrogram::contourPen()).
+  bool d_color_map_pen;
+  bool useColorMapPen(){return d_color_map_pen;};
+  void setColorMapPen(bool on = true);
+  void showContourLineLabels(bool show = true);
+  bool hasLabels(){return d_show_labels;};
+  QList <PlotMarker *> labelsList(){return d_labels_list;};
+  const MantidColorMap & getColorMap() const;
+  MantidColorMap & mutableColorMap();
+  void saveSettings();
+  void loadSettings();
+  void setColorMapFileName(QString colormapName);
+  double labelsRotation(){return d_labels_angle;};
+  void setLabelsRotation(double angle);
+  bool labelsWhiteOut(){return d_white_out_labels;};
+  void setLabelsWhiteOut(bool whiteOut);
+  void setLabelsOffset(double x, double y);
+  void setLabelOffset(int index, double x, double y);
+  QColor labelsColor(){return d_labels_color;};
+  void setLabelsColor(const QColor& c);
+  //	void setLabelOffset(int index, double x, double y);
 
-	void updateForNewMaxData(const double new_max);
-	void updateForNewMinData(const double new_min);
-	void recount();
-	void setCustomColorMap(const QwtColorMap &map);
-	
-	void setContourLevels (const QwtValueList & levels);
-	bool hasSelectedLabels();
-	bool selectedLabels(const QPoint& pos);
-	double labelsXOffset(){return d_labels_x_offset;};
-    double labelsYOffset(){return d_labels_y_offset;};
-	void selectLabel(bool on);
-	/// change intensity of the colors
-	void changeIntensity( double start,double end);
-	///sets a boolan flag for intensity changes
-	void setIntensityChange(bool on);
-	/// returns boolan flag intensity change 
-	bool isIntensityChanged();
+  void updateForNewMaxData(const double new_max);
+  void updateForNewMinData(const double new_min);
+  void recount();
+  void setCustomColorMap(const QwtColorMap &map);
+
+  void setContourLevels (const QwtValueList & levels);
+  bool hasSelectedLabels();
+  bool selectedLabels(const QPoint& pos);
+  double labelsXOffset(){return d_labels_x_offset;};
+  double labelsYOffset(){return d_labels_y_offset;};
+  void selectLabel(bool on);
+  /// change intensity of the colors
+  void changeIntensity( double start,double end);
+  ///sets a boolan flag for intensity changes
+  void setIntensityChange(bool on);
+  /// returns boolan flag intensity change
+  bool isIntensityChanged();
 
 protected:
-	virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
-	void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
-	void createLabels();
+  virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
+  void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
+  void createLabels();
 
-	//! Pointer to the source data matrix
-	Matrix *d_matrix;
-    UserHelperFunction *d_funct;
+  //! Pointer to the source data matrix
+  Matrix *d_matrix;
+  UserHelperFunction *d_funct;
 
-	//! Axis used to display the color scale
-	int color_axis;
+  //! Axis used to display the color scale
+  int color_axis;
 
-	//! Flags
-	ColorMapPolicy color_map_policy;
+  //! Flags
+  ColorMapPolicy color_map_policy;
 
-	QwtLinearColorMap color_map;
-	
-	QList<QPen> d_pen_list;
-	//! Flag telling if we display the labels
-	bool d_show_labels;
-	//! Flag telling if we paint a white background for the labels
-	bool d_white_out_labels;
-	double d_labels_angle;
-	//! List of the text labels associated to this spectrogram.
-	QList <PlotMarker *> d_labels_list;
-	//! Keeps track of the plot marker on which the user clicked when selecting the labels.
-	PlotMarker *d_selected_label;
+  QwtLinearColorMap color_map;
 
-	//! Keep track of the coordinates of the point where the user clicked when selecting the labels.
-	double d_click_pos_x, d_click_pos_y;
-	//! Labels color
-	QColor d_labels_color;
-	double d_labels_x_offset, d_labels_y_offset;
-	int d_labels_align;
-     //! Labels font
-	QFont d_labels_font;
-	//! Pointer to the parent plot
-	//Graph *d_graph;
-	MantidColorMap mColorMap;
-	QString mCurrentColorMap;
-	
+  QList<QPen> d_pen_list;
+  //! Flag telling if we display the labels
+  bool d_show_labels;
+  //! Flag telling if we paint a white background for the labels
+  bool d_white_out_labels;
+  double d_labels_angle;
+  //! List of the text labels associated to this spectrogram.
+  QList <PlotMarker *> d_labels_list;
+  //! Keeps track of the plot marker on which the user clicked when selecting the labels.
+  PlotMarker *d_selected_label;
+
+  //! Keep track of the coordinates of the point where the user clicked when selecting the labels.
+  double d_click_pos_x, d_click_pos_y;
+  //! Labels color
+  QColor d_labels_color;
+  double d_labels_x_offset, d_labels_y_offset;
+  int d_labels_align;
+  //! Labels font
+  QFont d_labels_font;
+  //! Pointer to the parent plot
+  //Graph *d_graph;
+  MantidColorMap mColorMap;
+  QString mCurrentColorMap;
+
   int m_nRows;
   int m_nColumns;
   /// Store a value between 0->255 for each of the integrated spectra.
@@ -208,131 +208,131 @@ public:
 class MatrixData: public SpectrogramData
 {
 public:
-    MatrixData(Matrix *m):
+  MatrixData(Matrix *m):
     SpectrogramData(m->boundingRect()),
-		d_matrix(m)
-    {
-	n_rows = d_matrix->numRows();
-	n_cols = d_matrix->numCols();
+    d_matrix(m)
+  {
+    n_rows = d_matrix->numRows();
+    n_cols = d_matrix->numCols();
 
-	d_m = new double* [n_rows];
-	for ( int l = 0; l < n_rows; ++l)
-		d_m[l] = new double [n_cols];
+    d_m = new double* [n_rows];
+    for ( int l = 0; l < n_rows; ++l)
+      d_m[l] = new double [n_cols];
 
-	for (int i = 0; i < n_rows; i++)
-         for (int j = 0; j < n_cols; j++)
-           d_m[i][j] = d_matrix->cell(i, j);
+    for (int i = 0; i < n_rows; i++)
+      for (int j = 0; j < n_cols; j++)
+        d_m[i][j] = d_matrix->cell(i, j);
 
-	m->range(&min_z, &max_z);
+    m->range(&min_z, &max_z);
 
-	x_start = d_matrix->xStart();
-	dx = d_matrix->dx();
-	y_start = d_matrix->yStart();
-	dy = d_matrix->dy();
-    }
+    x_start = d_matrix->xStart();
+    dx = d_matrix->dx();
+    y_start = d_matrix->yStart();
+    dy = d_matrix->dy();
+  }
 
-	~MatrixData()
-	{
-	for (int i = 0; i < n_rows; i++)
-		delete [] d_m[i];
+  ~MatrixData()
+  {
+    for (int i = 0; i < n_rows; i++)
+      delete [] d_m[i];
 
-	delete [] d_m;
-	};
+    delete [] d_m;
+  };
 
-    virtual QwtRasterData *copy() const
-    {
-        return new MatrixData(d_matrix);
-    }
+  virtual QwtRasterData *copy() const
+  {
+    return new MatrixData(d_matrix);
+  }
 
-    virtual QwtDoubleInterval range() const
-    {
-        return QwtDoubleInterval(min_z, max_z);
-    }
+  virtual QwtDoubleInterval range() const
+  {
+    return QwtDoubleInterval(min_z, max_z);
+  }
 
-	virtual QSize rasterHint (const QwtDoubleRect &) const
-	{
-		return QSize(n_cols, n_rows);
-	}
+  virtual QSize rasterHint (const QwtDoubleRect &) const
+  {
+    return QSize(n_cols, n_rows);
+  }
 
-    virtual double value(double x, double y) const;
+  virtual double value(double x, double y) const;
 
-    double getMinPositiveValue()const;
+  double getMinPositiveValue()const;
 
 private:
-	//! Pointer to the source data matrix
-	Matrix *d_matrix;
+  //! Pointer to the source data matrix
+  Matrix *d_matrix;
 
-	//! Vector used to store in memory the data from the source matrix window
-	double** d_m;
+  //! Vector used to store in memory the data from the source matrix window
+  double** d_m;
 
-	//! Data size
-	int n_rows, n_cols;
+  //! Data size
+  int n_rows, n_cols;
 
-	//! Min and max values in the source data matrix
-	double min_z, max_z;
+  //! Min and max values in the source data matrix
+  double min_z, max_z;
 
-	//! Data resolution in x(columns) and y(rows)
-	double dx, dy;
+  //! Data resolution in x(columns) and y(rows)
+  double dx, dy;
 
-	//! X axis left value in the data matrix
-	double x_start;
+  //! X axis left value in the data matrix
+  double x_start;
 
-	//! Y axis bottom value in the data matrix
-	double y_start;
-	 
+  //! Y axis bottom value in the data matrix
+  double y_start;
+
 };
 
 class FunctionData: public SpectrogramData
 {
 public:
-    FunctionData(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz):
-        SpectrogramData(QwtDoubleRect(left, top, width, height)),
-		d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
-    {
-    }
+  FunctionData(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz):
+    SpectrogramData(QwtDoubleRect(left, top, width, height)),
+    d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
+  {
+  }
 
-    FunctionData(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz):
-        SpectrogramData(bRect),
-		d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
-    {
-    }
+  FunctionData(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz):
+    SpectrogramData(bRect),
+    d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
+  {
+  }
 
-	~FunctionData()
-	{
-	};
+  ~FunctionData()
+  {
+  };
 
-    virtual QwtRasterData *copy() const
-    {
-        return new FunctionData(d_funct, n_rows, n_cols,boundingRect(),min_z,max_z);
-    }
+  virtual QwtRasterData *copy() const
+  {
+    return new FunctionData(d_funct, n_rows, n_cols,boundingRect(),min_z,max_z);
+  }
 
-    virtual QwtDoubleInterval range() const
-    {
-        return QwtDoubleInterval(min_z, max_z);
-    }
+  virtual QwtDoubleInterval range() const
+  {
+    return QwtDoubleInterval(min_z, max_z);
+  }
 
-	virtual QSize rasterHint (const QwtDoubleRect &) const
-	{
-		return QSize(n_cols, n_rows);
-	}
+  virtual QSize rasterHint (const QwtDoubleRect &) const
+  {
+    return QSize(n_cols, n_rows);
+  }
 
-    virtual double value(double x, double y) const
-    {
-        //static std::ofstream f("funct.txt");
-        //f<<x<<' '<<y<<' '<<d_funct->operator()(x,y)<<'\n';
-        return d_funct->operator()(x,y);
-    }
+  virtual double value(double x, double y) const
+  {
+    //static std::ofstream f("funct.txt");
+    //f<<x<<' '<<y<<' '<<d_funct->operator()(x,y)<<'\n';
+    return d_funct->operator()(x,y);
+  }
 
-    double getMinPositiveValue()const{return d_funct->getMinPositiveValue();}
+  double getMinPositiveValue()const{return d_funct->getMinPositiveValue();}
 
 private:
-	UserHelperFunction *d_funct;
+  UserHelperFunction *d_funct;
 
-	//! Data size
-	int n_rows, n_cols;
+  //! Data size
+  int n_rows, n_cols;
 
-	//! Min and max values in the source data matrix
-	double min_z, max_z;
+  //! Min and max values in the source data matrix
+  double min_z, max_z;
 };
 
 #endif

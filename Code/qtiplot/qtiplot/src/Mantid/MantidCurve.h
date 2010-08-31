@@ -111,6 +111,7 @@ private:
   /// Handles delete notification
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
+    (void) ws; //Avoid compiler warning
     if (wsName == m_wsName.toStdString())
       emit removeMe(this);
   }

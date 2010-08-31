@@ -403,6 +403,7 @@ void ApplicationWindow::init(bool factorySettings)
 
 void ApplicationWindow::showresultsContextMenu(const QPoint & p)
 {
+  (void)p; //Avoid compiler warning
   QMenu *menu = results->createStandardContextMenu();
   if(!menu) return;
   if(results->text().isEmpty())

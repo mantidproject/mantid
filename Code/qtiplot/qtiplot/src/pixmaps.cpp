@@ -12034,7 +12034,7 @@ static const char * magnifier_xpm[] = {
 //----------------------------------------------
 QPixmap getQPixmap(const std::string name)
 {
-       if (name == "cursor_xpm") return QPixmap(cursor_xpm);
+  if (name == "cursor_xpm") return QPixmap(cursor_xpm);
   else if (name == "vizor_xpm") return QPixmap(vizor_xpm);
   else if (name == "lens_xpm") return QPixmap(lens_xpm);
   else if (name == "param_range_btn_xpm") return QPixmap(param_range_btn_xpm);
@@ -12054,7 +12054,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "flip_vertical_xpm") return QPixmap(flip_vertical_xpm);
   else if (name == "flip_horizontal_xpm") return QPixmap(flip_horizontal_xpm);
   else if (name == "delete_column_xpm") return QPixmap(delete_column_xpm);
-  else if (name == "insert_column_xpm") return QPixmap(insert_column_xpm);
+  if (name == "insert_column_xpm") return QPixmap(insert_column_xpm);
   else if (name == "delete_row_xpm") return QPixmap(delete_row_xpm);
   else if (name == "insert_row_xpm") return QPixmap(insert_row_xpm);
   else if (name == "set_label_col_xpm") return QPixmap(set_label_col_xpm);
@@ -12074,7 +12074,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "fit_frame_xpm") return QPixmap(fit_frame_xpm);
   else if (name == "reset_rotation_xpm") return QPixmap(reset_rotation_xpm);
   else if (name == "perspective_xpm") return QPixmap(perspective_xpm);
-  else if (name == "gray_map_xpm") return QPixmap(gray_map_xpm);
+  if (name == "gray_map_xpm") return QPixmap(gray_map_xpm);
   else if (name == "contour_map_xpm") return QPixmap(contour_map_xpm);
   else if (name == "color_map_xpm") return QPixmap(color_map_xpm);
   else if (name == "auto_layout_xpm") return QPixmap(auto_layout_xpm);
@@ -12094,7 +12094,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "new_graph_xpm") return QPixmap(new_graph_xpm);
   else if (name == "vectXYAM_xpm") return QPixmap(vectXYAM_xpm);
   else if (name == "vectXYXY_xpm") return QPixmap(vectXYXY_xpm);
-  else if (name == "open_template_xpm") return QPixmap(open_template_xpm);
+  if (name == "open_template_xpm") return QPixmap(open_template_xpm);
   else if (name == "save_template_xpm") return QPixmap(save_template_xpm);
   else if (name == "boxPlot_xpm") return QPixmap(boxPlot_xpm);
   else if (name == "clock_xpm") return QPixmap(clock_xpm);
@@ -12114,7 +12114,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "hor_steps_xpm") return QPixmap(hor_steps_xpm);
   else if (name == "vert_steps_xpm") return QPixmap(vert_steps_xpm);
   else if (name == "cones_xpm") return QPixmap(cones_xpm);
-  else if (name == "crosses_xpm") return QPixmap(crosses_xpm);
+  if (name == "crosses_xpm") return QPixmap(crosses_xpm);
   else if (name == "plot_bars_xpm") return QPixmap(plot_bars_xpm);
   else if (name == "bars_xpm") return QPixmap(bars_xpm);
   else if (name == "trajectory_xpm") return QPixmap(trajectory_xpm);
@@ -12134,7 +12134,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "floorGrid_xpm") return QPixmap(floorGrid_xpm);
   else if (name == "pointsMesh_xpm") return QPixmap(pointsMesh_xpm);
   else if (name == "frontGrid_xpm") return QPixmap(frontGrid_xpm);
-  else if (name == "no_floor_xpm") return QPixmap(no_floor_xpm);
+  if (name == "no_floor_xpm") return QPixmap(no_floor_xpm);
   else if (name == "isolines_xpm") return QPixmap(isolines_xpm);
   else if (name == "floor_xpm") return QPixmap(floor_xpm);
   else if (name == "grid_poly_xpm") return QPixmap(grid_poly_xpm);
@@ -12154,7 +12154,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "wizard_xpm") return QPixmap(wizard_xpm);
   else if (name == "pie_xpm") return QPixmap(pie_xpm);
   else if (name == "randomNumbers_xpm") return QPixmap(randomNumbers_xpm);
-  else if (name == "rowNumbers_xpm") return QPixmap(rowNumbers_xpm);
+  if (name == "rowNumbers_xpm") return QPixmap(rowNumbers_xpm);
   else if (name == "hBars_xpm") return QPixmap(hBars_xpm);
   else if (name == "vertBars_xpm") return QPixmap(vertBars_xpm);
   else if (name == "area_xpm") return QPixmap(area_xpm);
@@ -12174,7 +12174,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "copy2_xpm") return QPixmap(copy2_xpm);
   else if (name == "text_xpm") return QPixmap(text_xpm);
   else if (name == "duplicate_xpm") return QPixmap(duplicate_xpm);
-  else if (name == "new_xpm") return QPixmap(new_xpm);
+  if (name == "new_xpm") return QPixmap(new_xpm);
   else if (name == "addCol_xpm") return QPixmap(addCol_xpm);
   else if (name == "pPlot_xpm") return QPixmap(pPlot_xpm);
   else if (name == "lpPlot_xpm") return QPixmap(lpPlot_xpm);
@@ -12194,7 +12194,7 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "erase_xpm") return QPixmap(erase_xpm);
   else if (name == "zoom_xpm") return QPixmap(zoom_xpm);
   else if (name == "log_xpm") return QPixmap(log_xpm);
-  else if (name == "quit_xpm") return QPixmap(quit_xpm);
+  if (name == "quit_xpm") return QPixmap(quit_xpm);
   else if (name == "qtiplot_logo_xpm") return QPixmap(qtiplot_logo_xpm);
   else if (name == "Fit_xpm") return QPixmap(Fit_xpm);
   else if (name == "fileopen_raw_xpm") return QPixmap(fileopen_raw_xpm);
@@ -12202,12 +12202,10 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "filesave_nexus_xpm") return QPixmap(filesave_nexus_xpm);
   else if (name == "magnifier_xpm") return QPixmap(magnifier_xpm);
 
-  else
-  {
-    std::ostringstream msg;
-    msg << "Error in pixmaps.cpp: The specified XPM " << name << " was not found!";
-    throw std::runtime_error( msg.str() );
-  }
+  //If you get here, nothing else was trapped.
+  std::ostringstream msg;
+  msg << "Error in pixmaps.cpp: The specified XPM " << name << " was not found!";
+  throw std::runtime_error( msg.str() );
 
 }
 
