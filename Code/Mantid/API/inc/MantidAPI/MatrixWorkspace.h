@@ -90,6 +90,9 @@ public:
   IndexToIndexMap * getSpectrumToWorkspaceIndexMap() const;
   IndexToIndexMap * getWorkspaceIndexToDetectorIDMap() const;
   IndexToIndexMap * getDetectorIDToWorkspaceIndexMap() const;
+  void getIndicesFromSpectra(const std::vector<int>& spectraList, std::vector<int>& indexList) const;
+
+
 
 
   /// Sample accessors

@@ -236,6 +236,42 @@ IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap() const
 }
 
 
+//---------------------------------------------------------------------------------------
+/** Converts a list of spectrum numbers to the corresponding workspace indices.
+ *  Not a very efficient operation, but unfortunately it's sometimes required.
+ *  @param WS          The workspace on which to carry out the operation
+ *  @param spectraList The list of spectrum numbers required
+ *  @param indexList   Returns a reference to the vector of indices (empty if not a Workspace2D)
+ */
+void MatrixWorkspace::getIndicesFromSpectra(const std::vector<int>& spectraList, std::vector<int>& indexList) const
+{
+  // Clear the output index list
+  indexList.clear();
+  indexList.reserve(this->getNumberHistograms());
+  // get the spectra axis
+  SpectraAxis *spectraAxis;
+  if (this->axes() == 2)
+  {
+    spectraAxis = dynamic_cast<SpectraAxis*>(this->getAxis(1));
+    if (!spectraAxis) return;
+  }
+  // Just return an empty list if this isn't a Workspace2D
+  else return;
+
+  std::vector<int>::const_iterator iter = spectraList.begin();
+  while( iter != spectraList.end() )
+  {
+    for (int i = 0; i < this->getNumberHistograms(); ++i)
+    {
+      if ( spectraAxis->spectraNo(i) == *iter )
+      {
+        indexList.push_back(i);
+      }
+    }
+    ++iter;
+  }
+}
+
 
 
 //---------------------------------------------------------------------------------------

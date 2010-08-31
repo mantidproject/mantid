@@ -105,7 +105,7 @@ double GetEi2::calculateEi(const double initial_guess)
   std::vector<int> mon_indices;
   mon_indices.reserve(2);
   // get the index number of the histogram for the first monitor
-  WorkspaceHelpers::getIndicesFromSpectra(m_input_ws, spec_nums, mon_indices);
+  m_input_ws->getIndicesFromSpectra(spec_nums, mon_indices);
 
   if( mon_indices.size() != 2 )
   {

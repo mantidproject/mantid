@@ -183,8 +183,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
   // only look at these other parameters if the file wasn't set
   if ( ! spectraList.empty() )
   {
-    WorkspaceHelpers::getIndicesFromSpectra(workspace,
-                                            spectraList, m_GroupSpecInds[0]);
+    workspace->getIndicesFromSpectra( spectraList, m_GroupSpecInds[0]);
     g_log.debug() << "Converted " << spectraList.size() << " spectra numbers into spectra indices to be combined\n";
   }
   else
@@ -193,8 +192,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     {// we are going to group on the basis of detector IDs, convert from detectors to spectra numbers
       std::vector<int> mySpectraList = workspace->spectraMap().getSpectra(detectorList);
       //then from spectra numbers to indices
-      WorkspaceHelpers::getIndicesFromSpectra(
-                                  workspace, mySpectraList, m_GroupSpecInds[0]);
+      workspace->getIndicesFromSpectra( mySpectraList, m_GroupSpecInds[0]);
       g_log.debug() << "Found " << m_GroupSpecInds[0].size() << " spectra indices from the list of " << detectorList.size() << " detectors\n";
     }
     else if ( ! indexList.empty() )

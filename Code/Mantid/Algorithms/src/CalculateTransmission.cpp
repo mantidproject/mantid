@@ -79,7 +79,7 @@ void CalculateTransmission::exec()
   udets.push_back(getProperty("TransmissionMonitor"));
   // Convert UDETs to workspace indices via spectrum numbers
   const std::vector<int> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
-  WorkspaceHelpers::getIndicesFromSpectra(sampleWS,sampleSpectra,indices);
+  sampleWS->getIndicesFromSpectra(sampleSpectra,indices);
   if (indices.size() < 2)
   {
     if (indices.size() == 1)
@@ -88,7 +88,7 @@ void CalculateTransmission::exec()
     }
     else
     {
-      g_log.debug() << "WorkspaceHelpers::getIndicesFromSpectra() returned empty\n";
+      g_log.debug() << "sampleWS->getIndicesFromSpectra() returned empty\n";
     }
     throw std::invalid_argument("Could not find the incident and transmission monitor spectra\n");
   }
@@ -104,7 +104,7 @@ void CalculateTransmission::exec()
   MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
   MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
   const std::vector<int> directSpectra = directWS->spectraMap().getSpectra(udets);
-  WorkspaceHelpers::getIndicesFromSpectra(sampleWS,directSpectra,indices);
+  sampleWS->getIndicesFromSpectra(directSpectra,indices);
   // Check that given spectra are monitors
   if ( !directWS->getDetector(indices.front())->isMonitor() )
   {

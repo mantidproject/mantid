@@ -159,7 +159,7 @@ std::vector<int> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS,
   
   // get the index number of the histogram for the first monitor
   std::vector<int> specNumTemp(&specNum1, &specNum1+1);
-  WorkspaceHelpers::getIndicesFromSpectra(WS, specNumTemp, specInds);
+  WS->getIndicesFromSpectra(specNumTemp, specInds);
   if ( specInds.size() != 1 )
   {// the monitor spectrum isn't present in the workspace, we can't continue from here
     g_log.error() << "Couldn't find the first monitor spectrum, number " << specNum1 << std::endl;
@@ -169,7 +169,7 @@ std::vector<int> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS,
   // nowe the second monitor
   std::vector<int> specIndexTemp;
   specNumTemp[0] = specNum2;
-  WorkspaceHelpers::getIndicesFromSpectra(WS, specNumTemp, specIndexTemp);
+  WS->getIndicesFromSpectra(specNumTemp, specIndexTemp);
   if ( specIndexTemp.size() != 1 )
   {// the monitor spectrum isn't present in the workspace, we can't continue from here
     g_log.error() << "Couldn't find the second monitor spectrum, number " << specNum2 << std::endl;

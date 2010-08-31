@@ -73,14 +73,14 @@ void GroupDetectors::exec()
   // appropriate spectra number and adding the indices they are linked to the list to be processed
   if ( ! spectraList.empty() )
   {
-    WorkspaceHelpers::getIndicesFromSpectra(WS,spectraList,indexList);
+    WS->getIndicesFromSpectra(spectraList,indexList);
   }// End dealing with spectraList
   else if ( ! detectorList.empty() )
   {// Dealing with DetectorList
     //convert from detectors to spectra numbers
     std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
-    WorkspaceHelpers::getIndicesFromSpectra(WS,mySpectraList,indexList);
+    WS->getIndicesFromSpectra(mySpectraList,indexList);
   }
 
   if ( indexList.size() == 0 )

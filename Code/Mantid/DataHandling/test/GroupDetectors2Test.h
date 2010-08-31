@@ -86,11 +86,11 @@ public:
   void testSetup()
   {
     GroupDetectors2 gd;
-    TS_ASSERT_EQUALS( gd.name(), "GroupDetectors" )
-    TS_ASSERT_EQUALS( gd.version(), 2 )
-    TS_ASSERT_EQUALS( gd.category(), "DataHandling\\Detectors" )
-    TS_ASSERT_THROWS_NOTHING( gd.initialize() )
-    TS_ASSERT( gd.isInitialized() )
+    TS_ASSERT_EQUALS( gd.name(), "GroupDetectors" );
+    TS_ASSERT_EQUALS( gd.version(), 2 );
+    TS_ASSERT_EQUALS( gd.category(), "DataHandling\\Detectors" );
+    TS_ASSERT_THROWS_NOTHING( gd.initialize() );
+    TS_ASSERT( gd.isInitialized() );
 
     gd.setPropertyValue("InputWorkspace", inputWS);
     gd.setPropertyValue("OutputWorkspace", outputBase);
@@ -114,20 +114,20 @@ public:
 
     MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
-    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 )
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 );
     std::vector<double> tens(NBINS+1, 10.0);
     std::vector<double> ones(NBINS, 1.0);
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+4) )
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+4) );
     for (int i = 0; i < NBINS; ++i)
     {
-      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(2)), 0.0001 )
+      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(2)), 0.0001 );
     }
 
     boost::shared_ptr<IDetector> det;
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1))
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
+    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
     
     AnalysisDataService::Instance().remove(output);
   }
@@ -142,7 +142,7 @@ public:
     // test the algorithm behaves if you give it a non-existent index
     grouper3.setPropertyValue("WorkspaceIndexList","4-6");
     grouper3.execute();
-    TS_ASSERT( ! grouper3.isExecuted() )
+    TS_ASSERT( ! grouper3.isExecuted() );
 
     grouper3.setPropertyValue("WorkspaceIndexList","2-5");
     TS_ASSERT_THROWS_NOTHING( grouper3.execute());
@@ -150,20 +150,20 @@ public:
 
     MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
-    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 )
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 );
     std::vector<double> tens(NBINS+1, 10.0);
     std::vector<double> ones(NBINS, 1.0);
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, (3+4+5+6)) )
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, (3+4+5+6)) );
     for (int i = 0; i < NBINS; ++i)
     {
-      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(4.0), 0.0001 )
+      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(4.0), 0.0001 );
     }
 
     boost::shared_ptr<IDetector> det;
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1))
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
+    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
     
     AnalysisDataService::Instance().remove(output);
   }
@@ -183,21 +183,21 @@ public:
 
     MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
-    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 )
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 );
     std::vector<double> tens(NBINS+1, 10.0);
     std::vector<double> ones(NBINS, 1.0);
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(0),
-      std::vector<double>(NBINS, (3+1)+(1+1)+(4+1)+(0+1)+(2+1)+(5+1)) )
+      std::vector<double>(NBINS, (3+1)+(1+1)+(4+1)+(0+1)+(2+1)+(5+1)) );
     for (int i = 0; i < NBINS; ++i)
     {// assume that we have grouped all the spectra in the input workspace
-      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(NHIST)), 0.0001 )
+      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(NHIST)), 0.0001 );
     }
 
     boost::shared_ptr<IDetector> det;
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
-    TS_ASSERT_THROWS_ANYTHING( det = outputWS->getDetector(1) )
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
+    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT_THROWS_ANYTHING( det = outputWS->getDetector(1) );
 
     AnalysisDataService::Instance().remove(output);
   }
@@ -220,49 +220,49 @@ public:
 
     MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
-    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), NHIST-1 )
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), NHIST-1 );
     std::vector<double> tens(NBINS+1, 10.0);
     std::vector<double> ones(NBINS, 1.0);
     // check the two grouped spectra
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+3) );
     for (int i = 0; i < NBINS; ++i)
     {
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(2)), 1e-6)
+      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(2)), 1e-6);
     }
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 )
-    TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 );
+    TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) );
     
-    TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
+    TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
 
-      TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 )
+      TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 );
     //check the unmoved spectra
-    TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 2) )
-    TS_ASSERT_EQUALS( outputWS->dataE(2), ones )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 2 )
-    TS_ASSERT_EQUALS( outputWS->dataX(3), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(3), std::vector<double>(NBINS, 5) )
-    TS_ASSERT_EQUALS( outputWS->dataE(3), ones )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), 5 )
-    TS_ASSERT_EQUALS( outputWS->dataY(4), std::vector<double>(NBINS, 6) )
-    TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 6 )
+    TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 2) );
+    TS_ASSERT_EQUALS( outputWS->dataE(2), ones );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 2 );
+    TS_ASSERT_EQUALS( outputWS->dataX(3), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(3), std::vector<double>(NBINS, 5) );
+    TS_ASSERT_EQUALS( outputWS->dataE(3), ones );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), 5 );
+    TS_ASSERT_EQUALS( outputWS->dataY(4), std::vector<double>(NBINS, 6) );
+    TS_ASSERT_EQUALS( outputWS->dataE(4), ones );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 6 );
 
     // the first two spectra should have a group of detectors the other spectra a single detector
 
     boost::shared_ptr<IDetector> det;
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(1) )
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(2) )
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(3) )
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(4) )
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
+    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(1) );
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(2) );
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(3) );
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(4) );
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
     
     AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());
@@ -286,31 +286,31 @@ public:
 
     MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
-    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), NHIST-3 )
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), NHIST-3 );
     std::vector<double> tens(NBINS+1, 10.0);
     std::vector<double> ones(NBINS, 1.0);
     // check the first grouped spectrum
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+2+3) );
     for (int i = 0; i < NBINS; ++i)
     {
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(3)), 1e-6)
+      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(3)), 1e-6);
     }
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 );
     // check the second grouped spectrum
-    TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
+    TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) );
-    TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 )
+    TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 );
     // check the third grouped spectrum
-    TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
+    TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 5+6 ) );
     for (int i = 0; i < NBINS; ++i)
     {
       TS_ASSERT_DELTA(
-        outputWS->dataE(2)[i], std::sqrt(static_cast<double>(2)), 1e-6)
+        outputWS->dataE(2)[i], std::sqrt(static_cast<double>(2)), 1e-6);
     }
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 5 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 5 );
 
     AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());
