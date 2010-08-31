@@ -273,7 +273,7 @@ void DiffractionFocussing2::execEvent()
   g_log.information() << nGroups << " groups found in .cal file.\n";
 
   //Flag to determine whether the X for a group has been set
-  std::vector<bool> flags(nGroups,true);
+  std::vector<bool> flags(nGroups+1,true);
 
   //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
   std::vector< MantidVec > original_X_to_use(nGroups+1);
