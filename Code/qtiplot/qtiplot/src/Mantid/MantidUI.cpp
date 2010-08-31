@@ -1799,9 +1799,27 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   label.replace("_","-");
 
   appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
-  t->setColName(0, "Time");
-  t->setColumnType(0, Table::Date);
-  t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 0, false);
+
+  //Toggle to switch between using the real date or the change in seconds.
+  bool useAbsoluteDate = false;
+
+  if (useAbsoluteDate)
+  {
+    // --------- Date
+    t->setColName(0, "Time");
+    t->setColumnType(0, Table::Date);
+    t->setDateFormat("yyyy-MMM-dd HH:mm:ss.ffffff", 0, false);
+  }
+  else
+  {
+    //Seconds offset
+    t->setColName(0, "Time (sec)");
+    t->setColumnType(0, Table::Numeric); //six digits after 0
+    t->setNumericPrecision(6); //six digits after 0
+  }
+
+
+
   t->setColName(1, label.section("-",1));
 
   int iValueCurve = 0;
@@ -1856,31 +1874,48 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
         }
     }
 
-    t->addColumns(2);
-    t->setColName(2, "FTime");
-    t->setColumnType(2, Table::Date);
-    t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false); //This is the format of the date column
-    t->setColPlotDesignation(2,Table::X);
-    t->setColName(3, "Filter");
-
-    if (flt.filter()->size() > rowcount)
+    if (flt.filter())
     {
-      t->addRows(flt.filter()->size() - rowcount);
-    }
+      //Valid filter was found
+      t->addColumns(2);
+      t->setColName(2, "FTime");
 
-    if (flt.data()->size() > rowcount)
-    {
-      t->addRows(flt.data()->size() - rowcount);
-    }
+      if (useAbsoluteDate)
+      {
+        t->setColumnType(2, Table::Date);
+        t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false); //This is the format of the date column
+      }
+      else
+      {
+        t->setColumnType(2, Table::Numeric); //six digits after 0
+        t->setNumericPrecision(6); //six digits after 0
+      }
 
-    for(int i=0;i<flt.filter()->size();i++)
-    {
-      t->setText(i,2,QString::fromStdString(flt.filter()->nthInterval(i).begin_str()));
-      t->setCell(i,3,!flt.filter()->nthValue(i));
-    }
+      t->setColPlotDesignation(2,Table::X);
+      t->setColName(3, "Filter");
 
-    iValueCurve = 1;
-    iFilterCurve = 0;
+      if (flt.filter()->size() > rowcount)
+      {
+        t->addRows(flt.filter()->size() - rowcount);
+      }
+
+      if (flt.data()->size() > rowcount)
+      {
+        t->addRows(flt.data()->size() - rowcount);
+      }
+
+      for(int i=0;i<flt.filter()->size();i++)
+      {
+        t->setText(i,2,QString::fromStdString(flt.filter()->nthInterval(i).begin_str()));
+        t->setCell(i,3,!flt.filter()->nthValue(i));
+      }
+
+      iValueCurve = 1;
+      iFilterCurve = 0;
+
+    } //end (valid filter exists)
+
+
   }
 
   Mantid::Kernel::dateAndTime lastTime;
@@ -1888,21 +1923,47 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   //Iterate through the time-value map.
   int i = 0;
-  std::map<dateAndTime, double>::iterator it;
-  for (it = time_value_map.begin(); it!=time_value_map.end(); it++)
+  std::map<dateAndTime, double>::iterator it = time_value_map.begin();
+  if (it!=time_value_map.end())
   {
-    lastTime = it->first;
-    lastValue = it->second;
-    //Convert time into string
-    std::string time_string = Mantid::Kernel::DateAndTime::to_string(lastTime, "%Y-%b-%d %H:%M:%S" );
-    t->setText(i,0,QString::fromStdString(time_string));
-    t->setCell(i,1,lastValue);
-    i++;
+    //Get the starting time
+    Mantid::Kernel::dateAndTime startTime = it->first;
+    for (; it!=time_value_map.end(); it++)
+    {
+      lastTime = it->first;
+      lastValue = it->second;
+
+      std::string time_string;
+
+      if (useAbsoluteDate)
+      {
+        //Convert time into string
+        //std::string time_string = Mantid::Kernel::DateAndTime::to_string(lastTime, "%Y-%b-%d %H:%M:%S" );
+        std::string time_string = Mantid::Kernel::DateAndTime::to_simple_string(lastTime);
+      }
+      else
+      {
+        //How many seconds elapsed?
+        Mantid::Kernel::time_duration elapsed = lastTime - startTime;
+        double seconds = Mantid::Kernel::DateAndTime::durationInSeconds(elapsed);
+
+        //Output with 6 decimal points
+        std::ostringstream oss;
+        oss.precision(6);
+        oss << std::fixed << seconds;
+        time_string = oss.str();
+      }
+
+      t->setText(i,0,QString::fromStdString(time_string));
+      t->setCell(i,1,lastValue);
+      i++;
+    }
   }
 
   try
   {
-    if (filter && lastTime < flt.filter()->lastTime())
+    //Set the filter strings
+    if (filter && flt.filter() && lastTime < flt.filter()->lastTime())
     {
       rowcount = time_value_map.size();
       if (rowcount == t->numRows()) t->addRows(1);
@@ -1924,7 +1985,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   t->showNormal();
 
   QStringList colNames;
-  if (filter)
+  if (filter && flt.filter())
   {
     colNames <<t->colName(3);
   }
@@ -1936,24 +1997,32 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   Graph* g = ml->activeGraph();
 
   // Set x-axis label format
-  Mantid::Kernel::dateAndTime label_as_ptime = flt.data()->nthInterval(0).begin();
-  QDateTime dt = QDateTime::fromTime_t( Mantid::Kernel::DateAndTime::to_localtime_t( label_as_ptime ) );
-  QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
-  g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
+  if (useAbsoluteDate)
+  {
+    Mantid::Kernel::dateAndTime label_as_ptime = flt.data()->nthInterval(0).begin();
+    QDateTime dt = QDateTime::fromTime_t( Mantid::Kernel::DateAndTime::to_localtime_t( label_as_ptime ) );
+    QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
+    g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
+  }
+  else
+  {
+    //Make the x-axis a numeric format, 0 decimals
+    g->setLabelsNumericFormat(2,1,0, "");
+  }
 
   // Set style #3 (HorizontalSteps) for curve iValueCurve
   g->setCurveStyle(iValueCurve,3);
   QPen pn = QPen(Qt::black);
   g->setCurvePen(iValueCurve, pn);
 
-  if (filter)
+  if (filter && flt.filter())
   {
     QwtPlotCurve *c = g->curve(iFilterCurve);
     // Set the right axis as Y axis for the filter curve.
     c->setAxis(2,1);
     // Set style #3 (HorizontalSteps) for curve 1
-    g->setCurveStyle(iFilterCurve,3);
     // Set scale of right Y-axis (#3) from 0 to 1
+    g->setCurveStyle(iFilterCurve,3);
     g->setScale(3,0,1);
     // Fill area under the curve with a pattern
     QBrush br = QBrush(Qt::gray, Qt::Dense5Pattern);
