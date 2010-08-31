@@ -46,7 +46,7 @@ def Detector(det_name):
     ReductionSingleton().instrument.setDetector(det_name)
     
 def MaskFile(file_name):
-    ReductionSingleton().instrument.read_mask_file(file_name)
+    ReductionSingleton().read_mask_file(file_name)
     
 def SetMonitorSpectrum(specNum, interp=False):
     ReductionSingleton().set_monitor_spectrum(specNum, interp)
@@ -67,8 +67,10 @@ def Gravity(flag):
     ReductionSingleton().set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
-    trans = ISISReductionSteps.Transmission(lambda_min=lambdamin, 
-                                            lambda_max=lambdamax, 
-                                            fit_method=mode)
-    ReductionSingleton().set_transmission(trans)
+    ReductionSingleton().set_trans_fit(lambda_min=lambdamin, 
+                                       lambda_max=lambdamax, 
+                                       fit_method=mode)
+    
+def AssignCan(can_run, reload = True, period = -1):
+    ReductionSingleton().set_background(can_run, reload = reload, period = period)
     

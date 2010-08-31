@@ -29,7 +29,7 @@ class ISISReducer(SANSReducer):
     WAV2 = None
     DWAV = None
     Q_REBIN = None
-    QXY = None
+    QXY2 = None
     DQY = None
     
     # Scaling values [%]
@@ -53,6 +53,7 @@ class ISISReducer(SANSReducer):
     PHIMIRROR=True
     
     ## Flag for gravity correction
+    # Belongs in Q1D
     _use_gravity = False
     
     ## Path for user settings files
@@ -60,6 +61,9 @@ class ISISReducer(SANSReducer):
     
     def __init__(self):
         super(ISISReducer, self).__init__()
+        self._transmission_calculator = ISISReductionSteps.Transmission()
+        # Default data loader
+        self._data_loader = ISISReductionSteps.LoadRun()
         
     def set_user_path(self, path):
         """
@@ -71,6 +75,21 @@ class ISISReducer(SANSReducer):
         else:
             raise RuntimeError, "ISISReducer.set_data_path: provided path is not a directory (%s)" % path
 
+    def set_background(self, can_run=None, reload = True, period = -1):
+        """
+            Sets the can data to be subtracted from sample data files
+            @param data_file: Name of the can run file
+        """
+        if can_run is None:
+            self._background_subtracter = None
+        else:
+            self._background_subtracter = ISISReductionSteps.CanSubtraction(can_run, reload=reload, period=period)
+
+    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
+        if not issubclass(self._transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
+            raise RuntimeError, "ISISReducer.set_trans_fit: transmission calculator not set"
+        self._transmission_calculator(lambda_min=lambda_min, lambda_max=lambda_max, fit_method=fit_method)
+        
     def set_gravity(self, flag):
         if isinstance(flag, bool) or isinstance(flag, int):
             self._use_gravity = flag
@@ -150,8 +169,12 @@ class ISISReducer(SANSReducer):
         
         self.RESCALE = 100.0
     
-    def mask(self, descr): pass #Mask()
-    
+    def mask(self, instruction):
+        if self._mask is None:
+            masker = ISISReductionSteps.Mask()
+            self.set_mask(masker)
+        self._mask.parse_instruction(instruction)
+        
     def read_mask_file(self, filename):
         """
             Reads a SANS mask file
@@ -185,7 +208,7 @@ class ISISReducer(SANSReducer):
             
             elif upper_line.startswith('SET CENTRE'):
                 values = upper_line.split()
-                self.set_beam_finder(SANSReductionSteps.BaseBeamFinder(float(values[2]), float(values[3])))
+                self.set_beam_finder(SANSReductionSteps.BaseBeamFinder(float(values[2])/1000.0, float(values[3])/1000.0))
             
             elif upper_line.startswith('SET SCALES'):
                 values = upper_line.split()
@@ -227,9 +250,9 @@ class ISISReducer(SANSReducer):
                 params = upper_line[10:].split()
                 if len(params) == 3:
                     fit_type, lambdamin, lambdamax = params
-                    self._transmission_calculator = ISISReductionSteps.Transmission(lambda_min=lambdamin, 
-                                                                                    lambda_max=lambdamax, 
-                                                                                    fit_method=fit_type)
+                    self._transmission_calculator.set_trans_fit(lambda_min=lambdamin, 
+                                                                lambda_max=lambdamax, 
+                                                                fit_method=fit_type)
                 else:
                     _issueWarning('Incorrectly formatted FIT/TRANS line, setting defaults to LOG and full range')
                     self._transmission_calculator = ISISReductionSteps.Transmission()

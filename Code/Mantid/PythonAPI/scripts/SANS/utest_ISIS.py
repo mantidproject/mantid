@@ -33,15 +33,23 @@ class TestInstrument(unittest.TestCase):
         SANS2D()
         DataPath("../../../Test/Data/SANS2D")
         UserPath("../../../Test/Data/SANS2D/")
-        ReductionSingleton().read_mask_file("../../../Test/Data/SANS2D/MASKSANS2Doptions.091A")        
-    
+        Detector("rear-detector")
+        Gravity(True)
+        MaskFile("../../../Test/Data/SANS2D/MASKSANS2Doptions.091A")        
+        #AssignCan('993.raw')
+        
+        #AppendDataFile('SANS2D00000992.raw')
+        #Reduce1D()
+        
                 
         SANSReduction.DataPath("../../../Test/Data/SANS2D")
         SANSReduction.UserPath("../../../Test/Data/SANS2D/")
         SANSReduction.SANS2D()
         SANSReduction.Set1D()
+        SANSReduction.Gravity(True)
         SANSReduction.Detector("rear-detector")
         SANSReduction.MaskFile('MASKSANS2Doptions.091A')
+        #SANSReduction.AssignCan('993.raw')
         
         self.assertEqual(ReductionSingleton().instrument.FRONT_DET_Z_CORR,
                          SANSReduction.INSTRUMENT.FRONT_DET_Z_CORR)
@@ -60,6 +68,9 @@ class TestInstrument(unittest.TestCase):
 
         self.assertEqual(ReductionSingleton().instrument.REAR_DET_X_CORR,
                          SANSReduction.INSTRUMENT.REAR_DET_X_CORR)
+        
+        self.assertEqual(ReductionSingleton().instrument.SAMPLE_Z_CORR,
+                         SANSReduction.INSTRUMENT.SAMPLE_Z_CORR)
         
         self.assertEqual(ReductionSingleton()._user_path,
                          SANSReduction.USER_PATH)
@@ -98,7 +109,67 @@ class TestInstrument(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._transmission_calculator._fit_method,
                          SANSReduction.TRANS_FIT)
         
+        self.assertEqual(ReductionSingleton().RMIN,
+                         SANSReduction.RMIN)
+        self.assertEqual(ReductionSingleton().RMAX,
+                         SANSReduction.RMAX)
+        self.assertEqual(ReductionSingleton().DEF_RMIN,
+                         SANSReduction.DEF_RMIN)
+        self.assertEqual(ReductionSingleton().DEF_RMAX,
+                         SANSReduction.DEF_RMAX)
 
+        self.assertEqual(ReductionSingleton().WAV1,
+                         SANSReduction.WAV1)
+        self.assertEqual(ReductionSingleton().WAV2,
+                         SANSReduction.WAV2)
+        self.assertEqual(ReductionSingleton().DWAV,
+                         SANSReduction.DWAV)
+        self.assertEqual(ReductionSingleton().Q_REBIN,
+                         SANSReduction.Q_REBIN)
+        self.assertEqual(ReductionSingleton().QXY2,
+                         SANSReduction.QXY2)
+        self.assertEqual(ReductionSingleton().DQY,
+                         SANSReduction.DQY)
+        
+        self.assertEqual(ReductionSingleton().instrument.incid_mon_4_trans_calc,
+                         SANSReduction.INSTRUMENT.incid_mon_4_trans_calc)
+        
+        self.assertEqual(ReductionSingleton().instrument._incid_monitor,
+                         SANSReduction.INSTRUMENT._incid_monitor)
+        self.assertEqual(ReductionSingleton().instrument._incid_monitor,
+                         SANSReduction.INSTRUMENT._incid_monitor)
+        
+        self.assertEqual(ReductionSingleton()._beam_finder._beam_center_x,
+                         SANSReduction.XBEAM_CENTRE)
+        self.assertEqual(ReductionSingleton()._beam_finder._beam_center_y,
+                         SANSReduction.YBEAM_CENTRE)
+
+        self.assertEqual(ReductionSingleton().RESCALE,
+                         SANSReduction.RESCALE)
+        self.assertEqual(ReductionSingleton()._use_gravity,
+                         SANSReduction.GRAVITY)
+        self.assertEqual(ReductionSingleton().BACKMON_START,
+                         SANSReduction.BACKMON_START)
+        self.assertEqual(ReductionSingleton().BACKMON_END,
+                         SANSReduction.BACKMON_END)
+        
+        self.assertEqual(ReductionSingleton().instrument.cur_detector().name(),
+                         SANSReduction.INSTRUMENT.cur_detector().name())
+        
+        # Mask
+        self.assertEqual(ReductionSingleton()._mask._timemask,
+                         SANSReduction.TIMEMASKSTRING)
+        self.assertEqual(ReductionSingleton()._mask._timemask_r,
+                         SANSReduction.TIMEMASKSTRING_R)
+        self.assertEqual(ReductionSingleton()._mask._timemask_f,
+                         SANSReduction.TIMEMASKSTRING_F)
+        self.assertEqual(ReductionSingleton()._mask._specmask,
+                         SANSReduction.SPECMASKSTRING)
+        self.assertEqual(ReductionSingleton()._mask._specmask_r,
+                         SANSReduction.SPECMASKSTRING_R)
+        self.assertEqual(ReductionSingleton()._mask._specmask_f,
+                         SANSReduction.SPECMASKSTRING_F)
+        
 
 if __name__ == '__main__':
     unittest.main()
