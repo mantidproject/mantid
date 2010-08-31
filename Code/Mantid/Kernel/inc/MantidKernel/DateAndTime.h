@@ -43,6 +43,8 @@ DLLExport dateAndTime from_time_t(const std::time_t &time);
 
 DLLExport std::tm to_tm(const dateAndTime &time);
 
+DLLExport std::tm to_localtime_tm(const dateAndTime &time);
+
 DLLExport dateAndTime get_current_time();
 
 

@@ -44,7 +44,7 @@ class Algorithm;
 class DLLExport AlgorithmHistory
 {
 public:
-  /// The date-and-time will be stored as the ctime time_t type
+  /// The date-and-time will be stored as the Mantid::Kernel::dateAndTime type
 
   explicit AlgorithmHistory(const Algorithm* const alg,const Mantid::Kernel::dateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime,
                             const double& duration = -1,unsigned int uexeccount=0);

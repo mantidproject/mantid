@@ -10,8 +10,12 @@ namespace DateAndTime
 {
 
 //-----------------------------------------------------------------------------------------------
-/** Portable implementation of gmtime_r (re-entrant gmtime)
+/** Convert time_t to tm as UTC time.
+ * Portable implementation of gmtime_r (re-entrant gmtime) that works on Windows and Linux
  *
+ * @param clock pointer to time_t to convert
+ * @param result pointer to a struct tm (timeinfo structure) that will be filled.
+ * @return result if successful, or NULL if there was an error.
  */
 std::tm * gmtime_r_portable( const std::time_t *clock, struct std::tm *result )
 {
@@ -31,6 +35,7 @@ std::tm * gmtime_r_portable( const std::time_t *clock, struct std::tm *result )
 #endif
 }
 
+//-----------------------------------------------------------------------------------------------
 /// utc_mktime() converts a struct tm that contains
 /// broken down time in utc to a time_t.  This function uses
 /// a brute-force method of conversion that does not require
@@ -140,12 +145,33 @@ std::tm to_tm(const dateAndTime &time)
 }
 
 //-----------------------------------------------------------------------------------------------
+/** Convert a dateAndTime object (in UTC) to a std::tm time structure, using the locat time zone.
+ */
+std::tm to_localtime_tm(const dateAndTime &time)
+{
+  //Get the time_t in UTC
+  std::time_t my_time_t = to_time_t(time);
+  std::tm result;
+
+#ifdef _WIN32
+  //Windows version
+  localtime_s(&result, &my_time_t);
+#else
+  //Unix implementation
+  localtime_r(&my_time_t, &result);
+#endif
+
+  return result;
+}
+
+
+//-----------------------------------------------------------------------------------------------
 /** Returns the current dateAndTime, in UTC time, with microsecond precision
  *
  */
 dateAndTime get_current_time()
 {
-return boost::posix_time::microsec_clock::universal_time();
+  return boost::posix_time::microsec_clock::universal_time();
 }
 
 
@@ -178,7 +204,8 @@ std::time_t to_localtime_t(const dateAndTime &time)
   return as_time_t;
 }
 
-/** Return time as string in simple format CCYY-mmm-dd hh:mm:ss.fffffff
+//-----------------------------------------------------------------------------------------------
+/** Return time as string in simple format CCYY-mmm-dd hh:mm:ss
  */
 std::string to_simple_string(const dateAndTime &time)
 {
