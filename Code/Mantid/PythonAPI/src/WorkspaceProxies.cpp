@@ -49,39 +49,6 @@ namespace Mantid
       return MantidVecHelper::createPythonWrapper(self.readE(index), true);
     }
 
-    /**
-    * Returns the X values from the spectra at the given index wrapped in a read-write numpy array
-    * @param self A reference to the workspace
-    * @param index The index of the workspace
-    * @returns A numpy array for the given index
-    */
-    PyObject * MatrixWorkspaceWrapper::dataX(API::MatrixWorkspace& self, int index)
-    {
-      return MantidVecHelper::createPythonWrapper(self.readX(index), false);
-    }
-
-    /**
-    * Returns the Y values from the spectra at the given index wrapped in a read-write numpy array
-    * @param self A reference to the workspace
-    * @param index The index of the workspace
-    * @returns A numpy array for the given index
-    */
-    PyObject * MatrixWorkspaceWrapper::dataY(API::MatrixWorkspace& self, int index)
-    {
-      return MantidVecHelper::createPythonWrapper(self.readY(index), false);
-    }
-
-    /**
-    * Returns the E values from the spectra at the given index wrapped in a read-write numpy array
-    * @param self A reference to the workspace
-    * @param index The index of the workspace
-    * @returns A numpy array for the given index
-    */
-    PyObject * MatrixWorkspaceWrapper::dataE(API::MatrixWorkspace& self, int index)
-    {
-      return MantidVecHelper::createPythonWrapper(self.readE(index), false);
-    }
-
     //*********************************************************************************
     //
     // WorkspaceAlgebraProxy

@@ -65,12 +65,6 @@ namespace Mantid
       static PyObject * readY(API::MatrixWorkspace& self, int index);
       /// Read E values from a spectra in a workspace and return it as a read-only numpy array
       static PyObject * readE(API::MatrixWorkspace& self, int index);
-      /// Read X values from a spectra in a workspace and return it as a read-write numpy array
-      static PyObject * dataX(API::MatrixWorkspace& self, int index);
-      /// Read Y values from a spectra in a workspace and return it as a read-write numpy array
-      static PyObject * dataY(API::MatrixWorkspace& self, int index);
-      /// Read E values from a spectra in a workspace and return it as a read-write numpy array
-      static PyObject * dataE(API::MatrixWorkspace& self, int index);
 
     private:
       /// Stored Python object
