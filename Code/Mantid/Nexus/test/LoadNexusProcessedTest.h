@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cxxtest/TestSuite.h>
 #include "MantidNexus/LoadNexusProcessed.h"
+#include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Instrument.h"
@@ -313,6 +314,55 @@ public:
    }
 
 
+   // Saving and reading masking correctly
+   void testMasked()
+   {
+     LoadNexusProcessed alg;
+
+     TS_ASSERT_THROWS_NOTHING(alg.initialize());
+     TS_ASSERT( alg.isInitialized() );
+     testFile="../../../../Test/Nexus/focussed.nxs";
+     alg.setProperty("Filename", testFile);
+     alg.setPropertyValue("OutputWorkspace", output_ws);
+
+     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+     //Test some aspects of the file
+     MatrixWorkspace_sptr workspace;
+     workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws) );
+     TS_ASSERT( workspace.get() );
+
+     for(int si = 0; si < workspace->getNumberHistograms(); ++si)
+     {
+       workspace->maskBin(si,0,1.0);
+       workspace->maskBin(si,1,1.0);
+       workspace->maskBin(si,2,1.0);
+     }
+
+     SaveNexusProcessed save;
+     save.initialize();
+     save.setPropertyValue("InputWorkspace",output_ws);
+     save.setPropertyValue("Filename","LoadNexusProcessed_tmp.nxs");
+     save.execute();
+
+     LoadNexusProcessed load;
+     load.initialize();
+     load.setPropertyValue("Filename","LoadNexusProcessed_tmp.nxs");
+     load.setPropertyValue("OutputWorkspace",output_ws);
+     load.execute();
+
+     workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws) );
+     TS_ASSERT( workspace.get() );
+
+     TS_ASSERT_EQUALS(workspace->getNumberHistograms(),6)
+
+     TS_ASSERT(workspace->hasMaskedBins(0));
+     TS_ASSERT(workspace->hasMaskedBins(1));
+     TS_ASSERT(workspace->hasMaskedBins(2));
+     TS_ASSERT(workspace->hasMaskedBins(3));
+     TS_ASSERT(workspace->hasMaskedBins(4));
+     TS_ASSERT(workspace->hasMaskedBins(5));
+   }
 
 
 

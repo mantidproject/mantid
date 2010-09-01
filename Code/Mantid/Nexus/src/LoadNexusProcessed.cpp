@@ -906,7 +906,7 @@ namespace Mantid
       {
         int si = spec(i,0);
         int j0 = spec(i,1);
-        int j1 = i < n1 ? spec(i+1,1) : n;
+        int j1 = i < n1 ? spec(i+1,1) : bins.dim0();
         for(int j = j0; j < j1; ++j)
         {
           local_workspace->maskBin(si,bins[j],weights[j]);
