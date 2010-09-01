@@ -14,6 +14,13 @@ from mantidsimple import *
 ## Version number
 __version__ = '0.0'
 
+def _issueWarning(msg):
+    """
+        Issues a Mantid message
+        @param msg: message to be issued
+    """
+    mantid.sendLogMessage('::SANS::Warning: ' + msg)
+    
 class ISISReducer(SANSReducer):
     """
         ISIS Reducer
@@ -132,7 +139,32 @@ class ISISReducer(SANSReducer):
               
         self.PHIMIN = phimin
         self.PHIMAX = phimax
-        self.PHIMIRROR = phimirror                      
+        self.PHIMIRROR = phimirror
+        
+    def set_sample_geometry(self, geom_id):
+        if geom_id > 3 or geom_id < 1:
+            _issueWarning("Invalid geometry type for sample: " + str(geom_id) + ". Setting default to 3.")
+            geom_id = 3
+        self.SAMPLE_GEOM = geom_id  
+               
+    def set_sample_thickness(self, thickness):
+        self.SAMPLE_THICKNESS = thickness                     
+                                
+    def set_sample_height(self, height):
+        if self.SAMPLE_GEOM == None:
+            raise RuntimeError, 'Attempting to set height without setting geometry flag. Please set geometry type first'
+        self.SAMPLE_HEIGHT = height
+        # For a disk the height=width
+        if self.SAMPLE_GEOM == 3:
+            self.SAMPLE_WIDTH = height                    
+               
+    def set_sample_width(self, width):
+        if self.SAMPLE_GEOM == None:
+            raise RuntimeError, 'Attempting to set width without setting geometry flag. Please set geometry type first'
+        self.SAMPLE_WIDTH = width
+        # For a disk the height=width
+        if self.SAMPLE_GEOM == 3:
+            self.SAMPLE_HEIGHT = width   
                                 
     def _initialize_mask(self):
         self.instrument.FRONT_DET_Z_CORR = 0.0

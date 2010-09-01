@@ -36,10 +36,10 @@ class TestInstrument(unittest.TestCase):
         Detector("rear-detector")
         Gravity(True)
         MaskFile("../../../Test/Data/SANS2D/MASKSANS2Doptions.091A")        
-        #AssignCan('993.raw')
+        AssignCan('993.raw')
         
-        #AppendDataFile('SANS2D00000992.raw')
-        #Reduce1D()
+        AppendDataFile('SANS2D00000992.raw')
+        Reduce1D()
         
                 
         SANSReduction.DataPath("../../../Test/Data/SANS2D")
@@ -49,7 +49,7 @@ class TestInstrument(unittest.TestCase):
         SANSReduction.Gravity(True)
         SANSReduction.Detector("rear-detector")
         SANSReduction.MaskFile('MASKSANS2Doptions.091A')
-        #SANSReduction.AssignCan('993.raw')
+        SANSReduction.AssignCan('993.raw')
         
         self.assertEqual(ReductionSingleton().instrument.FRONT_DET_Z_CORR,
                          SANSReduction.INSTRUMENT.FRONT_DET_Z_CORR)

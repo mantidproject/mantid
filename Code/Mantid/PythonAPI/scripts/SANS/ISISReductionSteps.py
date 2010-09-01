@@ -9,7 +9,15 @@ from SANSReductionSteps import BaseTransmission
 from mantidsimple import *
 import SANSUtility
 import SANSInsts
+import os
 
+def _issueWarning(msg):
+    """
+        Issues a Mantid message
+        @param msg: message to be issued
+    """
+    mantid.sendLogMessage('::SANS::Warning: ' + msg)
+    
 class Transmission(BaseTransmission):
     """
         Transmission calculation for ISIS SANS instruments
@@ -61,10 +69,12 @@ class Transmission(BaseTransmission):
         
 class CanSubtraction(ReductionStep):
     """
-        Subtract the can after correcting it
+        Subtract the can after correcting it.
+        Note that in the original SANSReduction.py, the can run was loaded immediately after
+        the AssignCan() command was called. Since the loading needs information from the instrument, 
+        we load only before doing the subtraction.
     """
-  
-    
+
     SCATTER_CAN = None
     _CAN_SETUP = None
     _CAN_RUN = None
@@ -94,7 +104,7 @@ class CanSubtraction(ReductionStep):
         if not issubclass(reducer.instrument.__class__, SANSInsts.ISISInstrument):
             raise RuntimeError, "Transmission.assign_can expects an argument of class ISISInstrument"
         
-        self.__clearPrevious(self.SCATTER_CAN,others=[self.SCATTER_SAMPLE,self.TRANS_SAMPLE,
+        _clearPrevious(self.SCATTER_CAN,others=[self.SCATTER_SAMPLE,self.TRANS_SAMPLE,
                                                       self.TRANS_CAN,self.DIRECT_SAMPLE,self.DIRECT_CAN])
         self._CAN_N_PERIODS = -1
         
@@ -106,7 +116,7 @@ class CanSubtraction(ReductionStep):
     
         self._CAN_RUN = can_run
         self.SCATTER_CAN ,reset, logname,filepath, self._CAN_N_PERIODS = \
-            self._assignHelper(can_run, False, reload, period, reducer)
+            _assignHelper(can_run, False, reload, period, reducer)
         if self.SCATTER_CAN.getName() == '':
             mantid.sendLogMessage('::SANS::Warning: Unable to load sans can run, cannot continue.')
             return '','()'
@@ -115,7 +125,7 @@ class CanSubtraction(ReductionStep):
             
         if (reducer.instrument.name() == 'SANS2D'):
             self._MARKED_DETS_ = []
-            logvalues = Transmission._loadDetectorLogs(logname,filepath)
+            logvalues = _loadDetectorLogs(logname,filepath)
             if logvalues == None:
                 mantid.sendLogMessage('::SANS::Warning: Can logs could not be loaded, using sample values.')
                 return self.SCATTER_CAN.getName(), "()"
@@ -249,21 +259,53 @@ class LoadRun(ReductionStep):
         to the beam center and normalize the data.
     """
     #TODO: Move this to HFIR-specific module 
-    def __init__(self, datafile=None):
+    def __init__(self, data_file=None, spec_min=None, spec_max=None, period=1):
+        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(LoadRun, self).__init__()
-        self._data_file = datafile
+        self._data_file = data_file
+        self._spec_min = spec_min
+        self._spec_max = spec_max
+        self._period = period
         
-    def execute(self, reducer, workspace):      
+    def execute(self, reducer, workspace):
         # If we don't have a data file, look up the workspace handle
         if self._data_file is None:
             if workspace in reducer._data_files:
-                self._data_file = reducer._data_files[workspace]
+                #self._data_file = reducer._data_files[workspace]
+                self._data_file = reducer._full_file_path(reducer._data_files[workspace])
             else:
                 raise RuntimeError, "ISISReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
         
-        # Load data
-        filepath = reducer._full_file_path(self._data_file)
-        Load(filepath, workspace)
+        if os.path.splitext(self._data_file)[1].lower().startswith('n'):
+            alg = LoadNexus(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
+        else:
+            alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
+            LoadSampleDetailsFromRaw(workspace, self._data_file)
+    
+        pWorksp = mtd[workspace]
+    
+        if pWorksp.isGroup() :
+            #get the number of periods in a group using the fact that each period has a different name
+            nNames = len(pWorksp.getNames())
+            numPeriods = nNames - 1
+            workspace = _leaveSinglePeriod(pWorksp, self._period)
+            pWorksp = mtd[workspace]
+        else :
+            #if the work space isn't a group there is only one period
+            numPeriods = 1
+            
+        if (self._period > numPeriods) or (self._period < 1):
+            raise ValueError('_loadRawData: Period number ' + str(self._period) + ' doesn\'t exist in workspace ' + pWorksp.getName())
+    
+        sample_details = pWorksp.getSampleInfo()
+        reducer.set_sample_geometry(sample_details.getGeometryFlag())
+        reducer.set_sample_thickness(sample_details.getThickness())
+        reducer.set_sample_height(sample_details.getHeight())
+        reducer.set_sample_width(sample_details.getWidth())
+    
+        # Return the filepath actually used to load the data
+        fullpath = alg.getPropertyValue("Filename")
+        return [ os.path.dirname(fullpath), workspace, numPeriods]        
         
 
         
@@ -286,7 +328,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None
     else:
         field_width = 8
         
-    fullrun_no,logname,shortrun_no = Transmission.padRunNumber(run_no, field_width)
+    fullrun_no,logname,shortrun_no = _padRunNumber(run_no, field_width)
     
     if is_trans:
         wkspname =  shortrun_no + '_trans_' + ext.lower()
@@ -313,7 +355,8 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None
                 specmin = None
                 specmax = 8
                 
-            print "LoadRawData not implemented"   
+            loader = LoadRun(filename+'.'+ext, spec_min=specmin, spec_max=specmax, period=period)
+            [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
             #[filepath, wkspname, nPeriods] = \
             #   _loadRawData(filename, wkspname, ext, specmin, specmax, period)
         except RuntimeError, err:
@@ -321,7 +364,8 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
     else:
         try:
-            print "LoadRawData not implemented"
+            loader = LoadRun(filename+'.'+ext, spec_min=None, spec_max=None, period=period)
+            [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
             #[filepath, wkspname, nPeriods] = _loadRawData(filename, wkspname, ext, None, None, period)
         except RuntimeError, details:
             mantid.sendLogMessage("::SANS::Warning: "+str(details))
@@ -366,7 +410,7 @@ def _loadDetectorLogs(logname,filepath):
     return logvalues
 
 
-def padRunNumber(run_no, field_width):
+def _padRunNumber(run_no, field_width):
     nchars = len(run_no)
     digit_end = 0
     for i in range(0, nchars):
@@ -382,7 +426,7 @@ def padRunNumber(run_no, field_width):
         filebase = run_no[:digit_end].rjust(field_width, '0')
         return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
 
-def __clearPrevious(inWS, others = []):
+def _clearPrevious(inWS, others = []):
     if inWS != None:
         if type(inWS) == SANSUtility.WorkspaceDetails:
             inWS = inWS.getName()
