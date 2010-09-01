@@ -7,6 +7,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -30,6 +31,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output));
     }
 
+    //--------------------------------------------------------------------------------------------
     /** Executes the algorithm
      *
      *  @throw runtime_error Thrown if algorithm cannot execute
@@ -39,6 +41,17 @@ namespace Mantid
       // get input workspace, dynamic cast not needed
       MatrixWorkspace_const_sptr lhs = getProperty(inputPropName1());
       MatrixWorkspace_const_sptr rhs = getProperty(inputPropName2());
+
+      //Should we use event-type processing?
+      if (checkEventCompatibility(lhs, rhs))
+      {
+        //Have the subclass handle the event stuff
+        this->execEvent( boost::dynamic_pointer_cast<const EventWorkspace>(lhs),
+            boost::dynamic_pointer_cast<const EventWorkspace>(rhs));
+
+        //And we are done
+        return;
+      }
 
       // Check that the input workspace are compatible
       if (!checkCompatibility(lhs,rhs))
@@ -56,7 +69,7 @@ namespace Mantid
         lhs = rhs;
         rhs = smaller;
       }
-      
+
       MatrixWorkspace_sptr out_work = getProperty(outputPropName());
       // We need to create a new workspace for the output if:
       //   (a) the output workspace hasn't been set to one of the input ones, or
@@ -71,7 +84,7 @@ namespace Mantid
 
       // Initialise the progress reporting object
       m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms());
-      
+
       // There are now 4 possible scenarios, shown schematically here:
       // xxx x   xxx xxx   xxx xxx   xxx x
       // xxx   , xxx xxx , xxx     , xxx x
@@ -93,7 +106,7 @@ namespace Mantid
       {
         do2D(lhs,rhs,out_work);
       }
-      
+
       // Call the virtual unit manipulation method
       setOutputUnits(lhs,rhs,out_work);
 
@@ -103,6 +116,19 @@ namespace Mantid
       return;
     }
 
+
+    //--------------------------------------------------------------------------------------------
+    /** Execute a binary operation on events. Should be overridden. */
+    void BinaryOperation::execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs )
+    {
+      (void) lhs;(void) rhs; //Avoid compiler warnings
+      //This should never happen
+      throw Exception::NotImplementedError("BinaryOperation::execEvent() is not implemented for this operation.");
+    }
+
+    //--------------------------------------------------------------------------------------------
+    /** Return true if the two workspaces are compatible for this operation
+     * Virtual: will be overridden as needed. */
     bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       Unit_const_sptr lhs_unit = Unit_sptr();
@@ -135,6 +161,19 @@ namespace Mantid
       return true;
     }
 
+    //--------------------------------------------------------------------------------------------
+    /** Return true if the two workspaces can be treated as event workspaces
+     * for the binary operation (e.g. Plus algorithm will concatenate event lists)
+     *
+     * @return false by default; will be overridden by specific algorithms
+     */
+    bool BinaryOperation::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs)
+    {
+      return false;
+    }
+
+
+    //--------------------------------------------------------------------------------------------
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
      *  In order to be size compatible then the larger workspace
      *  must divide be the size of the smaller workspace leaving no remainder
@@ -161,6 +200,8 @@ namespace Mantid
       return ( lhs->blocksize() == rhs->blocksize() && ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec ) );
     }
 
+
+    //--------------------------------------------------------------------------------------------
     /** Called when the rhs operand is a single value. 
      *  Loops over the lhs workspace calling the abstract binary operation function. 
      *  @param lhs The workspace which is the left hand operand
@@ -189,6 +230,8 @@ namespace Mantid
       PARALLEL_CHECK_INTERUPT_REGION
    }
    
+
+    //--------------------------------------------------------------------------------------------
     /** Called when the rhs operand is a single spectrum. 
      *  Loops over the lhs workspace calling the abstract binary operation function. 
      *  @param lhs The workspace which is the left hand operand

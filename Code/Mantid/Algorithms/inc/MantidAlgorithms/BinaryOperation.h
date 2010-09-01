@@ -8,6 +8,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -64,6 +65,9 @@ namespace Mantid
       void exec();
 
     protected:
+      /// Execution method for event workspaces, to be overridden as needed.
+      virtual void execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs );
+
       /// The name of the first input workspace property
       virtual std::string inputPropName1() const { return "LHSWorkspace";}
       /// The name of the second input workspace property
@@ -73,6 +77,10 @@ namespace Mantid
 
       /// Checks the compatibility of the two workspaces
       virtual bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+
+      /// Checks the compatibility of event-based processing of the two workspaces
+      virtual bool checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs);
+
       /// Checks the overall size compatibility of two workspaces
       virtual bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 

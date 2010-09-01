@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -65,6 +66,17 @@ namespace Mantid
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
       bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run & ans) const;
+
+      //Overridden event-specific operation
+      void execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs );
+      /// Checks the compatibility of event-based processing of the two workspaces
+      bool checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs);
+
+      //Variables used in processing
+      std::string lhs_name, rhs_name, out_name;
+
+
+
     };
 
   } // namespace Algorithm

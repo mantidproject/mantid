@@ -20,7 +20,13 @@ using namespace Mantid::DataObjects;
 
 class PlusTest : public CxxTest::TestSuite
 {
+
 public:
+  //Constructor
+  PlusTest()
+  {
+  }
+
 
   void testInit()
   {
@@ -28,9 +34,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg.setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument )
-    TS_ASSERT_THROWS( alg.setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument )    
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","test_out2") )
+    TS_ASSERT_THROWS( alg.setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","test_out2") );
   }
   
   void testExec1D1D()
@@ -421,6 +427,265 @@ public:
     AnalysisDataService::Instance().remove("c");
   }
   
+
+  void EventSetup()
+  {
+    AnalysisDataService::Instance().add("ev1",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 3)); // 100 ev
+    AnalysisDataService::Instance().add("ev2",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2)); //200 ev
+    AnalysisDataService::Instance().add("ev3",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100)); //200 events per spectrum, but the spectra are at different pixel ids
+    //a 2d workspace with the value 2 in each bin
+    AnalysisDataService::Instance().add("in2D", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
+
+  }
+
+  void EventTeardown()
+  {
+    AnalysisDataService::Instance().remove("ev1");
+    AnalysisDataService::Instance().remove("ev2");
+    AnalysisDataService::Instance().remove("ev3");
+    AnalysisDataService::Instance().remove("in2D");
+    AnalysisDataService::Instance().remove("evOUT");
+    AnalysisDataService::Instance().remove("out2D");
+  }
+
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_addingInPlace()
+  {
+    EventSetup();
+
+    std::string in1_name("ev1");
+    std::string in2_name("ev2");
+    std::string out_name("ev1");
+
+    EventWorkspace_sptr in1, in2, out;
+    TS_ASSERT_THROWS_NOTHING(in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in1_name)));
+    TS_ASSERT_THROWS_NOTHING(in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in2_name)));
+    int numEvents1 = in1->getNumberEvents();
+    int numEvents2 = in2->getNumberEvents();
+
+    //Tests that the workspace is okay at first
+    TS_ASSERT_EQUALS( in1->blocksize(), 10);
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i<in1->blocksize(); i++)
+        TS_ASSERT_EQUALS( in1->readY(wi)[i], 1);
+
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",in1_name);
+    alg.setPropertyValue("RHSWorkspace",in2_name);
+    alg.setPropertyValue("OutputWorkspace",out_name);
+    alg.execute();
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_name));
+    int numEventsOut = out->getNumberEvents();
+
+    //Correct in output
+    TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
+    //10 bins copied
+    TS_ASSERT_EQUALS( out->blocksize(), 10);
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i<out->blocksize(); i++)
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 3);
+
+    //But they were added in #1
+    TS_ASSERT_EQUALS( in1->getNumberEvents(), numEvents1+numEvents2);
+    TS_ASSERT_EQUALS( in1, out);
+    TS_ASSERT_DIFFERS( in2, out);
+
+    EventTeardown();
+  }
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_differentOutputWorkspace()
+  {
+    EventSetup();
+
+    std::string in1_name("ev1");
+    std::string in2_name("ev2");
+    std::string out_name("evOUT");
+
+    EventWorkspace_sptr in1, in2, out;
+    TS_ASSERT_THROWS_NOTHING(in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in1_name)));
+    TS_ASSERT_THROWS_NOTHING(in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in2_name)));
+    int numEvents1 = in1->getNumberEvents();
+    int numEvents2 = in2->getNumberEvents();
+
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",in1_name);
+    alg.setPropertyValue("RHSWorkspace",in2_name);
+    alg.setPropertyValue("OutputWorkspace",out_name);
+    alg.execute();
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_name));
+    //Ya, its an event workspace
+    TS_ASSERT(out);
+    int numEventsOut = out->getNumberEvents();
+
+    //Correct in output
+    TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
+    //10 bins copied
+    TS_ASSERT_EQUALS( out->blocksize(), 10);
+
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i<out->blocksize(); i++)
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 3);
+
+    //But they were added in #1
+    TS_ASSERT_DIFFERS( in1, out);
+    TS_ASSERT_DIFFERS( in2, out);
+
+    EventTeardown();
+  }
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_differentOutputAndDifferentPixelIDs()
+  {
+    EventSetup();
+
+    std::string in1_name("ev1");
+    std::string in2_name("ev3");
+    std::string out_name("evOUT");
+
+    EventWorkspace_sptr in1, in2, out;
+    TS_ASSERT_THROWS_NOTHING(in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in1_name)));
+    TS_ASSERT_THROWS_NOTHING(in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in2_name)));
+    int numEvents1 = in1->getNumberEvents();
+    int numEvents2 = in2->getNumberEvents();
+
+    IndexToIndexMap *rhs_map = in2->getWorkspaceIndexToDetectorIDMap();
+    //First pixel id of rhs is 100
+    TS_ASSERT_EQUALS( (*rhs_map)[0], 100);
+
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",in1_name);
+    alg.setPropertyValue("RHSWorkspace",in2_name);
+    alg.setPropertyValue("OutputWorkspace",out_name);
+    alg.execute();
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_name));
+    //Ya, its an event workspace
+    TS_ASSERT(out);
+    int numEventsOut = out->getNumberEvents();
+
+    //Correct in output
+    TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
+    //Twice the # of histograms
+    TS_ASSERT_EQUALS( out->getNumberHistograms(), 6);
+    //10 bins copied
+    TS_ASSERT_EQUALS( out->blocksize(), 10);
+
+    //1 event per pixel for the first 3 histograms (pixels 0-2)
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i < out->blocksize(); i++)
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 1);
+    //2 events after that (pixels 100-102)
+    for (int wi=3; wi < 6; wi++)
+      for (int i=0; i<out->blocksize(); i++)
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 2);
+
+    //But they were added in #1
+    TS_ASSERT_DIFFERS( in1, out);
+    TS_ASSERT_DIFFERS( in2, out);
+
+    EventTeardown();
+  }
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_addingInPlace_But_DifferentPixelIDs()
+  {
+    EventSetup();
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","ev3");
+    alg.setPropertyValue("OutputWorkspace","ev1");
+    alg.execute();
+    //Fails because of detector id mismatch; even though they have the same # of workspace indices
+    TS_ASSERT( !alg.isExecuted() );
+
+    EventTeardown();
+  }
+
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_Event_Plus_2D_differentOutput()
+  {
+    EventSetup();
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","in2D");
+    alg.setPropertyValue("OutputWorkspace","out2D");
+    alg.execute();
+
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out2D"));
+    //It's not an EventWorkspace
+    TS_ASSERT( ! (boost::dynamic_pointer_cast<EventWorkspace>(out)) );
+
+    //Should be 3 counts per bin
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i < out->blocksize(); i++)
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 3);
+
+    EventTeardown();
+  }
+
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_Event_Plus_2D_addingInPlaceSucceeds()
+  {
+    //This test result may change with ProxyWorkspace
+
+    EventSetup();
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","in2D");
+    alg.setPropertyValue("OutputWorkspace","in2D");
+    alg.execute();
+
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("in2D"));
+    //It's not an EventWorkspace
+    TS_ASSERT( ! (boost::dynamic_pointer_cast<EventWorkspace>(out)) );
+
+    //Should be 3 counts per bin
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
+    for (int wi=0; wi < 3; wi++)
+      for (int i=0; i < out->blocksize(); i++)
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 3);
+
+    EventTeardown();
+  }
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_Event_Plus_2D_addingInPlaceFails()
+  {
+    //Can't add into an EventWorkspace
+    //This test result may change with ProxyWorkspace
+
+    EventSetup();
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","in2D");
+    alg.setPropertyValue("OutputWorkspace","ev1");
+    alg.execute();
+
+    TS_ASSERT( ! alg.isExecuted() );
+
+    EventTeardown();
+  }
+
+
+
 private:
 
   void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1)

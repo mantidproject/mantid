@@ -50,7 +50,7 @@ using Kernel::Exception::NotImplementedError;
   {
     //Return false if ANY event list is not sorted. You can't have 2 threads trying to sort the
     //  same event list simultaneously.
-    for (int i=0; i<data.size(); i++)
+    for (int i=0; i<static_cast<int>(data.size()); i++)
       if (!data[i]->isSortedByTof())
         return false;
     return true;
@@ -104,7 +104,6 @@ using Kernel::Exception::NotImplementedError;
       //Create a new event list, copying over the events
       EventList * newel = new EventList( **it );
       this->data.push_back(newel);
-      //std::cout << "newel has " << newel->getNumberEvents() << " ; old one has " << (*it)->getNumberEvents() << "\n";
     }
     this->clearMRU();
     //The data map is useless now
@@ -425,7 +424,7 @@ using Kernel::Exception::NotImplementedError;
       data = new MantidVecWithMarker(index);
 
       //Now use that to get E -- Y values are generated from another function
-      this->data[index]->generateErrorsHistogram( this->dataY(index), data->m_data);
+      el->generateErrorsHistogram( this->dataY(index), data->m_data);
 
       //Lets save it in the MRU
       MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);

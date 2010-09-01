@@ -142,7 +142,7 @@ public:
    */
   static EventWorkspace_sptr CreateEventWorkspace(int numPixels,
     int numBins, int numEvents = 100, double x0=0.0, double binDelta=1.0,
-    int eventPattern = 1)
+    int eventPattern = 1, int start_at_pixelID = 0)
   {
     //add one to the number of bins as this is histogram
     numBins++;
@@ -153,7 +153,7 @@ public:
     //Make fake events
     if (eventPattern) // 0 == no events
     {
-      for (int pix=0; pix<numPixels; pix++)
+      for (int pix= start_at_pixelID+0; pix < start_at_pixelID+numPixels; pix++)
       {
         for (int i=0; i<numEvents; i++)
         {
@@ -163,6 +163,10 @@ public:
           {
             retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1); 
             retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1); 
+          }
+          else if (eventPattern == 3) // solid 1
+          {
+            retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1);
           }
         }
       }
