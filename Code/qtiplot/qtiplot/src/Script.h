@@ -118,6 +118,10 @@ protected:
   { if(EmitErrors) emit error(message, Name, lineNumber); }
   
 private:
+  /// Normalise line endings for the given code. The Python C/API does not seem to like CRLF endings so normalise to just LF
+  QString normaliseLineEndings(QString text) const;
+
+private:
   int m_line_offset;
 };
 

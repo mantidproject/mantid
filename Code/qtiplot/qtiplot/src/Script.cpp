@@ -30,6 +30,7 @@
 #include "Script.h"
 
 #include <QMessageBox>
+#include <QRegExp>
 
 Script::Script(ScriptingEnv *env, const QString &code, bool interactive, QObject *context, 
 	       const QString &name)
@@ -48,16 +49,14 @@ Script::~Script()
 
 void Script::addCode(const QString &code) 
 { 
-  Code.append(code);
-  Code.remove('\r');
+  Code.append(normaliseLineEndings(code));
   compiled = notCompiled; 
   emit codeChanged(); 
 }
 
 void Script::setCode(const QString &code) 
 {
-  Code=code;
-  Code.remove('\r');
+  Code = normaliseLineEndings(code);
   compiled = notCompiled; 
   emit codeChanged();
 }
@@ -79,5 +78,16 @@ bool Script::exec()
 {
   emit_error("Script::exec called!",0);
   return false;
+}
+
+/**
+ * Ensure that any line endings are converted to single '\n' so that the Python C API is happy
+ * @param text The text to check and convert
+ */
+QString Script::normaliseLineEndings(QString text) const
+{
+  text = text.replace(QRegExp("\\r\\n"), QString("\n"));
+  text = text.replace(QRegExp("\\r"), QString("\n"));
+  return text;
 }
 

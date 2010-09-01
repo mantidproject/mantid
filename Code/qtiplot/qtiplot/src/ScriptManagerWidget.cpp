@@ -169,7 +169,7 @@ QString ScriptManagerWidget::readScript(const QString& filename, bool *ok)
 {
   QFile file(filename);
   QString script_txt;
-  if( !file.open(QIODevice::ReadOnly) )
+  if( !file.open(QIODevice::ReadOnly|QIODevice::Text) )
   {
     QMessageBox::critical(this, tr("MantidPlot - File error"), 
 			  tr("Could not open file \"%1\" for reading.").arg(filename));
