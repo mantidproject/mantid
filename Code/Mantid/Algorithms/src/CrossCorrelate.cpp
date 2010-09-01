@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <sstream>
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include <numeric>
@@ -22,9 +23,15 @@ namespace Mantid
     /// Initialisation method.
     void CrossCorrelate::init()
     {
+      API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
+      wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
+      wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
+
     	//Input and output workspaces
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsValidator),
+          "A 2D workspace with X values of d-spacing");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+          "The name of the output workspace");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
