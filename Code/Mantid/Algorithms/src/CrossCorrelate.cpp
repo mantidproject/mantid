@@ -73,13 +73,17 @@ void CrossCorrelate::exec()
    		throw std::runtime_error("Can't find reference spectra");
    	const int index_ref=index_map_it->second;
 
+   	// check that the data range specified makes sense
+    double xmin=getProperty("XMin");
+    double xmax=getProperty("XMax");
+    if (xmin >= xmax)
+      throw std::runtime_error("Must specify xmin < xmax");
+
    	// Now check if the range between x_min and x_max is valid
    	const MantidVec& referenceX=inputWS->dataX(index_ref);
-   	double xmin=getProperty("XMin");
     MantidVec::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
    	if (minIt==referenceX.end())
-   		throw std::runtime_error("No data above X_min");
-   	double xmax=getProperty("XMax");
+   		throw std::runtime_error("No data above XMin");
    	MantidVec::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
    	if (minIt==maxIt)
    		throw std::runtime_error("Range is not valid");
@@ -91,6 +95,10 @@ void CrossCorrelate::exec()
 
    	int specmin=getProperty("WorkspaceIndexMin");
    	int specmax=getProperty("WorkspaceIndexMax");
+   	if (specmin>=specmax)
+   	  throw std::runtime_error("Must specify WorkspaceIndexMin<WorkspaceIndexMax");
+   	if (reference<specmin || reference>specmax)
+   	  throw std::runtime_error("Must specify ReferenceSpectra within workspace indices");
    	// Get the number of spectra in range specmin to specmax
    	int nspecs=0;
    	std::vector<int> indexes; // Indexes of all spectra in range
