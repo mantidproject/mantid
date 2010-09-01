@@ -480,9 +480,22 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
   {
     return QString();
   }
-  //Ensure the correct instrument is set
-  QString code_torun =  "SetNoPrintMode(True)\n" + pycode + "\nSetNoPrintMode(False)";
-  return runPythonCode(code_torun).trimmed();
+  g_log.debug() << "Executing Python: " << pycode.toStdString() << std::endl;
+
+  QString code_torun =  "SetNoPrintMode(True);";
+  code_torun += pycode + ";";
+  const static QString PYTHON_SEP("C++ImplementationReservedC++");
+  code_torun += "SetNoPrintMode(False);print '"+PYTHON_SEP+"'";
+  QString pythonOut = runPythonCode(code_torun).trimmed();
+  
+  QStringList allOutput = pythonOut.split(PYTHON_SEP);
+
+  if ( allOutput.count() < 2 )
+  {
+    throw std::runtime_error("Error reported by Python script: " + pythonOut.toStdString());
+  }
+
+  return allOutput[0];
 }
 
 /**
@@ -523,7 +536,10 @@ bool SANSRunWindow::loadUserFile()
   }
 
   // Use python function to read the file and then extract the fields
-  runReduceScriptFunction("MaskFile(r'" + filetext + "')");
+  if ( runReduceScriptFunction("print MaskFile(r'"+filetext+"')") != "True\n" )
+  {
+    return false;
+  }
 
   handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
 
@@ -567,7 +583,7 @@ bool SANSRunWindow::loadUserFile()
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction(
-    "printParameter('INSTRUMENT.get_incident_mntr()'),"));
+    "printParameter('INSTRUMENT.get_incident_mon()'),"));
   m_uiForm.trans_monitor->setText(runReduceScriptFunction(
     "printParameter('INSTRUMENT.incid_mon_4_trans_calc'),"));
   m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
@@ -1698,13 +1714,13 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     trans_behav += "NewTrans";
   }
 
-  const static QString runPythonSep("C++ImplementationReservedC++");
+  const static QString PYTHON_SEP("C++ImplementationReservedC++");
   //Need to check which mode we're in
   if ( runMode == SingleMode )
   {
     py_code += "\nreduced = WavRangeReduction(use_def_trans=" + trans_behav + ")\n";
     //output the name of the output workspace, this is returned up by the runPythonCode() call below
-    py_code += "print '"+runPythonSep+"'+reduced";
+    py_code += "print '"+PYTHON_SEP+"'+reduced";
     if( m_uiForm.plot_check->isChecked() )
     {
       py_code += "\nPlotResult(reduced)\n";
@@ -1745,11 +1761,16 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   setProcessingState(true, idtype);
   m_lastreducetype = idtype;
 
-  //Execute the code
+  g_log.debug() << "Executing Python: " << py_code.toStdString() << std::endl;
   QString pythonStdOut = runPythonCode(py_code, false);
   if ( runMode == SingleMode )
   {
-    QString reducedWS = pythonStdOut.split(runPythonSep)[1];
+    QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
+    if ( pythonDiag.count() < 2 )
+    {
+      throw std::runtime_error("Python error: "+pythonStdOut.toStdString());
+    }
+    QString reducedWS = pythonDiag[1];
     reducedWS = reducedWS.split("\n")[0];
     resetDefaultOutput(reducedWS);
   }
@@ -2241,7 +2262,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
   }
   bool status(true);
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
-  const static QString runPythonSep("C++ImplementationReservedC++");
+  const static QString PYTHON_SEP("C++ImplementationReservedC++");
   if( is_trans )
   {
     QString direct_run = m_run_no_boxes.value(key + 3)->text();
@@ -2265,11 +2286,11 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
     assign_fn += ", period = " + QString::number(getPeriod(key))+")";
     //assign the workspace name to a Python variable and read back some details
-    QString pythonC="t1, t2 = " + assign_fn + ";print t1,'"+runPythonSep+"',t2";
+    QString pythonC="t1, t2 = " + assign_fn + ";print t1,'"+PYTHON_SEP+"',t2";
     QString ws_names = runReduceScriptFunction(pythonC);
     //read the informtion returned from Python
-    QString trans_ws = ws_names.section(runPythonSep, 0,0).trimmed();
-    QString direct_ws = ws_names.section(runPythonSep, 1).trimmed();
+    QString trans_ws = ws_names.section(PYTHON_SEP, 0,0).trimmed();
+    QString direct_ws = ws_names.section(PYTHON_SEP, 1).trimmed();
 
     status = ( ! trans_ws.isEmpty() ) && ( ! direct_ws.isEmpty() );
 
@@ -2310,12 +2331,12 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     assign_fn += "('" + run_number + "', reload = True";
     assign_fn += ", period = " + QString::number(getPeriod(key)) + ")";
     //assign the workspace name to a Python variable and read back some details
-    QString run_info = "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE,'"+runPythonSep+"',logvalues";
+    QString run_info = "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
     run_info = runReduceScriptFunction(run_info);
     //read the informtion returned from Python
-    QString base_workspace = run_info.section(runPythonSep, 0, 0).trimmed();
+    QString base_workspace = run_info.section(PYTHON_SEP, 0, 0).trimmed();
 
-    logs = run_info.section(runPythonSep, 1);
+    logs = run_info.section(PYTHON_SEP, 1);
     if( !logs.isEmpty() )
     {
       trimPyMarkers(logs);
