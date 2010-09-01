@@ -10,6 +10,7 @@ from mantidsimple import *
 import SANSUtility
 import SANSInsts
 import os
+import math
 
 def _issueWarning(msg):
     """
@@ -79,13 +80,13 @@ class CanSubtraction(ReductionStep):
     _CAN_SETUP = None
     _CAN_RUN = None
     _CAN_N_PERIODS = -1
-    PERIOD_NOS = None
+    PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
     #_MARKED_DETS_ = None
     SCATTER_SAMPLE = None
-    TRANS_SAMPLE = None
-    TRANS_CAN = None
-    DIRECT_SAMPLE = None
-    DIRECT_CAN = None
+    TRANS_SAMPLE = ''
+    TRANS_CAN = ''
+    DIRECT_SAMPLE = ''
+    DIRECT_CAN = ''
 
     def __init__(self, can_run, reload = True, period = -1):
         """
@@ -375,42 +376,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None
             
     inWS = SANSUtility.WorkspaceDetails(wkspname, shortrun_no)
     
-    #TODO: temp fix as we refactor. Rem
-    print "Need to replace filepath and nPeriods"
-    filepath = '.'
-    nPeriods = -1
     return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
-
-# Load the detector logs
-def no_loadDetectorLogs(logname,filepath):
-    # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
-    logname = logname[0:6] + '0' + logname[7:]
-    filename = os.path.join(filepath, logname + '.log')
-
-    # Build a dictionary of log data 
-    logvalues = {}
-    logvalues['Rear_Det_X'] = '0.0'
-    logvalues['Rear_Det_Z'] = '0.0'
-    logvalues['Front_Det_X'] = '0.0'
-    logvalues['Front_Det_Z'] = '0.0'
-    logvalues['Front_Det_Rot'] = '0.0'
-    try:
-        file_handle = open(filename, 'r')
-    except IOError:
-        mantid.sendLogMessage("::SANS::Warning: Log file \"" + filename + "\" could not be loaded.")
-        return None
-        
-    for line in file_handle:
-        parts = line.split()
-        if len(parts) != 3:
-            mantid.sendLogMessage('::SANS::Warning: Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
-        component = parts[1]
-        if component in logvalues.keys():
-            logvalues[component] = parts[2]
-    
-    file_handle.close()
-    return logvalues
-
 
 def _padRunNumber(run_no, field_width):
     nchars = len(run_no)

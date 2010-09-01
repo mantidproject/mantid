@@ -170,6 +170,24 @@ class TestInstrument(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._mask._specmask_f,
                          SANSReduction.SPECMASKSTRING_F)
         
+        # Can run
+        #self.assertEqual(ReductionSingleton()._background_subtracter.SCATTER_CAN,
+        #                 SANSReduction.SCATTER_CAN)
+        self.assertEqual(ReductionSingleton()._background_subtracter.PERIOD_NOS,
+                         SANSReduction.PERIOD_NOS)     
+        self.assertEqual(ReductionSingleton()._background_subtracter.SCATTER_SAMPLE,
+                         SANSReduction.SCATTER_SAMPLE)
+        self.assertEqual(ReductionSingleton()._background_subtracter.TRANS_SAMPLE,
+                         SANSReduction.TRANS_SAMPLE)
+        self.assertEqual(ReductionSingleton()._background_subtracter.TRANS_CAN,
+                         SANSReduction.TRANS_CAN)
+        self.assertEqual(ReductionSingleton()._background_subtracter.DIRECT_SAMPLE,
+                         SANSReduction.DIRECT_SAMPLE)
+        self.assertEqual(ReductionSingleton()._background_subtracter.DIRECT_CAN,
+                         SANSReduction.DIRECT_CAN)
+        self.assertEqual(ReductionSingleton().instrument._marked_dets,
+                         SANSReduction.INSTRUMENT._marked_dets)
+
 
 if __name__ == '__main__':
     unittest.main()
