@@ -22,12 +22,8 @@ public:
     AnalysisDataService::Instance().add("in4",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,5,20));
     AnalysisDataService::Instance().add("in5",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,5,3.5,2));
     AnalysisDataService::Instance().add("in6",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,3,2,2));
-
-    //Event workspaces with 100 events
-    AnalysisDataService::Instance().add("ev1",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
-    AnalysisDataService::Instance().add("ev2",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
-    AnalysisDataService::Instance().add("ev3",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
   }
+
 
 	void testTheBasics()
 	{
@@ -70,6 +66,11 @@ public:
   //-----------------------------------------------------------------------------------------------
   void xtestExecAllEvents()
   {
+    //Event workspaces with 100 events
+    AnalysisDataService::Instance().add("ev1",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
+    AnalysisDataService::Instance().add("ev2",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
+    AnalysisDataService::Instance().add("ev3",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
+
     if ( !merge.isInitialized() ) merge.initialize();
 
     TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("InputWorkspaces","ev1,ev2,ev3") );
