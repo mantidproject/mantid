@@ -38,11 +38,29 @@ class Transmission(BaseTransmission):
     _lambda_max = None
     _fit_method = 'Log'
     
+    # Transmission sample parameters
+    _direct_sample = None
+    _trans_sample = None
+    _sample_reload = True
+    _sample_period = -1
+    
+    # Transmission can parameters
+    _direct_can = None
+    _trans_can = None
+    _can_reload = True
+    _can_period = -1
+    
+    TRANS_SAMPLE = '' 
+    DIRECT_SAMPLE = ''
+    TRANS_SAMPLE_N_PERIODS = -1
+    DIRECT_SAMPLE_N_PERIODS = -1
+    TRANS_CAN = ''
+    DIRECT_CAN = ''
+    TRANS_CAN_N_PERIODS = -1
+    DIRECT_CAN_N_PERIODS = -1
+    
     def __init__(self):
         """
-            @param lambda_min: MinWavelength parameter for CalculateTransmission
-            @param lambda_max: MaxWavelength parameter for CalculateTransmission
-            @param fit_method: FitMethod parameter for CalculateTransmission (Linear or Log)
         """
         super(Transmission, self).__init__()
     
@@ -56,6 +74,18 @@ class Transmission(BaseTransmission):
             self._fit_method = 'Log'      
             mantid.sendLogMessage("ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default LOG method")
     
+    def set_trans_sample(self, sample, direct, reload=True, period=-1):            
+        self._trans_sample = sample
+        self._direct_sample = direct
+        self._sample_reload = reload
+        self._sample_period = period
+        
+    def set_trans_can(self, can, direct, reload = True, period = -1):
+        self._trans_can = can
+        self._direct_can = direct
+        self._can_reload = reload
+        self._can_period = period
+    
     def execute(self, reducer, workspace):
         """
             Calls the CalculateTransmission algorithm
@@ -65,6 +95,36 @@ class Transmission(BaseTransmission):
         if self._lambda_min == None:
             self._lambda_min = reducer.instrument.TRANS_WAV2_FULL
         
+        # Load transmission sample
+        _clearPrevious(self.TRANS_SAMPLE)
+        _clearPrevious(self.DIRECT_SAMPLE)
+        
+        if self._trans_sample not in [None, '']:
+            trans_ws, dummy1, dummy2, dummy3, self.TRANS_SAMPLE_N_PERIODS = \
+                _assignHelper(self._trans_sample, True, self._sample_reload, self._sample_period, reducer)
+            self.TRANS_SAMPLE = trans_ws.getName()
+        
+        if self._direct_sample not in [None, '']:
+            direct_sample_ws, dummy1, dummy2, dummy3, self.DIRECT_SAMPLE_N_PERIODS = \
+                _assignHelper(self._direct_sample, True, self._sample_reload, self._sample_period, reducer)
+            self.DIRECT_SAMPLE = direct_sample_ws.getName()
+        
+        # Load transmission can
+        _clearPrevious(self.TRANS_CAN)
+        _clearPrevious(self.DIRECT_CAN)
+    
+        if self._trans_can not in [None, '']:
+            can_ws, dummy1, dummy2, dummy3, self.TRANS_CAN_N_PERIODS = \
+                _assignHelper(self._trans_can, True, self._can_reload, self._can_period, reducer)
+            self.TRANS_CAN = can_ws.getName()
+            
+        if self._direct_can in [None, '']:
+            self.DIRECT_CAN, self.DIRECT_CAN_N_PERIODS = self.DIRECT_SAMPLE, self.DIRECT_SAMPLE_N_PERIODS
+        else:
+            direct_can_ws, dummy1, dummy2, dummy3, self.DIRECT_CAN_N_PERIODS = \
+                _assignHelper(self._direct_can, True, self._can_reload, self._can_period, reducer)
+            self.DIRECT_CAN = direct_can_ws.getName()
+ 
         #TODO: Call CalculateTransmission
 
         
@@ -81,12 +141,6 @@ class CanSubtraction(ReductionStep):
     _CAN_RUN = None
     _CAN_N_PERIODS = -1
     PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
-    #_MARKED_DETS_ = None
-    SCATTER_SAMPLE = None
-    TRANS_SAMPLE = ''
-    TRANS_CAN = ''
-    DIRECT_SAMPLE = ''
-    DIRECT_CAN = ''
 
     def __init__(self, can_run, reload = True, period = -1):
         """
@@ -105,8 +159,8 @@ class CanSubtraction(ReductionStep):
         if not issubclass(reducer.instrument.__class__, SANSInsts.ISISInstrument):
             raise RuntimeError, "Transmission.assign_can expects an argument of class ISISInstrument"
         
-        _clearPrevious(self.SCATTER_CAN,others=[self.SCATTER_SAMPLE,self.TRANS_SAMPLE,
-                                                      self.TRANS_CAN,self.DIRECT_SAMPLE,self.DIRECT_CAN])
+        _clearPrevious(self.SCATTER_CAN)
+        
         self._CAN_N_PERIODS = -1
         
         if( can_run.startswith('.') or can_run == '' or can_run == None):

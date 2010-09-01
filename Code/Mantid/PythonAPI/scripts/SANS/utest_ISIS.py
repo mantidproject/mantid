@@ -37,6 +37,8 @@ class TestInstrument(unittest.TestCase):
         Gravity(True)
         MaskFile("../../../Test/Data/SANS2D/MASKSANS2Doptions.091A")        
         AssignCan('993.raw')
+        TransmissionSample('988.raw', '987.raw')
+        TransmissionCan('989.raw', '987.raw')
         
         AppendDataFile('SANS2D00000992.raw')
         Reduce1D()
@@ -50,6 +52,8 @@ class TestInstrument(unittest.TestCase):
         SANSReduction.Detector("rear-detector")
         SANSReduction.MaskFile('MASKSANS2Doptions.091A')
         SANSReduction.AssignCan('993.raw')
+        SANSReduction.TransmissionSample('988.raw', '987.raw')
+        SANSReduction.TransmissionCan('989.raw', '987.raw')
         
         self.assertEqual(ReductionSingleton().instrument.FRONT_DET_Z_CORR,
                          SANSReduction.INSTRUMENT.FRONT_DET_Z_CORR)
@@ -175,15 +179,15 @@ class TestInstrument(unittest.TestCase):
         #                 SANSReduction.SCATTER_CAN)
         self.assertEqual(ReductionSingleton()._background_subtracter.PERIOD_NOS,
                          SANSReduction.PERIOD_NOS)     
-        self.assertEqual(ReductionSingleton()._background_subtracter.SCATTER_SAMPLE,
-                         SANSReduction.SCATTER_SAMPLE)
-        self.assertEqual(ReductionSingleton()._background_subtracter.TRANS_SAMPLE,
+        #self.assertEqual(ReductionSingleton()._background_subtracter.SCATTER_SAMPLE,
+        #                 SANSReduction.SCATTER_SAMPLE)
+        self.assertEqual(ReductionSingleton()._transmission_calculator.TRANS_SAMPLE,
                          SANSReduction.TRANS_SAMPLE)
-        self.assertEqual(ReductionSingleton()._background_subtracter.TRANS_CAN,
+        self.assertEqual(ReductionSingleton()._transmission_calculator.TRANS_CAN,
                          SANSReduction.TRANS_CAN)
-        self.assertEqual(ReductionSingleton()._background_subtracter.DIRECT_SAMPLE,
+        self.assertEqual(ReductionSingleton()._transmission_calculator.DIRECT_SAMPLE,
                          SANSReduction.DIRECT_SAMPLE)
-        self.assertEqual(ReductionSingleton()._background_subtracter.DIRECT_CAN,
+        self.assertEqual(ReductionSingleton()._transmission_calculator.DIRECT_CAN,
                          SANSReduction.DIRECT_CAN)
         self.assertEqual(ReductionSingleton().instrument._marked_dets,
                          SANSReduction.INSTRUMENT._marked_dets)

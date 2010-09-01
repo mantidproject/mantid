@@ -10,6 +10,25 @@ import SANSInsts
 from CommandInterface import *
 import ISISReducer
 
+_NOPRINT_ = False
+_VERBOSE_ = False
+
+def SetNoPrintMode(quiet = True):
+    global _NOPRINT_
+    _NOPRINT_ = quiet
+
+def SetVerboseMode(state):
+    global _VERBOSE_
+    _VERBOSE_ = state
+
+# Print a message and log it if the 
+def _printMessage(msg, log = True):
+    if log == True and _VERBOSE_ == True:
+        mantid.sendLogMessage('::SANS::' + msg)
+    if _NOPRINT_ == True: 
+        return
+    print msg
+    
 def _issueWarning(msg):
     """
         Issues a Mantid message
@@ -86,5 +105,9 @@ def SampleHeight(height):
 def SampleWidth(width):
     ReductionSingleton().set_sample_width(width)
     
+def TransmissionSample(sample, direct, reload = True, period = -1):
+    ReductionSingleton().set_trans_sample(sample, direct, reload = True, period = -1)
     
-    
+def TransmissionCan(can, direct, reload = True, period = -1):
+    _printMessage('TransmissionCan("' + can + '","' + direct + '")')
+    ReductionSingleton().set_trans_can(can, direct, reload = True, period = -1)

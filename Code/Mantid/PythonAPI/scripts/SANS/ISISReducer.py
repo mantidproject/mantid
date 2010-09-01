@@ -95,7 +95,17 @@ class ISISReducer(SANSReducer):
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
         if not issubclass(self._transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
             raise RuntimeError, "ISISReducer.set_trans_fit: transmission calculator not set"
-        self._transmission_calculator(lambda_min=lambda_min, lambda_max=lambda_max, fit_method=fit_method)
+        self._transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method)
+        
+    def set_trans_sample(self, sample, direct, reload=True, period=-1):
+        if not issubclass(self._transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
+            raise RuntimeError, "ISISReducer.set_trans_sample: transmission calculator not set"
+        self._transmission_calculator.set_trans_sample(sample, direct, reload, period)
+        
+    def set_trans_can(self, can, direct, reload = True, period = -1):
+        if not issubclass(self._transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
+            raise RuntimeError, "ISISReducer.set_trans_can: transmission calculator not set"
+        self._transmission_calculator.set_trans_can(can, direct, reload, period)
         
     def set_gravity(self, flag):
         if isinstance(flag, bool) or isinstance(flag, int):
