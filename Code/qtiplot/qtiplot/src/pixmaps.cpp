@@ -16,6 +16,118 @@
 // xpms from other spots in the files
 //==================================================================================
 
+static const char* folder_closed_xpm[]={
+    "16 16 9 1",
+    "g c #808080",
+    "b c #c0c000",
+    "e c #c0c0c0",
+    "# c #000000",
+    "c c #ffff00",
+    ". c None",
+    "a c #585858",
+    "f c #a0a0a4",
+    "d c #ffffff",
+    "..###...........",
+    ".#abc##.........",
+    ".#daabc#####....",
+    ".#ddeaabbccc#...",
+    ".#dedeeabbbba...",
+    ".#edeeeeaaaab#..",
+    ".#deeeeeeefe#ba.",
+    ".#eeeeeeefef#ba.",
+    ".#eeeeeefeff#ba.",
+    ".#eeeeefefff#ba.",
+    ".##geefeffff#ba.",
+    "...##gefffff#ba.",
+    ".....##fffff#ba.",
+    ".......##fff#b##",
+    ".........##f#b##",
+    "...........####."};
+
+
+static const char* folder_open_xpm[]={
+    "16 16 11 1",
+    "# c #000000",
+    "g c #c0c0c0",
+    "e c #303030",
+    "a c #ffa858",
+    "b c #808080",
+    "d c #a0a0a4",
+    "f c #585858",
+    "c c #ffdca8",
+    "h c #dcdcdc",
+    "i c #ffffff",
+    ". c None",
+    "....###.........",
+    "....#ab##.......",
+    "....#acab####...",
+    "###.#acccccca#..",
+    "#ddefaaaccccca#.",
+    "#bdddbaaaacccab#",
+    ".eddddbbaaaacab#",
+    ".#bddggdbbaaaab#",
+    "..edgdggggbbaab#",
+    "..#bgggghghdaab#",
+    "...ebhggghicfab#",
+    "....#edhhiiidab#",
+    "......#egiiicfb#",
+    "........#egiibb#",
+    "..........#egib#",
+    "............#ee#"};
+
+
+static const char* choose_folder_xpm[]={
+    "16 16 11 1",
+    "# c #000000",
+    "g c #c0c0c0",
+    "e c #303030",
+    "a c #ffa858",
+    "b c #808080",
+    "d c #a0a0a4",
+    "f c #585858",
+    "c c #ffdca8",
+    "h c #dcdcdc",
+    "i c #ffffff",
+    ". c None",
+    "....###.........",
+    "....#ab##.......",
+    "....#acab####...",
+    "###.#acccccca#..",
+    "#ddefaaaccccca#.",
+    "#bdddbaaaacccab#",
+    ".eddddbbaaaacab#",
+    ".#bddggdbbaaaab#",
+    "..edgdggggbbaab#",
+    "..#bgggghghdaab#",
+    "...ebhggghicfab#",
+    "....#edhhiiidab#",
+    "......#egiiicfb#",
+    "........#egiibb#",
+    "..........#egib#",
+    "............#ee#"};
+static const char * lineSymbol_xpm[] = {
+"16 16 4 1",
+"   c None",
+".  c #8C2727",
+"+  c #272787",
+"@  c #FFFFFF",
+"                ",
+"                ",
+"                ",
+"      ...       ",
+"  ............  ",
+"      ...       ",
+"                ",
+"                ",
+"                ",
+"      +++       ",
+"  +++++@++++++  ",
+"      +++       ",
+"                ",
+"                ",
+"                ",
+"                "};
+
 static const char *cursor_xpm[]={
 "32 32 2 1",
 ". c None",
@@ -3102,7 +3214,7 @@ static const char* newfolder_xpm[] = {
     ".+@+@+@+@+.    ",
     "...........    "};
 
-static const char* folder_open_xpm[]={
+static const char* folder_open_xpm2[]={
     "16 16 11 1",
     "# c #000000",
     "g c #c0c0c0",
@@ -12034,7 +12146,12 @@ static const char * magnifier_xpm[] = {
 //----------------------------------------------
 QPixmap getQPixmap(const std::string name)
 {
-  if (name == "cursor_xpm") return QPixmap(cursor_xpm);
+  if (name == "choose_folder_xpm") return QPixmap(choose_folder_xpm);
+  else if (name == "folder_closed_xpm") return QPixmap(folder_closed_xpm);
+  else if (name == "folder_open_xpm") return QPixmap(folder_open_xpm);
+  else if (name == "folder_open_xpm2") return QPixmap(folder_open_xpm2);
+  else if (name == "lineSymbol_xpm") return QPixmap(lineSymbol_xpm);
+  else if (name == "cursor_xpm") return QPixmap(cursor_xpm);
   else if (name == "vizor_xpm") return QPixmap(vizor_xpm);
   else if (name == "lens_xpm") return QPixmap(lens_xpm);
   else if (name == "param_range_btn_xpm") return QPixmap(param_range_btn_xpm);
@@ -12049,12 +12166,12 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "sort_descending_xpm") return QPixmap(sort_descending_xpm);
   else if (name == "sort_ascending_xpm") return QPixmap(sort_ascending_xpm);
   else if (name == "formula_xpm") return QPixmap(formula_xpm);
-  else if (name == "rotate_counterclockwise_xpm") return QPixmap(rotate_counterclockwise_xpm);
+  if (name == "rotate_counterclockwise_xpm") return QPixmap(rotate_counterclockwise_xpm);
   else if (name == "rotate_clockwise_xpm") return QPixmap(rotate_clockwise_xpm);
   else if (name == "flip_vertical_xpm") return QPixmap(flip_vertical_xpm);
   else if (name == "flip_horizontal_xpm") return QPixmap(flip_horizontal_xpm);
   else if (name == "delete_column_xpm") return QPixmap(delete_column_xpm);
-  if (name == "insert_column_xpm") return QPixmap(insert_column_xpm);
+  else if (name == "insert_column_xpm") return QPixmap(insert_column_xpm);
   else if (name == "delete_row_xpm") return QPixmap(delete_row_xpm);
   else if (name == "insert_row_xpm") return QPixmap(insert_row_xpm);
   else if (name == "set_label_col_xpm") return QPixmap(set_label_col_xpm);
@@ -12069,12 +12186,12 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "z_col_xpm") return QPixmap(z_col_xpm);
   else if (name == "disregard_col_xpm") return QPixmap(disregard_col_xpm);
   else if (name == "move_col_right_xpm") return QPixmap(move_col_right_xpm);
-  else if (name == "move_col_left_xpm") return QPixmap(move_col_left_xpm);
+  if (name == "move_col_left_xpm") return QPixmap(move_col_left_xpm);
   else if (name == "pdf_xpm") return QPixmap(pdf_xpm);
   else if (name == "fit_frame_xpm") return QPixmap(fit_frame_xpm);
   else if (name == "reset_rotation_xpm") return QPixmap(reset_rotation_xpm);
   else if (name == "perspective_xpm") return QPixmap(perspective_xpm);
-  if (name == "gray_map_xpm") return QPixmap(gray_map_xpm);
+  else if (name == "gray_map_xpm") return QPixmap(gray_map_xpm);
   else if (name == "contour_map_xpm") return QPixmap(contour_map_xpm);
   else if (name == "color_map_xpm") return QPixmap(color_map_xpm);
   else if (name == "auto_layout_xpm") return QPixmap(auto_layout_xpm);
@@ -12089,12 +12206,12 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "resize_xpm") return QPixmap(resize_xpm);
   else if (name == "newfolder_xpm") return QPixmap(newfolder_xpm);
   else if (name == "folder_open_xpm") return QPixmap(folder_open_xpm);
-  else if (name == "note_xpm") return QPixmap(note_xpm);
+  if (name == "note_xpm") return QPixmap(note_xpm);
   else if (name == "new_note_xpm") return QPixmap(new_note_xpm);
   else if (name == "new_graph_xpm") return QPixmap(new_graph_xpm);
   else if (name == "vectXYAM_xpm") return QPixmap(vectXYAM_xpm);
   else if (name == "vectXYXY_xpm") return QPixmap(vectXYXY_xpm);
-  if (name == "open_template_xpm") return QPixmap(open_template_xpm);
+  else if (name == "open_template_xpm") return QPixmap(open_template_xpm);
   else if (name == "save_template_xpm") return QPixmap(save_template_xpm);
   else if (name == "boxPlot_xpm") return QPixmap(boxPlot_xpm);
   else if (name == "clock_xpm") return QPixmap(clock_xpm);
@@ -12109,12 +12226,12 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "panel_h2_xpm") return QPixmap(panel_h2_xpm);
   else if (name == "stacked_hist_xpm") return QPixmap(stacked_hist_xpm);
   else if (name == "histogram_xpm") return QPixmap(histogram_xpm);
-  else if (name == "dropLines_xpm") return QPixmap(dropLines_xpm);
+  if (name == "dropLines_xpm") return QPixmap(dropLines_xpm);
   else if (name == "spline_xpm") return QPixmap(spline_xpm);
   else if (name == "hor_steps_xpm") return QPixmap(hor_steps_xpm);
   else if (name == "vert_steps_xpm") return QPixmap(vert_steps_xpm);
   else if (name == "cones_xpm") return QPixmap(cones_xpm);
-  if (name == "crosses_xpm") return QPixmap(crosses_xpm);
+  else if (name == "crosses_xpm") return QPixmap(crosses_xpm);
   else if (name == "plot_bars_xpm") return QPixmap(plot_bars_xpm);
   else if (name == "bars_xpm") return QPixmap(bars_xpm);
   else if (name == "trajectory_xpm") return QPixmap(trajectory_xpm);
@@ -12129,12 +12246,12 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "lineMesh_xpm") return QPixmap(lineMesh_xpm);
   else if (name == "rightGrid_xpm") return QPixmap(rightGrid_xpm);
   else if (name == "leftGrid_xpm") return QPixmap(leftGrid_xpm);
-  else if (name == "backGrid_xpm") return QPixmap(backGrid_xpm);
+  if (name == "backGrid_xpm") return QPixmap(backGrid_xpm);
   else if (name == "ceilGrid_xpm") return QPixmap(ceilGrid_xpm);
   else if (name == "floorGrid_xpm") return QPixmap(floorGrid_xpm);
   else if (name == "pointsMesh_xpm") return QPixmap(pointsMesh_xpm);
   else if (name == "frontGrid_xpm") return QPixmap(frontGrid_xpm);
-  if (name == "no_floor_xpm") return QPixmap(no_floor_xpm);
+  else if (name == "no_floor_xpm") return QPixmap(no_floor_xpm);
   else if (name == "isolines_xpm") return QPixmap(isolines_xpm);
   else if (name == "floor_xpm") return QPixmap(floor_xpm);
   else if (name == "grid_poly_xpm") return QPixmap(grid_poly_xpm);
@@ -12149,12 +12266,12 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "stat_rows_xpm") return QPixmap(stat_rows_xpm);
   else if (name == "fx_xpm") return QPixmap(fx_xpm);
   else if (name == "redo_xpm") return QPixmap(redo_xpm);
-  else if (name == "undo_xpm") return QPixmap(undo_xpm);
+  if (name == "undo_xpm") return QPixmap(undo_xpm);
   else if (name == "col_stat_xpm") return QPixmap(col_stat_xpm);
   else if (name == "wizard_xpm") return QPixmap(wizard_xpm);
   else if (name == "pie_xpm") return QPixmap(pie_xpm);
   else if (name == "randomNumbers_xpm") return QPixmap(randomNumbers_xpm);
-  if (name == "rowNumbers_xpm") return QPixmap(rowNumbers_xpm);
+  else if (name == "rowNumbers_xpm") return QPixmap(rowNumbers_xpm);
   else if (name == "hBars_xpm") return QPixmap(hBars_xpm);
   else if (name == "vertBars_xpm") return QPixmap(vertBars_xpm);
   else if (name == "area_xpm") return QPixmap(area_xpm);
@@ -12169,12 +12286,12 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "select_xpm") return QPixmap(select_xpm);
   else if (name == "cursor_16_xpm") return QPixmap(cursor_16_xpm);
   else if (name == "unzoom2_xpm") return QPixmap(unzoom2_xpm);
-  else if (name == "paste_xpm") return QPixmap(paste_xpm);
+  if (name == "paste_xpm") return QPixmap(paste_xpm);
   else if (name == "cut2_xpm") return QPixmap(cut2_xpm);
   else if (name == "copy2_xpm") return QPixmap(copy2_xpm);
   else if (name == "text_xpm") return QPixmap(text_xpm);
   else if (name == "duplicate_xpm") return QPixmap(duplicate_xpm);
-  if (name == "new_xpm") return QPixmap(new_xpm);
+  else if (name == "new_xpm") return QPixmap(new_xpm);
   else if (name == "addCol_xpm") return QPixmap(addCol_xpm);
   else if (name == "pPlot_xpm") return QPixmap(pPlot_xpm);
   else if (name == "lpPlot_xpm") return QPixmap(lpPlot_xpm);
@@ -12189,18 +12306,19 @@ QPixmap getQPixmap(const std::string name)
   else if (name == "worksheet_xpm") return QPixmap(worksheet_xpm);
   else if (name == "folder_xpm") return QPixmap(folder_xpm);
   else if (name == "fileopen_xpm") return QPixmap(fileopen_xpm);
-  else if (name == "fileprint_xpm") return QPixmap(fileprint_xpm);
+  if (name == "fileprint_xpm") return QPixmap(fileprint_xpm);
   else if (name == "filesave_xpm") return QPixmap(filesave_xpm);
   else if (name == "erase_xpm") return QPixmap(erase_xpm);
   else if (name == "zoom_xpm") return QPixmap(zoom_xpm);
   else if (name == "log_xpm") return QPixmap(log_xpm);
-  if (name == "quit_xpm") return QPixmap(quit_xpm);
+  else if (name == "quit_xpm") return QPixmap(quit_xpm);
   else if (name == "qtiplot_logo_xpm") return QPixmap(qtiplot_logo_xpm);
   else if (name == "Fit_xpm") return QPixmap(Fit_xpm);
   else if (name == "fileopen_raw_xpm") return QPixmap(fileopen_raw_xpm);
   else if (name == "fileopen_nexus_xpm") return QPixmap(fileopen_nexus_xpm);
   else if (name == "filesave_nexus_xpm") return QPixmap(filesave_nexus_xpm);
   else if (name == "magnifier_xpm") return QPixmap(magnifier_xpm);
+
 
   //If you get here, nothing else was trapped.
   std::ostringstream msg;

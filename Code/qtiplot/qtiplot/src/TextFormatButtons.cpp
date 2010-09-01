@@ -35,29 +35,6 @@
 #include <QHBoxLayout>
 #include <QString>
 
-static const char * lineSymbol_xpm[] = {
-"16 16 4 1",
-" 	c None",
-".	c #8C2727",
-"+	c #272787",
-"@	c #FFFFFF",
-"                ",
-"                ",
-"                ",
-"      ...       ",
-"  ............  ",
-"      ...       ",
-"                ",
-"                ",
-"                ",
-"      +++       ",
-"  +++++@++++++  ",
-"      +++       ",
-"                ",
-"                ",
-"                ",
-"                "};
-
 
 TextFormatButtons::TextFormatButtons(QTextEdit * textEdit, QWidget * parent)
 : QWidget(parent)
