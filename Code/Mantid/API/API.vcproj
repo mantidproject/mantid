@@ -255,6 +255,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IEventWorkspace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\IFunction.cpp"
 				>
 			</File>
@@ -548,6 +552,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\IDataItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\IEventWorkspace.h"
 				>
 			</File>
 			<File
