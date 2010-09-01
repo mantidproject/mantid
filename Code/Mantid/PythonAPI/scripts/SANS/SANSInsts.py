@@ -14,7 +14,7 @@ def instrument_factory(name):
     else:
         raise RuntimeError, "Instrument %s doesn't exist\n  %s" % (name, sys.exc_value)
 
-class DetectorBank :
+class DetectorBank:
     def __init__(self, instr, det_type) :
         self.parent = instr
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
@@ -70,11 +70,11 @@ class DetectorBank :
                 return True
         return False
     
-class Instrument(object) :
-    def __init__(self) :
+class Instrument(object):
+    def __init__(self):
         """
             Reads the instrument definition xml file
-            @raise IndexError if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
+            @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """ 
     
         temp_WS_name = '_'+self._NAME+'instrument_definition'
@@ -96,20 +96,22 @@ class Instrument(object) :
         """
             Only sets the monitor spectrum number if it isn't locked, used
             so MON/SPECTRUM in ISIS user files don't change MON/LENGTH settings
-            @param the set the monitor spectrum number to be that with this number, regardless of lock 
+            @param spectrum_number: monitor's sectrum number
         """
         if not self._incid_monitor_lckd :
             self._incid_monitor = int(spectrum_number)
         
-    def get_incident_mntr(self):
+    def get_incident_mon(self):
         """
-            @return the spectrum number of the incident scattering monitor
+            @return: the spectrum number of the incident scattering monitor
         """
         return self._incid_monitor
         
-    def set_incident_mntr(self, spectrum_number):
+    def set_incident_mon(self, spectrum_number):
         """
-            @param set the incident scattering monitor spectrum number to be that with this number, regardless of lock 
+            set the incident scattering monitor spectrum number regardless of
+            lock
+            @param spectrum_number: monitor's sectrum number
         """
         self._incid_monitor = int(spectrum_number)
         self._incid_monitor_lckd = True
@@ -123,7 +125,7 @@ class Instrument(object) :
         self.SAMPLE_Z_CORR = float(value)/1000.
         
         
-class ISISInstrument(Instrument) :
+class ISISInstrument(Instrument):
     def __init__(self) :
         Instrument.__init__(self)
     
@@ -181,10 +183,10 @@ class ISISInstrument(Instrument) :
         self._use_interpol_norm = True
      
     def suggest_interpolating_norm(self):
-        if not self._incid_monitor_lckd :
+        if not self._incid_monitor_lckd:
             self._use_interpol_norm = True
      
-    def cur_detector(self) :
+    def cur_detector(self):
         if self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
     
@@ -235,13 +237,15 @@ class LOQ(ISISInstrument):
         yshift = (317.5/1000.) - ybeam
         MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
         # LOQ instrument description has detector at 0.0, 0.0
-        return [xshift, yshift], [xshift, yshift] 
+        return [xshift, yshift], [xshift, yshift]
         
 class SANS2D(ISISInstrument): 
 
     def __init__(self):
         self._NAME = "SANS2D"
         super(SANS2D, self).__init__()
+        
+        _marked_dets = []
         
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -271,6 +275,39 @@ class SANS2D(ISISInstrument):
             mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0,0.0], [xshift, yshift]
-  
+    # Load the detector logs
+    def load_detector_logs(self,log_name,file_path):
+    # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
+        _marked_dets = []
+        log_name = log_name[0:6] + '0' + log_name[7:]
+        filename = os.path.join(file_path, log_name + '.log')
+
+        # Build a dictionary of log data 
+        logvalues = {}
+        logvalues['Rear_Det_X'] = '0.0'
+        logvalues['Rear_Det_Z'] = '0.0'
+        logvalues['Front_Det_X'] = '0.0'
+        logvalues['Front_Det_Z'] = '0.0'
+        logvalues['Front_Det_Rot'] = '0.0'
+        try:
+            file_handle = open(filename, 'r')
+        except IOError:
+            _issueWarning("Log file \"" + filename + "\" could not be loaded.")
+            return None
+        
+        for line in file_handle:
+            parts = line.split()
+            if len(parts) != 3:
+                _issueWarning('Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
+            component = parts[1]
+            if component in logvalues.keys():
+                logvalues[component] = parts[2]
+
+        file_handle.close()
+        return logvalues
+    
+    def append_marked(detNames):
+        _marked_dets.append(detNames)
+
 if __name__ == '__main__':
     pass

@@ -140,8 +140,6 @@ _NOPRINT_ = False
 _VERBOSE_ = False
 DefaultTrans = True
 NewTrans = False
-# Mismatched detectors
-_MARKED_DETS_ = []
 
 def SetNoPrintMode(quiet = True):
     global _NOPRINT_
@@ -183,7 +181,7 @@ def DataPath(directory):
 USER_PATH = ''
 # Set the user directory
 def UserPath(directory):
-    _printMessage('UserPath("' + directory + '") - Will look for mask file here')
+    _printMessage('UserPath("' + directory + '") #Will look for mask file here')
     if os.path.exists(directory) == False:
         _issueWarning("Data directory does not exist")
         return
@@ -263,18 +261,21 @@ def AssignSample(sample_run, reload = True, period = -1):
         return '','()'
     if reset == True:
         _SAMPLE_SETUP = None
-    if (INSTRUMENT.name() == 'SANS2D'):
-        global _MARKED_DETS_
-        _MARKED_DETS_ = []
-        logvalues = _loadDetectorLogs(logname,filepath)
+
+    try:
+        logvalues = INSTRUMENT.load_detector_logs(logname,filepath)
         if logvalues == None:
             mtd.deleteWorkspace(SCATTER_SAMPLE.getName())
             _issueWarning("Sample logs cannot be loaded, cannot continue")
             return '','()'
-    else:
-        PERIOD_NOS["SCATTER_SAMPLE"] = period
+    except AttributeError:
+        if not INSTRUMENT.name() == 'LOQ': raise
+    
+    PERIOD_NOS["SCATTER_SAMPLE"] = period
+
+    if (INSTRUMENT.name() == 'LOQ'):
         return SCATTER_SAMPLE.getName(), None
-        
+
     #global FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X
     INSTRUMENT.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
     INSTRUMENT.FRONT_DET_X = float(logvalues['Front_Det_X'])
@@ -282,7 +283,6 @@ def AssignSample(sample_run, reload = True, period = -1):
     INSTRUMENT.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
     INSTRUMENT.REAR_DET_X = float(logvalues['Rear_Det_X'])
 
-    PERIOD_NOS["SCATTER_SAMPLE"] = period
     return SCATTER_SAMPLE.getName(), logvalues
 
 ########################### 
@@ -311,17 +311,20 @@ def AssignCan(can_run, reload = True, period = -1):
         return '','()'
     if reset == True:
         _CAN_SETUP  = None
-    if (INSTRUMENT.name() == 'SANS2D'):
-        global _MARKED_DETS_
-        _MARKED_DETS_ = []
-        logvalues = _loadDetectorLogs(logname,filepath)
+    
+    try:
+        logvalues = INSTRUMENT.load_detector_logs(logname,filepath)
         if logvalues == None:
             _issueWarning("Can logs could not be loaded, using sample values.")
             return SCATTER_CAN.getName(), "()"
-    else:
-        PERIOD_NOS["SCATTER_CAN"] = period
+    except AttributeError:
+        if not INSTRUMENT.name() == 'LOQ' : raise
+
+    PERIOD_NOS["SCATTER_CAN"] = period
+
+    if (INSTRUMENT.name() == 'LOQ'):
         return SCATTER_CAN.getName(), ""
-    
+
     smp_values = []
     smp_values.append(INSTRUMENT.FRONT_DET_Z + INSTRUMENT.FRONT_DET_Z_CORR)
     smp_values.append(INSTRUMENT.FRONT_DET_X + INSTRUMENT.FRONT_DET_X_CORR)
@@ -329,7 +332,6 @@ def AssignCan(can_run, reload = True, period = -1):
     smp_values.append(INSTRUMENT.REAR_DET_Z + INSTRUMENT.REAR_DET_Z_CORR)
     smp_values.append(INSTRUMENT.REAR_DET_X + INSTRUMENT.REAR_DET_X_CORR)
 
-    PERIOD_NOS["SCATTER_CAN"] = period
     # Check against sample values and warn if they are not the same but still continue reduction
     if len(logvalues) == 0:
         return  SCATTER_CAN.getName(), logvalues
@@ -347,7 +349,7 @@ def AssignCan(can_run, reload = True, period = -1):
         if math.fabs(smp_values[i] - can_values[i]) > 5e-04:
             _issueWarning(det_names[i] + " values differ between sample and can runs. Sample = " + str(smp_values[i]) + \
                               ' , Can = ' + str(can_values[i]))
-            _MARKED_DETS_.append(det_names[i])
+            INSTRUMENT.append_marked(det_names[i])
     
     return SCATTER_CAN.getName(), logvalues
 
@@ -529,38 +531,6 @@ def _leaveSinglePeriod(groupW, period):
     #remove the rest of the group
     mtd.deleteWorkspace(groupW.getName())
     return newName
-
-
-# Load the detector logs
-def _loadDetectorLogs(logname,filepath):
-    # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
-    logname = logname[0:6] + '0' + logname[7:]
-    filename = os.path.join(filepath, logname + '.log')
-
-    # Build a dictionary of log data 
-    logvalues = {}
-    logvalues['Rear_Det_X'] = '0.0'
-    logvalues['Rear_Det_Z'] = '0.0'
-    logvalues['Front_Det_X'] = '0.0'
-    logvalues['Front_Det_Z'] = '0.0'
-    logvalues['Front_Det_Rot'] = '0.0'
-    try:
-        file_handle = open(filename, 'r')
-    except IOError:
-        _issueWarning("Log file \"" + filename + "\" could not be loaded.")
-        return None
-        
-    for line in file_handle:
-        parts = line.split()
-        if len(parts) != 3:
-            _issueWarning('Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
-        component = parts[1]
-        if component in logvalues.keys():
-            logvalues[component] = parts[2]
-    
-    file_handle.close()
-    return logvalues
-
 # Return the list of mismatched detector names
 def GetMismatchedDetList():
     return _MARKED_DETS_
@@ -819,7 +789,7 @@ def Mask(details):
 # Read a mask file
 #############################
 def MaskFile(filename):
-    _printMessage('MaskFile("' + filename + '")')
+    _printMessage('#Opening "'+filename+'"')
     if os.path.isabs(filename) == False:
         filename = os.path.join(USER_PATH, filename)
 
@@ -909,6 +879,8 @@ def MaskFile(filename):
     filename = os.path.basename(filename)
     global MASKFILE
     MASKFILE = filename
+    _printMessage('#Successfully read "'+filename+'"')
+    return True
 
 # Read a limit line of a mask file
 def _readLimitValues(limit_line):
@@ -1059,7 +1031,7 @@ def SetSampleOffset(value):
     INSTRUMENT.set_sample_offset(value)
 
 def SetMonitorSpectrum(specNum, interp=False):
-    INSTRUMENT.set_incident_mntr(specNum)
+    INSTRUMENT.set_incident_mon(specNum)
     #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
     if interp :
         INSTRUMENT.set_interpolating_norm()
@@ -1348,7 +1320,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     if INSTRUMENT.name() == "SANS2D":
         base_runno = sample_raw.getRunNumber()
         if base_runno < 568:
-            MONITORSPECTRUM = 73730
+            INSTRUMENT.set_incident_mon(73730)
             orientation=SANSUtility.Orientation.Vertical
             if INSTRUMENT.cur_detector().name() == 'front-detector':
                 SPECMIN = DIMENSION*DIMENSION + 1 
@@ -1363,7 +1335,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
 
     ############################# Setup workspaces ######################################
     monitorWS = "Monitor"
-    montorSpecNum = INSTRUMENT.get_incident_mntr()
+    montorSpecNum = INSTRUMENT.get_incident_mon()
     _printMessage('monitor ' + str(montorSpecNum), True)
     sample_name = sample_raw.getName()
     # Get the monitor ( StartWorkspaceIndex is off by one with cropworkspace)
