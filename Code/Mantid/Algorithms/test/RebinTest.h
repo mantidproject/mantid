@@ -1,5 +1,5 @@
-#ifndef SIMPLEREBINTEST_H_
-#define SIMPLEREBINTEST_H_
+#ifndef REBINTEST_H_
+#define REBINTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -7,7 +7,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 using namespace Mantid;
@@ -17,13 +17,13 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 
 
-class SimpleRebinTest : public CxxTest::TestSuite
+class RebinTest : public CxxTest::TestSuite
 {
 public:
   double BIN_DELTA;
   int NUMPIXELS, NUMBINS;
 
-  SimpleRebinTest()
+  RebinTest()
   {
     BIN_DELTA = 2.0;
     NUMPIXELS = 20;
@@ -37,7 +37,7 @@ public:
     test_in1D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in1D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
@@ -78,7 +78,7 @@ public:
 //    test_in1D->isDistribution(true);
 //    AnalysisDataService::Instance().add("test_in1D", test_in1D);
 //
-//    SimpleRebin rebin;
+//    Rebin rebin;
 //    rebin.initialize();
 //    rebin.setPropertyValue("InputWorkspace","test_in1D");
 //    rebin.setPropertyValue("OutputWorkspace","test_out");
@@ -98,7 +98,7 @@ public:
     Workspace1D_sptr test_in1D = Create1DWorkspace(50);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in1D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
@@ -133,7 +133,7 @@ public:
     test_in1D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in1D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
@@ -168,7 +168,7 @@ public:
     test_in2D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in2D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
@@ -211,7 +211,7 @@ public:
     TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
     TS_ASSERT_EQUALS( (*el.dataY())[NUMBINS-2], 1); //The last bin
 
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_inEvent");
     rebin.setPropertyValue("OutputWorkspace","test_inEvent");
@@ -278,7 +278,7 @@ public:
     TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
     TS_ASSERT_EQUALS( (*el.dataY())[NUMBINS-2], 1); //The last bin
 
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_inEvent2");
     rebin.setPropertyValue("OutputWorkspace","test_out2");
@@ -397,4 +397,4 @@ private:
 
 
 };
-#endif /* SIMPLEREBINTEST */
+#endif /* REBINTEST */

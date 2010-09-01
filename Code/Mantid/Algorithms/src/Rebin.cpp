@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -14,7 +14,7 @@ namespace Mantid
   {
 
     // Register the class into the algorithm factory
-    DECLARE_ALGORITHM(SimpleRebin)
+    DECLARE_ALGORITHM(Rebin)
 
     using namespace Kernel;
     using namespace API;
@@ -26,7 +26,7 @@ namespace Mantid
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */
-    void SimpleRebin::init()
+    void Rebin::init()
     {
       this->g_log.setName("Algorithms::Rebin");
 
@@ -49,7 +49,7 @@ namespace Mantid
     *
     *  @throw runtime_error Thrown if the bin range does not intersect the range of the input workspace
     */
-    void SimpleRebin::exec()
+    void Rebin::exec()
     {
       // Get the input workspace
       MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
@@ -213,7 +213,7 @@ namespace Mantid
 
 //
 //    /** Continue execution for EventWorkspace scenario */
-//    void SimpleRebin::execEvent()
+//    void Rebin::execEvent()
 //    {
 //      // retrieve the properties
 //      std::vector<double> rb_params=getProperty("Params");
@@ -227,7 +227,7 @@ namespace Mantid
      *  @param outputW The output workspace
      *  @param hist    The index of the current histogram
      */
-    void SimpleRebin::propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist)
+    void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist)
     {
       // Not too happy with the efficiency of this way of doing it, but it's a lot simpler to use the
       // existing rebin algorithm to distribute the weights than to re-implement it for this

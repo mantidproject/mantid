@@ -18,12 +18,12 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    /** Only calls its parent's (SimpleRebin) init()
+    /** Only calls its parent's (Rebin) init()
     *
     */
     void InterpolatingRebin::init()
     {
-      SimpleRebin::init();
+      Rebin::init();
     }
 
     /** Executes the rebin algorithm

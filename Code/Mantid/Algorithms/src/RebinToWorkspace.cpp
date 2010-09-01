@@ -73,7 +73,7 @@ void RebinToWorkspace::createRebinParameters(Mantid::API::MatrixWorkspace_sptr t
   using namespace Mantid::API;
 
   const MantidVec & matchXdata = toMatch->readX(0);
-  //params vector should have the form [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n), see SimpleRebin.cpp
+  //params vector should have the form [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n), see Rebin.cpp
   rb_params.clear();
   int xsize = (int)matchXdata.size();
   rb_params.reserve(xsize*2);

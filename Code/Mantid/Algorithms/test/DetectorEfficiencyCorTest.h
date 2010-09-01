@@ -5,7 +5,7 @@
 
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"

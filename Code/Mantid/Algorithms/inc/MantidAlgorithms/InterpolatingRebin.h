@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
@@ -59,11 +59,11 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport InterpolatingRebin : public Algorithms::SimpleRebin
+class DLLExport InterpolatingRebin : public Algorithms::Rebin
 {
 public:
   /// Default constructor
-  InterpolatingRebin() : Algorithms::SimpleRebin() {};
+  InterpolatingRebin() : Algorithms::Rebin() {};
   /// Destructor
   virtual ~InterpolatingRebin() {};
   /// Algorithm's name for identification overriding a virtual method

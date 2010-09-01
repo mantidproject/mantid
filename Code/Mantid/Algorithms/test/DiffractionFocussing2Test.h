@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidDataHandling/LoadRaw.h"
@@ -179,7 +179,7 @@ public:
     }
 
     //Now let's try to rebin using log parameters
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", outputws);
     rebin.setPropertyValue("OutputWorkspace", outputws);
@@ -261,7 +261,7 @@ public:
 
 
     //Now let's try to rebin using log parameters
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", outputws);
     rebin.setPropertyValue("OutputWorkspace", outputws);

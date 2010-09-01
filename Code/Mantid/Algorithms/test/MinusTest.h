@@ -6,7 +6,7 @@
 
 #include "WorkspaceCreationHelper.hh"
 #include "MantidAlgorithms/Minus.h"
-#include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -317,7 +317,7 @@ public:
     AnalysisDataService::Instance().add(wsName2, work_in2);
 
     //Rebin the input event workspace
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", wsName1);
     rebin.setPropertyValue("OutputWorkspace", wsName1);

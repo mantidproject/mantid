@@ -5,7 +5,7 @@
 
 #include "MantidDataObjects/CompressedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/SimpleRebin.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 using namespace Mantid::Kernel;
@@ -24,7 +24,7 @@ public:
     test_in2D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in2D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
@@ -63,7 +63,7 @@ public:
     test_in2D->maskBin(10,4);
     test_in2D->maskBin(10,5);
     
-    SimpleRebin rebin;
+    Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in2D");
     rebin.setPropertyValue("OutputWorkspace","test_out");

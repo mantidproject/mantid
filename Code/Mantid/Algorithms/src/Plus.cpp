@@ -134,7 +134,7 @@ namespace Mantid
       return true;
     }
 
-//    /**
+//    /** */
 //    void Plus::buildAdditionMap()
 //    {
 //

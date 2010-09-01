@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SIMPLEREBIN_H_
-#define MANTID_ALGORITHMS_SIMPLEREBIN_H_
+#ifndef MANTID_ALGORITHMS_REBIN_H_
+#define MANTID_ALGORITHMS_REBIN_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -47,13 +47,13 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SimpleRebin : public API::Algorithm
+class DLLExport Rebin : public API::Algorithm
 {
 public:
   /// Default constructor
-  SimpleRebin() : API::Algorithm() {};
+  Rebin() : API::Algorithm() {};
   /// Destructor
-  virtual ~SimpleRebin() {};
+  virtual ~Rebin() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Rebin";}
   /// Algorithm's version for identification overriding a virtual method
@@ -72,4 +72,4 @@ protected:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SIMPLEREBIN_H_*/
+#endif /*MANTID_ALGORITHMS_REBIN_H_*/
