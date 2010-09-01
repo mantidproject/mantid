@@ -80,7 +80,7 @@ class CanSubtraction(ReductionStep):
     _CAN_RUN = None
     _CAN_N_PERIODS = -1
     PERIOD_NOS = None
-    _MARKED_DETS_ = None
+    #_MARKED_DETS_ = None
     SCATTER_SAMPLE = None
     TRANS_SAMPLE = None
     TRANS_CAN = None
@@ -123,14 +123,17 @@ class CanSubtraction(ReductionStep):
         if reset == True:
             self._CAN_SETUP  = None
             
-        if (reducer.instrument.name() == 'SANS2D'):
-            self._MARKED_DETS_ = []
-            logvalues = _loadDetectorLogs(logname,filepath)
+        try:
+            logvalues = reducer.instrument.load_detector_logs(logname,filepath)
             if logvalues == None:
-                mantid.sendLogMessage('::SANS::Warning: Can logs could not be loaded, using sample values.')
+                _issueWarning("Can logs could not be loaded, using sample values.")
                 return self.SCATTER_CAN.getName(), "()"
-        else:
-            self.PERIOD_NOS["SCATTER_CAN"] = period
+        except AttributeError:
+            if not reducer.instrument.name() == 'LOQ' : raise
+    
+        self.PERIOD_NOS["SCATTER_CAN"] = period
+    
+        if (reducer.instrument.name() == 'LOQ'):
             return self.SCATTER_CAN.getName(), ""
         
         smp_values = []
@@ -140,7 +143,6 @@ class CanSubtraction(ReductionStep):
         smp_values.append(reducer.instrument.REAR_DET_Z + reducer.instrument.REAR_DET_Z_CORR)
         smp_values.append(reducer.instrument.REAR_DET_X + reducer.instrument.REAR_DET_X_CORR)
     
-        self.PERIOD_NOS["SCATTER_CAN"] = period
         # Check against sample values and warn if they are not the same but still continue reduction
         if len(logvalues) == 0:
             return  self.SCATTER_CAN.getName(), logvalues
@@ -158,7 +160,7 @@ class CanSubtraction(ReductionStep):
             if math.fabs(smp_values[i] - can_values[i]) > 5e-04:
                 mantid.sendLogMessage("::SANS::Warning: values differ between sample and can runs. Sample = " + str(smp_values[i]) + \
                                   ' , Can = ' + str(can_values[i]))
-                self._MARKED_DETS_.append(det_names[i])
+                reducer.instrument.append_marked(det_names[i])
         
         return self.SCATTER_CAN.getName(), logvalues
 
@@ -380,7 +382,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None
     return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
 
 # Load the detector logs
-def _loadDetectorLogs(logname,filepath):
+def no_loadDetectorLogs(logname,filepath):
     # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
     logname = logname[0:6] + '0' + logname[7:]
     filename = os.path.join(filepath, logname + '.log')

@@ -245,7 +245,7 @@ class SANS2D(ISISInstrument):
         self._NAME = "SANS2D"
         super(SANS2D, self).__init__()
         
-        _marked_dets = []
+        self._marked_dets = []
         
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -275,10 +275,11 @@ class SANS2D(ISISInstrument):
             mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0,0.0], [xshift, yshift]
+        
     # Load the detector logs
     def load_detector_logs(self,log_name,file_path):
     # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
-        _marked_dets = []
+        self._marked_dets = []
         log_name = log_name[0:6] + '0' + log_name[7:]
         filename = os.path.join(file_path, log_name + '.log')
 
@@ -292,13 +293,13 @@ class SANS2D(ISISInstrument):
         try:
             file_handle = open(filename, 'r')
         except IOError:
-            _issueWarning("Log file \"" + filename + "\" could not be loaded.")
+            mantid.sendLogMessage("::SANS::load_detector_logs: Log file \"" + filename + "\" could not be loaded.")
             return None
         
         for line in file_handle:
             parts = line.split()
             if len(parts) != 3:
-                _issueWarning('Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
+                mantid.sendLogMessage('::SANS::load_detector_logs: Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
             component = parts[1]
             if component in logvalues.keys():
                 logvalues[component] = parts[2]
@@ -306,8 +307,8 @@ class SANS2D(ISISInstrument):
         file_handle.close()
         return logvalues
     
-    def append_marked(detNames):
-        _marked_dets.append(detNames)
+    def append_marked(self, detNames):
+        self._marked_dets.append(detNames)
 
 if __name__ == '__main__':
     pass

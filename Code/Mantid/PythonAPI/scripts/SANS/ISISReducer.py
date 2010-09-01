@@ -104,7 +104,7 @@ class ISISReducer(SANSReducer):
             _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
                    
     def set_monitor_spectrum(self, specNum, interp=False):
-        self.instrument.set_incident_mntr(specNum)
+        self.instrument.set_incident_mon(specNum)
         #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
         if interp :
             self.instrument.set_interpolating_norm()
@@ -302,6 +302,7 @@ class ISISReducer(SANSReducer):
             
         # just print the name, remove the path
         filename = os.path.basename(filename)
+        return True
 
             
     # Read a limit line of a mask file
