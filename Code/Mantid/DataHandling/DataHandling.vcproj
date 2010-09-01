@@ -253,6 +253,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadGSS.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadInstrument.cpp"
 				>
 			</File>
@@ -508,6 +512,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadEventPreNeXus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadGSS.h"
 				>
 			</File>
 			<File
