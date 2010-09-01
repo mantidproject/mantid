@@ -112,6 +112,7 @@ namespace Mantid
         else
         {
           //Matching # of histograms, but that doesn't mean the detector IDs match too!
+          //TODO: Check that the full detector list matches
           IndexToIndexMap * lhs_map = lhs->getWorkspaceIndexToDetectorIDMap();
           IndexToIndexMap * rhs_map = rhs->getWorkspaceIndexToDetectorIDMap();
           for (int i=0; i < lhs->getNumberHistograms(); i++)
@@ -177,7 +178,7 @@ namespace Mantid
         //Clear the MRU list since its not valid anymore.
         outWS->clearMRU();
 
-      } //adding in place ----------------
+      } //------------ adding in place ----------------
 
 
       else if (!outWS)
