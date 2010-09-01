@@ -281,7 +281,7 @@ void DiffractionFocussing2::execEvent()
   //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
   std::vector< MantidVec > original_X_to_use(nGroups+1);
 
-  //Shortcup to the spectra Map (maps spectrum # to a [list of] detector ID #s
+  //Shortcut to the spectra Map (maps spectrum # to a [list of] detector ID #s
   const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
   const API::Axis* const inSpecAxis = inputW->getAxis(1);
 

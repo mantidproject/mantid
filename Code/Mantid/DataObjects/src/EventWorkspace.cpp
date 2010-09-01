@@ -249,6 +249,34 @@ using Kernel::Exception::NotImplementedError;
 
 
   //-----------------------------------------------------------------------------
+  /** Adds a new EventList at the end of the current workspace index list.
+   * Copies the EventList from a const reference to another one.
+   * The # of histograms in the workspace increases by one.
+   *
+   * @param existingEventList a reference to an existing event list;
+   *            all events and the X histogram is copied.
+   * @return a pointer to the new EventList that was created.
+   */
+  EventList * EventWorkspace::addNewEventList(const EventList& existingEventList)
+  {
+    EventList * newEL = new EventList(existingEventList);
+    this->data.push_back(newEl);
+
+    //Workspace index of the new data
+    int wi = this->data.size()-1;
+
+
+    //Spectrum number of this workspace index
+    this->m_axes[1]->spectraNo()
+
+    m_spectramap->addSpectrumEntries( )
+
+    this->m_noVectors = this->data.size();
+    return newEL;
+  }
+
+
+  //-----------------------------------------------------------------------------
   /** Call this method when loading event data is complete.
    * The map of pixelid to spectrum # is generated.
    * Also, a simple 1:1 map of spectrum # to pixel id (detector #) is generated
@@ -424,7 +452,9 @@ using Kernel::Exception::NotImplementedError;
       data = new MantidVecWithMarker(index);
 
       //Now use that to get E -- Y values are generated from another function
-      el->generateErrorsHistogram( this->dataY(index), data->m_data);
+      MantidVec Y;
+      el->generateCountsHistogram( *(el->getRefX()), Y);
+      el->generateErrorsHistogram( Y, data->m_data);
 
       //Lets save it in the MRU
       MantidVecWithMarker * oldData = m_bufferedDataE.insert(data);

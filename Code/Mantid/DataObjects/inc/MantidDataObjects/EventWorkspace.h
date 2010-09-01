@@ -214,6 +214,7 @@ private:
   EventWorkspace& operator=(const EventWorkspace&);
 
   /** A map that holds the event list for each pixel; the key is the pixelid.
+   * This is used when loading data.
    * This is NOT guaranteed to be ok after DoneLoadingData. Don't use it!
    */
   EventListMap data_map;
@@ -221,8 +222,8 @@ private:
   /// Set to true when loading data is finished.
   bool done_loading_data;
 
-  /** A vector that holds the event list for each pixel; the key is
-   * the spectrum #, which is not necessarily the pixelid.
+  /** A vector that holds the event list for each spectrum; the key is
+   * the workspace index, which is not necessarily the pixelid.
    */
   EventListVector data;
 

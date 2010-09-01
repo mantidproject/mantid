@@ -134,6 +134,12 @@ namespace Mantid
       return true;
     }
 
+//    /**
+//    void Plus::buildAdditionMap()
+//    {
+//
+//    }
+
     //---------------------------------------------------------------------------------------------
     /** Perform the plus operation on the two event workspaces. This will only be called if they are compatible.
      *
@@ -191,7 +197,7 @@ namespace Mantid
 
         //Create a copy of the lhs workspace
         outWS = boost::dynamic_pointer_cast<EventWorkspace>(API::WorkspaceFactory::Instance().create("EventWorkspace", lhs->getNumberHistograms(), 2, 1));
-        //Copy geometry over.
+        //Copy geometry, spectra map, etc. over.
         API::WorkspaceFactory::Instance().initializeFromParent(lhs, outWS, false);
         //But we don't copy any data yet.
 
