@@ -129,8 +129,10 @@ private:
   group2vectormap group2xvector;
   /// Map from the group number to the group's summed weight vector
   group2vectormap group2wgtvector;
-  /// The number of groups
+  /// The number of (used) groups
   int nGroups;
+  /// The maximum # of the group in the file - for workspace2Ds, this can be > than nGroups.
+  int maxgroup_in_file;
   /// Number of histograms
   int nHist;
   /// Number of points in the 2D workspace

@@ -132,9 +132,9 @@ public:
 
     //The fake grouping file has 100 groups, starting at 1, so there'll be 100 histograms
     int numgroups = 100;
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups+1);
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
     //This means that the map between workspace index and spectrum # is just off by 1
-    TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups+1);
+    TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups);
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups);
 
@@ -210,7 +210,7 @@ public:
 
 
   //Warning: can be a slow test.
-  void xtestEventWorkspace_PG3()
+  void testEventWorkspace_PG3()
   {
     std::string outputws( "pg3" );
 
@@ -252,7 +252,7 @@ public:
     EventWorkspace_const_sptr output;
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
 
-    //There should be 4 groups
+    //There should be 4 groups (including group 4, which should be empty)
     int numgroups = 4;
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
 
@@ -285,6 +285,10 @@ public:
       if (wi < 3)
       {
         TS_ASSERT_LESS_THAN(0, events_after_binning);
+      }
+      else
+      { //Group 4 is empty
+        TS_ASSERT_EQUALS(0, events_after_binning);
       }
     }
 

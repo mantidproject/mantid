@@ -270,10 +270,13 @@ void DiffractionFocussing2::execEvent()
 
   // Make sure the group list is initialized
   this->initializeGroups();
-  g_log.information() << nGroups << " groups found in .cal file.\n";
+
+  //BUT! We want to use all groups, even if no pixels ever refer to them.
+  nGroups = maxgroup_in_file+1;
+  g_log.information() << nGroups << " groups found in .cal file (counting group 0).\n";
 
   //Flag to determine whether the X for a group has been set
-  std::vector<bool> flags(nGroups+1,true);
+  std::vector<bool> flags(nGroups,true);
 
   //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
   std::vector< MantidVec > original_X_to_use(nGroups+1);
@@ -317,7 +320,7 @@ void DiffractionFocussing2::execEvent()
 
   //Now, we want to make sure that all groups are listed in the output workspace,
   //  even those with no events at all
-  for (int group=1; group<this->nGroups+1; group++)
+  for (int group=1; group < this->nGroups; group++)
   {
     //Flags still true = this group was not touched yet
     if (flags[group])
@@ -340,7 +343,7 @@ void DiffractionFocussing2::execEvent()
   Mantid::API::SpectraAxis::spec2index_map mymap;
   axis->getSpectraIndexMap(mymap);
 
-  for (int g=1; g < nGroups+1; g++)
+  for (int g=1; g < nGroups; g++)
   {
     //First look in the map to see if you find the group #
     Mantid::API::SpectraAxis::spec2index_map::iterator it = mymap.find(g);
@@ -392,7 +395,7 @@ void DiffractionFocussing2::initializeGroups()
     if (group > maxGroup)
       maxGroup = group;
   }
-  //Save the # of groups
+  //Save the # of groups; note: if any group is never referred to, it will not show up in the output.
   nGroups = maxGroup+1;
 }
 
@@ -443,6 +446,7 @@ void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName
     g_log.error() << "Unable to open grouping file " << groupingFileName << std::endl;
     throw Exception::FileError("Error reading .cal file",groupingFileName);
   }
+  maxgroup_in_file = 0;
 
   udet2group.clear();
   std::string str;
@@ -457,6 +461,9 @@ void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName
     if ((sel) && (group>0))
     {
       udet2group[udet]=group; //Register this udet
+      //Track the highest group #
+      if (group > maxgroup_in_file)
+        maxgroup_in_file = group;
     }
   }
   grFile.close();
