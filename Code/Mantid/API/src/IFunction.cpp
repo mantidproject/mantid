@@ -358,7 +358,12 @@ std::string IFunction::asString()const
   std::vector<std::string> attr = this->getAttributeNames();
   for(size_t i=0;i<attr.size();i++)
   {
-    ostr<<','<<attr[i]<<'='<<this->getAttribute(attr[i]).value();
+    std::string attName = attr[i];
+    std::string attValue = this->getAttribute(attr[i]).value();
+    if (!attValue.empty())
+    {
+      ostr<<','<<attName<<'='<<attValue;
+    }
   }
   for(int i=0;i<nParams();i++)
   {

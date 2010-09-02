@@ -327,7 +327,9 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
 {
   try
   {
-    QList<PropertyHandler*> peaks = fitBrowser()->getHandler()->getPeakList();
+    PropertyHandler* h = fitBrowser()->getHandler();
+    if ( !h ) return;
+    QList<PropertyHandler*> peaks = h->getPeakList();
     foreach(PropertyHandler* peak,peaks)
     {
       double c = peak->centre();

@@ -62,6 +62,7 @@ void PropertyHandler::init()
     {
       throw std::runtime_error("Parent function handler does not exist");
     }
+    PropertyHandler* ph = parentHandler();
     QtBrowserItem* pi = parentHandler()->item();
     // Create group property with function name on it
     QtProperty* fnProp = m_browser->m_groupManager->addProperty(
@@ -360,7 +361,8 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
 
   if (m_cf->nFunctions() != nFunctions)
   {// this may happen
-    m_browser->clearBrowser();
+    m_browser->reset();
+    return NULL;
   }
 
   PropertyHandler* h = new PropertyHandler(f,m_cf,m_browser);
@@ -1227,6 +1229,7 @@ QList<PropertyHandler*> PropertyHandler::getPeakList()
     for(int i=0;i<m_cf->nFunctions();++i)
     {
       PropertyHandler* h = getHandler(i);
+      if ( !h )  continue;
       if (h->pfun())
       {
         res << h;

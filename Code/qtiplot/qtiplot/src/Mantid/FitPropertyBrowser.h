@@ -231,6 +231,7 @@ private slots:
   void copy();///< Copy the function string to the clipboard
   void paste();///< Paste a function string from the clipboard
   void updateDecimals();
+  void reset();///< reset the function part, renew function, all handlers are new
 
   void popupMenu(const QPoint &);
   /* Context menu slots */

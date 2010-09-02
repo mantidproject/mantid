@@ -321,7 +321,7 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
       return;
     }
     Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f);
-    if (!cf)
+    if (!cf || cf->name() != "CompositeFunction")
     {
       m_compositeFunction = new Mantid::API::CompositeFunction();
       m_compositeFunction->addFunction(f);
@@ -335,6 +335,7 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
 
   PropertyHandler* h = new PropertyHandler(m_compositeFunction,NULL,this);
   m_compositeFunction->setHandler(h);
+  setCurrentFunction(h);
 
   if (m_auto_back)
   {
@@ -342,7 +343,7 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
   }
 
   disableUndo();
-  setFitEnabled(false);
+  setFitEnabled(m_compositeFunction->nFunctions() > 0);
   emit functionChanged();
 }
 
@@ -593,6 +594,7 @@ void FitPropertyBrowser::deleteFunction()
   {
     getHandler()->removePlot();
     h->removeFunction();
+    compositeFunction()->checkFunction();
     emit functionRemoved();
     emit functionChanged();
   }
@@ -1391,7 +1393,6 @@ void FitPropertyBrowser::setFitEnabled(bool yes)
 {
   m_btnFit->setEnabled(yes);
   m_btnSeqFit->setEnabled(yes);
-  //m_btnFindPeaks->setEnabled(yes);
 }
 
 /// Returns true if the function is ready for a fit
@@ -1823,6 +1824,14 @@ void FitPropertyBrowser::paste()
 {
   QClipboard *clipboard = QApplication::clipboard();
   QString str = clipboard->text();
+  createCompositeFunction(str);
+}
+
+void FitPropertyBrowser::reset()
+{
+  QString str = QString::fromStdString(*theFunction());
+  //getHandler()->removeAllPlots();// this crashes mantidplot
+  clearBrowser();
   createCompositeFunction(str);
 }
 

@@ -88,7 +88,8 @@ void Resolution::setAttribute(const std::string& attName,const IFunction::Attrib
     }
     else
     {
-      throw std::runtime_error(error);
+      //throw std::runtime_error(error);
+      return; // allow initialization with invalid attribute (for editing)
     }
     load(m_fileName);
   }
