@@ -721,7 +721,10 @@ void GL3DWidget::saveToFile(const QString & filename)
   if( filename.isEmpty() ) return;
   //  QPixmap pm = renderPixmap();
   //pm.save(filename);
+  // It seems QGLWidget grabs the back buffer
+  this->swapBuffers(); // temporarily swap the buffers
   QImage image = this->grabFrameBuffer();
+  this->swapBuffers(); // swap them back
   image.save(filename);
 }
 
