@@ -15,8 +15,57 @@ namespace Mantid
 {
 namespace PythonAPI
 {
-
   //@cond Disable Doxygen for Python bindings
+  /// Prefix a value with a string when it is printed
+  template<typename TYPE>
+  std::string toStringPrefix(const TYPE & value)
+  {
+    return "";
+  }
+
+  /// Prefix a value with a string when it is printed (std::string specialization)
+  template<>
+  inline std::string toStringPrefix(const std::string& value)
+  {
+    return "'";
+  }
+
+  /// Suffix a value with a string when it is printed
+  template<typename TYPE>
+  std::string toStringSuffix(const TYPE & value)
+  {
+    return "";
+  }
+
+  /// Suffix a value with a string when it is printed (std::string specialization)
+  template<>
+  inline std::string toStringSuffix(const std::string& value)
+  {
+    return "'";
+  }
+
+  /// Convert a sequence of values to a string for printing
+  template<typename SequenceType,typename ElementType>
+  std::string sequence_to_string(const SequenceType & values)
+  {
+    typename SequenceType::const_iterator iend = values.end();
+    std::ostringstream os;
+    std::string retval;
+    for( typename SequenceType::const_iterator itr = values.begin(); itr != iend; )
+    {
+      os << *itr;
+      retval += toStringPrefix<ElementType>(*itr);
+      retval += os.str();
+      os.str("");
+      retval += toStringSuffix<ElementType>(*itr);
+      if( ++itr != iend )
+      {
+        retval += ",";
+      }
+    }
+    return retval;
+  }
+
   /// std::vector wrapper
   template <typename ElementType>
   struct vector_proxy
@@ -28,25 +77,13 @@ namespace PythonAPI
     {
       if( values.empty() ) return "[]";
       std::string retval("[");
-      typename w_t::const_iterator iend = values.end();
-      std::ostringstream os;
-      for( typename w_t::const_iterator itr = values.begin(); itr != iend; )
-      {
-        os << *itr;
-        retval += os.str();
-        os.str("");
-        if( ++itr != iend )
-        {
-          retval += ",";
-        }
-      }
+      retval += sequence_to_string<w_t, ElementType>(values);
       retval += "]";
       return retval;
     }
 
     ///a python wrapper
-    static void
-    wrap(std::string const& python_name)
+    static void wrap(std::string const& python_name)
     {
       boost::python::class_<w_t, std::auto_ptr<w_t> >(python_name.c_str())
         .def(boost::python::init<w_t const&>())
@@ -103,24 +140,12 @@ namespace PythonAPI
     {
       if( values.empty() ) return "set()";
       std::string retval("set(");
-      typename w_t::const_iterator iend = values.end();
-      std::ostringstream os;
-      for( typename w_t::const_iterator itr = values.begin(); itr != iend; )
-      {
-        os << *itr;
-        retval += os.str();
-        os.str("");
-        if( ++itr != iend )
-        {
-          retval += ",";
-        }
-      }
+      retval += sequence_to_string<w_t, ElementType>(values);
       retval += ")";
       return retval;
     }
 
-    static void
-    wrap(std::string const& python_name)
+    static void wrap(std::string const& python_name)
     {
       boost::python::class_<w_t, std::auto_ptr<w_t> >(python_name.c_str())
         .def(boost::python::init<w_t const&>())
