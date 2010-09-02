@@ -155,6 +155,11 @@
            <property name="multipleFiles" stdset="0" >
             <bool>false</bool>
            </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>.nxs</string>
+            </stringlist>
+           </property>
           </widget>
          </item>
          <item row="1" column="0" >
@@ -167,6 +172,11 @@
            </property>
            <property name="multipleFiles" stdset="0" >
             <bool>false</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>_res.nxs</string>
+            </stringlist>
            </property>
           </widget>
          </item>
@@ -318,6 +328,11 @@
          <property name="multipleFiles" stdset="0" >
           <bool>false</bool>
          </property>
+         <property name="fileExtensions" >
+          <stringlist>
+           <string>.nxs</string>
+          </stringlist>
+         </property>
         </widget>
        </item>
        <item>
@@ -462,6 +477,11 @@
          <property name="multipleFiles" stdset="0" >
           <bool>false</bool>
          </property>
+         <property name="fileExtensions" >
+          <stringlist>
+           <string>.raw</string>
+          </stringlist>
+         </property>
         </widget>
        </item>
        <item>
@@ -474,6 +494,11 @@
          </property>
          <property name="multipleFiles" stdset="0" >
           <bool>false</bool>
+         </property>
+         <property name="fileExtensions" >
+          <stringlist>
+           <string>_calib.nxs</string>
+          </stringlist>
          </property>
         </widget>
        </item>
@@ -639,6 +664,11 @@
          </property>
          <property name="multipleFiles" stdset="0" >
           <bool>false</bool>
+         </property>
+         <property name="fileExtensions" >
+          <stringlist>
+           <string>_elw.nxs</string>
+          </stringlist>
          </property>
         </widget>
        </item>

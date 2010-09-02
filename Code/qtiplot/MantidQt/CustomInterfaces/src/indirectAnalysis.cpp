@@ -28,6 +28,10 @@ indirectAnalysis::indirectAnalysis(QWidget *parent) :
 UserSubWindow(parent), m_valInt(0), m_valDbl(0)
 {
 }
+void indirectAnalysis::closeEvent(QCloseEvent* close)
+{
+  saveSettings();
+}
 
 /// Set up the dialog layout
 void indirectAnalysis::initLayout()
@@ -35,9 +39,9 @@ void indirectAnalysis::initLayout()
   m_uiForm.setupUi(this);
 
   // settings
-  connect(m_uiForm.set_cbInst, SIGNAL(activated(int)), this, SLOT(instrumentChanged(int)));
-  connect(m_uiForm.set_cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
-  connect(m_uiForm.set_cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
+  connect(m_uiForm.set_cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentChanged(int)));
+  connect(m_uiForm.set_cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
+  connect(m_uiForm.set_cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
 
   // fury
   connect(m_uiForm.fury_pbRun, SIGNAL(clicked()), this, SLOT(furyRun()));
@@ -52,6 +56,9 @@ void indirectAnalysis::initLayout()
   connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
 
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
+  m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+
+  m_settingsGroup = "CustomInterfaces/IndirectAnalysis/";
 
   // create validators
   m_valInt = new QIntValidator(this);
@@ -92,50 +99,91 @@ void indirectAnalysis::initLayout()
 
 void indirectAnalysis::initLocalPython()
 {
-  clearSettings();
-
-  QString pyInput = 
-    "from IndirectEnergyConversion import getInstrumentDetails\n"
-    "result = getInstrumentDetails('" + m_uiForm.set_cbInst->currentText() + "')\n"
-    "print result\n";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-
-  if ( pyOutput == "" )
-  {
-    showInformationBox("Could not gather required information from instrument definition.");
-  }
-  else
-  {
-    QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
-
-    for (int i = 0; i< analysers.count(); i++ )
-    {
-      QString text; // holds Text field of combo box (name of analyser)
-      QVariant data; // holds Data field of combo box (list of reflections)
-
-      QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
-
-      text = analyser[0];
-
-      if ( analyser.count() > 1 )
-      {
-        QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
-        data = QVariant(reflections);
-        m_uiForm.set_cbAnalyser->addItem(text, data);
-      }
-      else
-      {
-        m_uiForm.set_cbAnalyser->addItem(text);
-      }
-    }
-
-    analyserSelected(m_uiForm.set_cbAnalyser->currentIndex());
-
-  }
+  instrumentChanged(m_uiForm.set_cbInst->currentIndex());
+  loadSettings();
 }
 
+void indirectAnalysis::loadSettings()
+{
+  QSettings settings;
 
-// validation functions
+  settings.beginGroup(m_settingsGroup + "DataFiles");
+
+  QString dataCurrent = settings.value("last_directory", "").toString();
+
+  if ( dataCurrent == "" )
+  {
+    settings.setValue("last_directory", m_dataDir);
+  }
+
+  m_uiForm.slice_inputFile->readSettings(settings.group());
+  m_uiForm.slice_calibFile->readSettings(settings.group());
+
+  settings.endGroup();
+  settings.beginGroup(m_settingsGroup + "ProcessedFiles");
+
+  QString procCurrent = settings.value("last_directory", "").toString();
+
+  if ( procCurrent == "" )
+  {
+    settings.setValue("last_directory", m_saveDir);
+  }
+
+  m_uiForm.fury_iconFile->readSettings(settings.group());
+  m_uiForm.fury_resFile->readSettings(settings.group());
+  m_uiForm.elwin_inputFile->readSettings(settings.group());
+  m_uiForm.elwin_inputFile->readSettings(settings.group());
+  m_uiForm.msd_inputFile->readSettings(settings.group());
+  m_uiForm.abs_inputFile->readSettings(settings.group());
+
+  settings.endGroup();
+  settings.beginGroup(m_settingsGroup + "InstrumentOptions");
+
+  QString instrument = settings.value("instrument", "").toString();
+  QString analyser = settings.value("analyser", "").toString();
+  QString reflection = settings.value("reflection", "").toString();
+
+  if ( instrument != "" )
+  {
+    int index = m_uiForm.set_cbInst->findText(instrument);
+    if ( index != -1 )
+    {
+      m_uiForm.set_cbInst->setCurrentIndex(index);
+    }
+  }
+  if ( analyser != "" )
+  {
+    int index = m_uiForm.set_cbAnalyser->findText(analyser);
+    if ( index != -1 )
+    {
+      m_uiForm.set_cbAnalyser->setCurrentIndex(index);
+    }
+  }
+  if ( reflection != "" )
+  {
+    int index = m_uiForm.set_cbReflection->findText(reflection);
+    if ( index != -1 )
+    {
+      m_uiForm.set_cbReflection->setCurrentIndex(index);
+    }
+  }
+
+  settings.endGroup();
+
+}
+void indirectAnalysis::saveSettings()
+{ // The only settings we want to preserve are the instrument selection.
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup + "InstrumentOptions");
+  QString instrument = m_uiForm.set_cbInst->currentText();
+  QString analyser = m_uiForm.set_cbAnalyser->currentText();
+  QString reflection = m_uiForm.set_cbReflection->currentText();
+
+  settings.setValue("instrument", instrument);
+  settings.setValue("analyser", analyser);
+  settings.setValue("reflection", reflection);
+}
+
 bool indirectAnalysis::validateFury()
 {
   bool valid = true;
@@ -432,23 +480,55 @@ bool indirectAnalysis::validateAbsorption()
 
   return valid;
 }
-// cleanups
-void indirectAnalysis::clearSettings()
-{
-  m_uiForm.set_cbAnalyser->clear();
-}
-
-// settings slots
 void indirectAnalysis::instrumentChanged(int index)
 {
-  this->initLocalPython();
+  m_uiForm.set_cbAnalyser->blockSignals(true);
+  m_uiForm.set_cbAnalyser->clear();
+  m_uiForm.set_cbAnalyser->blockSignals(false);
+
+  QString pyInput = 
+    "from IndirectEnergyConversion import getInstrumentDetails\n"
+    "result = getInstrumentDetails('" + m_uiForm.set_cbInst->currentText() + "')\n"
+    "print result\n";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+
+  if ( pyOutput == "" )
+  {
+    showInformationBox("Could not gather required information from instrument definition.");
+  }
+  else
+  {
+    QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
+
+    for (int i = 0; i< analysers.count(); i++ )
+    {
+      QString text; // holds Text field of combo box (name of analyser)
+      QVariant data; // holds Data field of combo box (list of reflections)
+
+      QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
+
+      text = analyser[0];
+
+      if ( analyser.count() > 1 )
+      {
+        QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
+        data = QVariant(reflections);
+        m_uiForm.set_cbAnalyser->addItem(text, data);
+      }
+      else
+      {
+        m_uiForm.set_cbAnalyser->addItem(text);
+      }
+    }
+  }
 }
 
 void indirectAnalysis::analyserSelected(int index)
 {
   // populate Reflection combobox with correct values for Analyser selected.
+  m_uiForm.set_cbReflection->blockSignals(true);
   m_uiForm.set_cbReflection->clear();
-  // clearReflectionInfo();
+  m_uiForm.set_cbReflection->blockSignals(false);
 
   QVariant currentData = m_uiForm.set_cbAnalyser->itemData(index);
   if ( currentData == QVariant::Invalid )
@@ -465,11 +545,7 @@ void indirectAnalysis::analyserSelected(int index)
     {
       m_uiForm.set_cbReflection->addItem(reflections[i]);
     }
-
-    reflectionSelected(m_uiForm.set_cbReflection->currentIndex());
   }
-
-
 }
 
 void indirectAnalysis::reflectionSelected(int index)
@@ -489,7 +565,6 @@ void indirectAnalysis::reflectionSelected(int index)
   m_uiForm.set_leEFixed->setText(values[2]);
 }
 
-/// fury slots
 void indirectAnalysis::furyRun()
 {
   if ( !validateFury() )
