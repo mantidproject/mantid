@@ -263,7 +263,7 @@ def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax, specMin
 		mantid.deleteWorkspace(outWS_n)
 	return savefile
 
-def res(file, nspec, iconOpt, rebinParam, background):
+def res(file, nspec, iconOpt, rebinParam, background, plotOpt = False):
 	(direct, filename) = os.path.split(file)
 	(root, ext) = os.path.splitext(filename)
 	mapping = createMappingFile('res.map', 1, nspec, iconOpt['first'])
@@ -272,10 +272,14 @@ def res(file, nspec, iconOpt, rebinParam, background):
 	iconWS = workspace_list[0]
 	Rebin(iconWS, iconWS, rebinParam)
 	FFTSmooth(iconWS,iconWS,0)
-	name = root[:3] + mantid.getMatrixWorkspace(workspace_list[0]).getRun().getLogData("run_number").value() + '_res'
+	name = root[:3].lower() + mantid.getMatrixWorkspace(workspace_list[0]).getRun().getLogData("run_number").value() + '_res'
 	FlatBackground(iconWS, name, background[0], background[1])
 	mantid.deleteWorkspace(iconWS)
 	SaveNexusProcessed(name, name+'.nxs')
+	if plotOpt:
+		graph = plotSpectrum(name, 0)
+	else:
+		mantid.deleteWorkspace(name)
 	return name
 
 def saveItems(workspaces, runNos, fileFormats, ins, suffix, directory = ''):

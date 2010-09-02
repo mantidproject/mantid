@@ -168,6 +168,7 @@ void ConvertToEnergy::setDefaultInstrument(const QString & name)
     if( index >= 0 )
     {
         m_uiForm.cbInst->setCurrentIndex(index);
+        instrumentSelectChanged(name);
     }
 }
 
