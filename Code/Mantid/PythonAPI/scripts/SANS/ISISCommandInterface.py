@@ -14,11 +14,9 @@ _NOPRINT_ = False
 _VERBOSE_ = False
 
 def SetNoPrintMode(quiet = True):
-    global _NOPRINT_
     _NOPRINT_ = quiet
 
 def SetVerboseMode(state):
-    global _VERBOSE_
     _VERBOSE_ = state
 
 # Print a message and log it if the 
