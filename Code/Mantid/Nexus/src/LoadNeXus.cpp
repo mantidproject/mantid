@@ -7,8 +7,8 @@
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NeXusUtils.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFileIO.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -81,9 +81,8 @@ namespace Mantid
       // Otherwise try LoadIsisNexus.
       std::string dataName="analysis", muonTD="muonTD", pulsedTD="pulsedTD";
       std::string value;
-      NeXusUtils *nexusFile= new NeXusUtils();
       std::vector<std::string> entryName,definition;
-      int count=nexusFile->getNexusEntryTypes(m_filename,entryName,definition);
+      int count= getNexusEntryTypes(m_filename,entryName,definition);
       if(count<=-1)
       {
         g_log.error("Error reading file " + m_filename);

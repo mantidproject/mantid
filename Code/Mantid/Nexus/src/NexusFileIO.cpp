@@ -1169,5 +1169,95 @@ namespace Mantid
     template<>
     std::string NexusFileIO::logValueType<bool>()const{return "bool";}
 
+    int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
+                           std::vector<std::string>& definition )
+    {
+     //
+     // Try to open named Nexus file and return all entries plus the definition found for each.
+     // If definition not found, try and return "analysis" field (Muon V1 files)
+     // Return count of entries if OK, -1 failed to open file. Close file on exit.
+     //
+     NXhandle fileH;
+     NXaccess mode= NXACC_READ;
+     NXstatus stat=NXopen(fileName.c_str(), mode, &fileH);
+     if(stat==NX_ERROR) return(-1);
+     //
+     entryName.clear();
+     definition.clear();
+     char *nxname,*nxclass;
+     int nxdatatype;
+     nxname= new char[NX_MAXNAMELEN];
+     nxclass = new char[NX_MAXNAMELEN];
+     int rank,dims[2],type;
+     //
+     // Loop through all entries looking for the definition section in each (or analysis for MuonV1)
+     //
+     std::vector<std::string> entryList;
+     while( ( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) ) == NX_OK )
+     {
+         std::string nxc(nxclass);
+         if(nxc.compare("NXentry")==0)
+             entryList.push_back(nxname);
+     }
+     // for each entry found, look for "analysis" or "definition" text data fields and return value plus entry name
+     for(size_t i=0;i<entryList.size();i++)
+     {
+         //
+         stat=NXopengroup(fileH,entryList[i].c_str(),"NXentry");
+         // loop through field names in this entry
+         while( ( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) ) == NX_OK )
+         {
+             std::string nxc(nxclass),nxn(nxname);
+             // if a data field
+             if(nxc.compare("SDS")==0)
+                 // if one of the two names we are looking for
+                 if(nxn.compare("definition")==0 || nxn.compare("analysis")==0)
+                 {
+                     stat=NXopendata(fileH,nxname);
+                     stat=NXgetinfo(fileH,&rank,dims,&type);
+                     if(stat==NX_ERROR)
+                         continue;
+                     char* value=new char[dims[0]+1];
+                     stat=NXgetdata(fileH,value);
+                     if(stat==NX_ERROR)
+                         continue;
+                     value[dims[0]]='\0';
+                     // return e.g entryName "analysis"/definition "muonTD"
+                     definition.push_back(value);
+                     entryName.push_back(entryList[i]);
+                     delete[] value;
+                     stat=NXclosegroup(fileH); // close data group, then entry
+                     stat=NXclosegroup(fileH);
+                     break;
+                 }
+         }
+         /*
+         stat=NXopendata(fileH,"definition");
+         if(stat==NX_ERROR)
+             {
+             stat=NXopendata(fileH,"analysis");
+       if(stat==NX_ERROR)
+                 continue;
+             }
+         stat=NXgetinfo(fileH,&rank,dims,&type);
+         if(stat==NX_ERROR || type!=NX_CHAR)
+             continue;
+         char* value=new char[dims[0]+1];
+         stat=NXgetdata(fileH,value);
+         if(stat==NX_ERROR)
+             continue;
+         value[dims[0]]='\0';
+         definition.push_back(value);
+         entryName.push_back(entryList[i]);
+         delete[] value;
+         stat=NXclosegroup(fileH); // close data group, then entry
+         stat=NXclosegroup(fileH);
+         */
+     }
+     stat=NXclose(&fileH);
+     delete[] nxname;
+     delete[] nxclass;
+     return(entryName.size());
+    }
   } // namespace NeXus
 } // namespace Mantid
