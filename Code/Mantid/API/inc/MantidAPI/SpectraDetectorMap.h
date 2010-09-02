@@ -77,7 +77,7 @@ public:
   /// Empties the map
   void clear();
   /// Return number of detectors contributing to this spectrum
-  int ndet(const int spectrum_number) const;
+  const int ndet(const int spectrum_number) const;
   /// Get a vector of detectors ids contributing to a spectrum
   std::vector<int> getDetectors(const int spectrum_number) const;
   /// Gets a list of spectra corresponding to a list of detector numbers
