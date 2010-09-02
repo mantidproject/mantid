@@ -116,6 +116,8 @@ namespace Mantid
       
       /// Opens the output file and, as necessary blanks it, writes the file header and moves the file pointer
       void prepareFileToWriteEntry();
+      /// opens the named file if possible or returns false
+      bool openForAppending(const std::string & filename);
       /// Moves to the end of the last entry in the file
       void findEndofLastEntry();
       /// Write xml header tags

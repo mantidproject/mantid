@@ -166,7 +166,8 @@ throw std::invalid_argument("Error in  SaveCanSAS1D");
 }
 /** Opens the output file and either moves the file pointer to beyond the last
 *  entry or blanks the file and writes a header
-*  @throw FileError if append was selected but end of an entry tag couldn't be found
+*  @throw logic_error if append was selected but end of an entry tag couldn't be found
+*  @throw FileError if there was a problem writing to the file
 */
 void SaveCanSAS1D::prepareFileToWriteEntry()
 {
@@ -178,94 +179,119 @@ void SaveCanSAS1D::prepareFileToWriteEntry()
 
   // write xml manually as the user requires a specific format were the placement of new line characters is controled
   //and this can't be done in using the stylesheet part in Poco or libXML 
+  if (append)
+  {
+    append = openForAppending(fileName);
+  }
+
+  if (append)
+  {
+    findEndofLastEntry();
+  }
+  else
+  {
+    writeHeader(fileName);
+  }
+}
+/** opens the named file if possible or returns false
+*  @param filename
+*  @return true if the file was opened successfully and isn't empty
+*/
+bool SaveCanSAS1D::openForAppending(const std::string & filename)
+{
   try
   {
-    if (append)
+    m_outFile.open(filename.c_str(), std::ios::out | std::ios::in);
+    //check if the file already has data
+    m_outFile.seekg(0, std::ios::end);
+    if ( m_outFile.tellg() > 0 )
     {
-      m_outFile.open(fileName.c_str(), std::ios::out | std::ios::in);
-      //check if the file already has data
-      m_outFile.seekg(0, std::ios::end);
-      if ( static_cast<int>(m_outFile.tellg()) == 0 )
-      {
-        //it's a new file, we're not really appending
-        append = false;
-        m_outFile.close();
-      }
+      //a file exists with data leave the file open and state that appending should be possible
+      return true;
     }
-
-    if (append)
-    {
-      findEndofLastEntry();
-    }
-    else
-    {
-      writeHeader(fileName);
-    }
-  }
-  catch (std::logic_error &e)
-  {
-    throw Exception::FileError(e.what(), fileName);
   }
   catch (std::fstream::failure)
   {
-    // give users more explaination about no being able to read their files
-    throw Exception::FileError("Trouble reading existing data in the output file, are you appending to an invalid CanSAS1D file?", fileName);
+    g_log.information() << "File " << filename << " couldn't be opened for a appending, will try to create the file\n"; 
   }
+  m_outFile.clear();
+  if (m_outFile.is_open())
+  {
+    m_outFile.close();
+  }
+  return false;
 }
 /** Moves to the end of the last entry in the file, after &ltSASentry&gt
 *  before &lt/SASroot&gt
 *  @throw fstream::failure if the read or write commands couldn't complete
-*  @throw logic_error if append was selected but end of an entry tag couldn't be found
+*  @throw logic_error if the tag at the end of the last entry couldn't be found
 */
 void SaveCanSAS1D::findEndofLastEntry()
 {
   static const int LAST_TAG_LEN = 11;
   static const char LAST_TAG[LAST_TAG_LEN+1] = "</SASentry>";
+  // UNCERT should be less than the length of a SASentry
+  static const int UNCERT = 20;
   const int rootTagLen = static_cast<int>(std::string("</SASroot>").length());
-  //move to the place _near_ the end of the file where the data will be appended to
-  m_outFile.seekg(-LAST_TAG_LEN-rootTagLen, std::ios::end);
-  char test_tag[LAST_TAG_LEN+1];
-  m_outFile.read(test_tag, LAST_TAG_LEN);
-  //check we're in the correct place in the file
-  if ( std::string(test_tag,LAST_TAG_LEN)!=std::string(LAST_TAG,LAST_TAG_LEN) )
+
+  try
   {
-    //we'll allow some extra charaters so there is some variablity in where the tag might be found
-    bool tagFound(false);
-    // UNCERT should be less than the length of an entry
-    static const int UNCERT = 20;
-    for ( int i = 1; i < UNCERT; ++i )
+    //move to the place _near_ the end of the file where the data will be appended to
+    m_outFile.seekg(-LAST_TAG_LEN-rootTagLen, std::ios::end);
+    char test_tag[LAST_TAG_LEN+1];
+    m_outFile.read(test_tag, LAST_TAG_LEN);
+    //check we're in the correct place in the file
+    if ( std::string(test_tag,LAST_TAG_LEN)!=std::string(LAST_TAG,LAST_TAG_LEN) )
     {
-      //together this seek and read move the file pointer back on byte at a time and read
-      m_outFile.seekg( -i-LAST_TAG_LEN-rootTagLen, std::ios::end);
-      m_outFile.read(test_tag, LAST_TAG_LEN);
-      std::string read = std::string(test_tag, LAST_TAG_LEN);
-      if ( read == std::string(LAST_TAG,LAST_TAG_LEN) )
+      //we'll allow some extra charaters so there is some variablity in where the tag might be found
+      bool tagFound(false);
+      for ( int i = 1; i < UNCERT; ++i )
       {
-        tagFound = true;
-        break;
+        //together this seek and read move the file pointer back on byte at a time and read
+        m_outFile.seekg( -i-LAST_TAG_LEN-rootTagLen, std::ios::end);
+        m_outFile.read(test_tag, LAST_TAG_LEN);
+        std::string read = std::string(test_tag, LAST_TAG_LEN);
+        if ( read == std::string(LAST_TAG,LAST_TAG_LEN) )
+        {
+          tagFound = true;
+          break;
+        }
+      }
+      if ( ! tagFound )
+      {
+        throw std::logic_error("Couldn't find the end of the existing data, missing </SASentry> tag");
       }
     }
-    if ( ! tagFound )
-    {
-      throw std::logic_error("Couldn't find the end of the existing data, missing </SASentry> tag");
-    }
+    // prepare to write to the place found by reading
+    m_outFile.seekp(m_outFile.tellg(), std::ios::beg);
   }
-  // prepare to write to the place found by reading
-  m_outFile.seekp(m_outFile.tellg(), std::ios::beg);
+  catch (std::fstream::failure)
+  {
+    // give users more explaination about no being able to read their files
+    throw std::logic_error("Trouble reading existing data in the output file, are you appending to an invalid CanSAS1D file?");
+  }
 }
 /** Write xml header tags including the root element and starting the SASentry
 *  element
 *  @param fileName the name of the file to write to
+*  @throw FileError if the file can't be opened or writen to
 */
 void SaveCanSAS1D::writeHeader(const std::string & fileName)
 {
-  m_outFile.open(fileName.c_str(), std::ofstream::out | std::ios::trunc);
-  //write the file header
-  m_outFile << "<?xml version=\"1.0\"?>\n"
-    << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>\n";
-  std::string sasroot="";
-  createSASRootElement(sasroot);
-  m_outFile<<sasroot;
+  try
+  {
+    m_outFile.open(fileName.c_str(), std::ios::out | std::ios::trunc);
+    //write the file header
+    m_outFile << "<?xml version=\"1.0\"?>\n"
+      << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>\n";
+    std::string sasroot="";
+    createSASRootElement(sasroot);
+    m_outFile<<sasroot;
+  }  
+  catch (std::fstream::failure)
+  {
+    throw Exception::FileError("Error opening the output file for writing", fileName);
+  }
 }
     /** This method search for xml special characters in the input string
     * and  replaces this with xml entity reference
