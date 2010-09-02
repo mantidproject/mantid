@@ -70,7 +70,7 @@ class ISISReducer(SANSReducer):
         super(ISISReducer, self).__init__()
         self._transmission_calculator = ISISReductionSteps.Transmission()
         # Default data loader
-        self._data_loader = ISISReductionSteps.LoadRun()
+        self._data_loader = ISISReductionSteps.LoadSample()
         
     def set_user_path(self, path):
         """
@@ -82,6 +82,28 @@ class ISISReducer(SANSReducer):
         else:
             raise RuntimeError, "ISISReducer.set_data_path: provided path is not a directory (%s)" % path
 
+    def load_set_options(self, reload=True, period=-1):
+        if not issubclass(self._data_loader.__class__, ISISReductionSteps.LoadSample):
+            raise RuntimeError, "ISISReducer.load_set_options: method called with wrong loader class"
+        self._data_loader.set_options(reload, period)
+
+    def append_data_file(self, data_file, workspace=None):
+        """
+            Append a file to be processed.
+            @param data_file: name of the file to be processed
+            @param workspace: optional name of the workspace for this data,
+                default will be the name of the file 
+        """
+        wrkspc, _, _, filename = ISISReductionSteps.extract_workspace_name(data_file, False, 
+                                                                           self.instrument.name(), 
+                                                                           self.instrument.run_number_width)
+        if workspace is None:
+            workspace = wrkspc
+            
+        self._full_file_path(filename)
+        
+        self._data_files[workspace] = data_file
+        
     def set_background(self, can_run=None, reload = True, period = -1):
         """
             Sets the can data to be subtracted from sample data files

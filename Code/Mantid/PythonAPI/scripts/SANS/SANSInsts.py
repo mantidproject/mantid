@@ -221,6 +221,10 @@ class ISISInstrument(Instrument):
         self.lowAngDetSet = True
         
 class LOQ(ISISInstrument):
+    
+    # Number of digits in standard file name
+    run_number_width = 5
+    
     def __init__(self):
         self._NAME = "LOQ"
         super(LOQ, self).__init__()
@@ -240,6 +244,9 @@ class LOQ(ISISInstrument):
         return [xshift, yshift], [xshift, yshift]
         
 class SANS2D(ISISInstrument): 
+
+    # Number of digits in standard file name
+    run_number_width = 8
 
     def __init__(self):
         self._NAME = "SANS2D"

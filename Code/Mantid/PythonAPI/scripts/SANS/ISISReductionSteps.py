@@ -140,6 +140,7 @@ class CanSubtraction(ReductionStep):
     _CAN_SETUP = None
     _CAN_RUN = None
     _CAN_N_PERIODS = -1
+    #TODO: we don't need a dictionary here
     PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
 
     def __init__(self, can_run, reload = True, period = -1):
@@ -309,7 +310,74 @@ class Mask(ReductionStep):
                     _issueWarning('Unrecognized masking option "' + details + '"')
         else:
             pass
+     
+class LoadSample(ReductionStep):   
+    """
+    """
+    SCATTER_SAMPLE = None
+    _SAMPLE_SETUP = None
+    _SAMPLE_RUN = None
+    _SAMPLE_N_PERIODS = -1
+    #TODO: we don't need a dictionary here
+    PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
+    
+    def __init__(self, sample_run=None, reload=True, period=-1):
+        self._sample_run = sample_run
+        self._reload = reload
+        self._period = period
+    
+    def set_options(self, reload=True, period=-1):
+        self._reload = reload
+        self._period = period        
         
+    def execute(self, reducer, workspace):
+        # If we don't have a data file, look up the workspace handle
+        if self._sample_run is None:
+            if workspace in reducer._data_files:
+                self._sample_run = reducer._data_files[workspace]
+            else:
+                raise RuntimeError, "ISISReductionSteps.LoadSample doesn't recognize workspace handle %s" % workspace        
+        
+        _clearPrevious(self.SCATTER_SAMPLE)
+        self._SAMPLE_N_PERIODS = -1
+        
+        if( self._sample_run.startswith('.') or self._sample_run == '' or self._sample_run == None):
+            self._SAMPLE_SETUP = None
+            self._SAMPLE_RUN = ''
+            self.SCATTER_SAMPLE = None
+            return '', '()'
+        
+        self._SAMPLE_RUN = self._sample_run
+        self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = _assignHelper(self._sample_run, False, self._reload, self._period, reducer)
+        if self.SCATTER_SAMPLE.getName() == '':
+            _issueWarning('Unable to load SANS sample run, cannot continue.')
+            return '','()'
+        if reset == True:
+            self._SAMPLE_SETUP = None
+    
+        try:
+            logvalues = reducer.instrument.load_detector_logs(logname,filepath)
+            if logvalues == None:
+                mtd.deleteWorkspace(self.SCATTER_SAMPLE.getName())
+                _issueWarning("Sample logs cannot be loaded, cannot continue")
+                return '','()'
+        except AttributeError:
+            if not reducer.instrument.name() == 'LOQ': raise
+        
+        self.PERIOD_NOS["SCATTER_SAMPLE"] = self._period
+    
+        if (reducer.instrument.name() == 'LOQ'):
+            return self.SCATTER_SAMPLE.getName(), None
+    
+        reducer.instrument.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
+        reducer.instrument.FRONT_DET_X = float(logvalues['Front_Det_X'])
+        reducer.instrument.FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
+        reducer.instrument.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
+        reducer.instrument.REAR_DET_X = float(logvalues['Rear_Det_X'])
+    
+        return self.SCATTER_SAMPLE.getName(), logvalues
+
+    
 class LoadRun(ReductionStep):
     """
         Load a data file, move its detector to the right position according
@@ -370,41 +438,26 @@ class LoadRun(ReductionStep):
 def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None):
     if run_string == '' or run_string.startswith('.'):
         return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-    pieces = run_string.split('.')
-    if len(pieces) != 2 :
-         #TODO: we probably don't want to use exist() here
-         exit("Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format")
-    else:
-        run_no = pieces[0]
-        ext = pieces[1]
+    
+    wkspname, run_no, logname, data_file = extract_workspace_name(run_string, is_trans, 
+                                                        prefix=reducer.instrument.name(), 
+                                                        run_number_width=reducer.instrument.run_number_width)
+    
     if run_no == '':
         return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-        
-    if reducer.instrument.name() == 'LOQ':
-        field_width = 5
-    else:
-        field_width = 8
-        
-    fullrun_no,logname,shortrun_no = _padRunNumber(run_no, field_width)
-    
-    if is_trans:
-        wkspname =  shortrun_no + '_trans_' + ext.lower()
-    else:
-        wkspname =  shortrun_no + '_sans_' + ext.lower()
 
     if reload == False and mtd.workspaceExists(wkspname):
         return WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
 
-    basename = reducer.instrument.name() + fullrun_no
-    filename = os.path.join(reducer._data_path,basename)
+    filename = os.path.join(reducer._data_path, data_file)
     # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
-    if not os.path.exists(filename + '.' + ext):
-        filename = basename
+    if not os.path.exists(filename):
+        filename = data_file
     if period <= 0:
         period = 1
     if is_trans:
         try:
-            if reducer.instrument.name() == 'SANS2D' and int(shortrun_no) < 568:
+            if reducer.instrument.name() == 'SANS2D' and int(run_no) < 568:
                 dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
                 specmin = dimension*dimension*2
                 specmax = specmin + 4
@@ -412,23 +465,20 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None
                 specmin = None
                 specmax = 8
                 
-            loader = LoadRun(filename+'.'+ext, spec_min=specmin, spec_max=specmax, period=period)
+            loader = LoadRun(filename, spec_min=specmin, spec_max=specmax, period=period)
             [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
-            #[filepath, wkspname, nPeriods] = \
-            #   _loadRawData(filename, wkspname, ext, specmin, specmax, period)
         except RuntimeError, err:
             mantid.sendLogMessage("::SANS::Warning: "+str(err))
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
     else:
         try:
-            loader = LoadRun(filename+'.'+ext, spec_min=None, spec_max=None, period=period)
+            loader = LoadRun(filename, spec_min=None, spec_max=None, period=period)
             [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
-            #[filepath, wkspname, nPeriods] = _loadRawData(filename, wkspname, ext, None, None, period)
         except RuntimeError, details:
             mantid.sendLogMessage("::SANS::Warning: "+str(details))
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
             
-    inWS = SANSUtility.WorkspaceDetails(wkspname, shortrun_no)
+    inWS = SANSUtility.WorkspaceDetails(wkspname, run_no)
     
     return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
 
@@ -455,3 +505,22 @@ def _clearPrevious(inWS, others = []):
         if mtd.workspaceExists(inWS) and (not inWS in others):
             mtd.deleteWorkspace(inWS)
             
+            
+def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8):
+    pieces = run_string.split('.')
+    if len(pieces) != 2 :
+         raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
+    else:
+        run_no = pieces[0]
+        ext = pieces[1]
+        
+    fullrun_no, logname, shortrun_no = _padRunNumber(run_no, run_number_width)
+
+    if is_trans:
+        wkspname =  shortrun_no + '_trans_' + ext.lower()
+    else:
+        wkspname =  shortrun_no + '_sans_' + ext.lower()
+    
+    return wkspname, run_no, logname, prefix+fullrun_no+'.'+ext
+
+

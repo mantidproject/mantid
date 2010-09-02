@@ -111,3 +111,12 @@ def TransmissionSample(sample, direct, reload = True, period = -1):
 def TransmissionCan(can, direct, reload = True, period = -1):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
     ReductionSingleton().set_trans_can(can, direct, reload = True, period = -1)
+    
+def AssignSample(sample_run, reload = True, period = -1):
+    _printMessage('AssignSample("' + sample_run + '")')
+    ReductionSingleton().append_data_file(sample_run)
+    ReductionSingleton().load_set_options(reload, period)
+    
+def AppendDataFile(datafile, workspace=None):
+    AssignSample(datafile)
+    

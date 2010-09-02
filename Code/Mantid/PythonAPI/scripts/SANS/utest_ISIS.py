@@ -39,8 +39,7 @@ class TestInstrument(unittest.TestCase):
         AssignCan('993.raw')
         TransmissionSample('988.raw', '987.raw')
         TransmissionCan('989.raw', '987.raw')
-        
-        AppendDataFile('SANS2D00000992.raw')
+        AssignSample('992.raw')
         Reduce1D()
         
                 
@@ -54,6 +53,7 @@ class TestInstrument(unittest.TestCase):
         SANSReduction.AssignCan('993.raw')
         SANSReduction.TransmissionSample('988.raw', '987.raw')
         SANSReduction.TransmissionCan('989.raw', '987.raw')
+        SANSReduction.AssignSample('992.raw')
         
         self.assertEqual(ReductionSingleton().instrument.FRONT_DET_Z_CORR,
                          SANSReduction.INSTRUMENT.FRONT_DET_Z_CORR)
@@ -174,11 +174,13 @@ class TestInstrument(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._mask._specmask_f,
                          SANSReduction.SPECMASKSTRING_F)
         
-        # Can run
+        # Sample and Can runs
         #self.assertEqual(ReductionSingleton()._background_subtracter.SCATTER_CAN,
         #                 SANSReduction.SCATTER_CAN)
-        self.assertEqual(ReductionSingleton()._background_subtracter.PERIOD_NOS,
-                         SANSReduction.PERIOD_NOS)     
+        self.assertEqual(ReductionSingleton()._background_subtracter.PERIOD_NOS['SCATTER_CAN'],
+                         SANSReduction.PERIOD_NOS['SCATTER_CAN'])     
+        self.assertEqual(ReductionSingleton()._data_loader.PERIOD_NOS['SCATTER_SAMPLE'],
+                         SANSReduction.PERIOD_NOS['SCATTER_SAMPLE'])     
         #self.assertEqual(ReductionSingleton()._background_subtracter.SCATTER_SAMPLE,
         #                 SANSReduction.SCATTER_SAMPLE)
         self.assertEqual(ReductionSingleton()._transmission_calculator.TRANS_SAMPLE,
