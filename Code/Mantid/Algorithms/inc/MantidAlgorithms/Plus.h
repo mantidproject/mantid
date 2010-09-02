@@ -69,6 +69,7 @@ namespace Mantid
 
       //Overridden event-specific operation
       void execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs );
+      bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       /// Checks the compatibility of event-based processing of the two workspaces
       bool checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs);
 

@@ -433,6 +433,10 @@ public:
     AnalysisDataService::Instance().addOrReplace("ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 3))); // 100 ev
     AnalysisDataService::Instance().addOrReplace("ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2))); //200 ev
     AnalysisDataService::Instance().addOrReplace("ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
+    //Make one with weird units
+    MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100));
+    ev4->setYUnit("Microfurlongs per Megafortnights");
+    AnalysisDataService::Instance().addOrReplace("ev4_weird_units",ev4);
     //a 2d workspace with the value 2 in each bin
     AnalysisDataService::Instance().addOrReplace("in2D", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
 
@@ -443,11 +447,25 @@ public:
     AnalysisDataService::Instance().remove("ev1");
     AnalysisDataService::Instance().remove("ev2");
     AnalysisDataService::Instance().remove("ev3");
+    AnalysisDataService::Instance().remove("ev4_weird_units");
     AnalysisDataService::Instance().remove("in2D");
     AnalysisDataService::Instance().remove("evOUT");
     AnalysisDataService::Instance().remove("out2D");
   }
 
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_IncompatibleUnits_Fail()
+  {
+    EventSetup();
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","ev4_weird_units");
+    alg.setPropertyValue("OutputWorkspace", "evOUT");
+    alg.execute();
+    TS_ASSERT( !alg.isExecuted() );
+    EventTeardown();
+  }
 
   //------------------------------------------------------------------------------------------------
   void testEventWorkspaces_addingInPlace()

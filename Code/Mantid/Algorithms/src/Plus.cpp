@@ -36,7 +36,8 @@ namespace Mantid
     }
     
     //---------------------------------------------------------------------------------------------
-    bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    /* Return true if the units and distribution-type of the workspaces make them compatible */
+    bool Plus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       if ( lhs->size() > 1 && rhs->size() > 1 )
       {
@@ -51,7 +52,16 @@ namespace Mantid
           return false;
         }
       }
+      return true;
+    }
 
+    //---------------------------------------------------------------------------------------------
+    bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    {
+      if (!checkUnitCompatibility(lhs, rhs))
+        return false;
+
+      //Keep checking more generally.
       return BinaryOperation::checkCompatibility(lhs,rhs);
     }
 
@@ -77,7 +87,7 @@ namespace Mantid
     //---------------------------------------------------------------------------------------------
     /** Return true if both workspaces are event workspaces, and they both match in instrument name
      * and number of spectra.
-     * @throw std::invalid_argument if they are event workspaces but can't be added
+     * @throw std::invalid_argument if they are event workspaces, but can't be added for some other reason
      */
     bool Plus::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs)
     {
@@ -93,6 +103,10 @@ namespace Mantid
 
       //Both have to be valid event workspaces
       if (!event_lhs || !event_rhs)
+        return false;
+
+      //Matching units?
+      if (!checkUnitCompatibility(lhs, rhs))
         return false;
 
       //Mismatched instruments?
