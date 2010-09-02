@@ -51,7 +51,7 @@ void Q1D::exec()
 
   // Calculate the output binning
   const std::vector<double> binParams = getProperty("OutputBinning");
-  DataObjects::Histogram1D::RCtype XOut;
+  MantidVecPtr XOut;
   const int sizeOut = VectorHelper::createAxisFromRebinParams(binParams,XOut.access());
 
   // Now create the output workspace

@@ -52,7 +52,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 192);
@@ -109,7 +109,7 @@ public:
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,25), "2008-Sep-11 14:17:41  180" );
     //check that sample name has been set correctly
-    TS_ASSERT_EQUALS(output->sample().getName(), "GaAs")
+    TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
     
 	
     //----------------------------------------------------------------------
@@ -154,7 +154,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 11);
@@ -199,7 +199,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 3);
@@ -246,7 +246,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 14);
@@ -292,7 +292,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));    
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 192);
@@ -314,8 +314,8 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.992,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-    TS_ASSERT( ! output-> isDistribution() )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT( ! output-> isDistribution() );
 
     /*
     //----------------------------------------------------------------------
@@ -349,7 +349,7 @@ public:
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,25), "2008-Sep-18 00:57:19  7.3" );
     //check that sample name has been set correctly
-    TS_ASSERT_EQUALS(output->sample().getName(), "GaAs")
+    TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
     
 	
     //----------------------------------------------------------------------
@@ -394,7 +394,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2"));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 192);

@@ -27,6 +27,7 @@ def do_checkin(only_this):
             filename = line[8:].strip()
             if (".cproject" in filename) or\
                 (".project" in filename) or\
+                ("LoadDAETest.h" in filename) or\
                 ("Mantid.properties" in filename) or\
                 ("Scons_Linux.conf" in filename) or\
                 (filename == ".") :

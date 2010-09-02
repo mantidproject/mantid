@@ -78,7 +78,7 @@ protected:
   void init();
   virtual void exec();
 
-  void outputYandEValues(API::MatrixWorkspace_const_sptr inputW, const DataObjects::Histogram1D::RCtype &XValues_new, API::MatrixWorkspace_sptr outputW);
+  void outputYandEValues(API::MatrixWorkspace_const_sptr inputW, const MantidVecPtr &XValues_new, API::MatrixWorkspace_sptr outputW);
   void cubicInterpolation(const MantidVec &xOld, const MantidVec &yOld, const MantidVec &eOld, const MantidVec& xNew, MantidVec &yNew, MantidVec &eNew) const;
   void noInterpolation(const MantidVec &xOld, const double yOld, const MantidVec &eOld, const MantidVec& xNew, MantidVec &yNew, MantidVec &eNew) const;
   double estimateError(const MantidVec &xsOld, const MantidVec &esOld, const double xNew) const;

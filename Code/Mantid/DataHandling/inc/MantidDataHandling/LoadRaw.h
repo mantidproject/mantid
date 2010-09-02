@@ -82,7 +82,7 @@ namespace Mantid
 
       bool isAscii(const std::string & filename) const;
       void checkOptionalProperties();
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , const int& , int*, DataObjects::Workspace2D_sptr );
+      void loadData(const MantidVecPtr::ptr_type&,int, int&, ISISRAW& , const int& , int*, DataObjects::Workspace2D_sptr );
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);

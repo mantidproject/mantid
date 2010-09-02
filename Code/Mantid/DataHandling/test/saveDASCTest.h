@@ -100,7 +100,7 @@ private:
       WorkspaceFactory::Instance().create("Workspace2D", NHISTS, NBINS+1, NBINS);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Histogram1D::RCtype xs, errors, data[NHISTS];
+    MantidVecPtr xs, errors, data[NHISTS];
     xs = rampXs();
     errors.access().resize(NBINS, 1.0);
     for (int j = 0; j < NHISTS; ++j)
@@ -114,9 +114,9 @@ private:
     AnalysisDataService::Instance().add(SMALL_WS_NAME, space);
   }
 
-Histogram1D::RCtype rampXs()
+MantidVecPtr rampXs()
 {
-  Histogram1D::RCtype xs;
+  MantidVecPtr xs;
   xs.access().resize(NBINS+1);
   for (int i = 0; i < NBINS+1; i ++)
     xs.access()[i] = i/1000.0;

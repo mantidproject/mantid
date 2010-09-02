@@ -58,7 +58,7 @@ void Q1DWeighted::exec()
   // Calculate the output binning
   const std::vector<double> binParams = getProperty("OutputBinning");
   // XOut defines the output histogram, so its length is equal to the number of bins + 1
-  DataObjects::Histogram1D::RCtype XOut;
+  MantidVecPtr XOut;
   const int sizeOut = VectorHelper::createAxisFromRebinParams(binParams,XOut.access());
 
   // Get pixel size and pixel sub-division

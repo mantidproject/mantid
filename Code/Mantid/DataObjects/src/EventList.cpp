@@ -312,7 +312,7 @@ namespace DataObjects
   void EventList::reverse()
   {
     // reverse the histogram bin parameters
-    StorageType x = this->refX.access();
+    MantidVec x = this->refX.access();
     std::reverse(x.begin(), x.end());
     this->refX.access() = x;
 
@@ -345,7 +345,7 @@ namespace DataObjects
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
    */
-  void EventList::setX(const RCtype::ptr_type& X)
+  void EventList::setX(const MantidVecPtr::ptr_type& X)
   {
     this->refX = X;
   }
@@ -353,7 +353,7 @@ namespace DataObjects
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
    */
-  void EventList::setX(const RCtype& X)
+  void EventList::setX(const MantidVecPtr& X)
   {
     this->refX = X;
   }
@@ -361,7 +361,7 @@ namespace DataObjects
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
    */
-  void EventList::setX(const StorageType& X)
+  void EventList::setX(const MantidVec& X)
   {
     this->refX.access()=X;
   }
@@ -376,7 +376,7 @@ namespace DataObjects
   // el2.dataX(); <<<<< this throws an error.
 
   /** Returns the x data. */
-  const EventList::StorageType& EventList::dataX() const
+  const MantidVec& EventList::dataX() const
   {
     return *(this->refX);
   }
@@ -391,9 +391,9 @@ namespace DataObjects
   /** Calculates and returns a pointer to the Y histogrammed data.
    * Remember to delete your pointer after use!
    */
-  EventList::StorageType * EventList::dataY() const
+  MantidVec * EventList::dataY() const
   {
-    StorageType * Y = new StorageType();
+    MantidVec * Y = new MantidVec();
     generateCountsHistogram(*this->refX, *Y);
     return Y;
   }
@@ -401,11 +401,11 @@ namespace DataObjects
   /** Calculates and returns a pointer to the E histogrammed data.
    * Remember to delete your pointer after use!
    */
-  EventList::StorageType * EventList::dataE() const
+  MantidVec * EventList::dataE() const
   {
-    StorageType Y;
+    MantidVec Y;
     generateCountsHistogram(*this->refX, Y);
-    StorageType * E = new StorageType();
+    MantidVec * E = new MantidVec();
     generateErrorsHistogram(Y, *E);
     return E;
   }
@@ -417,7 +417,7 @@ namespace DataObjects
    * @param X The x bins
    * @param Y The generated counts histogram
    */
-  void EventList::generateCountsHistogram(const StorageType& X, StorageType& Y) const
+  void EventList::generateCountsHistogram(const MantidVec& X, MantidVec& Y) const
   {
     //For slight speed=up.
     size_t x_size = X.size();
@@ -490,7 +490,7 @@ namespace DataObjects
    * @param Y The counts histogram
    * @param E The generated error histogram
    */
-  void EventList::generateErrorsHistogram(const StorageType& Y, StorageType& E) const
+  void EventList::generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const
   {
       // Fill the vector for the errors, containing sqrt(count)
       E.resize(Y.size(), 0);    
@@ -530,8 +530,8 @@ namespace DataObjects
       iter->time_of_flight = iter->time_of_flight * factor + offset;
 
     // fix the histogram parameter
-    StorageType x = this->refX.access();
-    for (StorageType::iterator iter = x.begin(); iter != x.end(); ++iter)
+    MantidVec x = this->refX.access();
+    for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter)
       *iter = (*iter) * factor + offset;
     this->refX.access() = x;
 
@@ -551,7 +551,7 @@ namespace DataObjects
     if (this->events.empty())
       return;
 
-    StorageType x = this->refX.access();
+    MantidVec x = this->refX.access();
     std::transform(x.begin(), x.end(), x.begin(),
                    std::bind2nd(std::multiplies<double>(), factor));
 
@@ -580,7 +580,7 @@ namespace DataObjects
       iter->time_of_flight += offset;
 
     // fix the histogram vector
-    StorageType x = this->refX.access();
+    MantidVec x = this->refX.access();
     std::transform(x.begin(), x.end(), x.begin(),
                    std::bind2nd(std::plus<double>(), offset));
     this->refX.access() = x;
@@ -622,9 +622,9 @@ namespace DataObjects
    *
    * @return A list of the current TOFs
    */
-  EventList::StorageType * EventList::getTofs() const
+  MantidVec * EventList::getTofs() const
   {
-    StorageType * tofs = new StorageType();
+    MantidVec * tofs = new MantidVec();
     // iterate through all events
     std::vector<TofEvent>::iterator iter;
     for (iter = this->events.begin(); iter != this->events.end(); iter++)
@@ -640,7 +640,7 @@ namespace DataObjects
    *
    * @param T The vector of doubles to set the tofs to.
    */
-  void EventList::setTofs(const StorageType &T)
+  void EventList::setTofs(const MantidVec &T)
   {
     if (T.empty())
     {

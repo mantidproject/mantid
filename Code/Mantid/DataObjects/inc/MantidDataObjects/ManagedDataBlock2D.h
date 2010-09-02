@@ -68,19 +68,19 @@ public:
   void hasChanges(bool has);
 
   // Must be a case for having an interface for these accessor methods, which are the same as Workspace2D
-  void setX(const int histnumber, const Histogram1D::RCtype&);
-  void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
-  void setData(const int histnumber, const Histogram1D::RCtype&);
-  void setData(const int histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-  void setData(const int histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
+  void setX(const int histnumber, const MantidVecPtr&);
+  void setX(const int histnumber, const MantidVecPtr::ptr_type&);
+  void setData(const int histnumber, const MantidVecPtr&);
+  void setData(const int histnumber, const MantidVecPtr&, const MantidVecPtr&);
+  void setData(const int histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
 	
-  Histogram1D::StorageType& dataX(const int index);
-  Histogram1D::StorageType& dataY(const int index);
-  Histogram1D::StorageType& dataE(const int index);
-  const Histogram1D::StorageType& dataX(const int index) const;
-  const Histogram1D::StorageType& dataY(const int index) const;
-  const Histogram1D::StorageType& dataE(const int index) const;
-  Histogram1D::RCtype refX(const int index) const;
+  MantidVec& dataX(const int index);
+  MantidVec& dataY(const int index);
+  MantidVec& dataE(const int index);
+  const MantidVec& dataX(const int index) const;
+  const MantidVec& dataY(const int index) const;
+  const MantidVec& dataE(const int index) const;
+  MantidVecPtr refX(const int index) const;
   
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

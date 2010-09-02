@@ -78,7 +78,7 @@ void ManagedDataBlock2D::hasChanges(bool has)
  @param index :: Index to the histogram
  @param vec :: Shared ptr base object
  */
-void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype::ptr_type& vec)
+void ManagedDataBlock2D::setX(const int index, const MantidVecPtr::ptr_type& vec)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -94,7 +94,7 @@ void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype::ptr_ty
  @param index :: Index to the histogram
  @param PA :: Reference counted histogram
  */
-void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype& PA)
+void ManagedDataBlock2D::setX(const int index, const MantidVecPtr& PA)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -110,7 +110,7 @@ void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype& PA)
  @param index The histogram to be set
  @param PY A reference counted data range  
  */
-void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY)
+void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -127,8 +127,8 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY)
  @param PY A reference counted data range  
  @param PE A reference containing the corresponding errors
  */
-void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
-    const Histogram1D::RCtype& PE)
+void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY,
+    const MantidVecPtr& PE)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -145,8 +145,8 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
  @param PY A reference counted data range  
  @param PE A reference containing the corresponding errors
  */
-void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr_type& PY,
-    const Histogram1D::RCtype::ptr_type& PE)
+void ManagedDataBlock2D::setData(const int index, const MantidVecPtr::ptr_type& PY,
+    const MantidVecPtr::ptr_type& PE)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -162,7 +162,7 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr
   @param index The number of the histogram
   @return A vector of doubles containing the x data
 */
-Histogram1D::StorageType& ManagedDataBlock2D::dataX(const int index)
+MantidVec& ManagedDataBlock2D::dataX(const int index)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -177,7 +177,7 @@ Histogram1D::StorageType& ManagedDataBlock2D::dataX(const int index)
   @param index The number of the histogram
   @return A vector of doubles containing the y data
 */
-Histogram1D::StorageType& ManagedDataBlock2D::dataY(const int index)
+MantidVec& ManagedDataBlock2D::dataY(const int index)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -192,7 +192,7 @@ Histogram1D::StorageType& ManagedDataBlock2D::dataY(const int index)
   @param index The number of the histogram
   @return A vector of doubles containing the error data
 */
-Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index)
+MantidVec& ManagedDataBlock2D::dataE(const int index)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -207,7 +207,7 @@ Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index)
   @param index The number of the histogram
   @return A vector of doubles containing the x data
 */
-const Histogram1D::StorageType& ManagedDataBlock2D::dataX(const int index) const
+const MantidVec& ManagedDataBlock2D::dataX(const int index) const
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -221,7 +221,7 @@ const Histogram1D::StorageType& ManagedDataBlock2D::dataX(const int index) const
   @param index The number of the histogram
   @return A vector of doubles containing the y data
 */
-const Histogram1D::StorageType& ManagedDataBlock2D::dataY(const int index) const
+const MantidVec& ManagedDataBlock2D::dataY(const int index) const
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -235,7 +235,7 @@ const Histogram1D::StorageType& ManagedDataBlock2D::dataY(const int index) const
   @param index The number of the histogram
   @return A vector of doubles containing the error data
 */
-const Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index) const
+const MantidVec& ManagedDataBlock2D::dataE(const int index) const
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -249,7 +249,7 @@ const Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index) const
   @param index The number of the histogram
   @return A reference to the X vector of the specified histogram
 */
-Histogram1D::RCtype ManagedDataBlock2D::refX(const int index) const
+MantidVecPtr ManagedDataBlock2D::refX(const int index) const
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )

@@ -68,15 +68,15 @@ public:
   //inheritance redirections
   // Reimplemented these Histogram1D methods simply to hide the other ones
   /// Sets the x data.
-  void setX(const RCtype& X) { Histogram1D::setX(X); }
+  void setX(const MantidVecPtr& X) { Histogram1D::setX(X); }
   /// Sets the data.
-  void setData(const RCtype& Y) { Histogram1D::setData(Y); }
+  void setData(const MantidVecPtr& Y) { Histogram1D::setData(Y); }
   /// Sets the data and errors
-  void setData(const RCtype& Y, const RCtype& E) { Histogram1D::setData(Y,E); }  
+  void setData(const MantidVecPtr& Y, const MantidVecPtr& E) { Histogram1D::setData(Y,E); }  
   /// Sets the x data
-  void setX(const RCtype::ptr_type& X) { Histogram1D::setX(X); }
+  void setX(const MantidVecPtr::ptr_type& X) { Histogram1D::setX(X); }
   /// Sets the data and errors
-  void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E) { Histogram1D::setData(Y,E); }  
+  void setData(const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E) { Histogram1D::setData(Y,E); }  
   
   ///Returns the x data
   virtual MantidVec& dataX(int const index) { return Histogram1D::dataX(); }

@@ -45,8 +45,6 @@ public:
 
   void testAgainstHRPDdataPeak()
   {
-    int iii;
-    std::cin >> iii;
 
     // load dataset
     std::string inputFile = "../../../../Test/Data/HRP38692.RAW";

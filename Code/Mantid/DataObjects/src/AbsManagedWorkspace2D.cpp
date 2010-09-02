@@ -77,7 +77,7 @@ int AbsManagedWorkspace2D::blocksize() const
 *  @param histnumber Index of the histogram to be set
 *  @param PA The data to enter
 */
-void AbsManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
+void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr& PA)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
@@ -90,7 +90,7 @@ void AbsManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype
 *  @param histnumber Index of the histogram to be set
 *  @param Vec The data to enter
 */
-void AbsManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
+void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
@@ -103,7 +103,7 @@ void AbsManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype
 *  @param histnumber Index of the histogram to be set
 *  @param PY The data to enter
 */
-void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
+void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
@@ -117,8 +117,8 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCt
 *  @param PY The data to enter
 *  @param PE The corresponding errors
 */
-void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
-                                    const Histogram1D::RCtype& PE)
+void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY,
+                                    const MantidVecPtr& PE)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
@@ -132,8 +132,8 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCt
 *  @param PY The data to enter
 *  @param PE The corresponding errors
 */
-void AbsManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY,
-                                    const Histogram1D::RCtype::ptr_type& PE)
+void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr::ptr_type& PY,
+                                    const MantidVecPtr::ptr_type& PE)
 {
   if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");

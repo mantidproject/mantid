@@ -108,7 +108,7 @@ public:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     
-    Histogram1D::RCtype x,y,e;
+    MantidVecPtr x,y,e;
     x.access().resize(nbins+1, 0.0);
     y.access().resize(nbins, 0.0);
     e.access().resize(nbins, 0.0);

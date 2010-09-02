@@ -38,7 +38,7 @@ public:
       WorkspaceFactory::Instance().create("Workspace2D", NHIST, NBINS+1, NBINS);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Histogram1D::RCtype xs, errors, data[NHIST];
+    MantidVecPtr xs, errors, data[NHIST];
     xs.access().resize(NBINS+1, 10.0);
     errors.access().resize(NBINS, 1.0);
     int detIDs[NHIST];
@@ -337,7 +337,7 @@ public:
     TS_ASSERT( nxLoad.isExecuted() );    
 
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));    
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 64);
 

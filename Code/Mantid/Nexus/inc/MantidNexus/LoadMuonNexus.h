@@ -111,7 +111,7 @@ namespace Mantid
       /// Overwrites Algorithm method.
       void init();
       
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int, DataObjects::Workspace2D_sptr );
+      void loadData(const MantidVecPtr::ptr_type&,int, int&, MuonNexusReader& , const int, DataObjects::Workspace2D_sptr );
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);

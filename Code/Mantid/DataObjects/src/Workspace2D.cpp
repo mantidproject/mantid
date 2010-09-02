@@ -40,7 +40,7 @@ namespace Mantid
       // This axis is always a spectra one for now
       m_axes[1] = new API::SpectraAxis(m_noVectors);
 
-      Histogram1D::RCtype t1,t2;
+      MantidVecPtr t1,t2;
       t1.access().resize(XLength); //this call initializes array to zero
       t2.access().resize(YLength);
       for (int i=0;i<m_noVectors;i++)
@@ -57,7 +57,7 @@ namespace Mantid
     \param Vec :: Shared ptr base object
     */
     void
-      Workspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
+      Workspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec)
     {
     
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -74,7 +74,7 @@ namespace Mantid
     \param PA :: Reference counted histogram
     */
     void
-      Workspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
+      Workspace2D::setX(const int histnumber, const MantidVecPtr& PA)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
@@ -90,7 +90,7 @@ namespace Mantid
     \param PY A reference counted data range
     */
     void
-      Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
+      Workspace2D::setData(const int histnumber, const MantidVecPtr& PY)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
@@ -104,8 +104,8 @@ namespace Mantid
     \param PY A reference counted data range
     \param PE A reference containing the corresponding errors
     */
-    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
-      const Histogram1D::RCtype& PE)
+    void Workspace2D::setData(const int histnumber, const MantidVecPtr& PY,
+      const MantidVecPtr& PE)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
@@ -120,8 +120,8 @@ namespace Mantid
     \param PY A reference counted data range
     \param PE A reference containing the corresponding errors
     */
-    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY,
-      const Histogram1D::RCtype::ptr_type& PE)
+    void Workspace2D::setData(const int histnumber, const MantidVecPtr::ptr_type& PY,
+      const MantidVecPtr::ptr_type& PE)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");

@@ -63,11 +63,11 @@ namespace DataObjects
 
     virtual const std::string id() const {return "AbsManagedWorkspace2D";}
 
-    virtual void setX(const int histnumber, const Histogram1D::RCtype&);
-    virtual void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
-    virtual void setData(int const histnumber, const Histogram1D::RCtype&);
-    virtual void setData(int const histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-    virtual void setData(int const histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
+    virtual void setX(const int histnumber, const MantidVecPtr&);
+    virtual void setX(const int histnumber, const MantidVecPtr::ptr_type&);
+    virtual void setData(int const histnumber, const MantidVecPtr&);
+    virtual void setData(int const histnumber, const MantidVecPtr&, const MantidVecPtr&);
+    virtual void setData(int const histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
 
     //section required for iteration
     virtual int size() const;

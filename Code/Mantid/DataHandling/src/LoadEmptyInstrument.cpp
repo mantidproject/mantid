@@ -85,7 +85,7 @@ namespace Mantid
       localWorkspace->mutableSpectraMap().populate(spec,udet,number_spectra);
 
       counter = 0;
-      DataObjects::Histogram1D::RCtype x,v,v_monitor;
+      MantidVecPtr x,v,v_monitor;
       x.access().resize(2); x.access()[0]=1.0; x.access()[1]=2.0;
       v.access().resize(1); v.access()[0]=detector_value;
       v_monitor.access().resize(1); v_monitor.access()[0]=monitor_value;

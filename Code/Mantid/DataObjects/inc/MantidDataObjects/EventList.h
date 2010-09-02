@@ -103,10 +103,6 @@ enum EventSortType {UNSORTED, TOF_SORT, FRAME_SORT};
 class DLLExport EventList
 {
 public:
-  /// The data storage type used internally in a Histogram1D
-  typedef MantidVec StorageType;
-  /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
-  typedef Kernel::cow_ptr<StorageType > RCtype;
 
   EventList();
 
@@ -140,17 +136,17 @@ public:
   bool isSortedByTof() const;
 
 
-  void setX(const RCtype::ptr_type& X);
+  void setX(const MantidVecPtr::ptr_type& X);
 
-  void setX(const RCtype& X);
+  void setX(const MantidVecPtr& X);
 
-  void setX(const StorageType& X);
+  void setX(const MantidVec& X);
 
-  virtual const StorageType& dataX() const;
+  virtual const MantidVec& dataX() const;
 
-  virtual StorageType * dataY() const;
+  virtual MantidVec * dataY() const;
 
-  virtual StorageType * dataE() const;
+  virtual MantidVec * dataE() const;
 
   Kernel::cow_ptr<MantidVec> getRefX() const;
 
@@ -158,9 +154,9 @@ public:
 
   virtual size_t histogram_size() const;
 
-  void generateCountsHistogram(const StorageType& X, StorageType& Y) const;
+  void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;
 
-  void generateErrorsHistogram(const StorageType& Y, StorageType& E) const;
+  void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
 
   void convertTof(const double factor, const double offset=0.);
 
@@ -170,9 +166,9 @@ public:
 
   void maskTof(const double tofMin, const double tofMax);
 
-  virtual StorageType * getTofs() const;
+  virtual MantidVec * getTofs() const;
 
-  void setTofs(const StorageType& T);
+  void setTofs(const MantidVec& T);
 
   void reverse();
 
@@ -183,7 +179,7 @@ private:
   /// Last sorting order
   mutable EventSortType order;
   /** Cached version of the x axis. */
-  mutable RCtype refX;
+  mutable MantidVecPtr refX;
 };
 
 } // DataObjects

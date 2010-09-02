@@ -21,10 +21,6 @@
 
 namespace Mantid
 {
-/// typedef for the data storage used in Mantid matrix workspaces
-typedef std::vector<double> MantidVec;
-/// typedef for the data storage used in Mantid matrix workspaces
-typedef Kernel::cow_ptr<MantidVec> MantidVecPtr;
 
 namespace API
 {

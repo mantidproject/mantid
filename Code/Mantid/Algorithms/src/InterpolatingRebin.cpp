@@ -35,7 +35,7 @@ namespace Mantid
       // retrieve the properties
       std::vector<double> rb_params=getProperty("Params");
 
-      DataObjects::Histogram1D::RCtype XValues_new;
+      MantidVecPtr XValues_new;
       // create new output X axis
       const int ntcnew =
         VectorHelper::createAxisFromRebinParams(rb_params,XValues_new.access());
@@ -109,7 +109,7 @@ namespace Mantid
     *  @param[in] XValues_new new x-values to interpolated to
     *  @param[out] outputW this will contain the interpolated data, the lengths of the histograms must corrospond with the number of x-values in XValues_new
     */
-    void InterpolatingRebin::outputYandEValues(API::MatrixWorkspace_const_sptr inputW, const DataObjects::Histogram1D::RCtype &XValues_new, API::MatrixWorkspace_sptr outputW)
+    void InterpolatingRebin::outputYandEValues(API::MatrixWorkspace_const_sptr inputW, const MantidVecPtr &XValues_new, API::MatrixWorkspace_sptr outputW)
     {
       g_log.debug() << "Preparing to calculate y-values using splines and estimate errors\n";
 

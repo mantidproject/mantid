@@ -4,12 +4,13 @@
 #include "../PlotCurve.h"
 #include "WorkspaceObserver.h"
 #include "boost/shared_ptr.hpp"
+#include "MantidAPI/MatrixWorkspace.h"
 
 
 // Forward definitions
 namespace Mantid
 {
-  typedef std::vector<double> MantidVec;
+
   namespace API
   {
     class MatrixWorkspace;

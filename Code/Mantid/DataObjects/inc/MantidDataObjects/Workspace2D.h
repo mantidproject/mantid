@@ -66,11 +66,11 @@ public:
   Workspace2D();
   virtual ~Workspace2D();
 
-  virtual void setX(int const, const Histogram1D::RCtype&);
-  virtual void setX(int const, const Histogram1D::RCtype::ptr_type&);
-  virtual void setData(int const, const Histogram1D::RCtype&);
-  virtual void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-  virtual void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
+  virtual void setX(int const, const MantidVecPtr&);
+  virtual void setX(int const, const MantidVecPtr::ptr_type&);
+  virtual void setData(int const, const MantidVecPtr&);
+  virtual void setData(int const, const MantidVecPtr&, const MantidVecPtr&);
+  virtual void setData(int const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
   
   /// Returns the histogram number
   int getNumberHistograms() const;

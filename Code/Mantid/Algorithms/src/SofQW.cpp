@@ -155,7 +155,7 @@ void SofQW::exec()
 API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace, std::vector<double>& newAxis)
 {
   // Create vector to hold the new X axis values
-  DataObjects::Histogram1D::RCtype xAxis;
+  MantidVecPtr xAxis;
   xAxis.access() = inputWorkspace->readX(0);
   const int xLength = xAxis->size();
   // Create a vector to temporarily hold the vertical ('y') axis and populate that

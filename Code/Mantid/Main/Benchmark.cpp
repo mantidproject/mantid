@@ -10,7 +10,7 @@ using namespace Mantid::API;
 
 Workspace1D_sptr Benchmark::Create1DWorkspaceFib(int size)
 {
-  Histogram1D::RCtype x1,y1,e1;
+  MantidVecPtr x1,y1,e1;
   x1.access().resize(size,1);
   y1.access().resize(size);
   std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
@@ -22,7 +22,7 @@ Workspace1D_sptr Benchmark::Create1DWorkspaceFib(int size)
 }
 Workspace2D_sptr Benchmark::Create2DWorkspace123(int xlen, int ylen)
 {
-  Histogram1D::RCtype x1,y1,e1;
+  MantidVecPtr x1,y1,e1;
   x1.access().resize(xlen,1);
   y1.access().resize(xlen,2);
   e1.access().resize(xlen,3);
@@ -39,7 +39,7 @@ Workspace2D_sptr Benchmark::Create2DWorkspace123(int xlen, int ylen)
 
 Workspace2D_sptr Benchmark::Create2DWorkspace154(int xlen, int ylen)
 {
-  Histogram1D::RCtype x1,y1,e1;
+  MantidVecPtr x1,y1,e1;
   x1.access().resize(xlen,1);
   y1.access().resize(xlen,5);
   e1.access().resize(xlen,4);
@@ -59,7 +59,7 @@ Workspace2D_sptr Benchmark::Create2DWorkspace(int xlen, int ylen)
 }
 Workspace2D_sptr Benchmark::Create2DWorkspace123Hist(int xlen, int ylen)
 {
-  Histogram1D::RCtype x1,y1,e1;
+  MantidVecPtr x1,y1,e1;
   x1.access().resize(xlen+1,1);
   y1.access().resize(xlen,2);
   e1.access().resize(xlen,3);
@@ -75,7 +75,7 @@ Workspace2D_sptr Benchmark::Create2DWorkspace123Hist(int xlen, int ylen)
 }  
 Workspace2D_sptr Benchmark::Create2DWorkspace154Hist(int xlen, int ylen)
 {
-  Histogram1D::RCtype x1,y1,e1;
+  MantidVecPtr x1,y1,e1;
   x1.access().resize(xlen+1,1);
   y1.access().resize(xlen,5);
   e1.access().resize(xlen,4);

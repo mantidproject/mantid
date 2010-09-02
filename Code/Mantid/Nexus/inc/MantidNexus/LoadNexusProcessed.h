@@ -117,7 +117,7 @@ namespace Mantid
       /// Does the current workspace have uniform binning
       bool m_shared_bins;
       /// The cached x binning if we have bins
-      DataObjects::Histogram1D::RCtype m_xbins;
+      MantidVecPtr m_xbins;
       /// Numeric values for the second axis, if applicable
       MantidVec m_axis1vals;
 

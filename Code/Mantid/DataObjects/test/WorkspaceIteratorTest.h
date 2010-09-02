@@ -72,7 +72,7 @@ public:
 
   W1D Create1DWorkspaceFib(int size)
   {
-    Histogram1D::RCtype x1,y1,e1;
+    MantidVecPtr x1,y1,e1;
     y1.access().resize(size);
     std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
     e1.access().resize(size);

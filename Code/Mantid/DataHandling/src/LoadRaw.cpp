@@ -302,7 +302,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
      *  @param spectrum Pointer to the array into which the spectrum will be read
      *  @param localWorkspace A pointer to the workspace in which the data will be stored
      */
-    void LoadRaw::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i, ISISRAW& iraw, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadRaw::loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& i, ISISRAW& iraw, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum
       memcpy(spectrum, iraw.dat1 + i * lengthIn, lengthIn * sizeof(int));

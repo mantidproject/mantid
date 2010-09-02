@@ -37,7 +37,7 @@ public:
 
   static Workspace1D_sptr Create1DWorkspaceRand(int size)
   {
-    Histogram1D::RCtype x1,y1,e1;
+    MantidVecPtr x1,y1,e1;
     x1.access().resize(size,1);
     y1.access().resize(size);
     std::generate(y1.access().begin(),y1.access().end(),rand);
@@ -52,7 +52,7 @@ public:
 
   static Workspace1D_sptr Create1DWorkspaceFib(int size)
   {
-    Histogram1D::RCtype x1,y1,e1;
+    MantidVecPtr x1,y1,e1;
     x1.access().resize(size,1);
     y1.access().resize(size);
     std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
@@ -70,7 +70,7 @@ public:
 
   static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist=0)
   {
-    Histogram1D::RCtype x1,y1,e1;
+    MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?xlen+1:xlen,1);
     y1.access().resize(xlen,2);
     e1.access().resize(xlen,3);
@@ -87,7 +87,7 @@ public:
 
   static Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen,bool isHist=0)
   {
-    Histogram1D::RCtype x1,y1,e1;
+    MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?xlen+1:xlen,1);
     y1.access().resize(xlen,5);
     e1.access().resize(xlen,4);
@@ -104,7 +104,7 @@ public:
 
   static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0=0.0, double deltax = 1.0)
   {
-    Histogram1D::RCtype x,y,e;
+    MantidVecPtr x,y,e;
     x.access().resize(nbins+1);
     y.access().resize(nbins,2);
     e.access().resize(nbins,sqrt(2.0));
@@ -174,7 +174,7 @@ public:
     retVal->doneLoadingData();
 
    //Create the x-axis for histogramming.
-    Histogram1D::RCtype x1;
+    MantidVecPtr x1;
     MantidVec& xRef = x1.access();
     xRef.resize(numBins);
     for (int i = 0; i < numBins; ++i)

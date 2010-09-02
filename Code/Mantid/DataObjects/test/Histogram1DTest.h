@@ -15,8 +15,8 @@ class Histogram1DTest : public CxxTest::TestSuite
 private: 
   int nel; // Number of elements in the array
   Histogram1D h, h2; // Two histograms
-  Histogram1D::StorageType x1,y1,e1; // vectors 
-  typedef boost::shared_ptr<Histogram1D::StorageType > parray;
+  MantidVec x1,y1,e1; // vectors 
+  typedef boost::shared_ptr<MantidVec > parray;
   parray pa, pb; // Shared_ptr to vectors
 public:
   Histogram1DTest()
@@ -27,9 +27,9 @@ public:
     y1.resize(nel);
     std::fill(y1.begin(),y1.end(),rand());
     e1.resize(nel);
-    pa=parray(new Histogram1D::StorageType(nel));
+    pa=parray(new MantidVec(nel));
     std::fill(pa->begin(),pa->end(),rand());
-    pb=parray(new Histogram1D::StorageType(nel));
+    pb=parray(new MantidVec(nel));
     std::fill(pa->begin(),pa->end(),rand());
   }
   void testsetgetXvector()
@@ -128,7 +128,7 @@ public:
     //	    e1.resize(nel+1);
     // TS_ASSERT_THROWS(h.setData(y1,e1),const std::invalid_argument&);
     //pb.reset();
-    //pb=RCtype::(new std::vector<double>(nel+1));
+    //pb=MantidVecPtr::(new std::vector<double>(nel+1));
     //TS_ASSERT_THROWS(h.setData(pa,pb),const std::invalid_argument&);
   }
 

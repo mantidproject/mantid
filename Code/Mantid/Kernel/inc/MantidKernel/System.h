@@ -78,7 +78,7 @@ namespace Mantid
   DLLExport int EMPTY_INT();
 
   /// Return what we consider to be an empty double, -DBL_MAX
-  DLLExport double EMPTY_DBL();  
+  DLLExport double EMPTY_DBL();
 
 namespace Kernel
 {

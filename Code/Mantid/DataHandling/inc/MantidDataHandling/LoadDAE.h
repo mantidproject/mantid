@@ -97,7 +97,7 @@ namespace Mantid
       void loadSpectraMap(idc_handle_t dae_handle, DataObjects::Workspace2D_sptr ws);
 
       /// load data from the DAE
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
+      void loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
     		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData = 0);
 
       /// The host name of the DAE

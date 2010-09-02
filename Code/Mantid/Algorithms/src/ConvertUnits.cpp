@@ -329,13 +329,13 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
       }
 
       // Convert from time-of-flight to the desired unit
-      EventList::StorageType tofs = *outputWS->getEventListAtWorkspaceIndex(i).getTofs();
+      MantidVec tofs = *outputWS->getEventListAtWorkspaceIndex(i).getTofs();
       fromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputWS->getEventListAtWorkspaceIndex(i).setTofs(tofs);
 
       // convert the cached x-values to the desired unit
-      EventList::StorageType x = (outputWS->getEventListAtWorkspaceIndex(i).getRefX()).access();
+      MantidVec x = (outputWS->getEventListAtWorkspaceIndex(i).getRefX()).access();
       fromUnit->toTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputUnit->fromTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputWS->getEventListAtWorkspaceIndex(i).setX(x);
@@ -390,7 +390,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
       Workspace2D_sptr WS2D = boost::dynamic_pointer_cast<Workspace2D>(outputWS);
       if (WS2D)
       {
-        Histogram1D::RCtype xVals;
+        MantidVecPtr xVals;
         xVals.access() = outputWS->dataX(0);
         Progress prog(this,0.5,1.0,numberOfSpectra);
 
@@ -623,7 +623,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
       Workspace2D_sptr WS2D = boost::dynamic_pointer_cast<Workspace2D>(WS);
       if (WS2D)
       {
-        Histogram1D::RCtype xVals;
+        MantidVecPtr xVals;
         xVals.access() = WS->dataX(0);
         for (int j = 1; j < numberOfSpectra; ++j)
         {

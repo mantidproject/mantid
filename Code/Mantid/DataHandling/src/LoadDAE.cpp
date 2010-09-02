@@ -37,7 +37,7 @@ namespace Mantid
 
 
     /// load data from the DAE
-    void LoadDAE::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
+    void LoadDAE::loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
         int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData)
     {
       int ndims, dims_array[1];

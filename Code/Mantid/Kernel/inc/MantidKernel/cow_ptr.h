@@ -3,6 +3,7 @@
 
 #include "MultiThreaded.h"
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace Mantid
 {
@@ -164,6 +165,16 @@ DataType& cow_ptr<DataType>::access()
 }
 
 } // NAMESPACE Kernel
+
+
+
+/// typedef for the data storage used in Mantid matrix workspaces
+typedef std::vector<double> MantidVec;
+
+/// typedef for the pointer to data storage used in Mantid matrix workspaces
+typedef Kernel::cow_ptr<MantidVec> MantidVecPtr;
+
+
 } // NAMESPACE Mantid
 
 #endif //MANTIDKERNEL_COW_PTR_H

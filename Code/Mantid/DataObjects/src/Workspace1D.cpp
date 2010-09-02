@@ -38,7 +38,7 @@ namespace Mantid
       m_axes.resize(1);
       m_axes[0] = new API::RefAxis(XLength, this);
 
-      Histogram1D::RCtype t1,t2;
+      MantidVecPtr t1,t2;
       t1.access().resize(XLength);//this call initializes array to zero
       t2.access().resize(YLength);
       this->setX(t1);

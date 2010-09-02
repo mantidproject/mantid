@@ -55,7 +55,7 @@ public:
     algToBeTested.setPropertyValue("FileName", inputFile);
    
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile)); 
   
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
@@ -63,7 +63,7 @@ public:
     //
     //  test workspace, copied from LoadMuonNexusTest.h
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace))); 
+    (output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
 
 	// MatrixWorkspace_sptr output;
     //TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"))); 
@@ -97,7 +97,7 @@ public:
     alg2.setPropertyValue("FileName", inputFile);
    
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = alg2.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = alg2.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile)); 
   
     TS_ASSERT_THROWS_NOTHING(alg2.execute());    
@@ -110,12 +110,11 @@ public:
 	 MatrixWorkspace_sptr output,output1,output2,output3,output4;
    // TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
 	WorkspaceGroup_sptr work_grpout;
-	TS_ASSERT_THROWS_NOTHING(work_grpout = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace))); 
-	TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
-
-    TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
-    TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
-    TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+	  (work_grpout = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+	  (output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
+    (output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+    (output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
+    (output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
     
 	Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output1);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
@@ -133,7 +132,7 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output2->getAxis(0)->unit()->unitID(), "TOF" )
+    TS_ASSERT_EQUALS( output2->getAxis(0)->unit()->unitID(), "TOF" );
     
 #endif /*_WIN64*/
   }

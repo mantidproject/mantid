@@ -112,7 +112,7 @@ void LoadSPE::exec()
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Now the X bin boundaries
-  DataObjects::Histogram1D::RCtype XValues;
+  MantidVecPtr XValues;
   MantidVec& X = XValues.access();
   X.resize(nbins+1);
 

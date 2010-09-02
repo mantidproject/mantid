@@ -423,7 +423,7 @@ namespace Mantid
     *  @param lengthIn The number of elements in a spectrum
     *  @param localWorkspace A pointer to the workspace in which the data will be stored
     */
-    void LoadMuonNexus::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i,
+    void LoadMuonNexus::loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& i,
       MuonNexusReader& nxload, const int lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum

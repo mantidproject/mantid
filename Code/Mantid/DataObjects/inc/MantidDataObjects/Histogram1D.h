@@ -6,6 +6,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
+using namespace Mantid;
+
 namespace Mantid
 {
 namespace DataObjects
@@ -40,15 +42,16 @@ namespace DataObjects
 class DLLExport Histogram1D
 {
 public:
+
   /// The data storage type used internally in a Histogram1D
-  typedef std::vector<double> StorageType;
+  // typedef std::vector<double> MantidVec; //Removed redundant typedef
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR 
-  typedef Kernel::cow_ptr<StorageType > RCtype;    
+  //typedef Kernel::cow_ptr<MantidVec > MantidVecPtr;
   
 private:
-  RCtype refX;   ///< RefCounted X
-  RCtype refY;   ///< RefCounted Y
-  RCtype refE;   ///< RefCounted Error
+  MantidVecPtr refX;   ///< RefCounted X
+  MantidVecPtr refY;   ///< RefCounted Y
+  MantidVecPtr refE;   ///< RefCounted Error
 
 public:
   Histogram1D();
@@ -57,51 +60,51 @@ public:
   virtual ~Histogram1D();
 
   /// Sets the x data.
-  void setX(const StorageType& X) {  refX.access()=X; }
+  void setX(const MantidVec& X) {  refX.access()=X; }
   /// Sets the data.
-  void setData(const StorageType& Y) {  refY.access()=Y; };
+  void setData(const MantidVec& Y) {  refY.access()=Y; };
   /// Sets the data and errors
-  void setData(const StorageType& Y, const StorageType& E) 
+  void setData(const MantidVec& Y, const MantidVec& E) 
     {  refY.access()=Y; refE.access()=E; }
 
   /// Sets the x data.
-  void setX(const RCtype& X) { refX=X; }
+  void setX(const MantidVecPtr& X) { refX=X; }
   /// Sets the data.
-  void setData(const RCtype& Y) { refY=Y; }
+  void setData(const MantidVecPtr& Y) { refY=Y; }
   /// Sets the data and errors
-  void setData(const RCtype& Y, const RCtype& E) { refY=Y; refE=E;}
+  void setData(const MantidVecPtr& Y, const MantidVecPtr& E) { refY=Y; refE=E;}
   
   /// Sets the x data
-  void setX(const RCtype::ptr_type& X) { refX=X; }
+  void setX(const MantidVecPtr::ptr_type& X) { refX=X; }
   /// Sets the data.
-  void setData(const RCtype::ptr_type& Y) { refY=Y; }
+  void setData(const MantidVecPtr::ptr_type& Y) { refY=Y; }
   /// Sets the data and errors
-  void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E) { refY=Y; refE=E;}
+  void setData(const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E) { refY=Y; refE=E;}
 
   // Get the array data
   /// Returns the x data const
-  virtual const StorageType& dataX() const { return *refX; }  
+  virtual const MantidVec& dataX() const { return *refX; }  
   /// Returns the y data const
-  virtual const StorageType& dataY() const { return *refY; }
+  virtual const MantidVec& dataY() const { return *refY; }
   /// Returns the error data const
-  virtual const StorageType& dataE() const { return *refE; }
+  virtual const MantidVec& dataE() const { return *refE; }
 
   ///Returns the x data
-  virtual StorageType& dataX() { return refX.access(); }
+  virtual MantidVec& dataX() { return refX.access(); }
   ///Returns the y data
-  virtual StorageType& dataY() { return refY.access(); }
+  virtual MantidVec& dataY() { return refY.access(); }
   ///Returns the error data
-  virtual StorageType& dataE() { return refE.access(); }
+  virtual MantidVec& dataE() { return refE.access(); }
 
   /// Returns a pointer to the x data
-  virtual RCtype ptrX() const { return refX; }  
+  virtual MantidVecPtr ptrX() const { return refX; }  
   
   ///Clear the x data
-  StorageType& emptyX() { refX.access().clear(); return refX.access(); }
+  MantidVec& emptyX() { refX.access().clear(); return refX.access(); }
   ///Clear the y data
-  StorageType& emptyY() { refY.access().clear(); return refY.access(); }
+  MantidVec& emptyY() { refY.access().clear(); return refY.access(); }
   ///Clear the error data
-  StorageType& emptyE() { refE.access().clear(); return refE.access(); }
+  MantidVec& emptyE() { refE.access().clear(); return refE.access(); }
 
   int nxbin() const { return static_cast<int>(refX->size()); }         ///< Return the number of X bins
   int nybin() const { return static_cast<int>(refY->size()); }         ///< Return the number of data bin (Y or YE)

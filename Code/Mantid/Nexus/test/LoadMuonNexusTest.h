@@ -56,7 +56,7 @@ public:
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
     
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile)); 
     //
     // Test execute to read file and populate workspace
@@ -67,7 +67,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
@@ -83,8 +83,8 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-    TS_ASSERT( ! output-> isDistribution() )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT( ! output-> isDistribution() );
 
     /*  - other tests from LoadRawTest - These test data not in current Nexus files
     //----------------------------------------------------------------------
@@ -115,7 +115,7 @@ public:
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );
     //check that sample name has been set correctly
-    TS_ASSERT_EQUALS(output->sample().getName(), "Cr2.7Co0.3Si")
+    TS_ASSERT_EQUALS(output->sample().getName(), "Cr2.7Co0.3Si");
     
 	/*
     //----------------------------------------------------------------------
@@ -180,7 +180,7 @@ public:
 	int entryNumber=nxLoad.getProperty("EntryNumber");
     
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile2)); 
     //
     // Test execute to read file and populate workspace
@@ -200,7 +200,7 @@ public:
 	if(entryNumber==1)
 	{
 		MatrixWorkspace_sptr output;
-		TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+		output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
 
 		Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 		//Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
@@ -214,15 +214,15 @@ public:
 		TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
 		// Check the unit has been set correctly
-		TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-			TS_ASSERT( ! output-> isDistribution() )
+		TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT( ! output-> isDistribution() );
 
 			//check that sample name has been set correctly
 			//boost::shared_ptr<Sample> sample,sample2;
 		//sample = output->getSample();
 		//sample2 = output2->getSample();
 		//TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
-		TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
+		TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test");
 
 	}
     MatrixWorkspace_sptr output,output2,output3,output4;
@@ -232,10 +232,10 @@ public:
 	{
 		TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
 
-		TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
-		TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
-		TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
-		TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+		(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
+		(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+		(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
+		(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
 	
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
@@ -253,15 +253,15 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-    TS_ASSERT( ! output-> isDistribution() )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT( ! output-> isDistribution() );
 
     //check that sample name has been set correctly
    // boost::shared_ptr<Sample> sample,sample2;
     //sample = output->getSample();
    // sample2 = output2->getSample();
     TS_ASSERT_EQUALS(output->sample().getName(), output2->sample().getName());
-    TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
+    TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test");
 	
 	}  
 #endif /*_WIN64*/  
@@ -281,7 +281,7 @@ public:
 	int entryNumber=nxLoad.getProperty("EntryNumber");
     
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile2)); 
     //
     // Test execute to read file and populate workspace
@@ -301,10 +301,10 @@ public:
 	{
 		//TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
 
-		TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
-		TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
-		TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
-		TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+		(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
+		(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+		(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
+		(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
 	
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
@@ -322,15 +322,15 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-    TS_ASSERT( ! output-> isDistribution() )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT( ! output-> isDistribution() );
 
     //check that sample name has been set correctly
     //boost::shared_ptr<Sample> sample,sample2;
   //  sample = output->getSample();
   //  sample2 = output2->getSample();
     TS_ASSERT_EQUALS(output->sample().getName(), output2->sample().getName());
-    TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
+    TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test");
 	
 	}  
 #endif /*_WIN64*/  
@@ -353,7 +353,7 @@ public:
     
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS")));    
+    (output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS")));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     // Should be 6 for selected input

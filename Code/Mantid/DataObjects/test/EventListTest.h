@@ -210,7 +210,7 @@ public:
   void test_setX()
   {
     //Generate the histrogram bins
-    EventList::StorageType shared_x;
+    MantidVec shared_x;
     double tof; //in ns
     for (tof=0; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
     {
@@ -228,7 +228,7 @@ public:
   {
     el = EventList();
     //Generate the histrogram bins
-    EventList::StorageType shared_x;
+    MantidVec shared_x;
     double tof; //in ns
     for (tof=0; tof<16e3*1e3; tof += 1e4)
     {
@@ -252,7 +252,7 @@ public:
 
     //Now do set up an X axis.
     this->test_setX();
-    EventList::StorageType X, Y;
+    MantidVec X, Y;
     const EventList el3(el);
     X = el3.dataX();
     Y = *el3.dataY();
@@ -290,7 +290,7 @@ public:
   {
     this->fake_uniform_data();
     this->test_setX(); //Set it up
-    EventList::StorageType X, Y;
+    MantidVec X, Y;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
     X = el3.dataX();
     Y = *el3.dataY();
@@ -310,13 +310,13 @@ public:
     this->fake_uniform_data();
 
     //Generate the histrogram bins starting at 1000
-    EventList::StorageType shared_x;
+    MantidVec shared_x;
     for (double tof=1000; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
       shared_x.push_back(tof);
     el.setX(shared_x);
 
     //Get them back
-    EventList::StorageType X, Y;
+    MantidVec X, Y;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
     X = el3.dataX();
     Y = *el3.dataY();
@@ -335,7 +335,7 @@ public:
   {
     this->fake_data();
     this->test_setX();
-    EventList::StorageType X, Y;
+    MantidVec X, Y;
     const EventList el3(el);
     X = el3.dataX();
     Y = *el3.dataY();
@@ -357,13 +357,13 @@ public:
     TS_ASSERT_EQUALS(this->el.getRefX()->size(), NUMBINS+1);
 
     //Make one with half the bins
-    EventList::StorageType some_other_x;
+    MantidVec some_other_x;
     double tof; //in ns
     for (tof=0; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA*2)
       some_other_x.push_back(tof);
 
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    EventList::StorageType Y, E;
+    MantidVec Y, E;
     el3.generateCountsHistogram(some_other_x, Y);
     el3.generateErrorsHistogram(Y, E);
     TS_ASSERT_EQUALS(Y.size(), some_other_x.size()-1);
@@ -418,7 +418,7 @@ public:
     this->fake_data();
 
     // Grab original data as it will become "new" data
-    EventList::StorageType T;
+    MantidVec T;
     T = *el.getTofs();
 
     // Convert to make values something different

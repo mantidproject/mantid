@@ -271,7 +271,7 @@ public:
       WorkspaceFactory::Instance().create("Workspace2D", NDETECTS, NBINS+1, NBINS);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Histogram1D::RCtype xs, errors, data[NDETECTS];
+    MantidVecPtr xs, errors, data[NDETECTS];
     xs.access().resize(NBINS+1, 0.0);
     errors.access().resize(NBINS, 1.0);
     int detIDs[NDETECTS];

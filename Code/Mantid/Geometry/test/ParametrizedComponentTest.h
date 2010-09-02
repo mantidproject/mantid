@@ -16,7 +16,7 @@ class testParComponent : public CxxTest::TestSuite
 {
 public:
 
-  testParComponent::testParComponent() : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL), m_paramMap(NULL),
+  testParComponent() : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL), m_paramMap(NULL),
   m_strName("StringParam"), m_strValue("test-string"), m_dblName("DblParam"), m_dblValue(10.0),
   m_posName("PosParam"), m_posValue(1,1,1), m_quatName("QuatParam"),
   m_quatValue(2,3,4,5)
