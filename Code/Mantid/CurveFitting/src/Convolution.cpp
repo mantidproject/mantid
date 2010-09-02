@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/DeltaFunction.h"
 #include <cmath>
 #include <algorithm>
 #include <functional>
@@ -116,6 +117,35 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
     return;
   }
 
+  // check for delta functions
+  std::vector<DeltaFunction*> dltFuns;
+  double dltF = 0;
+  CompositeFunction* cf = dynamic_cast<CompositeFunction*>(getFunction(1));
+  if (cf)
+  {
+    for(int i = 0; i < cf->nFunctions(); ++i)
+    {
+      DeltaFunction* df = dynamic_cast<DeltaFunction*>(cf->getFunction(i));
+      if (df)
+      {
+        dltFuns.push_back(df);
+        dltF += df->getParameter("Height");
+      }
+    }
+    if (dltFuns.size() == cf->nFunctions())
+    {// all delta functions - return scaled reslution
+      getFunction(0)->function(out,xValues,nData);
+      std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dltF));
+      return;
+    }
+  }
+  else if (dynamic_cast<DeltaFunction*>(getFunction(1)))
+  {// single delta function - return scaled reslution
+    getFunction(0)->function(out,xValues,nData);
+    std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),getFunction(1)->getParameter("Height")));
+    return;
+  }
+
   getFunction(1)->function(out,xValues,nData);
   gsl_fft_real_transform (out, 1, nData, wavetable, workspace);
   gsl_fft_real_wavetable_free (wavetable);
@@ -148,6 +178,15 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
 
   dx = nData > 1? 1./(xValues[1] - xValues[0]): 1.;
   std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dx));
+
+  if (dltF != 0.)
+  {
+    double* tmp = new double[nData];
+    getFunction(0)->function(tmp,xValues,nData);
+    std::transform(tmp,tmp+nData,tmp,std::bind2nd(std::multiplies<double>(),dltF));
+    std::transform(out,out+nData,tmp,out,std::plus<double>());
+    delete tmp;
+  }
 
 }
 

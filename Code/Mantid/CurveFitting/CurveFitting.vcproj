@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DeltaFunction.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Fit.cpp"
 				>
 			</File>
@@ -386,6 +390,10 @@
 			</File>
 			<File
 				RelativePath=".\test\CostFunctionFactoryTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\DeltaFunction.h"
 				>
 			</File>
 			<File
