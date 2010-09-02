@@ -257,23 +257,23 @@ using Kernel::Exception::NotImplementedError;
    *            all events and the X histogram is copied.
    * @return a pointer to the new EventList that was created.
    */
-  EventList * EventWorkspace::addNewEventList(const EventList& existingEventList)
-  {
-    EventList * newEL = new EventList(existingEventList);
-    this->data.push_back(newEl);
+  //EventList * EventWorkspace::addNewEventList(const EventList& existingEventList)
+  //{
+  //  EventList * newEL = new EventList(existingEventList);
+  //  this->data.push_back(newEl);
 
-    //Workspace index of the new data
-    int wi = this->data.size()-1;
+  //  //Workspace index of the new data
+  //  int wi = this->data.size()-1;
 
 
-    //Spectrum number of this workspace index
-    this->m_axes[1]->spectraNo()
+  //  //Spectrum number of this workspace index
+  //  this->m_axes[1]->spectraNo()
 
-    m_spectramap->addSpectrumEntries( )
+  //  m_spectramap->addSpectrumEntries( )
 
-    this->m_noVectors = this->data.size();
-    return newEL;
-  }
+  //  this->m_noVectors = this->data.size();
+  //  return newEL;
+  //}
 
 
   //-----------------------------------------------------------------------------

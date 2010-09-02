@@ -487,6 +487,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Rebin.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\RebinToWorkspace.cpp"
 				>
 			</File>
@@ -516,10 +520,6 @@
 			</File>
 			<File
 				RelativePath=".\src\SimpleIntegration.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\SimpleRebin.cpp"
 				>
 			</File>
 			<File
@@ -1053,6 +1053,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\Rebin.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\RebinToWorkspace.h"
 				>
 			</File>
@@ -1110,14 +1114,6 @@
 			</File>
 			<File
 				RelativePath=".\test\SimpleIntegrationTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\SimpleRebin.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\SimpleRebinTest.h"
 				>
 			</File>
 			<File
