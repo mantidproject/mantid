@@ -114,7 +114,10 @@ public:
   //@{
   // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
   // one for each type, luckily there won't be too many
-  
+  /// Return the parameter names
+  virtual std::set<std::string> getParameterNames(bool recursive = true) const;
+  /// Returns a boolean indicating whether the parameter exists or not
+  bool hasParameter(const std::string & name, bool recursive = true) const;
   /**
    * Get a parameter defined as a double
    * @param pname The name of the parameter

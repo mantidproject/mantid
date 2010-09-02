@@ -18,155 +18,169 @@
 
 namespace Mantid
 {
-namespace PythonAPI
-{
-  using namespace boost::python;
-  
-  //@cond
-  void export_utils()
+  namespace PythonAPI
   {
-    //V3D class
-    class_< Mantid::Geometry::V3D >("V3D", init<double, double, double>())
-      .def("getX", &Mantid::Geometry::V3D::X, return_value_policy< copy_const_reference >())
-      .def("getY", &Mantid::Geometry::V3D::Y, return_value_policy< copy_const_reference >())
-      .def("getZ", &Mantid::Geometry::V3D::Z, return_value_policy< copy_const_reference >())
-      .def("distance", &Mantid::Geometry::V3D::distance)
-      .def("angle", &Mantid::Geometry::V3D::angle)
-      .def("zenith", &Mantid::Geometry::V3D::zenith)
-      .def("scalar_prod", &Mantid::Geometry::V3D::scalar_prod)
-      .def("cross_prod", &Mantid::Geometry::V3D::cross_prod)
-      .def("norm", &Mantid::Geometry::V3D::norm)
-      .def("norm2", &Mantid::Geometry::V3D::norm2)
-      .def(self + self)
-      .def(self += self)
-      .def(self - self)
-      .def(self -= self)
-      .def(self * self)
-      .def(self *= self)
-      .def(self / self)
-      .def(self /= self)
-      .def(self * int())
-      .def(self *= int())
-      .def(self * double())
-      .def(self *= double())
-      .def(self < self)
-      .def(self == self)
-      .def(self_ns::str(self))
-      ;
+    using namespace boost::python;
 
-    //Quat class
-    class_< Mantid::Geometry::Quat >("Quaternion", init<double, double, double, double>())
-      .def("rotate", &Mantid::Geometry::Quat::rotate)
-      .def("real", &Mantid::Geometry::Quat::real)
-      .def("imagI", &Mantid::Geometry::Quat::imagI)
-      .def("imagJ", &Mantid::Geometry::Quat::imagJ)
-      .def("imagK", &Mantid::Geometry::Quat::imagK)
-      .def(self + self)
-      .def(self += self)
-      .def(self - self)
-      .def(self -= self)
-      .def(self * self)
-      .def(self *= self)
-      .def(self == self)
-      .def(self != self)
-      .def(self_ns::str(self))
-      ;
+
+    void export_utils()
+    {
+      //V3D class
+      class_< Geometry::V3D >("V3D", init<double, double, double>())
+        .def("getX", &Geometry::V3D::X, return_value_policy< copy_const_reference >())
+        .def("getY", &Geometry::V3D::Y, return_value_policy< copy_const_reference >())
+        .def("getZ", &Geometry::V3D::Z, return_value_policy< copy_const_reference >())
+        .def("distance", &Geometry::V3D::distance)
+        .def("angle", &Geometry::V3D::angle)
+        .def("zenith", &Geometry::V3D::zenith)
+        .def("scalar_prod", &Geometry::V3D::scalar_prod)
+        .def("cross_prod", &Geometry::V3D::cross_prod)
+        .def("norm", &Geometry::V3D::norm)
+        .def("norm2", &Geometry::V3D::norm2)
+        .def(self + self)
+        .def(self += self)
+        .def(self - self)
+        .def(self -= self)
+        .def(self * self)
+        .def(self *= self)
+        .def(self / self)
+        .def(self /= self)
+        .def(self * int())
+        .def(self *= int())
+        .def(self * double())
+        .def(self *= double())
+        .def(self < self)
+        .def(self == self)
+        .def(self_ns::str(self))
+        ;
+
+      //Quat class
+      class_< Geometry::Quat >("Quaternion", init<double, double, double, double>())
+        .def("rotate", &Geometry::Quat::rotate)
+        .def("real", &Geometry::Quat::real)
+        .def("imagI", &Geometry::Quat::imagI)
+        .def("imagJ", &Geometry::Quat::imagJ)
+        .def("imagK", &Geometry::Quat::imagK)
+        .def(self + self)
+        .def(self += self)
+        .def(self - self)
+        .def(self -= self)
+        .def(self * self)
+        .def(self *= self)
+        .def(self == self)
+        .def(self != self)
+        .def(self_ns::str(self))
+        ;
+    }
+
+
+    // Default parameter function overloads
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,Geometry::Component::getParameterNames,0,1);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getParameterNames,Geometry::ParametrizedComponent::getParameterNames,0,1);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_hasParameter,Geometry::Component::hasParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_hasParameter,Geometry::ParametrizedComponent::hasParameter,1,2);
+
+    void export_components()
+    {
+      /**
+      * Both the interface and concrete implementations need to be exposed here so that Python
+      * sees the correct object type and not just always IComponent. This enables getComponentByName
+      * to return an IComponent pointer in C++ while still having an underlying object in Python that will accept
+      * the usage of ICompAssembly methods
+      */
+      //IComponent class
+      register_ptr_to_python<boost::shared_ptr<Geometry::IComponent> >();
+
+      class_<Geometry::IComponent, boost::noncopyable>("IComponent", no_init)
+        .def("getPos", &Geometry::IComponent::getPos)
+        .def("getDistance", &Geometry::IComponent::getDistance)
+        .def("getName", &Geometry::IComponent::getName)
+        .def("type", &Geometry::IComponent::type)
+        .def("getNumberParameter", &Geometry::IComponent::getNumberParameter)
+        .def("getPositionParameter", &Geometry::IComponent::getPositionParameter)
+        .def("getRotationParameter", &Geometry::IComponent::getRotationParameter)
+        .def("getStringParameter", &Geometry::IComponent::getStringParameter)
+        ;
+
+      //ICompAssembly class
+      register_ptr_to_python<boost::shared_ptr<Geometry::ICompAssembly> >();
+
+      class_<Geometry::ICompAssembly, boost::python::bases<Geometry::IComponent>, 
+        boost::noncopyable>("ICompAssembly", no_init)
+        .def("nElements", &Geometry::ICompAssembly::nelements)
+        .def("__getitem__", &Geometry::ICompAssembly::operator[])
+        ;
+
+      //IObjComponent class
+      register_ptr_to_python<boost::shared_ptr<Geometry::IObjComponent> >();
+
+      class_< Geometry::IObjComponent, boost::python::bases<Geometry::IComponent>, 
+        boost::noncopyable>("IObjComponent", no_init)
+        ;
+
+      //IDetector Class
+      register_ptr_to_python<boost::shared_ptr<Geometry::IDetector> >();
+
+      class_< Geometry::IDetector, bases<Geometry::IObjComponent>,
+        boost::noncopyable>("IDetector", no_init)
+        .def("getID", &Geometry::IDetector::getID)
+        .def("isMasked", &Geometry::IDetector::isMasked)
+        .def("isMonitor", &Geometry::IDetector::isMonitor)
+        .def("solidAngle", &Geometry::IDetector::solidAngle)
+        .def("getTwoTheta", &Geometry::IDetector::getTwoTheta)
+        .def("getPhi", &Geometry::IDetector::getPhi)
+        ;
+
+      /**
+      * Concrete implementations
+      */
+      /**
+      * MG 14/07/2010 - These classes do not offer any additional functionality they just allow 
+      * Python to cast an object of a base-class to one of the derived types
+      */
+
+      //Component class
+      class_<Geometry::Component, bases<Geometry::IComponent>, boost::noncopyable>("Component", no_init)
+        .def("getParameterNames", &Geometry::Component::getParameterNames, Component_getParameterNames())
+        .def("hasParameter", &Geometry::Component::hasParameter, Component_hasParameter())
+        ;
+      //ParameterizedComponent
+      class_<Geometry::ParametrizedComponent, bases<Geometry::IComponent>, 
+        boost::noncopyable>("ParameterizedComponent", no_init)
+        .def("getParameterNames", &Geometry::ParametrizedComponent::getParameterNames, ParComponent_getParameterNames())
+        .def("hasParameter", &Geometry::ParametrizedComponent::hasParameter, ParComponent_hasParameter())
+        ;
+
+      /** 
+      * The detector classes are prefixed with Mantid due to an unfortunate name clash in an existing user script
+      * where a function was already called Detector. Given that the name here should rarely be used
+      * this seemed like an acceptable compromise.
+      */
+      //Detector
+      class_<Geometry::Detector, bases<Geometry::IDetector>,
+        boost::noncopyable>("MantidDetector", no_init)
+        ;
+      //Detector
+      class_<Geometry::ParDetector, bases<Geometry::IDetector>,
+        boost::noncopyable>("MantidParDetector", no_init)
+        ;
+
+      //CompAssembly class
+      class_<Geometry::CompAssembly, boost::python::bases<Geometry::Component, Geometry::ICompAssembly>, 
+        boost::noncopyable>("CompAssembly", no_init)
+        ;
+      //ParCompAssembly class
+      class_<Geometry::ParCompAssembly, boost::python::bases<Geometry::ParametrizedComponent,Geometry::ICompAssembly>, 
+        boost::noncopyable>("ParCompAssembly", no_init)
+        ;
+    }
+
+    void export_geometry_namespace()
+    {
+      export_utils();
+      export_components();
+    }
+
+    //@endcond
   }
-
-  void export_components()
-  {
-    /**
-     * Both the interface and concrete implementations need to be exposed here so that Python
-     * sees the correct object type and not just always IComponent. This enables getComponentByName
-     * to return an IComponent pointer in C++ while still having an underlying object in Python that will accept
-     * the usage of ICompAssembly methods
-     */
-    //IComponent class
-    register_ptr_to_python<boost::shared_ptr<Mantid::Geometry::IComponent> >();
-    
-    class_<Mantid::Geometry::IComponent, boost::noncopyable>("IComponent", no_init)
-      .def("getPos", &Mantid::Geometry::IComponent::getPos)
-	  .def("getDistance", &Mantid::Geometry::IComponent::getDistance)
-      .def("getName", &Mantid::Geometry::IComponent::getName)
-      .def("type", &Mantid::Geometry::IComponent::type)
-      .def("getNumberParameter", &Mantid::Geometry::IComponent::getNumberParameter)
-      .def("getPositionParameter", &Mantid::Geometry::IComponent::getPositionParameter)
-      .def("getRotationParameter", &Mantid::Geometry::IComponent::getRotationParameter)
-	  .def("getStringParameter", &Mantid::Geometry::IComponent::getStringParameter)
-      ;
-   
-    //ICompAssembly class
-    register_ptr_to_python<boost::shared_ptr<Mantid::Geometry::ICompAssembly> >();
-    
-    class_<Mantid::Geometry::ICompAssembly, boost::python::bases<Mantid::Geometry::IComponent>, 
-      boost::noncopyable>("ICompAssembly", no_init)
-      .def("nElements", &Mantid::Geometry::ICompAssembly::nelements)
-      .def("__getitem__", &Mantid::Geometry::ICompAssembly::operator[])
-      ;
-    
-    //IObjComponent class
-    register_ptr_to_python<boost::shared_ptr<Mantid::Geometry::IObjComponent> >();
-    
-    class_< Mantid::Geometry::IObjComponent, boost::python::bases<Mantid::Geometry::IComponent>, 
-      boost::noncopyable>("IObjComponent", no_init)
-    ;
-  
-    //IDetector Class
-    register_ptr_to_python<boost::shared_ptr<Mantid::Geometry::IDetector> >();
-  
-    class_< Mantid::Geometry::IDetector, bases<Mantid::Geometry::IObjComponent>,
-      boost::noncopyable>("IDetector", no_init)
-      .def("getID", &Mantid::Geometry::IDetector::getID)
-      .def("isMasked", &Mantid::Geometry::IDetector::isMasked)
-      .def("isMonitor", &Mantid::Geometry::IDetector::isMonitor)
-      .def("solidAngle", &Mantid::Geometry::IDetector::solidAngle)
-      .def("getTwoTheta", &Mantid::Geometry::IDetector::getTwoTheta)
-      .def("getPhi", &Mantid::Geometry::IDetector::getPhi)
-	  ;
-
-    /**
-     * Concrete implementations
-     */
-    //Component class
-    class_<Mantid::Geometry::Component, bases<Mantid::Geometry::IComponent>, boost::noncopyable>("Component", no_init)
-      ;
-    //ParameterizedComponent
-    class_<Mantid::Geometry::ParametrizedComponent, bases<Mantid::Geometry::IComponent>, 
-      boost::noncopyable>("ParameterizedComponent", no_init)
-      ;
-
-    /**
-     * MG 14/07/2010 - These classes do not offer any additional functionality they just allow 
-     * Python to recogise that an object of this type may exist. The detector class 
-     * is prefixed with Mantid due to an unfortunate name class in an existing user script (SANS)
-     * where a function was already called Detector. Given that the name here should rarely be used
-     * this seemed like an acceptable compromise.
-     */
-	//Detector
-	class_<Mantid::Geometry::Detector, bases<Mantid::Geometry::IDetector>,
-		boost::noncopyable>("MantidDetector", no_init)
-		;
-	//Detector
-	class_<Mantid::Geometry::ParDetector, bases<Mantid::Geometry::IDetector>,
-		boost::noncopyable>("MantidParDetector", no_init)
-		;
-
-    //CompAssembly class
-    class_<Mantid::Geometry::CompAssembly, boost::python::bases<Mantid::Geometry::ICompAssembly>, 
-      boost::noncopyable>("CompAssembly", no_init)
-      ;
-    //ParCompAssembly class
-    class_<Mantid::Geometry::ParCompAssembly, boost::python::bases<Mantid::Geometry::ICompAssembly>, 
-	   boost::noncopyable>("ParCompAssembly", no_init)
-      ;
-  }
-
-  void export_geometry_namespace()
-  {
-    export_utils();
-    export_components();
-  }
-
-  //@endcond
-}
 }

@@ -88,23 +88,14 @@ public:
     }
 
     /// Method for adding a parameter providing its value as a string
-    void add(const std::string& type,const IComponent* comp,const std::string& name, const std::string& value)
-    {
-      boost::shared_ptr<Parameter> param = ParameterFactory::create(type,name);
-      param->fromString(value);
-      std::pair<pmap_it,pmap_it> range = m_map.equal_range(comp->getComponentID());
-      for(pmap_it it=range.first;it!=range.second;++it)
-      {
-        if (it->second->name() == name)
-        {
-          it->second = param;
-          return;
-        }
-      }
-      m_map.insert(std::make_pair(comp->getComponentID(),param));
-    }
-
-    /// Method for adding a parameter providing its value of a particular type
+    void add(const std::string& type,const IComponent* comp,const std::string& name, const std::string& value);
+    /**
+     * Method for adding a parameter providing its value of a particular type
+     * @param type A string denoting the type, e.g. double, string, fitting
+     * @param comp A pointer to the component that this parameter is attached to
+     * @param name The name of the parameter
+     * @param value The parameter's value
+     */
     template<class T>
     void add(const std::string& type,const IComponent* comp,const std::string& name, const T& value)
     {
@@ -127,11 +118,8 @@ public:
       }
       m_map.insert(std::make_pair(comp->getComponentID(),param));
     }
-
-    
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
-
     /// Create or adjust "rot" parameter for a component
     void addRotationParam(const IComponent* comp,const std::string& name, const double deg);
 
@@ -213,7 +201,8 @@ public:
       add("Quat",comp,name,value);
       clearCache();
     }
-
+    /// Does the named parameter exist for the given component.
+    bool contains(const IComponent* comp, const std::string & name, const std::string & type = std::string("")) const;
     /**  Return the value of a parameter as a string
          @param comp Component to which parameter is related
          @param name Parameter name
@@ -274,8 +263,8 @@ public:
      */
     std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const{return getType<V3D>(compName,name);}
 
-    /// Returns a vector with all parameter names for component comp
-    std::vector<std::string> nameList(const IComponent* comp)const;
+    /// Returns a set with all parameter names for component
+    std::set<std::string> names(const IComponent* comp) const;
 
     /// Returns a string with all component names, parameter names and values
     std::string asString()const;

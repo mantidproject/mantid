@@ -263,6 +263,28 @@ double Component::getDistance(const IComponent& comp) const
   return getPos().distance(comp.getPos());
 }
 
+/**
+* Get the names of the parameters for this component.
+* @param recursive If true, the parameters for all of the parent components are also included
+* @returns A set of strings giving the parameter names for this component
+*/
+std::set<std::string> Component::getParameterNames(bool recursive) const
+{
+  return std::set<std::string>();
+}
+
+/**
+* Returns a boolean indicating if the component has the named parameter
+* @param name The name of the parameter
+* @param recursive If true the parent components will also be searched (Default: true)
+* @returns A boolean indicating if the search was successful or not. Always false as this is not
+* parameterized
+*/
+bool Component::hasParameter(const std::string & name, bool recursive) const
+{
+  return false;
+}
+
 /// Default implementation
 std::vector<double> Component::getNumberParameter(const std::string&) const
 {

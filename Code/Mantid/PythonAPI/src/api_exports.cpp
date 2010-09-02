@@ -309,11 +309,11 @@ namespace PythonAPI
     /** Concrete implementations so that Python knows about them */
     
     //Instrument class
-    class_< API::Instrument, boost::python::bases<API::IInstrument>, 
+    class_< API::Instrument, boost::python::bases<API::IInstrument, Geometry::CompAssembly>, 
 	    boost::noncopyable>("Instrument", no_init)
       ;
     //Instrument class
-    class_< API::ParInstrument, boost::python::bases<API::IInstrument>, 
+    class_< API::ParInstrument, boost::python::bases<API::IInstrument, Geometry::ParCompAssembly>, 
 	    boost::noncopyable>("ParInstrument", no_init)
       ;
   }

@@ -247,6 +247,59 @@ namespace Mantid
       return getPos().distance(comp.getPos());
     }
 
+    /**
+    * Get the names of the parameters for this component.
+    * @param recursive If true, the parameters for all of the parent components are also included
+    * @returns A set of strings giving the parameter names for this component
+    */
+    std::set<std::string> ParametrizedComponent::getParameterNames(bool recursive) const
+    {
+      std::set<std::string> names = m_map.names(this);
+      if( recursive )
+      {
+        //Walk up the tree and find the parameters attached to the parent components
+        boost::shared_ptr<const IComponent> parent = getParent();
+        if( parent )
+        {
+          std::set<std::string> parentNames = parent->getParameterNames(true);
+          names.insert(parentNames.begin(), parentNames.end());
+        }
+      }
+      return names;
+    }
+
+    /**
+     * Returns a boolean indicating if the component has the named parameter
+     * @param name The name of the parameter
+     * @param recursive If true the parent components will also be searched (Default: true)
+     * @returns A boolean indicating if the search was successful or not.
+     */
+    bool ParametrizedComponent::hasParameter(const std::string & name, bool recursive) const
+    {
+      bool match_found(false);
+      if( m_map.contains(this, name) )
+      {
+        match_found = true;
+      }
+      else if( recursive )
+      {
+        boost::shared_ptr<const IComponent> parent = getParent();
+        if( parent )
+        {
+          match_found = parent->hasParameter(name, true);
+        }
+        else
+        {
+          match_found = false;
+        }
+      }
+      else
+      {
+        match_found = false;
+      }
+      return match_found;
+    }
+
     /** Prints a text representation of itself
     * @param os The ouput stream to write to
     */

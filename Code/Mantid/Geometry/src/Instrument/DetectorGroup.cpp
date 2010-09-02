@@ -226,6 +226,28 @@ int  DetectorGroup::getPointInObject(V3D& point) const
   return ( *m_detectors.begin() ).second->getPointInObject(point);
 }
 
+/**
+* Get the names of the parameters for this component.
+* @param recursive If true, the parameters for all of the parent components are also included
+* @returns A set of strings giving the parameter names for this component
+*/
+std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const
+{
+  return std::set<std::string>();
+}
+
+/**
+* Returns a boolean indicating if the component has the named parameter
+* @param name The name of the parameter
+* @param recursive If true the parent components will also be searched (Default: true)
+* @returns A boolean indicating if the search was successful or not. Always false as this is not
+* parameterized
+*/
+bool DetectorGroup::hasParameter(const std::string & name, bool recursive) const
+{
+  return false;
+}
+
 /// Default implementation
 std::vector<double> DetectorGroup::getNumberParameter(const std::string&) const
 {
