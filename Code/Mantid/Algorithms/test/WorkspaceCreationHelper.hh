@@ -188,6 +188,48 @@ public:
     return retVal;
   }
 
+
+  /** Create event workspace
+   */
+  static EventWorkspace_sptr CreateGroupedEventWorkspace(std::vector< std::vector<int> > groups,
+      int numBins, double binDelta=1.0)
+  {
+
+    EventWorkspace_sptr retVal(new EventWorkspace);
+    retVal->initialize(1,2,1);
+
+    for (int g=0; g < groups.size(); g++)
+    {
+      std::vector<int> dets = groups[g];
+      for (std::vector<int>::iterator it = dets.begin(); it != dets.end(); it++)
+      {
+        for (int i=0; i < numBins; i++)
+          retVal->getOrAddEventList(g) += TofEvent((i+0.5)*binDelta, 1);
+        retVal->getOrAddEventList(g).addDetectorID( *it );
+      }
+    }
+
+    retVal->doneAddingEventLists();
+
+   //Create the x-axis for histogramming.
+    MantidVecPtr x1;
+    MantidVec& xRef = x1.access();
+    double x0=0;
+    xRef.resize(numBins);
+    for (int i = 0; i < numBins; ++i)
+    {
+      xRef[i] = x0+i*binDelta;
+    }
+
+    //Set all the histograms at once.
+    retVal->setAllX(x1);
+
+    return retVal;
+  }
+
+
+
+
   //not strictly creating a workspace, but really helpfull to see what one contains
   static void DisplayDataY(const MatrixWorkspace_sptr ws)
   {

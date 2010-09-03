@@ -179,7 +179,7 @@ if __name__ == "__main__":
             MantidBuild.color_output(cmdline=runtests_cmd, workingdir=subproj)
 
             #Now show the log
-            if 0:
+            if 1:
               print
               print "-------------- mantid.log output (ERRORS only) ------------------------------"
               print

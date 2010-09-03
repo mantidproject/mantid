@@ -428,6 +428,7 @@ public:
   }
   
 
+
   void EventSetup()
   {
     AnalysisDataService::Instance().addOrReplace("ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 3))); // 100 ev

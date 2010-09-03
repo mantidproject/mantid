@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "WorkspaceCreationHelper.hh"
+#include <stdarg.h>
 
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -14,6 +15,9 @@ using namespace Mantid::DataObjects;
 class MergeRunsTest : public CxxTest::TestSuite
 {
 public:
+
+  EventWorkspace_sptr ev1, ev2, ev3, ev4, ev5,ev6,evg1, evg2, evg3;
+
   MergeRunsTest()
   {
     AnalysisDataService::Instance().add("in1",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,1));
@@ -23,6 +27,77 @@ public:
     AnalysisDataService::Instance().add("in5",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,5,3.5,2));
     AnalysisDataService::Instance().add("in6",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,3,2,2));
   }
+
+  std::vector<int> makeVector(int num, ...)
+  {
+    std::vector<int> retVal;
+    va_list vl;
+    va_start( vl, num );
+    for (int i=0; i<num; i++)
+      retVal.push_back( va_arg( vl, int) );
+    return retVal;
+  }
+
+
+
+  void EventSetup()
+  {
+    ev1 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 3);
+    AnalysisDataService::Instance().addOrReplace("ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(ev1)); // 100 ev
+    AnalysisDataService::Instance().addOrReplace("ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2))); //200 ev
+    AnalysisDataService::Instance().addOrReplace("ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
+    //Make one with weird units
+    MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100));
+    ev4->setYUnit("Microfurlongs per Megafortnights");
+    AnalysisDataService::Instance().addOrReplace("ev4_weird_units",ev4);
+    AnalysisDataService::Instance().addOrReplace("ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(5,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
+    ev6 = WorkspaceCreationHelper::CreateEventWorkspace(6,10,100, 0.0, 1.0, 3);//ids 0-5
+    AnalysisDataService::Instance().addOrReplace("ev6", boost::dynamic_pointer_cast<MatrixWorkspace>(ev6));
+    //a 2d workspace with the value 2 in each bin
+    AnalysisDataService::Instance().addOrReplace("in2D", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
+
+
+    std::vector< std::vector<int> > groups;
+
+    groups.clear();
+    groups.push_back( makeVector(3,  0,1,2) );
+    groups.push_back( makeVector(3,  3,4,5) );
+    evg1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100);
+    AnalysisDataService::Instance().addOrReplace("evg1", boost::dynamic_pointer_cast<MatrixWorkspace>(evg1));
+
+    //let's check on the setup
+    TS_ASSERT_EQUALS( evg1->getNumberEvents(), 600);
+    TS_ASSERT_EQUALS( evg1->getNumberHistograms(), 2);
+    TS_ASSERT( evg1->getEventList(0).hasDetectorID(0));
+    TS_ASSERT( evg1->getEventList(0).hasDetectorID(1));
+    TS_ASSERT( evg1->getEventList(0).hasDetectorID(2));
+    TS_ASSERT( evg1->getEventList(1).hasDetectorID(3));
+
+    groups.clear();
+    groups.push_back( makeVector(2,  3,4) );
+    groups.push_back( makeVector(3,  0,1,2) );
+    groups.push_back( makeVector(1,  15) );
+    evg2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100);
+    AnalysisDataService::Instance().addOrReplace("evg2", boost::dynamic_pointer_cast<MatrixWorkspace>(evg2));
+
+
+  }
+
+
+  void EventTeardown()
+  {
+    AnalysisDataService::Instance().remove("ev1");
+    AnalysisDataService::Instance().remove("ev2");
+    AnalysisDataService::Instance().remove("ev3");
+    AnalysisDataService::Instance().remove("ev4_weird_units");
+    AnalysisDataService::Instance().remove("ev5");
+    AnalysisDataService::Instance().remove("ev6");
+    AnalysisDataService::Instance().remove("in2D");
+    AnalysisDataService::Instance().remove("evg1");
+    AnalysisDataService::Instance().remove("evOUT");
+    AnalysisDataService::Instance().remove("out2D");
+  }
+
 
 
 	void testTheBasics()
@@ -64,31 +139,166 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  void xtestExecAllEvents()
+  void testExec_MixingEventAnd2D_gives_a2D()
   {
-    //Event workspaces with 100 events
-    AnalysisDataService::Instance().add("ev1",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
-    AnalysisDataService::Instance().add("ev2",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
-    AnalysisDataService::Instance().add("ev3",WorkspaceCreationHelper::CreateEventWorkspace(3,10,100));
+    EventSetup();
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","ev1,ev2,in1");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
+    //Not an EventWorkspace
+    EventWorkspace_sptr outEvent =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    TS_ASSERT( !outEvent );
+    EventTeardown();
+  }
 
-    if ( !merge.isInitialized() ) merge.initialize();
-
-    TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("InputWorkspaces","ev1,ev2,ev3") );
-    TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("OutputWorkspace","outWS") );
-
-    TS_ASSERT_THROWS_NOTHING( merge.execute() );
-    TS_ASSERT( merge.isExecuted() );
+  //-----------------------------------------------------------------------------------------------
+  void testExec_Events_MixedIDs()
+  {
+    EventSetup();
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","ev1,ev2,ev3");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS")) );
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
-    //Should have 300 total events
-    TS_ASSERT_EQUALS( output->getNumberEvents(), 300);
+    //Should have 300+600+600 = 1500 total events
+    TS_ASSERT_EQUALS( output->getNumberEvents(), 1500);
+    //6 unique pixel ids
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 6);
 
-    AnalysisDataService::Instance().remove("outWS");
+    EventTeardown();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void testExec_Events_MatchingPixelIDs()
+  {
+    EventSetup();
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","ev1,ev2");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
+
+    //Get the output event workspace
+    EventWorkspace_const_sptr output;
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    //This checks that it is indeed an EW
+    TS_ASSERT( output  );
+
+    //Should have 300+600
+    TS_ASSERT_EQUALS( output->getNumberEvents(), 900);
+    //3 unique pixel ids
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 3);
+
+    EventTeardown();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void testExec_Events_Grouped1()
+  {
+    EventSetup();
+
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","evg1,ev1");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
+
+    //Get the output event workspace
+    EventWorkspace_const_sptr output;
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    //This checks that it is indeed an EW
+    TS_ASSERT( output  );
+
+    //Total # of events
+    TS_ASSERT_EQUALS( output->getNumberEvents(), ev1->getNumberEvents() + evg1->getNumberEvents());
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 2); //2 groups
+    TS_ASSERT( output->getEventList(0).hasDetectorID(0));
+    TS_ASSERT( output->getEventList(0).hasDetectorID(1));
+    TS_ASSERT( output->getEventList(0).hasDetectorID(2));
+    TS_ASSERT( output->getEventList(1).hasDetectorID(3));
+    TS_ASSERT( output->getEventList(1).hasDetectorID(4));
+    TS_ASSERT( output->getEventList(1).hasDetectorID(5));
+    //std::cout << "WWOWOWOWOWOWOW\n\n\n" << *output->getEventList(2).getDetectorIDs().begin() << "\n";
+
+    EventTeardown();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void testExec_Events_Grouped1_flipped()
+  {
+    EventSetup();
+
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","ev1,evg1");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
+
+    //Get the output event workspace
+    EventWorkspace_const_sptr output;
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    //This checks that it is indeed an EW
+    TS_ASSERT( output  );
+
+    //Total # of events
+    TS_ASSERT_EQUALS( output->getNumberEvents(), ev1->getNumberEvents() + evg1->getNumberEvents());
+    // Grouped pixel IDs: 0; 1; 2; 012; 345
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 5);
+    TS_ASSERT( output->getEventList(0).hasDetectorID(0));
+    TS_ASSERT( output->getEventList(1).hasDetectorID(1));
+    TS_ASSERT( output->getEventList(2).hasDetectorID(2));
+    TS_ASSERT( output->getEventList(3).hasDetectorID(0));
+    TS_ASSERT( output->getEventList(3).hasDetectorID(1));
+    TS_ASSERT( output->getEventList(3).hasDetectorID(2));
+    TS_ASSERT( output->getEventList(4).hasDetectorID(3));
+    TS_ASSERT( output->getEventList(4).hasDetectorID(4));
+    TS_ASSERT( output->getEventList(4).hasDetectorID(5));
+    //std::cout << "WWOWOWOWOWOWOW\n\n\n" << *output->getEventList(2).getDetectorIDs().begin() << "\n";
+
+    EventTeardown();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void testExec_Events_Grouped2()
+  {
+    EventSetup();
+
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","evg2,ev6");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
+
+    //Get the output event workspace
+    EventWorkspace_const_sptr output;
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    //This checks that it is indeed an EW
+    TS_ASSERT( output  );
+
+    //Total # of events
+    TS_ASSERT_EQUALS( output->getNumberEvents(), ev6->getNumberEvents() + evg2->getNumberEvents());
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS( output->getEventList(0).getNumberEvents(), 400); //4 lists were added
+    TS_ASSERT_EQUALS( output->getEventList(1).getNumberEvents(), 600);
+    TS_ASSERT_EQUALS( output->getEventList(2).getNumberEvents(), 100);
+    TS_ASSERT( output->getEventList(0).hasDetectorID(3));
+    TS_ASSERT( output->getEventList(0).hasDetectorID(4));
+    TS_ASSERT( output->getEventList(1).hasDetectorID(0));
+    TS_ASSERT( output->getEventList(1).hasDetectorID(1));
+    TS_ASSERT( output->getEventList(1).hasDetectorID(2));
+    TS_ASSERT( output->getEventList(2).hasDetectorID(15));
+    TS_ASSERT( output->getEventList(3).hasDetectorID(5)); //Leftover from the ev1 workspace
+
+    EventTeardown();
   }
 
   //-----------------------------------------------------------------------------------------------
