@@ -437,6 +437,8 @@ public:
     MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100));
     ev4->setYUnit("Microfurlongs per Megafortnights");
     AnalysisDataService::Instance().addOrReplace("ev4_weird_units",ev4);
+    //Different # of spectra
+    AnalysisDataService::Instance().addOrReplace("ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(5,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
     //a 2d workspace with the value 2 in each bin
     AnalysisDataService::Instance().addOrReplace("in2D", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
 
@@ -448,6 +450,7 @@ public:
     AnalysisDataService::Instance().remove("ev2");
     AnalysisDataService::Instance().remove("ev3");
     AnalysisDataService::Instance().remove("ev4_weird_units");
+    AnalysisDataService::Instance().remove("ev5");
     AnalysisDataService::Instance().remove("in2D");
     AnalysisDataService::Instance().remove("evOUT");
     AnalysisDataService::Instance().remove("out2D");
@@ -590,19 +593,23 @@ public:
 
     //Correct in output
     TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
-    //Twice the # of histograms
-    TS_ASSERT_EQUALS( out->getNumberHistograms(), 6);
+    //Still the same # of histograms
+    TS_ASSERT_EQUALS( out->getNumberHistograms(), 3);
     //10 bins copied
     TS_ASSERT_EQUALS( out->blocksize(), 10);
 
     //1 event per pixel for the first 3 histograms (pixels 0-2)
     for (int wi=0; wi < 3; wi++)
       for (int i=0; i < out->blocksize(); i++)
-        TS_ASSERT_EQUALS( out->readY(wi)[i], 1);
-    //2 events after that (pixels 100-102)
-    for (int wi=3; wi < 6; wi++)
-      for (int i=0; i<out->blocksize(); i++)
-        TS_ASSERT_EQUALS( out->readY(wi)[i], 2);
+        TS_ASSERT_EQUALS( out->readY(wi)[i], 3);
+
+    //But two detector IDs in each one
+    for (int i=0; i<3; i++)
+    {
+      std::vector<int> detList = out->spectraMap().getDetectors(i);
+      TS_ASSERT_EQUALS( detList[0], 0+i );
+      TS_ASSERT_EQUALS( detList[1], 100+i );
+    }
 
     //But they were added in #1
     TS_ASSERT_DIFFERS( in1, out);
@@ -621,8 +628,8 @@ public:
     alg.setPropertyValue("RHSWorkspace","ev3");
     alg.setPropertyValue("OutputWorkspace","ev1");
     alg.execute();
-    //Fails because of detector id mismatch; even though they have the same # of workspace indices
-    TS_ASSERT( !alg.isExecuted() );
+    //Succeeds despite detector id mismatch
+    TS_ASSERT( alg.isExecuted() );
 
     EventTeardown();
   }
@@ -699,6 +706,20 @@ public:
 
     TS_ASSERT( ! alg.isExecuted() );
 
+    EventTeardown();
+  }
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_Event_DifferentSizesFail()
+  {
+    EventSetup();
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace","ev1");
+    alg.setPropertyValue("RHSWorkspace","ev5");
+    alg.setPropertyValue("OutputWorkspace","evOUT");
+    alg.execute();
+    TS_ASSERT( ! alg.isExecuted() );
     EventTeardown();
   }
 

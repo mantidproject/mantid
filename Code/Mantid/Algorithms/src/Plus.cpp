@@ -87,6 +87,8 @@ namespace Mantid
     //---------------------------------------------------------------------------------------------
     /** Return true if both workspaces are event workspaces, and they both match in instrument name
      * and number of spectra.
+     * @return  true if they are both event workspaces and everything else is valid
+     *          false if they are not event workspaces.
      * @throw std::invalid_argument if they are event workspaces, but can't be added for some other reason
      */
     bool Plus::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs)
@@ -107,7 +109,7 @@ namespace Mantid
 
       //Matching units?
       if (!checkUnitCompatibility(lhs, rhs))
-        return false;
+        throw std::invalid_argument("Cannot add event workspaces; mismatched Y units.");
 
       //Mismatched instruments?
       if (event_lhs->getInstrument() && event_rhs->getInstrument())
@@ -116,43 +118,16 @@ namespace Mantid
           throw std::invalid_argument("Cannot add event workspaces; mismatched instrument names.");
         }
 
-      //Must match in number of histograms if adding in place
-      if (addingInPlace)
+      //Must match in number of histograms
+      if ((event_lhs->getNumberHistograms() != event_rhs->getNumberHistograms()))
       {
-        if ((event_lhs->getNumberHistograms() != event_rhs->getNumberHistograms()))
-        {
-          throw std::invalid_argument("Cannot add event workspaces in place together if the number of histograms does not match. Please specify a different output workspace name for the addition; or Pad Pixels when loading neutron event files.");
-        }
-        else
-        {
-          //Matching # of histograms, but that doesn't mean the detector IDs match too!
-          //TODO: Check that the full detector list matches
-          IndexToIndexMap * lhs_map = lhs->getWorkspaceIndexToDetectorIDMap();
-          IndexToIndexMap * rhs_map = rhs->getWorkspaceIndexToDetectorIDMap();
-          for (int i=0; i < lhs->getNumberHistograms(); i++)
-            if ((*lhs_map)[i] != (*rhs_map)[i])
-            {
-              delete lhs_map;
-              delete rhs_map;
-              throw std::invalid_argument("Cannot add event workspaces in place together because the pixel IDs are not the same at all workspace indices.");
-            }
-
-          delete lhs_map;
-          delete rhs_map;
-
-        }
+        throw std::invalid_argument("Cannot add event workspaces together if the number of histograms does not match. Please use MergeRuns to merge runs with different pixel lists; or Pad Pixels when loading neutron event files.");
       }
 
 
       //All is good if we got here
       return true;
     }
-
-//    /** */
-//    void Plus::buildAdditionMap()
-//    {
-//
-//    }
 
     //---------------------------------------------------------------------------------------------
     /** Perform the plus operation on the two event workspaces. This will only be called if they are compatible.
@@ -184,74 +159,39 @@ namespace Mantid
         {
           adder = lhs;
         }
-
-        //Go through all the histograms and add up the histograms
-        //(Number of histograms has to match, from checkEventCompatibility)
-        int numhist = outWS->getNumberHistograms();
-        for (int i=0; i < numhist; i++)
-        {
-          //Concatenate event lists
-          outWS->getEventList(i) += adder->getEventList(i);
-          //Two steps (handled two lists at once)
-          progress.report(2);
-        }
-        //Clear the MRU list since its not valid anymore.
-        outWS->clearMRU();
-
-      } //------------ adding in place ----------------
-
-
+      }
       else if (!outWS)
       {
         //outWS is null since it is a new workspace
-
-        //Get the required maps for accessing the detector IDs
-        IndexToIndexMap * lhs_map = lhs->getWorkspaceIndexToDetectorIDMap();
-        IndexToIndexMap * rhs_map = rhs->getWorkspaceIndexToDetectorIDMap();
-
         //Create a copy of the lhs workspace
         outWS = boost::dynamic_pointer_cast<EventWorkspace>(API::WorkspaceFactory::Instance().create("EventWorkspace", lhs->getNumberHistograms(), 2, 1));
         //Copy geometry, spectra map, etc. over.
         API::WorkspaceFactory::Instance().initializeFromParent(lhs, outWS, false);
-        //But we don't copy any data yet.
-
-        //Go through all the histograms of lhs
-        int numhist, pid;
-        numhist = lhs->getNumberHistograms();
-        for (int i=0; i < numhist; i++)
-        {
-          //Pixel ID of that histogram #
-          pid = (*lhs_map)[i];
-          //Concatenate event lists
-          outWS->getEventListAtPixelID(pid) += lhs->getEventList(i);
-          //Copy the cow_ptr to the same X axis used in the other
-          outWS->getEventListAtPixelID(pid).setX( lhs->refX(i) );
-
-          progress.report();
-        }
-
-        //Same for the RHS workspace
-        numhist = rhs->getNumberHistograms();
-        for (int i=0; i < numhist; i++)
-        {
-          pid = (*rhs_map)[i];
-          outWS->getEventListAtPixelID(pid) += rhs->getEventList(i);
-          outWS->getEventListAtPixelID(pid).setX( rhs->refX(i) );
-          progress.report();
-        }
-
-        //Finalize the event list histograms and such.
-        outWS->doneLoadingData();
-
-        delete lhs_map;
-        delete rhs_map;
+        //And we copy all the events from the lhs
+        outWS->copyDataFrom( *lhs );
+        //And this is what we'll add in to it
+        adder = rhs;
       }
-
       else
       {
         //Should never happen
         throw Exception::NotImplementedError("Plus::execEvent:outWS came out non-null, but does not match either lhs or rhs workspaces. This should not happen.");
       }
+
+      //Go through all the histograms and add up the event lists
+      //(Number of histograms has to match, from checkEventCompatibility)
+      int numhist = outWS->getNumberHistograms();
+      for (int i=0; i < numhist; i++)
+      {
+        //Concatenate event lists
+        outWS->getEventList(i) += adder->getEventList(i);
+        //Two steps (handled two lists at once)
+        progress.report(2);
+      }
+      //Redo the spectra to detector IDs map
+      outWS->makeSpectraMap();
+      //Clear the MRU list since its not valid anymore.
+      outWS->clearMRU();
 
       // only overridden for some operations (plus and minus at the time of writing)
       operateOnRun(lhs->run(), rhs->run(), outWS->mutableRun());
