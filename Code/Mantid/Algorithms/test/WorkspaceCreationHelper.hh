@@ -158,15 +158,15 @@ public:
         for (int i=0; i<numEvents; i++)
         {
           if (eventPattern == 1) // 0, 1 diagonal pattern
-            retVal->getEventList(pix) += TofEvent((pix+i+0.5)*binDelta, 1); 
+            retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, 1); 
           else if (eventPattern == 2) // solid 2
           {
-            retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1); 
-            retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1); 
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, 1); 
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, 1); 
           }
           else if (eventPattern == 3) // solid 1
           {
-            retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, 1);
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, 1);
           }
         }
       }

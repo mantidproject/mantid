@@ -150,7 +150,7 @@ void MaskBins::execEvent()
   for (int i = 0; i < numHists; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    outputWS->getEventListAtWorkspaceIndex(i).maskTof(m_startX, m_endX);
+    outputWS->getEventList(i).maskTof(m_startX, m_endX);
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }

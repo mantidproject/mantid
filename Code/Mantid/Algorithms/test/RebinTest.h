@@ -203,7 +203,7 @@ public:
     EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("test_inEvent", test_in);
 
-    const EventList el(test_in->getEventListAtWorkspaceIndex(1));
+    const EventList el(test_in->getEventList(1));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
@@ -219,7 +219,7 @@ public:
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    const EventList el2(test_in->getEventListAtWorkspaceIndex(2));
+    const EventList el2(test_in->getEventList(2));
     TS_ASSERT_EQUALS( el2.dataX()[0], 0.0);
     TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
 
@@ -240,7 +240,7 @@ public:
     rebin.setPropertyValue("OutputWorkspace","test_inEvent");
     rebin.setPropertyValue("Params", "0.0,4.0,100");
     TS_ASSERT(rebin.execute());
-    const EventList el3(test_in->getEventListAtWorkspaceIndex(2));
+    const EventList el3(test_in->getEventList(2));
     TS_ASSERT_EQUALS(el3.dataX().size(), 26);
 
 
@@ -249,7 +249,7 @@ public:
     rebin.setPropertyValue("OutputWorkspace","test_inEvent");
     rebin.setPropertyValue("Params", "-100.0,4.0,100");
     TS_ASSERT(rebin.execute());
-    const EventList el4(test_in->getEventListAtWorkspaceIndex(2));
+    const EventList el4(test_in->getEventList(2));
     TS_ASSERT_EQUALS(el4.dataX().size(), 51);
 
     EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve("test_inEvent"));
@@ -264,7 +264,7 @@ public:
     EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("test_inEvent2", test_in);
 
-    const EventList el(test_in->getEventListAtWorkspaceIndex(1));
+    const EventList el(test_in->getEventList(1));
     //Correct # of bins?
     TS_ASSERT_EQUALS(test_in->blocksize(), NUMBINS-1);
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
@@ -339,7 +339,7 @@ private:
     for (int i=0; i< numpixels; i++)
     {
       //Create one event for each bin
-      EventList& events = retVal->getEventList(i);
+      EventList& events = retVal->getEventListAtPixelID(i);
       for (double ie=0; ie<numbins; ie++)
       {
         //Create a list of events in order, one per bin.

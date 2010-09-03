@@ -149,6 +149,32 @@ public:
     TS_ASSERT_EQUALS(rel[5].tof(), 50);
   }
 
+  void testDetectorIDs()
+  {
+    EventList el1;
+    el1.addDetectorID( 14 );
+    TS_ASSERT_EQUALS( el1.getDetectorIDs().size(), 1);
+    el1.addDetectorID( 21 );
+    TS_ASSERT_EQUALS( el1.getDetectorIDs().size(), 2);
+    el1.addDetectorID( 21 );
+    TS_ASSERT_EQUALS( el1.getDetectorIDs().size(), 2);
+
+    EventList el2;
+    el2.addDetectorID( 7 );
+    el2.addDetectorID( 14 );
+    el2.addDetectorID( 28 );
+    TS_ASSERT_EQUALS( el2.getDetectorIDs().size(), 3);
+
+    //One detID was repeated, so it doesn't appear twice
+    el2 += el1;
+    TS_ASSERT_EQUALS( el2.getDetectorIDs().size(), 4);
+    //Find the right stuff
+    for (int i=7; i< 35; i+=7)
+      TS_ASSERT( el2.hasDetectorID(i) );
+    TS_ASSERT( !el2.hasDetectorID(0) );
+
+  }
+
   //==================================================================================
   //--- Sorting Tests ---
 

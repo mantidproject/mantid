@@ -174,13 +174,21 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
   /// Get an EventList object at the given pixelid/spectrum number
-  EventList& getEventList(const int pixelid);
+  EventList& getEventListAtPixelID(const int pixelid);
 
   /// Get an EventList object at the given workspace index number
-  EventList& getEventListAtWorkspaceIndex(const int workspace_index);
+  EventList& getEventList(const int workspace_index);
 
   /// Get a const EventList object at the given workspace index number
-  const EventList& getEventListAtWorkspaceIndex(const int workspace_index) const;
+  const EventList& getEventList(const int workspace_index) const;
+
+  /// Get or add an EventList
+  EventList& getOrAddEventList(const int workspace_index);
+
+  /// Make all the mapping stuff
+  void makeSpectraMap();
+  void makeAxis1();
+  void doneAddingEventLists();
 
   /// Call this method when loading event data is complete.
   void doneLoadingData(int makeSpectraMap = 1);

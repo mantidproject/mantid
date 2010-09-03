@@ -77,6 +77,8 @@ public:
   void getSpectraIndexMap(spec2index_map&) const;
   void getIndexSpectraMap(spec2index_map& map) const;
 
+  void populateSimple(int end);
+
 private:
   /// Private, undefined copy assignment operator
   const SpectraAxis& operator=(const SpectraAxis&);

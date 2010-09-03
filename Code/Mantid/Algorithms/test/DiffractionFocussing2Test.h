@@ -103,7 +103,7 @@ public:
     //Fake a d-spacing unit in the data.
     inputW->getAxis(0)->unit() =UnitFactory::Instance().create("dSpacing");
 
-    //Create a DIFFERENT x-axis for each pixel. Starting bing = the workspace index #
+    //Create a DIFFERENT x-axis for each pixel. Starting bin = the input workspace index #
     for (int pix=0; pix < numpixels_with_events; pix++)
     {
       Kernel::cow_ptr<MantidVec> axis;
@@ -117,7 +117,7 @@ public:
     }
 
     focus.setPropertyValue("InputWorkspace", "refl");
-    std::string outputws( "refl" );
+    std::string outputws( "refl2" );
     focus.setPropertyValue("OutputWorkspace", outputws);
 
     //This fake calibration file was generated using DiffractionFocussing2Test_helper.py
@@ -133,10 +133,13 @@ public:
     //The fake grouping file has 100 groups, starting at 1, so there'll be 100 histograms
     int numgroups = 100;
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
-    //This means that the map between workspace index and spectrum # is just off by 1
+    if (output->getNumberHistograms() != numgroups)
+      return;
+
+    //The map between workspace index and spectrum # is still 1:1
     TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups);
-    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 1);
-    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups);
+    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 0);
+    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups-1);
 
     //Because no pixels are rejected or anything, the total # of events should stay the same.
     TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
@@ -145,36 +148,39 @@ public:
     int * expected_total_events = new int[numgroups+1];
 
     //Now let's test the grouping of detector UDETS to groups
-    for (int group=1; group<numgroups+1; group++)
+    for (int group=1; group<=numgroups; group++)
     {
-      std::vector<int> mylist = output->spectraMap().getDetectors(group);
+      int workspaceindex_in_output = group-1;
+
+      //This is the list of the detectors (grouped)
+      std::vector<int> mylist = output->spectraMap().getDetectors(workspaceindex_in_output);
+
       //Each group has around 47 detectors, but there is some variation. They are all above 35 though
       TS_ASSERT_LESS_THAN(35, mylist.size());
       int numevents = 0;
+
       //This is to find the workspace index for a given original spectrum #
-      Mantid::API::SpectraAxis::spec2index_map mymap;
-      Mantid::API::SpectraAxis* axis = dynamic_cast<Mantid::API::SpectraAxis*>(inputW->getAxis(1));
-      TS_ASSERT(axis);
-      axis->getSpectraIndexMap(mymap);
+      Mantid::API::IndexToIndexMap * mymap = inputW->getDetectorIDToWorkspaceIndexMap();
 
       for (int i=0; i<mylist.size(); i++)
       {
         //The formula for assigning fake group #
         TS_ASSERT_EQUALS( (mylist[i] % numgroups)+1, group );
         //The workspace index in the input workspace for this detector #
-        int workspaceIndex = mymap[ mylist[i] ];
+        int workspaceIndex_in_input = (*mymap)[ mylist[i] ];
         //Add up the events
-        numevents += inputW->getEventListAtWorkspaceIndex(workspaceIndex).getNumberEvents();
+        numevents += inputW->getEventList(workspaceIndex_in_input).getNumberEvents();
       }
       //Look up how many events in the output, summed up spectrum (workspace index = group-1)
-      TS_ASSERT_EQUALS(numevents, output->getEventListAtWorkspaceIndex(group-1).getNumberEvents());
+      TS_ASSERT_EQUALS(numevents, output->getEventList(workspaceindex_in_output).getNumberEvents());
 
       //The first X bin of each group corresponds to the workspace index in the INPUT workspace of the first pixel in the group.
-      int workspaceindex_in_output = group-1;
       TS_ASSERT( (*output->refX(workspaceindex_in_output)).size() > 0);
-      TS_ASSERT_EQUALS((*output->refX(workspaceindex_in_output))[0], mymap[ mylist[0] ]);
+      TS_ASSERT_EQUALS((*output->refX(workspaceindex_in_output))[0], (*mymap)[ mylist[0] ]);
       //Save the # of events for later
       expected_total_events[workspaceindex_in_output] = numevents;
+
+      delete mymap;
 
     }
 
@@ -192,7 +198,7 @@ public:
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
 
 
-    for (int workspace_index=0; workspace_index<output->getNumberHistograms()-1; workspace_index++)
+    for (int workspace_index=0; workspace_index<output->getNumberHistograms(); workspace_index++)
     {
       //should be 16 bins
       TS_ASSERT_EQUALS( output->refX(workspace_index)->size(), 16);
@@ -210,7 +216,7 @@ public:
 
 
   //Warning: can be a slow test.
-  void testEventWorkspace_PG3()
+  void xtestEventWorkspace_PG3()
   {
     std::string outputws( "pg3" );
 

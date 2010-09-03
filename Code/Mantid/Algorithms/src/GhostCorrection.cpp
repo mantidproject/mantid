@@ -341,7 +341,7 @@ namespace Mantid
           int inputDetectorID = it->second;
 
           //This is the events in the pixel CAUSING the ghost.
-          const EventList & sourceEventList = eventW->getEventListAtWorkspaceIndex(inputWorkspaceIndex);
+          const EventList & sourceEventList = eventW->getEventList(inputWorkspaceIndex);
 
           //Now get the actual vector of tofevents
           const std::vector<TofEvent>& events = sourceEventList.getEvents();
@@ -457,7 +457,7 @@ namespace Mantid
 //      for (int i=0; i < eventW->getNumberHistograms(); i++)
 //      {
 //        PARALLEL_START_INTERUPT_REGION
-//        eventW->getEventListAtWorkspaceIndex(i).sortTof();
+//        eventW->getEventList(i).sortTof();
 //        prog.report();
 //        PARALLEL_END_INTERUPT_REGION
 //      }
@@ -491,7 +491,7 @@ namespace Mantid
 //          int inputWorkspaceIndex = it->first;
 //          double weight = it->second;
 //          //This is the histogram of the pixel CAUSING the ghost.
-//          EventList sourceEvents = eventW->getEventListAtWorkspaceIndex(inputWorkspaceIndex);
+//          EventList sourceEvents = eventW->getEventList(inputWorkspaceIndex);
 //
 //          //Histogram it using the binning parameters of the output workspace.
 //          MantidVec sourceY;
@@ -599,7 +599,7 @@ namespace Mantid
 //            else
 //            {
 //              //This is the histogram of the pixel CAUSING the ghost.
-//              EventList sourceEvents = eventW->getEventListAtWorkspaceIndex(wi);
+//              EventList sourceEvents = eventW->getEventList(wi);
 //
 //              //Histogram it using the binning parameters of the output workspace.
 //              MantidVec sourceY;

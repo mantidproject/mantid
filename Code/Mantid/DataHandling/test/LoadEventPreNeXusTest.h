@@ -146,20 +146,26 @@ public:
     //Is the length good?
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
 
+    //WorkspaceIndex to spectrum number is simple 1:1
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 1);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(122), 122);
+
     //First pixel with events.
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 12085);
-    //And the spectra # grow monotonically
-    TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
+    std::vector<int> dets = ew->spectraMap().getDetectors(1);
+    TS_ASSERT_EQUALS( dets.size(), 1);
+    TS_ASSERT_EQUALS( dets[0], 12085); //This is the pixel ID of the first spectrum
+
+    //And the pixel IDs grow monotonically
+    dets = ew->spectraMap().getDetectors(2);
+    TS_ASSERT_EQUALS( dets.size(), 1);
+    TS_ASSERT( dets[0] > 12085);
+
     //The detector has 304x256 pixels
     TS_ASSERT_LESS_THAN( ew->getAxis(1)->spectraNo(numpixels_with_events-1), 304*256);
     int max_pixel_id = ew->getAxis(1)->spectraNo(numpixels_with_events-1);
 
-    //Now the mapping of spectrum # to detector #; is a simple 1-1 map.
-    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), max_pixel_id+1);
-    TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(0)[0], 0);
-    TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(2)[0], 2);
-    TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(256)[0], 256);
-    TS_ASSERT_EQUALS( ew->spectraMap().getDetectors(61661)[0], 61661);
+    //And the spectramap length matches the # of pixels with events
+    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), numpixels_with_events);
 
   }
 
@@ -223,10 +229,10 @@ public:
     TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), inputWS->getNumberHistograms() );
     TS_ASSERT_EQUALS( outputWS->getInstrument()->getName(), "CNCS");
 
-    TS_ASSERT_EQUALS( outputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(), inputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof() );
+    TS_ASSERT_EQUALS( outputWS->getEventList(0).getEvents()[0].tof(), inputWS->getEventList(0).getEvents()[0].tof() );
     //It should be possible to change an event list and not affect the other one
-    outputWS->getEventListAtWorkspaceIndex(0).convertTof(1.5, 0.2);
-    TS_ASSERT_DIFFERS( outputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(), inputWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof() );
+    outputWS->getEventList(0).convertTof(1.5, 0.2);
+    TS_ASSERT_DIFFERS( outputWS->getEventList(0).getEvents()[0].tof(), inputWS->getEventList(0).getEvents()[0].tof() );
 
     //Setting X should still be possible
     Kernel::cow_ptr<MantidVec> x;
@@ -295,12 +301,19 @@ public:
     int numpixels = 2;
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
 
-    //Mapping between workspace index and spectrum number
-    //Is the length good?
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 45);
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 110);
+    //Mapping between workspace index and spectrum number; simple
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 0);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 1);
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 2);
 
+    //Are the pixel IDs ok?
+    std::vector<int> dets = ew->spectraMap().getDetectors(0);
+    TS_ASSERT_EQUALS( dets.size(), 1);
+    TS_ASSERT_EQUALS( dets[0], 45);
+
+    dets = ew->spectraMap().getDetectors(1);
+    TS_ASSERT_EQUALS( dets.size(), 1);
+    TS_ASSERT_EQUALS( dets[0], 110);
   }
 
 

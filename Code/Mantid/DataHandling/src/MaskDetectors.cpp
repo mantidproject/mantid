@@ -140,7 +140,7 @@ void MaskDetectors::exec()
     if (eventWS)
     {
       //Valid event workspace - clear the event list.
-      eventWS->getEventListAtWorkspaceIndex(*it).clear();
+      eventWS->getEventList(*it).clear();
     }
     else
     {

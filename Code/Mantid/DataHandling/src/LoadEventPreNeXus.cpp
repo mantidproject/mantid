@@ -412,7 +412,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
         longest_tof = tof;
 
       //The addEventQuickly method does not clear the cache, making things slightly faster.
-      workspace->getEventList(temp.pid).addEventQuickly(event);
+      workspace->getEventListAtPixelID(temp.pid).addEventQuickly(event);
 
       // TODO work with period
       this->num_good_events++;
@@ -444,7 +444,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
         if (!it->second->isMonitor())
         {
           // and simply get the event list. It will be created if it was not there already.
-          workspace->getEventList(it->first); //it->first is detector ID #
+          workspace->getEventListAtPixelID(it->first); //it->first is detector ID #
         }
       }
 
@@ -588,7 +588,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 //          TofEvent event = TofEvent(tof, frame_index);
 //          //TODO: Fix the PID here
 //          //Add it to the list
-//          workspace->getEventList(pid).addEventQuickly(event);
+//          workspace->getEventListAtPixelID(pid).addEventQuickly(event);
 //        }
 //      }
 //    }
@@ -622,10 +622,10 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 ////      this->fixPixelId(temp.pid, period);
 ////
 ////      //Parallel: this critical block is almost certainly killing parallel efficiency.
-////      //workspace->getEventList(temp.pid) += event;
+////      //workspace->getEventListAtPixelID(temp.pid) += event;
 ////
 ////      //The addEventQuickly method does not clear the cache, making things slightly faster.
-////      workspace->getEventList(temp.pid).addEventQuickly(event);
+////      workspace->getEventListAtPixelID(temp.pid).addEventQuickly(event);
 ////
 ////            // TODO work with period
 ////            // TODO filter based on pixel ids
@@ -655,7 +655,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 //  {
 //    //Go through each pixel in the map
 //    // and simply get the event list. It will be created if empty.
-//    workspace->getEventList(*pix);
+//    workspace->getEventListAtPixelID(*pix);
 //  }
 //   */
 //

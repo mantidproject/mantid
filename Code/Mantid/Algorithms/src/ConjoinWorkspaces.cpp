@@ -156,15 +156,16 @@ void ConjoinWorkspaces::exec()
 void ConjoinWorkspaces::execEvent()
 {
   //We do not need to check that binning is compatible, just that there is no overlap
-  this->checkForOverlap(event_ws1, event_ws2);
+  this->checkForOverlap(event_ws1, event_ws2, false);
 
   // Create the output workspace
   const int totalHists = event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
+  // Have the minimum # of histograms in the output.
   EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace",
-          totalHists, event_ws1->readX(0).size(), event_ws1->readY(0).size())
+          1, event_ws1->readX(0).size(), event_ws1->readY(0).size())
       );
-  // Copy over stuff from first input workspace
+  // Copy over geometry (but not data) from first input workspace
   WorkspaceFactory::Instance().initializeFromParent(event_ws1,output,true);
 
   // Create the X values inside a cow pointer - they will be shared in the output workspace
@@ -175,41 +176,26 @@ void ConjoinWorkspaces::execEvent()
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
   const int& nhist1 = event_ws1->getNumberHistograms();
-  const Axis* axis1 = event_ws1->getAxis(1);
-//  PARALLEL_FOR2(event_ws1, output)
   for (int i = 0; i < nhist1; ++i)
   {
-//    PARALLEL_START_INTERUPT_REGION
-    //This is the spectrum # at the input
-    int specNo = axis1->spectraNo(i);
     //Copy the events over
-    output->getEventList(specNo).clear();
-    output->getEventList(specNo) += event_ws1->getEventListAtWorkspaceIndex(i).getEvents();
+    output->getOrAddEventList(i) = event_ws1->getEventList(i); //Should fire the copy constructor
     m_progress->report();
-//    PARALLEL_END_INTERUPT_REGION
   }
-//  PARALLEL_CHECK_INTERUPT_REGION
 
   //For second loop we use the offset from the first
   const int& nhist2 = event_ws2->getNumberHistograms();
-  const Axis* axis2 = event_ws2->getAxis(1);
-
-//  PARALLEL_FOR2(event_ws2, output)
   for (int j = 0; j < nhist2; ++j)
   {
-//    PARALLEL_START_INTERUPT_REGION
-    //This is the spectrum # at the input
-    int specNo = axis2->spectraNo(j);
+    //This is the workspace index at which we assign in the output
+    int output_wi = j + nhist1;
     //Copy the events over
-    output->getEventList(specNo).clear();
-    output->getEventList(specNo) += event_ws2->getEventListAtWorkspaceIndex(j).getEvents();
+    output->getOrAddEventList(output_wi) = event_ws2->getEventList(j); //Should fire the copy constructor
     m_progress->report();
-//    PARALLEL_END_INTERUPT_REGION
   }
-//  PARALLEL_CHECK_INTERUPT_REGION
 
   //This will make the spectramap axis.
-  output->doneLoadingData();
+  output->doneAddingEventLists();
 
   //Set the same bins for all output pixels
   output->setAllX(XValues);
@@ -273,16 +259,17 @@ void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API:
     throw std::invalid_argument(message);
   }
 
-  this->checkForOverlap(ws1,ws2);
+  this->checkForOverlap(ws1,ws2, true);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Checks that the two input workspaces have non-overlapping spectra numbers and contributing detectors
  *  @param ws1 The first input workspace
  *  @param ws2 The second input workspace
+ *  @param checkSpectra set to true to check for overlapping spectra numbers (non-sensical for event workspaces)
  *  @throw std::invalid_argument If there is some overlap
  */
-void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const
+void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const
 {
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);
@@ -308,10 +295,13 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   for (int j = 0; j < nhist2; ++j)
   {
     const int spectrum = axis2->spectraNo(j);
-    if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
+    if (checkSpectra)
     {
-      g_log.error("The input workspaces have overlapping spectrum numbers");
-      throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
+      if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
+      {
+        g_log.error("The input workspaces have overlapping spectrum numbers");
+        throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
+      }
     }
     std::vector<int> dets = specmap2.getDetectors(spectrum);
     std::vector<int>::const_iterator it;

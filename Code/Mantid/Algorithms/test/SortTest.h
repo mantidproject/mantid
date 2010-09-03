@@ -52,7 +52,7 @@ public:
 
     EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
-    std::vector<TofEvent> ve = outWS->getEventListAtWorkspaceIndex(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
       TS_ASSERT_LESS_THAN( ve[i].tof(), ve[i+1].tof());
@@ -77,7 +77,7 @@ public:
     TS_ASSERT(sort.isExecuted());
 
     EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-    std::vector<TofEvent> ve = outWS->getEventListAtWorkspaceIndex(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
       TS_ASSERT_LESS_THAN_EQUALS( ve[i].frame(), ve[i+1].frame());
@@ -107,7 +107,7 @@ private:
     for (int i=0; i< numpixels; i++)
     {
       //Create one event for each bin
-      EventList& events = retVal->getEventList(i);
+      EventList& events = retVal->getEventListAtPixelID(i);
       for (double ie=0; ie<numbins; ie++)
       {
         //Create a list of events, randomize

@@ -159,7 +159,7 @@ public:
     conj->initialize();
     TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","vulcan0") );
     TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","vulcan1") );
-    TS_ASSERT_THROWS_NOTHING( conj->execute() );
+    conj->execute();
     TS_ASSERT( conj->isExecuted() );
     delete conj;
 

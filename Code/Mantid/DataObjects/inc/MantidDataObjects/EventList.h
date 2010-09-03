@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include <set>
 
 namespace Mantid
 {
@@ -125,6 +126,13 @@ public:
   std::vector<TofEvent>& getEvents();
   const std::vector<TofEvent>& getEvents() const;
 
+  void addDetectorID(const int detID);
+
+  bool hasDetectorID(const int detID) const;
+
+  std::set<int>& getDetectorIDs();
+  const std::set<int>& getDetectorIDs() const;
+
   void clear();
 
   void sort(const EventSortType order) const;
@@ -178,8 +186,12 @@ private:
 
   /// Last sorting order
   mutable EventSortType order;
+
   /** Cached version of the x axis. */
   mutable MantidVecPtr refX;
+
+  /// Set of the detector IDs associated with this EventList
+  std::set<int> detectorIDs;
 };
 
 } // DataObjects

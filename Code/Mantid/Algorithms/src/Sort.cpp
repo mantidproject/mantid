@@ -72,9 +72,9 @@ namespace Mantid
 
           //Perform the sort
           if (sortByTof)
-            eventW->getEventListAtWorkspaceIndex(i).sortTof();
+            eventW->getEventList(i).sortTof();
           else
-            eventW->getEventListAtWorkspaceIndex(i).sortFrame();
+            eventW->getEventList(i).sortFrame();
 
           //Report progress
           prog.report();

@@ -168,11 +168,11 @@ public:
     EventWorkspace_sptr WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     TS_ASSERT(WSO);
 
-    TS_ASSERT_DIFFERS(WSI->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(),
-        WSO->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS(WSI->getEventList(0).getEvents()[0].tof(),
+        WSO->getEventList(0).getEvents()[0].tof());
 
-    TS_ASSERT_DIFFERS(WSI->getEventListAtWorkspaceIndex(0).dataX()[1],
-        WSO->getEventListAtWorkspaceIndex(0).dataX()[1]);
+    TS_ASSERT_DIFFERS(WSI->getEventList(0).dataX()[1],
+        WSO->getEventList(0).dataX()[1]);
 	}
 
 private:

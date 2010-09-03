@@ -152,9 +152,10 @@ namespace DataObjects
   // --- Constructors -------------------------------------------------------------------
 
   /// Constructor (empty)
-  EventList::EventList()
+  EventList::EventList() :
+      order(UNSORTED),
+      detectorIDs()
   {
-    this->order = UNSORTED;
   }
 
   /** Constructor copying from an existing event list
@@ -189,9 +190,12 @@ namespace DataObjects
     this->events.assign(rhs.events.begin(), rhs.events.end());
     this->refX = rhs.refX;
     this->order = rhs.order;
+    //Copy the detector ID set
+    this->detectorIDs = rhs.detectorIDs;
     return *this;
   }
 
+  // --------------------------------------------------------------------------
   /** Append an event to the histogram.
    * @param event TofEvent to add at the end of the list.*/
   EventList& EventList::operator+=(const TofEvent &event)
@@ -201,6 +205,7 @@ namespace DataObjects
     return *this;
   }
 
+  // --------------------------------------------------------------------------
   /** Append a list of events to the histogram.
    * @param more_events A vector of events to append.*/
   EventList& EventList::operator+=(const std::vector<TofEvent> & more_events)
@@ -210,18 +215,26 @@ namespace DataObjects
     return *this;
   }
 
-  /** Append a list of events to the histogram.
+  // --------------------------------------------------------------------------
+  /** Append another EventList to this event list.
+   * The event lists are concatenated, and a union of the sets of detector ID's is done.
    * @param more_events Another EventList.
    * */
   EventList& EventList::operator+=(const EventList& more_events)
   {
     vector<TofEvent> rel = more_events.getEvents();
     this->events.insert(this->events.end(), rel.begin(), rel.end());
-    this->order = UNSORTED;    
+    this->order = UNSORTED;
+    //Do a union between the detector IDs of both lists
+    std::set<int>::const_iterator it;
+    for (it = more_events.detectorIDs.begin(); it != more_events.detectorIDs.end(); it++ )
+      this->detectorIDs.insert( *it );
+
     return *this;
   }
 
 
+  // --------------------------------------------------------------------------
   /** Append an event to the histogram, without clearing the cache, to make it faster.
    * @param event TofEvent to add at the end of the list.
    * */
@@ -230,6 +243,38 @@ namespace DataObjects
     this->events.push_back(event);
   }
 
+
+  // --------------------------------------------------------------------------
+  /** Add a detector ID to the set of detector IDs
+   *
+   * @param detID detector ID to insert in set.
+   */
+  void EventList::addDetectorID(const int detID)
+  {
+    this->detectorIDs.insert( detID );
+  }
+
+  // --------------------------------------------------------------------------
+  /** Return true if the given detector ID is in the list for this eventlist */
+  bool EventList::hasDetectorID(const int detID) const
+  {
+    return ( detectorIDs.find(detID) != detectorIDs.end() );
+  }
+
+  // --------------------------------------------------------------------------
+  /** Get a const reference to the detector IDs set.
+   */
+  const std::set<int>& EventList::getDetectorIDs() const
+  {
+    return this->detectorIDs;
+  }
+
+  /** Get a mutable reference to the detector IDs set.
+   */
+  std::set<int>& EventList::getDetectorIDs()
+  {
+    return this->detectorIDs;
+  }
 
   // --------------------------------------------------------------------------
   // --- Handling the event list -------------------------------------------------------------------
@@ -245,10 +290,13 @@ namespace DataObjects
     return this->events;
   }
 
-  /** Clear the list of events */
+  /** Clear the list of events and any
+   * associated detector ID's.
+   * */
   void EventList::clear()
   {
-    this->events.clear();    
+    this->events.clear();
+    this->detectorIDs.clear();
   }
 
   // --------------------------------------------------------------------------

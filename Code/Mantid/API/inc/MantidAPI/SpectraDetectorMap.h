@@ -72,6 +72,8 @@ public:
   void populateSimple(const int start, const int end);
   /// Link a list of UDETs to the given spectrum
   void addSpectrumEntries(const int spectrum, const std::vector<int>& udetList);
+  void addSpectrumEntries(const int spectrum, const std::set<int>& detectorIDs);
+
   /// Move a detector from one spectrum to another
   void remap(const int oldSpectrum, const int newSpectrum);
   /// Empties the map

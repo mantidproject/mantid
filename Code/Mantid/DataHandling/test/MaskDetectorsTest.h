@@ -54,7 +54,7 @@ public:
       {
         //Just one event per pixel
         TofEvent event(1.23, 4.56);
-        spaceEvent->getEventList(j).addEventQuickly(event);
+        spaceEvent->getEventListAtPixelID(j).addEventQuickly(event);
         spaceEvent->getAxis(1)->spectraNo(j) = j;
         forSpecDetMap[j] = j;
       }

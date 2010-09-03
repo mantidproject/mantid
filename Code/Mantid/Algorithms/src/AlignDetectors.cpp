@@ -356,7 +356,7 @@ void AlignDetectors::execEvent()
     double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
 
     //Perform the multiplication on all events
-    outputWS->getEventListAtWorkspaceIndex(i).convertTof(factor);
+    outputWS->getEventList(i).convertTof(factor);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

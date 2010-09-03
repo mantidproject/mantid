@@ -72,8 +72,8 @@ public:
       for (int i=0; i<NUMEVENTS; i++)
       {
         //Two events per bin
-        retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
-        retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+        retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+        retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
       }
     }
     retVal->doneLoadingData();
@@ -112,13 +112,32 @@ public:
     TS_ASSERT_EQUALS( ew->size(), (NUMBINS-1)*NUMPIXELS);
 
     //Are the returned arrays the right size?
-    const EventList el(ew->getEventListAtWorkspaceIndex(1));
+    const EventList el(ew->getEventList(1));
     TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
     TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS-1);
     TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS-1);
+    TS_ASSERT( el.hasDetectorID(1) );
 
     //Don't access data after doneLoadingData
-    TS_ASSERT_THROWS( ew->getEventList(12), std::runtime_error);
+    TS_ASSERT_THROWS( ew->getEventListAtPixelID(12), std::runtime_error);
+  }
+
+  //------------------------------------------------------------------------------
+  void testgetOrAddEventList()
+  {
+    //Pick some workspace index
+    EventList& el = ew->getOrAddEventList(1023);
+    //Now you got lots more histograms
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 1023+1);
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( el.getDetectorIDs().size(), 0);
+    TS_ASSERT( !el.hasDetectorID(1023) );
+
+    ew->doneAddingEventLists();
+    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 1023+1);
+    //but there are still only 500 entries in the spectra map, since only 500 of them have detectors
+    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), 500);
+
   }
 
   //------------------------------------------------------------------------------
@@ -146,7 +165,7 @@ public:
     TS_ASSERT_EQUALS( ew->size(), 0);
 
     //Didn't set X? well all the histograms are size 0
-    const EventList el(ew->getEventListAtWorkspaceIndex(1));
+    const EventList el(ew->getEventList(1));
     TS_ASSERT_EQUALS( el.dataX().size(), 0);
     TS_ASSERT_EQUALS( el.dataY()->size(), 0);
     TS_ASSERT_EQUALS( el.dataE()->size(), 0);
@@ -160,12 +179,12 @@ public:
     EventWorkspace_sptr uneven(new EventWorkspace);
     uneven->initialize(1,1,1);
 
-    //Make fake events. Spectrum IDs start at 5 increment by 10
+    //Make fake events. Pixel IDs start at 5 increment by 10
     for (int pix=5; pix<NUMPIXELS; pix += 10)
     {
       for (int i=0; i<pix; i++)
       {
-        uneven->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+        uneven->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
       }
     }
     uneven->doneLoadingData();
@@ -183,20 +202,23 @@ public:
     TS_ASSERT_EQUALS( uneven->blocksize(), (NUMBINS-1));
     TS_ASSERT_EQUALS( uneven->size(), (NUMBINS-1)*NUMPIXELS/10);
 
-    //The spectra map should be a dumb 1-1 map
-    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(0)[0], 0);
-    TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(5)[0], 5);
+    //Axis 1 is the map between spectrum # and the workspace index.
+    //  It should be a dumb 1-1 map
+    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(0), 0 );
+    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(5), 5 );
+    TS_ASSERT_EQUALS( uneven->getAxis(1)->length(), NUMPIXELS/10 );
 
-    //But axis 1 is the map between spectrum # and the workspace index
-    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(0), 5 );
-    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(5), 55 );
+    //The spectra map should take each workspace index and point to the right pixel id: 5,15,25, etc.
+    for (int i=0; i<uneven->getNumberHistograms(); i++)
+      TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(i)[0], 5 + i*10);
 
-    //Spectrum 0 is at pixelid 5 and has 5 events
-    const EventList el0(uneven->getEventListAtWorkspaceIndex(0));
+    //Workspace index 0 is at pixelid 5 and has 5 events
+    const EventList el0(uneven->getEventList(0));
     TS_ASSERT_EQUALS( el0.getNumberEvents(), 5);
-    const EventList el1(uneven->getEventListAtWorkspaceIndex(1));
+    //And so on, the # of events = pixel ID
+    const EventList el1(uneven->getEventList(1));
     TS_ASSERT_EQUALS( el1.getNumberEvents(), 15);
-    const EventList el5(uneven->getEventListAtWorkspaceIndex(5));
+    const EventList el5(uneven->getEventList(5));
     TS_ASSERT_EQUALS( el5.getNumberEvents(), 55);
 
     //Out of range
@@ -205,10 +227,10 @@ public:
   }
 
   //------------------------------------------------------------------------------
-  void test_getEventList()
+  void test_getEventListAtPixelID()
   {
     //Get pixel 1
-    const EventList el(ew->getEventListAtWorkspaceIndex(1));
+    const EventList el(ew->getEventList(1));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
     //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
@@ -266,7 +288,7 @@ public:
       xRef[i] = i*BIN_DELTA*2;
 
     ew->setX(0, axis);
-    const EventList el(ew->getEventListAtWorkspaceIndex(0));
+    const EventList el(ew->getEventList(0));
     TS_ASSERT_EQUALS( el.dataX()[0], 0);
     TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA*2);
 
@@ -281,7 +303,7 @@ public:
     TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2], 0);
 
     //But pixel 1 is the same, 2 events in the bin
-    const EventList el1(ew->getEventListAtWorkspaceIndex(1));
+    const EventList el1(ew->getEventList(1));
     TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
     TS_ASSERT_EQUALS( (*el1.dataY())[1], 2);
   }

@@ -191,7 +191,7 @@ namespace Mantid
         for (int i=0; i < numhist; i++)
         {
           //Concatenate event lists
-          outWS->getEventListAtWorkspaceIndex(i) += adder->getEventListAtWorkspaceIndex(i);
+          outWS->getEventList(i) += adder->getEventList(i);
           //Two steps (handled two lists at once)
           progress.report(2);
         }
@@ -223,9 +223,9 @@ namespace Mantid
           //Pixel ID of that histogram #
           pid = (*lhs_map)[i];
           //Concatenate event lists
-          outWS->getEventList(pid) += lhs->getEventListAtWorkspaceIndex(i);
+          outWS->getEventListAtPixelID(pid) += lhs->getEventList(i);
           //Copy the cow_ptr to the same X axis used in the other
-          outWS->getEventList(pid).setX( lhs->refX(i) );
+          outWS->getEventListAtPixelID(pid).setX( lhs->refX(i) );
 
           progress.report();
         }
@@ -235,8 +235,8 @@ namespace Mantid
         for (int i=0; i < numhist; i++)
         {
           pid = (*rhs_map)[i];
-          outWS->getEventList(pid) += rhs->getEventListAtWorkspaceIndex(i);
-          outWS->getEventList(pid).setX( rhs->refX(i) );
+          outWS->getEventListAtPixelID(pid) += rhs->getEventList(i);
+          outWS->getEventListAtPixelID(pid).setX( rhs->refX(i) );
           progress.report();
         }
 

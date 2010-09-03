@@ -121,8 +121,6 @@ public:
 
   void testParameterTags()
   {
-    int iii;
-    std::cin >> iii;
 
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());

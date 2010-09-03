@@ -76,6 +76,9 @@ using Kernel::Exception::NotImplementedError;
     //Initialize the data
     m_noVectors = NVectors;
     data.resize(m_noVectors, NULL);
+    //Make sure SOMETHING exists for all initialized spots.
+    for (int i=0; i < m_noVectors; i++)
+      data[i] = new EventList();
     this->done_loading_data = false;
 
     //Create axes.
@@ -204,76 +207,150 @@ using Kernel::Exception::NotImplementedError;
   // --- Data Access ----
   //-----------------------------------------------------------------------------
 
-  /** Get an EventList object at the given pixelid/spectrum number
-   * @param spectrumNumber Spectrum number to get. This is not necessarily the same as the workspace Index.
+  /** Used during data loading: gets, or CREATES an EventList object for a given pixelid.
+   * If never referred to before, an empty EventList (holding just the right pixel ID) is returned.
+   *
+   * @param pixelID pixelID of this event list. This is not necessarily the same as the workspace Index.
    * @returns A reference to the eventlist
    */
-  EventList& EventWorkspace::getEventList(const int spectrumNumber)
+  EventList& EventWorkspace::getEventListAtPixelID(const int pixelID)
   {
     if (this->done_loading_data)
-      throw std::runtime_error("EventWorkspace::getEventList called after doneLoadingData(). Try getEventListAtWorkspaceIndex() instead.");
+      throw std::runtime_error("EventWorkspace::getEventListAtPixelID called after doneLoadingData(). Try getEventList() instead.");
     //An empty entry will be made if needed
-    EventListMap::iterator it = this->data_map.find(spectrumNumber);
+    EventListMap::iterator it = this->data_map.find(pixelID);
     if (it == this->data_map.end())
     {
       //Need to make a new one!
       EventList * newel = new EventList();
+      //Set the (single) entry in the detector ID set
+      newel->addDetectorID( pixelID );
       //Save it in the map
-      this->data_map[spectrumNumber] = newel;
+      this->data_map[pixelID] = newel;
       return (*newel);
     }
     else
     {
       //Already exists; return it
-      return *this->data_map[spectrumNumber];
+      return *this->data_map[pixelID];
     }
   }
 
+  //-----------------------------------------------------------------------------
   /** Get an EventList object at the given workspace index number
    * @param workspace_index The histogram workspace index number.
    * @returns A reference to the eventlist
    */
-  EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index)
+  EventList& EventWorkspace::getEventList(const int workspace_index)
   {
-    return *this->data[workspace_index];
+    EventList * result = data[workspace_index];
+    if (!result)
+      throw std::runtime_error("EventWorkspace::getEventList: NULL EventList found.");
+    else
+      return *result;
   }
 
+  //-----------------------------------------------------------------------------
   /** Get a const EventList object at the given workspace index number
-   * @param workspace_index The histogram workspace index number.
+   * @param workspace_index The workspace index number.
    * @returns A const reference to the eventlist
    */
-  const EventList& EventWorkspace::getEventListAtWorkspaceIndex(const int workspace_index) const
+  const EventList& EventWorkspace::getEventList(const int workspace_index) const
   {
-    return *this->data[workspace_index];
+    EventList * result = data[workspace_index];
+    if (!result)
+      throw std::runtime_error("EventWorkspace::getEventList (const): NULL EventList found.");
+    else
+      return *result;
+  }
+
+  //-----------------------------------------------------------------------------
+  /** Either return an existing EventList from the list, or
+   * create a new one if needed and expand the list.
+   * NOTE: After you are done adding event lists, call doneAddingEventLists()
+   *  to finalize the stuff that needs to.
+   **
+   * @param workspace_index The workspace index number.
+   */
+  EventList& EventWorkspace::getOrAddEventList(const int workspace_index)
+    {
+    if (workspace_index < 0)
+      throw std::invalid_argument("EventWorkspace::getOrAddEventList: workspace_index < 0 is not valid.");
+
+    int old_size = static_cast<int>(data.size());
+    if (workspace_index >= old_size)
+    {
+      //Increase the size of the eventlist lists.
+      for (int wi = old_size; wi <= workspace_index; wi++)
+      {
+        //Need to make a new one!
+        EventList * newel = new EventList();
+        //Add to list
+        this->data.push_back(newel);
+      }
+      m_noVectors = data.size();
+    }
+
+    //Now it should be safe to return the value
+    EventList * result = data[workspace_index];
+    if (!result)
+      throw std::runtime_error("EventWorkspace::getOrAddEventList: NULL EventList found.");
+    else
+      return *result;
   }
 
 
   //-----------------------------------------------------------------------------
-  /** Adds a new EventList at the end of the current workspace index list.
-   * Copies the EventList from a const reference to another one.
-   * The # of histograms in the workspace increases by one.
-   *
-   * @param existingEventList a reference to an existing event list;
-   *            all events and the X histogram is copied.
-   * @return a pointer to the new EventList that was created.
+  /** Generate the spectra map (map between spectrum # and detector IDs)
+   * by using the info in each EventList.
    */
-  //EventList * EventWorkspace::addNewEventList(const EventList& existingEventList)
-  //{
-  //  EventList * newEL = new EventList(existingEventList);
-  //  this->data.push_back(newEl);
+  void EventWorkspace::makeSpectraMap()
+  {
+    //Flush the existing one
+    API::SpectraDetectorMap& myMap = mutableSpectraMap();
+    myMap.clear();
 
-  //  //Workspace index of the new data
-  //  int wi = this->data.size()-1;
+    //Go through all the spectra
+    for (int wi=0; wi<this->m_noVectors; wi++)
+    {
+      //And copy over the set of detector IDs. Not the smartest way to do it, but we are kinda stuck.
+      myMap.addSpectrumEntries(wi, this->data[wi]->getDetectorIDs() );
+    }
+  }
+
+  //-----------------------------------------------------------------------------
+  /** Generate the axes[1] (the mapping between workspace index and spectrum number)
+   * as a stupid 1:1 map.
+   */
+  void EventWorkspace::makeAxis1()
+  {
+    //We create a spectra-type axis that holds the spectrum # at each workspace index.
+    //  It is a simple 1-1 map (workspace index = spectrum #)
+    delete m_axes[1];
+    API::SpectraAxis * ax1 = new API::SpectraAxis(m_noVectors);
+    ax1->populateSimple(m_noVectors);
+    m_axes[1] = ax1;
+  }
 
 
-  //  //Spectrum number of this workspace index
-  //  this->m_axes[1]->spectraNo()
+  //-----------------------------------------------------------------------------
+  /** Call this method when you are done manually adding event lists
+   * at specific workspace indices.
+   * The spectra map and axis#1 are populated:
+   *      makeSpectraMap() to map to detector IDs
+   *      makeAxis1() to map workspace index to spectrum number
+   */
+  void EventWorkspace::doneAddingEventLists()
+  {
+    //Make the wi to spectra map
+    this->makeAxis1();
 
-  //  m_spectramap->addSpectrumEntries( )
+    //Now, make the spectra map (index -> detector ID)
+    this->makeSpectraMap();
 
-  //  this->m_noVectors = this->data.size();
-  //  return newEL;
-  //}
+    //Marker makes it okay to go on.
+    done_loading_data = true;
+  }
 
 
   //-----------------------------------------------------------------------------
@@ -291,61 +368,33 @@ using Kernel::Exception::NotImplementedError;
     {
       //Too many vectors! Why did you initialize it bigger than you needed to, silly?
       for (int i=this->data_map.size(); i<m_noVectors; i++)
+      {
         //Delete the offending EventList so as to avoid memory leaks.
         delete this->data[i];
+      }
     }
     //Now resize
     m_noVectors = this->data_map.size();
     this->data.resize(m_noVectors, NULL);
 
-    //For the mapping workspace
-    int* index_table = new int [m_noVectors];
-    int* pixelid_table = new int [m_noVectors];
-    int max_pixel_id = 0;
-
     int counter = 0;
     EventListMap::iterator it;
     for (it = this->data_map.begin(); it != this->data_map.end(); it++)
     {
-      //Iterate through the map
-      index_table[counter] = counter;
-      pixelid_table[counter] = it->first; //The key = the pixelid
-      //Find the maximum pixel id #
-      if (it->first > max_pixel_id)
-        max_pixel_id = it->first;
-
       //Copy the pointer to the event list in there.
       this->data[counter] = it->second;
-
+      //Increase the workspace index
       counter++;
     }
 
-    //We create a spectra-type axis that holds the spectrum # at each workspace index, in a convoluted and annoying way.
-    delete m_axes[1];
-    m_axes[1] = new API::SpectraAxis(m_noVectors);
-    //Fill it with the pixel id / spectrum # at workspace index i.
-    for (int i=0; i < m_noVectors; i++)
-      m_axes[1]->setValue(i, pixelid_table[i]);
+    //Make the wi to spectra map
+    this->makeAxis1();
 
-    if (makeSpectraMap)
-    {
-      g_log.information() << "About to populate spectra map with a 1:1 map up to " << max_pixel_id << "\n";
-      if (max_pixel_id > 10e6)
-      {
-        g_log.warning() << "Warning! The maximum pixel ID counted, " << max_pixel_id << ", is so large that it might be in error. The spectra map will only be made up to 10e6 pixels.\n";
-        max_pixel_id = 10e6;
-      }
-      //Make the mapping between spectrum # and pixel id (aka detector id)
-      //  In this case, it is a simple 1-1 map.
-      mutableSpectraMap().populateSimple(0, max_pixel_id+1); //Go to max_pixel_id+1 to make sure you catch that one too
-    }
+    //Now, make the spectra map (index -> detector ID)
+    this->makeSpectraMap();
 
-    //Now clear the data_map
+    //Now clear the data_map. We don't need it anymore
     this->data_map.clear();
-
-    //Get your memory back :)
-    delete [] index_table;
-    delete [] pixelid_table;
 
     //Cache the # of events (for getMemorySize)
     this->m_cachedNumberOfEvents = this->getNumberEvents();

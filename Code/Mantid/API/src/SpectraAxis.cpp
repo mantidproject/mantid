@@ -124,6 +124,14 @@ void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
   }
 }
 
+/** Populate the SpectraAxis with a simple 1:1 map from 0 to end-1.
+ */
+void SpectraAxis::populateSimple(int end)
+{
+  m_values.resize(static_cast<size_t>(end), 0);
+  for (int i=0; i < end; i++)
+    m_values[i] = i;
+}
 
 
 /** Check if two axis defined as spectra or numeric axis are equivalent

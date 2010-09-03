@@ -105,7 +105,7 @@ namespace Mantid
             outputW->setX(i, XValues_new);
 
             //Get a const event list reference. eventW->dataY() doesn't work.
-            const EventList& el = eventW->getEventListAtWorkspaceIndex(i);
+            const EventList& el = eventW->getEventList(i);
 
             //Now use this const method to generate a histogram without changing the event list or requiring const casts
             MantidVec y_data, e_data;

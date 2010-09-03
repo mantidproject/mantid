@@ -69,6 +69,21 @@ namespace Mantid
       }
     }
     
+
+    /** Links a SET of detector IDs to the given spectrum.
+     *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
+     *  @param spectrum The spectrum number to which detectors should be added
+     *  @param detectorIDs The std::set of detectors id's to add to the map
+     */
+    void SpectraDetectorMap::addSpectrumEntries(const int spectrum, const std::set<int>& detectorIDs)
+    {
+      std::set<int>::const_iterator it;
+      for (it = detectorIDs.begin(); it != detectorIDs.end(); ++it)
+      {
+        m_s2dmap.insert(std::pair<int,int>(spectrum,*it));
+      }
+    }
+
     /** Moves all detectors assigned to a particular spectrum number to a different one.
      *  Does nothing if the oldSpectrum number does not exist in the map.
      *  @param oldSpectrum The spectrum number to be removed and have its detectors reassigned

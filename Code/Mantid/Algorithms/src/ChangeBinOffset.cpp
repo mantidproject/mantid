@@ -160,7 +160,7 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
-        outputWS->getEventListAtWorkspaceIndex(i).addTof(offset);
+        outputWS->getEventList(i).addTof(offset);
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION
       }

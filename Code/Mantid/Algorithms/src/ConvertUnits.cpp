@@ -329,25 +329,25 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
       }
 
       // Convert from time-of-flight to the desired unit
-      MantidVec tofs = *outputWS->getEventListAtWorkspaceIndex(i).getTofs();
+      MantidVec tofs = *outputWS->getEventList(i).getTofs();
       fromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-      outputWS->getEventListAtWorkspaceIndex(i).setTofs(tofs);
+      outputWS->getEventList(i).setTofs(tofs);
 
       // convert the cached x-values to the desired unit
-      MantidVec x = (outputWS->getEventListAtWorkspaceIndex(i).getRefX()).access();
+      MantidVec x = (outputWS->getEventList(i).getRefX()).access();
       fromUnit->toTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       outputUnit->fromTOF(x,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-      outputWS->getEventListAtWorkspaceIndex(i).setX(x);
+      outputWS->getEventList(i).setX(x);
 
       // reverse the data if appropriate
       if ((!x.empty()) && (*(x.begin()) > *(x.end()-1)))
-          outputWS->getEventListAtWorkspaceIndex(i).reverse();
+          outputWS->getEventList(i).reverse();
 
     } catch (Exception::NotFoundError &e) {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
-      outputWS->getEventListAtWorkspaceIndex(i).clear();
+      outputWS->getEventList(i).clear();
     }
 
     prog.report();

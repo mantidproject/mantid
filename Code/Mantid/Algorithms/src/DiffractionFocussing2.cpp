@@ -265,8 +265,6 @@ void DiffractionFocussing2::execEvent()
       API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1) );
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(inputW, out, true);
-  //Make sure the output spectra map is clear (it should be anyway).
-  out->mutableSpectraMap().clear();
 
   // Make sure the group list is initialized
   this->initializeGroups();
@@ -281,24 +279,15 @@ void DiffractionFocussing2::execEvent()
   //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
   std::vector< MantidVec > original_X_to_use(nGroups+1);
 
-  //Shortcut to the spectra Map (maps spectrum # to a [list of] detector ID #s
-  const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
-  const API::Axis* const inSpecAxis = inputW->getAxis(1);
-
   API::Progress progress(this,0.0,1.0,nHist+nGroups);
   for (int i=0;i<nHist;i++)
   {
     progress.report();
     //i is the workspace index (of the input)
-    //and spectrum_no is the corresponding spectrum #
-    int spectrum_no = inSpecAxis->spectraNo(i);
-    //And these are the detectors at that spectrum
-    std::vector<int> detlist = inSpecMap.getDetectors(spectrum_no);
 
     //Check whether this spectra is in a valid group
     const int group=groupAtWorkspaceIndex[i];
-    //std::cout << "Workspace index " << i << ", which is spectrum # " << spectrum_no << ", goes to group " << group << "; this spectrum has " << detlist.size() << " detectors" << "\n";
-    if (group==-1) // Not in a group
+    if (group < 1) // Not in a group
       continue;
 
     // Assign the new X axis only once (i.e when this group is encountered the first time)
@@ -310,12 +299,8 @@ void DiffractionFocussing2::execEvent()
       flags[group]=false;
     }
 
-    // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    out->mutableSpectraMap().addSpectrumEntries(group, detlist);
-    //std::cout << "Group has " << out->mutableSpectraMap().getDetectors(group).size() << " detectors now.\n";
-
-    //In workspace index Group, but what was in the OLD workspace index i
-    out->getEventList(group) += eventW->getEventListAtWorkspaceIndex(i);
+    //In workspace index group-1, put what was in the OLD workspace index i
+    out->getOrAddEventList(group-1) += eventW->getEventList(i);
   }
 
   //Now, we want to make sure that all groups are listed in the output workspace,
@@ -326,37 +311,23 @@ void DiffractionFocussing2::execEvent()
     if (flags[group])
     {
       //Simply getting the event list will create it, if not already there.
-      EventList& emptyEventList = out->getEventList(group);
+      EventList& emptyEventList = out->getOrAddEventList(group-1);
       emptyEventList.clear();
       //If the X axis hasn't been set, just use the one from workspace index 0.
       original_X_to_use[group].assign( eventW->refX(0)->begin(), eventW->refX(0)->end())  ;
     }
   }
 
-  //Clean up the workspace index but don't change the spectraMap, since we made that manually
-  out->doneLoadingData(0);
+  //Finalize the maps
+  out->doneAddingEventLists();
 
   //Now that the data is cleaned up, go through it and set the X vectors to the input workspace we first talked about.
 
-  //(map to go from spectrum # to workspace index in the OUTPUT workspace)
-  Mantid::API::SpectraAxis* axis = dynamic_cast<Mantid::API::SpectraAxis*>(out->getAxis(1));
-  Mantid::API::SpectraAxis::spec2index_map mymap;
-  axis->getSpectraIndexMap(mymap);
-
   for (int g=1; g < nGroups; g++)
   {
-    //First look in the map to see if you find the group #
-    Mantid::API::SpectraAxis::spec2index_map::iterator it = mymap.find(g);
-    if (it == mymap.end())
-    {
-      if (g>0)
-        g_log.warning() << "Warning! No workspace index found for group # " << g << ". Histogram will be empty.\n";
-      continue;
-    }
+    //Now this is the workspace index of that group; simply 1 offset
+    int workspaceIndex = g-1;
 
-    //Now this is the workspace index of that group
-    int workspaceIndex = it->second;
-    //std::cout << "group" << g << " workspace index " << workspaceIndex << "\n";
     if (workspaceIndex >= out->getNumberHistograms())
     {
       g_log.warning() << "Warning! Invalid workspace index found for group # " << g << ". Histogram will be empty.\n";

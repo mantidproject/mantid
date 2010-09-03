@@ -113,7 +113,7 @@ public:
     TS_ASSERT( WS ); //workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    double a_tof = WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof();
+    double a_tof = WS->getEventList(0).getEvents()[0].tof();
 
     //Start by init'ing the algorithm
     TS_ASSERT_THROWS_NOTHING( align.initialize() );
@@ -134,7 +134,7 @@ public:
     TS_ASSERT_EQUALS( start_blocksize, WS->blocksize());
     TS_ASSERT_EQUALS( num_events, WS->getNumberEvents() );
     //But a TOF changed.
-    TS_ASSERT_DIFFERS(a_tof, WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS(a_tof, WS->getEventList(0).getEvents()[0].tof());
   }
 
 
@@ -147,7 +147,7 @@ public:
     TS_ASSERT( WS ); //workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    double a_tof = WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof();
+    double a_tof = WS->getEventList(0).getEvents()[0].tof();
 
     //Start by init'ing the algorithm
     TS_ASSERT_THROWS_NOTHING( align.initialize() );
@@ -171,7 +171,7 @@ public:
     TS_ASSERT_EQUALS( outWS->blocksize(), WS->blocksize());
     TS_ASSERT_EQUALS( outWS->getNumberEvents(), WS->getNumberEvents() );
     //But a TOF changed.
-    TS_ASSERT_DIFFERS( outWS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof(), WS->getEventListAtWorkspaceIndex(0).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS( outWS->getEventList(0).getEvents()[0].tof(), WS->getEventList(0).getEvents()[0].tof());
   }
 
 private:
