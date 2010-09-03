@@ -5,7 +5,7 @@
     ReductionStep objects. The guts needs refactoring.
 """
 from Reducer import ReductionStep
-from SANSReductionSteps import *
+import SANSReductionSteps
 from mantidsimple import *
 import SANSUtility
 import SANSInsts
@@ -19,7 +19,7 @@ def _issueWarning(msg):
     """
     mantid.sendLogMessage('::SANS::Warning: ' + msg)
     
-class Transmission(BaseTransmission):
+class Transmission(SANSReductionSteps.BaseTransmission):
     """
         Transmission calculation for ISIS SANS instruments
     """
@@ -424,33 +424,11 @@ class LoadRun(ReductionStep):
         # Return the file path actually used to load the data
         fullpath = alg.getPropertyValue("Filename")
         
-        reducer.opt_steps['SampleGeomCor'] = SampleGeomCor()
-        #set the defaults incase the following line fails
-        reducer.opt_steps['SampleGeomCor'].set_dimensions_to_unity()
-        reducer.opt_steps['SampleGeomCor'].read_from_workspace(workspace)
+        reducer.geometry_correcter.read_from_workspace(workspace)
         
         return [ os.path.dirname(fullpath), workspace, numPeriods]        
         
 
-#class DirectBeamTransmission(BaseTransmission):
-#    """
-#        Calculate transmission using the direct beam method
-#    """
-#    def __init__(self):
-#        super(DirectBeamTransmission, self).__init__()
-#        # Location of the data files used to calculate transmission
-#        ## Transmission workspace (output of transmission calculation)
-#        self.transmission_run = None
-#        self.can_run = None
-#        self.transmission_can = None
-#        self.direct = None
-#        self.direct_can = None
-#        
-#    def execute(self, reducer, workspace=None):
-#        """
-#        """
-##        if not self.transmission_run is None:
-#        pass
         
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None):

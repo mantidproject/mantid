@@ -40,6 +40,7 @@ class TestInstrument(unittest.TestCase):
         TransmissionSample('988.raw', '987.raw')
         TransmissionCan('989.raw', '987.raw')
         AssignSample('992.raw')
+        SetCentre(0,0)
         Reduce1D()
         
                 
@@ -54,6 +55,7 @@ class TestInstrument(unittest.TestCase):
         SANSReduction.TransmissionSample('988.raw', '987.raw')
         SANSReduction.TransmissionCan('989.raw', '987.raw')
         SANSReduction.AssignSample('992.raw')
+        SANSReduction.SetCentre(0,0)
         
         self.assertEqual(ReductionSingleton().instrument.FRONT_DET_Z_CORR,
                          SANSReduction.INSTRUMENT.FRONT_DET_Z_CORR)
@@ -84,6 +86,15 @@ class TestInstrument(unittest.TestCase):
         
         self.assertEqual(ReductionSingleton().DIRECT_BEAM_FILE_R,
                          SANSReduction.DIRECT_BEAM_FILE_R)
+        
+        self.assertEqual(ReductionSingleton().geometry_correcter._width,
+                         SANSReduction.SAMPLE_WIDTH)
+        
+        self.assertEqual(ReductionSingleton().geometry_correcter._height,
+                         SANSReduction.SAMPLE_HEIGHT)
+        
+        self.assertEqual(ReductionSingleton().geometry_correcter._thickness,
+                         SANSReduction.SAMPLE_THICKNESS)
         
         self.assertEqual(ReductionSingleton().PHIMIN,
                          SANSReduction.PHIMIN)
@@ -184,6 +195,15 @@ class TestInstrument(unittest.TestCase):
                          SANSReduction.DIRECT_CAN)
         self.assertEqual(ReductionSingleton().instrument._marked_dets,
                          SANSReduction.INSTRUMENT._marked_dets)
+        
+        #self.assertEqual(ReductionSingleton()._data_loader.SCATTER_SAMPLE,
+        #                 SANSReduction.SCATTER_SAMPLE)
+        self.assertEqual(ReductionSingleton()._data_loader._SAMPLE_SETUP,
+                         SANSReduction._SAMPLE_SETUP)
+        self.assertEqual(ReductionSingleton()._data_loader._SAMPLE_RUN,
+                         SANSReduction._SAMPLE_RUN)
+        self.assertEqual(ReductionSingleton()._data_loader._SAMPLE_N_PERIODS,
+                         SANSReduction._SAMPLE_N_PERIODS)
 
 
 if __name__ == '__main__':

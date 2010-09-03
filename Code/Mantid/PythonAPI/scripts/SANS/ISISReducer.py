@@ -41,10 +41,6 @@ class ISISReducer(SANSReducer):
     
     # Scaling values [%]
     RESCALE = 100.0
-    SAMPLE_GEOM = 3
-    SAMPLE_WIDTH = 1.0
-    SAMPLE_HEIGHT = 1.0
-    SAMPLE_THICKNESS = 1.0
     
     BACKMON_START = None
     BACKMON_END = None
@@ -71,6 +67,7 @@ class ISISReducer(SANSReducer):
         self._transmission_calculator = ISISReductionSteps.Transmission()
         # Default data loader
         self._data_loader = ISISReductionSteps.LoadSample()
+        self.geometry_correcter = SANSReductionSteps.SampleGeomCor()
         
     def set_user_path(self, path):
         """
@@ -201,10 +198,8 @@ class ISISReducer(SANSReducer):
         self.BACKMON_END = None
         self.BACKMON_START = None
         
-        self.SAMPLE_GEOM = 3
-        self.SAMPLE_WIDTH = 1.0
-        self.SAMPLE_HEIGHT = 1.0
-        self.SAMPLE_THICKNESS = 1.0
+        if self.geometry_correcter is not None:
+            self.geometry_correcter = SANSReductionSteps.SampleGeomCor()
         
         self.RESCALE = 100.0
     

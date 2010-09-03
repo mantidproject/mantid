@@ -115,8 +115,8 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._data_path, test_path)
         
     def test_direct_beam_center(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         Reduce1D()
         center = ReductionSingleton()._beam_finder.get_beam_center()
@@ -131,8 +131,8 @@ class TestCommands(unittest.TestCase):
         self.assertAlmostEqual(center[1], 2.2, 0.0001)
         
     def test_load_run(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         self.assertEqual(len(ReductionSingleton()._data_files), 0)
         AppendDataFile("BioSANS_test_data.xml")
         self.assertEqual(len(ReductionSingleton()._data_files), 1)  
@@ -145,8 +145,8 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(ReductionSingleton()._normalizer._normalization_spectrum, 1)
         
     def test_to_steps(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
@@ -160,8 +160,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_calculated.txt"))
     
     def skip_test_reduction_1(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml")
@@ -176,8 +176,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
 
     def test_no_solid_angle(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         NoSolidAngle()
@@ -191,8 +191,8 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(data[20], 0.252098592791137, 0.00001)
 
     def skip_test_reduction_2(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
@@ -207,8 +207,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
 
     def skip_test_straight_Q1D(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         AzimuthalAverage(error_weighting=True)
@@ -222,8 +222,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
 
     def test_transmission(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
     
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -240,8 +240,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(math.fabs(delta)<0.00001)
         
     def skip_test_spreader_transmission(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AzimuthalAverage(error_weighting=True)
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml", 
@@ -259,8 +259,8 @@ class TestCommands(unittest.TestCase):
         self.assertAlmostEqual(data[10], 0.0042193, 0.00001)
 
     def skip_test_transmission_by_hand(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -272,8 +272,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_transmission.txt", 0.0001))
             
     def test_center_by_hand(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml")
@@ -284,8 +284,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_by_hand.txt", 0.0001))
             
     def test_background(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml")
@@ -300,8 +300,8 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(data[20], 0.0)
             
     def test_bck_w_transmission(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml", "test_data")
         SensitivityCorrection("BioSANS_flood_data.xml")
@@ -318,8 +318,8 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(data[20], 0.0)
             
     def skip_test_transmission_by_hand_w_sensitivity(self):
-        DataPath(TEST_DIR)
         HFIRSANS()
+        DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -351,7 +351,7 @@ class TestCommands(unittest.TestCase):
         # we don't need to do a full reduction for this test, do a partial reduction
         ReductionSingleton().pre_process()
         ReductionSingleton()._reduction_steps[0].execute(ReductionSingleton(), "BioSANS_test_data")
-        ReductionSingleton().opt_steps['SampleGeomCor'].execute(ReductionSingleton(), "BioSANS_test_data")
+        ReductionSingleton().geometry_correcter.execute(ReductionSingleton(), "BioSANS_test_data")
           
         ws = mtd["BioSANS_test_data"]
         data = [ws.dataY(0)[0], ws.dataY(1)[0], ws.dataY(2)[0], ws.dataY(3)[0], ws.dataY(4)[0], ws.dataY(5)[0]]

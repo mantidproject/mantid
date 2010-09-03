@@ -106,3 +106,6 @@ def AssignSample(sample_run, reload = True, period = -1):
 def AppendDataFile(datafile, workspace=None):
     AssignSample(datafile)
     
+def SetCentre(XVAL, YVAL):
+    _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
+    SetBeamCenter(XVAL/1000.0, YVAL/1000.0)

@@ -556,15 +556,13 @@ class SampleGeomCor(ReductionStep):
     """
         Correct the neutron count rates for the size of the sample
     """
-    def __init__(self, trans=0.0, error=0.0):
+    def __init__(self):
         super(SampleGeomCor, self).__init__()
-        self._trans = trans
-        self._error = error
 
         # string specifies the sample's shape
         self._default_shape = 'cylinder-axis-along'
         self._shape = self._default_shape
-        self._width = self._thickness = self._height = None
+        self._width = self._thickness = self._height = 1.0
         # dictionary contains the list of all shapes that can be calculated and the id number for them
         self._shape_ids = {1 : 'cylinder-axis-up',
                            2 : 'cuboid',
@@ -603,7 +601,7 @@ class SampleGeomCor(ReductionStep):
         self.set_height(sample_details.getHeight())
         self.set_width(sample_details.getWidth())
         
-    def set_geometry(self,shape):
+    def set_geometry(self, shape):
         """
             Sets the sample's shape from a string or an ID. If the ID is not
             in the list of allowed values the shape is set to the default but
@@ -620,33 +618,33 @@ class SampleGeomCor(ReductionStep):
             shape = self._default_shape
         self._shape = shape
         
-    def set_width(self,width):
+    def set_width(self, width):
         self._width = float(width)
         # For a disk the height=width
         if self._shape.startswith('cylinder'):
             self._height = self._width
             
-    def set_height(self,height):
+    def set_height(self, height):
         self._height = float(height)
         
         # For a cylinder and sphere the height=width=radius
         if self._shape.startswith('cylinder'):
             self._width = self._height
 
-    def set_thickness(self,thickness):
+    def set_thickness(self, thickness):
         """
             Simply sets the variable _thickness to the value passed
         """
         if not self._shape == 'cuboid':
-            raise RuntimeError('Can''t set thickness for shape "'+self._shape+'"')
+            mantid.sendLogMessage('::SANS::Warning: Can''t set thickness for shape "'+self._shape+'"')
         self._thickness = float(thickness)
     
     def set_dimensions_to_unity(self):
         self._width = self._thickness = self._height = 1.0
 
-    def display(self):
-        print '-- Sample Geometry --\n' + \
-            '    Shape: ' + self._shape+'\n'+\
-            '    Width: ' + str(self._width)+'\n'+\
-            '    Height: ' + str(self._height)+'\n'+\
-            '    Thickness: ' + str(self._thickness)+'\n'   
+    def __str__(self):
+        return '-- Sample Geometry --\n' + \
+               '    Shape: ' + self._shape+'\n'+\
+               '    Width: ' + str(self._width)+'\n'+\
+               '    Height: ' + str(self._height)+'\n'+\
+               '    Thickness: ' + str(self._thickness)+'\n'   
