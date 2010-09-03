@@ -242,7 +242,6 @@ public:
     // test that can hold of "string" parameter in two ways
     boost::shared_ptr<IComponent> ptrNickelHolder = i->getComponentByName("nickel-holder");
     std::string dummyString = paramMap.getString(&(*ptrNickelHolder), "fjols-string");
-    //std::cout << "\n\n size " << dummyStringff << "\n\n";
     TS_ASSERT( dummyString.compare("boevs") == 0 );
     std::vector<std::string> dummyStringVec = paramMap.getString("nickel-holder", "fjols-string");
     TS_ASSERT( dummyStringVec[0].compare("boevs") == 0 );
@@ -259,8 +258,8 @@ public:
     boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1004);
     TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation2");
     TS_ASSERT_EQUALS( ptrDet1->getID(), 1004);
-    TS_ASSERT_DELTA( ptrDet1->getRelativePos().X(), 2.0, 0.0001);
-    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getRelativePos().X(), 10.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), -8.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 3.0, 0.0001);
 
     ptrDet1 = i->getDetector(1005);
@@ -274,7 +273,7 @@ public:
     TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation4");
     TS_ASSERT_EQUALS( ptrDet1->getID(), 1006);
     TS_ASSERT_DELTA( ptrDet1->getPos().X(), 20.0, 0.0001);
-    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), -8.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
 
     ptrDet1 = i->getDetector(1007);
@@ -289,6 +288,13 @@ public:
     TS_ASSERT_EQUALS( ptrDet1->getID(), 1008);
     TS_ASSERT_DELTA( ptrDet1->getPos().X(), 12.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1009);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation7");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1009);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 8.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);

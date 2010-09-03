@@ -637,7 +637,7 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
   }
 
-  Geometry::V3D pos;  // position may be defined from values in <location> combined with values from sub-elements <trans>
+  Geometry::V3D pos;  // position for <location>
 
   // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
   if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
@@ -685,13 +685,13 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
       // Subtract the two V3D's to get what we want (child's relative position in x,y,z)
       Geometry::V3D relPos;
       relPos = absPos - parentPos;
-      comp->setPos(relPos);
+      comp->translate(relPos);
     }
     else
     {
       // In this case, the value given represents a vector from the parent to the child
       pos.spherical(R,theta,phi);
-      comp->setPos(pos);
+      comp->translate(pos);
     }
 
   }
@@ -704,19 +704,60 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
 
     pos(x,y,z);
-    comp->setPos(pos);
+    comp->translate(pos);
   }
 
-  // Check if sub-elements <trans> present - for now ignore these if m_deltaOffset = true
+
+  // Rotate coordinate system of this component
+
+  if ( pElem->hasAttribute("rot") )
+  {
+    double rotAngle = atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+
+    double axis_x = 0.0;
+    double axis_y = 0.0;
+    double axis_z = 1.0;
+
+    if ( pElem->hasAttribute("axis-x") )
+      axis_x = atof( (pElem->getAttribute("axis-x")).c_str() );
+    if ( pElem->hasAttribute("axis-y") )
+      axis_y = atof( (pElem->getAttribute("axis-y")).c_str() );
+    if ( pElem->hasAttribute("axis-z") )
+      axis_z = atof( (pElem->getAttribute("axis-z")).c_str() );
+
+    comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));
+  }
+
+
+
+
+  // Check if sub-elements <trans> or <rot> of present - for now ignore these if m_deltaOffset = true
 
   Element* pRecursive = pElem;
   if ( !m_deltaOffsets )
   {
     bool stillTransElement = true;
-    Geometry::V3D posTrans;
+    //Geometry::V3D posTrans;
     while ( stillTransElement )
     {
+      // figure out if child element is <trans> or <rot> or none of these
+
       Element* tElem = pRecursive->getChildElement("trans");
+      Element* rElem = pRecursive->getChildElement("rot");
+
+      if (tElem && rElem)
+      {
+        // if both a <trans> and <rot> child element present. Ignore <rot> element
+        rElem = NULL;
+      }
+
+      if (!tElem && !rElem)
+      {
+        stillTransElement = false;
+      }
+
+      Geometry::V3D posTrans;
+
       if (tElem)
       {
         // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
@@ -745,67 +786,45 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 
           posTrans(x,y,z);
         }
-        pos += posTrans;     
 
-        pRecursive = tElem; // for recursive action
+        // to get the change in translation relative to current rotation of comp
+        Geometry::CompAssembly compToGetRot;
+        Geometry::CompAssembly compRot;
+        compRot.setRot(comp->getRotation());
+        compToGetRot.setParent(&compRot);
+        compToGetRot.setPos(posTrans);
+
+        // Apply translation
+        comp->translate(compToGetRot.getPos());   
+
+        // for recursive action
+        pRecursive = tElem; 
+      }  // end translation
+
+      if (rElem) 
+      {
+        double rotAngle = atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
+
+        double axis_x = 0.0;
+        double axis_y = 0.0;
+        double axis_z = 1.0;
+
+        if ( rElem->hasAttribute("axis-x") )
+          axis_x = atof( (rElem->getAttribute("axis-x")).c_str() );
+        if ( rElem->hasAttribute("axis-y") )
+          axis_y = atof( (rElem->getAttribute("axis-y")).c_str() );
+        if ( rElem->hasAttribute("axis-z") )
+          axis_z = atof( (rElem->getAttribute("axis-z")).c_str() );
+
+        comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));      
+
+        // for recursive action
+        pRecursive = rElem; 
       }
-      else
-        stillTransElement = false;
-    }
 
-    // Set potentially updated position
-    comp->setPos(pos);
-  }
+    } // end while
+  } //  end if ( !m_deltaOffsets )
 
-
-  // Rotate coordinate system of this component
-
-  if ( pElem->hasAttribute("rot") )
-  {
-    double rotAngle = atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
-
-    double axis_x = 0.0;
-    double axis_y = 0.0;
-    double axis_z = 1.0;
-
-    if ( pElem->hasAttribute("axis-x") )
-      axis_x = atof( (pElem->getAttribute("axis-x")).c_str() );
-    if ( pElem->hasAttribute("axis-y") )
-      axis_y = atof( (pElem->getAttribute("axis-y")).c_str() );
-    if ( pElem->hasAttribute("axis-z") )
-      axis_z = atof( (pElem->getAttribute("axis-z")).c_str() );
-
-    comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));
-  }
-
-  // loop recursively to see if location element containes (further) rotation instructions
-  pRecursive = pElem;
-  bool stillRotationElement = true;
-  while ( stillRotationElement )
-  {
-    Element* rotElement = pRecursive->getChildElement("rot");
-    if (rotElement) 
-    {
-      double rotAngle = atof( (rotElement->getAttribute("val")).c_str() ); // assumed to be in degrees
-
-      double axis_x = 0.0;
-      double axis_y = 0.0;
-      double axis_z = 1.0;
-
-      if ( rotElement->hasAttribute("axis-x") )
-        axis_x = atof( (rotElement->getAttribute("axis-x")).c_str() );
-      if ( rotElement->hasAttribute("axis-y") )
-        axis_y = atof( (rotElement->getAttribute("axis-y")).c_str() );
-      if ( rotElement->hasAttribute("axis-z") )
-        axis_z = atof( (rotElement->getAttribute("axis-z")).c_str() );
-
-      comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));      
-
-      pRecursive = rotElement; // for recursive action
-    }
-    else
-      stillRotationElement = false;
-  }
 }
 
 
