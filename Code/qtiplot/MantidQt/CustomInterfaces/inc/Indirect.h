@@ -68,6 +68,7 @@ namespace MantidQt
       void createRESfile(const QString& file); ///< create a RES file for use in Fury
       bool validateInput(); ///< validate input of "Energy Transfer" tab
       bool validateCalib(); ///< validate input of "Calibration" tab
+      bool validateSofQw(); ///< validate input of "S(Q, w)" tab
       bool isDirty(); ///< state whether interface has had any changes
       void isDirty(bool state); ///< signify changes to interface
       bool isDirtyRebin(); ///< state whether post-rebin interface has had any changes
@@ -93,6 +94,8 @@ namespace MantidQt
       void setasDirty(); ///< sets m_isDirty(true)
       void setasDirtyRebin(); ///< sets m_isDirtyRebin(true)
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
+
+      void sOfQwClicked(); ///< S(Q,w) tab run button clicked
 
     private:
       // member variables

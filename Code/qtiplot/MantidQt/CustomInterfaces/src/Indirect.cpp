@@ -71,6 +71,9 @@ void Indirect::initLayout()
   connect(m_uiForm.cal_pbCreate, SIGNAL(clicked()), this, SLOT(calibCreate()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
+  // "SofQW" tab
+  connect(m_uiForm.sqw_pbRun, SIGNAL(clicked()), this, SLOT(sOfQwClicked()));
+
   // set values of m_dataDir and m_saveDir
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
@@ -99,6 +102,10 @@ void Indirect::initLayout()
   m_uiForm.cal_leELow->setValidator(m_valDbl);
   m_uiForm.cal_leEWidth->setValidator(m_valDbl);
   m_uiForm.cal_leEHigh->setValidator(m_valDbl);
+  m_uiForm.sqw_leEFixed->setValidator(m_valDbl);
+  m_uiForm.sqw_leELow->setValidator(m_valDbl);
+  m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
+  m_uiForm.sqw_leEHigh->setValidator(m_valDbl);
 
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
@@ -865,6 +872,57 @@ bool Indirect::validateCalib()
 
   return valid;
 }
+
+bool Indirect::validateSofQw()
+{
+  bool valid = true;
+
+  if ( ! m_uiForm.sqw_inputFile->isValid() )
+  {
+    valid = false;
+  }
+
+  if ( m_uiForm.sqw_leEFixed->text() == "" )
+  {
+    valid = false;
+    m_uiForm.sqw_valEFixed->setText("*");
+  }
+  else
+  {
+    m_uiForm.sqw_valEFixed->setText(" ");
+  }
+
+  if ( m_uiForm.sqw_leELow->text() == "" )
+  {
+    valid = false;
+    m_uiForm.sqw_valELow->setText("*");
+  }
+  else
+  {
+    m_uiForm.sqw_valELow->setText(" ");
+  }
+
+  if ( m_uiForm.sqw_leEWidth->text() == "" )
+  {
+    valid = false;
+    m_uiForm.sqw_valEWidth->setText("*");
+  }
+  else
+  {
+    m_uiForm.sqw_valEWidth->setText(" ");
+  }
+  if ( m_uiForm.sqw_leEHigh->text() == "" )
+  {
+    valid = false;
+    m_uiForm.sqw_valEHigh->setText("*");
+  }
+  else
+  {
+    m_uiForm.sqw_valEHigh->setText(" ");
+  }
+  return valid;
+}
+
 /**
 * Used to check whether any changes have been made by the user to the interface.
 * @return boolean m_isDirty
@@ -1298,5 +1356,24 @@ void Indirect::calibFileChanged(const QString & calib)
   else
   {
     m_uiForm.ckUseCalib->setChecked(true);
+  }
+}
+
+void Indirect::sOfQwClicked()
+{
+  if ( validateSofQw() )
+  {
+    QString rebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
+    QString pyInput =
+      "from mantidsimple import *\n"
+      "LoadNexusProcessed(r'"+m_uiForm.sqw_inputFile->getFirstFilename()+ "','sqwInput')\n"
+      "efixed = " +m_uiForm.sqw_leEFixed->text()+"\n"
+      "rebin = '" + rebinString + "'\n"
+      "SofQW('sqwInput','sqwOutput',rebin,'Indirect',EFixed=efixed)\n";
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+  else
+  {
+    showInformationBox("Some of your input is invalid. Please check the input highlighted.");
   }
 }

@@ -303,6 +303,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     {
     case Direct:
         m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabCalibration));
+        m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabSofQW));
         m_uiForm.tabWidget->addTab(m_uiForm.tabDiagnoseDetectors, "Diagnose Detectors");
         m_uiForm.tabWidget->addTab(m_uiForm.tabAbsoluteUnits, "Absolute Units");
 
@@ -321,6 +322,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
         m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabDiagnoseDetectors));
         m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabAbsoluteUnits));
         m_uiForm.tabWidget->addTab(m_uiForm.tabCalibration, "Calibration");
+        m_uiForm.tabWidget->addTab(m_uiForm.tabSofQW, "S(Q, w)");
 
         if ( m_indirectInstruments == NULL )
         {
