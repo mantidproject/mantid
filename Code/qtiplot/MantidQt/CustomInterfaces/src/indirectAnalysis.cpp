@@ -49,6 +49,8 @@ void indirectAnalysis::initLayout()
   connect(m_uiForm.elwin_pbRun, SIGNAL(clicked()), this, SLOT(elwinRun()));
   // slice
   connect(m_uiForm.slice_pbRun, SIGNAL(clicked()), this, SLOT(sliceRun()));
+  connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
+  connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
   // msd
   connect(m_uiForm.msd_pbRun, SIGNAL(clicked()), this, SLOT(msdRun()));
   // absorption
@@ -270,7 +272,7 @@ bool indirectAnalysis::validateSlice()
     valid = false;
   }
 
-  if ( ! m_uiForm.slice_calibFile->isValid() )
+  if ( m_uiForm.slice_ckUseCalib->isChecked() && ! m_uiForm.slice_calibFile->isValid() )
   {
     valid = false;
   }
@@ -295,23 +297,31 @@ bool indirectAnalysis::validateSlice()
     m_uiForm.slice_valRange1->setText(" ");
   }
 
-  if ( m_uiForm.slice_leRange2->text() == "" )
+  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
   {
-    m_uiForm.slice_valRange2->setText("*");
-    valid = false;
+    if ( m_uiForm.slice_leRange2->text() == "" )
+    {
+      m_uiForm.slice_valRange2->setText("*");
+      valid = false;
+    }
+    else
+    {
+      m_uiForm.slice_valRange2->setText(" ");
+    }
+
+    if ( m_uiForm.slice_leRange3->text() == "" )
+    {
+      m_uiForm.slice_valRange3->setText("*");
+      valid = false;
+    }
+    else
+    {
+      m_uiForm.slice_valRange3->setText(" ");
+    }
   }
   else
   {
     m_uiForm.slice_valRange2->setText(" ");
-  }
-
-  if ( m_uiForm.slice_leRange3->text() == "" )
-  {
-    m_uiForm.slice_valRange3->setText("*");
-    valid = false;
-  }
-  else
-  {
     m_uiForm.slice_valRange3->setText(" ");
   }
 
@@ -574,7 +584,7 @@ void indirectAnalysis::furyRun()
   }
 
   QString pyInput =
-    "from IndirectDataAnalysis import fury\n"
+    "from IndirectDataAnalysis import fury, plotFury\n"
     "sample = r'" + m_uiForm.fury_iconFile->getFirstFilename() + "'\n"
     "resolution = r'" + m_uiForm.fury_resFile->getFirstFilename() + "'\n"
     "rebin = '" + m_uiForm.fury_leELow->text()+","+m_uiForm.fury_leEWidth->text()+","+ m_uiForm.fury_leEHigh->text()+"'\n";
@@ -589,6 +599,11 @@ void indirectAnalysis::furyRun()
   }
   pyInput +=
     "fury_ws = fury(sample, resolution, rebin, Save=save)\n";
+  if ( m_uiForm.fury_ckPlot->isChecked() )
+  {
+    pyInput += "specrange = range(0, mtd[fury_ws].getNumberHistograms())\n";
+    pyInput += "plotFury(fury_ws, [0])\n";
+  }
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 void indirectAnalysis::elwinRun()
@@ -628,11 +643,30 @@ void indirectAnalysis::sliceRun()
   QString pyInput =
     "from IndirectDataAnalysis import slice\n"
     "tofRange = [" + m_uiForm.slice_leRange0->text() + ","
-    + m_uiForm.slice_leRange1->text() + ","
-    + m_uiForm.slice_leRange2->text() + ","
-    + m_uiForm.slice_leRange3->text() + "]\n"
-    "rawfile = [r'" + m_uiForm.slice_inputFile->getFirstFilename() + "']\n"
-    "calib = r'" + m_uiForm.slice_calibFile->getFirstFilename() + "'\n"
+    + m_uiForm.slice_leRange1->text();
+  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
+  {
+    pyInput +=
+      "," + m_uiForm.slice_leRange2->text() + ","
+      + m_uiForm.slice_leRange3->text() + "]\n";
+  }
+  else
+  {
+    pyInput += "]\n";
+  }
+  if ( m_uiForm.slice_ckUseCalib->isChecked() )
+  {
+    pyInput +=
+      "calib = r'" + m_uiForm.slice_calibFile->getFirstFilename() + "'\n";
+  }
+  else
+  {
+    pyInput +=
+      "calib = ''\n";
+  }
+  QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
+  pyInput +=
+    "rawfile = [r'" + filenames + "']\n"
     "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n";
 
   if ( m_uiForm.slice_ckSave->isChecked() )
@@ -641,9 +675,31 @@ void indirectAnalysis::sliceRun()
     pyInput += "save = False\n";
 
   pyInput +=
-    "slice(rawfile, calib, tofXRange=tofRange, spectra=spec, Save=save)";
+    "slice(rawfile, calib, tofRange, spectra=spec, Save=save)";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+void indirectAnalysis::slicePlotRaw()
+{
+  if ( m_uiForm.slice_inputFile->isValid() )
+  {
+    QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
+    QString pyInput =
+      "from IndirectDataAnalysis import plotRaw\n"
+      "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n"
+      "files = [r'" + filenames + "']\n"
+      "plotRaw(files, spectra=spec)\n";
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+  else
+  {
+    showInformationBox("Selected input files are invalid.");
+  }
+}
+void indirectAnalysis::sliceCalib(bool state)
+{
+  m_uiForm.slice_calibFile->setEnabled(state);
+  m_uiForm.slice_calibFile->isOptional(!state);
 }
 void indirectAnalysis::msdRun()
 {

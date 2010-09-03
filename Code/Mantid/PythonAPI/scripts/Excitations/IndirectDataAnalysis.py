@@ -152,7 +152,7 @@ def msdfit(file, startX, endX, Save=False, Plot=False):
 	A1 = fit_alg.getPropertyValue("FitSlope")
 	title = 'Intercept: '+A0+' ; Slope: '+A1
 	if Plot:
-		graph=plotSpectrum([root,outWS_n],0)
+		graph=plotSpectrum([root,outWS_n],0, 1)
 		graph.activeLayer().setTitle(title)
 	if Save:
 		SaveNexusProcessed(outWS_n, outWS_n+'.nxs', Title=title)
@@ -180,65 +180,59 @@ def mut(inWS_n, deltaW, filename, efixed):
 def plotFury(inWS_n, spec):
 	inWS = mantid.getMatrixWorkspace(inWS_n)
 	nbins = inWS.getNumberBins()
+	lastValueZero = False
 	for i in range(0, nbins):
-		if (inWS.readY(spec[0])[i] > 1.0):
-			xBoundary = inWS.readX(spec[0])[i]
-			break
+		if (inWS.readY(spec[0])[i] == 0.0):
+			if lastValueZero:
+				xBoundary = inWS.readX(spec[0])[i]
+				break
+			else:
+				lastValueZero = True
+		else:
+			lastValueZero = False
 	graph = plotSpectrum(inWS_n, spec)
 	layer = graph.activeLayer()
 	layer.setScale(0, 0, 1.0)
 	layer.setScale(2, 0, xBoundary)
 
-def slice(inputfiles, calib, enXRange = [], tofXRange = [], inWS_n='Energy', outWS_n='Time', spectra = [0,0], Save=True):
-	'''
-	This function does the "Slice" part of modes. To be passed in a list of input files (either .raw or .nxs),
-	and a (2) 4-element list of X-values to integrate over for the files passed in, one for Energy and one for TOF.
-	If your files only deal with one of these, you can omit the other.
-	'''
-	if ( enXRange == [] and tofXRange == [] ):
-		message = 'Slice: no x-ranges for integration were provided.'
-		print message
-		sys.exit(message)
+def slice(inputfiles, calib, tofXRange, spectra = [0,0], Save=True):
+	if  not ( ( len(tofXRange) == 2 ) or ( len(tofXRange) == 4 ) ):
+		mantid.sendLogMessage('TOF Range inputs must contain either 2 or 4 numbers.')
+		sys.exit(1)
 	for file in inputfiles:
 		(direct, filename) = os.path.split(file)
 		(root, ext) = os.path.splitext(filename)
-		if ext == '.nxs':
-			if (enXRange == []):
-				message = 'Slice: values for integration over energy have not been supplied.'
-				print message
-				sys.exit(message)
-			root = root[:-3]
-			LoadNexus(file, root)
-			nhist = mantid.getMatrixWorkspace(root).getNumberHistograms()
-			savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_sle'
-			Integration(root, 'Unit1', enXRange[0], enXRange[1], 0, nhist-1)
-			Integration(root, 'Unit2', enXRange[2], enXRange[3], 0, nhist-1)
-			Minus('Unit1', 'Unit2', savefile)
-			SaveNexusProcessed(savefile, savefile+'.nxs')
-			mantid.deleteWorkspace(root)
-		elif ext == '.raw':
-			if (tofXRange == []):
-				message = 'Slice: values for integration over time of flight have not been supplied.'
-				print message
-				sys.exit(message)
-			unit = 'Time'
-			if spectra == [0, 0]:
-				LoadRaw(file, root)
-			else:
-				LoadRaw(file, root, SpectrumMin = spectra[0], SpectrumMax = spectra[1])
-			nhist = mantid.getMatrixWorkspace(root).getNumberHistograms()
-			if calib != '':
-				useCalib(calib, inWS_n=root, outWS_n=root)
-			savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_slt'
+		if spectra == [0, 0]:
+			LoadRaw(file, root)
+		else:
+			LoadRaw(file, root, SpectrumMin = spectra[0], SpectrumMax = spectra[1])
+		nhist = mantid.getMatrixWorkspace(root).getNumberHistograms()
+		if calib != '':
+			useCalib(calib, inWS_n=root, outWS_n=root)
+		savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_slt'
+		if (len(tofXRange) == 2):
+			Integration(root, savefile, tofXRange[0], tofXRange[1], 0, nhist-1)
+		else:
 			Integration(root, 'Unit1', tofXRange[0], tofXRange[1], 0, nhist-1)
 			Integration(root, 'Unit2', tofXRange[2], tofXRange[3], 0, nhist-1)
 			Minus('Unit1', 'Unit2', savefile)
-			if Save:
-				SaveNexusProcessed(savefile, savefile+'.nxs')
-			mantid.deleteWorkspace(root)
-		else:
-			message = 'Slice: Unrecognised file extension ('+ext+')'
-			print message
-			sys.exit(message)
-	mantid.deleteWorkspace('Unit1')
-	mantid.deleteWorkspace('Unit2')
+			mantid.deleteWorkspace('Unit1')
+			mantid.deleteWorkspace('Unit2')
+		if Save:
+			SaveNexusProcessed(savefile, savefile+'.nxs')
+		mantid.deleteWorkspace(root)
+
+def plotRaw(inputfiles,spectra=[]):
+	if len(spectra) != 2:
+		sys.exit(1)
+	workspaces = []
+	for file in inputfiles:
+		(direct, filename) = os.path.split(file)
+		(root, ext) = os.path.splitext(filename)
+		LoadRaw(file, root, SpectrumMin=spectra[0], SpectrumMax = spectra[1])
+		GroupDetectors(root,root,DetectorList=range(spectra[0],spectra[1]+1))
+		workspaces.append(root)
+	if len(workspaces) > 0:
+		graph = plotSpectrum(workspaces,0)
+		layer = graph.activeLayer().setTitle(", ".join(workspaces))
+		
