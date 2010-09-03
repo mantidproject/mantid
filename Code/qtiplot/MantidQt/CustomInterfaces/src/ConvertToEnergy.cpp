@@ -315,6 +315,14 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
                 this, SIGNAL(runAsPythonScript(const QString&)));
             m_directInstruments->initLocalPython();
         }
+        else
+        {
+          connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_directInstruments, SLOT(browseSaveFile()));
+        }
+        if ( m_indirectInstruments != NULL )
+        {
+          disconnect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_indirectInstruments, SLOT(browseSave()));
+        }
         m_directInstruments->setIDFValues(curInstPrefix);
         m_uiForm.save_lbFile->setText("Filename:");
         break;
@@ -331,6 +339,14 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
             connect(m_indirectInstruments, SIGNAL(runAsPythonScript(const QString&)),
                 this, SIGNAL(runAsPythonScript(const QString&)));
             m_indirectInstruments->initLocalPython();
+        }
+        else
+        {
+          connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_indirectInstruments, SLOT(browseSave()));
+        }
+        if ( m_directInstruments != NULL )
+        {
+          disconnect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_directInstruments, SLOT(browseSaveFile()));
         }
         m_indirectInstruments->setIDFValues(curInstPrefix);
         m_uiForm.save_lbFile->setText("Save Directory:");
