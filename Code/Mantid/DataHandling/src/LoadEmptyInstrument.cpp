@@ -101,10 +101,6 @@ namespace Mantid
         ++counter;
       }
 
-      // populate the workspace parameter map the best you can
-
-      localWorkspace->populateInstrumentParameters();
-
 
       setProperty("OutputWorkspace",localWorkspace);
         

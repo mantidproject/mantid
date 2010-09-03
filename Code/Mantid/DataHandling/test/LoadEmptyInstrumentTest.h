@@ -121,6 +121,9 @@ public:
 
   void testParameterTags()
   {
+    int iii;
+    std::cin >> iii;
+
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
@@ -296,6 +299,35 @@ public:
     TS_ASSERT_DELTA( ptrDet1->getPos().X(), 11.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 8.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    // test parameter rotation
+    ptrDet1 = i->getDetector(1200);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1200);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 10.5, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), -0.866, 0.0001);
+
+    ptrDet1 = i->getDetector(1201);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1201);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 10.5, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), -0.866, 0.0001);
+
+    ptrDet1 = i->getDetector(1202);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1202);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0, 0.0001);
+
+    ptrDet1 = i->getDetector(1203);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1203);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
