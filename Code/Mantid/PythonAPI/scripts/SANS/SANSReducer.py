@@ -56,6 +56,8 @@ class SANSReducer(Reducer):
     ## Data loader
     _data_loader = None
     
+    opt_steps = {}
+    
     def __init__(self):
         super(SANSReducer, self).__init__()
         

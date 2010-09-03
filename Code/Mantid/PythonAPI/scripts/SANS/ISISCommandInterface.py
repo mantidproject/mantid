@@ -91,18 +91,6 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
 def AssignCan(can_run, reload = True, period = -1):
     ReductionSingleton().set_background(can_run, reload = reload, period = period)
     
-def SampleGeometry(geom_id):
-    ReductionSingleton().set_sample_geometry(geom_id)
-    
-def SampleThickness(thickness):
-    ReductionSingleton().set_sample_thickness(thickness)
-    
-def SampleHeight(height):
-    ReductionSingleton().set_sample_height(height)
-
-def SampleWidth(width):
-    ReductionSingleton().set_sample_width(width)
-    
 def TransmissionSample(sample, direct, reload = True, period = -1):
     ReductionSingleton().set_trans_sample(sample, direct, reload = True, period = -1)
     

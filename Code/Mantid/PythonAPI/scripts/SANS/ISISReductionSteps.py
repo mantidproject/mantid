@@ -5,7 +5,7 @@
     ReductionStep objects. The guts needs refactoring.
 """
 from Reducer import ReductionStep
-from SANSReductionSteps import BaseTransmission
+from SANSReductionSteps import *
 from mantidsimple import *
 import SANSUtility
 import SANSInsts
@@ -383,7 +383,6 @@ class LoadRun(ReductionStep):
         Load a data file, move its detector to the right position according
         to the beam center and normalize the data.
     """
-    #TODO: Move this to HFIR-specific module 
     def __init__(self, data_file=None, spec_min=None, spec_max=None, period=1):
         #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(LoadRun, self).__init__()
@@ -421,18 +420,37 @@ class LoadRun(ReductionStep):
             
         if (self._period > numPeriods) or (self._period < 1):
             raise ValueError('_loadRawData: Period number ' + str(self._period) + ' doesn\'t exist in workspace ' + pWorksp.getName())
-    
-        sample_details = pWorksp.getSampleInfo()
-        reducer.set_sample_geometry(sample_details.getGeometryFlag())
-        reducer.set_sample_thickness(sample_details.getThickness())
-        reducer.set_sample_height(sample_details.getHeight())
-        reducer.set_sample_width(sample_details.getWidth())
-    
-        # Return the filepath actually used to load the data
+        
+        # Return the file path actually used to load the data
         fullpath = alg.getPropertyValue("Filename")
+        
+        reducer.opt_steps['SampleGeomCor'] = SampleGeomCor()
+        #set the defaults incase the following line fails
+        reducer.opt_steps['SampleGeomCor'].set_dimensions_to_unity()
+        reducer.opt_steps['SampleGeomCor'].read_from_workspace(workspace)
+        
         return [ os.path.dirname(fullpath), workspace, numPeriods]        
         
 
+#class DirectBeamTransmission(BaseTransmission):
+#    """
+#        Calculate transmission using the direct beam method
+#    """
+#    def __init__(self):
+#        super(DirectBeamTransmission, self).__init__()
+#        # Location of the data files used to calculate transmission
+#        ## Transmission workspace (output of transmission calculation)
+#        self.transmission_run = None
+#        self.can_run = None
+#        self.transmission_can = None
+#        self.direct = None
+#        self.direct_can = None
+#        
+#    def execute(self, reducer, workspace=None):
+#        """
+#        """
+##        if not self.transmission_run is None:
+#        pass
         
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None):
@@ -513,7 +531,7 @@ def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_wid
     else:
         run_no = pieces[0]
         ext = pieces[1]
-        
+    
     fullrun_no, logname, shortrun_no = _padRunNumber(run_no, run_number_width)
 
     if is_trans:

@@ -214,7 +214,7 @@ class ISISInstrument(Instrument):
         else:
             if not self.cur_detector().isAlias(detName):
                 mantid.sendLogMessage("::SANS::setDetector: Detector not found")
-                mantid.sendLogMessage("::SANS::setDetector: Detector set to " + INSTRUMENT.cur_detector().name() + ' in ' + INSTRUMENT.name())
+                mantid.sendLogMessage("::SANS::setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
                 
 
     def setDefaultDetector(self):

@@ -551,4 +551,102 @@ class SubtractBackground(ReductionStep):
         
         Minus(workspace, self._background_ws, workspace)
         
+ 
+class SampleGeomCor(ReductionStep):
+    """
+        Correct the neutron count rates for the size of the sample
+    """
+    def __init__(self, trans=0.0, error=0.0):
+        super(SampleGeomCor, self).__init__()
+        self._trans = trans
+        self._error = error
+
+        # string specifies the sample's shape
+        self._default_shape = 'cylinder-axis-along'
+        self._shape = self._default_shape
+        self._width = self._thickness = self._height = None
+        # dictionary contains the list of all shapes that can be calculated and the id number for them
+        self._shape_ids = {1 : 'cylinder-axis-up',
+                           2 : 'cuboid',
+                           3 : 'cylinder-axis-along'}
+
+    def execute(self, reducer, workspace):
+        """
+            Divide the counts by the volume of the sample
+        """
+        
+        try:
+            if self._shape == 'cylinder-axis-up':
+    		    # Volume = circle area * height
+    		    # Factor of four comes from radius = width/2
+    		    scale_factor = self._height*math.pi*math.pow(self._width,2)/4.0
+            elif self._shape == 'cuboid':
+    		    scale_factor = (self._width*self._height*self._thickness)
+            elif self._shape == 'cylinder-axis-along':
+    		    # Factor of four comes from radius = width/2
+    		    scale_factor = self._thickness*math.pi*math.pow(self._width, 2)/4.0
+            else:
+                raise NotImplemented('Shape "'+self._shape+'" is not in the list of supported shapes')
+        except TypeError:
+            raise TypeError('Error calculating sample volume with width='+str(self._width) + ' height='+str(self._height) + 'and thickness='+str(self._thickness)) 
+        
+        # Multiply by the calculated correction factor
+	    #ws = mtd[workspace]
+	    #ws *= scalefactor
+        CreateSingleValuedWorkspace('temp', scale_factor)
+        Divide(workspace, 'temp', workspace)
     
+    def read_from_workspace(self, workspace):
+        sample_details = mtd[workspace].getSampleInfo()
+        self.set_geometry(sample_details.getGeometryFlag())
+        self.set_thickness(sample_details.getThickness())
+        self.set_height(sample_details.getHeight())
+        self.set_width(sample_details.getWidth())
+        
+    def set_geometry(self,shape):
+        """
+            Sets the sample's shape from a string or an ID. If the ID is not
+            in the list of allowed values the shape is set to the default but
+            shape strings not in the list are not checked
+        """
+        try:
+            # deal with ID numbers as arguments
+            shape = self._shape_ids[int(shape)]
+        except ValueError:
+            # means that we weren't passed an ID number, the code below treats it as a shape name
+            pass
+        except KeyError:
+            mantid.sendLogMessage("::SANS::Warning: Invalid geometry type for sample: " + str(shape) + ". Setting default to " + self._default_shape)
+            shape = self._default_shape
+        self._shape = shape
+        
+    def set_width(self,width):
+        self._width = float(width)
+        # For a disk the height=width
+        if self._shape.startswith('cylinder'):
+            self._height = self._width
+            
+    def set_height(self,height):
+        self._height = float(height)
+        
+        # For a cylinder and sphere the height=width=radius
+        if self._shape.startswith('cylinder'):
+            self._width = self._height
+
+    def set_thickness(self,thickness):
+        """
+            Simply sets the variable _thickness to the value passed
+        """
+        if not self._shape == 'cuboid':
+            raise RuntimeError('Can''t set thickness for shape "'+self._shape+'"')
+        self._thickness = float(thickness)
+    
+    def set_dimensions_to_unity(self):
+        self._width = self._thickness = self._height = 1.0
+
+    def display(self):
+        print '-- Sample Geometry --\n' + \
+            '    Shape: ' + self._shape+'\n'+\
+            '    Width: ' + str(self._width)+'\n'+\
+            '    Height: ' + str(self._height)+'\n'+\
+            '    Thickness: ' + str(self._thickness)+'\n'   

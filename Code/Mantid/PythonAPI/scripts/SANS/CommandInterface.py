@@ -139,3 +139,28 @@ def SaveIqAscii():
 
 def NoSaveIq():
     ReductionSingleton().set_save_Iq(None)
+    
+def SampleGeometry(shape):
+    if not ReductionSingleton().opt_steps.has_key('SampleGeomCor'):
+        ReductionSingleton().opt_steps['SampleGeomCor'] = SANSReductionSteps.SampleGeomCor()
+    
+    ReductionSingleton().opt_steps['SampleGeomCor'].set_geometry(shape)
+    
+def SampleThickness(thickness):
+    if not ReductionSingleton().opt_steps.has_key('SampleGeomCor'):
+        ReductionSingleton().opt_steps['SampleGeomCor'] = SANSReductionSteps.SampleGeomCor()
+
+    ReductionSingleton().opt_steps['SampleGeomCor'].set_thickness(thickness)
+    
+def SampleHeight(height):
+    if not ReductionSingleton().opt_steps.has_key('SampleGeomCor'):
+        ReductionSingleton().opt_steps['SampleGeomCor'] = SANSReductionSteps.SampleGeomCor()
+        
+    ReductionSingleton().opt_steps['SampleGeomCor'].set_height(height)
+
+def SampleWidth(width):
+    if not ReductionSingleton().opt_steps.has_key('SampleGeomCor'):
+        ReductionSingleton().opt_steps['SampleGeomCor'] = SANSReductionSteps.SampleGeomCor()
+        
+    ReductionSingleton().opt_steps['SampleGeomCor'].set_width(width)
+

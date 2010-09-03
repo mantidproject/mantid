@@ -396,7 +396,6 @@ def TransmissionCan(can, direct, reload = True, period = -1):
 
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True, period = -1):
-    global INSTRUMENT
     if run_string == '' or run_string.startswith('.'):
         return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
     pieces = run_string.split('.')

@@ -85,15 +85,6 @@ class TestInstrument(unittest.TestCase):
         self.assertEqual(ReductionSingleton().DIRECT_BEAM_FILE_R,
                          SANSReduction.DIRECT_BEAM_FILE_R)
         
-        self.assertEqual(ReductionSingleton().SAMPLE_WIDTH,
-                         SANSReduction.SAMPLE_WIDTH)
-        
-        self.assertEqual(ReductionSingleton().SAMPLE_HEIGHT,
-                         SANSReduction.SAMPLE_HEIGHT)
-        
-        self.assertEqual(ReductionSingleton().SAMPLE_THICKNESS,
-                         SANSReduction.SAMPLE_THICKNESS)
-        
         self.assertEqual(ReductionSingleton().PHIMIN,
                          SANSReduction.PHIMIN)
         
