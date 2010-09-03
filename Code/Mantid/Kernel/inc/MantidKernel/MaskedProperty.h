@@ -68,11 +68,18 @@ namespace Mantid
 			  virtual const Kernel::PropertyHistory createHistory() const
 			  {
 							  
-				  doMasking();
+				  //doMasking();
 				
 				  return Kernel::PropertyHistory(this->name(),this->getMaskedValue(),this->type(),this->isDefault(),Kernel::PropertyWithValue<TYPE >::direction());
 			  }
 
+			  /** This method returns the masked property value
+			  */
+			  TYPE getMaskedValue() const
+			  {	
+				  doMasking();
+				  return m_maskedValue;
+			  }
         /**
         * Do not remember the inputs from a masked property
         * @return do not remember masked property values
@@ -89,12 +96,7 @@ namespace Mantid
 				  m_maskedValue=std::string(value.size(),'*');
 			  }
 
-			/** This method returns the masked property value
-			  */
-			  TYPE getMaskedValue() const
-			  {				  
-				  return m_maskedValue;
-     		  }
+			
 		private:
 			mutable TYPE m_maskedValue; ///< the masked value
 

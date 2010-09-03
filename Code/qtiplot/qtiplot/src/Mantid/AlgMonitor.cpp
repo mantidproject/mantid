@@ -3,6 +3,7 @@
 #include "MantidDock.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/MaskedProperty.h"
 
 #include <QtGui>
 #include <QThread>
@@ -173,11 +174,20 @@ void MonitorDlg::update()
       AlgButton *cancelButton = new AlgButton("Cancel", alg);
       m_tree->setItemWidget(algItem,1,algProgress);
       m_tree->setItemWidget(algItem,2,cancelButton);
-      const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
+       const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
         for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();prop++)
 	  {
-            QStringList lstr;
+		  QStringList lstr;
+		  Mantid::Kernel::MaskedProperty<std::string> * maskedProp = dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(*prop);
+		  if(maskedProp)
+		  {
+			  lstr  << QString::fromStdString(maskedProp->name()) + ": " << QString::fromStdString(maskedProp->getMaskedValue());
+		  }
+		  else
+		  {
+            
             lstr  << QString::fromStdString((**prop).name()) + ": " << QString::fromStdString((**prop).value());
+		  }
             if ((**prop).isDefault()) lstr << " Default";
             algItem->addChild(new QTreeWidgetItem(lstr));
         }
