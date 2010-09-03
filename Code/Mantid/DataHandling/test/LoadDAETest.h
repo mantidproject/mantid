@@ -14,16 +14,15 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
-#endif
-
-#include <Poco/Net/HostEntry.h>
+#else
 #include <netdb.h>
+#include <arpa/inet.h>
+#endif
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using namespace std;
 
 class LoadDAETest : public CxxTest::TestSuite
 {
