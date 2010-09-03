@@ -271,6 +271,7 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
 bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>& inputWorkspaces)
 {
   Unit_sptr unit;
+  std::string YUnit;
   bool dist(false);
 
   inEventWS.clear();
@@ -292,18 +293,22 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
     // Check a few things are the same for all input workspaces
     if ( i == 0 )
     {
-      unit = inEventWS.back()->getAxis(0)->unit();
-      dist = inEventWS.back()->isDistribution();
-      instrument = inEventWS.back()->getInstrument()->getName();
+      unit = ws->getAxis(0)->unit();
+      YUnit = ws->YUnit();
+      dist = ws->isDistribution();
+      instrument = ws->getInstrument()->getName();
     }
     else
     {
-      if (    inEventWS.back()->getAxis(0)->unit() != unit
-           || inEventWS.back()->isDistribution()   != dist
-           || inEventWS.back()->getInstrument()->getName() != instrument )
+      std::string errors;
+      if (ws->getAxis(0)->unit() != unit)               errors += "different X units; ";
+      if (ws->YUnit() != YUnit)                         errors += "different Y units; ";
+      if (ws->isDistribution()   != dist)               errors += "not all distribution or all histogram type; ";
+      if (ws->getInstrument()->getName() != instrument) errors += "different instrument names; ";
+      if (errors.length() > 0)
       {
-        g_log.error("Input workspaces are not compatible");
-        throw std::invalid_argument("Input workspaces are not compatible");
+        g_log.error("Input workspaces are not compatible: " + errors);
+        throw std::invalid_argument("Input workspaces are not compatible: " + errors);
       }
     }
   } //for each input WS name
@@ -328,6 +333,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
 
   int numSpec(0);
   Unit_sptr unit;
+  std::string YUnit;
   bool dist(false);
   // Going to check that name of instrument matches - think that's the best possible at the moment
   //   because if instrument is created from raw file it'll be a different object
@@ -335,9 +341,11 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
 
   for ( unsigned int i = 0; i < inputWorkspaces.size(); ++i )
   {
+    MatrixWorkspace_sptr ws;
     // Fetch the next input workspace - throw an error if it's not there
-    try {
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
+    try
+    {
+        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
         if (!ws)
         {
             g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found." << std::endl;
@@ -358,20 +366,24 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
     // Check a few things are the same for all input workspaces
     if ( i == 0 )
     {
-      numSpec = inWS.back()->getNumberHistograms();
-      unit = inWS.back()->getAxis(0)->unit();
-      dist = inWS.back()->isDistribution();
-      instrument = inWS.back()->getInstrument()->getName();
+      numSpec = ws->getNumberHistograms();
+      unit = ws->getAxis(0)->unit();
+      YUnit = ws->YUnit();
+      dist = ws->isDistribution();
+      instrument = ws->getInstrument()->getName();
     }
     else
     {
-      if ( inWS.back()->getNumberHistograms() != numSpec
-           || inWS.back()->getAxis(0)->unit() != unit
-           || inWS.back()->isDistribution()   != dist
-           || inWS.back()->getInstrument()->getName() != instrument )
+      std::string errors;
+      if (ws->getNumberHistograms() != numSpec)         errors += "different number of histograms; ";
+      if (ws->getAxis(0)->unit() != unit)               errors += "different X units; ";
+      if (ws->YUnit() != YUnit)                         errors += "different Y units; ";
+      if (ws->isDistribution()   != dist)               errors += "not all distribution or all histogram type; ";
+      if (ws->getInstrument()->getName() != instrument) errors += "different instrument names; ";
+      if (errors.length() > 0)
       {
-        g_log.error("Input workspaces are not compatible");
-        throw std::invalid_argument("Input workspaces are not compatible");
+        g_log.error("Input workspaces are not compatible: " + errors);
+        throw std::invalid_argument("Input workspaces are not compatible: " + errors);
       }
     }
   }

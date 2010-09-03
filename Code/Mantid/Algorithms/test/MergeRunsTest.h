@@ -178,6 +178,18 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
+  void testExec_Events_MismatchedUnits_fail()
+  {
+    EventSetup();
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","ev1,ev4_weird_units,ev3");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( !mrg.isExecuted() );
+    EventTeardown();
+  }
+
+  //-----------------------------------------------------------------------------------------------
   void testExec_Events_MatchingPixelIDs()
   {
     EventSetup();
