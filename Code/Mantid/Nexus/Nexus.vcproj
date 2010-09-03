@@ -226,10 +226,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\NeXusUtils.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\SaveNeXus.cpp"
 				>
 			</File>
@@ -321,10 +317,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidNexus\NexusFileIO.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidNexus\NeXusUtils.h"
 				>
 			</File>
 			<File
