@@ -317,6 +317,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadSNSspec.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadSPE.cpp"
 				>
 			</File>
@@ -616,6 +620,14 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadSaveAsciiTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadSNSspec.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadSNSspecTest.h"
 				>
 			</File>
 			<File

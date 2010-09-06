@@ -57,7 +57,8 @@ namespace Mantid
       const double monitor_value = getProperty("MonitorValue");
 
       // load the instrument into this workspace
-      IInstrument_sptr instrument = this->runLoadInstrument();
+      MatrixWorkspace_sptr ws = this->runLoadInstrument();
+      IInstrument_sptr instrument = ws->getInstrument();
 
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 
@@ -66,8 +67,8 @@ namespace Mantid
       
       // Now create the outputworkspace and copy over the instrument object
       DataObjects::Workspace2D_sptr localWorkspace = 
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D",number_spectra,2,1));
-      localWorkspace->setInstrument(instrument);
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
+      //localWorkspace->setInstrument(instrument);
       
       int *spec = new int[number_spectra];
       int *udet = new int[number_spectra];
@@ -101,18 +102,15 @@ namespace Mantid
         ++counter;
       }
 
-
       setProperty("OutputWorkspace",localWorkspace);
-        
       
       // Clean up
       delete[] spec;
       delete[] udet;
     }
-
-
+    
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
-    API::IInstrument_sptr LoadEmptyInstrument::runLoadInstrument()
+    API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument()
     {
       const std::string filename = getPropertyValue("Filename");
       // Determine the search directory for XML instrument definition files (IDFs)
@@ -138,7 +136,7 @@ namespace Mantid
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1);
       loadInst->setPropertyValue("Filename", fullPathIDF);
-      MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
+      MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",ws);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
@@ -151,10 +149,8 @@ namespace Mantid
         g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
       }
       
-      return ws->getInstrument();
+      return ws;
     }
-
-
 
   } // namespace DataHandling
 } // namespace Mantid
