@@ -90,6 +90,8 @@ private slots:
   /// called when spectra or workspace index change
   void spectraChanged(int row,int col);
 
+  void plotAgainstLog(bool);
+
 private:
 
   /// Checks that the logs in workspace wsName are consistent
@@ -101,6 +103,20 @@ private:
 
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm* alg);
+
+  /// set spectrum value for workspace/file in row row
+  void setSpectrum(int row,int spec);
+
+  /// set workspace index for workspace/file in row row
+  void setWSIndex(int row,int wi);
+
+  void setRange(int row,double from,double to);
+
+  int rowCount()const;
+
+  int defaultSpectrum()const;
+
+  QString name(int row)const;
 
 };
 

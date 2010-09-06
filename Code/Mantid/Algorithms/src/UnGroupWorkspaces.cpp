@@ -19,15 +19,21 @@ namespace Mantid
       const AnalysisDataServiceImpl & data_store = AnalysisDataService::Instance();
       // Get the list of workspaces in the ADS
       std::set<std::string> workspaceList = data_store.getObjectNames();
+      std::set<std::string> groupWorkspaceList;
       // Not iterate over, removing all those which are not group workspaces
       std::set<std::string>::iterator it;
       for ( it = workspaceList.begin(); it != workspaceList.end(); ++it)
       {
         WorkspaceGroup_const_sptr group = boost::dynamic_pointer_cast<const WorkspaceGroup>(data_store.retrieve(*it));
-        if ( !group ) workspaceList.erase(it);
+        // RNT: VC returns bad pointer after erase
+        //if ( !group ) workspaceList.erase(it);
+        if ( group )
+        {
+          groupWorkspaceList.insert(*it);
+        }
       }
       // Declare a text property with the list of group workspaces as its allowed values
-      declareProperty("InputWorkspace","","Name of the input workspace to ungroup",new ListValidator(workspaceList) );
+      declareProperty("InputWorkspace","","Name of the input workspace to ungroup",new ListValidator(groupWorkspaceList) );
     }
     
     /** Executes the algorithm

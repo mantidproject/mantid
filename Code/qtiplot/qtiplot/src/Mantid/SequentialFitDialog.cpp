@@ -34,8 +34,10 @@ QDialog(fitBrowser->m_appWindow),m_fitBrowser(fitBrowser)
   connect(ui.btnFit,SIGNAL(clicked()),this,SLOT(accept()));
   connect(ui.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
   connect(ui.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
+  connect(ui.ckbLogPlot,SIGNAL(toggled(bool)),this,SLOT(plotAgainstLog(bool)));
 
   ui.cbLogValue->setEditable(true);
+  ui.ckbLogPlot->setChecked(true);
   ui.sbPeriod->setValue(1);
 
   populateParameters();
@@ -64,15 +66,13 @@ bool SequentialFitDialog::addWorkspaces(const QStringList wsNames)
   QAbstractItemModel* model = ui.tWorkspaces->model();
   foreach(QString name,wsNames)
   {
-    if (!validateLogs(name))
+    model->setData(model->index(row,0,QModelIndex()),name);
+
+    if (row == 0)
     {
-      QMessageBox::critical((QWidget*)parent(),"Mantid - Error","Workspace "+name+" was not included because it does not have any logs");
-      ui.tWorkspaces->model()->removeRow(row);
-      if (row == 0) return false;
-      continue;
+      ui.ckbLogPlot->setChecked(validateLogs(name));
     }
       
-    model->setData(model->index(row,0,QModelIndex()),name);
     // disable the period cell
     model->setData(model->index(row,1,QModelIndex()),"");
     QTableWidgetItem* item = ui.tWorkspaces->item(row,1);
@@ -82,28 +82,33 @@ bool SequentialFitDialog::addWorkspaces(const QStringList wsNames)
       item->setFlags(Qt::NoItemFlags);
     }
 
-    // set spectrum number corresponding to the workspace index
-    Mantid::API::MatrixWorkspace_sptr ws = 
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(name.toStdString())
-      );
-    int spec = -1;
-    if (ws)
+    if (ui.ckbLogPlot->isChecked())
     {
-      Mantid::API::Axis* y = ws->getAxis(1);
-      if (y->isSpectra())
+      // set spectrum number corresponding to the workspace index
+      Mantid::API::MatrixWorkspace_sptr ws = 
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(name.toStdString())
+        );
+      int spec = -1;
+      if (ws)
       {
-        spec = y->spectraNo(wi);
+        Mantid::API::Axis* y = ws->getAxis(1);
+        if (y->isSpectra())
+        {
+          spec = y->spectraNo(wi);
+        }
       }
-    }
-    model->setData(model->index(row,2,QModelIndex()),spec);
-    if (row == 0)
-    {
-      ui.sbSpectrum->setValue(spec);
-    }
+      //model->setData(model->index(row,2,QModelIndex()),spec);
+      setSpectrum(row,spec);
+      if (row == 0)
+      {
+        ui.sbSpectrum->setValue(spec);
+      }
 
-    // set workspace index
-    model->setData(model->index(row,3,QModelIndex()),wi);
+      // set workspace index
+      //model->setData(model->index(row,3,QModelIndex()),wi);
+      setWSIndex(row,wi);
+    }
     ++row;
   }
   ui.tWorkspaces->resizeRowsToContents();
@@ -235,15 +240,24 @@ void SequentialFitDialog::accept()
     // spectrum (for files) or workspace index (for workspaces)
     int j = 3;
     QString prefx;
-    bool isFile = ui.tWorkspaces->item(i,3)->flags().testFlag(Qt::ItemIsEnabled) == false;
-    if (isFile)
-    {
-      j = 2;
-      prefx = "sp";
+    QTableWidgetItem* item = ui.tWorkspaces->item(i,3);
+    bool isFile = !item || item->flags().testFlag(Qt::ItemIsEnabled) == false;
+    if (ui.ckbLogPlot->isChecked())
+    {// plot against logs
+      if (isFile)
+      {
+        j = 2;
+        prefx = "sp";
+      }
+      else
+      {
+        prefx = "i";
+      }
     }
     else
-    {
-      prefx = "i";
+    {// plot against axis values
+      prefx = "v";
+      j = 2;
     }
     QString index = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i,j)).toString();
     QString parStr = name + "," + prefx + index;
@@ -272,7 +286,11 @@ void SequentialFitDialog::accept()
   alg->setProperty("EndX",m_fitBrowser->endX());
   alg->setPropertyValue("OutputWorkspace",m_fitBrowser->outputName());
   alg->setPropertyValue("Function",funStr);
-  alg->setPropertyValue("LogValue",ui.cbLogValue->currentText().toStdString());
+  if (ui.ckbLogPlot->isChecked())
+  {
+    std::string logName = ui.cbLogValue->currentText().toStdString();
+    alg->setPropertyValue("LogValue",logName);
+  }
   alg->setPropertyValue("Minimizer",m_fitBrowser->minimizer());
   alg->setPropertyValue("CostFunction",m_fitBrowser->costFunction());
   if (ui.rbIndividual->isChecked())
@@ -316,6 +334,7 @@ void SequentialFitDialog::showPlot()
   {
     if ((ws->columnCount() - 1)/2 != m_fitBrowser->compositeFunction()->nParams()) return;
     Table *t = m_fitBrowser->m_appWindow->mantidUI->importTableWorkspace(QString::fromStdString(wsName));
+    if (!t) return;
     QString parName;
     if (m_fitBrowser->compositeFunction()->nFunctions() == 1)
     {
@@ -353,6 +372,7 @@ void SequentialFitDialog::helpClicked()
   */
 void SequentialFitDialog::spectraChanged(int row,int col)
 {
+  if (!ui.ckbLogPlot->isChecked()) return;
   QTableWidgetItem* item = ui.tWorkspaces->item(row,3);
   if (!item) return;
   if ((col == 2 || col == 3) && item->flags().testFlag(Qt::ItemIsEnabled) == true)
@@ -376,7 +396,7 @@ void SequentialFitDialog::spectraChanged(int row,int col)
     if (wi >= 0 && wi < ws->getNumberHistograms())
     {
       // this prevents infinite loops
-      if (y->spectraNo(wi) == spec) return;
+      if ( !y->isSpectra() || y->spectraNo(wi) == spec) return;
     }
     else
     {
@@ -388,7 +408,8 @@ void SequentialFitDialog::spectraChanged(int row,int col)
       try
       {
         spec = y->spectraNo(wi);
-        ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,2),spec);
+        //ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,2),spec);
+        setSpectrum(row,spec);
       }
       catch(...)
       {
@@ -402,15 +423,93 @@ void SequentialFitDialog::spectraChanged(int row,int col)
       {
         if ((*y)(i) == spec)
         {
-          ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,3),i);
+          //ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,3),i);
+          setWSIndex(row,i);
           return;
         }
       }
       try
       {
-        ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,2),(*y)(0));
+        //ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,2),(*y)(0));
+        setSpectrum(row,(*y)(0));
       }
       catch(...){}
+    }
+  }
+}
+
+void SequentialFitDialog::setSpectrum(int row,int spec)
+{
+  ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,2),spec);
+}
+
+void SequentialFitDialog::setWSIndex(int row,int wi)
+{
+  ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,3),wi);
+}
+
+int SequentialFitDialog::rowCount()const
+{
+  return ui.tWorkspaces->rowCount();
+}
+
+int SequentialFitDialog::defaultSpectrum()const
+{
+  return ui.sbSpectrum->value();
+}
+
+QString SequentialFitDialog::name(int row)const
+{
+  return ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row,0)).toString();
+}
+
+void SequentialFitDialog::setRange(int row,double from,double to)
+{
+  QString range = QString::number(from) + ":" + QString::number(to);
+  ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,2),range);
+}
+
+void SequentialFitDialog::plotAgainstLog(bool yes)
+{
+  ui.btnAddFile->setEnabled(yes);
+  ui.btnAddWorkspace->setEnabled(yes);
+  ui.btnDelete->setEnabled(yes);
+  ui.lblLogValue->setVisible(yes);
+  ui.cbLogValue->setVisible(yes);
+  ui.lblPeriod->setVisible(yes);
+  ui.sbPeriod->setVisible(yes);
+  ui.lblSpectrum->setVisible(yes);
+  ui.sbSpectrum->setVisible(yes);
+  if (yes)
+  {// plot agains log value
+    ui.tWorkspaces->showColumn(3);
+    ui.tWorkspaces->horizontalHeaderItem(2)->setData(Qt::DisplayRole,"Spectrum");
+    int spec = defaultSpectrum();
+    for(int row = 0; row < rowCount(); ++row)
+    {
+      setSpectrum(row,spec);
+    }
+  }
+  else
+  {// plot against "spectra" axis values
+    ui.tWorkspaces->hideColumn(3);
+    ui.tWorkspaces->horizontalHeaderItem(2)->setData(Qt::DisplayRole,"Range");
+    for(int row = 0; row < rowCount(); ++row)
+    {
+      Mantid::API::MatrixWorkspace_sptr ws;
+      try
+      {
+        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(name(row).toStdString())
+          );
+      }
+      catch(...)
+      {// 
+        continue;
+      }
+      if (!ws) continue;
+      Mantid::API::Axis* y = ws->getAxis(1);
+      setRange(row,(*y)(0),(*y)(y->length()-1));
     }
   }
 }

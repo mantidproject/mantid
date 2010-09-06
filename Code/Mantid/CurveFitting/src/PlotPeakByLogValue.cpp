@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
 
@@ -47,7 +48,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output));
       declareProperty("Function","",new MandatoryValidator<std::string>(),
         "The fitting function, common for all workspaces");
-      declareProperty("LogValue","","Name of the log value to plot the parameters against",new MandatoryValidator<std::string>());
+      declareProperty("LogValue","","Name of the log value to plot the parameters against");
       declareProperty("StartX", EMPTY_DBL(),
         "A value of x in, or on the low x boundary of, the first bin to include in\n"
         "the fit (default lowest value of x)" );
@@ -87,7 +88,14 @@ namespace Mantid
       bool sequential = getPropertyValue("FitType") == "Sequential";
 
       ITableWorkspace_sptr result = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      result->addColumn("double",logName);
+      if (logName.empty())
+      {
+        result->addColumn("double","axis-1");
+      }
+      else
+      {
+        result->addColumn("double",logName);
+      }
       // Create an instance of the fitting function to obtain the names of fitting parameters
       IFunction* ifun = FunctionFactory::Instance().createInitialized(fun);
       if (!ifun)
@@ -103,6 +111,7 @@ namespace Mantid
       setProperty("OutputWorkspace",result);
 
       double dProg = 1./wsNames.size();
+      double Prog = 0.;
       for(int i=0;i<wsNames.size();++i)
       {
         InputData data = getWorkspace(wsNames[i]);
@@ -113,63 +122,90 @@ namespace Mantid
           continue;
         }
 
-        // Find the log value: it is either a log-file value or simply the workspace number
-        double logValue;
-        if (!logName.empty())
+        if (data.i < 0 && data.indx.empty())
         {
-          Kernel::Property* prop = data.ws->run().getLogData(logName);
-          if (!prop)
-          {
-            throw std::invalid_argument("Log value "+logName+" does not exist");
-          }
-          TimeSeriesProperty<double>* logp = 
-            dynamic_cast<TimeSeriesProperty<double>*>(prop); 
-          logValue = logp->lastValue();
+          g_log.warning() << "Zero spectra selected for fitting in workspace " << wsNames[i].name << '\n';
+          continue;
+        }
+
+        int j,jend;
+        if (data.i >= 0)
+        {
+          j = data.i;
+          jend = j + 1;
         }
         else
-        {
-          logValue = i;
+        {// no need to check data.indx.empty()
+          j = data.indx.front();
+          jend = data.indx.back() + 1;
         }
 
-        std::string resFun = fun;
-        std::vector<double> errors;
+        dProg /= abs(jend - j);
+        for(;j < jend;++j)
+        {
 
-        try
-        {
-          // Fit the function
-          API::IAlgorithm_sptr fit = createSubAlgorithm("Fit",i*dProg,(i+1)*dProg);
-          fit->initialize();
-          fit->setProperty("InputWorkspace",data.ws);
-          fit->setProperty("WorkspaceIndex",data.i);
-          fit->setPropertyValue("Function",fun);
-          fit->setPropertyValue("StartX",getPropertyValue("StartX"));
-          fit->setPropertyValue("EndX",getPropertyValue("EndX"));
-          fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
-          fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
-          fit->execute();
-          resFun = fit->getPropertyValue("Function");
-          errors = fit->getProperty("Errors");
-        }
-        catch(...)
-        {
-          g_log.error("Error in Fit subalgorithm");
-          throw;
-        }
+          // Find the log value: it is either a log-file value or simply the workspace number
+          double logValue;
+          if (logName.empty())
+          {
+            API::Axis* axis = data.ws->getAxis(1);
+            logValue = (*axis)(j);
+          }
+          else
+          {
+            Kernel::Property* prop = data.ws->run().getLogData(logName);
+            if (!prop)
+            {
+              throw std::invalid_argument("Log value "+logName+" does not exist");
+            }
+            TimeSeriesProperty<double>* logp = 
+              dynamic_cast<TimeSeriesProperty<double>*>(prop); 
+            logValue = logp->lastValue();
+          }
 
-        if (sequential)
-        {
-          fun = resFun;
-        }
+          std::string resFun = fun;
+          std::vector<double> errors;
 
-        // Extract the fitted parameters and put them into the result table
-        TableRow row = result->appendRow();
-        row << logValue;
-        ifun = FunctionFactory::Instance().createInitialized(resFun);
-        for(int iPar=0;iPar<ifun->nParams();++iPar)
-        {
-          row << ifun->getParameter(iPar) << errors[iPar];
-        }
-        delete ifun;
+          try
+          {
+            // Fit the function
+            API::IAlgorithm_sptr fit = createSubAlgorithm("Fit");
+            fit->initialize();
+            fit->setProperty("InputWorkspace",data.ws);
+            fit->setProperty("WorkspaceIndex",j);
+            fit->setPropertyValue("Function",fun);
+            fit->setPropertyValue("StartX",getPropertyValue("StartX"));
+            fit->setPropertyValue("EndX",getPropertyValue("EndX"));
+            fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
+            fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
+            fit->execute();
+            resFun = fit->getPropertyValue("Function");
+            errors = fit->getProperty("Errors");
+          }
+          catch(...)
+          {
+            g_log.error("Error in Fit subalgorithm");
+            throw;
+          }
+
+          if (sequential)
+          {
+            fun = resFun;
+          }
+
+          // Extract the fitted parameters and put them into the result table
+          TableRow row = result->appendRow();
+          row << logValue;
+          ifun = FunctionFactory::Instance().createInitialized(resFun);
+          for(int iPar=0;iPar<ifun->nParams();++iPar)
+          {
+            row << ifun->getParameter(iPar) << errors[iPar];
+          }
+          delete ifun;
+          Prog += dProg;
+          progress(Prog);
+          interruption_point();
+        } // for(;j < jend;++j)
       }
     }
 
@@ -266,7 +302,7 @@ namespace Mantid
 
       API::Axis* axis = out.ws->getAxis(1);
       if (axis->isSpectra())
-      {
+      {// spectra axis
         if (out.spec < 0)
         {
           if (out.i >= 0)
@@ -274,8 +310,15 @@ namespace Mantid
             out.spec = axis->spectraNo(out.i);
           }
           else
-          {// error
-            return  data;
+          {// i < 0 && spec < 0 => use start and end
+            for(int i=0;i<axis->length();++i)
+            {
+              double s = double(axis->spectraNo(i));
+              if (s >= out.start && s <= out.end)
+              {
+                out.indx.push_back(i);
+              }
+            }
           }
         }
         else
@@ -290,9 +333,33 @@ namespace Mantid
             }
           }
         }
-        if (out.i < 0)
+        if (out.i < 0 && out.indx.empty())
         {
           return data;
+        }
+      }
+      else
+      {// numeric axis
+        out.spec = -1;
+        if (out.i >= 0)
+        {
+          out.indx.clear();
+        }
+        else
+        {
+          if (out.i < -1)
+          {
+            out.start = (*axis)(0);
+            out.end = (*axis)(axis->length()-1);
+          }
+          for(int i=0;i<axis->length();++i)
+          {
+            double s = (*axis)(i);
+            if (s >= out.start && s <= out.end)
+            {
+              out.indx.push_back(i);
+            }
+          }
         }
       }
 
@@ -306,6 +373,8 @@ namespace Mantid
       std::string inputList = getPropertyValue("Input");
       int default_wi = getProperty("WorkspaceIndex");
       int default_spec = getProperty("Spectrum");
+      double start = 0;
+      double end = 0;
 
       typedef Poco::StringTokenizer tokenizer;
       tokenizer names(inputList, ";", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
@@ -328,11 +397,42 @@ namespace Mantid
             wi = boost::lexical_cast<int>(index.substr(1));
             spec = -1; // undefined yet
           }
+          else if (index.size() > 0 && index[0] == 'v')
+          {
+            if (index.size() > 1)
+            {// there is some text after 'v'
+              tokenizer range(index.substr(1), ":", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+              if (range.count() < 1)
+              {
+                wi = -2; // means use the whole range
+              }
+              else if (range.count() == 1)
+              {
+                start = boost::lexical_cast<double>(range[0]);
+                end = start;
+                wi = -1;
+                spec = -1;
+              }
+              else if (range.count() > 1)
+              {
+                start = boost::lexical_cast<double>(range[0]);
+                end = boost::lexical_cast<double>(range[1]);
+                if (start > end) std::swap(start,end);
+                wi = -1;
+                spec = -1;
+              }
+            }
+            else
+            {
+              wi = -2;
+            }
+          }
           else
           {// error
-            throw std::invalid_argument("Malformed spectrum identifier ("+index+"). "
-              "It must be either \"sp\" followed by a number for a spectrum number or"
-              "\"i\" followed by a number for a workspace index.");
+            //throw std::invalid_argument("Malformed spectrum identifier ("+index+"). "
+            //  "It must be either \"sp\" followed by a number for a spectrum number or"
+            //  "\"i\" followed by a number for a workspace index.");
+            wi = default_wi;
           }
           
         }
@@ -347,12 +447,12 @@ namespace Mantid
             for(std::vector<std::string>::iterator i=wsNames.begin();i!=wsNames.end();++i)
             {
               if (*i == name) continue;
-              nameList.push_back(InputData(*i,wi,-1,period));
+              nameList.push_back(InputData(*i,wi,-1,period,start,end));
             }
             continue;
           }
         }
-        nameList.push_back(InputData(name,wi,spec,period));
+        nameList.push_back(InputData(name,wi,spec,period,start,end));
       }
       return nameList;
     }

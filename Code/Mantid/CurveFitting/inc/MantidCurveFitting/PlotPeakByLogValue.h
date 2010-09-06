@@ -59,14 +59,34 @@ namespace Mantid
       struct InputData
       {
         /// Constructor
-        InputData(const std::string& nam,int ix,int s,int p):name(nam),i(ix),spec(s),period(p){}
+        InputData(const std::string& nam,int ix,int s,int p,double st=0,double en=0)
+          :name(nam),
+          i(ix),
+          spec(s),
+          period(p),
+          start(st),
+          end(en)
+        {}
         /// Copy constructor
-        InputData(const InputData& data):name(data.name),i(data.i),spec(data.spec),period(data.period),ws(data.ws){}
+        InputData(const InputData& data)
+          :name(data.name),
+          i(data.i),
+          spec(data.spec),
+          period(data.period),
+          ws(data.ws),
+          start(data.start),
+          end(data.end)
+        {
+          indx.assign(data.indx.begin(),data.indx.end());
+        }
         std::string name; ///< Name of a workspace or file
         int i;            ///< Workspace index of the spectra to fit
         int spec;         ///< Spectrum number to fit
         int period;       ///< Period, needed if a file contains several periods
+        double start;     ///< starting axis value
+        double end;       ///< ending axis value
         API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
+        std::vector<int> indx;  ///< a list of ws indices to fit if i and spec < 0
       };
     public:
       /// Default constructor
