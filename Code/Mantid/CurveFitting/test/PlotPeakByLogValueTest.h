@@ -8,6 +8,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <sstream>
@@ -185,20 +186,25 @@ public:
     AnalysisDataService::Instance().remove("PlotPeakResult");
   }
 
-  void testEmptyLog()
+  void t1estEmptyLog()
   {
+
+    createData();
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input",
-      "../../../../Test/Data/HET15958.RAW,sp6;"
-      "../../../../Test/Data/HET15958.RAW,sp7");
+    alg.setPropertyValue("Input","PlotPeakGroup_0,v1:2");
     alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
-    //alg.setPropertyValue("WorkspaceIndex","1");
-    alg.setPropertyValue("StartX","2912");
-    alg.setPropertyValue("EndX","3104");
-    TS_ASSERT_THROWS(alg.setPropertyValue("LogValue",""),std::invalid_argument);
-    alg.setPropertyValue("Function","name=Gaussian");
-    TS_ASSERT_THROWS(alg.execute(),std::runtime_error);
+    alg.setPropertyValue("StartX","0");
+    alg.setPropertyValue("EndX","8");
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    alg.execute();
+
+    TWS_type result = getTWS("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(),11);
+    TS_ASSERT_EQUALS(result->rowCount(),3);
+
+    AnalysisDataService::Instance().remove("PlotPeakResult");
+    deleteData();
   }
 
   
@@ -248,6 +254,8 @@ private:
     double spec;
     double x;
 
+    //Mantid::API::Axis* y  = new Mantid::API::SpectraAxis(3);
+    //ws->replaceAxis(1,y);
     for(int iSpec=0;iSpec<nSpec;iSpec++)
     {
       spec = iSpec;
@@ -263,6 +271,7 @@ private:
       }
       if (isHist)
         X.back() = X[nY-1] + dx;
+      //y->setValue(iSpec,iSpec+1);
     }
     return ws;
   }
