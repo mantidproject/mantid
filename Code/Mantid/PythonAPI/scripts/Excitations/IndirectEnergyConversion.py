@@ -126,7 +126,7 @@ def detailedBalance(tempK, inWS_n = 'Energy', outWS_n = 'Energy'):
 	ExponentialCorrection(inWS_n, outWS_n, 1.0, ( 11.606 / ( 2 * tempK ) ) )
 	return outWS_n
 
-def scaleAndGroup(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
+def groupData(mapfile, inWS_n = 'Energy', outWS_n = 'IconComplete'):
 	GroupDetectors(inWS_n, outWS_n, MapFile = mapfile)
 	mantid.deleteWorkspace(inWS_n)
 	return outWS_n
@@ -150,7 +150,9 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', ref
 	'''
 	output_workspace_names = []
 	runNos = []
+	mtd.sendLogMessage(">> Loading RAW Files: " + ", ".join(rawfiles))
 	workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
+	mtd.sendLogMessage(">> Raw files loaded into workspaces: " + ", ".join(ws_name))
 	for i in range(0, len(workspace)):
 		(direct, filename) = os.path.split(rawfiles[i])
 		runNo = workspace[i].getRun().getLogData("run_number").value()
@@ -158,30 +160,40 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', ref
 		name = filename[:3].lower() + runNo + '_' + analyser + reflection
 		MonitorWS_n = timeRegime(workspace[i], inWS_n = ws_name[i])
 		MonWS_n = monitorEfficiency()
+		mtd.sendLogMessage(">> Monitor Workspace for " +ws_name[i]+" is " + MonWS_n)
 		CropWorkspace(ws_name[i], 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
 		mantid.deleteWorkspace(ws_name[i])
 		if ( bgremove != [0, 0] ):
 			backgroundRemoval(bgremove[0], bgremove[1])
 		if ( calib != '' ):
+			mtd.sendLogMessage('>> Applying Calibration File: ' + calib)
 			calibrated = useCalib(calib)
 		normalised = normToMon()
+		mtd.sendLogMessage('>> Converting workspace ' + normalised + ' to units of deltaE.')
 		cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
-		# 
 		if ( rebinParam != ''):
+			mtd.sendLogMessage('>> Rebinning workspace ' + cte + ' with parameters (' +rebinParam+ ')')
 			rebin = rebinData(rebinParam, inWS_n=cte)
 			if CleanUp:
+				mtd.sendLogMessage('>> Removing intermediate workspace: ' + cte)
 				mantid.deleteWorkspace(cte)
 		else:
 			if CleanUp:
+				mtd.sendLogMessage('>> Removing intermediate workspace: ' + cte)
 				RenameWorkspace(cte, 'Energy')
 			else:
 				CloneWorkspace(cte, 'Energy')
 		if ( tempK != -1 ):
+			mtd.sendLogMessage('>> Adjusting for "detailed balance" at temperature: ' + str(tempK) + 'K')
 			db = detailedBalance(tempK)
-		scale = scaleAndGroup(mapfile, outWS_n=name)
-		output_workspace_names.append(scale)
+		group = groupData(mapfile, outWS_n=name)
+		output_workspace_names.append(group)
 	if ( saveFormats != [] ):
 		saveItems(output_workspace_names, runNos, saveFormats, instrument, savesuffix, directory = savedir)
+		mtd.sendLogMessage(">> Saved workspaces: " + ", ".join(output_workspace_names) +" in formats: "+ ", ".join(saveFormats))
+	else:
+		mtd.sendLogMessage(">> Workspaces were not saved.")
+	mtd.sendLogMessage(">> Convert to Energy completed with the following output workspaces: " + ", ".join(output_workspace_names))
 	return output_workspace_names, runNos
 
 def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, savesuffix, saveFormats, savedir, CleanUp=False):
@@ -242,12 +254,9 @@ def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax, specMin
 		sys.exit('Calib: Could not load raw file.')
 	tmp = mantid.getMatrixWorkspace('Raw')
 	nhist = tmp.getNumberHistograms()
-	Integration('Raw', 'CalA', peakMin, peakMax, 0, nhist -1)
-	Integration('Raw', 'CalB', backMin, backMax, 0, nhist -1)
-	Minus('CalA', 'CalB', outWS_n)
+	FlatBackground('Raw', 'Raw', StartX=backMin, EndX=backMax, Mode='Mean')
+	Integration('Raw', outWS_n, peakMin, peakMax)
 	mantid.deleteWorkspace('Raw')
-	mantid.deleteWorkspace('CalA')
-	mantid.deleteWorkspace('CalB')
 	cal_ws = mantid.getMatrixWorkspace(outWS_n)
 	sum = 0
 	for i in range(0, nhist):
