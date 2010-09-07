@@ -160,6 +160,8 @@ class CanSubtraction(ReductionStep):
         if not issubclass(reducer.instrument.__class__, SANSInsts.ISISInstrument):
             raise RuntimeError, "Transmission.assign_can expects an argument of class ISISInstrument"
         
+        
+        # Code from AssignCan
         _clearPrevious(self.SCATTER_CAN)
         
         self._CAN_N_PERIODS = -1
@@ -217,6 +219,7 @@ class CanSubtraction(ReductionStep):
                 mantid.sendLogMessage("::SANS::Warning: values differ between sample and can runs. Sample = " + str(smp_values[i]) + \
                                   ' , Can = ' + str(can_values[i]))
                 reducer.instrument.append_marked(det_names[i])
+        # End of AssignCan code
         
         return self.SCATTER_CAN.getName(), logvalues
 
@@ -227,6 +230,60 @@ class CanSubtraction(ReductionStep):
             self._assign_can(reducer, self._can_run, reload = self._can_run_reload, period = self._can_run_period)
         
         # Apply same corrections as for data then subtract from data
+        # Start of WaveRangeReduction code
+        # _initReduction code
+        # _init_run()
+        beamcoords = reducer._beam_finder.get_beam_center()
+        mantid.sendLogMessage('::SANS:: Initializing can workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
+
+        final_ws = "can_temp_workspace"
+
+        # Put the components in the correct positions
+        currentDet = reducer.instrument.cur_detector().name() 
+        maskpt_rmin, maskpt_rmax = reducer.instrument.set_component_positions(self.SCATTER_CAN.getName(), beamcoords[0], beamcoords[1])
+        
+        # Create a run details object
+        TRANS_CAN = ''
+        DIRECT_CAN = ''
+        if reducer._transmission_calculator is not None:
+            TRANS_CAN = reducer._transmission_calculator.TRANS_CAN
+        if reducer._transmission_calculator is not None:
+            DIRECT_CAN = reducer._transmission_calculator.DIRECT_CAN
+            
+        can_setup = SANSUtility.RunDetails(self.SCATTER_CAN, final_ws, TRANS_CAN, DIRECT_CAN, maskpt_rmin, maskpt_rmax, 'can')
+        # End _init_run            
+        # End of _initReduction  
+        
+        finding_centre = False
+        
+        
+        tmp_smp = workspace+"_sam_tmp"
+        RenameWorkspace(workspace, tmp_smp)
+        # Run correction function
+        # was  Correct(SCATTER_CAN, can_setup[0], can_setup[1], wav_start, wav_end, can_setup[2], can_setup[3], finding_centre)
+        tmp_can = workspace+"_can_tmp"
+        can_setup.setReducedWorkspace(tmp_can)
+        # Can correction
+        #TODO: deal with this once we have the final workspace name (setReducedWorkspace) sorted
+        if False:
+            Correct(can_setup, wav_start, wav_end, use_def_trans, finding_centre)
+            Minus(tmp_smp, tmp_can, workspace)
+    
+            # Due to rounding errors, small shifts in detector encoders and poor stats in highest Q bins need "minus" the
+            # workspaces before removing nan & trailing zeros thus, beware,  _sc,  _sam_tmp and _can_tmp may NOT have same Q bins
+            if finding_centre == False:
+                ReplaceSpecialValues(InputWorkspace = tmp_smp,OutputWorkspace = tmp_smp, NaNValue="0", InfinityValue="0")
+                ReplaceSpecialValues(InputWorkspace = tmp_can,OutputWorkspace = tmp_can, NaNValue="0", InfinityValue="0")
+                if reducer.CORRECTION_TYPE == '1D':
+                    SANSUtility.StripEndZeroes(tmp_smp)
+                    SANSUtility.StripEndZeroes(tmp_can)
+            else:
+                mantid.deleteWorkspace(tmp_smp)
+                mantid.deleteWorkspace(tmp_can)
+                mantid.deleteWorkspace(workspace)        
+        # End of WaveRangeReduction  
+        
+            
     
 class Mask(ReductionStep):
     """
@@ -338,6 +395,7 @@ class LoadSample(ReductionStep):
             else:
                 raise RuntimeError, "ISISReductionSteps.LoadSample doesn't recognize workspace handle %s" % workspace        
         
+        # Code from AssignSample
         _clearPrevious(self.SCATTER_SAMPLE)
         self._SAMPLE_N_PERIODS = -1
         
@@ -374,6 +432,39 @@ class LoadSample(ReductionStep):
         reducer.instrument.FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
         reducer.instrument.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
         reducer.instrument.REAR_DET_X = float(logvalues['Rear_Det_X'])
+        # End of AssignSample
+        
+        # Start code from WaveRangeReduction
+        # SANSReduction._initReduction
+        beamcoords = reducer._beam_finder.get_beam_center()
+        
+        # SANSReduction._init_run. This should go in LoadSample
+        #sample_setup = _init_run(SCATTER_SAMPLE, beam_center, False)    
+        mantid.sendLogMessage('::SANS:: Initializing sample workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
+    
+        final_ws = self.SCATTER_SAMPLE.getName().split('_')[0]
+        final_ws += reducer.instrument.cur_detector().name('short')
+        #TODO: Need to do something about CORRECTION_TYPE
+        final_ws += '_' + reducer.CORRECTION_TYPE
+
+        # Put the components in the correct positions
+        currentDet = reducer.instrument.cur_detector().name() 
+        maskpt_rmin, maskpt_rmax = reducer.instrument.set_component_positions(self.SCATTER_SAMPLE.getName(), beamcoords[0], beamcoords[1])
+        
+        # Create a run details object
+        TRANS_SAMPLE = ''
+        DIRECT_SAMPLE = ''
+        if reducer._transmission_calculator is not None:
+            TRANS_SAMPLE = reducer._transmission_calculator.TRANS_SAMPLE
+        if reducer._transmission_calculator is not None:
+            DIRECT_SAMPLE = reducer._transmission_calculator.DIRECT_SAMPLE
+            
+        sample_setup = SANSUtility.RunDetails(self.SCATTER_SAMPLE, final_ws, 
+                                              TRANS_SAMPLE, DIRECT_SAMPLE, maskpt_rmin, maskpt_rmax, 'sample')
+        # End of _init_run
+        #TODO: 
+        sample_setup.setReducedWorkspace(workspace + '_' + str(reducer.WAV1) + '_' + str(reducer.WAV2))
+        
     
         return self.SCATTER_SAMPLE.getName(), logvalues
 
@@ -518,5 +609,4 @@ def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_wid
         wkspname =  shortrun_no + '_sans_' + ext.lower()
     
     return wkspname, run_no, logname, prefix+fullrun_no+'.'+ext
-
 

@@ -62,6 +62,10 @@ def LOQ():
 def Detector(det_name):
     ReductionSingleton().instrument.setDetector(det_name)
     
+def Mask(details):
+    _printMessage('Mask("' + details + '")')
+    ReductionSingleton().mask(details)
+    
 def MaskFile(file_name):
     ReductionSingleton().read_mask_file(file_name)
     
@@ -109,3 +113,15 @@ def AppendDataFile(datafile, workspace=None):
 def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
     SetBeamCenter(XVAL/1000.0, YVAL/1000.0)
+    
+def WaveRangeReduction(wav_start = None, wav_end = None, use_def_trans = True, finding_centre = False):
+    SetWavelengthRange(wav_start, wav_end)
+    Reduce1D()
+    
+def SetWavelengthRange(start, end):
+    ReductionSingleton().set_wavelength_range(wav_start, wav_end)
+    
+    
+
+    
+

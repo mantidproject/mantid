@@ -9,6 +9,7 @@ from SANSReducer import SANSReducer
 from Reducer import ReductionStep
 import SANSReductionSteps
 import ISISReductionSteps
+import SANSUtility
 from mantidsimple import *
 
 ## Version number
@@ -54,6 +55,12 @@ class ISISReducer(SANSReducer):
     PHIMIN=-90.0
     PHIMAX=90.0
     PHIMIRROR=True
+    
+    CORRECTION_TYPE = '1D'
+    DIMENSION = None
+    SPECMIN = None
+    SPECMAX = None
+
     
     ## Flag for gravity correction
     # Belongs in Q1D
@@ -208,6 +215,75 @@ class ISISReducer(SANSReducer):
             masker = ISISReductionSteps.Mask()
             self.set_mask(masker)
         self._mask.parse_instruction(instruction)
+    
+    def set_wavelength_range(self, start, end):
+        self.WAV1 = start
+        self.WAV2 = end
+        
+        
+    def reduce(self):
+        """
+            Go through the list of reduction steps
+        """
+        # Check that an instrument was specified
+        if self.instrument is None:
+            raise RuntimeError, "Reducer: trying to run a reduction with an instrument specified"
+
+        # Go through the list of steps that are common to all data files
+        self.pre_process()
+
+        #TODO: change the following
+        finding_centre = False
+
+        # Go through the list of files to be reduced
+        for file_ws in self._data_files:
+            
+            #TODO: set up the final workspace name
+            if finding_centre == False:
+                final_workspace = file_ws + '_' + str(self.WAV1) + '_' + str(self.WAV2)
+            else:
+                final_workspace = file_ws.split('_')[0] + '_quadrants'
+            #self._data_files[final_workspace] = self._data_files[file_ws]
+            #del self._data_files[file_ws]
+            #----> can_setup.setReducedWorkspace(tmp_can)
+            
+            # Perform correction
+            #TODO: all reduction steps from Correct() should go in _2D_steps()
+            #Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
+            for item in self._reduction_steps:
+                item.execute(self, file_ws)    
+                     
+                 
+            # Crop Workspace to remove leading and trailing zeroes
+            #TODO: deal with this once we have the final workspace name sorted out
+            if False:
+                if finding_centre == False:
+                    # Replaces NANs with zeroes
+                    ReplaceSpecialValues(InputWorkspace = final_workspace, OutputWorkspace = final_workspace, NaNValue="0", InfinityValue="0")
+                    if self.CORRECTION_TYPE == '1D':
+                        SANSUtility.StripEndZeroes(final_workspace)
+                    # Store the mask file within the final workspace so that it is saved to the CanSAS file
+                    AddSampleLog(final_workspace, "UserFile", self.MASKFILE)
+                else:
+                    quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
+                    for key, value in quadrants.iteritems():
+                        old_name = final_workspace + '_' + str(key)
+                        RenameWorkspace(old_name, value)
+                        AddSampleLog(value, "UserFile", self._maskfile)       
+                        
+    def pre_process(self): 
+        """
+            Reduction steps that are meant to be executed only once per set
+            of data files. After this is executed, all files will go through
+            the list of reduction steps.
+        """
+        # from SANSReduction._initReduction
+        self.DIMENSION, self.SPECMIN, self.SPECMAX  = SANSUtility.GetInstrumentDetails(self.instrument)
+        # End of _initReduction    
+
+        # Create the list of reduction steps
+        self._to_steps()  
+    
         
     def read_mask_file(self, filename):
         """
@@ -217,6 +293,7 @@ class ISISReducer(SANSReducer):
             
             @param filename: file path of the mask file to be read
         """
+        self._maskfile = filename
         #Check that the file exists.
         if not os.path.isfile(filename):
             raise RuntimeError, "Cannot read mask. File path '%s' does not exist." % filename
