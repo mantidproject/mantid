@@ -17,7 +17,7 @@ using namespace MantidQt::MantidWidgets;
 static const int MAX_FILE_NOT_FOUND_DISP = 3;
 
 MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(true), 
-  m_isOptional(false), m_algorithmProperty(""), m_fileFilter("")
+m_isOptional(false), m_algorithmProperty(""), m_fileFilter("")
 {
   m_uiForm.setupUi(this);
 
@@ -32,54 +32,54 @@ MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent), m_findRunFiles(t
 }
 
 /**
- * Returns if this widget is for run file searching or not
- * @returns True if this widget searches for run files, false otherwise
- */
+* Returns if this widget is for run file searching or not
+* @returns True if this widget searches for run files, false otherwise
+*/
 bool MWRunFiles::isForRunFiles() const
 {
   return m_findRunFiles;
 }
 
 /**
- * Sets whether this widget is for run file searching or not
- * @param True if this widget searches for run files, false otherwise
- */
+* Sets whether this widget is for run file searching or not
+* @param True if this widget searches for run files, false otherwise
+*/
 void MWRunFiles::isForRunFiles(const bool mode)
 {
   m_findRunFiles = mode;
 }
 
 /**
- * Return the label text on the widget
- * @returns The current value of the text on the label
- */
+* Return the label text on the widget
+* @returns The current value of the text on the label
+*/
 QString MWRunFiles::getLabelText() const
 { 
   return m_uiForm.textLabel->text();
 }
 
 /**
- * Set the text on the label
- * @param text A string giving the label to use for the text
- */
+* Set the text on the label
+* @param text A string giving the label to use for the text
+*/
 void MWRunFiles::setLabelText(const QString & text) 
 { 
   m_uiForm.textLabel->setText(text);
 }
 
 /**
- * Return whether this widget allows multiple files to be specified within the edit box
- * @returns True if multiple files can be specified, false otherwise
- */
+* Return whether this widget allows multiple files to be specified within the edit box
+* @returns True if multiple files can be specified, false otherwise
+*/
 bool MWRunFiles::allowMultipleFiles() const
 {
   return m_allowMultipleFiles;
 }
 
 /**
- * Set whether this widget allows multiple files to be specifed or not
- * @param allow If true then the widget will accept multiple files else only a single file may be specified
- */
+* Set whether this widget allows multiple files to be specifed or not
+* @param allow If true then the widget will accept multiple files else only a single file may be specified
+*/
 void MWRunFiles::allowMultipleFiles(const bool allow)
 {
   m_allowMultipleFiles = allow;
@@ -87,17 +87,17 @@ void MWRunFiles::allowMultipleFiles(const bool allow)
 }
 
 /**
- * Return whether empty input is allowed
- */
+* Return whether empty input is allowed
+*/
 bool MWRunFiles::isOptional() const
 {
   return m_isOptional;
 }
 
 /**
- * Sets if the text field is optional
- * @param optional Set the optional status of the text field
- */
+* Sets if the text field is optional
+* @param optional Set the optional status of the text field
+*/
 void MWRunFiles::isOptional(const bool optional)
 {
   m_isOptional = optional;
@@ -105,18 +105,18 @@ void MWRunFiles::isOptional(const bool optional)
 }
 
 /**
- * Returns the algorithm name
- * @returns The algorithm name
- */
+* Returns the algorithm name
+* @returns The algorithm name
+*/
 QString MWRunFiles::getAlgorithmProperty() const
 {
   return m_algorithmProperty;
 }
 
 /**
- * Sets an algorithm name that can be tied to this widget
- * @param name The name of the algorithm and property in the form [AlgorithmName|PropertyName]
- */
+* Sets an algorithm name that can be tied to this widget
+* @param name The name of the algorithm and property in the form [AlgorithmName|PropertyName]
+*/
 void MWRunFiles::setAlgorithmProperty(const QString & text)
 {
   m_algorithmProperty = text;
@@ -127,7 +127,7 @@ void MWRunFiles::setAlgorithmProperty(const QString & text)
 */
 QStringList MWRunFiles::getFileExtensions() const
 {
-    return m_fileExtensions;
+  return m_fileExtensions;
 }
 /**
 * Sets the list of file extensions the dialog will search for. Only taken notice of if AlgorithmProperty not set.
@@ -135,13 +135,13 @@ QStringList MWRunFiles::getFileExtensions() const
 */
 void MWRunFiles::setFileExtensions(const QStringList & extensions)
 {
-    m_fileExtensions = extensions;
+  m_fileExtensions = extensions;
 }
 
 /**
- * Is the input within the widget valid?
- * @returns True of the file names within the widget are valid, false otherwise
- */
+* Is the input within the widget valid?
+* @returns True of the file names within the widget are valid, false otherwise
+*/
 bool MWRunFiles::isValid() const
 {
   if( m_uiForm.valid->isHidden() )
@@ -176,23 +176,23 @@ QString MWRunFiles::getFirstFilename() const
 }
 
 /**
- * Save settings to the given group
- * @param group The name of the group key to save to
- */
+* Save settings to the given group
+* @param group The name of the group key to save to
+*/
 void MWRunFiles::saveSettings(const QString & group)
 {
   QSettings settings;
   settings.beginGroup(group);
-  
+
   settings.setValue("last_directory", m_lastDir);
-  
+
   settings.endGroup();
 }
 
 /** 
- * Set the file text
- * @param text The text string to set
- */
+* Set the file text
+* @param text The text string to set
+*/
 void MWRunFiles::setFileText(const QString & text)
 {
   m_uiForm.fileEditor->setText(text);
@@ -201,47 +201,46 @@ void MWRunFiles::setFileText(const QString & text)
 
 
 /**
- * Read settings from the given group
- * @param group The name of the group key to retrieve data from
- */
+* Read settings from the given group
+* @param group The name of the group key to retrieve data from
+*/
 void MWRunFiles::readSettings(const QString & group)
 {
   QSettings settings;
   settings.beginGroup(group);
-  
+
   m_lastDir = settings.value("last_directory", "").toString();
 
   if ( m_lastDir == "" )
   {
-          // set to default data directory
-          QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
-          m_lastDir = datadirs[0];
+    QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
+    if ( ! datadirs.isEmpty() ) m_lastDir = datadirs[0];
   }
-  
+
   settings.endGroup();
 }
 
 /**
- * Set a new file filter for the file dialog based on the given extensions
- * @returns A string containing the file filter
- */
+* Set a new file filter for the file dialog based on the given extensions
+* @returns A string containing the file filter
+*/
 QString MWRunFiles::createFileFilter()
 {
   QStringList fileExts;
   if( m_algorithmProperty.isEmpty() )
   {
-      if ( !m_fileExtensions.isEmpty() )
+    if ( !m_fileExtensions.isEmpty() )
+    {
+      fileExts = m_fileExtensions;
+    }
+    else
+    {
+      std::vector<std::string> exts = ConfigService::Instance().Facility().extensions();
+      for( std::vector<std::string>::iterator ex= exts.begin(); ex != exts.end(); ++ex )
       {
-          fileExts = m_fileExtensions;
+        fileExts.append(QString::fromStdString(*ex));
       }
-      else
-      {
-          std::vector<std::string> exts = ConfigService::Instance().Facility().extensions();
-          for( std::vector<std::string>::iterator ex= exts.begin(); ex != exts.end(); ++ex )
-          {
-              fileExts.append(QString::fromStdString(*ex));
-          }
-      }
+    }
   }
   else
   {
@@ -268,11 +267,11 @@ QString MWRunFiles::createFileFilter()
 }
 
 /**
- * Create a list of file extensions from the given algorithm
- * @param algName The name of the algorithm
- * @param propName The name of the property
- * @returns A list of file extensions
- */
+* Create a list of file extensions from the given algorithm
+* @param algName The name of the algorithm
+* @param propName The name of the property
+* @returns A list of file extensions
+*/
 QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName)
 {
   Mantid::API::IAlgorithm_sptr algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName.toStdString());
@@ -314,11 +313,19 @@ QString MWRunFiles::openFileDia()
   {
     m_fileFilter = createFileFilter();
   }
- 
-  filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter);
+
+  if ( m_allowMultipleFiles )
+  {
+    filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter);
+  }
+  else
+  {
+    filenames.append(QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter));
+  }
+
   if(filenames.isEmpty())
   {
-	  return "";
+    return "";
   }
   m_lastDir = QFileInfo(filenames.front()).absoluteDir().path();
   // turns the QStringList into a coma separated list inside a QString
@@ -326,9 +333,9 @@ QString MWRunFiles::openFileDia()
 }
 
 /**
- * Mark an error on the form
- * @param A message to include (default: "")
- */
+* Mark an error on the form
+* @param A message to include (default: "")
+*/
 void MWRunFiles::showError(const QString & message)
 {
   m_uiForm.valid->setToolTip(message);
@@ -344,14 +351,14 @@ void MWRunFiles::browseClicked()
 
   if( this->allowMultipleFiles() )
   {
-   if ( !m_uiForm.fileEditor->text().isEmpty() )
-   {
-     m_uiForm.fileEditor->setText(m_uiForm.fileEditor->text()+", " + uFile);
-   }
-   else
-   {
-     m_uiForm.fileEditor->setText(uFile);
-   }
+    if ( !m_uiForm.fileEditor->text().isEmpty() )
+    {
+      m_uiForm.fileEditor->setText(m_uiForm.fileEditor->text()+", " + uFile);
+    }
+    else
+    {
+      m_uiForm.fileEditor->setText(uFile);
+    }
   }
   else
   {
@@ -362,10 +369,14 @@ void MWRunFiles::browseClicked()
 }
 
 /** 
- * Puts the comma separated string in the fileEditor into the m_files array
+* Puts the comma separated string in the fileEditor into the m_files array
 */
 void MWRunFiles::findFiles()
 {
+
+  QStringList filestext = this->m_uiForm.fileEditor->text().split(", ", QString::SkipEmptyParts);
+  QString file;
+
   std::string text = this->m_uiForm.fileEditor->text().toStdString();
   if( text.empty() )
   {
@@ -392,8 +403,11 @@ void MWRunFiles::findFiles()
     }
     else
     {
-      std::string result = fileSearcher.getFullPath(text);
-      if( !result.empty() ) filenames.push_back(text);
+      foreach(file, filestext)
+      {
+        std::string result = fileSearcher.getFullPath(file.toStdString());
+        if( !result.empty() ) filenames.push_back(file.toStdString());
+      }
     }
   }
   catch(Exception::NotFoundError& exc)
