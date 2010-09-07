@@ -231,8 +231,8 @@ using Kernel::Exception::NotImplementedError;
     }
     else
     {
-      //Already exists; return it
-      return *this->data_map[pixelID];
+      //Already exists; return it (deref the pointer)
+      return *(it->second);
     }
   }
 
@@ -364,7 +364,7 @@ using Kernel::Exception::NotImplementedError;
     //Ok, we need to take the data_map, and turn it into a data[] vector.
 
     //Let's make the vector big enough.
-    if (static_cast<int>(this->data_map.size()) > m_noVectors)
+    if (static_cast<int>(this->data_map.size()) < m_noVectors)
     {
       //Too many vectors! Why did you initialize it bigger than you needed to, silly?
       for (int i=this->data_map.size(); i<m_noVectors; i++)

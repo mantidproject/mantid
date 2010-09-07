@@ -70,41 +70,79 @@ public:
     TS_ASSERT_EQUALS( sizeof(Pulse), 24);
     TS_ASSERT_EQUALS( sizeof(DasEvent), 8);
   }
-//
-//  void test_LoadPreNeXus_TOPAZ()
+
+  void checkWorkspace(std::string eventfile, std::string WSName, int numpixels_with_events)
+  {
+    //Get the event file size
+    struct stat filestatus;
+    stat(eventfile.c_str(), &filestatus);
+
+    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(WSName));
+
+    //The # of events = size of the file / 8 bytes (per event)
+    TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
+
+    //Only some of the pixels were loaded, because of lot of them are empty
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
+
+    //Mapping between workspace index and spectrum number
+    //Is the length good?
+    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
+
+  }
+
+#ifdef LOADEVENTPRENEXUS_ALLOW_PARALLEL
+//  void test_LoadPreNeXus_TOPAZ_Parallel()
 //  {
 //    //std::string eventfile( "/home/janik/data/TOPAZ_1241/preNeXus/TOPAZ_1241_neutron_event.dat" );
 //    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
 //    eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/TOPAZ_TS_2010_04_16.dat");
+//    eventLoader->setPropertyValue("UseParallelProcessing", "1");
+//    eventLoader->setPropertyValue("MappingFilename", "");
 //    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
-//
-//    //Get the event file size
-//    struct stat filestatus;
-//    stat(eventfile.c_str(), &filestatus);
-//
-//    //std::cout << "***** executing *****" << std::endl;
 //    TS_ASSERT( eventLoader->execute() );
-//
-//    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("topaz1249"));
-//
-//    //The # of events = size of the file / 8 bytes (per event)
-//    TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
-//
-//    //Only some of the pixels were loaded, because of lot of them are empty
-//    int numpixels_with_events = 199824;
-//    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
-//
-//    //Mapping between workspace index and spectrum number
-//    //Is the length good?
-//    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
-//    //Depends on which was the first pixel with events. BUT it has to be
-//    // more than 65536, because the 0th detector has no events (does not exist).
-//    TS_ASSERT( ew->getAxis(1)->spectraNo(0) >= 65536);
-//    //And the spectra # grow monotonically
-//    TS_ASSERT( ew->getAxis(1)->spectraNo(1) > ew->getAxis(1)->spectraNo(0));
-//    TS_ASSERT( ew->getAxis(1)->spectraNo(numpixels_with_events-1) < 15*256*256);
+//    checkWorkspace(eventfile, "topaz1249", 199824);
 //  }
+//
+//  void test_LoadPreNeXus_TOPAZ_Linear()
+//  {
+//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
+//    eventLoader->setPropertyValue("EventFilename", eventfile);
+//    eventLoader->setPropertyValue("UseParallelProcessing", "0");
+//    eventLoader->setPropertyValue("MappingFilename", "");
+//    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
+//    TS_ASSERT( eventLoader->execute() );
+//    checkWorkspace(eventfile, "topaz1249", 199824);
+//  }
+//
+//
+//  //These two tests are very slow
+//  void xtest_LoadPreNeXus_PG3_Parallel()
+//  {
+//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
+//    eventLoader->setPropertyValue("EventFilename", eventfile);
+//    eventLoader->setPropertyValue("UseParallelProcessing", "1");
+//    eventLoader->setPropertyValue("MappingFilename", "");
+//    eventLoader->setPropertyValue("LoadingBlockSize", "10000000");
+//    eventLoader->setPropertyValue("OutputWorkspace", "pg3_732");
+//    TS_ASSERT( eventLoader->execute() );
+//    checkWorkspace(eventfile, "pg3_732", 14616);
+//  }
+//
+//  void xtest_LoadPreNeXus_PG3_Serial()
+//  {
+//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
+//    eventLoader->setPropertyValue("EventFilename", eventfile);
+//    eventLoader->setPropertyValue("UseParallelProcessing", "0");
+//    eventLoader->setPropertyValue("MappingFilename", "");
+//    eventLoader->setPropertyValue("LoadingBlockSize", "1000000");
+//    eventLoader->setPropertyValue("OutputWorkspace", "pg3_732");
+//    TS_ASSERT( eventLoader->execute() );
+//    checkWorkspace(eventfile, "pg3_732", 14616);
+//  }
+
+#endif
+
 
 
   void test_LoadPreNeXus_REFL()

@@ -160,6 +160,8 @@ public:
 
   virtual std::size_t getNumberEvents() const;
 
+  void allocateMoreEvents(int numEvents);
+
   virtual size_t histogram_size() const;
 
   void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;

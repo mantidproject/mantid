@@ -23,7 +23,13 @@ using std::string;
 using std::vector;
 
 /// Default number of items to read in from any of the files.
-static const size_t DEFAULT_BLOCK_SIZE = 1000000; // 100,000
+static const size_t DEFAULT_BLOCK_SIZE = 100000; // 100,000
+
+/// Max size block to read from a file (memory limitations)
+static const size_t MAX_BLOCK_SIZE = 100000000; // 100 million
+
+/// Min size of a block (too small is inefficient)
+static const size_t MIN_BLOCK_SIZE = 1000;
 
 /**
  * The BinaryFile template is a helper function for loading simple binary files.

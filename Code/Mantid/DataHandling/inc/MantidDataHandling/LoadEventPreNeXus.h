@@ -40,6 +40,10 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
+/// This define is used to quickly turn parallel code on or off.
+#undef LOADEVENTPRENEXUS_ALLOW_PARALLEL
+
+
 /// Make the code clearer by having this an explicit type
 typedef uint32_t PixelType;
 
@@ -56,6 +60,24 @@ struct DasEvent
   PixelType pid;
 };
 #pragma pack(pop)
+
+
+/// Structure used as an intermediate for parallel processing of events
+#pragma pack(push, 4) //Make sure the structure is 8 bytes.
+struct IntermediateEvent
+{
+  /// Time of flight.
+  DasTofType tof;
+  /// Pixel identifier as published by the DAS/DAE/DAQ.
+  PixelType pid;
+  /// Frame index (pulse # of this event)
+  size_t frame_index;
+  /// Period of the event (not really used at this time)
+  uint32_t period;
+};
+#pragma pack(pop)
+
+
 
 /// Structure that matches the form in the new pulseid files.
 #pragma pack(push, 4) //Make sure the structure is 16 bytes.
@@ -133,6 +155,18 @@ private:
   /// Set to true when instrument geometry was loaded.
   bool instrument_loaded_correctly;
 
+  //For loading only some spectra
+  bool loadOnlySomeSpectra;
+  std::map<int, bool> spectraLoadMap;
+
+  //Limits found to tof
+  double longest_tof, shortest_tof;
+
+  bool parallelProcessing;
+
+  /// How many events to load at a time
+  size_t loadBlockSize;
+
   void loadPixelMap(const std::string &filename);
 
   void openEventFile(const std::string &filename);
@@ -145,7 +179,11 @@ private:
 
   void procEvents(DataObjects::EventWorkspace_sptr & workspace);
 
-  void procEventsParallel(DataObjects::EventWorkspace_sptr & workspace);
+  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer, size_t current_event_buffer_size, size_t fileOffset);
+
+  void makeIntermediateEventBuffer(DasEvent * event_buffer, size_t& current_event_buffer_size, IntermediateEvent * intermediate_buffer, size_t fileOffset);
+
+  void procEventsParallel(DataObjects::EventWorkspace_sptr & workspace, IntermediateEvent * intermediate_buffer, size_t current_event_buffer_size);
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
 

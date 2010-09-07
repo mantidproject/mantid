@@ -378,6 +378,11 @@ namespace DataObjects
     return this->events.size();
   }
 
+  void EventList::allocateMoreEvents(int numEvents)
+  {
+    this->events.reserve( events.size() + numEvents );
+  }
+
   /** Return the size of the histogram representation of the data (size of Y) **/
   size_t EventList::histogram_size() const
   {
