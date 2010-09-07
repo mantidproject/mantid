@@ -1,13 +1,13 @@
 #include <iostream>
 
 #include "Poco/Path.h"
-#include "Poco/File.h"
-#include "Poco/DirectoryIterator.h"
-#include "boost/algorithm/string.hpp"
-
 #include "MantidKernel/DllOpen.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
+
+#include "Poco/File.h"
+#include "Poco/DirectoryIterator.h"
+#include "boost/algorithm/string.hpp"
 
 namespace Mantid
 {

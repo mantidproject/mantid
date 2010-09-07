@@ -1,29 +1,7 @@
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <cfloat>
-#include <list>
-#include <vector>
-#include <map>
-#include <stack>
-#include <string>
-#include <algorithm>
-#include <boost/regex.hpp>
-
+#include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
-
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Tolerance.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Surfaces/BaseVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-
 
 namespace Mantid
 {

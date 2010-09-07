@@ -1,21 +1,5 @@
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <list>
-#include <vector>
-#include <map>
-#include <stack>
-#include <string>
-#include <algorithm>
-#include <boost/regex.hpp>
-
-#include "MantidKernel/Logger.h"
-
-#include "MantidKernel/Support.h"
 #include "MantidGeometry/Objects/Material.h"
-
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {

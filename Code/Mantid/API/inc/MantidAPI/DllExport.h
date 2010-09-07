@@ -3,6 +3,7 @@
 /**
 *	Sets the dll import export correctly for members of the API DLL
 **/
+#include <MantidKernel/System.h>
 
 #ifdef IN_MANTID_API
 #define EXPORT_OPT_MANTID_API DLLExport 

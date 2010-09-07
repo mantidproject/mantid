@@ -545,5 +545,8 @@
     <ClInclude Include="inc\MantidGeometry\Tolerance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Rendering\OpenCascadeConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

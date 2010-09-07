@@ -1,26 +1,7 @@
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <list>
-#include <vector>
-#include <map>
-#include <stack>
-#include <string>
-#include <algorithm>
-#include <boost/regex.hpp>
-
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Support.h"
-
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Surfaces/BaseVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/General.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Support.h"
+#include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
 {
@@ -29,8 +10,6 @@ namespace Geometry
 {
 
 Kernel::Logger& General::PLog(Kernel::Logger::get("General"));
-
-
 
 const double GTolerance(1e-6);  ///< Tolerance
 

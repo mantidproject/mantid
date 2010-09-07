@@ -23,7 +23,7 @@
     <ClCompile Include="src\MatlabInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\MATLAB\R2008a\extern\src\mwdebug.c">
+    <ClCompile Include="C:\MATLAB\mwdebug.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

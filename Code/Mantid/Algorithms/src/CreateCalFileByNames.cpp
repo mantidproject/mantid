@@ -1,9 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/detail/classification.hpp>
+#include "MantidAlgorithms/CreateCalFileByNames.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -11,7 +9,9 @@
 #include <queue>
 #include <fstream>
 #include <iomanip>
-#include "MantidAlgorithms/CreateCalFileByNames.h"
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/detail/classification.hpp>
 
 
 namespace Mantid

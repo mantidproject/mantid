@@ -28,9 +28,11 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\MantidRelease.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\MantidDebug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -46,7 +48,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;_DEBUG;_WINDOWS;POCO_DLL;GSL_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;BOOST_ALL_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_ALGORITHMS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <WarningLevel>Level3</WarningLevel>
@@ -69,7 +71,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GSL_DLL;NOMINMAX;BOOST_ALL_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_ALGORITHMS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <WarningLevel>Level3</WarningLevel>
@@ -119,6 +121,7 @@
     <ClCompile Include="src\ExtractSingleSpectrum.cpp" />
     <ClCompile Include="src\FFT.cpp" />
     <ClCompile Include="src\FFTSmooth.cpp" />
+    <ClCompile Include="src\FFTSmooth2.cpp" />
     <ClCompile Include="src\FindCenterOfMassPosition.cpp" />
     <ClCompile Include="src\FindDeadDetectors.cpp" />
     <ClCompile Include="src\FindDetectorsOutsideLimits.cpp" />
@@ -129,6 +132,7 @@
     <ClCompile Include="src\GetDetectorOffsets.cpp" />
     <ClCompile Include="src\GetEi.cpp" />
     <ClCompile Include="src\GetEi2.cpp" />
+    <ClCompile Include="src\GhostCorrection.cpp" />
     <ClCompile Include="src\HRPDSlabCanAbsorption.cpp" />
     <ClCompile Include="src\InputWSDetectorInfo.cpp" />
     <ClCompile Include="src\InterpolatingRebin.cpp" />
@@ -139,6 +143,7 @@
     <ClCompile Include="src\MedianDetectorTest.cpp" />
     <ClCompile Include="src\MergeRuns.cpp" />
     <ClCompile Include="src\Minus.cpp" />
+    <ClCompile Include="src\MultipleScatteringAbsorption.cpp" />
     <ClCompile Include="src\Multiply.cpp" />
     <ClCompile Include="src\MultiplyRange.cpp" />
     <ClCompile Include="src\MuonAsymmetryCalc.cpp" />
@@ -158,6 +163,7 @@
     <ClCompile Include="src\Qxy.cpp" />
     <ClCompile Include="src\ReadGroupsFromFile.cpp" />
     <ClCompile Include="src\RealFFT.cpp" />
+    <ClCompile Include="src\Rebin.cpp" />
     <ClCompile Include="src\RebinToWorkspace.cpp" />
     <ClCompile Include="src\Rebunch.cpp" />
     <ClCompile Include="src\Regroup.cpp" />
@@ -166,11 +172,11 @@
     <ClCompile Include="src\ReplaceSpecialValues.cpp" />
     <ClCompile Include="src\Scale.cpp" />
     <ClCompile Include="src\SimpleIntegration.cpp" />
-    <ClCompile Include="src\SimpleRebin.cpp" />
     <ClCompile Include="src\SmoothData.cpp" />
     <ClCompile Include="src\SofQW.cpp" />
     <ClCompile Include="src\SolidAngle.cpp" />
     <ClCompile Include="src\SolidAngleCorrection.cpp" />
+    <ClCompile Include="src\Sort.cpp" />
     <ClCompile Include="src\StripPeaks.cpp" />
     <ClCompile Include="src\SumRowColumn.cpp" />
     <ClCompile Include="src\SumSpectra.cpp" />
@@ -183,6 +189,12 @@
   <ItemGroup>
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\AddSampleLog.h" />
+    <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h" />
+    <ClInclude Include="inc\MantidAlgorithms\FFTSmooth2.h" />
+    <ClInclude Include="inc\MantidAlgorithms\GhostCorrection.h" />
+    <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />
+    <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
+    <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
     <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h" />
     <ClInclude Include="inc\mantidalgorithms\applytransmissioncorrection.h" />
     <ClInclude Include="inc\mantidalgorithms\calculateefficiency.h" />
@@ -312,7 +324,6 @@
     <ClInclude Include="inc\MantidAlgorithms\Scale.h" />
     <ClInclude Include="inc\MantidAlgorithms\SimpleIntegration.h" />
     <ClInclude Include="test\SimpleIntegrationTest.h" />
-    <ClInclude Include="inc\MantidAlgorithms\SimpleRebin.h" />
     <ClInclude Include="test\SimpleRebinTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\SmoothData.h" />
     <ClInclude Include="test\SmoothDataTest.h" />

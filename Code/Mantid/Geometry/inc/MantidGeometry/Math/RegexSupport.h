@@ -1,8 +1,8 @@
-#ifndef regexSupport_h
-#define regexSupport_h
+#ifndef REGEXSUPPORT_H
+#define REGEXSUPPORT_H
 
-#include <boost/regex.hpp>
 #include "MantidKernel/Support.h"
+#include <boost/regex.hpp>
 
 namespace Mantid 
 {

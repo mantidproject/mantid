@@ -69,9 +69,6 @@ class DLLExport Surface
   virtual void acceptVisitor(BaseVisit& A) const
   {  A.Accept(*this); }
 
-  //  virtual double lineIntersect(const Vec3D&,
-  //			       const Vec3D&) const;
-
   void setName(int const N) { Name=N; }            ///< Set Name
   int getName() const { return Name; }             ///< Get Name
 

@@ -246,9 +246,6 @@
     <ClCompile Include="src\SimpleIntegration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\SimpleRebin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\SmoothData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -292,6 +289,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CalculateTransmissionBeamSpreader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AlignDetectors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FFTSmooth2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhostCorrection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MultipleScatteringAbsorption.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rebin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -677,9 +692,6 @@
     <ClInclude Include="test\SimpleIntegrationTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidAlgorithms\SimpleRebin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="test\SimpleRebinTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -738,6 +750,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\mantidalgorithms\calculatetransmissionbeamspreader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\FFTSmooth2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\GhostCorrection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\Rebin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\Sort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

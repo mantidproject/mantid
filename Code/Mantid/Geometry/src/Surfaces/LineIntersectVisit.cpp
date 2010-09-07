@@ -1,25 +1,7 @@
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <list>
-#include <stack>
-#include <vector>
-#include <map>
-#include <string>
-#include <algorithm>
-#include <complex>
-#include <boost/regex.hpp>
-#include <boost/bind.hpp>
-
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/Logger.h"
-
-#include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Support.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Surfaces/BaseVisit.h"
+
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -27,8 +9,8 @@
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/General.h"
-#include "MantidGeometry/Surfaces/Line.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
+#include <algorithm>
+#include <boost/bind.hpp>
 
 namespace Mantid
 {
@@ -37,6 +19,7 @@ namespace Geometry
 {
 
 Kernel::Logger& LineIntersectVisit::PLog(Kernel::Logger::get("LineIntersectVisit"));
+
 LineIntersectVisit::LineIntersectVisit
   (const Geometry::V3D& Pt,const Geometry::V3D& uVec) :
     ATrack(Pt,uVec)
@@ -137,7 +120,7 @@ LineIntersectVisit::procTrack()
 {
   // Calculate the distances to the points
   DOut.resize(PtOut.size());
-  transform(PtOut.begin(),PtOut.end(),DOut.begin(),
+  std::transform(PtOut.begin(),PtOut.end(),DOut.begin(),
 	    boost::bind(&Geometry::V3D::distance,ATrack.getOrigin(),_1));
   return;
 }

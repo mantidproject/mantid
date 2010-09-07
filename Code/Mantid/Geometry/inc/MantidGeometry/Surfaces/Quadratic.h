@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Logger.h"
+#include <vector>
 
 namespace Mantid
 {

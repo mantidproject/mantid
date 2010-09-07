@@ -32,9 +32,11 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\MantidRelease.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\MantidDebug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -52,7 +54,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../Algorithms/inc;../../Third_Party/include;../../Third_Party/include/muParser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;POCO_DLL;GSL_DLL;WINVER=0x0500;IN_MANTID_CURVE_FITTING=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_CURVE_FITTING=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -80,7 +82,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;../../Third_Party/include/muParser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_CURVE_FITTING=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GSL_DLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_CURVE_FITTING=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -111,9 +113,9 @@
     <ClCompile Include="src\CostFuncIgnorePosPeaks.cpp" />
     <ClCompile Include="src\CostFuncLeastSquares.cpp" />
     <ClCompile Include="src\CostFunctionFactory.cpp" />
+    <ClCompile Include="src\DeltaFunction.cpp" />
     <ClCompile Include="src\Fit.cpp" />
     <ClCompile Include="src\Fit1D.cpp" />
-    <ClCompile Include="src\FitMultispectral.cpp" />
     <ClCompile Include="src\FRConjugateGradientMinimizer.cpp" />
     <ClCompile Include="src\FuncMinimizerFactory.cpp" />
     <ClCompile Include="src\Gaussian.cpp" />
@@ -139,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="inc\MantidCurveFitting\BackgroundFunction.h" />
     <ClInclude Include="inc\MantidCurveFitting\BackToBackExponential.h" />
+    <ClInclude Include="inc\MantidCurveFitting\DeltaFunction.h" />
     <ClInclude Include="test\BackToBackExponentialTest.h" />
     <ClInclude Include="inc\MantidCurveFitting\BFGS_Minimizer.h" />
     <ClInclude Include="inc\MantidCurveFitting\BoundaryConstraint.h" />
@@ -154,7 +157,6 @@
     <ClInclude Include="test\CostFunctionFactoryTest.h" />
     <ClInclude Include="inc\MantidCurveFitting\Fit.h" />
     <ClInclude Include="inc\MantidCurveFitting\Fit1D.h" />
-    <ClInclude Include="inc\MantidCurveFitting\FitMultispectral.h" />
     <ClInclude Include="test\FitMultispectralTest.h" />
     <ClInclude Include="test\FitTest.h" />
     <ClInclude Include="inc\MantidCurveFitting\FRConjugateGradientMinimizer.h" />

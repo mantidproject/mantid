@@ -1,3 +1,4 @@
+#include "MantidGeometry/Rendering/OCGeometryGenerator.h"
 #include "MantidKernel/Logger.h"
 #include <vector>
 #include <cmath>
@@ -11,7 +12,10 @@
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Torus.h"
-#include "MantidGeometry/Rendering/OCGeometryGenerator.h"
+#include "MantidGeometry/Objects/Rules.h"
+
+
+#include "MantidGeometry/Rendering/OpenCascadeConfig.h"
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Dir.hxx>
@@ -36,6 +40,7 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
+
 namespace Mantid
 {
 

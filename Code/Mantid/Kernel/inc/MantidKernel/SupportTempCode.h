@@ -29,7 +29,7 @@ int sectPartNum(std::string& A,T& out)
   cx.str(A);
   cx.clear();
   cx>>retval;
-  const int xpt=cx.tellg();
+  const size_t xpt=static_cast<size_t>(cx.tellg());
   if (xpt<0)
     return 0;
   A.erase(0,xpt);
@@ -78,7 +78,7 @@ int section(std::string& A,T& out)
   cx>>retval;
   if (cx.fail())
     return 0;
-  const int xpt=cx.tellg();
+  const size_t xpt=static_cast<size_t>(cx.tellg());
   const char xc=cx.get();
   if (!cx.fail() && !isspace(xc))
     return 0;
@@ -109,7 +109,7 @@ int sectionMCNPX(std::string& A,T& out)
   cx>>retval;
   if (!cx.fail())
     {
-      int xpt=cx.tellg();
+      const size_t xpt=static_cast<size_t>(cx.tellg());
       const char xc=cx.get();
       if (!cx.fail() && !isspace(xc) 
 	  && (xc!='-' || xpt<5))
@@ -141,7 +141,7 @@ int convPartNum(const std::string& A,T& out)
   cx.str(A);
   cx.clear();
   cx>>retval;
-  const int xpt=cx.tellg();
+  const size_t xpt=static_cast<size_t>(cx.tellg());
   if (xpt<0)
     return 0;
   out=retval;

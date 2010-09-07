@@ -1,8 +1,11 @@
-#ifndef BnId_h
-#define BnId_h 
+#ifndef BNID_H
+#define BNID_H 
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include <vector>
+#include <set>
+#include <map>
 
 namespace Mantid
 {

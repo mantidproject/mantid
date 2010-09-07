@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AlignDetectors.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\CreateSampleShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -179,9 +176,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="test\AlignDetectorsTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>

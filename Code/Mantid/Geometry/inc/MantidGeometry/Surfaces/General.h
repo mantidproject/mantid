@@ -2,9 +2,15 @@
 #define General_h
 
 #include "MantidKernel/System.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
 
 namespace Mantid
 {
+
+  namespace Kernel
+  {
+    class Logger;
+  }
 
 namespace Geometry
 {

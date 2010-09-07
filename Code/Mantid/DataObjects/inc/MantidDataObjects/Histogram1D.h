@@ -1,12 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_HISTOGRAM1D_H_
 #define MANTID_DATAOBJECTS_HISTOGRAM1D_H_
 
-#include <boost/shared_ptr.hpp>
-#include <vector>
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
-
-using namespace Mantid;
+#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace Mantid
 {

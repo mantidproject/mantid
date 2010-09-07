@@ -1,11 +1,25 @@
-#ifndef Plane_h
-#define Plane_h
+#ifndef PLANE_H
+#define PLANE_H
+
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/V3D.h"
+#include <string>
 
 namespace Mantid
 {
 
+  namespace Kernel
+  {
+    class Logger;
+  }
+
   namespace Geometry
   {
+    //---------------------------------------------
+    // Forward declaration
+    //---------------------------------------------
+    class BaseVisit;
+    template <typename T> class Matrix;
 
     /*!
     \class Plane
@@ -36,7 +50,6 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-	class BaseVisit;
     class DLLExport Plane : public Quadratic
     {
     private:
@@ -82,12 +95,12 @@ namespace Mantid
       void write(std::ostream&) const;        ///< Write in MCNPX form
 
       void setBaseEqn() ;                      ///< set up to be eqn based
-	
-	  int  LineIntersectionWithPlane(V3D startpt,V3D endpt,V3D& output);
-	  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
+
+      int  LineIntersectionWithPlane(V3D startpt,V3D endpt,V3D& output);
+      void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
     };
 
-  } // NAMESPACE MonteCarlo
+  } // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid
 

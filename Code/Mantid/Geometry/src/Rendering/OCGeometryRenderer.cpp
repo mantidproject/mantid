@@ -2,9 +2,10 @@
 #include "MantidGeometry/IObjComponent.h"
 #include <climits>
 #ifdef _WIN32
-#include "windows.h"
+  #include "windows.h"
 #endif
 #include "GL/gl.h"
+#include "MantidGeometry/Rendering/OpenCascadeConfig.h"
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>

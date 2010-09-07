@@ -6,8 +6,13 @@
 #include "boost/shared_ptr.hpp"
 
 class TopoDS_Shape;
+
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class Logger;
+  }
 
 	namespace Geometry
 	{

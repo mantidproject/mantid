@@ -4,18 +4,18 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include <map>
 #include "MantidKernel/System.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
+#include <vector>
+#include <map>
 
 #ifdef _WIN32
 #if (IN_MANTID_GEOMETRY)
-#define GEOMETRY_DLL_EXPORT __declspec( dllexport )
+#define GEOMETRY_DLL_EXPORT DLLExport
 #else
-#define GEOMETRY_DLL_EXPORT __declspec( dllimport )
+#define GEOMETRY_DLL_EXPORT DLLImport
 #endif
 #else
 #define GEOMETRY_DLL_EXPORT

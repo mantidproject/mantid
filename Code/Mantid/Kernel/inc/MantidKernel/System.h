@@ -45,7 +45,7 @@
 
 // information for holding onto stdint.h
 #ifdef HAVE_STDINT_H
-#include <stdint.h>
+#include <cstdint>
 #else
 #ifdef _WIN32
 typedef signed char          int8_t;

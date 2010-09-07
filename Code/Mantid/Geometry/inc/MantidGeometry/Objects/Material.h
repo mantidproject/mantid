@@ -1,8 +1,15 @@
-#ifndef Material_h
-#define Material_h
+#ifndef MATERIAL_H
+#define MATERIAL_H
+
+#include "MantidKernel/System.h"
+#include <string>
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class Logger;
+  }
 
 namespace Geometry
 {

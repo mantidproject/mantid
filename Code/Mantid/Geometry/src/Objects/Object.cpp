@@ -1,38 +1,23 @@
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <cmath>
-#include <complex>
-#include <vector>
-#include <list>
-#include <deque>
-#include <map>
-#include <stack>
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <boost/regex.hpp>
-
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
 #include "MantidKernel/Exception.h"
-
-#include "MantidGeometry/Tolerance.h"
-#include "MantidGeometry/Math/RegexSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/Surfaces/BaseVisit.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Line.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Objects/Track.h"
+
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Math/RegexSupport.h"
+#include "MantidGeometry/Tolerance.h"
+#include <deque>
+#include <stack>
 
 namespace Mantid
 {
@@ -731,7 +716,7 @@ int Object::procString(const std::string& Line)
   // Remove all surfaces :
   std::ostringstream cx;
   const std::string::size_type length = Ln.length();
-  for (int i = 0; i < length; i++)
+  for (size_t i = 0; i < length; i++)
   {
     if (isdigit(Ln[i]) || Ln[i] == '-')
     {

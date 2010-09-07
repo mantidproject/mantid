@@ -11,7 +11,7 @@ using namespace Mantid::API;
 
 Workspace1D_sptr UserAlgorithmTest::Create1DWorkspace(int size)
 {
-  MantidVecPtr x1,y1,e1;
+  Mantid::MantidVecPtr x1,y1,e1;
   x1.access().resize(size,1);
   y1.access().resize(size);
   std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());

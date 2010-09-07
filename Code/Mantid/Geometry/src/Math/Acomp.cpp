@@ -1,26 +1,10 @@
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <set>
-#include <map>
-#include <stack>
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <functional>
-#include <iterator>
-#include <boost/regex.hpp>
-
+#include "MantidGeometry/Math/Acomp.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Math/RotCounter.h"
-#include "MantidGeometry/Math/Triple.h"
-#include "MantidGeometry/Math/BnId.h"
-#include "MantidGeometry/Math/Acomp.h"
+#include <algorithm>
+#include <iterator>
 
 namespace Mantid
 {
@@ -117,7 +101,7 @@ namespace Mantid
       */
     { }
 
-    int
+    bool
       Acomp::operator!=(const Acomp& A) const
       /*!
       Inequality operator
@@ -125,10 +109,10 @@ namespace Mantid
       \returns Not this==A
       */
     {
-      return 1-(this->operator==(A));
+      return !(this->operator==(A));
     }
 
-    int
+    bool
       Acomp::operator==(const Acomp& A) const
       /*!
       Equals operator requires that the
@@ -140,13 +124,13 @@ namespace Mantid
     {
       // Size not equal then definately not equal
       if (A.Units.size()!=Units.size())
-        return 0;
+        return false;
       if (A.Comp.size()!=Comp.size())
-        return 0;
+        return false;
       // Intersect not the same (unless size==1)
       if (A.Intersect!=Intersect && 
         Units.size()+Comp.size()!=1)          // Intersect type is not relevent 
-        return 0;                               // if singular.
+        return false;                               // if singular.
 
       // If Units not empty compare each and determine
       // if equal. 
@@ -156,22 +140,22 @@ namespace Mantid
         xc=A.Units.begin();
         for(vc=Units.begin();vc!=Units.end();xc++,vc++)
           if (*vc != *xc)
-            return 0;
+            return false;
       }
 
       // Both Empty :: thus equal
       if (Comp.empty())    
-        return 1;
+        return true;
 
       // Assume that comp Units are sorted.
       std::vector<Acomp>::const_iterator acv,xcv;
       acv=A.Comp.begin();
       for(xcv=Comp.begin();xcv!=Comp.end() &&
         *xcv==*acv ;xcv++,acv++);
-        return (xcv==Comp.end()) ? 1 : 0;
+        return (xcv==Comp.end()) ? true : false;
     }
 
-    int
+    bool
       Acomp::operator<(const Acomp& A) const
       /*!
       Comparitor operator:: Comparies the 
@@ -191,10 +175,20 @@ namespace Mantid
       const int TS=isSingle();         // is this one component
       const int AS=A.isSingle(); 
       if (TS!=AS)                     
-        return (TS>AS) ? 1 : 0;
+        return (TS>AS) ? true : false;
       // PROCESS Intersection/Union
       if (!TS && Intersect!=A.Intersect)
-        return Intersect;                  // Union==0 therefore this > A 
+      {
+        // Union==0 therefore this > A
+        if (Intersect > 0)
+        {
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
 
       // PROCESS Units. (order : then size)
       std::vector<int>::const_iterator uc,ac;
@@ -205,9 +199,9 @@ namespace Mantid
           return (*uc < *ac);
 
       if (ac!=A.Units.end())
-        return 0;
+        return false;
       if (uc!=Units.end())
-        return 1;
+        return true;
 
       // PROCESS CompUnits.
       std::vector<Acomp>::const_iterator ux,ax;
@@ -219,9 +213,9 @@ namespace Mantid
           return (*ux < *ax);
       }
       if (uc!=Units.end())
-        return 1;
+        return true;
       // everything idential or A.comp bigger:
-      return 0;
+      return false;
     }
 
     Acomp&
@@ -276,12 +270,12 @@ namespace Mantid
 
       // Have DNF parts and will return the same...
       // Sort the components of the list
-      for_each(Fparts.begin(),Fparts.end(),std::mem_fun_ref(&Acomp::Sort));
-      for_each(Gparts.begin(),Gparts.end(),std::mem_fun_ref(&Acomp::Sort));
+      std::for_each(Fparts.begin(),Fparts.end(),std::mem_fun_ref(&Acomp::Sort));
+      std::for_each(Gparts.begin(),Gparts.end(),std::mem_fun_ref(&Acomp::Sort));
 
       //Sort the list itself...
       std::sort(Gparts.begin(),Gparts.end());
-      sort(Fparts.begin(),Fparts.end());
+      std::sort(Fparts.begin(),Fparts.end());
 
       //Process Components:
       std::vector<Acomp>::const_iterator fc,gc;
@@ -322,7 +316,7 @@ namespace Mantid
       return *this;
     }
 
-    int
+    bool
       Acomp::operator>(const Acomp& A) const
       /*! 
       Operator> takes first to last precidence.
@@ -396,7 +390,7 @@ namespace Mantid
         for(aup=AX.Units.begin();aup!=AX.Units.end();aup++)
         {
           std::vector<int>::iterator ipt;
-          ipt=lower_bound(Units.begin(),Units.end(),*aup);
+          ipt=std::lower_bound(Units.begin(),Units.end(),*aup);
           if (ipt==Units.end() || *ipt!=*aup)                       // Only insert if new
             Units.insert(ipt,*aup);
         }
@@ -404,7 +398,7 @@ namespace Mantid
         for(acp=AX.Comp.begin();acp!=AX.Comp.end();acp++)
         {
           std::vector<Acomp>::iterator cpt;
-          cpt=lower_bound(Comp.begin(),Comp.end(),*acp);
+          cpt=std::lower_bound(Comp.begin(),Comp.end(),*acp);
           if (cpt==Comp.end() || *cpt!=*aup)                       // Only insert if new
             Comp.insert(cpt,*acp);
         }
@@ -412,7 +406,7 @@ namespace Mantid
       }
       // Type different insertion
       std::vector<Acomp>::iterator cpt;
-      cpt=lower_bound(Comp.begin(),Comp.end(),AX);
+      cpt=std::lower_bound(Comp.begin(),Comp.end(),AX);
       if (cpt==Comp.end() || *cpt!=AX)                       // Only insert if new
         Comp.insert(cpt,AX);
       return;
@@ -427,7 +421,7 @@ namespace Mantid
     {
       // Quick and cheesy insertion if big.
       std::vector<int>::iterator ipt;
-      ipt=lower_bound(Units.begin(),Units.end(),Item);
+      ipt=std::lower_bound(Units.begin(),Units.end(),Item);
       if (ipt==Units.end() || *ipt!=Item)                       // Only insert if new
         Units.insert(ipt,Item);
       return;
@@ -606,7 +600,7 @@ namespace Mantid
         std::vector<int>::iterator Ept=Units.end();
         Units.resize(Units.size()+A.Units.size());
         copy(A.Units.begin(),A.Units.end(),Ept);
-        sort(Units.begin(),Units.end());
+        std::sort(Units.begin(),Units.end());
       }
 
       // Add components 
@@ -637,7 +631,7 @@ namespace Mantid
           Units.push_back(S*Index[i]);
         }
       }
-      sort(Units.begin(),Units.end());
+      std::sort(Units.begin(),Units.end());
       return;
     }
 
@@ -723,7 +717,7 @@ namespace Mantid
     {
       std::sort(Units.begin(),Units.end());
       // Sort each decending object first
-      for_each(Comp.begin(),Comp.end(),std::mem_fun_ref(&Acomp::Sort));
+      std::for_each(Comp.begin(),Comp.end(),std::mem_fun_ref(&Acomp::Sort));
       // use the sorted components to sort our component list
       std::sort(Comp.begin(),Comp.end());
       return;
@@ -933,7 +927,7 @@ namespace Mantid
       int cnt(0);
       std::vector<Acomp>::iterator dx;
       sort(Comp.begin(),Comp.end());
-      dx=unique(Comp.begin(),Comp.end());
+      dx=std::unique(Comp.begin(),Comp.end());
       cnt+=std::distance(dx,Comp.end());
       Comp.erase(dx,Comp.end());
 

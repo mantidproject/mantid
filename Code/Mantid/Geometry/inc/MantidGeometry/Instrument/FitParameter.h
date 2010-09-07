@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include <fstream>
 #include "MantidKernel/System.h"
 #include "MantidKernel/Interpolation.h"
 

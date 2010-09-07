@@ -4,8 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DllExport.h"
 #include "MantidKernel/Interpolation.h"
+#include <string>
 
 namespace Mantid
 {	
@@ -49,7 +50,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class DLLExport XMLlogfile
+    class EXPORT_OPT_MANTID_API XMLlogfile
     {
     public:
       /// Default constructor
