@@ -150,10 +150,10 @@
             <bool>false</bool>
            </property>
            <property name="label" stdset="0" >
-            <string>ICON File</string>
+            <string>Sample:     </string>
            </property>
            <property name="multipleFiles" stdset="0" >
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="fileExtensions" >
             <stringlist>
@@ -168,7 +168,7 @@
             <bool>false</bool>
            </property>
            <property name="label" stdset="0" >
-            <string>RES File</string>
+            <string>Resolution:</string>
            </property>
            <property name="multipleFiles" stdset="0" >
             <bool>false</bool>
@@ -177,6 +177,13 @@
             <stringlist>
              <string>_res.nxs</string>
             </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QPushButton" name="fury_pbPlotInput" >
+           <property name="text" >
+            <string>Plot Input</string>
            </property>
           </widget>
          </item>
@@ -360,22 +367,33 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3" >
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
-         <property name="findRunFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="label" stdset="0" >
-          <string>Input File</string>
-         </property>
-         <property name="multipleFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="fileExtensions" >
-          <stringlist>
-           <string>.nxs</string>
-          </stringlist>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_16" >
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
+           <property name="findRunFiles" stdset="0" >
+            <bool>false</bool>
+           </property>
+           <property name="label" stdset="0" >
+            <string>Input File</string>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>.nxs</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="elwin_pbPlotInput" >
+           <property name="text" >
+            <string>Plot Input</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3" >
@@ -411,6 +429,81 @@
          </item>
          <item>
           <widget class="QLabel" name="elwin_valRangeEnd" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_13" >
+         <item>
+          <widget class="QCheckBox" name="elwin_ckUseTwoRanges" >
+           <property name="text" >
+            <string>Use Two Energy Ranges &amp;&amp; Subtract</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_15" >
+         <item>
+          <widget class="QLabel" name="elwin_lbR2Start" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>Start: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leRangeTwoStart" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeTwoStart" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_lbR2End" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>End: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leRangeTwoEnd" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeTwoEnd" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
            <property name="styleSheet" >
             <string notr="true" >color: rgb(255, 0, 0);</string>
            </property>
@@ -578,16 +671,27 @@
           <widget class="QLineEdit" name="slice_leRange0" />
          </item>
          <item row="2" column="1" >
-          <widget class="QLineEdit" name="slice_leRange2" />
+          <widget class="QLineEdit" name="slice_leRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item row="0" column="4" >
           <widget class="QLineEdit" name="slice_leRange1" />
          </item>
          <item row="2" column="4" >
-          <widget class="QLineEdit" name="slice_leRange3" />
+          <widget class="QLineEdit" name="slice_leRange3" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item row="2" column="2" >
           <widget class="QLabel" name="slice_valRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
            <property name="styleSheet" >
             <string notr="true" >color: rgb(255, 0, 0);</string>
            </property>
@@ -615,6 +719,9 @@
          </item>
          <item row="2" column="3" >
           <widget class="QLabel" name="slice_lbTo2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
            <property name="text" >
             <string>to</string>
            </property>
@@ -629,6 +736,9 @@
          </item>
          <item row="2" column="0" >
           <widget class="QLabel" name="slice_lbRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
            <property name="text" >
             <string>TOF Range 2</string>
            </property>

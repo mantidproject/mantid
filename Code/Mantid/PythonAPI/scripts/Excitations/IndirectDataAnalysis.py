@@ -68,79 +68,62 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, plo
 			plotSpectrum(demon, range(0, nspec))
 	return workspaces, runNos
 
-def elwin(inputFiles, eRange, efixed, iconOpt = {}, Save=False):
+def elwin(inputFiles, eRange, efixed, Save=False):
 	outWS_list = []
 	for file in inputFiles:
 		(direct, filename) = os.path.split(file)
 		(root, ext) = os.path.splitext(filename)
-		if ext == '.nxs':
-			LoadNexus(file, root)
-			savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_elw'
-			Elwin(root, savefile, eRange, efixed)
-			if Save:
-				SaveNexusProcessed(savefile, savefile+'.nxs')
-			outWS_list.append(savefile)
-			mantid.deleteWorkspace(root)
-		elif ext == '.raw':
-			if ( len(iconOpt) != 8 ):
-				message = 'Elwin: Number of values for iconOpt parameter do not match expectation. Please view function definition for details.'
-				print message
-				sys.exit(message)
-			inWS_l, runNos = convert_to_energy([file], iconOpt['map'], iconOpt['first'], iconOpt['last'], iconOpt['efixed'], bgremove = iconOpt['bgremove'], tempK=iconOpt['tempK'], calib=iconOpt['calib'], rebinParam=iconOpt['rebin'])
-			inWS = inWS_l[0]
-			savefile = file[:3] + runNos[0] + '_elw'
-			nhist = mantid.getMatrixWorkspace(inWS).getNumberHistograms()
-			Integration(inWS, savefile, eRange[0], eRange[1], 0, nhist-1)
+		LoadNexus(file, root)
+		savefile = root[:3] + mantid.getMatrixWorkspace(root).getRun().getLogData("run_number").value() + '_elw'
+		Elwin(root, savefile, eRange, efixed)
+		if Save:
 			SaveNexusProcessed(savefile, savefile+'.nxs')
-			outWS_list.append(savefile)
-			mantid.deleteWorkspace(inWS)
-		else:
-			print 'Unrecognised file type.'
-			sys.exit('Elwin: unrecognised input file type (' +ext+ ')')
+		outWS_list.append(savefile)
+		mantid.deleteWorkspace(root)
 	return outWS_list
 
-def fury(sam_file, res_file, rebinParam, outWS_n = '', Save=False):
-	(direct, filename) = os.path.split(sam_file)
-	(root, ext) = os.path.splitext(filename)
+def fury(sam_files, res_file, rebinParam, Save=False):
+	outWSlist = []
 
-	LoadNexus(sam_file, 'irs_sam_data') # SAMPLE
+	# Process RES Data Only Once
 	LoadNexus(res_file, 'irs_res_data') # RES
-
-	Rebin('irs_sam_data', 'irs_sam_data', rebinParam)
 	Rebin('irs_res_data', 'irs_res_data', rebinParam)
-
-	ExtractFFTSpectrum('irs_sam_data', 'irs_sam_fft', 2)
 	ExtractFFTSpectrum('irs_res_data', 'irs_res_fft', 2)
-
-	Integration('irs_sam_data', 'irs_sam_int')
 	Integration('irs_res_data', 'irs_res_int')
-
-	Divide('irs_sam_fft', 'irs_sam_int', 'irs_sam')
 	Divide('irs_res_fft', 'irs_res_int', 'irs_res')
 
-	# Create save file name.
-	runNo = mantid.getMatrixWorkspace('irs_sam_data').getRun().getLogData("run_number").value()
-	savefile = root[:3] + runNo + '_iqt'
-	if outWS_n == '':
-		outWS_n = savefile
+	for sam_file in sam_files:
+		(direct, filename) = os.path.split(sam_file)
+		(root, ext) = os.path.splitext(filename)
 
-	# CleanUp A
-	mantid.deleteWorkspace('irs_sam_data')
+		LoadNexus(sam_file, 'irs_sam_data') # SAMPLE
+		Rebin('irs_sam_data', 'irs_sam_data', rebinParam)
+		ExtractFFTSpectrum('irs_sam_data', 'irs_sam_fft', 2)
+		Integration('irs_sam_data', 'irs_sam_int')
+		Divide('irs_sam_fft', 'irs_sam_int', 'irs_sam')
+
+		# Create save file name.
+		runNo = mantid.getMatrixWorkspace('irs_sam_data').getRun().getLogData("run_number").value()
+		savefile = root[:3] + runNo + '_iqt'
+		outWSlist.append(savefile)
+
+		DivideBySpectrum('irs_sam', 'irs_res', savefile)
+
+		# Cleanup Sample Files
+		mantid.deleteWorkspace('irs_sam_data')
+		mantid.deleteWorkspace('irs_sam_int')
+		mantid.deleteWorkspace('irs_sam_fft')
+		mantid.deleteWorkspace('irs_sam')
+		if Save:
+			SaveNexusProcessed(savefile, savefile + '.nxs')
+
+	# Clean Up RES files
 	mantid.deleteWorkspace('irs_res_data')
-	mantid.deleteWorkspace('irs_sam_int')
-	mantid.deleteWorkspace('irs_sam_fft')
 	mantid.deleteWorkspace('irs_res_int')
 	mantid.deleteWorkspace('irs_res_fft')
-
-	DivideBySpectrum('irs_sam', 'irs_res', outWS_n)
-
-	# Final Cleanup
-	mantid.deleteWorkspace('irs_sam')
 	mantid.deleteWorkspace('irs_res')
 
-	if Save:
-		SaveNexusProcessed(outWS_n, savefile + '.nxs')
-	return outWS_n
+	return outWSlist
 
 def msdfit(file, startX, endX, Save=False, Plot=False):
 	(direct, filename) = os.path.split(file)
@@ -197,7 +180,7 @@ def plotFury(inWS_n, spec):
 
 def slice(inputfiles, calib, tofXRange, spectra = [0,0], Save=True):
 	if  not ( ( len(tofXRange) == 2 ) or ( len(tofXRange) == 4 ) ):
-		mantid.sendLogMessage('TOF Range inputs must contain either 2 or 4 numbers.')
+		mantid.sendLogMessage('>> TOF Range inputs must contain either 2 or 4 numbers.')
 		sys.exit(1)
 	for file in inputfiles:
 		(direct, filename) = os.path.split(file)
@@ -213,11 +196,8 @@ def slice(inputfiles, calib, tofXRange, spectra = [0,0], Save=True):
 		if (len(tofXRange) == 2):
 			Integration(root, savefile, tofXRange[0], tofXRange[1], 0, nhist-1)
 		else:
-			Integration(root, 'Unit1', tofXRange[0], tofXRange[1], 0, nhist-1)
-			Integration(root, 'Unit2', tofXRange[2], tofXRange[3], 0, nhist-1)
-			Minus('Unit1', 'Unit2', savefile)
-			mantid.deleteWorkspace('Unit1')
-			mantid.deleteWorkspace('Unit2')
+			FlatBackground(root, savefile, StartX=tofXRange[2], EndX=tofXRange[3], Mode='Mean')
+			Integration(savefile, savefile, tofXRange[0], tofXRange[1], 0, nhist-1)
 		if Save:
 			SaveNexusProcessed(savefile, savefile+'.nxs')
 		mantid.deleteWorkspace(root)
@@ -235,4 +215,17 @@ def plotRaw(inputfiles,spectra=[]):
 	if len(workspaces) > 0:
 		graph = plotSpectrum(workspaces,0)
 		layer = graph.activeLayer().setTitle(", ".join(workspaces))
-		
+
+def plotInput(inputfiles,spectra=[]):
+	if len(spectra) != 2:
+		sys.exit(1)
+	workspaces = []
+	for file in inputfiles:
+		(direct, filename) = os.path.split(file)
+		(root, ext) = os.path.splitext(filename)
+		LoadNexusProcessed(file, root)
+		GroupDetectors(root,root,DetectorList=range(spectra[0],spectra[1]+1))
+		workspaces.append(root)
+	if len(workspaces) > 0:
+		graph = plotSpectrum(workspaces,0)
+		layer = graph.activeLayer().setTitle(", ".join(workspaces))

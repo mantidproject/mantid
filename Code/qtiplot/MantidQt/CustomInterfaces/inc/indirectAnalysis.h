@@ -49,9 +49,13 @@ namespace MantidQt
       void analyserSelected(int index);
       void reflectionSelected(int index);
       void furyRun();
+      void furyPlotInput();
       void elwinRun();
+      void elwinPlotInput();
+      void elwinTwoRanges(bool state);
       void sliceRun();
       void slicePlotRaw();
+      void sliceTwoRanges(bool state);
       void sliceCalib(bool state);
       void msdRun();
       void absorptionRun();

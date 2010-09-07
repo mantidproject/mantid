@@ -45,11 +45,15 @@ void indirectAnalysis::initLayout()
 
   // fury
   connect(m_uiForm.fury_pbRun, SIGNAL(clicked()), this, SLOT(furyRun()));
+  connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
   // elwin
   connect(m_uiForm.elwin_pbRun, SIGNAL(clicked()), this, SLOT(elwinRun()));
+  connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
+  connect(m_uiForm.elwin_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(elwinTwoRanges(bool)));
   // slice
   connect(m_uiForm.slice_pbRun, SIGNAL(clicked()), this, SLOT(sliceRun()));
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
+  connect(m_uiForm.slice_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(sliceTwoRanges(bool)));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
   // msd
   connect(m_uiForm.msd_pbRun, SIGNAL(clicked()), this, SLOT(msdRun()));
@@ -77,6 +81,8 @@ void indirectAnalysis::initLayout()
   // apply validators - elwin
   m_uiForm.elwin_leEStart->setValidator(m_valDbl);
   m_uiForm.elwin_leEEnd->setValidator(m_valDbl);
+  m_uiForm.elwin_leRangeTwoStart->setValidator(m_valDbl);
+  m_uiForm.elwin_leRangeTwoEnd->setValidator(m_valDbl);
   // apply validators - slice
   m_uiForm.slice_leRange0->setValidator(m_valInt);
   m_uiForm.slice_leRange1->setValidator(m_valInt);
@@ -259,6 +265,28 @@ bool indirectAnalysis::validateElwin()
     m_uiForm.elwin_valRangeEnd->setText(" ");
   }
 
+  if ( m_uiForm.elwin_ckUseTwoRanges->isChecked() )
+  {
+    if ( m_uiForm.elwin_leRangeTwoStart->text() == "" )
+    {
+      m_uiForm.elwin_valRangeTwoStart->setText("*");
+      valid = false;
+    }
+    else
+    {
+      m_uiForm.elwin_valRangeTwoStart->setText(" ");
+    }
+
+    if ( m_uiForm.elwin_leRangeTwoEnd->text() == "" )
+    {
+      m_uiForm.elwin_valRangeTwoEnd->setText("*");
+      valid = false;
+    }
+    else
+    {
+      m_uiForm.elwin_valRangeTwoEnd->setText(" ");
+    }
+  }
 
   return valid;
 }
@@ -573,6 +601,12 @@ void indirectAnalysis::reflectionSelected(int index)
   m_uiForm.set_leSpecMin->setText(values[0]);
   m_uiForm.set_leSpecMax->setText(values[1]);
   m_uiForm.set_leEFixed->setText(values[2]);
+
+  // Also set defaults in "Slice" tab
+  m_uiForm.slice_leRange0->setText(values[3]);
+  m_uiForm.slice_leRange1->setText(values[4]);
+  m_uiForm.slice_leRange2->setText(values[5]);
+  m_uiForm.slice_leRange3->setText(values[6]);
 }
 
 void indirectAnalysis::furyRun()
@@ -583,9 +617,11 @@ void indirectAnalysis::furyRun()
     return;
   }
 
+  QString filenames = m_uiForm.fury_iconFile->getFilenames().join("', r'");
+
   QString pyInput =
     "from IndirectDataAnalysis import fury, plotFury\n"
-    "sample = r'" + m_uiForm.fury_iconFile->getFirstFilename() + "'\n"
+    "samples = [r'" + filenames + "']\n"
     "resolution = r'" + m_uiForm.fury_resFile->getFirstFilename() + "'\n"
     "rebin = '" + m_uiForm.fury_leELow->text()+","+m_uiForm.fury_leEWidth->text()+","+ m_uiForm.fury_leEHigh->text()+"'\n";
 
@@ -598,13 +634,25 @@ void indirectAnalysis::furyRun()
     pyInput += "save = False\n";
   }
   pyInput +=
-    "fury_ws = fury(sample, resolution, rebin, Save=save)\n";
+    "fury_ws = fury(samples, resolution, rebin, Save=save)\n";
   if ( m_uiForm.fury_ckPlot->isChecked() )
   {
     pyInput += "specrange = range(0, mtd[fury_ws].getNumberHistograms())\n";
     pyInput += "plotFury(fury_ws, [0])\n";
   }
+  showInformationBox(pyInput);
   QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+void indirectAnalysis::furyPlotInput()
+{
+  if ( m_uiForm.fury_iconFile->isValid() )
+  {
+    QString pyInput = "from IndirectDataAnalysis import plotInput\n"
+      "inputfiles = [r'" + m_uiForm.fury_iconFile->getFilenames().join("', r'") + "']\n"
+      "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n"
+      "plotInput(inputfiles, spectra=spec)\n";
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
 }
 void indirectAnalysis::elwinRun()
 {
@@ -616,8 +664,14 @@ void indirectAnalysis::elwinRun()
 
   QString pyInput =
     "from IndirectDataAnalysis import elwin\n"
-    "input = [r'" + m_uiForm.elwin_inputFile->getFirstFilename() + "']\n"
-    "eRange = [ " + m_uiForm.elwin_leEStart->text() +","+ m_uiForm.elwin_leEEnd->text() +"]\n"
+    "input = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
+    "eRange = [ " + m_uiForm.elwin_leEStart->text() +","+ m_uiForm.elwin_leEEnd->text();
+  if ( m_uiForm.elwin_ckUseTwoRanges->isChecked() )
+  {
+    pyInput += ", " + m_uiForm.elwin_leRangeTwoStart->text() + ", " + m_uiForm.elwin_leRangeTwoEnd->text();
+  }
+
+  pyInput+= "]\n"
     "eFixed = "+ m_uiForm.set_leEFixed->text() +"\n";
   if ( m_uiForm.elwin_ckSave->isChecked() )
   {
@@ -631,6 +685,26 @@ void indirectAnalysis::elwinRun()
     "elwin_ws = elwin(input, eRange, eFixed, Save=save)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+void indirectAnalysis::elwinPlotInput()
+{
+  if ( m_uiForm.elwin_inputFile->isValid() )
+  {
+    QString pyInput = "from IndirectDataAnalysis import plotInput\n"
+      "inputfiles = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
+      "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n"
+      "plotInput(inputfiles, spectra=spec)\n";
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+}
+void indirectAnalysis::elwinTwoRanges(bool state)
+{
+  m_uiForm.elwin_lbR2Start->setEnabled(state);
+  m_uiForm.elwin_lbR2End->setEnabled(state);
+  m_uiForm.elwin_leRangeTwoStart->setEnabled(state);
+  m_uiForm.elwin_leRangeTwoEnd->setEnabled(state);
+  m_uiForm.elwin_valRangeTwoStart->setEnabled(state);
+  m_uiForm.elwin_valRangeTwoEnd->setEnabled(state);
 }
 void indirectAnalysis::sliceRun()
 {
@@ -695,6 +769,15 @@ void indirectAnalysis::slicePlotRaw()
   {
     showInformationBox("Selected input files are invalid.");
   }
+}
+void indirectAnalysis::sliceTwoRanges(bool state)
+{
+  m_uiForm.slice_lbRange2->setEnabled(state);
+  m_uiForm.slice_lbTo2->setEnabled(state);
+  m_uiForm.slice_leRange2->setEnabled(state);
+  m_uiForm.slice_leRange3->setEnabled(state);
+  m_uiForm.slice_valRange2->setEnabled(state);
+  m_uiForm.slice_valRange3->setEnabled(state);
 }
 void indirectAnalysis::sliceCalib(bool state)
 {

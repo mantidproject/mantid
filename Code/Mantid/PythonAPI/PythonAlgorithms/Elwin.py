@@ -22,7 +22,6 @@ class Elwin(PythonAlgorithm):
 		self.inWS = self.getProperty("InputWorkspace")
 		self.eRange = self.getProperty("EnergyRange")
 		self.eFixed = self.getProperty("EFixed")
-		#perform execution
 		nhist = self.inWS.getNumberHistograms()
 		samplePos = self.inWS.getInstrument().getSample().getPos()
 		beamPos = samplePos - self.inWS.getInstrument().getSource().getPos()
@@ -31,7 +30,16 @@ class Elwin(PythonAlgorithm):
 			self.omega = ( eRange[0] + eRange[1] ) / 2
 			self.ei = self.hbar * self.omega + self.eFixed
 			self.ki = self.getK(self.ei)
-		Integration(self.inWS, '_elwin_tmp_ws', self.eRange[0], self.eRange[1], 0, nhist-1)
+
+		# Perform the intergration steps here
+		if ( len(self.eRange) == 2 ):
+			Integration(self.inWS, '_elwin_tmp_ws', RangeLower=self.eRange[0], RangeUpper=self.eRange[1])
+		elif ( len(self.eRange) == 4 ):
+			FlatBackground(self.inWS, '_elwin_tmp_ws', StartX=self.eRange[2], EndX=self.eRange[3], Mode='Mean')
+			Integration('_elwin_tmp_ws', '_elwin_tmp_ws', RangeLower=self.eRange[0], RangeUpper=self.eRange[1])
+		else:
+			sys.exit(1)
+
 		temp = mantid.getMatrixWorkspace('_elwin_tmp_ws')
 		outWS = WorkspaceFactory.createMatrixWorkspace(1, nhist+1, nhist)
 		for i in range(0, nhist):
