@@ -97,8 +97,6 @@ void CrossCorrelate::exec()
    	int specmax=getProperty("WorkspaceIndexMax");
    	if (specmin>=specmax)
    	  throw std::runtime_error("Must specify WorkspaceIndexMin<WorkspaceIndexMax");
-   	if (reference<specmin || reference>specmax)
-   	  throw std::runtime_error("Must specify ReferenceSpectra within workspace indices");
    	// Get the number of spectra in range specmin to specmax
    	int nspecs=0;
    	std::vector<int> indexes; // Indexes of all spectra in range
