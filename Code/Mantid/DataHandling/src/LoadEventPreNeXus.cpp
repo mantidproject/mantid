@@ -396,10 +396,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   //For slight speed up
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
-  //Turn the spectra list into a map, for speed
+  //Turn the spectra list into a map, for speed of access
   for (std::vector<int>::iterator it = spectra_list.begin(); it != spectra_list.end(); it++)
     spectraLoadMap[*it] = true;
-
 
   //Allocate the intermediate buffer, if it will be used in parallel processing
   IntermediateEvent * intermediate_buffer;
@@ -529,7 +528,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
     if (loadOnlySomeSpectra)
     {
       std::map<int, bool>::iterator it;
-      it = spectraLoadMap.find(temp.pid);
+      it = spectraLoadMap.find(pid);
       if (it == spectraLoadMap.end())
       {
         //Pixel ID was not found, so the event is being ignored.

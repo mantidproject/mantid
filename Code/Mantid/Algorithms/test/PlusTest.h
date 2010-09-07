@@ -664,7 +664,7 @@ public:
 
 
   //------------------------------------------------------------------------------------------------
-  void testEventWorkspaces_Event_Plus_2D_addingInPlaceSucceeds()
+  void testEventWorkspaces_Event_Plus_2D_addingInPlace_to_2D_Succeeds()
   {
     //This test result may change with ProxyWorkspace
 
@@ -692,7 +692,7 @@ public:
   }
 
   //------------------------------------------------------------------------------------------------
-  void testEventWorkspaces_Event_Plus_2D_addingInPlaceFails()
+  void testEventWorkspaces_Event_Plus_2D_addingInPlace_to_Event_Fails()
   {
     //Can't add into an EventWorkspace
     //This test result may change with ProxyWorkspace

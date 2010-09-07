@@ -212,7 +212,7 @@ public:
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
     eventLoader->setProperty<bool>("PadEmptyPixels", false);
 
@@ -284,7 +284,7 @@ public:
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/CNCS_Definition.xml");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
     eventLoader->setProperty("PadEmptyPixels", true);
 
@@ -325,7 +325,8 @@ public:
   {
     std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs_skipped");
     //Load just 2 pixels
     eventLoader->setProperty("SpectrumList", "45, 110");
     eventLoader->setProperty("PadEmptyPixels", false);
@@ -333,7 +334,7 @@ public:
     TS_ASSERT( eventLoader->execute() );
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("cncs"));
+            (AnalysisDataService::Instance().retrieve("cncs_skipped"));
 
     //Only some of the pixels weretof loaded, because of lot of them are empty
     int numpixels = 2;
