@@ -3,6 +3,7 @@
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
+#include <cfloat>
 
 namespace Mantid
 {

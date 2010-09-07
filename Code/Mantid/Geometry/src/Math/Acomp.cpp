@@ -1,6 +1,7 @@
 #include "MantidGeometry/Math/Acomp.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Math/RotCounter.h"
 #include <algorithm>

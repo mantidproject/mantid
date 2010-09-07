@@ -1,7 +1,7 @@
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
-
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"

@@ -2,6 +2,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Tolerance.h"
+#include <cfloat>
 
 namespace Mantid
 {
