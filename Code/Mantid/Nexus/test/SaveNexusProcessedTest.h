@@ -2,6 +2,11 @@
 #define SAVENEXUSPROCESSEDTEST_H_
 
 
+//TODO: Remove this before checking in the test
+//#define _WIN64
+
+
+
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
@@ -14,6 +19,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidNexus/LoadMuonNexus.h"
@@ -64,6 +70,42 @@ public:
     TS_ASSERT( algToBeTested.isInitialized() );
   }
 
+  void xtestExec_EventWorkspaces()
+  {
+    //Load a CNCS file
+    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    Mantid::DataHandling::LoadEventPreNeXus * eventLoader;
+    eventLoader = new Mantid::DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
+    eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs_pad");
+    eventLoader->setProperty("PadEmptyPixels", true);
+    TS_ASSERT( eventLoader->execute() );
+    delete eventLoader;
+
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+
+    // Now set it...
+    // specify name of file to save workspace to
+    alg.setPropertyValue("InputWorkspace", "cncs");
+    outputFile = "testOfSaveNexusProcessed.nxs";
+    dataName = "spectra";
+    title = "A simple workspace saved in Processed Nexus format";
+
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
+    outputFile = alg.getPropertyValue("Filename");
+    alg.setPropertyValue("Title", title);
+    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    if(clearfiles) Poco::File(outputFile).remove();
+
+  }
+
 
   void testExec()
   {
@@ -88,7 +130,7 @@ public:
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));
     //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
     //TS_ASSERT( ! result.compare(entryName));
@@ -100,6 +142,8 @@ public:
     if(clearfiles) Poco::File(outputFile).remove();
 
   }
+
+
 void testExecOnMuon()
   {
 
@@ -159,6 +203,8 @@ void testExecOnMuon()
 
 #endif /*_WIN64*/
   }
+
+
 
 void testExecOnLoadraw()
 {
