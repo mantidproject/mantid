@@ -116,6 +116,16 @@ void MergeRuns::buildAdditionTables()
   EventWorkspace_sptr lhs = inEventWS[0];
   int lhs_nhist = lhs->getNumberHistograms();
 
+  IndexToIndexMap * lhs_det_to_wi = NULL;
+  try
+  {
+    lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap();
+  }
+  catch (std::runtime_error err)
+  {
+    //If it fails, then there are some grouped detector IDs, and the map cannot exist
+  }
+
   for (int workspaceNum=1; workspaceNum < static_cast<int>(inEventWS.size()); workspaceNum++)
   {
     //Get the workspace
@@ -150,9 +160,34 @@ void MergeRuns::buildAdditionTables()
         }
       }
 
+      if (!done && lhs_det_to_wi && (inDets.size() == 1))
+      {
+        //Didn't find it. Try to use the LHS map.
+
+        //First, we have to get the (single) detector ID of the RHS
+        std::set<int>::iterator inDets_it = inDets.begin();
+        int rhs_detector_ID = *inDets_it;
+
+        //Now we use the LHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
+        IndexToIndexMap::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
+        if (map_it != lhs_det_to_wi->end())
+        {
+          outWI = map_it->second; //This is the workspace index in the LHS that matched rhs_detector_ID
+        }
+        else
+        {
+          //Did not find it!
+          outWI = -1; //Marker to mean its not in the LHS.
+        }
+        table->push_back( std::pair<int,int>(inWI, outWI) );
+        done = true; //Great, we did it.
+      }
+
       if (!done)
       {
-        //Didn't find it? Now we need to iterate through the output workspace
+        //Didn't find it? Now we need to iterate through the output workspace to
+        //  match the detector ID.
+        // NOTE: This can be SUPER SLOW!
         for (outWI=0; outWI < lhs_nhist; outWI++)
         {
           std::set<int>& outDets2 = lhs->getEventList(outWI).getDetectorIDs();
@@ -165,15 +200,16 @@ void MergeRuns::buildAdditionTables()
             continue;
           }
         }
-        if (!done)
-        {
-          //If we reach here, not a single match was found for this set of inDets.
+      }
 
-          //TODO: should we check that none of the output ones are subsets of this one?
+      if (!done)
+      {
+        //If we reach here, not a single match was found for this set of inDets.
 
-          //So we need to add it as a new workspace index
-          table->push_back( std::pair<int,int>(inWI, -1) );
-        }
+        //TODO: should we check that none of the output ones are subsets of this one?
+
+        //So we need to add it as a new workspace index
+        table->push_back( std::pair<int,int>(inWI, -1) );
       }
 
     }
