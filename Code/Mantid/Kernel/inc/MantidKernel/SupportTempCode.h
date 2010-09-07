@@ -29,10 +29,10 @@ int sectPartNum(std::string& A,T& out)
   cx.str(A);
   cx.clear();
   cx>>retval;
-  const size_t xpt=static_cast<size_t>(cx.tellg());
-  if (xpt<0)
+  const std::streamoff xpt = cx.tellg();
+  if (xpt < 0)
     return 0;
-  A.erase(0,xpt);
+  A.erase(0,static_cast<unsigned int>(xpt));
   out=retval;
   return 1; 
 }
@@ -78,11 +78,11 @@ int section(std::string& A,T& out)
   cx>>retval;
   if (cx.fail())
     return 0;
-  const size_t xpt=static_cast<size_t>(cx.tellg());
+  const std::streamoff xpt = cx.tellg();
   const char xc=cx.get();
   if (!cx.fail() && !isspace(xc))
     return 0;
-  A.erase(0,xpt);
+  A.erase(0, static_cast<unsigned int>(xpt));
   out=retval;
   return 1;
 }
@@ -109,12 +109,17 @@ int sectionMCNPX(std::string& A,T& out)
   cx>>retval;
   if (!cx.fail())
     {
-      const size_t xpt=static_cast<size_t>(cx.tellg());
+      const std::streamoff xpt = cx.tellg();
+      if( xpt < 0 )
+      {
+        return 0;
+      }
       const char xc=cx.get();
-      if (!cx.fail() && !isspace(xc) 
-	  && (xc!='-' || xpt<5))
-	return 0;
-      A.erase(0,xpt);
+      if (!cx.fail() && !isspace(xc) && (xc!='-' || xpt<5))
+	    {
+        return 0;
+      }
+      A.erase(0, static_cast<unsigned int>(xpt));
       out=retval;
       return 1;
     }
@@ -141,11 +146,11 @@ int convPartNum(const std::string& A,T& out)
   cx.str(A);
   cx.clear();
   cx>>retval;
-  const size_t xpt=static_cast<size_t>(cx.tellg());
+  const std::streamoff xpt = cx.tellg();
   if (xpt<0)
     return 0;
   out=retval;
-  return xpt; 
+  return static_cast<int>(xpt); 
 }
 
 /*!
