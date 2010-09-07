@@ -61,6 +61,18 @@ void ICatAdvancedSearch::initLayout()
 {
 	m_uiForm.setupUi(this);
 
+	// as the instrument/investigation type combo box's popup down and up arrow disappeared when the light blue back ground is set in ICat search dailog 
+	// I'm setting this style sheet to bring the combo box arrows back.
+
+	QString str="QComboBox#instrumentBox QListView{background-color: white;background-image: url(ICatCombobackground.png);background-attachment: scroll;}"
+		"QComboBox#instrumentBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} ";
+	m_uiForm.instrumentBox->setStyleSheet(str);
+
+    str="QComboBox#invstTypeBox QListView{background-color: white;background-image: url(ICatCombobackground.png);background-attachment: scroll;}"
+		"QComboBox#invstTypeBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} ";
+	m_uiForm.invstTypeBox->setStyleSheet(str);
+	
+
 	QValidator * val= new QIntValidator(0,100000000,m_uiForm.startRunEdit);
 	m_uiForm.startRunEdit->setValidator(val);
 	m_uiForm.endRunEdit->setValidator(val);

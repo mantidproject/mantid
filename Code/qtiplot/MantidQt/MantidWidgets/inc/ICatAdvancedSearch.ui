@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>753</width>
-    <height>672</height>
+    <width>681</width>
+    <height>471</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -95,7 +95,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="4" colspan="2" >
+        <item row="0" column="4" >
          <widget class="QLineEdit" name="endRunEdit" >
           <property name="maximumSize" >
            <size>
@@ -258,6 +258,9 @@
           <property name="toolTip" >
            <string>Instrument Box</string>
           </property>
+          <property name="styleSheet" >
+           <string notr="true" >QComboBox#instrumentBox QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#instrumentBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+          </property>
          </widget>
         </item>
         <item row="3" column="4" >
@@ -309,6 +312,9 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="styleSheet" >
+           <string notr="true" >QComboBox#invstTypeBox QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#invstTypeBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+          </property>
          </widget>
         </item>
         <item row="4" column="4" >
@@ -318,8 +324,8 @@
           </property>
           <property name="sizeHint" stdset="0" >
            <size>
-            <width>115</width>
-            <height>13</height>
+            <width>78</width>
+            <height>17</height>
            </size>
           </property>
          </spacer>

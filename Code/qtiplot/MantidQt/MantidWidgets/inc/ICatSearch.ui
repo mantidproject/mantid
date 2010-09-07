@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>718</width>
-    <height>611</height>
+    <width>688</width>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -38,7 +38,7 @@
       <enum>QFrame::StyledPanel</enum>
      </property>
      <property name="frameShadow" >
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Sunken</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_4" >
       <item row="0" column="0" >
@@ -58,6 +58,9 @@
           <property name="statusTip" >
            <string/>
           </property>
+          <property name="styleSheet" >
+           <string notr="true" >background-color: rgb(255, 255, 255);</string>
+          </property>
           <property name="inputMask" >
            <string/>
           </property>
@@ -71,6 +74,9 @@
           <property name="toolTip" >
            <string>End Run Number</string>
           </property>
+          <property name="styleSheet" >
+           <string notr="true" >background-color: rgb(255, 255, 255);</string>
+          </property>
           <property name="inputMask" >
            <string/>
           </property>
@@ -83,10 +89,13 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="2" >
+        <item row="1" column="1" >
          <widget class="QComboBox" name="instrumentBox" >
           <property name="toolTip" >
            <string/>
+          </property>
+          <property name="styleSheet" >
+           <string notr="true" >QComboBox#instrumentBox QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#instrumentBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
           </property>
          </widget>
         </item>
@@ -105,6 +114,9 @@
          <widget class="QLineEdit" name="startdateLineEdit" >
           <property name="toolTip" >
            <string>Start Date in DD/MM/YYYY format</string>
+          </property>
+          <property name="styleSheet" >
+           <string notr="true" >background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="inputMask" >
            <string>00/00/0000;_</string>
@@ -133,6 +145,9 @@
           <property name="toolTip" >
            <string>End Date in DD/MM/YYYY format</string>
           </property>
+          <property name="styleSheet" >
+           <string notr="true" >background-color: rgb(255, 255, 255);</string>
+          </property>
           <property name="inputMask" >
            <string>00/00/0000;_</string>
           </property>
@@ -152,15 +167,12 @@
       </item>
       <item row="0" column="2" >
        <layout class="QGridLayout" name="gridLayout_3" >
-        <item row="0" column="0" >
-         <widget class="QLabel" name="keywordsLabel" >
-          <property name="text" >
-           <string>KeyWord(s):</string>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="keywordslineEdit" >
+          <property name="styleSheet" >
+           <string notr="true" >background-color: rgb(255, 255, 255);</string>
           </property>
          </widget>
-        </item>
-        <item row="0" column="1" >
-         <widget class="QLineEdit" name="keywordslineEdit" />
         </item>
         <item row="1" column="1" >
          <widget class="QCheckBox" name="casesensitiveBox" >
@@ -172,17 +184,41 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="0" >
+         <widget class="QLabel" name="keywordsLabel" >
+          <property name="text" >
+           <string>KeyWord(s):</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
-      <item row="1" column="3" >
-       <widget class="QPushButton" name="searchButton" >
-        <property name="toolTip" >
-         <string>Search Investigations</string>
-        </property>
-        <property name="text" >
-         <string>Search</string>
-        </property>
-       </widget>
+      <item row="1" column="0" colspan="3" >
+       <layout class="QHBoxLayout" name="horizontalLayout_2" >
+        <item>
+         <spacer name="horizontalSpacer" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>598</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="searchButton" >
+          <property name="toolTip" >
+           <string>Search Investigations</string>
+          </property>
+          <property name="text" >
+           <string>Search</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

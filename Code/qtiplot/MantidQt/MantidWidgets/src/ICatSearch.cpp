@@ -60,6 +60,11 @@ void ICatSearch::setparentWidget(QWidget* par)
 void ICatSearch::initLayout()
 {
  	m_uiForm.setupUi(this);
+	// as the instrument combo box popup down and up arrow disappeared when the light blue back ground is set in ICat search dailog 
+	// I'm setting this style sheet to bring the combo box arrows back.
+	QString str="QComboBox#instrumentBox QListView{background-color: white;background-image: url(ICatCombobackground.png);background-attachment: scroll;}"
+		"QComboBox#instrumentBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} ";
+	m_uiForm.instrumentBox->setStyleSheet(str);
 
 	QValidator * val= new QIntValidator(0,100000000,m_uiForm.startRunEdit);
 	m_uiForm.startRunEdit->setValidator(val);

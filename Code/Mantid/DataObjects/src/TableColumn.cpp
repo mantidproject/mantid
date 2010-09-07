@@ -13,7 +13,7 @@ DECLARE_TABLECOLUMN(double,double)
 DECLARE_TABLECOLUMN(API::Boolean,bool)
 DECLARE_TABLECOLUMN(std::string,str)
 DECLARE_TABLECOLUMN(Mantid::Geometry::V3D,V3D)
-DECLARE_TABLECOLUMN(long long,long64)
+DECLARE_TABLECOLUMN(int64_t,long64)
 
 
 } // namespace DataObjects
