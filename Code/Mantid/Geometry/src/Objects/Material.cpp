@@ -1,5 +1,6 @@
 #include "MantidGeometry/Objects/Material.h"
 #include "MantidKernel/Logger.h"
+#include <cmath>
 
 namespace Mantid
 {
@@ -137,7 +138,7 @@ Material::calcAtten(const double Wave,const double Length) const
     \return Attenuation (including density)
   */
 {
-  return exp(-Length*density*(scoh+sinc+Wave*sabs/1.798));
+  return std::exp(-Length*density*(scoh+sinc+Wave*sabs/1.798));
 }
 
 double
