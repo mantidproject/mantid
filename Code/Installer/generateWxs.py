@@ -726,7 +726,7 @@ addCRef('MantidQtPlugins', MantidExec)
 # C/C++ runtime. The msm files are essentially themseleves installers  and merging them in this manner causes their contents to be installed during the Mantid install
 # procedure
 Redist = addHiddenFeature('Redist',Complete)
-if arch = '32':
+if ARCH == '32':
     # VS2010 files. Uncommented when move is complete
     #msm_files = ['Microsoft_VC100_CRT_x86.msm','Microsoft_VC100_OpenMP_x86.msm']
     msm_files = ['Microsoft_VC80_CRT_x86.msm', 'Microsoft_VC80_OpenMP_x86.msm','policy_8_0_Microsoft_VC80_CRT_x86.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86.msm']
