@@ -140,6 +140,8 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_data_loader expects an object of class ReductionStep"
         
+    def get_data_loader(self): return self._data_loader
+        
     def set_sensitivity_correcter(self, correcter):
         """
             Set the ReductionStep object that applies the sensitivity correction.

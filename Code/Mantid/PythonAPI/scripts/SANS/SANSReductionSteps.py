@@ -323,9 +323,29 @@ class LoadRun(ReductionStep):
         to the beam center and normalize the data.
     """
     #TODO: Move this to HFIR-specific module 
-    def __init__(self, datafile=None):
+    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0):
         super(LoadRun, self).__init__()
         self._data_file = datafile
+        self.set_sample_detector_distance(sample_det_dist)
+        self.set_sample_detector_offset(sample_det_offset)
+        
+    def set_sample_detector_distance(self, distance):
+        # Check that the distance given is either None of a float
+        if distance is not None:
+            try:
+                float(distance)
+            except:
+                raise RuntimeError, "LoadRun.set_sample_detector_distance expects a float: %s" % str(distance)
+        self._sample_det_dist = distance
+        
+    def set_sample_detector_offset(self, offset):
+        # Check that the offset given is either None of a float
+        if offset is not None:
+            try:
+                float(offset)
+            except:
+                raise RuntimeError, "LoadRun.set_sample_detector_offset expects a float: %s" % str(offset)
+        self._sample_det_offset = offset
         
     def execute(self, reducer, workspace):      
         # If we don't have a data file, look up the workspace handle
@@ -340,8 +360,13 @@ class LoadRun(ReductionStep):
         Load(filepath, workspace)
         
         # Store the sample-detector distance
-        reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getSample().getNumberParameter("sample-detector-distance")[0]        
-        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
+        if self._sample_det_dist is None:
+            reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getSample().getNumberParameter("sample-detector-distance")[0]        
+            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
+        else:
+            reducer.instrument.sample_detector_distance = self._sample_det_dist
+        
+        reducer.instrument.sample_detector_distance += self._sample_det_offset
         
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load

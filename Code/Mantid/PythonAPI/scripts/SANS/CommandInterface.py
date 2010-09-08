@@ -164,3 +164,15 @@ def SampleWidth(width):
         
     ReductionSingleton().geometry_correcter.set_width(width)
 
+def SetSampleDetectorDistance(distance):
+    if not isinstance(ReductionSingleton().get_data_loader(), SANSReductionSteps.LoadRun):
+        raise RuntimeError, "SetSampleDetectorDistance was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
+    ReductionSingleton().get_data_loader().set_sample_detector_distance(distance)
+    
+def SetSampleDetectorOffset(distance):
+    if not isinstance(ReductionSingleton().get_data_loader(), SANSReductionSteps.LoadRun):
+        raise RuntimeError, "SetSampleDetectorOffset was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
+    ReductionSingleton().get_data_loader().set_sample_detector_offset(distance)
+    
+    
+    

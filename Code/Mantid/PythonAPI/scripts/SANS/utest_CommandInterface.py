@@ -114,6 +114,25 @@ class TestCommands(unittest.TestCase):
         DataPath(test_path)
         self.assertEqual(ReductionSingleton()._data_path, test_path)
         
+    def test_set_detector_distance(self):
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        AppendDataFile("BioSANS_test_data.xml")
+        SetSampleDetectorDistance(2500.0)
+        Reduce1D()
+        
+        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 2500.0)
+        
+    def test_set_detector_offset(self):
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        AppendDataFile("BioSANS_test_data.xml")
+        SetSampleDetectorDistance(2500.0)
+        SetSampleDetectorOffset(500.0)
+        Reduce1D()
+        
+        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 3000.0)
+        
     def test_direct_beam_center(self):
         HFIRSANS()
         DataPath(TEST_DIR)
