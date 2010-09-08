@@ -74,6 +74,8 @@ private:
   void init();
   /// Execution code
   void exec();
+  /// The name and path of the input file
+  std::string m_filename;
   /// Determine whether the grouping file already exists.
   /// @param filename GroupingFilename (extension .cal)
   bool groupingFileDoesExist(const std::string& filename) const;
