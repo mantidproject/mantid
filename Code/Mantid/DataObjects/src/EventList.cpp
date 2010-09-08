@@ -12,7 +12,8 @@ namespace Mantid
 {
 namespace DataObjects
 {
-  using Kernel::Exception::NotImplementedError;
+using Kernel::Exception::NotImplementedError;
+using Kernel::PulseTimeType;
 
   //==========================================================================
   /// --------------------- TofEvent stuff ----------------------------------
@@ -21,26 +22,23 @@ namespace DataObjects
    * @param time_of_flight time of flight, in nanoseconds
    * @param frameid frame id, integer
    */
-  TofEvent::TofEvent(const double time_of_flight, const std::size_t frameid)
+  TofEvent::TofEvent(const double time_of_flight, const PulseTimeType pulse_time) :
+              time_of_flight(time_of_flight), pulse_time(pulse_time)
   {
-	  this->time_of_flight = time_of_flight;
-	  this->frame_index = frameid;
   }
 
   /** Constructor, copy from another TofEvent object
    * @param rhs Other TofEvent to copy.
    */
-  TofEvent::TofEvent(const TofEvent& rhs)
+  TofEvent::TofEvent(const TofEvent& rhs) :
+      time_of_flight(rhs.time_of_flight), pulse_time(rhs.pulse_time)
   {
-    this->time_of_flight = rhs.time_of_flight;
-    this->frame_index = rhs.frame_index;
   }
 
   /// Empty constructor
-  TofEvent::TofEvent()
+  TofEvent::TofEvent() :
+            time_of_flight(0), pulse_time(0)
   {
-    this->time_of_flight = 0;
-    this->frame_index = 0;
   }
 
   /// Destructor
@@ -54,7 +52,7 @@ namespace DataObjects
   TofEvent& TofEvent::operator=(const TofEvent& rhs)
   {
 	  this->time_of_flight = rhs.time_of_flight;
-	  this->frame_index = rhs.frame_index;
+	  this->pulse_time = rhs.pulse_time;
 	  return *this;
   }
 
@@ -65,9 +63,9 @@ namespace DataObjects
   }
 
   /// Return the frame id
-  size_t TofEvent::frame() const
+  PulseTimeType TofEvent::pulseTime() const
   {
-	  return this->frame_index;
+	  return this->pulse_time;
   }
 
   /** Output a string representation of the event to a stream
@@ -76,7 +74,7 @@ namespace DataObjects
    */
   ostream& operator<<(ostream &os, const TofEvent &event)
   {
-    os << event.time_of_flight << "," << event.frame_index;
+    os << event.time_of_flight << "," << event.pulse_time;
     return os;
   }
 
@@ -97,9 +95,9 @@ namespace DataObjects
   * @param e1 first event
   * @param e2 second event
   *  */
-  bool compareEventFrame(TofEvent e1, TofEvent e2)
+  bool compareEventPulseTime(TofEvent e1, TofEvent e2)
   {
-    return (e1.frame() < e2.frame());
+    return (e1.pulseTime() < e2.pulseTime());
   }
 
   //==========================================================================
@@ -314,9 +312,9 @@ namespace DataObjects
     {
       this->sortTof();
     }
-    else if (order == FRAME_SORT)
+    else if (order == PULSETIME_SORT)
     {
-      this->sortFrame();
+      this->sortPulseTime();
     }
     else
     {
@@ -338,16 +336,16 @@ namespace DataObjects
   }
 
   /** Sort events by Frame */
-  void EventList::sortFrame() const
+  void EventList::sortPulseTime() const
   {
-    if (this->order == FRAME_SORT)
+    if (this->order == PULSETIME_SORT)
     {
       return; // nothing to do
     }
     //Perform sort.
-    std::sort(events.begin(), events.end(), compareEventFrame);
+    std::sort(events.begin(), events.end(), compareEventPulseTime);
     //Save the order to avoid unnecessary re-sorting.
-    this->order = FRAME_SORT;
+    this->order = PULSETIME_SORT;
   }
 
   /** Return true if the event list is sorted by TOF */

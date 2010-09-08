@@ -14,6 +14,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Glob.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
@@ -66,12 +67,6 @@ static const PixelType ERROR_PID = 0x80000000;
 /// The maximum possible tof as native type
 static const uint32_t MAX_TOF_UINT32 = std::numeric_limits<uint32_t>::max();
 
-/// The difference in seconds between standard unix and gps epochs.
-static const uint32_t EPOCH_DIFF = 631152000;
-/// The epoch for GPS times.
-static const ptime GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
-/// The epoch for Unix times.
-static const ptime UNIX_EPOCH(boost::gregorian::date(1970, 1, 1));
 /// The number of nanoseconds in a second.
 static const uint32_t NANO_TO_SEC = 1000000000;
 
@@ -217,6 +212,12 @@ void LoadEventPreNeXus::exec()
   }
 
   this->readPulseidFile(pulseid_filename);
+
+
+//  // add the frame information to the event workspace
+//  for (size_t i = 0; i < this->num_pulses; i++)
+//    workspace->addTime(i, this->pulsetimes[i]);
+
 
   this->openEventFile(event_filename);
 
@@ -472,10 +473,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 //  }
 
 
-  // add the frame information to the event workspace
-  for (size_t i = 0; i < this->num_pulses; i++)
-    workspace->addTime(i, this->pulsetimes[i]);
-
   this->setProtonCharge(workspace);
 
 
@@ -508,6 +505,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
   DasEvent temp;
   uint32_t period;
   size_t frame_index(0);
+  PulseTimeType pulse_time = 0;
 
   // process the individual events
   for (size_t i = 0; i < current_event_buffer_size; i++)
@@ -538,11 +536,18 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
     }
 
     // work with the good guys
+
+    //Frame index (typically starts at 0)
     frame_index = this->getFrameIndex(fileOffset + i, frame_index);
+    //Retrieve the absolute time in nanosec.
+    if ((frame_index >= 0) && (frame_index < num_pulses))
+      pulse_time = this->pulsetimes[frame_index];
+    else
+      pulse_time = 0;
+
     double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
     TofEvent event;
-    event = TofEvent(tof, frame_index);
-
+    event = TofEvent(tof, pulse_time);
 
     //Find the overall max/min tof
     if (tof < shortest_tof)
@@ -780,7 +785,11 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
   TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("ProtonCharge");
   size_t num = this->proton_charge.size();
   for (size_t i = 0; i < num; i++)
-    log->addValue(this->pulsetimes[i], this->proton_charge[i]);
+  {
+    //Get an absolute time from the pulse time
+    Mantid::Kernel::dateAndTime time = Mantid::Kernel::DateAndTime::get_time_from_pulse_time( this->pulsetimes[i] );
+    log->addValue(time, this->proton_charge[i]);
+  }
   /// TODO set the units for the log
   run.addLogData(log);
 }
@@ -871,26 +880,25 @@ void LoadEventPreNeXus::openEventFile(const std::string &filename)
 }
 
 //-----------------------------------------------------------------------------
-/** Get time with nanosecond resolution.
+/** Get the pulse time with nanosecond resolution, as int64_t from GPS_EPOCH
  * @param sec seconds
  * @param nano nanoseconds
  */
-static ptime getTime(uint32_t sec, uint32_t nano)
+static PulseTimeType getTime(uint32_t seconds, uint32_t nanoseconds)
 {
   // push the nanoseconds to be less than one second
+  PulseTimeType sec = seconds;
+  PulseTimeType nano = nanoseconds;
 
   if (nano / NANO_TO_SEC > 0)
   {
-    sec = nano / NANO_TO_SEC;
+    //Add to the # of seconds
+    sec += nano / NANO_TO_SEC;
     nano = nano % NANO_TO_SEC;
   }
 
-#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
-  return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nano);
-#else
-  //Use microseconds if you can't use nano.
-  return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::microseconds(nano / 1000);
-#endif
+  //Time is returned as the number of nanoseconds since GPS_EPOCH (Jan 1, 1990)
+  return sec * NANO_TO_SEC + nano;
 }
 
 //-----------------------------------------------------------------------------

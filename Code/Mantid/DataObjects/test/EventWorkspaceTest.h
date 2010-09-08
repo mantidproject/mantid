@@ -309,26 +309,6 @@ public:
   }
 
   //------------------------------------------------------------------------------
-  void test_frameTime()
-  {
-    //Nothing yet
-    TS_ASSERT_THROWS(ew->getTime(0), std::range_error);
-    //Add some times
-    ptime t;
-    t = microsec_clock::local_time();
-    ew->addTime(0, t );
-    TS_ASSERT_EQUALS(ew->getTime(0), t);
-    //Add another id
-    ew->addTime(1000, t+ minutes(5) );
-    TS_ASSERT_EQUALS(ew->getTime(1000), t+minutes(5));
-    //Intermediate ones are not-a-date
-    TS_ASSERT(ew->getTime(234).is_not_a_date_time());
-
-    //Invalid addition - doesn't work because -100 gets wrapped back to positive because of size_t
-    //TS_ASSERT_THROWS( ew->addTime(-100, t - minutes(5) ), std::range_error);
-  }
-
-  //------------------------------------------------------------------------------
   /// Linux-only method for getting memory usage
   int memory_usage()
   {

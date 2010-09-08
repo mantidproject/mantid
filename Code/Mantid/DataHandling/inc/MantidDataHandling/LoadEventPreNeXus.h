@@ -128,7 +128,7 @@ private:
   std::vector<int> spectra_list; ///<the list of Spectra
 
   /// The times for each pulse.
-  std::vector<boost::posix_time::ptime> pulsetimes;
+  std::vector<Kernel::PulseTimeType> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
   /// The proton charge on a pulse by pulse basis.

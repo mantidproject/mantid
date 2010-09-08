@@ -163,6 +163,17 @@ std::tm to_localtime_tm(const dateAndTime &time)
 
 
 //-----------------------------------------------------------------------------------------------
+/** Returns the dateAndTime, in UTC time, corresponding to the pulse time
+ * (which is specified in nanoseconds since Jan 1, 1990)
+ */
+dateAndTime get_time_from_pulse_time(PulseTimeType pulse)
+{
+  boost::posix_time::time_duration td(0,0,0, pulse);
+  return GPS_EPOCH + td;
+}
+
+
+//-----------------------------------------------------------------------------------------------
 /** Returns the current dateAndTime, in UTC time, with microsecond precision
  *
  */

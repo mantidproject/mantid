@@ -34,7 +34,7 @@ namespace Mantid
 
       std::vector<std::string> propOptions;
       propOptions.push_back("Time of Flight");
-      propOptions.push_back("Frame Index");
+      propOptions.push_back("Pulse Time");
       declareProperty("SortBy", "Time of Flight",new ListValidator(propOptions),
         "How to sort the events.");
 
@@ -74,7 +74,7 @@ namespace Mantid
           if (sortByTof)
             eventW->getEventList(i).sortTof();
           else
-            eventW->getEventList(i).sortFrame();
+            eventW->getEventList(i).sortPulseTime();
 
           //Report progress
           prog.report();

@@ -28,7 +28,7 @@ public:
   void testInit()
   {
     TS_ASSERT_EQUALS(e.tof(), 123);
-    TS_ASSERT_EQUALS(e.frame(), 456);
+    TS_ASSERT_EQUALS(e.pulseTime(), 456);
   }
 
   void testAssign()
@@ -36,18 +36,18 @@ public:
     TofEvent e2;
     e2 = e;
     TS_ASSERT_EQUALS(e2.tof(), 123);
-    TS_ASSERT_EQUALS(e2.frame(), 456);
+    TS_ASSERT_EQUALS(e2.pulseTime(), 456);
   }
 
   void testConstructors()
   {
     TofEvent e2 = TofEvent(e);
     TS_ASSERT_EQUALS(e2.tof(), 123);
-    TS_ASSERT_EQUALS(e2.frame(), 456);
+    TS_ASSERT_EQUALS(e2.pulseTime(), 456);
 
     TofEvent e3 = TofEvent(890.234, 321);
     TS_ASSERT_EQUALS(e3.tof(), 890.234);
-    TS_ASSERT_EQUALS(e3.frame(), 321);
+    TS_ASSERT_EQUALS(e3.pulseTime(), 321);
   }
 
   void test_timestamp()
@@ -67,7 +67,7 @@ public:
 //
 //    e = TofEvent(1,-500);
 //    // SHOULD THIS BE THE BEHAVIOR FOR BAD INPUTS????
-//    TS_ASSERT_EQUALS(e.frame(), 0);
+//    TS_ASSERT_EQUALS(e.pulseTime(), 0);
 //  }
 };
 
@@ -103,7 +103,7 @@ public:
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 3);
     TS_ASSERT_EQUALS(rel[0].tof(), 100);
-    TS_ASSERT_EQUALS(rel[0].frame(), 200);
+    TS_ASSERT_EQUALS(rel[0].pulseTime(), 200);
     TS_ASSERT_EQUALS(rel[2].tof(), 50);
   }
 
@@ -210,22 +210,22 @@ public:
     }
   }
 
-  void testSortFrame()
+  void testSortPulseTime()
   {
-    el.sortFrame();
+    el.sortPulseTime();
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 3);
-    TS_ASSERT_EQUALS(rel[0].frame(), 60);
-    TS_ASSERT_EQUALS(rel[1].frame(), 200);
-    TS_ASSERT_EQUALS(rel[2].frame(), 400);
+    TS_ASSERT_EQUALS(rel[0].pulseTime(), 60);
+    TS_ASSERT_EQUALS(rel[1].pulseTime(), 200);
+    TS_ASSERT_EQUALS(rel[2].pulseTime(), 400);
 
     this->fake_data();
-    el.sort(FRAME_SORT);
+    el.sort(PULSETIME_SORT);
     rel = el.getEvents();
     int i;
     for (i=1; i<100; i++)
     {
-      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].frame(), rel[i].frame());
+      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].pulseTime(), rel[i].pulseTime());
     }
   }
 

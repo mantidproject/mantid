@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/DateAndTime.h"
 #include <set>
 
 namespace Mantid
@@ -55,19 +56,23 @@ class DLLExport TofEvent {
   friend class tofGreater;
 
 private:
-  /** The units of the time of flight index in nanoseconds.
+  /** The units of the time of flight index in nanoseconds. This is relative to the
+   * start of the pulse (stored in pulse_time.
    * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1 */
   double time_of_flight;
 
   /**
-   * The frame vector is not a member of this object, but it is necessary in
-   * order to have the actual time for the data.
+   * The absolute time of the start of the pulse that generated this event.
+   * This is saved as the number of ticks (1 nanosecond if boost is compiled
+   * for nanoseconds) since a specified epoch: we use the GPS epoch of Jan 1, 1990.
+   *
+   * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be enough.
    */
-  std::size_t frame_index;
+  Mantid::Kernel::PulseTimeType pulse_time;
 
  public:
   /// Constructor, specifying the time of flight and the frame id
-  TofEvent(double time_of_flight, const std::size_t frameid);
+  TofEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime);
 
   /// Constructor, copy from another TofEvent object
   TofEvent(const TofEvent&);
@@ -85,7 +90,7 @@ private:
   double tof() const;
 
   /// Return the frame id
-  std::size_t frame() const;
+  Mantid::Kernel::PulseTimeType pulseTime() const;
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
@@ -99,7 +104,7 @@ private:
 /** A list of TofEvent objects, corresponding to all the events that were measured on a pixel.
  *
  */
-enum EventSortType {UNSORTED, TOF_SORT, FRAME_SORT};
+enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
 
 class DLLExport EventList
 {
@@ -139,7 +144,7 @@ public:
 
   void sortTof() const;
 
-  void sortFrame() const;
+  void sortPulseTime() const;
 
   bool isSortedByTof() const;
 

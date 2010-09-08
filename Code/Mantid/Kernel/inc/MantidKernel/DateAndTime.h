@@ -17,8 +17,25 @@ typedef boost::posix_time::ptime dateAndTime;
 /// Durations and time intervals
 typedef boost::posix_time::time_duration time_duration;
 
+/** Typedef of the data structure used to store the pulse times. A signed 64-bit int
+ * of the # of milliseconds since Jan 1, 1990.
+ */
+typedef int64_t PulseTimeType;
+
+
+
 namespace DateAndTime
 {
+
+/// The difference in seconds between standard unix and gps epochs.
+static const uint32_t EPOCH_DIFF = 631152000;
+
+/// The epoch for GPS times.
+static const dateAndTime GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
+
+/// The epoch for Unix times.
+static const dateAndTime UNIX_EPOCH(boost::gregorian::date(1970, 1, 1));
+
 /// Const of one second time duration
 static const time_duration oneSecond = boost::posix_time::time_duration(0,0,1,0);
 
@@ -49,6 +66,7 @@ DLLExport std::tm to_localtime_tm(const dateAndTime &time);
 
 DLLExport dateAndTime get_current_time();
 
+DLLExport dateAndTime get_time_from_pulse_time(PulseTimeType pulse);
 
 }
 

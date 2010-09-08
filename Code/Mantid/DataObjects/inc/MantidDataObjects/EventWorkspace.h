@@ -241,9 +241,6 @@ private:
   /// The number of vectors in the workspace
   int m_noVectors;
 
-  /// Vector where the index is the frameId and the value is the corresponding time, in Posix timing.
-  std::vector<boost::posix_time::ptime> frameTime;
-
   /// The most-recently-used list of dataY histograms
   mutable mru_list m_bufferedDataY;
 

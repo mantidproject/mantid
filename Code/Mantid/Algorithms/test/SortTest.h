@@ -55,7 +55,7 @@ public:
     std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
-      TS_ASSERT_LESS_THAN( ve[i].tof(), ve[i+1].tof());
+      TS_ASSERT_LESS_THAN_EQUALS( ve[i].tof(), ve[i+1].tof());
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove("workspace2d");
@@ -63,7 +63,7 @@ public:
   }
 
 
-  void testSortByFrame()
+  void testSortByPulseTime()
   {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
@@ -72,7 +72,7 @@ public:
     Sort sort;
     sort.initialize();
     sort.setPropertyValue("InputWorkspace",wsName);
-    sort.setPropertyValue("SortBy", "Frame Index");
+    sort.setPropertyValue("SortBy", "Pulse Time");
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
 
@@ -80,7 +80,7 @@ public:
     std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
-      TS_ASSERT_LESS_THAN_EQUALS( ve[i].frame(), ve[i+1].frame());
+      TS_ASSERT_LESS_THAN_EQUALS( ve[i].pulseTime(), ve[i+1].pulseTime());
 
     AnalysisDataService::Instance().remove(wsName);
 
