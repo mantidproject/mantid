@@ -9,9 +9,25 @@
 #include <queue>
 #include <fstream>
 #include <iomanip>
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
+
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::Node;
+using Poco::XML::NodeList;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeFilter;
 
 
 namespace Mantid
@@ -59,6 +75,32 @@ namespace Mantid
       std::string instshort=instname;
       std::transform(instshort.begin(),instshort.end(),instshort.begin(),toupper);
       instshort=instshort+"_Definition.xml";
+
+      // Set up the DOM parser and parse xml file
+      DOMParser pParser;
+      Document* pDoc;
+      try
+      {
+        pDoc = pParser.parse("../../../Test/Instrument/"+instshort);
+      }
+      catch(...)
+      {
+        g_log.error("Unable to parse file " + m_filename);
+        throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
+      }
+      // Get pointer to root element
+      Element* pRootElem = pDoc->documentElement();
+      if ( !pRootElem->hasChildNodes() )
+      {
+        g_log.error("XML file: " + m_filename + "contains no root element.");
+        throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
+      }
+
+      // Handle used in the singleton constructor for instrument file should append the value
+      // of the date-time tag inside the file to determine if it is already in memory so that
+      // changes to the instrument file will cause file to be reloaded.
+      instshort = instshort + pRootElem->getAttribute("date");
+
       // If instrument not in store, insult the user
       if (!API::InstrumentDataService::Instance().doesExist(instshort))
       {
