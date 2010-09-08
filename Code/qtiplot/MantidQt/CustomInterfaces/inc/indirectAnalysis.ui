@@ -162,7 +162,7 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0" >
+         <item row="2" column="0" >
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" >
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
@@ -186,6 +186,31 @@
             <string>Plot Input</string>
            </property>
           </widget>
+         </item>
+         <item row="1" column="0" >
+          <layout class="QHBoxLayout" name="horizontalLayout_17" >
+           <item>
+            <widget class="QLabel" name="fury_lbResType" >
+             <property name="text" >
+              <string>Resolution File Type:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="fury_cbResType" >
+             <item>
+              <property name="text" >
+               <string>Function File</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>Data File</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>

@@ -82,7 +82,7 @@ def elwin(inputFiles, eRange, efixed, Save=False):
 		mantid.deleteWorkspace(root)
 	return outWS_list
 
-def fury(sam_files, res_file, rebinParam, Save=False):
+def fury(sam_files, res_file, rebinParam, Save=False, RES=True):
 	outWSlist = []
 
 	# Process RES Data Only Once
@@ -107,7 +107,10 @@ def fury(sam_files, res_file, rebinParam, Save=False):
 		savefile = root[:3] + runNo + '_iqt'
 		outWSlist.append(savefile)
 
-		DivideBySpectrum('irs_sam', 'irs_res', savefile)
+		if RES:
+			DivideBySpectrum('irs_sam', 'irs_res', savefile)
+		else:
+			Divide('irs_sam', 'irs_res', savefile)
 
 		# Cleanup Sample Files
 		mantid.deleteWorkspace('irs_sam_data')

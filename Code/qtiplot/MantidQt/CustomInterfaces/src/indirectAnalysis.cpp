@@ -5,7 +5,6 @@
 
 #include "MantidKernel/ConfigService.h"
 
-#include <QFileDialog>
 #include <QLineEdit>
 #include <QValidator>
 
@@ -25,7 +24,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 indirectAnalysis::indirectAnalysis(QWidget *parent) :
-UserSubWindow(parent), m_valInt(0), m_valDbl(0)
+UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true)
 {
 }
 void indirectAnalysis::closeEvent(QCloseEvent* close)
@@ -45,6 +44,7 @@ void indirectAnalysis::initLayout()
 
   // fury
   connect(m_uiForm.fury_pbRun, SIGNAL(clicked()), this, SLOT(furyRun()));
+  connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
   connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
   // elwin
   connect(m_uiForm.elwin_pbRun, SIGNAL(clicked()), this, SLOT(elwinRun()));
@@ -640,8 +640,23 @@ void indirectAnalysis::furyRun()
     pyInput += "specrange = range(0, mtd[fury_ws].getNumberHistograms())\n";
     pyInput += "plotFury(fury_ws, [0])\n";
   }
-  showInformationBox(pyInput);
   QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+void indirectAnalysis::furyResType(const QString& type)
+{
+  QStringList exts;
+  if ( type == "Function File" )
+  {
+    exts.append("_res.nxs");
+    m_furyResFileType = true;
+  }
+  else
+  {
+    exts.append("_ipg.nxs");
+    exts.append("_imi.nxs");
+    m_furyResFileType = false;
+  }
+  m_uiForm.fury_resFile->setFileExtensions(exts);
 }
 void indirectAnalysis::furyPlotInput()
 {

@@ -49,6 +49,7 @@ namespace MantidQt
       void analyserSelected(int index);
       void reflectionSelected(int index);
       void furyRun();
+      void furyResType(const QString& type);
       void furyPlotInput();
       void elwinRun();
       void elwinPlotInput();
@@ -72,6 +73,8 @@ namespace MantidQt
 
       QIntValidator *m_valInt;
       QDoubleValidator *m_valDbl;
+
+      bool m_furyResFileType;
 
     };
   }
