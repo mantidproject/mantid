@@ -136,6 +136,7 @@ QStringList MWRunFiles::getFileExtensions() const
 void MWRunFiles::setFileExtensions(const QStringList & extensions)
 {
   m_fileExtensions = extensions;
+  m_fileFilter.clear();
 }
 
 /**
