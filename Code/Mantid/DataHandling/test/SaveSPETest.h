@@ -127,9 +127,7 @@ public:
     Poco::File(outputFile).remove();
   }
 
-  // MG: 24/08/2010 - The non-spectra axis case was never tested and does not work. Ticket #1514 will deal with this
-  // issue and should reenable this test (and remove this comment).
-  void xtestThatOutputIsValidFromWorkspaceWithNumericAxis()
+  void testThatOutputIsValidFromWorkspaceWithNumericAxis()
   {
     // Create a small test workspace
     std::string WSName = "saveSPETestB_input";
@@ -139,11 +137,14 @@ public:
     const std::string outputFile("testSPE_Axis.spe");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) )
     saver->setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(saver->execute());
+    saver->execute();
     TS_ASSERT( saver->isExecuted() )
     
     TS_ASSERT( Poco::File(outputFile).exists() )
-    Poco::File(outputFile).remove();  
+    if( Poco::File(outputFile).exists() )
+    {    
+      Poco::File(outputFile).remove();  
+    }
   }
 
 private:

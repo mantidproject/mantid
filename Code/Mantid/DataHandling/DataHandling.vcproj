@@ -731,6 +731,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SaveSPETest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\SaveVTK.h"
 				>
 			</File>
