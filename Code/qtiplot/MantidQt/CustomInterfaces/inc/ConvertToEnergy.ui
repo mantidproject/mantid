@@ -235,6 +235,9 @@
                   </item>
                   <item>
                    <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" >
+                    <property name="enabled" >
+                     <bool>false</bool>
+                    </property>
                     <property name="findRunFiles" stdset="0" >
                      <bool>false</bool>
                     </property>
@@ -245,7 +248,7 @@
                      <bool>false</bool>
                     </property>
                     <property name="optional" stdset="0" >
-                     <bool>true</bool>
+                     <bool>false</bool>
                     </property>
                     <property name="fileExtensions" >
                      <stringlist>
@@ -1835,6 +1838,13 @@ p, li { white-space: pre-wrap; }
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="cal_pbPlotEnergy" >
+           <property name="text" >
+            <string>Plot Energy</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

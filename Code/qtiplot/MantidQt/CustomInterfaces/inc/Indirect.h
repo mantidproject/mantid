@@ -86,6 +86,7 @@ namespace MantidQt
       void plotRaw(); ///< plot raw data from instrument
       void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
       void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
+      void resPlotInput();
       void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
       void rebinData(); ///< rebin transformed data
       void useCalib(bool state); ///< whether to use calib file

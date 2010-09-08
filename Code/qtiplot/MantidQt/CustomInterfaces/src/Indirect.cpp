@@ -69,6 +69,7 @@ void Indirect::initLayout()
   // "Calibration" tab
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calibPlot()));
   connect(m_uiForm.cal_pbCreate, SIGNAL(clicked()), this, SLOT(calibCreate()));
+  connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(resPlotInput()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
   // "SofQW" tab
@@ -537,8 +538,8 @@ void Indirect::createRESfile(const QString& file)
     "import IndirectEnergyConversion as ind\n"
     "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
     ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
-    ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n";
-  "plot = ";
+    ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
+    "plot = ";
 
   if ( m_uiForm.cal_ckPlotResult->isChecked() )
   {
@@ -554,11 +555,10 @@ void Indirect::createRESfile(const QString& file)
   QString background = "[ " +m_uiForm.cal_leStartX->text()+ ", " +m_uiForm.cal_leEndX->text()+"]";
 
   pyInput +=
-    "nspec = iconOpt['last'] - iconOpt['first'] + 1\n"
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = r'" + file + "'\n"
-    "outWS = ind.res(file, nspec, iconOpt, rebinParam, background, plotOpt = plot)\n";
+    "outWS = ind.res(file, iconOpt, rebinParam, background, plotOpt = plot)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1237,12 +1237,33 @@ void Indirect::detailedBalanceCheck(bool state)
 
   isDirtyRebin(true);
 }
+void Indirect::resPlotInput()
+{
+  if ( m_uiForm.cal_leRunNo->isValid() )
+  {
+    QString file = m_uiForm.cal_leRunNo->getFirstFilename();
+    QString pyInput =
+    "from IndirectEnergyConversion import res\n"
+    "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
+    ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
+    ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
+    "file = r'" + file + "'\n"
+    "outWS = res(file, iconOpt, '', '', plotOpt=True, Res=False)\n";
+    QString pyOuput = runPythonCode(pyInput).trimmed();
+  }
+  else
+  {
+    showInformationBox("Run number not valid.");
+  }
+}
+
 /**
 * This function enables/disables the display of the options involved in creating the RES file.
 * @param state whether checkbox is checked or unchecked
 */
 void Indirect::resCheck(bool state)
 {
+  m_uiForm.cal_pbPlotEnergy->setEnabled(state);
   m_uiForm.cal_gbRES->setEnabled(state);
   if ( state )
   {
@@ -1264,7 +1285,7 @@ void Indirect::rebinData()
 
 void Indirect::useCalib(bool state)
 {
-  m_uiForm.ind_calibFile->isOptional(!state);
+  m_uiForm.ind_calibFile->setEnabled(state);
 }
 
 /**
