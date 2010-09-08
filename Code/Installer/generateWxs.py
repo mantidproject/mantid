@@ -298,19 +298,6 @@ def addCRefs(lstId,parent):
         e.setAttribute('Id',Id)
         parent.appendChild(e)
  
-def addModules(location,parent):
-    global globalFileCount
-    global TargetDir
-    sfiles = os.listdir(location);
-    for fil in sfiles:
-        #print fil
-        fn = fil.replace('.','_')
-        if (fil.find('.svn') < 0 and os.path.isfile(location+'/'+fil)):
-            Id = 'Module'+str(globalFileCount)
-            addTo(TargetDir,'Merge',{'Id':Id,'SourceFile':location+'/'+fil,'DiskId':'1','Language':'1033'})
-            addTo(Redist,'MergeRef',{'Id':Id})
-            globalFileCount = globalFileCount + 1
-            
 def createPropertiesFile(filename):
     # Field replacements
     replacements = {
@@ -736,9 +723,25 @@ addCRefs(pyalgsList,MantidExec)
 addCRef('QtImagePlugins', MantidExec)
 addCRef('MantidQtPlugins', MantidExec)
 
+# C/C++ runtime. The msm files are essentially themseleves installers  and merging them in this manner causes their contents to be installed during the Mantid install
+# procedure
 Redist = addHiddenFeature('Redist',Complete)
-addModules(toget + '/VCRedist',Redist)
+if arch = '32':
+    # VS2010 files. Uncommented when move is complete
+    #msm_files = ['Microsoft_VC100_CRT_x86.msm','Microsoft_VC100_OpenMP_x86.msm']
+    msm_files = ['Microsoft_VC80_CRT_x86.msm', 'Microsoft_VC80_OpenMP_x86.msm','policy_8_0_Microsoft_VC80_CRT_x86.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86.msm']
+    msm_dir = r'C:\Program Files\Common Files\Merge Modules'
+else:
+    # VS2010 files. Uncommented when move is complete
+    #msm_files = ['Microsoft_VC100_CRT_x64.msm','Microsoft_VC100_OpenMP_x64.msm']
+    msm_files = ['Microsoft_VC80_CRT_x86_x64.msm', 'Microsoft_VC80_OpenMP_x86_x64.msm','policy_8_0_Microsoft_VC80_CRT_x86_x64.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86_x64.msm']
+    msm_dir = r'C:\Program Files (x86)\Common Files\Merge Modules'
+for index, mod in enumerate(msm_files):
+    id = 'VCRed_' + str(index)
+    addTo(TargetDir,'Merge',{'Id':id, 'SourceFile': os.path.join(msm_dir,mod), 'DiskId':'1','Language':'1033'})
+    addTo(Redist,'MergeRef',{'Id':id})
 
+# Header files
 Includes = addFeature('Includes','Includes','Mantid and third party header files.','2',Complete)
 addCRef('IncludeMantidAlgorithms',Includes)
 addCRef('IncludeMantidAPI',Includes)
@@ -754,11 +757,10 @@ addCRefs(pocoList,Includes)
 
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
-
 addTo(Product,'UIRef',{'Id':'WixUI_FeatureTree'})
 addTo(Product,'UIRef',{'Id':'WixUI_ErrorProgressText'})
 
-
+# Output the file so that the next step in the chain can process it
 f = open('tmp.wxs','w')
 doc.writexml(f,newl="\r\n")
 f.close()
