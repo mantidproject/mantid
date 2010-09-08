@@ -13,6 +13,9 @@ import ISISReducer
 _NOPRINT_ = False
 _VERBOSE_ = False
 
+#set the reduction singleton to the ISIS version
+Clear(ISISReducer.ISISReducer)
+
 def SetNoPrintMode(quiet = True):
     _NOPRINT_ = quiet
 
@@ -38,7 +41,6 @@ def UserPath(path):
     ReductionSingleton().set_user_path(path)
         
 def SANS2D():
-    Clear(ISISReducer.ISISReducer)
     instrument = SANSInsts.SANS2D()
     
     #TODO: this should probably be part of __init__. Leave it for now
@@ -114,12 +116,12 @@ def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
     SetBeamCenter(XVAL/1000.0, YVAL/1000.0)
     
-def WaveRangeReduction(wav_start = None, wav_end = None, use_def_trans = True, finding_centre = False):
+def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True, finding_centre = False):
     SetWavelengthRange(wav_start, wav_end)
     Reduce1D()
     
 def SetWavelengthRange(start, end):
-    ReductionSingleton().set_wavelength_range(wav_start, wav_end)
+    ReductionSingleton().set_wavelength_range(start, end)
     
     
 

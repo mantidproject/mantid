@@ -84,7 +84,7 @@ class ISISReducer(SANSReducer):
         if os.path.isdir(path):
             self._user_path = path
         else:
-            raise RuntimeError, "ISISReducer.set_data_path: provided path is not a directory (%s)" % path
+            raise RuntimeError, "ISISReducer.set_user_path: provided path is not a directory (%s)" % path
 
     def load_set_options(self, reload=True, period=-1):
         if not issubclass(self._data_loader.__class__, ISISReductionSteps.LoadSample):
@@ -227,7 +227,7 @@ class ISISReducer(SANSReducer):
         """
         # Check that an instrument was specified
         if self.instrument is None:
-            raise RuntimeError, "Reducer: trying to run a reduction with an instrument specified"
+            raise RuntimeError, "Reducer: trying to run a reduction without an instrument specified"
 
         # Go through the list of steps that are common to all data files
         self.pre_process()

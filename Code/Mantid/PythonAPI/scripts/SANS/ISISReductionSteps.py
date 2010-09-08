@@ -491,7 +491,7 @@ class LoadRun(ReductionStep):
             else:
                 raise RuntimeError, "ISISReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
         
-        if os.path.splitext(self._data_file)[1].lower().startswith('n'):
+        if os.path.splitext(self._data_file)[1].lower().startswith('.n'):
             alg = LoadNexus(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
         else:
             alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
@@ -592,7 +592,25 @@ def _clearPrevious(inWS, others = []):
         if mtd.workspaceExists(inWS) and (not inWS in others):
             mtd.deleteWorkspace(inWS)
             
-            
+def _leaveSinglePeriod(groupW, period):
+    #get the name of the individual workspace in the group
+    oldName = groupW.getName()+'_'+str(period)
+    #move this workspace out of the group (this doesn't delete it)
+    groupW.remove(oldName)
+
+    discriptors = groupW.getName().split('_')       #information about the run (run number, if it's 1D or 2D, etc) is listed in the workspace name between '_'s
+    for i in range(0, len(discriptors) ):           #insert the period name after the run number
+        if i == 0 :                                 #the run number is the first part of the name
+            newName = discriptors[0]+'p'+str(period)#so add the period number here
+        else :
+            newName += '_'+discriptors[i]
+
+    RenameWorkspace(oldName, newName)
+
+    #remove the rest of the group
+    mtd.deleteWorkspace(groupW.getName())
+    return newName
+
 def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8):
     pieces = run_string.split('.')
     if len(pieces) != 2 :
