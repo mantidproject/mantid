@@ -96,6 +96,7 @@ namespace MantidQt
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
 
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
+      void sOfQwRebinE(bool state);
 
     private:
       // member variables

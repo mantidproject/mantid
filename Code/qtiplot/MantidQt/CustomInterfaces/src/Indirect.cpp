@@ -73,6 +73,7 @@ void Indirect::initLayout()
 
   // "SofQW" tab
   connect(m_uiForm.sqw_pbRun, SIGNAL(clicked()), this, SLOT(sOfQwClicked()));
+  connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
 
   // set values of m_dataDir and m_saveDir
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
@@ -102,10 +103,12 @@ void Indirect::initLayout()
   m_uiForm.cal_leELow->setValidator(m_valDbl);
   m_uiForm.cal_leEWidth->setValidator(m_valDbl);
   m_uiForm.cal_leEHigh->setValidator(m_valDbl);
-  m_uiForm.sqw_leEFixed->setValidator(m_valDbl);
   m_uiForm.sqw_leELow->setValidator(m_valDbl);
   m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leEHigh->setValidator(m_valDbl);
+  m_uiForm.sqw_leQLow->setValidator(m_valDbl);
+  m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
+  m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
 
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
@@ -882,43 +885,65 @@ bool Indirect::validateSofQw()
     valid = false;
   }
 
-  if ( m_uiForm.sqw_leEFixed->text() == "" )
+  if ( m_uiForm.sqw_ckRebinE->isChecked() )
   {
-    valid = false;
-    m_uiForm.sqw_valEFixed->setText("*");
-  }
-  else
-  {
-    m_uiForm.sqw_valEFixed->setText(" ");
+    if ( m_uiForm.sqw_leELow->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valELow->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valELow->setText(" ");
+    }
+
+    if ( m_uiForm.sqw_leEWidth->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valEWidth->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valEWidth->setText(" ");
+    }
+    if ( m_uiForm.sqw_leEHigh->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valEHigh->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valEHigh->setText(" ");
+    }
   }
 
-  if ( m_uiForm.sqw_leELow->text() == "" )
+  if ( m_uiForm.sqw_leQLow->text() == "" )
   {
     valid = false;
-    m_uiForm.sqw_valELow->setText("*");
+    m_uiForm.sqw_valQLow->setText("*");
   }
   else
   {
-    m_uiForm.sqw_valELow->setText(" ");
+    m_uiForm.sqw_valQLow->setText(" ");
   }
 
-  if ( m_uiForm.sqw_leEWidth->text() == "" )
+  if ( m_uiForm.sqw_leQWidth->text() == "" )
   {
     valid = false;
-    m_uiForm.sqw_valEWidth->setText("*");
+    m_uiForm.sqw_valQWidth->setText("*");
   }
   else
   {
-    m_uiForm.sqw_valEWidth->setText(" ");
+    m_uiForm.sqw_valQWidth->setText(" ");
   }
-  if ( m_uiForm.sqw_leEHigh->text() == "" )
+  if ( m_uiForm.sqw_leQHigh->text() == "" )
   {
     valid = false;
-    m_uiForm.sqw_valEHigh->setText("*");
+    m_uiForm.sqw_valQHigh->setText("*");
   }
   else
   {
-    m_uiForm.sqw_valEHigh->setText(" ");
+    m_uiForm.sqw_valQHigh->setText(" ");
   }
   return valid;
 }
@@ -1079,7 +1104,7 @@ void Indirect::mappingOptionSelected(const QString& groupType)
 void Indirect::tabChanged(int index)
 {
   QString tabName = m_uiForm.tabWidget->tabText(index);
-  bool state = ( tabName != "Calibration" );
+  bool state = ( tabName == "Energy Transfer" );
   m_uiForm.pbRun->setEnabled(state);
 }
 
@@ -1167,7 +1192,7 @@ void Indirect::plotRaw()
         "from mantidsimple import *\n"
         "from mantidplot import *\n"
         "LoadRaw(r'"+rawFile+"', 'RawTime', SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
-        "GroupDetectors('RawTime', 'RawTime', SpectraList=range("+specList[0]+","+specList[1]+"+1))\n"
+        "GroupDetectors('RawTime', 'RawTime', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
         "graph = plotSpectrum('RawTime', 0)\n";
 
       QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -1363,11 +1388,18 @@ void Indirect::sOfQwClicked()
 {
   if ( validateSofQw() )
   {
-    QString rebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
+    QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
     QString pyInput =
       "from mantidsimple import *\n"
-      "LoadNexusProcessed(r'"+m_uiForm.sqw_inputFile->getFirstFilename()+ "','sqwInput')\n"
-      "efixed = " +m_uiForm.sqw_leEFixed->text()+"\n"
+      "LoadNexusProcessed(r'"+m_uiForm.sqw_inputFile->getFirstFilename()+ "','sqwInput')\n";
+
+    if ( m_uiForm.sqw_ckRebinE->isChecked() )
+    {
+      QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
+      pyInput += "Rebin('sqwInput', 'sqwInput', '" + eRebinString + "')\n";
+    }
+    pyInput +=
+      "efixed = " +m_uiForm.leEfixed->text()+"\n"
       "rebin = '" + rebinString + "'\n"
       "SofQW('sqwInput','sqwOutput',rebin,'Indirect',EFixed=efixed)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -1376,4 +1408,16 @@ void Indirect::sOfQwClicked()
   {
     showInformationBox("Some of your input is invalid. Please check the input highlighted.");
   }
+}
+void Indirect::sOfQwRebinE(bool state)
+{
+  m_uiForm.sqw_leELow->setEnabled(state);
+  m_uiForm.sqw_leEWidth->setEnabled(state);
+  m_uiForm.sqw_leEHigh->setEnabled(state);
+  m_uiForm.sqw_valELow->setEnabled(state);
+  m_uiForm.sqw_valEWidth->setEnabled(state);
+  m_uiForm.sqw_valEHigh->setEnabled(state);
+  m_uiForm.sqw_lbELow->setEnabled(state);
+  m_uiForm.sqw_lbEWidth->setEnabled(state);
+  m_uiForm.sqw_lbEHigh->setEnabled(state);
 }
