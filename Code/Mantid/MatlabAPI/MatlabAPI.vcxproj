@@ -30,11 +30,15 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidRelease.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidDebug.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -51,7 +55,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../DataHandling/inc;../../Third_Party/include;c:/matlab/R2007a/extern/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../DataHandling/inc;c:/matlab/R2007a/extern/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_MATLAB_API=1;MATLAB_MEX_FILE;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -68,7 +72,7 @@
     <Link>
       <AdditionalDependencies>libmex.lib;libmx.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>..\..\Third_Party\lib\win32;..\Debug;c:\matlab\R2007a\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Debug;c:\matlab\R2007a\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <ModuleDefinitionFile>linkoptions.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -85,7 +89,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../DataHandling/inc;../../Third_Party/include;c:/matlab/R2007a/extern/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../DataHandling/inc;c:/matlab/R2007a/extern/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_MATLAB_API=1;MATLAB_MEX_FILE;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -96,7 +100,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)API.lib;$(SolutionName)Kernel.lib;$(SolutionName)Geometry.lib;$(SolutionName)DataHandling.lib;libmex.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>..\..\Third_Party\lib\win32;..\Release;c:\matlab\R2007a\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Release;c:\matlab\R2007a\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>linkoptions.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>

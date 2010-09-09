@@ -30,11 +30,15 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidRelease.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidDebug.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -51,7 +55,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>inc;../../Third_Party/include/muParser;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc;inc;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc;../../Third_party/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Kernel/inc;../Geometry/inc;../DataObjects/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_ICAT=1;WINDOWS;_USRDLL;ICAT_EXPORTS;WITH_OPENSSL;WITH_NONAMESPACES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -64,7 +68,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)API.lib;$(SolutionName)Geometry.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../debug;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -72,7 +76,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>inc;../../Third_Party/include/muParser;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Kernel/inc;../Geometry/inc;../DataObjects/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_ICAT=1;_USRDLL;ICAT_EXPORTS;WITH_OPENSSL;WITH_NONAMESPACES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -83,7 +87,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)API.lib;$(SolutionName)Geometry.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../release;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

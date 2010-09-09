@@ -28,11 +28,15 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidRelease.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidDebug.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -53,7 +57,7 @@
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;../CurveFitting/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../CurveFitting/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_ALGORITHMS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -62,7 +66,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)DataObjects.lib;$(SolutionName)Geometry.lib;$(SolutionName)API.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../debug;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -79,7 +83,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;../CurveFitting/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../CurveFitting/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_ALGORITHMS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -87,7 +91,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)DataObjects.lib;$(SolutionName)Geometry.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../release;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>

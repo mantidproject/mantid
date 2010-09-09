@@ -130,7 +130,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../DataHandling/inc;../../Third_Party/include;c:/matlab/R2008a/extern/include"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../DataHandling/inc;../../Third_Party/include;c:/matlab/R2006a/extern/include"
 				PreprocessorDefinitions="MATLAB_MEX_FILE;WIN32;NDEBUG;_WINDOWS;_USRDLL;IN_MANTID_MATLAB_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -149,10 +149,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataHandling.lib libmex.lib libmx.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataHandling.lib libmex.lib libmx.lib libmat.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;..\Release;c:\matlab\R2006a\extern\lib\win32\microsoft"
+				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;..\release;c:\matlab\R2006a\extern\lib\win32\microsoft"
 				ModuleDefinitionFile="linkoptions.def"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
@@ -207,7 +207,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\MATLAB\R2008a\extern\src\mwdebug.c"
+				RelativePath="..\..\..\..\..\Matlab\R2006a\extern\src\mwdebug.c"
 				>
 			</File>
 		</Filter>

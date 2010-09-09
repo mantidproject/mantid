@@ -26,11 +26,15 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidRelease.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidDebug.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -45,7 +49,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_DATA_OBJECTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -55,7 +59,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)DataObjects.lib;libnexus-0.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../debug;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -66,7 +70,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_DATA_OBJECTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -75,7 +79,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)DataObjects.lib;libnexus-0.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../release;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>

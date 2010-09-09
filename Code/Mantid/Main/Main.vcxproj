@@ -26,11 +26,15 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidRelease.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidDebug.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -45,7 +49,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../CurveFitting/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../API/inc;../Kernel/inc;../CurveFitting/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;IN_MANTID_MAIN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -53,7 +57,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)API.lib;$(SolutionName)Kernel.lib;$(SolutionName)Geometry.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\Third_Party\lib\win32;..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -65,14 +69,14 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>../CurveFitting/inc;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CurveFitting/inc;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_MAIN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(SolutionName)API.lib;$(SolutionName)Kernel.lib;$(SolutionName)Geometry.lib;$(SolutionName)DataObjects.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\Release;..\..\Third_Party\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>

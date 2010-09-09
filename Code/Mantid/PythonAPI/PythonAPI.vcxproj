@@ -26,11 +26,15 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidRelease.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidDebug.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -51,7 +55,7 @@
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>inc;../API/inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include;C:\Python25\Lib\site-packages\numpy\core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;C:\python25\include;C:\Python25\Lib\site-packages\numpy\core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_PYTHON_API=1;BOOST_DEBUG_PYTHON;BOOST_PYTHON_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -59,7 +63,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)Kernel.lib;$(SolutionName)Geometry.lib;$(SolutionName)API.lib;boost_python-vc100-mt-gyd-1_43.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName)_d.pyd</OutputFile>
-      <AdditionalLibraryDirectories>../debug;../../Third_Party/lib/win32;c:\Python25\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../debug;c:\Python25\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -76,7 +80,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>inc;../API/inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include;C:\python25\Lib\site-packages\numpy\core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;C:\python25\include;C:\python25\Lib\site-packages\numpy\core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_PYTHON_API=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>false</OpenMPSupport>
@@ -84,7 +88,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)API.lib;$(SolutionName)DataHandling.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).pyd</OutputFile>
-      <AdditionalLibraryDirectories>../release;../../Third_Party/lib/win32;c:\Python25\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../release;c:\Python25\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>

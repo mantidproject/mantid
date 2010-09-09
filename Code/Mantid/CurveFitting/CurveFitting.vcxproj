@@ -32,11 +32,15 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidRelease.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\MantidDebug.props" />
+    <Import Project="..\Mantid.props" />
+    <Import Project="..\Mantid-win32.props" />
+    <Import Project="..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -53,7 +57,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../Algorithms/inc;../../Third_Party/include;../../Third_Party/include/muParser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../Algorithms/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_CURVE_FITTING=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -67,7 +71,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)DataObjects.lib;$(SolutionName)Geometry.lib;gsl_d.lib;cblas_d.lib;muparser_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../debug;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
       <TargetMachine>NotSet</TargetMachine>
@@ -81,7 +85,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;../../Third_Party/include/muParser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_CURVE_FITTING=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -94,7 +98,7 @@
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)DataObjects.lib;$(SolutionName)Geometry.lib;gsl.lib;muparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../release;../../Third_Party/lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
