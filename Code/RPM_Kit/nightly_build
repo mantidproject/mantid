@@ -56,7 +56,8 @@ scp $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm isisupd
 # remove to avoid copying debug twice
 rm -f $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm
 scp $build_base/RPMS/x86_64/Mantid-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64
-scp Mantid-1.0.tar.gz isisupdate@shadow:/isis/www/mantidproject_download/CurrentBuild
+build_src=`ls -t *.tar.gz | head -1`
+scp $build_src isisupdate@shadow:/isis/www/mantidproject_download/CurrentBuild
 echo "Subject: RPM build R$rev SUCCEEDED" > $MESS
 echo >> $MESS
 echo "RPM build of svn R$rev SUCCEEDED - see http://download.mantidproject.org/logs/Linux/rpmbuild/`basename $log_file`" >> $MESS

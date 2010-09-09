@@ -88,6 +88,8 @@ echo "Exporting complete - making spec file for version $mantid_version release 
 # Set correct path to python
 py_sitepackages=`python python_sitepackages.py`
 sed -e "s/MANTID_VERSION/$mantid_version/" -e "s/MANTID_RELEASE/$mantid_release/" -e "s/SVN_VERSION/$svn_version/" -e "s@PYTHON_SITEPACKAGES@$py_sitepackages@" < mantid.spec.template > Mantid.spec
+echo "Removing old tar files"
+rm -f *.tar.gz
 echo "Building tar file Mantid-$mantid_version.tar.gz"
 tar -cpzf Mantid-$mantid_version.tar.gz Mantid-$mantid_version
 topdir=`rpm --showrc|grep topdir| awk '{print $3}' | tail -1`
