@@ -1165,6 +1165,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Transpose.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Transpose.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TransposeTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\UnaryOperation.h"
 				>
 			</File>
