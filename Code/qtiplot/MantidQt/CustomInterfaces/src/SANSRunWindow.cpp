@@ -484,7 +484,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 
   QString code_torun =  "SetNoPrintMode(True);";
   code_torun += pycode + ";";
-  const static QString PYTHON_SEP("C++ImplementationReservedC++");
+  const static QString PYTHON_SEP("C++runReduceScriptFunctionC++");
   code_torun += "SetNoPrintMode(False);print '"+PYTHON_SEP+"'";
   QString pythonOut = runPythonCode(code_torun).trimmed();
   
@@ -1714,7 +1714,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     trans_behav += "NewTrans";
   }
 
-  const static QString PYTHON_SEP("C++ImplementationReservedC++");
+  const static QString PYTHON_SEP("C++handleReduceButtonClickC++");
   //Need to check which mode we're in
   if ( runMode == SingleMode )
   {
@@ -2262,7 +2262,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
   }
   bool status(true);
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
-  const static QString PYTHON_SEP("C++ImplementationReservedC++");
+  const static QString PYTHON_SEP("C++runAssignC++");
   if( is_trans )
   {
     QString direct_run = m_run_no_boxes.value(key + 3)->text();
