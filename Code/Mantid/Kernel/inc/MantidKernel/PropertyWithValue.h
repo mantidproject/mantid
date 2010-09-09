@@ -165,9 +165,37 @@ inline void toValue<unsigned int>(const std::string& strvalue, std::vector<unsig
     appendValue(*it, value);
   }
 }
-//----------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+// Templated += operator functions for specific types
+template<typename T>
+inline void addingOperator(T& lhs, const T& rhs)
+{
+  lhs += rhs;
+}
+
+template<typename T>
+inline void addingOperator(std::vector<T>& lhs, const std::vector<T>& rhs)
+{
+  //This concatenates the two
+  lhs.insert(lhs.end(), rhs.begin(), rhs.end());
+}
+
+template<typename T>
+inline void addingOperator(boost::shared_ptr<T>& lhs, const boost::shared_ptr<T>& rhs)
+{
+  throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
+}
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------------------------
 // Now the PropertyWithValue class itself
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 
 template <typename TYPE>
 class PropertyWithValue : public Property
@@ -210,7 +238,6 @@ public:
     m_validator( right.m_validator->clone() )
   {
   }
-
   /// 'Virtual copy constructor'
   Property* clone() { return new PropertyWithValue<TYPE>(*this); }
 
@@ -278,6 +305,24 @@ public:
     return *this;
   }
 
+
+  //--------------------------------------------------------------------------------------
+  ///Add the value of another property
+  virtual PropertyWithValue& operator+=( Property * right )
+  {
+    PropertyWithValue * rhs = dynamic_cast< PropertyWithValue * >(right);
+
+    //This function basically does:
+    //  m_value += rhs->m_value; for values
+    //  or concatenates vectors for vectors
+    addingOperator(m_value, rhs->m_value);
+
+    return *this;
+  }
+
+
+
+  //--------------------------------------------------------------------------------------
   /** Assignment operator.
    *  Allows assignment of a new value to the property by writing,
    *  e.g., myProperty = 3;
@@ -362,6 +407,23 @@ private:
   /// Private default constructor
   PropertyWithValue();
 };
+
+
+//
+////==============================================================================================
+//// Specialization of the Template
+//template <typename TYPE>
+//class PropertyWithValue< std::vector<TYPE> >
+//{
+//PropertyWithValue& operator+=( const PropertyWithValue& right )
+//{
+//  //m_value.push_back(12);
+//  //m_value += right.m_value;
+//  return *this;
+//}
+//};
+
+
 
 template <typename TYPE>
 Logger& PropertyWithValue<TYPE>::g_log = Logger::get("PropertyWithValue");

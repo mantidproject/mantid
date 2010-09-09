@@ -1,5 +1,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
+#include <string>
+#include <sstream>
 
 namespace Mantid
 {
@@ -118,6 +120,18 @@ std::set<std::string> Property::allowedValues() const
 const PropertyHistory Property::createHistory() const
 {
   return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),this->direction());
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/** Add to the property.
+ * @throw NotImplementedError always, since this should have been overridden
+ */
+Property& Property::operator+=( Property * rhs )
+{
+  std::stringstream msg;
+  msg << "Property object '" << m_name << "' of type '" << type() << "' has not implemented a operator+=() method.";
+  throw Exception::NotImplementedError(msg.str());
 }
 
 

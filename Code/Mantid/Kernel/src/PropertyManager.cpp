@@ -11,15 +11,19 @@ namespace Mantid
   namespace Kernel
   {
 
+    using std::string;
+
     // Get a reference to the logger
     Logger& PropertyManager::g_log = Logger::get("PropertyManager");
 
+    //-----------------------------------------------------------------------------------------------
     /// Default constructor
     PropertyManager::PropertyManager() :
       m_properties(), m_orderedProperties()
     {
     }
     
+    //-----------------------------------------------------------------------------------------------
     /// copy constructor
     /// @param other the PropertyManager to copy
     PropertyManager::PropertyManager(const PropertyManager& other) :
@@ -36,6 +40,7 @@ namespace Mantid
       }
     }
 
+    //-----------------------------------------------------------------------------------------------
     /// Assignment operator - performs a deep copy
     /// @param other the PropertyManager to copy
     /// @return pointer to this
@@ -62,6 +67,7 @@ namespace Mantid
       return *this;
     }
 
+    //-----------------------------------------------------------------------------------------------
     /// Virtual destructor
     PropertyManager::~PropertyManager()
     {
@@ -71,6 +77,44 @@ namespace Mantid
       }
     }
 
+
+    //-----------------------------------------------------------------------------------------------
+    /**
+     * Addition operator
+     * @param rhs The object that is being added to this.
+     * @returns A reference to the summed object
+     */
+    PropertyManager& PropertyManager::operator+=(const PropertyManager& rhs)
+    {
+      //Iterate through all properties on the RHS
+      PropertyMap::const_iterator it;
+      for (it = rhs.m_properties.begin(); it != rhs.m_properties.end(); it++)
+      {
+        //The name on the rhs
+        string rhs_name = it->first;
+        try
+        {
+          Property * lhs_prop = this->getPointerToProperty(rhs_name);
+          //Use the property's += operator to add THAT. Isn't abstraction fun?!
+          (*lhs_prop) += it->second;
+        }
+        catch (Exception::NotFoundError err)
+        {
+          //The property isnt on the lhs.
+          //Let's copy it
+          Property * copy = it->second->clone();
+          //And we add a copy of that property to *this
+          this->declareProperty(copy, "");
+        }
+
+        //(*it->second) +=
+      }
+
+      return *this;
+    }
+
+
+    //-----------------------------------------------------------------------------------------------
     /** Add a property to the list of managed properties
      *  @param p The property object to add
      *  @param doc A description of the property that may be displayed to users
@@ -101,6 +145,7 @@ namespace Mantid
       p->setDocumentation(doc);
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Set the ordered list of properties by one string of values.
      *  @param propertiesArray The list of property values
      *  @throws invalid_argument if error in parameters
@@ -139,6 +184,7 @@ namespace Mantid
       }  
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Set the value of a property by string
      *  N.B. bool properties must be set using 1/0 rather than true/false
      *  @param name The name of the property (case insensitive)
@@ -158,6 +204,7 @@ namespace Mantid
       }
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Set the value of a property by an index
      *  N.B. bool properties must be set using 1/0 rather than true/false
      *  @param index The index of the property to assign
@@ -177,6 +224,7 @@ namespace Mantid
       }
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Checks whether the named property is already in the list of managed property.
      *  @param name The name of the property (case insensitive)
      *  @return True if the property is already stored
@@ -194,6 +242,7 @@ namespace Mantid
       }
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Validates all the properties in the collection
      *  @return True if all properties have a valid value
      */
@@ -215,6 +264,8 @@ namespace Mantid
       return allValid;
     }
 
+
+    //-----------------------------------------------------------------------------------------------
     /** Get the value of a property as a string
      *  @param name The name of the property (case insensitive)
      *  @return The value of the named property
@@ -226,6 +277,8 @@ namespace Mantid
       return p->value();
     }
 
+
+    //-----------------------------------------------------------------------------------------------
     /** Get a property by name
      *  @param name The name of the property (case insensitive)
      *  @return A pointer to the named property
@@ -243,6 +296,7 @@ namespace Mantid
       throw Exception::NotFoundError("Unknown property", name);
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Get a property by an index
      *  @param index The name of the property (case insensitive)
      *  @return A pointer to the named property
@@ -258,6 +312,7 @@ namespace Mantid
       throw std::runtime_error("Property index too high");
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Get the list of managed properties.
      *  The properties will be stored in the order that they were declared.
      *  @return A vector holding pointers to the list of properties
@@ -267,6 +322,7 @@ namespace Mantid
       return m_orderedProperties;
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Get the value of a property. Allows you to assign directly to a variable of the property's type
      *  (if a supported type).
      *
@@ -285,16 +341,18 @@ namespace Mantid
       return TypedValue(*this, name);
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Removes the property from properties map.
      *  @param name  name of the property to be removed.
      */
     void PropertyManager::removeProperty(const std::string &name)
     {
       if(existsProperty(name))
-      {		 //remove it
+      {
+        //remove it
         Property* prop=getPointerToProperty(name);
-	std::string key = name;
-	std::transform(key.begin(), key.end(), key.begin(), toupper);
+        std::string key = name;
+        std::transform(key.begin(), key.end(), key.begin(), toupper);
         m_properties.erase(key);
         std::vector<Property*>::iterator itr;
         itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);

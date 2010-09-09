@@ -38,20 +38,20 @@ public:
     Run runInfo;
 
     Property *p = new ConcreteProperty();
-    TS_ASSERT_THROWS_NOTHING( runInfo.addProperty(p) )
+    TS_ASSERT_THROWS_NOTHING( runInfo.addProperty(p) );
 
     Property *pp;
-    TS_ASSERT_THROWS_NOTHING( pp = runInfo.getProperty("Test") )
-    TS_ASSERT_EQUALS( p, pp )
-    TS_ASSERT( ! pp->name().compare("Test") )
-    TS_ASSERT( dynamic_cast<ConcreteProperty*>(pp) )
-    TS_ASSERT_THROWS( pp = runInfo.getProperty("NotThere"), Exception::NotFoundError )
+    TS_ASSERT_THROWS_NOTHING( pp = runInfo.getProperty("Test") );
+    TS_ASSERT_EQUALS( p, pp );
+    TS_ASSERT( ! pp->name().compare("Test") );
+    TS_ASSERT( dynamic_cast<ConcreteProperty*>(pp) );
+    TS_ASSERT_THROWS( pp = runInfo.getProperty("NotThere"), Exception::NotFoundError );
 
     std::vector< Property* > props = runInfo.getProperties();
-    TS_ASSERT( ! props.empty() )
-    TS_ASSERT_EQUALS( props.size(), 1 )
-    TS_ASSERT( ! props[0]->name().compare("Test") )
-    TS_ASSERT( dynamic_cast<ConcreteProperty*>(props[0]) )
+    TS_ASSERT( ! props.empty() );
+    TS_ASSERT_EQUALS( props.size(), 1 );
+    TS_ASSERT( ! props[0]->name().compare("Test") );
+    TS_ASSERT( dynamic_cast<ConcreteProperty*>(props[0]) );
   }
 
   void testRemoveLogData()
@@ -67,9 +67,9 @@ public:
   void testGetSetProtonCharge()
   {
     Run runInfo;
-    TS_ASSERT_THROWS(runInfo.getProtonCharge(), Exception::NotFoundError)
-    TS_ASSERT_THROWS_NOTHING( runInfo.setProtonCharge(10.0) )
-    TS_ASSERT_EQUALS( runInfo.getProtonCharge(), 10.0 )
+    TS_ASSERT_THROWS(runInfo.getProtonCharge(), Exception::NotFoundError);
+    TS_ASSERT_THROWS_NOTHING( runInfo.setProtonCharge(10.0) );
+    TS_ASSERT_EQUALS( runInfo.getProtonCharge(), 10.0 );
   }
 
   void testCopyAndAssignment()

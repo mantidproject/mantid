@@ -55,7 +55,9 @@ namespace Mantid
       Run(const Run& copy);
       /// Assignment operator
       const Run& operator=(const Run& rhs);
-    
+      /// Addition
+      Run& operator+=(const Run& rhs);
+
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop);
       /// Add a property of given type
@@ -80,8 +82,8 @@ namespace Mantid
        */
       Kernel::Property * getProperty(const std::string & name) const
       {
-	Kernel::Property *p = m_manager.getProperty(name);
-	return p;
+        Kernel::Property *p = m_manager.getProperty(name);
+        return p;
       }
 
       /** @name Legacy functions */
@@ -90,17 +92,20 @@ namespace Mantid
       void setProtonCharge( const double charge);
       /// Get the proton charge
       double getProtonCharge() const;
+
       /**
        * Add a log entry
        * @param p A pointer to the property containing the log entry
        */
       void addLogData( Kernel::Property *p ) { addProperty(p); }
+
       /**
        * Access a single log entry
        * @param name The name of the log entry to retrieve
        * @returns A pointer to a property containing the log entry
        */ 
       Kernel::Property* getLogData(const std::string &name) const { return getProperty(name); }
+
       /**
        * Access all log entries
        * @returns A list of all of the log entries

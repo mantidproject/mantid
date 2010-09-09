@@ -223,6 +223,8 @@ protected:
   template<typename T>
   T getValue(const std::string &name) const;
 
+
+
   /// Utility class that enables the getProperty() method to effectively be templated on the return type
   struct DLLExport TypedValue
   {

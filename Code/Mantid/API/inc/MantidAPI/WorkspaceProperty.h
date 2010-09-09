@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Exception.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -93,6 +94,15 @@ namespace Mantid
       virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
       {
         return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
+      }
+
+
+      //--------------------------------------------------------------------------------------
+      ///Add the value of another property
+      virtual WorkspaceProperty& operator+=( Kernel::Property * right )
+      {
+        throw Kernel::Exception::NotImplementedError("+= operator is not implemented for WorkspaceProperty.");
+        return *this;
       }
 
       /// 'Virtual copy constructor'

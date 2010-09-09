@@ -75,6 +75,7 @@ public:
     /// Returns a reference to the WorkspaceHistory const
     const WorkspaceHistory& getHistory() const { return m_history; }
 
+
 private:
     /// The title of the workspace
     std::string m_title;

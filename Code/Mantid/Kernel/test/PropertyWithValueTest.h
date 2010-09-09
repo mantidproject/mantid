@@ -427,7 +427,87 @@ public:
     TS_ASSERT_EQUALS( iProp->setValue("2"), "" );
     TS_ASSERT( !iProp->isDefault() ) ;
   }
- 
+
+
+
+//class A
+//{
+//public:
+//  virtual A& fun(const A& rhs)
+//  {
+//    std::cout << "fun() called from class A\n";
+//  }
+//};
+//
+//template <typename T>
+//class B : public A
+//{
+//public:
+//  B(T value) : m_value(value)
+//  {
+//
+//  }
+//
+//  virtual A& fun(const A& rhs)
+//  {
+//    std::cout << "fun() called from class B<T>. I contain " << m_value << " and the parameter contains " << rhs.m_value << "\n";
+//  }
+//  T m_value;
+//};
+//
+//  void testTemplates()
+//  {
+//    std::cout << "\n\n";
+//    A myA;
+//    B<int> myB(12);
+//    myA.fun(myA);
+//    myB.fun(myB);
+//
+//    A * myAptr = new A();
+//    A * myBptr = new B<int>(23);
+//
+//    myAptr->fun(*myAptr);
+//    myBptr->fun(*myBptr);
+//
+//  }
+
+
+
+
+
+  void testAdditionOperator()
+  {
+    int i; double d; bool b;
+    Property * p1;
+    Property * p2;
+
+    // --- Numbers are added together ----
+    p1 = new PropertyWithValue<double>("Prop1", 12.0);
+    p2 = new PropertyWithValue<double>("Prop1", 23.0);
+    (*p1) += p2;
+    PropertyWithValue<double> * pd = dynamic_cast< PropertyWithValue<double> * >(p1);
+    d = *pd;
+    TS_ASSERT_EQUALS( d, 35.0 );
+
+    p1 = new PropertyWithValue<int>("Prop1", 34);
+    p2 = new PropertyWithValue<int>("Prop1", 62);
+    (*p1) += p2;
+    PropertyWithValue<int> * pi = dynamic_cast< PropertyWithValue<int> * >(p1);
+    i = *pi;
+    TS_ASSERT_EQUALS( i, 96 );
+
+    // --- Vectors are appennded together ----
+    std::vector<int> v1, v2;
+    v1.push_back(1); v1.push_back(2); v1.push_back(3);
+    v1.push_back(4); v1.push_back(5); v1.push_back(6);
+    p1 = new PropertyWithValue< std::vector<int> >("Prop1", v1);
+    p2 = new PropertyWithValue< std::vector<int> >("Prop1", v2);
+    (*p1) += p2;
+    PropertyWithValue< std::vector<int> > * pvi = dynamic_cast< PropertyWithValue< std::vector<int> > * >(p1);
+    std::vector<int> v3 = *pvi;
+    TS_ASSERT_EQUALS( v3.size(), 6 );
+
+  }
   
 private:
   PropertyWithValue<int> *iProp;

@@ -34,19 +34,19 @@ public:
   
   void testName()
   {
-    TS_ASSERT( ! p->name().compare("Test") )
+    TS_ASSERT( ! p->name().compare("Test") );
   }
 
   void testDocumentation()
   {
     Property *pp = new PropertyHelper;
-    TS_ASSERT( ! pp->documentation().compare("") )
+    TS_ASSERT( ! pp->documentation().compare("") );
     delete pp;
   }
 
   void testType_info()
   {
-    TS_ASSERT( typeid( int ) == *p->type_info()  )
+    TS_ASSERT( typeid( int ) == *p->type_info()  );
   }
 
   void testType()
@@ -58,40 +58,40 @@ public:
 //#endif
 // MG 16/07/2009: Type now returns something standardized across platforms
 // so that it can be shown in the interfaces
-  TS_ASSERT( ! p->type().compare("number") )
+  TS_ASSERT( ! p->type().compare("number") );
   
   }
 
   void testisValid()
   {
-    TS_ASSERT_EQUALS( p->isValid(), "" )
+    TS_ASSERT_EQUALS( p->isValid(), "" );
   }
 
   void testIsDefault()
   {
-    TS_ASSERT( p->isDefault() )
+    TS_ASSERT( p->isDefault() );
   }
 
   void testSetDocumentation()
   {
     const std::string str("Documentation comment");
     p->setDocumentation(str);
-    TS_ASSERT( ! p->documentation().compare(str) )
+    TS_ASSERT( ! p->documentation().compare(str) );
   }
 
   void testAllowedValues()
   {
-    TS_ASSERT( p->allowedValues().empty() )
+    TS_ASSERT( p->allowedValues().empty() );
   }
 
   void testCreateHistory()
   {
     PropertyHistory history = p->createHistory();
-    TS_ASSERT_EQUALS( history.name(), "Test" )
-    TS_ASSERT_EQUALS( history.value(), "Nothing" )
-    TS_ASSERT( history.isDefault() )
-    TS_ASSERT_EQUALS( history.type(), p->type() )
-    TS_ASSERT_EQUALS( history.direction(), 0 )
+    TS_ASSERT_EQUALS( history.name(), "Test" );
+    TS_ASSERT_EQUALS( history.value(), "Nothing" );
+    TS_ASSERT( history.isDefault() );
+    TS_ASSERT_EQUALS( history.type(), p->type() );
+    TS_ASSERT_EQUALS( history.direction(), 0 );
   }
 
 private:

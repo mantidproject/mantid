@@ -79,6 +79,21 @@ public:
   /// 'Virtual copy constructor'
   Property* clone() { return new TimeSeriesProperty<TYPE>(*this); }
 
+
+  //--------------------------------------------------------------------------------------
+  ///Add the value of another property
+  virtual TimeSeriesProperty& operator+=( Property * right )
+  {
+    TimeSeriesProperty * rhs = dynamic_cast< TimeSeriesProperty * >(right);
+
+    //Concatenate the maps!
+    m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
+
+    this->countSize();
+
+    return *this;
+  }
+
   //-----------------------------------------------------------------------------------------------
   /* Get the time series property as a string of 'time  value'
    *
@@ -471,7 +486,9 @@ public:
 
 
   //-----------------------------------------------------------------------------------------------
-  /// Updates m_size
+  /** Updates m_size.
+   * TODO: Warning! COULD BE VERY SLOW, since it counts each entry each time.
+   */
   void countSize()
   {
     m_size = 0;

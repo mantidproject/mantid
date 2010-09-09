@@ -57,6 +57,8 @@ public:
   PropertyManager();
   PropertyManager(const PropertyManager&);
   PropertyManager& operator=(const PropertyManager&);
+  PropertyManager& operator+=(const PropertyManager& rhs);
+
   virtual ~PropertyManager();
 
   // Function to declare properties (i.e. store them)
@@ -92,7 +94,7 @@ private:
   typedef std::map<std::string, Property*> PropertyMap;
   /// The properties under management
   PropertyMap m_properties;
-  /// Stores the order that the properties were declared in
+  /// Stores the order in which the properties were declared.
   std::vector<Property*> m_orderedProperties;
 
   /// Static reference to the logger class

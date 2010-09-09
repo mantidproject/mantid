@@ -83,6 +83,28 @@ public:
 	  TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) );
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(sProp), static_cast<Property*>(0) );
 	}
+
+
+	void testAdditionOperator()
+	{
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
+
+    TimeSeriesProperty<int> * log2  = new TimeSeriesProperty<int>("MyIntLog2");
+    TS_ASSERT( log2->addValue("2007-11-30T16:18:00",3) );
+    TS_ASSERT( log2->addValue("2007-11-30T16:18:10",4) );
+    TS_ASSERT( log2->addValue("2007-11-30T16:18:11",5) );
+
+    TS_ASSERT_EQUALS( log->size(), 2);
+
+    //Concatenate the lists
+    (*log) += log2;
+
+    TS_ASSERT_EQUALS( log->size(), 5);
+
+
+	}
   
 	
 private:

@@ -119,6 +119,9 @@ public:
     return m_direction;
   }
 
+  /// Add to this
+  virtual Property& operator+=( Property * rhs );
+
 protected:
   /// Constructor
   Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);
