@@ -8,10 +8,12 @@
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 class MergeRunsTest : public CxxTest::TestSuite
 {
@@ -37,34 +39,67 @@ public:
   //-----------------------------------------------------------------------------------------------
   void testExec_Event_CNCS()
   {
-    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    std::string eventfile1( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    std::string eventfile2( "../../../../Test/Data/sns_event_prenexus/CNCS_7850_neutron_event.dat" );
     DataHandling::LoadEventPreNeXus * eventLoader;
 
+    TimeSeriesProperty<double>* log;
+    EventWorkspace_sptr output;
+    int log1, log2, logTot;
+    int nev1, nev2, nevTot;
+    double pc1, pc2, pcTot;
+
     eventLoader = new DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setPropertyValue("EventFilename", eventfile1);
     eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs_pad");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs1");
     eventLoader->setProperty("PadEmptyPixels", true);
     TS_ASSERT( eventLoader->execute() );
     delete eventLoader;
 
+    output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs1"));
+    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("ProtonCharge") );
+    log1 = log->realSize();
+    nev1 = output->getNumberEvents();
+    pc1 = output->mutableRun().getProtonCharge();
+
+    //For the second one, we wont pad the pixels
     eventLoader = new DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setPropertyValue("EventFilename", eventfile2);
     eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs_nopad");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs2");
     eventLoader->setProperty("PadEmptyPixels", false);
     TS_ASSERT( eventLoader->execute() );
     delete eventLoader;
 
+    output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs2"));
+    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("ProtonCharge") );
+    log2 = log->realSize();
+    nev2 = output->getNumberEvents();
+    pc2 = output->mutableRun().getProtonCharge();
+
     MergeRuns mrg;  mrg.initialize();
-    mrg.setPropertyValue("InputWorkspaces","cncs_nopad,cncs_pad");
+    mrg.setPropertyValue("InputWorkspaces","cncs1,cncs2");
     mrg.setPropertyValue("OutputWorkspace","outWS");
     mrg.execute();
     TS_ASSERT( mrg.isExecuted() );
-    EventWorkspace_sptr output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
     TS_ASSERT( output );
+
     //This many pixels total at CNCS
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 51200);
+
+    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("ProtonCharge") );
+    logTot = log->realSize();
+    nevTot = output->getNumberEvents();
+    pcTot = output->mutableRun().getProtonCharge();
+
+    //Total # of log entries
+    TS_ASSERT_EQUALS( logTot, log1+log2 );
+    //Summed up the proton charge
+    TS_ASSERT_EQUALS( pcTot, pc1+pc2 );
+    //Total events counted.
+    TS_ASSERT_EQUALS( nevTot, nev1+nev2 );
 
   }
 

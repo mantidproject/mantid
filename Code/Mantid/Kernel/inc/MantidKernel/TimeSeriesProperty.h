@@ -107,7 +107,15 @@ public:
 
     while (p != m_propertySeries.end())
     {
-      ins << p->first << "  " << p->second << std::endl;
+      try
+      {
+        ins << p->first << "  " << p->second << std::endl;
+      }
+      catch (...)
+      {
+        //Some kind of error; for example, invalid year, can occur when converying boost time.
+        ins << "Error Error" << std::endl;
+      }
       p++;
     }
 
@@ -225,12 +233,20 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  /// Returns the number of values (or time intervals) in the time series
+  /// Returns the number of values at UNIQUE time intervals in the time series
   int size() const
   {
     return m_size;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the real size of the time series property map:
+   * the number of entries, including repeated ones.
+   */
+  int realSize() const
+  {
+    return m_propertySeries.size();
+  }
   //-----------------------------------------------------------------------------------------------
   /** Returns n-th value in an incredibly inefficient way.
    *  @param n index

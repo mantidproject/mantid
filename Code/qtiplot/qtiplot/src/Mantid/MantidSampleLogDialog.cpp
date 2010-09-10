@@ -190,8 +190,15 @@ void MantidSampleLogDialog::init()
     QString filename = QFileInfo((**pItr).name().c_str()).fileName();
     if( filename.size() > max_length ) max_length = filename.size();
     QTreeWidgetItem *treeItem = new QTreeWidgetItem(QStringList(filename));
+
     //store the log contents in the treeItem
-    treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+    //treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+
+    //NOTE: The line above appears to be completely unused since it is overwritten. And it is real slow.
+    //  So commented out, and putting this placeholder instead
+    treeItem->setData(0, Qt::UserRole, "value");
+
+
     //this specifies the format of the data it should be overridden below or there is a problem
     treeItem->setData(1, Qt::UserRole, -1);
     //See what type of data we have    

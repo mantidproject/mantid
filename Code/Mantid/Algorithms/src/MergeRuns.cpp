@@ -258,6 +258,7 @@ void MergeRuns::execEvent()
 
     AdditionTable * table = tables[workspaceNum-1];
 
+    //Add all the event lists together as the table says to do
     AdditionTable::iterator it;
     for (it = table->begin(); it != table->end(); it++)
     {
@@ -273,6 +274,9 @@ void MergeRuns::execEvent()
         outWS->getOrAddEventList(outWS->getNumberHistograms()) += addee->getEventList(inWI);
       }
     }
+
+    //Now we add up the runs
+    outWS->mutableRun() += addee->mutableRun();
 
     m_progress->report();
   }
