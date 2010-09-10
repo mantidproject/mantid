@@ -97,6 +97,38 @@ public:
     return retVal;
   }
 
+
+
+  EventWorkspace_sptr CreateRandomEventWorkspace(int numbins, int numpixels)
+  {
+    EventWorkspace_sptr retVal(new EventWorkspace);
+    retVal->initialize(numpixels,numbins,numbins-1);
+    //Create the original X axis to histogram on.
+    //Create the x-axis for histogramming.
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.resize(numbins);
+    for (int i = 0; i < numbins; ++i)
+      xRef[i] = i*BIN_DELTA;
+
+    //Make up some data for each pixels
+    for (int i=0; i< numpixels; i++)
+    {
+      //Create one event for each bin
+      EventList& events = retVal->getEventListAtPixelID(i);
+      for (double ie=0; ie<numbins; ie++)
+      {
+        //Create a list of events, randomize
+        events += TofEvent( std::rand() , std::rand());
+      }
+    }
+    retVal->doneLoadingData();
+    retVal->setAllX(axis);
+
+    return retVal;
+  }
+
+
   //------------------------------------------------------------------------------
   void setUp()
   {
@@ -455,6 +487,37 @@ public:
   }
 
 
+
+
+  void testSortByTof()
+  {
+    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    Progress * prog = NULL;
+
+    test_in->sortAll(TOF_SORT, prog);
+
+    EventWorkspace_sptr outWS = test_in;
+    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    TS_ASSERT_EQUALS( ve.size(), NUMBINS);
+    for (size_t i=0; i<ve.size()-1; i++)
+      TS_ASSERT_LESS_THAN_EQUALS( ve[i].tof(), ve[i+1].tof());
+
+  }
+
+
+  void testSortByPulseTime()
+  {
+    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    Progress * prog = NULL;
+
+    test_in->sortAll(PULSETIME_SORT, prog);
+
+    EventWorkspace_sptr outWS = test_in;
+    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    TS_ASSERT_EQUALS( ve.size(), NUMBINS);
+    for (size_t i=0; i<ve.size()-1; i++)
+      TS_ASSERT_LESS_THAN_EQUALS( ve[i].pulseTime(), ve[i+1].pulseTime());
+  }
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */

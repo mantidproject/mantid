@@ -13,6 +13,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "MantidAPI/Progress.h"
 
 namespace Mantid
 {
@@ -214,6 +215,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   int MRUSize() const;
 
   void clearMRU() const;
+
+  void sortAll(EventSortType sortType, Mantid::API::Progress * prog);
 
 private:
   /// NO COPY ALLOWED

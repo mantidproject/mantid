@@ -48,13 +48,13 @@ namespace Mantid
     void Sort::exec()
     {
       // Get the input workspace
-      MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
+      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
       //And other properties
       bool sortByTof = (getPropertyValue("SortBy") == "Time of Flight");
 
       //---------------------------------------------------------------------------------
       //Now, determine if the input workspace is actually an EventWorkspace
-      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      EventWorkspace_sptr eventW = boost::dynamic_pointer_cast<EventWorkspace>(inputW);
 
       if (eventW != NULL)
       {
@@ -64,23 +64,11 @@ namespace Mantid
         //Initialize progress reporting.
         Progress prog(this,0.0,1.0, histnumber);
 
-        //Go through all the histograms and set the data
-        PARALLEL_FOR1(eventW)
-        for (int i=0; i < histnumber; ++i)
-        {
-          PARALLEL_START_INTERUPT_REGION
+        DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
+        if (!sortByTof) sortType = DataObjects::PULSETIME_SORT;
 
-          //Perform the sort
-          if (sortByTof)
-            eventW->getEventList(i).sortTof();
-          else
-            eventW->getEventList(i).sortPulseTime();
-
-          //Report progress
-          prog.report();
-          PARALLEL_END_INTERUPT_REGION
-        }
-        PARALLEL_CHECK_INTERUPT_REGION
+        //This runs the sort algorithm in parallel
+        eventW->sortAll(sortType, &prog);
 
       } // END ---- EventWorkspace
       else

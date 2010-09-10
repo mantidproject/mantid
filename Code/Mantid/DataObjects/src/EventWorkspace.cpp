@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 
 DECLARE_WORKSPACE(EventWorkspace)
 
@@ -572,6 +573,28 @@ using Kernel::Exception::NotImplementedError;
     //Clear MRU lists now, free up memory
     this->clearMRU();
   }
+
+
+  //-----------------------------------------------------------------------------
+  /*** Sort all event lists. Uses a parallelized algortih
+   * @param sortType How to sort the event lists.
+   * @param prog a progress report object. If the pointer is not NULL, each event list will call prog.report() once.
+   */
+  void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog)
+  {
+
+    //Go through all the histograms and set the data
+    PARALLEL_FOR_NO_WSP_CHECK() //We manually can say that this'll be thread-safe
+    for (int i=0; i < m_noVectors; ++i)
+    {
+      //Perform the sort
+      this->data[i]->sort(sortType);
+
+      //Report progress
+      if (prog) prog->report();
+    }
+  }
+
 
 
 } // namespace DataObjects
