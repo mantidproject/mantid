@@ -3,9 +3,12 @@
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
+#include <vector>
 #include <numeric>
 #include <limits>
 #include <iostream>
+#include <sstream>
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid
 {
@@ -200,6 +203,7 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
   return; //without problems
 }
 
+//-------------------------------------------------------------------------------------------------
 /** Rebins histogram data according to a new output X array. Should be faster than previous one.
  *  @author Laurent Chapon 10/03/2009
  *
@@ -299,6 +303,7 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
   return;
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Convert the given set of bin boundaries into bin centre values
  * @param bin_edges A vector of values specifying bin boundaries
@@ -320,56 +325,33 @@ void convertToBinCentre(const std::vector<double> & bin_edges, std::vector<doubl
   bin_centres.erase(bin_centres.begin());
 }
 
+//-------------------------------------------------------------------------------------------------
 /** Assess if all the values in the vector are equal or if there are some different values
-
 *  @param[in] arra the vector to examine
-
 *  @param[out] val if there is only one value this variable takes that value, otherwise its contents are undefined
-
 */
-
 bool isConstantValue(const std::vector<double> &arra, double &val)
-
 {
-
   //make comparisons with the first value
-
   std::vector<double>::const_iterator i = arra.begin();
 
-
   if ( i == arra.end() )
-
   {//empty array
     return true;
-
   }
-
-  
 
   //this loop can be entered! NAN values make comparisons difficult because nan != nan, deal with these first
-
   for ( val = *i; val != val ; )
-
   {
-
     ++i;
-
     if ( i == arra.end() )
-
     {
-
       //all values are contant (NAN)
-
       return true;
-
     }
-
     val = *i;
-
   }
-
   
-
   for ( ; i != arra.end() ; ++i )
   {
     if ( *i != val )
@@ -379,6 +361,52 @@ bool isConstantValue(const std::vector<double> &arra, double &val)
   }
   //no different value was found and so every must be equal to c
   return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Take a string of comma or space-separated values, and splits it into
+ * a vector of doubles.
+ * @param listString a string like "0.0 1.2" or "2.4, 5.67, 88"
+ * @return a vector of doubles
+ * @throw an error if there was a string that could not convert to a double.
+ */
+std::vector<double> splitStringIntoVector(std::string listString)
+{
+  //Split the string and turn it into a vector.
+  std::vector<double> values;
+  std::vector<std::string> strs;
+  boost::split(strs, listString, boost::is_any_of(", "));
+  for (std::vector<std::string>::iterator it= strs.begin(); it != strs.end(); it++)
+  {
+    std::stringstream oneNumber(*it);
+    double num;
+    oneNumber >> num;
+    values.push_back(num);
+  }
+  return values;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/** Return the index into a vector of bin boundaries for a particular X value.
+ * The index returned is the one left edge of the bin.
+ * If beyond the range of the vector, it will return either 0 or bins.size()-2.
+ */
+int getBinIndex(std::vector<double>& bins, const double X )
+{
+  int index = 0;
+  //If X is below the min value
+  if (X < bins[0])
+    return 0;
+
+  int nBins = bins.size();
+  for (index = 0; index < nBins-1; index++)
+  {
+    if ((X >= bins[index]) && (X < bins[index+1]))
+      return index;
+  }
+  //If X is beyond the max value
+  return index;
 }
 
 

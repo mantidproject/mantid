@@ -120,8 +120,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     outputWS->dataX(k) = input->readX(k);
     outputWS->dataY(k) = input->readY(k);
     outputWS->dataE(k) = input->readE(k);
-	prg+=(0.1/hists);
-	progress(prg);
+    prg+=(0.1/hists);
+    progress(prg);
   }
 
   const bool isHistogramData = outputWS->isHistogramData();

@@ -56,6 +56,11 @@ namespace VectorHelper
 
   bool DLLExport isConstantValue(const std::vector<double> &arra, double &val);
 
+  DLLExport std::vector<double> splitStringIntoVector(std::string listString);
+
+  DLLExport int getBinIndex(std::vector<double>& bins, const double X );
+
+
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
   {

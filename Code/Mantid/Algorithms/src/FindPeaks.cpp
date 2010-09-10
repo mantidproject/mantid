@@ -99,16 +99,7 @@ void FindPeaks::exec()
   if (peakPositions.size() > 0)
   {
     //Split the string and turn it into a vector.
-    std::vector<double> centers;
-    std::vector<std::string> strs;
-    boost::split(strs, peakPositions, boost::is_any_of(", "));
-    for (std::vector<std::string>::iterator it= strs.begin(); it != strs.end(); it++)
-    {
-      std::stringstream oneNumber(*it);
-      double num;
-      oneNumber >> num;
-      centers.push_back(num);
-    }
+    std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector(peakPositions);
 
     //Perform fit with fixed start positions.
     this->findPeaksGivenStartingPoints(centers);
