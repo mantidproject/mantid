@@ -108,7 +108,7 @@ void StripVanadiumPeaks::exec()
 
   for (int k = 0; k < nhists; ++k)
   {
-    if (!singleSpectrum or (singleIndex == k))
+    if (!singleSpectrum || (singleIndex == k))
     {
       //Get the X and Y vectors
       MantidVec X = inputWS->dataX(k);
