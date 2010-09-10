@@ -73,7 +73,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
         return values[0]
     
-    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_white_run=None, abs_ei=None, save_filename=None):
+    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_white_run=None, abs_ei=None, save_filename=None, Tzero=None):
         '''
         Convert mono-chromatic run to deltaE
         '''
@@ -96,7 +96,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         else:
             absnorm_factor = None
         # Main run file conversion
-        sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file, self.spectra_masks, save_filename)
+        sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file, self.spectra_masks, save_filename, Tzero)
         if not absnorm_factor is None:
             absnorm_factor *= (self.abs_mass/self.abs_rmm)
             sample_wkspace /= absnorm_factor
@@ -127,12 +127,16 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             #self.log("--- CNCS ---")
             self.fix_ei = True
             ei_value = ei_guess
-            tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
+            if (Tzero is None):
+            	tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
+            else:
+            	tzero = Tzero
             ChangeBinOffset(result_ws, result_ws, -tzero)
             mon1_peak = 0.0
             self.applyDetectorEfficiency = False
         elif (self.file_prefix == "ARCS" or self.file_prefix == "SEQUOIA"):
             #self.log("***** ARCS/SEQUOIA *****")
+            self.log(mono_run)
             InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
             loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
             monitor_ws = loader.workspace()
@@ -144,6 +148,8 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 # TODO: Calculate T0
                 #tzero = float(alg.getPropertyValue("Tzero"))
                 tzero = 0.0
+            else:	
+            	tzero = Tzero
             mon1_peak = 0.0
             ChangeBinOffset(result_ws, result_ws, -tzero)
             self.applyDetectorEfficiency = False
