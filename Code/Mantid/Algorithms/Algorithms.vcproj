@@ -555,6 +555,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Transpose.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\UnaryOperation.cpp"
 				>
 			</File>
@@ -1162,10 +1166,6 @@
 			</File>
 			<File
 				RelativePath=".\test\SumSpectraTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Transpose.cpp"
 				>
 			</File>
 			<File

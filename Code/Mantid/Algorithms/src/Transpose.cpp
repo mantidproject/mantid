@@ -27,10 +27,13 @@ void Transpose::exec()
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   const int numHists = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",numBins,numHists,numHists);
-  outputWorkspace->setTitle(inputWorkspace->getTitle());
-  Mantid::API::Axis* inputAxis = inputWorkspace->getAxis(1);
-  if ( inputAxis == NULL )
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,numBins,numHists,numHists);
+  Mantid::API::Axis* inputAxis;
+  try
+  {
+    inputAxis = inputWorkspace->getAxis(1);
+  }
+  catch ( Kernel::Exception::IndexError )
   {
     g_log.error() << "Axis(1) not found on input workspace." << std::endl;
     throw std::runtime_error("Axis(1) not found on input workspace.");
@@ -45,7 +48,15 @@ void Transpose::exec()
       outputWorkspace->dataY(j)[i] = inputWorkspace->readY(i)[j];
       outputWorkspace->dataE(j)[i] = inputWorkspace->readE(i)[j];
     }
-    double axisValue = inputWorkspace->readX(0)[j];
+    double axisValue;
+    if ( inputWorkspace->isHistogramData() )
+    {
+      axisValue = (inputWorkspace->readX(0)[j] + inputWorkspace->readX(0)[j+1])/2;
+    }
+    else
+    {
+      axisValue = inputWorkspace->readX(0)[j];
+    }
     newAxis->setValue(j, axisValue);
     prog.report();
   }
