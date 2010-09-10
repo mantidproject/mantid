@@ -1,61 +1,62 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>ConvertToEnergy</class>
- <widget class="QWidget" name="ConvertToEnergy" >
-  <property name="geometry" >
+ <widget class="QWidget" name="ConvertToEnergy">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>604</height>
+    <width>552</width>
+    <height>685</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Convert To Energy</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_20" >
-   <property name="topMargin" >
+  <layout class="QVBoxLayout" name="verticalLayout_20">
+   <property name="topMargin">
     <number>9</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="styleSheet" >
-      <string notr="true" />
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
-     <property name="currentIndex" >
+     <property name="currentIndex">
       <number>0</number>
      </property>
-     <property name="iconSize" >
+     <property name="iconSize">
       <size>
        <width>14</width>
        <height>14</height>
       </size>
      </property>
-     <widget class="QWidget" name="tabEnergyTransfer" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabEnergyTransfer">
+      <attribute name="title">
        <string>Energy Transfer</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_27" >
-         <property name="topMargin" >
+        <layout class="QHBoxLayout" name="horizontalLayout_27">
+         <property name="topMargin">
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_2" >
-           <property name="text" >
+          <widget class="QLabel" name="label_2">
+           <property name="text">
             <string>Instrument</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst" >
-           <property name="techniques" >
+          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
+           <property name="techniques">
             <stringlist>
              <string>TOF Direct Geometry Spectroscopy</string>
              <string>TOF Indirect Geometry Spectroscopy</string>
@@ -64,24 +65,24 @@
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="swInstrument" >
-           <property name="lineWidth" >
+          <widget class="QStackedWidget" name="swInstrument">
+           <property name="lineWidth">
             <number>0</number>
            </property>
-           <property name="currentIndex" >
+           <property name="currentIndex">
             <number>0</number>
            </property>
-           <widget class="QWidget" name="page" >
-            <layout class="QHBoxLayout" name="horizontalLayout_16" >
+           <widget class="QWidget" name="page">
+            <layout class="QHBoxLayout" name="horizontalLayout_16">
              <item>
-              <spacer name="horizontalSpacer_3" >
-               <property name="orientation" >
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <property name="sizeType" >
+               <property name="sizeType">
                 <enum>QSizePolicy::Expanding</enum>
                </property>
-               <property name="sizeHint" stdset="0" >
+               <property name="sizeHint" stdset="0">
                 <size>
                  <width>40</width>
                  <height>10</height>
@@ -91,40 +92,40 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="page_2" >
-            <layout class="QHBoxLayout" name="horizontalLayout" >
+           <widget class="QWidget" name="page_2">
+            <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2" >
-               <property name="spacing" >
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <property name="spacing">
                 <number>6</number>
                </property>
-               <property name="sizeConstraint" >
+               <property name="sizeConstraint">
                 <enum>QLayout::SetDefaultConstraint</enum>
                </property>
                <item>
-                <widget class="QLabel" name="lbAnalyser" >
-                 <property name="text" >
+                <widget class="QLabel" name="lbAnalyser">
+                 <property name="text">
                   <string>Analyser</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cbAnalyser" >
-                 <property name="toolTip" >
+                <widget class="QComboBox" name="cbAnalyser">
+                 <property name="toolTip">
                   <string>Select Analyser bank to use.</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="lbReflection" >
-                 <property name="text" >
+                <widget class="QLabel" name="lbReflection">
+                 <property name="text">
                   <string>Reflection</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cbReflection" >
-                 <property name="toolTip" >
+                <widget class="QComboBox" name="cbReflection">
+                 <property name="toolTip">
                   <string>Select Reflection used for experiment(s).</string>
                  </property>
                 </widget>
@@ -138,48 +139,48 @@
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbExperiment" >
-         <property name="title" >
+        <widget class="QGroupBox" name="gbExperiment">
+         <property name="title">
           <string>Input Files</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout" >
-          <property name="spacing" >
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
            <number>0</number>
           </property>
-          <property name="margin" >
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QStackedWidget" name="swInputFiles" >
-            <property name="lineWidth" >
+           <widget class="QStackedWidget" name="swInputFiles">
+            <property name="lineWidth">
              <number>0</number>
             </property>
-            <property name="currentIndex" >
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_3" >
-             <layout class="QVBoxLayout" name="verticalLayout_32" >
+            <widget class="QWidget" name="page_3">
+             <layout class="QVBoxLayout" name="verticalLayout_32">
               <item>
-               <layout class="QHBoxLayout" name="runFilesLay" >
-                <property name="spacing" >
+               <layout class="QHBoxLayout" name="runFilesLay">
+                <property name="spacing">
                  <number>9</number>
                 </property>
-                <property name="topMargin" >
+                <property name="topMargin">
                  <number>9</number>
                 </property>
-                <property name="bottomMargin" >
+                <property name="bottomMargin">
                  <number>6</number>
                 </property>
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" >
-                  <property name="label" stdset="0" >
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles">
+                  <property name="label" stdset="0">
                    <string>Runs          </string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="ckSumSpecs" >
-                  <property name="text" >
+                 <widget class="QCheckBox" name="ckSumSpecs">
+                  <property name="text">
                    <string>Sum</string>
                   </property>
                  </widget>
@@ -187,70 +188,70 @@
                </layout>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" >
-                <property name="findRunFiles" stdset="0" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile">
+                <property name="findRunFiles" stdset="0">
                  <bool>false</bool>
                 </property>
-                <property name="label" stdset="0" >
+                <property name="label" stdset="0">
                  <string>Map File     </string>
                 </property>
-                <property name="multipleFiles" stdset="0" >
+                <property name="multipleFiles" stdset="0">
                  <bool>false</bool>
                 </property>
-                <property name="optional" stdset="0" >
+                <property name="optional" stdset="0">
                  <bool>true</bool>
                 </property>
-                <property name="algorithmAndProperty" stdset="0" >
+                <property name="algorithmAndProperty" stdset="0">
                  <string>GroupDetectors|MapFile</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" >
-                <property name="label" stdset="0" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile">
+                <property name="label" stdset="0">
                  <string>White beam</string>
                 </property>
-                <property name="multipleFiles" stdset="0" >
+                <property name="multipleFiles" stdset="0">
                  <bool>false</bool>
                 </property>
-                <property name="optional" stdset="0" >
+                <property name="optional" stdset="0">
                  <bool>true</bool>
                 </property>
                </widget>
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_4" >
-             <layout class="QVBoxLayout" name="verticalLayout_9" >
+            <widget class="QWidget" name="page_4">
+             <layout class="QVBoxLayout" name="verticalLayout_9">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_15" >
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
                 <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_6" >
+                 <layout class="QVBoxLayout" name="verticalLayout_6">
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" >
-                    <property name="label" stdset="0" >
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles">
+                    <property name="label" stdset="0">
                      <string>Run Files</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" >
-                    <property name="enabled" >
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile">
+                    <property name="enabled">
                      <bool>false</bool>
                     </property>
-                    <property name="findRunFiles" stdset="0" >
+                    <property name="findRunFiles" stdset="0">
                      <bool>false</bool>
                     </property>
-                    <property name="label" stdset="0" >
+                    <property name="label" stdset="0">
                      <string>Calibration File</string>
                     </property>
-                    <property name="multipleFiles" stdset="0" >
+                    <property name="multipleFiles" stdset="0">
                      <bool>false</bool>
                     </property>
-                    <property name="optional" stdset="0" >
+                    <property name="optional" stdset="0">
                      <bool>false</bool>
                     </property>
-                    <property name="fileExtensions" >
+                    <property name="fileExtensions">
                      <stringlist>
                       <string>_calib.nxs</string>
                      </stringlist>
@@ -260,23 +261,23 @@
                  </layout>
                 </item>
                 <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_8" >
+                 <layout class="QVBoxLayout" name="verticalLayout_8">
                   <item>
-                   <widget class="QCheckBox" name="ckSumFiles" >
-                    <property name="toolTip" >
+                   <widget class="QCheckBox" name="ckSumFiles">
+                    <property name="toolTip">
                      <string>Sum multiple files together.</string>
                     </property>
-                    <property name="text" >
+                    <property name="text">
                      <string>Sum Files</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="ckUseCalib" >
-                    <property name="toolTip" >
+                   <widget class="QCheckBox" name="ckUseCalib">
+                    <property name="toolTip">
                      <string>Use calibration file to adjust for detector efficiency.</string>
                     </property>
-                    <property name="text" >
+                    <property name="text">
                      <string>Use Calib File</string>
                     </property>
                    </widget>
@@ -286,81 +287,81 @@
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_10" >
-                <property name="spacing" >
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <property name="spacing">
                  <number>6</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="lbMapping" >
-                  <property name="sizePolicy" >
-                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                 <widget class="QLabel" name="lbMapping">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="layoutDirection" >
+                  <property name="layoutDirection">
                    <enum>Qt::LeftToRight</enum>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>Mapping</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>cbMappingOptions</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="cbMappingOptions" >
-                  <property name="toolTip" >
+                 <widget class="QComboBox" name="cbMappingOptions">
+                  <property name="toolTip">
                    <string>Select type of detector grouping to apply.</string>
                   </property>
                   <item>
-                   <property name="text" >
+                   <property name="text">
                     <string>All</string>
                    </property>
                   </item>
                   <item>
-                   <property name="text" >
+                   <property name="text">
                     <string>Groups</string>
                    </property>
                   </item>
                   <item>
-                   <property name="text" >
+                   <property name="text">
                     <string>Individual</string>
                    </property>
                   </item>
                   <item>
-                   <property name="text" >
+                   <property name="text">
                     <string>File</string>
                    </property>
                   </item>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QStackedWidget" name="swMapping" >
-                  <property name="lineWidth" >
+                 <widget class="QStackedWidget" name="swMapping">
+                  <property name="lineWidth">
                    <number>0</number>
                   </property>
-                  <property name="currentIndex" >
+                  <property name="currentIndex">
                    <number>2</number>
                   </property>
-                  <widget class="QWidget" name="page_11" >
-                   <layout class="QHBoxLayout" name="horizontalLayout_5" >
+                  <widget class="QWidget" name="page_11">
+                   <layout class="QHBoxLayout" name="horizontalLayout_5">
                     <item>
-                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" >
-                      <property name="findRunFiles" stdset="0" >
+                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile">
+                      <property name="findRunFiles" stdset="0">
                        <bool>false</bool>
                       </property>
-                      <property name="label" stdset="0" >
+                      <property name="label" stdset="0">
                        <string/>
                       </property>
-                      <property name="multipleFiles" stdset="0" >
+                      <property name="multipleFiles" stdset="0">
                        <bool>false</bool>
                       </property>
-                      <property name="algorithmAndProperty" stdset="0" >
+                      <property name="algorithmAndProperty" stdset="0">
                        <string/>
                       </property>
-                      <property name="fileExtensions" >
+                      <property name="fileExtensions">
                        <stringlist>
                         <string>.map</string>
                        </stringlist>
@@ -369,41 +370,41 @@
                     </item>
                    </layout>
                   </widget>
-                  <widget class="QWidget" name="page_12" >
-                   <layout class="QHBoxLayout" name="horizontalLayout_26" >
+                  <widget class="QWidget" name="page_12">
+                   <layout class="QHBoxLayout" name="horizontalLayout_26">
                     <item>
-                     <widget class="QLabel" name="lbNoGroups" >
-                      <property name="text" >
+                     <widget class="QLabel" name="lbNoGroups">
+                      <property name="text">
                        <string>Number of Groups: </string>
                       </property>
-                      <property name="buddy" >
+                      <property name="buddy">
                        <cstring>leNoGroups</cstring>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLineEdit" name="leNoGroups" >
-                      <property name="toolTip" >
+                     <widget class="QLineEdit" name="leNoGroups">
+                      <property name="toolTip">
                        <string>Desired number of groups.</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="valNoGroups" >
-                      <property name="styleSheet" >
-                       <string notr="true" >color: rgb(255, 0, 4)</string>
+                     <widget class="QLabel" name="valNoGroups">
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(255, 0, 4)</string>
                       </property>
-                      <property name="text" >
+                      <property name="text">
                        <string>*</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer_32" >
-                      <property name="orientation" >
+                     <spacer name="horizontalSpacer_32">
+                      <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
-                      <property name="sizeHint" stdset="0" >
+                      <property name="sizeHint" stdset="0">
                        <size>
                         <width>40</width>
                         <height>20</height>
@@ -413,29 +414,29 @@
                     </item>
                    </layout>
                   </widget>
-                  <widget class="QWidget" name="pgMapping_blank" />
+                  <widget class="QWidget" name="pgMapping_blank"/>
                  </widget>
                 </item>
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_11" >
+               <layout class="QHBoxLayout" name="horizontalLayout_11">
                 <item>
-                 <widget class="QPushButton" name="pbBack_2" >
-                  <property name="toolTip" >
+                 <widget class="QPushButton" name="pbBack_2">
+                  <property name="toolTip">
                    <string>Remove a range of background value.</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>Background Removal</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_11" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_11">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -444,11 +445,11 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pbPlotRaw" >
-                  <property name="toolTip" >
+                 <widget class="QPushButton" name="pbPlotRaw">
+                  <property name="toolTip">
                    <string>Plot raw time values.</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>Plot Time</string>
                   </property>
                  </widget>
@@ -463,43 +464,43 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbAnalysis" >
-         <property name="title" >
+        <widget class="QGroupBox" name="gbAnalysis">
+         <property name="title">
           <string>Analysis Options</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3" >
-          <property name="sizeConstraint" >
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
-          <property name="margin" >
+          <property name="margin">
            <number>0</number>
           </property>
-          <property name="spacing" >
+          <property name="spacing">
            <number>0</number>
           </property>
-          <item row="0" column="0" >
-           <widget class="QStackedWidget" name="swAnalysis" >
-            <property name="lineWidth" >
+          <item row="0" column="0">
+           <widget class="QStackedWidget" name="swAnalysis">
+            <property name="lineWidth">
              <number>0</number>
             </property>
-            <property name="currentIndex" >
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_5" >
-             <layout class="QGridLayout" name="gridLayout_4" >
-              <item row="1" column="1" >
-               <widget class="QPushButton" name="pbBack" >
-                <property name="text" >
+            <widget class="QWidget" name="page_5">
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="1" column="1">
+               <widget class="QPushButton" name="pbBack">
+                <property name="text">
                  <string>bg removal: none</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="2" >
-               <spacer name="horizontalSpacer_9" >
-                <property name="orientation" >
+              <item row="1" column="2">
+               <spacer name="horizontalSpacer_9">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -507,12 +508,12 @@
                 </property>
                </spacer>
               </item>
-              <item row="1" column="5" >
-               <spacer name="horizontalSpacer_6" >
-                <property name="orientation" >
+              <item row="1" column="5">
+               <spacer name="horizontalSpacer_6">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -520,12 +521,12 @@
                 </property>
                </spacer>
               </item>
-              <item row="1" column="0" >
-               <spacer name="horizontalSpacer_22" >
-                <property name="orientation" >
+              <item row="1" column="0">
+               <spacer name="horizontalSpacer_22">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -533,30 +534,30 @@
                 </property>
                </spacer>
               </item>
-              <item row="1" column="3" >
-               <widget class="QLabel" name="label" >
-                <property name="text" >
+              <item row="1" column="3">
+               <widget class="QLabel" name="label">
+                <property name="text">
                  <string>Normalise By</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="4" >
-               <widget class="QComboBox" name="cbNormal" >
-                <property name="frame" >
+              <item row="1" column="4">
+               <widget class="QComboBox" name="cbNormal">
+                <property name="frame">
                  <bool>true</bool>
                 </property>
                 <item>
-                 <property name="text" >
+                 <property name="text">
                   <string>monitor-1</string>
                  </property>
                 </item>
                 <item>
-                 <property name="text" >
+                 <property name="text">
                   <string>current</string>
                  </property>
                 </item>
                 <item>
-                 <property name="text" >
+                 <property name="text">
                   <string>none</string>
                  </property>
                 </item>
@@ -564,14 +565,14 @@
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_6" >
-             <layout class="QGridLayout" name="gridLayout_10" >
-              <item row="0" column="6" >
-               <spacer name="horizontalSpacer_10" >
-                <property name="orientation" >
+            <widget class="QWidget" name="page_6">
+             <layout class="QGridLayout" name="gridLayout_10">
+              <item row="0" column="6">
+               <spacer name="horizontalSpacer_10">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -579,12 +580,12 @@
                 </property>
                </spacer>
               </item>
-              <item row="0" column="0" >
-               <spacer name="horizontalSpacer" >
-                <property name="orientation" >
+              <item row="0" column="0">
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -592,51 +593,51 @@
                 </property>
                </spacer>
               </item>
-              <item row="0" column="2" >
-               <widget class="QCheckBox" name="ckDetailedBalance" >
-                <property name="text" >
+              <item row="0" column="2">
+               <widget class="QCheckBox" name="ckDetailedBalance">
+                <property name="text">
                  <string>Detailed Balance</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="3" >
-               <widget class="QLineEdit" name="leDetailedBalance" >
-                <property name="sizePolicy" >
-                 <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+              <item row="0" column="3">
+               <widget class="QLineEdit" name="leDetailedBalance">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="maximumSize" >
+                <property name="maximumSize">
                  <size>
                   <width>40</width>
                   <height>300</height>
                  </size>
                 </property>
-                <property name="toolTip" >
+                <property name="toolTip">
                  <string>Temperature value to use in Detailed Balance.</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>300</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="5" >
-               <widget class="QLabel" name="lbDBKelvin" >
-                <property name="text" >
+              <item row="0" column="5">
+               <widget class="QLabel" name="lbDBKelvin">
+                <property name="text">
                  <string>Kelvin</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>leDetailedBalance</cstring>
                 </property>
                </widget>
               </item>
-              <item row="0" column="4" >
-               <widget class="QLabel" name="valDetailedBalance" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+              <item row="0" column="4">
+               <widget class="QLabel" name="valDetailedBalance">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
@@ -649,47 +650,34 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
           <string>Conversion to Energy Transfer</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_6" >
-          <property name="margin" >
+         <layout class="QGridLayout" name="gridLayout_6">
+          <property name="margin">
            <number>0</number>
           </property>
-          <property name="spacing" >
+          <property name="spacing">
            <number>0</number>
           </property>
-          <item row="0" column="0" >
-           <widget class="QStackedWidget" name="swConvertToEnergy" >
-            <property name="currentIndex" >
+          <item row="0" column="0">
+           <widget class="QStackedWidget" name="swConvertToEnergy">
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_7" >
-             <layout class="QHBoxLayout" name="horizontalLayout_3" >
+            <widget class="QWidget" name="page_7">
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <spacer name="horizontalSpacer_30" >
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0" >
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_9" >
-                <property name="text" >
+               <widget class="QLabel" name="label_9">
+                <property name="text">
                  <string>Incident Energy</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leEGuess" >
-                <property name="maximumSize" >
+               <widget class="QLineEdit" name="leEGuess">
+                <property name="maximumSize">
                  <size>
                   <width>70</width>
                   <height>16777215</height>
@@ -698,13 +686,13 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valGuess" >
-                <property name="palette" >
+               <widget class="QLabel" name="valGuess">
+                <property name="palette">
                  <palette>
                   <active>
-                   <colorrole role="WindowText" >
-                    <brush brushstyle="SolidPattern" >
-                     <color alpha="255" >
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
                       <red>170</red>
                       <green>0</green>
                       <blue>0</blue>
@@ -713,9 +701,9 @@
                    </colorrole>
                   </active>
                   <inactive>
-                   <colorrole role="WindowText" >
-                    <brush brushstyle="SolidPattern" >
-                     <color alpha="255" >
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
                       <red>170</red>
                       <green>0</green>
                       <blue>0</blue>
@@ -724,9 +712,9 @@
                    </colorrole>
                   </inactive>
                   <disabled>
-                   <colorrole role="WindowText" >
-                    <brush brushstyle="SolidPattern" >
-                     <color alpha="255" >
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
                       <red>118</red>
                       <green>116</green>
                       <blue>108</blue>
@@ -736,27 +724,27 @@
                   </disabled>
                  </palette>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>leEGuess</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_10" >
-                <property name="text" >
+               <widget class="QLabel" name="label_10">
+                <property name="text">
                  <string>meV</string>
                 </property>
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_8" >
-                <property name="orientation" >
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>5</width>
                   <height>20</height>
@@ -765,18 +753,18 @@
                </spacer>
               </item>
               <item>
-               <widget class="QCheckBox" name="ckFixEi" >
-                <property name="text" >
+               <widget class="QCheckBox" name="ckFixEi">
+                <property name="text">
                  <string>Fix Ei</string>
                 </property>
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_7" >
-                <property name="orientation" >
+               <spacer name="horizontalSpacer_7">
+                <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="sizeHint" stdset="0" >
+                <property name="sizeHint" stdset="0">
                  <size>
                   <width>40</width>
                   <height>20</height>
@@ -784,87 +772,111 @@
                 </property>
                </spacer>
               </item>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>T0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="TzeroEdit">
+                <property name="maximumSize">
+                 <size>
+                  <width>70</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>usec</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_8" >
-             <layout class="QHBoxLayout" name="horizontalLayout_4" >
+            <widget class="QWidget" name="page_8">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
-               <widget class="QLabel" name="lbEFixed" >
-                <property name="text" >
+               <widget class="QLabel" name="lbEFixed">
+                <property name="text">
                  <string>Efixed value:</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>leEfixed</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leEfixed" >
-                <property name="toolTip" >
+               <widget class="QLineEdit" name="leEfixed">
+                <property name="toolTip">
                  <string>Value of Efixed for conversion from time to energy.</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valEFixed" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valEFixed">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="lbSpectraMin" >
-                <property name="text" >
+               <widget class="QLabel" name="lbSpectraMin">
+                <property name="text">
                  <string>Spectra Min:</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>leSpectraMin</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leSpectraMin" >
-                <property name="toolTip" >
+               <widget class="QLineEdit" name="leSpectraMin">
+                <property name="toolTip">
                  <string>Minimum spectra number for data.</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valSpectraMin" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valSpectraMin">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="lbSpectraMax" >
-                <property name="text" >
+               <widget class="QLabel" name="lbSpectraMax">
+                <property name="text">
                  <string>Spectra Max</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>leSpectraMax</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="leSpectraMax" >
-                <property name="toolTip" >
+               <widget class="QLineEdit" name="leSpectraMax">
+                <property name="toolTip">
                  <string>Maximum spectra number for data.</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valSpectraMax" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valSpectraMax">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
@@ -877,32 +889,32 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbRebin" >
-         <property name="title" >
+        <widget class="QGroupBox" name="gbRebin">
+         <property name="title">
           <string>Rebin</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3" >
-          <property name="spacing" >
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
            <number>0</number>
           </property>
-          <property name="margin" >
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QStackedWidget" name="swRebin" >
-            <property name="currentIndex" >
+           <widget class="QStackedWidget" name="swRebin">
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_9" >
-             <layout class="QGridLayout" name="gridLayout_9" >
-              <item row="1" column="1" >
-               <layout class="QHBoxLayout" name="horizontalLayout_14" >
+            <widget class="QWidget" name="page_9">
+             <layout class="QGridLayout" name="gridLayout_9">
+              <item row="1" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_14">
                 <item>
-                 <spacer name="horizontalSpacer_28" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_28">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -911,15 +923,15 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_19" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_19">
+                  <property name="text">
                    <string>Low</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="leELow" >
-                  <property name="maximumSize" >
+                 <widget class="QLineEdit" name="leELow">
+                  <property name="maximumSize">
                    <size>
                     <width>70</width>
                     <height>16777215</height>
@@ -928,13 +940,13 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="validRebinLow" >
-                  <property name="palette" >
+                 <widget class="QLabel" name="validRebinLow">
+                  <property name="palette">
                    <palette>
                     <active>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>170</red>
                         <green>0</green>
                         <blue>0</blue>
@@ -943,9 +955,9 @@
                      </colorrole>
                     </active>
                     <inactive>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>170</red>
                         <green>0</green>
                         <blue>0</blue>
@@ -954,9 +966,9 @@
                      </colorrole>
                     </inactive>
                     <disabled>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>118</red>
                         <green>116</green>
                         <blue>108</blue>
@@ -966,24 +978,24 @@
                     </disabled>
                    </palette>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>leELow</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_20" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_20">
+                  <property name="text">
                    <string>Width</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="leEWidth" >
-                  <property name="maximumSize" >
+                 <widget class="QLineEdit" name="leEWidth">
+                  <property name="maximumSize">
                    <size>
                     <width>70</width>
                     <height>16777215</height>
@@ -992,13 +1004,13 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="validRebinWidth" >
-                  <property name="palette" >
+                 <widget class="QLabel" name="validRebinWidth">
+                  <property name="palette">
                    <palette>
                     <active>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>170</red>
                         <green>0</green>
                         <blue>0</blue>
@@ -1007,9 +1019,9 @@
                      </colorrole>
                     </active>
                     <inactive>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>170</red>
                         <green>0</green>
                         <blue>0</blue>
@@ -1018,9 +1030,9 @@
                      </colorrole>
                     </inactive>
                     <disabled>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>118</red>
                         <green>116</green>
                         <blue>108</blue>
@@ -1030,24 +1042,24 @@
                     </disabled>
                    </palette>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>leEWidth</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_21" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_21">
+                  <property name="text">
                    <string>High</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="leEHigh" >
-                  <property name="maximumSize" >
+                 <widget class="QLineEdit" name="leEHigh">
+                  <property name="maximumSize">
                    <size>
                     <width>70</width>
                     <height>16777215</height>
@@ -1056,13 +1068,13 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="validRebinHigh" >
-                  <property name="palette" >
+                 <widget class="QLabel" name="validRebinHigh">
+                  <property name="palette">
                    <palette>
                     <active>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>170</red>
                         <green>0</green>
                         <blue>0</blue>
@@ -1071,9 +1083,9 @@
                      </colorrole>
                     </active>
                     <inactive>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>170</red>
                         <green>0</green>
                         <blue>0</blue>
@@ -1082,9 +1094,9 @@
                      </colorrole>
                     </inactive>
                     <disabled>
-                     <colorrole role="WindowText" >
-                      <brush brushstyle="SolidPattern" >
-                       <color alpha="255" >
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
                         <red>118</red>
                         <green>116</green>
                         <blue>108</blue>
@@ -1094,20 +1106,20 @@
                     </disabled>
                    </palette>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>leEHigh</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_29" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_29">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1119,39 +1131,39 @@
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_10" >
-             <layout class="QGridLayout" name="gridLayout_7" >
-              <item row="3" column="1" >
-               <layout class="QHBoxLayout" name="horizontalLayout_12" >
+            <widget class="QWidget" name="page_10">
+             <layout class="QGridLayout" name="gridLayout_7">
+              <item row="3" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_12">
                 <item>
-                 <widget class="QCheckBox" name="rebin_ckDNR" >
-                  <property name="toolTip" >
+                 <widget class="QCheckBox" name="rebin_ckDNR">
+                  <property name="toolTip">
                    <string>Do not perform rebinning step on this data.</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>Do Not Rebin</string>
                   </property>
-                  <property name="checked" >
+                  <property name="checked">
                    <bool>true</bool>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="ckCleanUp" >
-                  <property name="text" >
+                 <widget class="QCheckBox" name="ckCleanUp">
+                  <property name="text">
                    <string>Keep Intermediate Workspaces</string>
                   </property>
-                  <property name="checked" >
+                  <property name="checked">
                    <bool>true</bool>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_12" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_12">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1160,62 +1172,62 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="rebin_pbRebin" >
-                  <property name="toolTip" >
+                 <widget class="QPushButton" name="rebin_pbRebin">
+                  <property name="toolTip">
                    <string>Run program up to point where data would be saved, but don't save it.</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>Rebin</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item row="0" column="1" >
-               <layout class="QHBoxLayout" name="horizontalLayout_13" >
+              <item row="0" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <item>
-                 <widget class="QLabel" name="rebin_lbLow" >
-                  <property name="text" >
+                 <widget class="QLabel" name="rebin_lbLow">
+                  <property name="text">
                    <string>Low</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>rebin_leELow</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leELow" >
-                  <property name="sizePolicy" >
-                   <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+                 <widget class="QLineEdit" name="rebin_leELow">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+                  <property name="toolTip">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">x&lt;span style=" vertical-align:sub;">1 &lt;/span>value for rebinning (start point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;x&lt;span style=&quot; vertical-align:sub;&quot;&gt;1 &lt;/span&gt;value for rebinning (start point for range of bins)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valELow" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valELow">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_13" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_13">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1224,42 +1236,42 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="rebin_lbWidth" >
-                  <property name="text" >
+                 <widget class="QLabel" name="rebin_lbWidth">
+                  <property name="text">
                    <string>Width</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>rebin_leEWidth</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leEWidth" >
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+                 <widget class="QLineEdit" name="rebin_leEWidth">
+                  <property name="toolTip">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Δx&lt;span style=" vertical-align:sub;">1&lt;/span> for rebinning (width of bins)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Δx&lt;span style=&quot; vertical-align:sub;&quot;&gt;1&lt;/span&gt; for rebinning (width of bins)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valEWidth" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valEWidth">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_14" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_14">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1268,32 +1280,32 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="rebin_lbHigh" >
-                  <property name="text" >
+                 <widget class="QLabel" name="rebin_lbHigh">
+                  <property name="text">
                    <string>High</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>rebin_leEHigh</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leEHigh" >
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+                 <widget class="QLineEdit" name="rebin_leEHigh">
+                  <property name="toolTip">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;x&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; value for rebinning (end point for range of bins)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valEHigh" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valEHigh">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
@@ -1308,55 +1320,55 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
           <string>Save</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_8" >
-          <property name="topMargin" >
+         <layout class="QGridLayout" name="gridLayout_8">
+          <property name="topMargin">
            <number>0</number>
           </property>
-          <property name="bottomMargin" >
+          <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item row="2" column="0" >
-           <layout class="QHBoxLayout" name="horizontalLayout_8" >
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
-             <widget class="QLabel" name="save_lbFormats" >
-              <property name="text" >
+             <widget class="QLabel" name="save_lbFormats">
+              <property name="text">
                <string>Select Desired Formats:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="save_ckSPE" >
-              <property name="toolTip" >
+             <widget class="QCheckBox" name="save_ckSPE">
+              <property name="toolTip">
                <string>Save file in SPE format.</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>SPE</string>
               </property>
-              <property name="checked" >
+              <property name="checked">
                <bool>true</bool>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="save_ckNexus" >
-              <property name="toolTip" >
+             <widget class="QCheckBox" name="save_ckNexus">
+              <property name="toolTip">
                <string>Save file in Nexus format.</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>Nexus</string>
               </property>
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_15" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_15">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -1366,18 +1378,18 @@ p, li { white-space: pre-wrap; }
             </item>
            </layout>
           </item>
-          <item row="1" column="0" >
-           <layout class="QHBoxLayout" name="horizontalLayout_9" >
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
-             <widget class="QLabel" name="save_lbFile" >
-              <property name="text" >
+             <widget class="QLabel" name="save_lbFile">
+              <property name="text">
                <string>Filename</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="leNameSPE" >
-              <property name="minimumSize" >
+             <widget class="QLineEdit" name="leNameSPE">
+              <property name="minimumSize">
                <size>
                 <width>250</width>
                 <height>0</height>
@@ -1386,21 +1398,21 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pbBrowseSPE" >
-              <property name="text" >
+             <widget class="QPushButton" name="pbBrowseSPE">
+              <property name="text">
                <string>Browse</string>
               </property>
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_2" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeType" >
+              <property name="sizeType">
                <enum>QSizePolicy::MinimumExpanding</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -1415,31 +1427,31 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabCalibration" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabCalibration">
+      <attribute name="title">
        <string>Calibration</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_10" >
+      <layout class="QVBoxLayout" name="verticalLayout_10">
        <item>
-        <widget class="QGroupBox" name="cal_gbInputs" >
-         <property name="title" >
+        <widget class="QGroupBox" name="cal_gbInputs">
+         <property name="title">
           <string/>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_17" >
+         <layout class="QVBoxLayout" name="verticalLayout_17">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_18" >
+           <layout class="QHBoxLayout" name="horizontalLayout_18">
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" >
-              <property name="label" stdset="0" >
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo">
+              <property name="label" stdset="0">
                <string>Run No</string>
               </property>
-              <property name="multipleFiles" stdset="0" >
+              <property name="multipleFiles" stdset="0">
                <bool>false</bool>
               </property>
-              <property name="algorithmAndProperty" stdset="0" >
+              <property name="algorithmAndProperty" stdset="0">
                <string/>
               </property>
-              <property name="fileExtensions" >
+              <property name="fileExtensions">
                <stringlist>
                 <string>.raw</string>
                </stringlist>
@@ -1447,11 +1459,11 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_23" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_23">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -1460,11 +1472,11 @@ p, li { white-space: pre-wrap; }
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="cal_pbPlot" >
-              <property name="toolTip" >
+             <widget class="QPushButton" name="cal_pbPlot">
+              <property name="toolTip">
                <string>Plot first detector spectra</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>Plot Raw</string>
               </property>
              </widget>
@@ -1476,39 +1488,39 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="cal_gbSpectralRange" >
-         <property name="title" >
+        <widget class="QGroupBox" name="cal_gbSpectralRange">
+         <property name="title">
           <string>Spectral Range</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_20" >
+         <layout class="QHBoxLayout" name="horizontalLayout_20">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_19" >
+           <layout class="QHBoxLayout" name="horizontalLayout_19">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_15" >
+             <layout class="QVBoxLayout" name="verticalLayout_15">
               <item>
-               <widget class="QLabel" name="cal_lbQuasielastic" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbQuasielastic">
+                <property name="text">
                  <string>Quasielastic</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbGraphite" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbGraphite">
+                <property name="text">
                  <string>Graphite</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbMica" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbMica">
+                <property name="text">
                  <string>Mica</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbDiffraction" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbDiffraction">
+                <property name="text">
                  <string>Diffraction</string>
                 </property>
                </widget>
@@ -1516,31 +1528,31 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_13" >
+             <layout class="QVBoxLayout" name="verticalLayout_13">
               <item>
-               <widget class="QLabel" name="cal_lbSpectraMin" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbSpectraMin">
+                <property name="text">
                  <string>Min</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbGraphiteMin" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbGraphiteMin">
+                <property name="text">
                  <string>?</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbMicaMin" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbMicaMin">
+                <property name="text">
                  <string>?</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbDiffractionMin" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbDiffractionMin">
+                <property name="text">
                  <string>?</string>
                 </property>
                </widget>
@@ -1548,31 +1560,31 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_14" >
+             <layout class="QVBoxLayout" name="verticalLayout_14">
               <item>
-               <widget class="QLabel" name="cal_lbSpectraMax" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbSpectraMax">
+                <property name="text">
                  <string>Max</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbGraphiteMax" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbGraphiteMax">
+                <property name="text">
                  <string>?</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbMicaMax" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbMicaMax">
+                <property name="text">
                  <string>?</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbDiffractionMax" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbDiffractionMax">
+                <property name="text">
                  <string>?</string>
                 </property>
                </widget>
@@ -1586,25 +1598,25 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="cal_gbTimeRange" >
-         <property name="title" >
+        <widget class="QGroupBox" name="cal_gbTimeRange">
+         <property name="title">
           <string>Time Range</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_19" >
+         <layout class="QVBoxLayout" name="verticalLayout_19">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_23" >
+           <layout class="QHBoxLayout" name="horizontalLayout_23">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_16" >
+             <layout class="QVBoxLayout" name="verticalLayout_16">
               <item>
-               <widget class="QLabel" name="cal_lbPeak" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbPeak">
+                <property name="text">
                  <string>Peak</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbBack" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbBack">
+                <property name="text">
                  <string>Background</string>
                 </property>
                </widget>
@@ -1612,11 +1624,11 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <spacer name="horizontalSpacer_19" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_19">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -1625,11 +1637,11 @@ p, li { white-space: pre-wrap; }
              </spacer>
             </item>
             <item>
-             <spacer name="horizontalSpacer_18" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_18">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -1638,15 +1650,15 @@ p, li { white-space: pre-wrap; }
              </spacer>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_18" >
+             <layout class="QVBoxLayout" name="verticalLayout_18">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_21" >
+               <layout class="QHBoxLayout" name="horizontalLayout_21">
                 <item>
-                 <spacer name="horizontalSpacer_4" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_4">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1655,38 +1667,38 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="cal_lbPeakMin" >
-                  <property name="text" >
+                 <widget class="QLabel" name="cal_lbPeakMin">
+                  <property name="text">
                    <string>Min:</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>cal_lePeakMin</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_lePeakMin" >
-                  <property name="toolTip" >
+                 <widget class="QLineEdit" name="cal_lePeakMin">
+                  <property name="toolTip">
                    <string>Start of range of Peak in Time of Flight</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valPeakMin" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valPeakMin">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_16" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_16">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1695,28 +1707,28 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="cal_lbPeakMax" >
-                  <property name="text" >
+                 <widget class="QLabel" name="cal_lbPeakMax">
+                  <property name="text">
                    <string>Max:</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>cal_lePeakMax</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_lePeakMax" >
-                  <property name="toolTip" >
+                 <widget class="QLineEdit" name="cal_lePeakMax">
+                  <property name="toolTip">
                    <string>End of range of peak in Time of Flight</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valPeakMax" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valPeakMax">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
@@ -1724,13 +1736,13 @@ p, li { white-space: pre-wrap; }
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_22" >
+               <layout class="QHBoxLayout" name="horizontalLayout_22">
                 <item>
-                 <spacer name="horizontalSpacer_31" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_31">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1739,38 +1751,38 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="cal_lbBackMin" >
-                  <property name="text" >
+                 <widget class="QLabel" name="cal_lbBackMin">
+                  <property name="text">
                    <string>Min:</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>cal_leBackMin</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leBackMin" >
-                  <property name="toolTip" >
+                 <widget class="QLineEdit" name="cal_leBackMin">
+                  <property name="toolTip">
                    <string>Start of range of background in time of flight.</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valBackMin" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valBackMin">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_17" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_17">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1779,28 +1791,28 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="cal_lbBackMax" >
-                  <property name="text" >
+                 <widget class="QLabel" name="cal_lbBackMax">
+                  <property name="text">
                    <string>Max:</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>cal_leBackMax</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leBackMax" >
-                  <property name="toolTip" >
+                 <widget class="QLineEdit" name="cal_leBackMax">
+                  <property name="toolTip">
                    <string>End of range of background in time of flight.</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valBackMax" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valBackMax">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
@@ -1815,23 +1827,23 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_29" >
+        <layout class="QHBoxLayout" name="horizontalLayout_29">
          <item>
-          <widget class="QCheckBox" name="cal_ckRES" >
-           <property name="toolTip" >
+          <widget class="QCheckBox" name="cal_ckRES">
+           <property name="toolTip">
             <string>Create RES file</string>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Create RES File</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_37" >
-           <property name="orientation" >
+          <spacer name="horizontalSpacer_37">
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>40</width>
              <height>20</height>
@@ -1840,8 +1852,8 @@ p, li { white-space: pre-wrap; }
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="cal_pbPlotEnergy" >
-           <property name="text" >
+          <widget class="QPushButton" name="cal_pbPlotEnergy">
+           <property name="text">
             <string>Plot Energy</string>
            </property>
           </widget>
@@ -1849,50 +1861,50 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="cal_gbRES" >
-         <property name="title" >
+        <widget class="QGroupBox" name="cal_gbRES">
+         <property name="title">
           <string>RES Options</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_22" >
+         <layout class="QVBoxLayout" name="verticalLayout_22">
           <item>
-           <layout class="QHBoxLayout" name="cal_layoutRES" >
+           <layout class="QHBoxLayout" name="cal_layoutRES">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_27" >
-              <property name="spacing" >
+             <layout class="QVBoxLayout" name="verticalLayout_27">
+              <property name="spacing">
                <number>0</number>
               </property>
               <item>
-               <widget class="QLabel" name="cal_lbSpecSelect" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbSpecSelect">
+                <property name="text">
                  <string>Spectra Selection</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbResBG" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbResBG">
+                <property name="text">
                  <string>Background Subtraction</string>
                 </property>
                </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_32" >
+               <layout class="QHBoxLayout" name="horizontalLayout_32">
                 <item>
-                 <widget class="QLabel" name="cal_lbELow" >
-                  <property name="text" >
+                 <widget class="QLabel" name="cal_lbELow">
+                  <property name="text">
                    <string>Rebin: ELow</string>
                   </property>
-                  <property name="buddy" >
+                  <property name="buddy">
                    <cstring>cal_leELow</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_33" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_33">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -1901,28 +1913,28 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="cal_leELow" >
-                  <property name="maximumSize" >
+                 <widget class="QLineEdit" name="cal_leELow">
+                  <property name="maximumSize">
                    <size>
                     <width>75</width>
                     <height>16777215</height>
                    </size>
                   </property>
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+                  <property name="toolTip">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">x&lt;span style=" vertical-align:sub;">1 &lt;/span>value for rebinning (start point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;x&lt;span style=&quot; vertical-align:sub;&quot;&gt;1 &lt;/span&gt;value for rebinning (start point for range of bins)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="valResELow" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                 <widget class="QLabel" name="valResELow">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>*</string>
                   </property>
                  </widget>
@@ -1932,36 +1944,36 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_26" >
-              <property name="spacing" >
+             <layout class="QVBoxLayout" name="verticalLayout_26">
+              <property name="spacing">
                <number>0</number>
               </property>
               <item>
-               <widget class="QLabel" name="cal_lbResSpecMin" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbResSpecMin">
+                <property name="text">
                  <string>Minimum</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>cal_leResSpecMin</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbStartX" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbStartX">
+                <property name="text">
                  <string>StartX</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>cal_leStartX</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbEWidth" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbEWidth">
+                <property name="text">
                  <string>EWidth</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>cal_leEWidth</cstring>
                 </property>
                </widget>
@@ -1969,89 +1981,89 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_25" >
-              <property name="spacing" >
+             <layout class="QVBoxLayout" name="verticalLayout_25">
+              <property name="spacing">
                <number>0</number>
               </property>
               <item>
-               <widget class="QLineEdit" name="cal_leResSpecMin" >
-                <property name="maximumSize" >
+               <widget class="QLineEdit" name="cal_leResSpecMin">
+                <property name="maximumSize">
                  <size>
                   <width>75</width>
                   <height>16777215</height>
                  </size>
                 </property>
-                <property name="toolTip" >
+                <property name="toolTip">
                  <string>Min Spectra range for creation of RES file</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="cal_leStartX" >
-                <property name="sizePolicy" >
-                 <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+               <widget class="QLineEdit" name="cal_leStartX">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="maximumSize" >
+                <property name="maximumSize">
                  <size>
                   <width>75</width>
                   <height>16777215</height>
                  </size>
                 </property>
-                <property name="toolTip" >
+                <property name="toolTip">
                  <string>Start of background range to subtract from RES in Energy</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="cal_leEWidth" >
-                <property name="maximumSize" >
+               <widget class="QLineEdit" name="cal_leEWidth">
+                <property name="maximumSize">
                  <size>
                   <width>75</width>
                   <height>16777215</height>
                  </size>
                 </property>
-                <property name="toolTip" >
-                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+                <property name="toolTip">
+                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Δx&lt;span style=" vertical-align:sub;">1&lt;/span> for rebinning (width of bins)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Δx&lt;span style=&quot; vertical-align:sub;&quot;&gt;1&lt;/span&gt; for rebinning (width of bins)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_29" >
+             <layout class="QVBoxLayout" name="verticalLayout_29">
               <item>
-               <widget class="QLabel" name="valResSpecMin" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valResSpecMin">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valStartX" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valStartX">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valResEWidth" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valResEWidth">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
@@ -2059,36 +2071,36 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_24" >
-              <property name="spacing" >
+             <layout class="QVBoxLayout" name="verticalLayout_24">
+              <property name="spacing">
                <number>0</number>
               </property>
               <item>
-               <widget class="QLabel" name="cal_lbResSpecMax" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbResSpecMax">
+                <property name="text">
                  <string>Maximum</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>cal_leResSpecMax</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbEndX" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbEndX">
+                <property name="text">
                  <string>EndX</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>cal_leEndX</cstring>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="cal_lbEHigh" >
-                <property name="text" >
+               <widget class="QLabel" name="cal_lbEHigh">
+                <property name="text">
                  <string>EHigh</string>
                 </property>
-                <property name="buddy" >
+                <property name="buddy">
                  <cstring>cal_leEHigh</cstring>
                 </property>
                </widget>
@@ -2096,83 +2108,83 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_23" >
-              <property name="spacing" >
+             <layout class="QVBoxLayout" name="verticalLayout_23">
+              <property name="spacing">
                <number>0</number>
               </property>
               <item>
-               <widget class="QLineEdit" name="cal_leResSpecMax" >
-                <property name="maximumSize" >
+               <widget class="QLineEdit" name="cal_leResSpecMax">
+                <property name="maximumSize">
                  <size>
                   <width>75</width>
                   <height>16777215</height>
                  </size>
                 </property>
-                <property name="toolTip" >
+                <property name="toolTip">
                  <string>Max spectra range for creation of RES file</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="cal_leEndX" >
-                <property name="maximumSize" >
+               <widget class="QLineEdit" name="cal_leEndX">
+                <property name="maximumSize">
                  <size>
                   <width>75</width>
                   <height>16777215</height>
                  </size>
                 </property>
-                <property name="toolTip" >
+                <property name="toolTip">
                  <string>End of background range to subtract from RES in energy</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="cal_leEHigh" >
-                <property name="maximumSize" >
+               <widget class="QLineEdit" name="cal_leEHigh">
+                <property name="maximumSize">
                  <size>
                   <width>75</width>
                   <height>16777215</height>
                  </size>
                 </property>
-                <property name="toolTip" >
-                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+                <property name="toolTip">
+                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;x&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; value for rebinning (end point for range of bins)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_30" >
+             <layout class="QVBoxLayout" name="verticalLayout_30">
               <item>
-               <widget class="QLabel" name="valResSpecMax" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valResSpecMax">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valEndX" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valEndX">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="valResEHigh" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
+               <widget class="QLabel" name="valResEHigh">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 4)</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
@@ -2185,19 +2197,19 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="cal_gbButtons" >
-         <property name="title" >
+        <widget class="QGroupBox" name="cal_gbButtons">
+         <property name="title">
           <string/>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_25" >
+         <layout class="QHBoxLayout" name="horizontalLayout_25">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_24" >
+           <layout class="QHBoxLayout" name="horizontalLayout_24">
             <item>
-             <spacer name="horizontalSpacer_20" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_20">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -2206,15 +2218,15 @@ p, li { white-space: pre-wrap; }
              </spacer>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_5" >
+             <layout class="QVBoxLayout" name="verticalLayout_5">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_7" >
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
                 <item>
-                 <spacer name="horizontalSpacer_34" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_34">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -2223,21 +2235,21 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="cal_ckPlotResult" >
-                  <property name="toolTip" >
+                 <widget class="QCheckBox" name="cal_ckPlotResult">
+                  <property name="toolTip">
                    <string>Plot resulting calibration file when created.</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>Plot Result</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_35" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_35">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -2248,13 +2260,13 @@ p, li { white-space: pre-wrap; }
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_28" >
+               <layout class="QHBoxLayout" name="horizontalLayout_28">
                 <item>
-                 <spacer name="horizontalSpacer_36" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_36">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -2263,21 +2275,21 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="cal_pbCreate" >
-                  <property name="toolTip" >
+                 <widget class="QPushButton" name="cal_pbCreate">
+                  <property name="toolTip">
                    <string>Create calibration file and RES file is applicable</string>
                   </property>
-                  <property name="text" >
+                  <property name="text">
                    <string>Create Calibration</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_38" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_38">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -2290,11 +2302,11 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item>
-             <spacer name="horizontalSpacer_21" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_21">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -2308,11 +2320,11 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -2322,49 +2334,49 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabSofQW" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabSofQW">
+      <attribute name="title">
        <string>S(Q, w)</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_7" >
+      <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
-        <widget class="QGroupBox" name="sqw_gbInput" >
-         <property name="title" >
+        <widget class="QGroupBox" name="sqw_gbInput">
+         <property name="title">
           <string>Input</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_12" >
+         <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_30" >
+           <layout class="QHBoxLayout" name="horizontalLayout_30">
             <item>
-             <widget class="QLabel" name="label_3" >
-              <property name="text" >
+             <widget class="QLabel" name="label_3">
+              <property name="text">
                <string>Input Type</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="sqw_cbInput" >
-              <property name="enabled" >
+             <widget class="QComboBox" name="sqw_cbInput">
+              <property name="enabled">
                <bool>false</bool>
               </property>
               <item>
-               <property name="text" >
+               <property name="text">
                 <string>File</string>
                </property>
               </item>
               <item>
-               <property name="text" >
+               <property name="text">
                 <string>Workspace</string>
                </property>
               </item>
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_39" >
-              <property name="orientation" >
+             <spacer name="horizontalSpacer_39">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -2375,50 +2387,50 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item>
-           <widget class="QStackedWidget" name="sqw_swInput" >
-            <property name="currentIndex" >
+           <widget class="QStackedWidget" name="sqw_swInput">
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_13" >
-             <layout class="QVBoxLayout" name="verticalLayout_21" >
+            <widget class="QWidget" name="page_13">
+             <layout class="QVBoxLayout" name="verticalLayout_21">
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" >
-                <property name="findRunFiles" stdset="0" >
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile">
+                <property name="findRunFiles" stdset="0">
                  <bool>false</bool>
                 </property>
-                <property name="label" stdset="0" >
+                <property name="label" stdset="0">
                  <string>Input File</string>
                 </property>
-                <property name="multipleFiles" stdset="0" >
+                <property name="multipleFiles" stdset="0">
                  <bool>false</bool>
                 </property>
-                <property name="algorithmAndProperty" stdset="0" >
+                <property name="algorithmAndProperty" stdset="0">
                  <string>LoadNexusProcessed|FileName</string>
                 </property>
                </widget>
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_14" >
-             <layout class="QVBoxLayout" name="verticalLayout_28" >
+            <widget class="QWidget" name="page_14">
+             <layout class="QVBoxLayout" name="verticalLayout_28">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_31" >
+               <layout class="QHBoxLayout" name="horizontalLayout_31">
                 <item>
-                 <widget class="QLabel" name="label_4" >
-                  <property name="text" >
+                 <widget class="QLabel" name="label_4">
+                  <property name="text">
                    <string>TextLabel</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="sqw_cbWorkspace" />
+                 <widget class="QComboBox" name="sqw_cbWorkspace"/>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_40" >
-                  <property name="orientation" >
+                 <spacer name="horizontalSpacer_40">
+                  <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="sizeHint" stdset="0" >
+                  <property name="sizeHint" stdset="0">
                    <size>
                     <width>40</width>
                     <height>20</height>
@@ -2436,106 +2448,106 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="sqw_gbOptions" >
-         <property name="title" >
+        <widget class="QGroupBox" name="sqw_gbOptions">
+         <property name="title">
           <string>Options</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_33" >
+         <layout class="QVBoxLayout" name="verticalLayout_33">
           <item>
-           <widget class="QCheckBox" name="sqw_ckRebinE" >
-            <property name="text" >
+           <widget class="QCheckBox" name="sqw_ckRebinE">
+            <property name="text">
              <string>Rebin in Energy</string>
             </property>
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_33" >
+           <layout class="QHBoxLayout" name="horizontalLayout_33">
             <item>
-             <widget class="QLabel" name="sqw_lbELow" >
-              <property name="enabled" >
+             <widget class="QLabel" name="sqw_lbELow">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>E Low:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="sqw_leELow" >
-              <property name="enabled" >
+             <widget class="QLineEdit" name="sqw_leELow">
+              <property name="enabled">
                <bool>false</bool>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_valELow" >
-              <property name="enabled" >
+             <widget class="QLabel" name="sqw_valELow">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 4)</string>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 4)</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_lbEWidth" >
-              <property name="enabled" >
+             <widget class="QLabel" name="sqw_lbEWidth">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>E Width:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="sqw_leEWidth" >
-              <property name="enabled" >
+             <widget class="QLineEdit" name="sqw_leEWidth">
+              <property name="enabled">
                <bool>false</bool>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_valEWidth" >
-              <property name="enabled" >
+             <widget class="QLabel" name="sqw_valEWidth">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 4)</string>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 4)</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_lbEHigh" >
-              <property name="enabled" >
+             <widget class="QLabel" name="sqw_lbEHigh">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>E High:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="sqw_leEHigh" >
-              <property name="enabled" >
+             <widget class="QLineEdit" name="sqw_leEHigh">
+              <property name="enabled">
                <bool>false</bool>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_valEHigh" >
-              <property name="enabled" >
+             <widget class="QLabel" name="sqw_valEHigh">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 4)</string>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 4)</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
@@ -2543,63 +2555,63 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="sqw_layoutRebinInQ" >
+           <layout class="QHBoxLayout" name="sqw_layoutRebinInQ">
             <item>
-             <widget class="QLabel" name="sqw_lbQLow" >
-              <property name="text" >
+             <widget class="QLabel" name="sqw_lbQLow">
+              <property name="text">
                <string>Q Low:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="sqw_leQLow" />
+             <widget class="QLineEdit" name="sqw_leQLow"/>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_valQLow" >
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 4)</string>
+             <widget class="QLabel" name="sqw_valQLow">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 4)</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_lbQWidth" >
-              <property name="text" >
+             <widget class="QLabel" name="sqw_lbQWidth">
+              <property name="text">
                <string>Q Width:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="sqw_leQWidth" />
+             <widget class="QLineEdit" name="sqw_leQWidth"/>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_valQWidth" >
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 4)</string>
+             <widget class="QLabel" name="sqw_valQWidth">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 4)</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_lbQHigh" >
-              <property name="text" >
+             <widget class="QLabel" name="sqw_lbQHigh">
+              <property name="text">
                <string>Q High:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="sqw_leQHigh" />
+             <widget class="QLineEdit" name="sqw_leQHigh"/>
             </item>
             <item>
-             <widget class="QLabel" name="sqw_valQHigh" >
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 4)</string>
+             <widget class="QLabel" name="sqw_valQHigh">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 4)</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
@@ -2610,13 +2622,13 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_35" >
+        <layout class="QHBoxLayout" name="horizontalLayout_35">
          <item>
-          <spacer name="horizontalSpacer_42" >
-           <property name="orientation" >
+          <spacer name="horizontalSpacer_42">
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>40</width>
              <height>20</height>
@@ -2625,18 +2637,18 @@ p, li { white-space: pre-wrap; }
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="sqw_pbRun" >
-           <property name="text" >
+          <widget class="QPushButton" name="sqw_pbRun">
+           <property name="text">
             <string>Run S(Q,w)</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_43" >
-           <property name="orientation" >
+          <spacer name="horizontalSpacer_43">
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>40</width>
              <height>20</height>
@@ -2647,11 +2659,11 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_3" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -2661,82 +2673,82 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabDiagnoseDetectors" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabDiagnoseDetectors">
+      <attribute name="title">
        <string>Diagnose Detectors</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4" >
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QCheckBox" name="ckRunDiag" >
-         <property name="enabled" >
+        <widget class="QCheckBox" name="ckRunDiag">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>Find Bad Detectors</string>
          </property>
-         <property name="checked" >
+         <property name="checked">
           <bool>true</bool>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabAbsoluteUnits" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabAbsoluteUnits">
+      <attribute name="title">
        <string>Absolute Units</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_11" >
+      <layout class="QVBoxLayout" name="verticalLayout_11">
        <item>
-        <widget class="QCheckBox" name="ckRunAbsol" >
-         <property name="enabled" >
+        <widget class="QCheckBox" name="ckRunAbsol">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>Absolute Units</string>
          </property>
-         <property name="checked" >
+         <property name="checked">
           <bool>false</bool>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbCalRuns" >
-         <property name="enabled" >
+        <widget class="QGroupBox" name="gbCalRuns">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="title" >
+         <property name="title">
           <string>Run Files</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_31" >
+         <layout class="QVBoxLayout" name="verticalLayout_31">
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" >
-            <property name="label" stdset="0" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles">
+            <property name="label" stdset="0">
              <string>Mono Van</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" >
-            <property name="findRunFiles" stdset="0" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile">
+            <property name="findRunFiles" stdset="0">
              <bool>false</bool>
             </property>
-            <property name="label" stdset="0" >
+            <property name="label" stdset="0">
              <string>Map File  </string>
             </property>
-            <property name="multipleFiles" stdset="0" >
+            <property name="multipleFiles" stdset="0">
              <bool>false</bool>
             </property>
-            <property name="algorithmAndProperty" stdset="0" >
+            <property name="algorithmAndProperty" stdset="0">
              <string>GroupDetectors|MapFile</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" >
-            <property name="label" stdset="0" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile">
+            <property name="label" stdset="0">
              <string>White Beam</string>
             </property>
-            <property name="multipleFiles" stdset="0" >
+            <property name="multipleFiles" stdset="0">
              <bool>false</bool>
             </property>
            </widget>
@@ -2745,29 +2757,29 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_17" >
+        <layout class="QHBoxLayout" name="horizontalLayout_17">
          <item>
-          <widget class="QGroupBox" name="gbInteg" >
-           <property name="styleSheet" >
-            <string notr="true" />
+          <widget class="QGroupBox" name="gbInteg">
+           <property name="styleSheet">
+            <string notr="true"/>
            </property>
-           <property name="title" >
+           <property name="title">
             <string>Integration</string>
            </property>
-           <layout class="QGridLayout" name="gridLayout_17" >
-            <item row="2" column="1" >
-             <widget class="QLabel" name="label_29" >
-              <property name="text" >
+           <layout class="QGridLayout" name="gridLayout_17">
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_29">
+              <property name="text">
                <string>E Min</string>
               </property>
-              <property name="alignment" >
+              <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="2" >
-             <widget class="QLineEdit" name="leVanELow" >
-              <property name="maximumSize" >
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="leVanELow">
+              <property name="maximumSize">
                <size>
                 <width>60</width>
                 <height>16777215</height>
@@ -2775,19 +2787,19 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="3" column="1" >
-             <widget class="QLabel" name="label_30" >
-              <property name="text" >
+            <item row="3" column="1">
+             <widget class="QLabel" name="label_30">
+              <property name="text">
                <string>E Max</string>
               </property>
-              <property name="alignment" >
+              <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="3" column="2" >
-             <widget class="QLineEdit" name="leVanEHigh" >
-              <property name="maximumSize" >
+            <item row="3" column="2">
+             <widget class="QLineEdit" name="leVanEHigh">
+              <property name="maximumSize">
                <size>
                 <width>60</width>
                 <height>16777215</height>
@@ -2795,25 +2807,25 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="1" column="1" >
-             <widget class="QLabel" name="label_31" >
-              <property name="text" >
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_31">
+              <property name="text">
                <string>Incident Energy</string>
               </property>
-              <property name="alignment" >
+              <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="1" column="2" >
-             <widget class="QLineEdit" name="leVanEi" >
-              <property name="minimumSize" >
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="leVanEi">
+              <property name="minimumSize">
                <size>
                 <width>0</width>
                 <height>0</height>
                </size>
               </property>
-              <property name="maximumSize" >
+              <property name="maximumSize">
                <size>
                 <width>70</width>
                 <height>16777215</height>
@@ -2821,12 +2833,12 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="1" column="4" >
-             <spacer name="horizontalSpacer_24" >
-              <property name="orientation" >
+            <item row="1" column="4">
+             <spacer name="horizontalSpacer_24">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -2834,12 +2846,12 @@ p, li { white-space: pre-wrap; }
               </property>
              </spacer>
             </item>
-            <item row="1" column="0" >
-             <spacer name="horizontalSpacer_25" >
-              <property name="orientation" >
+            <item row="1" column="0">
+             <spacer name="horizontalSpacer_25">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -2847,14 +2859,14 @@ p, li { white-space: pre-wrap; }
               </property>
              </spacer>
             </item>
-            <item row="1" column="3" >
-             <widget class="QLabel" name="lbValAbsEi" >
-              <property name="palette" >
+            <item row="1" column="3">
+             <widget class="QLabel" name="lbValAbsEi">
+              <property name="palette">
                <palette>
                 <active>
-                 <colorrole role="WindowText" >
-                  <brush brushstyle="SolidPattern" >
-                   <color alpha="255" >
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
                     <red>170</red>
                     <green>0</green>
                     <blue>0</blue>
@@ -2863,9 +2875,9 @@ p, li { white-space: pre-wrap; }
                  </colorrole>
                 </active>
                 <inactive>
-                 <colorrole role="WindowText" >
-                  <brush brushstyle="SolidPattern" >
-                   <color alpha="255" >
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
                     <red>170</red>
                     <green>0</green>
                     <blue>0</blue>
@@ -2874,9 +2886,9 @@ p, li { white-space: pre-wrap; }
                  </colorrole>
                 </inactive>
                 <disabled>
-                 <colorrole role="WindowText" >
-                  <brush brushstyle="SolidPattern" >
-                   <color alpha="255" >
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
                     <red>118</red>
                     <green>116</green>
                     <blue>108</blue>
@@ -2886,10 +2898,10 @@ p, li { white-space: pre-wrap; }
                 </disabled>
                </palette>
               </property>
-              <property name="styleSheet" >
-               <string notr="true" />
+              <property name="styleSheet">
+               <string notr="true"/>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
@@ -2898,65 +2910,65 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="gbMasses" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <widget class="QGroupBox" name="gbMasses">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="title" >
+           <property name="title">
             <string>Masses</string>
            </property>
-           <layout class="QGridLayout" name="gridLayout_18" >
-            <item row="0" column="1" >
-             <widget class="QLabel" name="label_32" >
-              <property name="layoutDirection" >
+           <layout class="QGridLayout" name="gridLayout_18">
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_32">
+              <property name="layoutDirection">
                <enum>Qt::LeftToRight</enum>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>Vanadium mass</string>
               </property>
-              <property name="alignment" >
+              <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="1" column="1" >
-             <widget class="QLabel" name="label_33" >
-              <property name="layoutDirection" >
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_33">
+              <property name="layoutDirection">
                <enum>Qt::LeftToRight</enum>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>Sample mass</string>
               </property>
-              <property name="alignment" >
+              <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="1" >
-             <widget class="QLabel" name="label_34" >
-              <property name="layoutDirection" >
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_34">
+              <property name="layoutDirection">
                <enum>Qt::LeftToRight</enum>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>Sample RMM</string>
               </property>
-              <property name="alignment" >
+              <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="2" >
-             <widget class="QLineEdit" name="leRMMMass" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="leRMMMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="maximumSize" >
+              <property name="maximumSize">
                <size>
                 <width>60</width>
                 <height>16777215</height>
@@ -2964,15 +2976,15 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="1" column="2" >
-             <widget class="QLineEdit" name="leSamMass" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="leSamMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="maximumSize" >
+              <property name="maximumSize">
                <size>
                 <width>60</width>
                 <height>16777215</height>
@@ -2980,15 +2992,15 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="0" column="2" >
-             <widget class="QLineEdit" name="leVanMass" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+            <item row="0" column="2">
+             <widget class="QLineEdit" name="leVanMass">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="maximumSize" >
+              <property name="maximumSize">
                <size>
                 <width>60</width>
                 <height>16777215</height>
@@ -2996,12 +3008,12 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="0" column="3" >
-             <spacer name="horizontalSpacer_26" >
-              <property name="orientation" >
+            <item row="0" column="3">
+             <spacer name="horizontalSpacer_26">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -3009,12 +3021,12 @@ p, li { white-space: pre-wrap; }
               </property>
              </spacer>
             </item>
-            <item row="0" column="0" >
-             <spacer name="horizontalSpacer_27" >
-              <property name="orientation" >
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_27">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -3028,11 +3040,11 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -3045,29 +3057,29 @@ p, li { white-space: pre-wrap; }
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_6" >
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="QPushButton" name="pbHelp" >
-       <property name="maximumSize" >
+      <widget class="QPushButton" name="pbHelp">
+       <property name="maximumSize">
         <size>
          <width>25</width>
          <height>25</height>
         </size>
        </property>
-       <property name="toolTip" >
+       <property name="toolTip">
         <string>Open interface help page in your web browser.</string>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>?</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_1" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_1">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -3076,27 +3088,27 @@ p, li { white-space: pre-wrap; }
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pbRun" >
-       <property name="maximumSize" >
+      <widget class="QPushButton" name="pbRun">
+       <property name="maximumSize">
         <size>
          <width>91</width>
          <height>16777215</height>
         </size>
        </property>
-       <property name="toolTip" >
+       <property name="toolTip">
         <string>Run conversion to energy process.</string>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Run</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_5" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
