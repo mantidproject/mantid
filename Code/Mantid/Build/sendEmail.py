@@ -330,10 +330,13 @@ if __name__ == "__main__":
     SconBuildTime, TestBuildTime, UnitTestsTime = GetTimes()
     warnCount, DocumentationBuild, mssgDoxy, lastDoxy = ParseDoxygenLog()
 
+    mtdtests = open(localLogDir + 'MantidTests.txt','w')
     if FrameWorkBuild and TestsBuild and UnitTests:
         OverAllSuccess = True
+        mtdtests.write('True\n')       
     else:
         SendEmail = True
+	mtdtests.write('False\n')
 
     if not CreateTREntry():
         CreateTREntry()
