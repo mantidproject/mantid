@@ -16,7 +16,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::Kernel::DateAndTime;
+using Mantid::Kernel::DateAndTime::get_time_from_pulse_time;
 
 using std::runtime_error;
 using std::size_t;
