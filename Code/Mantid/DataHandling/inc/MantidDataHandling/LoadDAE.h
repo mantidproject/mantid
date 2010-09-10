@@ -124,8 +124,6 @@ namespace Mantid
       /// has true during the first run of loadDAE and false all subsequent runs
       bool m_firstRun;
       
-      ///a flag int value to indicate that the value wasn't set by users
-      static const int unSetInt = INT_MAX-15;
       ///static reference to the logger class
       static Kernel::Logger& g_StaticLog;
       

@@ -32,7 +32,7 @@ namespace Mantid
     /// Default constructor
     LoadNexusProcessed::LoadNexusProcessed() : Algorithm(), m_shared_bins(false), m_xbins(), 
       m_axis1vals(), m_list(false), m_interval(false),
-      m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+      m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT())
     {
       NXMDisableErrorReporting();
     }
@@ -71,7 +71,7 @@ namespace Mantid
 		  "Index number of the first spectrum to read, only used if\n"
 		  "spectrum_max is set and only for single period data, not\n"
 		  " yet implemented (default 0)");
-	  declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
+	  declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
 		  "Index of last spectrum to read, only for single period data,\n"
 		  " not yet implemented (default the last spectrum).");
 	  declareProperty(new ArrayProperty<int> ("SpectrumList"),
@@ -1086,8 +1086,8 @@ namespace Mantid
 		m_spec_min = getProperty("SpectrumMin");
 		//Are we using a list of spectra or all the spectra in a range?
 		m_list = !m_spec_list.empty();
-		m_interval = (m_spec_max != unSetInt) || (m_spec_min != 1);
-		if ( m_spec_max == unSetInt ) m_spec_max = 1;
+		m_interval = (m_spec_max != Mantid::EMPTY_INT()) || (m_spec_min != 1);
+		if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 1;
 		
 		// Check validity of spectra list property, if set
 		if (m_list)

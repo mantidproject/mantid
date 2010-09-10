@@ -73,19 +73,18 @@ namespace Mantid
       std::string m_filename;
       /// The name and path of the input file
       std::string m_entryname;
-	  /// The prefix to be used to name spectra (_n added for nth spectra)
+      /// The prefix to be used to name spectra (_n added for nth spectra)
       std::string m_dataname;
-	  /// The file type to save, currently only one type possible
+      /// The file type to save, currently only one type possible
       std::string m_filetype;
       /// Pointer to the local workspace
       std::string m_inputWorkspace;
       /// Method to execute SNP sub algorithm
       void runSaveNexusProcessed();
-	  /// sets non workspace properties for the algorithm
-	 void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
+      /// sets non workspace properties for the algorithm
+      void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
-      ///a flag int value that indicates a value that wasn't set
-      static const int unSetInt = INT_MAX-15;
+
 		
     };
 

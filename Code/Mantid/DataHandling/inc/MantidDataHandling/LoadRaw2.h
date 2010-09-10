@@ -114,9 +114,6 @@ namespace Mantid
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
      
-      ///a flag int value to indicate that the value wasn't set by users
-      static const int unSetInt = INT_MAX-15;
-
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
 	   /// TimeSeriesProperty<int> containing data periods.

@@ -59,13 +59,13 @@ void SaveNexus::init()
       "A title to describe the saved workspace");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
   mustBePositive->setLower(0);
-  // declareProperty("EntryNumber", unSetInt, mustBePositive,
+  // declareProperty("EntryNumber", Mantid::EMPTY_INT(), mustBePositive,
   //  "(Not implemented yet) The index number of the workspace within the Nexus file\n"
   // "(default leave unchanged)" );
   declareProperty("WorkspaceIndexMin", 0, mustBePositive->clone(),
       "Number of first WorkspaceIndex to read, only for single period data.\n"
         "Not yet implemented");
-  declareProperty("WorkspaceIndexMax", unSetInt, mustBePositive->clone(),
+  declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
       "Number of last WorkspaceIndex to read, only for single period data.\n"
         "Not yet implemented.");
   declareProperty(new ArrayProperty<int> ("WorkspaceIndexList"),
@@ -142,7 +142,7 @@ void SaveNexus::runSaveNexusProcessed()
     saveNexusPro->setPropertyValue("WorkspaceIndexList", getPropertyValue("WorkspaceIndexList"));
   //
   int specMax = getProperty("WorkspaceIndexMax");
-  if (specMax != unSetInt)
+  if (specMax != Mantid::EMPTY_INT())
   {
     saveNexusPro->setPropertyValue("WorkspaceIndexMax", getPropertyValue("WorkspaceIndexMax"));
     saveNexusPro->setPropertyValue("WorkspaceIndexMin", getPropertyValue("WorkspaceIndexMin"));

@@ -108,9 +108,6 @@ namespace Mantid
       /// The value of the spectrum_max property
       int m_spec_max;
       
-      ///a flag int value to indicate that the value wasn't set by users
-      static const int unSetInt = INT_MAX-15;
-
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
 

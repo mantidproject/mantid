@@ -34,7 +34,7 @@ namespace Mantid
     /// Constructor
     LoadRaw2::LoadRaw2() :
       Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT())
     {}
     
     LoadRaw2::~LoadRaw2()
@@ -64,7 +64,7 @@ namespace Mantid
       mustBePositive->setLower(1);
       declareProperty("SpectrumMin",1, mustBePositive, "The index number of the first spectrum to read.  Only used if\n"
         "spectrum_max is set.");
-      declareProperty("SpectrumMax",unSetInt, mustBePositive->clone(), "The number of the last spectrum to read. Only used if explicitly\n"
+      declareProperty("SpectrumMax",Mantid::EMPTY_INT(), mustBePositive->clone(), "The number of the last spectrum to read. Only used if explicitly\n"
         "set.");
 
       declareProperty(new ArrayProperty<int>("SpectrumList"), "A comma-separated list of individual spectra to read.  Only used if\n"
@@ -315,8 +315,8 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
       m_spec_max = getProperty("SpectrumMax");
 
       m_list = !m_spec_list.empty();
-      m_interval = m_spec_max != unSetInt;
-      if ( m_spec_max == unSetInt ) m_spec_max = 1; 
+      m_interval = m_spec_max != Mantid::EMPTY_INT();
+      if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 1; 
 
       // Check validity of spectra list property, if set
       if ( m_list )

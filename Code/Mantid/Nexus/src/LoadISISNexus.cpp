@@ -35,7 +35,7 @@ namespace Mantid
     /// Empty default constructor
     LoadISISNexus::LoadISISNexus() : 
     Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT())
     {}
 
     /// Initialisation method.
@@ -51,7 +51,7 @@ namespace Mantid
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
       declareProperty("SpectrumMin", 0, mustBePositive);
-      declareProperty("SpectrumMax", unSetInt, mustBePositive->clone());
+      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone());
       declareProperty(new ArrayProperty<int>("SpectrumList"));
       declareProperty("EntryNumber", 0, mustBePositive->clone(),
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
@@ -242,8 +242,8 @@ namespace Mantid
       m_spec_list = getProperty("SpectrumList");
       m_spec_max = getProperty("SpectrumMax");
       //now check that data
-      m_interval = !( m_spec_max == unSetInt );
-      if ( m_spec_max == unSetInt ) m_spec_max = 0;
+      m_interval = !( m_spec_max == Mantid::EMPTY_INT() );
+      if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 0;
       m_list = !m_spec_list.empty();
 
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning

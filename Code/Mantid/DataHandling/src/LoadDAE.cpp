@@ -32,7 +32,7 @@ namespace Mantid
     /// Empty default constructor
     LoadDAE::LoadDAE() :
       Algorithm(), m_daename(""), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),m_firstRun(true)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),m_firstRun(true)
     {}
 
 
@@ -88,7 +88,7 @@ namespace Mantid
         "The number of the first spectrum to read (default 0).  Only used\n"
         "if spectrum_max is set and is not available for multiperiod data\n"
         "files.");
-      declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
+      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
         "The number of the last spectrum to read.  Only used if explicitly\n"
         "set and is not available for multiperiod data files. ");
       declareProperty(new ArrayProperty<int>("SpectrumList"),
@@ -409,8 +409,8 @@ namespace Mantid
       m_spec_max = getProperty("SpectrumMax");
       //check that data
       m_list = !m_spec_list.empty();
-      m_interval = !(m_spec_max == unSetInt);
-      if ( m_spec_max == unSetInt ) m_spec_max = 0;
+      m_interval = !(m_spec_max == Mantid::EMPTY_INT());
+      if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 0;
 
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)

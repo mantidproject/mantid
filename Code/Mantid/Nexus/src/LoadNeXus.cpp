@@ -55,7 +55,7 @@ namespace Mantid
       mustBePositive->setLower(0);
       declareProperty("SpectrumMin",1, mustBePositive,
         "Index number of first spectrum to read, only for single period data");
-      declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
+      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
         "Index number of last spectrum to read, only for single period data");
       declareProperty(new ArrayProperty<int>("SpectrumList"),
         "A comma seperated or array with the list of index number to read" );
@@ -137,7 +137,7 @@ namespace Mantid
         loadMuonNexus->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
       //
       int specMax = getProperty("SpectrumMax");
-      if( specMax != unSetInt )
+      if( specMax != Mantid::EMPTY_INT() )
       {
         loadMuonNexus->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
         loadMuonNexus->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
@@ -215,7 +215,7 @@ namespace Mantid
       //}
       //int specMin = getProperty("SpectrumMin");
       //int specMax = getProperty("SpectrumMax");
-      //if ( specMax != unSetInt || specMin != 0 )
+      //if ( specMax != Mantid::EMPTY_INT() || specMin != 0 )
       //{
       //  g_log.warning("SpectrumMin/Max properties ignored - they are not implemented in LoadNexusProcessed.");
       //  //loadNexusPro->setProperty("SpectrumMax",specMin);
@@ -272,7 +272,7 @@ namespace Mantid
         loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
       //
       int specMax = getProperty("SpectrumMax");
-      if ( specMax != unSetInt )
+      if ( specMax != Mantid::EMPTY_INT() )
       {
         loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
         loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
@@ -336,7 +336,7 @@ namespace Mantid
         loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
       //
       int specMax = getProperty("SpectrumMax");
-      if ( specMax != unSetInt )
+      if ( specMax != Mantid::EMPTY_INT() )
       {
         loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
         loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));

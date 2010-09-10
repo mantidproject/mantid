@@ -30,7 +30,7 @@ namespace Mantid
     /// Empty default constructor
     LoadRaw::LoadRaw() :
       Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT())
     {}
 
     /// Initialisation method.
@@ -58,7 +58,7 @@ namespace Mantid
       declareProperty("SpectrumMin", 1, mustBePositive,
         "The index number of the first spectrum to read.  Only used if\n"
         "spectrum_max is set.");
-      declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
+      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
         "The number of the last spectrum to read. Only used if explicitly\n"
         "set.");
 
@@ -264,8 +264,8 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
       m_spec_max = getProperty("SpectrumMax");
       //check that data
       m_list = !(m_spec_list.empty());
-      m_interval = !(m_spec_max == unSetInt);
-      if ( m_spec_max == unSetInt ) m_spec_max = 0;
+      m_interval = !(m_spec_max == Mantid::EMPTY_INT());
+      if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 0;
 
       // Check validity of spectra list property, if set
       if ( m_list )

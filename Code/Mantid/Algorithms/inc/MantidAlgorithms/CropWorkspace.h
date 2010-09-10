@@ -100,9 +100,6 @@ private:
   /// Flag indicating whether XMin and/or XMax has been set
   bool m_croppingInX;
   
-  ///a flag int value to indicate that the value wasn't set by users
-  static const int unSetInt = INT_MAX-15;
- 
 };
 
 } // namespace Algorithms

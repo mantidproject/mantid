@@ -31,7 +31,7 @@ namespace NeXus
   /// Empty default constructor
   SaveNexusProcessed::SaveNexusProcessed() :
   Algorithm(),
-  m_spec_list(), m_spec_max(unSetInt)
+  m_spec_list(), m_spec_max(Mantid::EMPTY_INT())
   {
   }
 
@@ -61,7 +61,7 @@ namespace NeXus
     declareProperty("WorkspaceIndexMin", 0, mustBePositive->clone(), 
         "Index number of first spectrum to write, only for single\n"
         "period data. Not yet implemented");
-    declareProperty("WorkspaceIndexMax", unSetInt, mustBePositive->clone(),
+    declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
         "Index of last spectrum to write, only for single period\n"
         "data. Not yet implemented");
     declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
@@ -99,8 +99,8 @@ namespace NeXus
     m_spec_list = getProperty("WorkspaceIndexList");
     m_spec_max = getProperty("WorkspaceIndexMax");
     m_list = !m_spec_list.empty();
-    m_interval = (m_spec_max != unSetInt);
-    if ( m_spec_max == unSetInt ) m_spec_max = 0;
+    m_interval = (m_spec_max != Mantid::EMPTY_INT());
+    if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 0;
 
     const std::string workspaceID = m_inputWorkspace->id();
     if (workspaceID.find("Workspace2D") == std::string::npos )

@@ -82,26 +82,23 @@ namespace Mantid
       /// The name and path of the input file
       std::string m_filename;
 
-	  /// The name of the output workspace
-	  std::string m_workspace;
+      /// The name of the output workspace
+      std::string m_workspace;
 
       /// Pointer to the local workspace
       DataObjects::Workspace2D_sptr m_localWorkspace;
 
-	  /// run LoadMuonNexus
-	  void runLoadMuonNexus();
+      /// run LoadMuonNexus
+      void runLoadMuonNexus();
 
-	  /// run LoadIsisNexus
-	  void runLoadIsisNexus();
+      /// run LoadIsisNexus
+      void runLoadIsisNexus();
 
-	  /// run LoadNexusProcessed
-	  void runLoadNexusProcessed();
+      /// run LoadNexusProcessed
+      void runLoadNexusProcessed();
 
-      /// run LoadSNSNexus
-	  void runLoadSNSNexus();
-
-      ///a flag int value that indicates a value that wasn't set
-      static const int unSetInt = INT_MAX-15;
+        /// run LoadSNSNexus
+      void runLoadSNSNexus();
     };
   } // namespace NeXus
 } // namespace Mantid

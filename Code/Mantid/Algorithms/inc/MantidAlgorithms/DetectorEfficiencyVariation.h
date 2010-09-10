@@ -106,8 +106,6 @@ namespace Mantid
         /// The total of all run times
         RTTotal = 2*RTGetTotalCounts + RTMarkDetects
       };
-      ///a flag int value to indicate that the value wasn't set by users
-      static const int UNSETINT = INT_MAX-15;
       /// An estimate of the percentage of the algorithm runtimes that has been completed 
       double m_fracDone;
       /// An estimate total number of additions or equilivent are require to compute a spectrum 

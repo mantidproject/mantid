@@ -55,15 +55,16 @@ void DetectorEfficiencyVariation::init()
   declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
     "The index number of the first entry in the Workspace to include in\n"
     "the calculation (default: 0)" );
-  //UNSETINT and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
-  declareProperty("EndWorkspaceIndex", UNSETINT, mustBePosInt->clone(),
+
+  //Mantid::EMPTY_INT() and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
+  declareProperty("EndWorkspaceIndex", Mantid::EMPTY_INT(), mustBePosInt->clone(),
     "The index number of the last entry in the Workspace to include in\n"
     "the calculation (default: the last spectrum in the workspace)" );
-  declareProperty("RangeLower", EMPTY_DBL(),
+  declareProperty("RangeLower", Mantid::EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be included\n"
     "in the summation used to decide if a detector is 'bad' (default: the\n"
     "start of each histogram)" );
-  declareProperty("RangeUpper", EMPTY_DBL(),
+  declareProperty("RangeUpper", Mantid::EMPTY_DBL(),
     "No bin with a boundary at an x value higher than this value will\n"
     "be included in the summation used to decide if a detector is 'bad'\n"
     "(default: the end of each histogram)" );
@@ -90,9 +91,9 @@ void DetectorEfficiencyVariation::exec()
   MatrixWorkspace_sptr WB1;
   MatrixWorkspace_sptr WB2;
   MatrixWorkspace_sptr frac;
-  double vari = EMPTY_DBL();
+  double vari = Mantid::EMPTY_DBL();
   int minSpec = 0;
-  int maxSpec = UNSETINT;
+  int maxSpec = Mantid::EMPTY_INT();
   // sets the values passed to it with those from the algorithm properties, only that need checking are passed. Throws an invalid_argument if we can't find a good value for a property
   retrieveProperties( WB1, WB2, vari, minSpec, maxSpec);
 
@@ -165,7 +166,7 @@ void DetectorEfficiencyVariation::retrieveProperties(
     minSpec = 0;
   }
   maxSpec = getProperty("EndWorkspaceIndex");
-  if (maxSpec == UNSETINT) maxSpec = maxSpecIndex;
+  if (maxSpec == Mantid::EMPTY_INT()) maxSpec = maxSpecIndex;
   if ( (maxSpec < 0) || (maxSpec > maxSpecIndex ) )
   {
     g_log.warning("EndWorkspaceIndex out of range, changed to max Workspace number");
