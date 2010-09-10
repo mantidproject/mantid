@@ -18,26 +18,19 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** This algorithm calls FindPeaks as a subalgorithm and then subtracts
-    all the peaks found from the data, leaving just the 'background'.
+/** StripVanadiumPeaks algorithm
 
-    *** IT IS ASSUMED THAT THE FITTING FUNCTION WAS A GAUSSIAN ***
+    This algorithm takes a list of peak centers (or uses a default one for Vanadium peaks)
+    and cuts them out by performing a linear fit of the Y values to the left and right of the peak:
 
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace - The name of the Workspace to take as input. </LI>
-    <LI> OutputWorkspace - The name under which to store the output workspace. </LI>
-    </UL>
+    - The center of the peak C is specified in d-spacing.
+    - A peak width W is specified as a percentage of the d-spacing at the peak center.
+    - A width of W/2 is averaged on the left and right sides, centered at C +- W/2.
+    - A linear fit is made from those two value.
+    - The Y values between C-W/2 and C+W/2 are filled in with the result of the fit.
 
-    Optional Properties:
-    <UL>
-    <LI> fwhm - passed to the FindPeaks subalgorithm</LI>
-    <LI> Tolerance - passed to the FindPeaks subalgorithm</LI>
-    <LI> WorkspaceIndex - The spectrum from which to remove peaks. Will search all spectra if absent.</LI>
-    </UL>
-
-    @author Russell Taylor, Tessella Support Services plc
-    @date 30/10/2008
+    @author Janik Zikovsky, SNS
+    @date 2010-09-10
 
     Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

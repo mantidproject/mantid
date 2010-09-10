@@ -48,7 +48,7 @@ public:
 
     strip.setPropertyValue("InputWorkspace",inputWSName);
     strip.setPropertyValue("OutputWorkspace",outputWSName);
-    strip.setPropertyValue("PeakWidth", "3.0");
+    strip.setPropertyValue("PeakWidthPercent", "3.0");
     strip.setPropertyValue("AlternativePeakPositions", "");
     strip.execute();
     TS_ASSERT( strip.isExecuted() );

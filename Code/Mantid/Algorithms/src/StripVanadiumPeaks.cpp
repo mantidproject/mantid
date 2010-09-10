@@ -1,13 +1,7 @@
-/*
- * StripVanadiumPeaks.cpp
- *
- *  Created on: Sep 10, 2010
- *      Author: janik
- */
-
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -24,7 +18,7 @@ using namespace DataObjects;
 using namespace API;
 using namespace Kernel::VectorHelper;
 
-static const std::string PARAM_WIDTH( "PeakWidth" );
+static const std::string PARAM_WIDTH( "PeakWidthPercent" );
 static const std::string PARAM_POSITIONS( "AlternativePeakPositions" );
 
 StripVanadiumPeaks::StripVanadiumPeaks() : API::Algorithm() {}
@@ -80,18 +74,17 @@ void StripVanadiumPeaks::exec()
       "StripVanadiumPeaks WorkspaceIndex property");
   }
 
-
-  Progress progress(this,0.0,1.0,10);
-
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Copy the data over from the input to the output workspace
   const int nhists = inputWS->getNumberHistograms();
+  Progress progress(this,0.0,1.0,nhists*2);
   for (int k = 0; k < nhists; ++k)
   {
     outputWS->dataX(k) = inputWS->readX(k);
     outputWS->dataY(k) = inputWS->readY(k);
     outputWS->dataE(k) = inputWS->readE(k);
+    progress.report();
   }
 
   //Get the peak center positions
@@ -100,6 +93,9 @@ void StripVanadiumPeaks::exec()
   {
     //Use the default Vanadium peak positions instead
     peakPositions = "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401";
+    //Check for units
+    if (inputWS->getAxis(0)->unit()->unitID() != "dSpacing")
+      throw std::invalid_argument("Cannot strip using default Vanadium peak positions for an input workspace whose units are not d-spacing. Convert to d-spacing or specify your own alternative peak positions.");
   }
   std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector(peakPositions);
 
@@ -108,11 +104,11 @@ void StripVanadiumPeaks::exec()
 
   for (int k = 0; k < nhists; ++k)
   {
-    if (!singleSpectrum || (singleIndex == k))
+    if ((!singleSpectrum) || (singleIndex == k))
     {
       //Get the X and Y vectors
-      MantidVec X = inputWS->dataX(k);
-      MantidVec Y = inputWS->dataY(k);
+      MantidVec X = outputWS->dataX(k);
+      MantidVec Y = outputWS->dataY(k);
 
       //Middle of each X bin
       MantidVec midX;
@@ -164,6 +160,7 @@ void StripVanadiumPeaks::exec()
       //Save the output
       outputWS->dataY(k) = outY;
     }//if the spectrum is to be changed.
+    progress.report();
   }//each spectrum
 
   //Save the output workspace
