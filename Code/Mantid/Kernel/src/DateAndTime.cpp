@@ -168,8 +168,20 @@ std::tm to_localtime_tm(const dateAndTime &time)
  */
 dateAndTime get_time_from_pulse_time(PulseTimeType pulse)
 {
-  boost::posix_time::time_duration td(0,0,0, pulse);
+  PulseTimeType sec = pulse/1000000000;
+  PulseTimeType nanosec = pulse % 1000000000;
+
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
+  boost::posix_time::time_duration td(0,0, sec, nanosec);
+#else
+  // Microsecond resolution
+  boost::posix_time::time_duration td(0,0, sec, nanosec/1000);
+#endif
+
   return GPS_EPOCH + td;
+
+//  return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nanosec);
 }
 
 

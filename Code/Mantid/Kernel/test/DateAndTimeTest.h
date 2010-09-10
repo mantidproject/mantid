@@ -16,6 +16,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using namespace Mantid::Kernel::DateAndTime;
 
 using std::runtime_error;
 using std::size_t;
@@ -90,6 +91,31 @@ public:
     //Now the string
     TS_ASSERT_EQUALS( Mantid::Kernel::DateAndTime::to_simple_string(utc_time), "2008-Feb-29 12:00:00");
 
+  }
+
+
+  void test_get_time_from_pulse_time()
+  {
+    dateAndTime dt = DateAndTime::GPS_EPOCH;
+    PulseTimeType pt = 0;
+    TS_ASSERT_EQUALS( dt, get_time_from_pulse_time(pt));
+
+    //Add one second
+    dt += time_duration(0,0,1,0);
+    pt = 1e9;
+    TS_ASSERT_EQUALS( dt, get_time_from_pulse_time(pt));
+
+    //Half a second
+    dt += boost::posix_time::milliseconds(500);
+    pt += 5e8;
+    TS_ASSERT_EQUALS( dt, get_time_from_pulse_time(pt));
+
+    //All installs should support at least 1 microsecond resolution.
+    dt += boost::posix_time::microseconds(1);
+    pt += 1e3;
+    TS_ASSERT_EQUALS( dt, get_time_from_pulse_time(pt));
+
+//    std::cout << DateAndTime::to_simple_string(get_time_from_pulse_time(pt)) << "\n";
   }
 
 
