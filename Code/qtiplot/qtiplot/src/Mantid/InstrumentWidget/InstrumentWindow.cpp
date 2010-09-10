@@ -788,6 +788,13 @@ void InstrumentWindow::loadSettings()
   mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));
   mScaleOptions->blockSignals(false);
   mInstrumentDisplay->mutableColorMap().changeScaleType(type);
+
+  //Restore the setting for the 3D axes visible or not
+  int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
+  if (show3daxes)
+    m3DAxesToggle->setCheckState(Qt::Checked);
+  else
+    m3DAxesToggle->setCheckState(Qt::Unchecked);
   
   settings.endGroup();
 }
@@ -802,6 +809,9 @@ void InstrumentWindow::saveSettings()
   settings.setValue("BackgroundColor", mInstrumentDisplay->currentBackgroundColor());
   settings.setValue("ColormapFile", mCurrentColorMap);
   settings.setValue("ScaleType", mInstrumentDisplay->getColorMap().getScaleType());
+  settings.setValue("ColormapFile", mCurrentColorMap);
+  int val = 0;  if (m3DAxesToggle->isChecked()) val = 1;
+  settings.setValue("3DAxesShown", QVariant(val));
   settings.endGroup();
 }
 
