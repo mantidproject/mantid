@@ -130,7 +130,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
     case numeric :
     case string :
       m_mantidUI->importString(item->text(0),
-        item->data(0, Qt::UserRole).toString());
+        item->data(0, Qt::UserRole).toString()); //Pretty much just print out the string
       break;
     case numTSeries :
       if (filterStatus->isChecked()) filter = 1;
@@ -214,17 +214,20 @@ void MantidSampleLogDialog::init()
     {
       treeItem->setText(1, "string series");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(stringTSeries));
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
     }
     else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(*pItr) )
     {
       treeItem->setText(1, "string");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(string));
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
     }
     else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(*pItr) ||
              dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(*pItr))
     {
       treeItem->setText(1, "numeric");
-      treeItem->setData(1, Qt::UserRole, static_cast<int>(numeric));
+      treeItem->setData(1, Qt::UserRole, static_cast<int>(numeric)); //Save the "role" as numeric.
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
     }
 
     //Add tree item
