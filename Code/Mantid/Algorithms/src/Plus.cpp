@@ -74,13 +74,9 @@ namespace Mantid
     */
     void Plus::operateOnRun(const Run& lhs, const Run& rhs, Run& ans) const
     {
-      try
-      {
-        ans.setProtonCharge( lhs.getProtonCharge() + rhs.getProtonCharge() );
-      }
-      catch(Exception::NotFoundError &)
-      {
-      }
+      //The addition operator of Run will add the proton charges, append logs, etc.
+      ans = lhs;
+      ans += rhs;
     }
 
 
