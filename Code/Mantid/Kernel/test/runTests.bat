@@ -23,7 +23,7 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "..\.." /I "../../API/inc" /I "..\inc" /D_CRT_SECURE_NO_DEPRECATE /DBOOST_ALL_DYN_LINK /EHsc /MDd /W3 /wd4275 /nologo /c /ZI /TP 
+cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "..\.." /I "../../API/inc" /I "..\inc" /D_CRT_SECURE_NO_DEPRECATE /DBOOST_ALL_DYN_LINK /DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG /EHsc /MDd /W3 /wd4275 /nologo /c /ZI /TP 
 
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib MantidApi.lib runner.obj
   
