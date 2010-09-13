@@ -81,10 +81,14 @@ int LevenbergMarquardtMinimizer::iterate()
   // stock - even after having achieved a sensible fit. This seem in particular to be a
   // problem on Linux. However, to force GSL not to return ga ga have to do stuff in the
   // if statement below
-  if (retVal == GSL_CONTINUE)
+  // GSL 1.14 changed return value from GSL_CONTINUE->GSL_ENOPROG for non-converging fits at 10 iterations
+  if( retVal == GSL_CONTINUE || retVal == GSL_ENOPROG ) 
   {
     for (int i = 0; i < m_function->nActive(); i++)
+    {
       m_function->setActiveParameter(i,gsl_vector_get(m_gslSolver->x,i));
+    }
+    retVal = GSL_CONTINUE;
   }
 
   return retVal;

@@ -73,7 +73,7 @@ public:
 
     bk->setParameter("A0",8.0);
     bk->setParameter("A1",0.0);
-    bk->removeActive(1);    
+    bk->removeActive(1); 
 
     BackToBackExponential* fn = new BackToBackExponential();
     fn->initialize();
@@ -230,7 +230,7 @@ public:
 
     // did you get what you expected
     double dummy = alg.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 1.523,1.524);  // were large error here since on 64 machine gives 0.0551
+    TS_ASSERT_DELTA( dummy, 1.523,0.2);  // were large error here since on 64 machine gives 0.0551
                                           // whereas on 32 machine gives 1.523 although the fit
                                           // appear identical???
 

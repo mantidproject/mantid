@@ -285,9 +285,7 @@ namespace CurveFitting
       {
         iter++;
         status = minimizer->iterate();
-
-        // break if status is not success
-        if (status)  
+        if (status != GSL_SUCCESS)  
         { 
           // From experience it is found that gsl_multifit_fdfsolver_iterate occasionally get
           // stock - even after having achieved a sensible fit. This seem in particular to be a
