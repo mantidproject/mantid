@@ -10,7 +10,7 @@ buildargs = []
 if os.name == 'posix':
     make = "make"
 else:
-	make = "nmake"
+    make = "nmake"
 
 if platform.system() == 'Linux':
     qmake = "qmake-qt4 QMAKE_CXX=g++44 QMAKE_CC=gcc44 QMAKE_LINK=g++44"
@@ -21,12 +21,14 @@ elif platform.system() == 'Darwin':
     qmake = "qmake CONFIG+=release"
     buildargs.append("-j2")
 elif platform.system() == 'Windows':
-    setenv = 'CALL "%VCINSTALLDIR%\\vcvarsall.bat"'
+    msvc_version = "80"
+    arch_string = "x86"
     qmake_conf = ''
     if platform.architecture()[0] == '64bit':
-        setenv += ' amd64'
-        qmake_conf = 'CONFIG+=build64'
-    setenv += ' && '
+        msvc_version = "100"
+        arch_string = 'amd64'
+        qmake_conf = 'QMAKESPEC=win32-msvc2008 CONFIG+=build64'
+    setenv = 'CALL "%VS' + msvc_version + 'COMNTOOLS%..\\..\\VC\\vcvarsall.bat" ' + arch_string + ' &&' 
     make = setenv + make
     qmake = setenv + 'qmake' + ' ' + qmake_conf
 else:
@@ -37,23 +39,16 @@ retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-
 if retcode != 0:
     sys.exit(1)
 
-svnlog = open("../../../../logs/qtiplot/svn.log","w")
+log_dir = "../../../../logs/"
+svnlog = open(log_dir + "qtiplot/svn.log","w")
 sp.call("svn log -v -rBASE",stdout=svnlog,shell=True)
 svnlog.close()
 
 # Update the header containing the revision number
 sp.call("python release_date.py",shell=True)
 
-# If the dependent Mantid framework headers have changed, clean first
-#frameworkLog = sp.Popen("svn log -qv -rCOMMITTED",stdout=sp.PIPE,shell=True,cwd="../Mantid").communicate()[0]
-#mantidQtLog = sp.Popen("svn log -qv -rCOMMITTED",stdout=sp.PIPE,shell=True).communicate()[0]
-#if ("MantidKernel" in frameworkLog) or ("MantidGeometry" in frameworkLog) or ("MantidAPI" in frameworkLog) or ("MantidQt" in mantidQtLog):
-#    sp.call(make+" clean",shell=True,cwd="MantidQt")
-#    sp.call(make+" clean",shell=True,cwd="qtiplot")
-
-
-buildlog = open("../../../../logs/qtiplot/build.log","w") 
-errorlog = open("../../../../logs/qtiplot/error.log","w")
+buildlog = open(log_dir + "qtiplot/build.log","w") 
+errorlog = open(log_dir + "qtiplot/error.log","w")
 
 buildStart = time.time()
 # Build MantidQt
@@ -61,12 +56,13 @@ buildStart = time.time()
 sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 sp.call(make + ' clean',stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
+
 if ret != 0:
     outcome = "MantidQt build failed"
     buildlog.write(outcome)
     sys.exit(0)
 
-# Build QtPropertyBrowser
+#Build QtPropertyBrowser
 sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
 ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
 if ret != 0:
@@ -74,7 +70,7 @@ if ret != 0:
     buildlog.write(outcome)
     sys.exit(0)
 
-# Now build MantidPlot
+#Now build MantidPlot
 sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
 ret = sp.call(make + ' ' + ''.join(buildargs),stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
 if ret != 0:
@@ -84,7 +80,7 @@ if ret != 0:
 buildFinish = time.time()
 buildTime = buildFinish - buildStart
 
-BuildTimeLog = open("../../../../logs/qtiplot/timebuild.log", "w")
+BuildTimeLog = open(log_dir + "qtiplot/timebuild.log", "w")
 BuildTimeLog.write(str(buildTime))
 BuildTimeLog.close()
 

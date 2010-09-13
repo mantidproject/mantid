@@ -40,8 +40,8 @@ goto failed
 :end
 ENDLOCAL
 echo "MSI build succeeded"
-EXIT 0
+EXIT /b 0
 
 :failed
 ENDLOCAL
-EXIT 1
+EXIT /b 1

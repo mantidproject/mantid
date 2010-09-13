@@ -26,8 +26,7 @@ SCRIPTING_LANGS += Python
 DEFINES         += SCRIPTING_CONSOLE
 # a dialog for selecting the scripting language on a per-project basis
 DEFINES         += SCRIPTING_DIALOG
-#DEFINES         += QTIPLOT_DEMO
-DEFINES         += GSL_DLL
+DEFINES         += GSL_DLL POCO_DLL
 win32:DEFINES   += _WIN32_WINNT=0x0400
 win32:DEFINES   += _WIN32
 win32:DEFINES   += BOOST_ALL_DYN_LINK
@@ -44,9 +43,7 @@ RESOURCES        += ../MantidQt/MantidWidgets/inc/ICatSearchBackGround.qrc
 #CONFIG          += CustomInstall
 
 CONFIG += debug_and_release
-
 win32:build_pass:CONFIG(debug, debug|release) {
-  CONFIG += console
   # Make sure we don't link to the non-debug runtime
   QMAKE_LFLAGS_CONSOLE += /NODEFAULTLIB:msvcrt.lib
 }
@@ -182,6 +179,7 @@ win32 {
   
   CONFIG(build64)  {
     THIRD_PARTY = ../../Third_Party/lib/win64
+    DEFINES += HAVE_STDINT_H
     message(SETTING FOR x64)
   } else {
     THIRD_PARTY = ../../Third_Party/lib/win32

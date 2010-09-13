@@ -8,7 +8,7 @@
 #------------------------
 CONFIG += qt warn_on exceptions debug_and_release
 
-win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS WIN32 BOOST_ALL_DYN_LINK
+win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 BOOST_ALL_DYN_LINK POCO_DLL
 
 # Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function
 # to check system header paths and worse still no way of accessing what they are!
@@ -92,6 +92,7 @@ win32 {
 
 CONFIG(build64)  {
     THIRDPARTYLIB = "$$THIRDPARTY/lib/win64"
+    DEFINES += HAVE_STDINT_H
     message(SETTING FOR x64)
   } else {
     THIRDPARTYLIB = "$$THIRDPARTY/lib/win32"
