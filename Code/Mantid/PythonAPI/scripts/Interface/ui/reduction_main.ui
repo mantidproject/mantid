@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SANSReduction</class>
+ <widget class="QMainWindow" name="SANSReduction">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1039</width>
+    <height>905</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>SANS Reduction</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>20</y>
+      <width>951</width>
+      <height>721</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Tab 1</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Tab 2</string>
+     </attribute>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="reduce_button">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>780</y>
+      <width>93</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reduce</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1039</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuInstrument">
+    <property name="title">
+     <string>Instrument</string>
+    </property>
+   </widget>
+   <addaction name="menuInstrument"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>reduce_button</sender>
+   <signal>clicked()</signal>
+   <receiver>SANSReduction</receiver>
+   <slot>reduce_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>917</x>
+     <y>817</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>748</x>
+     <y>815</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>reduce_clicked()</slot>
+ </slots>
+</ui>
