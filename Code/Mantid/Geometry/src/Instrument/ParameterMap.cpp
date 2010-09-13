@@ -68,15 +68,17 @@ namespace Mantid
         return Parameter_sptr();
       }
 
-      pmap_cit it_begin = m_map.lower_bound(id);
-      pmap_cit it_end = m_map.upper_bound(id);
+      pmap_cit itr = m_map.lower_bound(id);
+      pmap_cit itr_end = m_map.upper_bound(id);
 
-      pmap_cit param = std::find_if(it_begin,it_end,equalParameterName(name));
-      
       const bool anytype = type.empty();
-      if ( param != it_end && (anytype || param->second->type() == type) )
+      for( ; itr != itr_end; ++itr )
       {
-        return param->second;
+        Parameter_sptr param = itr->second;
+        if( param->name() == name && (anytype || param->type() == type) )
+        {
+          return param;
+        }
       }
 
       return Parameter_sptr();

@@ -647,7 +647,7 @@ void MatrixWorkspace::populateInstrumentParameters()
           << ((*it).second)->m_constraint[1] << " , " << ((*it).second)->m_penaltyFactor << " , " 
           << ((*it).second)->m_tie << " , " << ((*it).second)->m_formula << " , " 
           << ((*it).second)->m_formulaUnit << " , " << ((*it).second)->m_resultUnit << " , " << (*(((*it).second)->m_interpolation));
-        paramMap.add("FitParameter",((*it).second)->m_component, paramN, str.str());
+        paramMap.add("fitting",((*it).second)->m_component, paramN, str.str());
       }
       else if ( category.compare("string") == 0 )
       {

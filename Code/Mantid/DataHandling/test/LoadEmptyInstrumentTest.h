@@ -164,7 +164,7 @@ public:
     param = paramMap.get(&(*det), "boevs");
     TS_ASSERT( param == NULL );
 
-    param = paramMap.getRecursive(&(*det), "boevs", "spade");
+    param = paramMap.getRecursive(&(*det), "boevs", "double");
     TS_ASSERT_DELTA( param->value<double>(), 8.0, 0.0001);
 
     param = paramMap.getRecursive(&(*det), "fiddo", "fitting");
