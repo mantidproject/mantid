@@ -5,6 +5,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <cfloat>
+
 /// @cond
 // Don't document this very long winded way of getting "radians" to print on the axis.
 namespace
