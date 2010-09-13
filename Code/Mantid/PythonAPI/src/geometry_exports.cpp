@@ -80,6 +80,18 @@ namespace Mantid
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_hasParameter,Geometry::Component::hasParameter,1,2);
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_hasParameter,Geometry::ParametrizedComponent::hasParameter,1,2);
 
+    //
+    // MG: Ticket #1601 is going to clean up the parameter access mess but the recursion takes precendence.
+    //
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getNumberParameter,Geometry::Component::getNumberParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getNumberParameter,Geometry::ParametrizedComponent::getNumberParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getPositionParameter,Geometry::Component::getPositionParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getPositionParameter,Geometry::ParametrizedComponent::getPositionParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotationParameter,Geometry::Component::getRotationParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getRotationParameter,Geometry::ParametrizedComponent::getRotationParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Geometry::Component::getStringParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ParComponent_getStringParameter,Geometry::ParametrizedComponent::getStringParameter,1,2);
+    
     void export_components()
     {
       /**
@@ -91,15 +103,15 @@ namespace Mantid
       //IComponent class
       register_ptr_to_python<boost::shared_ptr<Geometry::IComponent> >();
 
+      //
+      // MG: Ticket #1601 is going to clean up the parameter access mess but the recursion takes precendence.
+      //
+
       class_<Geometry::IComponent, boost::noncopyable>("IComponent", no_init)
         .def("getPos", &Geometry::IComponent::getPos)
         .def("getDistance", &Geometry::IComponent::getDistance)
         .def("getName", &Geometry::IComponent::getName)
         .def("type", &Geometry::IComponent::type)
-        .def("getNumberParameter", &Geometry::IComponent::getNumberParameter)
-        .def("getPositionParameter", &Geometry::IComponent::getPositionParameter)
-        .def("getRotationParameter", &Geometry::IComponent::getRotationParameter)
-        .def("getStringParameter", &Geometry::IComponent::getStringParameter)
         ;
 
       //ICompAssembly class
@@ -143,12 +155,22 @@ namespace Mantid
       class_<Geometry::Component, bases<Geometry::IComponent>, boost::noncopyable>("Component", no_init)
         .def("getParameterNames", &Geometry::Component::getParameterNames, Component_getParameterNames())
         .def("hasParameter", &Geometry::Component::hasParameter, Component_hasParameter())
+        .def("getNumberParameter", &Geometry::Component::getNumberParameter, Component_getNumberParameter())
+        .def("getPositionParameter", &Geometry::Component::getPositionParameter, Component_getPositionParameter())
+        .def("getRotationParameter", &Geometry::Component::getRotationParameter, Component_getRotationParameter())
+        .def("getStringParameter", &Geometry::Component::getStringParameter, Component_getStringParameter())
+
         ;
       //ParameterizedComponent
       class_<Geometry::ParametrizedComponent, bases<Geometry::IComponent>, 
         boost::noncopyable>("ParameterizedComponent", no_init)
         .def("getParameterNames", &Geometry::ParametrizedComponent::getParameterNames, ParComponent_getParameterNames())
         .def("hasParameter", &Geometry::ParametrizedComponent::hasParameter, ParComponent_hasParameter())
+        .def("getNumberParameter", &Geometry::ParametrizedComponent::getNumberParameter, ParComponent_getNumberParameter())
+        .def("getPositionParameter", &Geometry::ParametrizedComponent::getPositionParameter, ParComponent_getPositionParameter())
+        .def("getRotationParameter", &Geometry::ParametrizedComponent::getRotationParameter, ParComponent_getRotationParameter())
+        .def("getStringParameter", &Geometry::ParametrizedComponent::getStringParameter, ParComponent_getStringParameter())
+
         ;
 
       /** 

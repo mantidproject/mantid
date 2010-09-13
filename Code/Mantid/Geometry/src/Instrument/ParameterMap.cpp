@@ -59,7 +59,7 @@ namespace Mantid
       m_map.insert(std::make_pair(comp->getComponentID(),param));
     }
 
-    Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name)const
+    Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name, const std::string & type) const
     {
       const ComponentID id = comp->getComponentID();
       pmap_cit it_found = m_map.find(id);
@@ -72,28 +72,26 @@ namespace Mantid
       pmap_cit it_end = m_map.upper_bound(id);
 
       pmap_cit param = std::find_if(it_begin,it_end,equalParameterName(name));
-
-      if ( param == it_end )
+      
+      const bool anytype = type.empty();
+      if ( param != it_end && (anytype || param->second->type() == type) )
       {
-        return Parameter_sptr();
+        return param->second;
       }
 
-      return param->second;
+      return Parameter_sptr();
     }
 
-    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, const std::string& type)const
+    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, const std::string & type)const
     {
-      Parameter_sptr retVal;
-
-      boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
-
-      while ( compInFocus != NULL )
+      boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
+      while( compInFocus != NULL )
       {
-        retVal = get(&(*compInFocus), name);
-
-        if (retVal != Parameter_sptr())
-          return retVal;
-
+        Parameter_sptr param = get(compInFocus.get(), name, type);
+        if (param)
+        {
+          return param;
+        }
         compInFocus = compInFocus->getParent();
       }
 

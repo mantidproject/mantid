@@ -218,15 +218,16 @@ public:
     /**  Get the shared pointer to the parameter with name \a name belonging to component \a comp.
          @param comp Component
          @param name Parameter name
+         @param type, i.e. is it a fitting parameter
      */
-    boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name)const;
+    boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name, const std::string & type = "")const;
 
     /**  Same as get() but look up recursively to see if can find param in all parents of comp.
          @param comp Component
          @param name Parameter name
          @param type Parameter type, i.e. is it a fitting parameter or something else
      */
-    boost::shared_ptr<Parameter> getRecursive(const IComponent* comp,const std::string& name,const std::string& type)const;
+    boost::shared_ptr<Parameter> getRecursive(const IComponent* comp,const std::string& name, const std::string & type = "")const;
 
     /** Get the values of a given parameter of all the components that have the name: compName
      *  @tparam The parameter type

@@ -258,6 +258,7 @@
     <ClCompile Include="src\SolidAngleCorrection.cpp" />
     <ClCompile Include="src\Sort.cpp" />
     <ClCompile Include="src\StripPeaks.cpp" />
+    <ClCompile Include="src\StripVanadiumPeaks.cpp" />
     <ClCompile Include="src\SumRowColumn.cpp" />
     <ClCompile Include="src\SumSpectra.cpp" />
     <ClCompile Include="src\UnaryOperation.cpp" />
@@ -275,6 +276,7 @@
     <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
+    <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
     <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h" />
     <ClInclude Include="inc\mantidalgorithms\applytransmissioncorrection.h" />
     <ClInclude Include="inc\mantidalgorithms\calculateefficiency.h" />

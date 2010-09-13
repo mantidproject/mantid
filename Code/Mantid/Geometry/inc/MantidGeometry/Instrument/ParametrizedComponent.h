@@ -13,16 +13,16 @@
 
 namespace Mantid
 {
-namespace Geometry
-{
+  namespace Geometry
+  {
 
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-class V3D;
-class Quat;
+    //----------------------------------------------------------------------
+    // Forward declarations
+    //----------------------------------------------------------------------
+    class V3D;
+    class Quat;
 
-/** @class ParametrizedComponent ParametrizedComponent.h Geometry/ParametrizedComponent.h
+    /** @class ParametrizedComponent ParametrizedComponent.h Geometry/ParametrizedComponent.h
 
     ParametrizedComponent is a wrapper for a Component which can modify some of its
     parameters, e.g. position, orientation. Implements IComponent.
@@ -49,164 +49,172 @@ class Quat;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport ParametrizedComponent:public virtual IComponent
-{
-public:
-    /// Constructor
-    ParametrizedComponent(const IComponent* base, const ParameterMap& map);
-    /// Copy Constructor
-    ParametrizedComponent(const ParametrizedComponent&);
-    ///  destructor
-    ~ParametrizedComponent();
+    */
+    class DLLExport ParametrizedComponent:public virtual IComponent
+    {
+    public:
+      /// Constructor
+      ParametrizedComponent(const IComponent* base, const ParameterMap& map);
+      /// Copy Constructor
+      ParametrizedComponent(const ParametrizedComponent&);
+      ///  destructor
+      ~ParametrizedComponent();
 
-     IComponent* clone() const;
-     
-     //! Returns the ComponentID - a unique identifier of the component.
-     ComponentID getComponentID()const;
+      IComponent* clone() const;
 
-    //! Assign a parent IComponent. Previous parent link is lost
-     void setParent(IComponent*);
+      //! Returns the ComponentID - a unique identifier of the component.
+      ComponentID getComponentID()const;
 
-    //! Return a pointer to the current parent.
-     boost::shared_ptr<const IComponent> getParent() const;
-    //! Return an array of all ancestors
-    std::vector<boost::shared_ptr<const IComponent> > getAncestors() const;
+      //! Assign a parent IComponent. Previous parent link is lost
+      void setParent(IComponent*);
 
-    //! Set the IComponent name
-     void setName(const std::string&);
+      //! Return a pointer to the current parent.
+      boost::shared_ptr<const IComponent> getParent() const;
+      //! Return an array of all ancestors
+      std::vector<boost::shared_ptr<const IComponent> > getAncestors() const;
 
-    //! Get the IComponent name
-     std::string getName() const;
+      //! Set the IComponent name
+      void setName(const std::string&);
 
-    //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
-     void setPos(double, double, double);
-     void setPos(const V3D&);
+      //! Get the IComponent name
+      std::string getName() const;
 
-    //! Set the orientation quaternion relative to parent (if present) otherwise absolute
-     void setRot(const Quat&);
+      //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
+      void setPos(double, double, double);
+      void setPos(const V3D&);
 
-    //! Copy the Rotation from another IComponent
-     void copyRot(const IComponent&);
+      //! Set the orientation quaternion relative to parent (if present) otherwise absolute
+      void setRot(const Quat&);
 
-    //! Translate the IComponent (vector form). This is relative to parent if present.
-     void translate(const V3D&);
+      //! Copy the Rotation from another IComponent
+      void copyRot(const IComponent&);
 
-    //! Translate the IComponent (x,y,z form). This is relative to parent if present.
-     void translate(double, double, double);
+      //! Translate the IComponent (vector form). This is relative to parent if present.
+      void translate(const V3D&);
 
-    //! Rotate the IComponent. This is relative to parent.
-     void rotate(const Quat&);
+      //! Translate the IComponent (x,y,z form). This is relative to parent if present.
+      void translate(double, double, double);
 
-    //! Rotate the IComponent by an angle in degrees with respect to an axis.
-     void rotate(double,const V3D&);
+      //! Rotate the IComponent. This is relative to parent.
+      void rotate(const Quat&);
 
-    //! Get the position relative to the parent IComponent (absolute if no parent)
-     V3D getRelativePos() const;
+      //! Rotate the IComponent by an angle in degrees with respect to an axis.
+      void rotate(double,const V3D&);
 
-    //! Get the position of the IComponent. Tree structure is traverse through the parent chain
-     virtual V3D getPos() const;
+      //! Get the position relative to the parent IComponent (absolute if no parent)
+      V3D getRelativePos() const;
 
-    //! Get the relative Orientation
-     const Quat& getRelativeRot() const;
+      //! Get the position of the IComponent. Tree structure is traverse through the parent chain
+      virtual V3D getPos() const;
 
-    //! Get the absolute orientation of the IComponent
-     virtual const Quat getRotation() const;
+      //! Get the relative Orientation
+      const Quat& getRelativeRot() const;
 
-    //! Get the distance to another IComponent
-     double getDistance(const IComponent&) const;
+      //! Get the absolute orientation of the IComponent
+      virtual const Quat getRotation() const;
 
-     /** @name ParamaterMap access */
-     //@{
-     // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
-     // one for each type, luckily there won't be too many
-     /// Return the parameter names
-     virtual std::set<std::string> getParameterNames(bool recursive = true) const;
-     /// Returns a boolean indicating if the component has the named parameter
-     virtual bool hasParameter(const std::string & name, bool recursive = true) const;
-     /**
+      //! Get the distance to another IComponent
+      double getDistance(const IComponent&) const;
+
+      /** @name ParamaterMap access */
+      //@{
+      // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
+      // one for each type, luckily there won't be too many
+      /// Return the parameter names
+      virtual std::set<std::string> getParameterNames(bool recursive = true) const;
+      /// Returns a boolean indicating if the component has the named parameter
+      virtual bool hasParameter(const std::string & name, bool recursive = true) const;
+      /**
       * Get a parameter defined as a double
       * @param pname The name of the parameter
-      * @return A list of size 0 or 1 containing the parameter value or 
-      * nothing if it does not exist
+      * @param recursive If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
       */
-     std::vector<double> getNumberParameter(const std::string& pname) const
-     {
-       return getParameter<double>(pname);
-     }
-     /**
+      std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const
+      {
+        return getParameter<double>(pname, recursive);
+      }
+      /**
       * Get a parameter defined as a V3D
       * @param pname The name of the parameter
-      * @return A list of size 0 or 1 containing the parameter value or 
-      * nothing if it does not exist
+      * @param recursive If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
       */
-     std::vector<V3D> getPositionParameter(const std::string& pname) const
-     {
-       return getParameter<V3D>(pname);
-     }
-     /**
+      std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const
+      {
+        return getParameter<V3D>(pname, recursive);
+      }
+      /**
       * Get a parameter defined as a Quaternion
       * @param pname The name of the parameter
-      * @return A list of size 0 or 1 containing the parameter value or 
-      * nothing if it does not exist
+      * @param recursive If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
       */
-     std::vector<Quat> getRotationParameter(const std::string& pname) const
-     {
-       return getParameter<Quat>(pname);
-     }
-
-	 /**
+      std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const
+      {
+        return getParameter<Quat>(pname, recursive);
+      }
+      /**
       * Get a parameter defined as a string
       * @param pname The name of the parameter
-      * @return A list of size 0 or 1 containing the parameter value or 
-      * nothing if it does not exist
+      * @param recursive If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
       */
-	 std::vector<std::string> getStringParameter(const std::string& pname) const
-     {
-		 return getParameter<std::string>(pname);
-     }
-     //@}
+      std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const
+      {
+        return getParameter<std::string>(pname, recursive);
+      }
+      //@}
 
-     void printSelf(std::ostream&) const;
+      void printSelf(std::ostream&) const;
 
-     /// Returns the address of the base component
-     const IComponent* base()const{return m_base;}
+      /// Returns the address of the base component
+      const IComponent* base()const{return m_base;}
 
-     /// Returns the ScaleFactor
-     V3D getScaleFactorP() const;
+      /// Returns the ScaleFactor
+      V3D getScaleFactorP() const;
 
-protected:
+    protected:
 
-    /// The base component 
-    const IComponent* m_base;
+      /// The base component 
+      const IComponent* m_base;
 
-    /// Reference to the map
-    const ParameterMap& m_map;
+      /// Reference to the map
+      const ParameterMap& m_map;
 
-private:
+    private:
 
-     /**
+      /**
       *  Get a parameter from the parameter map
       * @param p_name The name of the parameter
+      * @param recursive If true then the lookup will walk up the tree if this component does not have parameter
       * @return A list of size 0 or 1 containing the parameter value or 
       * nothing if it does not exist
       */
-     template <class TYPE>
-     std::vector<TYPE> getParameter(const std::string & p_name) const
-     {
-       Parameter_sptr param = m_map.get(this, p_name);
-       if( param != Parameter_sptr() )
-       {
-         return std::vector<TYPE>(1, param->value<TYPE>());
-       }
-       else
-       {
-         return std::vector<TYPE>(0);
-       }
-     }
-};
+      template <class TYPE>
+      std::vector<TYPE> getParameter(const std::string & p_name, bool recursive) const
+      {
+        Parameter_sptr param;
+        if( recursive )
+        {
+          param = m_map.getRecursive(this, p_name);
+        }
+        else
+        {
+          param = m_map.get(this, p_name);
+        }
+        if( param != Parameter_sptr() )
+        {
+          return std::vector<TYPE>(1, param->value<TYPE>());
+        }
+        else
+        {
+          return std::vector<TYPE>(0);
+        }
+      }
+    };
 
-} // namespace Geometry
+  } // namespace Geometry
 } // namespace Mantid
 
 #endif /*MANTID_GEOMETRY_PARAMETRIZED_COMPONENT_H_*/

@@ -249,25 +249,25 @@ bool DetectorGroup::hasParameter(const std::string & name, bool recursive) const
 }
 
 /// Default implementation
-std::vector<double> DetectorGroup::getNumberParameter(const std::string&) const
+std::vector<double> DetectorGroup::getNumberParameter(const std::string&, bool) const
 {
   return std::vector<double>(0);
 }
 
 /// Default implementation
-std::vector<V3D> DetectorGroup::getPositionParameter(const std::string&) const
+std::vector<V3D> DetectorGroup::getPositionParameter(const std::string&, bool) const
 {
   return std::vector<V3D>(0);
 }
 
 /// Default implementation  
-std::vector<Quat> DetectorGroup::getRotationParameter(const std::string&) const
+std::vector<Quat> DetectorGroup::getRotationParameter(const std::string&, bool) const
 {
   return std::vector<Quat>(0);
 }
 
 /// Default implementation  
-std::vector<std::string> DetectorGroup::getStringParameter(const std::string&) const
+std::vector<std::string> DetectorGroup::getStringParameter(const std::string&, bool) const
 {
   return std::vector<std::string>(0);
 }

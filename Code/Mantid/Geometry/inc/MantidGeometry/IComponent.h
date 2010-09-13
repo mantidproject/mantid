@@ -113,13 +113,13 @@ public:
   // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
   // one for each type, luckily there won't be too many
   /// Get a parameter defined as a double
-  virtual std::vector<double> getNumberParameter(const std::string& pname) const = 0;
+  virtual std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const = 0;
   /// Get a parameter defined as a V3D
-  virtual std::vector<V3D> getPositionParameter(const std::string& pname) const = 0;
+  virtual std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const = 0;
   /// Get a parameter defined as a Quaternion
-  virtual std::vector<Quat> getRotationParameter(const std::string& pname) const = 0;
+  virtual std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const = 0;
   /// Get a parameter defined as a string
-  virtual std::vector<std::string> getStringParameter(const std::string& pname) const = 0;
+  virtual std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const = 0;
   //@}
   /** Prints a text representation of itself
    */

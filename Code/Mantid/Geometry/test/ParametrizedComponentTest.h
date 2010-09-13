@@ -68,13 +68,35 @@ public:
     cleanUpParametrizedComponent();
   }
 
+  void testThatNonRecursiveGetParameterOnlySearchesCurrentComponent()
+  {
+    createParameterizedTree();
+    ParametrizedComponent *grandchild = new ParametrizedComponent(m_childTwoComp, *m_paramMap);
+
+    TS_ASSERT_EQUALS(grandchild->getStringParameter(m_strName,false).size(), 0);
+    TS_ASSERT_EQUALS(grandchild->getNumberParameter(m_dblName, false).size(), 0);
+    TS_ASSERT_EQUALS(grandchild->getPositionParameter(m_posName, false).size(), 0);
+    TS_ASSERT_EQUALS(grandchild->getRotationParameter(m_quatName, false).size(), 0);
+
+    std::vector<std::string> params = grandchild->getStringParameter(m_strName+"_child2", false);
+    const size_t nparams = params.size(); 
+    TS_ASSERT_EQUALS(nparams, 1);
+    if( nparams > 0 )
+    {
+      TS_ASSERT_EQUALS(params[0], m_strValue + "_child2");
+    }
+
+    delete grandchild;
+    cleanUpParametrizedComponent();
+  }
+
   void testThatCorrectParametersAreListed()
   {
     ParametrizedComponent * paramComp = createSingleParameterizedComponent();
     std::set<std::string> paramNames = paramComp->getParameterNames();
 
     TS_ASSERT_EQUALS(paramNames.size(), 4);
-    checkBaseParameterNames(paramNames);
+    checkBaseParameterNamesExist(paramNames);
     cleanUpParametrizedComponent();
   }
 
@@ -88,16 +110,16 @@ public:
     //Parent
     std::set<std::string> paramNames = parent->getParameterNames();
     TS_ASSERT_EQUALS(paramNames.size(), 4);
-    checkBaseParameterNames(paramNames);
+    checkBaseParameterNamesExist(paramNames);
     //Child
     paramNames = child->getParameterNames();
     TS_ASSERT_EQUALS(paramNames.size(), 5);
-    checkBaseParameterNames(paramNames);
+    checkBaseParameterNamesExist(paramNames);
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child1"), paramNames.end());
     // Grandchild
     paramNames = grandchild->getParameterNames();
     TS_ASSERT_EQUALS(paramNames.size(), 6);
-    checkBaseParameterNames(paramNames);
+    checkBaseParameterNamesExist(paramNames);
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child1"), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_strName + "_child2"), paramNames.end());
 
@@ -145,7 +167,7 @@ public:
 
 private:
   
-  void checkBaseParameterNames(const std::set<std::string> & paramNames)
+  void checkBaseParameterNamesExist(const std::set<std::string> & paramNames)
   {
     TS_ASSERT_DIFFERS(paramNames.find(m_strName), paramNames.end());
     TS_ASSERT_DIFFERS(paramNames.find(m_dblName), paramNames.end());
@@ -186,9 +208,13 @@ private:
   void cleanUpParametrizedComponent()
   {
     delete m_parentComp;
+    m_parentComp = NULL;
     delete m_childOneComp;
+    m_childOneComp = NULL;
     delete m_childTwoComp;
+    m_childTwoComp = NULL;
     delete m_paramMap;
+    m_paramMap = NULL;
   }
 
   Component *m_parentComp,*m_childOneComp,*m_childTwoComp;
