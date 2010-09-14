@@ -704,5 +704,41 @@ using Kernel::PulseTimeType;
     }
   }
 
+
+  /** Filter this EventList into an output EventList, using
+   * keeping only events within the >= start and < end pulse times.
+   * Detector IDs and the X axis are copied as well.
+   *
+   * @param start start time (absolute)
+   * @param stop end time (absolute)
+   * @param output reference to an event list that will be output.
+   */
+  void EventList::filterByPulseTime(PulseTimeType start, PulseTimeType stop, EventList & output) const
+  {
+    //Start by sorting the event list by pulse time.
+    this->sortPulseTime();
+    //Clear the output
+    output.clear();
+    //Copy the detector IDs
+    output.detectorIDs = this->detectorIDs;
+    output.refX = this->refX;
+
+    //Iterate through all events (sorted by tof)
+    std::vector<TofEvent>::iterator itev = this->events.begin();
+
+    //Find the first event with pulse_time >= start
+    while ((itev != this->events.end()) && (itev->pulse_time < start))
+      itev++;
+
+    while ((itev != this->events.end()) && (itev->pulse_time < stop))
+    {
+      //Copy the event into another
+      const TofEvent eventCopy(*itev);
+      //Add the copy to the output
+      output.addEventQuickly(eventCopy);
+      ++itev;
+    }
+  }
+
 } /// namespace DataObjects
 } /// namespace Mantid

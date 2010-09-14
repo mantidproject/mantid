@@ -187,6 +187,8 @@ public:
 
   void reverse();
 
+  void filterByPulseTime(Kernel::PulseTimeType start, Kernel::PulseTimeType stop, EventList & output) const;
+
 private:
   ///List of events.
   mutable std::vector<TofEvent> events;

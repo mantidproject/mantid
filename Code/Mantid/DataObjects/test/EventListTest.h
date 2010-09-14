@@ -77,7 +77,7 @@ class EventListTest : public CxxTest::TestSuite
 {
 private:
   EventList el;
-  static const int NUMEVENTS = 100;
+  static const int NUMEVENTS = 200;
   static const int NUMBINS = 1600;
   int BIN_DELTA;
 
@@ -187,6 +187,7 @@ public:
     for (int i=0; i < NUMEVENTS; i++)
     {
       //Random tof up to 10 ms
+      //Random pulse time up to 1000
       el += TofEvent( 1e7*(rand()*1.0/RAND_MAX), rand()%1000);
     }
   }
@@ -459,6 +460,33 @@ public:
 
     TS_ASSERT_EQUALS(old_size, new_size);
     TS_ASSERT_DIFFERS(old_value, new_value);
+  }
+
+
+  void testFilterByPulseTime()
+  {
+    this->fake_data();
+
+    //Filter into this
+    EventList out = EventList();
+    el.filterByPulseTime(100, 200, out);
+
+    std::vector<TofEvent> eventsIn = el.getEvents();
+    int numGood = 0;
+    for (int i=0; i < eventsIn.size(); i++)
+      if ((eventsIn[i].pulseTime() >= 100) and (eventsIn[i].pulseTime() < 200))
+        numGood++;
+
+    //Good # of events.
+    TS_ASSERT_EQUALS( numGood, out.getNumberEvents());
+
+    std::vector<TofEvent> events = out.getEvents();
+    for (int i=0; i < events.size(); i++)
+    {
+      //Check that the times are within the given limits.
+      TS_ASSERT_LESS_THAN_EQUALS( 100, events[i].pulseTime());
+      TS_ASSERT_LESS_THAN( events[i].pulseTime(), 200);
+    }
   }
 };
 
