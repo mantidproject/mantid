@@ -24,6 +24,7 @@ import SANSInsts
 import math
 from mantidsimple import *
 # disable plotting if running outside Mantidplot
+##START REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 try:
     from mantidplot import plotSpectrum, mergePlots
 except ImportError:
@@ -39,6 +40,7 @@ try:
 except ImportError:
     def appwidgets():
         return []
+##END REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 
 # The workspaces
 SCATTER_SAMPLE = None
@@ -140,7 +142,7 @@ _NOPRINT_ = False
 _VERBOSE_ = False
 DefaultTrans = True
 NewTrans = False
-
+##START REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 def SetNoPrintMode(quiet = True):
     global _NOPRINT_
     _NOPRINT_ = quiet
@@ -156,7 +158,7 @@ def _printMessage(msg, log = True):
     if _NOPRINT_ == True: 
         return
     print msg
-
+##END REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 # Warn the user
 def _issueWarning(msg):
     mantid.sendLogMessage('::SANS::Warning: ' + msg)
@@ -512,6 +514,7 @@ def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period
     fullpath = alg.getPropertyValue("Filename")
     return [ os.path.dirname(fullpath), wsName, numPeriods]
 
+##REMOVED STEVE 08 September 2010
 def _leaveSinglePeriod(groupW, period):
     #get the name of the individual workspace in the group
     oldName = groupW.getName()+'_'+str(period)
@@ -530,6 +533,7 @@ def _leaveSinglePeriod(groupW, period):
     #remove the rest of the group
     mtd.deleteWorkspace(groupW.getName())
     return newName
+##REMOVED STEVE 08 Sepember 2010
 # Return the list of mismatched detector names
 def GetMismatchedDetList():
     return _MARKED_DETS_
@@ -604,7 +608,7 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
 def _SetScales(scalefactor):
     global RESCALE
     RESCALE = scalefactor * 100.0
-
+##START REMOVED STEVE (ISISCOmmandInterface.py)
 ######################### 
 # Sample geometry flag
 ######################### 
@@ -658,8 +662,7 @@ def displayGeometry():
         '    Width: ' + str(SAMPLE_WIDTH) + '\n' + \
         '    Height: ' + str(SAMPLE_HEIGHT) + '\n' + \
         '    Thickness: ' + str(SAMPLE_THICKNESS) + '\n'
-
-
+##END REMOVED STEVE (ISISCOmmandInterface.py)
 ######################################
 # Set the centre in mm
 ####################################
@@ -694,10 +697,7 @@ def SetPhiLimit(phimin,phimax, phimirror=True):
     PHIMAX = phimax
     PHIMIRROR = phimirror
     
-
-#####################################
-# Clear current mask defaults
-#####################################
+##START REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
 def _restore_defaults():
 
     Mask('MASK/CLEAR')
@@ -718,6 +718,7 @@ def _restore_defaults():
     
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
+##START REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
 ####################################
 # Add a mask to the correct string
 ###################################
@@ -783,10 +784,7 @@ def Mask(details):
                 _issueWarning('Unrecognized masking option "' + details + '"')
     else:
         pass
-
-#############################
-# Read a mask file
-#############################
+##START REMOVED (ISISReducer.py)
 def MaskFile(filename):
     _printMessage('#Opening "'+filename+'"')
     if os.path.isabs(filename) == False:
@@ -1024,8 +1022,9 @@ def _readDetectorCorrections(details):
         elif det_axis == 'ROT':
             INSTRUMENT.FRONT_DET_ROT_CORR = shift
         else:
-            pass    
-
+            pass
+##END REMOVED (ISISReducer.py)
+##START REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
 def SetSampleOffset(value):
     INSTRUMENT.set_sample_offset(value)
 
@@ -1069,7 +1068,6 @@ def displayMaskFile():
     print '    global time mask: ', TIMEMASKSTRING
     print '    rear time mask: ', TIMEMASKSTRING_R
     print '    front time mask: ', TIMEMASKSTRING_F
-
 # ---------------------------------------------------------------------------------------
 
 ##
@@ -1097,6 +1095,7 @@ def _initReduction(xcentre = None, ycentre = None):
     DIMENSION, SPECMIN, SPECMAX  = SANSUtility.GetInstrumentDetails(INSTRUMENT)
 
     return _SAMPLE_SETUP, _CAN_SETUP
+##END REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
 
 ##
 # Run the reduction for a given wavelength range
@@ -1165,10 +1164,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
     # Revert the name change so that future calls with different wavelengths get the correct name
     sample_setup.setReducedWorkspace(wsname_cache)
     return final_workspace
-
-##
-# Init helper
-##
+##REMOVED STEVE 08 September 2010
 def _init_run(raw_ws, beamcoords, emptycell):
     if raw_ws == '':
         return None
@@ -1194,7 +1190,7 @@ def _init_run(raw_ws, beamcoords, emptycell):
         return SANSUtility.RunDetails(raw_ws, final_ws, TRANS_CAN, DIRECT_CAN, maskpt_rmin, maskpt_rmax, 'can')
     else:
         return SANSUtility.RunDetails(raw_ws, final_ws, TRANS_SAMPLE, DIRECT_SAMPLE, maskpt_rmin, maskpt_rmax, 'sample')
-
+##REMOVED STEVE 08 September 2010
 ##
 # Setup the transmission workspace
 ##
@@ -1297,16 +1293,13 @@ def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orien
     SANSUtility.MaskBySpecNumber(workspace, speclist)
 
     SANSUtility.MaskByBinRange(workspace, timestring)
-    
+##REMOVED STEVE 08 September 2010
     # Finally apply masking to get the correct phi range
     if limitphi == True:
         # Detector has been moved such that beam centre is at [0,0,0]
         SANSUtility.LimitPhi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
-        
-#----------------------------------------------------------------------------------------------------------------------------
-##
-# Main correction routine
-##
+##REMOVED STEVE 08 September 2010
+##START REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False):
     '''Performs the data reduction steps'''
     global SPECMIN, SPECMAX
@@ -1434,17 +1427,15 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
 
     mantid.deleteWorkspace(tmpWS)
     return
-############################# End of Correct function ###################################################
-
-############################ Centre finding functions ###################################################
-
+##END REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
+##REMOVED STEVE 08 September 2010 (ISISCommandInterface.py)
 # These variables keep track of the centre coordinates that have been used so that we can calculate a relative shift of the
 # detector
 XVAR_PREV = 0.0
 YVAR_PREV = 0.0
 ITER_NUM = 0
 RESIDUE_GRAPH = None
-                
+
 # Create a workspace with a quadrant value in it 
 def CreateQuadrant(reduced_ws, rawcount_ws, quadrant, xcentre, ycentre, q_bins, output):
     # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
@@ -1532,7 +1523,7 @@ def CalculateResidue():
         
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
     return residueX, residueY
-
+##END REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 def RunReduction(coords):
     '''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants'''
     global XVAR_PREV, YVAR_PREV
@@ -1624,7 +1615,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     
     RMIN = DEF_RMIN
     RMAX = DEF_RMAX
-
+##START REMOVED STEVE 08 September 2010 (ISISCommandInterface.py)
 ##
 # Plot the results on the correct type of plot
 ##
@@ -1716,3 +1707,4 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath + '\n'
         
     return script
+##END REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)

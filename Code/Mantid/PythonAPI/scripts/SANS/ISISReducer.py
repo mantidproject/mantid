@@ -76,6 +76,8 @@ class ISISReducer(SANSReducer):
         self._data_loader = ISISReductionSteps.LoadSample()
         self.geometry_correcter = SANSReductionSteps.SampleGeomCor()
         
+        self._final_workspace = ''
+        
     def set_user_path(self, path):
         """
             Set the path for user files
@@ -209,7 +211,7 @@ class ISISReducer(SANSReducer):
             self.geometry_correcter = SANSReductionSteps.SampleGeomCor()
         
         self.RESCALE = 100.0
-    
+
     def mask(self, instruction):
         if self._mask is None:
             masker = ISISReductionSteps.Mask()
@@ -240,9 +242,9 @@ class ISISReducer(SANSReducer):
             
             #TODO: set up the final workspace name
             if finding_centre == False:
-                final_workspace = file_ws + '_' + str(self.WAV1) + '_' + str(self.WAV2)
+                self._final_workspace = file_ws + '_' + str(self.WAV1) + '_' + str(self.WAV2)
             else:
-                final_workspace = file_ws.split('_')[0] + '_quadrants'
+                self._final_workspace = file_ws.split('_')[0] + '_quadrants'
             #self._data_files[final_workspace] = self._data_files[file_ws]
             #del self._data_files[file_ws]
             #----> can_setup.setReducedWorkspace(tmp_can)
@@ -259,15 +261,15 @@ class ISISReducer(SANSReducer):
             if False:
                 if finding_centre == False:
                     # Replaces NANs with zeroes
-                    ReplaceSpecialValues(InputWorkspace = final_workspace, OutputWorkspace = final_workspace, NaNValue="0", InfinityValue="0")
+                    ReplaceSpecialValues(InputWorkspace = self._final_workspace, OutputWorkspace = self._final_workspace, NaNValue="0", InfinityValue="0")
                     if self.CORRECTION_TYPE == '1D':
-                        SANSUtility.StripEndZeroes(final_workspace)
+                        SANSUtility.StripEndZeroes(self._final_workspace)
                     # Store the mask file within the final workspace so that it is saved to the CanSAS file
-                    AddSampleLog(final_workspace, "UserFile", self.MASKFILE)
+                    AddSampleLog(self._final_workspace, "UserFile", self.MASKFILE)
                 else:
                     quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
                     for key, value in quadrants.iteritems():
-                        old_name = final_workspace + '_' + str(key)
+                        old_name = self._final_workspace + '_' + str(key)
                         RenameWorkspace(old_name, value)
                         AddSampleLog(value, "UserFile", self._maskfile)       
                         
@@ -523,4 +525,24 @@ class ISISReducer(SANSReducer):
             elif det_axis == 'ROT':
                 self.instrument.FRONT_DET_ROT_CORR = shift
             else:
-                pass  
+                pass
+
+
+    def set_workspace_name(self, name):
+        RenameWorkspace(self._final_workspace, name)
+
+    def _restore_defaults():
+        Mask('MASK/CLEAR')
+        Mask('MASK/CLEAR/TIME')
+        SetRearEfficiencyFile(None)
+        SetFrontEfficiencyFile(None)
+        self.RMIN = self.RMAX = self.DEF_RMIN = self.DEF_RMAX
+        self.WAV1 = self.WAV2 = self.DWAV = self.Q_REBIN = self.QXY = self.DQY = None
+        global RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS
+        # Scaling values
+        self.RESCALE = 100.  # percent
+        INSTRUMENT.FRONT_DET_Z_CORR = INSTRUMENT.FRONT_DET_Y_CORR = INSTRUMENT.FRONT_DET_X_CORR = INSTRUMENT.FRONT_DET_ROT_CORR = 0.0
+        INSTRUMENT.REAR_DET_Z_CORR = INSTRUMENT.REAR_DET_X_CORR = 0.0
+        
+        self.BACKMON_START = self.BACKMON_END = None
+    

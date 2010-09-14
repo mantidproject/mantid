@@ -73,7 +73,7 @@ def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
 def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
     '''Mask out the outside of a cylinder or specified radius'''
     MaskWithCylinder(workspace, radius, xcentre, ycentre, '#')
-
+##START REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
@@ -103,7 +103,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
             xmldef += '<algebra val="#(pla pla2)" />'
     
     MaskDetectorsInShape(workspace, xmldef)	
-
+##END REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
 # Essentially an enumeration
 class Orientation(object):
 
@@ -240,8 +240,8 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
         Rebin(tmpWS, tmpWS, wavbining)
 
     return tmpWS
-
-# Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
+##START REMOVED STEVE (SANSReductionSteps.py)
+ # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
 def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 	# Divide by the area
 	if geomid == 1:
@@ -256,7 +256,7 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 	# Multiply by the calculated correction factor
 	ws = mtd[inputWS]
 	ws *= scalefactor
-
+##END REMOVED STEVE (SANSReductionSteps.py)
 def InfinitePlaneXML(id, planept, normalpt):
 	return  '<infinite-plane id="' + str(id) + '">' + \
 	    '<point-in-plane x="' + str(planept[0]) + '" y="' + str(planept[1]) + '" z="' + str(planept[2]) + '" />' + \
@@ -290,7 +290,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
 	xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
 	xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n' 
 	return xmlstring
-
+##START REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
 def StripEndZeroes(workspace, flag_value = 0.0):
         result_ws = mantid.getMatrixWorkspace(workspace)
         y_vals = result_ws.readY(0)
@@ -314,7 +314,7 @@ def StripEndZeroes(workspace, flag_value = 0.0):
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop + 1]
         CropWorkspace(workspace,workspace,startX,endX)
-
+##END REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
 ##
 # A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment
 ##

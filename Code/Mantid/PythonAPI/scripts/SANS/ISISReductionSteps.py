@@ -18,7 +18,31 @@ def _issueWarning(msg):
         @param msg: message to be issued
     """
     mantid.sendLogMessage('::SANS::Warning: ' + msg)
-    
+
+def _strip_end_zeros(workspace, flag_value = 0.0):
+    result_ws = mantid.getMatrixWorkspace(workspace)
+    y_vals = result_ws.readY(0)
+    length = len(y_vals)
+    # Find the first non-zero value
+    start = 0
+    for i in range(0, length):
+        if ( y_vals[i] != flag_value ):
+            start = i
+            break
+    # Now find the last non-zero value
+    stop = 0
+    length -= 1
+    for j in range(length, 0,-1):
+        if ( y_vals[j] != flag_value ):
+            stop = j
+            break
+    # Find the appropriate X values and call CropWorkspace
+    x_vals = result_ws.readX(0)
+    startX = x_vals[start]
+    # Make sure we're inside the bin that we want to crop
+    endX = 1.001*x_vals[stop + 1]
+    CropWorkspace(workspace,workspace,startX,endX)
+
 class Transmission(SANSReductionSteps.BaseTransmission):
     """
         Transmission calculation for ISIS SANS instruments
@@ -275,8 +299,8 @@ class CanSubtraction(ReductionStep):
                 ReplaceSpecialValues(InputWorkspace = tmp_smp,OutputWorkspace = tmp_smp, NaNValue="0", InfinityValue="0")
                 ReplaceSpecialValues(InputWorkspace = tmp_can,OutputWorkspace = tmp_can, NaNValue="0", InfinityValue="0")
                 if reducer.CORRECTION_TYPE == '1D':
-                    SANSUtility.StripEndZeroes(tmp_smp)
-                    SANSUtility.StripEndZeroes(tmp_can)
+                    _strip_end_zeros(tmp_smp)
+                    _strip_end_zeros(tmp_can)
             else:
                 mantid.deleteWorkspace(tmp_smp)
                 mantid.deleteWorkspace(tmp_can)
@@ -289,7 +313,7 @@ class Mask(ReductionStep):
     """
     """
     def __init__(self, timemask='', timemask_r='', timemask_f='', 
-                 specmask='', specmask_r='', specmask_f=''):
+                 specmask='', specmask_r='', specmask_f='', limit_phi=False):
         """
             ISIS mask
         """
@@ -299,8 +323,14 @@ class Mask(ReductionStep):
         self._specmask=specmask
         self._specmask_r=specmask_r
         self._specmask_f=specmask_f
+        self.lim_phi=limit_phi
         
     def execute(self, reducer, workspace):
+        # Finally apply masking to get the correct phi range
+        if self.lim_phi == True:
+        # Detector has been moved such that beam centre is at [0,0,0]
+            self.mask_phi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
+
         return NotImplemented
     
     def parse_instruction(self, details):
@@ -367,7 +397,36 @@ class Mask(ReductionStep):
                     _issueWarning('Unrecognized masking option "' + details + '"')
         else:
             pass
-     
+    # Mask such that the remainder is that specified by the phi range
+    def mask_phi(workspace, centre, phimin, phimax, use_mirror=True):
+        # convert all angles to be between 0 and 360
+        while phimax > 360 : phimax -= 360
+        while phimax < 0 : phimax += 360
+        while phimin > 360 : phimin -= 360
+        while phimin < 0 : phimin += 360
+        while phimax<phimin : phimax += 360
+    
+        #Convert to radians
+        phimin = math.pi*phimin/180.0
+        phimax = math.pi*phimax/180.0
+        xmldef =  InfinitePlaneXML('pla',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0]) + \
+        InfinitePlaneXML('pla2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0]) + \
+        InfinitePlaneXML('pla3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) + \
+        InfinitePlaneXML('pla4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0])
+        
+        if use_mirror : 
+            xmldef += '<algebra val="#((pla pla2):(pla3 pla4))" />'
+        else:
+            #the formula is different for acute verses obstruse angles
+            if phimax-phimin > math.pi :
+              # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
+                xmldef += '<algebra val="#(pla:pla2)" />'
+            else :
+              # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
+                xmldef += '<algebra val="#(pla pla2)" />'
+        
+        MaskDetectorsInShape(workspace, xmldef)    
+
 class LoadSample(ReductionStep):   
     """
     """
@@ -396,7 +455,7 @@ class LoadSample(ReductionStep):
                 raise RuntimeError, "ISISReductionSteps.LoadSample doesn't recognize workspace handle %s" % workspace        
         
         # Code from AssignSample
-        _clearPrevious(self.SCATTER_SAMPLE)
+        self._clearPrevious(self.SCATTER_SAMPLE)
         self._SAMPLE_N_PERIODS = -1
         
         if( self._sample_run.startswith('.') or self._sample_run == '' or self._sample_run == None):
@@ -467,8 +526,14 @@ class LoadSample(ReductionStep):
         
     
         return self.SCATTER_SAMPLE.getName(), logvalues
-
     
+    def _clearPrevious(inWS, others = []):
+        if inWS != None:
+            if type(inWS) == SANSUtility.WorkspaceDetails:
+                inWS = inWS.getName()
+            if mtd.workspaceExists(inWS) and (not inWS in others):
+                mtd.deleteWorkspace(inWS)
+
 class LoadRun(ReductionStep):
     """
         Load a data file, move its detector to the right position according
@@ -518,99 +583,74 @@ class LoadRun(ReductionStep):
         reducer.geometry_correcter.read_from_workspace(workspace)
         
         return [ os.path.dirname(fullpath), workspace, numPeriods]        
-        
 
-        
-# Helper function
-def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None):
-    if run_string == '' or run_string.startswith('.'):
-        return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-    
-    wkspname, run_no, logname, data_file = extract_workspace_name(run_string, is_trans, 
-                                                        prefix=reducer.instrument.name(), 
-                                                        run_number_width=reducer.instrument.run_number_width)
-    
-    if run_no == '':
-        return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-
-    if reload == False and mtd.workspaceExists(wkspname):
-        return WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
-
-    filename = os.path.join(reducer._data_path, data_file)
-    # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
-    if not os.path.exists(filename):
-        filename = data_file
-    if period <= 0:
-        period = 1
-    if is_trans:
-        try:
-            if reducer.instrument.name() == 'SANS2D' and int(run_no) < 568:
-                dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
-                specmin = dimension*dimension*2
-                specmax = specmin + 4
-            else:
-                specmin = None
-                specmax = 8
-                
-            loader = LoadRun(filename, spec_min=specmin, spec_max=specmax, period=period)
-            [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
-        except RuntimeError, err:
-            mantid.sendLogMessage("::SANS::Warning: "+str(err))
+    # Helper function
+    def _assignHelper(run_string, is_trans, reload = True, period = -1, reducer=None):
+        if run_string == '' or run_string.startswith('.'):
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-    else:
-        try:
-            loader = LoadRun(filename, spec_min=None, spec_max=None, period=period)
-            [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
-        except RuntimeError, details:
-            mantid.sendLogMessage("::SANS::Warning: "+str(details))
+        
+        wkspname, run_no, logname, data_file = extract_workspace_name(run_string, is_trans, 
+                                                            prefix=reducer.instrument.name(), 
+                                                            run_number_width=reducer.instrument.run_number_width)
+        
+        if run_no == '':
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-            
-    inWS = SANSUtility.WorkspaceDetails(wkspname, run_no)
     
-    return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
-
-def _padRunNumber(run_no, field_width):
-    nchars = len(run_no)
-    digit_end = 0
-    for i in range(0, nchars):
-        if run_no[i].isdigit():
-            digit_end += 1
+        if reload == False and mtd.workspaceExists(wkspname):
+            return WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
+    
+        filename = os.path.join(reducer._data_path, data_file)
+        # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
+        if not os.path.exists(filename):
+            filename = data_file
+        if period <= 0:
+            period = 1
+        if is_trans:
+            try:
+                if reducer.instrument.name() == 'SANS2D' and int(run_no) < 568:
+                    dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
+                    specmin = dimension*dimension*2
+                    specmax = specmin + 4
+                else:
+                    specmin = None
+                    specmax = 8
+                    
+                loader = LoadRun(filename, spec_min=specmin, spec_max=specmax, period=period)
+                [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
+            except RuntimeError, err:
+                mantid.sendLogMessage("::SANS::Warning: "+str(err))
+                return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
         else:
-            break
+            try:
+                loader = LoadRun(filename, spec_min=None, spec_max=None, period=period)
+                [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
+            except RuntimeError, details:
+                mantid.sendLogMessage("::SANS::Warning: "+str(details))
+                return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
+                
+        inWS = SANSUtility.WorkspaceDetails(wkspname, run_no)
+        
+        return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
+
+    def _leaveSinglePeriod(groupW, period):
+        #get the name of the individual workspace in the group
+        oldName = groupW.getName()+'_'+str(period)
+        #move this workspace out of the group (this doesn't delete it)
+        groupW.remove(oldName)
     
-    if digit_end == nchars:
-        filebase = run_no.rjust(field_width, '0')
-        return filebase, filebase, run_no
-    else:
-        filebase = run_no[:digit_end].rjust(field_width, '0')
-        return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
-
-def _clearPrevious(inWS, others = []):
-    if inWS != None:
-        if type(inWS) == SANSUtility.WorkspaceDetails:
-            inWS = inWS.getName()
-        if mtd.workspaceExists(inWS) and (not inWS in others):
-            mtd.deleteWorkspace(inWS)
-            
-def _leaveSinglePeriod(groupW, period):
-    #get the name of the individual workspace in the group
-    oldName = groupW.getName()+'_'+str(period)
-    #move this workspace out of the group (this doesn't delete it)
-    groupW.remove(oldName)
-
-    discriptors = groupW.getName().split('_')       #information about the run (run number, if it's 1D or 2D, etc) is listed in the workspace name between '_'s
-    for i in range(0, len(discriptors) ):           #insert the period name after the run number
-        if i == 0 :                                 #the run number is the first part of the name
-            newName = discriptors[0]+'p'+str(period)#so add the period number here
-        else :
-            newName += '_'+discriptors[i]
-
-    RenameWorkspace(oldName, newName)
-
-    #remove the rest of the group
-    mtd.deleteWorkspace(groupW.getName())
-    return newName
-
+        discriptors = groupW.getName().split('_')       #information about the run (run number, if it's 1D or 2D, etc) is listed in the workspace name between '_'s
+        for i in range(0, len(discriptors) ):           #insert the period name after the run number
+            if i == 0 :                                 #the run number is the first part of the name
+                newName = discriptors[0]+'p'+str(period)#so add the period number here
+            else :
+                newName += '_'+discriptors[i]
+    
+        RenameWorkspace(oldName, newName)
+    
+        #remove the rest of the group
+        mtd.deleteWorkspace(groupW.getName())
+        return newName
+    
 def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8):
     pieces = run_string.split('.')
     if len(pieces) != 2 :
@@ -628,3 +668,18 @@ def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_wid
     
     return wkspname, run_no, logname, prefix+fullrun_no+'.'+ext
 
+def _padRunNumber(run_no, field_width):
+    nchars = len(run_no)
+    digit_end = 0
+    for i in range(0, nchars):
+        if run_no[i].isdigit():
+            digit_end += 1
+        else:
+            break
+    
+    if digit_end == nchars:
+        filebase = run_no.rjust(field_width, '0')
+        return filebase, filebase, run_no
+    else:
+        filebase = run_no[:digit_end].rjust(field_width, '0')
+        return filebase + run_no[digit_end:], filebase, run_no[:digit_end]

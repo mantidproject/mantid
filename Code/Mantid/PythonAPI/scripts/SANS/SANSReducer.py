@@ -295,3 +295,5 @@ class SANSReducer(Reducer):
         if self._save_iq is not None:
             self.append_step(self._save_iq)
             
+        if self.geometry_correcter is not None:
+            self.append_step(self.geometry_correcter)
