@@ -2,6 +2,7 @@
     Beam finder interface
 """
 import util
+import os
 from PyQt4 import QtGui, uic, QtCore
 from reduction.hfir_reduction_steps import BeamFinder
 
@@ -56,11 +57,11 @@ class BeamFinderFrame(QtGui.QFrame):
         self.beam_radius_edit.setEnabled(False)
             
 class BeamFinderWidget(QtGui.QWidget):    
-    def __init__(self, parent=None, state=None):
+    def __init__(self, parent=None, state=None, ui_path='ui'):
         QtGui.QWidget.__init__(self, parent)
         self._layout = QtGui.QHBoxLayout()
         self._content = BeamFinderFrame(self)
-        uic.loadUi("ui/hfir_beam_finder.ui", self._content)
+        uic.loadUi(os.path.join(ui_path, "hfir_beam_finder.ui"), self._content)
         self._layout.addWidget(self._content)
         self.setLayout(self._layout)
         

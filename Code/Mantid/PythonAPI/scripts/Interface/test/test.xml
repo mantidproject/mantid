@@ -1,0 +1,18 @@
+<Reduction>
+	<Instrument>
+	  <name>BIOSANS-TEST</name>
+	  <nx_pixels>128</nx_pixels>
+	  <ny_pixels>128</ny_pixels>
+	  <pixel_size>3.1416</pixel_size>
+	</Instrument>
+	
+	<BeamFinder>
+	  <position>
+	    <x>0</x>
+	    <y>0</y>
+	  </position>
+	  <use_finder>False</use_finder>
+	  <beam_file>some file</beam_file>
+	  <use_direct_beam>True</use_direct_beam>
+	</BeamFinder>
+</Reduction>

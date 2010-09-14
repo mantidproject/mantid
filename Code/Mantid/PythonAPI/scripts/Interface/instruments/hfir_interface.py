@@ -14,6 +14,8 @@ class HFIRInterface(object):
     """
         Defines the widgets for HFIR reduction
     """
+    ui_path = 'ui'
+    
     def __init__(self, name=''):
         self.scripter = ReductionScripter(name=name)
         # Main panel with instrument description common to all data files
@@ -34,10 +36,12 @@ class HFIRInterface(object):
     def get_tabs(self):
         
         # Instrument description
-        self._instrument_widget = SANSInstrumentWidget(state=self.scripter.instrument)
+        self._instrument_widget = SANSInstrumentWidget(state=self.scripter.instrument,
+                                                       ui_path = self.ui_path)
         
         # Beam finder
-        self._beam_finder_widget = BeamFinderWidget(state=self.scripter.beam_finder)
+        self._beam_finder_widget = BeamFinderWidget(state=self.scripter.beam_finder,
+                                                    ui_path = self.ui_path)
         
         return {"Instrument": self._instrument_widget,
                 "Beam Finder": self._beam_finder_widget}

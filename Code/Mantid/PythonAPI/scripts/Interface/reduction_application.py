@@ -1,11 +1,16 @@
-import sys
+import sys, os
 from PyQt4 import QtGui, uic
+
 from instruments.instrument_factory import instrument_factory
 from reduction.hfir_reduction import ReductionScripter
-        
+     
+
 class ReductionGUI(QtGui.QMainWindow):
-    def __init__(self, instrument=None):
+    def __init__(self, instrument=None, ui_path="ui"):
         QtGui.QMainWindow.__init__(self)
+        
+        # Directory where to find the .ui files
+        self.ui_path = ui_path
         
         # Name handle for the instrument
         self._instrument = instrument
@@ -17,6 +22,7 @@ class ReductionGUI(QtGui.QMainWindow):
         #TODO: add instrument selection to top menu
 
         self._interface = instrument_factory(self._instrument)
+        self._interface.ui_path = self.ui_path
         self.tabWidget.clear()
         
         tab_dict = self._interface.get_tabs()
@@ -30,18 +36,21 @@ class ReductionGUI(QtGui.QMainWindow):
         """
         self._interface.reduce()
         
-        
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+def start(ui_path="ui"):
+    app = QtGui.QApplication([])
     
     # Instrument selection
     #TODO: pick up list of instrument from settings file
-    dialog = uic.loadUi("ui/instrument_dialog.ui")
+    dialog = uic.loadUi(os.path.join(ui_path,"instrument_dialog.ui"))
     dialog.exec_()
     if dialog.result()==1:
-        reducer = ReductionGUI(dialog.instr_combo.currentText())
-        uic.loadUi("ui/reduction_main.ui", reducer)
+        reducer = ReductionGUI(dialog.instr_combo.currentText(), ui_path=ui_path)
+        uic.loadUi(os.path.join(ui_path,"reduction_main.ui"), reducer)
         reducer.setup_layout()
         reducer.show()
-        sys.exit(app.exec_())
+        sys.exit(app.exec_())   
+        
+if __name__ == '__main__':
+    start()
+
         

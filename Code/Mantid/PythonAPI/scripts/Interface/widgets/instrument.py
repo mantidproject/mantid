@@ -1,16 +1,17 @@
 from PyQt4 import QtGui, uic, QtCore
 import util
+import os
 from reduction.hfir_reduction import InstrumentDescription
 
 class SANSInstrumentWidget(QtGui.QWidget):    
     
-    def __init__(self, parent=None, state=None):
+    def __init__(self, parent=None, state=None, ui_path='ui'):
         QtGui.QWidget.__init__(self, parent)
         
         self._layout = QtGui.QHBoxLayout()
 
         self._summary = QtGui.QFrame(self)
-        uic.loadUi("ui/hfir_summary.ui", self._summary)
+        uic.loadUi(os.path.join(ui_path, "hfir_summary.ui"), self._summary)
         self._layout.addWidget(self._summary)
 
         self.setLayout(self._layout)
