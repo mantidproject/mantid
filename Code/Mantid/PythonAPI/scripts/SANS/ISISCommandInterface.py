@@ -248,13 +248,15 @@ def Correct():
             GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
             return
         else:
-            Q1D(tmpWS,final_result,final_result,Q_REBIN, AccountForGravity=GRAVITY)
+            conv = RunQ1D()
+            conv.execute(ReductionSingleton, tmpWS,final_result,final_result,Q_REBIN, GRAVITY)
     # 2D    
     else:
         if finding_centre == True:
             raise Exception('Running center finding in 2D analysis is not possible, set1D() first.') 
         # Run 2D algorithm
-        Qxy(tmpWS, final_result, QXY2, DQXY)
+        conv = RunQxy()
+        conv.execute(tmpWS, final_result, QXY2, DQXY)
 
     mantid.deleteWorkspace(tmpWS)
     return

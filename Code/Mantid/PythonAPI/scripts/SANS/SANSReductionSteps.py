@@ -675,27 +675,28 @@ class SampleGeomCor(ReductionStep):
                '    Height: ' + str(self._height)+'\n'+\
                '    Thickness: ' + str(self._thickness)+'\n'
 
-class StripEndZeroes(ReductionStep):
-    def __init__(self):
-        super(SampleGeomCor, self).__init__()
-    
-    def execute(self, reducer, workspace, flag_value = 0.0):
+class StripEndZeros(ReductionStep):
+    def __init__(self, flag_value = 0.0):
+        super(StripEndZeros, self).__init__()
+        self._flag_value = flag_value
+        
+    def execute(self, reducer, workspace):
         result_ws = mantid.getMatrixWorkspace(workspace)
         y_vals = result_ws.readY(0)
         length = len(y_vals)
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
-                if ( y_vals[i] != flag_value ):
-                        start = i
-                        break
+            if ( y_vals[i] != self._flag_value ):
+                start = i
+                break
         # Now find the last non-zero value
         stop = 0
         length -= 1
         for j in range(length, 0,-1):
-                if ( y_vals[j] != flag_value ):
-                        stop = j
-                        break
+            if ( y_vals[j] != self._flag_value ):
+                stop = j
+                break
         # Find the appropriate X values and call CropWorkspace
         x_vals = result_ws.readX(0)
         startX = x_vals[start]

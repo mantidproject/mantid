@@ -19,30 +19,6 @@ def _issueWarning(msg):
     """
     mantid.sendLogMessage('::SANS::Warning: ' + msg)
 
-def _strip_end_zeros(workspace, flag_value = 0.0):
-    result_ws = mantid.getMatrixWorkspace(workspace)
-    y_vals = result_ws.readY(0)
-    length = len(y_vals)
-    # Find the first non-zero value
-    start = 0
-    for i in range(0, length):
-        if ( y_vals[i] != flag_value ):
-            start = i
-            break
-    # Now find the last non-zero value
-    stop = 0
-    length -= 1
-    for j in range(length, 0,-1):
-        if ( y_vals[j] != flag_value ):
-            stop = j
-            break
-    # Find the appropriate X values and call CropWorkspace
-    x_vals = result_ws.readX(0)
-    startX = x_vals[start]
-    # Make sure we're inside the bin that we want to crop
-    endX = 1.001*x_vals[stop + 1]
-    CropWorkspace(workspace,workspace,startX,endX)
-
 class Transmission(SANSReductionSteps.BaseTransmission):
     """
         Transmission calculation for ISIS SANS instruments
@@ -683,3 +659,19 @@ def _padRunNumber(run_no, field_width):
     else:
         filebase = run_no[:digit_end].rjust(field_width, '0')
         return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
+
+class RunQ1D(ReductionStep):
+    def __init__(self):
+        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
+        super(RunQ1D, self).__init__()
+
+    def execute(self, reducer, tmpWS,final_result,final_result,Q_REBIN, GRAVITY):
+        Q1D(tmpWS,final_result,final_result,Q_REBIN, AccountForGravity=GRAVITY)
+
+class RunQxy(ReductionStep):
+    def __init__(self):
+        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
+        super(RunQxy, self).__init__()
+
+    def execute(self, tmpWS, final_result, QXY2, DQXY):
+        Qxy(tmpWS, final_result, QXY2, DQXY)
