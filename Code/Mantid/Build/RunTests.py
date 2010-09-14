@@ -42,7 +42,7 @@ env_var_name = ''
 new_val = os.path.join(os.getcwd(), 'release')
 if platform.system() == 'Darwin':
     env_var_name = 'DYLD_LIBRARY_PATH'
-    new_val += ':' + os.join(os.getcwd(),thirdparty_libpath)
+    new_val += ':' + os.path.join(os.getcwd(),thirdparty_libpath)
 elif platform.system() == 'Linux':
     env_var_name = 'LD_LIBRARY_PATH'
 else:
