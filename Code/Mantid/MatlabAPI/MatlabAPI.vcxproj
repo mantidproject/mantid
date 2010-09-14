@@ -180,10 +180,6 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
       <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../DataHandling/inc;c:/matlab/R2007a/extern/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_MATLAB_API=1;MATLAB_MEX_FILE;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -191,6 +187,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(SolutionName)API.lib;$(SolutionName)Kernel.lib;$(SolutionName)Geometry.lib;$(SolutionName)DataHandling.lib;libmex.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>

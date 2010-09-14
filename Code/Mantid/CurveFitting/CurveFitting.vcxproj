@@ -170,12 +170,6 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>IN_MANTID_CURVE_FITTING=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -185,6 +179,7 @@
       <DebugInformationFormat>
       </DebugInformationFormat>
       <DisableSpecificWarnings>4275; 4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(SolutionName)kernel.lib;$(SolutionName)DataObjects.lib;$(SolutionName)Geometry.lib;gsl.lib;muparser.lib;%(AdditionalDependencies)</AdditionalDependencies>

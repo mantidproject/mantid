@@ -152,7 +152,13 @@ if os.name == 'nt':
         cflags.extend([ '/wd4275', '/wd4996'])
         env.Append(CPPDEFINES = ['_DEBUG'])
     else :
-        cflags = ['/Ox','/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP']
+        cflags = ['/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP']
+        # Optimzation flags. Note that there is a bug in the 64-bit VS 2010 compiler when using the /O2 compiler option so until the hotfix for this is obtained use /O1
+        # Bug information here: http://support.microsoft.com/kb/2280741
+        if int(win64):
+            cflags.extend(['/O1'])
+        else:
+            cflags.extend(['/O2'])
         cflags.extend(['/wd4251', '/wd4275', '/wd4996'])
         env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/ltcg'])
         # WIN98 optimisation no longer available in VS2010 so option removed

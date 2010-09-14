@@ -52,7 +52,6 @@ testsToRun = os.listdir(testDir)
 for test in testsToRun:
     if test.endswith("cpp"):
         test = test.split(".")[0]
-        if not test == 'CurveFitting': continue
         runlog += test+"\n"
         if os.name == 'posix':
             test = "./" + test

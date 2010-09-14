@@ -12,6 +12,9 @@
     <Link>
       <AdditionalLibraryDirectories>..\..\Third_Party\lib\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ClCompile>
+      <Optimization>MinSpace</Optimization>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
