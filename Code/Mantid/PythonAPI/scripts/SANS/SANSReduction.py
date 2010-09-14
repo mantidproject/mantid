@@ -195,7 +195,7 @@ def UserPath(directory):
 #####################################################
 def printParameter(var):
     try:
-        exec('print ' + var)
+        exec('print ' + var + ',')
     except:
         _issueWarning("Could not find parameter " + var + ", trying instrument object")
         exec('print INSTRUMENT.' + var)
@@ -662,7 +662,6 @@ def displayGeometry():
         '    Width: ' + str(SAMPLE_WIDTH) + '\n' + \
         '    Height: ' + str(SAMPLE_HEIGHT) + '\n' + \
         '    Thickness: ' + str(SAMPLE_THICKNESS) + '\n'
-##END REMOVED STEVE (ISISCOmmandInterface.py)
 ######################################
 # Set the centre in mm
 ####################################
@@ -671,6 +670,7 @@ def SetCentre(XVAL, YVAL):
     global XBEAM_CENTRE, YBEAM_CENTRE
     XBEAM_CENTRE = XVAL/1000.
     YBEAM_CENTRE = YVAL/1000.
+##END REMOVED STEVE (ISISCOmmandInterface.py)
 
 #####################################
 # Set the phi limit
@@ -1096,7 +1096,7 @@ def _initReduction(xcentre = None, ycentre = None):
 
     return _SAMPLE_SETUP, _CAN_SETUP
 ##END REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
-
+##START REMOVED STEVE 14 September 2010 (ISISSANSReductionSteps.py)
 ##
 # Run the reduction for a given wavelength range
 ##
@@ -1121,7 +1121,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
     sample_setup.setReducedWorkspace(final_workspace)
     # Perform correction
     Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
-
+##END REMOVED STEVE 14 September 2010 (ISISSANSReductionSteps.py)
     if can_setup != None:
         tmp_smp = final_workspace+"_sam_tmp"
         RenameWorkspace(final_workspace, tmp_smp)
