@@ -29,8 +29,7 @@ except ImportError:
 _NOPRINT_ = False
 _VERBOSE_ = False
 
-#set the reduction singleton to the ISIS version
-Clear(ISISReducer.ISISReducer)
+
 
 def SetNoPrintMode(quiet = True):
     _NOPRINT_ = quiet
@@ -57,6 +56,7 @@ def UserPath(path):
     ReductionSingleton().set_user_path(path)
         
 def SANS2D():
+    Clear(ISISReducer.ISISReducer)
     instrument = SANSInsts.SANS2D()
     
     #TODO: this should probably be part of __init__. Leave it for now
@@ -68,6 +68,7 @@ def SANS2D():
     ReductionSingleton().set_instrument(instrument)
 
 def LOQ():
+    Clear(ISISReducer.ISISReducer)
     instrument = SANSInsts.LOQ()
     
     #TODO: refactor this away
