@@ -11,11 +11,18 @@ log_dir = '../../../../logs/'
 buildlog = open(log_dir + "Mantid/testsBuild.log","w")
 builderr = open(log_dir + "Mantid/testsBuildErr.log","w")
 buildargs=[]
+thirdparty_libpath=""
 if platform.system() == 'Windows':
+    thirdparty_libpath = "..\\Third_Party\\lib\\win"
     if platform.architecture()[0] == '64bit':
         buildargs.append("win64=1")
+        thirdparty_libpath += "64"
+    else:
+        thirdparty_libpath += "32"
 elif platform.system() == 'Linux':
     buildargs.append('gcc44=1')
+elif platform.system() == "Darwin":
+    thirdparty_libpath = '/../Third_Party/lib/mac'
 sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
 buildlog.close()
 builderr.close()
@@ -30,18 +37,17 @@ BuildTimeLog.close()
 # Then run them
 timeStart = time.time()
 
-# On the Mac, need to set the path to the shared libraries
-# Hopefully can remove this when paths are correctly embedded by build
+# On the Mac & Windows, need to set the path to the shared libraries when running the tests
 env_var_name = ''
 new_val = os.path.join(os.getcwd(), 'release')
 if platform.system() == 'Darwin':
     env_var_name = 'DYLD_LIBRARY_PATH'
-    new_val += ':' + os.getcwd()+'/../Third_Party/lib/mac'
+    new_val += ':' + os.join(os.getcwd(),thirdparty_libpath)
 elif platform.system() == 'Linux':
     env_var_name = 'LD_LIBRARY_PATH'
 else:
     env_var_name = 'PATH'
-    new_val += ";" + os.environ[env_var_name]
+    new_val += ";" + os.path.join(os.getcwd(),thirdparty_libpath) + ";" + os.environ[env_var_name]
 start_environ = { env_var_name:os.environ[env_var_name] }
 os.putenv(env_var_name, new_val)    
 
