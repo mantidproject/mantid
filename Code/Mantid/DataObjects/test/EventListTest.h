@@ -474,7 +474,7 @@ public:
     std::vector<TofEvent> eventsIn = el.getEvents();
     int numGood = 0;
     for (int i=0; i < eventsIn.size(); i++)
-      if ((eventsIn[i].pulseTime() >= 100) and (eventsIn[i].pulseTime() < 200))
+      if ((eventsIn[i].pulseTime() >= 100) && (eventsIn[i].pulseTime() < 200))
         numGood++;
 
     //Good # of events.
