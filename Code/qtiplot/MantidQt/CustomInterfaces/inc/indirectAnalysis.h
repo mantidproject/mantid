@@ -59,6 +59,7 @@ namespace MantidQt
       void sliceTwoRanges(bool state);
       void sliceCalib(bool state);
       void msdRun();
+      void msdPlotInput();
       void absorptionRun();
       void absorptionShape(int index);
 

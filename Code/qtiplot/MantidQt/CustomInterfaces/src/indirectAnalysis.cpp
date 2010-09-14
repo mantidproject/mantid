@@ -57,6 +57,7 @@ void indirectAnalysis::initLayout()
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
   // msd
   connect(m_uiForm.msd_pbRun, SIGNAL(clicked()), this, SLOT(msdRun()));
+  connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
   // absorption
   connect(m_uiForm.abs_pbRun, SIGNAL(clicked()), this, SLOT(absorptionRun()));
   connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
@@ -637,7 +638,7 @@ void indirectAnalysis::furyRun()
     "fury_ws = fury(samples, resolution, rebin, Save=save)\n";
   if ( m_uiForm.fury_ckPlot->isChecked() )
   {
-    pyInput += "specrange = range(0, mtd[fury_ws].getNumberHistograms())\n";
+    pyInput += "specrange = range(0, mtd[fury_ws[0]].getNumberHistograms())\n";
     pyInput += "plotFury(fury_ws, [0])\n";
   }
   QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -811,7 +812,7 @@ void indirectAnalysis::msdRun()
     "from IndirectDataAnalysis import msdfit\n"
     "startX = " + m_uiForm.msd_leStartX->text() +"\n"
     "endX = " + m_uiForm.msd_leEndX->text() +"\n"
-    "elwin = r'" + m_uiForm.msd_inputFile->getFirstFilename() + "'\n";
+    "inputs = [r'" + m_uiForm.msd_inputFile->getFilenames().join("', r'") + "']\n";
 
   if ( m_uiForm.msd_ckSave->isChecked() )
     pyInput += "save = True\n";
@@ -824,11 +825,19 @@ void indirectAnalysis::msdRun()
     pyInput += "plot = False\n";
 
   pyInput +=
-    "msdfit(elwin, startX, endX, Save=save, Plot=plot)\n";
+    "msdfit(inputs, startX, endX, Save=save, Plot=plot)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
 
+}
+void indirectAnalysis::msdPlotInput()
+{
+  QString pyInput = "from mantidsimple import *\n"
+    "from mantidplot import *\n"
+    "LoadNexusProcessed(r'" + m_uiForm.msd_inputFile->getFirstFilename() + "', 'msd_input_plot')\n"
+    "plotSpectrum('msd_input_plot', 0)\n";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 void indirectAnalysis::absorptionRun()
 {

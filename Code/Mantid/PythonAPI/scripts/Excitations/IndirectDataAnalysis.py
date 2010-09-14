@@ -26,7 +26,7 @@ def absorption(input, mode, sample, can, efixed, Save=False):
 		SaveNexus(outWS_n, outWS_n+'.nxs')
 	mantid.deleteWorkspace(root)
 
-def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, plotOpt=False):
+def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, plotOpt=False, Save=True):
 	'''
 	DEMON function for unit conversion on diffraction backs of IRIS/OSIRIS.
 	MANDATORY PARAMS:
@@ -61,7 +61,8 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, plo
 		workspaces.append(savefile)
 		if CleanUp:
 			mantid.deleteWorkspace(ws_names[i])
-		SaveNexusProcessed(savefile, savefile+'.nxs')
+		if Save:
+			SaveNexusProcessed(savefile, savefile+'.nxs')
 	if plotOpt:
 		for demon in workspaces:
 			nspec = mantid.getMatrixWorkspace(demon).getNumberHistograms()
@@ -128,20 +129,21 @@ def fury(sam_files, res_file, rebinParam, Save=False, RES=True):
 
 	return outWSlist
 
-def msdfit(file, startX, endX, Save=False, Plot=False):
-	(direct, filename) = os.path.split(file)
-	(root, ext) = os.path.splitext(filename)
-	LoadNexusProcessed(file, root)
-	outWS_n = root[:-3] + 'msd'
-	fit_alg = Linear(root, outWS_n, WorkspaceIndex=0, StartX=startX, EndX=endX)
-	A0 = fit_alg.getPropertyValue("FitIntercept")
-	A1 = fit_alg.getPropertyValue("FitSlope")
-	title = 'Intercept: '+A0+' ; Slope: '+A1
-	if Plot:
-		graph=plotSpectrum([root,outWS_n],0, 1)
-		graph.activeLayer().setTitle(title)
-	if Save:
-		SaveNexusProcessed(outWS_n, outWS_n+'.nxs', Title=title)
+def msdfit(inputs, startX, endX, Save=False, Plot=False):
+	for file in inputs:
+		(direct, filename) = os.path.split(file)
+		(root, ext) = os.path.splitext(filename)
+		LoadNexusProcessed(file, root)
+		outWS_n = root[:-3] + 'msd'
+		fit_alg = Linear(root, outWS_n, WorkspaceIndex=0, StartX=startX, EndX=endX)
+		A0 = fit_alg.getPropertyValue("FitIntercept")
+		A1 = fit_alg.getPropertyValue("FitSlope")
+		title = 'Intercept: '+A0+' ; Slope: '+A1
+		if Plot:
+			graph=plotSpectrum([root,outWS_n],0, 1)
+			graph.activeLayer().setTitle(title)
+		if Save:
+			SaveNexusProcessed(outWS_n, outWS_n+'.nxs', Title=title)
 
 def mut(inWS_n, deltaW, filename, efixed):
 	file_handle = open(filename, 'w') # Open File
@@ -164,7 +166,7 @@ def mut(inWS_n, deltaW, filename, efixed):
 	mantid.deleteWorkspace(tempWS)
 
 def plotFury(inWS_n, spec):
-	inWS = mantid.getMatrixWorkspace(inWS_n)
+	inWS = mantid.getMatrixWorkspace(inWS_n[0])
 	nbins = inWS.getNumberBins()
 	lastValueZero = False
 	for i in range(0, nbins):

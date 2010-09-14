@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
+    <width>435</width>
     <height>286</height>
    </rect>
   </property>
@@ -134,6 +134,673 @@
           </size>
          </property>
         </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabSlice" >
+      <attribute name="title" >
+       <string>Slice</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_7" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_12" >
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
+           <property name="findRunFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="label" stdset="0" >
+            <string>Input Files</string>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>.raw</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="slice_pbPlotRaw" >
+           <property name="text" >
+            <string>Plot Raw</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10" >
+         <item>
+          <widget class="QCheckBox" name="slice_ckUseCalib" >
+           <property name="text" >
+            <string>Use Calibration File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="findRunFiles" stdset="0" >
+            <bool>false</bool>
+           </property>
+           <property name="label" stdset="0" >
+            <string/>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>false</bool>
+           </property>
+           <property name="optional" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>_calib.nxs</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_19" >
+         <item>
+          <widget class="QLabel" name="slice_lbRange1" >
+           <property name="text" >
+            <string>TOF Range 1</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="slice_leRange0" />
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_valRange0" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_lbTo1" >
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="slice_leRange1" />
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_valRange1" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="slice_ckUseTwoRanges" >
+         <property name="text" >
+          <string>Use Two Time of Flight Ranges and Subtract</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout" >
+         <item row="2" column="1" >
+          <widget class="QLineEdit" name="slice_leRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4" >
+          <widget class="QLineEdit" name="slice_leRange3" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2" >
+          <widget class="QLabel" name="slice_valRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3" >
+          <widget class="QLabel" name="slice_lbTo2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" >
+          <widget class="QLabel" name="slice_lbRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>TOF Range 2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="5" >
+          <widget class="QLabel" name="slice_valRange3" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_11" >
+         <item>
+          <spacer name="horizontalSpacer_10" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_8" >
+           <item>
+            <widget class="QCheckBox" name="slice_ckSave" >
+             <property name="text" >
+              <string>Save Output</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_4" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="slice_pbRun" >
+             <property name="text" >
+              <string>Run Slice</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_11" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabElwin" >
+      <attribute name="title" >
+       <string>Elwin</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_16" >
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
+           <property name="findRunFiles" stdset="0" >
+            <bool>false</bool>
+           </property>
+           <property name="label" stdset="0" >
+            <string>Input File</string>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>.nxs</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="elwin_pbPlotInput" >
+           <property name="text" >
+            <string>Plot Input</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+         <item>
+          <widget class="QLabel" name="elwin_lbStart" >
+           <property name="text" >
+            <string>Energy Range 1</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leEStart" />
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeStart" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_lbEnd" >
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leEEnd" />
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeEnd" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_13" >
+         <item>
+          <widget class="QCheckBox" name="elwin_ckUseTwoRanges" >
+           <property name="text" >
+            <string>Use Two Energy Ranges &amp;&amp; Subtract</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_15" >
+         <item>
+          <widget class="QLabel" name="elwin_lbR2Start" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>Energy Range 2</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leRangeTwoStart" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeTwoStart" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_lbR2End" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="elwin_leRangeTwoEnd" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="elwin_valRangeTwoEnd" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_7" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>60</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout" >
+         <item>
+          <spacer name="horizontalSpacer_4" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_4" >
+           <item>
+            <widget class="QCheckBox" name="elwin_ckSave" >
+             <property name="text" >
+              <string>Save Result</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="elwin_pbRun" >
+             <property name="text" >
+              <string>Run Elwin</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabMSD" >
+      <attribute name="title" >
+       <string>MSD Fit</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_18" >
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" >
+           <property name="findRunFiles" stdset="0" >
+            <bool>false</bool>
+           </property>
+           <property name="label" stdset="0" >
+            <string>Input File</string>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>_elw.nxs</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="msd_pbPlotInput" >
+           <property name="text" >
+            <string>Plot Input</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6" >
+         <item>
+          <widget class="QLabel" name="msd_lbStartX" >
+           <property name="text" >
+            <string>Start X</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="msd_leStartX" />
+         </item>
+         <item>
+          <widget class="QLabel" name="msd_valStartX" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="msd_lbEndX" >
+           <property name="text" >
+            <string>End X</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="msd_leEndX" />
+         </item>
+         <item>
+          <widget class="QLabel" name="msd_valEndX" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7" >
+         <item>
+          <spacer name="horizontalSpacer_6" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_6" >
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8" >
+             <item>
+              <widget class="QCheckBox" name="msd_ckSave" >
+               <property name="text" >
+                <string>Save Output</string>
+               </property>
+               <property name="checked" >
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="msd_ckPlot" >
+               <property name="text" >
+                <string>Plot Output</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_9" >
+             <item>
+              <spacer name="horizontalSpacer_8" >
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0" >
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="msd_pbRun" >
+               <property name="text" >
+                <string>Run MSD Fit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_9" >
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0" >
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_7" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -385,658 +1052,6 @@
        </item>
       </layout>
       <zorder></zorder>
-     </widget>
-     <widget class="QWidget" name="tabElwin" >
-      <attribute name="title" >
-       <string>Elwin</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3" >
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_16" >
-         <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
-           <property name="findRunFiles" stdset="0" >
-            <bool>false</bool>
-           </property>
-           <property name="label" stdset="0" >
-            <string>Input File</string>
-           </property>
-           <property name="multipleFiles" stdset="0" >
-            <bool>true</bool>
-           </property>
-           <property name="fileExtensions" >
-            <stringlist>
-             <string>.nxs</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="elwin_pbPlotInput" >
-           <property name="text" >
-            <string>Plot Input</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" >
-         <item>
-          <widget class="QLabel" name="elwin_lbStart" >
-           <property name="text" >
-            <string>Window Start:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="elwin_leEStart" />
-         </item>
-         <item>
-          <widget class="QLabel" name="elwin_valRangeStart" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="elwin_lbEnd" >
-           <property name="text" >
-            <string>End:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="elwin_leEEnd" />
-         </item>
-         <item>
-          <widget class="QLabel" name="elwin_valRangeEnd" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_13" >
-         <item>
-          <widget class="QCheckBox" name="elwin_ckUseTwoRanges" >
-           <property name="text" >
-            <string>Use Two Energy Ranges &amp;&amp; Subtract</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_15" >
-         <item>
-          <widget class="QLabel" name="elwin_lbR2Start" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="text" >
-            <string>Start: </string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="elwin_leRangeTwoStart" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="elwin_valRangeTwoStart" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="elwin_lbR2End" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="text" >
-            <string>End: </string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="elwin_leRangeTwoEnd" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="elwin_valRangeTwoEnd" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_7" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType" >
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>60</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" >
-         <item>
-          <spacer name="horizontalSpacer_4" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_4" >
-           <item>
-            <widget class="QCheckBox" name="elwin_ckSave" >
-             <property name="text" >
-              <string>Save Result</string>
-             </property>
-             <property name="checked" >
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_2" >
-             <property name="orientation" >
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0" >
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="elwin_pbRun" >
-             <property name="text" >
-              <string>Run Elwin</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_3" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabSlice" >
-      <attribute name="title" >
-       <string>Slice</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_7" >
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_12" >
-         <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
-           <property name="findRunFiles" stdset="0" >
-            <bool>true</bool>
-           </property>
-           <property name="label" stdset="0" >
-            <string>Input Files</string>
-           </property>
-           <property name="multipleFiles" stdset="0" >
-            <bool>true</bool>
-           </property>
-           <property name="fileExtensions" >
-            <stringlist>
-             <string>.raw</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="slice_pbPlotRaw" >
-           <property name="text" >
-            <string>Plot Raw</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_10" >
-         <item>
-          <widget class="QCheckBox" name="slice_ckUseCalib" >
-           <property name="text" >
-            <string>Use Calibration File</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="findRunFiles" stdset="0" >
-            <bool>false</bool>
-           </property>
-           <property name="label" stdset="0" >
-            <string/>
-           </property>
-           <property name="multipleFiles" stdset="0" >
-            <bool>false</bool>
-           </property>
-           <property name="optional" stdset="0" >
-            <bool>true</bool>
-           </property>
-           <property name="fileExtensions" >
-            <stringlist>
-             <string>_calib.nxs</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QGridLayout" name="gridLayout" >
-         <item row="0" column="1" >
-          <widget class="QLineEdit" name="slice_leRange0" />
-         </item>
-         <item row="2" column="1" >
-          <widget class="QLineEdit" name="slice_leRange2" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="4" >
-          <widget class="QLineEdit" name="slice_leRange1" />
-         </item>
-         <item row="2" column="4" >
-          <widget class="QLineEdit" name="slice_leRange3" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2" >
-          <widget class="QLabel" name="slice_valRange2" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" >
-          <widget class="QLabel" name="slice_valRange0" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3" >
-          <widget class="QLabel" name="slice_lbTo1" >
-           <property name="text" >
-            <string>to</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3" >
-          <widget class="QLabel" name="slice_lbTo2" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="text" >
-            <string>to</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="slice_lbRange1" >
-           <property name="text" >
-            <string>TOF Range 1</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0" >
-          <widget class="QLabel" name="slice_lbRange2" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="text" >
-            <string>TOF Range 2</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="5" >
-          <widget class="QLabel" name="slice_valRange1" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="5" >
-          <widget class="QLabel" name="slice_valRange3" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" >
-          <widget class="QCheckBox" name="slice_ckUseTwoRanges" >
-           <property name="text" >
-            <string>Use Two Ranges</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_11" >
-         <item>
-          <spacer name="horizontalSpacer_10" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_8" >
-           <item>
-            <widget class="QCheckBox" name="slice_ckSave" >
-             <property name="text" >
-              <string>Save Output</string>
-             </property>
-             <property name="checked" >
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_4" >
-             <property name="orientation" >
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0" >
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="slice_pbRun" >
-             <property name="text" >
-              <string>Run Slice</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_11" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabMSD" >
-      <attribute name="title" >
-       <string>MSD Fit</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_5" >
-       <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" >
-         <property name="findRunFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="label" stdset="0" >
-          <string>Input File</string>
-         </property>
-         <property name="multipleFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="fileExtensions" >
-          <stringlist>
-           <string>_elw.nxs</string>
-          </stringlist>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6" >
-         <item>
-          <widget class="QLabel" name="msd_lbStartX" >
-           <property name="text" >
-            <string>Start X</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="msd_leStartX" />
-         </item>
-         <item>
-          <widget class="QLabel" name="msd_valStartX" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="msd_lbEndX" >
-           <property name="text" >
-            <string>End X</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="msd_leEndX" />
-         </item>
-         <item>
-          <widget class="QLabel" name="msd_valEndX" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7" >
-         <item>
-          <spacer name="horizontalSpacer_6" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_6" >
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_8" >
-             <item>
-              <widget class="QCheckBox" name="msd_ckSave" >
-               <property name="text" >
-                <string>Save Output</string>
-               </property>
-               <property name="checked" >
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="msd_ckPlot" >
-               <property name="text" >
-                <string>Plot Output</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_3" >
-             <property name="orientation" >
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0" >
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_9" >
-             <item>
-              <spacer name="horizontalSpacer_8" >
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0" >
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="msd_pbRun" >
-               <property name="text" >
-                <string>Run MSD Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_9" >
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0" >
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_7" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-      </layout>
      </widget>
      <widget class="QWidget" name="tabAbsorption" >
       <attribute name="title" >
@@ -1400,6 +1415,73 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabDemon" >
+      <attribute name="title" >
+       <string>DEMON</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_14" >
+       <item>
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
+         <property name="label" stdset="0" >
+          <string>Run Number</string>
+         </property>
+         <property name="multipleFiles" stdset="0" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_9" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_20" >
+         <item>
+          <spacer name="horizontalSpacer_15" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="dem_pbRun" >
+           <property name="text" >
+            <string>Run DEMON</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_16" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -1424,8 +1506,6 @@
   <tabstop>elwin_leEEnd</tabstop>
   <tabstop>elwin_ckSave</tabstop>
   <tabstop>elwin_pbRun</tabstop>
-  <tabstop>slice_leRange0</tabstop>
-  <tabstop>slice_leRange1</tabstop>
   <tabstop>slice_leRange2</tabstop>
   <tabstop>slice_leRange3</tabstop>
   <tabstop>slice_ckSave</tabstop>
