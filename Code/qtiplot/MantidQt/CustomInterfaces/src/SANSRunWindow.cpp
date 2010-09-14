@@ -775,7 +775,7 @@ void SANSRunWindow::addSpectrumMasksToTable(const QString & mask_string, const Q
   QStringListIterator sitr(elements);
   while(sitr.hasNext())
   {
-    QString item = sitr.next();
+    QString item = sitr.next().trimmed();
     QString col1_txt;
     if( item.startsWith('s', Qt::CaseInsensitive) )
     {
