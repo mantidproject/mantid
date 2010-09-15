@@ -357,7 +357,68 @@ private:
   }
 
 };
+//===============================================================================================
+/** A validator which checks whether the input workspace has the Spectra number in the axis.
+ *  @author Michael Whitty, STFC
+ *  @date 15/09/2010
+ */
+template <typename TYPE = MatrixWorkspace>
+class DLLExport SpectraAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+{
+public:
+  SpectraAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
+  virtual ~SpectraAxisValidator() {}
 
+  ///Gets the type of the validator
+  std::string getType() const { return "spectraaxis"; }
+
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new SpectraAxisValidator(*this); }
+
+private:
+  /** Checks that the axis stated 
+  *  @param value The workspace to test
+  *  @return A message for users with negative results, otherwise ""
+  */
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  {
+    Mantid::API::Axis* axis = value->getAxis(m_axisNumber);
+    if ( axis->isSpectra() ) return "";
+    else return "A workspace with axis being Spectra Number is required here.";
+  }
+  const int m_axisNumber; ///< axis number to check on, defaults to 1
+
+};
+//===============================================================================================
+/** A validator which checks whether the input workspace has the Numeric data in the axis.
+ *  @author Michael Whitty, STFC
+ *  @date 15/09/2010
+ */
+template <typename TYPE = MatrixWorkspace>
+class DLLExport NumericAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+{
+public:
+  NumericAxisValidator(const int& axisNumber = 1) : m_axisNumber(axisNumber) {}
+  virtual ~NumericAxisValidator() {}
+
+  ///Gets the type of the validator
+  std::string getType() const { return "numericaaxis"; }
+
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new NumericAxisValidator(*this); }
+
+private:
+  /** Checks that the axis stated 
+  *  @param value The workspace to test
+  *  @return A message for users with negative results, otherwise ""
+  */
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  {
+    Mantid::API::Axis* axis = value->getAxis(m_axisNumber);
+    if ( axis->isNumeric() ) return "";
+    else return "A workspace with axis being a Numeric Axis is required here.";
+  }
+  const int m_axisNumber; ///< axis number to check on, defaults to 1
+
+};
 } // namespace API
 } // namespace Mantid
 
