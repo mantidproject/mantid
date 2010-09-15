@@ -23,7 +23,7 @@ elif platform.system() == 'Linux':
     buildargs.append('gcc44=1')
 elif platform.system() == "Darwin":
     thirdparty_libpath = '../Third_Party/lib/mac'
-#sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
+sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
 buildlog.close()
 builderr.close()
 
