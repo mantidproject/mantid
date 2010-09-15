@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/DateAndTime.h"
 #include <string>
 #include <typeinfo>
 #include <set>
@@ -121,6 +122,7 @@ public:
 
   /// Add to this
   virtual Property& operator+=( Property * rhs );
+  virtual void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
 
 protected:
   /// Constructor

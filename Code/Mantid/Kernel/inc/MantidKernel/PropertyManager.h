@@ -59,6 +59,8 @@ public:
   PropertyManager& operator=(const PropertyManager&);
   PropertyManager& operator+=(const PropertyManager& rhs);
 
+  void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
+
   virtual ~PropertyManager();
 
   // Function to declare properties (i.e. store them)

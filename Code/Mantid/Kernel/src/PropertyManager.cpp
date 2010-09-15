@@ -115,6 +115,27 @@ namespace Mantid
 
 
     //-----------------------------------------------------------------------------------------------
+    /**
+     * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
+     *  absolute time range.
+     *
+     * @param start Absolute start time. Any log entries at times >= to this time are kept.
+     * @param stop Absolute stop time. Any log entries at times < than this time are kept.
+     */
+    void PropertyManager::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
+    {
+      //Iterate through all properties on the RHS
+      PropertyMap::const_iterator it;
+      for (it = this->m_properties.begin(); it != this->m_properties.end(); it++)
+      {
+        //Filter out the property
+        Property * prop = it->second;
+        prop->filterByTime(start, stop);
+      }
+    }
+
+
+    //-----------------------------------------------------------------------------------------------
     /** Add a property to the list of managed properties
      *  @param p The property object to add
      *  @param doc A description of the property that may be displayed to users

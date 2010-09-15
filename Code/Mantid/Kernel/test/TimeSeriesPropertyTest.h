@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <ctime>
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid::Kernel;
 
@@ -103,6 +104,27 @@ public:
 
     TS_ASSERT_EQUALS( log->size(), 5);
 
+
+	}
+
+	void testFiltering()
+	{
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:10",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:20",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:30",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:40",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:50",1) );
+
+    TS_ASSERT_EQUALS( log->realSize(), 6);
+    dateAndTime start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:10");
+    dateAndTime stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:40");
+
+    //Since the filter is < stop, the last one is not counted, so there are  3 taken out.
+
+    log->filterByTime(start, stop);
+    TS_ASSERT_EQUALS( log->realSize(), 3);
 
 	}
   

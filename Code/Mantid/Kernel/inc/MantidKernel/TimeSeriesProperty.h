@@ -94,6 +94,31 @@ public:
     return *this;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
+   *  absolute time range.
+   *
+   * @param start Absolute start time. Any log entries at times >= to this time are kept.
+   * @param stop Absolute stop time. Any log entries at times < than this time are kept.
+   */
+  void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
+  {
+    typename timeMap::iterator it;
+    for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
+    {
+      dateAndTime t = it->first;
+      if ((t < start) || (t >= stop))
+      {
+        //Is outside the range we are keeping, so erase that.
+        m_propertySeries.erase(it);
+      }
+    }
+    //The function below is stupid. Should be removed or fixed.
+    this->countSize();
+  }
+
   //-----------------------------------------------------------------------------------------------
   /* Get the time series property as a string of 'time  value'
    *
