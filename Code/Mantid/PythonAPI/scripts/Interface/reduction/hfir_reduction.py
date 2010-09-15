@@ -85,7 +85,7 @@ class ReductionScripter(object):
         if self.beam_finder is not None:
             self.beam_finder.from_xml(xml_str)
 
-    def to_script(self):
+    def to_script(self, file_name=None):
         """
             Spits out the text of a reduction script with the current state.
         """
@@ -106,6 +106,11 @@ class ReductionScripter(object):
         if self.beam_finder is None:
             raise RuntimeError, "A beam center option was not established before starting reduction."
         script += str(self.beam_finder)
+        
+        if file_name is not None:
+            f = open(file_name, 'w')
+            f.write(script)
+            f.close()
         
         return script
         

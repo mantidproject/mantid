@@ -79,9 +79,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen"/>
-    <addaction name="actionQuit"/>
-    <addaction name="actionChange_Instrument"/>
    </widget>
    <addaction name="file_menu"/>
   </widget>
@@ -132,22 +129,6 @@
     <hint type="destinationlabel">
      <x>748</x>
      <y>815</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionOpen</sender>
-   <signal>activated()</signal>
-   <receiver>SANSReduction</receiver>
-   <slot>file_open()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>519</x>
-     <y>452</y>
     </hint>
    </hints>
   </connection>
