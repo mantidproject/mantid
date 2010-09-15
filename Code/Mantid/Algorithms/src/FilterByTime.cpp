@@ -61,10 +61,10 @@ void FilterByTime::init()
   BoundedValidator<double> *min = new BoundedValidator<double>();
   min->setLower(0.0);
   declareProperty("StartTime", 0.0, min,
-      "The start time, in seconds, since the start of the run. Events before this time are filtered out." + commonHelp);
+      "The start time, in seconds, since the start of the run. Events before this time are filtered out. The time of the first pulse (i.e. the first entry in the ProtonCharge sample log) is used as the zero. " + commonHelp);
 
   declareProperty("StopTime", 0.0,
-      "The stop time, in seconds, since the start of the run. Events at or after this time are filtered out." + commonHelp);
+      "The stop time, in seconds, since the start of the run. Events at or after this time are filtered out. The time of the first pulse (i.e. the first entry in the ProtonCharge sample log) is used as the zero. " + commonHelp);
 
   std::string absoluteHelp("Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12." + commonHelp);
   declareProperty("AbsoluteStartTime", "",

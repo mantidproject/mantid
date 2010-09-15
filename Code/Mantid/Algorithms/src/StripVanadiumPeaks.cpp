@@ -41,7 +41,7 @@ void StripVanadiumPeaks::init()
   declareProperty(PARAM_POSITIONS, "",
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. \n"
     "Only peaks near these positions will be fitted.\n"
-    "If not entered, the default Vanadium peak positions will be used.");
+    "If not entered, the default vanadium peak positions will be used.");
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);

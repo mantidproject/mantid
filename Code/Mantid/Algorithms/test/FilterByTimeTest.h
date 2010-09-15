@@ -155,7 +155,7 @@ public:
     TS_ASSERT_DELTA( outWS->getNumberEvents(), outWS2->getNumberEvents(), 10 );
     for (int i=0; i<outWS->getNumberHistograms(); i++)
     {
-      int diff = iabs(outWS->getEventList(i).getNumberEvents() - outWS2->getEventList(i).getNumberEvents());
+      double diff = fabs(outWS->getEventList(i).getNumberEvents() - outWS2->getEventList(i).getNumberEvents());
       //No more than 2 events difference because of rounding to second
       TS_ASSERT_LESS_THAN( diff, 3);
     }
