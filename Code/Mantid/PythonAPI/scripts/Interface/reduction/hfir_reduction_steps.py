@@ -31,7 +31,6 @@ class InstrumentDescription(object):
     def to_xml(self):
         """
             Create XML from the current data.
-            @param file_name: file name to write the XML to [optional]
         """
         xml  = "<Instrument>\n"
         xml += "  <name>%s</name>\n" % self.instrument_name
@@ -45,7 +44,7 @@ class InstrumentDescription(object):
     def from_xml(self, xml_str):
         """
             Read in data from XML
-            @param file_name: file to read the data from
+            @param xml_str: text to read the data from
         """       
         dom = xml.dom.minidom.parseString(xml_str)
         instrument_dom = dom.getElementsByTagName("Instrument")[0]
@@ -92,7 +91,6 @@ class BeamFinder(BaseScriptElement):
     def to_xml(self):
         """
             Create XML from the current data.
-            @param file_name: file name to write the XML to [optional]
         """
         xml  = "<BeamFinder>\n"
         xml += "  <position>\n"
@@ -109,7 +107,7 @@ class BeamFinder(BaseScriptElement):
     def from_xml(self, xml_str):
         """
             Read in data from XML
-            @param file_name: file to read the data from
+            @param xml_str: text to read the data from
         """
         dom = xml.dom.minidom.parseString(xml_str)
         beam_finder_dom = dom.getElementsByTagName("BeamFinder")[0]

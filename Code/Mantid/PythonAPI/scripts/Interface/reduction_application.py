@@ -29,6 +29,10 @@ class ReductionGUI(QtGui.QMainWindow):
         self._filename = None
         
     def _set_window_title(self):
+        """
+            Sets the window title using the instrument name and the 
+            current settings file
+        """
         title = "%s Reduction" % self._instrument
         if self._filename is not None:
             title += ": %s" % self._filename
@@ -36,6 +40,9 @@ class ReductionGUI(QtGui.QMainWindow):
     
         
     def setup_layout(self):
+        """
+            Sets up the instrument-specific part of the UI layout
+        """
         #TODO: add instrument selection to top menu
         self._update_file_menu()
 
@@ -97,6 +104,9 @@ class ReductionGUI(QtGui.QMainWindow):
                 self.file_menu.addAction(action)
 
     def _quit(self):
+        """
+            Quit the application
+        """
         sys.exit()
 
     def reduce_clicked(self):
@@ -107,6 +117,10 @@ class ReductionGUI(QtGui.QMainWindow):
         self._interface.reduce()
         
     def open_file(self, file_path=None):
+        """
+            Open an XML file and populate the UI
+            @param file_path: path to the file to be loaded
+        """
         if file_path is None:
             action = self.sender()
             if isinstance(action, QtGui.QAction):
@@ -139,6 +153,10 @@ class ReductionGUI(QtGui.QMainWindow):
             self.open_file(fname)
             
     def _save(self):
+        """
+            Present a file dialog to the user and saves the content of the
+            UI in XML format
+        """
         if self._filename is None:
             self._save_as()
         else:
@@ -154,6 +172,10 @@ class ReductionGUI(QtGui.QMainWindow):
             
             
     def _save_as(self):
+        """
+            Present a file dialog to the user and saves the content of
+            the UI in XML format.
+        """
         fname = self._filename if self._filename is not None else '.'
         
         fname = unicode(QtGui.QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
@@ -170,6 +192,10 @@ class ReductionGUI(QtGui.QMainWindow):
             self._save()
         
     def _export(self):
+        """
+            Exports the current content of the UI to a python script that can 
+            be run within MantidPlot
+        """
         fname = '.'
         if self._filename is not None:
             (root, ext) = os.path.splitext(self._filename)

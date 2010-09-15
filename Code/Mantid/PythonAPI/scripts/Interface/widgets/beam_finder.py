@@ -9,7 +9,7 @@ from reduction.hfir_reduction_steps import BeamFinder
 # Beam finder frame
 class BeamFinderFrame(QtGui.QFrame):
     """
-        Beam center interface.
+        Beam center interface
     """
         
     def __init__(self, parent=None, flags=0):
@@ -30,6 +30,10 @@ class BeamFinderFrame(QtGui.QFrame):
         return m
         
     def set_state(self, state):
+        """
+            Populate the UI elements with the data from the given state.
+            @param state: BeamFinder object
+        """
         self.x_pos_edit.setText(QtCore.QString(str(state.x_position)))
         self.y_pos_edit.setText(QtCore.QString(str(state.y_position)))
         self.use_beam_finder_checkbox.setChecked(state.use_finder)
@@ -41,6 +45,10 @@ class BeamFinderFrame(QtGui.QFrame):
         self.beam_radius_edit.setEnabled(not state.use_direct_beam)
         
     def use_beam_finder_changed(self):
+        """
+            Call-back method for when the user toggles between using a 
+            beam finder or setting the beam center by hand
+        """
         if self.use_beam_finder_checkbox.isChecked():
             self.groupBox.setEnabled(True)
             self.x_pos_edit.setEnabled(False)
@@ -51,9 +59,18 @@ class BeamFinderFrame(QtGui.QFrame):
             self.y_pos_edit.setEnabled(True)
 
     def fit_scattering_data(self):
+        """
+            Call-back method for when the user selects to fit the
+            scattering data (as opposed to assume direct beam data and fit 
+            the whole detector) 
+        """
         self.beam_radius_edit.setEnabled(True)
         
     def fit_direct_beam(self):
+        """
+            Call-back method for when the user selects to fit the direct beam
+            data by using the whole detector
+        """
         self.beam_radius_edit.setEnabled(False)
             
 class BeamFinderWidget(QtGui.QWidget):    
@@ -71,7 +88,13 @@ class BeamFinderWidget(QtGui.QWidget):
             self._content.set_state(BeamFinder())
             
     def get_state(self):
+        """
+            Relay a get_state() method call to the beam finder widget
+        """
         return self._content.get_state()
     
     def set_state(self, state):
+        """
+            Relay a set_state() method call to the beam finder widget
+        """
         return self._content.set_state(state)

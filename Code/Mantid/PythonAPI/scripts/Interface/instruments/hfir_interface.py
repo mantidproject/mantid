@@ -24,15 +24,30 @@ class HFIRInterface(object):
         self._beam_finder_widget = None
         
     def load_file(self, file_name):
+        """
+            Load an XML file containing reduction parameters and
+            populate the UI with them
+            @param file_name: XML file to be loaded
+        """
         self.scripter.from_xml(file_name)
         self._beam_finder_widget.set_state(self.scripter.beam_finder)
         self._instrument_widget.set_state(self.scripter.instrument)
         
     def save_file(self, file_name):
+        """
+            Save the content of the UI as a settings file that can 
+            be reloaded
+            @param file_name: XML file to be saved
+        """
         self._push_to_scripter()
         self.scripter.to_xml(file_name)
         
     def export(self, file_name):
+        """
+            Export the content of the UI as a python script that can 
+            be run within Mantid
+            @param file_name: name of the python script to be saved
+        """
         self._push_to_scripter()
         self.scripter.to_script(file_name)
         
@@ -53,7 +68,10 @@ class HFIRInterface(object):
         print self.scripter.to_script()
         
     def get_tabs(self):
-        
+        """
+            Returns a list of widgets used to populate the central tab widget
+            of the interface.
+        """
         # Instrument description
         self._instrument_widget = SANSInstrumentWidget(state=self.scripter.instrument,
                                                        ui_path = self.ui_path)

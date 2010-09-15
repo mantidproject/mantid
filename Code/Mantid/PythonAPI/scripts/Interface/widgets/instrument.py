@@ -4,6 +4,9 @@ import os
 from reduction.hfir_reduction_steps import InstrumentDescription
 
 class SANSInstrumentWidget(QtGui.QWidget):    
+    """
+        Widget that present instrument details to the user
+    """
     
     def __init__(self, parent=None, state=None, ui_path='ui'):
         QtGui.QWidget.__init__(self, parent)
@@ -25,12 +28,19 @@ class SANSInstrumentWidget(QtGui.QWidget):
         return self._summary
     
     def set_state(self, state):
+        """
+            Populate the UI elements with the data from the given state.
+            @param state: InstrumentDescription object
+        """
         self._summary.instr_name_edit.setText(QtCore.QString(state.instrument_name))
         npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
         self._summary.n_pixel_edit.setText(QtCore.QString(npixels))
         self._summary.pixel_size_edit.setText(QtCore.QString(str(state.pixel_size)))
     
     def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
         m = InstrumentDescription()
         m.pixel_size = util._check_and_get_float_line_edit(self._summary.pixel_size_edit)
         return m

@@ -15,16 +15,30 @@ class BaseScriptElement(object):
         return NotImplemented
     
     def apply(self):
+        """
+            Method called to apply the reduction script element
+            to a Mantid Reducer
+        """
         return NotImplemented
     
-    def to_xml(self, file_name=None):
+    def to_xml(self):
+        """
+            Return an XML representation of the data / state of the object
+        """
         return NotImplemented
     
-    def from_xml(self, file_name):
+    def from_xml(self, xml_str):
+        """
+            Parse the input text as XML to populate the data members
+            of this object
+        """
         return NotImplemented
     
     @classmethod
     def getText(cls, nodelist):
+        """
+            Utility method to extract text out of an XML node
+        """
         rc = ""
         for node in nodelist:
             if node.nodeType == node.TEXT_NODE:
@@ -88,6 +102,7 @@ class ReductionScripter(object):
     def to_script(self, file_name=None):
         """
             Spits out the text of a reduction script with the current state.
+            @param file_name: name of the file to write the script to
         """
         script = "# HFIR reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
