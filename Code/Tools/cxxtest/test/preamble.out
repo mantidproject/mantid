@@ -1,0 +1,67 @@
+Running 14 tests
+In CreatedTest::test_nothing:
+CreatedTest.h:26: Error: Test failed: Nothing to test
+.
+In EnumTraits::test_Enum_traits:
+EnumTraits.h:32: Error: Test failed: Yes
+In ExceptionTest::testAssertion:
+ExceptionTest.h:20: Error: Expected (throwThis(5)) to throw (const char *) but it threw something else
+In FixtureTest::test_strcpy:
+FixtureTest.h:32: Error: Expected (_buffer[1] == 'E'), found ('e' != 'E')
+In MessageTest::testValues:
+MessageTest.h:24: Error: Test failed: My hovercraft
+MessageTest.h:24: Error: Assertion failed: value != 0
+In SimpleTest::testEquality:
+SimpleTest.h:16: Error: Expected (1 == 2), found (1 != 2)
+In SimpleTest::testAddition:
+SimpleTest.h:24: Error: Expected (2 + 2 == 5), found (4 != 5)
+In SimpleTest::TestMultiplication:
+SimpleTest.h:30: Error: Expected (4 * 4 == 44), found (16 != 44)
+In SimpleTest::testComparison:
+SimpleTest.h:37: Error: Expected (-1 < -2), found (-1 >= -2)
+In SimpleTest::testTheWorldIsCrazy:
+SimpleTest.h:42: Error: Expected (true == false), found (true != false)
+In SimpleTest::test_Failure:
+SimpleTest.h:47: Error: Test failed: Not implemented
+In SimpleTest::test_TS_WARN_macro:
+SimpleTest.h:53: Warning: Just a friendly warning
+SimpleTest.h:54: Warning: Warnings don't abort the test
+.
+In TestFunky::testPets:
+TraitsTest.h:59: Error: Expected (pet1 == pet2), found (Pet("dog") != Pet("cat"))
+Failed 12 of 14 tests
+Success rate: 14%
+Running 14 tests
+In CreatedTest::test_nothing:
+CreatedTest.h:26: Error: Test failed: Nothing to test
+.
+In EnumTraits::test_Enum_traits:
+EnumTraits.h:32: Error: Test failed: Yes
+In ExceptionTest::testAssertion:
+ExceptionTest.h:20: Error: Expected (throwThis(5)) to throw (const char *) but it threw something else
+In FixtureTest::test_strcpy:
+FixtureTest.h:32: Error: Expected (_buffer[1] == 'E'), found ('e' != 'E')
+In MessageTest::testValues:
+MessageTest.h:24: Error: Test failed: My hovercraft
+MessageTest.h:24: Error: Assertion failed: value != 0
+In SimpleTest::testEquality:
+SimpleTest.h:16: Error: Expected (1 == 2), found (1 != 2)
+In SimpleTest::testAddition:
+SimpleTest.h:24: Error: Expected (2 + 2 == 5), found (4 != 5)
+In SimpleTest::TestMultiplication:
+SimpleTest.h:30: Error: Expected (4 * 4 == 44), found (16 != 44)
+In SimpleTest::testComparison:
+SimpleTest.h:37: Error: Expected (-1 < -2), found (-1 >= -2)
+In SimpleTest::testTheWorldIsCrazy:
+SimpleTest.h:42: Error: Expected (true == false), found (true != false)
+In SimpleTest::test_Failure:
+SimpleTest.h:47: Error: Test failed: Not implemented
+In SimpleTest::test_TS_WARN_macro:
+SimpleTest.h:53: Warning: Just a friendly warning
+SimpleTest.h:54: Warning: Warnings don't abort the test
+.
+In TestFunky::testPets:
+TraitsTest.h:59: Error: Expected (pet1 == pet2), found (Pet("dog") != Pet("cat"))
+Failed 12 of 14 tests
+Success rate: 14%
+Error level = 24
