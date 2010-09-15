@@ -97,6 +97,10 @@ def SuggestMonitorSpectrum(specNum, interp=False):
 def SetTransSpectrum(specNum, interp=False):
     ReductionSingleton().set_trans_spectrum(specNum, interp)
       
+def SetCentre(XVAL, YVAL):
+    _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
+    ReductionSingleton().set_beam_finder(BaseBeamFinder(XVAL, YVAL))
+
 def SetPhiLimit(phimin,phimax, phimirror=True):
     ReductionSingleton().set_phi_limit(phimin, phimax, phimirror)
     
@@ -126,6 +130,7 @@ def AssignSample(sample_run, reload = True, period = -1):
     ReductionSingleton().append_data_file(sample_run)
     ReductionSingleton().load_set_options(reload, period)
     
+    
 def AppendDataFile(datafile, workspace=None):
     AssignSample(datafile)
     
@@ -133,7 +138,7 @@ def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
     SetBeamCenter(XVAL/1000.0, YVAL/1000.0)
     
-def Correct():
+def _correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False):
     Reduce1D()
     global SPECMIN, SPECMAX
     sample_raw = run_setup.getRawWorkspace()
@@ -250,7 +255,7 @@ def Correct():
             return
         else:
             conv = RunQ1D()
-            conv.execute(ReductionSingleton, tmpWS,final_result,final_result,Q_REBIN, GRAVITY)
+            conv.execute(ReductionSingleton, tmpWS,final_result,Q_REBIN, GRAVITY)
     # 2D    
     else:
         if finding_centre == True:
@@ -263,8 +268,27 @@ def Correct():
     return
 
 def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True, finding_centre = False):
-    SetWavelengthRange(wav_start, wav_end)
-    Correct()
+    if wav_start == None:
+        wav_start = ReductionSingleton().WAV1
+    if wav_end == None:
+        wav_end = ReductionSingleton().WAV2
+
+    if finding_centre == False:
+        _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ',' + str(use_def_trans) + ',' + str(finding_centre) + ')')
+        _printMessage("Running reduction for wavelength range " + str(wav_start) + '-' + str(wav_end))
+    
+    # This only performs the init if it needs to
+    sample_setup, can_setup = _initReduction()
+
+    wsname_cache = sample_setup.getReducedWorkspace()
+    # Run correction function
+    if finding_centre == True:
+        final_workspace = wsname_cache.split('_')[0] + '_quadrants'
+    else:
+        final_workspace = wsname_cache + '_' + str(wav_start) + '_' + str(wav_end)
+    sample_setup.setReducedWorkspace(final_workspace)
+    # Perform correction
+    _correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
 
 def SetWavelengthRange(start, end):
     ReductionSingleton().set_wavelength_range(start, end)
@@ -299,14 +323,12 @@ def displayMaskFile():
     print '    rear time mask: ', TIMEMASKSTRING_R
     print '    front time mask: ', TIMEMASKSTRING_F
 
-def _initReduction(xcentre = None, ycentre = None):
+def _initReduction():
     # *** Sample setup first ***
     if SCATTER_SAMPLE == None:
         exit('Error: No sample run has been set')
 
-    if xcentre == None or ycentre == None:
-        xcentre = XBEAM_CENTRE
-        ycentre = YBEAM_CENTRE
+    xcentre, ycentre = ReductionSingleton().get_beam_center()
 
     global _SAMPLE_SETUP    
     if _SAMPLE_SETUP == None:
