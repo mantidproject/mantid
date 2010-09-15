@@ -505,7 +505,7 @@ class MantidPyFramework(FrameworkManager):
         Called in reponse to an algorithm factory update
         """
         # Reload the simple api
-        self._importSimpleAPIToGlobal()
+        self._importSimpleAPIToMain()
 
     def _createAlgProxy(self, ialg):
         return IAlgorithmProxy(ialg, self)
