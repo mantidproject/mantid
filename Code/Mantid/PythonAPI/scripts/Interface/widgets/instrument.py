@@ -1,7 +1,7 @@
 from PyQt4 import QtGui, uic, QtCore
 import util
 import os
-from reduction.hfir_reduction import InstrumentDescription
+from reduction.hfir_reduction_steps import InstrumentDescription
 
 class SANSInstrumentWidget(QtGui.QWidget):    
     
