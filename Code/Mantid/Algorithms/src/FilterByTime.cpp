@@ -56,6 +56,23 @@ void FilterByTime::init()
     new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
 
+  std::string commonHelp("\nYou can only specify the relative or absolute start/stop times, not both.");
+
+  BoundedValidator<double> *min = new BoundedValidator<double>();
+  min->setLower(0.0);
+  declareProperty("StartTime", 0.0, min,
+      "The start time, in seconds, since the start of the run. Events before this time are filtered out." + commonHelp);
+
+  declareProperty("StopTime", 0.0,
+      "The stop time, in seconds, since the start of the run. Events at or after this time are filtered out." + commonHelp);
+
+  std::string absoluteHelp("Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12." + commonHelp);
+  declareProperty("AbsoluteStartTime", "",
+    "Absolute start time; events before this time are filtered out. " + absoluteHelp );
+
+  declareProperty("AbsoluteStopTime", "",
+    "Absolute stop time; events at of after this time are filtered out. " + absoluteHelp );
+
 }
 
 
@@ -64,6 +81,7 @@ void FilterByTime::init()
  */
 void FilterByTime::exec()
 {
+
   // convert the input workspace into the event workspace we already know it is
   const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
   EventWorkspace_const_sptr inputWS
@@ -72,6 +90,43 @@ void FilterByTime::exec()
   {
     throw std::invalid_argument("Input workspace is not an EventWorkspace. Aborting.");
   }
+
+
+  // ---- Find the start/end times ----
+  PulseTimeType start, stop;
+
+  double start_dbl, stop_dbl;
+  start_dbl = getProperty("StartTime");
+  stop_dbl = getProperty("StopTime");
+
+  std::string start_str, stop_str;
+  start_str = getPropertyValue("AbsoluteStartTime");
+  stop_str = getPropertyValue("AbsoluteStopTime");
+
+  if ((start_str!="") && (stop_str!="") && (stop_dbl<=0.0) && (stop_dbl<=0.0))
+  {
+    //Use the absolute string
+    start = DateAndTime::get_from_absolute_time( DateAndTime::create_DateAndTime_FromISO8601_String( start_str ) );
+    stop  = DateAndTime::get_from_absolute_time( DateAndTime::create_DateAndTime_FromISO8601_String( stop_str ) );
+  }
+  else
+  if ((start_str=="") && (stop_str=="") && (stop_dbl> 0.0) && (stop_dbl> 0.0))
+  {
+    //Use the relative times in seconds.
+    PulseTimeType first = inputWS->getFirstPulseTime();
+    start = first + start_dbl*1000000000;
+    stop = first + stop_dbl*1000000000;
+  }
+  else
+  {
+    //Either both or none were specified
+    throw std::invalid_argument("You need to specify either: both the StartTime and StopTime parameters; or both the AbsoluteStartTime and AbsoluteStopTime parameters; but not all four.");
+  }
+
+  if (stop <= start)
+    throw std::invalid_argument("The stop time should be larger than the start time.");
+
+
 
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
@@ -92,7 +147,6 @@ void FilterByTime::exec()
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
 
-  PulseTimeType start, stop;
 
 
   int numberOfSpectra = inputWS->getNumberHistograms();
@@ -101,8 +155,11 @@ void FilterByTime::exec()
   Progress prog(this,0.0,1.0,numberOfSpectra);
 
   // Loop over the histograms (detector spectra)
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < numberOfSpectra; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
+
     //Get the output event list (should be empty)
     EventList& output_el = outputWS->getEventList(i);
     //and this is the input event list
@@ -112,9 +169,16 @@ void FilterByTime::exec()
     input_el.filterByPulseTime(start, stop, output_el);
 
     prog.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->doneAddingEventLists();
+
+  //Now filter out the run, using the dateAndTime type.
+  outputWS->mutableRun().filterByTime(
+      Kernel::DateAndTime::get_time_from_pulse_time(start),
+      Kernel::DateAndTime::get_time_from_pulse_time(stop) );
 
 }
 

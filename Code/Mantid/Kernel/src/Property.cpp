@@ -134,6 +134,8 @@ Property& Property::operator+=( Property * rhs )
   throw Exception::NotImplementedError(msg.str());
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /** Filter out a property by time. Will be overridden by TimeSeriesProperty (only) */
 void Property::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
 {

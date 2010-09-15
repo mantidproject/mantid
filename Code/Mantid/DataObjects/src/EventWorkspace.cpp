@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MultiThreaded.h"
 
 DECLARE_WORKSPACE(EventWorkspace)
@@ -19,6 +20,7 @@ namespace Mantid
 namespace DataObjects
 {
 using Kernel::Exception::NotImplementedError;
+using namespace Mantid::Kernel;
 
   // get a reference to the logger
   Kernel::Logger& EventWorkspace::g_log
@@ -593,6 +595,23 @@ using Kernel::Exception::NotImplementedError;
       //Report progress
       if (prog) prog->report();
     }
+  }
+
+
+  //-----------------------------------------------------------------------------
+  /** Return the time of the first pulse received, by accessing the run's
+   * sample logs to find the ProtonCharge
+   *
+   * @throw runtime_error if the log is not found; or if it is empty.
+   */
+  Kernel::PulseTimeType EventWorkspace::getFirstPulseTime() const
+  {
+    TimeSeriesProperty<double>* log = dynamic_cast<TimeSeriesProperty<double>*> (this->run().getLogData("ProtonCharge"));
+    if (!log)
+      throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'ProtonCharge' found in the workspace.");
+    dateAndTime startDate = log->firstTime();
+    //Return as PulseTimeType.
+    return DateAndTime::get_from_absolute_time(startDate);
   }
 
 

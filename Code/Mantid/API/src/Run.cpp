@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Run.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "boost/lexical_cast.hpp"
 
 namespace Mantid
@@ -62,6 +64,26 @@ namespace API
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
+   *  absolute time range.
+   *
+   * Total proton charge will get re-integrated after filtering.
+   *
+   * @param start Absolute start time. Any log entries at times >= to this time are kept.
+   * @param stop Absolute stop time. Any log entries at times < than this time are kept.
+   */
+  void Run::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
+  {
+    //The propery manager operator will make all timeseriesproperties filter.
+    m_manager.filterByTime(start, stop);
+
+    //Re-integrate proton charge
+    this->integrateProtonCharge();
+  }
+
+
 
   //-----------------------------------------------------------------------------------------------
   /**
@@ -110,6 +132,33 @@ namespace API
     double charge = m_manager.getProperty(m_protonChargeName);
     return charge;
   }
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Calculate the total proton charge by summing up all the entries in the
+   * "ProtonCharge" time series log. This is then saved in the log entry
+   * using setProtonCharge().
+   *
+   * @return the total charge in microAmp*hours
+   */
+  double Run::integrateProtonCharge()
+  {
+    /// Conversion factor between picoColumbs and microAmp*hours
+    const double CURRENT_CONVERSION = 1.e-6 / 3600.;
+
+    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( this->getProperty("ProtonCharge") );
+    if (log)
+    {
+      double total = log->getTotalValue() * CURRENT_CONVERSION;
+      this->setProtonCharge(total);
+      return total;
+    }
+    else
+    {
+      return -1;
+    }
+  }
+
 
 
 

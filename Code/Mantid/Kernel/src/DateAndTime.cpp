@@ -111,7 +111,7 @@ double durationInSeconds(time_duration duration)
 
 //-----------------------------------------------------------------------------------------------
 /// Create dateAndTime instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
-dateAndTime create_DateAndTime_FromISO8601_String(const std::string &str)
+dateAndTime create_DateAndTime_FromISO8601_String(const std::string& str)
 {
   //Make a copy
   std::string time = str;
@@ -166,9 +166,9 @@ std::tm to_localtime_tm(const dateAndTime &time)
 /** Returns the dateAndTime, in UTC time, corresponding to the pulse time
  * (which is specified in nanoseconds since Jan 1, 1990)
  */
-dateAndTime get_time_from_pulse_time(PulseTimeType pulse)
+dateAndTime get_time_from_pulse_time(const PulseTimeType& pulse)
 {
-  PulseTimeType sec = pulse/1000000000;
+  PulseTimeType sec = pulse / 1000000000;
   PulseTimeType nanosec = pulse % 1000000000;
 
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
@@ -183,6 +183,27 @@ dateAndTime get_time_from_pulse_time(PulseTimeType pulse)
 
 //  return GPS_EPOCH + boost::posix_time::seconds(sec) + boost::posix_time::nanoseconds(nanosec);
 }
+
+
+/** Return the pulse time, as PulseTimeType, from an absolute time given.
+ */
+PulseTimeType get_from_absolute_time(dateAndTime time)
+{
+  //Our reference is the GPS epoch.
+  boost::posix_time::time_duration td = time - GPS_EPOCH;
+
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
+  PulseTimeType nanosec = td.total_nanoseconds();
+  return nanosec;
+#else
+  // Microsecond resolution
+  PulseTimeType nanosec = td.total_microseconds() * 1000;
+#endif
+  //Total in nanoseconds since 1990.
+  return nanosec;
+}
+
 
 
 //-----------------------------------------------------------------------------------------------

@@ -218,6 +218,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   void sortAll(EventSortType sortType, Mantid::API::Progress * prog);
 
+  Kernel::PulseTimeType getFirstPulseTime() const;
+
 private:
   /// NO COPY ALLOWED
   EventWorkspace(const EventWorkspace&);

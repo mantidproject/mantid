@@ -124,7 +124,7 @@ namespace Mantid
      */
     void PropertyManager::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
     {
-      //Iterate through all properties on the RHS
+      //Iterate through all properties
       PropertyMap::const_iterator it;
       for (it = this->m_properties.begin(); it != this->m_properties.end(); it++)
       {

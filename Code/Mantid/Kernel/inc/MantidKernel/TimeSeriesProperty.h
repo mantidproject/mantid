@@ -258,6 +258,20 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Returns total value, added up for all times
+   *  @param t time
+   *  @return Value at time \a t
+   */
+  TYPE getTotalValue() const
+  {
+    typename timeMap::const_iterator it = m_propertySeries.begin();
+    TYPE total = 0;
+    for (; it != m_propertySeries.end(); it++)
+      total += it->second;
+    return total;
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /// Returns the number of values at UNIQUE time intervals in the time series
   int size() const
   {

@@ -58,6 +58,8 @@ namespace Mantid
       /// Addition
       Run& operator+=(const Run& rhs);
 
+      void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
+
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop);
       /// Add a property of given type
@@ -92,6 +94,8 @@ namespace Mantid
       void setProtonCharge( const double charge);
       /// Get the proton charge
       double getProtonCharge() const;
+
+      double integrateProtonCharge();
 
       /**
        * Add a log entry

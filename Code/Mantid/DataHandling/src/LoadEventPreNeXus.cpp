@@ -771,17 +771,19 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 
 //-----------------------------------------------------------------------------
 /**
- * Add a sample environment log for the proton chage and set the scalar 
- * value on the sample.
+ * Add a sample environment log for the proton chage (charge of the pulse in picoColoumbs)
+ * and set the scalar value (total proton charge, microAmps*hours, on the sample)
+ *
  * @param workspace Event workspace to set the proton charge on
  */
 void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & workspace)
 {
   if (this->proton_charge.empty()) // nothing to do
     return;
-  Run& run = workspace->mutableRun();
-  run.setProtonCharge(this->proton_charge_tot);
 
+  Run& run = workspace->mutableRun();
+
+  //Add the proton charge entries.
   TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("ProtonCharge");
   size_t num = this->proton_charge.size();
   for (size_t i = 0; i < num; i++)
@@ -790,8 +792,13 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
     Mantid::Kernel::dateAndTime time = Mantid::Kernel::DateAndTime::get_time_from_pulse_time( this->pulsetimes[i] );
     log->addValue(time, this->proton_charge[i]);
   }
+
   /// TODO set the units for the log
   run.addLogData(log);
+  double integ = run.integrateProtonCharge();
+  //run.setProtonCharge(this->proton_charge_tot); //This is now redundant
+  this->g_log.information() << "Total proton charge of " << integ << " microAmp*hours found by integrating.\n";
+
 }
 
 //-----------------------------------------------------------------------------
@@ -917,12 +924,13 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
   }
 
   // set up for reading
-  this->g_log.debug("Using pulseid file \"" + filename + "\"");
-
   //Open the file; will throw if there is any problem
   BinaryFile<Pulse> pulseFile(filename);
   //Get the # of pulse
   this->num_pulses = pulseFile.getNumElements();
+
+  this->g_log.information() << "Using pulseid file \"" << filename << "\", with " << num_pulses << " pulses.\n";
+
 
   //Load all the data
   std::vector<Pulse> * pulses;
@@ -933,7 +941,7 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
   {
     this->pulsetimes.push_back(getTime((*it).seconds, (*it).nanoseconds));
     this->event_indices.push_back((*it).event_index);
-    temp = (*it).pCurrent; // * CURRENT_CONVERSION;
+    temp = (*it).pCurrent;
     this->proton_charge.push_back(temp);
     if (temp < 0.)
       this->g_log.warning("Individiual proton charge < 0 being ignored");
@@ -942,7 +950,6 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
   }
 
   this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
-  this->g_log.information() << "Total proton charge of " << this->proton_charge_tot << " microAmp*hours.\n";
 
   //Clear the vector
   delete pulses;

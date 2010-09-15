@@ -46,7 +46,7 @@ DLLExport double durationInSeconds(time_duration duration);
 
 DLLExport time_t utc_mktime(struct tm *utctime);
 
-DLLExport dateAndTime create_DateAndTime_FromISO8601_String(const std::string &str);
+DLLExport dateAndTime create_DateAndTime_FromISO8601_String(const std::string& str);
 
 DLLExport std::string create_ISO8601_String(const dateAndTime &time);
 
@@ -66,7 +66,9 @@ DLLExport std::tm to_localtime_tm(const dateAndTime &time);
 
 DLLExport dateAndTime get_current_time();
 
-DLLExport dateAndTime get_time_from_pulse_time(PulseTimeType pulse);
+DLLExport dateAndTime get_time_from_pulse_time(const PulseTimeType& pulse);
+
+DLLExport PulseTimeType get_from_absolute_time(dateAndTime time);
 
 }
 

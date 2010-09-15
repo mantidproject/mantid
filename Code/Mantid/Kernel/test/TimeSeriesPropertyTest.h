@@ -107,17 +107,18 @@ public:
 
 	}
 
-	void testFiltering()
+	void test_filterByTime_and_getTotalValue()
 	{
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT( log->addValue("2007-11-30T16:17:10",1) );
-    TS_ASSERT( log->addValue("2007-11-30T16:17:20",1) );
-    TS_ASSERT( log->addValue("2007-11-30T16:17:30",1) );
-    TS_ASSERT( log->addValue("2007-11-30T16:17:40",1) );
-    TS_ASSERT( log->addValue("2007-11-30T16:17:50",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:40",5) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:50",6) );
 
     TS_ASSERT_EQUALS( log->realSize(), 6);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 21);
     dateAndTime start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:10");
     dateAndTime stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:40");
 
@@ -125,6 +126,7 @@ public:
 
     log->filterByTime(start, stop);
     TS_ASSERT_EQUALS( log->realSize(), 3);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 9);
 
 	}
   
