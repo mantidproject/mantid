@@ -48,7 +48,12 @@ elif platform.system() == 'Linux':
 else:
     env_var_name = 'PATH'
     new_val += ";" + os.path.join(os.getcwd(),thirdparty_libpath) + ";" + os.environ[env_var_name]
-start_environ = { env_var_name:os.environ[env_var_name] }
+    
+try:
+    start_val = os.environ[env_var_name]
+except KeyError:
+    start_val = ''
+start_environ = { env_var_name:start_val }
 os.putenv(env_var_name, new_val)    
 
 runlog = ''
