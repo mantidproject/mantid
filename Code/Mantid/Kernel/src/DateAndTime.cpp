@@ -106,7 +106,7 @@ time_t utc_mktime(struct tm *utctime)
  */
 double durationInSeconds(time_duration duration)
 {
-  return static_cast<double>(duration.total_seconds()) + static_cast<double>(duration.total_nanoseconds()) / 1e9;
+  return static_cast<double>(duration.total_nanoseconds()) / 1e9;
 }
 
 //-----------------------------------------------------------------------------------------------
