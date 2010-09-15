@@ -1,0 +1,57 @@
+#For Tests
+
+import os
+import platform
+import sys
+
+import MantidBuild
+
+Import('env')
+
+libList = env['MYLIBLIST']
+libDirList = env['MYLIBDIRLIST']
+cppPath = env['CPPPATH']
+myenv = env.Clone()
+myenv.Append(CPPDEFINES=[('IN_MANTID_TESTS',1)])
+myenv.Append(LIBS=libList)
+myenv.Append(LIBPATH=libDirList+['../../Bin/Shared'])
+myenv.Append(CPPPATH=cppPath + ['../../../Tools/cxxtest'])
+
+#GET LIST OF TESTS
+path = '../../'
+testfolder = '/test'
+
+testsToRun = []
+
+#get list of directories in trunk
+dirList = os.listdir(path)
+
+#Find Cxxtestgen
+cxxtestgen = 'python ../../../Tools/cxxtest/python/scripts/cxxtestgen'
+
+for fname in dirList:
+  # Disable ICAT tests while the server is down and we have no way of killing a connection so that the rest of the unit tests can run.
+  if fname == 'ICat':
+    continue
+  if os.path.isdir(path + fname):
+      #does folder contain /test?
+      fullpath=path + fname + testfolder
+      if os.path.exists(fullpath) and len(os.listdir(fullpath)) > 0:
+        #generate the test cpp file
+        #os.popen(cxxtestgen + ' --runner=MantidPrinter --xunit-file=TEST-' + fname + '.xml -o ' + fname + '.cpp '+ path + fname + testfolder +'/*.h')
+        os.popen(cxxtestgen + ' --runner=MantidPrinter --xunit-printer --world=' + fname + ' -o ' + fname + '.cpp '+ path + fname + testfolder +'/*.h')
+        #If there are not tests then there will be no cpp file created
+        if os.path.exists(fname + ".cpp"):
+          testsToRun.append(fname)
+
+#BUILD the tests
+if platform.system() == 'Darwin':
+	myenv.Append(LIBS='python' + sys.version[0:3])
+for test in testsToRun:
+  temp= test.split('/')
+  myenv.Append(CPPPATH='#/'+test+'/inc')
+  myenv.Append(LIBS='Mantid'+test)
+  dotcpp = test + '.cpp'
+  dotpdb = test + '.pdb'
+  myenv.Program([dotcpp], PDB=dotpdb)
+
