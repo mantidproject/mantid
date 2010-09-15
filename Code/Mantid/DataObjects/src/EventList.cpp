@@ -705,6 +705,7 @@ using Kernel::PulseTimeType;
   }
 
 
+  //------------------------------------------------------------------------------------------------
   /** Filter this EventList into an output EventList, using
    * keeping only events within the >= start and < end pulse times.
    * Detector IDs and the X axis are copied as well.
@@ -739,6 +740,85 @@ using Kernel::PulseTimeType;
       ++itev;
     }
   }
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Split the event list into n outputs
+   *
+   * @param splitter a TimeSplitterType giving where to split
+   * @param outputs a vector of where the split events will end up. The # of entries in there should
+   *        be big enough to accommodate the indices.
+   */
+  void EventList::splitByTime(TimeSplitterType splitter, std::vector< EventList * > outputs) const
+  {
+    //Start by sorting the event list by pulse time.
+    this->sortPulseTime();
+
+    //Initialize all the outputs
+    int numOutputs = outputs.size();
+    for (int i=0; i<numOutputs; i++)
+    {
+      outputs[i]->clear();
+      outputs[i]->detectorIDs = this->detectorIDs;
+      outputs[i]->refX = this->refX;
+    }
+
+    //Do nothing if there are no entries, or only one
+    if (splitter.size() <= 1)
+      return;
+
+    //Iterate through all events (sorted by tof)
+    std::vector<TofEvent>::iterator itev = this->events.begin();
+
+    //And at the same time, iterate through the splitter
+    TimeSplitterType::iterator itspl = splitter.begin();
+
+    PulseTimeType time, nextTime;
+    int index;
+
+    //This is the time of the first section. Anything before is thrown out.
+    nextTime = itspl->first;
+
+    //Find the first event to split
+    while ((itev != this->events.end()) && (itev->pulse_time < nextTime))
+      itev++;
+
+    while (itspl != splitter.end())
+    {
+      //The start time is the old stop time
+      time = nextTime;
+      //And this is where the next events will go.
+      index = itspl->second;
+
+      //Find the next time after;
+      itspl++;
+      //But if we reached the end, then we are done.
+      if (itspl==splitter.end())
+        break;
+      nextTime = itspl->first;
+
+      while ((itev != this->events.end()) && (itev->pulse_time < nextTime))
+      {
+        //Copy the event into another
+        const TofEvent eventCopy(*itev);
+        EventList * myOutput = outputs[index];
+        if ((index >= 0) && (index < numOutputs))
+        {
+          //Add the copy to the output
+          myOutput->addEventQuickly(eventCopy);
+        }
+        ++itev;
+      }
+
+      //No need to keep looping through the filter if we are out of events
+      if (itev == this->events.end())
+        break;
+
+    } //Looping through entries in the splitter vector
+
+    //Done!
+  }
+
 
 } /// namespace DataObjects
 } /// namespace Mantid

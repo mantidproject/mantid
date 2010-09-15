@@ -351,6 +351,9 @@ using namespace Mantid::Kernel;
     //Now, make the spectra map (index -> detector ID)
     this->makeSpectraMap();
 
+    //Clearing the MRU list is a good idea too.
+    this->clearMRU();
+
     //Marker makes it okay to go on.
     done_loading_data = true;
   }

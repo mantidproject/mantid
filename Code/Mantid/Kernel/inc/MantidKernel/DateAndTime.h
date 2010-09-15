@@ -70,6 +70,9 @@ DLLExport dateAndTime get_time_from_pulse_time(const PulseTimeType& pulse);
 
 DLLExport PulseTimeType get_from_absolute_time(dateAndTime time);
 
+DLLExport PulseTimeType getMaximumPulseTime();
+DLLExport PulseTimeType getMinimumPulseTime();
+
 }
 
 typedef boost::posix_time::ptime dateAndTime;

@@ -313,6 +313,19 @@ public:
     }
   }
 
+  void fake_uniform_time_data()
+  {
+    //Clear the list
+    el = EventList();
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (double time=0; time < 1000; time++)
+    {
+      //All pulse times from 0 to 999
+      el += TofEvent( rand()%1000, time);
+    }
+  }
+
   void test_histogram()
   {
     this->fake_uniform_data();
@@ -486,6 +499,112 @@ public:
       //Check that the times are within the given limits.
       TS_ASSERT_LESS_THAN_EQUALS( 100, events[i].pulseTime());
       TS_ASSERT_LESS_THAN( events[i].pulseTime(), 200);
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void testSplit()
+  {
+    this->fake_uniform_time_data();
+
+    std::vector< EventList * > outputs;
+    for (int i=0; i<10; i++)
+      outputs.push_back( new EventList() );
+
+    TimeSplitterType split;
+    //Start only at 100
+    for (int i=1; i<10; i++)
+    {
+      //Reject the odd hundreds pulse times (100-199, 300-399, etc).
+      if ((i%2) == 0)
+        split.push_back( std::pair<PulseTimeType, int>(i*100, i) );
+      else
+        split.push_back( std::pair<PulseTimeType, int>(i*100, -1) );
+    }
+
+    //Do the splitting
+    el.splitByTime(split, outputs);
+
+    //No events in the first ouput 0-99
+    TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
+
+    for (int i=1; i<10; i++)
+    {
+      EventList * myOut = outputs[i];
+      //std::cout << i << " " << myOut->getNumberEvents() << "\n";
+      if ((i%2) == 0)
+      {
+        //Even
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 100);
+      }
+      else
+      {
+        //Odd
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
+      }
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  // Splitter should handle the splitter ending before the event list
+  void testSplitterIsSmallerThanEventList()
+  {
+    this->fake_uniform_time_data();
+
+    std::vector< EventList * > outputs;
+    for (int i=0; i<10; i++)
+      outputs.push_back( new EventList() );
+
+    TimeSplitterType split;
+    //Keep only from 200 to 300
+    split.push_back( std::pair<PulseTimeType, int>(200, 5) );
+    split.push_back( std::pair<PulseTimeType, int>(300, -1) );
+
+    //Do the splitting
+    el.splitByTime(split, outputs);
+
+    for (int i=0; i<10; i++)
+    {
+      EventList * myOut = outputs[i];
+      if (i==5)
+      {
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 100);
+      }
+      else
+      {
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
+      }
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  // Splitter should handle the events running out before the end of events
+  void testSplitterIsBiggerThanEventList()
+  {
+    this->fake_uniform_time_data();
+
+    std::vector< EventList * > outputs;
+    for (int i=0; i<10; i++)
+      outputs.push_back( new EventList() );
+
+    TimeSplitterType split;
+    split.push_back( std::pair<PulseTimeType, int>(-1000, 5) );
+    split.push_back( std::pair<PulseTimeType, int>(3300, -1) );
+
+    //Do the splitting
+    el.splitByTime(split, outputs);
+
+    for (int i=0; i<10; i++)
+    {
+      EventList * myOut = outputs[i];
+      if (i==5)
+      {
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 1000);
+      }
+      else
+      {
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
+      }
     }
   }
 };

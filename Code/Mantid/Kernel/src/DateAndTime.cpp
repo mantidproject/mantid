@@ -204,6 +204,18 @@ PulseTimeType get_from_absolute_time(dateAndTime time)
   return nanosec;
 }
 
+/// Returns the maximum value the PulseTime can take.
+PulseTimeType getMaximumPulseTime()
+{
+  return std::numeric_limits<int64_t>::max();
+}
+
+/// Returns the minimum value the PulseTime can take.
+PulseTimeType getMinimumPulseTime()
+{
+  return std::numeric_limits<int64_t>::min();
+}
+
 
 
 //-----------------------------------------------------------------------------------------------
