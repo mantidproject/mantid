@@ -63,7 +63,6 @@ testsToRun = os.listdir(testDir)
 for test in testsToRun:
     if test.endswith("cpp"):
         test = test.split(".")[0]
-        if test != 'Kernel': continue
         runlog += test+"\n"
         if os.name == 'posix':
             test = "./" + test
