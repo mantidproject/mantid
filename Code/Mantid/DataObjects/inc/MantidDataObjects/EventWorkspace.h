@@ -183,6 +183,9 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Get a const EventList object at the given workspace index number
   const EventList& getEventList(const int workspace_index) const;
 
+  /// Get an EventList pointer at the given workspace index number
+  EventList * getEventListPtr(const int workspace_index);
+
   /// Get or add an EventList
   EventList& getOrAddEventList(const int workspace_index);
 

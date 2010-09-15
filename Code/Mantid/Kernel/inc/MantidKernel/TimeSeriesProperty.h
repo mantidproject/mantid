@@ -119,6 +119,80 @@ public:
     this->countSize();
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Fill a TimeSplitterType that will filter the events by matching
+   * log values >= min and < max.
+   *
+   * @param split Splitter that will be filled.
+   * @param min min value
+   * @param max max value
+   * @param TimeTolerance offset added to times in seconds.
+   */
+  void makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance)
+  {
+    //Do nothing if the log is empty.
+    if (m_propertySeries.size() == 0)
+      return;
+
+    typename timeMap::iterator it;
+    bool lastGood = false;
+    bool isGood;
+    time_duration tol = DateAndTime::duration_from_seconds( TimeTolerance );
+    int numgood = 0;
+    dateAndTime lastTime, t;
+    PulseTimeType pt;
+
+    for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
+    {
+      lastTime = t;
+      //The new entry
+      t = it->first;
+      TYPE val = it->second;
+
+      //A good value?
+      isGood = ((val >= min) && (val < max));
+      if (isGood)
+        numgood++;
+
+      if (isGood != lastGood)
+      {
+        //We switched from bad to good or good to bad
+
+        if (isGood)
+        {
+          //Start of a good section
+          pt = DateAndTime::get_from_absolute_time( t - tol );
+          split.push_back( std::pair<PulseTimeType, int>(pt, 0) );
+        }
+        else
+        {
+          //End of the good section
+          if (numgood == 1)
+          {
+            //There was only one point with the value. Use the last time, + the tolerance, as the end time
+            pt = DateAndTime::get_from_absolute_time( lastTime + tol );
+            split.push_back( std::pair<PulseTimeType, int>(pt, -1) );
+          }
+          else
+          {
+            //At least 2 good values. Save the end time
+            pt = DateAndTime::get_from_absolute_time( t + tol );
+            split.push_back( std::pair<PulseTimeType, int>(pt, -1) );
+          }
+        }
+      }
+    }
+
+    //Add a "end" bit for the very last entry in the log.
+    typename timeMap::reverse_iterator rit = m_propertySeries.rbegin();
+    t = rit->first;
+    pt = DateAndTime::get_from_absolute_time( t + tol );
+    split.push_back( std::pair<PulseTimeType, int>(pt, -1) );
+  }
+
+
   //-----------------------------------------------------------------------------------------------
   /* Get the time series property as a string of 'time  value'
    *

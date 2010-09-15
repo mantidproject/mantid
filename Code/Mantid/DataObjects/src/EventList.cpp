@@ -749,7 +749,7 @@ using Kernel::PulseTimeType;
    * @param outputs a vector of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
    */
-  void EventList::splitByTime(TimeSplitterType splitter, std::vector< EventList * > outputs) const
+  void EventList::splitByTime(Kernel::TimeSplitterType splitter, std::vector< EventList * > outputs) const
   {
     //Start by sorting the event list by pulse time.
     this->sortPulseTime();
@@ -771,7 +771,7 @@ using Kernel::PulseTimeType;
     std::vector<TofEvent>::iterator itev = this->events.begin();
 
     //And at the same time, iterate through the splitter
-    TimeSplitterType::iterator itspl = splitter.begin();
+    Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
     PulseTimeType time, nextTime;
     int index;
@@ -801,9 +801,9 @@ using Kernel::PulseTimeType;
       {
         //Copy the event into another
         const TofEvent eventCopy(*itev);
-        EventList * myOutput = outputs[index];
         if ((index >= 0) && (index < numOutputs))
         {
+          EventList * myOutput = outputs[index];
           //Add the copy to the output
           myOutput->addEventQuickly(eventCopy);
         }

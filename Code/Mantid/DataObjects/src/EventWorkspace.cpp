@@ -267,6 +267,15 @@ using namespace Mantid::Kernel;
       return *result;
   }
 
+
+  //-----------------------------------------------------------------------------
+  /// Get an EventList pointer at the given workspace index number
+  EventList * EventWorkspace::getEventListPtr(const int workspace_index)
+  {
+    return data[workspace_index];
+  }
+
+
   //-----------------------------------------------------------------------------
   /** Either return an existing EventList from the list, or
    * create a new one if needed and expand the list.

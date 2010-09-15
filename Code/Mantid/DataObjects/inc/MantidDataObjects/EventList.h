@@ -104,21 +104,6 @@ private:
 /// How the event list is sorted.
 enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
 
-/**
- * A typedef for splitting events according their pulse time.
- *
- * It is a vector of pairs of:
- *  ->first: the PulseTime of this edge.
- *  ->second: the index to which any events with time >= this time will go.
- *            this index refers to an output workspace of event list, for example.
- *            -1 indicates the event is thrown out.
- *
- * ... up until the next pair in the index, where the destination may change.
- * The vector has to be sorted by time!
- */
-typedef std::vector< std::pair<Kernel::PulseTimeType, int> > TimeSplitterType;
-
-
 //==========================================================================================
 /** A list of TofEvent objects, corresponding to all the events that were measured on a pixel.
  *
@@ -206,7 +191,7 @@ public:
 
   void filterByPulseTime(Kernel::PulseTimeType start, Kernel::PulseTimeType stop, EventList & output) const;
 
-  void splitByTime(TimeSplitterType splitter, std::vector< EventList * > outputs) const;
+  void splitByTime(Kernel::TimeSplitterType splitter, std::vector< EventList * > outputs) const;
 
 private:
   ///List of events.

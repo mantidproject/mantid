@@ -110,6 +110,15 @@ double durationInSeconds(time_duration duration)
 }
 
 //-----------------------------------------------------------------------------------------------
+/**
+ * Return a time_duration object with the given the number of seconds
+ */
+time_duration duration_from_seconds(double duration)
+{
+  return boost::posix_time::nanoseconds( duration * 1e9 );
+}
+
+//-----------------------------------------------------------------------------------------------
 /// Create dateAndTime instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
 dateAndTime create_DateAndTime_FromISO8601_String(const std::string& str)
 {
