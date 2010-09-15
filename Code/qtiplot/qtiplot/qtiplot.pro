@@ -26,7 +26,7 @@ SCRIPTING_LANGS += Python
 DEFINES         += SCRIPTING_CONSOLE
 # a dialog for selecting the scripting language on a per-project basis
 DEFINES         += SCRIPTING_DIALOG
-DEFINES         += GSL_DLL POCO_DLL
+DEFINES         += GSL_DLL POCO_DLL BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
 win32:DEFINES   += _WIN32_WINNT=0x0400
 win32:DEFINES   += _WIN32
 win32:DEFINES   += BOOST_ALL_DYN_LINK
