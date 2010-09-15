@@ -369,6 +369,11 @@ skiptest=ARGUMENTS.get('skiptest',0)
 if not int(skiptest) and not env.GetOption('clean'):
 	print 'Building Tests.  Specify "skiptest=1" to skip the tests'
 	# tests
-	ret = SConscript(['Build/Tests/SConscript'])
+	hudsonbuild=ARGUMENTS.get('xunitoutput',0)
+	if not int(hudsonbuild):
+		ret = SConscript(['Build/Tests/SConscript'])
+	else:
+		print 'Using xUnit Output'
+		ret = SConscript(['Build/Tests/SConscript_hudson'])
 else:
 	print "Not Building Tests."
