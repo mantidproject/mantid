@@ -23,6 +23,11 @@ class HFIRInterface(object):
         # Beam finder panel
         self._beam_finder_widget = None
         
+    def load_file(self, file_path):
+        self.scripter.from_xml(file_path)
+        self._beam_finder_widget.set_state(self.scripter.beam_finder)
+        self._instrument_widget.set_state(self.scripter.instrument)
+        
     def reduce(self):
         """
             Pass the interface data to the scripter

@@ -72,3 +72,6 @@ class BeamFinderWidget(QtGui.QWidget):
             
     def get_state(self):
         return self._content.get_state()
+    
+    def set_state(self, state):
+        return self._content.set_state(state)

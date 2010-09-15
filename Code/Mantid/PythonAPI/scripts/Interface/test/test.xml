@@ -8,8 +8,8 @@
 	
 	<BeamFinder>
 	  <position>
-	    <x>0</x>
-	    <y>0</y>
+	    <x>5</x>
+	    <y>5</y>
 	  </position>
 	  <use_finder>False</use_finder>
 	  <beam_file>some file</beam_file>

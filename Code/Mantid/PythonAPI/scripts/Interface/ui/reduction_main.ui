@@ -32,7 +32,7 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>30</x>
       <y>20</y>
       <width>951</width>
       <height>721</height>
@@ -75,14 +75,44 @@
      <height>23</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuInstrument">
+   <widget class="QMenu" name="file_menu">
     <property name="title">
-     <string>Instrument</string>
+     <string>File</string>
     </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionQuit"/>
+    <addaction name="actionChange_Instrument"/>
    </widget>
-   <addaction name="menuInstrument"/>
+   <addaction name="file_menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open...</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a reduction settings file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q, Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionChange_Instrument">
+   <property name="text">
+    <string>Change Instrument</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
@@ -105,8 +135,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>activated()</signal>
+   <receiver>SANSReduction</receiver>
+   <slot>file_open()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>519</x>
+     <y>452</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>reduce_clicked()</slot>
+  <slot>file_open()</slot>
  </slots>
 </ui>
