@@ -146,7 +146,7 @@ public:
   
   void testThatRunNumberReturnsFileWithCorrectPrefix()
   {
-    Poco::Path test_dir = Poco::Path("../../../../Test/Data/").absolute();
+    Poco::Path test_dir = Poco::Path("../../../../Test/AutoTestData/").absolute();
     Poco::Path test_file = test_dir.resolve("GEM38370.raw");
     
 
