@@ -73,11 +73,11 @@ public:
   void xtestExec_EventWorkspaces()
   {
     //Load a CNCS file
-    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/CNCS_12772/CNCS_12772_neutron_event.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772/CNCS_12772_neutron_event.dat" );
     Mantid::DataHandling::LoadEventPreNeXus * eventLoader;
     eventLoader = new Mantid::DataHandling::LoadEventPreNeXus(); eventLoader->initialize();
     eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs_pad");
     eventLoader->setProperty("PadEmptyPixels", true);
     TS_ASSERT( eventLoader->execute() );
@@ -153,7 +153,7 @@ void testExecOnMuon()
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
     nxLoad.setPropertyValue("Filename", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
@@ -208,7 +208,7 @@ void testExecOnMuon()
 
 void testExecOnLoadraw()
 {
-    std::string inputFile = "../../../../Test/Data/HET15869.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HET15869.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
@@ -266,7 +266,7 @@ void testExecOnMuonXml()
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
-    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
+    inputFile = "../../../../Test/AutoTestData/emu00006473.nxs";
     nxLoad.setPropertyValue("Filename", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
