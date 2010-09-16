@@ -37,7 +37,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile = "../../../../Test/Nexus/Muon-v2/argus0026287.nxs";
+    std::string inputFile = "../../../../Test/AutoTestData/argus0026287.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);
 
     std::string outputSpace="outer";
@@ -139,7 +139,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    nxLoad.setPropertyValue("FileName", "../../../../Test/Nexus/Muon-v2/argus0026287.nxs");
+    nxLoad.setPropertyValue("FileName", "../../../../Test/AutoTestData/argus0026287.nxs");
     std::string outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     nxLoad.setPropertyValue("SpectrumMin","10");
@@ -185,7 +185,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    nxLoad.setPropertyValue("FileName", "../../../../Test/Nexus/Muon-v2/argus0026287.nxs");
+    nxLoad.setPropertyValue("FileName", "../../../../Test/AutoTestData/argus0026287.nxs");
     std::string outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     nxLoad.setPropertyValue("SpectrumList","1,10,20");
@@ -230,7 +230,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    nxLoad.setPropertyValue("FileName", "../../../../Test/Nexus/Muon-v2/argus0026287.nxs");
+    nxLoad.setPropertyValue("FileName", "../../../../Test/AutoTestData/argus0026287.nxs");
     std::string outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     nxLoad.setPropertyValue("SpectrumMin","10");
@@ -277,7 +277,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile = "../../../../Test/Nexus/Muon-v2/argus0026577.nxs";
+    std::string inputFile = "../../../../Test/AutoTestData/argus0026577.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);
 
     std::string outputSpace="outer";
@@ -379,7 +379,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile = "../../../../Test/Nexus/Muon-v2/argus0031800.nxs";
+    std::string inputFile = "../../../../Test/AutoTestData/argus0031800.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);
 
     std::string outputSpace="outer";
