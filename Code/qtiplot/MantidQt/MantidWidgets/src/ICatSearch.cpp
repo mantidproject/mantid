@@ -16,7 +16,7 @@
 #include <QMdiSubWindow>
 #include <QDesktopServices>
 #include <QUrl>
-
+#include <QLayoutItem>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -32,6 +32,7 @@ QWidget(par),m_sender(NULL),m_invstWidget(NULL),
 m_utils_sptr( new ICatUtils)
 {
 	initLayout();
+	
 //	 getting the application window pointer and setting it 
 	//this is bcoz parent()->parent() is not working in some slots as I expected 
 	QObject* qobj = parent();
@@ -40,7 +41,8 @@ m_utils_sptr( new ICatUtils)
 	{
 		setparentWidget(parent);
 	}
-
+    m_alg=createAlgorithm();
+	addtoPropertyLabelsHash();
 	
 }
 ICatSearch::~ICatSearch()
@@ -60,18 +62,23 @@ void ICatSearch::setparentWidget(QWidget* par)
 void ICatSearch::initLayout()
 {
  	m_uiForm.setupUi(this);
-	// as the instrument combo box popup down and up arrow disappeared when the light blue back ground is set in ICat search dailog 
-	// I'm setting this style sheet to bring the combo box arrows back.
-	QString str="QComboBox#instrumentBox QListView{background-color: white;background-image: url(ICatCombobackground.png);background-attachment: scroll;}"
-		"QComboBox#instrumentBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} ";
-	m_uiForm.instrumentBox->setStyleSheet(str);
-
-	QValidator * val= new QIntValidator(0,100000000,m_uiForm.startRunEdit);
-	m_uiForm.startRunEdit->setValidator(val);
-	m_uiForm.endRunEdit->setValidator(val);
-    	
+	// as the instrument combo box popup down and up arrow disappeared 
+	//when light blue back ground is set in ICat search dailog 
+	// I'm setting this style sheet to bring the combobox's popup listview's arrows back.
+	QString str="QComboBox#Instrument QListView{background-color: white;background-image:"
+		"url(ICatCombobackground.png);background-attachment: scroll;}"
+		"QComboBox#Instrument QListView QScrollBar:vertical{background-image:"
+		"url(:/images/ICatComboVScrollbar.png); "
+		"background-repeat: repeat-y; width: 17px; height:20px;} ";
+	m_uiForm.Instrument->setStyleSheet(str);
+	
 	populateInstrumentBox();
-		
+
+	//validator for start and end run numbers
+	QValidator * runval= new QIntValidator(0,100000000,m_uiForm.StartRun);
+	m_uiForm.StartRun->setValidator(runval);
+	m_uiForm.EndRun->setValidator(runval);
+			
 	//getting last saved input data from registry
 	readSettings();
 
@@ -84,9 +91,10 @@ void ICatSearch::initLayout()
 	connect(m_uiForm.enddatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.helpButton,SIGNAL(clicked()),this,SLOT(helpButtonClicked()));
 
-	m_uiForm.startRunEdit->installEventFilter(this);
-	m_uiForm.endRunEdit->installEventFilter(this);
-	m_uiForm.keywordslineEdit->installEventFilter(this);
+	//this is for hiding the calendar widget if it's visible
+	m_uiForm.StartRun->installEventFilter(this);
+	m_uiForm.EndRun->installEventFilter(this);
+	m_uiForm.Keywords->installEventFilter(this);
 	m_uiForm.searchframeWidget->installEventFilter(this);
 		
 }
@@ -109,7 +117,7 @@ void ICatSearch::onSearch()
 */
 bool ICatSearch::isCaseSensitiveSearch()
 {
-	return m_uiForm.casesensitiveBox->isChecked();
+	return m_uiForm.CaseSensitive->isChecked();
 }
 
 /* This method updates the search result to search tree
@@ -135,7 +143,7 @@ void ICatSearch::populateInstrumentBox(){
 		//ICatUtils utils;
 		if(!m_utils_sptr)
 			return;
-		m_utils_sptr->populateInstrumentBox(m_uiForm.instrumentBox);
+		m_utils_sptr->populateInstrumentBox(m_uiForm.Instrument);
 	}
 	catch(std::invalid_argument& e)
 	{
@@ -217,8 +225,8 @@ ITableWorkspace_sptr  ICatSearch::executeListInstruments()
 */
 void ICatSearch::getRunValues(double& startRun,double& endRun)
 {
-	endRun = m_uiForm.endRunEdit->text().toDouble();
-	startRun = m_uiForm.startRunEdit->text().toDouble();
+	endRun = m_uiForm.EndRun->text().toDouble();
+	startRun = m_uiForm.StartRun->text().toDouble();
 }
 
 /**This method gets start and end dates from the start and end date boxes.
@@ -227,13 +235,14 @@ void ICatSearch::getRunValues(double& startRun,double& endRun)
 */
 void ICatSearch::getDates(QString& startDate,QString& endDate)
 {
-	startDate = m_uiForm.startdateLineEdit->text();
-	endDate =m_uiForm.enddateLineEdit->text();
+	startDate = m_uiForm.StartDate->text();
+	endDate =m_uiForm.EndDate->text();
 
 	if(!startDate.compare("//",Qt::CaseInsensitive))
 	{
 		startDate="";
 	}
+
 	if(!endDate.compare("//",Qt::CaseInsensitive))
 	{
 		endDate="";
@@ -262,11 +271,11 @@ void ICatSearch::getDate(const QDate& date  )
 
 	if(!m_sender->objectName().compare("startdatetoolButton"))
 	{
-	m_uiForm.startdateLineEdit->setText(date.toString("dd/MM/yyyy"));
+	m_uiForm.StartDate->setText(date.toString("dd/MM/yyyy"));
 	}
 	if(!m_sender->objectName().compare("enddatetoolButton"))
 	{
-	m_uiForm.enddateLineEdit->setText(date.toString("dd/MM/yyyy"));
+	m_uiForm.EndDate->setText(date.toString("dd/MM/yyyy"));
 	}
 }
 
@@ -275,9 +284,25 @@ void ICatSearch::getDate(const QDate& date  )
 */
 void ICatSearch::getSelectedInstrument(QString& instrName)
 {
-	instrName=m_uiForm.instrumentBox->currentText();
+	instrName=m_uiForm.Instrument->currentText();
 }
 
+Mantid::API::IAlgorithm_sptr ICatSearch::createAlgorithm()
+{
+	QString algName("SearchByRunNumber");
+	Mantid::API::IAlgorithm_sptr alg;
+	const int version=-1;
+	try
+	{
+	alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+	}
+	catch(...)
+	{
+		throw std::runtime_error("Error when Populating the instrument list box"); 
+	}
+	return alg;
+
+}
 /**This method executes the search by run number algorithm
  *@param ws_sptr shared pointer to outputworkspace
 */
@@ -290,10 +315,7 @@ bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
 		AnalysisDataService::Instance().remove("investigations");
 
 	}
-	
-	QString algName("SearchByRunNumber");
-	const int version=-1;
-
+		
 	QString startDate,endDate;
 	getDates(startDate,endDate);
 
@@ -309,47 +331,52 @@ bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
 	}
 
 	// get the selected instrument
-	QString instr ;;
+	QString instr ;
 	getSelectedInstrument(instr);
 	
 	bool bCase(isCaseSensitiveSearch());
 	
-	QString keywords= m_uiForm.keywordslineEdit->text();
+	QString keywords= m_uiForm.Keywords->text();
 
-	//ITableWorkspace_sptr  ws_sptr;
-	Mantid::API::IAlgorithm_sptr alg;
-	try
+		
+	if(!setProperty("StartRun",startRun))
 	{
-		alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
-	}
-	catch(...)
-	{
-		throw std::runtime_error("Error when Populating the instrument list box"); 
-	}
-	try
-	{
-		alg->setProperty("StartRun",startRun);
-		alg->setProperty("EndRun",endRun);
-		alg->setProperty("Instrument",instr.toStdString());
-		alg->setProperty("StartDate",startDate.toStdString());
-		alg->setProperty("EndDate",endDate.toStdString());
-		alg->setProperty("Case Sensitive",bCase);
-		alg->setProperty("Keywords",keywords.toStdString());
-		alg->setProperty("OutputWorkspace","investigations");
-	
-	}
-	catch(std::invalid_argument& e)
-	{			
-		emit error(e.what());
-		return false;
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError& e)
-	{
-		emit error(e.what());
+		updatesearchResults(ws_sptr);
 		return false;
 	}
 	
-	Poco::ActiveResult<bool> result(alg->executeAsync());
+	if(!setProperty("EndRun",endRun)){
+		
+		updatesearchResults(ws_sptr);
+		return false;
+	}
+	if(!setProperty("Instrument",instr.toStdString())){
+		updatesearchResults(ws_sptr);
+		return false;
+	}
+	if(!setProperty("StartDate",startDate.toStdString())){
+		updatesearchResults(ws_sptr);
+		return false;
+	}
+	if(!setProperty("EndDate",endDate.toStdString())){
+		updatesearchResults(ws_sptr);
+		return false;
+	}
+	if(!setProperty("Case Sensitive",bCase)){
+		updatesearchResults(ws_sptr);
+		return false;
+	}
+	if(!setProperty("Keywords",keywords.toStdString())){
+		updatesearchResults(ws_sptr);
+		return false;
+	}
+	if(!setProperty("OutputWorkspace","investigations")){
+		updatesearchResults(ws_sptr);
+		return false;
+	}
+	
+		
+	Poco::ActiveResult<bool> result(m_alg->executeAsync());
 	while(!result.available() )
 	{
 		QCoreApplication::processEvents();
@@ -357,7 +384,7 @@ bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
 	}
 	if(result.available())
 	{
-		if(!alg->isExecuted())
+		if(!m_alg->isExecuted())
 		{
 			ws_sptr.reset();
 			return false;
@@ -374,6 +401,103 @@ bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
 
 }
 
+struct Contains
+{ 
+Contains(std::string name):m_name(name){}
+bool operator()(Mantid::Kernel::Property* prop)
+{
+std::string name=prop->name();
+std::string::iterator pos = std::remove_if(name.begin(),name.end(), isspace);
+name.erase(pos,name.end());//removing the sapce
+
+return (!name.compare(m_name));
+}
+std::string m_name;
+
+};
+
+/** This method adds prpoerty name and validator label for the property to a hash table
+  * This method iterates through each widget in the search grid layout and gets the label widget
+  * and if it's validator label adds this to a hash table.
+  * validator label objectname  for each property is "propertyname_2" eg;"StartDate_2"
+  * from the label object name remove the "_2" to get propertyname
+  * some property has space between words.remove the space(as space not allowed in QT object names)
+  * and compare with propertyname to know the label is a validator label
+*/
+void ICatSearch::addtoPropertyLabelsHash()
+{		
+	//get total row and column count in the gridlayout where search controls are placed
+	int totalcol= m_uiForm.gridLayout->columnCount();
+	int totalrow =m_uiForm.gridLayout->rowCount();
+	//loop through each widget in the gridlayout
+	for (int row=0;row<totalrow;++row)
+	{
+		for (int col=0;col<totalcol;++col)
+		{
+			QLayoutItem  *item= m_uiForm.gridLayout->itemAtPosition(row,col); 
+			if(!item) continue;
+			QWidget* widget=item->widget();
+			if(!widget) continue;
+			QLabel* label=qobject_cast<QLabel*>(widget);
+			if(!label)
+				continue;
+			
+			//validator labels i've named as "propertyname_2",
+			//so remove "_2" from label name to get property name
+			int index=label->objectName().indexOf("_");
+			if(index!=-1)
+			{
+				QString name;
+				name=label->objectName().left(index);
+				std::string propName=name.toStdString();
+				
+				std::vector<Mantid::Kernel::Property*> props=m_alg->getProperties();
+				//if this name exists in algorithm properties vector it's a property validator label
+				std::vector<Mantid::Kernel::Property*>::iterator result;
+				result=std::find_if(props.begin(),props.end(),Contains(propName));
+				if(result!=props.end())
+				{				
+					//at this point the label is a validator label
+					m_propLabelHash[QString::fromStdString((*result)->name())]=label;
+					label->hide();//initially hide the label 
+
+				}
+			}
+			
+		}
+	}
+	
+}
+/// show invalid marker labels
+void ICatSearch::showInvalidMarkerLabel(const QString& name)
+{
+	if(m_propLabelHash.contains(name))
+	{	
+		std::string documentation;
+		std::vector<Mantid::Kernel::Property*> props=m_alg->getProperties();
+		//if this name exists in algorithm properties vector it's a proprty validator label
+		std::vector<Mantid::Kernel::Property*>::iterator result;
+		result=std::find_if(props.begin(),props.end(),Contains(name.toStdString()));
+		if(result!=props.end())
+		{
+			documentation=(*result)->documentation();
+
+		}
+		m_propLabelHash.value(name)->setToolTip(QString::fromStdString(documentation));
+		m_propLabelHash.value(name)->show();
+	}
+}
+/// hide invalid marker labels
+void ICatSearch::hideInvalidMarkerLabel(const QString& name)
+{
+	if(m_propLabelHash.contains(name))
+	{
+		if(m_propLabelHash.value(name)->isVisible())
+		{
+			m_propLabelHash.value(name)->hide();
+		}
+	}
+}
 /** This method closes the search widget.
 */
 void ICatSearch::onClose()
@@ -404,13 +528,13 @@ void ICatSearch::saveSettings()
 {
 	QSettings searchsettings;
 	searchsettings.beginGroup("ICatSettings/Search");
-	searchsettings.setValue("StartRun",m_uiForm.startRunEdit->text());
-    searchsettings.setValue("EndRun",m_uiForm.endRunEdit->text());
-	searchsettings.setValue("Instrument",m_uiForm.instrumentBox->currentText());
-	searchsettings.setValue("Start Date",m_uiForm.startdateLineEdit->text());
-	searchsettings.setValue("End Date",m_uiForm.enddateLineEdit->text());
-	searchsettings.setValue("Keywords",m_uiForm.keywordslineEdit->text());
-	searchsettings.setValue("Case Sensitive",m_uiForm.casesensitiveBox->isChecked());
+	searchsettings.setValue("StartRun",m_uiForm.StartRun->text());
+    searchsettings.setValue("EndRun",m_uiForm.EndRun->text());
+	searchsettings.setValue("Instrument",m_uiForm.Instrument->currentText());
+	searchsettings.setValue("Start Date",m_uiForm.StartDate->text());
+	searchsettings.setValue("End Date",m_uiForm.EndDate->text());
+	searchsettings.setValue("Keywords",m_uiForm.Keywords->text());
+	searchsettings.setValue("Case Sensitive",m_uiForm.CaseSensitive->isChecked());
 	
 	searchsettings.endGroup();
 
@@ -420,17 +544,17 @@ void ICatSearch::readSettings()
 {
 	QSettings searchsettings;
 	searchsettings.beginGroup("ICatSettings/Search");
-	m_uiForm.startRunEdit->setText(searchsettings.value("startRun").toString());
-	m_uiForm.endRunEdit->setText(searchsettings.value("endRun").toString());
-	//m_uiForm.instrumentBox->setItemText (0,searchsettings.value("instrument").toString());
-	int index=m_uiForm.instrumentBox->findText(searchsettings.value("instrument").toString());
+	m_uiForm.StartRun->setText(searchsettings.value("startRun").toString());
+	m_uiForm.EndRun->setText(searchsettings.value("endRun").toString());
+	//m_uiForm.Instrument->setItemText (0,searchsettings.value("instrument").toString());
+	int index=m_uiForm.Instrument->findText(searchsettings.value("instrument").toString());
 	if(index!=-1)
 	{
-		m_uiForm.instrumentBox->setCurrentIndex(index);
+		m_uiForm.Instrument->setCurrentIndex(index);
 	}
-	m_uiForm.startdateLineEdit->setText(searchsettings.value("Start Date").toString());
-	m_uiForm.enddateLineEdit->setText(searchsettings.value("End Date").toString());
-	m_uiForm.casesensitiveBox->setChecked(searchsettings.value("Case Sensitive").toBool());
+	m_uiForm.StartDate->setText(searchsettings.value("Start Date").toString());
+	m_uiForm.EndDate->setText(searchsettings.value("End Date").toString());
+	m_uiForm.CaseSensitive->setChecked(searchsettings.value("Case Sensitive").toBool());
 
 	searchsettings.endGroup();
 }
@@ -442,25 +566,6 @@ void ICatSearch::helpButtonClicked()
 
 }
 
-void ICatSearch::mousePressEvent (QMouseEvent* )
-{
-	/*if(m_uiForm.startRunEdit->underMouse())
-	{
-		emit error("mousePressEvent:undermouse");
-		if(event->button()==Qt::LeftButton )
-		{
-			if(m_utils_sptr->calendarWidget())
-			{		
-				m_utils_sptr->calendarWidget()->hide();
-			}
-		}
-	}
-	else
-	{
-		emit error("mousePressEvent:not undermouse");
-	}*/
-
-}
 bool ICatSearch::eventFilter(QObject *obj, QEvent *event)
 {
 	if (event->type() ==QEvent::FocusIn && obj==m_uiForm.searchframeWidget)

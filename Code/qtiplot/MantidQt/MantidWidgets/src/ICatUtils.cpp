@@ -243,20 +243,23 @@ void ICatUtils::populateInstrumentBox(QComboBox* instrumentBox)
 void ICatUtils::updateSearchLabel(const Mantid::API::ITableWorkspace_sptr& ws_sptr,QLabel* label)
 {
 	std::stringstream rowcount;
+	QString results;
 	if(!ws_sptr)
 	{
-		rowcount<<0;
+		//rowcount<<0;
+		results=" no investigations to dispaly as an error occured during investigations search";
+
 		
 	}
 	else{
 		rowcount<<ws_sptr->rowCount();
+		results=QString::fromStdString(rowcount.str()) + " Investigations Found";
 	}
 
 	//setting the label string
 	QFont font;
 	font.setBold(true);
-	label->setText("Investigations Search Results : "+
-		QString::fromStdString(rowcount.str()) + " Investigations Found");
+	label->setText("Investigations Search Results : "+results);
 	label->setAlignment(Qt::AlignHCenter);
 	label->setFont(font);
 
@@ -269,10 +272,7 @@ void  ICatUtils::popupCalendar(QWidget* parent)
     m_calendarWidget->setGeometry(QRect(386, 64, 211, 148));
     m_calendarWidget->setGridVisible(true);
 	m_calendarWidget->show();
-	/*m_calendarWidget->setMouseTracking(true);
-	m_calendarWidget->setFocus();
-	m_calendarWidget->setFocusPolicy(Qt::WheelFocus);
-	m_calendarWidget->installEventFilter(parent);*/
+	
 }
 
 /// close calendarwidget

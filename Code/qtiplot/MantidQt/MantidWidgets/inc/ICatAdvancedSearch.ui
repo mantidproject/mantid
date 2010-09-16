@@ -5,14 +5,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>681</width>
-    <height>471</height>
+    <width>784</width>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>ICat Advanced Search</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" >
+  <layout class="QVBoxLayout" name="verticalLayout" >
    <item>
     <widget class="QLabel" name="advsearchtitleLabel" >
      <property name="maximumSize" >
@@ -28,7 +28,11 @@
       <enum>QFrame::Sunken</enum>
      </property>
      <property name="text" >
-      <string>Advanced Investigations Search</string>
+      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Advanced Investigations Search&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
      </property>
      <property name="indent" >
       <number>321</number>
@@ -52,8 +56,8 @@
      <property name="frameShadow" >
       <enum>QFrame::Sunken</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout" >
-      <item>
+     <layout class="QGridLayout" name="gridLayout_2" >
+      <item row="0" column="0" >
        <layout class="QGridLayout" name="gridLayout" >
         <item row="0" column="0" >
          <widget class="QLabel" name="invstNameLabel" >
@@ -63,51 +67,48 @@
          </widget>
         </item>
         <item row="0" column="1" >
-         <widget class="QLineEdit" name="investigatonNameEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>133</width>
-            <height>16777215</height>
-           </size>
+         <widget class="QLineEdit" name="InvestigationName" />
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLabel" name="InvestigationName_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2" >
+        <item row="0" column="3" >
          <widget class="QLabel" name="runNumberLabel" >
           <property name="text" >
            <string>Run#:</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="3" >
-         <widget class="QLineEdit" name="startRunEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>81</width>
-            <height>16777215</height>
-           </size>
+        <item row="0" column="4" >
+         <widget class="QLineEdit" name="StartRun" />
+        </item>
+        <item row="0" column="5" >
+         <widget class="QLabel" name="StartRun_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
           </property>
-          <property name="toolTip" >
-           <string>Start Run Number</string>
-          </property>
-          <property name="inputMask" >
-           <string/>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="4" >
-         <widget class="QLineEdit" name="endRunEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>81</width>
-            <height>16777215</height>
-           </size>
+        <item row="0" column="6" colspan="2" >
+         <widget class="QLineEdit" name="EndRun" />
+        </item>
+        <item row="0" column="8" colspan="3" >
+         <widget class="QLabel" name="EndRun_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
           </property>
-          <property name="toolTip" >
-           <string>End Run Number</string>
-          </property>
-          <property name="inputMask" >
-           <string/>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
@@ -119,30 +120,27 @@
          </widget>
         </item>
         <item row="1" column="1" >
-         <widget class="QLineEdit" name="invstAbstractEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>133</width>
-            <height>16777215</height>
-           </size>
+         <widget class="QLineEdit" name="InvestigationAbstract" />
+        </item>
+        <item row="1" column="2" >
+         <widget class="QLabel" name="InvestigationAbstract_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="2" >
+        <item row="1" column="3" >
          <widget class="QLabel" name="startdateLabel" >
           <property name="text" >
            <string>Start Date:</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="3" >
-         <widget class="QLineEdit" name="startdateLineEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>101</width>
-            <height>16777215</height>
-           </size>
-          </property>
+        <item row="1" column="4" >
+         <widget class="QLineEdit" name="StartDate" >
           <property name="toolTip" >
            <string>Date in DD/MM/YYY format</string>
           </property>
@@ -154,7 +152,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="4" >
+        <item row="1" column="5" colspan="2" >
          <widget class="QToolButton" name="startdatetoolButton" >
           <property name="maximumSize" >
            <size>
@@ -167,6 +165,16 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="7" >
+         <widget class="QLabel" name="StartDate_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0" >
          <widget class="QLabel" name="sampleLabel" >
           <property name="text" >
@@ -175,30 +183,27 @@
          </widget>
         </item>
         <item row="2" column="1" >
-         <widget class="QLineEdit" name="sampleEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>133</width>
-            <height>16777215</height>
-           </size>
+         <widget class="QLineEdit" name="SampleName" />
+        </item>
+        <item row="2" column="2" >
+         <widget class="QLabel" name="SampleName_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="2" >
+        <item row="2" column="3" >
          <widget class="QLabel" name="enddateLabel" >
           <property name="text" >
            <string>End Date:</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="3" >
-         <widget class="QLineEdit" name="enddateLineEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>101</width>
-            <height>16777215</height>
-           </size>
-          </property>
+        <item row="2" column="4" >
+         <widget class="QLineEdit" name="EndDate" >
           <property name="toolTip" >
            <string>Date in DD/MM/YYY format</string>
           </property>
@@ -210,7 +215,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="4" >
+        <item row="2" column="5" colspan="2" >
          <widget class="QToolButton" name="enddatetoolButton" >
           <property name="maximumSize" >
            <size>
@@ -223,6 +228,16 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="7" >
+         <widget class="QLabel" name="EndDate_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
         <item row="3" column="0" >
          <widget class="QLabel" name="invstsurnameLabel" >
           <property name="text" >
@@ -231,52 +246,62 @@
          </widget>
         </item>
         <item row="3" column="1" >
-         <widget class="QLineEdit" name="invstsurnameEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>133</width>
-            <height>16777215</height>
-           </size>
+         <widget class="QLineEdit" name="InvestigatorSurName" />
+        </item>
+        <item row="3" column="2" >
+         <widget class="QLabel" name="InvestigatorSurName_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="2" >
+        <item row="3" column="3" >
          <widget class="QLabel" name="instrumentLabel" >
           <property name="text" >
            <string>Instrument:</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="3" >
-         <widget class="QComboBox" name="instrumentBox" >
-          <property name="maximumSize" >
-           <size>
-            <width>101</width>
-            <height>16777215</height>
-           </size>
-          </property>
+        <item row="3" column="4" >
+         <widget class="QComboBox" name="Instrument" >
           <property name="toolTip" >
            <string>Instrument Box</string>
           </property>
           <property name="styleSheet" >
-           <string notr="true" >QComboBox#instrumentBox QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#instrumentBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+           <string notr="true" >QComboBox#Instrument QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#Instrument QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
           </property>
          </widget>
         </item>
-        <item row="3" column="4" >
+        <item row="3" column="5" >
+         <widget class="QLabel" name="Instrument_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="7" colspan="2" >
          <widget class="QLabel" name="keywordsLabel" >
           <property name="text" >
            <string>    KeyWord(s):</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="5" >
-         <widget class="QLineEdit" name="keywordsEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>121</width>
-            <height>16777215</height>
-           </size>
+        <item row="3" column="9" colspan="2" >
+         <widget class="QLineEdit" name="Keywords" />
+        </item>
+        <item row="3" column="11" >
+         <widget class="QLabel" name="Keywords_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
@@ -288,59 +313,76 @@
          </widget>
         </item>
         <item row="4" column="1" >
-         <widget class="QLineEdit" name="datafilenameEdit" >
-          <property name="maximumSize" >
-           <size>
-            <width>133</width>
-            <height>16777215</height>
-           </size>
+         <widget class="QLineEdit" name="DataFileName" />
+        </item>
+        <item row="4" column="2" >
+         <widget class="QLabel" name="DataFileName_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="2" >
+        <item row="4" column="3" >
          <widget class="QLabel" name="invstTypeLabel" >
           <property name="text" >
            <string>Investigation Type:</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="3" >
-         <widget class="QComboBox" name="invstTypeBox" >
-          <property name="maximumSize" >
-           <size>
-            <width>101</width>
-            <height>16777215</height>
-           </size>
-          </property>
+        <item row="4" column="4" >
+         <widget class="QComboBox" name="InvestigationType" >
           <property name="styleSheet" >
-           <string notr="true" >QComboBox#invstTypeBox QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#invstTypeBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+           <string notr="true" >QComboBox#InvestigationType QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#InvestigationType QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
           </property>
          </widget>
         </item>
-        <item row="4" column="4" >
+        <item row="4" column="5" colspan="2" >
+         <widget class="QLabel" name="InvestigationType_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="7" colspan="3" >
          <spacer name="horizontalSpacer_3" >
           <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0" >
            <size>
-            <width>78</width>
+            <width>108</width>
             <height>17</height>
            </size>
           </property>
          </spacer>
         </item>
-        <item row="4" column="5" >
+        <item row="4" column="10" >
          <widget class="QCheckBox" name="casesensitiveBox" >
           <property name="text" >
            <string>Case Sensitive</string>
           </property>
          </widget>
         </item>
+        <item row="4" column="11" >
+         <widget class="QLabel" name="CaseSensitive_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3" >
+      <item row="1" column="0" >
+       <layout class="QHBoxLayout" name="horizontalLayout_2" >
         <item>
          <spacer name="horizontalSpacer_4" >
           <property name="orientation" >

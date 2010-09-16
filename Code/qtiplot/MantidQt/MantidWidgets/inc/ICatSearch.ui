@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
-    <height>469</height>
+    <width>683</width>
+    <height>465</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -22,10 +22,14 @@
       <enum>QFrame::Sunken</enum>
      </property>
      <property name="text" >
-      <string>ISIS Investigations Search</string>
+      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-weight:600;">ISIS Investigations Search&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
      </property>
      <property name="indent" >
-      <number>339</number>
+      <number>292</number>
      </property>
     </widget>
    </item>
@@ -40,7 +44,7 @@
      <property name="frameShadow" >
       <enum>QFrame::Sunken</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4" >
+     <layout class="QGridLayout" name="gridLayout_2" >
       <item row="0" column="0" >
        <layout class="QGridLayout" name="gridLayout" >
         <item row="0" column="0" >
@@ -50,8 +54,69 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="2" >
+         <widget class="QLabel" name="StartRun_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4" >
+         <widget class="QLabel" name="EndRun_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5" >
+         <widget class="QLabel" name="startdateLabel" >
+          <property name="text" >
+           <string>Start Date:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7" >
+         <widget class="QToolButton" name="startdatetoolButton" >
+          <property name="text" >
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="8" >
+         <widget class="QLabel" name="StartDate_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="9" >
+         <widget class="QLabel" name="keywordsLabel" >
+          <property name="text" >
+           <string>KeyWord(s):</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="12" >
+         <widget class="QLabel" name="Keywords_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="1" >
-         <widget class="QLineEdit" name="startRunEdit" >
+         <widget class="QLineEdit" name="StartRun" >
           <property name="toolTip" >
            <string>Start Run Number</string>
           </property>
@@ -69,8 +134,8 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2" >
-         <widget class="QLineEdit" name="endRunEdit" >
+        <item row="0" column="3" >
+         <widget class="QLineEdit" name="EndRun" >
           <property name="toolTip" >
            <string>End Run Number</string>
           </property>
@@ -82,36 +147,8 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="instrumentLabel" >
-          <property name="text" >
-           <string>Instrument:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1" >
-         <widget class="QComboBox" name="instrumentBox" >
-          <property name="toolTip" >
-           <string/>
-          </property>
-          <property name="styleSheet" >
-           <string notr="true" >QComboBox#instrumentBox QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#instrumentBox QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="1" >
-       <layout class="QGridLayout" name="gridLayout_2" >
-        <item row="0" column="0" >
-         <widget class="QLabel" name="startdateLabel" >
-          <property name="text" >
-           <string>Start Date:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" >
-         <widget class="QLineEdit" name="startdateLineEdit" >
+        <item row="0" column="6" >
+         <widget class="QLineEdit" name="StartDate" >
           <property name="toolTip" >
            <string>Start Date in DD/MM/YYYY format</string>
           </property>
@@ -126,22 +163,49 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2" >
-         <widget class="QToolButton" name="startdatetoolButton" >
-          <property name="text" >
-           <string>...</string>
+        <item row="0" column="10" colspan="2" >
+         <widget class="QLineEdit" name="Keywords" >
+          <property name="styleSheet" >
+           <string notr="true" >background-color: rgb(255, 255, 255);</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0" >
+         <widget class="QLabel" name="instrumentLabel" >
+          <property name="text" >
+           <string>Instrument:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QComboBox" name="Instrument" >
+          <property name="toolTip" >
+           <string/>
+          </property>
+          <property name="styleSheet" >
+           <string notr="true" >QComboBox#Instrument QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#Instrument QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" >
+         <widget class="QLabel" name="Instrument_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5" >
          <widget class="QLabel" name="enddateLabel" >
           <property name="text" >
            <string>End Date:</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1" >
-         <widget class="QLineEdit" name="enddateLineEdit" >
+        <item row="1" column="6" >
+         <widget class="QLineEdit" name="EndDate" >
           <property name="toolTip" >
            <string>End Date in DD/MM/YYYY format</string>
           </property>
@@ -156,26 +220,25 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="2" >
+        <item row="1" column="7" >
          <widget class="QToolButton" name="enddatetoolButton" >
           <property name="text" >
            <string>...</string>
           </property>
          </widget>
         </item>
-       </layout>
-      </item>
-      <item row="0" column="2" >
-       <layout class="QGridLayout" name="gridLayout_3" >
-        <item row="0" column="1" >
-         <widget class="QLineEdit" name="keywordslineEdit" >
+        <item row="1" column="8" >
+         <widget class="QLabel" name="EndDate_2" >
           <property name="styleSheet" >
-           <string notr="true" >background-color: rgb(255, 255, 255);</string>
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1" >
-         <widget class="QCheckBox" name="casesensitiveBox" >
+        <item row="1" column="10" >
+         <widget class="QCheckBox" name="CaseSensitive" >
           <property name="toolTip" >
            <string/>
           </property>
@@ -184,16 +247,19 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0" >
-         <widget class="QLabel" name="keywordsLabel" >
+        <item row="1" column="11" colspan="2" >
+         <widget class="QLabel" name="CaseSensitive_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
           <property name="text" >
-           <string>KeyWord(s):</string>
+           <string>*</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
-      <item row="1" column="0" colspan="3" >
+      <item row="1" column="0" >
        <layout class="QHBoxLayout" name="horizontalLayout_2" >
         <item>
          <spacer name="horizontalSpacer" >
@@ -202,7 +268,7 @@
           </property>
           <property name="sizeHint" stdset="0" >
            <size>
-            <width>598</width>
+            <width>582</width>
             <height>20</height>
            </size>
           </property>

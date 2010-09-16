@@ -5,9 +5,11 @@
 #include "MantidQtMantidWidgets/ui_ICatAdvancedSearch.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtMantidWidgets/ICatUtils.h"
+#include <algorithm>
 
 #include <QCalendarWidget>
 #include<QObject>
+#include <QHash>
 
 namespace MantidQt
 {
@@ -64,6 +66,42 @@ namespace MantidQt
 			  //event filtering
 			bool eventFilter(QObject *obj, QEvent *event);
 
+			/// This method sets the property of algorithm
+			template<typename T >
+			bool setProperty(QString name,T value)
+			{
+
+				try
+				{
+					m_alg->setProperty(name.toStdString(),value);
+				}
+				catch(std::invalid_argument& e)
+				{	
+					emit error(e.what());
+					showInvalidMarkerLabel(name);
+
+					return false;
+				}
+				catch (Mantid::Kernel::Exception::NotFoundError& e)
+				{
+					emit error(e.what());
+					showInvalidMarkerLabel(name);
+					return false;
+				}
+
+				hideInvalidMarkerLabel(name);
+				return true;
+			}
+
+   /// This method adds invalid marker labels to hashtable
+   void addtoPropertyLabelsHash();
+   /// this method creates shared pointer to search algorithm
+   Mantid::API::IAlgorithm_sptr createAlgorithm();
+   /// show invalid marker labels
+   void showInvalidMarkerLabel(const QString& name);
+   /// hide invalid marker labels
+   void hideInvalidMarkerLabel(const QString& name);
+
 		private:
 			Ui::ICatAdvancedSearch m_uiForm;
 
@@ -76,6 +114,12 @@ namespace MantidQt
 			QObject* m_sender;
 
 			boost::shared_ptr<ICatUtils> m_utils_sptr;
+
+			/// hash containing property name and invalid marker * label
+			QHash<QString,QWidget*> m_propLabelHash;
+
+			/// shared pointer to search algorithm
+			Mantid::API::IAlgorithm_sptr m_alg;
 		};
 	}
 }
