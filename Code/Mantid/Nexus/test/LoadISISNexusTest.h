@@ -25,7 +25,7 @@ public:
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();
-        ld.setPropertyValue("Filename","../../../../Test/Nexus/LOQ49886.nxs");
+        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/LOQ49886.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
@@ -78,7 +78,7 @@ public:
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();
-        ld.setPropertyValue("Filename","../../../../Test/Nexus/LOQ49886.nxs");
+        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/LOQ49886.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
         ld.setPropertyValue("SpectrumMin","10");
         ld.setPropertyValue("SpectrumMax","20");
@@ -107,7 +107,7 @@ public:
 		Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();
-        ld.setPropertyValue("Filename","../../../../Test/Nexus/TEST00000008.nxs");
+        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/TEST00000008.nxs");
 	    ld.setPropertyValue("OutputWorkspace","outWS");
         ld.setPropertyValue("SpectrumMin","10");
         ld.setPropertyValue("SpectrumMax","19");
@@ -141,7 +141,7 @@ public:
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();
-        ld.setPropertyValue("Filename","../../../../Test/Nexus/TEST00000008.nxs");
+        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/TEST00000008.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
         ld.setPropertyValue("SpectrumMin","10");
         ld.setPropertyValue("SpectrumMax","20");
