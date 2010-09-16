@@ -123,6 +123,87 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /**
+   * Split out a time series property by time intervals.
+   *
+   * @param splitter a TimeSplitterType object containing the list of intervals and destinations.
+   * @param outputs A vector of output TimeSeriesProperty pointers of the same type.
+   */
+  void splitByTime(TimeSplitterType& splitter, std::vector< TimeSeriesProperty<TYPE> * > outputs)
+  {
+    int numOutputs = static_cast<int>( outputs.size() );
+    if (numOutputs <= 0)
+      return;
+
+    //Clear the outputs before you start
+    for (int i=0; i < numOutputs; i++)
+    {
+      TimeSeriesProperty<TYPE> * myOutput = outputs[i];
+      if (myOutput)
+        myOutput->m_propertySeries.clear();
+    }
+
+
+    //We will be iterating through all the entries in the the map
+    typename timeMap::iterator it;
+    it = m_propertySeries.begin();
+
+    //And at the same time, iterate through the splitter
+    Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+
+    //Info of each splitter
+    dateAndTime start, stop;
+    int index;
+
+    while (itspl != splitter.end())
+    {
+      //Get the splitting interval times and destination
+      start = itspl->startDate();
+      stop = itspl->stopDate();
+      index = itspl->index();
+
+      //Skip the events before the start of the time
+      while ((it != this->m_propertySeries.end()) && (it->first < start))
+        it++;
+
+      //Go through all the events that are in the interval (if any)
+      while ((it != this->m_propertySeries.end()) && (it->first < stop))
+      {
+        if ((index >= 0) && (index < numOutputs))
+        {
+          TimeSeriesProperty<TYPE> * myOutput = outputs[index];
+          //Copy the log out to the output
+          if (myOutput)
+            myOutput->addValue(it->first, it->second);
+        }
+        ++it;
+      }
+
+      //Go to the next interval
+      itspl++;
+      //But if we reached the end, then we are done.
+      if (itspl==splitter.end())
+        break;
+
+      //No need to keep looping through the filter if we are out of events
+      if (it == this->m_propertySeries.end())
+        break;
+
+    } //Looping through entries in the splitter vector
+
+
+    //Count the sizes (this function is still stupid and slow and should not be necessary, but I don't know if I should take it out)
+    for (int i=0; i < numOutputs; i++)
+    {
+      TimeSeriesProperty<TYPE> * myOutput = outputs[index];
+      if (myOutput)
+        myOutput->countSize();
+    }
+
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /**
    * Fill a TimeSplitterType that will filter the events by matching
    * log values >= min and < max.
    *
@@ -173,13 +254,13 @@ public:
           {
             //There was only one point with the value. Use the last time, + the tolerance, as the end time
             stop = DateAndTime::get_from_absolute_time( lastTime + tol );
-            split.push_back( SplittingInterval(start, stop, -1) );
+            split.push_back( SplittingInterval(start, stop, 0) );
           }
           else
           {
             //At least 2 good values. Save the end time
             stop = DateAndTime::get_from_absolute_time( t + tol );
-            split.push_back( SplittingInterval(start, stop, -1) );
+            split.push_back( SplittingInterval(start, stop, 0) );
           }
           //Reset the number of good ones, for next time
           numgood = 0;
@@ -192,7 +273,7 @@ public:
     {
       //The log ended on "good" so we need to close it using the last time we found
       stop = DateAndTime::get_from_absolute_time( t + tol );
-      split.push_back( SplittingInterval(start, stop, -1) );
+      split.push_back( SplittingInterval(start, stop, 0) );
       numgood = 0;
     }
   }
