@@ -51,7 +51,7 @@ public:
     
     // Now set it...
     // specify name of file to load workspace from
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
     algToBeTested.setPropertyValue("FileName", inputFile);
    
     std::string result;
@@ -93,7 +93,7 @@ public:
     alg2.setPropertyValue("OutputWorkspace", outputSpace);     
     
     // specify name of file to load workspace from
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006475.nxs").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006475.nxs").toString();
     alg2.setPropertyValue("FileName", inputFile);
    
     std::string result;
