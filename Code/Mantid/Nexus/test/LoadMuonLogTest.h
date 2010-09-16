@@ -54,7 +54,7 @@ public:
     loaderNexusFile.initialize();
 
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
     loaderNexusFile.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadMuonLogTest-nexusdatafile";
