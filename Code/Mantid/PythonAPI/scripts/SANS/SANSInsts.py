@@ -226,7 +226,7 @@ class LOQ(ISISInstrument):
     run_number_width = 5
     
     def __init__(self):
-        self._NAME = "LOQ"
+        self._NAME = 'LOQ'
         super(LOQ, self).__init__()
 
     def set_component_positions(self, ws, xbeam, ybeam):
@@ -242,6 +242,10 @@ class LOQ(ISISInstrument):
         MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
         # LOQ instrument description has detector at 0.0, 0.0
         return [xshift, yshift], [xshift, yshift]
+
+    def get_marked_dets(self):
+        raise NotImplementedError('The marked detector list isn\'t stored for instrument '+self._NAME)
+
         
 class SANS2D(ISISInstrument): 
 
@@ -249,7 +253,7 @@ class SANS2D(ISISInstrument):
     run_number_width = 8
 
     def __init__(self):
-        self._NAME = "SANS2D"
+        self._NAME = 'SANS2D'
         super(SANS2D, self).__init__()
         
         self._marked_dets = []
@@ -316,6 +320,9 @@ class SANS2D(ISISInstrument):
     
     def append_marked(self, detNames):
         self._marked_dets.append(detNames)
+
+    def get_marked_dets(self):
+        return self._marked_dets
 
 if __name__ == '__main__':
     pass
