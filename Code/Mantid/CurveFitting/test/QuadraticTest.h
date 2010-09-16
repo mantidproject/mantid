@@ -35,7 +35,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // load hrpd dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP39182.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HRP39182.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
