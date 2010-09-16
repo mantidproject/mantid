@@ -1,20 +1,12 @@
 #############################################################################
 ###################### USER-SERVICEABLE PART ################################
 #############################################################################
-
 unix {
 QMAKE_CXXFLAGS_RELEASE += -g
 QMAKE_LFLAGS_RELEASE += -g
  macx{
  QMAKESPEC=macx-g++
- } else {
-# could also be linux-g++-64 so maybe best left to the system to determine
-# QMAKESPEC=linux-g++
  }
- # Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function
- # to check system header paths and worse still no way of accessing what they are!
- # For simplicity we'll assume existence on Unix and Mac
- DEFINES += HAVE_STDINT_H
 }
 
 # building without muParser doesn't work yet
@@ -30,6 +22,14 @@ DEFINES         += GSL_DLL POCO_DLL BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
 win32:DEFINES   += _WIN32_WINNT=0x0400
 win32:DEFINES   += _WIN32
 win32:DEFINES   += BOOST_ALL_DYN_LINK
+
+# Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function
+# to check system header paths and worse still no way of accessing what they are!
+# For simplicity we'll assume existence on Unix and Mac and VS 2010
+unix|mac|win32-msvc2008 {
+   DEFINES += HAVE_STDINT_H
+}
+
 RESOURCES        = ../../../Images/images.qrc
 RESOURCES        += ../MantidQt/MantidWidgets/inc/ICatSearchBackGround.qrc
 
@@ -45,7 +45,7 @@ RESOURCES        += ../MantidQt/MantidWidgets/inc/ICatSearchBackGround.qrc
 CONFIG += debug_and_release
 win32:build_pass:CONFIG(debug, debug|release) {
   # Make sure we don't link to the non-debug runtime
-  QMAKE_LFLAGS_CONSOLE += /NODEFAULTLIB:msvcrt.lib
+  QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrt.lib
 }
 
 MANTIDPATH = ../../Mantid
@@ -174,9 +174,7 @@ CONFIG(debug, debug|release) {
 ##################### Windows ###############################################
 win32 {
   LIBPATH += C:/Python25/libs
-
-#  LIBS += -lqscintilla2
-  
+ 
   CONFIG(build64)  {
     THIRD_PARTY = ../../Third_Party/lib/win64
     DEFINES += HAVE_STDINT_H
@@ -187,9 +185,12 @@ win32 {
   }
   
   LIBPATH += $${THIRD_PARTY}
+  # Temp while different compiler versions are being used
+  win32-msvc2005 {
+    LIBS += qwt.lib
+    LIBS += qwtplot3d.lib
+  }
   
-  LIBS += qwtplot3d.lib
-  LIBS += qwt.lib
   LIBS += zlib1.lib
   # Although we have debug versions of gsl & cblas, they appear to be missing some symbols
   LIBS += gsl.lib
@@ -200,12 +201,21 @@ win32 {
     LIBS += PocoUtild.lib
     LIBS += PocoFoundationd.lib
     LIBS += QtPropertyBrowserd.lib
+    # Temporary while we have different versions of compilers floating around
+    win32-msvc2008 {
+        LIBS += qwtd.lib
+        LIBS += qwtplot3dd.lib
+    }
   } else {
     LIBS += -lqscintilla2
     LIBS += muparser.lib
     LIBS += PocoUtil.lib
     LIBS += PocoFoundation.lib
     LIBS += QtPropertyBrowser.lib
+    win32-msvc2008 {
+       LIBS += qwt.lib
+       LIBS += qwtplot3d.lib
+    }
   }
   
   build_pass:CONFIG(debug, debug|release) {
