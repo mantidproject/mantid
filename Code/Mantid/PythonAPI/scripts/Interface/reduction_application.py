@@ -9,24 +9,34 @@ class ReductionGUI(QtGui.QMainWindow):
     def __init__(self, instrument=None, ui_path="ui"):
         QtGui.QMainWindow.__init__(self)
         
+        # Application settings
+        settings = QtCore.QSettings()
+        
         # Directory where to find the .ui files
+        #TODO: put this in resource file
         self.ui_path = ui_path
         
         # Name handle for the instrument
+        if instrument is None:
+            instrument = unicode(settings.value("instrument_name", '').toString())
+
         self._instrument = instrument
         
         # Reduction interface
         self._interface = None
         
         # Recent files
-        self._recent_files = []
+        self._recent_files = settings.value("recent_files", []).toStringList()
         
         # Folder to open files in
-        self._last_directory = '.'
-        self._last_export_directory = '.'
+        self._last_directory = unicode(settings.value("last_directory", '.').toString())
+        self._last_export_directory = unicode(settings.value("last_export_directory", '.').toString())
         
         # Current file name
-        self._filename = None
+        self._filename = None   
+        
+        # Internal flag for clearing all settings and restarting the application
+        self._clear_and_restart = False
         
     def _set_window_title(self):
         """
@@ -43,22 +53,31 @@ class ReductionGUI(QtGui.QMainWindow):
         """
             Sets up the instrument-specific part of the UI layout
         """
-        #TODO: add instrument selection to top menu
+        if self._instrument == '':
+            self._change_instrument()
+            if self._instrument == '':
+                self.close()
+                return
+        
         self._update_file_menu()
 
         self._interface = instrument_factory(self._instrument)
-        self._interface.ui_path = self.ui_path
-        self.tabWidget.clear()
         
-        tab_dict = self._interface.get_tabs()
-        for tab in tab_dict:
-            self.tabWidget.addTab(tab_dict[tab], tab)
+        if self._interface is not None:
+            self._interface.ui_path = self.ui_path
+            self.tabWidget.clear()
             
-        self._set_window_title()
+            tab_dict = self._interface.get_tabs()
+            for tab in tab_dict:
+                self.tabWidget.addTab(tab_dict[tab], tab)
+                
+            self._set_window_title()
+        else:
+            self.close()
 
     def _update_file_menu(self):
         """
-            Update the menu with recent files
+            Set up the File menu and update the menu with recent files
         """
         openAction = QtGui.QAction("&Open...", self)
         openAction.setShortcut("Ctrl+O")
@@ -81,14 +100,29 @@ class ReductionGUI(QtGui.QMainWindow):
     
         quitAction = QtGui.QAction("&Quit", self)
         quitAction.setShortcut("Ctrl+Q")
-        self.connect(quitAction, QtCore.SIGNAL("triggered()"), self._quit)
+        self.connect(quitAction, QtCore.SIGNAL("triggered()"), self.close)
+    
+        clearAction = QtGui.QAction("&Clear settings and quit", self)
+        clearAction.setStatusTip("Restore initial application settings and close the application")
+        self.connect(clearAction, QtCore.SIGNAL("triggered()"), self._clear_and_close)
     
         self.file_menu.clear()
         self.file_menu.addAction(openAction)
         self.file_menu.addAction(saveAction)
         self.file_menu.addAction(saveAsAction)
         self.file_menu.addAction(exportAction)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(clearAction)
         self.file_menu.addAction(quitAction)
+        
+        # TOOLS menu
+        instrAction = QtGui.QAction("Change &instrument...", self)
+        instrAction.setShortcut("Ctrl+I")
+        instrAction.setStatusTip("Select a new instrument")
+        self.connect(instrAction, QtCore.SIGNAL("triggered()"), self._change_instrument)
+    
+        self.tools_menu.clear()
+        self.tools_menu.addAction(instrAction)
         
         recent_files = []
         for fname in self._recent_files:
@@ -103,11 +137,60 @@ class ReductionGUI(QtGui.QMainWindow):
                 self.connect(action, QtCore.SIGNAL("triggered()"), self.open_file)
                 self.file_menu.addAction(action)
 
-    def _quit(self):
+    def _change_instrument(self):
         """
-            Quit the application
+            Invoke an instrument selection dialog
         """
-        sys.exit()
+        dialog = uic.loadUi(os.path.join(self.ui_path,"instrument_dialog.ui"))
+        dialog.exec_()
+        if dialog.result()==1:
+            self._instrument = dialog.instr_combo.currentText()
+            self.setup_layout()
+            
+    def _clear_and_close(self):
+        """
+            Clear all QSettings parameters
+        """
+        self._clear_and_restart = True
+        self.close()
+        self._clear_and_restart = False
+
+    def closeEvent(self, event):
+        """
+            Executed when the application closes
+        """
+        reply = QtGui.QMessageBox.question(self, 'Message',
+            "Are you sure you want to quit this application?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+                
+        # Save application settings
+        if self._clear_and_restart:
+            self._clear_and_restart = False
+            QtCore.QSettings().clear()
+        else:    
+            settings = QtCore.QSettings()
+            
+            instrument = QtCore.QVariant(QtCore.QString(self._instrument)) \
+                if self._instrument is not None else QtCore.QVariant()    
+            settings.setValue("instrument_name", instrument)
+            
+            filename = QtCore.QVariant(QtCore.QString(self._filename)) \
+                if self._filename is not None else QtCore.QVariant()    
+            settings.setValue("last_file", filename)
+            
+            recent_files = QtCore.QVariant(self._recent_files) \
+                if self._recent_files is not [] else QtCore.QVariant()
+            settings.setValue("recent_files", recent_files)
+            
+            last_dir = QtCore.QVariant(QtCore.QString(self._last_directory))
+            settings.setValue("last_directory", last_dir)
+    
+            last_export_dir = QtCore.QVariant(QtCore.QString(self._last_export_directory))
+            settings.setValue("last_export_directory", last_export_dir)
 
     def reduce_clicked(self):
         """
@@ -214,21 +297,19 @@ class ReductionGUI(QtGui.QMainWindow):
             self.statusBar().showMessage("Saved as %s" % fname)
 
         
-def start(ui_path="ui"):
-    app = QtGui.QApplication([])
+def start(ui_path="ui", argv=[]):
+    app = QtGui.QApplication(argv)
+    app.setOrganizationName("Mantid")
+    app.setOrganizationDomain("mantidproject.org")
+    app.setApplicationName("Mantid Reduction")
     
-    # Instrument selection
-    #TODO: pick up list of instrument from settings file
-    dialog = uic.loadUi(os.path.join(ui_path,"instrument_dialog.ui"))
-    dialog.exec_()
-    if dialog.result()==1:
-        reducer = ReductionGUI(dialog.instr_combo.currentText(), ui_path=ui_path)
-        uic.loadUi(os.path.join(ui_path,"reduction_main.ui"), reducer)
-        reducer.setup_layout()
-        reducer.show()
-        sys.exit(app.exec_())   
+    reducer = ReductionGUI(ui_path=ui_path)
+    uic.loadUi(os.path.join(ui_path,"reduction_main.ui"), reducer)
+    reducer.setup_layout()
+    reducer.show()
+    sys.exit(app.exec_())   
         
 if __name__ == '__main__':
-    start()
+    start(argv=sys.argv)
 
         

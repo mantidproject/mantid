@@ -39,7 +39,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -80,7 +80,13 @@
      <string>File</string>
     </property>
    </widget>
+   <widget class="QMenu" name="tools_menu">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+   </widget>
    <addaction name="file_menu"/>
+   <addaction name="tools_menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
