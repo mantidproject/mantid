@@ -194,7 +194,7 @@ public:
 
     LoadRaw loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/Data/HRP39182.RAW");
+    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39182.raw");
     loader.setPropertyValue("OutputWorkspace", "HRP39182");
     loader.execute();
 
@@ -244,7 +244,7 @@ public:
   {
     LoadNexus load;
     load.initialize();
-    load.setPropertyValue("FileName", "../../../../Test/Nexus/focussedGEM38370_TOF.nxs");
+    load.setPropertyValue("FileName", "../../../../Test/AutoTestData/focussedGEM38370_TOF.nxs");
     std::string wsname = "GEM38370nexus";
     load.setPropertyValue("OutputWorkspace", wsname);
     TS_ASSERT_THROWS_NOTHING(load.execute());
@@ -311,7 +311,7 @@ public:
   {
     LoadNexus load;
     load.initialize();
-    load.setPropertyValue("FileName", "../../../../Test/Nexus/focussedGEM38370_TOF.nxs");
+    load.setPropertyValue("FileName", "../../../../Test/AutoTestData/focussedGEM38370_TOF.nxs");
     std::string wsname = "GEM38370nexus";
     load.setPropertyValue("OutputWorkspace", wsname);
     TS_ASSERT_THROWS_NOTHING(load.execute());
@@ -392,7 +392,7 @@ public:
   {
     LoadRaw3 load;
     load.initialize();
-    load.setPropertyValue("FileName", "../../../../Test/Data/GEM38370.raw");
+    load.setPropertyValue("FileName", "../../../../Test/AutoTestData/GEM38370.raw");
     load.setPropertyValue("OutputWorkspace", "GEM38370");
     TS_ASSERT_THROWS_NOTHING(load.execute());
     TS_ASSERT( load.isExecuted() );
@@ -401,7 +401,7 @@ public:
     align.initialize();
     align.setPropertyValue("InputWorkspace", "GEM38370");
     align.setPropertyValue("OutputWorkspace", "GEM38370");
-    align.setPropertyValue("CalibrationFile", "../../../../Test/Data/offsets_2006_cycle064.cal");
+    align.setPropertyValue("CalibrationFile", "../../../../Test/AutoTestData/offsets_2006_cycle064.cal");
     TS_ASSERT_THROWS_NOTHING(align.execute());
     TS_ASSERT( align.isExecuted() );
 
@@ -409,7 +409,7 @@ public:
     focused.initialize();
     focused.setPropertyValue("InputWorkspace", "GEM38370");
     focused.setPropertyValue("OutputWorkspace", "focused");
-    focused.setPropertyValue("GroupingFileName", "../../../../Test/Data/offsets_2006_cycle064.cal");
+    focused.setPropertyValue("GroupingFileName", "../../../../Test/AutoTestData/offsets_2006_cycle064.cal");
     TS_ASSERT_THROWS_NOTHING(focused.execute());
     TS_ASSERT( focused.isExecuted() );
 
