@@ -599,15 +599,42 @@ void indirectAnalysis::reflectionSelected(int index)
 
   QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
 
-  m_uiForm.set_leSpecMin->setText(values[0]);
-  m_uiForm.set_leSpecMax->setText(values[1]);
-  m_uiForm.set_leEFixed->setText(values[2]);
-
-  // Also set defaults in "Slice" tab
-  m_uiForm.slice_leRange0->setText(values[3]);
-  m_uiForm.slice_leRange1->setText(values[4]);
-  m_uiForm.slice_leRange2->setText(values[5]);
-  m_uiForm.slice_leRange3->setText(values[6]);
+  QString analysisType = values[0];
+  m_uiForm.set_leSpecMin->setText(values[1]);
+  m_uiForm.set_leSpecMax->setText(values[2]);
+  
+  if ( values.count() == 8 )
+  {
+    m_uiForm.set_leEFixed->setText(values[3]);
+    // Also set defaults in "Slice" tab
+    m_uiForm.slice_leRange0->setText(values[4]);
+    m_uiForm.slice_leRange1->setText(values[5]);
+    m_uiForm.slice_leRange2->setText(values[6]);
+    m_uiForm.slice_leRange3->setText(values[7]);
+  }
+  else
+  {
+    m_uiForm.set_leEFixed->clear();
+    m_uiForm.slice_leRange0->clear();
+    m_uiForm.slice_leRange1->clear();
+    m_uiForm.slice_leRange2->clear();
+    m_uiForm.slice_leRange3->clear();
+  }
+  bool state;
+  if ( analysisType == "diffraction" )
+  {
+    state = false;
+  }
+  else
+  {
+    state = true;
+  }
+  m_uiForm.tabSlice->setEnabled(state);
+  m_uiForm.tabElwin->setEnabled(state);
+  m_uiForm.tabMSD->setEnabled(state);
+  m_uiForm.tabFury->setEnabled(state);
+  m_uiForm.tabAbsorption->setEnabled(state);
+  m_uiForm.tabDemon->setEnabled(!state);
 }
 
 void indirectAnalysis::furyRun()
@@ -621,40 +648,35 @@ void indirectAnalysis::furyRun()
   QString filenames = m_uiForm.fury_iconFile->getFilenames().join("', r'");
 
   QString pyInput =
-    "from IndirectDataAnalysis import fury, plotFury\n"
+    "from IndirectDataAnalysis import fury\n"
     "samples = [r'" + filenames + "']\n"
     "resolution = r'" + m_uiForm.fury_resFile->getFirstFilename() + "'\n"
     "rebin = '" + m_uiForm.fury_leELow->text()+","+m_uiForm.fury_leEWidth->text()+","+ m_uiForm.fury_leEHigh->text()+"'\n";
 
-  if ( m_uiForm.fury_ckSave->isChecked() )
-  {
-    pyInput += "save = True\n";
-  }
-  else
-  {
-    pyInput += "save = False\n";
-  }
+  if ( m_uiForm.fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
+  if ( m_uiForm.fury_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.fury_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
+
   pyInput +=
-    "fury_ws = fury(samples, resolution, rebin, Save=save)\n";
-  if ( m_uiForm.fury_ckPlot->isChecked() )
-  {
-    pyInput += "specrange = range(0, mtd[fury_ws[0]].getNumberHistograms())\n";
-    pyInput += "plotFury(fury_ws, [0])\n";
-  }
+    "fury_ws = fury(samples, resolution, rebin, Save=save, Verbose=verbose, Plot=plot)\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 void indirectAnalysis::furyResType(const QString& type)
 {
   QStringList exts;
-  if ( type == "Function File" )
+  if ( type == "RES File" )
   {
     exts.append("_res.nxs");
     m_furyResFileType = true;
   }
   else
   {
-    exts.append("_ipg.nxs");
-    exts.append("_imi.nxs");
+    exts.append("_red.nxs");
     m_furyResFileType = false;
   }
   m_uiForm.fury_resFile->setFileExtensions(exts);
@@ -689,16 +711,18 @@ void indirectAnalysis::elwinRun()
 
   pyInput+= "]\n"
     "eFixed = "+ m_uiForm.set_leEFixed->text() +"\n";
-  if ( m_uiForm.elwin_ckSave->isChecked() )
-  {
-    pyInput += "save = True\n";
-  }
-  else
-  {
-    pyInput += "save = False\n";
-  }
+
+  if ( m_uiForm.elwin_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
+  if ( m_uiForm.elwin_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.elwin_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
+
   pyInput +=
-    "elwin_ws = elwin(input, eRange, eFixed, Save=save)\n";
+    "elwin_ws = elwin(input, eRange, eFixed, Save=save, Verbose=verbose, Plot=plot)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
@@ -715,12 +739,17 @@ void indirectAnalysis::elwinPlotInput()
 }
 void indirectAnalysis::elwinTwoRanges(bool state)
 {
+  QString val;
+  if ( state ) val = "*";
+  else val = " ";
   m_uiForm.elwin_lbR2Start->setEnabled(state);
   m_uiForm.elwin_lbR2End->setEnabled(state);
   m_uiForm.elwin_leRangeTwoStart->setEnabled(state);
   m_uiForm.elwin_leRangeTwoEnd->setEnabled(state);
   m_uiForm.elwin_valRangeTwoStart->setEnabled(state);
   m_uiForm.elwin_valRangeTwoEnd->setEnabled(state);
+  m_uiForm.elwin_valRangeTwoStart->setText(val);
+  m_uiForm.elwin_valRangeTwoEnd->setText(val);
 }
 void indirectAnalysis::sliceRun()
 {
@@ -757,15 +786,19 @@ void indirectAnalysis::sliceRun()
   QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
   pyInput +=
     "rawfile = [r'" + filenames + "']\n"
-    "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n";
+    "spectra = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n";
 
-  if ( m_uiForm.slice_ckSave->isChecked() )
-    pyInput += "save = True\n";
-  else
-    pyInput += "save = False\n";
+  if ( m_uiForm.slice_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
+  if ( m_uiForm.slice_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.slice_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
 
   pyInput +=
-    "slice(rawfile, calib, tofRange, spectra=spec, Save=save)";
+    "slice(rawfile, calib, tofRange, spectra, Save=save, Verbose=verbose, Plot=plot)";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
@@ -788,12 +821,17 @@ void indirectAnalysis::slicePlotRaw()
 }
 void indirectAnalysis::sliceTwoRanges(bool state)
 {
+  QString val;
+  if ( state ) val = "*";
+  else val = " ";
   m_uiForm.slice_lbRange2->setEnabled(state);
   m_uiForm.slice_lbTo2->setEnabled(state);
   m_uiForm.slice_leRange2->setEnabled(state);
   m_uiForm.slice_leRange3->setEnabled(state);
   m_uiForm.slice_valRange2->setEnabled(state);
+  m_uiForm.slice_valRange2->setText(val);
   m_uiForm.slice_valRange3->setEnabled(state);
+  m_uiForm.slice_valRange3->setText(val);
 }
 void indirectAnalysis::sliceCalib(bool state)
 {
@@ -814,18 +852,17 @@ void indirectAnalysis::msdRun()
     "endX = " + m_uiForm.msd_leEndX->text() +"\n"
     "inputs = [r'" + m_uiForm.msd_inputFile->getFilenames().join("', r'") + "']\n";
 
-  if ( m_uiForm.msd_ckSave->isChecked() )
-    pyInput += "save = True\n";
-  else
-    pyInput += "save = False\n";
+  if ( m_uiForm.msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
 
-  if ( m_uiForm.msd_ckPlot->isChecked() )
-    pyInput += "plot = True\n";
-  else
-    pyInput += "plot = False\n";
+  if ( m_uiForm.msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.msd_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
 
   pyInput +=
-    "msdfit(inputs, startX, endX, Save=save, Plot=plot)\n";
+    "msdfit(inputs, startX, endX, Save=save, Verbose=verbose, Plot=plot)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -873,16 +910,18 @@ void indirectAnalysis::absorptionRun()
     pyInput = pyInput.arg(m_uiForm.abs_leSlices->text());
     pyInput = pyInput.arg(m_uiForm.abs_leAnnuli->text());
   }
-  if ( m_uiForm.abs_ckSave->isChecked() )
-  {
-    pyInput += "save = True\n";
-  }
-  else
-  {
-    pyInput += "save = False\n";
-  }
+
+  if ( m_uiForm.abs_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
+  if ( m_uiForm.abs_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.abs_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
+
   pyInput +=
-    "absorption(file, mode, sample, can, efixed, Save=save)\n";
+    "absorption(file, mode, sample, can, efixed, Save=save, Verbose=verbose, Plot=plot)\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 void indirectAnalysis::absorptionShape(int index)

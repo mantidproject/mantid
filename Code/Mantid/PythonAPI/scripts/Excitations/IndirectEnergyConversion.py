@@ -350,13 +350,18 @@ def getReflectionDetails(instrument, analyser, reflection):
 	LoadEmptyInstrument(idf, 'ins')
 	LoadParameterFile('ins', ipf)
 	instrument = mtd['ins'].getInstrument()
-	result = str( int(instrument.getNumberParameter('spectra-min')[0]) ) + '\n'
-	result += str( int(instrument.getNumberParameter('spectra-max')[0]) ) + '\n'
-	result += str( instrument.getNumberParameter('efixed-val')[0] ) + '\n'
-	result += str( int(instrument.getNumberParameter('peak-start')[0]) ) + '\n'
-	result += str( int(instrument.getNumberParameter('peak-end')[0]) ) + '\n'
-	result += str( int(instrument.getNumberParameter('back-start')[0]) ) + '\n'
-	result += str( int(instrument.getNumberParameter('back-end')[0]) )
+	result = ''
+	try:
+		result += str( instrument.getStringParameter('analysis-type')[0] ) + '\n'
+		result += str( int(instrument.getNumberParameter('spectra-min')[0]) ) + '\n'
+		result += str( int(instrument.getNumberParameter('spectra-max')[0]) ) + '\n'
+		result += str( instrument.getNumberParameter('efixed-val')[0] ) + '\n'
+		result += str( int(instrument.getNumberParameter('peak-start')[0]) ) + '\n'
+		result += str( int(instrument.getNumberParameter('peak-end')[0]) ) + '\n'
+		result += str( int(instrument.getNumberParameter('back-start')[0]) ) + '\n'
+		result += str( int(instrument.getNumberParameter('back-end')[0]) )
+	except IndexError:
+		pass
 	mantid.deleteWorkspace('ins')
 	return result
 

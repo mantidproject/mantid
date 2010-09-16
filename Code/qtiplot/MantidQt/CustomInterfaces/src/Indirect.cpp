@@ -19,7 +19,7 @@ using namespace MantidQt::CustomInterfaces;
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
 UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true),
-m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL)
+  m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL)
 {
   // Constructor
 }
@@ -121,6 +121,7 @@ void Indirect::initLayout()
   m_uiForm.ind_calibFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
   m_uiForm.ind_mapFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
   m_uiForm.cal_leRunNo->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
+  m_uiForm.sqw_inputFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/ProcessedFiles");
 }
 
 /**
@@ -137,8 +138,15 @@ void Indirect::initLocalPython()
 */
 void Indirect::helpClicked()
 {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-    "ConvertToEnergy#Indirect_Interface"));
+  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+  QString url = "http://www.mantidproject.org/ConvertToEnergy#";
+  if ( tabName == "Energy Transfer" )
+    url += "Energy_transfer_tab";
+  else if ( tabName == "Calibration" )
+    url += "Calibration_tab";
+  else if ( tabName == "S(Q, w)" )
+    url += "SofQW_tab";
+  QDesktopServices::openUrl(QUrl(url));
 }
 
 /**
@@ -498,13 +506,8 @@ QString Indirect::savePyCode()
   QString analyser = m_uiForm.cbAnalyser->currentText();
 
   QString ins = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
-  QString suffix = analyser + m_uiForm.cbReflection->currentText() + "_";
+  QString suffix = analyser + m_uiForm.cbReflection->currentText() + "_red";
   QString directory = m_uiForm.leNameSPE->text();
-
-  if ( analyser == "graphite" )
-    suffix += "ipg";
-  else if ( analyser == "mica" || analyser == "fmica" )
-    suffix += "imi";
 
   QStringList fileFormats;
   QString fileFormatList;
@@ -991,6 +994,7 @@ void Indirect::saveSettings()
   m_uiForm.ind_runFiles->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
   m_uiForm.ind_calibFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
   m_uiForm.ind_mapFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
+  m_uiForm.sqw_inputFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/ProcessedFiles");
 }
 
 /**
@@ -1048,23 +1052,53 @@ void Indirect::reflectionSelected(int index)
 
   QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
 
-  if ( values.count() != 7 )
+  if ( values.count() < 3 )
   {
     showInformationBox("Could not gather necessary data from parameter file.");
     return;
   }
+  else
+  {
+    QString analysisType = values[0];
+    m_uiForm.leSpectraMin->setText(values[1]);
+    m_uiForm.leSpectraMax->setText(values[2]);
+    m_uiForm.cal_leResSpecMin->setText(values[1]);
+    m_uiForm.cal_leResSpecMax->setText(values[2]);
+    if ( values.count() == 8 )
+    {
+      m_uiForm.leEfixed->setText(values[3]);
+      m_uiForm.cal_lePeakMin->setText(values[4]);
+      m_uiForm.cal_lePeakMax->setText(values[5]);
+      m_uiForm.cal_leBackMin->setText(values[6]);
+      m_uiForm.cal_leBackMax->setText(values[7]);
+    }
+    else
+    {
+      m_uiForm.leEfixed->clear();
+      m_uiForm.cal_lePeakMin->clear();
+      m_uiForm.cal_lePeakMax->clear();
+      m_uiForm.cal_leBackMin->clear();
+      m_uiForm.cal_leBackMax->clear();
+    }
 
-  m_uiForm.leSpectraMin->setText(values[0]);
-  m_uiForm.leSpectraMax->setText(values[1]);
-  m_uiForm.leEfixed->setText(values[2]);
-  m_uiForm.cal_lePeakMin->setText(values[3]);
-  m_uiForm.cal_lePeakMax->setText(values[4]);
-  m_uiForm.cal_leBackMin->setText(values[5]);
-  m_uiForm.cal_leBackMax->setText(values[6]);
+    bool state;
+    if ( analysisType == "diffraction" )
+      state = false;
+    else
+      state = true;
 
-  m_uiForm.cal_leResSpecMin->setText(values[0]);
-  m_uiForm.cal_leResSpecMax->setText(values[1]);
-
+    if ( state != m_uiForm.gbExperiment->isEnabled() )
+    {
+      m_uiForm.tabCalibration->setEnabled(state);
+      m_uiForm.tabSofQW->setEnabled(state);
+      m_uiForm.gbExperiment->setEnabled(state);
+      m_uiForm.gbAnalysis->setEnabled(state);
+      m_uiForm.gbCtoE->setEnabled(state);
+      m_uiForm.gbRebin->setEnabled(state);
+      m_uiForm.gbSave->setEnabled(state);
+      m_uiForm.pbRun->setEnabled(state);
+    }
+  }
 
   // clear validation markers
   validateInput();
@@ -1215,6 +1249,9 @@ void Indirect::plotRaw()
 */
 void Indirect::rebinCheck(bool state) 
 {
+  QString val;
+  if ( state ) val = " ";
+  else val = "*";
   m_uiForm.rebin_pbRebin->setEnabled( !state );
   m_uiForm.rebin_lbLow->setEnabled( !state );
   m_uiForm.rebin_lbWidth->setEnabled( !state );
@@ -1222,7 +1259,12 @@ void Indirect::rebinCheck(bool state)
   m_uiForm.rebin_leELow->setEnabled( !state );
   m_uiForm.rebin_leEWidth->setEnabled( !state );
   m_uiForm.rebin_leEHigh->setEnabled( !state );
-
+  m_uiForm.valELow->setEnabled(!state);
+  m_uiForm.valELow->setText(val);
+  m_uiForm.valEWidth->setEnabled(!state);
+  m_uiForm.valEWidth->setText(val);
+  m_uiForm.valEHigh->setEnabled(!state);
+  m_uiForm.valEHigh->setText(val);
   isDirtyRebin(true);
 }
 /**
@@ -1243,12 +1285,12 @@ void Indirect::resPlotInput()
   {
     QString file = m_uiForm.cal_leRunNo->getFirstFilename();
     QString pyInput =
-    "from IndirectEnergyConversion import res\n"
-    "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
-    ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
-    ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
-    "file = r'" + file + "'\n"
-    "outWS = res(file, iconOpt, '', '', plotOpt=True, Res=False)\n";
+      "from IndirectEnergyConversion import res\n"
+      "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
+      ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
+      ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
+      "file = r'" + file + "'\n"
+      "outWS = res(file, iconOpt, '', '', plotOpt=True, Res=False)\n";
     QString pyOuput = runPythonCode(pyInput).trimmed();
   }
   else
@@ -1285,6 +1327,7 @@ void Indirect::rebinData()
 
 void Indirect::useCalib(bool state)
 {
+  m_uiForm.ind_calibFile->isOptional(!state);
   m_uiForm.ind_calibFile->setEnabled(state);
 }
 
@@ -1432,12 +1475,18 @@ void Indirect::sOfQwClicked()
 }
 void Indirect::sOfQwRebinE(bool state)
 {
+  QString val;
+  if ( state ) val = "*";
+  else val = " ";
   m_uiForm.sqw_leELow->setEnabled(state);
   m_uiForm.sqw_leEWidth->setEnabled(state);
   m_uiForm.sqw_leEHigh->setEnabled(state);
   m_uiForm.sqw_valELow->setEnabled(state);
+  m_uiForm.sqw_valELow->setText(val);
   m_uiForm.sqw_valEWidth->setEnabled(state);
+  m_uiForm.sqw_valEWidth->setText(val);
   m_uiForm.sqw_valEHigh->setEnabled(state);
+  m_uiForm.sqw_valEHigh->setText(val);
   m_uiForm.sqw_lbELow->setEnabled(state);
   m_uiForm.sqw_lbEWidth->setEnabled(state);
   m_uiForm.sqw_lbEHigh->setEnabled(state);

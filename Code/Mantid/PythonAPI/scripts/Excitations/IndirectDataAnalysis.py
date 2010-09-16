@@ -13,7 +13,7 @@ def absflat(inWS_n, outWS_n, efixed, sample, can):
 	FlatPlateAbsorption('wavelength', outWS_n, sample[0], sample[1], sample[2], can[0], can[1], can[2], EMode='Indirect', EFixed=efixed, ElementSize=can[3])
 	mantid.deleteWorkspace('wavelength')
 
-def absorption(input, mode, sample, can, efixed, Save=False):
+def absorption(input, mode, sample, can, efixed, Save=False, Verbose=False, Plot=False):
 	(direct, filename) = os.path.split(input)
 	(root, ext) = os.path.splitext(filename)
 	LoadNexusProcessed(input, root)
@@ -25,8 +25,10 @@ def absorption(input, mode, sample, can, efixed, Save=False):
 	if Save:
 		SaveNexus(outWS_n, outWS_n+'.nxs')
 	mantid.deleteWorkspace(root)
+	if Plot:
+		graph = plotSpectrum(outWS_n,0)
 
-def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, plotOpt=False, Save=True):
+def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, Plot=False, Save=True, Verbose=False):
 	'''
 	DEMON function for unit conversion on diffraction backs of IRIS/OSIRIS.
 	MANDATORY PARAMS:
@@ -63,13 +65,13 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, plo
 			mantid.deleteWorkspace(ws_names[i])
 		if Save:
 			SaveNexusProcessed(savefile, savefile+'.nxs')
-	if plotOpt:
+	if Plot:
 		for demon in workspaces:
 			nspec = mantid.getMatrixWorkspace(demon).getNumberHistograms()
 			plotSpectrum(demon, range(0, nspec))
 	return workspaces, runNos
 
-def elwin(inputFiles, eRange, efixed, Save=False):
+def elwin(inputFiles, eRange, efixed, Save=False, Verbose=False, Plot=False):
 	outWS_list = []
 	for file in inputFiles:
 		(direct, filename) = os.path.split(file)
@@ -81,55 +83,52 @@ def elwin(inputFiles, eRange, efixed, Save=False):
 			SaveNexusProcessed(savefile, savefile+'.nxs')
 		outWS_list.append(savefile)
 		mantid.deleteWorkspace(root)
+	if Plot:
+		graph = plotSpectrum(outWS_list, 0)
 	return outWS_list
 
-def fury(sam_files, res_file, rebinParam, Save=False, RES=True):
+def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False, Plot=False):
 	outWSlist = []
-
 	# Process RES Data Only Once
 	LoadNexus(res_file, 'irs_res_data') # RES
 	Rebin('irs_res_data', 'irs_res_data', rebinParam)
 	ExtractFFTSpectrum('irs_res_data', 'irs_res_fft', 2)
 	Integration('irs_res_data', 'irs_res_int')
 	Divide('irs_res_fft', 'irs_res_int', 'irs_res')
-
 	for sam_file in sam_files:
 		(direct, filename) = os.path.split(sam_file)
 		(root, ext) = os.path.splitext(filename)
-
 		LoadNexus(sam_file, 'irs_sam_data') # SAMPLE
 		Rebin('irs_sam_data', 'irs_sam_data', rebinParam)
 		ExtractFFTSpectrum('irs_sam_data', 'irs_sam_fft', 2)
 		Integration('irs_sam_data', 'irs_sam_int')
 		Divide('irs_sam_fft', 'irs_sam_int', 'irs_sam')
-
 		# Create save file name.
 		runNo = mantid.getMatrixWorkspace('irs_sam_data').getRun().getLogData("run_number").value()
 		savefile = root[:3] + runNo + '_iqt'
 		outWSlist.append(savefile)
-
 		if RES:
 			DivideBySpectrum('irs_sam', 'irs_res', savefile)
 		else:
 			Divide('irs_sam', 'irs_res', savefile)
-
-		# Cleanup Sample Files
+		#Cleanup Sample Files
 		mantid.deleteWorkspace('irs_sam_data')
 		mantid.deleteWorkspace('irs_sam_int')
 		mantid.deleteWorkspace('irs_sam_fft')
 		mantid.deleteWorkspace('irs_sam')
 		if Save:
 			SaveNexusProcessed(savefile, savefile + '.nxs')
-
 	# Clean Up RES files
 	mantid.deleteWorkspace('irs_res_data')
 	mantid.deleteWorkspace('irs_res_int')
 	mantid.deleteWorkspace('irs_res_fft')
 	mantid.deleteWorkspace('irs_res')
-
+	if Plot:
+		specrange = range(0,mtd[outWSlist[0]].getNumberHistograms())
+		plotFury(outWSlist, specrange)
 	return outWSlist
 
-def msdfit(inputs, startX, endX, Save=False, Plot=False):
+def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
 	for file in inputs:
 		(direct, filename) = os.path.split(file)
 		(root, ext) = os.path.splitext(filename)
@@ -183,7 +182,8 @@ def plotFury(inWS_n, spec):
 	layer.setScale(0, 0, 1.0)
 	layer.setScale(2, 0, xBoundary)
 
-def slice(inputfiles, calib, tofXRange, spectra = [0,0], Save=True):
+def slice(inputfiles, calib, tofXRange, spectra, Save=False, Verbose=False, Plot=False):
+	outWSlist = []
 	if  not ( ( len(tofXRange) == 2 ) or ( len(tofXRange) == 4 ) ):
 		mantid.sendLogMessage('>> TOF Range inputs must contain either 2 or 4 numbers.')
 		sys.exit(1)
@@ -205,7 +205,10 @@ def slice(inputfiles, calib, tofXRange, spectra = [0,0], Save=True):
 			Integration(savefile, savefile, tofXRange[0], tofXRange[1], 0, nhist-1)
 		if Save:
 			SaveNexusProcessed(savefile, savefile+'.nxs')
+		outWSlist.append(savefile)
 		mantid.deleteWorkspace(root)
+	if Plot:
+		graph = plotBin(outWSlist, 0)
 
 def plotRaw(inputfiles,spectra=[]):
 	if len(spectra) != 2:

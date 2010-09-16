@@ -129,6 +129,9 @@
     <ClCompile Include="src\BinFinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\DateValidator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidKernel\ArrayProperty.h">
@@ -348,6 +351,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidKernel\BinFinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidKernel\DateValidator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

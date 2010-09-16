@@ -185,6 +185,7 @@
     <ClCompile Include="src\BinFinder.cpp" />
     <ClCompile Include="src\ConfigService.cpp" />
     <ClCompile Include="src\DateAndTime.cpp" />
+    <ClCompile Include="src\DateValidator.cpp" />
     <ClCompile Include="src\DllOpen.cpp" />
     <ClCompile Include="src\EnvironmentHistory.cpp" />
     <ClCompile Include="src\Exception.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="inc\MantidKernel\ArrayProperty.h" />
     <ClInclude Include="inc\MantidKernel\BinaryFile.h" />
     <ClInclude Include="inc\MantidKernel\BinFinder.h" />
+    <ClInclude Include="inc\MantidKernel\DateValidator.h" />
     <ClInclude Include="inc\mantidkernel\facilityinfo.h" />
     <ClInclude Include="inc\mantidkernel\instrumentinfo.h" />
     <ClInclude Include="test\ArrayPropertyTest.h" />
