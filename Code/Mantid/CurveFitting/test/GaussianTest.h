@@ -98,7 +98,7 @@ public:
   void testAgainstHRPD_DatasetLookUpTable()
   {
     // load dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
@@ -179,7 +179,7 @@ public:
   void testAgainstHRPD_DatasetLookUpTableDifferentUnit()
   {
     // load dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
@@ -273,7 +273,7 @@ public:
   void testAgainstHRPD_DatasetWithConstraints()
   {
     // load dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
@@ -356,7 +356,7 @@ public:
   void testAgainstHRPD_DatasetWithConstraintsTestAlsoFormula()
   {
     // load dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
@@ -442,7 +442,7 @@ public:
   void testAgainstHRPD_FallbackToSimplex()
   {
     // load dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
@@ -865,7 +865,7 @@ public:
   void testAgainstHRPD_DatasetWithConstraintsSimplex()
   {
     // load dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
