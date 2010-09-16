@@ -11,6 +11,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSplitter.h"
 #include <set>
 
 namespace Mantid

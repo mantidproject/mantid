@@ -773,31 +773,24 @@ using Kernel::PulseTimeType;
     //And at the same time, iterate through the splitter
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
-    PulseTimeType time, nextTime;
+    PulseTimeType start, stop;
     int index;
 
     //This is the time of the first section. Anything before is thrown out.
-    nextTime = itspl->first;
-
-    //Find the first event to split
-    while ((itev != this->events.end()) && (itev->pulse_time < nextTime))
-      itev++;
 
     while (itspl != splitter.end())
     {
-      //The start time is the old stop time
-      time = nextTime;
-      //And this is where the next events will go.
-      index = itspl->second;
+      //Get the splitting interval times and destination
+      start = itspl->start();
+      stop = itspl->stop();
+      index = itspl->index();
 
-      //Find the next time after;
-      itspl++;
-      //But if we reached the end, then we are done.
-      if (itspl==splitter.end())
-        break;
-      nextTime = itspl->first;
+      //Skip the events before the start of the time
+      while ((itev != this->events.end()) && (itev->pulse_time < start))
+        itev++;
 
-      while ((itev != this->events.end()) && (itev->pulse_time < nextTime))
+      //Go through all the events that are in the interval (if any)
+      while ((itev != this->events.end()) && (itev->pulse_time < stop))
       {
         //Copy the event into another
         const TofEvent eventCopy(*itev);
@@ -809,6 +802,12 @@ using Kernel::PulseTimeType;
         }
         ++itev;
       }
+
+      //Go to the next interval
+      itspl++;
+      //But if we reached the end, then we are done.
+      if (itspl==splitter.end())
+        break;
 
       //No need to keep looping through the filter if we are out of events
       if (itev == this->events.end())
