@@ -1417,8 +1417,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
             GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
             return
         else:
-            Q1D(tmpWS,final_result,'check this',Q_REBIN, AccountForGravity=GRAVITY)
-            exit('Are we back to all zeros?')
+            Q1D(tmpWS,final_result,final_result,Q_REBIN, AccountForGravity=GRAVITY)
     # 2D    
     else:
         if finding_centre == True:

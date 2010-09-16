@@ -818,7 +818,8 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
     m_uiForm.mask_table->insertRow(row);
     m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("time"));
     m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(det_name));
-    m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(sitr.next()));
+    const QString shape(sitr.next().trimmed());
+    m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(shape));
   }
 }
 
@@ -1354,8 +1355,10 @@ void SANSRunWindow::saveFileBrowse()
   QString prevPath = prevValues.value("dir", QString::fromStdString(
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
-  QString filter = ";;AllFiles (*.*)";
-  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter);
+  const QString filter = ";;AllFiles (*.*)";
+  QString defFilter = ";;AllFiles (*.*)";
+  QString oFile = QFileDialog::getSaveFileName(this, title, 
+    prevPath+"/"+m_uiForm.outfile_edit->text(), filter, &defFilter);
 
   if( ! oFile.isEmpty() )
   {
