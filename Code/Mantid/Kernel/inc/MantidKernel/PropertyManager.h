@@ -8,6 +8,7 @@
 #include <map>
 
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid
 {
@@ -60,6 +61,7 @@ public:
   PropertyManager& operator+=(const PropertyManager& rhs);
 
   void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
+  void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< PropertyManager * > outputs) const;
 
   virtual ~PropertyManager();
 
@@ -90,6 +92,7 @@ protected:
 
   Property* getPointerToProperty(const std::string &name) const;
   Property* getPointerToPropertyOrdinal(const int &index) const;
+  Property* getPointerToPropertyOrNull( const std::string &name ) const;
 	
 private:
   /// typedef for the map holding the properties

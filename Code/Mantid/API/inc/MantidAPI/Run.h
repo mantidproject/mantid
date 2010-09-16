@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/TimeSplitter.h"
 #include <vector>
 
 namespace Mantid
@@ -59,6 +60,7 @@ namespace Mantid
       Run& operator+=(const Run& rhs);
 
       void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
+      void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
 
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop);

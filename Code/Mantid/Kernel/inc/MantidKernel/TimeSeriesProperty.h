@@ -128,23 +128,31 @@ public:
    * @param splitter a TimeSplitterType object containing the list of intervals and destinations.
    * @param outputs A vector of output TimeSeriesProperty pointers of the same type.
    */
-  void splitByTime(TimeSplitterType& splitter, std::vector< TimeSeriesProperty<TYPE> * > outputs)
+  void splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
   {
     int numOutputs = static_cast<int>( outputs.size() );
     if (numOutputs <= 0)
       return;
 
+    std::vector< TimeSeriesProperty<TYPE> *> outputs_tsp;
     //Clear the outputs before you start
     for (int i=0; i < numOutputs; i++)
     {
-      TimeSeriesProperty<TYPE> * myOutput = outputs[i];
+      TimeSeriesProperty<TYPE> * myOutput = dynamic_cast< TimeSeriesProperty<TYPE> * >(outputs[i]);
       if (myOutput)
+      {
+        outputs_tsp.push_back(myOutput);
         myOutput->m_propertySeries.clear();
+      }
+      else
+      {
+        outputs_tsp.push_back( NULL );
+      }
     }
 
 
     //We will be iterating through all the entries in the the map
-    typename timeMap::iterator it;
+    typename timeMap::const_iterator it;
     it = m_propertySeries.begin();
 
     //And at the same time, iterate through the splitter
@@ -170,7 +178,7 @@ public:
       {
         if ((index >= 0) && (index < numOutputs))
         {
-          TimeSeriesProperty<TYPE> * myOutput = outputs[index];
+          TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[index];
           //Copy the log out to the output
           if (myOutput)
             myOutput->addValue(it->first, it->second);
@@ -194,7 +202,7 @@ public:
     //Count the sizes (this function is still stupid and slow and should not be necessary, but I don't know if I should take it out)
     for (int i=0; i < numOutputs; i++)
     {
-      TimeSeriesProperty<TYPE> * myOutput = outputs[index];
+      TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[index];
       if (myOutput)
         myOutput->countSize();
     }

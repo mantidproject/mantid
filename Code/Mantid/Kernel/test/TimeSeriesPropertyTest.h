@@ -149,11 +149,13 @@ public:
     TS_ASSERT_EQUALS( log->realSize(), 12);
 
     //Make the outputs
-    std::vector< TimeSeriesProperty<int> * > outputs;
+//    std::vector< TimeSeriesProperty<int> * > outputs2;
+    std::vector< Property * > outputs;
     for (int i=0; i<4; i++)
     {
       TimeSeriesProperty<int> * newlog  = new TimeSeriesProperty<int>("MyIntLog");
       outputs.push_back(newlog);
+      //outputs2.push_back(newlog);
     }
 
     //Make a splitter
@@ -177,10 +179,10 @@ public:
 
     log->splitByTime(splitter, outputs);
 
-    TS_ASSERT_EQUALS( outputs[0]->realSize(), 3);
-    TS_ASSERT_EQUALS( outputs[1]->realSize(), 0);
-    TS_ASSERT_EQUALS( outputs[2]->realSize(), 2);
-    TS_ASSERT_EQUALS( outputs[3]->realSize(), 1);
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[0])->realSize(), 3);
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[1])->realSize(), 0);
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[2])->realSize(), 2);
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[3])->realSize(), 1);
 
   }
   

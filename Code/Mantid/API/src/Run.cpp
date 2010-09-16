@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Run.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "boost/lexical_cast.hpp"
 
@@ -10,6 +11,9 @@ namespace Mantid
 {
 namespace API
 {
+
+using namespace Kernel;
+
   //----------------------------------------------------------------------
   // Public member functions
   //----------------------------------------------------------------------
@@ -81,6 +85,40 @@ namespace API
 
     //Re-integrate proton charge
     this->integrateProtonCharge();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Split a run by time (splits the TimeSeriesProperties contained).
+   *
+   * Total proton charge will get re-integrated after filtering.
+   *
+   * @param splitter TimeSplitterType with the intervals and destinations.
+   * @param outputs Vector of output runs.
+   */
+  void Run::splitByTime(TimeSplitterType& splitter, std::vector< Run * > outputs) const
+  {
+    //Make a vector of managers for the splitter. Fun!
+    std::vector< PropertyManager *> output_managers;
+    size_t n = outputs.size();
+    for (size_t i=0; i<n; i++)
+    {
+      if (outputs[i])
+        output_managers.push_back( &(outputs[i]->m_manager) );
+      else
+        output_managers.push_back( NULL );
+    }
+
+    //Now that will do the split down here.
+    m_manager.splitByTime(splitter, output_managers);
+
+    //Re-integrate proton charge of all outputs
+    for (size_t i=0; i<n; i++)
+    {
+      if (outputs[i])
+        outputs[i]->integrateProtonCharge();
+    }
   }
 
 

@@ -144,5 +144,17 @@ void Property::filterByTime(const Kernel::dateAndTime start, const Kernel::dateA
 }
 
 
+//-----------------------------------------------------------------------------------------------
+/** Split a property by time. Will be overridden by TimeSeriesProperty (only)
+ * For any other property type, this does nothing.
+ * */
+void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
+{
+  return;
+}
+
+
+
+
 } // namespace Kernel
 } // namespace Mantid

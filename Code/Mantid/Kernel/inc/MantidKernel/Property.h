@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSplitter.h"
 #include <string>
 #include <typeinfo>
 #include <set>
@@ -123,6 +124,7 @@ public:
   /// Add to this
   virtual Property& operator+=( Property * rhs );
   virtual void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
+  virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Property * > outputs) const;
 
 protected:
   /// Constructor

@@ -136,6 +136,45 @@ namespace Mantid
 
 
     //-----------------------------------------------------------------------------------------------
+    /**
+     * Split a run by time (splits the TimeSeriesProperties contained).
+     *
+     * Total proton charge will get re-integrated after filtering.
+     *
+     * @param splitter TimeSplitterType with the intervals and destinations.
+     * @param outputs Vector of output runs.
+     */
+    void PropertyManager::splitByTime(TimeSplitterType& splitter, std::vector< PropertyManager * > outputs) const
+    {
+      size_t n = outputs.size();
+
+      //Iterate through all properties
+      PropertyMap::const_iterator it;
+      for (it = this->m_properties.begin(); it != this->m_properties.end(); it++)
+      {
+        //Filter out the property
+        Property * prop = it->second;
+
+        //Make a vector of the output properties contained in the other property managers.
+        //  NULL if it was not found.
+        std::vector< Property *> output_properties;
+        for (size_t i=0; i<n; i++)
+        {
+          if (outputs[i])
+            output_properties.push_back( outputs[i]->getPointerToPropertyOrNull( prop->name() ) );
+          else
+            output_properties.push_back( NULL );
+        }
+
+        //Now the property does the splitting.
+        prop->splitByTime(splitter, output_properties);
+
+      }//for each property
+
+    }
+
+
+    //-----------------------------------------------------------------------------------------------
     /** Add a property to the list of managed properties
      *  @param p The property object to add
      *  @param doc A description of the property that may be displayed to users
@@ -315,6 +354,23 @@ namespace Mantid
         return it->second;
       }
       throw Exception::NotFoundError("Unknown property", name);
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Get a property by name
+     *  @param name The name of the property (case insensitive)
+     *  @return A pointer to the named property; NULL if not found
+     */
+    Property* PropertyManager::getPointerToPropertyOrNull( const std::string &name ) const
+    {
+      std::string ucName = name;
+      std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
+      PropertyMap::const_iterator it = m_properties.find(ucName);
+      if (it != m_properties.end())
+      {
+        return it->second;
+      }
+      return NULL;
     }
 
     //-----------------------------------------------------------------------------------------------
