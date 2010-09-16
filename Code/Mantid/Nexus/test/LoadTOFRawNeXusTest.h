@@ -22,7 +22,7 @@ public:
     Mantid::API::FrameworkManager::Instance();
     LoadTOFRawNeXus ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "../../../../Test/Nexus/CNCS_7850_100us_binning.nxs");
+    ld.setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7850_100us_binning.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
