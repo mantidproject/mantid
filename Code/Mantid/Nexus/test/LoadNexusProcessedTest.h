@@ -18,7 +18,7 @@ class LoadNexusProcessedTest : public CxxTest::TestSuite
 public:
 
   LoadNexusProcessedTest() :
-    testFile("../../../../Test/Data/GEM38370_Focussed_Legacy.nxs"),
+    testFile("../../../../Test/AutoTestData/GEM38370_Focussed_Legacy.nxs"),
     output_ws("nxstest")
   {
 
@@ -79,7 +79,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/Nexus/focussed.nxs";
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
     alg.setProperty("Filename", testFile);
     alg.setPropertyValue("OutputWorkspace", output_ws);
 	alg.setPropertyValue("SpectrumMin","2");
@@ -129,7 +129,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/Nexus/focussed.nxs";
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
     alg.setProperty("Filename", testFile);
     alg.setPropertyValue("OutputWorkspace", output_ws);
 	alg.setPropertyValue("SpectrumList","1,2,3,4");
@@ -178,7 +178,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/Nexus/focussed.nxs";
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
     alg.setProperty("Filename", testFile);
     alg.setPropertyValue("OutputWorkspace", output_ws);
 	alg.setPropertyValue("SpectrumMin","1");
@@ -228,7 +228,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/Nexus/focussed.nxs";
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
     alg.setProperty("Filename", testFile);
     alg.setPropertyValue("OutputWorkspace", output_ws);
 	alg.setPropertyValue("SpectrumMin","4");
@@ -276,7 +276,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-    testFile="../../../../Test/Nexus/focussed.nxs";
+    testFile="../../../../Test/AutoTestData/focussed.nxs";
     alg.setProperty("Filename", testFile);
     alg.setPropertyValue("OutputWorkspace", output_ws);
 	alg.setPropertyValue("SpectrumMax","3");
@@ -321,7 +321,7 @@ public:
 
      TS_ASSERT_THROWS_NOTHING(alg.initialize());
      TS_ASSERT( alg.isInitialized() );
-     testFile="../../../../Test/Nexus/focussed.nxs";
+     testFile="../../../../Test/AutoTestData/focussed.nxs";
      alg.setProperty("Filename", testFile);
      alg.setPropertyValue("OutputWorkspace", output_ws);
 
