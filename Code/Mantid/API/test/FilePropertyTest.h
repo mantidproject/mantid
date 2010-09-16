@@ -67,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(msg, "")
 
     // Absolute path
-    Poco::Path test_dir = Poco::Path("../../../../Test/Data/").absolute();
+    Poco::Path test_dir = Poco::Path("../../../../Test/AutoTestData/").absolute();
     msg = fp->setValue(test_dir.resolve(Poco::Path(test_file)).toString());
     TS_ASSERT_EQUALS(msg, "")    
 
@@ -87,7 +87,7 @@ public:
     ///Test a GEM file in the test directory
     std::string msg = fp->setValue("GEM38370.raw");
     TS_ASSERT_EQUALS(msg, "")    
-    msg = fp->setValue("ALF15739.RAW");
+    msg = fp->setValue("ALF15739.raw");
     TS_ASSERT_EQUALS(msg, "")    
 
     //Check different extension
