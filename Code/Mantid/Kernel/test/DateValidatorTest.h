@@ -28,13 +28,13 @@ public:
 
 		DateValidator v;
 		TS_ASSERT_EQUALS( v.isValid("32/10/2009"),
-		"Invalid Date:Day part of parameter Date must be between 1 and 31")
+		"Invalid Date:Day part of the Date parameter must be between 1 and 31")
 
 		TS_ASSERT_EQUALS( v.isValid("12/101/2009"),
-		"Invalid Date:Month part of parameter Date must be between 1 and 12")
+		"Invalid Date:Month part of the Date parameter must be between 1 and 12")
 
 		TS_ASSERT_EQUALS( v.isValid("12/10/2012"),
-		"Invalid Date:Year part of the parameter can not be greater than the current year")
+		"Invalid Date:Year part of the Date parameter can not be greater than the current year")
    
   }
   void testValidDate()

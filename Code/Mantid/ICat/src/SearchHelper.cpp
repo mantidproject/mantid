@@ -68,11 +68,11 @@ namespace Mantid
 			boost::shared_ptr<ns1__advancedSearchDetails>adv_sptr(new ns1__advancedSearchDetails);
 			req_sptr->advancedSearchDetails=adv_sptr.get();
 			//run start
-			boost::shared_ptr<double>runstart_sptr(new double);
+			//boost::shared_ptr<double>runstart_sptr(new double);
 			if(inputs.getRunStart()>0)
 			{
-				req_sptr->advancedSearchDetails->runStart=runstart_sptr.get();
-			   *req_sptr->advancedSearchDetails->runStart=inputs.getRunStart();
+				//req_sptr->advancedSearchDetails->runStart=runstart_sptr.get();
+			   req_sptr->advancedSearchDetails->runStart=& inputs.getRunStart();
 			}
 			//run end
 			boost::shared_ptr<double>runend_sptr(new double);
@@ -219,7 +219,7 @@ namespace Mantid
 		*/
 		void CSearchHelper::saveInvestigations(const std::vector<ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws)
 		{
-			
+	
 			try
 			{
 				std::vector<ns1__investigation*>::const_iterator citr;
@@ -227,7 +227,9 @@ namespace Mantid
 				{
 					API::TableRow t = outputws->appendRow();
 					//investigation id
+					
 					savetoTableWorkspace((*citr)->id,t);
+					
 					//std::cout<<"investigation id is "<<(*(*citr)->id)<<std::endl;
 										
 					//rb number
@@ -256,7 +258,7 @@ namespace Mantid
 						sInvEndtime=new std::string;
 						time_t  invEndtime=*(*citr)->invEndDate;
 						char temp [25];
-						//strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&invEndtime));
+						strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&invEndtime));
 						strftime (temp,25,"%Y",localtime(&invEndtime));
 						std::string ftime(temp);
 						
@@ -284,6 +286,7 @@ namespace Mantid
 			
 			try
 			{
+
 				//   abstract
 				savetoTableWorkspace(investigation->invAbstract,t);
 
@@ -528,7 +531,7 @@ namespace Mantid
 			//API::ITableWorkspace_sptr outputws =createTableWorkspace();
 
 			outputws->addColumn("str","Name");//File name
-			outputws->addColumn("int","File Size");//File Size
+			outputws->addColumn("int","File Size (B)");//File Size
 			outputws->addColumn("long64","File Id");//File id
 			outputws->addColumn("str","Format");//File Format
 			outputws->addColumn("str","Format Version");//File Version
@@ -640,7 +643,6 @@ namespace Mantid
 				return false;
 			}
 			std::basic_string <char>::size_type dotIndex;
-			const std::basic_string <char>::size_type npos = -1;
 			//find the position of .in row file
 			dotIndex = (*fileName).find_last_of (".");
 			std::string fextn=(*fileName).substr(dotIndex+1,(*fileName).size()-dotIndex);
@@ -1185,73 +1187,48 @@ namespace Mantid
 		 */
 		time_t CSearchHelper::getTimevalue(const std::string& sDate)
 		{
-			if((!sDate.compare("DD/MM/YYYY")) || (!sDate.compare("dd/mm/yyyy")) )
-			{
-				return 0;
-			}
+
 			if(!sDate.compare(""))
 			{
 				return 0;
 			}
-			//struct tm * timeinfo =new tm;;
+			struct tm  timeinfo;
 			std::basic_string <char>::size_type index,off=0;
 			int day,month,year;
-		
-			//timeinfo
-			struct tm  timeinfo;
-			//get the day 
-		    day=atoi(sDate.substr(off,2).c_str());
-			
+
+			//look for the first '/' to extract day part from the date string
+			index=sDate.find('/',off);
+			if(index == std::string::npos)
+			{			
+				throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
+			}
+			//get day part of the date
+			day=atoi(sDate.substr(off,index-off).c_str());
 			timeinfo.tm_mday=day;
-			
-			//getting teh month
-			index=sDate.find('/',off);
-			if(index!=std::string::npos)
-			{
+
+			//change the offset to the next position after "/"
 			off=index+1;
-			}
-			else
-			{
-				throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
-			}
-			month=atoi(sDate.substr(off,2).c_str());
-			timeinfo.tm_mon=month-1;
-			
-			//getting the year
+			//look for 2nd '/' to get month part from  the date string
 			index=sDate.find('/',off);
-			if(index!=std::string::npos)
-			{
-				off=index+1;
-			}
-			else
-			{
+			if(index == std::string::npos)
+			{			
 				throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
 			}
+			//now get the month part
+			month=atoi(sDate.substr(off,index-off).c_str());
+			timeinfo.tm_mon=month-1;
+
+			//change the offset to the position after "/"
+			off=index+1;
+			//now get the year part from the date string
 			year=atoi(sDate.substr(off,4).c_str());
-						
+
 			timeinfo.tm_year=year-1900;
-			validateTimeFormat(timeinfo);
 			timeinfo.tm_min=0;
 			timeinfo.tm_sec=0;
 			timeinfo.tm_hour=0;
 			//timeinfo->tm_isdst=-1;
-			 return std::mktime (&timeinfo );
-		}
-
-
-	  /**This method validates the date properties
-		*@param timeinfo refrence to structure containing time information
-		*/
-		void CSearchHelper::validateTimeFormat(const struct tm &timeinfo)
-		{
-			if (timeinfo.tm_mday<1 || timeinfo.tm_mday>31)
-			{
-				throw std::runtime_error("Invalid Date:Day part of search parameter Date must be between 1 and 31 ");
-			}
-			if (timeinfo.tm_mon<0 || timeinfo.tm_mon>11)
-			{
-				throw std::runtime_error("Invalid Date:Month part of search parameter Date must be between 1 and 12 ");
-			}
+			return std::mktime (&timeinfo );
 		}
 
 		

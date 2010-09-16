@@ -117,7 +117,7 @@ namespace Mantid
 			/** This method  returns the start run number
            	 *  @returns  run start number
 			 */
-			const double& getRunStart(){return m_startRun; }
+			double& getRunStart(){return m_startRun; }
 			/** This method  returns the end run number
            	 *  @returns  run end number
 			 */
@@ -296,10 +296,6 @@ namespace Mantid
 
 			///saves 
 			void saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t);
-
-
-			/// this method validates the format of date properties
-			 void validateTimeFormat(const struct tm& timeinfo);
 		       
 
 			/* This is a template method to save data to table workspace
@@ -319,8 +315,10 @@ namespace Mantid
 					t<<"";
 				}
 			}
+			private:
 			Kernel::Logger& g_log;    ///< reference to the logger class
 		};
+
 	
 			
 	}

@@ -22,9 +22,6 @@ public:
 	}
 	void testSearchByRunNumberandInstrument()
 	{
-		/*std::string s;
-		std::getline(std::cin,s);*/
-
 		CSearchByRunNumber searchobj;
 		Login loginobj;
 		Session::Instance();
@@ -51,7 +48,7 @@ public:
 	void testSearchByKeywords()
 	{
 		
-		/*std::string s;
+	/*	std::string s;
 		std::getline(std::cin,s);*/
 		
 		CSearchByRunNumber searchobj;
@@ -85,8 +82,7 @@ public:
 
 		loginobj.setPropertyValue("Username", "mantid_test");
 		loginobj.setPropertyValue("Password", "mantidtestuser");
-		//loginobj.setPropertyValue("DBServer", "");
-		
+			
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
 
@@ -128,7 +124,40 @@ public:
 
 	}
 
-	void testSearchByInvalidDates()
+	void xtestSearchByInvalidDates1()
+	{
+
+		std::string s;
+		std::getline(std::cin,s);
+
+		CSearchByRunNumber searchobj;
+		Login loginobj;
+		Session::Instance();
+		if ( !loginobj.isInitialized() ) loginobj.initialize();
+
+		loginobj.setPropertyValue("Username", "mantid_test");
+		loginobj.setPropertyValue("Password", "mantidtestuser");
+		
+		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
+		TS_ASSERT( loginobj.isExecuted() );
+
+		if ( !searchobj.isInitialized() ) searchobj.initialize();
+		std::string errorMsg="Invalid value for property StartDate (string) ""sssss"": Invalid Date:date format must be DD/MM/YYYY";
+
+		TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate","sssss"),std::invalid_argument(errorMsg));
+		
+		errorMsg="Invalid value for property StartDate (string) ""aaaaa"": Invalid Date:date format must be DD/MM/YYYY";
+		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","aaaaa"),std::invalid_argument(errorMsg));
+		searchobj.setPropertyValue("OutputWorkspace","Investigations");
+		
+		TS_ASSERT_THROWS(searchobj.execute(),std::runtime_error);
+
+		//should fail
+		TS_ASSERT( !searchobj.isExecuted() );
+
+	}
+
+	void xtestSearchByInvalidDates2()
 	{
 
 		CSearchByRunNumber searchobj;
@@ -144,11 +173,11 @@ public:
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 				
-		searchobj.setPropertyValue("StartDate","sssss");
-		searchobj.setPropertyValue("EndDate","aaaaa");
+		TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate","39/22/2009"),std::runtime_error);
+		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","aaaaa"),std::runtime_error);
 		searchobj.setPropertyValue("OutputWorkspace","Investigations");
-				
-		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
+		
+		TS_ASSERT_THROWS(searchobj.execute(),std::runtime_error);
 
 		//should fail
 		TS_ASSERT(! searchobj.isExecuted() );

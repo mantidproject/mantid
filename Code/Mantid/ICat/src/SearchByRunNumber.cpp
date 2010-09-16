@@ -3,6 +3,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/Session.h"
+#include "MantidKernel/DateValidator.h"
 #include<limits>
 
 namespace Mantid
@@ -18,14 +19,14 @@ namespace Mantid
 		{
 			BoundedValidator<double>* mustBePositive = new BoundedValidator<double>();
 			mustBePositive->setLower(0.0);
-
+			
 			declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
 			
 			declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");
 			
 			declareProperty("Instrument","","The list of instruments used in ISIS nuetron scattering experiments.");
-			declareProperty("StartDate","","The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-			declareProperty("EndDate","","The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+			declareProperty("StartDate","",new DateValidator(),"The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+			declareProperty("EndDate","",new DateValidator(),"The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("Keywords","","An option to search investigations data");
 			declareProperty("Case Sensitive", false, "Boolean option to do case sensitive ICat investigations search.");
 
@@ -40,7 +41,6 @@ namespace Mantid
 			{
 				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
 			}
-			//API::ITableWorkspace_sptr ws_sptr=doSearchByRunNumber();
 			ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
 			doSearchByRunNumber(ws_sptr);
 			setProperty("OutputWorkspace",ws_sptr);

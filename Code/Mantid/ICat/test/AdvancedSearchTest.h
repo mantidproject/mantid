@@ -128,7 +128,7 @@ public:
 
 	}
 
-	void testSearchByInvalidDates()
+	void xtestSearchByInvalidDates()
 	{
 
 		CAdvancedSearch searchobj;
