@@ -49,7 +49,7 @@ void testExecOnLoadraw()
 {
     // use SaveNexusProcessed to build a test file to load
     // for this use LoadRaw
-    std::string inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/CSP78173.raw").toString();
+    std::string inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/CSP78173.raw").toString();
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
