@@ -49,7 +49,7 @@ public:
     TS_ASSERT_THROWS(nxLoad.execute(),std::runtime_error);
 
     // Now set required filename and output workspace name
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
     nxLoad.setPropertyValue("FileName", inputFile);
 
     outputSpace="outer";
@@ -171,7 +171,7 @@ public:
 #ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
-    inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006475.nxs").toString();
+    inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006475.nxs").toString();
     nxLoad.setPropertyValue("FileName", inputFile2);
 
     outputSpace="outer2";
@@ -272,7 +272,7 @@ public:
 #ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
-    inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006475.nxs").toString();
+    inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006475.nxs").toString();
     nxLoad.setPropertyValue("FileName", inputFile2);
 
     outputSpace="outer2";
