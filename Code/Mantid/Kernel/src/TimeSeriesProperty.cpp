@@ -16,3 +16,5 @@ template DLLExport class TimeSeriesProperty<std::string>;
 
 } // namespace Kernel
 } // namespace Mantid
+
+

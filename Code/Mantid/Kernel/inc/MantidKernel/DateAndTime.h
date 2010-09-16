@@ -23,21 +23,6 @@ typedef boost::posix_time::time_duration time_duration;
 typedef int64_t PulseTimeType;
 
 
-/**
- * A typedef for splitting events according their pulse time.
- *
- * It is a vector of pairs of:
- *  ->first: the PulseTime of this edge.
- *  ->second: the index to which any events with time >= this time will go.
- *            this index refers to an output workspace of event list, for example.
- *            -1 indicates the event is thrown out.
- *
- * ... up until the next pair in the index, where the destination may change.
- * The vector has to be sorted by time!
- */
-typedef std::vector< std::pair<Kernel::PulseTimeType, int> > TimeSplitterType;
-
-
 
 namespace DateAndTime
 {

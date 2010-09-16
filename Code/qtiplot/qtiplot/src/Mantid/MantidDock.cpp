@@ -4,6 +4,7 @@
 #include "../pixmaps.h"
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
+#include <MantidAPI/IEventWorkspace.h>
 #include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>
@@ -383,6 +384,15 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize())+" KB"));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
+
+  //Extra stuff for EventWorkspace
+  Mantid::API::IEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace> ( workspace );
+  if (eventWS)
+  {
+    data_item = new QTreeWidgetItem(QStringList("Number of events: "+QString::number(eventWS->getNumberEvents())));
+    data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(data_item);
+  }
 }
 
 /**

@@ -37,6 +37,7 @@ namespace API
   public:
     /// Return the workspace typeID
     virtual const std::string id() const { return "IEventWorkspace"; }
+    virtual std::size_t getNumberEvents() const = 0;
   };
 
   ///shared pointer to the matrix workspace base class

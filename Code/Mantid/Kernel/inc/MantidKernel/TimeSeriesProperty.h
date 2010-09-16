@@ -8,6 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSplitter.h"
 #include <iostream>
 #include <map>
 #include <vector>
@@ -142,7 +143,7 @@ public:
     time_duration tol = DateAndTime::duration_from_seconds( TimeTolerance );
     int numgood = 0;
     dateAndTime lastTime, t;
-    PulseTimeType pt;
+    PulseTimeType start, stop;
 
     for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
     {
@@ -163,8 +164,7 @@ public:
         if (isGood)
         {
           //Start of a good section
-          pt = DateAndTime::get_from_absolute_time( t - tol );
-          split.push_back( std::pair<PulseTimeType, int>(pt, 0) );
+          start = DateAndTime::get_from_absolute_time( t - tol );
         }
         else
         {
@@ -172,24 +172,29 @@ public:
           if (numgood == 1)
           {
             //There was only one point with the value. Use the last time, + the tolerance, as the end time
-            pt = DateAndTime::get_from_absolute_time( lastTime + tol );
-            split.push_back( std::pair<PulseTimeType, int>(pt, -1) );
+            stop = DateAndTime::get_from_absolute_time( lastTime + tol );
+            split.push_back( SplittingInterval(start, stop, -1) );
           }
           else
           {
             //At least 2 good values. Save the end time
-            pt = DateAndTime::get_from_absolute_time( t + tol );
-            split.push_back( std::pair<PulseTimeType, int>(pt, -1) );
+            stop = DateAndTime::get_from_absolute_time( t + tol );
+            split.push_back( SplittingInterval(start, stop, -1) );
           }
+          //Reset the number of good ones, for next time
+          numgood = 0;
         }
+        lastGood = isGood;
       }
     }
 
-    //Add a "end" bit for the very last entry in the log.
-    typename timeMap::reverse_iterator rit = m_propertySeries.rbegin();
-    t = rit->first;
-    pt = DateAndTime::get_from_absolute_time( t + tol );
-    split.push_back( std::pair<PulseTimeType, int>(pt, -1) );
+    if (numgood > 0)
+    {
+      //The log ended on "good" so we need to close it using the last time we found
+      stop = DateAndTime::get_from_absolute_time( t + tol );
+      split.push_back( SplittingInterval(start, stop, -1) );
+      numgood = 0;
+    }
   }
 
 
