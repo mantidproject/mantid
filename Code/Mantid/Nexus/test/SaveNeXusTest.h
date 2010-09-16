@@ -45,7 +45,7 @@ void testExecOnMuon()
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/emu00006473.nxs").toString();
     nxLoad.setPropertyValue("Filename", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
