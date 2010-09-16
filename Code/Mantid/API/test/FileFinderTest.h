@@ -67,7 +67,7 @@ public:
   void testGetFullPath()
   {
     ConfigService::Instance().setString("datasearch.directories",
-      "../../../../Test/Data;../../../../Test/Nexus");
+      "../../../../Test/AutoTestData;../../../../Test/");
     std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");
     TS_ASSERT( !path.empty() );
   }
