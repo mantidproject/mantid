@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DateValidator.h"
-
+#include "boost/lexical_cast.hpp"
 namespace Mantid
 {
 	namespace Kernel
@@ -39,7 +39,16 @@ namespace Mantid
 			return timeinfo;
 		}
 		//get day part of the date
-		day=atoi(sDate.substr(off,index-off).c_str());
+		//day=atoi(sDate.substr(off,index-off).c_str());
+		try
+		{
+			day=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
+		}
+		catch(boost::bad_lexical_cast&)
+		{
+			error="Invalid Date";
+			return timeinfo;
+		}
 		timeinfo.tm_mday=day;
 
 		//change the offset to the next position after "/"
@@ -52,13 +61,32 @@ namespace Mantid
 			return timeinfo;
 		}
 		//now get the month part
-		month=atoi(sDate.substr(off,index-off).c_str());
-		timeinfo.tm_mon=month-1;
+		//month=atoi(sDate.substr(off,index-off).c_str());
+		try
+		{
+			month=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
 
+		}
+		catch(boost::bad_lexical_cast&)
+		{
+			error="Invalid Date";
+			return timeinfo;
+		}
+		timeinfo.tm_mon=month-1;
 		//change the offset to the position after "/"
 		off=index+1;
 		//now get the year part from the date string
-		year=atoi(sDate.substr(off,4).c_str());
+		//year=atoi(sDate.substr(off,4).c_str());
+		try
+		{
+			year=boost::lexical_cast<int>(sDate.substr(off,4).c_str());
+
+		}
+		catch(boost::bad_lexical_cast&)
+		{
+			error="Invalid Date";
+			return timeinfo;
+		}
 
 		timeinfo.tm_year=year-1900;
 		timeinfo.tm_min=0;

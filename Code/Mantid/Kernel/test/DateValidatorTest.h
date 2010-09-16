@@ -18,7 +18,7 @@ public:
 		  "Invalid Date:date format must be DD/MM/YYYY")
 
 	  TS_ASSERT_EQUALS( v.isValid("dd/mm:yyyy"),
-	  "Invalid Date:date format must be DD/MM/YYYY")
+	  "Invalid Date")
   }
 
   void testInvalidaDate()
