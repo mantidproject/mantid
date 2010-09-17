@@ -330,6 +330,8 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  // also test that when loading in instrument a 2nd time that parameters defined
+  // in instrument gets loaded as well
   void testToscaParameterTags()
   {
     LoadEmptyInstrument loader;
@@ -361,6 +363,93 @@ public:
     TS_ASSERT_DELTA( param->value<double>(), 4.000, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
+
+
+    // load the instrument a second time to check that the parameters are still there
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/TOSCA_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamToscaTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+
+    ParameterMap& paramMap2 = ws->instrumentParameters();
+
+    det = ws->getDetector(69);  
+
+    TS_ASSERT_EQUALS( det->getID(), 78);
+    TS_ASSERT_EQUALS( det->getName(), "Detector #70");
+
+    param = paramMap2.get(&(*det), "Efixed");
+    TS_ASSERT_DELTA( param->value<double>(), 4.000, 0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  // also test that when loading in instrument a 2nd time that parameters defined
+  // in instrument gets loaded as well
+  void testHRPDParameterTags()
+  {
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/HRPD_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamHRPDTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+
+    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+    boost::shared_ptr<IDetector> det = i->getDetector(1100);  // should be a detector from bank_bsk
+    Parameter_sptr param = paramMap.getRecursive(&(*det), "S", "fitting");
+    const FitParameter& fitParam1 = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam1.getValue(1.0), 0.0024, 0.0001);
+    TS_ASSERT( fitParam1.getFunction().compare("BackToBackExponential") == 0 );
+
+
+    // load the instrument a second time to check that the parameters are still there
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/HRPD_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    std::string wsName2 = "LoadEmptyInstrumentParamHRPDTest";
+    loader.setPropertyValue("OutputWorkspace", wsName2);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName2));
+
+    // get parameter map
+    ParameterMap& paramMap2 = ws->instrumentParameters();
+
+    i = ws->getInstrument();
+    det = i->getDetector(1100);  // should be a detector from bank_bsk
+    param = paramMap2.getRecursive(&(*det), "S", "fitting");
+    const FitParameter& fitParam2 = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam2.getValue(1.0), 0.0024, 0.0001);
+    TS_ASSERT( fitParam2.getFunction().compare("BackToBackExponential") == 0 );
+
+    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().remove(wsName2);
+
   }
 
   void testGEMParameterTags()

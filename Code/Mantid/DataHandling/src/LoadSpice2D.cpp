@@ -320,7 +320,6 @@ namespace Mantid
       {
         g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
       }
-      localWorkspace->populateInstrumentParameters();
     }
 
     /**

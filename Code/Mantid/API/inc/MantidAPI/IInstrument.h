@@ -94,4 +94,4 @@ typedef boost::shared_ptr<const IInstrument> IInstrument_const_sptr;
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_PARINSTRUMENT_H_*/
+#endif /*MANTID_API_IINSTRUMENT_H_*/
