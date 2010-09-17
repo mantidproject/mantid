@@ -1356,9 +1356,15 @@ void SANSRunWindow::saveFileBrowse()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   const QString filter = ";;AllFiles (*.*)";
-  QString defFilter = ";;AllFiles (*.*)";
+  QString usersFilter = ";;AllFiles (*.*)";
+  
+  // deal with Mac's native browse button hanging, first set to the default behavour
+  QFileDialog::Option options = static_cast<QFileDialog::Option>(0);
+#ifdef Q_OS_DARWIN
+  options = QFileDialog::DontUseNativeDialog;
+#endif
   QString oFile = QFileDialog::getSaveFileName(this, title, 
-    prevPath+"/"+m_uiForm.outfile_edit->text(), filter, &defFilter);
+    prevPath+"/"+m_uiForm.outfile_edit->text(), filter, &usersFilter, options);
 
   if( ! oFile.isEmpty() )
   {
