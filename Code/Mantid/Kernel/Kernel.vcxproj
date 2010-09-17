@@ -217,6 +217,7 @@
     <ClCompile Include="src\ThreadSafeLogStream.cpp" />
     <ClCompile Include="src\Timer.cpp" />
     <ClCompile Include="src\TimeSeriesProperty.cpp" />
+    <ClCompile Include="src\TimeSplitter.cpp" />
     <ClCompile Include="src\Unit.cpp" />
     <ClCompile Include="src\UnitFactory.cpp" />
     <ClCompile Include="src\VectorHelper.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="inc\MantidKernel\DateValidator.h" />
     <ClInclude Include="inc\mantidkernel\facilityinfo.h" />
     <ClInclude Include="inc\mantidkernel\instrumentinfo.h" />
+    <ClInclude Include="inc\MantidKernel\TimeSplitter.h" />
     <ClInclude Include="test\ArrayPropertyTest.h" />
     <ClInclude Include="inc\MantidKernel\BoundedValidator.h" />
     <ClInclude Include="test\BoundedValidatorTest.h" />

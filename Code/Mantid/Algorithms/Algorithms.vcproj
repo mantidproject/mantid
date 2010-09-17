@@ -555,6 +555,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TofCorrection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Transpose.cpp"
 				>
 			</File>
@@ -1166,6 +1170,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SumSpectraTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\TofCorrection.h"
 				>
 			</File>
 			<File

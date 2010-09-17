@@ -255,6 +255,8 @@
     <ClCompile Include="src\StripVanadiumPeaks.cpp" />
     <ClCompile Include="src\SumRowColumn.cpp" />
     <ClCompile Include="src\SumSpectra.cpp" />
+    <ClCompile Include="src\TofCorrection.cpp" />
+    <ClCompile Include="src\Transpose.cpp" />
     <ClCompile Include="src\UnaryOperation.cpp" />
     <ClCompile Include="src\UnGroupWorkspaces.cpp" />
     <ClCompile Include="src\Unwrap.cpp" />
@@ -271,6 +273,8 @@
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
+    <ClInclude Include="inc\MantidAlgorithms\TofCorrection.h" />
+    <ClInclude Include="inc\MantidAlgorithms\Transpose.h" />
     <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h" />
     <ClInclude Include="inc\mantidalgorithms\applytransmissioncorrection.h" />
     <ClInclude Include="inc\mantidalgorithms\calculateefficiency.h" />
@@ -415,6 +419,8 @@
     <ClInclude Include="inc\MantidAlgorithms\UnaryOperation.h" />
     <ClInclude Include="inc\MantidAlgorithms\UnGroupWorkspaces.h" />
     <ClInclude Include="inc\MantidAlgorithms\Unwrap.h" />
+    <ClInclude Include="test\TofCorrectionTest.h" />
+    <ClInclude Include="test\TransposeTest.h" />
     <ClInclude Include="test\UnwrapTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\WeightedMean.h" />
   </ItemGroup>
