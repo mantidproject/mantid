@@ -35,11 +35,11 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   
   m_tree = new QTreeWidget;
   QStringList titles;
-  titles << "File name" << "Type";
+  titles << "Name" << "Type" << "Value";
   m_tree->setHeaderLabels(titles);
   m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
   QHeaderView* hHeader = (QHeaderView*)m_tree->header();
-  hHeader->setResizeMode(0,QHeaderView::Stretch);
+  hHeader->setResizeMode(2,QHeaderView::Stretch);
   hHeader->setStretchLastSection(false);
 
   QHBoxLayout *uiLayout = new QHBoxLayout;
@@ -86,7 +86,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
 
   init();
 
-  resize(500,400);
+  resize(750,400);
   
   connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedFiles()));
   connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
@@ -115,6 +115,7 @@ void MantidSampleLogDialog::importSelectedFiles()
 }
 
 
+//------------------------------------------------------------------------------------------------
 /**
 * Import an item
 * @param item The item to be imported
@@ -148,6 +149,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
 }
 
 
+//------------------------------------------------------------------------------------------------
 /**
  * Popup a custom context menu
  */
@@ -169,6 +171,7 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Initialize everything
  */
@@ -206,21 +209,25 @@ void MantidSampleLogDialog::init()
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(*pItr) ||
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*pItr) )
     {
-      treeItem->setText(1, "numeric series");
+      treeItem->setText(1, "num. series");
       //state that the string we passed into data[0] is a time series -multiple lines with a time and then a number
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numTSeries));
+      treeItem->setText(2, "-");
     }
     else if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr) )
     {
-      treeItem->setText(1, "string series");
+      treeItem->setText(1, "str. series");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(stringTSeries));
       treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+      treeItem->setText(2, "-");
     }
     else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(*pItr) )
     {
       treeItem->setText(1, "string");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(string));
       treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+      treeItem->setText(2, QString::fromStdString((*pItr)->value()));
+
     }
     else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(*pItr) ||
              dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(*pItr))
@@ -228,14 +235,17 @@ void MantidSampleLogDialog::init()
       treeItem->setText(1, "numeric");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numeric)); //Save the "role" as numeric.
       treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+      treeItem->setText(2, QString::fromStdString((*pItr)->value()));
     }
 
     //Add tree item
     m_tree->addTopLevelItem(treeItem);
   }
   
+  //Resize the columns
   m_tree->header()->resizeSection(0, max_length*10);
   m_tree->header()->resizeSection(1, 100);
+  m_tree->header()->resizeSection(2, 170);
   m_tree->header()->setMovable(false);
   m_tree->setSortingEnabled(true);
 }
