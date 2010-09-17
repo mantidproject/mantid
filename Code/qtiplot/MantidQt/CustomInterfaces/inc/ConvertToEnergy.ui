@@ -2356,7 +2356,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <widget class="QComboBox" name="sqw_cbInput" >
               <property name="enabled" >
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <item>
                <property name="text" >
@@ -2425,6 +2425,16 @@ p, li { white-space: pre-wrap; }
                  <widget class="QComboBox" name="sqw_cbWorkspace" />
                 </item>
                 <item>
+                 <widget class="QLabel" name="sqw_valWorkspace" >
+                  <property name="styleSheet" >
+                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text" >
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="horizontalSpacer_40" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
@@ -2436,6 +2446,13 @@ p, li { white-space: pre-wrap; }
                    </size>
                   </property>
                  </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="sqw_pbRefresh" >
+                  <property name="text" >
+                   <string>Refresh List</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>

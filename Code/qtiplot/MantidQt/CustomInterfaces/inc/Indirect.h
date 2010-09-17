@@ -59,7 +59,8 @@ namespace MantidQt
       void runClicked(bool tryToSave=true);
       /// gather necessary information from Instument Definition Files
       virtual void setIDFValues(const QString & prefix);
-
+    protected:
+      virtual void closeEvent(QCloseEvent* close);
     private:
       void getSpectraRanges(); ///< populate the spectra ranges for the "Calibration" tab.
       void clearReflectionInfo(); ///< clear various line edit boxes
@@ -76,6 +77,7 @@ namespace MantidQt
       void saveSettings();
 
     private slots:
+      void refreshWSlist();
       void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
       void reflectionSelected(int index); ///< set up parameter file values based on reflection
       void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
@@ -98,6 +100,7 @@ namespace MantidQt
 
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
       void sOfQwRebinE(bool state);
+      void sOfQwInputType(const QString& input);
 
     private:
       // member variables

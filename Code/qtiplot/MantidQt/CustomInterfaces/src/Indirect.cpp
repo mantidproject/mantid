@@ -3,6 +3,7 @@
 #include "MantidQtCustomInterfaces/Background.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <QUrl>
 #include <QDesktopServices>
@@ -75,6 +76,8 @@ void Indirect::initLayout()
   // "SofQW" tab
   connect(m_uiForm.sqw_pbRun, SIGNAL(clicked()), this, SLOT(sOfQwClicked()));
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
+  connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(sOfQwInputType(const QString&)));
+  connect(m_uiForm.sqw_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
 
   // set values of m_dataDir and m_saveDir
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
@@ -122,6 +125,8 @@ void Indirect::initLayout()
   m_uiForm.ind_mapFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
   m_uiForm.cal_leRunNo->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
   m_uiForm.sqw_inputFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/ProcessedFiles");
+
+  refreshWSlist();
 }
 
 /**
@@ -303,7 +308,6 @@ void Indirect::runClicked(bool tryToSave)
   {
     isDirty(false);
     isDirtyRebin(false);
-    saveSettings();
   }
 
 }
@@ -365,7 +369,10 @@ void Indirect::setIDFValues(const QString & prefix)
     analyserSelected(m_uiForm.cbAnalyser->currentIndex());
   }
 }
-
+void Indirect::closeEvent(QCloseEvent* close)
+{
+  saveSettings();
+}
 /**
 * This function loads the min and max values for the analysers spectra and
 * displays this in the "Calibration" tab.
@@ -883,9 +890,24 @@ bool Indirect::validateSofQw()
 {
   bool valid = true;
 
-  if ( ! m_uiForm.sqw_inputFile->isValid() )
+  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
   {
-    valid = false;
+    if ( ! m_uiForm.sqw_inputFile->isValid() )
+    {
+      valid = false;
+    }
+  }
+  else
+  {
+    if ( m_uiForm.sqw_cbWorkspace->currentText().isEmpty() )
+    {
+      valid = false;
+      m_uiForm.sqw_valWorkspace->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valWorkspace->setText(" ");
+    }
   }
 
   if ( m_uiForm.sqw_ckRebinE->isChecked() )
@@ -995,6 +1017,20 @@ void Indirect::saveSettings()
   m_uiForm.ind_calibFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
   m_uiForm.ind_mapFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
   m_uiForm.sqw_inputFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/ProcessedFiles");
+}
+
+void Indirect::refreshWSlist()
+{
+  m_uiForm.sqw_cbWorkspace->clear();
+  std::set<std::string> workspaceList = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  if ( ! workspaceList.empty() )
+  {
+    std::set<std::string>::const_iterator wsIt;
+    for ( wsIt=workspaceList.begin(); wsIt != workspaceList.end(); ++wsIt )
+    {
+      m_uiForm.sqw_cbWorkspace->addItem(QString::fromStdString(*wsIt));
+    }
+  }
 }
 
 /**
@@ -1453,19 +1489,34 @@ void Indirect::sOfQwClicked()
   if ( validateSofQw() )
   {
     QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
-    QString pyInput =
-      "from mantidsimple import *\n"
-      "LoadNexusProcessed(r'"+m_uiForm.sqw_inputFile->getFirstFilename()+ "','sqwInput')\n";
+    QString pyInput = "from mantidsimple import *\n";
+
+    if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+    {
+      pyInput += "cleanup = True\n"
+        "sqwInput = 'sqwInput'"
+        "LoadNexusProcessed(r'"+m_uiForm.sqw_inputFile->getFirstFilename()+ "','sqwInput')\n";
+    }
+    else
+    {
+      pyInput += "cleanup = False\n"
+        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+    }
 
     if ( m_uiForm.sqw_ckRebinE->isChecked() )
     {
       QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
-      pyInput += "Rebin('sqwInput', 'sqwInput', '" + eRebinString + "')\n";
+      pyInput += "Rebin(sqwInput, 'sqwInput_r', '" + eRebinString + "')\n"
+        "if cleanup:\n"
+        "    mantid.deleteWorkspace(sqwInput)\n"
+        "sqwInput = 'sqwInput_r'\n";
     }
     pyInput +=
       "efixed = " +m_uiForm.leEfixed->text()+"\n"
       "rebin = '" + rebinString + "'\n"
-      "SofQW('sqwInput','sqwOutput',rebin,'Indirect',EFixed=efixed)\n";
+      "SofQW(sqwInput,'sqwOutput',rebin,'Indirect',EFixed=efixed)\n"
+      "if cleanup:\n"
+      "    mantid.deleteWorkspace(sqwInput)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
@@ -1490,4 +1541,12 @@ void Indirect::sOfQwRebinE(bool state)
   m_uiForm.sqw_lbELow->setEnabled(state);
   m_uiForm.sqw_lbEWidth->setEnabled(state);
   m_uiForm.sqw_lbEHigh->setEnabled(state);
+}
+
+void Indirect::sOfQwInputType(const QString& input)
+{
+  if ( input == "File" )
+    m_uiForm.sqw_swInput->setCurrentIndex(0);
+  else
+    m_uiForm.sqw_swInput->setCurrentIndex(1);
 }
