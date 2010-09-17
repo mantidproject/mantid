@@ -6,8 +6,17 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
+
+//TODO: Is that the right path for the include?
+//#include "../../../Third_Party/include/NeXusFile.hpp"
+
+//We have to rename the namespace since there is a conflict with Mantid::NeXus
+//namespace NeXusAPI = NeXus;
+
+
 
 namespace Mantid
 {
@@ -77,14 +86,17 @@ namespace API
 
     private:
 
-      /// Overwrites Algorithm method. Does nothing at present
       void init();
 
-      /// Overwrites Algorithm method
       void exec();
+
+//      void loadSampleLog(NeXusAPI::File file, std::string entry_name, std::string entry_class);
 
       /// The name and path of the input file
       std::string m_filename;
+
+      /// The workspace being fille
+      API::Workspace_const_sptr localWorkspace;
 
     };
 

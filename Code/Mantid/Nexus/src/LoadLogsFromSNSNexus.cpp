@@ -11,12 +11,6 @@
 #include <sstream>
 #include <boost/algorithm/string/replace.hpp>
 
-//TODO: Is that the right path for the include?
-#include "../../../Third_Party/include/NeXusFile.hpp"
-
-//We have to rename the namespace since there is a conflict with Mantid::NeXus
-namespace NeXusAPI = NeXus;
-
 using std::cout;
 using std::endl;
 using std::map;
@@ -65,43 +59,63 @@ void LoadLogsFromSNSNexus::exec()
   m_filename = getPropertyValue("Filename");
 
   // Get the input workspace
-  const Workspace_sptr localWorkspace = getProperty("Workspace");
+  localWorkspace = getProperty("Workspace");
 
 
-
-  // top level file information
-  NeXusAPI::File file(m_filename);
-  g_log.information() << "NeXus file found: " << file.inquireFile() << endl;
-
-//  vector<NeXusAPI::AttrInfo> attr_infos = file.getAttrInfos();
-//  cout << "Number of global attributes: " << attr_infos.size() << endl;
-//  for (vector<NeXusAPI::AttrInfo>::iterator it = attr_infos.begin();
-//      it != attr_infos.end(); it++) {
-//    if (it->name != "file_time" && it->name != "HDF_version" && it->name !=  "HDF5_Version" && it->name != "XML_version") {
-//      cout << "   " << it->name << " = ";
-//      if (it->type == NeXusAPI::CHAR) {
-//        cout << file.getStrAttr(*it);
-//      }
-//      cout << endl;
-//    }
-//  }
+//  // top level file information
+//  NeXusAPI::File file(m_filename);
+//  g_log.information() << "NeXus file found: " << file.inquireFile() << endl;
 //
-//  // check group attributes
+//  //Start with the base entry
 //  file.openGroup("entry", "NXentry");
-//  attr_infos = file.getAttrInfos();
-//  cout << "Number of group attributes: " << attr_infos.size() << endl;
-//  for (vector<NeXusAPI::AttrInfo>::iterator it = attr_infos.begin();
-//      it != attr_infos.end(); it++) {
-//    cout << "   " << it->name << " = ";
-//    if (it->type == NeXusAPI::CHAR) {
-//      cout << file.getStrAttr(*it);
+//
+//  //TODO: Load run title and other info.
+//
+//  //Now go to the DAS logs
+//  file.openGroup("DASlogs", "NXgroup");
+//
+//
+//  // print out the entry level fields
+//  map<string, string> entries = file.getEntries();
+//  cout << "DASlogs contains " << entries.size() << " items" << endl;
+//
+//  NeXusAPI::Info info;
+//  for (map<string,string>::const_iterator it = entries.begin();
+//       it != entries.end(); it++)
+//  {
+//    std::string entry_name = it->first;
+//    std::string entry_class = it->second;
+//    if (entry_class == "NXlog")
+//    {
+//      loadSampleLog(file, entry_name, entry_class);
 //    }
-//    cout << endl;
 //  }
+//  file.closeGroup();
 
 
   return;
 }
+
+
+/** Loads an entry from a previously-open NXS file as a log entry
+ * in the workspace's run.
+ */
+//void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File file, std::string entry_name, std::string entry_class)
+//{
+//  cout << entry_name << "\n";
+//  file.openGroup(entry_name, entry_class);
+//
+//  NeXusAPI::Info info;
+//  file.openData("value");
+//  info = file.getInfo();
+//  vector<float> * result = file.getData<float>();
+//
+//  if (result->size() > 0)
+//    cout << entry_name << (*result)[0] << "\n";
+//
+//  delete result;
+//  file.closeGroup();
+//}
 
 
 } // namespace NeXus
