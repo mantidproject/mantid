@@ -86,6 +86,7 @@ public:
 	}
 
 
+  //----------------------------------------------------------------------------
 	void testAdditionOperator()
 	{
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
@@ -103,10 +104,9 @@ public:
     (*log) += log2;
 
     TS_ASSERT_EQUALS( log->size(), 5);
-
-
 	}
 
+  //----------------------------------------------------------------------------
   void test_filterByTime_and_getTotalValue()
   {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
@@ -127,10 +127,49 @@ public:
     log->filterByTime(start, stop);
     TS_ASSERT_EQUALS( log->realSize(), 3);
     TS_ASSERT_EQUALS( log->getTotalValue(), 9);
+  }
+
+
+
+  //----------------------------------------------------------------------------
+  void test_makeFilterByValue()
+  {
+    TimeSeriesProperty<double> * log  = new TimeSeriesProperty<double>("MyIntLog");
+    TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:30",2.0) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:40",2.01) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:50",6) );
+
+    TS_ASSERT_EQUALS( log->realSize(), 6);
+
+    TimeSplitterType splitter;
+    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0);
+
+    TS_ASSERT_EQUALS( splitter.size(), 2);
+    SplittingInterval s;
+    dateAndTime t;
+
+    s = splitter[0];
+    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:09");
+    TS_ASSERT_DELTA( s.start(), DateAndTime::get_from_absolute_time(t), 1000);
+    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:11");
+    TS_ASSERT_DELTA( s.stop(), DateAndTime::get_from_absolute_time(t), 1000);
+
+    s = splitter[1];
+    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:29");
+    TS_ASSERT_DELTA( s.start(), DateAndTime::get_from_absolute_time(t), 1000);
+    t = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:41");
+    TS_ASSERT_DELTA( s.stop(), DateAndTime::get_from_absolute_time(t), 1000);
+
 
   }
 
 
+
+
+  //----------------------------------------------------------------------------
   void test_splitByTime_and_getTotalValue()
   {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
@@ -151,7 +190,7 @@ public:
     //Make the outputs
 //    std::vector< TimeSeriesProperty<int> * > outputs2;
     std::vector< Property * > outputs;
-    for (int i=0; i<4; i++)
+    for (int i=0; i<5; i++)
     {
       TimeSeriesProperty<int> * newlog  = new TimeSeriesProperty<int>("MyIntLog");
       outputs.push_back(newlog);
@@ -166,27 +205,77 @@ public:
     splitter.push_back( SplittingInterval(start, stop, 0) );
 
     start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:55");
-    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:59");
+    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:56");
     splitter.push_back( SplittingInterval(start, stop, 1) );
+
+    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:56");
+    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:01");
+    splitter.push_back( SplittingInterval(start, stop, 2) ); //just one entry
 
     start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:09");
     stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:21");
-    splitter.push_back( SplittingInterval(start, stop, 2) );
+    splitter.push_back( SplittingInterval(start, stop, 3) );
 
     start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:18:45");
     stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:22:50");
-    splitter.push_back( SplittingInterval(start, stop, 3) );
+    splitter.push_back( SplittingInterval(start, stop, 4) );
 
     log->splitByTime(splitter, outputs);
 
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[0])->realSize(), 3);
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[1])->realSize(), 0);
-    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[2])->realSize(), 2);
-    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[3])->realSize(), 1);
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[2])->realSize(), 1);
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[3])->realSize(), 2);
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[4])->realSize(), 1);
 
   }
   
-	
+
+  //----------------------------------------------------------------------------
+  void test_splitByTime_withOverlap()
+  {
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:40",5) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:50",6) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:00",7) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:10",8) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:20",9) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:30",10) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:40",11) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:50",12) );
+    TS_ASSERT_EQUALS( log->realSize(), 12);
+
+    //Make the outputs
+//    std::vector< TimeSeriesProperty<int> * > outputs2;
+    std::vector< Property * > outputs;
+    for (int i=0; i<1; i++)
+    {
+      TimeSeriesProperty<int> * newlog  = new TimeSeriesProperty<int>("MyIntLog");
+      outputs.push_back(newlog);
+    }
+
+    //Make a splitter
+    dateAndTime start, stop;
+    TimeSplitterType splitter;
+    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:10");
+    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:40");
+    splitter.push_back( SplittingInterval(start, stop, 0) );
+
+    start = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:35");
+    stop = DateAndTime::create_DateAndTime_FromISO8601_String("2007-11-30T16:17:59");
+    splitter.push_back( SplittingInterval(start, stop, 0) );
+
+    log->splitByTime(splitter, outputs);
+
+    TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[0])->realSize(), 5);
+
+  }
+
+
 private:
   TimeSeriesProperty<int> *iProp;
   TimeSeriesProperty<double> *dProp;

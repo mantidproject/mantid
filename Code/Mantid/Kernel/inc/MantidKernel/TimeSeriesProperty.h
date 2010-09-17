@@ -202,7 +202,7 @@ public:
     //Count the sizes (this function is still stupid and slow and should not be necessary, but I don't know if I should take it out)
     for (int i=0; i < numOutputs; i++)
     {
-      TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[index];
+      TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[i];
       if (myOutput)
         myOutput->countSize();
     }
@@ -233,13 +233,20 @@ public:
     int numgood = 0;
     dateAndTime lastTime, t;
     PulseTimeType start, stop;
+//    int count = 0;
 
     for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
     {
+//      count++;
+
       lastTime = t;
       //The new entry
       t = it->first;
       TYPE val = it->second;
+
+//      //The time cannot have gone backwards! But it could be the same twice
+//      if (t < lastTime)
+//        std::cout << "Time has gone backwards!" << count <<"\n";
 
       //A good value?
       isGood = ((val >= min) && (val < max));
@@ -267,7 +274,7 @@ public:
           else
           {
             //At least 2 good values. Save the end time
-            stop = DateAndTime::get_from_absolute_time( t + tol );
+            stop = DateAndTime::get_from_absolute_time( lastTime + tol );
             split.push_back( SplittingInterval(start, stop, 0) );
           }
           //Reset the number of good ones, for next time
@@ -370,7 +377,7 @@ public:
    */
   std::string setValue(const std::string&)
   {
-    throw Exception::NotImplementedError("Not yet");
+    throw Exception::NotImplementedError("Not implemented in this class");
   }
 
 
@@ -380,7 +387,7 @@ public:
    *  @param value The associated value
    *  @return True if insertion successful (i.e. identical time not already in map
    */
-  bool addValue(const boost::posix_time::ptime &time, const TYPE value)
+  bool addValue(const Kernel::dateAndTime &time, const TYPE value)
   {
     m_size++;
     return m_propertySeries.insert(typename timeMap::value_type(time, value)) != m_propertySeries.end();
@@ -405,7 +412,7 @@ public:
    */
   bool addValue(const std::time_t &time, const TYPE value)
   {
-    return addValue(boost::posix_time::from_time_t(time), value);
+    return addValue(Kernel::DateAndTime::from_time_t(time), value);
   }
 
   //-----------------------------------------------------------------------------------------------

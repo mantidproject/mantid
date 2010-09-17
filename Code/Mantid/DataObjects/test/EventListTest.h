@@ -461,6 +461,7 @@ public:
     TS_ASSERT_EQUALS( el.getNumberEvents(), 3000);
   }
 
+  //-----------------------------------------------------------------------------------------------
   void testSetTofs()
   {
     this->fake_data();
@@ -484,6 +485,7 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   void testFilterByPulseTime()
   {
     this->fake_data();
@@ -583,6 +585,28 @@ public:
     TS_ASSERT_EQUALS( outputs[7]->getNumberEvents(), 0);
     TS_ASSERT_EQUALS( outputs[8]->getNumberEvents(), 1);
     TS_ASSERT_EQUALS( outputs[9]->getNumberEvents(), 0);
+
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  void testSplit_FilterWithOverlap()
+  {
+    this->fake_uniform_time_data();
+
+    std::vector< EventList * > outputs;
+    for (int i=0; i<1; i++)
+      outputs.push_back( new EventList() );
+
+    TimeSplitterType split;
+    split.push_back( SplittingInterval(100, 200, 0) );
+    split.push_back( SplittingInterval(150, 250, 0) );
+
+    //Do the splitting
+    el.splitByTime(split, outputs);
+
+    //No events in the first ouput 0-99
+    TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 150);
 
   }
 
