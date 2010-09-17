@@ -113,13 +113,18 @@ message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
 #Create Subject
-subject = 'Subject: Mac Installer Build Report: '
 
+
+#Create Subject
+subject = 'Subject: 
 if buildSuccess:
-	subject += '[Build Successful]\n\n\n'
+	subject += 'Success: '
 else:
-	subject += '[Build Failed]\n\n\n'
-	
+	subject += 'FAILED: '
+subject = 'Darwin'
+subject += ' - Installer\n\n\n'
+
+
 #Send Email
 session = smtplib.SMTP(smtpserver)
 

@@ -42,8 +42,6 @@ base_url = notifier.base_url
 smtpserver = 'outbox.rl.ac.uk'
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = 'Win' + platform.architecture()[0][:2]  + 'Installer@mantidproject.org'
-#Create Subject
-subject = 'Subject: Windows' + platform.architecture()[0][:2]  + ' Build Report: '
 
 #Set up email content 
 buildSuccess = True
@@ -121,12 +119,15 @@ message += 'BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
-
+#Create Subject
+subject = 'Subject: 
 if buildSuccess:
-	subject += '[Build Successful]\n\n\n'
+	subject += 'Success: '
 else:
-	subject += '[Build Failed]\n\n\n'
-	
+	subject += 'FAILED: '
+subject = 'Windows' + platform.architecture()[0][:2]
+subject += ' - MantidPlot\n\n\n'
+
 #Send Email
 session = smtplib.SMTP(smtpserver)
 

@@ -355,7 +355,7 @@ if __name__ == "__main__":
             SENDER += '64'
             subject += '64'
         SENDER += 'BuildServer1@mantidproject.org'
-        subject += '\n'
+        subject += ' - Framework\n'
         
         httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
 

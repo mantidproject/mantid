@@ -40,16 +40,6 @@ def CreateRecord():
 project = 'qtiplot'
 base_url = notifier.base_url
 
-#Email settings
-SENDER = platform.system() 
-#Create Subject
-subject = 'Subject: ' + platform.system()
-if platform.architecture()[0] == '64bit':
-    SENDER += '64'
-    subject += '64'
-SENDER += 'BuildServer1@mantidproject.org'
-subject += ' Build Report: '
-
 #Set up email content 
 buildSuccess = True
 
@@ -68,7 +58,7 @@ f.close()
 notifier.moveToArchive(fileBuild,remoteArchiveDir)
 
 if 'failed' in buildResult:
-     buildSuccess = False	
+     buildSuccess = False
 	
 fileBuildErr = localLogDir+'error.log'
 notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
@@ -139,6 +129,21 @@ except IOError:
 # We want to skip sending email if this AND previous build succeeded
 if buildSuccess and lastBuild=='True':
      sys.exit(0)
+     
+#Email settings
+SENDER = platform.system() 
+#Create Subject
+subject = 'Subject: '
+if buildSuccess:
+	subject += 'Success: '
+else:
+	subject += 'FAILED: '
+subject += platform.system()
+if platform.architecture()[0] == '64bit':
+    SENDER += '64'
+    subject += '64'
+SENDER += 'BuildServer1@mantidproject.org'
+subject += ' - MantidPlot\n\n\n'
 
 #Construct Message
 httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
@@ -152,11 +157,6 @@ message += '--------------------------------------------------------------------
 message += 'MANTIDPLOT BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
-
-if buildSuccess:
-	subject += '[MantidPlot Build Successful]\n\n\n'
-else:
-	subject += '[MantidPlot Build Failed]\n\n\n'
 
 # Send mail
 logfile = notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
