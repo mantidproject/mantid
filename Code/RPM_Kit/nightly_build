@@ -10,7 +10,7 @@ MESS=/tmp/build_mantid.$$
 
 function error_found() {
     local exit_status=${1:-$?}
-    echo "Subject: RPM build R$rev FAILED" > $MESS
+    echo "Subject: FAILED: Redhat - RPM build R$rev" > $MESS
     echo >> $MESS
     echo "RPM build of svn R$rev FAILED with error code $exit_status - see http://download.mantidproject.org/logs/Linux/rpmbuild/`basename $log_file`" >> $MESS
     echo >> $MESS
@@ -58,7 +58,7 @@ rm -f $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm
 scp $build_base/RPMS/x86_64/Mantid-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64
 build_src=`ls -t *.tar.gz | head -1`
 scp $build_src isisupdate@shadow:/isis/www/mantidproject_download/CurrentBuild
-echo "Subject: RPM build R$rev SUCCEEDED" > $MESS
+echo "Subject: Success: Redhat - RPM build R$rev" > $MESS
 echo >> $MESS
 echo "RPM build of svn R$rev SUCCEEDED - see http://download.mantidproject.org/logs/Linux/rpmbuild/`basename $log_file`" >> $MESS
 /usr/sbin/sendmail -fRPMBuildServer1@mantidproject.org mantid-buildserver@mantidproject.org < $MESS
