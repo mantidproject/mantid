@@ -343,15 +343,20 @@ if __name__ == "__main__":
 
 
     if SendEmail:
+        #Create Subject and sender
+        subject = ''
+        if OverAllSuccess:
+          subject += 'Success: '
+        else:
+          subject += 'FAILED: '
         SENDER = platform.system() 
-        #Create Subject
-        subject = 'Subject: ' + platform.system() 
+        subject += platform.system() 
         if platform.architecture()[0] == '64bit':
             SENDER += '64'
             subject += '64'
         SENDER += 'BuildServer1@mantidproject.org'
-        subject += ' Build Report: '
-
+        subject += '\n''
+        
         httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
 
         #compose message
@@ -392,18 +397,7 @@ if __name__ == "__main__":
         message += '------------------------------------------------------------------------\n'
         message += 'DOXYGEN LOG\n\n'
         message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
-        if FrameWorkBuild:
-	    subject += '[Framework Build Successful, '
-        else:
-	    subject += '[Framework Build Failed, '
-        if TestsBuild:
-	    subject += 'Tests Build Successful, '
-        else:
-	    subject += 'Tests Build Failed, '
-        if UnitTests:
-	    subject += 'Tests Successful]\n'
-        else:
-	    subject += 'Tests Failed]\n'
+
         logfile = buildNotification.sendResultMail(subject+message,localLogDir,sender=SENDER)
         buildNotification.moveToArchive(logfile, remoteArchivePath)
 
