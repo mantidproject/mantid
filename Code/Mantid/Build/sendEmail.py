@@ -344,7 +344,7 @@ if __name__ == "__main__":
 
     if SendEmail:
         #Create Subject and sender
-        subject = ''
+        subject = 'Subject: '
         if OverAllSuccess:
           subject += 'Success: '
         else:
