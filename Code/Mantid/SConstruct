@@ -25,6 +25,7 @@ opts = Options('scons_options.py')
 opts.Add('debug','Set to 1 to build debug', 0)
 opts.Add('matlab','Set to 1 to build matlab API', 0)
 opts.Add('gcc44','Set to 1 to build with gcc44 on RHEL5', 0)
+opts.Add('xunitoutput','Set to 1 to make tests output xUnit XML',0)
 
 env = Environment(ENV=os.environ, options = opts)
 Help(opts.GenerateHelpText(env))
@@ -33,6 +34,10 @@ debug = ARGUMENTS.get('debug', 0)
 # on RHEL5 gcc 4.1 is the default
 # gcc 4.4 installed under a different name
 gcc44 = ARGUMENTS.get('gcc44', 0)
+
+# Check for RHEL5, if so then force gcc44
+if platform.dist()[2] == 'Tikanga':
+	gcc44 = 1
 
 if int(gcc44) :
     if sys.platform == 'darwin':
