@@ -92,8 +92,8 @@ public:
     inputWS = "eventWS";
     LoadEventPreNeXus loader;
     loader.initialize();
-    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772/CNCS_12772_neutron_event.dat" );
-    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_12772/CNCS_12772_pulseid.dat" );
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_12772_neutron_event.dat" );
+    std::string pulsefile( "../../../../Test/AutoTestData/CNCS_12772_pulseid.dat" );
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setProperty("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
