@@ -101,7 +101,7 @@ public:
     TS_ASSERT(file.exists());
     path = FileFinder::Instance().findRun("HRP37129");
     TS_ASSERT(path.size() > 3);
-    TS_ASSERT_EQUALS(path.substr(path.size()-3),"S02");
+    TS_ASSERT_EQUALS(path.substr(path.size()-3),"s02");
 
     //ConfigService::Instance().setString("datasearch.searcharchive","On");
     //path = FileFinder::Instance().findRun("CSP77374");
