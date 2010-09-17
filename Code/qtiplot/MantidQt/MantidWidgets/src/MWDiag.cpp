@@ -2,6 +2,7 @@
 #include "MantidQtMantidWidgets/MWDiagCalcs.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileProperty.h"
@@ -350,7 +351,7 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
   QString filename;
   if( save )
   {
-    filename = QFileDialog::getSaveFileName(this, "Save file",
+    filename = FileDialogHandler::getSaveFileName(this, "Save file",
 	  m_prevSets.value("save file dir", "").toString(), filter);
 	if( ! filename.isEmpty() )
 	{

@@ -2,6 +2,7 @@
 // Includes
 //----------------------
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -287,7 +288,7 @@ void SaveWorkspaces::saveFileBrowse()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   QString filter = ";;AllFiles (*.*)";
-  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter);
+  QString oFile = API::FileDialogHandler::getSaveFileName(this, title, prevPath, filter);
 
   if( ! oFile.isEmpty() )
   {

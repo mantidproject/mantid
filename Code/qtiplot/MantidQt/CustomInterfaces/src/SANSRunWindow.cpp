@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 #include "MantidQtCustomInterfaces/SANSUtilityDialogs.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -20,7 +21,6 @@
 #include "MantidKernel/Exception.h"
 
 #include <QLineEdit>
-#include <QFileDialog>
 #include <QHash>
 #include <QTextStream>
 #include <QTreeWidgetItem>
@@ -45,6 +45,7 @@ namespace CustomInterfaces
 }
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -1356,15 +1357,9 @@ void SANSRunWindow::saveFileBrowse()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   const QString filter = ";;AllFiles (*.*)";
-  QString usersFilter = ";;AllFiles (*.*)";
   
-  // deal with Mac's native browse button hanging, first set to the default behavour
-  QFileDialog::Option options = static_cast<QFileDialog::Option>(0);
-#ifdef Q_OS_DARWIN
-  options = QFileDialog::DontUseNativeDialog;
-#endif
-  QString oFile = QFileDialog::getSaveFileName(this, title, 
-    prevPath+"/"+m_uiForm.outfile_edit->text(), filter, &usersFilter, options);
+  QString oFile = FileDialogHandler::getSaveFileName(this, title, 
+    prevPath+"/"+m_uiForm.outfile_edit->text());
 
   if( ! oFile.isEmpty() )
   {

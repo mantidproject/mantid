@@ -3,6 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -323,7 +324,8 @@ void MuonAnalysis::runSaveGroupButton()
   QString filter;
   filter.append("Files (*.XML *.xml)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = QFileDialog::getSaveFileName(this, "Save Grouping file as", prevPath, filter);    
+  QString groupingFile = API::FileDialogHandler::getSaveFileName(this,
+                                   "Save Grouping file as", prevPath, filter);
 
   if( ! groupingFile.isEmpty() )
   {

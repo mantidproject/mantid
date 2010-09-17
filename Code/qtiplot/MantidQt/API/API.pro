@@ -37,8 +37,8 @@ HEADERS = \
   $$HEADERDIR/AlgorithmDialog.h \
   $$HEADERDIR/GenericDialog.h \
   $$HEADERDIR/UserSubWindow.h \
-  $$HEADERDIR/MantidQtDialog.h
-  
+  $$HEADERDIR/MantidQtDialog.h \
+  $$HEADERDIR/FileDialogHandler.h
   
   
 #-----------------------------
