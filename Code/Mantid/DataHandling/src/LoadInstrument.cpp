@@ -375,8 +375,6 @@ namespace Mantid
         setComponentLinks(m_instrument, pRootElem);
         // Add the instrument to the InstrumentDataService
         InstrumentDataService::Instance().add(instrumentFile,m_instrument);
-        // release XML document
-        pDoc->release();
       }
 
       // populate parameter map of workspace 
@@ -384,6 +382,9 @@ namespace Mantid
 
       // check if default parameter file is also present
       runLoadParameterFile();
+
+      // release XML document
+      pDoc->release();
     }
     /** Reads the contents of the \<defaults\> element to set member variables,
     *  requires m_instrument to be already set

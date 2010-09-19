@@ -8,18 +8,18 @@ namespace Kernel
 
 /// Constructor
 LibraryWrapper::LibraryWrapper() :
-	module(0)
+  module(0)
 {}
 
 /// Destructor
 LibraryWrapper::~LibraryWrapper()
 {
-	//Close lib
-	if (module)
-	{
-		DllOpen::CloseDll(module);
-		module = 0;
-	}
+  //Close lib
+  if (module)
+  {
+    DllOpen::CloseDll(module);
+    module = 0;
+  }
 }
 
 /** Opens a DLL.
@@ -28,18 +28,18 @@ LibraryWrapper::~LibraryWrapper()
  */
 bool LibraryWrapper::OpenLibrary(const std::string& libName)
 {
-	if (!module)
-	{
-		//Load dynamically loaded library
-		module = DllOpen::OpenDll(libName);
-		
-		if (!module)
-		{
-			return false;
-		}
-	}
+  if (!module)
+  {
+    //Load dynamically loaded library
+    module = DllOpen::OpenDll(libName);
+    
+    if (!module)
+    {
+      return false;
+    }
+  }
 
-	return true;
+  return true;
 }
 
 /** Opens a DLL.
@@ -48,19 +48,19 @@ bool LibraryWrapper::OpenLibrary(const std::string& libName)
  *  \return True if DLL is opened or already open
  */
 bool LibraryWrapper::OpenLibrary(const std::string& libName,
-		const std::string& filePath)
+    const std::string& filePath)
 {
-	if (!module)
-	{
-		//Load dynamically loaded library
-		module = DllOpen::OpenDll(libName, filePath);
-		if (!module)
-		{
-			return false;
-		}
-	}
+  if (!module)
+  {
+    //Load dynamically loaded library
+    module = DllOpen::OpenDll(libName, filePath);
+    if (!module)
+    {
+      return false;
+    }
+  }
 
-	return true;
+  return true;
 }
 
 } // namespace Kernel
