@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../../Third_Party/include/muParser;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc;inc;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc;../../Third_party/Include"
-				PreprocessorDefinitions="WINDOWS;POCO_DLL;_USRDLL;ICAT_EXPORTS;WITH_OPENSSL;WITH_NONAMESPACES;IN_MANTID_ICAT=1;BOOST_ALL_DYN_LINK"
+				PreprocessorDefinitions="WINDOWS;POCO_DLL;_USRDLL;ICAT_EXPORTS;WITH_OPENSSL;WITH_NONAMESPACES;IN_MANTID_ICAT=1;BOOST_ALL_DYN_LINK;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -120,7 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="inc;../../Third_Party/include/muParser;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc"
-				PreprocessorDefinitions="_WIN32;NDEBUG;_WINDOWS;_USRDLL;ICAT_EXPORTS;WITH_OPENSSL;WITH_NONAMESPACES;IN_MANTID_ICAT=1;BOOST_ALL_DYN_LINK"
+				PreprocessorDefinitions="_WIN32;NDEBUG;_WINDOWS;_USRDLL;ICAT_EXPORTS;WITH_OPENSSL;WITH_NONAMESPACES;IN_MANTID_ICAT=1;BOOST_ALL_DYN_LINK;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

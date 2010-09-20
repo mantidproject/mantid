@@ -41,7 +41,7 @@
 				AdditionalOptions="/DWNT"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts/;inc;../Kernel/inc;../../Third_Party/include;..\..\Third_Party\include\OpenCascade;../../Third_Party/include/muParser"
-				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="3"
 				OpenMP="true"
 				WarningLevel="3"
@@ -121,7 +121,7 @@
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts;inc;../Kernel/inc;../../Third_Party/include;../../Third_Party/include/OpenCascade;../../Third_Party/include/muParser"
-				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="2"
 				OpenMP="true"
 				WarningLevel="3"
@@ -639,11 +639,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
 				>
 			</File>
 			<File

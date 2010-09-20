@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../../Third_Party/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="3"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -124,7 +124,7 @@
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="inc;../../Third_Party/include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK"
+				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="2"
 				WarningLevel="3"
 				DisableSpecificWarnings="4275"
@@ -196,6 +196,10 @@
 			</File>
 			<File
 				RelativePath=".\src\DateAndTime.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DateValidator.cpp"
 				>
 			</File>
 			<File
@@ -323,6 +327,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TimeSplitter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Unit.cpp"
 				>
 			</File>
@@ -346,6 +354,10 @@
 			</File>
 			<File
 				RelativePath=".\test\ArrayPropertyTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\BinaryFile.h"
 				>
 			</File>
 			<File
@@ -386,6 +398,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\DateAndTime.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\DateValidator.h"
 				>
 			</File>
 			<File
@@ -618,6 +634,10 @@
 			</File>
 			<File
 				RelativePath=".\test\TimeSeriesPropertyTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\TimeSplitter.h"
 				>
 			</File>
 			<File

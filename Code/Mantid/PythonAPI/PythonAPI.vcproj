@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include;&quot;C:\Python25\Lib\site-packages\numpy\core\include&quot;"
-				PreprocessorDefinitions="BOOST_DEBUG_PYTHON;BOOST_PYTHON_NO_LIB;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK"
+				PreprocessorDefinitions="BOOST_DEBUG_PYTHON;BOOST_PYTHON_NO_LIB;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_ALL_DYN_LINK;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -118,7 +118,7 @@
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include;&quot;C:\Python25\Lib\site-packages\numpy\core\include&quot;"
-				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="2"
 				OpenMP="false"
 			/>

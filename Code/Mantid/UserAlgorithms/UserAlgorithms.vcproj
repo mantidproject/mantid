@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;../CurveFitting/inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;BOOST_ALL_DYN_LINK"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;BOOST_ALL_DYN_LINK;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4996"
@@ -122,7 +122,7 @@
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include;../CurveFitting/inc"
-				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;BOOST_ALL_DYN_LINK"
+				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX;BOOST_ALL_DYN_LINK;BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"
 				RuntimeLibrary="2"
 				DisableSpecificWarnings="4996"
 			/>
