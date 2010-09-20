@@ -13,9 +13,17 @@ DEFINES += BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
 
 # Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function
 # to check system header paths and worse still no way of accessing what they are!
-# For simplicity we'll assume existence on Unix and Mac
-unix|macx {
-   DEFINES += HAVE_STDINT_H
+# For simplicity we'll assume existence on Unix and Mac.
+# On windows we have to pretend to use win32-msvc2008 when using MSVC 2010 so we'll have to do it there as well.
+unix|macx|win32-msvc2008|win32-msvc2010 {
+   unix|macx|win32-msvc2010 {
+      DEFINES += HAVE_STDINT_H
+   }
+   win32-msvc2008 {
+      exists("C:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdint.h") | exists("C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdint.h") {
+        DEFINES += HAVE_STDINT_H
+    }
+   }
 }
 
 #-------------------------------
@@ -93,7 +101,6 @@ win32 {
 
 CONFIG(build64)  {
     THIRDPARTYLIB = "$$THIRDPARTY/lib/win64"
-    DEFINES += HAVE_STDINT_H
     message(SETTING FOR x64)
   } else {
     THIRDPARTYLIB = "$$THIRDPARTY/lib/win32"

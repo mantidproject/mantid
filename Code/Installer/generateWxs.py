@@ -727,12 +727,9 @@ addCRef('MantidQtPlugins', MantidExec)
 # procedure
 Redist = addHiddenFeature('Redist',Complete)
 if ARCH == '32':
-    # VS2010 files. Uncommented when move is complete
-    #msm_files = ['Microsoft_VC100_CRT_x86.msm','Microsoft_VC100_OpenMP_x86.msm']
-    msm_files = ['Microsoft_VC80_CRT_x86.msm', 'Microsoft_VC80_OpenMP_x86.msm','policy_8_0_Microsoft_VC80_CRT_x86.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86.msm']
+    msm_files = ['Microsoft_VC100_CRT_x86.msm','Microsoft_VC100_OpenMP_x86.msm']
     msm_dir = r'C:\Program Files\Common Files\Merge Modules'
 else:
-    # VS2010 files. Uncommented when move is complete
     msm_files = ['Microsoft_VC100_CRT_x64.msm','Microsoft_VC100_OpenMP_x64.msm']
     msm_dir = r'C:\Program Files (x86)\Common Files\Merge Modules'
 for index, mod in enumerate(msm_files):

@@ -4,10 +4,9 @@ import sys
 import platform
 
 if platform.system() == 'Windows':
-    msvc_version = "80"
+    msvc_version = "100"
     arch_string = "x86"
     if platform.architecture()[0] == '64bit':
-        msvc_version = "100"
         arch_string = 'amd64'
     setenv = 'CALL "%VS' + msvc_version + 'COMNTOOLS%..\\..\\VC\\vcvarsall.bat" ' + arch_string + ' &&' 
 else:
