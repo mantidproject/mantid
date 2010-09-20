@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/TofCorrection.h"
-
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
 {
@@ -33,15 +33,21 @@ void TofCorrection::exec()
   outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Get the sample object
   IObjComponent_const_sptr sample = inputWS->getInstrument()->getSample();
+
+  PARALLEL_FOR2(inputWS, outputWS)
   for ( int i = 0; i < nHist; i++ )
   {
+    // Start multi-threading
+    PARALLEL_START_INTERUPT_REGION
+
     outputWS->dataY(i) = inputWS->readY(i);
     outputWS->dataE(i) = inputWS->readE(i);
     IDetector_sptr detector;
     try
     {
       detector = inputWS->getDetector(i);
-    } catch ( Mantid::Kernel::Exception::NotFoundError )
+    }
+    catch ( Mantid::Kernel::Exception::NotFoundError& )
     {
       g_log.warning() << "Unable to retrieve detector information for spectra " << i <<  ", data has been copied verbatim." << std::endl;
       outputWS->dataX(i) = inputWS->readX(i);
@@ -60,12 +66,14 @@ void TofCorrection::exec()
       continue;
     }
     double adjustment = ( l2 / sqrt(efixed) ) * 2286.2873574; // 2286.2873574 - what is this value?
-                                                              // require clarification from T Ramirez-Cuesta
-    for ( int j = 0; j < (nBins+1); j++ )
-    {
-      outputWS->dataX(i)[j] = inputWS->readX(i)[j] - adjustment;
-    }
+    // require clarification from T Ramirez-Cuesta
+
+    std::transform(inputWS->readX(i).begin(), inputWS->readX(i).end(), outputWS->dataX(i).begin(), std::bind2nd(std::minus<double>(), adjustment));
+
+    // end multi-threading
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   // Finally, set the output property to be the workspace created.
   setProperty("OutputWorkspace", outputWS);
 }
