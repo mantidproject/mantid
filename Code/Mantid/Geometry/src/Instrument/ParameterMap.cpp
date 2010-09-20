@@ -237,6 +237,84 @@ namespace Mantid
     {
       Parameter_sptr param = get(comp,"rot");
       Quat quat;
+
+      Parameter_sptr paramRotX = get(comp,"rotx");
+      Parameter_sptr paramRotY = get(comp,"roty");
+      Parameter_sptr paramRotZ = get(comp,"rotz");
+      double rotX, rotY, rotZ;
+
+      if ( paramRotX )
+        rotX = paramRotX->value<double>();
+      else
+        rotX = 0.0;
+
+      if ( paramRotY )
+        rotY = paramRotY->value<double>();
+      else
+        rotY = 0.0;
+
+      if ( paramRotZ )
+        rotZ = paramRotZ->value<double>();
+      else
+        rotZ = 0.0;
+        
+
+      // adjust rotation
+
+      if ( name.compare("rotx")==0 )
+      {
+        if (paramRotX)
+          paramRotX->set(deg);
+        else
+          addDouble(comp, "rotx", deg);
+
+        quat = Quat(deg,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
+      }
+      else if ( name.compare("roty")==0 )
+      {
+        if (paramRotY)
+          paramRotY->set(deg);
+        else
+          addDouble(comp, "roty", deg);
+
+        quat = Quat(rotX,V3D(1,0,0))*Quat(deg,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
+      }
+      else if ( name.compare("rotz")==0 )
+      {
+        if (paramRotZ)
+          paramRotZ->set(deg);
+        else
+          addDouble(comp, "rotz", deg);
+
+        quat = Quat(rotX,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(deg,V3D(0,0,1));
+      }
+      else
+      {
+        g_log.warning() << "addRotationParam() called with unrecognised coordinate symbol: " << name;
+        return;
+      }
+
+      //clear the position cache
+      clearCache();
+
+      // finally add or update "pos" parameter
+      if (param)
+        param->set(quat);
+      else
+        addQuat(comp, "rot", quat);
+    }
+
+    /** Create or adjust "rot" parameter for a component
+    * Assumed that name either equals "rotx", "roty" or "rotz" otherwise this method will not add/modify "rot" parameter
+    @param comp Component
+    @param name Parameter name
+    @param deg Parameter value in degrees
+    */
+    /*
+    void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
+    {
+      Parameter_sptr param = get(comp,"rot");
+      Quat quat;
       if (param)
       {
         // so "rot" already defined
@@ -276,7 +354,8 @@ namespace Mantid
         param->set(quat);
       else
         addQuat(comp, "rot", quat);
-    }
+    }*/
+
 
     /** @param str The error message
     */

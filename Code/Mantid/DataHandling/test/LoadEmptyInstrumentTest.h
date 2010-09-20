@@ -327,6 +327,27 @@ public:
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 1.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0, 0.0001);
 
+    ptrDet1 = i->getDetector(1204);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1204);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0, 0.0001);
+
+    ptrDet1 = i->getDetector(1205);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1205);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0, 0.0001);
+
+    ptrDet1 = i->getDetector(1206);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "param rot-test");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1206);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 1, 0.0001);
+
     AnalysisDataService::Instance().remove(wsName);
   }
 
