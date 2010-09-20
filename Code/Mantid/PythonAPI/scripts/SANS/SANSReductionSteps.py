@@ -358,11 +358,16 @@ class LoadRun(ReductionStep):
         
         # Load data
         filepath = reducer._full_file_path(self._data_file)
-        Load(filepath, workspace)
+        if reducer.instrument.wavelength is None:
+            LoadSpice2D(filepath, workspace)
+        else:
+            LoadSpice2D(filepath, workspace, 
+                        Wavelength=reducer.instrument.wavelength,
+                        WavelengthSpread=reducer.instrument.wavelength_spread)
         
         # Store the sample-detector distance
         if self._sample_det_dist is None:
-            reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getSample().getNumberParameter("sample-detector-distance")[0]        
+            reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getNumberParameter("sample-detector-distance")[0]        
             mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         else:
             reducer.instrument.sample_detector_distance = self._sample_det_dist

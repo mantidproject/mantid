@@ -133,6 +133,18 @@ class TestCommands(unittest.TestCase):
         
         self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 3000.0)
         
+    def test_set_wavelength(self):
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        AppendDataFile("BioSANS_test_data.xml")
+        SetWavelength(5.0, 1.2)
+        Reduce1D()
+        
+        ws = mtd["BioSANS_test_data"]
+        v_x = ws.dataX(0)
+        self.assertEqual(v_x[0], 4.4)
+        self.assertEqual(v_x[1], 5.6)
+        
     def test_direct_beam_center(self):
         HFIRSANS()
         DataPath(TEST_DIR)

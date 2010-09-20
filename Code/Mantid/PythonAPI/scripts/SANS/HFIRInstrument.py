@@ -22,6 +22,20 @@ class HFIRSANS(Instrument):
         self.sample_detector_distance = 0
         ## Detector name
         self.detector_ID = self.definition.getStringParameter("detector-name")[0]
+        ## Wavelength value to be used instead of value read from data file
+        self.wavelength = None
+        self.wavelength_spread = None
+
+    def set_wavelength(self, wavelength=None, spread=None):
+        """
+            Sets the wavelength. If the wavelength is set to something other 
+            than None, that value will take precedence over any value read in 
+            the data files.
+            @param wavelength: value of the wavelength [Angstrom]
+            @param spread: wavelength spread [Angstrom]
+        """
+        self.wavelength = wavelength
+        self.wavelength_spread = spread
 
     def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high):
         """
