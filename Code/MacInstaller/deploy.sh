@@ -124,7 +124,7 @@ install_name_tool -change /usr/local/lib/libNeXus.0.dylib @loader_path/../Conten
 cp ../Mantid/release/libMantidQtCustomDialogs.dylib MantidPlot.app/plugins/qtplugins/mantid
 cp ../Mantid/release/libMantidQtCustomInterfaces.dylib MantidPlot.app/plugins/qtplugins/mantid
 # Example Python algorithm
-cp ../Mantid/PythonAPI/PythonAlgorithms/Squares.py MantidPlot.app/plugins/PythonAlgs/Examples/
+cp ../Mantid/PythonAPI/PythonAlgorithms/Examples/Squares.py MantidPlot.app/plugins/PythonAlgs/Examples/
 
 PLUGINLIBS='MantidPlot.app/plugins/*.dylib'
 update_lib_paths "$PLUGINLIBS" "$MACOSLIBS" "$QTLIBS" ".."
