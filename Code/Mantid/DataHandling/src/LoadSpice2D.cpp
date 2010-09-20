@@ -100,12 +100,26 @@ namespace Mantid
           "The name of the input xml file to load");
       declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
           Kernel::Direction::Output), "The name of the Output workspace");
+
+      // Optionally, we can specify the wavelength and wavelength spread and overwrite
+      // the value in the data file (used when the data file is not populated)
+      Kernel::BoundedValidator<double> *mustBePositive = new Kernel::BoundedValidator<double>();
+      mustBePositive->setLower(0.0);
+      declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
+          "Wavelength value to use when loading the data file (Angstrom).");
+      declareProperty("WavelengthSpread", 0.1, mustBePositive->clone(),
+        "Wavelength spread to use when loading the data file (default 0.0)" );
+
     }
 
     /// Overwrites Algorithm exec method
     void LoadSpice2D::exec()
     {
       std::string fileName = getPropertyValue("Filename");
+
+      const double wavelength_input = getProperty("Wavelength");
+      const double wavelength_spread_input = getProperty("WavelengthSpread");
+
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
       Document* pDoc;
@@ -144,9 +158,16 @@ namespace Mantid
 
       // Read in wavelength and wavelength spread
       double wavelength = 0;
-      from_element<double>(wavelength, sasEntryElem, "wavelength", fileName);
       double dwavelength = 0;
-      from_element<double>(dwavelength, sasEntryElem, "wavelength_spread", fileName);
+      if ( isEmpty(wavelength_input) ) {
+        from_element<double>(wavelength, sasEntryElem, "wavelength", fileName);
+        from_element<double>(dwavelength, sasEntryElem, "wavelength_spread", fileName);
+      }
+      else
+      {
+        wavelength = wavelength_input;
+        dwavelength = wavelength_spread_input;
+      }
 
       // Read in positions
       sasEntryElem = pRootElem->getChildElement("Motor_Positions");

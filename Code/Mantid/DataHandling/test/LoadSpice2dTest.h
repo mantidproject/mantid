@@ -134,6 +134,47 @@ public:
     TS_ASSERT_EQUALS( i->getComponentByName("detector1")->getPos().Z(), 6.0);
   }
 
+
+  void testExecChooseWavelength()
+  {
+    Mantid::DataHandling::LoadSpice2D spice2d;
+
+    if ( !spice2d.isInitialized() ) spice2d.initialize();
+
+    //No parameters have been set yet, so it should throw
+    TS_ASSERT_THROWS(spice2d.execute(), std::runtime_error);
+
+    //Set the file name
+    spice2d.setPropertyValue("Filename", inputFile);
+
+    std::string outputSpace = "outws";
+    //Set an output workspace
+    spice2d.setPropertyValue("OutputWorkspace", outputSpace);
+    spice2d.setPropertyValue("Wavelength", "5.0");
+    spice2d.setPropertyValue("WavelengthSpread", "1.0");
+
+
+    //Should now throw nothing
+    TS_ASSERT_THROWS_NOTHING( spice2d.execute() );
+    TS_ASSERT( spice2d.isExecuted() );
+
+   //Now need to test the resultant workspace, first retrieve it
+    Mantid::API::Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace) );
+    Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+
+    //Test the size of the data vectors
+    TS_ASSERT_EQUALS( (ws2d->dataX(0).size()), 2);
+    TS_ASSERT_EQUALS( (ws2d->dataY(0).size()), 1);
+    TS_ASSERT_EQUALS( (ws2d->dataE(0).size()), 1);
+
+
+    double tolerance(1e-04);
+    int nmon = Mantid::DataHandling::LoadSpice2D::nMonitors;
+    TS_ASSERT_DELTA( ws2d->dataX(0+nmon)[0], 4.5, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataX(2+nmon)[0], 4.5, tolerance );
+    TS_ASSERT_DELTA( ws2d->dataX(192+nmon)[0], 4.5, tolerance );
+  }
 private:
   std::string inputFile;
   Mantid::DataHandling::LoadSpice2D spice2d;
