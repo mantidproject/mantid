@@ -149,6 +149,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
+  m_ConfigPaths.insert(std::make_pair("parameterDefinition.directory", true));
   m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
