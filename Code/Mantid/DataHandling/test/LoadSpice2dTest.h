@@ -125,8 +125,7 @@ public:
     sample_aperture_size->set(15.0);
     TS_ASSERT_EQUALS( sample_aperture_size->value<double>(), 15.0);
 
-    boost::shared_ptr<Mantid::Geometry::IComponent> sample = i->getSample();
-    boost::shared_ptr<Mantid::Geometry::Parameter> d = m_paraMap->get(sample.get(), "sample-detector-distance");
+    boost::shared_ptr<Mantid::Geometry::Parameter> d = m_paraMap->get(i.get(), "sample-detector-distance");
     TS_ASSERT_EQUALS( d->type(), "double");
     TS_ASSERT_EQUALS( d->value<double>(), 6000.0);
 
