@@ -182,6 +182,12 @@ inline void addingOperator(std::vector<T>& lhs, const std::vector<T>& rhs)
   lhs.insert(lhs.end(), rhs.begin(), rhs.end());
 }
 
+template<>
+inline void addingOperator(bool&, const bool&)
+{
+  throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for type bool");
+}
+
 template<typename T>
 inline void addingOperator(boost::shared_ptr<T>& lhs, const boost::shared_ptr<T>& rhs)
 {
@@ -189,12 +195,6 @@ inline void addingOperator(boost::shared_ptr<T>& lhs, const boost::shared_ptr<T>
   (void) rhs; //avoid compiler warning
   throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
 }
-
-
-
-
-
-
 
 //------------------------------------------------------------------------------------------------
 // Now the PropertyWithValue class itself
