@@ -183,7 +183,6 @@ win32 {
  
   CONFIG(build64)  {
     THIRD_PARTY = ../../Third_Party/lib/win64
-    DEFINES += HAVE_STDINT_H
     message(SETTING FOR x64)
   } else {
     THIRD_PARTY = ../../Third_Party/lib/win32
@@ -191,37 +190,28 @@ win32 {
   }
   
   LIBPATH += $${THIRD_PARTY}
-  # Temp while different compiler versions are being used
-  win32-msvc2005 {
-    LIBS += qwt.lib
-    LIBS += qwtplot3d.lib
-  }
-  
   LIBS += zlib1.lib
   # Although we have debug versions of gsl & cblas, they appear to be missing some symbols
-  LIBS += gsl.lib
-  LIBS += cblas.lib
   build_pass:CONFIG(debug, debug|release) {
     LIBS += -lqscintilla2d
     LIBS += muparser_d.lib
     LIBS += PocoUtild.lib
     LIBS += PocoFoundationd.lib
+    LIBS += gsl.lib
+    LIBS += cblas.lib
     LIBS += QtPropertyBrowserd.lib
-    # Temporary while we have different versions of compilers floating around
-    win32-msvc2008 {
-        LIBS += qwtd.lib
-        LIBS += qwtplot3dd.lib
-    }
+    LIBS += qwtd.lib
+    LIBS += qwtplot3dd.lib
   } else {
     LIBS += -lqscintilla2
     LIBS += muparser.lib
     LIBS += PocoUtil.lib
     LIBS += PocoFoundation.lib
+    LIBS += gsl_d.lib
+    LIBS += cblas_d.lib
     LIBS += QtPropertyBrowser.lib
-    win32-msvc2008 {
-       LIBS += qwt.lib
-       LIBS += qwtplot3d.lib
-    }
+    LIBS += qwt.lib
+    LIBS += qwtplot3d.lib
   }
   
   build_pass:CONFIG(debug, debug|release) {
