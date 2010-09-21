@@ -321,7 +321,8 @@ QString MWRunFiles::openFileDia()
   }
   else
   {
-    filenames.append(QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter));
+    QString file = QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter);
+    if(  !file.isEmpty() ) filenames.append(file);
   }
 
   if(filenames.isEmpty())
