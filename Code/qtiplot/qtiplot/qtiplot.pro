@@ -191,24 +191,26 @@ win32 {
   
   LIBPATH += $${THIRD_PARTY}
   LIBS += zlib1.lib
-  # Although we have debug versions of gsl & cblas, they appear to be missing some symbols
   build_pass:CONFIG(debug, debug|release) {
     LIBS += -lqscintilla2d
     LIBS += muparser_d.lib
     LIBS += PocoUtild.lib
     LIBS += PocoFoundationd.lib
-    LIBS += gsl.lib
-    LIBS += cblas.lib
+    LIBS += gsl_d.lib
+    LIBS += cblas_d.lib
     LIBS += QtPropertyBrowserd.lib
     LIBS += qwtd.lib
     LIBS += qwtplot3dd.lib
+    
+    # Add a console for stdout/stderr to be displayed
+    CONFIG += console
   } else {
     LIBS += -lqscintilla2
     LIBS += muparser.lib
     LIBS += PocoUtil.lib
     LIBS += PocoFoundation.lib
-    LIBS += gsl_d.lib
-    LIBS += cblas_d.lib
+    LIBS += gsl.lib
+    LIBS += cblas.lib
     LIBS += QtPropertyBrowser.lib
     LIBS += qwt.lib
     LIBS += qwtplot3d.lib
