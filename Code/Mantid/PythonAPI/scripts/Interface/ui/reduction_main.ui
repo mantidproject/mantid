@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1039</width>
-    <height>905</height>
+    <width>988</width>
+    <height>783</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,10 +32,10 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>20</y>
+      <x>20</x>
+      <y>10</y>
       <width>951</width>
-      <height>721</height>
+      <height>671</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -45,6 +45,7 @@
      <attribute name="title">
       <string>Tab 1</string>
      </attribute>
+     <zorder>scrollArea</zorder>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -55,8 +56,8 @@
    <widget class="QPushButton" name="reduce_button">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>780</y>
+      <x>870</x>
+      <y>700</y>
       <width>93</width>
       <height>27</height>
      </rect>
@@ -71,7 +72,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1039</width>
+     <width>988</width>
      <height>23</height>
     </rect>
    </property>

@@ -23,12 +23,16 @@ class HFIRInterface(object):
         # Beam finder panel
         self._beam_finder_widget = None
         
+        # Data file directory
+        self.data_directory = '.'
+        
     def load_file(self, file_name):
         """
             Load an XML file containing reduction parameters and
             populate the UI with them
             @param file_name: XML file to be loaded
         """
+        self.scripter = ReductionScripter(name=self.scripter.instrument_name)
         self.scripter.from_xml(file_name)
         self._beam_finder_widget.set_state(self.scripter.beam_finder)
         self._instrument_widget.set_state(self.scripter.instrument)

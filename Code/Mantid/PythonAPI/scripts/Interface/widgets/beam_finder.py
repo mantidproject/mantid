@@ -13,7 +13,16 @@ class BeamFinderFrame(QtGui.QFrame):
     """
         
     def __init__(self, parent=None, flags=0):
-        super(BeamFinderFrame, self).__init__(parent)
+        super(BeamFinderFrame, self).__init__(parent)        
+    
+    def initialize_content(self):
+        """
+            Initialize the content that was added by loading the .ui file
+        """
+        # Validators
+        self.x_pos_edit.setValidator(QtGui.QDoubleValidator(self.x_pos_edit))
+        self.y_pos_edit.setValidator(QtGui.QDoubleValidator(self.y_pos_edit))
+        self.beam_radius_edit.setValidator(QtGui.QDoubleValidator(self.beam_radius_edit))
     
     def get_state(self):
         """
@@ -79,6 +88,7 @@ class BeamFinderWidget(QtGui.QWidget):
         self._layout = QtGui.QHBoxLayout()
         self._content = BeamFinderFrame(self)
         uic.loadUi(os.path.join(ui_path, "hfir_beam_finder.ui"), self._content)
+        self._content.initialize_content()
         self._layout.addWidget(self._content)
         self.setLayout(self._layout)
         

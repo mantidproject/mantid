@@ -153,6 +153,9 @@ class ReductionGUI(QtGui.QMainWindow):
         """
         self._clear_and_restart = True
         self.close()
+        # If we make it here, the user canceled the close, which 
+        # means that we need to reset the clear&close flag so
+        # that the state is properly saved on the next close.
         self._clear_and_restart = False
 
     def closeEvent(self, event):

@@ -13,6 +13,20 @@ class InstrumentDescription(object):
     nx_pixels = 192
     ny_pixels = 192
     pixel_size = 5.1
+    
+    # Sample-detector distance to force on the data set [mm]
+    sample_detector_distance = 0
+    # Detector distance offset [mm]
+    detector_offset = 0
+    # Wavelength value to force on the data set [Angstrom]
+    wavelength = 0
+    
+    # Flag to perform the solid angle correction
+    solid_angle_corr = True
+    # Flag to perform sensitivity correction
+    sensitivity_corr = True
+    # Data file to be used to calculate sensitivity
+    sensitivity_data = ''
         
     def __str__(self):
         """
@@ -37,6 +51,15 @@ class InstrumentDescription(object):
         xml += "  <nx_pixels>%g</nx_pixels>\n" % self.nx_pixels
         xml += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
         xml += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
+
+        xml += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
+        xml += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
+        xml += "  <wavelength>%g</wavelength>\n" % self.wavelength
+        
+        xml += "  <solid_angle_corr>%s</solid_angle_corr>\n" % str(self.solid_angle_corr)
+        xml += "  <sensitivity_corr>%s</sensitivity_corr>\n" % str(self.sensitivity_corr)
+        xml += "  <sensitivity_data>%s</sensitivity_data>\n" % self.sensitivity_data
+        
         xml += "</Instrument>\n"
 
         return xml
