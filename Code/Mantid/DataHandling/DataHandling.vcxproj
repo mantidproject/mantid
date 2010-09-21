@@ -172,12 +172,14 @@
     <ClCompile Include="src\LoadDetectorInfo.cpp" />
     <ClCompile Include="src\LoadEmptyInstrument.cpp" />
     <ClCompile Include="src\LoadEventPreNeXus.cpp" />
+    <ClCompile Include="src\LoadGSS.cpp" />
     <ClCompile Include="src\LoadInstrument.cpp" />
     <ClCompile Include="src\LoadInstrumentFromRaw.cpp" />
     <ClCompile Include="src\LoadLog.cpp" />
     <ClCompile Include="src\LoadLOQDistancesFromRaw.cpp" />
     <ClCompile Include="src\LoadMappingTable.cpp" />
     <ClCompile Include="src\LoadParameterFile.cpp" />
+    <ClCompile Include="src\LoadPreNeXusMonitors.cpp" />
     <ClCompile Include="src\LoadRaw.cpp" />
     <ClCompile Include="src\LoadRaw2.cpp" />
     <ClCompile Include="src\LoadRaw3.cpp" />
@@ -191,7 +193,9 @@
     <ClCompile Include="src\LoadRaw\vms_convert.cpp" />
     <ClCompile Include="src\LoadRKH.cpp" />
     <ClCompile Include="src\LoadSampleDetailsFromRaw.cpp" />
+    <ClCompile Include="src\LoadSNSspec.cpp" />
     <ClCompile Include="src\LoadSPE.cpp" />
+    <ClCompile Include="src\LoadSpec.cpp" />
     <ClCompile Include="src\LoadSpice2D.cpp" />
     <ClCompile Include="src\ManagedRawFileWorkspace2D.cpp" />
     <ClCompile Include="src\MaskDetectors.cpp" />
@@ -215,7 +219,11 @@
     <ClInclude Include="inc\mantiddatahandling\getmaskeddetectors.h" />
     <ClInclude Include="inc\mantiddatahandling\isisdataarchive.h" />
     <ClInclude Include="inc\mantiddatahandling\load.h" />
+    <ClInclude Include="inc\MantidDataHandling\LoadGSS.h" />
+    <ClInclude Include="inc\MantidDataHandling\LoadPreNeXusMonitors.h" />
     <ClInclude Include="inc\mantiddatahandling\loadrawspectrum0.h" />
+    <ClInclude Include="inc\MantidDataHandling\LoadSNSspec.h" />
+    <ClInclude Include="inc\MantidDataHandling\LoadSpec.h" />
     <ClInclude Include="test\AlignDetectorsTest.h" />
     <ClInclude Include="src\LoadRaw\byte_rel_comp.h" />
     <ClInclude Include="inc\MantidDataHandling\CreateSampleShape.h" />

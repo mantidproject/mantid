@@ -174,6 +174,18 @@
     <ClCompile Include="src\Load.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\LoadGSS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LoadPreNeXusMonitors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LoadSNSspec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LoadSpec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test\AlignDetectorsTest.h">
@@ -426,6 +438,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\mantiddatahandling\load.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataHandling\LoadGSS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataHandling\LoadPreNeXusMonitors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataHandling\LoadSNSspec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataHandling\LoadSpec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

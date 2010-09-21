@@ -21,13 +21,12 @@ elif platform.system() == 'Darwin':
     qmake = "qmake CONFIG+=release"
     buildargs.append("-j2")
 elif platform.system() == 'Windows':
-    msvc_version = "80"
+    msvc_version = "100"
     arch_string = "x86"
-    qmake_conf = ''
+    qmake_conf = 'QMAKESPEC=win32-msvc2008'
     if platform.architecture()[0] == '64bit':
-        msvc_version = "100"
         arch_string = 'amd64'
-        qmake_conf = 'QMAKESPEC=win32-msvc2008 CONFIG+=build64'
+        qmake_conf = ' CONFIG+=build64'
     setenv = 'CALL "%VS' + msvc_version + 'COMNTOOLS%..\\..\\VC\\vcvarsall.bat" ' + arch_string + ' &&' 
     make = setenv + make
     qmake = setenv + 'qmake' + ' ' + qmake_conf
