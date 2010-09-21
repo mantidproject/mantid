@@ -31,6 +31,7 @@ UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(tru
 */
 void Indirect::initLayout()
 {
+  m_settingsGroup = "CustomInterfaces/ConvertToEnergy/Indirect/";
   // connect Indirect-specific signals (buttons,checkboxes,etc) to suitable slots.
 
   // "Energy Transfer" tab
@@ -118,13 +119,7 @@ void Indirect::initLayout()
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
 
-  // Load settings for MWRunFile widgets
-
-  m_uiForm.ind_runFiles->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
-  m_uiForm.ind_calibFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
-  m_uiForm.ind_mapFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
-  m_uiForm.cal_leRunNo->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
-  m_uiForm.sqw_inputFile->readSettings("CustomInterfaces/ConvertToEnergy/Indirect/ProcessedFiles");
+  loadSettings();
 
   refreshWSlist();
 }
@@ -136,7 +131,6 @@ void Indirect::initLocalPython()
 {
   // Nothing to do at this stage.
 }
-
 /**
 * This function opens a web browser window to the Mantid Project wiki page for this
 * interface ("Inelastic" subsection of ConvertToEnergy).
@@ -153,7 +147,6 @@ void Indirect::helpClicked()
     url += "SofQW_tab";
   QDesktopServices::openUrl(QUrl(url));
 }
-
 /**
 * This function will control the actions needed for the Indirect interface when the
 * "Run" button is clicked by the user.
@@ -311,7 +304,6 @@ void Indirect::runClicked(bool tryToSave)
   }
 
 }
-
 /**
 * This function holds any steps that must be performed on the selection of an instrument,
 * for example loading values from the Instrument Definition File (IDF).
@@ -371,7 +363,7 @@ void Indirect::setIDFValues(const QString & prefix)
 }
 void Indirect::closeEvent(QCloseEvent* close)
 {
-  saveSettings();
+  //saveSettings();
 }
 /**
 * This function loads the min and max values for the analysers spectra and
@@ -577,7 +569,6 @@ void Indirect::createRESfile(const QString& file)
     showInformationBox("Unable to create RES file: \n" + pyOutput);
   }
 }
-
 /**
 * This function validates the input for the Convert To Energy process, highlighting invalid items.
 * @return true if input is ok, false otherwise
@@ -707,7 +698,6 @@ bool Indirect::validateInput()
 
   return valid;
 }
-
 /**
 * Validates user input on the calibration tab.
 */
@@ -885,7 +875,6 @@ bool Indirect::validateCalib()
 
   return valid;
 }
-
 bool Indirect::validateSofQw()
 {
   bool valid = true;
@@ -972,7 +961,6 @@ bool Indirect::validateSofQw()
   }
   return valid;
 }
-
 /**
 * Used to check whether any changes have been made by the user to the interface.
 * @return boolean m_isDirty
@@ -981,7 +969,6 @@ bool Indirect::isDirty()
 {
   return m_isDirty;
 }
-
 /**
 * Used to set value of m_isDirty, called from each function that signifies a change in the user interface.
 * Will be set to false in functions that use the input.
@@ -991,7 +978,6 @@ void Indirect::isDirty(bool state)
 {
   m_isDirty = state;
 }
-
 /**
 * Used to check whether any changes have been made by the user to the interface.
 * @return boolean m_isDirtyRebin
@@ -1000,7 +986,6 @@ bool Indirect::isDirtyRebin()
 {
   return m_isDirtyRebin;
 }
-
 /**
 * Used to set value of m_isDirtyRebin, called from each function that signifies a change in the user interface.
 * Will be set to false in functions that use the input.
@@ -1010,13 +995,29 @@ void Indirect::isDirtyRebin(bool state)
 {
   m_isDirtyRebin = state;
 }
+void Indirect::loadSettings()
+{
+  QSettings settings;
+  // Load settings for MWRunFile widgets
+  settings.beginGroup(m_settingsGroup + "DataFiles");
+  settings.setValue("last_directory", m_dataDir);
+  m_uiForm.ind_runFiles->readSettings(settings.group());
+  m_uiForm.cal_leRunNo->readSettings(settings.group());
+  settings.endGroup();
 
+  settings.beginGroup(m_settingsGroup + "ProcessedFiles");
+  settings.setValue("last_directory", m_saveDir);
+  m_uiForm.ind_calibFile->readSettings(settings.group());
+  m_uiForm.ind_mapFile->readSettings(settings.group());
+  m_uiForm.sqw_inputFile->readSettings(settings.group());
+  settings.endGroup();
+
+  // And for instrument/analyser/reflection
+}
 void Indirect::saveSettings()
 {
-  m_uiForm.ind_runFiles->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/RunFiles");
-  m_uiForm.ind_calibFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/CalibFiles");
-  m_uiForm.ind_mapFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/MapFiles");
-  m_uiForm.sqw_inputFile->saveSettings("CustomInterfaces/ConvertToEnergy/Indirect/ProcessedFiles");
+  // The only settings that we want to keep are the instrument / analyser / reflection ones
+  // Instrument is handled in ConvertToEnergy class
 }
 
 void Indirect::refreshWSlist()
@@ -1494,7 +1495,7 @@ void Indirect::sOfQwClicked()
     if ( m_uiForm.sqw_cbInput->currentText() == "File" )
     {
       pyInput += "cleanup = True\n"
-        "sqwInput = 'sqwInput'"
+        "sqwInput = 'sqwInput'\n"
         "LoadNexusProcessed(r'"+m_uiForm.sqw_inputFile->getFirstFilename()+ "','sqwInput')\n";
     }
     else

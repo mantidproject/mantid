@@ -107,10 +107,7 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False, P
 		runNo = mantid.getMatrixWorkspace('irs_sam_data').getRun().getLogData("run_number").value()
 		savefile = root[:3] + runNo + '_iqt'
 		outWSlist.append(savefile)
-		if RES:
-			DivideBySpectrum('irs_sam', 'irs_res', savefile)
-		else:
-			Divide('irs_sam', 'irs_res', savefile)
+		Divide('irs_sam', 'irs_res', savefile)
 		#Cleanup Sample Files
 		mantid.deleteWorkspace('irs_sam_data')
 		mantid.deleteWorkspace('irs_sam_int')
@@ -169,8 +166,8 @@ def plotFury(inWS_n, spec):
 	nbins = inWS.getNumberBins()
 	lastValueZero = False
 	for i in range(0, nbins):
-		if (inWS.readY(spec[0])[i] == 0.0):
-			if lastValueZero:
+		if (inWS.readY(spec[0])[i] == inWS.readY(spec[0])[i]): # nan != nan, isnan function only introduced
+			if lastValueZero:									# in python 2.6 so can't use
 				xBoundary = inWS.readX(spec[0])[i]
 				break
 			else:

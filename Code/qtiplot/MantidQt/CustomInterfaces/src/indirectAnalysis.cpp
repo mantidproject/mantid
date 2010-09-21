@@ -117,37 +117,22 @@ void indirectAnalysis::loadSettings()
   QSettings settings;
 
   settings.beginGroup(m_settingsGroup + "DataFiles");
-
-  QString dataCurrent = settings.value("last_directory", "").toString();
-
-  if ( dataCurrent == "" )
-  {
-    settings.setValue("last_directory", m_dataDir);
-  }
-
+  settings.setValue("last_directory", m_dataDir);
   m_uiForm.slice_inputFile->readSettings(settings.group());
-  m_uiForm.slice_calibFile->readSettings(settings.group());
-
   settings.endGroup();
+
   settings.beginGroup(m_settingsGroup + "ProcessedFiles");
-
-  QString procCurrent = settings.value("last_directory", "").toString();
-
-  if ( procCurrent == "" )
-  {
-    settings.setValue("last_directory", m_saveDir);
-  }
-
+  settings.setValue("last_directory", m_saveDir);
+  m_uiForm.slice_calibFile->readSettings(settings.group());
   m_uiForm.fury_iconFile->readSettings(settings.group());
   m_uiForm.fury_resFile->readSettings(settings.group());
   m_uiForm.elwin_inputFile->readSettings(settings.group());
   m_uiForm.elwin_inputFile->readSettings(settings.group());
   m_uiForm.msd_inputFile->readSettings(settings.group());
   m_uiForm.abs_inputFile->readSettings(settings.group());
-
   settings.endGroup();
-  settings.beginGroup(m_settingsGroup + "InstrumentOptions");
 
+  settings.beginGroup(m_settingsGroup + "InstrumentOptions");
   QString instrument = settings.value("instrument", "").toString();
   QString analyser = settings.value("analyser", "").toString();
   QString reflection = settings.value("reflection", "").toString();
@@ -192,7 +177,6 @@ void indirectAnalysis::saveSettings()
   settings.setValue("analyser", analyser);
   settings.setValue("reflection", reflection);
 }
-
 bool indirectAnalysis::validateFury()
 {
   bool valid = true;
@@ -237,7 +221,6 @@ bool indirectAnalysis::validateFury()
 
   return valid;
 }
-
 bool indirectAnalysis::validateElwin()
 {
   bool valid = true;
@@ -291,7 +274,6 @@ bool indirectAnalysis::validateElwin()
 
   return valid;
 }
-
 bool indirectAnalysis::validateSlice()
 {
   bool valid = true;
@@ -388,9 +370,6 @@ bool indirectAnalysis::validateMsd()
 
   return valid;
 }
-
-
-
 bool indirectAnalysis::validateAbsorption()
 {
   bool valid = true;
@@ -561,7 +540,6 @@ void indirectAnalysis::instrumentChanged(int index)
     }
   }
 }
-
 void indirectAnalysis::analyserSelected(int index)
 {
   // populate Reflection combobox with correct values for Analyser selected.
@@ -586,7 +564,6 @@ void indirectAnalysis::analyserSelected(int index)
     }
   }
 }
-
 void indirectAnalysis::reflectionSelected(int index)
 {
   QString pyInput =
@@ -636,7 +613,6 @@ void indirectAnalysis::reflectionSelected(int index)
   m_uiForm.tabAbsorption->setEnabled(state);
   m_uiForm.tabDemon->setEnabled(!state);
 }
-
 void indirectAnalysis::furyRun()
 {
   if ( !validateFury() )

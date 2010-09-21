@@ -74,6 +74,8 @@ namespace MantidQt
       void isDirty(bool state); ///< signify changes to interface
       bool isDirtyRebin(); ///< state whether post-rebin interface has had any changes
       void isDirtyRebin(bool state); ///< set value for above
+
+      void loadSettings();
       void saveSettings();
 
     private slots:
@@ -109,6 +111,7 @@ namespace MantidQt
 
       QString m_dataDir; ///< default data search directory
       QString m_saveDir; ///< default data save directory
+      QString m_settingsGroup;
       bool m_bgRemoval; ///< whether user has set values for BG removal
       bool m_isDirty; ///< whether pre-rebin options have changed
       bool m_isDirtyRebin; ///< whether rebin/post-rebin options have changed

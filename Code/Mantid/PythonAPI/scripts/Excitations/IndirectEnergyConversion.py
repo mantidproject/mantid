@@ -245,7 +245,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 	return filename
 
 def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax, specMin, specMax, outWS_n = 'Calibration', PlotOpt=False):
-	savepath = mantid.getConfigProperty('datasearch.directories')
+	savepath = mantid.getConfigProperty('defaultsave.directory')
 	savesuffix = rawfile[:-4] + suffix
 	savefile = os.path.join(savepath, savesuffix)
 	try:
