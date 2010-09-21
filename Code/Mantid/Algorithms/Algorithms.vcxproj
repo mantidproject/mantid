@@ -192,10 +192,13 @@
     <ClCompile Include="src\Divide.cpp" />
     <ClCompile Include="src\Exponential.cpp" />
     <ClCompile Include="src\ExponentialCorrection.cpp" />
+    <ClCompile Include="src\ExtractFFTSpectrum.cpp" />
     <ClCompile Include="src\ExtractSingleSpectrum.cpp" />
     <ClCompile Include="src\FFT.cpp" />
     <ClCompile Include="src\FFTSmooth.cpp" />
     <ClCompile Include="src\FFTSmooth2.cpp" />
+    <ClCompile Include="src\FilterByLogValue.cpp" />
+    <ClCompile Include="src\FilterByTime.cpp" />
     <ClCompile Include="src\FindCenterOfMassPosition.cpp" />
     <ClCompile Include="src\FindDeadDetectors.cpp" />
     <ClCompile Include="src\FindDetectorsOutsideLimits.cpp" />
@@ -267,7 +270,10 @@
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\AddSampleLog.h" />
     <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h" />
+    <ClInclude Include="inc\MantidAlgorithms\ExtractFFTSpectrum.h" />
     <ClInclude Include="inc\MantidAlgorithms\FFTSmooth2.h" />
+    <ClInclude Include="inc\MantidAlgorithms\FilterByLogValue.h" />
+    <ClInclude Include="inc\MantidAlgorithms\FilterByTime.h" />
     <ClInclude Include="inc\MantidAlgorithms\GhostCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
@@ -333,6 +339,9 @@
     <ClInclude Include="inc\MantidAlgorithms\FFTSmooth.h" />
     <ClInclude Include="inc\MantidAlgorithms\FindCenterOfMassPosition.h" />
     <ClInclude Include="inc\MantidAlgorithms\FindDeadDetectors.h" />
+    <ClInclude Include="test\ExtractFFTSpectrumTest.h" />
+    <ClInclude Include="test\FilterByLogValueTest.h" />
+    <ClInclude Include="test\FilterByTimeTest.h" />
     <ClInclude Include="test\FindDeadDetectorsTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\FindDetectorsOutsideLimits.h" />
     <ClInclude Include="test\FindDetectorsOutsideLimitsTest.h" />

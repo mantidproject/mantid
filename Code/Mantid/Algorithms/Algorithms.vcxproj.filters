@@ -318,6 +318,15 @@
     <ClCompile Include="src\TofCorrection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\FilterByTime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FilterByLogValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExtractFFTSpectrum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h">
@@ -795,6 +804,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\TofCorrectionTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\FilterByTime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\FilterByTimeTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\FilterByLogValueTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\FilterByLogValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\ExtractFFTSpectrum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ExtractFFTSpectrumTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
