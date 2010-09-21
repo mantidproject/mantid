@@ -120,7 +120,7 @@ message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
 #Create Subject
-subject = 'Subject: 
+subject = 'Subject: ' 
 if buildSuccess:
 	subject += 'Success: '
 else:
