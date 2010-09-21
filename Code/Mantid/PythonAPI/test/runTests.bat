@@ -1,6 +1,6 @@
 @echo off
 
-IF "%VCINSTALLDIR%"=="" CALL "C:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
+IF "%VCINSTALLDIR%"=="" CALL "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
 IF "%MANTIDTESTSETUP%"=="" SET PATH=%CD%\..\..\..\Third_Party\lib\win32;%CD%\..\..\Debug;%PATH%
 IF "%MANTIDTESTSETUP%"=="" SET MANTIDTESTSETUP=1
 REM Simple script to build and run the tests.
@@ -23,9 +23,9 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "C:\Python25\include" /I "..\.." /I "..\inc"  /I "../../Kernel/inc" /I "../../API/inc" /I "../../PythonAPI/inc" /I "../../Geometry/inc" /I "../../DataObjects/inc" /D_CRT_SECURE_NO_DEPRECATE /DBOOST_DEBUG_PYTHON /DBOOST_PYTHON_NO_LINK /wd4275 /EHsc /MDd /W3 /nologo /c /ZI /TP 
+cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "C:\Python25\include" /I "..\.." /I "..\inc"  /I "../../Kernel/inc" /I "../../API/inc" /I "../../PythonAPI/inc" /I "../../Geometry/inc" /I "../../DataObjects/inc" /D_CRT_SECURE_NO_DEPRECATE /DBOOST_ALL_DYN_LINK /DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG /DBOOST_DEBUG_PYTHON /DBOOST_PYTHON_NO_LINK /wd4275 /EHsc /MDd /W3 /nologo /c /ZI /TP 
 
-link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /LIBPATH:"C:\Python25\libs" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantiddataobjects.lib Mantiddatahandling.lib Mantidgeometry.lib MantidAPI.lib MantidPythonAPI_d.lib MantidAlgorithms.lib boost_python-vc80-mt-gyd-1_43.lib runner.obj
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /LIBPATH:"C:\Python25\libs" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantiddataobjects.lib Mantiddatahandling.lib Mantidgeometry.lib MantidAPI.lib MantidPythonAPI_d.lib MantidAlgorithms.lib boost_python-vc100-mt-gyd-1_43.lib runner.obj
   
 echo "Running the tests..."
 runner.exe
@@ -39,5 +39,5 @@ del *.pdb
 del runner.lib
 del runner.ilk
 del runner.exp
-del vc80.idb
+del vc100.idb
 del runner.exe
