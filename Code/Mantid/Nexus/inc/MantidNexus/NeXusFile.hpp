@@ -461,6 +461,27 @@ namespace NeXus {
     template <typename NumT>
     void getData(std::vector<NumT>& data);
 
+
+    /** Get data and coerce into an int vector.
+     *
+     * @throw Exception if the data is actually a float or
+     *    another type that cannot be coerced to an int.
+     * @param data vector to be filled.
+     */
+    void getDataCoerce(std::vector<int> &data);
+
+    /** Get data and coerce into a vector of doubles.
+     *
+     * @throw Exception if the data cannot be coerced to a double.
+     * @param data vector to be filled.
+     */
+    void getDataCoerce(std::vector<double> &data);
+
+    /** Return true if the data opened is of one of the
+     * int data types, 32 bits or less.
+     */
+    bool isDataInt();
+
     /**
      * \return String data from the file.
      */

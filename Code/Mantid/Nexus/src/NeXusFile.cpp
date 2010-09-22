@@ -76,9 +76,11 @@ namespace NeXus {
 #ifndef _MSC_VER
   template<>
   NXDLL_EXPORT NXnumtype getType(char number) {
-    stringstream msg;
-    msg << "NeXus::getType() does not know type of \"char\" " << number;
-    throw Exception(msg.str());
+    return CHAR;
+    //NOTE: I have no idea why this code (below) was there and that it was not allowed to have CHAR (Janik Zikovsky, sep 22, 2010)
+//    stringstream msg;
+//    msg << "NeXus::getType() does not know type of \"char\" " << number;
+//    throw Exception(msg.str());
   }
 #endif /* _MSC_VER */
 
@@ -665,6 +667,128 @@ void File::getData(vector<NumT>& data) {
   // fetch the data
   this->getData(&(data[0]));
 }
+
+
+
+void File::getDataCoerce(vector<int> &data)
+{
+  Info info = this->getInfo();
+  if (info.type == INT8)
+  {
+    vector<int8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == UINT8)
+  {
+    vector<uint8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == INT16)
+  {
+    vector<int16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == UINT16)
+  {
+    vector<uint16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == INT32)
+  {
+    vector<int32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == UINT32)
+  {
+    vector<uint32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else
+  {
+    throw Exception("NexusFile::getDataCoerce(): Could not coerce to int.");
+  }
+}
+
+void File::getDataCoerce(vector<double> &data)
+{
+  Info info = this->getInfo();
+  if (info.type == INT8)
+  {
+    vector<int8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == UINT8)
+  {
+    vector<uint8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == INT16)
+  {
+    vector<int16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == UINT16)
+  {
+    vector<uint16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == INT32)
+  {
+    vector<int32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == UINT32)
+  {
+    vector<uint32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == FLOAT32)
+  {
+    vector<float> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  }
+  else if (info.type == FLOAT64)
+  {
+    this->getData(data);
+  }
+  else
+  {
+    throw Exception("NexusFile::getDataCoerce(): Could not coerce to double.");
+  }
+}
+
+bool File::isDataInt()
+{
+  Info info = this->getInfo();
+  switch(info.type)
+  {
+  case INT8:
+  case UINT8:
+  case INT16:
+  case UINT16:
+  case INT32:
+  case UINT32:
+    return true;
+  default:
+    return false;
+  }
+}
+
+
+
 
 string File::getStrData() {
   string res;
