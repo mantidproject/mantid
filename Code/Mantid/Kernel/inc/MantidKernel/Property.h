@@ -126,6 +126,8 @@ public:
   virtual void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop);
   virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Property * > outputs) const;
 
+  virtual int size() const;
+
 protected:
   /// Constructor
   Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);

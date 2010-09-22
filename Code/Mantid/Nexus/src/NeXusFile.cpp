@@ -7,7 +7,7 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
 
-using namespace NeXus;
+using namespace NeXusAPI;
 using std::map;
 using std::pair;
 using std::string;
@@ -63,7 +63,7 @@ static string toString(const vector<NumT>& data) {
   return result.str();
 }
 
-namespace NeXus {
+namespace NeXusAPI {
 
   // catch for undefined types
   template <typename NumT>
@@ -172,7 +172,7 @@ static void inner_free(void* & data) {
   }
 }
 
-namespace NeXus {
+namespace NeXusAPI {
 File::File(NXhandle handle, bool close_handle) : m_file_id(handle), m_close_handle(close_handle) {
 
 }
@@ -994,7 +994,12 @@ string File::getStrAttr(const AttrInfo & info) {
   }
   char* value = new char[info.length + 1];
   this->getAttr(info, value, info.length+1);
-  res = string(value, info.length);
+
+  //res = string(value, info.length);
+
+  //allow the constructor to find the ending point of the string. Janik Zikovsky, sep 22, 2010
+  res = string(value);
+
   delete[] value;
   return res;
 }

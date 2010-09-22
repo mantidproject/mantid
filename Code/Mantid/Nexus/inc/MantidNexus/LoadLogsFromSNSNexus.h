@@ -6,16 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-//TODO: Is that the right path for the include?
-//#include "../../../Third_Party/include/NeXusFile.hpp"
-
-//We have to rename the namespace since there is a conflict with Mantid::NeXus
-//namespace NeXusAPI = NeXus;
-
+//Copy of the NexusCpp API was placed in MantidNexus
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
 
 namespace Mantid
@@ -90,13 +87,13 @@ namespace API
 
       void exec();
 
-//      void loadSampleLog(NeXusAPI::File file, std::string entry_name, std::string entry_class);
+      void loadSampleLog(NeXusAPI::File& file, std::string entry_name, std::string entry_class);
 
       /// The name and path of the input file
       std::string m_filename;
 
-      /// The workspace being fille
-      API::Workspace_const_sptr localWorkspace;
+      /// The workspace being filled out
+      API::MatrixWorkspace_sptr WS;
 
     };
 

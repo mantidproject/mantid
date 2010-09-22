@@ -122,6 +122,15 @@ const PropertyHistory Property::createHistory() const
   return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),this->direction());
 }
 
+/** Return the size of this property.
+ * Single-Value properties return 1.
+ * TimeSeriesProperties return the # of entries.
+ */
+int Property::size() const
+{
+  return 1;
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /** Add to the property.

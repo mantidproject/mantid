@@ -22,7 +22,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+//using namespace Mantid::NeXus;
 //using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 

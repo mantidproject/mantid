@@ -10,7 +10,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidNexus/LoadISISNexus2.h"
-using namespace Mantid::NeXus;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 

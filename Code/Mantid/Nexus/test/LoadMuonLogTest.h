@@ -24,7 +24,6 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
 class LoadMuonLogTest : public CxxTest::TestSuite

@@ -44,7 +44,7 @@
 //#include "MantidNexus/napiconfig.h"
 #include "MantidNexus/NeXusStream.hpp"
 #include "MantidNexus/NeXusException.hpp"
-namespace NeXus {
+namespace NeXusAPI {
 namespace Stream {
 
 HolderBase::HolderBase(const std::string& name) : m_name(name)
@@ -79,13 +79,13 @@ AttrHolder<NumT>::AttrHolder(const NumT& value) : HolderBase(""), m_c_value(&val
 template<typename NumT>
 NXnumtype AttrHolder<NumT>::getType()
 {
-    return NeXus::getType<NumT>();
+    return NeXusAPI::getType<NumT>();
 }
 
 template<>
 NXnumtype AttrHolder<std::string>::getType()
 {
-    return NeXus::getType<char>();
+    return NeXusAPI::getType<char>();
 }
 
 template<>

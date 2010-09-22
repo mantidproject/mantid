@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace NeXus{
+namespace NeXusAPI{
   class Exception : public std::runtime_error
   {
   public:

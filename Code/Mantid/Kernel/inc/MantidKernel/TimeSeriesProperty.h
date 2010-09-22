@@ -382,6 +382,28 @@ public:
 
 
   //-----------------------------------------------------------------------------------------------
+  /** Clears and creates a TimeSeriesProperty from these parameters:
+   *
+   *  @param start_time The reference time as a boost::posix_time::ptime value
+   *  @param time_sec A vector of time offset (from start_time) in seconds.
+   *  @param new_values A vector of values, each corresponding to the time offset in time_sec.
+   *    Vector sizes must match.
+   */
+  void create(const Kernel::dateAndTime &start_time, std::vector<double> time_sec, const std::vector<TYPE> new_values)
+  {
+    if (time_sec.size() != new_values.size())
+      throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
+    m_propertySeries.clear();
+    size_t num = new_values.size();
+    for (size_t i=0; i < num; i++)
+    {
+      Kernel::dateAndTime time = start_time + Kernel::DateAndTime::duration_from_seconds( time_sec[i] );
+      this->addValue(time, new_values[i]);
+    }
+    this->countSize();
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
    *  @param time The time as a boost::posix_time::ptime value
    *  @param value The associated value
