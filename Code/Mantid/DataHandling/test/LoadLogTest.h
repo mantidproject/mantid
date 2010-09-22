@@ -42,7 +42,7 @@ public:
     if ( !loader.isInitialized() ) loader.initialize();
 
     // Path to test input file assumes Test directory checked out from SVN
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "../../../../Test/Data/HRP37129_ICPevent.txt") )
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP37129_ICPevent.txt") )
     inputFile = loader.getPropertyValue("Filename");
 
     outputSpace = "LoadLogTest-singleLogFile";
@@ -93,7 +93,7 @@ public:
     loaderRawFile.initialize();
 
 	  // Path to test input file assumes Test directory checked out from SVN
-    loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/HRP37125.RAW");
+    loaderRawFile.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP37125.raw");
     inputFile = loaderRawFile.getPropertyValue("Filename");
     
     outputSpace = "LoadLogTestraw-datafile";
@@ -163,7 +163,7 @@ public:
     loaderRawFile.initialize();
 
 	  // Path to test input file assumes Test directory checked out from SVN
-    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/HRP37129.S02") )
+    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP37129.s02") )
       inputFile = loaderRawFile.getPropertyValue("Filename");
 
     outputSpace = "LoadLogTest-rawdatafile_so_type";
@@ -210,7 +210,7 @@ void testExecWiththreecolumnLogfile()
     loaderRawFile.initialize();
 
 	  // Path to test input file assumes Test directory checked out from SVN
-    loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/NIMROD00001097.raw");
+    loaderRawFile.setPropertyValue("Filename", "../../../../Test/AutoTestData/NIMROD00001097.raw");
     inputFile = loaderRawFile.getPropertyValue("Filename");
     
     outputSpace = "threecoulmlog_datafile";
@@ -269,7 +269,7 @@ void testloadlogwithalternatedatastream()
     loaderRawFile.initialize();
 
 	  // Path to test input file assumes Test directory checked out from SVN
-    loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/OFFSPEC00004622.raw");
+    loaderRawFile.setPropertyValue("Filename", "../../../../Test/AutoTestData/OFFSPEC00004622.raw");
     inputFile = loaderRawFile.getPropertyValue("Filename");
     
     outputSpace = "ads_datafile";
