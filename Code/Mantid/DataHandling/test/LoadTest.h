@@ -19,7 +19,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Data/IRS38633.raw");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/IRS38633.raw");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -31,7 +31,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Data/HRP37129.S02");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/HRP37129.s02");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -43,7 +43,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Data/EVS13895.raw");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/EVS13895.raw");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -63,7 +63,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Nexus/emu00006473.nxs");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/emu00006473.nxs");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -75,7 +75,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Nexus/MUSR00015189.nxs");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/MUSR00015189.nxs");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -91,7 +91,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Data/hrpd_new_072_01.cal");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/hrpd_new_072_01.cal");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( !loader.isExecuted() );
@@ -101,7 +101,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Data/Example.spe");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/Example.spe");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -113,7 +113,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Data/AsciiExample.txt");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/AsciiExample.txt");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -125,7 +125,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",m_baseDir+"Data/SANS2D/BioSANS_exp61_scan0004_0001.xml");
+    loader.setPropertyValue("Filename",m_baseDir+"AutoTestData/BioSANS_exp61_scan0004_0001.xml");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
