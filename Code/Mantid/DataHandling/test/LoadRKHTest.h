@@ -17,7 +17,7 @@ public:
   // A sample file is in the repository
   LoadRKHTest() : inputFile("")
   {    
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/DIRECT.041").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/DIRECT.041").toString();
   }
 
   void testInit()
