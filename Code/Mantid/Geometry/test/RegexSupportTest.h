@@ -110,15 +110,15 @@ public:
 
 	void testFindComp(){
 		// int findComp(std::istream&,const boost::regex&,int&);
-		//"../../../../Test/Data/HRP37129_ICPevent.txt"
-		std::ifstream fs("../../../../Test/Data/HRP37129_ICPevent.txt",std::ifstream::in);
+		//"../../../../Test/AutoTestData/HRP37129_ICPevent.txt"
+		std::ifstream fs("../../../../Test/AutoTestData/HRP37129_ICPevent.txt",std::ifstream::in);
 		std::string output;
 		TS_ASSERT_EQUALS(findComp(fs,boost::regex("BEGIN"),output),5);
 		TS_ASSERT_EQUALS(output,"");
 	}
 
 	void testFindPattern(){
-		std::ifstream fs("../../../../Test/Data/HRP37129_ICPevent.txt",std::ifstream::in);
+		std::ifstream fs("../../../../Test/AutoTestData/HRP37129_ICPevent.txt",std::ifstream::in);
 		 std::string output;
 		 TS_ASSERT_EQUALS(findPattern(fs,boost::regex("BEGIN"),output),5);
 		 TS_ASSERT_EQUALS(output,"2007-11-16T13:32:38 BEGIN");
