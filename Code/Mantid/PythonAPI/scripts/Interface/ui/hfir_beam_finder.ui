@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>646</width>
+    <width>813</width>
     <height>571</height>
    </rect>
   </property>
@@ -22,7 +22,7 @@
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>10</x>
      <y>10</y>
      <width>641</width>
      <height>551</height>
@@ -34,7 +34,7 @@
       <widget class="QLineEdit" name="x_pos_edit">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>20</x>
          <y>40</y>
          <width>113</width>
          <height>27</height>
@@ -44,7 +44,7 @@
       <widget class="QLineEdit" name="y_pos_edit">
        <property name="geometry">
         <rect>
-         <x>160</x>
+         <x>170</x>
          <y>40</y>
          <width>113</width>
          <height>27</height>
@@ -54,7 +54,7 @@
       <widget class="QLabel" name="x_pos_label">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>20</x>
          <y>20</y>
          <width>81</width>
          <height>17</height>
@@ -67,7 +67,7 @@
       <widget class="QLabel" name="y_pos_label">
        <property name="geometry">
         <rect>
-         <x>160</x>
+         <x>170</x>
          <y>20</y>
          <width>81</width>
          <height>17</height>
@@ -80,8 +80,8 @@
       <widget class="QGroupBox" name="groupBox">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>110</y>
+         <x>20</x>
+         <y>120</y>
          <width>611</width>
          <height>411</height>
         </rect>
@@ -93,9 +93,9 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>30</y>
+          <y>20</y>
           <width>591</width>
-          <height>321</height>
+          <height>131</height>
          </rect>
         </property>
         <layout class="QFormLayout" name="formLayout">
@@ -112,13 +112,6 @@
           <widget class="QLabel" name="data_file_label">
            <property name="text">
             <string>Data file:                       </string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="beam_data_file_edit">
-           <property name="toolTip">
-            <string>Enter the name of the beam data file</string>
            </property>
           </widget>
          </item>
@@ -153,7 +146,50 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QLineEdit" name="beam_radius_edit"/>
+          <widget class="QLineEdit" name="beam_radius_edit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QLineEdit" name="beam_data_file_edit">
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Enter the name of the beam data file</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="data_file_browse_button">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Browse...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -161,7 +197,7 @@
       <widget class="QCheckBox" name="use_beam_finder_checkbox">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>20</x>
          <y>80</y>
          <width>181</width>
          <height>22</height>

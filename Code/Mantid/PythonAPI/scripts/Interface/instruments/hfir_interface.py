@@ -16,7 +16,7 @@ class HFIRInterface(object):
     """
     ui_path = 'ui'
     
-    def __init__(self, name=''):
+    def __init__(self, name, settings):
         self.scripter = ReductionScripter(name=name)
         # Main panel with instrument description common to all data files
         self._instrument_widget = None
@@ -25,6 +25,10 @@ class HFIRInterface(object):
         
         # Data file directory
         self.data_directory = '.'
+        
+        # General settings
+        self._settings = settings
+        
         
     def load_file(self, file_name):
         """
@@ -78,12 +82,14 @@ class HFIRInterface(object):
         """
         # Instrument description
         self._instrument_widget = SANSInstrumentWidget(state=self.scripter.instrument,
-                                                       ui_path = self.ui_path)
+                                                       ui_path = self.ui_path,
+                                                       settings = self._settings)
         
         # Beam finder
         self._beam_finder_widget = BeamFinderWidget(state=self.scripter.beam_finder,
-                                                    ui_path = self.ui_path)
+                                                    ui_path = self.ui_path,
+                                                    settings = self._settings)
         
         return {"Instrument": self._instrument_widget,
-                "Beam Finder": self._beam_finder_widget}
+                "Beam Center": self._beam_finder_widget}
         

@@ -5,24 +5,18 @@ import util
 import os
 from PyQt4 import QtGui, uic, QtCore
 from reduction.hfir_reduction_steps import BeamFinder
+from application_settings import GeneralSettings
 
 # Beam finder frame
 class BeamFinderFrame(QtGui.QFrame):
     """
         Beam center interface
+        TODO: move most of this class in BeamFinderWidget, along the
+        lines of the SANSInstrumentWidget
     """
         
     def __init__(self, parent=None, flags=0):
         super(BeamFinderFrame, self).__init__(parent)        
-    
-    def initialize_content(self):
-        """
-            Initialize the content that was added by loading the .ui file
-        """
-        # Validators
-        self.x_pos_edit.setValidator(QtGui.QDoubleValidator(self.x_pos_edit))
-        self.y_pos_edit.setValidator(QtGui.QDoubleValidator(self.y_pos_edit))
-        self.beam_radius_edit.setValidator(QtGui.QDoubleValidator(self.beam_radius_edit))
     
     def get_state(self):
         """
@@ -83,12 +77,12 @@ class BeamFinderFrame(QtGui.QFrame):
         self.beam_radius_edit.setEnabled(False)
             
 class BeamFinderWidget(QtGui.QWidget):    
-    def __init__(self, parent=None, state=None, ui_path='ui'):
+    def __init__(self, parent=None, state=None, ui_path='ui', settings=None):
         QtGui.QWidget.__init__(self, parent)
         self._layout = QtGui.QHBoxLayout()
         self._content = BeamFinderFrame(self)
         uic.loadUi(os.path.join(ui_path, "hfir_beam_finder.ui"), self._content)
-        self._content.initialize_content()
+        self.initialize_content()
         self._layout.addWidget(self._content)
         self.setLayout(self._layout)
         
@@ -96,6 +90,11 @@ class BeamFinderWidget(QtGui.QWidget):
             self._content.set_state(state)
         else:
             self._content.set_state(BeamFinder())
+            
+        # General GUI settings
+        if settings is None:
+            settings = GeneralSettings()
+        self._settings = settings
             
     def get_state(self):
         """
@@ -108,3 +107,25 @@ class BeamFinderWidget(QtGui.QWidget):
             Relay a set_state() method call to the beam finder widget
         """
         return self._content.set_state(state)
+
+    def initialize_content(self):
+        """
+            Initialize the content that was added by loading the .ui file
+        """
+        # Validators
+        self._content.x_pos_edit.setValidator(QtGui.QDoubleValidator(self._content.x_pos_edit))
+        self._content.y_pos_edit.setValidator(QtGui.QDoubleValidator(self._content.y_pos_edit))
+        self._content.beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._content.beam_radius_edit))
+        self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
+    
+    def _data_file_browse(self):
+        fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
+                                                          self._settings.data_path, 
+                                                          "Data files (*.xml)"))
+        
+        if fname:
+            # Store the location of the loaded file
+            (folder, file_name) = os.path.split(fname)
+            self._settings.data_path = folder
+            self._content.beam_data_file_edit.setText(fname)          
+    

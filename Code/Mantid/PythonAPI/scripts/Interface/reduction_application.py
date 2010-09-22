@@ -3,7 +3,7 @@ from PyQt4 import QtGui, QtCore, uic
 
 from instruments.instrument_factory import instrument_factory
 from reduction.hfir_reduction import ReductionScripter
-     
+from application_settings import GeneralSettings
 
 class ReductionGUI(QtGui.QMainWindow):
     def __init__(self, instrument=None, ui_path="ui"):
@@ -38,6 +38,9 @@ class ReductionGUI(QtGui.QMainWindow):
         # Internal flag for clearing all settings and restarting the application
         self._clear_and_restart = False
         
+        # General settings shared by all widgets
+        self.general_settings = GeneralSettings(settings)
+        
     def _set_window_title(self):
         """
             Sets the window title using the instrument name and the 
@@ -61,7 +64,7 @@ class ReductionGUI(QtGui.QMainWindow):
         
         self._update_file_menu()
 
-        self._interface = instrument_factory(self._instrument)
+        self._interface = instrument_factory(self._instrument, settings=self.general_settings)
         
         if self._interface is not None:
             self._interface.ui_path = self.ui_path
@@ -194,6 +197,9 @@ class ReductionGUI(QtGui.QMainWindow):
     
             last_export_dir = QtCore.QVariant(QtCore.QString(self._last_export_directory))
             settings.setValue("last_export_directory", last_export_dir)
+            
+            # General settings
+            self.general_settings.to_settings(settings)
 
     def reduce_clicked(self):
         """

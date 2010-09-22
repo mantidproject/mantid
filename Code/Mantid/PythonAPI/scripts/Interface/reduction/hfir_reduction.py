@@ -45,6 +45,45 @@ class BaseScriptElement(object):
                 rc = rc + node.data
         return rc       
 
+    @classmethod
+    def getContent(cls, dom, tag):
+        element_list = dom.getElementsByTagName(tag)
+        if len(element_list)>0:
+            return BaseScriptElement.getText(element_list[0].childNodes)
+        else:
+            return None
+        
+    @classmethod
+    def getIntElement(cls, dom, tag, default=None):
+        value = BaseScriptElement.getContent(dom, tag)
+        if value is not None:
+            return int(value)
+        else:
+            return default
+
+    @classmethod
+    def getFloatElement(cls, dom, tag, default=None):
+        value = BaseScriptElement.getContent(dom, tag)
+        if value is not None:
+            return float(value)
+        else:
+            return default
+        
+    @classmethod
+    def getStringElement(cls, dom, tag, default=''):
+        value = BaseScriptElement.getContent(dom, tag)
+        if value is not None:
+            return value
+        else:
+            return default
+
+    @classmethod
+    def getBoolElement(cls, dom, tag, true_tag='true', default=False):
+        value = BaseScriptElement.getContent(dom, tag)
+        if value is not None:
+            return value==true_tag
+        else:
+            return default
 
 class ReductionScripter(object):
     """

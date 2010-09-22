@@ -113,7 +113,7 @@
      <x>30</x>
      <y>160</y>
      <width>751</width>
-     <height>181</height>
+     <height>191</height>
     </rect>
    </property>
    <property name="title">
@@ -125,7 +125,7 @@
       <x>10</x>
       <y>30</y>
       <width>671</width>
-      <height>131</height>
+      <height>161</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout_2">
@@ -257,6 +257,72 @@
        </item>
       </layout>
      </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Allowed sensitivity range:</string>
+       </property>
+       <property name="indent">
+        <number>50</number>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Min</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="min_sensitivity_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Enter the minimum allowed relative sensitivity for any given pixel.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Max</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="max_sensitivity_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Enter the maximum allowed relative sensitivity for any given pixel.</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -264,7 +330,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>360</y>
+     <y>370</y>
      <width>751</width>
      <height>141</height>
     </rect>

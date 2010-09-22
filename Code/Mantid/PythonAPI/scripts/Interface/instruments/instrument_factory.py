@@ -5,7 +5,7 @@
 """
 from hfir_interface import HFIRInterface
 
-def instrument_factory(instrument_name):
+def instrument_factory(instrument_name, settings=None):
     if str(instrument_name).strip().upper()=="BIOSANS":
-        return HFIRInterface("BIOSANS")
+        return HFIRInterface("BIOSANS", settings=settings)
         
