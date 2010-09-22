@@ -39,7 +39,7 @@ public:
 	{
     IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/Data/HRP38692.RAW");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP38692.RAW");
 
     std::string outputSpace = "tofocus";
     loader->setPropertyValue("OutputWorkspace", outputSpace);
@@ -50,7 +50,7 @@ public:
 
     focus.setPropertyValue("InputWorkspace", outputSpace);
     focus.setPropertyValue("OutputWorkspace", "focusedWS" );
-    focus.setPropertyValue("GroupingFileName","../../../../Test/Data/hrpd_new_072_01.cal");
+    focus.setPropertyValue("GroupingFileName","../../../../Test/AutoTestData/hrpd_new_072_01.cal");
 
 	  TS_ASSERT_THROWS_NOTHING( focus.execute() );
 	  TS_ASSERT( focus.isExecuted() );
