@@ -25,7 +25,7 @@ public:
 	LoadMappingTableTest()
 	{
 	  //
-	  inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
+	  inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/HET15869.raw").toString();
 		 outputSpace = "outerWS";
 		//initialise framework manager to allow logging
 		Mantid::API::FrameworkManager::Instance();

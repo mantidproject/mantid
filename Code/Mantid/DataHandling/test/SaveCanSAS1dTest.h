@@ -30,7 +30,7 @@ public:
     std::string inputFile; // Path to test input file assumes Test directory checked out from SVN
     
     //the file's run number needs to be stored in m_runNum for later tests
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/HET15869.raw").toString();
     m_runNum = "15869";
 
     loader.setPropertyValue("Filename", inputFile);

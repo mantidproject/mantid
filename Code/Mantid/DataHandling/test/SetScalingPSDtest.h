@@ -36,7 +36,7 @@ public:
 
   void testLoadMer()
   {
-    //std::string inputFile = "../../../../Test/Data/HET15869.RAW";
+    //std::string inputFile = "../../../../Test/AutoTestData/HET15869.raw";
     std::string inputFile = "../../../../Test/Data/MER02257.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
