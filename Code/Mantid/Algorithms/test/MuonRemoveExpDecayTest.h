@@ -40,7 +40,7 @@ public:
 #ifndef _WIN64
 
     loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/Nexus/emu00006473.nxs");
+    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/emu00006473.nxs");
     loader.setPropertyValue("OutputWorkspace", "EMU6473");
     TS_ASSERT_THROWS_NOTHING( loader.execute() );
     TS_ASSERT_EQUALS(loader.isExecuted(),true);

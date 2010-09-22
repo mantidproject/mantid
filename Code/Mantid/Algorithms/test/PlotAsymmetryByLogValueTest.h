@@ -20,7 +20,7 @@ class PlotAsymmetryByLogValueTest : public CxxTest::TestSuite
 public:
 
     PlotAsymmetryByLogValueTest()
-      :firstRun("../../../../Test/Nexus/MUSR00015189.nxs"),lastRun("../../../../Test/Nexus/MUSR00015199.nxs")
+      :firstRun("../../../../Test/AutoTestData/MUSR00015189.nxs"),lastRun("../../../../Test/AutoTestData/MUSR00015199.nxs")
     {
     }
 
