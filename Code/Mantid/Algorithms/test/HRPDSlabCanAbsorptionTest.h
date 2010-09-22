@@ -37,7 +37,7 @@ public:
 
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/HRP39191.RAW");
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/HRP39191.raw");
     inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumList","1,194,322");
