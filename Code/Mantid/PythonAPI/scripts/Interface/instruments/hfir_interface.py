@@ -7,6 +7,7 @@
 from PyQt4 import QtGui, uic, QtCore
 from widgets.beam_finder import BeamFinderWidget
 from widgets.instrument import SANSInstrumentWidget
+from widgets.transmission import TransmissionWidget
 from reduction.hfir_reduction import ReductionScripter
 
 
@@ -22,6 +23,8 @@ class HFIRInterface(object):
         self._instrument_widget = None
         # Beam finder panel
         self._beam_finder_widget = None
+        # Sample transmission
+        self._transmission_widget = None
         
         # Data file directory
         self.data_directory = '.'
@@ -40,6 +43,7 @@ class HFIRInterface(object):
         self.scripter.from_xml(file_name)
         self._beam_finder_widget.set_state(self.scripter.beam_finder)
         self._instrument_widget.set_state(self.scripter.instrument)
+        self._transmission_widget.set_state(self.scripter.transmission)
         
     def save_file(self, file_name):
         """
@@ -65,6 +69,7 @@ class HFIRInterface(object):
         """
         self.scripter.instrument = self._instrument_widget.get_state()
         self.scripter.beam_finder = self._beam_finder_widget.get_state()
+        self.scripter.transmission = self._transmission_widget.get_state()
         
     def reduce(self):
         """
@@ -90,6 +95,12 @@ class HFIRInterface(object):
                                                     ui_path = self.ui_path,
                                                     settings = self._settings)
         
-        return {"Instrument": self._instrument_widget,
-                "Beam Center": self._beam_finder_widget}
+        # Transmission
+        self._transmission_widget = TransmissionWidget(state=self.scripter.transmission,
+                                                       ui_path = self.ui_path,
+                                                       settings = self._settings)
+        
+        return [["Instrument", self._instrument_widget],
+                ["Beam Center", self._beam_finder_widget],
+                ["Transmission", self._transmission_widget]]
         

@@ -7,7 +7,10 @@ import xml.dom.minidom
 import copy
 from hfir_reduction import BaseScriptElement
 
-
+class Transmission(BaseScriptElement):
+    def __str__(self):
+        return ""
+    
 class InstrumentDescription(BaseScriptElement):
     instrument_name = "BIOSANS"
     nx_pixels = 192

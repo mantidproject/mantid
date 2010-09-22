@@ -70,9 +70,9 @@ class ReductionGUI(QtGui.QMainWindow):
             self._interface.ui_path = self.ui_path
             self.tabWidget.clear()
             
-            tab_dict = self._interface.get_tabs()
-            for tab in tab_dict:
-                self.tabWidget.addTab(tab_dict[tab], tab)
+            tab_list = self._interface.get_tabs()
+            for tab in tab_list:
+                self.tabWidget.addTab(tab[1], tab[0])
                 
             self._set_window_title()
         else:

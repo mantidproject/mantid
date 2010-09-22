@@ -101,6 +101,7 @@ class ReductionScripter(object):
         self.instrument_name = name
         self.beam_finder = hfir_reduction_steps.BeamFinder()
         self.instrument = hfir_reduction_steps.InstrumentDescription()
+        self.transmission = hfir_reduction_steps.Transmission()
         
 
     def to_xml(self, file_name=None):
