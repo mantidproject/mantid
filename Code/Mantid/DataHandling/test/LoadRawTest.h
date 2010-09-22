@@ -226,7 +226,7 @@ public:
   {
 	 LoadRaw loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/Data/CSP78173.raw");
+    loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     // Set these properties to check they're ignored
     //loader5.setPropertyValue("SpectrumList", "998,999,1000");
