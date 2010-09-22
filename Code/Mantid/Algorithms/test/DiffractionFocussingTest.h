@@ -39,7 +39,7 @@ public:
 	{
     IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP38692.RAW");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP38692.raw");
 
     std::string outputSpace = "tofocus";
     loader->setPropertyValue("OutputWorkspace", outputSpace);
