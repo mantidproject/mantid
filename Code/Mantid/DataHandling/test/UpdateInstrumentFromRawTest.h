@@ -55,7 +55,7 @@ public:
     // now try to reload in detector positions from raw file
     UpdateInstrumentFromRaw loadRawPos;
     loadRawPos.initialize();
-    loadRawPos.setPropertyValue("Filename", "../../../../Test/Data/HRP38692.RAW");
+    loadRawPos.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP38692.raw");
     loadRawPos.setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(loadRawPos.execute());
     TS_ASSERT( loadRawPos.isExecuted() );

@@ -25,7 +25,7 @@ class LoadSpice2DTest : public CxxTest::TestSuite
 public:
   LoadSpice2DTest()
   {
-     inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/SANS2D/BioSANS_exp61_scan0004_0001.xml").toString();
+     inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/BioSANS_exp61_scan0004_0001.xml").toString();
   }
   void testInit()
   {

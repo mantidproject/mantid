@@ -225,7 +225,7 @@ public:
   {
     LoadRaw2 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
+    loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod2");
     loader5.setPropertyValue("SpectrumList", "10,50,100,195");
     //loader5.setPropertyValue("SpectrumMin", "1");
