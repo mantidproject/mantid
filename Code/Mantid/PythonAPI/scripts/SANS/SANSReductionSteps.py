@@ -497,7 +497,6 @@ class Mask(ReductionStep):
     """
         Marks some spectra so that they are not included in the analysis
         TODO: Maintain HFIR-ISIS compatibility
-        TODO: ISIS to add a xml string data member and a MaskDetectorsInShape call
     """
     def __init__(self, nx_low=0, nx_high=0, ny_low=0, ny_high=0):
         """
@@ -514,7 +513,105 @@ class Mask(ReductionStep):
         self._ny_low = ny_low
         self._ny_high = ny_high
         
+        #the region to be masked expressed as xml that can be passed to MaskDetectorsInShape 
+        self.xml_string = ''
+        #these spectra will be masked by the algorithm MaskDetectors
+        self._spec_list = ''
+        
+    def add_infinite_plane(self, id, plane_pt, normal_pt):
+        self.xml_string += '<infinite-plane id="' + str(id) + '">' + \
+            '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
+            '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
+            '</infinite-plane>\n'
+
+    def add_infinite_cylinder(self, id, centre, radius, axis):
+        self.xml_string += '<infinite-cylinder id="' + str(id) + '">' + \
+        '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+        '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+        '<radius val="' + str(radius) + '" />' + \
+        '</infinite-cylinder>\n'
+
+    def add_cylinder(self, radius, xcentre, ycentre, algebra=''):
+        '''Mask a cylinder on the input workspace.'''
+        add_infinite_cylinder('shape', [xcentre, ycentre, 0.0], radius, [0,0,1])
+        self.xml_string += '<algebra val="' + algebra + 'shape" />'
+
+    def add_outside_cylinder(self, radius, xcentre = '0.0', ycentre = '0.0'):
+        '''Mask out the outside of a cylinder or specified radius'''
+        self.add_cylinder(radius, xcentre, ycentre, '#')
+    
+    def ConvertToSpecList(self, maskstring):
+        '''
+            Convert a mask string to a spectra list
+            6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
+        '''
+        #Compile spectra ID list
+        if maskstring == '':
+            return ''
+        masklist = maskstring.split(',')
+        
+        orientation = ReductionSingleton().instrument.get_orientation
+        detector = ReductionSingleton().instrument.cur_detector()
+        firstspec = detector.first_spec_num
+        dimension = detector.n_columns
+        speclist = ''
+        for x in masklist:
+            x = x.lower()
+            if '+' in x:
+                bigPieces = x.split('+')
+                if '>' in bigPieces[0]:
+                    pieces = bigPieces[0].split('>')
+                    low = int(pieces[0].lstrip('hv'))
+                    upp = int(pieces[1].lstrip('hv'))
+                else:
+                    low = int(bigPieces[0].lstrip('hv'))
+                    upp = low
+                if '>' in bigPieces[1]:
+                    pieces = bigPieces[1].split('>')
+                    low2 = int(pieces[0].lstrip('hv'))
+                    upp2 = int(pieces[1].lstrip('hv'))
+                else:
+                    low2 = int(bigPieces[1].lstrip('hv'))
+                    upp2 = low2            
+                if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
+                    ydim=abs(upp-low)+1
+                    xdim=abs(upp2-low2)+1
+                    speclist += spectrumBlock(firstspec,low, low2,ydim, xdim, dimension,orientation) + ','
+                elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
+                    xdim=abs(upp-low)+1
+                    ydim=abs(upp2-low2)+1
+                    speclist += spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
+                else:
+                    print "error in mask, ignored:  " + x
+            elif '>' in x:
+                pieces = x.split('>')
+                low = int(pieces[0].lstrip('hvs'))
+                upp = int(pieces[1].lstrip('hvs'))
+                if 'h' in pieces[0]:
+                    nstrips = abs(upp - low) + 1
+                    speclist += spectrumBlock(firstspec,low, 0,nstrips, dimension, dimension,orientation)  + ','
+                elif 'v' in pieces[0]:
+                    nstrips = abs(upp - low) + 1
+                    speclist += spectrumBlock(firstspec,0,low, dimension, nstrips, dimension,orientation)  + ','
+                else:
+                    for i in range(low, upp + 1):
+                        speclist += str(i) + ','
+            elif 'h' in x:
+                speclist += spectrumBlock(firstspec,int(x.lstrip('h')), 0,1, dimension, dimension,orientation) + ','
+            elif 'v' in x:
+                speclist += spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
+            else:
+                speclist += x.lstrip('s') + ','
+        
+        self._spec_list += speclist
+    
+    def set_spec_list(self, speclist):
+        self._spec_list = speclist.rstrip(',')
+
     def execute(self, reducer, workspace):
+
+        if self.xml_string != '':
+            MaskDetectorsInShape(workspace, self.xml_string)
         # Get a list of detector pixels to mask
         masked_pixels = reducer.instrument.get_masked_pixels(self._nx_low,
                                                              self._nx_high,
@@ -526,6 +623,10 @@ class Mask(ReductionStep):
         
         # Mask the pixels by passing the list of IDs
         MaskDetectors(workspace, None, masked_detectors)
+        
+        if self._spec_list != '':
+            MaskDetectors(workspace, SpectraList = self._spec_list)
+
 
 class SaveIqAscii(ReductionStep):
     def __init__(self):
