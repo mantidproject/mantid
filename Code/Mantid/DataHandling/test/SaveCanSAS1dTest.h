@@ -22,7 +22,7 @@ public:
   //set up the workspace that will be loaded
   SaveCanSAS1DTest() : m_workspace1("SaveCanSAS1DTest_in1"),
     m_workspace2("SaveCanSAS1DTest_in2"),
-    m_filename("../../../../Test/Data/savecansas1d.xml")
+    m_filename("../../../../Test/AutoTestData/savecansas1d.xml")
 
   {
     LoadRaw3 loader;
@@ -51,7 +51,7 @@ public:
 
     LoadRaw3 load;
     load.initialize();
-    load.setPropertyValue("Filename", "../../../../Test/Data/irs26173.raw");
+    load.setPropertyValue("Filename", "../../../../Test/AutoTestData/IRS26173.raw");
     load.setPropertyValue("OutputWorkspace", m_workspace2);
     load.setPropertyValue("SpectrumList", "30");
     TS_ASSERT_THROWS_NOTHING(load.execute());
