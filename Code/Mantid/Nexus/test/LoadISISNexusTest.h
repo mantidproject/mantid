@@ -12,6 +12,7 @@
 #include "MantidNexus/LoadISISNexus2.h"
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::NeXus;
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
