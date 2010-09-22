@@ -37,7 +37,7 @@ public:
   {
     Mantid::DataHandling::LoadRaw2 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48098.raw");
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/LOQ48098.raw");
     const std::string inputWS("wav");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumMin","30");
