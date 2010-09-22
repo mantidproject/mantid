@@ -88,7 +88,7 @@ public:
 	
 	LoadRawBin0 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
+    loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     //loader5.setPropertyValue("SpectrumList", "10,50,100,195");
     
