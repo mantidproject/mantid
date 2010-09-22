@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>267</height>
+    <width>544</width>
+    <height>280</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -66,7 +66,7 @@
          </item>
          <item row="0" column="1" >
           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="set_cbInst" >
-           <property name="techniques" stdset="0" >
+           <property name="techniques" >
             <stringlist>
              <string>TOF Indirect Geometry Spectroscopy</string>
             </stringlist>
@@ -145,7 +145,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_12" >
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="slice_inputFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
            <property name="findRunFiles" stdset="0" >
             <bool>true</bool>
            </property>
@@ -155,7 +155,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0" >
+           <property name="fileExtensions" >
             <stringlist>
              <string>.raw</string>
             </stringlist>
@@ -181,7 +181,7 @@
           </widget>
          </item>
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="slice_calibFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" >
            <property name="enabled" >
             <bool>false</bool>
            </property>
@@ -197,7 +197,7 @@
            <property name="optional" stdset="0" >
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0" >
+           <property name="fileExtensions" >
             <stringlist>
              <string>_calib.nxs</string>
             </stringlist>
@@ -393,7 +393,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16" >
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="elwin_inputFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -403,7 +403,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0" >
+           <property name="fileExtensions" >
             <stringlist>
              <string>_red.nxs</string>
             </stringlist>
@@ -629,7 +629,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18" >
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="msd_inputFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" >
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -639,7 +639,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0" >
+           <property name="fileExtensions" >
             <stringlist>
              <string>_elw.nxs</string>
             </stringlist>
@@ -774,7 +774,7 @@
        <item>
         <layout class="QGridLayout" name="fury_layoutFiles" >
          <item row="0" column="0" >
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="fury_iconFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" >
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -784,7 +784,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0" >
+           <property name="fileExtensions" >
             <stringlist>
              <string>_red.nxs</string>
             </stringlist>
@@ -792,7 +792,7 @@
           </widget>
          </item>
          <item row="2" column="0" >
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="fury_resFile" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" >
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -802,7 +802,7 @@
            <property name="multipleFiles" stdset="0" >
             <bool>false</bool>
            </property>
-           <property name="fileExtensions" stdset="0" >
+           <property name="fileExtensions" >
             <stringlist>
              <string>_res.nxs</string>
             </stringlist>
@@ -974,13 +974,23 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabFuryFit" >
+      <attribute name="title" >
+       <string>FuryFit</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabConvFit" >
+      <attribute name="title" >
+       <string>ConvFit</string>
+      </attribute>
+     </widget>
      <widget class="QWidget" name="tabAbsorption" >
       <attribute name="title" >
        <string>Absorption</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_10" >
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="abs_inputFile" >
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abs_inputFile" >
          <property name="findRunFiles" stdset="0" >
           <bool>false</bool>
          </property>
@@ -1343,7 +1353,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_14" >
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="dem_rawFiles" >
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
          <property name="label" stdset="0" >
           <string>Run Number</string>
          </property>

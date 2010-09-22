@@ -36,7 +36,8 @@ def loadData(rawfiles, outWS='RawFile', Sum=False):
 			workspace_list.append(mtd.getMatrixWorkspace(i))
 		return workspace_list, ws_name_list
 
-def getFirstMonFirstDet(workspace):
+def getFirstMonFirstDet(inWS):
+	workspace = mtd[inWS]
 	FirstDet = FirstMon = -1
 	nhist = workspace.getNumberHistograms()
 	for counter in range(0, nhist):
@@ -51,12 +52,13 @@ def getFirstMonFirstDet(workspace):
 			break
 	return FirstMon, FirstDet
 
-def timeRegime(inWS, inWS_n='Rawfile', outWS_n='MonWS', Smooth=True):
+def timeRegime(inWS='Rawfile', outWS_n='MonWS', Smooth=True):
+	workspace = mtd[inWS]
 	FirstMon, FirstDet = getFirstMonFirstDet(inWS)
 	LRef = getReferenceLength(inWS, FirstDet)
-	SpecMon = inWS.readX(FirstMon)[0]
-	SpecDet = inWS.readX(FirstDet)[0]
-	CropWorkspace(inWS_n, 'MonIn', StartWorkspaceIndex = FirstMon, EndWorkspaceIndex = FirstMon)
+	SpecMon = workspace.readX(FirstMon)[0]
+	SpecDet = workspace.readX(FirstDet)[0]
+	CropWorkspace(inWS, 'MonIn', StartWorkspaceIndex = FirstMon, EndWorkspaceIndex = FirstMon)
 	if ( SpecMon == SpecDet ):
 		alg = Unwrap('MonIn', outWS_n, LRef = LRef)
 		join = float(alg.getPropertyValue('JoinWavelength'))
@@ -69,13 +71,12 @@ def timeRegime(inWS, inWS_n='Rawfile', outWS_n='MonWS', Smooth=True):
 	return outWS_n
 
 def monitorEfficiency(inWS_n='MonWS', unt=1.276e-3, zz=0.025):
-	CreateSingleValuedWorkspace('moneff', unt) #value 1.276e-3 (unt)- what is it?
-	OneMinusExponentialCor(inWS_n, inWS_n, (8.3 * zz) ) #values 8.3 (?), 0.025 (zz) - what is it?
-	Divide(inWS_n,'moneff',inWS_n)
-	mantid.deleteWorkspace('moneff')
+	#value 1.276e-3 (unt)- what is it?
+	OneMinusExponentialCor(inWS_n, inWS_n, (8.3 * zz), (1.0/unt), Operation='Multiply' ) #values 8.3 (?), 0.025 (zz) - what is it?
 	return inWS_n
 
-def getReferenceLength(workspace, fdi):
+def getReferenceLength(inWS, fdi):
+	workspace = mtd[inWS]
 	instrument = workspace.getInstrument()
 	sample = instrument.getSample()
 	source = instrument.getSource()
@@ -153,16 +154,15 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', ref
 	mtd.sendLogMessage(">> Loading RAW Files: " + ", ".join(rawfiles))
 	workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
 	mtd.sendLogMessage(">> Raw files loaded into workspaces: " + ", ".join(ws_name))
-	for i in range(0, len(workspace)):
-		(direct, filename) = os.path.split(rawfiles[i])
-		runNo = workspace[i].getRun().getLogData("run_number").value()
+	for ws in ws_name:
+		runNo = mtd[ws].getRun().getLogData("run_number").value()
 		runNos.append(runNo)
-		name = filename[:3].lower() + runNo + '_' + analyser + reflection
-		MonitorWS_n = timeRegime(workspace[i], inWS_n = ws_name[i])
+		name = ws[:3].lower() + runNo + '_' + analyser + reflection
+		MonitorWS_n = timeRegime(inWS = ws)
 		MonWS_n = monitorEfficiency()
-		mtd.sendLogMessage(">> Monitor Workspace for " +ws_name[i]+" is " + MonWS_n)
-		CropWorkspace(ws_name[i], 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
-		mantid.deleteWorkspace(ws_name[i])
+		mtd.sendLogMessage(">> Monitor Workspace for " +ws+" is " + MonWS_n)
+		CropWorkspace(ws, 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
+		mantid.deleteWorkspace(ws)
 		if ( bgremove != [0, 0] ):
 			backgroundRemoval(bgremove[0], bgremove[1])
 		if ( calib != '' ):
@@ -281,9 +281,9 @@ def res(file, iconOpt, rebinParam, background, plotOpt = False, Res = True):
 	workspace_list, runNos = convert_to_energy(rawfiles, mapping, iconOpt['first'], iconOpt['last'], iconOpt['efixed'])
 	iconWS = workspace_list[0]
 	if Res:
+		name = root[:3].lower() + mantid.getMatrixWorkspace(workspace_list[0]).getRun().getLogData("run_number").value() + '_res'
 		Rebin(iconWS, iconWS, rebinParam)
 		FFTSmooth(iconWS,iconWS,0)
-		name = root[:3].lower() + mantid.getMatrixWorkspace(workspace_list[0]).getRun().getLogData("run_number").value() + '_res'
 		FlatBackground(iconWS, name, background[0], background[1])
 		mantid.deleteWorkspace(iconWS)
 		SaveNexusProcessed(name, name+'.nxs')

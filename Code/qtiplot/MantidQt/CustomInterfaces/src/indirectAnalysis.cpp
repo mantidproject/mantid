@@ -61,6 +61,8 @@ void indirectAnalysis::initLayout()
   // absorption
   connect(m_uiForm.abs_pbRun, SIGNAL(clicked()), this, SLOT(absorptionRun()));
   connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
+  // demon
+  connect(m_uiForm.dem_pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
 
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
@@ -498,6 +500,10 @@ bool indirectAnalysis::validateAbsorption()
 
   return valid;
 }
+bool indirectAnalysis::validateDemon()
+{
+  return m_uiForm.dem_rawFiles->isValid();
+}
 void indirectAnalysis::instrumentChanged(int index)
 {
   m_uiForm.set_cbAnalyser->blockSignals(true);
@@ -903,4 +909,31 @@ void indirectAnalysis::absorptionRun()
 void indirectAnalysis::absorptionShape(int index)
 {
   m_uiForm.abs_swDetails->setCurrentIndex(index);
+}
+void indirectAnalysis::demonRun()
+{
+  if ( validateDemon() )
+  {
+    QString pyInput = "from IndirectDataAnalysis import demon\n"
+      "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
+      "first = " +m_uiForm.set_leSpecMin->text()+"\n"
+      "last = " +m_uiForm.set_leSpecMax->text()+"\n";
+
+    if ( m_uiForm.dem_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    else pyInput += "verbose = False\n";
+
+    if ( m_uiForm.dem_ckPlot->isChecked() ) pyInput += "plot = True\n";
+    else pyInput += "plot = False\n";
+
+    if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
+    else pyInput += "save = False\n";
+
+    pyInput += "ws, rn = demon(files, first, last, Verbose=verbose, Plot=plot, Save=save)\n";
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+  else
+  {
+    showInformationBox("Input invalid.");
+  }
 }

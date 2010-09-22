@@ -28,7 +28,7 @@ def absorption(input, mode, sample, can, efixed, Save=False, Verbose=False, Plot
 	if Plot:
 		graph = plotSpectrum(outWS_n,0)
 
-def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, Plot=False, Save=True, Verbose=False):
+def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, Verbose=False, Plot=False, Save=True):
 	'''
 	DEMON function for unit conversion on diffraction backs of IRIS/OSIRIS.
 	MANDATORY PARAMS:
@@ -49,7 +49,7 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, Plo
 	(root, ext) = os.path.splitext(filename)
 	for i in range(0, len(ws_names)):
 		# Get Monitor WS
-		MonitorWS = timeRegime(ws_list[i], inWS_n=ws_names[i], Smooth=Smooth)
+		MonitorWS = timeRegime(inWS=ws_names[i], Smooth=Smooth)
 		monitorEfficiency(inWS_n=MonitorWS)
 		# Get Run no, crop file
 		runNo = ws_list[i].getRun().getLogData("run_number").value()
@@ -166,7 +166,7 @@ def plotFury(inWS_n, spec):
 	nbins = inWS.getNumberBins()
 	lastValueZero = False
 	for i in range(0, nbins):
-		if (inWS.readY(spec[0])[i] == inWS.readY(spec[0])[i]): # nan != nan, isnan function only introduced
+		if (inWS.readY(spec[0])[i] != inWS.readY(spec[0])[i]): # nan != nan, isnan function only introduced
 			if lastValueZero:									# in python 2.6 so can't use
 				xBoundary = inWS.readX(spec[0])[i]
 				break
