@@ -16,8 +16,9 @@ public:
   LoadPreNeXusMonitorsTest()
   {
     // Path to test input file assumes Test directory checked out from SVN
+	// You will need to make sure the bmon* files are in the same directory
     runinfoFile = Poco::Path(Poco::Path::current()).resolve(
-        "../../../../Test/Data/sns_event_prenexus/CNCS_7850_runinfo.xml").toString();
+        "../../../../Test/AutoTestData/CNCS_7850_runinfo.xml").toString();
   }
 
   void testInit()

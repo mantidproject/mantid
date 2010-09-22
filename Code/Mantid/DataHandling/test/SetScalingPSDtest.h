@@ -60,8 +60,8 @@ public:
   void testInitProperties()
   {
     // for testing we only use a small part of the full scaling file as it takes too long
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScalingFileName", "../../../../Test/Data/merlin_detector.sca"));
-    //alg.setPropertyValue("ScalingFileName", "../../../../Test/Data/merlin_detector_partial.sca");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScalingFileName", "../../../../Test/AutoTestData/merlin_detector.sca"));
+    //alg.setPropertyValue("ScalingFileName", "../../../../Test/AutoTestData/merlin_detector_partial.sca");
     alg.setPropertyValue("Workspace", "testWS");
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") )
