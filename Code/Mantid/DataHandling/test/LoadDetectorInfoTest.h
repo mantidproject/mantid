@@ -26,7 +26,7 @@ using namespace Mantid::DataObjects;
   
 // choose an instrument to test, we could test all instruments very time but I think a detailed test on the smallest workspace is enough as the other workspaces take a long time to process (Steve Williams)
                                     //MARI                               MAPS                         MERLIN
-static const std::string RAWFILE =  /**/"../../../../Test/Data/MAR11015.RAW" /*"../../../../Test/Data/MAP10241.RAW" "../../../../Test/Data/MER02257.RAW"/**/;
+static const std::string RAWFILE =  /**/"../../../../Test/AutoTestData/MAR11015.raw" /*"../../../../Test/AutoTestData/MAP10241.raw" "../../../../Test/AutoTestData/MER02257.raw"/**/;
 static const double TIMEOFF  =      /**/3.9                                 /*9.5                         5.3/**/   ;
 static const int MONITOR =          /**/2                                   /*41473                         69634/**/  ;
 static const int NUMRANDOM =        7;
