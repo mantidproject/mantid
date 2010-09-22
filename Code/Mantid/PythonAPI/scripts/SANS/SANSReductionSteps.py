@@ -514,32 +514,42 @@ class Mask(ReductionStep):
         self._ny_high = ny_high
         
         #the region to be masked expressed as xml that can be passed to MaskDetectorsInShape 
-        self.xml_string = ''
+        self._xml = {'shape_defs' : '', 'sum_shapes': '<algebra val="'}
         #these spectra will be masked by the algorithm MaskDetectors
         self._spec_list = ''
         
+    def add_xml_shape(self, id, complete_xml_element):
+        if not complete_xml_element.startswith('<') :
+            raise ValueError('Excepted xml string but found: ' + str(complete_xml_element))
+        self._xml[shape_defs] += complete_xml_element
+        self._xml[shape_defs] += str(id)+':'
+        
     def add_infinite_plane(self, id, plane_pt, normal_pt):
-        self.xml_string += '<infinite-plane id="' + str(id) + '">' + \
+        self.add_xml_shape(id, '<infinite-plane id="' + str(id) + '">' + \
             '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
             '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-            '</infinite-plane>\n'
+            '</infinite-plane>\n')
 
-    def add_infinite_cylinder(self, id, centre, radius, axis):
-        self.xml_string += '<infinite-cylinder id="' + str(id) + '">' + \
-        '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
-        '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-        '<radius val="' + str(radius) + '" />' + \
-        '</infinite-cylinder>\n'
+    def _infinite_cylinder(self, id, centre, radius, axis):
+        return '<infinite-cylinder id="' + str(id) + '">' + \
+            '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+            '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+            '<radius val="' + str(radius) + '" />' + \
+            '</infinite-cylinder>\n'
 
-    def add_cylinder(self, radius, xcentre, ycentre, algebra=''):
+    def add_cylinder(self, id, radius, xcentre, ycentre, algebra=''):
         '''Mask a cylinder on the input workspace.'''
-        add_infinite_cylinder('shape', [xcentre, ycentre, 0.0], radius, [0,0,1])
-        self.xml_string += '<algebra val="' + algebra + 'shape" />'
+        self.add_xml_shape(id,
+            self._infinite_cylinder(id, [xcentre, ycentre, 0.0], radius, [0,0,1]))
 
-    def add_outside_cylinder(self, radius, xcentre = '0.0', ycentre = '0.0'):
+    def add_outside_cylinder(self, id, radius, xcentre = '0.0', ycentre = '0.0'):
         '''Mask out the outside of a cylinder or specified radius'''
-        self.add_cylinder(radius, xcentre, ycentre, '#')
-    
+        id = str(id)
+        new_id = 'complement_reserved_'+id
+        xml_string = self._infinite_cylinder(new_id, [xcentre, ycentre, 0.0], radius, [0,0,1])
+        xml_string += '<'+id + ' val="#' + new_id+'" />'
+        self.add_xml_shape(id, xml_string)
+
     def ConvertToSpecList(self, maskstring):
         '''
             Convert a mask string to a spectra list
@@ -609,9 +619,11 @@ class Mask(ReductionStep):
         self._spec_list = speclist.rstrip(',')
 
     def execute(self, reducer, workspace):
-
-        if self.xml_string != '':
-            MaskDetectorsInShape(workspace, self.xml_string)
+        if self._xml['shape_defs'] != '':
+            if self._xml['sum_shapes'].endswith(':'):
+                self._xml['sum_shapes'] = self._xml['sum_shapes'].rpartition(':')[0]
+            xml_string = self._xml['shape_defs'] + self._xml['sum_shapes']
+            MaskDetectorsInShape(workspace, xml_string)
         # Get a list of detector pixels to mask
         masked_pixels = reducer.instrument.get_masked_pixels(self._nx_low,
                                                              self._nx_high,
