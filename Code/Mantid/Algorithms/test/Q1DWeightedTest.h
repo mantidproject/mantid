@@ -39,7 +39,7 @@ public:
   {
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/SANS2D/BioSANS_exp61_scan0004_0001.xml");
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/BioSANS_exp61_scan0004_0001.xml");
     const std::string inputWS("wav");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.execute();

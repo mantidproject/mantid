@@ -158,7 +158,7 @@ public:
     Mantid::Algorithms::FindCenterOfMassPosition center;
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/SANS2D/BioSANS_empty_cell.xml");
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/BioSANS_empty_cell.xml");
     const std::string inputWS("wav");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.execute();

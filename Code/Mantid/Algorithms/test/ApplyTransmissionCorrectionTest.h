@@ -19,7 +19,7 @@ public:
   {
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/SANS2D/BioSANS_test_data.xml");
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/BioSANS_test_data.xml");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.execute();
 
