@@ -324,7 +324,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile = "../../../../Test/Nexus/MUSR00015190.nxs";
+    std::string inputFile = "../../../../Test/AutoTestData/MUSR00015190.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);
 
     std::string outputSpace="outer";
