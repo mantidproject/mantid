@@ -4,17 +4,14 @@ from PyQt4 import QtGui, QtCore, uic
 from instruments.instrument_factory import instrument_factory
 from reduction.hfir_reduction import ReductionScripter
 from application_settings import GeneralSettings
+import qrc_resources
 
 class ReductionGUI(QtGui.QMainWindow):
-    def __init__(self, instrument=None, ui_path="ui"):
+    def __init__(self, instrument=None):
         QtGui.QMainWindow.__init__(self)
         
         # Application settings
         settings = QtCore.QSettings()
-        
-        # Directory where to find the .ui files
-        #TODO: put this in resource file
-        self.ui_path = ui_path
         
         # Name handle for the instrument
         if instrument is None:
@@ -67,7 +64,6 @@ class ReductionGUI(QtGui.QMainWindow):
         self._interface = instrument_factory(self._instrument, settings=self.general_settings)
         
         if self._interface is not None:
-            self._interface.ui_path = self.ui_path
             self.tabWidget.clear()
             
             tab_list = self._interface.get_tabs()
@@ -143,8 +139,10 @@ class ReductionGUI(QtGui.QMainWindow):
     def _change_instrument(self):
         """
             Invoke an instrument selection dialog
-        """
-        dialog = uic.loadUi(os.path.join(self.ui_path,"instrument_dialog.ui"))
+        """ 
+        f = QtCore.QFile(":/instrument_dialog.ui")
+        f.open(QtCore.QIODevice.ReadOnly)
+        dialog = uic.loadUi(f)
         dialog.exec_()
         if dialog.result()==1:
             self._instrument = dialog.instr_combo.currentText()
@@ -306,14 +304,17 @@ class ReductionGUI(QtGui.QMainWindow):
             self.statusBar().showMessage("Saved as %s" % fname)
 
         
-def start(ui_path="ui", argv=[]):
+def start(argv=[]):
     app = QtGui.QApplication(argv)
     app.setOrganizationName("Mantid")
     app.setOrganizationDomain("mantidproject.org")
     app.setApplicationName("Mantid Reduction")
     
-    reducer = ReductionGUI(ui_path=ui_path)
-    uic.loadUi(os.path.join(ui_path,"reduction_main.ui"), reducer)
+    reducer = ReductionGUI()
+    
+    f = QtCore.QFile(":/reduction_main.ui")
+    f.open(QtCore.QIODevice.ReadOnly)    
+    uic.loadUi(f, reducer)
     reducer.setup_layout()
     reducer.show()
     sys.exit(app.exec_())   

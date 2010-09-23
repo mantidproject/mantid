@@ -9,13 +9,15 @@ class SANSInstrumentWidget(QtGui.QWidget):
         Widget that present instrument details to the user
     """
     
-    def __init__(self, parent=None, state=None, ui_path='ui', settings=None):      
+    def __init__(self, parent=None, state=None, settings=None):      
         QtGui.QWidget.__init__(self, parent)
         
         self._layout = QtGui.QHBoxLayout()
 
         self._summary = QtGui.QFrame(self)
-        uic.loadUi(os.path.join(ui_path, "hfir_summary.ui"), self._summary)
+        f = QtCore.QFile(":/hfir_summary.ui")
+        f.open(QtCore.QIODevice.ReadOnly)
+        uic.loadUi(f, self._summary)
         self.initialize_content()
         self._layout.addWidget(self._summary)
 

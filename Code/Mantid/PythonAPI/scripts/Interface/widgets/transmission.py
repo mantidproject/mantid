@@ -11,10 +11,12 @@ class TransmissionWidget(BaseWidget):
         Widget that presents the transmission options to the user
     """
     
-    def __init__(self, parent=None, state=None, ui_path='ui', settings=None):
-        BaseWidget.__init__(self, parent=parent, state=state, ui_path=ui_path, settings=settings)
+    def __init__(self, parent=None, state=None, settings=None):
+        BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
 
-        uic.loadUi(os.path.join(ui_path, "hfir_transmission.ui"), self._content)
+        f = QtCore.QFile(":/hfir_transmission.ui")
+        f.open(QtCore.QIODevice.ReadOnly)
+        uic.loadUi(f, self._content)
         self.initialize_content()
         
         if state is not None:
@@ -22,7 +24,6 @@ class TransmissionWidget(BaseWidget):
         else:
             self.set_state(Transmission())
             
-        self._ui_path = ui_path
         self._method_box = None
 
     
@@ -38,9 +39,9 @@ class TransmissionWidget(BaseWidget):
         # Connections
         self.connect(self._content.calculate_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
         self.connect(self._content.direct_beam_chk, QtCore.SIGNAL("clicked(bool)"), 
-                     functools.partial(self._method_clicked, "trans_direct_beam.ui"))
+                     functools.partial(self._method_clicked, ":/trans_direct_beam.ui"))
         self.connect(self._content.beam_spreader_chk, QtCore.SIGNAL("clicked(bool)"), 
-                     functools.partial(self._method_clicked, "trans_spreader.ui"))
+                     functools.partial(self._method_clicked, ":/trans_spreader.ui"))
         
         
     def _method_clicked(self, ui_file):
@@ -51,7 +52,9 @@ class TransmissionWidget(BaseWidget):
                 item.widget().deleteLater()
             
         self._method_box = QtGui.QGroupBox(self)
-        uic.loadUi(os.path.join(self._ui_path, ui_file), self._method_box)
+        f = QtCore.QFile(ui_file)
+        f.open(QtCore.QIODevice.ReadOnly)
+        uic.loadUi(f, self._method_box)
         self._content.widget_placeholder.addWidget(self._method_box)
                 
         

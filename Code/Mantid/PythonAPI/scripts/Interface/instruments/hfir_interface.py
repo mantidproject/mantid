@@ -26,9 +26,6 @@ class HFIRInterface(object):
         # Sample transmission
         self._transmission_widget = None
         
-        # Data file directory
-        self.data_directory = '.'
-        
         # General settings
         self._settings = settings
         
@@ -86,19 +83,13 @@ class HFIRInterface(object):
             of the interface.
         """
         # Instrument description
-        self._instrument_widget = SANSInstrumentWidget(state=self.scripter.instrument,
-                                                       ui_path = self.ui_path,
-                                                       settings = self._settings)
+        self._instrument_widget = SANSInstrumentWidget(settings = self._settings)
         
         # Beam finder
-        self._beam_finder_widget = BeamFinderWidget(state=self.scripter.beam_finder,
-                                                    ui_path = self.ui_path,
-                                                    settings = self._settings)
+        self._beam_finder_widget = BeamFinderWidget(settings = self._settings)
         
         # Transmission
-        self._transmission_widget = TransmissionWidget(state=self.scripter.transmission,
-                                                       ui_path = self.ui_path,
-                                                       settings = self._settings)
+        self._transmission_widget = TransmissionWidget(settings = self._settings)
         
         return [["Instrument", self._instrument_widget],
                 ["Beam Center", self._beam_finder_widget],

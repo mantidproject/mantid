@@ -77,11 +77,13 @@ class BeamFinderFrame(QtGui.QFrame):
         self.beam_radius_edit.setEnabled(False)
             
 class BeamFinderWidget(QtGui.QWidget):    
-    def __init__(self, parent=None, state=None, ui_path='ui', settings=None):
+    def __init__(self, parent=None, state=None, settings=None):
         QtGui.QWidget.__init__(self, parent)
         self._layout = QtGui.QHBoxLayout()
         self._content = BeamFinderFrame(self)
-        uic.loadUi(os.path.join(ui_path, "hfir_beam_finder.ui"), self._content)
+        f = QtCore.QFile(":/hfir_beam_finder.ui")
+        f.open(QtCore.QIODevice.ReadOnly)
+        uic.loadUi(f, self._content)
         self.initialize_content()
         self._layout.addWidget(self._content)
         self.setLayout(self._layout)

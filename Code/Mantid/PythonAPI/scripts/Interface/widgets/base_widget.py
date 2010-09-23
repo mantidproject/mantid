@@ -7,7 +7,7 @@ class BaseWidget(QtGui.QWidget):
         Base widget for reduction UI
     """
     
-    def __init__(self, parent=None, state=None, ui_path='ui', settings=None):
+    def __init__(self, parent=None, state=None, settings=None):
         QtGui.QWidget.__init__(self, parent)
         
         self._layout = QtGui.QHBoxLayout()
