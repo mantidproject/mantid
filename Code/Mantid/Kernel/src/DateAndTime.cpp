@@ -106,7 +106,13 @@ time_t utc_mktime(struct tm *utctime)
  */
 double durationInSeconds(time_duration duration)
 {
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
   return static_cast<double>(duration.total_nanoseconds()) / 1e9;
+#else
+  // Microsecond resolution
+  return static_cast<double>(duration.total_microseconds()) / 1e6;
+#endif
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -115,7 +121,19 @@ double durationInSeconds(time_duration duration)
  */
 time_duration duration_from_seconds(double duration)
 {
-  return boost::posix_time::nanoseconds( duration * 1e9 );
+
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  // Nanosecond resolution
+  long fracsecs = long ( 1e9 * fmod(duration, 1.0) );
+  long secs = static_cast<long>(  duration  );
+  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+#else
+  // Microsecond resolution
+  long fracsecs = long ( 1e6 * fmod(duration, 1.0) );
+  long secs = static_cast<long>(  duration  );
+  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+#endif
+
 }
 
 //-----------------------------------------------------------------------------------------------

@@ -29,7 +29,7 @@ class DateAndTimeTest: public CxxTest::TestSuite
 {
 public:
 
-  void xtestCurrentTime()
+  void testCurrentTime()
   {
     //Use the c-method to get current (local) time
     std::time_t current_t = DateAndTime::to_time_t( DateAndTime::get_current_time() );
@@ -39,7 +39,7 @@ public:
     TS_ASSERT( current->tm_year >= 110 ); //Wrote this in 2010, so the
   }
 
-  void xtest_conversions()
+  void test_conversions()
   {
     Mantid::Kernel::dateAndTime execTime = DateAndTime::get_current_time();
     std::time_t execTime_t = DateAndTime::to_time_t(execTime);
@@ -49,7 +49,7 @@ public:
     TS_ASSERT_EQUALS( DateAndTime::to_time_t(execTime),  DateAndTime::to_time_t( DateAndTime::from_time_t(execTime_t)) );
   }
 
-  void xtest_timezones()
+  void test_timezones()
   {
     int hour = 12;
 
@@ -123,6 +123,37 @@ public:
 //    std::cout << DateAndTime::to_simple_string(get_time_from_pulse_time(pt)) << "\n";
   }
 
+
+  void testDurations()
+  {
+    time_duration onesec = time_duration(0,0,1,0);
+    TS_ASSERT_EQUALS( DateAndTime::durationInSeconds(onesec), 1.0 );
+
+    onesec = DateAndTime::duration_from_seconds(1.0);
+    TS_ASSERT_EQUALS( DateAndTime::durationInSeconds(onesec), 1.0 );
+
+    time_duration td = DateAndTime::duration_from_seconds(1e-6);
+    TS_ASSERT_DELTA( DateAndTime::durationInSeconds(td), 1e-6, 1e-9 );
+
+    //Now difference between dates
+    dateAndTime dt = DateAndTime::GPS_EPOCH;
+    dateAndTime dt2 = dt + td;
+    TS_ASSERT_DELTA( DateAndTime::durationInSeconds(dt2-dt), 1e-6, 1e-9 );
+
+    td = DateAndTime::duration_from_seconds(12.345);
+    TS_ASSERT_DELTA( DateAndTime::durationInSeconds(td), 12.345, 1e-9 );
+
+
+    dt2 = dt + DateAndTime::duration_from_seconds(123.5e-3);
+    TS_ASSERT_DELTA( DateAndTime::durationInSeconds(dt2-dt), 123.5e-3, 1e-9 );
+
+    dt2 = dt + DateAndTime::duration_from_seconds(15.2345);
+    TS_ASSERT_DELTA( DateAndTime::durationInSeconds(dt2-dt), 15.2345, 1e-9 );
+
+    dt2 = dt + DateAndTime::duration_from_seconds(152.345);
+    TS_ASSERT_DELTA( DateAndTime::durationInSeconds(dt2-dt), 152.345, 1e-9 );
+
+  }
 
 
 

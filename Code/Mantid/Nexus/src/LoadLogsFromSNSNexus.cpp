@@ -194,7 +194,6 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
     std::string start;
     file.getAttr("start", start);
 
-    //std::cout << "start is " << start << endl;
     //Convert to date and time
     Kernel::dateAndTime start_time = Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(start);
 
@@ -229,12 +228,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
       WS->mutableRun().addLogData( tsp );
     }
 
-    //TODO: Units!
-
-
-    //cout << entry_name << ":" << values[0] << "\n";
   }
-
 
   file.closeGroup();
 }

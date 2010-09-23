@@ -398,6 +398,8 @@ public:
     for (size_t i=0; i < num; i++)
     {
       Kernel::dateAndTime time = start_time + Kernel::DateAndTime::duration_from_seconds( time_sec[i] );
+      //Kernel::dateAndTime time = start_time + Kernel::DateAndTime::duration_from_seconds( i );
+      //std::cout << i << ":" << Kernel::DateAndTime::to_simple_string(time) << "\n";
       this->addValue(time, new_values[i]);
     }
     this->countSize();
