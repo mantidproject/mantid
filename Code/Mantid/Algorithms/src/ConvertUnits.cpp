@@ -284,33 +284,41 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
-
+  const bool needEfixed = ( outputUnit->unitID().find("DeltaE") != std::string::npos );
   double efixedProp = getProperty("Efixed");
-  if ( emode == 1 )
+  if ( needEfixed )
   {
-    //... direct efixed gather
-    if ( efixedProp == EMPTY_DBL() )
+    if ( emode == 1 )
     {
-      // try and get the value from the run parameters
-      const API::Run & run = outputWS->run();
-      if ( run.hasProperty("Ei") )
+      //... direct efixed gather
+      if ( efixedProp == EMPTY_DBL() )
       {
-        Kernel::Property* prop = run.getProperty("Ei");
-        efixedProp = boost::lexical_cast<double,std::string>(prop->value());
+        // try and get the value from the run parameters
+        const API::Run & run = outputWS->run();
+        if ( run.hasProperty("Ei") )
+        {
+          Kernel::Property* prop = run.getProperty("Ei");
+          efixedProp = boost::lexical_cast<double,std::string>(prop->value());
+        }
+        else
+        {
+          if ( needEfixed ) throw std::invalid_argument("Could not retrieve incident energy from run object");
+          else efixedProp = 0.0;
+        }
       }
       else
       {
-        throw std::invalid_argument("Could not retrieve incident energy from run object");
+        // set the Ei value in the run parameters
+        API::Run & run = outputWS->mutableRun();
+        run.addProperty<double>("Ei", efixedProp);
       }
     }
-    else
+    else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
     {
-      // set the Ei value in the run parameters
-      API::Run & run = outputWS->mutableRun();
-      run.addProperty<double>("Ei", efixedProp);
+      efixedProp = 0.0;
     }
   }
-  else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
+  else
   {
     efixedProp = 0.0;
   }
@@ -324,7 +332,8 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
 
-    try {
+    try
+    {
       // Now get the detector object for this histogram
       IDetector_sptr det = outputWS->getDetector(i);
       // Get the sample-detector distance for this detector (in metres)
@@ -337,14 +346,16 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode==2)
         {
-          try {
+          try
+          {
             Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
             if (par)
             {
               efixed = par->value<double>();
               g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
             }
-          } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
+          } 
+          catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
         }
       }
       else  // If this is a monitor then make l2 = source-detector distance, l1=0 and twoTheta=0
@@ -353,7 +364,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
         l2 = l2-l1;
         twoTheta = 0.0;
         // Energy transfer is meaningless for a monitor, so set l2 to 0.
-        if (outputUnit->unitID().find("Delta")==0)
+        if (needEfixed)
         {
           l2 = 0.0;
           efixed = DBL_MIN;
@@ -376,7 +387,9 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
       if ((!x.empty()) && (*(x.begin()) > *(x.end()-1)))
           outputWS->getEventList(i).reverse();
 
-    } catch (Exception::NotFoundError&) {
+    }
+    catch (Exception::NotFoundError&)
+    {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       outputWS->getEventList(i).clear();
@@ -501,6 +514,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
+  const bool needEfixed = ( outputUnit->unitID().find("DeltaE") != std::string::npos );
   double efixedProp = getProperty("Efixed");
   if ( emode == 1 )
   {
@@ -516,7 +530,14 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
       }
       else
       {
+        if ( needEfixed )
+        {
         throw std::invalid_argument("Could not retrieve incident energy from run object");
+        }
+        else
+        {
+          efixedProp = 0.0;
+        }
       }
     }
     else
@@ -573,7 +594,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         l2 = l2-l1;
         twoTheta = 0.0;
         // Energy transfer is meaningless for a monitor, so set l2 to 0.
-        if (outputUnit->unitID().find("Delta")==0)
+        if (needEfixed)
         {
           l2 = 0.0;
           efixed = DBL_MIN;
