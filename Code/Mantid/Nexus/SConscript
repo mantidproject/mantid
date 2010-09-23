@@ -11,7 +11,7 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 #Import environment
 Import('env')
 myenv = env.Clone()
-myenv.Append(CPPDEFINES=[('IN_MANTID_NEXUS',1),'NOMINMAX'])
+myenv.Append(CPPDEFINES=[('IN_MANTID_NEXUS',1),'IN_NEXUS_CPP_LIBRARY','NOMINMAX'])
 
 
 if platform.system() == 'Linux':
