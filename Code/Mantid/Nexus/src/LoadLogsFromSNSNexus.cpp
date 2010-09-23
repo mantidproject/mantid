@@ -85,7 +85,7 @@ void LoadLogsFromSNSNexus::exec()
   {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
-    if (entry_class == "NXlog")
+    if ((entry_class == "NXlog") ||(entry_class == "NXpositioner"))
     {
       loadSampleLog(file, entry_name, entry_class);
     }

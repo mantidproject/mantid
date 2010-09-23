@@ -59,6 +59,12 @@ public:
         TS_ASSERT_DELTA( val, 10914.857421875, 1e-6);
         TS_ASSERT_EQUALS(prop->units(), "Phase,uS");
 
+        //NXPositioner
+        prop = run.getLogData("chi");
+        val = boost::lexical_cast<double>(prop->value());
+        TS_ASSERT_DELTA( val, 45.0, 1e-6);
+        TS_ASSERT_EQUALS(prop->units(), "degree");
+
         TimeSeriesProperty<double> * tsp;
 
         prop = run.getLogData("Phase1");
