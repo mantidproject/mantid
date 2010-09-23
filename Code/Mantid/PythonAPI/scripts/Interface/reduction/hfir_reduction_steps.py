@@ -11,6 +11,14 @@ class Transmission(BaseScriptElement):
     def __str__(self):
         return ""
     
+class Background(BaseScriptElement):
+    def __str__(self):
+        return ""
+    
+class DataSets(BaseScriptElement):
+    def __str__(self):
+        return ""
+    
 class InstrumentDescription(BaseScriptElement):
     instrument_name = "BIOSANS"
     nx_pixels = 192

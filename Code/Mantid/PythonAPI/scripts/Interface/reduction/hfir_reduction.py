@@ -11,9 +11,6 @@ class BaseScriptElement(object):
         Base class for each script element (panel on the UI).
         Contains only data and is UI implementation agnostic.
     """
-    def __str__(self):
-        return NotImplemented
-    
     def apply(self):
         """
             Method called to apply the reduction script element

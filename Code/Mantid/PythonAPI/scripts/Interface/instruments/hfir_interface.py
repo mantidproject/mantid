@@ -8,6 +8,8 @@ from PyQt4 import QtGui, uic, QtCore
 from widgets.beam_finder import BeamFinderWidget
 from widgets.instrument import SANSInstrumentWidget
 from widgets.transmission import TransmissionWidget
+from widgets.background import BackgroundWidget
+from widgets.data_sets import DataWidget
 from reduction.hfir_reduction import ReductionScripter
 
 
@@ -25,6 +27,10 @@ class HFIRInterface(object):
         self._beam_finder_widget = None
         # Sample transmission
         self._transmission_widget = None
+        # Background
+        self._background_widget = None
+        # Data sets
+        self._data_widget = None
         
         # General settings
         self._settings = settings
@@ -41,6 +47,8 @@ class HFIRInterface(object):
         self._beam_finder_widget.set_state(self.scripter.beam_finder)
         self._instrument_widget.set_state(self.scripter.instrument)
         self._transmission_widget.set_state(self.scripter.transmission)
+        self._background_widget.set_state(self.scripter.background)
+        self._data_widget.set_state(self.scripter.data_sets)
         
     def save_file(self, file_name):
         """
@@ -67,6 +75,8 @@ class HFIRInterface(object):
         self.scripter.instrument = self._instrument_widget.get_state()
         self.scripter.beam_finder = self._beam_finder_widget.get_state()
         self.scripter.transmission = self._transmission_widget.get_state()
+        self.scripter.background = self._background_widget.get_state()
+        self.scripter.data_sets = self._data_widget.get_state()
         
     def reduce(self):
         """
@@ -91,7 +101,15 @@ class HFIRInterface(object):
         # Transmission
         self._transmission_widget = TransmissionWidget(settings = self._settings)
         
+        # Background
+        self._background_widget = BackgroundWidget(settings = self._settings)
+        
+        # Data sets
+        self._data_widget = DataWidget(settings = self._settings)
+        
         return [["Instrument", self._instrument_widget],
                 ["Beam Center", self._beam_finder_widget],
-                ["Transmission", self._transmission_widget]]
+                ["Transmission", self._transmission_widget],
+                ["Background", self._background_widget],
+                ["Data Sets", self._data_widget]]
         
