@@ -11,7 +11,7 @@
 
 #ifdef _WIN32
 
-#ifdef _MSC_VER 
+#ifndef _MSC_VER 
 #  define NXDLL_EXPORT
 #else
 #  if IN_NEXUS_CPP_LIBRARY
