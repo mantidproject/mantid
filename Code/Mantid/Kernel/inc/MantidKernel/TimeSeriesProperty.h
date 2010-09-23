@@ -22,6 +22,30 @@ namespace Mantid
 namespace Kernel
 {
 
+//================================================================================================
+/** Struct holding some useful statistics for a TimeSeriesProperty
+ *
+ */
+struct TimeSeriesPropertyStatistics
+{
+  /// Minimum value
+  double minimum;
+  /// Maximum value
+  double maximum;
+  /// Mean value
+  double mean;
+  /// Median value
+  double median;
+  /// standard_deviation of the values
+  double standard_deviation;
+  /// Duration in seconds
+  double duration;
+};
+
+
+
+
+//================================================================================================
 /** 
  A specialised Property class for holding a series of time-value pairs.
  Required by the LoadLog class.
@@ -806,6 +830,16 @@ public:
   /// static reference to the logger class
   //static Kernel::Logger& g_log;
 };
+
+
+
+//================================================================================================
+TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<double> * tsp);
+
+//TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<int> * tsp);
+//template<typename TYPE>
+//TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<TYPE> * tsp);
+
 
 } // namespace Kernel
 } // namespace Mantid

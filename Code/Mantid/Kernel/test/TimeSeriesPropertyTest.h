@@ -275,6 +275,33 @@ public:
 
   }
 
+  //----------------------------------------------------------------------------
+  void test_statistics()
+  {
+    TimeSeriesProperty<double> * log  = new TimeSeriesProperty<double>("MydoubleLog");
+    TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:40",5) );
+    TS_ASSERT( log->addValue("2007-11-30T16:17:50",6) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:00",7) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:10",8) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:20",9) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:30",10) );
+    TS_ASSERT( log->addValue("2007-11-30T16:18:40",11) );
+    TS_ASSERT_EQUALS( log->realSize(), 11);
+
+    TimeSeriesPropertyStatistics stats = getTimeSeriesPropertyStatistics( log );
+
+    TS_ASSERT_DELTA( stats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA( stats.maximum, 11.0, 1e-3);
+    TS_ASSERT_DELTA( stats.median, 6.0, 1e-3);
+    TS_ASSERT_DELTA( stats.mean, 6.0, 1e-3);
+    TS_ASSERT_DELTA( stats.duration, 100.0, 1e-3);
+    TS_ASSERT_DELTA( stats.standard_deviation, 3.1622, 1e-3);
+
+  }
 
 private:
   TimeSeriesProperty<int> *iProp;

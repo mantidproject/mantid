@@ -31,7 +31,7 @@ echo "Compiling the test executable..."
 mantid_libpath=../../debug
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
     -I../../DataObjects/inc -I../../DataHandling/inc -I ../inc -I ../../../Third_Party/src/cxxtest \
-    -L$mantid_libpath -lMantidNexus -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling -lNeXusCPP
+    -L$mantid_libpath -lMantidNexus -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling
 echo
 
 echo "Running the tests..."
