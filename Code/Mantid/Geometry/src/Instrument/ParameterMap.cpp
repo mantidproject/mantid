@@ -304,58 +304,6 @@ namespace Mantid
         addQuat(comp, "rot", quat);
     }
 
-    /** Create or adjust "rot" parameter for a component
-    * Assumed that name either equals "rotx", "roty" or "rotz" otherwise this method will not add/modify "rot" parameter
-    @param comp Component
-    @param name Parameter name
-    @param deg Parameter value in degrees
-    */
-    /*
-    void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
-    {
-      Parameter_sptr param = get(comp,"rot");
-      Quat quat;
-      if (param)
-      {
-        // so "rot" already defined
-        quat = param->value<Quat>();
-      }
-      else
-      {
-        // so "rot" is not defined - therefore get quarternion from component
-        quat = comp->getRelativeRot();
-      }
-
-      // adjust rotation
-
-      if ( name.compare("rotx")==0 )
-      {
-        quat = Quat(deg,V3D(1,0,0))*quat;
-      }
-      else if ( name.compare("roty")==0 )
-      {
-        quat = Quat(deg,V3D(0,1,0))*quat;
-      }
-      else if ( name.compare("rotz")==0 )
-      {
-        quat = Quat(deg,V3D(0,0,1))*quat;
-      }
-      else
-      {
-        g_log.warning() << "addRotationParam() called with unrecognised coordinate symbol: " << name;
-        return;
-      }
-
-      //clear the position cache
-      clearCache();
-
-      // finally add or update "pos" parameter
-      if (param)
-        param->set(quat);
-      else
-        addQuat(comp, "rot", quat);
-    }*/
-
 
     /** @param str The error message
     */

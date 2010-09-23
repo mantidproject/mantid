@@ -31,9 +31,9 @@ void MuonAsymmetryCalc::init()
   BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int> ();
   zeroOrGreater->setLower(1);
   declareProperty(new ArrayProperty<int> ("ForwardSpectra"),
-      "The detector number of the forward group (default 0)");
+      "The spectra numbers of the forward group");
   declareProperty(new ArrayProperty<int> ("BackwardSpectra"),
-      "The detector number of the backward group (default 1)");
+      "The spectra numbers of the backward group");
   declareProperty("Alpha", 1.0, "The balance parameter (default 1)", Direction::Input);
 }
 

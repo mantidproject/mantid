@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_MUONASYMMETRYCALC_H_
-#define MANTID_ALGORITHM_MUONASYMMETRYCALC_H_
+#ifndef MANTID_ALGORITHM_MUONALPHACALC_H_
+#define MANTID_ALGORITHM_MUONALPHACALC_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,24 +10,21 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /**Takes a muon workspace as input and sums all the spectra into two spectra which represent
-	  the two detector groupings. The resultant spectra are used to calculate (F-aB) / (F+aB) the results of which
-	  are stored in the output workspace.
+    /**Muon algorithm for calculating the detector efficiency between two groups of detectors.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     <LI> ForwardSpectra - The detector number of the first group </LI>
     <LI> BackwardSpectra - The detector number of the second group </LI>
-    <LI> Alpha - ?? </LI>
+    <LI> Alpha (output) </LI>
     </UL>
 
 
-    @author
-    @date 11/07/2008
+    @author Anders Markvardsen, ISIS, RAL
+    @date 21/09/2010
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -47,15 +44,15 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MuonAsymmetryCalc : public API::Algorithm
+    class DLLExport MuonAlphaCalc : public API::Algorithm
     {
     public:
       /// Default constructor
-      MuonAsymmetryCalc() : API::Algorithm() {};
+      MuonAlphaCalc() : API::Algorithm() {};
       /// Destructor
-      virtual ~MuonAsymmetryCalc() {};
+      virtual ~MuonAlphaCalc() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "AsymmetryCalc";}
+      virtual const std::string name() const { return "AlphaCalc";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
@@ -71,4 +68,4 @@ namespace Mantid
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_MUONASYMMETRYCALC_H_*/
+#endif /*MANTID_ALGORITHM_MUONALPHACALC_H_*/

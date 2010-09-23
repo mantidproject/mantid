@@ -223,6 +223,7 @@
     <ClCompile Include="src\MultipleScatteringAbsorption.cpp" />
     <ClCompile Include="src\Multiply.cpp" />
     <ClCompile Include="src\MultiplyRange.cpp" />
+    <ClCompile Include="src\MuonAlphaCalc.cpp" />
     <ClCompile Include="src\MuonAsymmetryCalc.cpp" />
     <ClCompile Include="src\MuonRemoveExpDecay.cpp" />
     <ClCompile Include="src\NormaliseByCurrent.cpp" />
@@ -276,6 +277,7 @@
     <ClInclude Include="inc\MantidAlgorithms\FilterByTime.h" />
     <ClInclude Include="inc\MantidAlgorithms\GhostCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />
+    <ClInclude Include="inc\MantidAlgorithms\MuonAlphaCalc.h" />
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
