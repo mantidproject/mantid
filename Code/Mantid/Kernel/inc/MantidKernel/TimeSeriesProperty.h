@@ -834,7 +834,7 @@ public:
 
 
 //================================================================================================
-TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<double> * tsp);
+DLLExport TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<double> * tsp);
 
 //TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<int> * tsp);
 //template<typename TYPE>
