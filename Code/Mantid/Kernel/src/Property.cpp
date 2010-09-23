@@ -17,7 +17,8 @@ Property::Property( const std::string &name, const std::type_info &type, const u
   m_name( name ),
   m_documentation( "" ),
   m_typeinfo( &type ),
-  m_direction( direction )
+  m_direction( direction ),
+  m_units("")
 {
     // Make sure a random int hasn't been passed in for the direction
     // Property & PropertyWithValue destructors will be called in this case
@@ -29,7 +30,8 @@ Property::Property( const Property& right ) :
   m_name( right.m_name ),
   m_documentation( right.m_documentation ),
   m_typeinfo( right.m_typeinfo ),
-  m_direction( right.m_direction )
+  m_direction( right.m_direction ),
+  m_units( right.m_units)
 {
 }
 
@@ -122,6 +124,7 @@ const PropertyHistory Property::createHistory() const
   return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),this->direction());
 }
 
+//-------------------------------------------------------------------------------------------------
 /** Return the size of this property.
  * Single-Value properties return 1.
  * TimeSeriesProperties return the # of entries.
@@ -130,6 +133,28 @@ int Property::size() const
 {
   return 1;
 }
+
+//-------------------------------------------------------------------------------------------------
+/* Returns the units of the property, if any, as a string.
+ * Units are optional, and will return empty string if they have
+ * not been set before.
+ */
+std::string Property::units() const
+{
+  return m_units;
+}
+
+//-------------------------------------------------------------------------------------------------
+/* Sets the units of the property, as a string. This is optional.
+ *
+ * @param unit string to set for the units.
+ */
+void Property::setUnits(std::string unit)
+{
+  m_units = std::string(unit); //force the copy constructor
+}
+
+
 
 
 //-------------------------------------------------------------------------------------------------

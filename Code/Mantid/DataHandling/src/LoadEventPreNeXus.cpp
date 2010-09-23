@@ -771,7 +771,7 @@ void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & wo
 
 //-----------------------------------------------------------------------------
 /**
- * Add a sample environment log for the proton chage (charge of the pulse in picoColoumbs)
+ * Add a sample environment log for the proton chage (charge of the pulse in picoCoulombs)
  * and set the scalar value (total proton charge, microAmps*hours, on the sample)
  *
  * @param workspace Event workspace to set the proton charge on
@@ -785,6 +785,7 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
 
   //Add the proton charge entries.
   TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("ProtonCharge");
+  log->setUnits("picoCoulombs");
   size_t num = this->proton_charge.size();
   for (size_t i = 0; i < num; i++)
   {

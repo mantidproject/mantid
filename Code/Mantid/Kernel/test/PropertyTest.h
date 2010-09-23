@@ -94,6 +94,16 @@ public:
     TS_ASSERT_EQUALS( history.direction(), 0 );
   }
 
+  void testUnits()
+  {
+    Property * p2;
+    p2 = new PropertyHelper;
+    //No unit at first
+    TS_ASSERT_EQUALS(p2->units(), "");
+    p2->setUnits("furlongs/fortnight");
+    TS_ASSERT_EQUALS(p2->units(), "furlongs/fortnight");
+  }
+
 private:
   Property *p;
 

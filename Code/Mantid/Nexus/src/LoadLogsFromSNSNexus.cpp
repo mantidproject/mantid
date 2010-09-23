@@ -128,9 +128,23 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
   bool isInt = false;
 
   file.openData("value");
-  info = file.getInfo();
+
+  //Get the units of the property
+  std::string units("");
+  try
+  {
+    file.getAttr("units", units);
+    //std::cout << entry_name << " has units " << units << "." << std::endl;
+  }
+  catch (NeXusAPI::Exception ex)
+  {
+    //Ignore missing units field.
+    //std::cout << entry_name << " has no units " << std::endl;
+    units = "";
+  }
 
   //If there is more than one entry, it is a timeseries
+  info = file.getInfo();
   isTimeSeries = (info.dims[0] > 1);
 
   //Get the data (convert types if necessary)
@@ -140,9 +154,8 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
     file.getDataCoerce(values_int);
     if (values_int.size() == 1)
     {
-      WS->mutableRun().addProperty(entry_name, values_int[0]);
+      WS->mutableRun().addProperty(entry_name, values_int[0], units);
     }
-    isTimeSeries = (values_int.size() > 1);
   }
   else
   {
@@ -152,9 +165,8 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
       file.getDataCoerce(values);
       if (values.size() == 1)
       {
-        WS->mutableRun().addProperty(entry_name, values[0]);
+        WS->mutableRun().addProperty(entry_name, values[0], units);
       }
-      isTimeSeries = (values.size() > 1);
     }
     catch (NeXusAPI::Exception)
     {
@@ -190,8 +202,6 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
     file.getAttr("units", time_units);
     if (time_units != "second")
     {
-//      std::cout << "time_units " << time_units << ";" << endl;
-//      std::cout << time_units.size() << endl;
       g_log.warning() << "NXlog entry " << entry_name << " has time units of '" << time_units << "', which are unsupported. 'second' is the only supported time unit.\n";
       file.closeData();
       file.closeGroup();
@@ -207,6 +217,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
       //Make an int TSP
       TimeSeriesProperty<int> * tsp = new TimeSeriesProperty<int>(entry_name);
       tsp->create(start_time, time_double, values_int);
+      tsp->setUnits( units );
       WS->mutableRun().addLogData( tsp );
     }
     else
@@ -214,10 +225,12 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
       //Make a double TSP
       TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(entry_name);
       tsp->create(start_time, time_double, values);
+      tsp->setUnits( units );
       WS->mutableRun().addLogData( tsp );
     }
 
     //TODO: Units!
+
 
     //cout << entry_name << ":" << values[0] << "\n";
   }

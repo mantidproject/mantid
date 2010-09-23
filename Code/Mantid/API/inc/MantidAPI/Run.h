@@ -67,6 +67,10 @@ namespace Mantid
       /// Add a property of given type
       template<class TYPE>
       void addProperty(const std::string & name, const TYPE & value);
+
+      template<class TYPE>
+      void addProperty(const std::string & name, const TYPE & value, const std::string & units);
+
       /// Does the property exist on the object
       bool hasProperty(const std::string & name) const { return m_manager.existsProperty(name); }
       // Expose some of the PropertyManager publicly
@@ -140,6 +144,21 @@ namespace Mantid
     void Run::addProperty(const std::string & name, const TYPE & value)
     {
       addProperty(new Kernel::PropertyWithValue<TYPE>(name, value));
+    }
+
+    /**
+     * Add a property of a specified type (Simply creates a Kernel::Property of that type)
+     *  and set its units.
+     * @param name The name of the type
+     * @param value The value of the property
+     * @param units a string giving the units of the property.
+     */
+    template<class TYPE>
+    void Run::addProperty(const std::string & name, const TYPE & value, const std::string& units)
+    {
+      Kernel::Property * newProp = new Kernel::PropertyWithValue<TYPE>(name, value);
+      newProp->setUnits(units);
+      addProperty(newProp);
     }
 
   }

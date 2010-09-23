@@ -43,26 +43,29 @@ public:
         TS_ASSERT( ld.isExecuted() );
 
         double val;
-        Run run = ws->mutableRun();
+        Run& run = ws->mutableRun();
         Property * prop;
         PropertyWithValue<double> * dProp;
 
         prop = run.getLogData("Speed3");
         TS_ASSERT(prop);
         TS_ASSERT_EQUALS( prop->value(), "60");
+        TS_ASSERT_EQUALS(prop->units(), "Phase,H");
 
         prop = run.getLogData("PhaseRequest1");
         dProp = dynamic_cast< PropertyWithValue<double> * >(prop);
         TS_ASSERT(dProp);
         val = boost::lexical_cast<double>(prop->value());
         TS_ASSERT_DELTA( val, 10914.857421875, 1e-6);
+        TS_ASSERT_EQUALS(prop->units(), "Phase,uS");
 
         TimeSeriesProperty<double> * tsp;
 
         prop = run.getLogData("Phase1");
         tsp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
         TS_ASSERT(tsp);
-        TS_ASSERT_EQUALS( tsp->realSize(), 1770);
+        TS_ASSERT_EQUALS(tsp->units(), "Phase,uS");
+        TS_ASSERT_EQUALS(tsp->realSize(), 1770);
         TS_ASSERT_DELTA( tsp->nthValue(1), 10915, 20);
     }
 };

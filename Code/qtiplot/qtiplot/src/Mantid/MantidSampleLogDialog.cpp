@@ -19,6 +19,7 @@
 
 #include <QMessageBox>
 #include <iostream>
+#include <sstream>
 //----------------------------------
 // Public methods
 //----------------------------------
@@ -35,7 +36,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   
   m_tree = new QTreeWidget;
   QStringList titles;
-  titles << "Name" << "Type" << "Value";
+  titles << "Name" << "Type" << "Value" << "Units";
   m_tree->setHeaderLabels(titles);
   m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
   QHeaderView* hHeader = (QHeaderView*)m_tree->header();
@@ -102,7 +103,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
 // Private methods
 //----------------------------------
 /**
- * Plot the selected log files
+ * Plot the selected log entries (TimeSeriesProperty or PropertyWithValue)
  */
 void MantidSampleLogDialog::importSelectedFiles()
 {
@@ -117,7 +118,8 @@ void MantidSampleLogDialog::importSelectedFiles()
 
 //------------------------------------------------------------------------------------------------
 /**
-* Import an item
+* Import an item from sample logs
+*
 * @param item The item to be imported
 * @throw invalid_argument if format identifier for the item is wrong
 */
@@ -201,6 +203,8 @@ void MantidSampleLogDialog::init()
     //  So commented out, and putting this placeholder instead
     treeItem->setData(0, Qt::UserRole, "value");
 
+    //Set the units text
+    treeItem->setText(3, QString::fromStdString((*pItr)->units()));
 
     //this specifies the format of the data it should be overridden below or there is a problem
     treeItem->setData(1, Qt::UserRole, -1);
@@ -212,14 +216,18 @@ void MantidSampleLogDialog::init()
       treeItem->setText(1, "num. series");
       //state that the string we passed into data[0] is a time series -multiple lines with a time and then a number
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numTSeries));
-      treeItem->setText(2, "-");
+      std::ostringstream msg;
+      msg << "(" << (*pItr)->size() << " entries)";
+      treeItem->setText(2, QString::fromStdString( msg.str()) );
     }
     else if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr) )
     {
       treeItem->setText(1, "str. series");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(stringTSeries));
       treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
-      treeItem->setText(2, "-");
+      std::ostringstream msg;
+      msg << "(" << (*pItr)->size() << " entries)";
+      treeItem->setText(2, QString::fromStdString( msg.str()) );
     }
     else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(*pItr) )
     {
@@ -246,6 +254,7 @@ void MantidSampleLogDialog::init()
   m_tree->header()->resizeSection(0, max_length*10);
   m_tree->header()->resizeSection(1, 100);
   m_tree->header()->resizeSection(2, 170);
+  m_tree->header()->resizeSection(3, 90); //units column
   m_tree->header()->setMovable(false);
   m_tree->setSortingEnabled(true);
 }

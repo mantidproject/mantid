@@ -945,7 +945,7 @@ void File::getAttr(const AttrInfo& info, void* data, int length) {
     throw Exception(msg.str());
   }
   // char attributes are always NULL terminated and so may change length
-  if (length != info.length && type != NX_CHAR) {
+  if (unsigned(length) != info.length && type != NX_CHAR) {
     stringstream msg;
     msg << "NXgetattr(" << info.name << ") change length [" << info.length
         << "->" << length << "]";

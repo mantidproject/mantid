@@ -149,7 +149,7 @@ using namespace Kernel;
   {
     if( !hasProperty(m_protonChargeName) )
     {
-      addProperty(m_protonChargeName, charge);
+      addProperty(m_protonChargeName, charge, "uA.hour");
     }
     else
     {

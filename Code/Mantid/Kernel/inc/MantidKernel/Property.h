@@ -128,6 +128,10 @@ public:
 
   virtual int size() const;
 
+  virtual std::string units() const;
+
+  virtual void setUnits(std::string unit);
+
 protected:
   /// Constructor
   Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);
@@ -145,6 +149,8 @@ private:
   const std::type_info* m_typeinfo;
   /// Whether the property is used as input, output or both to an algorithm
   const unsigned int m_direction;
+  /// Units of the property (optional)
+  std::string m_units;
 
   /// Private default constructor
   Property();

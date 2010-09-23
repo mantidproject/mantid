@@ -1768,6 +1768,8 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
 }
+
+//------------------------------------------------------------------------------------------------
 /**  Import a numeric log data. It will be shown in a graph and copied into a table
      @param wsName The workspace name which log data will be imported
      @param logname The name of the log property to import
@@ -1790,15 +1792,25 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   //Get a map of time/value. This greatly speeds up display
   std::map<dateAndTime, double> time_value_map = flt.data()->valueAsMap();
   int rowcount = time_value_map.size();
+  int colCount = 2;
+  Table* t = new Table(appWindow()->scriptingEnv(), rowcount, colCount, "", appWindow(), 0);
 
-  Table* t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
   if( !t ) return;
   // t->askOnCloseEvent(false);
   //Have to replace "_" since the legend widget uses them to separate things
   QString label = logname;
   label.replace("_","-");
 
-  appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
+  //Get the starting time of the log.
+  Mantid::Kernel::dateAndTime startTime;
+  if (time_value_map.size() > 0)
+  {
+    startTime = time_value_map.begin()->first;
+  }
+
+  //Make a unique title, and put in the start time of the log
+  QString title = label + QString::fromStdString( " (" + Mantid::Kernel::DateAndTime::to_simple_string(startTime) + ")" );
+  appWindow()->initTable(t, appWindow()->generateUniqueName(title));
 
   //Toggle to switch between using the real date or the change in seconds.
   bool useAbsoluteDate = false;
@@ -1818,9 +1830,11 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     t->setNumericPrecision(6); //six digits after 0
   }
 
-
-
-  t->setColName(1, label.section("-",1));
+  //Make the column header with the units, if any
+  QString column1 = label.section("-",1);
+  if (logData->units() != "")
+    column1 = column1 + QString::fromStdString(" (in " + logData->units() + ")");
+  t->setColName(1, column1);
 
   int iValueCurve = 0;
   int iFilterCurve = 1;
@@ -1926,8 +1940,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   std::map<dateAndTime, double>::iterator it = time_value_map.begin();
   if (it!=time_value_map.end())
   {
-    //Get the starting time
-    Mantid::Kernel::dateAndTime startTime = it->first;
     for (; it!=time_value_map.end(); it++)
     {
       lastTime = it->first;
