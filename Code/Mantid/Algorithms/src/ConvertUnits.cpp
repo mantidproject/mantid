@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -56,7 +57,7 @@ void ConvertUnits::init()
     "The energy mode (default: elastic)");
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
-  declareProperty("EFixed",0.0,mustBePositive,
+  declareProperty("EFixed",EMPTY_DBL(),mustBePositive,
     "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect) . Must be\n"
     "set if the target unit requires it (e.g. DeltaE)");
 
@@ -247,7 +248,8 @@ void ConvertUnits::execEvent()
 void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS)
 {
   using namespace Geometry;
-
+  
+  Progress prog(this,0.0,1.0,numberOfSpectra);
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
   // Get the parameter map
@@ -265,7 +267,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
     l1 = source->getDistance(*sample);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   }
-  catch (Exception::NotFoundError &e)
+  catch (Exception::NotFoundError &)
   {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
@@ -282,13 +284,43 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
-  Progress prog(this,0.0,1.0,numberOfSpectra);
+
+  double efixedProp = getProperty("Efixed");
+  if ( emode == 1 )
+  {
+    //... direct efixed gather
+    if ( efixedProp == EMPTY_DBL() )
+    {
+      // try and get the value from the run parameters
+      const API::Run & run = outputWS->run();
+      if ( run.hasProperty("Ei") )
+      {
+        Kernel::Property* prop = run.getProperty("Ei");
+        efixedProp = boost::lexical_cast<double,std::string>(prop->value());
+      }
+      else
+      {
+        throw std::invalid_argument("Could not retrieve incident energy from run object");
+      }
+    }
+    else
+    {
+      // set the Ei value in the run parameters
+      API::Run & run = outputWS->mutableRun();
+      run.addProperty<double>("Ei", efixedProp);
+    }
+  }
+  else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
+  {
+    efixedProp = 0.0;
+  }
+
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    double efixed = getProperty("Efixed");
+    double efixed = efixedProp;
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
 
@@ -344,7 +376,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
       if ((!x.empty()) && (*(x.begin()) > *(x.end()-1)))
           outputWS->getEventList(i).reverse();
 
-    } catch (Exception::NotFoundError &e) {
+    } catch (Exception::NotFoundError&) {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       outputWS->getEventList(i).clear();
@@ -432,6 +464,8 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
 {
   using namespace Geometry;
+  
+  Progress prog(this,0.5,1.0,numberOfSpectra);
 
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
@@ -450,7 +484,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
     l1 = source->getDistance(*sample);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   }
-  catch (Exception::NotFoundError e)
+  catch (Exception::NotFoundError &)
   {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
@@ -467,17 +501,47 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
-  Progress prog(this,0.5,1.0,numberOfSpectra);
+  double efixedProp = getProperty("Efixed");
+  if ( emode == 1 )
+  {
+    //... direct efixed gather
+    if ( efixedProp == EMPTY_DBL() )
+    {
+      // try and get the value from the run parameters
+      const API::Run & run = outputWS->run();
+      if ( run.hasProperty("Ei") )
+      {
+        Kernel::Property* prop = run.getProperty("Ei");
+        efixedProp = boost::lexical_cast<double,std::string>(prop->value());
+      }
+      else
+      {
+        throw std::invalid_argument("Could not retrieve incident energy from run object");
+      }
+    }
+    else
+    {
+      // set the Ei value in the run parameters
+      API::Run & run = outputWS->mutableRun();
+      run.addProperty<double>("Ei", efixedProp);
+    }
+  }
+  else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
+  {
+    efixedProp = 0.0;
+  }
+
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
   for (int i = 0; i < numberOfSpectra; ++i) 
   {
     PARALLEL_START_INTERUPT_REGION
-    double efixed = getProperty("Efixed");
+    double efixed = efixedProp;
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
 
-    try {
+    try
+    {
       // Now get the detector object for this histogram
       IDetector_sptr det = outputWS->getDetector(i);
       // Get the sample-detector distance for this detector (in metres)
@@ -488,8 +552,10 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         // The scattering angle for this detector (in radians).
         twoTheta = outputWS->detectorTwoTheta(det);
         // If an indirect instrument, try getting Efixed from the geometry
-        if (emode==2)
+        if (emode==2) // indirect
         {
+          if ( efixed == EMPTY_DBL() )
+          {
           try {
             Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
             if (par) 
@@ -497,7 +563,8 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
               efixed = par->value<double>();
               g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
             }
-          } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
+          } catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
+          }
         }
       }
       else  // If this is a monitor then make l2 = source-detector distance, l1=0 and twoTheta=0
@@ -518,7 +585,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
       // Convert from time-of-flight to the desired unit
       outputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 
-   } catch (Exception::NotFoundError e) {
+   } catch (Exception::NotFoundError&) {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
