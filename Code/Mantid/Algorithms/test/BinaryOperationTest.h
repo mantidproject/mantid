@@ -22,14 +22,6 @@ public:
   BinaryOpHelper() : BinaryOperation() {};
   /// Destructor
   virtual ~BinaryOpHelper() {};
-
-  /// function to return a name of the algorithm, must be overridden in all algorithms
-  virtual const std::string name() const { return "BinaryOpHelper"; }
-  /// function to return a version of the algorithm, must be overridden in all algorithms
-  virtual int version() const { 1; }
-  /// function to return a category of the algorithm. A default implementation is provided
-  virtual const std::string category() const {return "Helper";}
-  
   const bool checkSizeCompatibility(const MatrixWorkspace_sptr ws1,const MatrixWorkspace_sptr ws2) const
   {
     return BinaryOperation::checkSizeCompatibility(ws1,ws2);
@@ -108,57 +100,6 @@ public:
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent1));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent2));
-  }
-
-  void testMaskedSpectraPropagation()
-  {
-    const int sizex = 10,sizey=20;
-    std::set<int> masking;
-    masking.insert(0);
-    masking.insert(2);
-    masking.insert(4);
-    
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey, 0, masking);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-
-    BinaryOpHelper helper;
-    helper.initialize();
-    helper.setProperty("LHSWorkspace", work_in1);
-    helper.setProperty("RHSWorkspace", work_in2);
-    const std::string outputSpace("test");
-    helper.setPropertyValue("OutputWorkspace", outputSpace);
-    helper.setRethrows(true);
-    helper.execute();
-
-    
-    TS_ASSERT(helper.isExecuted());
-
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
-    TS_ASSERT(output);
-    
-    for( int i = 0; i < sizey; ++i )
-    {
-      IDetector_sptr det;
-      try
-      {
-	det = output->getDetector(i);
-      }
-      catch(Kernel::Exception::NotFoundError&)
-      {
-      }
-      
-      TS_ASSERT(det);
-      if( !det ) TS_FAIL("No detector found");
-      if( masking.count(i) == 0 )
-      {
-	TS_ASSERT_EQUALS(det->isMasked(), false);
-      }
-      else
-      {
-	TS_ASSERT_EQUALS(det->isMasked(), true);
-      }
-    }
-    
   }
 
 };

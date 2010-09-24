@@ -12,13 +12,11 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include <limits>
-#include "MantidGeometry/IDetector.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Geometry;
 
 class DivideTest : public CxxTest::TestSuite
 {
@@ -50,17 +48,6 @@ public:
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
     perfomTest(work_in1,work_in2);
   }
-
-  void testDivideWithMaskedSpectraProducesZeroes()
-  {
-    doDivideWithMaskedTest(false);
-  }
-
-  void testDivideWithMaskedSpectraProducesZeroesWhenReplacingInputWorkspace()
-  {
-    doDivideWithMaskedTest(true);
-  }
-
 
   void testExec1D2D()
   {
@@ -233,75 +220,6 @@ private:
       double err2 = work_in2->readE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
       double err3(sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))));
       TS_ASSERT_DELTA(err3, work_out1->readE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
-  }
-
-  void doDivideWithMaskedTest(bool replaceInput)
-  {
-    const int sizex = 10,sizey=20;
-    std::set<int> masking;
-    masking.insert(0);
-    masking.insert(2);
-    masking.insert(7);
-    
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey, 0, masking);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey, 0, masking);
-    const std::string lhs("work_in1"), rhs("work_in2");
-    AnalysisDataService::Instance().add(lhs, work_in1);
-    AnalysisDataService::Instance().add(rhs, work_in2);
-  
-    //Zero some data to test mask propagation
-    for( int j = 0; j < sizex; ++j )
-    {
-      work_in1->dataY(0)[j] = 0.0;
-      work_in1->dataY(2)[j] = 0.0;
-      work_in1->dataY(7)[j] = 0.0;
-
-      work_in2->dataY(0)[j] = 0.0;
-      work_in2->dataY(2)[j] = 0.0;
-      work_in2->dataY(7)[j] = 0.0;
-    }
-
-    Divide helper;
-    helper.initialize();
-    helper.setPropertyValue("LHSWorkspace", lhs);
-    helper.setPropertyValue("RHSWorkspace", rhs);
-    std::string outputSpace;
-    if( replaceInput )
-    {
-      outputSpace = lhs;
-    }
-    else
-    {
-      outputSpace = "lhsOverRhs";
-    }
-    helper.setPropertyValue("OutputWorkspace", lhs);
-    helper.execute();
-    
-    TS_ASSERT(helper.isExecuted());
-
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("work_in1"));
-    TS_ASSERT(output);
-    
-    for( int i = 0; i < sizey; ++i )
-    {
-      IDetector_sptr det = output->getDetector(i);
-      TS_ASSERT(det);
-      if( !det ) TS_FAIL("No detector found");
-      if( masking.count(i) == 0 )
-      {
-	TS_ASSERT_EQUALS(det->isMasked(), false);
-      }
-      else
-      {
-	TS_ASSERT_EQUALS(det->isMasked(), true);
-	double yValue = output->readY(i)[0];
-	TS_ASSERT_EQUALS(yValue, yValue );
-	TS_ASSERT_DIFFERS(yValue, std::numeric_limits<double>::infinity() );
-      }
-    }
-    AnalysisDataService::Instance().remove(lhs);
-    AnalysisDataService::Instance().remove(rhs);
-    if( !replaceInput ) AnalysisDataService::Instance().remove(outputSpace);
   }
 
 
