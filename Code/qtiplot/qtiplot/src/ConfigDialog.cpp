@@ -649,106 +649,68 @@ void ConfigDialog::initDirSearchTab()
   QGridLayout *grid = new QGridLayout(frame);
   mtdTabWidget->addTab(directoriesPage, "Directories");
 
-  /// datasearch.directories
+  /// pythonscripts.directories
 
-  QLabel* label = new QLabel(tr("Data search"));
+  QLabel* label = new QLabel(tr("Python scripts"));
 	grid->addWidget(label, 0, 0);
 
-  std::string str = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
-	leDataSearchDirs = new QLineEdit();
-  leDataSearchDirs->setText(QString::fromStdString(str));
-	grid->addWidget(leDataSearchDirs, 0, 1);
+  std::string str = Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directories");
+	lePythonScriptsDirs = new QLineEdit();
+  lePythonScriptsDirs->setText(QString::fromStdString(str));
+	grid->addWidget(lePythonScriptsDirs, 0, 1);
 
 	QPushButton *button = new QPushButton();
 	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
 	grid->addWidget(button, 0, 2);
-
-  connect( button, SIGNAL(clicked()), this, SLOT(addDataSearchDirs()) );
-
-  /// datasearch.searcharchive
-  cbSearchArchive = new QCheckBox(tr("Search archive"));
-	grid->addWidget(cbSearchArchive, 1, 1);
-  QString qstr = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.searcharchive")).toLower();
-  cbSearchArchive->setChecked( !qstr.isEmpty() && qstr != "off" );
-  
-
-  /// defaultsave.directory
-  label = new QLabel(tr("Default save"));
-	grid->addWidget(label, 2, 0);
-
-  str = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
-	leDefaultSaveDir = new QLineEdit();
-  leDefaultSaveDir->setText(QString::fromStdString(str));
-	grid->addWidget(leDefaultSaveDir, 2, 1);
-
-	button = new QPushButton();
-	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-	grid->addWidget(button, 2, 2);
-
-  connect( button, SIGNAL(clicked()), this, SLOT(addDefaultSaveDir()) );
-
-  /// pythonscripts.directories
-
-  label = new QLabel(tr("Python scripts"));
-	grid->addWidget(label, 3, 0);
-
-  str = Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directories");
-	lePythonScriptsDirs = new QLineEdit();
-  lePythonScriptsDirs->setText(QString::fromStdString(str));
-	grid->addWidget(lePythonScriptsDirs, 3, 1);
-
-	button = new QPushButton();
-	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-	grid->addWidget(button, 3, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addPythonScriptsDirs()) );
 
   /// pythonscripts.directories
 
   label = new QLabel(tr("Python algorithms"));
-	grid->addWidget(label, 4, 0);
+	grid->addWidget(label, 1, 0);
 
   str = Mantid::Kernel::ConfigService::Instance().getString("pythonalgorithms.directories");
 	lePythonAlgorithmsDirs = new QLineEdit();
   lePythonAlgorithmsDirs->setText(QString::fromStdString(str));
-	grid->addWidget(lePythonAlgorithmsDirs, 4, 1);
+	grid->addWidget(lePythonAlgorithmsDirs, 1, 1);
 
 	button = new QPushButton();
 	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-	grid->addWidget(button, 4, 2);
+	grid->addWidget(button, 1, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addPythonAlgorithmsDirs()) );
 
   /// instrumentDefinition.directory
   label = new QLabel(tr("Instrument definitions"));
-	grid->addWidget(label, 5, 0);
+	grid->addWidget(label, 2, 0);
 
   str = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 	leInstrumentDir = new QLineEdit();
   leInstrumentDir->setText(QString::fromStdString(str));
-	grid->addWidget(leInstrumentDir, 5, 1);
+	grid->addWidget(leInstrumentDir, 2, 1);
 
 	button = new QPushButton();
 	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-	grid->addWidget(button, 5, 2);
+	grid->addWidget(button, 2, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addInstrumentDir()) );
 
   /// parameterDefinition.directory
   label = new QLabel(tr("Parameter definitions"));
-	grid->addWidget(label, 6, 0);
+	grid->addWidget(label, 3, 0);
 
   str = Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory");
 	leParameterDir = new QLineEdit();
   leParameterDir->setText(QString::fromStdString(str));
-	grid->addWidget(leParameterDir, 6, 1);
+	grid->addWidget(leParameterDir, 3, 1);
 
 	button = new QPushButton();
 	button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-	grid->addWidget(button, 6, 2);
+	grid->addWidget(button, 3, 2);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
-  grid->setRowStretch(7,1);
+  grid->setRowStretch(4,1);
 }
 
 void ConfigDialog::initCurveFittingTab()
@@ -889,7 +851,6 @@ void ConfigDialog::initCurveFittingTab()
   decimals->setValue(app->mantidUI->fitFunctionBrowser()->getDecimals());
   
 }
-
 
 void ConfigDialog::initOptionsPage()
 {
@@ -1719,18 +1680,7 @@ void ConfigDialog::updateDirSearchSettings()
 {
   Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
 
-  QString setting = leDataSearchDirs->text();
-  setting.replace('\\','/');
-  mantid_config.setString("datasearch.directories",setting.toStdString());
-  
-  setting = cbSearchArchive->isChecked() ? "On" : "Off";
-  mantid_config.setString("datasearch.searcharchive",setting.toStdString());
-
-  setting = leDefaultSaveDir->text();
-  setting.replace('\\','/');
-  mantid_config.setString("defaultsave.directory",setting.toStdString());
-
-  setting = lePythonScriptsDirs->text();
+  QString setting = lePythonScriptsDirs->text();
   setting.replace('\\','/');
   mantid_config.setString("pythonscripts.directories",setting.toStdString());
 
@@ -1953,6 +1903,11 @@ void ConfigDialog::setColumnSeparator(const QString& sep)
 		boxSeparator->setEditText(separator.replace(" ","\\s").replace("\t","\\t"));
 	}
 }
+void ConfigDialog::gotoMantidDirectories()
+{
+  generalDialog->setCurrentWidget(mtdTabWidget);
+  mtdTabWidget->setCurrentWidget(directoriesPage);
+}
 
 void ConfigDialog::switchToLanguage(int param)
 {
@@ -2063,32 +2018,6 @@ void ConfigDialog::chooseHelpFolder()
 // 	}
 // }
 // #endif
-
-void ConfigDialog::addDataSearchDirs()
-{
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Add a data search directory"),
-			"", 0/*!QFileDialog::ShowDirsOnly*/);
-  if (!dir.isEmpty())
-  {
-    QString dirs = leDataSearchDirs->text();
-    if (!dirs.isEmpty())
-    {
-      dirs += ";";
-    }
-    dirs += dir;
-    leDataSearchDirs->setText(dirs);
-  }
-}
-
-void ConfigDialog::addDefaultSaveDir()
-{
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Select new default save directory"),
-			"", 0/*!QFileDialog::ShowDirsOnly*/);
-  if (!dir.isEmpty())
-  {
-    leDefaultSaveDir->setText(dir);
-  }
-}
 
 void ConfigDialog::addPythonScriptsDirs()
 {

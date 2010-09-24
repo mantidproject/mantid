@@ -1065,6 +1065,7 @@ private slots:
 	//@}
 
 	void showCustomActionDialog();
+  void showUserDirectoryDialog();
 	void performCustomAction(QAction *);
   void runPythonScript(const QString & code);
 
@@ -1346,7 +1347,7 @@ private:
     QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
     QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
 	QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
-	QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog;
+	QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs;
 	QAction *actionGreekMajSymbol, *actionMathSymbol;
 	QAction *Box, *Frame, *None;
     QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;

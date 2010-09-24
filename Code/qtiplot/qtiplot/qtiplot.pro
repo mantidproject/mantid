@@ -504,7 +504,8 @@ HEADERS  += src/ApplicationWindow.h \
 		src/Mantid/InstrumentWidget/ObjComponentActor.h \
 		src/Mantid/InstrumentWidget/InstrumentActor.h \
 		src/Mantid/InstrumentWidget/MantidColorMap.h \
-		src/Mantid/ManageCustomMenus.h
+		src/Mantid/ManageCustomMenus.h \
+		src/Mantid/ManageUserDirectories.h
 
 ###################### FORMS ##############################################
 
@@ -514,6 +515,7 @@ FORMS += src/Mantid/MantidAbout.ui
 FORMS += src/Mantid/RemoveErrorsDialog.ui
 FORMS += src/Mantid/SequentialFitDialog.ui
 FORMS += src/Mantid/ManageCustomMenus.ui
+FORMS += src/Mantid/ManageUserDirectories.ui
 
 ###################### SOURCES ##############################################
 
@@ -657,7 +659,7 @@ SOURCES  += src/ApplicationWindow.cpp \
         src/Mantid/MantidMatrixDialog.cpp \
 	    src/Mantid/PeakPickerTool.cpp \
 	    src/Mantid/MantidCurve.cpp \
-            src/Mantid/WorkspaceObserver.cpp \
+        src/Mantid/WorkspaceObserver.cpp \
 	    src/Mantid/UserFitFunctionDialog.cpp \
 	    src/Mantid/FitPropertyBrowser.cpp \
 	    src/Mantid/PropertyHandler.cpp \
@@ -685,7 +687,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/InstrumentActor.cpp \
 		src/Mantid/InstrumentWidget/MantidColorMap.cpp \
 		src/Mantid/ManageCustomMenus.cpp \
-		src/pixmaps.cpp
+		src/pixmaps.cpp \
+		src/Mantid/ManageUserDirectories.cpp
 
 
 ###############################################################

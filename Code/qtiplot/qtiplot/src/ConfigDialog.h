@@ -69,6 +69,7 @@ public:
 	 */
     ConfigDialog( QWidget* parent, Qt::WFlags fl = 0 );
 	void setColumnSeparator(const QString& sep);
+  void gotoMantidDirectories();
 
 private slots:
     virtual void languageChange();
@@ -113,8 +114,6 @@ private slots:
 // #endif
 
   //Mantid
-  void addDataSearchDirs();
-  void addDefaultSaveDir();
   void addPythonScriptsDirs();
   void addPythonAlgorithmsDirs();
   void addInstrumentDir();
@@ -144,12 +143,12 @@ private:
 	QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
 
 	QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators, *linearFit2PointsBox;
-        QTabWidget *plotsTabWidget, *appTabWidget, *mtdTabWidget;
+  QTabWidget *plotsTabWidget, *appTabWidget, *mtdTabWidget;
 	ColorButton *btnBackground3D, *btnMesh, *btnAxes, *btnLabels, *btnNumbers;
 	ColorButton *btnFromColor, *btnToColor, *btnGrid;
 	QPushButton	*btnTitleFnt, *btnLabelsFnt, *btnNumFnt;
 	ColorButton *buttonBackground, *buttonText, *buttonHeader;
-    QPushButton *buttonOk, *buttonCancel, *buttonApply;
+  QPushButton *buttonOk, *buttonCancel, *buttonApply;
 	QPushButton* buttonTextFont, *buttonHeaderFont;
 	QStackedWidget * generalDialog;
 	QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
@@ -161,9 +160,6 @@ private:
 
   /// Mantid tab for setting directories
   QWidget *directoriesPage;
-  QLineEdit* leDataSearchDirs;///< datasearch.directories
-  QCheckBox* cbSearchArchive;///< datasearch.searcharchive
-  QLineEdit* leDefaultSaveDir;///< defaultsave.directory
   QLineEdit* lePythonScriptsDirs;///< pythonscripts.directories
   QLineEdit* lePythonAlgorithmsDirs;///< pythonalgorithms.directories
   QLineEdit* leInstrumentDir;///< instrumentDefinition.directory

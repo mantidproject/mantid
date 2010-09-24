@@ -174,6 +174,7 @@
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
+#include "Mantid/ManageUserDirectories.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -695,6 +696,8 @@ void ApplicationWindow::initToolBars()
   fileTools->addAction(actionNewGraph);
   fileTools->addAction(actionNewFunctionPlot);
   fileTools->addAction(actionNewSurfacePlot);
+  fileTools->addSeparator ();
+  fileTools->addAction(actionManageDirs);
   fileTools->addSeparator ();
   //fileTools->addAction(actionOpen);
   fileTools->addAction(actionOpenProj);
@@ -8483,6 +8486,8 @@ void ApplicationWindow::fileMenuAboutToShow()
   recentMenuID = fileMenu->insertItem(tr("&Recent Projects"), recent);
 
   fileMenu->insertSeparator();
+  fileMenu->addAction(actionManageDirs);
+  fileMenu->insertSeparator();
   fileMenu->addAction(actionLoadImage);
 
   MdiSubWindow *w = activeWindow();
@@ -10630,12 +10635,12 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       {
         try {
           new MantidCurve(curvelst[1],ag,curvelst[2],curvelst[3].toInt(),curvelst[4].toInt());
-        } catch (Mantid::Kernel::Exception::NotFoundError) {
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);
           return 0;
 
-        } catch (std::invalid_argument& ex) {
+        } catch (std::invalid_argument&) {
           // Get here if invalid spectrum number given - shouldn't be possible, but just in case
           // plot->askOnCloseEvent(false);
           //plot->close();
@@ -11753,6 +11758,9 @@ void ApplicationWindow::createActions()
 {
   actionCustomActionDialog = new QAction(tr("Manage Custom Menus..."), this);
   connect(actionCustomActionDialog, SIGNAL(activated()), this, SLOT(showCustomActionDialog()));
+
+  actionManageDirs = new QAction(tr("Manage User Directories"), this);
+  connect(actionManageDirs, SIGNAL(activated()), this, SLOT(showUserDirectoryDialog()));
 
   actionNewProject = new QAction(QIcon(getQPixmap("new_xpm")), tr("New &Project"), this);
   actionNewProject->setShortcut( tr("Ctrl+N") );
@@ -16015,6 +16023,14 @@ void ApplicationWindow::insertMathSymbol()
 void ApplicationWindow::showCustomActionDialog()
 {
   ManageCustomMenus *ad = new ManageCustomMenus(this);
+  ad->setAttribute(Qt::WA_DeleteOnClose);
+  ad->show();
+  ad->setFocus();
+}
+
+void ApplicationWindow::showUserDirectoryDialog()
+{
+  ManageUserDirectories *ad = new ManageUserDirectories(this);
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
