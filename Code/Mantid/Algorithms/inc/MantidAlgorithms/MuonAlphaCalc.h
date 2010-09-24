@@ -15,8 +15,10 @@ namespace Mantid
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> ForwardSpectra - The detector number of the first group </LI>
-    <LI> BackwardSpectra - The detector number of the second group </LI>
+    <LI> ForwardSpectra - The spectra numbers of the forward group </LI>
+    <LI> BackwardSpectra - The spectra numbers of the backward group </LI>
+    <LI> FirstGoodValue - First good value </LI>
+    <LI> LastGoodValue - Last good value </LI>
     <LI> Alpha (output) </LI>
     </UL>
 

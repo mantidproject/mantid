@@ -29,17 +29,19 @@ void MuonAlphaCalc::init()
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");
 
-
   std::vector<int> forwardDefault;
   forwardDefault.push_back(1);
-  declareProperty(new ArrayProperty<int> ("ForwardSpectra", forwardDefault),
+  declareProperty(new ArrayProperty<int> ("ForwardSpectra", forwardDefault, Direction::Input),
       "The spectra numbers of the forward group (default to 1)");
+
   std::vector<int> backwardDefault;
   backwardDefault.push_back(2);
-  declareProperty(new ArrayProperty<int> ("BackwardSpectra", backwardDefault),
+  declareProperty(new ArrayProperty<int> ("BackwardSpectra", backwardDefault, Direction::Input),
       "The spectra numbers of the backward group (default to 2)");
+
   declareProperty("FirstGoodValue", EMPTY_DBL(), "First good value (default lowest value of x)", Direction::Input);
   declareProperty("LastGoodValue", EMPTY_DBL(), "Last good value (default highest value of x)", Direction::Input);
+
   declareProperty("Alpha", 1.0, "The alpha efficiency (default to 1.0)", Direction::Output);
 }
 
