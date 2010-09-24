@@ -13,8 +13,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -59,7 +59,9 @@ public:
     MatrixWorkspace_const_sptr input;
     input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_IWSName));
     TS_ASSERT(input)
-    TS_ASSERT(input->getInstrument()->getDetector(THEMASKED).get()->isMasked())
+    TS_ASSERT(
+      input->getInstrument()->getDetector(THEMASKED).get()->isMasked()
+      )
 
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT ( outputMat ) ;
@@ -67,21 +69,23 @@ public:
 
     //There are three outputs, a workspace (tested in the next code block), an array (later, this test) and a file (next test)
     //were all the spectra output?
-    const int numberOfSpectra = outputMat->getNumberHistograms();
+		const int numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
-
     // the numbers below are threshold values that were found by trail and error running these tests
     const int firstGoodSpec = 36;
     const int lastGoodSpec = 95;
-    for (int lHist = 0; lHist < firstGoodSpec; lHist++)
+    for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
-      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(), BAD_VAL )
+      TS_ASSERT_EQUALS(
+        outputMat->readY(lHist).front(), BAD_VAL )
     }
     for (int lHist=firstGoodSpec; lHist < THEMASKED-1; lHist++)
     {
-      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(), GOOD_VAL )
+      TS_ASSERT_EQUALS(
+        outputMat->readY(lHist).front(), GOOD_VAL )
     }
-    TS_ASSERT_EQUALS(outputMat->readY(THEMASKED-1).front(), BAD_VAL )
+    TS_ASSERT_EQUALS(
+        outputMat->readY(THEMASKED-1).front(), BAD_VAL )
     for (int lHist=THEMASKED; lHist <= lastGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
@@ -193,14 +197,13 @@ public:
       TS_ASSERT_EQUALS ( fileLine, correct )
     }
     testFile.close();
-    Poco::File(m_OFileName).remove();
+    Poco::File(m_OFileName.c_str()).remove();
   }
     
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput"),
-    m_OFileName(""), THEMASKED(40), SAVEDBYERRORBAR(143),Nhist(144), BAD_VAL(100), GOOD_VAL(0)
+    m_OFileName("")
   {
     m_OFileName = Poco::Path().absolute().resolve("MedianDetectorTestTestFile.txt").toString();
-
     using namespace Mantid;
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",Nhist,11,10);
@@ -285,10 +288,9 @@ private:
   std::string m_IWSName, m_OFileName;
   Workspace2D_sptr m_2DWS;
   double m_YSum;
-  const unsigned int THEMASKED, SAVEDBYERRORBAR,Nhist;
+  enum spectraIndexConsts{ THEMASKED = 40, SAVEDBYERRORBAR = 143, Nhist = 144 };
   //these values must match the values in MedianDetectorTest.h
-  const unsigned int GOOD_VAL;
-  const unsigned int BAD_VAL;
+  enum FLAGS{ BAD_VAL = 100, GOOD_VAL = 0 };
 
 };
 
