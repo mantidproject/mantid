@@ -394,10 +394,10 @@ namespace Mantid
    */
     void BinaryOperation::applyMaskingToOutput(API::MatrixWorkspace_sptr out)
   {
-    size_t nindices = m_indicesToMask.size();
+    int nindices = static_cast<int>(m_indicesToMask.size());
     ParameterMap &pmap = out->instrumentParameters();
     PARALLEL_FOR1(out)
-    for(size_t i = 0; i < nindices; ++i)
+    for(int i = 0; i < nindices; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
 
