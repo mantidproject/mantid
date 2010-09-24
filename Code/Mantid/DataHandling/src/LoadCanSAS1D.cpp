@@ -93,7 +93,6 @@ void LoadCanSAS1D::exec()
       break;
     default:
       WorkspaceGroup_sptr group(new WorkspaceGroup);
-      group->add(getPropertyValue("OutputWorkspace"));
       for (unsigned int i = 0; i < numEntries; ++i)
       {
         std::string runName;

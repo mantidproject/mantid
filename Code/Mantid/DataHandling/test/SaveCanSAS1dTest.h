@@ -46,7 +46,7 @@ public:
 
     WorkspaceGroup_sptr group(new WorkspaceGroup);
     AnalysisDataService::Instance().addOrReplace("SaveCanSAS1DTest_group", group);
-    group->add("SaveCanSAS1DTest_group");
+   // group->add("SaveCanSAS1DTest_group");
     group->add(m_workspace1);
 
     LoadRaw3 load;
@@ -163,12 +163,12 @@ public:
     TS_ASSERT(group)
     std::vector<std::string> wNames = group->getNames();
     
-    TS_ASSERT_EQUALS(wNames.size(), 3)//change this and the lines below when group workspace names change
-    TS_ASSERT_EQUALS(wNames[1], m_workspace1);
-    TS_ASSERT_EQUALS(wNames[2], m_workspace2);
+    TS_ASSERT_EQUALS(wNames.size(), 2)//change this and the lines below when group workspace names change
+    TS_ASSERT_EQUALS(wNames[0], m_workspace1);
+    TS_ASSERT_EQUALS(wNames[1], m_workspace2);
     
     //check the second workspace in more detail
-    ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[2]);
+    ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
 	Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
   TS_ASSERT(ws2d)
 

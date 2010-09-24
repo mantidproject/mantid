@@ -91,7 +91,6 @@ public:
     if (wsSptr)
     {
       AnalysisDataService::Instance().add("test_in", wsSptr);
-      wsSptr->add("test_in");
       AnalysisDataService::Instance().add("test_in_1", work_in1);
       wsSptr->add("test_in_1");
       AnalysisDataService::Instance().add("test_in_2", work_in2);
@@ -109,7 +108,7 @@ public:
     {
       std::vector<std::string> GroupNames = work_in->getNames();
       int nSize = GroupNames.size();
-      TS_ASSERT_EQUALS(nSize, 5);
+      TS_ASSERT_EQUALS(nSize, 4);
     }
     Plus alg;
     alg.initialize();
@@ -201,7 +200,6 @@ public:
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
     AnalysisDataService::Instance().add("testdead_in", wsSptr);
-    wsSptr->add("testdead_in");
     AnalysisDataService::Instance().add("testdead_in_1", work_in1);
     wsSptr->add("testdead_in_1");
     AnalysisDataService::Instance().add("testdead_in_2", work_in2);
@@ -277,7 +275,6 @@ public:
   {
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
     AnalysisDataService::Instance().add("InputWS", wsSptr);
-    wsSptr->add("InputWS");
     Mantid::Algorithms::PolynomialCorrection poly3;
     poly3.initialize();
     TS_ASSERT_THROWS_NOTHING      ( poly3.setPropertyValue("InputWorkspace","InputWS") )
@@ -306,7 +303,6 @@ public:
       if(wsSptr)
       {
         AnalysisDataService::Instance().add("testlhs_in", wsSptr);
-        wsSptr->add("testlhs_in");
         AnalysisDataService::Instance().add("testlhs_in_1", worklhs_in1);
         wsSptr->add("testlhs_in_1");
         AnalysisDataService::Instance().add("testlhs_in_2", worklhs_in2);
@@ -323,14 +319,13 @@ public:
       {
         std::vector<std::string> GroupNames=worklhsgrp_in->getNames();
         int nSize=GroupNames.size();
-        TS_ASSERT_EQUALS(nSize,5);
+        TS_ASSERT_EQUALS(nSize,4);
       }
 
       WorkspaceGroup_sptr wsSptr1= WorkspaceGroup_sptr(new WorkspaceGroup);
       if(wsSptr1)
       {
         AnalysisDataService::Instance().add("testrhs_in", wsSptr);
-        wsSptr1->add("testrhs_in");
         AnalysisDataService::Instance().add("testrhs_in_1", worklhs_in1);
         wsSptr1->add("testrhs_in_1");
         AnalysisDataService::Instance().add("testrhs_in_2", worklhs_in2);
@@ -347,7 +342,7 @@ public:
       {
         std::vector<std::string> GroupNames=workrhsgrp_in->getNames();
         int nSize=GroupNames.size();
-        TS_ASSERT_EQUALS(nSize,5);
+        TS_ASSERT_EQUALS(nSize,4);
       }
 
       Plus alg;
@@ -414,7 +409,6 @@ public:
       if(wsSptr1)
       {
         AnalysisDataService::Instance().add("testrhs_in", wsSptr1);
-        wsSptr1->add("testrhs_in");
         AnalysisDataService::Instance().add("testrhs_in_1", workrhs_in1);
         wsSptr1->add("testrhs_in_1");
         AnalysisDataService::Instance().add("testrhs_in_2", workrhs_in2);
@@ -431,7 +425,7 @@ public:
       {
         std::vector<std::string> GroupNames=workrhsgrp_in->getNames();
         int nSize=GroupNames.size();
-        TS_ASSERT_EQUALS(nSize,5);
+        TS_ASSERT_EQUALS(nSize,4);
       }
 
       Plus alg;
@@ -490,7 +484,6 @@ public:
       if(wsSptr)
       {
         AnalysisDataService::Instance().add("testlhs_in", wsSptr);
-        wsSptr->add("testlhs_in");
         AnalysisDataService::Instance().add("testlhs_in_1", worklhs_in1);
         wsSptr->add("testlhs_in_1");
         AnalysisDataService::Instance().add("testlhs_in_2", worklhs_in2);
@@ -507,7 +500,7 @@ public:
       {
         std::vector<std::string> GroupNames=worklhsgrp_in->getNames();
         int nSize=GroupNames.size();
-        TS_ASSERT_EQUALS(nSize,5);
+        TS_ASSERT_EQUALS(nSize,4);
       }
 
       Plus alg;

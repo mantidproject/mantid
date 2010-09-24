@@ -75,9 +75,7 @@ public:
 	}
 	void testExecGroupTwoNormalWorkspaces()
 	{
-		std::string s;
-		std::getline(std::cin,s);
-		
+			
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48097.raw"));
@@ -213,10 +211,8 @@ public:
 		AnalysisDataService::Instance().remove("EVS13895_6");
 		AnalysisDataService::Instance().remove("LOQ48098");
 	}
-	void testExecGroupTwoIncompatibleWorkspaces()
+	void xtestExecGroupTwoIncompatibleWorkspaces()
 	{
-		/*std::string s;
-		std::getline(std::cin,s);*/
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48094.raw"));
