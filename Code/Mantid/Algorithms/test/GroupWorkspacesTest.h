@@ -211,9 +211,9 @@ public:
 		AnalysisDataService::Instance().remove("EVS13895_6");
 		AnalysisDataService::Instance().remove("LOQ48098");
 	}
-	void xtestExecGroupTwoIncompatibleWorkspaces()
+	void testExecGroupTwoIncompatibleWorkspaces()
 	{
-		LoadRaw3 alg;
+		 LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48094.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48094"));

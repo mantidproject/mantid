@@ -136,7 +136,7 @@ bool GroupWorkspaces::isCompatibleWorkspaces(const std::string & firstWS, const 
 void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const std::string &wsName)
 {
   std::vector<std::string> groupVec = outgrp_sptr->getNames();
-  if (groupVec.size() > 1)
+  if (groupVec.size() > 0)
   {
     std::string firstws = groupVec[0];
     if (isCompatibleWorkspaces(firstws, wsName))
