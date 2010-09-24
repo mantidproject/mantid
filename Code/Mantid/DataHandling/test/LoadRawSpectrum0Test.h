@@ -90,8 +90,7 @@ public:
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
-    //loader5.setPropertyValue("SpectrumList", "10,50,100,195");
-    
+     
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
 	
@@ -104,7 +103,7 @@ public:
     wsNamevec=sptrWSGrp->getNames();
     int period=1;
     std::vector<std::string>::const_iterator it=wsNamevec.begin();
-    for (it++;it!=wsNamevec.end();it++)
+    for (;it!=wsNamevec.end();it++)
     {	std::stringstream count;
       count <<period;
       std::string wsName="multiperiod_"+count.str();
@@ -112,7 +111,7 @@ public:
       period++;
     }
     std::vector<std::string>::const_iterator itr1=wsNamevec.begin();
-    for (itr1++;itr1!=wsNamevec.end();itr1++)
+    for (;itr1!=wsNamevec.end();itr1++)
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
@@ -120,7 +119,7 @@ public:
 
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
-    itr++;
+
     MatrixWorkspace_sptr  outsptr1;
     TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
     MatrixWorkspace_sptr  outsptr2;

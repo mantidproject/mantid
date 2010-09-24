@@ -354,15 +354,20 @@ namespace Mantid
       WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int numberOfPeriods, bool bMonitor)
     {
       Property *ws = getProperty("OutputWorkspace");
+	  if(!ws) return;
+	  if(!grpws_sptr) return;
+	  if(!ws_sptr)return;
       std::string wsName = ws->value();
       if (bMonitor)
+	  {
         wsName += "_Monitors";
-      if(!ws_sptr)return;
+	  }
+      
       ws_sptr->setTitle(title);
       ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       if (numberOfPeriods > 1)
       {
-        grpws_sptr->add(wsName);
+        //grpws_sptr->add(wsName);
         setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(grpws_sptr));
       }
       else

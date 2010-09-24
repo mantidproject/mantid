@@ -189,10 +189,10 @@ namespace Mantid
       if (wsg)
       {
         std::vector<std::string> names = wsg->getNames();
-        for(size_t i = 1; i < names.size(); ++i)
+        for(size_t i = 0; i < names.size(); ++i)
         {
           std::ostringstream propName;
-          propName << "OutputWorkspace_" << i;
+          propName << "OutputWorkspace_" << (i+1);
           DataObjects::Workspace2D_sptr ws1 = load->getProperty(propName.str());
           std::string wsName = load->getPropertyValue(propName.str());
           declareProperty(new WorkspaceProperty<>(propName.str(),wsName,Direction::Output));

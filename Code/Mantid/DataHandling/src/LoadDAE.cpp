@@ -146,7 +146,6 @@ namespace Mantid
                   Workspace_sptr ws1 = AnalysisDataService::Instance().retrieve(*it);
                   std::stringstream propName;
                   propName << "OutputWorkspace";
-                  if (it != wsNames.begin())
                   {
                     propName << '_' << it - wsNames.begin();
                   }

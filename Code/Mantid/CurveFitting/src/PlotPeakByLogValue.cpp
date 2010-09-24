@@ -446,8 +446,7 @@ namespace Mantid
             std::vector<std::string> wsNames = wsg->getNames();
             for(std::vector<std::string>::iterator i=wsNames.begin();i!=wsNames.end();++i)
             {
-              if (*i == name) continue;
-              nameList.push_back(InputData(*i,wi,-1,period,start,end));
+             nameList.push_back(InputData(*i,wi,-1,period,start,end));
             }
             continue;
           }

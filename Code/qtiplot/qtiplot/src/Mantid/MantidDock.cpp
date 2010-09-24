@@ -315,8 +315,6 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
   {
     const std::vector<std::string> group_names = group_ptr->getNames();
     std::vector<std::string>::const_iterator sitr = group_names.begin();
-    // The first entry is the group's name
-    ++sitr;//? 
     std::vector<std::string>::const_iterator send = group_names.end();
     for( ; sitr != send; ++sitr )
     {
@@ -405,13 +403,11 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
   const std::vector<std::string> group_names = workspace->getNames();
   if (group_names.size() < 1) return;
   std::vector<std::string>::const_iterator sitr = group_names.begin();
-  // The first entry is the group's name
-  ++sitr;
   std::vector<std::string>::const_iterator send = group_names.end();
   for( ; sitr != send; ++sitr )
   {
     std::string name = *sitr;
-    Workspace_sptr member_ws;
+	Workspace_sptr member_ws;
     try
     {
       member_ws = AnalysisDataService::Instance().retrieve(name);

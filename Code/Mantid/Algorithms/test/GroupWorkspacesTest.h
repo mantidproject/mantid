@@ -71,10 +71,13 @@ public:
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","NewGroup"));
 		//only one workspace selected.,so it would throw
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
-		TS_ASSERT( !grpwsalg.isExecuted() );
+		TS_ASSERT( !grpwsalg.isExecuted() );//fail
 	}
 	void testExecGroupTwoNormalWorkspaces()
 	{
+		std::string s;
+		std::getline(std::cin,s);
+		
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/AutoTestData/LOQ48097.raw"));
@@ -101,7 +104,7 @@ public:
 		WorkspaceGroup_sptr result;
 		TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("NewGroup")) );
 		std::vector<std::string> grpVec=result->getNames();
-		TS_ASSERT_EQUALS(grpVec.size(),3);
+		TS_ASSERT_EQUALS(grpVec.size(),2);
 
 		Workspace_sptr result1;
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("LOQ48097")) );
@@ -230,7 +233,6 @@ public:
 		Mantid::Algorithms::FindPeaks finder;
 		finder.initialize();
 		TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace","peaksWS"));
-		//TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("SmoothedData","smoothed"));
 		TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList","foundpeaks"));
 		TS_ASSERT_THROWS_NOTHING( finder.execute());
 		ITableWorkspace_sptr result1;

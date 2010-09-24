@@ -53,8 +53,7 @@ void RenameWorkspace::exec()
     //create output group ws 
     WorkspaceGroup_sptr outgrp_sptr = WorkspaceGroup_sptr(new WorkspaceGroup);
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outgrp_sptr));
-    //add new group workspace name to group vector
-    outgrp_sptr->add(outputwsName);
+   
     //counter used to name the group members
     int count = 0;
     std::string outputWorkspace = "OutputWorkspace";
@@ -62,7 +61,7 @@ void RenameWorkspace::exec()
     const std::vector<std::string> names = ingrp_sptr->getNames();
     std::vector<std::string>::const_iterator citr = names.begin();
     //loop thorugh input ws group members
-    for (++citr; citr != names.end(); ++citr)
+    for (; citr != names.end(); ++citr)
     {
       try
       {

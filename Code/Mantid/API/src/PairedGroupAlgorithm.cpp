@@ -32,7 +32,7 @@ namespace Mantid
       const std::vector<std::string> inputWSNames=inputWSGrp->getNames();
       int nSize=inputWSNames.size();
       //return if atleast one member is not there in the group to process
-      if(nSize<2)
+      if(nSize<1)
       {
         throw std::runtime_error("Input WorkspaceGroup has no members to process");
       }
@@ -61,7 +61,7 @@ namespace Mantid
       {
         if(isCompatibleSizes(lhsWSGrp,rhsWSGrp))
         {
-          for (++lhsItr,++rhsItr;lhsItr!=lhsWSGrp.end();++lhsItr,++rhsItr)
+          for (;lhsItr!=lhsWSGrp.end();++lhsItr,++rhsItr)
           {
             ++nPeriod;
             // Create a new instance of the algorithm for each group member (needed if execute creates new properties)
@@ -79,7 +79,7 @@ namespace Mantid
       }
       else if(lhsWSGrp.size()==1)//if LHS is not a group workspace and RHS is group workspace
       {				
-        for (++rhsItr;rhsItr!=rhsWSGrp.end();rhsItr++)
+        for (;rhsItr!=rhsWSGrp.end();rhsItr++)
         {	++nPeriod;
         setProperties(alg,prop,(*lhsItr),(*rhsItr),nPeriod,outWSGrp);
         bStatus=alg->execute();
@@ -93,7 +93,7 @@ namespace Mantid
       }
       else if (rhsWSGrp.size()==1)//if RHS is not a group workspace and LHS is a group workspace
       {				
-        for (++lhsItr;lhsItr!=lhsWSGrp.end();lhsItr++)
+        for (;lhsItr!=lhsWSGrp.end();lhsItr++)
         {	++nPeriod;
         setProperties(alg,prop,(*lhsItr),(*rhsItr),nPeriod,outWSGrp);
         bStatus=alg->execute();
@@ -107,14 +107,10 @@ namespace Mantid
       }
 
       if(bgroupExecStatus)
+	  {
         setExecuted(true);
-      if(!bgroupFailed)
-      {
-        std::vector<std::string> names=outWSGrp->getNames();
-        if(!names.empty())
-          AnalysisDataService::Instance().remove(names[0]);
-
-      }
+	  }
+     
 
       m_notificationCenter.postNotification(new FinishedNotification(this,this->isExecuted()));
       return bStatus;
@@ -162,7 +158,6 @@ namespace Mantid
             std::string outWSName=str+"_"+speriodNum.str();
             alg->setPropertyValue((*propItr)->name(),outWSName);
             if(nPeriod==1){
-              if(outWSGrp)outWSGrp->add(str);
               AnalysisDataService::Instance().addOrReplace(str,outWSGrp );
             }
             if(outWSGrp)
@@ -213,7 +208,15 @@ namespace Mantid
           {
             currentPropName=(*itr)->name();
             std::string wsName=(*itr)->value();
-            Workspace_sptr wsPtr=AnalysisDataService::Instance().retrieve(wsName);
+			Workspace_sptr wsPtr;
+			try
+			{
+             wsPtr=AnalysisDataService::Instance().retrieve(wsName);
+			}
+			catch(Kernel::Exception::NotFoundError&)
+			{
+				throw std::runtime_error("Workspace "+ wsName+ "not loaded");
+			}
             WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsPtr);
             if(prevPropName.empty())
             {	//LHSWorkspace 

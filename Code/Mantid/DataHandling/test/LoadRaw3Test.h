@@ -145,9 +145,7 @@ public:
 
  void testMixedLimits()
   {
-	   /*std::string s;
-	  std::getline(std::cin,s);*/
-    if ( !loader2.isInitialized() ) loader2.initialize();
+	 if ( !loader2.isInitialized() ) loader2.initialize();
 
     loader2.setPropertyValue("Filename", inputFile);
     loader2.setPropertyValue("OutputWorkspace", "outWS");
@@ -249,9 +247,7 @@ public:
 
   void testListlimit()
   {
-	 /*  std::string s;
-	  std::getline(std::cin,s);*/
-    LoadRaw3 alg;
+	 LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
     if ( !alg.isInitialized() ) alg.initialize();
 
@@ -273,6 +269,7 @@ public:
 
   void testfail()
   {
+	  LoadRaw3 loader3;
     if ( !loader3.isInitialized() ) loader3.initialize();
     std::string outWS="LoadRaw3-out2";
     loader3.setPropertyValue("Filename", inputFile);
@@ -319,7 +316,6 @@ public:
 
   void testMultiPeriod()
   {
-
     LoadRaw3 loader5;
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
@@ -338,7 +334,7 @@ public:
     wsNamevec=sptrWSGrp->getNames();
     int period=1;
     std::vector<std::string>::const_iterator it=wsNamevec.begin();
-    for (it++;it!=wsNamevec.end();it++)
+    for (;it!=wsNamevec.end();it++)
     {	std::stringstream count;
       count <<period;
       std::string wsName="multiperiod_"+count.str();
@@ -346,7 +342,7 @@ public:
       period++;
     }
     std::vector<std::string>::const_iterator itr1=wsNamevec.begin();
-    for (itr1++;itr1!=wsNamevec.end();itr1++)
+    for (;itr1!=wsNamevec.end();itr1++)
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
@@ -354,7 +350,6 @@ public:
 
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
-    itr++;
     MatrixWorkspace_sptr  outsptr1;
     TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
     MatrixWorkspace_sptr  outsptr2;
@@ -449,10 +444,7 @@ public:
   }
   void testSeparateMonitors()
   {
-   /*  std::string s;
-	 std::getline(std::cin,s);*/
-
-	 LoadRaw3 loader6;
+ 	 LoadRaw3 loader6;
 	 if ( !loader6.isInitialized() ) loader6.initialize();
 
     // Should fail because mandatory parameter has not been set
@@ -566,7 +558,6 @@ public:
     loader7.initialize();
     loader7.setPropertyValue("Filename", "../../../../Test/AutoTestData/EVS13895.raw");
     loader7.setPropertyValue("OutputWorkspace", "multiperiod");
-    //loader7.setPropertyValue("SpectrumList", "10,50,100,195");
 	loader7.setPropertyValue("LoadMonitors", "Separate");
     
     TS_ASSERT_THROWS_NOTHING( loader7.execute() )
@@ -585,7 +576,7 @@ public:
     const std::vector<std::string>monitorwsNamevec = monitorsptrWSGrp->getNames();
     int period=1;
     std::vector<std::string>::const_iterator it=monitorwsNamevec.begin();
-    for (it++;it!=monitorwsNamevec.end();it++)
+    for (;it!=monitorwsNamevec.end();it++)
     {	std::stringstream count;
       count <<period;
       std::string wsName="multiperiod_Monitors_"+count.str();
@@ -593,7 +584,7 @@ public:
       period++;
     }
     std::vector<std::string>::const_iterator itr1=monitorwsNamevec.begin();
-    for (itr1++;itr1!=monitorwsNamevec.end();itr1++)
+    for (;itr1!=monitorwsNamevec.end();itr1++)
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
@@ -601,7 +592,6 @@ public:
 
     }
 	 std::vector<std::string>::const_iterator monitr=monitorwsNamevec.begin();
-    monitr++;
     MatrixWorkspace_sptr  monoutsptr1;
     TS_ASSERT_THROWS_NOTHING(monoutsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*monitr))));
     MatrixWorkspace_sptr  monoutsptr2;
@@ -644,7 +634,7 @@ public:
     const  std::vector<std::string>wsNamevec=sptrWSGrp->getNames();
      period=1;
      it=wsNamevec.begin();
-    for (it++;it!=wsNamevec.end();it++)
+    for (;it!=wsNamevec.end();it++)
     {	std::stringstream count;
       count <<period;
       std::string wsName="multiperiod_"+count.str();
@@ -652,14 +642,13 @@ public:
       period++;
     }
     itr1=wsNamevec.begin();
-    for (itr1++;itr1!=wsNamevec.end();itr1++)
+    for (;itr1!=wsNamevec.end();itr1++)
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
       TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 196 )
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
-    itr++;
     MatrixWorkspace_sptr  outsptr1;
     TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
     MatrixWorkspace_sptr  outsptr2;
@@ -714,10 +703,7 @@ public:
   //no monitors in the selected range 
   void testSeparateMonitorswithMixedLimits()
   {
-	//  std::string s;
-	//  std::getline(std::cin,s);
-
-	 LoadRaw3 loader9;
+	LoadRaw3 loader9;
     if ( !loader9.isInitialized() ) loader9.initialize();
 
     loader9.setPropertyValue("Filename", inputFile);
@@ -831,10 +817,7 @@ public:
    //no monitors in the selected range 
   void testSeparateMonitorswithMixedLimits3()
   {
-	//  std::string s;
-	//  std::getline(std::cin,s);
-
-	 LoadRaw3 loader11;
+	LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
 
     loader11.setPropertyValue("Filename", inputFile);

@@ -118,7 +118,6 @@ void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotificat
     (*itr) = notice->new_objectname();
   }
 }
- 
 
 } // namespace API
 } // namespace Mantid

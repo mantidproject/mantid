@@ -258,8 +258,10 @@ bool Algorithm::execute()
       // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
       if (!isChild())
       {
+		
         fillHistory(start_time,duration,Algorithm::g_execCount);
-        this->store();
+		this->store();
+	
       }
 
       // RJT, 19/3/08: Moved this up from below the catch blocks
@@ -336,6 +338,7 @@ bool Algorithm::execute()
 
    m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   // Only gets to here if algorithm ended normally
+   
   return isExecuted();
 }
 
@@ -622,19 +625,20 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
   int nSize=inputWSNames.size();
   //size is one if only group header.
   //return if atleast one meber is not there in group to process
-  if(nSize<2)
+  if(nSize<1)
   {	throw std::runtime_error("Input WorkspaceGroup has no members to process");
   }
-  std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
+  
   int execTotal=0;
   //removing the header count from the totalsize
-  execTotal=(nSize-1)*10;
+  execTotal=(nSize)*10;
   m_notificationCenter.postNotification(new StartedNotification(this));
+
   IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",this->version());
   if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
   //for each member in the input workspace group
-  //starts from the 2nd item in the group as 1st item is group header
-  for(++wsItr;wsItr!=inputWSNames.end();wsItr++)
+  std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
+  for(;wsItr!=inputWSNames.end();++wsItr)
   {	//set  properties
     std::vector<Mantid::Kernel::Property*>::const_iterator itr;
     for (itr=prop.begin();itr!=prop.end();itr++)
@@ -688,7 +692,9 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
     prevPropName="";
     // execute the algorithm 
     bool bStatus = false;
-    if ( alg->validateProperties() ) bStatus = alg->execute();
+    if ( alg->validateProperties() ) 
+		{bStatus = alg->execute();
+	}
     // status of each execution is checking 
     bgroupPassed=bgroupPassed&&bStatus;
     bgroupFailed=bgroupFailed||bStatus;
@@ -712,6 +718,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
  // {	// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
  //   AnalysisDataService::Instance().remove(outWSParentName);
   //}
+ 
   m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   return bgroupPassed;
 }
@@ -788,9 +795,11 @@ void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
 	std::stringstream suffix;
 	suffix<<nPeriod;
 	outWSChildName=outWSParentName+"_"+suffix.str();
-  if (prop->direction() == Kernel::Direction::Output) pAlg->setPropertyValue(prop->name(), outWSChildName);
+  if (prop->direction() == Kernel::Direction::Output) 
+	  {pAlg->setPropertyValue(prop->name(), outWSChildName);
+  }
 	if(nPeriod==1){
-		if(sptrWSGrp)sptrWSGrp->add(outWSParentName);
+		//if(sptrWSGrp)sptrWSGrp->add(outWSParentName);
 		AnalysisDataService::Instance().addOrReplace(outWSParentName,sptrWSGrp );
 	}
 	//adding to wsgroup vector

@@ -37,8 +37,6 @@ void GroupWorkspaces::exec()
   //creates workspace group pointer
   WorkspaceGroup_sptr outgrp_sptr = WorkspaceGroup_sptr(new WorkspaceGroup);
 
-  //add "NewGroup" to  workspace group
-  outgrp_sptr->add(newGroup);
   setProperty("OutputWorkspace", outgrp_sptr);
 
   std::string outputWorkspace = "OutputWorkspace";
@@ -54,7 +52,7 @@ void GroupWorkspaces::exec()
     {
       std::vector<std::string> names = ingrp_sptr->getNames();
       std::vector<std::string>::const_iterator itr = names.begin();
-      for (++itr; itr != names.end(); ++itr)
+      for (; itr != names.end(); ++itr)
       {
         std::stringstream suffix;
         suffix << ++count;
@@ -140,7 +138,7 @@ void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const
   std::vector<std::string> groupVec = outgrp_sptr->getNames();
   if (groupVec.size() > 1)
   {
-    std::string firstws = groupVec[1];
+    std::string firstws = groupVec[0];
     if (isCompatibleWorkspaces(firstws, wsName))
     {
       outgrp_sptr->add(wsName);
@@ -154,6 +152,7 @@ void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const
   else
   {
     outgrp_sptr->add(wsName);
+	
   }
 }
 
