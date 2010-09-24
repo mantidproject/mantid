@@ -49,7 +49,8 @@ class ISISReducer(SANSReducer):
     lowAngDetSet = True
     
     DIRECT_BEAM_FILE_R = None
-    DIRECT_BEAM_FILE_F = None  
+    DIRECT_BEAM_FILE_F = None
+    NORMALISATION_FILE = None
     
     # Component positions
     PHIMIN=-90.0
@@ -159,26 +160,6 @@ class ISISReducer(SANSReducer):
         if interp :
             self.instrument.use_interpol_trans_calc = True                    
                       
-    def set_phi_limit(self, phimin, phimax, phimirror=True):
-        if phimirror :
-            if phimin > phimax:
-                phimin, phimax = phimax, phimin
-            if abs(phimin) > 180.0 :
-                phimin = -90.0
-            if abs(phimax) > 180.0 :
-                phimax = 90.0
-        
-            if phimax - phimin == 180.0 :
-                phimin = -90.0
-                phimax = 90.0
-            else:
-                phimin = SANSUtility.normalizePhi(phimin)
-                phimax = SANSUtility.normalizePhi(phimax)
-              
-        self.PHIMIN = phimin
-        self.PHIMAX = phimax
-        self.PHIMIRROR = phimirror
-        
     def _initialize_mask(self):
         self.instrument.FRONT_DET_Z_CORR = 0.0
         self.instrument.FRONT_DET_Y_CORR = 0.0
@@ -191,6 +172,7 @@ class ISISReducer(SANSReducer):
         self.mask('MASK/CLEAR/TIME')
         self.DIRECT_BEAM_FILE_F = None
         self.DIRECT_BEAM_FILE_R = None
+        self.NORMALISATION_FILE = None
 
         self.RMIN = None
         self.RMAX = None
@@ -214,7 +196,7 @@ class ISISReducer(SANSReducer):
 
     def mask(self, instruction):
         if self._mask is None:
-            masker = ISISReductionSteps.Mask()
+            masker = ISISReductionSteps.Mask_ISIS()
             self.set_mask(masker)
         self._mask.parse_instruction(instruction)
     
@@ -470,7 +452,7 @@ class ISISReducer(SANSReducer):
                 _issueWarning('Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=')
             self.set_trans_spectrum(int(parts[1]), interpolate)        
     
-        elif 'DIRECT' in details.upper():
+        elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
             parts = details.split("=")
             if len(parts) == 2:
                 filepath = parts[1].rstrip()
@@ -487,6 +469,8 @@ class ISISReducer(SANSReducer):
                         self.DIRECT_BEAM_FILE_F = filepath
                     elif parts[0].upper() == 'HAB':
                         self.DIRECT_BEAM_FILE_F = filepath
+                    elif parts[0].upper() == 'FLAT':
+                        self.NORMALISATION_FILE = filepath
                     else:
                         pass
                 elif len(parts) == 2:

@@ -74,17 +74,17 @@ class LoadRun(ReductionStep):
     def _assignHelper(self, run_string, is_trans, reload = True, period = -1, reducer=None):
         if run_string == '' or run_string.startswith('.'):
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-        
+
         wkspname, run_no, logname, data_file = extract_workspace_name(run_string, is_trans, 
                                                             prefix=reducer.instrument.name(), 
                                                             run_number_width=reducer.instrument.run_number_width)
-        
+
         if run_no == '':
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-    
+
         if reload == False and mtd.workspaceExists(wkspname):
             return WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
-    
+
         filename = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
         if not os.path.exists(filename):
@@ -100,7 +100,7 @@ class LoadRun(ReductionStep):
                 else:
                     specmin = None
                     specmax = 8
-                    
+
                 loader = LoadRun(filename, spec_min=specmin, spec_max=specmax, period=period)
                 [filepath, wkspname, nPeriods] = loader.execute(reducer, wkspname)
             except RuntimeError, err:
@@ -113,7 +113,9 @@ class LoadRun(ReductionStep):
             except RuntimeError, details:
                 mantid.sendLogMessage("::SANS::Warning: "+str(details))
                 return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-                
+
+        if not reducer.NORMALISATION_FILE is None:
+            CorrectToFile(wkspname, reducer.NORMALISATION_FILE, 'SpectrumNumber', 'Divide', wkspname)
         inWS = SANSUtility.WorkspaceDetails(wkspname, run_no)
         
         return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
@@ -307,6 +309,11 @@ class CanSubtraction(LoadRun):
         if reset == True:
             self._CAN_SETUP  = None
             
+        
+        if not NORMALISATION_FILE is None:
+            if not NORMALISATION_FILE == "":
+                CorrectToFile(self.SCATTER_CAN.getName(), NORMALISATION_FILE, self.SCATTER_CAN.getName(), 'SpectrumNumber', 'Divide')
+
         try:
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
             if logvalues == None:
@@ -409,29 +416,33 @@ class CanSubtraction(LoadRun):
                 mantid.deleteWorkspace(workspace)        
         # End of WaveRangeReduction  
     
-class Mask(ReductionStep):
+class Mask_ISIS(SANSReductionSteps.Mask):
     """
+        Provides ISIS specific mask functionality (e.g. parsing
+        MASK commands from user files), inherits from Mask
     """
     def __init__(self, timemask='', timemask_r='', timemask_f='', 
-                 specmask='', specmask_r='', specmask_f='', limit_phi=False):
-        """
-            ISIS mask
-        """
+                 specmask='', specmask_r='', specmask_f=''):
+        SANSReductionSteps.Mask.__init__(self)
         self._timemask=timemask 
         self._timemask_r=timemask_r
         self._timemask_f=timemask_f
         self._specmask=specmask
         self._specmask_r=specmask_r
         self._specmask_f=specmask_f
-        self.lim_phi=limit_phi
+        self.lim_phi_xml = ''
         
     def execute(self, reducer, workspace):
+        SANSReductionSteps.Mask.execute(self, reducer, workspace)
+
+        self._ConvertToSpecList(self._specmask)
         # Finally apply masking to get the correct phi range
         if self.lim_phi == True:
         # Detector has been moved such that beam centre is at [0,0,0]
             self.mask_phi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
-
-        return NotImplemented
+            
+        if self.lim_phi_xml != '':
+            MaskDetectorsInShape(workspace, self.lim_phi_xml)
     
     def parse_instruction(self, details):
         """
@@ -497,8 +508,113 @@ class Mask(ReductionStep):
                     _issueWarning('Unrecognized masking option "' + details + '"')
         else:
             pass
-    # Mask such that the remainder is that specified by the phi range
-    def mask_phi(workspace, centre, phimin, phimax, use_mirror=True):
+
+    def _ConvertToSpecList(self, maskstring):
+        '''
+            Convert a mask string to a spectra list
+            6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
+        '''
+        #Compile spectra ID list
+        if maskstring == '':
+            return ''
+        masklist = maskstring.split(',')
+        
+        orientation = ReductionSingleton().instrument.get_orientation
+        detector = ReductionSingleton().instrument.cur_detector()
+        firstspec = detector.first_spec_num
+        dimension = detector.n_columns
+        speclist = ''
+        for x in masklist:
+            x = x.lower()
+            if '+' in x:
+                bigPieces = x.split('+')
+                if '>' in bigPieces[0]:
+                    pieces = bigPieces[0].split('>')
+                    low = int(pieces[0].lstrip('hv'))
+                    upp = int(pieces[1].lstrip('hv'))
+                else:
+                    low = int(bigPieces[0].lstrip('hv'))
+                    upp = low
+                if '>' in bigPieces[1]:
+                    pieces = bigPieces[1].split('>')
+                    low2 = int(pieces[0].lstrip('hv'))
+                    upp2 = int(pieces[1].lstrip('hv'))
+                else:
+                    low2 = int(bigPieces[1].lstrip('hv'))
+                    upp2 = low2            
+                if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
+                    ydim=abs(upp-low)+1
+                    xdim=abs(upp2-low2)+1
+                    speclist += self.spectrumBlock(firstspec,low, low2,ydim, xdim, dimension,orientation) + ','
+                elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
+                    xdim=abs(upp-low)+1
+                    ydim=abs(upp2-low2)+1
+                    speclist += self.spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
+                else:
+                    print "error in mask, ignored:  " + x
+            elif '>' in x:
+                pieces = x.split('>')
+                low = int(pieces[0].lstrip('hvs'))
+                upp = int(pieces[1].lstrip('hvs'))
+                if 'h' in pieces[0]:
+                    nstrips = abs(upp - low) + 1
+                    speclist += self.spectrumBlock(firstspec,low, 0,nstrips, dimension, dimension,orientation)  + ','
+                elif 'v' in pieces[0]:
+                    nstrips = abs(upp - low) + 1
+                    speclist += self.spectrumBlock(firstspec,0,low, dimension, nstrips, dimension,orientation)  + ','
+                else:
+                    for i in range(low, upp + 1):
+                        speclist += str(i) + ','
+            elif 'h' in x:
+                speclist += self.spectrumBlock(firstspec,int(x.lstrip('h')), 0,1, dimension, dimension,orientation) + ','
+            elif 'v' in x:
+                speclist += self.spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
+            else:
+                speclist += x.lstrip('s') + ','
+        
+        self.spec_list += speclist.rpartition(':')[0]
+
+    def _spectrumBlock(self, base, ylow, xlow, ydim, xdim, det_dimension, orientation):
+        '''
+            Compile a list of spectrum IDs for rectangular block of size xdim by ydim
+        '''
+        output = ''
+        if orientation == Orientation.Horizontal:
+            start_spec = base + ylow*det_dimension + xlow
+            for y in range(0, ydim):
+                for x in range(0, xdim):
+                    output += str(start_spec + x + (y*det_dimension)) + ','
+        elif orientation == Orientation.Vertical:
+            start_spec = base + xlow*det_dimension + ylow
+            for x in range(det_dimension - 1, det_dimension - xdim-1,-1):
+                for y in range(0, ydim):
+                    std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
+            output += str(std_i ) + ','
+        elif orientation == Orientation.Rotated:
+            # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
+            start_spec = base + ylow*det_dimension + xlow
+            max_spec = det_dimension*det_dimension + base - 1
+            for y in range(0, ydim):
+                for x in range(0, xdim):
+                    std_i = start_spec + x + (y*det_dimension)
+                    output += str(max_spec - (std_i - base)) + ','
+        elif orientation == Orientation.HorizontalFlipped:
+            start_spec = base + ylow*det_dimension + xlow
+        for y in range(0,ydim):
+            max_row = base + (y+1)*det_dimension - 1
+            min_row = base + (y)*det_dimension
+            for x in range(0,xdim):
+                std_i = start_spec + x + (y*det_dimension)
+            diff_s = std_i - min_row
+            output += str(max_row - diff_s) + ','
+    
+        return output.rstrip(",")
+
+    def _mask_phi(self, id, centre, phimin, phimax, use_mirror=True):
+        '''
+            Mask the detector bank such that only the region specified in the
+            phi range is left unmasked
+        '''
         # convert all angles to be between 0 and 360
         while phimax > 360 : phimax -= 360
         while phimax < 0 : phimax += 360
@@ -509,23 +625,51 @@ class Mask(ReductionStep):
         #Convert to radians
         phimin = math.pi*phimin/180.0
         phimax = math.pi*phimax/180.0
-        xmldef =  InfinitePlaneXML('pla',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0]) + \
-        InfinitePlaneXML('pla2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0]) + \
-        InfinitePlaneXML('pla3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) + \
-        InfinitePlaneXML('pla4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0])
+        
+        id = str(id)
+        self.lim_phi_xml = (
+            self._infinite_cylinder(id+'_plane1',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0])
+            + self._infinite_cylinder(id+'_plane2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0])
+            + self._infinite_cylinder(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0])
+            + self._infinite_cylinder(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]))
         
         if use_mirror : 
-            xmldef += '<algebra val="#((pla pla2):(pla3 pla4))" />'
+            self.lim_phi_xml += '<algebra val="#((pla pla2):(pla3 pla4))" />'
         else:
             #the formula is different for acute verses obstruse angles
             if phimax-phimin > math.pi :
               # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
-                xmldef += '<algebra val="#(pla:pla2)" />'
+                self.lim_phi_xml += '<algebra val="#(pla:pla2)" />'
             else :
               # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
-                xmldef += '<algebra val="#(pla pla2)" />'
+                self.lim_phi_xml += '<algebra val="#(pla pla2)" />'
+
+    def _normalizePhi(self, phi):
+        if phi > 90.0:
+            phi -= 180.0
+        elif phi < -90.0:
+            phi += 180.0
+        else:
+            pass
+        return phi
+
+    def SetPhiLimit(self, phimin, phimax, phimirror):
+        if phimirror :
+            if phimin > phimax:
+                phimin, phimax = phimax, phimin
+            if abs(phimin) > 180.0 :
+                phimin = -90.0
+            if abs(phimax) > 180.0 :
+                phimax = 90.0
         
-        MaskDetectorsInShape(workspace, xmldef)    
+            if phimax - phimin == 180.0 :
+                phimin = -90.0
+                phimax = 90.0
+            else:
+                phimin = self.normalizePhi(phimin)
+                phimax = self.normalizePhi(phimax)
+    
+        self._mask_phi('unique phi', [0,0,0], phimin,phimax,phimirror)
 
 class LoadSample(LoadRun):   
     """
@@ -535,7 +679,7 @@ class LoadSample(LoadRun):
     
     def __init__(self, sample_run=None, reload=True, period=-1):
         super(LoadRun, self).__init__()
-        self._SCATTER_SAMPLE = None
+        self.SCATTER_SAMPLE = None
         self._SAMPLE_SETUP = None
         self._SAMPLE_RUN = None
         self._SAMPLE_N_PERIODS = -1
@@ -556,27 +700,31 @@ class LoadSample(LoadRun):
                 raise RuntimeError, "ISISReductionSteps.LoadSample doesn't recognize workspace handle %s" % workspace        
         
         # Code from AssignSample
-        self._clearPrevious(self._SCATTER_SAMPLE)
+        self._clearPrevious(self.SCATTER_SAMPLE)
         self._SAMPLE_N_PERIODS = -1
         
         if( self._sample_run.startswith('.') or self._sample_run == '' or self._sample_run == None):
             self._SAMPLE_SETUP = None
             self._SAMPLE_RUN = ''
-            self._SCATTER_SAMPLE = None
+            self.SCATTER_SAMPLE = None
             return '', '()'
         
         self._SAMPLE_RUN = self._sample_run
-        self._SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(self._sample_run, False, self._reload, self._period, reducer)
-        if self._SCATTER_SAMPLE.getName() == '':
+        self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(self._sample_run, False, self._reload, self._period, reducer)
+        if self.SCATTER_SAMPLE.getName() == '':
             _issueWarning('Unable to load SANS sample run, cannot continue.')
             return '','()'
         if reset == True:
             self._SAMPLE_SETUP = None
-    
+
+#STEVES include this!!!        if not NORMALISATION_FILE is None:
+#            if not NORMALISATION_FILE == "":
+#                CorrectToFile(self.SCATTER_SAMPLE.getName(), NORMALISATION_FILE, self.SCATTER_SAMPLE.getName(), 'SpectrumNumber', 'Divide')
+
         try:
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
             if logvalues == None:
-                mtd.deleteWorkspace(self._SCATTER_SAMPLE.getName())
+                mtd.deleteWorkspace(self.SCATTER_SAMPLE.getName())
                 _issueWarning("Sample logs cannot be loaded, cannot continue")
                 return '','()'
         except AttributeError:
@@ -585,7 +733,7 @@ class LoadSample(LoadRun):
         self.PERIOD_NOS["SCATTER_SAMPLE"] = self._period
     
         if (reducer.instrument.name() == 'LOQ'):
-            return self._SCATTER_SAMPLE.getName(), None
+            return self.SCATTER_SAMPLE.getName(), None
     
         reducer.instrument.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
         reducer.instrument.FRONT_DET_X = float(logvalues['Front_Det_X'])
@@ -602,7 +750,7 @@ class LoadSample(LoadRun):
         #sample_setup = _init_run(SCATTER_SAMPLE, beam_center, False)    
         mantid.sendLogMessage('::SANS:: Initializing sample workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
     
-        final_ws = self._SCATTER_SAMPLE.getName().split('_')[0]
+        final_ws = self.SCATTER_SAMPLE.getName().split('_')[0]
         final_ws += reducer.instrument.cur_detector().name('short')
         #TODO: Need to do something about CORRECTION_TYPE
         final_ws += '_' + reducer.CORRECTION_TYPE
@@ -619,14 +767,14 @@ class LoadSample(LoadRun):
         if reducer._transmission_calculator is not None:
             DIRECT_SAMPLE = reducer._transmission_calculator.DIRECT_SAMPLE
             
-        sample_setup = SANSUtility.RunDetails(self._SCATTER_SAMPLE, final_ws, 
+        sample_setup = SANSUtility.RunDetails(self.SCATTER_SAMPLE, final_ws, 
                                               TRANS_SAMPLE, DIRECT_SAMPLE, maskpt_rmin, maskpt_rmax, 'sample')
         # End of _init_run
         #TODO: 
         sample_setup.setReducedWorkspace(workspace + '_' + str(reducer.WAV1) + '_' + str(reducer.WAV2))
         
     
-        return self._SCATTER_SAMPLE.getName(), logvalues
+        return self.SCATTER_SAMPLE.getName(), logvalues
 
 def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8):
     pieces = run_string.split('.')
@@ -677,3 +825,40 @@ class RunQxy(ReductionStep):
 
     def execute(self, tmpWS, final_result, QXY2, DQXY):
         Qxy(tmpWS, final_result, QXY2, DQXY)
+
+class NormalizeToMonitor(SANSReductionSteps.Normalize):
+    """
+        This step runs a LOQ specific
+        correction if the current instrument is LOQ and
+        performs background removal on the monitor spectrum
+        used for normalization
+    """
+    def execute(self, reducer, workspace):
+        if self._normalization_spectrum is None:
+            self._normalization_spectrum = reducer.instrument.get_incident_mon()
+        
+        # Get counting time or monitor
+        norm_ws = workspace+"_normalization"
+        CropWorkspace(workspace, norm_ws,
+                      StartWorkspaceIndex = str(self._normalization_spectrum), 
+                      EndWorkspaceIndex   = str(self._normalization_spectrum))
+    
+        if reducer.instrument.name() == 'LOQ':
+            RemoveBins(norm_ws, norm_ws, '19900', '20500',
+                Interpolation="Linear")
+        
+        # Remove flat background
+        if reducer.BACKMON_START != None and reducer.BACKMON_END != None:
+            FlatBackground(norm_ws, norm_ws, StartX = reducer.BACKMON_START,
+                EndX = reducer.BACKMON_END, WorkspaceIndexList = '0')
+    
+        ConvertUnits(norm_ws, norm_ws, "Wavelength")
+        wavbin = str(wav_start) + "," + str(DWAV) + "," + str(wav_end)
+        if reducer.instrument.is_interpolating_norm():
+            InterpolatingRebin(norm_ws, norm_ws, wavbin)
+        else :
+            Rebin(norm_ws, norm_ws, wavbin)
+    
+        Divide(workspace, norm_ws, workspace)
+            
+        mtd.deleteWorkspace(norm_ws)

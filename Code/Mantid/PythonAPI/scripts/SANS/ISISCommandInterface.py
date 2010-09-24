@@ -9,7 +9,8 @@ import os
 import SANSInsts
 from CommandInterface import *
 import ISISReducer
-
+Clear()
+# disable plotting if running outside Mantidplot
 try:
     from mantidplot import plotSpectrum, mergePlots
 except ImportError:
@@ -129,6 +130,8 @@ def AssignSample(sample_run, reload = True, period = -1):
     _printMessage('AssignSample("' + sample_run + '")')
     ReductionSingleton().append_data_file(sample_run)
     ReductionSingleton().load_set_options(reload, period)
+    #loader = LoadSample()
+    #loader.execute(ReductionSingleton(), None)
     
     
 def AppendDataFile(datafile, workspace=None):
@@ -137,7 +140,36 @@ def AppendDataFile(datafile, workspace=None):
 def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
     SetBeamCenter(XVAL/1000.0, YVAL/1000.0)
+
+def GetMismatchedDetList():
+    """
+        Return the list of mismatched detector names
+    """
+    return ReductionSingleton().instrument.get_marked_dets()
+
+def _applyMasking(workspace, maskStep, limitphi = True, useActiveDetector = True):
+    # mask areas both detectors
+    maskStep.ConvertToSpecList(SPECMASKSTRING)
+
+    #Time mask
+    SANSUtility.MaskByBinRange(workspace,TIMEMASKSTRING)
     
+    #this function only masks one detector, find out which one that should be
+    setLowAngle = ReductionSingleton().instrument.lowAngDetSet
+    if not useActiveDetector :
+        setLowAngle = not ReductionSingleton().instrument.lowAngDetSet
+        
+    if setLowAngle :
+        specstring = SPECMASKSTRING_R
+        timestring = TIMEMASKSTRING_R
+    else:
+        specstring = SPECMASKSTRING_F
+        timestring = TIMEMASKSTRING_F
+
+    maskStep.ConvertToSpecList(specstring) 
+
+    SANSUtility.MaskByBinRange(workspace, timestring)
+
 def _correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False):
     Reduce1D()
     global SPECMIN, SPECMAX
@@ -146,82 +178,47 @@ def _correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = Fals
 #but then what do we call the workspaces?
 
 #    period = run_setup.getPeriod()
-    orientation = orientation=SANSUtility.Orientation.Horizontal
-    if INSTRUMENT.name() == "SANS2D":
-        base_runno = sample_raw.getRunNumber()
-        if base_runno < 568:
-            INSTRUMENT.set_incident_mon(73730)
-            orientation=SANSUtility.Orientation.Vertical
-            if INSTRUMENT.cur_detector().name() == 'front-detector':
-                SPECMIN = DIMENSION*DIMENSION + 1 
-                SPECMAX = DIMENSION*DIMENSION*2
-            else:
-                SPECMIN = 1
-                SPECMAX = DIMENSION*DIMENSION
-        elif (base_runno >= 568 and base_runno < 684):
-            orientation = SANSUtility.Orientation.Rotated
-        else:
-            pass
 
-    ############################# Setup workspaces ######################################
-    monitorWS = "Monitor"
-    montorSpecNum = INSTRUMENT.get_incident_mon()
-    _printMessage('monitor ' + str(montorSpecNum), True)
+    ReductionSingleton().instrument.set_up_for_run(sample_raw.getRunNumber())
+
     sample_name = sample_raw.getName()
-    # Get the monitor ( StartWorkspaceIndex is off by one with cropworkspace)
-    CropWorkspace(sample_name, monitorWS,
-        StartWorkspaceIndex= montorSpecNum-1, EndWorkspaceIndex=montorSpecNum-1)
-    if INSTRUMENT.name() == 'LOQ':
-        RemoveBins(monitorWS, monitorWS, '19900', '20500',
-            Interpolation="Linear")
-    
-    # Remove flat background
-    if BACKMON_START != None and BACKMON_END != None:
-        FlatBackground(monitorWS, monitorWS, StartX = BACKMON_START, EndX = BACKMON_END, WorkspaceIndexList = '0')
     
     # Get the bank we are looking at
     final_result = run_setup.getReducedWorkspace()
     CropWorkspace(sample_name, final_result,
-        StartWorkspaceIndex = (SPECMIN - 1), EndWorkspaceIndex = str(SPECMAX - 1))
-    #####################################################################################
-        
+        StartWorkspaceIndex = ReductionSingleton().instrument.first_spec_num - 1,
+        EndWorkspaceIndex = ReductionSingleton().instrument.last_spec_num - 1)
+
+    montor_spec = ReductionSingleton().instrument.get_incident_mon()
+    norm_step = ISISReductionSteps.NormalizeToMonitor(montor_spec)
+    ReductionSingleton().set_normalizer(norm_step)
+
+    _printMessage('monitor ' + str(montor_spec), True)
     ########################## Masking  ################################################
     # Mask the corners and beam stop if radius parameters are given
+    masking = ISISReductionSteps.Mask_ISIS()
+
     maskpt_rmin = run_setup.getMaskPtMin()
     maskpt_rmax = run_setup.getMaskPtMax()
     if finding_centre == True:
         if RMIN > 0.0: 
-            SANSUtility.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
+            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
         if RMAX > 0.0:
-            SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmin[0], maskpt_rmin[1])
+            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmin[0], maskpt_rmin[1])
     else:
         if RMIN > 0.0: 
-            SANSUtility.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
+            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
         if RMAX > 0.0:
-            SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
+            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
-    _applyMasking(final_result, SPECMIN, DIMENSION, orientation,True)
-    ####################################################################################
+    _applyMasking(final_result, True ,True)
+    
+    ReductionSingleton().set_mask(masking)
 
-    ######################## Unit change and rebin #####################################
-    # Convert all of the files to wavelength and rebin
-    # ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
-    ConvertUnits(monitorWS, monitorWS, "Wavelength")
-    wavbin =  str(wav_start) + "," + str(DWAV) + "," + str(wav_end)
-    if INSTRUMENT.is_interpolating_norm() :
-        InterpolatingRebin(monitorWS, monitorWS,wavbin)
-    else :
-        Rebin(monitorWS, monitorWS,wavbin)
-        
+
     ConvertUnits(final_result,final_result,"Wavelength")
     Rebin(final_result,final_result,wavbin)
-    ####################################################################################
 
-    ####################### Correct by incident beam monitor ###########################
-    # At this point need to fork off workspace name to keep a workspace containing raw counts
-    tmpWS = "reduce_temp_workspace"
-    Divide(final_result, monitorWS, tmpWS)
-    mantid.deleteWorkspace(monitorWS)
     ###################################################################################
 
     ############################ Transmission correction ##############################
@@ -322,6 +319,24 @@ def displayMaskFile():
     print '    global time mask: ', TIMEMASKSTRING
     print '    rear time mask: ', TIMEMASKSTRING_R
     print '    front time mask: ', TIMEMASKSTRING_F
+
+def SetPhiLimit(phimin,phimax, phimirror=True):
+    maskStep = ReductionSingleton().get_mask()
+    #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
+    maskStep.SetPhiLimit(phimin, phimax, phimirror)
+    
+def LimitsPhi(phimin, phimax, use_mirror=True):
+    '''
+        !!DEPRECIATED by the function above, remove!!
+        need to remove from SANSRunWindow.cpp
+    '''
+    if use_mirror :
+        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
+        ReductionSingleton()._readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax))
+    else :
+        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
+        ReductionSingleton()._readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax))
+
 
 def _initReduction():
     # *** Sample setup first ***

@@ -33,7 +33,7 @@ def parseLogFile(logfile):
 			logkeywords[entry] = float(line.split()[2])
 	
 	return tuple(logkeywords.values())
-
+##START REMOVED STEVE 22 September 2010 (SANSReductionSteps.py)
 def normalizePhi(phi):
 	if phi > 90.0:
 		phi -= 180.0
@@ -73,6 +73,7 @@ def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
 def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
     '''Mask out the outside of a cylinder or specified radius'''
     MaskWithCylinder(workspace, radius, xcentre, ycentre, '#')
+##END REMOVED STEVE 22 September 2010 (SANSReductionSteps.py)
 ##START REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
@@ -104,6 +105,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     
     MaskDetectorsInShape(workspace, xmldef)	
 ##END REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
+##START REMOVED to SANSInsts
 # Essentially an enumeration
 class Orientation(object):
 
@@ -112,6 +114,7 @@ class Orientation(object):
     Rotated = 3
     # This is for the empty instrument
     HorizontalFlipped = 4
+##END REMOVED to SANSInsts
 
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
@@ -147,7 +150,7 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
 		 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
-    
+##START REMOVED to SANSReductionSteps
 # Convert a mask string to a spectra list
 # 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
 def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
@@ -212,7 +215,7 @@ def MaskBySpecNumber(workspace, speclist):
     if speclist == '':
         return ''
     MaskDetectors(workspace, SpectraList = speclist)
-
+##END REMOVED to SANSReductionSteps    
 # Mask by bin range
 def MaskByBinRange(workspace, timemask):
 	# timemask should be a ';' separated list of start/end values

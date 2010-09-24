@@ -126,6 +126,14 @@ class Instrument(object):
         
         
 class ISISInstrument(Instrument):
+    # Essentially an enumeration
+    class Orientation:
+        Horizontal = 1
+        Vertical = 2
+        Rotated = 3
+        # This is for the empty instrument
+        HorizontalFlipped = 4
+
     def __init__(self) :
         Instrument.__init__(self)
     
@@ -168,6 +176,8 @@ class ISISInstrument(Instrument):
         self.trans_monitor = int(self.definition.getNumberParameter(
             'default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
+        #used to handle runs in which the detector bank was rotated
+        self._orientation = self.Orientation.Horizontal
 
     def name(self):
         return self._NAME
@@ -212,13 +222,19 @@ class ISISInstrument(Instrument):
             self.lowAngDetSet = not self.lowAngDetSet
             return True
         else:
-            if not self.cur_detector().isAlias(detName):
+            #there are only two detectors, they must have selected the current one so no change is need
+            if self.cur_detector().isAlias(detName):
+                return True
+            else:
                 mantid.sendLogMessage("::SANS::setDetector: Detector not found")
                 mantid.sendLogMessage("::SANS::setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
                 
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
+        
+    def get_orientation(self):
+        return self._orientation
         
 class LOQ(ISISInstrument):
     
@@ -228,6 +244,12 @@ class LOQ(ISISInstrument):
     def __init__(self):
         self._NAME = 'LOQ'
         super(LOQ, self).__init__()
+
+    def set_up_for_run(self, base_runno):
+        """
+            LOQ doesn't have any per run setup so don't do anything
+        """
+        pass
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -257,7 +279,20 @@ class SANS2D(ISISInstrument):
         super(SANS2D, self).__init__()
         
         self._marked_dets = []
-        
+    
+    def set_up_for_run(self, base_runno):
+        if base_runno < 568:
+            self.set_incident_mon(73730)
+            self._orientation = self.Orientation.Vertical
+            self.DETECTORS['high-angle'].first_spec_num = (self._num_pixels*self._num_pixels) + 1 
+            self.DETECTORS['high-angle'].last_spec_num = self._num_pixels*self._num_pixels*2
+            self.DETECTORS['low-angle'].first_spec_num = 1
+            self.DETECTORS['low-angle'].last_spec_num = self._num_pixels*self._num_pixels
+        elif (base_runno >= 568 and base_runno < 684):
+            self._orientation = self.Orientation.Rotated
+        else:
+            pass
+
     def set_component_positions(self, ws, xbeam, ybeam):
         """
             @param ws: workspace containing the instrument information

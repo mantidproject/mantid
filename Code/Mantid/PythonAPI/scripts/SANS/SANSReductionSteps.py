@@ -526,16 +526,16 @@ class Mask(ReductionStep):
         if operation == 'add':
             sum = str(id)
         elif operation == 'add complement':
-            sum = '(# ' + id+')'
+            sum = ':(# ' + id+')'
         else:
             raise NotImplementedError('Operation "'+operation+'" not supported by add_xml_shape()')
         self._xml['sum_shapes'] += sum+':'
         
-    def add_infinite_plane(self, id, plane_pt, normal_pt):
-        self.add_xml_shape(id, '<infinite-plane id="' + str(id) + '">' + \
+    def _infinite_plane(self, id, plane_pt, normal_pt):
+        return '<infinite-plane id="' + str(id) + '">' + \
             '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
             '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-            '</infinite-plane>\n')
+            '</infinite-plane>\n'
 
     def _infinite_cylinder(self, id, centre, radius, axis):
         return '<infinite-cylinder id="' + str(id) + '">' + \
@@ -554,71 +554,6 @@ class Mask(ReductionStep):
         self.add_xml_shape(id,
             self._infinite_cylinder(id, [xcentre, ycentre, 0.0], radius, [0,0,1]),
             'add complement')
-
-    def ConvertToSpecList(self, maskstring):
-        '''
-            Convert a mask string to a spectra list
-            6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
-        '''
-        #Compile spectra ID list
-        if maskstring == '':
-            return ''
-        masklist = maskstring.split(',')
-        
-        orientation = ReductionSingleton().instrument.get_orientation
-        detector = ReductionSingleton().instrument.cur_detector()
-        firstspec = detector.first_spec_num
-        dimension = detector.n_columns
-        speclist = ''
-        for x in masklist:
-            x = x.lower()
-            if '+' in x:
-                bigPieces = x.split('+')
-                if '>' in bigPieces[0]:
-                    pieces = bigPieces[0].split('>')
-                    low = int(pieces[0].lstrip('hv'))
-                    upp = int(pieces[1].lstrip('hv'))
-                else:
-                    low = int(bigPieces[0].lstrip('hv'))
-                    upp = low
-                if '>' in bigPieces[1]:
-                    pieces = bigPieces[1].split('>')
-                    low2 = int(pieces[0].lstrip('hv'))
-                    upp2 = int(pieces[1].lstrip('hv'))
-                else:
-                    low2 = int(bigPieces[1].lstrip('hv'))
-                    upp2 = low2            
-                if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
-                    ydim=abs(upp-low)+1
-                    xdim=abs(upp2-low2)+1
-                    speclist += spectrumBlock(firstspec,low, low2,ydim, xdim, dimension,orientation) + ','
-                elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
-                    xdim=abs(upp-low)+1
-                    ydim=abs(upp2-low2)+1
-                    speclist += spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
-                else:
-                    print "error in mask, ignored:  " + x
-            elif '>' in x:
-                pieces = x.split('>')
-                low = int(pieces[0].lstrip('hvs'))
-                upp = int(pieces[1].lstrip('hvs'))
-                if 'h' in pieces[0]:
-                    nstrips = abs(upp - low) + 1
-                    speclist += spectrumBlock(firstspec,low, 0,nstrips, dimension, dimension,orientation)  + ','
-                elif 'v' in pieces[0]:
-                    nstrips = abs(upp - low) + 1
-                    speclist += spectrumBlock(firstspec,0,low, dimension, nstrips, dimension,orientation)  + ','
-                else:
-                    for i in range(low, upp + 1):
-                        speclist += str(i) + ','
-            elif 'h' in x:
-                speclist += spectrumBlock(firstspec,int(x.lstrip('h')), 0,1, dimension, dimension,orientation) + ','
-            elif 'v' in x:
-                speclist += spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
-            else:
-                speclist += x.lstrip('s') + ','
-        
-        self.spec_list += speclist.rpartition(':')[0]
 
     def execute(self, reducer, workspace):
         if self._xml['shape_defs'] != '':
@@ -640,7 +575,6 @@ class Mask(ReductionStep):
         
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
-
 
 class SaveIqAscii(ReductionStep):
     def __init__(self):

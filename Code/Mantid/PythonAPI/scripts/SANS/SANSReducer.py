@@ -114,6 +114,8 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_mask expects an object of class ReductionStep"
         
+    def get_mask(self): return self._mask
+
     def get_beam_center(self): 
         """
             Return the beam center position
