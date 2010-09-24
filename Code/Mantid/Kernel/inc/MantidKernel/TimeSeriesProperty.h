@@ -131,13 +131,16 @@ public:
   void filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
   {
     typename timeMap::iterator it;
-    for (it = m_propertySeries.begin(); it != m_propertySeries.end(); it++)
+    for (it = m_propertySeries.begin(); it != m_propertySeries.end(); /*increment within loop*/)
     {
       dateAndTime t = it->first;
+	  // Avoid iterator invalidation by caching current value and incrementing ahead of erase.
+      typename timeMap::iterator it_current = it;
+	  ++it;
       if ((t < start) || (t >= stop))
       {
         //Is outside the range we are keeping, so erase that.
-        m_propertySeries.erase(it);
+        m_propertySeries.erase(it_current);
       }
     }
     //The function below is stupid. Should be removed or fixed.
