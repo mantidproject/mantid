@@ -612,7 +612,7 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
 void GetEi2::storeEi(const double ei) const
 {
   Property *incident_energy = new PropertyWithValue<double>("Ei",ei,Direction::Input);
-  m_input_ws->mutableRun().addLogData(incident_energy);
+  m_input_ws->mutableRun().addProperty(incident_energy, true);
 }
 
 }

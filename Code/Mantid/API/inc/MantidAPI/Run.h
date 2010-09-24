@@ -63,13 +63,14 @@ namespace Mantid
       void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
 
       /// Add data to the object in the form of a property
-      void addProperty(Kernel::Property *prop);
+      void addProperty(Kernel::Property *prop, bool overwrite = false);
       /// Add a property of given type
       template<class TYPE>
-      void addProperty(const std::string & name, const TYPE & value);
+	void addProperty(const std::string & name, const TYPE & value, bool overwrite = false);
 
       template<class TYPE>
-      void addProperty(const std::string & name, const TYPE & value, const std::string & units);
+	void addProperty(const std::string & name, const TYPE & value, const std::string & units, 
+			 bool overwrite = false);
 
       /// Does the property exist on the object
       bool hasProperty(const std::string & name) const { return m_manager.existsProperty(name); }
@@ -139,11 +140,12 @@ namespace Mantid
      * Add a property of a specified type (Simply creates a Kernel::Property of that type
      * @param name The name of the type
      * @param value The value of the property
+     * @param overwrite If true, a current value is overwritten. (Default: False)
      */
     template<class TYPE>
-    void Run::addProperty(const std::string & name, const TYPE & value)
+      void Run::addProperty(const std::string & name, const TYPE & value, bool overwrite)
     {
-      addProperty(new Kernel::PropertyWithValue<TYPE>(name, value));
+      addProperty(new Kernel::PropertyWithValue<TYPE>(name, value), overwrite);
     }
 
     /**
@@ -152,13 +154,14 @@ namespace Mantid
      * @param name The name of the type
      * @param value The value of the property
      * @param units a string giving the units of the property.
+     * @param overwrite If true, a current value is overwritten. (Default: False)
      */
     template<class TYPE>
-    void Run::addProperty(const std::string & name, const TYPE & value, const std::string& units)
+      void Run::addProperty(const std::string & name, const TYPE & value, const std::string& units, bool overwrite)
     {
       Kernel::Property * newProp = new Kernel::PropertyWithValue<TYPE>(name, value);
       newProp->setUnits(units);
-      addProperty(newProp);
+      addProperty(newProp, overwrite);
     }
 
   }

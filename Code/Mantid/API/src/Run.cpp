@@ -127,12 +127,13 @@ using namespace Kernel;
   /**
    * Add data to the object in the form of a property
    * @param prop A pointer to a property whose ownership is transferred to this object
+   * @param overwrite If true, a current value is overwritten. (Default: False)
    */
-  void Run::addProperty(Kernel::Property *prop)
+  void Run::addProperty(Kernel::Property *prop, bool overwrite)
   {
-    // Throws if the property exists already but make an exception for the proton charge
+    // Mmake an exception for the proton charge
     // and overwrite it's value as we don't want to store the proton charge in two separate locations
-    if( prop->name() == m_protonChargeName && hasProperty(m_protonChargeName) )
+    if( hasProperty(m_protonChargeName) && (overwrite || prop->name() == m_protonChargeName) )
     {
       removeProperty(m_protonChargeName);
     }
