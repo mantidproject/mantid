@@ -31,12 +31,12 @@ void MuonAlphaCalc::init()
 
   std::vector<int> forwardDefault;
   forwardDefault.push_back(1);
-  declareProperty(new ArrayProperty<int> ("ForwardSpectra", forwardDefault, Direction::Input),
+  declareProperty(new ArrayProperty<int> ("ForwardSpectra", forwardDefault),
       "The spectra numbers of the forward group (default to 1)");
 
   std::vector<int> backwardDefault;
   backwardDefault.push_back(2);
-  declareProperty(new ArrayProperty<int> ("BackwardSpectra", backwardDefault, Direction::Input),
+  declareProperty(new ArrayProperty<int> ("BackwardSpectra", backwardDefault),
       "The spectra numbers of the backward group (default to 2)");
 
   declareProperty("FirstGoodValue", EMPTY_DBL(), "First good value (default lowest value of x)", Direction::Input);
