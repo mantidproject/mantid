@@ -4,7 +4,9 @@
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/IDetector.h"
 
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -13,7 +15,7 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    BinaryOperation::BinaryOperation() : API::PairedGroupAlgorithm(), m_progress(NULL) {}
+    BinaryOperation::BinaryOperation() : API::PairedGroupAlgorithm(), m_indicesToMask(), m_progress(NULL) {}
     
     BinaryOperation::~BinaryOperation()
     {
@@ -100,14 +102,16 @@ namespace Mantid
       }
       else if ( rhs->blocksize() == 1 ) // Single column on rhs
       {
+	m_indicesToMask.reserve(out_work->getNumberHistograms());
         doSingleColumn(lhs,rhs,out_work);
       }
       else // The two are both 2D and should be the same size
       {
+	m_indicesToMask.reserve(out_work->getNumberHistograms());
         do2D(lhs,rhs,out_work);
       }
 
-      // Call the virtual unit manipulation method
+      applyMaskingToOutput(out_work);
       setOutputUnits(lhs,rhs,out_work);
 
       // Assign the result to the output workspace property
@@ -200,6 +204,46 @@ namespace Mantid
       return ( lhs->blocksize() == rhs->blocksize() && ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec ) );
     }
 
+    //--------------------------------------------------------------------------------------------
+    /**
+     * Checks if the spectra at the given index of either input workspace is masked. If so then the output spectra has zeroed data
+     * and is also masked. 
+     * @param lhs A pointer to the left-hand operand
+     * @param rhs A pointer to the right-hand operand
+     * @param index The workspace index to check
+     * @param out A pointer to the output workspace
+     * @returns True if further processing is not required on the spectra, false if the binary operation should be performed.
+     */
+    bool BinaryOperation::propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs, 
+					       const int index, API::MatrixWorkspace_sptr out)
+    {
+      bool continueOp(true);
+      IDetector_sptr det_lhs, det_rhs;
+      try
+      {
+	det_lhs = lhs->getDetector(index);
+	det_rhs = rhs->getDetector(index);
+      }
+      catch(std::runtime_error &)
+      {
+      }
+      if( (det_lhs && det_lhs->isMasked()) || ( det_rhs && det_rhs->isMasked()) )
+      {
+ 	continueOp = false;
+	//Zero the output data and ensure that the output spectra is masked. The masking is done outside of this
+	//loop modiying the parameter map in a multithreaded loop requires too much locking
+	m_indicesToMask.push_back(index);
+   	MantidVec & yValues = out->dataY(index);
+   	MantidVec & eValues = out->dataE(index);
+   	MantidVec::const_iterator yend = yValues.end();
+	for( MantidVec::iterator yit(yValues.begin()), eit(eValues.begin()); yit != yend; ++yit, ++eit)
+ 	{
+   	  (*yit) = 0.0;
+   	  (*eit) = 0.0;
+ 	}
+      }
+      return continueOp;
+    }
 
     //--------------------------------------------------------------------------------------------
     /** Called when the rhs operand is a single value. 
@@ -241,7 +285,7 @@ namespace Mantid
     void BinaryOperation::doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
     {
       // Propagate any masking first or it could mess up the numbers
-      propagateMasking(rhs,out);
+      propagateBinMasks(rhs,out);
 
       // Pull out the rhs spectrum
       const MantidVec& rhsY = rhs->readY(0);
@@ -282,7 +326,10 @@ namespace Mantid
         const double rhsE = rhs->readE(i)[0];        
         
         out->setX(i,lhs->refX(i));
-        performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
+	if( propagateSpectraMask(lhs, rhs, i, out) )
+	{
+	  performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
+	}
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION
       }
@@ -298,7 +345,7 @@ namespace Mantid
     void BinaryOperation::do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
     {
       // Propagate any masking first or it could mess up the numbers
-      propagateMasking(rhs,out);
+      propagateBinMasks(rhs,out);
       // Loop over the spectra calling the virtual function for each one
       const int numHists = lhs->getNumberHistograms();
       PARALLEL_FOR3(lhs,rhs,out)
@@ -306,7 +353,10 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         out->setX(i,lhs->refX(i));
-        performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));
+	if( propagateSpectraMask(lhs, rhs, i, out) )
+	{
+	  performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));
+	}
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION
       }      
@@ -318,7 +368,7 @@ namespace Mantid
      *  @param rhs The workspace which is the right hand operand
      *  @param out The result workspace
      */
-    void BinaryOperation::propagateMasking(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out)
+    void BinaryOperation::propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out)
     {
       const int outHists = out->getNumberHistograms();
       const int rhsHists = rhs->getNumberHistograms();
@@ -331,10 +381,42 @@ namespace Mantid
           const MatrixWorkspace::MaskList & masks = rhs->maskedBins( (rhsHists==1) ? 0 : i );
           MatrixWorkspace::MaskList::const_iterator it;
           for (it = masks.begin(); it != masks.end(); ++it)
+	  {
             out->maskBin(i,it->first,it->second);
+	  }
         }
       }
     }
+
+  /**
+   * Apply the requested masking to the output workspace
+   * @param out The workspace to mask
+   */
+    void BinaryOperation::applyMaskingToOutput(API::MatrixWorkspace_sptr out)
+  {
+    int nindices = static_cast<int>(m_indicesToMask.size());
+    ParameterMap &pmap = out->instrumentParameters();
+    PARALLEL_FOR1(out)
+    for(int i = 0; i < nindices; ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
+
+      try
+      {
+	IDetector_sptr det_out = out->getDetector(m_indicesToMask[i]);
+	PARALLEL_CRITICAL(BinaryOperation_masking)
+	{
+	  pmap.addBool(det_out.get(), "masked", true);
+	}
+      }
+      catch(std::runtime_error &)
+      {
+      }
+
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
 
   } // namespace Algorithms
 } // namespace Mantid

@@ -13,6 +13,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -70,7 +72,7 @@ public:
 		const int numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     // the numbers below are threshold values that were found by trail and error running these tests
-    const int firstGoodSpec = 37;
+    const int firstGoodSpec = 36;
     const int lastGoodSpec = 95;
     for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
@@ -195,12 +197,13 @@ public:
       TS_ASSERT_EQUALS ( fileLine, correct )
     }
     testFile.close();
-    remove(m_OFileName.c_str());
+    Poco::File(m_OFileName.c_str()).remove();
   }
     
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput"),
-    m_OFileName("MedianDetectorTestTestFile.txt")
+    m_OFileName("")
   {
+    m_OFileName = Poco::Path().absolute().resolve("MedianDetectorTestTestFile.txt").toString();
     using namespace Mantid;
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",Nhist,11,10);
