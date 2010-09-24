@@ -193,8 +193,6 @@ public:
     if (wsSptr1)
     {
       AnalysisDataService::Instance().add("grp1", wsSptr1);
-      // First member of group has to be group itself
-      wsSptr1->add("grp1");
       // Group children expected to be parentName_1,2,3 etc. grrrr.
       wsSptr1->add("grp1_1");
     }
@@ -203,7 +201,6 @@ public:
     if (wsSptr2)
     {
       AnalysisDataService::Instance().add("grp2", wsSptr2);
-      wsSptr2->add("grp2");
       wsSptr2->add("grp2_1");
     }
 

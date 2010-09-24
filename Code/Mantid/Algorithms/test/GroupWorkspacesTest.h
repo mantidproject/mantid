@@ -149,7 +149,7 @@ public:
 		WorkspaceGroup_sptr result;
 		TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("NewGroup")) );
 		std::vector<std::string> grpVec=result->getNames();
-		TS_ASSERT_EQUALS(grpVec.size(),4);
+		TS_ASSERT_EQUALS(grpVec.size(),3);
 		Workspace_sptr result1;
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("LOQ48094")) );
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("LOQ48098")) );
@@ -194,7 +194,7 @@ public:
 		WorkspaceGroup_sptr result;
 		TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("NewGroup")) );
 		std::vector<std::string> grpVec=result->getNames();
-		TS_ASSERT_EQUALS(grpVec.size(),8);
+		TS_ASSERT_EQUALS(grpVec.size(),7);
 		Workspace_sptr result1;
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_1")) );
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_2")) );
