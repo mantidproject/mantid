@@ -107,6 +107,7 @@ public:
   void _declareListProperty(const std::string & prop_name, boost::python::list values, 
     Kernel::IValidator<TYPE> & validator,const std::string &doc, const unsigned int direction)
   {
+    (void)validator;
     //Extract the values from the python list into a std vector
     this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
   }

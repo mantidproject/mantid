@@ -49,7 +49,7 @@ namespace Geometry
 class DLLExport DetectorGroup : public virtual IDetector
 {
 public:
-  DetectorGroup(const std::vector<IDetector_sptr>& dets);
+  DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked = false);
   virtual ~DetectorGroup();
 
   void addDetector(IDetector_sptr det, bool& warn);

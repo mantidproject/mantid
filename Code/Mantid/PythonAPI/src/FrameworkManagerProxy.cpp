@@ -372,7 +372,7 @@ deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
 void FrameworkManagerProxy::
 addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
 {
-  
+  (void)notice;
 }
 
 /**

@@ -333,20 +333,26 @@ Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int index) const
     g_log.debug() << "Spectrum number " << spectrum_number << " not found" << std::endl;
     throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
   }
-  else if ( dets.size() == 1 ) 
+  IInstrument_sptr localInstrument = getInstrument();
+  if( !localInstrument )
+  {
+    g_log.debug() << "No instrument defined.\n";
+    throw Kernel::Exception::NotFoundError("Instrument not found", "");
+  }
+  if ( dets.size() == 1 ) 
   {
     // If only 1 detector for the spectrum number, just return it
-    return getInstrument()->getDetector(dets[0]);
+    return localInstrument->getDetector(dets[0]);
   }
   // Else need to construct a DetectorGroup and return that
   std::vector<Geometry::IDetector_sptr> dets_ptr;
   std::vector<int>::const_iterator it;
   for ( it = dets.begin(); it != dets.end(); ++it )
   {
-    dets_ptr.push_back( getInstrument()->getDetector(*it) );
+    dets_ptr.push_back( localInstrument->getDetector(*it) );
   }
   
-  return Geometry::IDetector_sptr( new Geometry::DetectorGroup(dets_ptr) );
+  return Geometry::IDetector_sptr( new Geometry::DetectorGroup(dets_ptr, false) );
 }
 
 /** Returns the 2Theta scattering angle for a detector
@@ -367,11 +373,11 @@ double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) con
  */
 IInstrument_sptr MatrixWorkspace::getInstrument()const
 {
-  if ( m_parmap->size() == 0 )  return sptr_instrument;
-  ParInstrument* pi = new ParInstrument(sptr_instrument,m_parmap);
-  IInstrument* ii = static_cast<IInstrument*>(pi);
-  boost::shared_ptr<IInstrument> tmp(ii);
-  return (tmp);
+  if( m_parmap->empty() )
+  {  
+    return sptr_instrument;
+  }
+  return boost::shared_ptr<ParInstrument>(new ParInstrument(sptr_instrument,m_parmap));
 }
 
 /** Get a shared pointer to the instrument associated with this workspace

@@ -96,10 +96,9 @@ namespace Mantid
         return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
       }
 
-
       //--------------------------------------------------------------------------------------
       ///Add the value of another property
-      virtual WorkspaceProperty& operator+=( Kernel::Property * right )
+      virtual WorkspaceProperty& operator+=( Kernel::Property * )
       {
         throw Kernel::Exception::NotImplementedError("+= operator is not implemented for WorkspaceProperty.");
         return *this;

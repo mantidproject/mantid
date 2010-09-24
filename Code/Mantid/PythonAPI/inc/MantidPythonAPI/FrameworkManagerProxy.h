@@ -125,17 +125,18 @@ public:
    * A function that can be overridden in Python to handle the removal of a workspace from the ADS
    * @param name The name of the workspace
    */
-  virtual void workspaceRemoved(const std::string & name) {}
+  virtual void workspaceRemoved(const std::string & name) {(void)name;}
   /** 
    * A function that can be overridden in Python to handle the adding a workspace to the ADS
    * @param name The name of the workspace
    */
-  virtual void workspaceAdded(const std::string & name) {}
+  virtual void workspaceAdded(const std::string & name) {(void)name;}
+
   /** 
    * A function that can be overridden in Python to handle the replacing a workspace to the ADS
    * @param name The name of the workspace
    */
-  virtual void workspaceReplaced(const std::string & name) {}
+  virtual void workspaceReplaced(const std::string & name) {(void)name;}
   /**
    * A function that notifies Python that that the workspace store has been cleared
    */

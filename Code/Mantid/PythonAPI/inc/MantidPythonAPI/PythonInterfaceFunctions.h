@@ -100,7 +100,7 @@ namespace Mantid
     template<>\
     struct DefaultReturn<const type>\
     {\
-    const type operator()()\
+    type operator()()\
     {\
     return value;\
     }\

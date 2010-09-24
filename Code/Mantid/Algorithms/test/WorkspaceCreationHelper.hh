@@ -8,6 +8,9 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
@@ -17,6 +20,7 @@ using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 class WorkspaceCreationHelper
 {
@@ -68,7 +72,7 @@ public:
     return Create2DWorkspaceBinned(xlen, ylen);
   }
 
-  static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist=0)
+  static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist=0, const std::set<int> & maskedWorkspaceIndices = std::set<int>())
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?xlen+1:xlen,1);
@@ -82,10 +86,12 @@ public:
       retVal->setData(i,y1,e1);
     }
 
+    retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+
     return retVal;
   }
 
-  static Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen,bool isHist=0)
+  static Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen,bool isHist=0, const std::set<int> & maskedWorkspaceIndices = std::set<int>())
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?xlen+1:xlen,1);
@@ -99,7 +105,47 @@ public:
       retVal->setData(i,y1,e1);
     }
 
+    retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+
     return retVal;
+  }
+
+  static Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace, const std::set<int> & maskedWorkspaceIndices)
+  {
+    // We need detectors to be able to mask them.
+    workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+    boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
+
+    std::string xmlShape = "<sphere id=\"shape\"> ";
+    xmlShape +=	"<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> " ;
+    xmlShape +=	"<radius val=\"0.05\" /> " ;
+    xmlShape +=	"</sphere>";
+    xmlShape +=	"<algebra val=\"shape\" /> ";  
+
+    ShapeFactory sFactory;
+    boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
+
+    const int nhist(workspace->getNumberHistograms());
+
+    ParameterMap& pmap = workspace->instrumentParameters();
+    for( int i = 0; i < nhist; ++i )
+    {
+      workspace->getAxis(1)->spectraNo(i) = i;
+    }
+    workspace->mutableSpectraMap().populateSimple(0, nhist);
+
+    for( int i = 0; i < nhist; ++i )
+    {
+      Detector *det = new Detector("det",shape, NULL);
+      det->setPos(i,i+1,1);
+      det->setID(i);
+      instrument->markAsDetector(det);     
+      if ( maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end() )
+      {
+ 	pmap.addBool(det,"masked",true);
+      }
+    }
+    return workspace;
   }
 
   static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0=0.0, double deltax = 1.0)

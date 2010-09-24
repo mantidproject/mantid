@@ -20,6 +20,7 @@ namespace PythonAPI
   template<typename TYPE>
   std::string toStringPrefix(const TYPE & value)
   {
+    (void)value;
     return "";
   }
 
@@ -27,6 +28,7 @@ namespace PythonAPI
   template<>
   inline std::string toStringPrefix(const std::string& value)
   {
+    (void)value;
     return "'";
   }
 
@@ -34,6 +36,7 @@ namespace PythonAPI
   template<typename TYPE>
   std::string toStringSuffix(const TYPE & value)
   {
+    (void)value;
     return "";
   }
 
@@ -41,6 +44,7 @@ namespace PythonAPI
   template<>
   inline std::string toStringSuffix(const std::string& value)
   {
+    (void)value;
     return "'";
   }
 

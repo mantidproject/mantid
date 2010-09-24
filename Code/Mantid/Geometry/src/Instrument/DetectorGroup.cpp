@@ -14,9 +14,10 @@ Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
 
 /** Constructor that takes a list of detectors to add
  *  @param dets The vector of IDetector pointers that this virtual detector will hold
+ *  @param warnAboutMasked If true a log message at warning level will be generated if a one of the detectors in dets is masked. 
  *  @throw std::invalid_argument If an empty vector is passed as argument
  */
-DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets) :
+  DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked) :
   IDetector(), m_id(), m_detectors(), m_unImplementedForInterface()
 {
   if ( dets.empty() )
@@ -24,11 +25,10 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets) :
     g_log.error("Illegal attempt to create an empty DetectorGroup");
     throw std::invalid_argument("Empty DetectorGroup objects are not allowed");
   }
-  bool warn = true;
   std::vector<IDetector_sptr>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it)
   {
-    addDetector(*it,warn);
+    addDetector(*it, warnAboutMasked);
   }
 }
 

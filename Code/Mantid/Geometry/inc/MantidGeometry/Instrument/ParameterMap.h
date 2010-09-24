@@ -76,8 +76,10 @@ public:
     ParameterMap(){}
     ///virtual destructor
     virtual ~ParameterMap(){}
+    /// Returns true if the map is empty, false otherwise
+    inline bool empty() const { return m_map.empty(); }
     /// Return the size of the map
-    int size() const {return static_cast<int>(m_map.size());}
+    inline int size() const { return static_cast<int>(m_map.size()); }
     ///Copy Contructor
     ParameterMap(const ParameterMap& copy);
     /// Clears the map

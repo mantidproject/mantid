@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
+#include <Poco/Path.h>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -111,7 +112,8 @@ public:
     alg.setProperty( "RangeLower", lRange );
     alg.setProperty( "RangeUpper", uRange );
 
-    std::string OFileName("DetEfficVariTestFile.txt");  
+    //Since Mantid's defaultsave.directory converts relative paths, make sure we put this in the current directory
+    std::string OFileName = Poco::Path().absolute().resolve("DetEfficVariTestFile.txt").toString();
     alg.setPropertyValue( "OutputFile", OFileName );
 
     //this is an extreme value for the variation there is only one value that I inserted that will fail

@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/MaskDetectors.h"
@@ -60,13 +61,22 @@ public:
   void testExecWithLimits()
   {
     if ( !alg.isInitialized() ) alg.initialize();
-    TS_ASSERT_THROWS_NOTHING( alg.execute());
-    TS_ASSERT( alg.isExecuted() );
 
     // Get back the input workspace
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
     Workspace2D_const_sptr input2D = boost::dynamic_pointer_cast<const Workspace2D>(input);
+
+    int nspecEntries(0);
+    const int nHist(input2D->getNumberHistograms());
+    const SpectraDetectorMap & specMap_in = input2D->spectraMap();
+    for( int i = 1; i < 4; ++i )
+    {
+      nspecEntries += specMap_in.ndet(i);
+    }
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute());
+    TS_ASSERT( alg.isExecuted() );
 
     // Get back the saved workspace
     Workspace_sptr output;
@@ -91,6 +101,16 @@ public:
       TS_ASSERT_DELTA( e[i], std::sqrt(input2D->readY(2)[i]+input2D->readY(3)[i]), 1.0e-10 );
     }
 
+    // Check the detectors mapped to the single spectra
+    const SpectraDetectorMap & specMap_out = output2D->spectraMap();
+    TS_ASSERT_EQUALS( specMap_out.ndet(2), nspecEntries);
+
+    // And their values
+    std::vector<int> dets = specMap_out.getDetectors(2);
+    TS_ASSERT_EQUALS(dets[0],2);
+    TS_ASSERT_EQUALS(dets[1],3);
+    TS_ASSERT_EQUALS(dets[2],4);
+
     AnalysisDataService::Instance().remove(outputSpace1);
   }
 
@@ -109,13 +129,21 @@ public:
     // Check setting of invalid property value causes failure
     TS_ASSERT_THROWS( alg2.setPropertyValue("StartWorkspaceIndex","-1"), std::invalid_argument) ;
 
-    TS_ASSERT_THROWS_NOTHING( alg2.execute());
-    TS_ASSERT( alg2.isExecuted() );
-
     // Get back the input workspace
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
     Workspace2D_const_sptr input2D = boost::dynamic_pointer_cast<const Workspace2D>(input);
+
+    int nspecEntries(0);
+    const int nHist(input2D->getNumberHistograms());
+    const SpectraDetectorMap & specMap_in = input2D->spectraMap();
+    for( int i = 0; i < nHist; ++i )
+    {
+      nspecEntries += specMap_in.ndet(i);
+    }
+
+    TS_ASSERT_THROWS_NOTHING( alg2.execute());
+    TS_ASSERT( alg2.isExecuted() );
 
     // Get back the saved workspace
     Workspace_sptr output;
@@ -143,6 +171,20 @@ public:
     TS_ASSERT_EQUALS( e[28], std::sqrt(y[28]) );
     TS_ASSERT_EQUALS( e[47], std::sqrt(y[47]) );
     TS_ASSERT_EQUALS( e[99], std::sqrt(y[99]) );
+
+    // Check the detectors mapped to the single spectra
+    const SpectraDetectorMap & specMap_out = output2D->spectraMap();
+    TS_ASSERT_EQUALS( specMap_out.ndet(1), nspecEntries);
+
+    // And their values
+    std::vector<int> dets = specMap_out.getDetectors(1);
+    TS_ASSERT_EQUALS(dets[0], 1);
+    TS_ASSERT_EQUALS(dets[1], 3);
+    TS_ASSERT_EQUALS(dets[2], 4);
+    TS_ASSERT_EQUALS(dets[3], 5);
+    TS_ASSERT_EQUALS(dets[4], 6);
+    TS_ASSERT_EQUALS(dets[5], 7);
+    TS_ASSERT_EQUALS(dets[6], 8);
 
     AnalysisDataService::Instance().remove(inputSpace);
     AnalysisDataService::Instance().remove(outputSpace1);
