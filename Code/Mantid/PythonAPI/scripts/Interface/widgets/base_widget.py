@@ -40,3 +40,14 @@ class BaseWidget(QtGui.QWidget):
             Returns an object with the state of the interface
         """
         return NotImplemented
+    
+    def data_browse_dialog(self):
+        fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
+                                                          self._settings.data_path, 
+                                                          "Data files (*.xml)"))
+        if fname:
+            # Store the location of the loaded file
+            (folder, file_name) = os.path.split(fname)
+            self._settings.data_path = folder
+        return fname     
+    

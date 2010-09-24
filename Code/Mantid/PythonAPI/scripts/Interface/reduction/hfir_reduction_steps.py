@@ -8,12 +8,112 @@ import copy
 from hfir_reduction import BaseScriptElement
 
 class Transmission(BaseScriptElement):
+
+    class DirectBeam(object):
+        sample_file = ''
+        direct_beam = ''
+        # Beam radius in pixels
+        beam_radius = 3.0
+        
+        def __str__(self):
+            return "DirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
+            (self.sample_file, self.direct_beam, self.beam_radius)
+        
+    class BeamSpreader(object):
+        sample_scatt = ''
+        sample_spreader = ''
+        direct_scatt = ''
+        direct_spreader = ''
+        spreader_trans = 1.0
+        spreader_trans_spread = 0.0
+        
+        def __str__(self):
+            return "BeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
+            (self.sample_spreader, self.direct_spreader, 
+             self.sample_scatt, self.direct_scatt, 
+             self.spreader_trans, self.spreader_trans_spread) 
+
+    transmission = 1.0
+    transmission_spread = 0.0
+    calculate_transmission = False
+    calculation_method = DirectBeam()
+            
     def __str__(self):
-        return ""
+        script = ""
+        if not self.calculate_transmission:
+            script += "SetTransmission(%g, %g)\n" % (self.transmission, self.transmission_spread)
+        else:
+            script += str(self.calculation_method)
+            
+        return script
+
+    def from_xml(self, xml_str):
+        """
+            Read in data from XML
+            @param xml_str: text to read the data from
+        """       
+        return None
     
 class Background(BaseScriptElement):
+    
+    class DirectBeam(Transmission.DirectBeam):
+        def __init__(self, state=None):
+            Transmission.DirectBeam.__init__(self)
+            if state is not None:
+                self.sample_file = state.sample_file
+                self.direct_beam = state.direct_beam
+                self.beam_radius = state.beam_radius
+
+        def __str__(self):
+            return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
+            (self.sample_file, self.direct_beam, self.beam_radius)
+        
+    class BeamSpreader(Transmission.BeamSpreader):
+        def __init__(self, state=None):
+            Transmission.BeamSpreader.__init__(self)
+            if state is not None:
+                self.sample_scatt = state.sample_scatt
+                self.sample_spreader = state.sample_spreader
+                self.direct_scatt = state.direct_scatt
+                self.direct_spreader = state.direct_spreader
+                self.spreader_trans = state.spreader_trans
+                self.spreader_trans_spread = state.spreader_trans_spread
+
+        def __str__(self):
+            return "BckBeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
+            (self.sample_spreader, self.direct_spreader, 
+             self.sample_scatt, self.direct_scatt, 
+             self.spreader_trans, self.spreader_trans_spread) 
+        
+    dark_current_corr = False
+    dark_current_file = ''
+    
+    background_corr = False
+    background_file = ''
+        
+    bck_transmission = 1.0
+    bck_transmission_spread = 0.0
+    calculate_transmission = False 
+    trans_calculation_method = DirectBeam()
+    
     def __str__(self):
-        return ""
+        script = ""
+        
+        # Dark current
+        if self.dark_current_corr:
+            script += "DarkCurrent(\"%s\")\n" % self.dark_current_file
+        
+        # Background
+        if self.background_corr:
+            script += "Background(\"%s\")\n" % self.background_file
+            
+            # Background transmission
+            if not self.calculate_transmission:
+                script += "SetBckTransmission(%g, %g)\n" % (self.bck_transmission, self.bck_transmission_spread)
+            else:
+                script += str(self.trans_calculation_method)
+            
+        return script
     
 class DataSets(BaseScriptElement):
     def __str__(self):
@@ -118,8 +218,6 @@ class InstrumentDescription(BaseScriptElement):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-            
-            TODO: improve the reader so that all the elements don't absolutely have to be present in the XML file.
         """       
         dom = xml.dom.minidom.parseString(xml_str)
         instrument_dom = dom.getElementsByTagName("Instrument")[0]

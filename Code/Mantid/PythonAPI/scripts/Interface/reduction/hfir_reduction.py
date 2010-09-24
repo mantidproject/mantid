@@ -90,15 +90,22 @@ class ReductionScripter(object):
     """
     # Instrument description
     instrument = None
-    
     # Beam finder
     beam_finder = None 
+    # Transmission panel
+    transmission = None
+    # Background panel
+    background = None
+    # Data set panel
+    data_sets = None
     
     def __init__(self, name="BIOSANS"):
         self.instrument_name = name
         self.beam_finder = hfir_reduction_steps.BeamFinder()
         self.instrument = hfir_reduction_steps.InstrumentDescription()
         self.transmission = hfir_reduction_steps.Transmission()
+        self.background = hfir_reduction_steps.Background()
+        self.data_sets = hfir_reduction_steps.DataSets()
         
 
     def to_xml(self, file_name=None):
@@ -112,6 +119,15 @@ class ReductionScripter(object):
             
         if self.beam_finder is not None:
             xml_str += self.beam_finder.to_xml()
+            
+        if self.transmission is not None:
+            xml_str += self.transmission.to_xml()
+            
+        if self.background is not None:
+            xml_str += self.background.to_xml()
+            
+        if self.data_sets is not None:
+            xml_str += self.data_sets.to_xml()
             
         xml_str += "</Reduction>\n"
             
@@ -136,6 +152,15 @@ class ReductionScripter(object):
         if self.beam_finder is not None:
             self.beam_finder.from_xml(xml_str)
 
+        if self.transmission is not None:
+            self.transmission.from_xml(xml_str)
+
+        if self.background is not None:
+            self.background.from_xml(xml_str)
+
+        if self.data_sets is not None:
+            self.data_sets.from_xml(xml_str)
+
     def to_script(self, file_name=None):
         """
             Spits out the text of a reduction script with the current state.
@@ -158,6 +183,21 @@ class ReductionScripter(object):
         if self.beam_finder is None:
             raise RuntimeError, "A beam center option was not established before starting reduction."
         script += str(self.beam_finder)
+        
+        # Transmission
+        if self.transmission is None:
+            raise RuntimeError, "Transmission options were not established before starting reduction."
+        script += str(self.transmission)
+        
+        # Background
+        if self.background is None:
+            raise RuntimeError, "A background option was not established before starting reduction."
+        script += str(self.background)
+        
+        # Data sets
+        if self.data_sets is None:
+            raise RuntimeError, "Data set options were not established before starting reduction."
+        script += str(self.data_sets)
         
         if file_name is not None:
             f = open(file_name, 'w')

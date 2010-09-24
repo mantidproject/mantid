@@ -3,8 +3,9 @@ import util
 import os
 from reduction.hfir_reduction_steps import InstrumentDescription
 from application_settings import GeneralSettings
+from base_widget import BaseWidget
 
-class SANSInstrumentWidget(QtGui.QWidget):    
+class SANSInstrumentWidget(BaseWidget):    
     """
         Widget that present instrument details to the user
     """
@@ -76,14 +77,8 @@ class SANSInstrumentWidget(QtGui.QWidget):
         self._summary.max_sensitivity_edit.setEnabled(is_checked)
         
     def _sensitivity_browse(self):
-        fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
-                                                          self._settings.data_path, 
-                                                          "Data files (*.xml)"))
-        
+        fname = self.data_browse_dialog()
         if fname:
-            # Store the location of the loaded file
-            (folder, file_name) = os.path.split(fname)
-            self._settings.data_path = folder
             self._summary.sensitivity_file_edit.setText(fname)      
             
     def set_state(self, state):

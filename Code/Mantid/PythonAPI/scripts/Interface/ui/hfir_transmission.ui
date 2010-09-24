@@ -108,9 +108,9 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>140</y>
+     <y>130</y>
      <width>671</width>
-     <height>201</height>
+     <height>251</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="widget_placeholder"/>

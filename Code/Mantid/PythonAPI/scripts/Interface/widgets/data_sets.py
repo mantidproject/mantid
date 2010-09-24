@@ -43,4 +43,11 @@ class DataWidget(BaseWidget):
         self._content.repaint()
         print self._mask_widget.height(), self._mask_widget.width()
 
+    def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
+        m = DataSets()
+        return m
+        
         

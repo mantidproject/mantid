@@ -6,6 +6,7 @@ import os
 from PyQt4 import QtGui, uic, QtCore
 from reduction.hfir_reduction_steps import BeamFinder
 from application_settings import GeneralSettings
+from base_widget import BaseWidget
 
 # Beam finder frame
 class BeamFinderFrame(QtGui.QFrame):
@@ -76,7 +77,7 @@ class BeamFinderFrame(QtGui.QFrame):
         """
         self.beam_radius_edit.setEnabled(False)
             
-class BeamFinderWidget(QtGui.QWidget):    
+class BeamFinderWidget(BaseWidget):    
     def __init__(self, parent=None, state=None, settings=None):
         QtGui.QWidget.__init__(self, parent)
         self._layout = QtGui.QHBoxLayout()
@@ -121,13 +122,7 @@ class BeamFinderWidget(QtGui.QWidget):
         self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
     
     def _data_file_browse(self):
-        fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
-                                                          self._settings.data_path, 
-                                                          "Data files (*.xml)"))
-        
+        fname = self.data_browse_dialog()
         if fname:
-            # Store the location of the loaded file
-            (folder, file_name) = os.path.split(fname)
-            self._settings.data_path = folder
             self._content.beam_data_file_edit.setText(fname)          
     
