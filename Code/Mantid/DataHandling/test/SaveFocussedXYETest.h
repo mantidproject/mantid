@@ -108,7 +108,6 @@ public:
 	if(wsSptr)
 	{
 		AnalysisDataService::Instance().add("test_in", wsSptr);
-		wsSptr->add("test_in");
 		AnalysisDataService::Instance().add("test_in_1", work_in1);
 		wsSptr->add("test_in_1");
 		AnalysisDataService::Instance().add("test_in_2", work_in2);
@@ -197,7 +196,6 @@ public:
 	if(wsSptr)
 	{
 		AnalysisDataService::Instance().add("test_in", wsSptr);
-		wsSptr->add("test_in");
 		AnalysisDataService::Instance().add("test_in_1", work_in1);
 		wsSptr->add("test_in_1");
 		AnalysisDataService::Instance().add("test_in_2", work_in2);

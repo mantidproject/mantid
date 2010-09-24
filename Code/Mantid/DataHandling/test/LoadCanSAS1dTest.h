@@ -117,9 +117,9 @@ public:
     TS_ASSERT(group)
     vector<string> wNames = group->getNames();
     
-    TS_ASSERT_EQUALS(wNames.size(), 3)//change this and the lines below when group workspace names change
+    TS_ASSERT_EQUALS(wNames.size(),2)//change this and the lines below when group workspace names change
 
-    ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
+    ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[0]);
 	Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
   TS_ASSERT(ws2d)
 
@@ -143,7 +143,7 @@ public:
     TS_ASSERT_DELTA( ws2d->dataE(0)[testIndices[i]], es99631[i], tolerance );
   }
 
-    ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[2]);
+    ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
 	ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
   TS_ASSERT(ws2d)
 
