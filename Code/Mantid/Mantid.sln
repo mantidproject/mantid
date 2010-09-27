@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Crystal", "Crystal\Crystal.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ICat", "ICat\ICat.vcxproj", "{1DDA04E9-DB1B-41DC-9E7C-7E1661073FAD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MDDataObjects", "MDDataObjects\MDDataObjects.vcxproj", "{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -141,6 +143,10 @@ Global
 		{1DDA04E9-DB1B-41DC-9E7C-7E1661073FAD}.Release|Win32.Build.0 = Release|Win32
 		{1DDA04E9-DB1B-41DC-9E7C-7E1661073FAD}.Release|x64.ActiveCfg = Release|x64
 		{1DDA04E9-DB1B-41DC-9E7C-7E1661073FAD}.Release|x64.Build.0 = Release|x64
+		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Debug|x64.ActiveCfg = Debug|x64
+		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Release|Win32.ActiveCfg = Release|Win32
+		{BB63CA4D-5656-433D-8FD5-75BFD0606C8C}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
