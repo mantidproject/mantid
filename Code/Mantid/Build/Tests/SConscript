@@ -31,7 +31,7 @@ cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
 
 for fname in dirList:
   # Disable ICAT tests while the server is down and we have no way of killing a connection so that the rest of the unit tests can run.
-  if fname == 'ICat':
+  if fname == 'MDDataObjects':
     continue
   if os.path.isdir(path + fname):
       #does folder contain /test?
