@@ -24,7 +24,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING( downloadobj.initialize());
 		TS_ASSERT( downloadobj.isInitialized() );
 	}
-	void testDownLoadDataFile()
+	void xtestDownLoadDataFile()
 	{
 		//std::string str;
 		//std::getline(std::cin,str);
@@ -87,7 +87,7 @@ public:
 
 	}
 
-	void testDownLoadNexusFile()
+	void xtestDownLoadNexusFile()
 	{				
 		Session::Instance();
 
