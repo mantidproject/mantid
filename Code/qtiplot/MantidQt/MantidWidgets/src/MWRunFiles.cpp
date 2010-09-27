@@ -200,6 +200,80 @@ void MWRunFiles::setFileText(const QString & text)
   findFiles();
 }
 
+/** 
+* Puts the comma separated string in the fileEditor into the m_files array
+*/
+void MWRunFiles::findFiles()
+{
+
+  QStringList filestext = this->m_uiForm.fileEditor->text().split(", ", QString::SkipEmptyParts);
+  QString file;
+
+  std::string text = this->m_uiForm.fileEditor->text().toStdString();
+  if( text.empty() )
+  {
+    if( this->isOptional() )
+    {
+      m_uiForm.valid->hide();
+      return;
+    }
+    else
+    {
+      showError("No files specified.");
+      return;
+    }
+  }
+
+  Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
+  std::vector<std::string> filenames;
+  QString error("");
+  try
+  {
+    if( isForRunFiles() )
+    {
+      filenames = fileSearcher.findRuns(text);
+    }
+    else
+    {
+      foreach(file, filestext)
+      {
+        std::string result = fileSearcher.getFullPath(file.toStdString());
+        if( !result.empty() ) filenames.push_back(file.toStdString());
+      }
+    }
+  }
+  catch(Exception::NotFoundError& exc)
+  {
+    error = QString::fromStdString(exc.what());
+  }
+  catch(std::invalid_argument& exc)
+  {
+    error = QString::fromStdString(exc.what());
+  }
+  if( !error.isEmpty() )
+  {
+    showError(error);
+    return;
+  }
+
+  m_foundFiles.clear();
+  for( size_t i = 0; i < filenames.size(); ++i)
+  {
+    m_foundFiles.append(QString::fromStdString(filenames[i]));
+  }
+  if( m_foundFiles.isEmpty() )
+  {
+    showError("Error: No files found. Check search paths.");
+  }
+  else if( m_foundFiles.count() > 1 && this->allowMultipleFiles() == false )
+  {
+    showError("Error: Multiple files specified.");
+  }
+  else
+  {
+    m_uiForm.valid->hide();
+  }
+}
 
 /**
 * Read settings from the given group
@@ -370,77 +444,3 @@ void MWRunFiles::browseClicked()
   emit fileEditingFinished();
 }
 
-/** 
-* Puts the comma separated string in the fileEditor into the m_files array
-*/
-void MWRunFiles::findFiles()
-{
-
-  QStringList filestext = this->m_uiForm.fileEditor->text().split(", ", QString::SkipEmptyParts);
-  QString file;
-
-  std::string text = this->m_uiForm.fileEditor->text().toStdString();
-  if( text.empty() )
-  {
-    if( this->isOptional() )
-    {
-      m_uiForm.valid->hide();
-      return;
-    }
-    else
-    {
-      showError("No files specified.");
-      return;
-    }
-  }
-
-  Mantid::API::FileFinderImpl & fileSearcher = Mantid::API::FileFinder::Instance();
-  std::vector<std::string> filenames;
-  QString error("");
-  try
-  {
-    if( isForRunFiles() )
-    {
-      filenames = fileSearcher.findRuns(text);
-    }
-    else
-    {
-      foreach(file, filestext)
-      {
-        std::string result = fileSearcher.getFullPath(file.toStdString());
-        if( !result.empty() ) filenames.push_back(file.toStdString());
-      }
-    }
-  }
-  catch(Exception::NotFoundError& exc)
-  {
-    error = QString::fromStdString(exc.what());
-  }
-  catch(std::invalid_argument& exc)
-  {
-    error = QString::fromStdString(exc.what());
-  }
-  if( !error.isEmpty() )
-  {
-    showError(error);
-    return;
-  }
-
-  m_foundFiles.clear();
-  for( size_t i = 0; i < filenames.size(); ++i)
-  {
-    m_foundFiles.append(QString::fromStdString(filenames[i]));
-  }
-  if( m_foundFiles.isEmpty() )
-  {
-    showError("Error: No files found. Check search paths.");
-  }
-  else if( m_foundFiles.count() > 1 && this->allowMultipleFiles() == false )
-  {
-    showError("Error: Multiple files specified.");
-  }
-  else
-  {
-    m_uiForm.valid->hide();
-  }
-}

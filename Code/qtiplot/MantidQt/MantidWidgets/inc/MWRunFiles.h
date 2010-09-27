@@ -88,6 +88,8 @@ namespace MantidQt
     public slots:
       /// Set the file text
       void setFileText(const QString & text);
+      /// Find the files within the text edit field and cache their full paths
+      void findFiles();
 
     private:
       /// Create a file filter from a list of extensions
@@ -102,8 +104,6 @@ namespace MantidQt
     private slots:
       /// Browse clicked slot
       void browseClicked();
-      /// Find the files within the text edit field
-      void findFiles();
 
     private:
       /// Is the widget for run files or standard files
