@@ -67,10 +67,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
     Workspace2D_const_sptr input2D = boost::dynamic_pointer_cast<const Workspace2D>(input);
 
+
     int nspecEntries(0);
     const int nHist(input2D->getNumberHistograms());
     const SpectraDetectorMap & specMap_in = input2D->spectraMap();
-    for( int i = 1; i < 4; ++i )
+    // Spectra at workspace index 1 is masked
+    for( int i = 2; i < 4; ++i )
     {
       nspecEntries += specMap_in.ndet(i);
     }
@@ -101,15 +103,22 @@ public:
       TS_ASSERT_DELTA( e[i], std::sqrt(input2D->readY(2)[i]+input2D->readY(3)[i]), 1.0e-10 );
     }
 
+
+
     // Check the detectors mapped to the single spectra
     const SpectraDetectorMap & specMap_out = output2D->spectraMap();
-    TS_ASSERT_EQUALS( specMap_out.ndet(2), nspecEntries);
+    const int newSpectrumNo = 2;
+    TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
-    std::vector<int> dets = specMap_out.getDetectors(2);
-    TS_ASSERT_EQUALS(dets[0],2);
-    TS_ASSERT_EQUALS(dets[1],3);
-    TS_ASSERT_EQUALS(dets[2],4);
+    std::vector<int> dets = specMap_out.getDetectors(newSpectrumNo);
+    if( dets.size() == 0 ) 
+    {
+      TS_FAIL("SpectraMap has been remapped incorrectly");
+      return;
+    }
+    TS_ASSERT_EQUALS(dets[0],3);
+    TS_ASSERT_EQUALS(dets[1],4);
 
     AnalysisDataService::Instance().remove(outputSpace1);
   }
@@ -124,7 +133,6 @@ public:
     alg2.setPropertyValue("InputWorkspace",inputSpace);
     alg2.setPropertyValue("OutputWorkspace",outputSpace2);
     alg2.setProperty("IncludeMonitors",false);
-    if ( !alg2.isInitialized() ) alg2.initialize();
 
     // Check setting of invalid property value causes failure
     TS_ASSERT_THROWS( alg2.setPropertyValue("StartWorkspaceIndex","-1"), std::invalid_argument) ;
@@ -137,7 +145,8 @@ public:
     int nspecEntries(0);
     const int nHist(input2D->getNumberHistograms());
     const SpectraDetectorMap & specMap_in = input2D->spectraMap();
-    for( int i = 0; i < nHist; ++i )
+    // Spectra at workspace index 1 is masked and 0 is a monitor
+    for( int i = 2; i < nHist; ++i )
     {
       nspecEntries += specMap_in.ndet(i);
     }
@@ -174,17 +183,22 @@ public:
 
     // Check the detectors mapped to the single spectra
     const SpectraDetectorMap & specMap_out = output2D->spectraMap();
-    TS_ASSERT_EQUALS( specMap_out.ndet(1), nspecEntries);
+    const int newSpectrumNo(1);
+    TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
-    std::vector<int> dets = specMap_out.getDetectors(1);
-    TS_ASSERT_EQUALS(dets[0], 1);
-    TS_ASSERT_EQUALS(dets[1], 3);
-    TS_ASSERT_EQUALS(dets[2], 4);
-    TS_ASSERT_EQUALS(dets[3], 5);
-    TS_ASSERT_EQUALS(dets[4], 6);
-    TS_ASSERT_EQUALS(dets[5], 7);
-    TS_ASSERT_EQUALS(dets[6], 8);
+    std::vector<int> dets = specMap_out.getDetectors(newSpectrumNo);
+    if( dets.size() == 0 ) 
+    {
+      TS_FAIL("SpectraMap has been remapped incorrectly");
+      return;
+    }
+    TS_ASSERT_EQUALS(dets[0], 3);
+    TS_ASSERT_EQUALS(dets[1], 4);
+    TS_ASSERT_EQUALS(dets[2], 5);
+    TS_ASSERT_EQUALS(dets[3], 6);
+    TS_ASSERT_EQUALS(dets[4], 7);
+    TS_ASSERT_EQUALS(dets[5], 8);
 
     AnalysisDataService::Instance().remove(inputSpace);
     AnalysisDataService::Instance().remove(outputSpace1);

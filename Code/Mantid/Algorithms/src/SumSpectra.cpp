@@ -82,6 +82,9 @@ void SumSpectra::exec()
   MantidVec& YError = outputWorkspace->dataE(0);
   // Get a reference to the spectra-detector map
   SpectraDetectorMap& specMap = outputWorkspace->mutableSpectraMap();
+  // Clear and add is orders of magnitude faster than remap()
+  specMap.clear();
+  const SpectraDetectorMap & inputSpecMap = localworkspace->spectraMap();
   const Axis* const spectraAxis = localworkspace->getAxis(1);
   int newSpectrumNo = 0;
   if ( spectraAxis->isSpectra() ) 
@@ -89,6 +92,7 @@ void SumSpectra::exec()
     newSpectrumNo = spectraAxis->spectraNo(m_MinSpec);
     outputWorkspace->getAxis(1)->spectraNo(0) = newSpectrumNo;
   }
+  g_log.information() << "Spectra ramapping gives single spectra with spectra number: " << newSpectrumNo << "\n";
 
   // Loop over spectra
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
@@ -118,7 +122,10 @@ void SumSpectra::exec()
     }
    
     // Map all the detectors onto the spectrum of the output
-    if (spectraAxis->isSpectra()) specMap.remap(spectraAxis->spectraNo(i),newSpectrumNo);
+    if (spectraAxis->isSpectra()) 
+    {
+      specMap.addSpectrumEntries(newSpectrumNo,inputSpecMap.getDetectors(spectraAxis->spectraNo(i)));
+    }
 
     progress.report();
   }
