@@ -4,11 +4,14 @@ import os
 from reduction.hfir_reduction_steps import InstrumentDescription
 from application_settings import GeneralSettings
 from base_widget import BaseWidget
+from mask import MaskWidget
 
 class SANSInstrumentWidget(BaseWidget):    
     """
         Widget that present instrument details to the user
     """
+    # Mask widget    
+    _mask_widget = None        
     
     def __init__(self, parent=None, state=None, settings=None):      
         QtGui.QWidget.__init__(self, parent)
@@ -16,7 +19,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._layout = QtGui.QHBoxLayout()
 
         self._summary = QtGui.QFrame(self)
-        f = QtCore.QFile(":/hfir_summary.ui")
+        f = QtCore.QFile(":/hfir_data_summary.ui")
         f.open(QtCore.QIODevice.ReadOnly)
         uic.loadUi(f, self._summary)
         self.initialize_content()
@@ -38,6 +41,12 @@ class SANSInstrumentWidget(BaseWidget):
         return self._summary
 
     def initialize_content(self):
+        # Mask widget
+        self._mask_widget = MaskWidget()
+        self._summary.placeholder_layout.addWidget(self._mask_widget)
+        self._mask_widget.setMinimumSize(400, 400)
+        self._summary.repaint()     
+        
         # Validators
         self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
         self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
@@ -52,6 +61,9 @@ class SANSInstrumentWidget(BaseWidget):
     
         self.connect(self._summary.sensitivity_chk, QtCore.SIGNAL("clicked(bool)"), self._sensitivity_clicked)
         self.connect(self._summary.sensitivity_browse_button, QtCore.SIGNAL("clicked()"), self._sensitivity_browse)
+
+        # Data file
+        self.connect(self._summary.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_browse)
             
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)
@@ -80,6 +92,33 @@ class SANSInstrumentWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._summary.sensitivity_file_edit.setText(fname)      
+
+    def _data_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._summary.data_file_edit.setText(fname)    
+            
+            # Set the mask background
+            self._find_background_image(fname)       
+            
+    def _find_background_image(self, filename):
+        """
+            Find a background image for a given data file.
+            If one is found, set it as the background for the mask widget
+            @param filename: data filename
+        """
+        # Assume the standard HFIR folder structure
+        [data_dir, data_file_name] = os.path.split(filename)
+        file_name = os.path.splitext(data_file_name)[0]
+        file_name += '.png'
+        image_dir = os.path.join(data_dir, "Images")
+        # Check that we have an image folder
+        if os.path.isdir(image_dir):
+            file_name = os.path.join(image_dir, file_name)
+            # Check that we have an image for the chosen data file
+            if os.path.isfile(file_name):
+                self._mask_widget.set_background(file_name)
+                self._summary.repaint()        
             
     def set_state(self, state):
         """
@@ -87,10 +126,24 @@ class SANSInstrumentWidget(BaseWidget):
             @param state: InstrumentDescription object
         """
         self._summary.instr_name_label.setText(QtCore.QString(state.instrument_name))
-        npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
-        self._summary.n_pixel_label.setText(QtCore.QString(npixels))
-        self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
+        #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
+        #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
+        #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
 
+        # Data file
+        self._summary.data_file_edit.setText(QtCore.QString(state.data_file))
+        self._find_background_image(state.data_file)
+        # Store the location of the loaded file
+        if len(state.data_file)>0:
+            (folder, file_name) = os.path.split(state.data_file)
+            self._settings.data_path = folder
+
+        # Mask
+        self._mask_widget.topSpinBox.setValue(state.mask_top)
+        self._mask_widget.bottomSpinBox.setValue(state.mask_bottom)
+        self._mask_widget.rightSpinBox.setValue(state.mask_right)
+        self._mask_widget.leftSpinBox.setValue(state.mask_left)
+        
         # Detector offset input
         self._prepare_field(state.detector_offset != 0, 
                             state.detector_offset, 
@@ -139,6 +192,15 @@ class SANSInstrumentWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = InstrumentDescription()
+        
+        # Data file
+        m.data_file = self._summary.data_file_edit.text()
+        
+        # Mask
+        m.mask_top = int(self._mask_widget.topSpinBox.value())
+        m.mask_bottom = int(self._mask_widget.bottomSpinBox.value())
+        m.mask_right = int(self._mask_widget.rightSpinBox.value())
+        m.mask_left = int(self._mask_widget.leftSpinBox.value())
         
         # Detector offset input
         if self._summary.detector_offset_chk.isChecked():

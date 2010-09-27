@@ -49,6 +49,9 @@
         <height>16777215</height>
        </size>
       </property>
+      <property name="toolTip">
+       <string>Enter a valid data file path.</string>
+      </property>
      </widget>
     </item>
     <item row="0" column="2">
@@ -71,6 +74,9 @@
         <width>16777215</width>
         <height>16777215</height>
        </size>
+      </property>
+      <property name="toolTip">
+       <string>Select to apply a background subtraction.</string>
       </property>
       <property name="text">
        <string>Background data file:</string>
@@ -97,6 +103,9 @@
         <height>16777215</height>
        </size>
       </property>
+      <property name="toolTip">
+       <string>Enter a valid data file path.</string>
+      </property>
      </widget>
     </item>
     <item row="1" column="2">
@@ -119,6 +128,9 @@
         <width>16777215</width>
         <height>16777215</height>
        </size>
+      </property>
+      <property name="toolTip">
+       <string>Select to apply a dark current subtraction.</string>
       </property>
       <property name="text">
        <string>Dark current data file:</string>
@@ -146,6 +158,9 @@
      <width>332</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>Select to let the reduction software calculate the background transmission.</string>
    </property>
    <property name="text">
     <string>Calculate background transmission</string>
@@ -179,6 +194,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>Select to use the direct beam method for transmission calculation.</string>
+   </property>
    <property name="text">
     <string>Direct beam</string>
    </property>
@@ -191,6 +209,9 @@
      <width>131</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>Select to use the beam spreader (glassy carbon) method for transmission calculation.</string>
    </property>
    <property name="text">
     <string>Beam spreader</string>
@@ -218,6 +239,9 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>Uncertainty on the background transmission.</string>
+   </property>
   </widget>
   <widget class="QLineEdit" name="transmission_edit">
    <property name="geometry">
@@ -227,6 +251,9 @@
      <width>113</width>
      <height>27</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>Transmission value for the background in %.</string>
    </property>
   </widget>
  </widget>

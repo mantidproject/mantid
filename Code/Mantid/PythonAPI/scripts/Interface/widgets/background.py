@@ -165,6 +165,8 @@ class BackgroundWidget(BaseWidget):
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
+        self._content.calculate_trans_chk.setEnabled(is_checked)
+        self._calculate_clicked(is_checked and self._content.calculate_trans_chk.isChecked())
         
     def _background_browse(self):
         fname = self.data_browse_dialog()

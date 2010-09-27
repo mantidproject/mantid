@@ -59,6 +59,9 @@
         <height>16777215</height>
        </size>
       </property>
+      <property name="toolTip">
+       <string>Enter a valid data file path.</string>
+      </property>
      </widget>
     </item>
     <item row="0" column="2">
@@ -100,6 +103,9 @@
         <width>300</width>
         <height>16777215</height>
        </size>
+      </property>
+      <property name="toolTip">
+       <string>Enter a valid data file path.</string>
       </property>
      </widget>
     </item>
@@ -156,6 +162,9 @@
         <height>16777215</height>
        </size>
       </property>
+      <property name="toolTip">
+       <string>Enter a valid data file path.</string>
+      </property>
      </widget>
     </item>
     <item row="3" column="1">
@@ -171,6 +180,9 @@
         <width>300</width>
         <height>16777215</height>
        </size>
+      </property>
+      <property name="toolTip">
+       <string>Enter a valid data file path.</string>
       </property>
      </widget>
     </item>
@@ -230,6 +242,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Transmission of the beam spreader in %.</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -252,6 +267,9 @@
           <width>113</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Uncertainty on the beam spreader transmission.</string>
         </property>
        </widget>
       </item>

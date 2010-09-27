@@ -34,7 +34,7 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>10</y>
       <width>311</width>
       <height>291</height>
@@ -47,7 +47,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QListWidget" name="listWidget">
+  <widget class="QListWidget" name="data_list">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -56,16 +56,15 @@
      <height>192</height>
     </rect>
    </property>
-   <item>
-    <property name="text">
-     <string>Some data file.xml</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Some other data file.xml</string>
-    </property>
-   </item>
+   <property name="dragEnabled">
+    <bool>true</bool>
+   </property>
+   <property name="dragDropMode">
+    <enum>QAbstractItemView::InternalMove</enum>
+   </property>
+   <property name="alternatingRowColors">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
@@ -80,7 +79,7 @@
     <string>Add a data file:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="data_edit">
    <property name="geometry">
     <rect>
      <x>160</x>
@@ -108,7 +107,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="data_browse">
    <property name="geometry">
     <rect>
      <x>470</x>

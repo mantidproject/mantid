@@ -29,8 +29,6 @@ class HFIRInterface(object):
         self._transmission_widget = None
         # Background
         self._background_widget = None
-        # Data sets
-        self._data_widget = None
         
         # General settings
         self._settings = settings
@@ -44,11 +42,11 @@ class HFIRInterface(object):
         """
         self.scripter = ReductionScripter(name=self.scripter.instrument_name)
         self.scripter.from_xml(file_name)
+        
         self._beam_finder_widget.set_state(self.scripter.beam_finder)
         self._instrument_widget.set_state(self.scripter.instrument)
         self._transmission_widget.set_state(self.scripter.transmission)
         self._background_widget.set_state(self.scripter.background)
-        self._data_widget.set_state(self.scripter.data_sets)
         
     def save_file(self, file_name):
         """
@@ -66,7 +64,11 @@ class HFIRInterface(object):
             @param file_name: name of the python script to be saved
         """
         self._push_to_scripter()
-        self.scripter.to_script(file_name)
+        try:
+            return self.scripter.to_script(file_name)
+        except RuntimeError, e:
+            msg = "The following error was encountered:\n\n%s" % unicode(e)
+            QtGui.QMessageBox.warning(self._instrument_widget, "Reduction Parameters Incomplete", msg)
         
     def _push_to_scripter(self):
         """
@@ -76,7 +78,6 @@ class HFIRInterface(object):
         self.scripter.beam_finder = self._beam_finder_widget.get_state()
         self.scripter.transmission = self._transmission_widget.get_state()
         self.scripter.background = self._background_widget.get_state()
-        self.scripter.data_sets = self._data_widget.get_state()
         
     def reduce(self):
         """
@@ -85,7 +86,7 @@ class HFIRInterface(object):
         self._push_to_scripter()
         
         # Print the script for now
-        print self.scripter.to_script()
+        print self.export(None)
         
     def get_tabs(self):
         """
@@ -104,12 +105,8 @@ class HFIRInterface(object):
         # Background
         self._background_widget = BackgroundWidget(settings = self._settings)
         
-        # Data sets
-        self._data_widget = DataWidget(settings = self._settings)
-        
         return [["Instrument", self._instrument_widget],
                 ["Beam Center", self._beam_finder_widget],
                 ["Transmission", self._transmission_widget],
-                ["Background", self._background_widget],
-                ["Data Sets", self._data_widget]]
+                ["Background", self._background_widget]]
         

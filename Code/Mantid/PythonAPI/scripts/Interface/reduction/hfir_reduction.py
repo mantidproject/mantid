@@ -11,6 +11,13 @@ class BaseScriptElement(object):
         Base class for each script element (panel on the UI).
         Contains only data and is UI implementation agnostic.
     """
+    def __str__(self):
+        """
+            Script representation of the object.
+            The output is meant to be executable as a Mantid python script
+        """
+        return ""
+    
     def apply(self):
         """
             Method called to apply the reduction script element
@@ -22,7 +29,7 @@ class BaseScriptElement(object):
         """
             Return an XML representation of the data / state of the object
         """
-        return NotImplemented
+        return ""
     
     def from_xml(self, xml_str):
         """
@@ -78,7 +85,7 @@ class BaseScriptElement(object):
     def getBoolElement(cls, dom, tag, true_tag='true', default=False):
         value = BaseScriptElement.getContent(dom, tag)
         if value is not None:
-            return value==true_tag
+            return value.lower()==true_tag.lower()
         else:
             return default
 
@@ -96,8 +103,6 @@ class ReductionScripter(object):
     transmission = None
     # Background panel
     background = None
-    # Data set panel
-    data_sets = None
     
     def __init__(self, name="BIOSANS"):
         self.instrument_name = name
@@ -105,8 +110,6 @@ class ReductionScripter(object):
         self.instrument = hfir_reduction_steps.InstrumentDescription()
         self.transmission = hfir_reduction_steps.Transmission()
         self.background = hfir_reduction_steps.Background()
-        self.data_sets = hfir_reduction_steps.DataSets()
-        
 
     def to_xml(self, file_name=None):
         """
@@ -125,9 +128,6 @@ class ReductionScripter(object):
             
         if self.background is not None:
             xml_str += self.background.to_xml()
-            
-        if self.data_sets is not None:
-            xml_str += self.data_sets.to_xml()
             
         xml_str += "</Reduction>\n"
             
@@ -157,9 +157,6 @@ class ReductionScripter(object):
 
         if self.background is not None:
             self.background.from_xml(xml_str)
-
-        if self.data_sets is not None:
-            self.data_sets.from_xml(xml_str)
 
     def to_script(self, file_name=None):
         """
@@ -193,11 +190,6 @@ class ReductionScripter(object):
         if self.background is None:
             raise RuntimeError, "A background option was not established before starting reduction."
         script += str(self.background)
-        
-        # Data sets
-        if self.data_sets is None:
-            raise RuntimeError, "Data set options were not established before starting reduction."
-        script += str(self.data_sets)
         
         if file_name is not None:
             f = open(file_name, 'w')

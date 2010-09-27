@@ -37,11 +37,14 @@ class DataWidget(BaseWidget):
         self._mask_widget = MaskWidget()
         
         self._content.placeholder_layout.addWidget(self._mask_widget)
-        #self._content.placeholder_layout.setGeometry(QtCore.QRect(200,200,200,200))
-        #self._mask_widget.resize(400, 400)
         self._mask_widget.setMinimumSize(400, 400)
         self._content.repaint()
-        print self._mask_widget.height(), self._mask_widget.width()
+
+        # Clear data list
+        self._content.data_list.clear()
+        
+        # Connections
+        self.connect(self._content.data_browse, QtCore.SIGNAL("clicked()"), self._data_browse)
 
     def get_state(self):
         """
@@ -50,4 +53,10 @@ class DataWidget(BaseWidget):
         m = DataSets()
         return m
         
-        
+    def _data_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.data_edit.setText(fname)    
+            self._content.data_list.addItem(QtGui.QListWidgetItem(QtCore.QString(fname)))
+
+    
