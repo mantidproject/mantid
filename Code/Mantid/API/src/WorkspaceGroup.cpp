@@ -71,15 +71,13 @@ void WorkspaceGroup::remove(const std::string& name)
 void WorkspaceGroup::deepRemoveAll()
 {
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-  // First member of the group is itself so skip it through and delete
-  // but skipping itself
-  size_t nentries = m_wsNames.size();
-  for( size_t i = nentries - 1; i > 0; --i)
-  {
-    AnalysisDataService::Instance().remove(m_wsNames[i]);
-    remove(m_wsNames[i]);
-  }
-  m_wsNames.clear();
+   while (!m_wsNames.empty())
+   {
+	   AnalysisDataService::Instance().remove(m_wsNames.back());
+	   m_wsNames.pop_back();
+
+   }
+   
   Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 }
 
