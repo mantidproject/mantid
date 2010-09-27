@@ -31,7 +31,8 @@ using namespace MantidQt::API;
 /**
  * Default Constructor
  */
-UserSubWindow::UserSubWindow(QWidget* parent) :  QWidget(parent), m_bIsInitialized(false), m_ifacename("")
+UserSubWindow::UserSubWindow(QWidget* parent) :  
+  QWidget(parent), m_bIsInitialized(false), m_isPyInitialized(false), m_ifacename("")
 {
   setAttribute(Qt::WA_DeleteOnClose, false);
 }
@@ -75,6 +76,15 @@ bool UserSubWindow::isInitialized() const
 }
 
 /**
+ * Has the Python initialization function been called yet?
+ * @returns Whether initializeLocalPython  has been called yet
+ */
+bool UserSubWindow::isPyInitialized() const
+{ 
+  return m_isPyInitialized; 
+}
+
+/**
  *  A boost 'slot' for the Mantid signal channel connection. This relays the message to
  * a Qt signal
  * @param msg The Poco message parameter
@@ -90,8 +100,11 @@ void UserSubWindow::mantidLogReceiver(const Poco::Message & msg)
  */
 void UserSubWindow::initializeLocalPython()
 {
+  if( isPyInitialized() ) return;
+
   //Call overridable function
   this->initLocalPython();
+  m_isPyInitialized = true;
 }
 
 //--------------------------------------

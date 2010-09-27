@@ -93,9 +93,10 @@ public:
   void initializeLayout();
   /// Run local Python init code. Calls overridable function in specialized interface
   void initializeLocalPython();
-
   /// Is this dialog initialized
   bool isInitialized() const;
+  /// Has the Python initialization function been run
+  bool isPyInitialized() const;
 
   /// A boost 'slot' for the Mantid signal channel connection
   void mantidLogReceiver(const Poco::Message & msg);
@@ -131,13 +132,12 @@ private:
 
   /// Set the interface name
   void setInterfaceName(const QString & iface_name);
-
   /// Connect this object to Mantid's signal channel
   bool connectToMantidSignal();
-  
   /// Has this already been initialized
   bool m_bIsInitialized;
-
+  /// Has the python initialization been run
+  bool m_isPyInitialized;
   /// Store the name of the interface
   QString m_ifacename;
 };

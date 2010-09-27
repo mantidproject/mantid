@@ -70,7 +70,6 @@ namespace MantidQt
 
       // Initialize the layout
       virtual void initLayout();
-      virtual void initLocalPython();
 
       void runClicked();
       void helpClicked();
@@ -144,8 +143,6 @@ namespace MantidQt
       //@todo These all should be handled by the file widget
       QString m_lastSaveDir;
       QString m_lastLoadDir;
-
-      bool m_isPyInitialized;
     };
   }
 }

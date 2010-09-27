@@ -62,29 +62,46 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   QString Tzero = m_sets.TzeroEdit->text();
   QString pyTzero = (Tzero.isEmpty()) ? "None" : Tzero;
 
-  if( m_sets.ckSumSpecs->isChecked() )
+  if( m_sets.ckSumSpecs->isChecked() || runFiles.size() == 1)
   {
-    QString pySaveName = "r'" + saveName + "'";
+    QString pySaveName;
+    if( saveName.isEmpty() )
+    {
+      pySaveName = "None";
+    }
+    else
+    {
+      pySaveName = "r'" + saveName + "'";
+    }
     pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7, Tzero=%8)");
     pyCode = pyCode.arg(pyRunFiles, eiGuess,pyWhiteBeam,pyAbsRunFiles,absEiGuess, pyAbsWhiteBeam, pySaveName, pyTzero);
   }
   else
   {
+    QString pySaveName;
+    if( saveName.isEmpty() )
+    {
+      pySaveName = "None";
+    }
+    else
+    {
+      pySaveName = "r'" + QFileInfo(saveName).absolutePath() + "'";
+    }
     pyCode += "rfiles = " + pyRunFiles + "\n";
     if( absRunFiles.isEmpty() )
     {
       pyCode +=
         "for run in rfiles:\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, Tzero=%3)\n";
-      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, pyTzero);
+        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3,Tzero=%4)\n";
+      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, pySaveName, pyTzero);
     }
     else
     {
       pyCode += "abs_rfiles = " + pyAbsRunFiles + "\n";
       pyCode +=
         "for run, abs in zip(rfiles, abs_rfiles):\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4, Tzero=%5)\n";
-      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, absEiGuess, pyAbsWhiteBeam, pyTzero);
+        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4, save_path=%5,Tzero=%6)\n";
+      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, absEiGuess, pyAbsWhiteBeam, pySaveName, pyTzero);
     }
   }
   m_pyScript = pyCode;

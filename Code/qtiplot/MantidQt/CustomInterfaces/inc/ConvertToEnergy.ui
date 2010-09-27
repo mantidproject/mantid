@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>604</height>
+    <width>503</width>
+    <height>703</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -3211,5 +3211,70 @@ p, li { white-space: pre-wrap; }
   <tabstop>leRMMMass</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cbInst</sender>
+   <signal>instrumentSelectionChanged(QString)</signal>
+   <receiver>runFiles</receiver>
+   <slot>findFiles()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>121</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>222</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbInst</sender>
+   <signal>instrumentSelectionChanged(QString)</signal>
+   <receiver>whiteBeamFile</receiver>
+   <slot>findFiles()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>121</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>251</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbInst</sender>
+   <signal>instrumentSelectionChanged(QString)</signal>
+   <receiver>absRunFiles</receiver>
+   <slot>findFiles()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>121</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>251</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbInst</sender>
+   <signal>instrumentSelectionChanged(QString)</signal>
+   <receiver>absWhiteFile</receiver>
+   <slot>findFiles()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>121</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>251</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -37,7 +37,7 @@ using namespace MantidQt::CustomInterfaces;
 Homer::Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm),
   m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
-  m_isPyInitialized(false), m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")
+  m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")
 {}
 
 /// Set up the dialog layout
@@ -51,11 +51,6 @@ void Homer::initLayout()
   m_uiForm.pbHelp->setToolTip("Online documentation (loads in a browser)");
 
   readSettings();
-}
-
-void Homer::initLocalPython()
-{
-  m_isPyInitialized = true;
 }
 
 /**
@@ -121,18 +116,15 @@ void Homer::setUpPage1()
   
   connect(m_uiForm.pbBack, SIGNAL(clicked()), this, SLOT(bgRemoveClick()));
 
-  // SIGNALS and SLOTS that deal with coping the text from one edit box to another 
+  // SIGNALS and SLOTS that deal with copying the text from one edit box to another 
   connect(m_uiForm.ckSumSpecs, SIGNAL(stateChanged(int)), this, SLOT(updateSaveName()));
   connect(m_uiForm.leNameSPE, SIGNAL(editingFinished()), this, SLOT(saveNameUpd()));
-  connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), this, SLOT(browseSaveFile()));
 }
 
 /// put default values into the controls in the first tab
 void Homer::page1FileWidgs()
 {
   connect(m_uiForm.runFiles, SIGNAL(fileEditingFinished()), this, SLOT(runFilesChanged()));
-  
-  m_uiForm.whiteBeamFile = m_uiForm.whiteBeamFile;
   connect(m_uiForm.whiteBeamFile, SIGNAL(fileEditingFinished()), this, SLOT(updateWBV()));
 
   // Add the save buttons to a button group
@@ -680,6 +672,7 @@ void Homer::runFilesChanged()
 {
   if( !m_uiForm.runFiles->isValid() ) return;
   emit MWDiag_sendRuns(m_uiForm.runFiles->getFilenames());
+  m_saveChanged = false;
   // the output file's default name is based on the input file names
   updateSaveName();
 }
@@ -723,12 +716,12 @@ QString Homer::defaultName()
   {//this will trhow if there is an invalid filename
     QStringList fileList = m_uiForm.runFiles->getFilenames();
     if ( fileList.size() == 0 )
-    {// no input files we can't say anything about the output files
+    {
       return "";
     }
     if ( fileList.size() > 1 && ! m_uiForm.ckSumSpecs->isChecked() )
-    {// multiple input files that are not summed give rise to multiple output files. Prepare to give the output files names that corrospond to the input filenames
-      return "";
+    {
+      return "multiple-output-files";
     }
     // maybe normal operation: the output file name is based on the first input file
     return deltaECalc::SPEFileName(fileList.front());
@@ -765,9 +758,13 @@ void Homer::bgRemoveReadSets()
 /**
  * Set the default parameters for the given instrument
  */
-void Homer::setIDFValues(const QString & name)
+void Homer::setIDFValues(const QString &)
 {
-  if( !m_isPyInitialized ) return;
+  if( !isPyInitialized() ) 
+  {
+    QMessageBox::information(this, "MantidPlot", "Error: Python not connected, cannot continue.");
+    return;
+  }
 
   QString prefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
 

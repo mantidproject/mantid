@@ -64,9 +64,6 @@ void Indirect::initLayout()
   connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.ind_mapFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirtyRebin()));
 
-  // "Browse" buttons
-  connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), this, SLOT(browseSave()));
-
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
   // "Calibration" tab
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calibPlot()));
