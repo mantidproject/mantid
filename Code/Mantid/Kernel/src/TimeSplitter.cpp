@@ -125,23 +125,52 @@ bool isFilter(const TimeSplitterType& a)
   return (max <= 0);
 }
 
+
+
 //------------------------------------------------------------------------------------------------
 /** Plus operator for TimeSplitterType.
  * Combines a filter and a splitter by removing entries that are filtered out from the splitter.
- * Combines two filters together by "and"ing them
+ * Also, will combine two filters together by "and"ing them
+ *
+ * @param a TimeSplitterType splitter OR filter
+ * @param b TimeSplitterType splitter OR filter.
+ * @throw std::invalid_argument if two splitters are given.
  */
 TimeSplitterType operator +(const TimeSplitterType& a, const TimeSplitterType& b)
 {
-  TimeSplitterType out;
+  bool a_filter, b_filter;
+  a_filter = isFilter(a);
+  b_filter = isFilter(b);
 
-  return out;
+  if (a_filter && b_filter)
+  {
+    return a & b;
+  }
+  else if (a_filter && !b_filter)
+  {
+    return b & a;
+  }
+  else if (!a_filter && b_filter)
+  {
+    return a & b;
+  }
+  else // (!a_filter && !b_filter)
+  {
+    //Both are splitters.
+    throw std::invalid_argument("Cannot combine two splitters together, as the output is undefined. Try splitting each output workspace by b after the a split has been done.");
+  }
 }
+
 
 
 //------------------------------------------------------------------------------------------------
 /** AND operator for TimeSplitterType
- * Only works on Filters, not splitters. Combines the splitters
- * to only keep times where both Filters are TRUE.
+ * Works on Filters - combines them to only keep times where both Filters are TRUE.
+ * Works on splitter + filter if (a) is a splitter and b is a filter.
+ *  In general, use the + operator since it will resolve the order for you.
+ *
+ * @param a TimeSplitterType filter or Splitter.
+ * @param b TimeSplitterType filter.
  */
 TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b)
 {
@@ -160,6 +189,8 @@ TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b
     {
       if (ait->overlaps(*bit))
       {
+        // The & operator for SplittingInterval keeps the index of the left-hand-side (ait in this case)
+        //  meaning that a has to be the splitter because the b index is ignored.
         out.push_back( *ait & *bit );
       }
     }
@@ -169,31 +200,24 @@ TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b
 
 
 //------------------------------------------------------------------------------------------------
-/** OR operator for TimeSplitterType
- * Only works on Filters, not splitters. Combines the splitters
- * to only keep times where EITHER Filter is TRUE.
+/** Remove any overlap in a filter (will not work properly on a splitter)
+ *
+ * @param a TimeSplitterType filter.
  */
-TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b)
+TimeSplitterType removeFilterOverlap(const TimeSplitterType &a)
 {
   TimeSplitterType out;
 
-  //Concatenate the two lists
-  TimeSplitterType temp = a;
-  temp.insert(temp.end(), b.begin(), b.end());
-
-  //Sort by start time
-  std::sort(temp.begin(), temp.end(), compareSplittingInterval);
-
   //Now we have to merge duplicate/overlapping intervals together
-  TimeSplitterType::iterator it = temp.begin();
-  while (it != temp.end())
+  TimeSplitterType::const_iterator it = a.begin();
+  while (it != a.end())
   {
     //All following intervals will start at or after this one
     PulseTimeType start = it->start();
     PulseTimeType stop = it->stop();
 
     //Keep looking for the next interval where there is a gap (start > old stop);
-    while ((it != temp.end()) && (it->start() <= stop))
+    while ((it != a.end()) && (it->start() <= stop))
     {
       //Extend the stop point (the start cannot be extended since the list is sorted)
       if (it->stop() > stop)
@@ -209,13 +233,73 @@ TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b
 
 
 //------------------------------------------------------------------------------------------------
+/** OR operator for TimeSplitterType
+ * Only works on Filters, not splitters. Combines the splitters
+ * to only keep times where EITHER Filter is TRUE.
+ *
+ * @param a TimeSplitterType filter.
+ * @param b TimeSplitterType filter.
+ */
+TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b)
+{
+  TimeSplitterType out;
+
+  //Concatenate the two lists
+  TimeSplitterType temp = a;
+  temp.insert(temp.end(), b.begin(), b.end());
+
+  //Sort by start time
+  std::sort(temp.begin(), temp.end(), compareSplittingInterval);
+
+  out = removeFilterOverlap(temp);
+
+  return out;
+}
+
+
+//------------------------------------------------------------------------------------------------
 /** NOT operator for TimeSplitterType
  * Only works on Filters. Returns a filter with the reversed
  * time intervals as the incoming filter.
+ *
+ * @param a TimeSplitterType filter.
  */
 TimeSplitterType operator ~(const TimeSplitterType& a)
 {
-  TimeSplitterType out;
+  TimeSplitterType out, temp;
+  //First, you must remove any overlapping intervals, otherwise the output is stupid.
+  temp = removeFilterOverlap(a);
+
+  //No entries: then make a "filter" that keeps everything
+  if ((temp.size()==0) )
+  {
+    out.push_back( SplittingInterval(DateAndTime::getMinimumPulseTime(), DateAndTime::getMaximumPulseTime(), 0 ) );
+    return out;
+  }
+
+  TimeSplitterType::const_iterator ait;
+  ait=temp.begin();
+  if (ait != temp.end())
+  {
+    //First entry; start at -infinite time
+    out.push_back( SplittingInterval( DateAndTime::getMinimumPulseTime(), ait->start(), 0) );
+    //Now start at the second entry
+    while (ait != temp.end())
+    {
+      PulseTimeType start, stop;
+      start = ait->stop();
+      ait++;
+      if (ait==temp.end())
+      { //Reached the end - go to inf
+        stop = DateAndTime::getMaximumPulseTime();
+      }
+      else
+      { //Stop at the start of the next entry
+        stop = ait->start();
+      }
+      out.push_back( SplittingInterval(start, stop, 0) );
+    }
+  }
   return out;
 }
 
