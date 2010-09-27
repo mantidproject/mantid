@@ -114,6 +114,7 @@ public:
     //Concatenate the maps!
     m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
 
+    //m_size = m_propertySeries.size();
     this->countSize();
 
     return *this;
@@ -420,6 +421,7 @@ public:
   {
     if (time_sec.size() != new_values.size())
       throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
+    m_size = 0;
     m_propertySeries.clear();
     size_t num = new_values.size();
     for (size_t i=0; i < num; i++)
@@ -429,7 +431,6 @@ public:
       //std::cout << i << ":" << Kernel::DateAndTime::to_simple_string(time) << "\n";
       this->addValue(time, new_values[i]);
     }
-    this->countSize();
   }
 
   //-----------------------------------------------------------------------------------------------

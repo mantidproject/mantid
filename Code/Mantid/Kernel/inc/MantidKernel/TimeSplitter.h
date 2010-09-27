@@ -26,19 +26,27 @@ public:
   /// Default constructor
   SplittingInterval();
 
-  /// Constructor using dateAndTime
+  SplittingInterval(const SplittingInterval& other);
+
   SplittingInterval(const dateAndTime& start, const dateAndTime& stop, const int index);
 
-  /// Constructor using PulseTimeType
   SplittingInterval(const PulseTimeType& start, const PulseTimeType& stop, const int index);
 
-  PulseTimeType start();
-  PulseTimeType stop();
+  PulseTimeType start() const;
+  PulseTimeType stop() const;
 
-  dateAndTime startDate();
-  dateAndTime stopDate();
+  dateAndTime startDate() const;
+  dateAndTime stopDate() const;
 
-  int index();
+  double duration() const;
+
+  int index() const;
+
+  double overlaps(const SplittingInterval& b) const;
+
+  SplittingInterval operator &(const SplittingInterval& b) const;
+
+  SplittingInterval operator |(const SplittingInterval& b) const;
 
 private:
     /// begin
@@ -56,6 +64,12 @@ private:
  *
  */
 typedef std::vector< SplittingInterval > TimeSplitterType;
+
+// -------------- Operators ---------------------
+DLLExport TimeSplitterType operator +(const TimeSplitterType& a, const TimeSplitterType& b);
+DLLExport TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b);
+DLLExport TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b);
+DLLExport TimeSplitterType operator ~(const TimeSplitterType& a);
 
 } //Namespace Kernel
 } //Namespace Mantid
