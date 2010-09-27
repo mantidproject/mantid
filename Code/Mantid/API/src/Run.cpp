@@ -133,9 +133,10 @@ using namespace Kernel;
   {
     // Mmake an exception for the proton charge
     // and overwrite it's value as we don't want to store the proton charge in two separate locations
-    if( hasProperty(m_protonChargeName) && (overwrite || prop->name() == m_protonChargeName) )
+    std::string name = prop->name();
+    if( hasProperty(name) && (overwrite || prop->name() == m_protonChargeName) )
     {
-      removeProperty(m_protonChargeName);
+      removeProperty(name);
     }
     m_manager.declareProperty(prop, "");
   }

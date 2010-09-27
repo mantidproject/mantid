@@ -544,7 +544,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
     {
       // set the Ei value in the run parameters
       API::Run & run = outputWS->mutableRun();
-      run.addProperty<double>("Ei", efixedProp);
+      run.addProperty<double>("Ei", efixedProp, true);
     }
   }
   else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic

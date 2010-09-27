@@ -73,7 +73,7 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
         return values[0]
     
-    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_white_run=None, abs_ei=None, save_filename=None, Tzero=None):
+    def convert_to_energy(self, mono_run, ei, white_run=None, abs_mono_run=None, abs_white_run=None, abs_ei=None, save_path=None, Tzero=None):
         '''
         Convert mono-chromatic run to deltaE
         '''
@@ -95,16 +95,29 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
             mtd.deleteWorkspace(abs_norm_wkspace.getName())
         else:
             absnorm_factor = None
+
+        # Figure out what to call the workspace 
+        resultws_name = save_path
+        if not resultws_name is None:
+            if os.path.isdir(save_path):
+                resultws_name = None
+            else:
+                resultws_name = os.path.split(save_path)[1]
+            if resultws_name == '':
+                resultws_name = None
+
         # Main run file conversion
-        sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file, self.spectra_masks, save_filename, Tzero)
+        sample_wkspace = self.do_conversion(mono_run, ei, white_run, self.map_file, self.spectra_masks, resultws_name, Tzero)
         if not absnorm_factor is None:
             absnorm_factor *= (self.abs_mass/self.abs_rmm)
             sample_wkspace /= absnorm_factor
         
-        if save_filename is None:
-            save_filename = sample_wkspace.getName()
+        if save_path is None:
+            save_path = sample_wkspace.getName()
+        elif os.path.isdir(save_path):
+            save_path = os.path.join(save_path, sample_wkspace.getName())
             
-        self.save_results(sample_wkspace, save_filename)
+        self.save_results(sample_wkspace, save_path)
         return sample_wkspace
         
     def do_conversion(self, mono_run, ei_guess, white_run=None, map_file=None, spectra_masks=None, resultws_name = None, Tzero=None):
@@ -354,21 +367,21 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         MaskDetectors(data_ws, SpectraList=median_test_alg.getPropertyValue('BadSpectraNums'))
         mtd.deleteWorkspace(median_tests_ws)
 
-    def save_results(self, workspace, save_filename, formats = None):
+    def save_results(self, workspace, save_path, formats = None):
         '''
         Save the result workspace to the specfied filename using the list of formats specified in 
         self.save_formats
         '''
-        if save_filename == '':
+        if save_path == '':
             raise ValueError('Empty filename is not allowed for saving')
         if formats is None:
             formats = self.save_formats
         if type(formats) == str:
             formats = [formats]
         #Make sure we just have a file stem
-        save_filename = os.path.splitext(save_filename)[0]
+        save_path = os.path.splitext(save_path)[0]
         for ext in formats:
-            filename = save_filename + ext
+            filename = save_path + ext
             if ext == '.spe':
                 SaveSPE(workspace, filename)
             elif ext == '.nxs':
