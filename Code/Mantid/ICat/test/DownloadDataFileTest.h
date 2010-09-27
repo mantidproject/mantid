@@ -148,7 +148,8 @@ public:
 		AnalysisDataService::Instance().remove("investigations");
 		AnalysisDataService::Instance().remove("investigation");
 	}
-	void testDownLoadDataFile_Merlin()
+
+	void xtestDownLoadDataFile_Merlin()
 	{
 		//std::string str;
 		//std::getline(std::cin,str);
