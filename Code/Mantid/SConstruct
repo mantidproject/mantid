@@ -368,6 +368,8 @@ env.Install('Build/Plugins', ret['shared'])
 # Copy required files to the build destination
 Command(dest_dir+'/Mantid.properties','Properties/Mantid.properties',Copy("$TARGET","$SOURCE"))
 Command(dest_dir+'/MantidFramework.py','PythonAPI/MantidFramework.py',Copy("$TARGET","$SOURCE"))
+Command(dest_dir+'/__init__.py','PythonAPI/__init__.py',Copy("$TARGET","$SOURCE"))
+Command(dest_dir+'/setup.py','PythonAPI/setup.py',Copy("$TARGET","$SOURCE"))
 
 # The unit tests
 skiptest=ARGUMENTS.get('skiptest',0)
