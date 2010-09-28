@@ -58,6 +58,7 @@ public:
   virtual const std::string category() const { return "General"; }
 
 private:
+  /// used for the progress bar: the, approximate, fraction of processing time that taken up with loading the file
   static const double LOAD_TIME;
   /// Initialisation code
   void init();
