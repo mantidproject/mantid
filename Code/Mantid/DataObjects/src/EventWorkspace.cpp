@@ -369,7 +369,9 @@ using namespace Mantid::Kernel;
 
 
   //-----------------------------------------------------------------------------
-  /** Call this method when loading event data is complete.
+  /** Call this method when loading event data is complete (adding events
+   * by calling getEventListAtPixelId() )
+   *
    * The map of pixelid to spectrum # is generated.
    * Also, a simple 1:1 map of spectrum # to pixel id (detector #) is generated
    * @param makeSpectraMap Generate a spectramap (0=No, otherwise yes). Default = YES

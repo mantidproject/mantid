@@ -39,6 +39,7 @@ public:
   vector<uint8_t> i1_array;
   vector<int16_t> i2_array;
   vector<int32_t> i4_array;
+  vector<int64_t> i8_array;
   vector<float> r4_array;
   vector<double> r8_array;
 
@@ -60,6 +61,10 @@ public:
     // 1d int32 data
     for (size_t i = 0; i < 4; i++) {
       i4_array.push_back(1000000*(i+1));
+    }
+    // 1d int64 data
+    for (size_t i = 0; i < 4; i++) {
+      i8_array.push_back(1000000000*(i+1));
     }
     // 2d float data
     for (size_t i = 0; i < 5*4; i++) {
@@ -99,6 +104,8 @@ public:
     file.writeData("i2_data", i2_array);
 
     file.writeData("i4_data", i4_array);
+
+    file.writeData("i8_data", i8_array);
 
     file.writeData("r4_data", r4_array, array_dims);
 
