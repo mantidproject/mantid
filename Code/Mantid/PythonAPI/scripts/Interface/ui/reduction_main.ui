@@ -55,7 +55,7 @@
    <widget class="QPushButton" name="reduce_button">
     <property name="geometry">
      <rect>
-      <x>750</x>
+      <x>650</x>
       <y>690</y>
       <width>93</width>
       <height>27</height>
@@ -63,6 +63,19 @@
     </property>
     <property name="text">
      <string>Reduce</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="export_button">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>690</y>
+      <width>93</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Export</string>
     </property>
    </widget>
   </widget>
@@ -121,24 +134,7 @@
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>reduce_button</sender>
-   <signal>clicked()</signal>
-   <receiver>SANSReduction</receiver>
-   <slot>reduce_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>917</x>
-     <y>817</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>748</x>
-     <y>815</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>reduce_clicked()</slot>
   <slot>file_open()</slot>
