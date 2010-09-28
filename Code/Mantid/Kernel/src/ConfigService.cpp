@@ -21,6 +21,7 @@
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/NodeList.h"
 #include "Poco/Notification.h"
+#include "Poco/Environment.h"
 
 #include <fstream>
 #include <sstream>
@@ -139,7 +140,10 @@ ConfigServiceImpl::ConfigServiceImpl() :
   if (callingApplication.find("python") != std::string::npos || callingApplication.find("matlab")
       != std::string::npos)
   {
-    m_strBaseDir = Poco::Path::current();
+    if (Poco::Environment::has("MANTIDPATH"))
+       m_strBaseDir = Poco::Environment::get("MANTIDPATH");
+    else
+      m_strBaseDir = Poco::Path::current();
   }
   else
   {
