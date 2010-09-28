@@ -10,6 +10,10 @@
 #include <map>
 #include <set>
 
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
+#include <Poco/AutoPtr.h>
+
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -65,6 +69,45 @@ namespace Mantid
     class EXPORT_OPT_MANTID_KERNEL ConfigServiceImpl
     {
     public:
+
+      /**
+      * This is the base class for POCO Notifications sent out from the Config Service.
+      * It does nothing.
+      */
+      class ConfigServiceNotification : public Poco::Notification
+      {
+      public:
+        /// Empty constructor for ConfigServiceNotification Base Class
+        ConfigServiceNotification() : Poco::Notification() {}
+      };
+
+      /**
+      * This is the class for the notification that is to be sent when a value has been changed in
+      * config service.
+      */
+      class ValueChanged : public ConfigServiceNotification
+      {
+      public:
+        /** Creates the Notification object with the required values
+        *   @param name property that has been changed
+        *   @param newvalue new value of property
+        *   @param prevvalue previous value of property
+        */
+        ValueChanged(const std::string name, const std::string newvalue, const std::string prevvalue) : ConfigServiceNotification(), m_name(name), m_value(newvalue), m_prev(prevvalue) {}
+        /// The name of the user property that has changed, as it appears in the user.properties file
+        const std::string & key() const { return this->m_name; } ///< @return The name of the changed the property
+        /// The new value for the property
+        const std::string & curValue() const { return this->m_value; } ///< @return The new value for the property
+        /// The previous value for the property
+        const std::string & preValue() const { return this->m_prev; } ///< @return The previous value for the property
+      private:
+        std::string m_name; ///< The name of the changed the property
+        std::string m_value; ///< The new value for the property
+        std::string m_prev; ///< The previous value for the property
+      };
+
+
+
       /// Wipe out the current configuration and load a new one
       void updateConfig(const std::string& filename, const bool append=false, const bool update_caches=true);
       /// Save the configuration to the user file
@@ -104,8 +147,16 @@ namespace Mantid
       /// Get a facility
       const FacilityInfo& Facility(const std::string& fName)const;
 
+      /// Add an observer for a notification
+			void addObserver(const Poco::AbstractObserver& observer)const;
+
+			/// Remove an observer
+			void removeObserver(const Poco::AbstractObserver& observer)const;
+
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
+
+      mutable Poco::NotificationCenter m_notificationCenter;
 
       // Private constructors and destructor for singleton class
       ConfigServiceImpl();
@@ -175,6 +226,9 @@ namespace Mantid
 #endif
     template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
     typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
+
+    typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged ConfigValChangeNotification;
+    typedef const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>& ConfigValChangeNotification_ptr;
 
   } // namespace Kernel
 } // namespace Mantid

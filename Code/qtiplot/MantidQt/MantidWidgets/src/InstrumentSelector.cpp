@@ -7,6 +7,13 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Exception.h"
 
+#include <QMessageBox>
+
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
+#include <Poco/AutoPtr.h>
+#include <Poco/NObserver.h>
+
 namespace MantidQt
 {
   namespace MantidWidgets
@@ -22,7 +29,8 @@ namespace MantidQt
      * @param parent A widget to act as this widget's parent (default = NULL)
      * @param init If true then the widget will be populated with the instrument list (default = true)
      */
-    InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) : QComboBox(parent), m_techniques(), m_currentFacility(NULL)
+    InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) : QComboBox(parent), m_techniques(), m_currentFacility(NULL),
+      m_changeObserver(*this, &InstrumentSelector::handleConfigChange)
     {
       setEditable(false);
       if( init )
@@ -30,6 +38,9 @@ namespace MantidQt
         fillWithInstrumentsFromFacility();
         connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateDefaultInstrument(const QString &)));
         connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SIGNAL(instrumentSelectionChanged(const QString &)));
+
+        Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+        config.addObserver(m_changeObserver);
       }
     }
 
@@ -53,6 +64,26 @@ namespace MantidQt
       {
         filterByTechniquesAtFacility(techniques, *m_currentFacility);
       }      
+    }
+    
+    void InstrumentSelector::handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+    {
+      QString prop = QString::fromStdString(pNf->key());
+      QString newV = QString::fromStdString(pNf->curValue());
+      QString oldV = QString::fromStdString(pNf->preValue());
+      if ( newV != oldV )
+      {
+        if ( prop == "default.facility" )
+        {
+          // QMessageBox::information(this, "MantidPlot", "Default facility has changed to: " + newV + " from " + oldV);
+          fillWithInstrumentsFromFacility(newV);
+        }
+        else if ( ( prop == "default.instrument" ) && ( newV != this->currentText() ) )
+        {
+          // QMessageBox::information(this, "MantidPlot", "Default instrument has changed to: " + newV + " from " + oldV);
+          this->setCurrentIndex(this->findText(newV));
+        }
+      }
     }
 
     //------------------------------------------------------

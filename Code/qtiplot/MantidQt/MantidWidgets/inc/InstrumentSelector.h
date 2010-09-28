@@ -4,6 +4,10 @@
 #include "WidgetDllOption.h"
 #include <QComboBox>
 #include <QStringList>
+#include "MantidKernel/ConfigService.h"
+
+#include <Poco/AutoPtr.h>
+#include <Poco/NObserver.h>
 
 //----------------------------------------------------------------
 // Forward declarations
@@ -58,6 +62,11 @@ namespace MantidQt
       QStringList getTechniques() const;
       /// Set the list of techniques
       void setTechniques(const QStringList & techniques);
+
+    protected:
+
+      void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+      Poco::NObserver<InstrumentSelector, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
     public slots:
       /// Update list for a new facility

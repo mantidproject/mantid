@@ -12,13 +12,15 @@
 #include <string>
 #include <fstream>
 
+#include <Poco/NObserver.h>
+
 using namespace Mantid::Kernel;
 
 class ConfigServiceTest : public CxxTest::TestSuite
 {
 public: 
 
-  ConfigServiceTest()
+  ConfigServiceTest() : m_changeObserver(*this, &ConfigServiceTest::handleConfigChange)
   {
 	  ConfigService::Instance().updateConfig("MantidTest.properties");
   }
@@ -251,6 +253,41 @@ public:
 
     // Clean up
     prop_file.remove();
+  }
+
+  // Test that the ValueChanged notification is sent
+  void testNotifications()
+  {
+    m_valueChangedSent = false;
+
+    ConfigServiceImpl& settings = ConfigService::Instance();
+
+    TS_ASSERT_THROWS_NOTHING(settings.addObserver(m_changeObserver));
+
+    settings.setString("default.facility", "SNS");
+
+    TS_ASSERT(m_valueChangedSent);
+    TS_ASSERT_EQUALS(m_key, "default.facility");
+    TS_ASSERT_DIFFERS(m_preValue, m_curValue);
+    TS_ASSERT_EQUALS(m_curValue, "SNS");
+
+    // Need to set back to ISIS for later tests
+    settings.setString("default.facility", "ISIS");
+  }
+
+
+protected:
+  bool m_valueChangedSent;
+  Poco::NObserver<ConfigServiceTest, Mantid::Kernel::ConfigServiceImpl::ValueChanged> m_changeObserver;
+  std::string m_key;
+  std::string m_preValue;
+  std::string m_curValue;
+  void handleConfigChange(const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>& pNf)
+  {
+    m_valueChangedSent = true;
+    m_key = pNf->key();
+    m_preValue = pNf->preValue();
+    m_curValue = pNf->curValue();
   }
 
 private:

@@ -20,6 +20,7 @@
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/NodeList.h"
+#include "Poco/Notification.h"
 
 #include <fstream>
 #include <sstream>
@@ -666,6 +667,16 @@ std::string ConfigServiceImpl::getString(const std::string& keyName, bool use_ca
  */
 void ConfigServiceImpl::setString(const std::string & key, const std::string & value)
 {
+  std::string old;
+  try
+  {
+    old = m_pConf->getString(key);
+  }
+  catch ( Poco::NotFoundException & )
+  {
+    old = "";
+  }
+  
   //Ensure we keep a correct full path
   std::map<std::string, bool>::const_iterator itr = m_ConfigPaths.find(key);
   if (itr != m_ConfigPaths.end())
@@ -686,6 +697,9 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   }
 
   m_pConf->setString(key, value);
+  
+  if (  value != old )
+    m_notificationCenter.postNotification(new ValueChanged(key, value, old));
 }
 
 /** Searches for a string within the currently loaded configuaration values and
@@ -901,6 +915,23 @@ const FacilityInfo& ConfigServiceImpl::Facility() const
   }
   return Facility(defFacility);
 }
+
+/**  Add an observer to a notification
+     @param observer Reference to the observer to add
+ */
+void ConfigServiceImpl::addObserver(const Poco::AbstractObserver& observer)const
+{
+    m_notificationCenter.addObserver(observer);
+}
+
+/**  Remove an observer
+     @param observer Reference to the observer to remove
+ */
+void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver& observer)const
+{
+    m_notificationCenter.removeObserver(observer);
+}
+
 
 /**
  * Get a facility
