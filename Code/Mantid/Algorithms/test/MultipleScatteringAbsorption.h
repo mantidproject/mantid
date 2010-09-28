@@ -80,12 +80,12 @@ public:
   {                                               // load input and "Gold" result workspaces
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/Data/PG3_539_Pixel_1.nxs");
+    loader.setProperty("Filename","../../../../Test/AutoTestData/PG3_539_Pixel_1.nxs");
     loader.setProperty("OutputWorkspace","TestInputWS");
     loader.execute();
 
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/Data/PG3_539_Pixel_1_Result_MultScatAbs.nxs");
+    loader.setProperty("Filename","../../../../Test/AutoTestData/PG3_539_Pixel_1_Result_MultScatAbs.nxs");
     loader.setProperty("OutputWorkspace","MultScatAbsGoldWS");
     loader.execute();
                                                  // create and execute the algorithm

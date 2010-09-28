@@ -193,7 +193,7 @@ public:
   {
 	 IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/Data/MAR11060.RAW");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/MAR11060.raw");
     loader->setPropertyValue("SpectrumList", "900");
     std::string ws = "mar";
     loader->setPropertyValue("OutputWorkspace", ws);

@@ -43,7 +43,7 @@ public:
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw3;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/Data/TSC10076.raw");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/TSC10076.raw");
     loader->setPropertyValue("OutputWorkspace", "tofcorrection_tsc_r");
     loader->setPropertyValue("SpectrumMin", "13");
     loader->setPropertyValue("SpectrumMax", "13");

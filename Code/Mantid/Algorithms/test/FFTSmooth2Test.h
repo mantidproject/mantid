@@ -67,12 +67,12 @@ public:
   {                                               // load input and "Gold" result workspaces
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/Data/MultispectralTestData.nxs");
+    loader.setProperty("Filename","../../../../Test/AutoTestData/MultispectralTestData.nxs");
     loader.setProperty("OutputWorkspace","TestInputWS");
     loader.execute();
 
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/Data/FFTSmooth2_Zeroing.nxs");
+    loader.setProperty("Filename","../../../../Test/AutoTestData/FFTSmooth2_Zeroing.nxs");
     loader.setProperty("OutputWorkspace","ZeroingGoldWS");
     loader.execute();
                                                  // create and execute the algorithm for "Zeroing"
@@ -113,12 +113,12 @@ public:
   {                                               // load input and "Gold" result workspaces
     Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/Data/MultispectralTestData.nxs");
+    loader.setProperty("Filename","../../../../Test/AutoTestData/MultispectralTestData.nxs");
     loader.setProperty("OutputWorkspace","TestInputWS");
     loader.execute();
 
     loader.initialize();
-    loader.setProperty("Filename","../../../../Test/Data/FFTSmooth2_Butterworth.nxs");
+    loader.setProperty("Filename","../../../../Test/AutoTestData/FFTSmooth2_Butterworth.nxs");
     loader.setProperty("OutputWorkspace","ButterworthGoldWS");
     loader.execute();
                                                  // create and execute the algorithm for "Butterworth"
