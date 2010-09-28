@@ -2386,79 +2386,90 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item>
-           <widget class="QStackedWidget" name="sqw_swInput" >
-            <property name="currentIndex" >
-             <number>0</number>
-            </property>
-            <widget class="QWidget" name="page_13" >
-             <layout class="QVBoxLayout" name="verticalLayout_21" >
-              <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" >
-                <property name="findRunFiles" stdset="0" >
-                 <bool>false</bool>
-                </property>
-                <property name="label" stdset="0" >
-                 <string>Input File</string>
-                </property>
-                <property name="multipleFiles" stdset="0" >
-                 <bool>false</bool>
-                </property>
-                <property name="algorithmAndProperty" stdset="0" >
-                 <string>LoadNexusProcessed|FileName</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="page_14" >
-             <layout class="QVBoxLayout" name="verticalLayout_28" >
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_31" >
+           <layout class="QHBoxLayout" name="horizontalLayout_34" >
+            <item>
+             <widget class="QStackedWidget" name="sqw_swInput" >
+              <property name="currentIndex" >
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="page_13" >
+               <layout class="QVBoxLayout" name="verticalLayout_21" >
                 <item>
-                 <widget class="QLabel" name="sqw_lbWorkspace" >
-                  <property name="text" >
-                   <string>Workspace: </string>
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" >
+                  <property name="findRunFiles" stdset="0" >
+                   <bool>false</bool>
                   </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="sqw_cbWorkspace" />
-                </item>
-                <item>
-                 <widget class="QLabel" name="sqw_valWorkspace" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
+                  <property name="label" stdset="0" >
+                   <string>Input File</string>
                   </property>
-                  <property name="text" >
-                   <string>*</string>
+                  <property name="multipleFiles" stdset="0" >
+                   <bool>false</bool>
                   </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_40" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="sqw_pbRefresh" >
-                  <property name="text" >
-                   <string>Refresh List</string>
+                  <property name="algorithmAndProperty" stdset="0" >
+                   <string>LoadNexusProcessed|FileName</string>
                   </property>
                  </widget>
                 </item>
                </layout>
-              </item>
-             </layout>
-            </widget>
-           </widget>
+              </widget>
+              <widget class="QWidget" name="page_14" >
+               <layout class="QVBoxLayout" name="verticalLayout_28" >
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_31" >
+                  <item>
+                   <widget class="QLabel" name="sqw_lbWorkspace" >
+                    <property name="text" >
+                     <string>Workspace: </string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="sqw_cbWorkspace" />
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="sqw_valWorkspace" >
+                    <property name="styleSheet" >
+                     <string notr="true" >color: rgb(255, 0, 4)</string>
+                    </property>
+                    <property name="text" >
+                     <string>*</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_40" >
+                    <property name="orientation" >
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0" >
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="sqw_pbRefresh" >
+                    <property name="text" >
+                     <string>Refresh List</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sqw_plotInput" >
+              <property name="text" >
+               <string>Plot Input</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -2568,7 +2579,7 @@ p, li { white-space: pre-wrap; }
                <string notr="true" >color: rgb(255, 0, 4)</string>
               </property>
               <property name="text" >
-               <string>*</string>
+               <string> </string>
               </property>
              </widget>
             </item>
@@ -2598,7 +2609,7 @@ p, li { white-space: pre-wrap; }
                <string notr="true" >color: rgb(255, 0, 4)</string>
               </property>
               <property name="text" >
-               <string>*</string>
+               <string>  </string>
               </property>
              </widget>
             </item>
@@ -2628,13 +2639,15 @@ p, li { white-space: pre-wrap; }
                <string notr="true" >color: rgb(255, 0, 4)</string>
               </property>
               <property name="text" >
-               <string>*</string>
+               <string>  </string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
          </layout>
+         <zorder>sqw_ckRebinE</zorder>
+         <zorder>sqw_gbInput</zorder>
         </widget>
        </item>
        <item>

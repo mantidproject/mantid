@@ -61,6 +61,8 @@ namespace MantidQt
       virtual void setIDFValues(const QString & prefix);
     protected:
       virtual void closeEvent(QCloseEvent* close);
+      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
+
     private:
       void getSpectraRanges(); ///< populate the spectra ranges for the "Calibration" tab.
       void clearReflectionInfo(); ///< clear various line edit boxes
@@ -74,7 +76,6 @@ namespace MantidQt
       void isDirty(bool state); ///< signify changes to interface
       bool isDirtyRebin(); ///< state whether post-rebin interface has had any changes
       void isDirtyRebin(bool state); ///< set value for above
-
       void loadSettings();
       void saveSettings();
 
@@ -103,6 +104,10 @@ namespace MantidQt
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
       void sOfQwRebinE(bool state);
       void sOfQwInputType(const QString& input);
+
+    protected:
+      // member variables
+      Poco::NObserver<Indirect, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
     private:
       // member variables

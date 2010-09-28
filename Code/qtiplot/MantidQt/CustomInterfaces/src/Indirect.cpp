@@ -5,6 +5,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include <Poco/NObserver.h>
+
 #include <QUrl>
 #include <QDesktopServices>
 #include <QDir>
@@ -20,7 +22,7 @@ using namespace MantidQt::CustomInterfaces;
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
 UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true),
-  m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL)
+  m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), m_changeObserver(*this, &Indirect::handleDirectoryChange)
 {
   // Constructor
 }
@@ -31,8 +33,9 @@ UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(tru
 */
 void Indirect::initLayout()
 {
+  Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
+
   m_settingsGroup = "CustomInterfaces/ConvertToEnergy/Indirect/";
-  // connect Indirect-specific signals (buttons,checkboxes,etc) to suitable slots.
 
   // "Energy Transfer" tab
   connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
@@ -76,10 +79,6 @@ void Indirect::initLayout()
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
   connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(sOfQwInputType(const QString&)));
   connect(m_uiForm.sqw_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
-
-  // set values of m_dataDir and m_saveDir
-  m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
-  m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   // create validators
   m_valInt = new QIntValidator(this);
@@ -361,7 +360,23 @@ void Indirect::setIDFValues(const QString & prefix)
 void Indirect::closeEvent(QCloseEvent* close)
 {
   //saveSettings();
+  Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
+
+
+void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+{
+  std::string key = pNf->key();
+  std::string preValue = pNf->preValue();
+  std::string curValue = pNf->curValue();
+
+  if ( key == "datasearch.directories" || key == "defaultsave.directory" )
+  {
+    loadSettings();
+  }
+}
+
+
 /**
 * This function loads the min and max values for the analysers spectra and
 * displays this in the "Calibration" tab.
@@ -994,6 +1009,13 @@ void Indirect::isDirtyRebin(bool state)
 }
 void Indirect::loadSettings()
 {
+  
+  // set values of m_dataDir and m_saveDir
+  m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
+  m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
+  m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+
+
   QSettings settings;
   // Load settings for MWRunFile widgets
   settings.beginGroup(m_settingsGroup + "DataFiles");
