@@ -18,8 +18,10 @@ class testWorkspaceGm :   public CxxTest::TestSuite
 {
 public:
     void testWorkspaceGeometry(void){
+
         // we can not define such dimensions
         TS_ASSERT_THROWS_ANYTHING(publicWorkspaceGeometry  space1(-1));
+
         TS_ASSERT_THROWS_ANYTHING(publicWorkspaceGeometry  space1(22));
         // the geometry which is lower than 4 can not be build using this constructor. 
         TS_ASSERT_THROWS_ANYTHING(publicWorkspaceGeometry space(3));
@@ -38,9 +40,10 @@ public:
         // attempting to get the coordinate of an non-existing dimension
         TS_ASSERT_THROWS_ANYTHING(space.getOrt(u7));
 
-        // this is 3-vector of first dimension
+     // this is 3-vector of first dimension
         std::vector<double> e2;
         TS_ASSERT_THROWS_NOTHING(e2=space.getOrt(ek));
+   
         // is it realy 3-vector?
         TS_ASSERT_EQUALS(e2.size(),3);
         // is this [0,1,0] ?
@@ -86,7 +89,6 @@ public:
         TS_ASSERT_EQUALS(space.getDimRefNum(u1),3);
         TS_ASSERT_EQUALS(space.getDimRefNum(u2),4);
         TS_ASSERT_EQUALS(space.getDimRefNum(u3),5);
-
 
 
 /// the techncalities of woriking with 2D+1 and 1D+1 workspaced have not been covered 

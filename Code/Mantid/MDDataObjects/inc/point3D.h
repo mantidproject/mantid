@@ -1,6 +1,9 @@
 #ifndef H_POINT3D
 #define H_POINT3D
 
+namespace Mantid{
+       namespace MDDataObjects{
+///
 struct data_point{
     double s;   // signal field;
     double err; // error field
@@ -12,6 +15,8 @@ struct coordinate{
 
 class point3D
 {
+
+    friend class MDData;
 public:
     point3D(void);
     ~point3D(void);
@@ -19,6 +24,9 @@ private:
     coordinate r;
     data_point data;
 
-friend class DND;
+
 };
+
+}
+}
 #endif

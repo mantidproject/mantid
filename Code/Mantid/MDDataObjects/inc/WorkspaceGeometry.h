@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include "MantidAPI/MatrixWorkspace.h"
 #include "stdafx.h"
 
 /** The class is the part of the VisualisationWorkspace and describes the basic multidimentional geometry of the object, 
@@ -39,7 +38,6 @@
 	  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
 namespace Mantid
 {
     namespace MDDataObjects
@@ -71,7 +69,7 @@ namespace Mantid
     };
 
 
-    class WorkspaceGeometry
+    class DLLExport WorkspaceGeometry
     {
 
      public:
@@ -89,7 +87,7 @@ namespace Mantid
     unsigned int getNumDims(void)const{return n_total_dim;}
 
     /// function rerutns the reference coordinate of the dimension, ID requested;
-    std::vector<double> getOrt(DimensionsID id)const;
+    const std::vector<double> & getOrt(DimensionsID id)const;
 
     /** return the number of the space dimension which corresponds to the ID provided
     *   in a future there will be group of this kind of functions used to construct a transformation matrix from the set of 
@@ -116,12 +114,10 @@ protected:
       /// function returns the id of the dimension No requseted
     DimensionsID getDimensionID(unsigned int nDim)const;
 
-   /// it is unclear what is the meaning of =
-    WorkspaceGeometry& operator=(const WorkspaceGeometry&);      
-
-      // this are the vectors of the primitive cell of the reciprocal lattice
+       // this are the vectors of the primitive cell of the reciprocal lattice
     // expressed in the framework of ???; All other vectors are orthogonal to this triplet
     std::vector<double> lattice_ort[3];
+    std::vector<double> unit;
 
     // init class with new number of dimensions and new dimensions types regardless of previous initialisation (which will be lost)
     void reinit_WorkspaceGeometry(const std::vector<DimensionsID> &ID);
@@ -129,6 +125,8 @@ private:
     // build default geometry based on cubic lattice. 
     void buildCubicGeometry(void);
 
+    /// it is unclear what is the meaning of =
+    WorkspaceGeometry& operator=(const WorkspaceGeometry&);      
     };
     };
 };

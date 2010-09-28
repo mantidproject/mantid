@@ -1,31 +1,31 @@
 #include "stdafx.h"
-#include "DND.h"
-#include "file_hdf_Matlab.h"
-#include "file_hdf.h"
+#include "MDData.h"
+#include "MD_File_hdfMatlab.h"
+#include "MD_File_hdfV1.h"
+
+namespace Mantid{
+    namespace MDDataObjects{
 //
-std::vector<point3D> & 
-DND::getPointData(void)const{
+    using namespace Mantid::Kernel;
+//
+void
+MDData::getPointData(std::vector<point3D> &image_points)const{
     std::vector<unsigned int> selection;
     if(this->n_expanded_dim>3){
         selection.assign(this->n_expanded_dim-3,0);
     }else{
         selection.resize(0);
     }
-    return this->getPointData(selection);
+    this->getPointData(selection,image_points);
+     
 }
 //
-void 
-DND::clearPointsMemory()
-{
-    this->image_points->resize(0);
-}
-//
-std::vector<point3D> & 
-DND::getPointData(std::vector<unsigned int> &selection)const
+void
+MDData::getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> &image_points)const
 {
     unsigned int selection_size  =  (unsigned int )selection.size();
     if(selection_size >this->n_expanded_dim){
-        throw(errorMantid("DND::getPointData: selection-> attempting to select more dimensions then there are expanded dimensions"));
+        throw(std::invalid_argument("MDData::getPointData: selection-> attempting to select more dimensions then there are expanded dimensions"));
     }
     unsigned int i,j,k,iMin,jMin,kMin,iMax,jMax,kMax,isel;
     size_t   base(0);
@@ -44,7 +44,7 @@ DND::getPointData(std::vector<unsigned int> &selection)const
         the_expanded_dim--;
     }
 
-    // check how the selection relates to 3 dimensions we will be working with;
+    // check how the selection relates to 3 dimensions we are working with;
     unsigned int current_selected_dimension(0);
     size_t   rez_size(0);
     if(the_expanded_dim>=0){ 
@@ -57,7 +57,8 @@ DND::getPointData(std::vector<unsigned int> &selection)const
         rez_size = 1;
         current_selected_dimension++;
     }
-    std::vector<double> xx=this->getDimension(0)->getAxisPoints();
+    std::vector<double> xx;
+    this->getDimension(0)->getAxisPoints(xx);
 
 
     if(the_expanded_dim>0){   
@@ -69,7 +70,8 @@ DND::getPointData(std::vector<unsigned int> &selection)const
         jMax=selection[current_selected_dimension]+1;
         current_selected_dimension++;
     }
-    std::vector<double> yy=this->getDimension(1)->getAxisPoints();
+    std::vector<double> yy;
+    this->getDimension(1)->getAxisPoints(yy);
 
     if(the_expanded_dim>1){   
         kMin=0;
@@ -80,11 +82,12 @@ DND::getPointData(std::vector<unsigned int> &selection)const
         kMax=selection[current_selected_dimension]+1;
         current_selected_dimension++;
     }
-    std::vector<double> zz=this->getDimension(2)->getAxisPoints();
+    std::vector<double> zz;
+    this->getDimension(2)->getAxisPoints(zz);
 
 // build full array of 3D points
-    this->image_points->clear();
-    this->image_points->resize(rez_size);
+
+    image_points.resize(rez_size);
     size_t ic(0);
     size_t indexZ,indexY,index;
     for(k=kMin;k<kMax;k++){
@@ -93,19 +96,16 @@ DND::getPointData(std::vector<unsigned int> &selection)const
             indexY =indexZ+nd2*j;
             for(i=iMin;i<iMax;i++){
                 index=indexY+i;
-                this->image_points->at(ic).r.x=xx[i];                
-                this->image_points->at(ic).r.y=yy[j];                
-                this->image_points->at(ic).r.z=zz[k];                
-                this->image_points->at(ic).data= this->data[index];
+                image_points[ic].r.x=xx[i];                
+                image_points[ic].r.y=yy[j];                
+                image_points[ic].r.z=zz[k];                
+                image_points[ic].data= this->data[index];
                     
                 ic++;
             }
         }
     }
 
-
-
-    return *image_points;
 }
 /*! function calculates min and max values of the array of 8 points (vertices of a cube)
 *
@@ -284,26 +284,26 @@ DND::rescale_transformations(const transf_matrix &trf,
 //*****************
 */
 void
-DND::select_file_reader(const char *file_name)
+MDData::select_file_reader(const char *file_name)
 {
 // check if the file exist;
     std::ifstream infile;
     infile.open(file_name);
     infile.close();
     if (infile.fail()){
-        throw("file does not exist");
+        throw(Exception::FileError("MDData::select_file_reader: Error->can not found or open",file_name));
     }
 // check if it is hdf5
     htri_t rez=H5Fis_hdf5(file_name);
     if (rez<=0){
         if (rez==0){
-            throw("the file is not an hdf5 file");
+            throw(Exception::FileError("MDData::select_file_reader: Error->the file is not hdf5 file",file_name));
         }else{
-            throw(" file found but error dealing with it");
+            throw(Exception::FileError("MDData::select_file_reader: Error->unspecified hdf5 error ",file_name));
         }
     }else{ 
         // ***> to do:: identify internal hdf5 format; only MATLAB is supported at the moment;
-        this->theFile= new file_hdf_Matlab(file_name);
+        this->theFile= new MD_File_hdfMatlab(file_name);
     }
 
 }
@@ -328,7 +328,7 @@ DND::write_dnd(const char *file_name){
 */
 //*******************************************************************************************************
 size_t
-DND::reshape_geometry(const SlicingData &transf)
+MDData::reshape_geometry(const SlicingData &transf)
 {
    unsigned int i;
 
@@ -365,7 +365,7 @@ DND::reshape_geometry(const SlicingData &transf)
     return data_size;
 }
 void 
-DND::alloc_dnd_arrays(const SlicingData &transf)
+MDData::alloc_dnd_arrays(const SlicingData &transf)
 {
 
 // initiate initial dimensions
@@ -379,7 +379,7 @@ DND::alloc_dnd_arrays(const SlicingData &transf)
 // allocate main data array;
     data = new data_point[data_size];
     if (!data){
-        throw("Can not allocate memory to keep dnd dataset");
+        throw(std::bad_alloc("Can not allocate memory to keep Multidimensional dataset"));
     }
 
     for(unsigned long j=0;j<data_size;j++){
@@ -389,32 +389,27 @@ DND::alloc_dnd_arrays(const SlicingData &transf)
     }
 
 }
-DND::DND(unsigned int nDims):
-Geometry(nDims),
+MDData::MDData(unsigned int nDims):
+MDGeometry(nDims),
 data_size(0),
 data(NULL),
 theFile(NULL),
 nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
 {
     if(nDims>MAX_NDIMS_POSSIBLE){
-        throw(errorMantid("DND::DND number of dimensions exceeds the possible value"));
+        throw(std::invalid_argument("MDData::MDData number of dimensions exceeds the possible value"));
     }
     this->dimSizes.assign(nDims,0);
     this->dimStride.assign(nDims+1,0);
-    this->image_points=new std::vector<point3D>;
-}
-DND::DND(const DND& origin)
-{
-
 }
 
-DND::~DND(void)
+MDData::~MDData(void)
 {
     clear_class();
 }
 //***************************************************************************************
 void
-DND::clear_class(void)
+MDData::clear_class(void)
 {
     if(data){
         delete [] data;
@@ -426,7 +421,8 @@ DND::clear_class(void)
         delete theFile;
         theFile=NULL;
     }
-    delete image_points;
- 
+
 }
 
+}
+}

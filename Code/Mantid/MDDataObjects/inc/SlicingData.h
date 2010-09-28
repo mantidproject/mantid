@@ -1,14 +1,16 @@
 #ifndef H_SLICICNG_DATA
 #define H_SLICICNG_DATA
-#include "Geometry.h"
+#include "MDGeometry.h"
 
-//* class describes rebinning matrix;
+//* class describes slicing and rebinning matrix;
+namespace Mantid{
+    namespace MDDataObjects{
 class SlicingData
 {
 public:
     SlicingData(std::vector<DimensionsID> &IDs);
     SlicingData(unsigned int numDims=4);
-    SlicingData(const Geometry &origin);
+    SlicingData(const MDGeometry &origin);
    ~SlicingData(void);
    unsigned int getNumDims(void)const{return nDimensions;}
    /// the function returns the rotation matrix which allows to transform vector inumber i into the basis;
@@ -96,4 +98,7 @@ private:
     /** the function which provides default constructor functionality */
     void intit_default_slicing(unsigned int nDims=4);
 };
+
+} // MDDataObjects
+} // Mantid
 #endif

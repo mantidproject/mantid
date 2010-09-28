@@ -1,8 +1,14 @@
 #include "stdafx.h"
-#include "Geometry.h"
+#include "MDGeometry.h"
 #include "SlicingData.h"
+
+using namespace Mantid::Kernel;
+
+namespace Mantid{
+    namespace MDDataObjects{
+//----------------------------------------------------------------
 void 
-Geometry::reinit_Geometry(const SlicingData &trf)
+MDGeometry::reinit_Geometry(const SlicingData &trf)
 {
     unsigned int i;
     std::vector<DimensionsID> ID(trf.getPAxis());
@@ -54,12 +60,12 @@ Geometry::reinit_Geometry(const SlicingData &trf)
 
 
 void 
-Geometry::arrangeDimensionsProperly(const std::vector<DimensionsID> &IDS)
+MDGeometry::arrangeDimensionsProperly(const std::vector<DimensionsID> &IDS)
 {
     unsigned int n_new_dims=(unsigned int)IDS.size();
 
     if(n_new_dims>this->n_total_dim){
-        throw(errorMantid("Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined "));
+        throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined "));
     }
 
     // array to keep final expanded dimensions
@@ -84,7 +90,7 @@ Geometry::arrangeDimensionsProperly(const std::vector<DimensionsID> &IDS)
 
 
         if(dim_num<0){
-              throw(errorMantid("Geometry::arrangeDimensionsProperly: new dimension requested but this function can not add new dimensions"));
+              throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: new dimension requested but this function can not add new dimensions"));
         }
         // get existing dimension to work with;
         pDim = this->theDimension[dim_num];
@@ -122,7 +128,7 @@ Geometry::arrangeDimensionsProperly(const std::vector<DimensionsID> &IDS)
     this->n_expanded_dim=n_expanded_dimensions;
     // total number of dimensions should not change;
     if(n_expanded_dimensions+n_collapsed_dimensions!=this->n_total_dim){
-        throw(errorMantid("Geometry::arrangeDimensionsProperly: n_expanded+n_collapsed!= nTotal; serious logical error"));
+        throw(Exception::NotImplementedError("Geometry::arrangeDimensionsProperly: Dimensions: n_expanded+n_collapsed!= nTotal; serious logical error"));
     }
     // deal with expanded dimensions
     for(i=0;i<this->n_expanded_dim;i++){
@@ -142,13 +148,13 @@ Geometry::arrangeDimensionsProperly(const std::vector<DimensionsID> &IDS)
 
 };
 void
-Geometry::setRanges(const SlicingData &trf)
+MDGeometry::setRanges(const SlicingData &trf)
 {
     unsigned int i;
     unsigned int n_new_dims=trf.getNumDims();
     Dimension *pDim;
     if(n_new_dims>this->n_total_dim){
-        throw(errorMantid("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
+        throw(std::invalid_argument("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
     }
 
 
@@ -175,31 +181,31 @@ Geometry::setRanges(const SlicingData &trf)
 }
 
 Dimension & 
-Geometry::getYDimension(void)const
+MDGeometry::getYDimension(void)const
 {
     if(this->n_total_dim<2){
-        throw(errorMantid("No Y dimension is defined in this workspace"));
+        throw(std::invalid_argument("No Y dimension is defined in this workspace"));
     }
     return *(theDimension[1]);
 }
 Dimension & 
-Geometry::getZDimension(void)const
+MDGeometry::getZDimension(void)const
 {
     if(this->n_total_dim<3){
-        throw(errorMantid("No Z dimension is defined in this workspace"));
+        throw(std::invalid_argument("No Z dimension is defined in this workspace"));
     }
     return *(theDimension[2]);
 }
 Dimension & 
-Geometry::getTDimension(void)const
+MDGeometry::getTDimension(void)const
 {
     if(this->n_total_dim<4){
-        throw(errorMantid("No T dimension is defined in this workspace"));
+        throw(std::invalid_argument("No T dimension is defined in this workspace"));
     }
     return *(theDimension[3]);
 }
 std::vector<Dimension *> 
-Geometry::getIntegratedDimensions(void)
+MDGeometry::getIntegratedDimensions(void)
 {
     std::vector<Dimension *> tmp;
 
@@ -212,39 +218,39 @@ Geometry::getIntegratedDimensions(void)
     return tmp;
 }
 Dimension * 
-Geometry::getDimension(unsigned int i)const
+MDGeometry::getDimension(unsigned int i)const
 {
     if(i>=this->n_total_dim){
-        throw(errorMantid("Geometry::getDimension: attemting to get the dimension which is out of range"));
+        throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension which is out of range"));
     }
     return theDimension[i];
 }
 Dimension * 
-Geometry::getDimension(DimensionsID ID)const
+MDGeometry::getDimension(DimensionsID ID)const
 {
     int ind=this->getDimNum(ID);
     if(ind<0)return NULL;
 
     if(ind>=MAX_NDIMS_POSSIBLE){
-        throw(errorMantid("Geometry::getDimension: dim index out of range; logical error"));
+        throw(std::out_of_range("Geometry::getDimension: dim index out of range; logical error"));
     }
     return this->theDimension[ind];
 
 }
 int
-Geometry::getDimNum(DimensionsID ID)const
+MDGeometry::getDimNum(DimensionsID ID)const
 {
     if(ID<0||ID>MAX_NDIMS_POSSIBLE){
-        throw(errorMantid("Geometry::getDimNum: DimensionsID out of range"));
+        throw(std::out_of_range("Geometry::getDimNum: DimensionsID out of range"));
     }
     return (this->theDimensionIDNum[ID]);
 
 }
-std::vector<double>
-Geometry::getOrt(DimensionsID id)const
+std::vector<double> 
+MDGeometry::getOrt(DimensionsID id)const
 {
     if(id>3||id<0){
-        throw(errorMantid("Geometry::getOrt dimension ID out of range "));
+        throw(std::out_of_range("Geometry::getOrt dimension ID out of range "));
     }
     std::vector<double> tmp(this->WorkspaceGeometry::getOrt(id));
     Dimension *pDim = this->getDimension(id);
@@ -260,7 +266,7 @@ Geometry::getOrt(DimensionsID id)const
     return tmp;
 }
 
-Geometry::Geometry(unsigned int nDimensions):
+MDGeometry::MDGeometry(unsigned int nDimensions):
 WorkspaceGeometry(nDimensions),
 n_expanded_dim(0)
 {
@@ -272,7 +278,7 @@ n_expanded_dim(0)
     
 }
  void 
-Geometry::init_empty_dimensions(const std::vector<DimensionsID> &ID)
+MDGeometry::init_empty_dimensions(const std::vector<DimensionsID> &ID)
  {
      unsigned int i;
      for(i=0;i<ID.size();i++){
@@ -289,7 +295,7 @@ Geometry::init_empty_dimensions(const std::vector<DimensionsID> &ID)
      this->n_expanded_dim=0;
 
  }
-Geometry::~Geometry(void)
+MDGeometry::~MDGeometry(void)
 {
     unsigned int i;
     for(i=0;i<this->n_total_dim;i++){
@@ -299,4 +305,6 @@ Geometry::~Geometry(void)
     this->theDimensionIDNum.clear();
     this->theDimension.clear();
     
+}
+}
 }

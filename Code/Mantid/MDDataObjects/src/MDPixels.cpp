@@ -1,8 +1,12 @@
 #include "stdafx.h"
-#include "SQW.h"
+#include "MDPixels.h"
 
-SQW::SQW(void):
-DND(),
+               
+namespace Mantid{
+    namespace MDDataObjects{
+        using namespace Mantid::Kernel;
+MDPixels::MDPixels(void):
+MDData(),
 ignore_inf(false),
 ignore_nan(true),
 memBased(false),
@@ -10,9 +14,29 @@ nPixels(0),
 pix_array(NULL)
 {
 }
+//
+void
+MDPixels::read_pix(void)
+{
+        if(this->theFile){
+            if(!this->data){
+                throw(Exception::NullPointerException("MDPixels::read_pix","MDPixels->data"));
+            }
+            this->alloc_pix_array();
+            if(!this->theFile->read_pix(*this)){
+                this->memBased=false;
+                throw(std::bad_alloc("can not place all data pixels in the memory, file operations needs to be performed"));
+            }else{
+                this->memBased=true;
+            }
+        }else{
+            throw(Exception::NullPointerException("MDPixels::read_pix","MDPixels->theFile"));
+        }
+}
+ 
 //***************************************************************************************
 void
-SQW::alloc_pix_array()
+MDPixels::alloc_pix_array()
 {
 if(!this->pix_array){
     this->pix_array = new pix_location[this->data_size];
@@ -32,7 +56,7 @@ if(!this->pix_array){
 }
 }
 //***************************************************************************************
-SQW::~SQW(void)
+MDPixels::~MDPixels(void)
 {
     if(pix_array){
         for(size_t i=0;i<this->data_size;i++){
@@ -46,7 +70,7 @@ SQW::~SQW(void)
 
 //***************************************************************************************
 void
-SQW::complete_rebinning()
+MDPixels::complete_rebinning()
 {
 size_t i;
 // normalize signal and error of the dnd object;
@@ -336,3 +360,5 @@ SQW::rebin_dataset4D(const transf_matrix &trf,sqw &newsqw)
 
 }
 */
+}
+}

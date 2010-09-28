@@ -1,20 +1,25 @@
 #include "stdafx.h"
 #include "Dimension.h"
-std::vector<double>
-Dimension::getAxisPoints(void)const
+namespace Mantid
 {
-    std::vector<double> rez(this->nBins,0);
+    namespace MDDataObjects
+    {
+//
+void
+Dimension::getAxisPoints(std::vector<double>  &rez)const
+{
+    rez.resize(this->nBins);
     for(unsigned int i=0;i<nBins;i++){
         rez[i]=0.5*(this->Axis[i]+this->Axis[i+1]);
     }
-    return rez;
 }
 
 // default dimension is always integrated (it has one point and limits) 
 Dimension::Dimension(DimensionsID ID):
 DimensionID(ID),
 latticeParam(1),
-isIntegrated(true)
+isIntegrated(true),
+coord(1,1)
 {
     const char *default_axis_names[MAX_NDIMS_POSSIBLE]={
           "","","","En","u1","u2","u3","u4","u5","u6","u7"
@@ -23,7 +28,7 @@ isIntegrated(true)
     
    this->setRange();
    if(ID<0||ID>=MAX_NDIMS_POSSIBLE){ 
-       throw(errorMantid("dimension ID exceeds the acceptable range; Are you trying to initiate an ortogonal dimension using resiprocal dimensions constructor?"));
+       throw(std::out_of_range("dimension ID exceeds the acceptable range; Are you trying to initiate an ortogonal dimension using resiprocal dimensions constructor?"));
    }
 
    this->setName(default_axis_names[(int)(ID)]);
@@ -37,7 +42,7 @@ void  Dimension::setRange(double rxMin,double rxMax,unsigned int nxBins)
         err<< "Attempting to set minimal integration limit higer then maximal in Dimension, ID N: "<<this->DimensionID<<std::endl;
         err<< "setting MinVal: "<<rxMin<<" MaxVal: "<<rxMax<<std::endl;
 
-        throw(errorMantid(err.str()));
+        throw(std::invalid_argument(err.str()));
     }
     this->rMin = rxMin;
     this->rMax = rxMax;
@@ -64,13 +69,13 @@ Dimension::check_ranges(double rxMin,double rxMax)
         err<< "Attempting to set minimal integration limit higer then maximal in Dimension, ID N: "<<this->DimensionID<<std::endl;
         err<< "setting MinVal: "<<rxMin<<" MaxVal: "<<rxMax<<std::endl;
 
-        throw(errorMantid(err.str()));
+        throw(std::invalid_argument(err.str()));
     }
     if(rxMin>this->rMax||rxMax<this->rMin){
         std::stringstream err;
         err<< "Attempting to set integration limits outside the data range in Dimension ID N: "<<this->DimensionID<<std::endl;
         err<< "existing MinVal: "<<this->rMin<<" MaxVal: "<<this->rMax<<" Setting: minVal: "<<rxMin<<" maxVal: "<<rxMax<<std::endl;
-        throw(errorMantid(err.str()));
+        throw(std::invalid_argument(err.str()));
 
     }
 
@@ -81,7 +86,7 @@ Dimension::setExpanded(unsigned int nxBins)
     if(nxBins<1||nxBins>MAX_REASONABLE_BIN_NUMBER){
         std::stringstream err;
         err<< "Setting number of bins="<<nxBins<<" our of range in dimension, ID N: "<<this->DimensionID<<std::endl;
-        throw(errorMantid(err.str()));
+        throw(std::invalid_argument(err.str()));
     }
     if(nxBins> 1){
         this->isIntegrated=false;
@@ -117,7 +122,7 @@ Dimension::setIntegrated(double rxMin){
         std::stringstream err;
         err<< "Attempting to set minimal integration limit higer then maximal in dimension, ID N: "<<this->DimensionID<<std::endl;
         err<< "existing MaxVal: "<<this->rMax<<" setting minVal: "<<rxMin<<std::endl;
-        throw(errorMantid(err.str()));
+        throw(std::invalid_argument(err.str()));
     }
     this->rMin=rxMin; 
     this->setIntegrated();
@@ -134,4 +139,6 @@ Dimension::setIntegrated(double rxMin, double rxMax)
 
 Dimension::~Dimension()
 {
+}
+}
 }

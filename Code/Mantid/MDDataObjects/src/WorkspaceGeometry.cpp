@@ -18,7 +18,7 @@ WorkspaceGeometry::WorkspaceGeometry(const WorkspaceGeometry &orgn){
     }   
 
 }
-std::vector<double> 
+const std::vector<double> &
 WorkspaceGeometry::getOrt(DimensionsID ID)const
 {
     unsigned int id=(unsigned int)ID;
@@ -29,9 +29,9 @@ WorkspaceGeometry::getOrt(DimensionsID ID)const
     }
 
     if(id<this->n_rsprcl_dim){
-        return std::vector<double>(lattice_ort[id]);
+        return this->lattice_ort[id];
     }else{
-        return std::vector<double>(1,1);
+        return this->unit;
     }
 }
 //
@@ -103,7 +103,8 @@ WorkspaceGeometry::reinit_WorkspaceGeometry(const std::vector<DimensionsID> &ID)
 // Private constructor;
 WorkspaceGeometry::WorkspaceGeometry(unsigned int nDimensions):
 n_total_dim(nDimensions),
-n_rsprcl_dim(3)
+n_rsprcl_dim(3),
+unit(1,1)
 {
     if(nDimensions<4){
         throw(std::invalid_argument("This constructor can not be used to buid low dimension datasets geometry"));

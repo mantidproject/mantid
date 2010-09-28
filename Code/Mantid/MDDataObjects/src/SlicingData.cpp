@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "SlicingData.h"
 /// the function returns the rotation vector which allows to transform vector inumber i into the basis;
+namespace Mantid{
+    namespace MDDataObjects{
+
 std::vector<double> 
 SlicingData::rotations(unsigned int i,const std::vector<double> basis[3])const
 {
@@ -16,7 +19,7 @@ SlicingData::rotations(unsigned int i,const std::vector<double> basis[3])const
     return tmp;
 }
 /// this extracts the size and shape of the current DND object
-SlicingData::SlicingData(const Geometry &origin)
+SlicingData::SlicingData(const MDGeometry &origin)
 {
     Dimension *pDim;
 
@@ -68,12 +71,12 @@ SlicingData::setCoord(unsigned int i,const std::vector<double> &coord)
     this->check_index(i,"setCoord");
     if(i<3){
         if(coord.size()!=3){
-            throw(errorMantid("SlicingData::setCoord wrong parameter, index<3 and attempting to set a non-3 point coordinate"));
+            throw(std::invalid_argument("SlicingData::setCoord wrong parameter, index<3 and attempting to set a non-3 point coordinate"));
         }
         this->coordinates[i]=coord;
     }else{
         if(coord.size()!=1){
-            throw(errorMantid("SlicingData::setCoord wrong parameter, index>=3 and attempting to set a coordinate of orthogonal dimension"));
+            throw(std::invalid_argument("SlicingData::setCoord wrong parameter, index>=3 and attempting to set a coordinate of orthogonal dimension"));
         }
     }
 }
@@ -135,7 +138,7 @@ SlicingData::setNumBins(unsigned int i,unsigned int Val)
 {
     this->check_index(i,"setNumBins");
     if(Val>MAX_REASONABLE_BIN_NUMBER){
-        throw(errorMantid("SlicingData::setNumBins value bin requested is larger than MAX_REASONABLE_BIN_NUMBER"));
+        throw(std::invalid_argument("SlicingData::setNumBins value bin requested is larger than MAX_REASONABLE_BIN_NUMBER"));
     }
     this->nBins[i]=Val;
 }
@@ -227,7 +230,7 @@ void
 SlicingData::intit_default_slicing(unsigned int nDims)
 {
     if(nDims>MAX_NDIMS_POSSIBLE){
-        throw(errorMantid("SlicingData::intit_default_slicing: attemting to init more dimension that it is actually possible "));
+        throw(std::invalid_argument("SlicingData::intit_default_slicing: attemting to init more dimension that it is actually possible "));
     }
     nDimensions=nDims;
 
@@ -255,7 +258,7 @@ std::vector<double>
 SlicingData::getCoord(DimensionsID id)const
 {
     if(id>2){
-        throw(errorMantid("SlicingData::getCoord attemt to get coordinate of non-reciprocal dimension"));
+        throw(std::invalid_argument("SlicingData::getCoord attemt to get coordinate of non-reciprocal dimension"));
     }
     return this->coordinates[id];
 }
@@ -271,6 +274,8 @@ SlicingData::check_index(unsigned int i,const char *fName)const
         std::stringstream err;
         err<<" index out of range for function: "<<fName<<std::endl;
         err<<" Allowed nDims: "<<this->nDimensions<<" and requested is: "<<i<<std::endl;
-        throw(errorMantid(err.str()));
+        throw(std::invalid_argument(err.str()));
     }
+}
+}
 }

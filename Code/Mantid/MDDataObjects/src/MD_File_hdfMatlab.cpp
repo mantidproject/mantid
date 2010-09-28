@@ -1,12 +1,14 @@
 #include "stdafx.h"
-#include "file_hdf_Matlab.h"
-
+#include "MD_File_hdfMatlab.h"
+namespace Mantid{
+    namespace MDDataObjects{
+        using namespace Mantid::Kernel;
 // dnd dataset name;
-const char * file_hdf_Matlab::DatasetName="Signals";
+const char * MD_File_hdfMatlab::DatasetName="Signals";
 // dataset descriptors:
-const char * file_hdf_Matlab::descriptor ="spe_header";
+const char * MD_File_hdfMatlab::descriptor ="spe_header";
 //
-const char *file_hdf_Matlab::pixels      ="pix";
+const char *MD_File_hdfMatlab::pixels      ="pix";
 
 // MATLAB datatypes which may be written into hdf HORACE file
 enum matlab_attrib_kind
@@ -21,7 +23,7 @@ enum matlab_attrib_kind
 
 //***************************************************************************************
 
-file_hdf_Matlab::file_hdf_Matlab(const char *file_name):
+MD_File_hdfMatlab::MD_File_hdfMatlab(const char *file_name):
 file_access_mode(H5P_DEFAULT),
 pixel_dataset_h(-1),
 file_handler(-1),
@@ -274,7 +276,7 @@ function cellarray=transform_array2cells(rdata,filler,type_name)
 }
 //***************************************************************************************
 bool 
-file_hdf_Matlab::check_or_open_pix_dataset(void)
+MD_File_hdfMatlab::check_or_open_pix_dataset(void)
 {
     bool was_opened(false); 
     if(this->pixel_dataset_h<0){
@@ -289,7 +291,7 @@ file_hdf_Matlab::check_or_open_pix_dataset(void)
     return was_opened;
 }
 void 
-file_hdf_Matlab::read_dnd(DND & dnd)
+MD_File_hdfMatlab::read_dnd(MDData & dnd)
 {
 // The function accepts full 4D dataset only!!!
 hid_t h_signal_DSID=H5Dopen(file_handler,this->DatasetName,H5P_DEFAULT);
@@ -410,7 +412,7 @@ H5Dclose(h_signal_DSID);
 //***************************************************************************************
 
 hsize_t
-file_hdf_Matlab::getNPix(void)
+MD_File_hdfMatlab::getNPix(void)
 {
     if(this->file_handler<0)return -1;
 
@@ -432,10 +434,11 @@ file_hdf_Matlab::getNPix(void)
     return nPixels;
 }
 //***************************************************************************************
-/*
+
 bool
-file_hdf_Matlab::read_pix(sqw &SQW)
+MD_File_hdfMatlab::read_pix(MDPixels & sqw)
 { 
+/*
     long i;
     matlab_attrib_kind kind;
     std::vector<int> arr_dims_vector;
@@ -552,12 +555,12 @@ file_hdf_Matlab::read_pix(sqw &SQW)
         this->pixel_dataset_h=-1;
         this->pixel_dataspace_h=-1;
     }
-    
+*/    
     return true;
 }
-
+/*
 size_t 
-file_hdf_Matlab::read_pix_subset(const sqw &SQW,const std::vector<long> &selected_cells,long starting_cell,sqw_pixel *& pix_buf, long &nPixels)
+MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &selected_cells,long starting_cell,sqw_pixel *& pix_buf, long &nPixels)
 {
 // open pixel dataset and dataspace if it has not been opened before;
     this->check_or_open_pix_dataset();
@@ -664,7 +667,7 @@ file_hdf_Matlab::read_pix_subset(const sqw &SQW,const std::vector<long> &selecte
     return n_cells_processed;
 }
 */
-file_hdf_Matlab::~file_hdf_Matlab(void)
+MD_File_hdfMatlab::~MD_File_hdfMatlab(void)
 {
     int i;
 
@@ -682,3 +685,5 @@ file_hdf_Matlab::~file_hdf_Matlab(void)
     delete [] this->MATLAB_dnd_fields;
  }
 
+}
+}

@@ -94,6 +94,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MDDATAOBJECTS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>inc;C:\Mantid\Code\Mantid\Kernel\inc;C:\Mantid\Code\Mantid\API\inc;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,12 +156,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="inc\Dimension.h" />
     <ClInclude Include="inc\DimensionIDS.h" />
+    <ClInclude Include="inc\DimensionRes.h" />
+    <ClInclude Include="inc\MDData.h" />
+    <ClInclude Include="inc\MDGeometry.h" />
+    <ClInclude Include="inc\MDPixels.h" />
+    <ClInclude Include="inc\MD_FileFormat.h" />
+    <ClInclude Include="inc\MD_File_hdfMatlab.h" />
+    <ClInclude Include="inc\MD_File_hdfV1.h" />
+    <ClInclude Include="inc\point3D.h" />
+    <ClInclude Include="inc\SlicingData.h" />
     <ClInclude Include="inc\stdafx.h" />
     <ClInclude Include="inc\WorkspaceGeometry.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Dimension.cpp" />
     <ClCompile Include="src\DimensionIDS.cpp" />
+    <ClCompile Include="src\DimensionRes.cpp" />
+    <ClCompile Include="src\MDData.cpp" />
+    <ClCompile Include="src\MDGeometry.cpp" />
+    <ClCompile Include="src\MDPixels.cpp" />
+    <ClCompile Include="src\MD_File_hdfMatlab.cpp" />
+    <ClCompile Include="src\point3D.cpp" />
+    <ClCompile Include="src\SlicingData.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\WorkspaceGeometry.cpp" />
   </ItemGroup>

@@ -1,13 +1,27 @@
 #include <cxxtest/TestSuite.h>
-#include "Geometry.h"
+#include "MDGeometry.h"
 #include "SlicingData.h"
+
+using namespace Mantid;
+using namespace MDDataObjects;
+
+// class accessor to protected properties;
+class tMDGeometry: public MDGeometry
+{
+public:
+    tMDGeometry(unsigned int nDims=4):MDGeometry(nDims){};
+    void setRanges(const SlicingData &slice){MDGeometry::setRanges(slice);}
+    void reinit_Geometry(const SlicingData &slice){MDGeometry::reinit_Geometry(slice);}
+
+};
+//
 class testGeometry : public CxxTest::TestSuite
 {
 public:
     void testGeometryC(void)
     {
       try{
-          Geometry   dnd_geometry;
+          tMDGeometry   dnd_geometry;
 
           TS_ASSERT_THROWS_NOTHING(dnd_geometry.getXDimension());
           TS_ASSERT_THROWS_NOTHING(dnd_geometry.getYDimension());
@@ -63,8 +77,8 @@ public:
          TS_ASSERT_THROWS_NOTHING(pDim = dnd_geometry.getDimension(3));
          TS_ASSERT_EQUALS(pDim->getDimensionID(),slice.getPAxis(3))
 
-      }catch(errorMantid &err){
-          std::cout<<" error of the Geomerty constructor "<<err.what()<<std::endl;
+      }catch(std::exception &err){
+          std::cout<<" error of the MDGeomerty constructor "<<err.what()<<std::endl;
           TS_ASSERT_THROWS_NOTHING(throw(err));
 
       }

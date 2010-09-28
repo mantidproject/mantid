@@ -1,6 +1,10 @@
 #ifndef H_SQW
 #define H_SQW
-#include "DND.h"
+#include "MDData.h"
+
+namespace Mantid{
+    namespace MDDataObjects{
+
 // structure describing the Horace pixels
 // will probably change in a future as tailored for our purposes;
 struct sqw_pixel{
@@ -32,11 +36,11 @@ struct pix_location
 
 //**********************************************************************************************************************
 
-class SQW :  public DND
+class MDPixels :  public MDData
 {
 public:
-     SQW(void);
-    ~SQW(void);
+     MDPixels(void);
+    ~MDPixels(void);
      void set_shape(const SlicingData &trf){
          this->alloc_dnd_arrays(trf);
          if(pix_array){
@@ -47,26 +51,11 @@ public:
     }
 
 
-    // read the whole pixels dataset in the memory
-    void read_pix(void){
-        if(this->theFile){
-            if(!this->data){
-                throw(errorMantid("sqw::read_pix => the DND structure has to be defined to read pixels "));
-            }
-            this->alloc_pix_array();
-            if(!this->theFile->read_pix(*this)){
-                this->memBased=false;
-                throw(errorMantid("can not place all data pixels in the memory, file operations needs to be performed"));
-            }else{
-                this->memBased=true;
-            }
-        }else{
-            throw(errorMantid("file reader is undefined"));
-        }
-    }
+    /// read the whole pixels dataset in the memory
+    void read_pix(void);
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
-    void rebin_dataset4D(const SlicingData &transf,SQW &newsqw);
+    void rebin_dataset4D(const SlicingData &transf,MDPixels &newsqw);
 private:
     // the parameter identify if the class data are file or memory based
    // usually it is file based and memory used for small datasets, debugging or in a future when PC are big
@@ -81,14 +70,15 @@ private:
 
     void alloc_pix_array();
 //
-    friend class file_hdf_Matlab;
+    friend class MD_File_hdfMatlab;
 // private for the time being but will be needed in a future
-   SQW(const SQW& p);
-   SQW & operator = (const SQW & other);
+   MDPixels(const MDPixels& p);
+   MDPixels & operator = (const MDPixels & other);
 // rebin pixels in the pix_aray and add them to the current dataset ;
     long rebin_dataset4D(const SlicingData &transf, const sqw_pixel *pix_array, long nPix_cell);
     void complete_rebinning(void);
     void extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted);
 };
-
+    }
+}
 #endif
