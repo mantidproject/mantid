@@ -40,10 +40,10 @@ void CalculateTransmissionBeamSpreader::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "The fitted transmission correction");
 
-  BoundedValidator<int> *oneOrMore = new BoundedValidator<int>();
-  oneOrMore->setLower(1);
+  BoundedValidator<int> *zeroOrMore = new BoundedValidator<int>();
+  zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
-  declareProperty("IncidentBeamMonitor",2,oneOrMore,"The UDET of the incident beam monitor");
+  declareProperty("IncidentBeamMonitor",2,zeroOrMore,"The UDET of the incident beam monitor");
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);  
