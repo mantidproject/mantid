@@ -207,6 +207,8 @@ private slots:
   void setUserFname();
   /// Update the centre finding progress
   void updateCentreFindingStatus(const QString & msg);
+  /// Enables or disables the floodFile run widget
+  void prepareFlood(int state);
   /// Enable the default save button only if there an output workspace and a filename to save it to
   void enableOrDisableDefaultSave();
   /// Append log message to log window
@@ -284,6 +286,8 @@ private:
   QAction *m_batch_paste;
   ///A clear action for the batch table
   QAction *m_batch_clear;
+  ///Load the sample, transmission, can, files etc.
+  void loadRuns(bool correctToFile = false);
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

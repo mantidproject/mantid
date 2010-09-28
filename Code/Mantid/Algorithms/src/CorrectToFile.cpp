@@ -6,11 +6,15 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
+namespace Mantid
+{
+namespace Algorithms
+{
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorrectToFile)
+const double CorrectToFile::LOAD_TIME = 0.75;
 
 void CorrectToFile::init()
 {
@@ -30,12 +34,108 @@ void CorrectToFile::init()
     "Allowed values: Divide, Multiply (default is divide)");
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output),
     "Name of the output workspace to store the results in" );
+
+  g_log.setName("CorrectToFile");
 }
 
 void CorrectToFile::exec()
 {
-  //First load in rkh file for correction
-  IAlgorithm_sptr loadRKH = createSubAlgorithm("LoadRKH");
+  //The input workspace is the uncorrected data
+  MatrixWorkspace_sptr toCorrect = getProperty("WorkspaceToCorrect");
+  //This workspace is loaded from the RKH compatible file
+  MatrixWorkspace_sptr rkhInput = fileToWksp(getProperty("Filename"));
+  // Only create the output workspace if it's not the same as the input one
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (outputWS != toCorrect)
+  {
+    outputWS = WorkspaceFactory::Instance().create(toCorrect);
+  }
+  const std::string operation = getProperty("WorkspaceOperation");
+
+  if ( getPropertyValue("FirstColumnValue") == "SpectrumNumber")
+  {
+    //the workspace probably contains many spectra but each with only 1 bin
+    doWkspAlgebra(toCorrect, rkhInput, operation, outputWS);
+  }
+  else
+  {//the correction values should be all contained in 1 spectrum
+    // Check that the workspace to rebin has the same units as the one that we are matching to
+    // However, just print a warning if it isn't, don't abort (since user provides the file's unit)
+    if (toCorrect->getAxis(0)->unit() != rkhInput->getAxis(0)->unit())
+    {
+      g_log.warning("Unit on input workspace is different to that specified in 'FirstColumnValue' property");
+    }
+
+    // Get references to the correction factors
+    const MantidVec &Xcor = rkhInput->readX(0);
+    const MantidVec &Ycor = rkhInput->readY(0);
+    const MantidVec &Ecor = rkhInput->readE(0);
+
+    const bool histogramData = outputWS->isHistogramData();
+    const bool divide = (operation == "Divide") ? true : false;
+    double Yfactor,Efactor;
+
+    Progress prg(this,LOAD_TIME,1.0,outputWS->size());
+    MatrixWorkspace::iterator outIt(*outputWS);
+    for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
+    {
+      const double currentX = histogramData ? (inIt->X()+inIt->X2())/2.0 : inIt->X();
+      // Find out the index of the first correction point after this value
+      MantidVec::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
+      const size_t index = pos-Xcor.begin();
+      if ( index == Xcor.size() )
+      {
+        // If we're past the end of the correction factors vector, use the last point
+        Yfactor = Ycor[index-1];
+        Efactor = Ycor[index-1];
+      }
+      else if (index)
+      {
+        // Calculate where between the two closest points our current X value is
+        const double fraction = (currentX-Xcor[index-1])/(Xcor[index]-Xcor[index-1]);
+        // Now linearly interpolate to find the correction factors to use
+        Yfactor = Ycor[index-1] + fraction*(Ycor[index]-Ycor[index-1]);
+        Efactor = Ecor[index-1] + fraction*(Ecor[index]-Ecor[index-1]);
+      }
+      else
+      {
+        // If we're before the start of the correction factors vector, use the first point
+        Yfactor = Ycor[0];
+        Efactor = Ycor[0];
+      }
+
+      // Now do the correction on the current point
+      if (divide)
+      {
+        outIt->Y() = inIt->Y()/Yfactor;
+        outIt->E() = inIt->E()/Efactor;
+      }
+      else
+      {
+        outIt->Y() = inIt->Y()*Yfactor;
+        outIt->E() = inIt->E()*Efactor;
+      }
+      // Copy X value over
+      outIt->X() = inIt->X();
+      if (histogramData) outIt->X2() = inIt->X2();
+      prg.report();
+
+    }
+  }
+
+  //Set the resulting workspace
+  setProperty("Outputworkspace", outputWS);
+}
+/** Load in the RKH file for that has the correction information
+*  @param corrFile the name of the correction to load
+*  @return workspace containing the loaded data
+*  @throw runtime_error if load algorithm fails
+*/
+MatrixWorkspace_sptr CorrectToFile::fileToWksp(const std::string & corrFile)
+{  
+  g_log.information() << "Loading file " << corrFile << std::endl;
+  progress(0, "Loading file");
+  IAlgorithm_sptr loadRKH = createSubAlgorithm("LoadRKH", 0, LOAD_TIME);
   std::string rkhfile = getProperty("Filename");
   loadRKH->setPropertyValue("Filename", rkhfile);
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");
@@ -52,80 +152,41 @@ void CorrectToFile::exec()
     throw std::runtime_error("Error executing LoadRKH as a sub algorithm.");
   }
 
-  //Now get input workspace for this algorithm
-  MatrixWorkspace_const_sptr toCorrect = getProperty("WorkspaceToCorrect");
-  MatrixWorkspace_const_sptr rkhInput = loadRKH->getProperty("OutputWorkspace");
+  g_log.debug() << corrFile << " loaded\n";
+  return loadRKH->getProperty("OutputWorkspace");
+}
+/** Multiply or divide the input workspace as specified by the user
+*  @param[in] lhs the first input workspace
+*  @param[in] rhs the last input workspace
+*  @param[in] algName the name of the algorithm to use on the input files
+*  @param[out] result the output workspace
+*  @throw NotFoundError if requested algorithm requested doesn't exist
+*  @throw runtime_error if algorithm encounters an error
+*/
+void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs, API::MatrixWorkspace_sptr rhs, const std::string & algName, API::MatrixWorkspace_sptr & result)
+{
+  g_log.information() << "Initalising the algorithm " << algName << std::endl;
+  progress(LOAD_TIME, "Applying correction");
+  IAlgorithm_sptr algebra = createSubAlgorithm(algName, LOAD_TIME, 1.0);
+  algebra->setProperty("LHSWorkspace", lhs);
+  algebra->setProperty("RHSWorkspace", rhs);
+  algebra->setProperty("OutputWorkspace", result);
 
-  // Check that the workspace to rebin has the same units as the one that we are matching to
-  // However, just print a warning if it isn't, don't abort (since user provides the file's unit)
-  if (toCorrect->getAxis(0)->unit() != rkhInput->getAxis(0)->unit())
+  try
   {
-    g_log.warning("Unit on input workspace is different to that specified in 'FirstColumnValue' property");
+    algebra->execute();
+  }
+  catch(std::runtime_error)
+  {
+    g_log.warning() << "Error encountered while running algorithm " << algName << std::endl;
+    g_log.error() << "Correction file " << getPropertyValue("Filename") + " can't be used to correct workspace " << getPropertyValue("WorkspaceToCorrect") << std::endl;
+    g_log.error() << "Mismatched number of spectra?" << std::endl;
+    throw std::runtime_error("Correct to file failed, see log for details");
   }
 
-  // Get references to the correction factors
-  const MantidVec &Xcor = rkhInput->readX(0);
-  const MantidVec &Ycor = rkhInput->readY(0);
-  const MantidVec &Ecor = rkhInput->readE(0);
+  result = algebra->getProperty("OutputWorkspace");
+  g_log.debug() << algName << " complete\n";
+}
 
-  // Only create the output workspace if it's not the same as the input one
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (outputWS != toCorrect)
-  {
-    outputWS = WorkspaceFactory::Instance().create(toCorrect);
-  }
-  const bool histogramData = outputWS->isHistogramData();
-  const std::string operation = getProperty("WorkspaceOperation");
-  const bool divide = (operation == "Divide") ? true : false;
-  double Yfactor,Efactor;
-
-  Progress prg(this,0.0,1.0,outputWS->size());
-  MatrixWorkspace::iterator outIt(*outputWS);
-  for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
-  {
-    const double currentX = histogramData ? (inIt->X()+inIt->X2())/2.0 : inIt->X();
-    // Find out the index of the first correction point after this value
-    MantidVec::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
-    const unsigned int index = pos-Xcor.begin();
-    if ( index == Xcor.size() )
-    {
-      // If we're past the end of the correction factors vector, use the last point
-      Yfactor = Ycor[index-1];
-      Efactor = Ycor[index-1];
-    }
-    else if (index)
-    {
-      // Calculate where between the two closest points our current X value is
-      const double fraction = (currentX-Xcor[index-1])/(Xcor[index]-Xcor[index-1]);
-      // Now linearly interpolate to find the correction factors to use
-      Yfactor = Ycor[index-1] + fraction*(Ycor[index]-Ycor[index-1]);
-      Efactor = Ecor[index-1] + fraction*(Ecor[index]-Ecor[index-1]);
-    }
-    else
-    {
-      // If we're before the start of the correction factors vector, use the first point
-      Yfactor = Ycor[0];
-      Efactor = Ycor[0];
-    }
-
-    // Now do the correction on the current point
-    if (divide)
-    {
-      outIt->Y() = inIt->Y()/Yfactor;
-      outIt->E() = inIt->E()/Efactor;
-    }
-    else
-    {
-      outIt->Y() = inIt->Y()*Yfactor;
-      outIt->E() = inIt->E()*Efactor;
-    }
-    // Copy X value over
-    outIt->X() = inIt->X();
-    if (histogramData) outIt->X2() = inIt->X2();
-    prg.report();
-
-  }
-
-  //Set the resulting workspace
-  setProperty("Outputworkspace", outputWS);
+}
 }

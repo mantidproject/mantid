@@ -22,6 +22,7 @@ m_isOptional(false), m_algorithmProperty(""), m_fileFilter("")
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString&)));
+  connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SLOT(findFiles()));
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SLOT(findFiles()));
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
@@ -199,7 +200,6 @@ void MWRunFiles::setFileText(const QString & text)
   m_uiForm.fileEditor->setText(text);
   findFiles();
 }
-
 /** 
 * Puts the comma separated string in the fileEditor into the m_files array
 */
@@ -215,6 +215,7 @@ void MWRunFiles::findFiles()
     if( this->isOptional() )
     {
       m_uiForm.valid->hide();
+      m_foundFiles.clear();
       return;
     }
     else
@@ -273,9 +274,7 @@ void MWRunFiles::findFiles()
   {
     m_uiForm.valid->hide();
   }
-}
-
-/**
+}/**
 * Read settings from the given group
 * @param group The name of the group key to retrieve data from
 */
@@ -325,19 +324,25 @@ QString MWRunFiles::createFileFilter()
       fileExts = getFileExtensionsFromAlgorithm(elements[0], elements[1]);
     }
   }
-  QString fileFilter = "Files (";
+
+  QString fileFilter;
   QStringListIterator itr(fileExts);
-  while( itr.hasNext() )
+  if (itr.hasNext())
   {
-    QString ext = itr.next();
-    fileFilter += "*" + ext.toLower() + " ";
-    fileFilter += "*" + ext.toUpper();
-    if( itr.hasNext() )
+    fileFilter += "Files (";
+    while( itr.hasNext() )
     {
-      fileFilter += " ";
+      QString ext = itr.next();
+      fileFilter += "*" + ext.toLower() + " ";
+      fileFilter += "*" + ext.toUpper();
+      if( itr.hasNext() )
+      {
+        fileFilter += " ";
+      }
     }
+    fileFilter += ")";
   }
-  fileFilter += ");;All Files (*.*)";
+  fileFilter += ";;All Files (*.*)";
   return fileFilter;
 }
 
@@ -360,16 +365,19 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
     std::set<std::string> allowed = fileProp->allowedValues();
     std::set<std::string>::const_iterator iend = allowed.end();
     QString preferredExt = QString::fromStdString(fileProp->getDefaultExt());
-    size_t index(0);
+    int index(0);
     for(std::set<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
     {
-      QString ext = QString::fromStdString(*it);
-      fileExts.append(ext);
-      if( ext == preferredExt )
+      if ( ! it->empty() )
       {
-        fileExts.move(index, 0);
+        QString ext = QString::fromStdString(*it);
+        fileExts.append(ext);
+        if( ext == preferredExt )
+        {
+          fileExts.move(index, 0);
+        }
+        ++index;
       }
-      ++index;
     }
   }
   return fileExts;
@@ -443,4 +451,3 @@ void MWRunFiles::browseClicked()
   findFiles();
   emit fileEditingFinished();
 }
-

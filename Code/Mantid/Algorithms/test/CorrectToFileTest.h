@@ -38,7 +38,7 @@ public:
 
     TS_ASSERT_DELTA( testInput->readY(0)[0], 2.0 , 0.0001 );
 
-    MatrixWorkspace_sptr data = executeAlgorithm(testInput);
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "Wavelength", "Divide");
 
     TS_ASSERT(data);
     TS_ASSERT_EQUALS( data->getNumberHistograms(), 10 );
@@ -64,7 +64,7 @@ public:
 
     TS_ASSERT_DELTA( testInput->readY(1)[0], 1.0 , 0.0001 );
 
-    MatrixWorkspace_sptr data = executeAlgorithm(testInput);
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "Wavelength", "Divide");
 
     TS_ASSERT(data);
     TS_ASSERT_EQUALS( data->getNumberHistograms(), 10 );
@@ -82,7 +82,56 @@ public:
     AnalysisDataService::Instance().remove(data->getName());
   }
 
-  MatrixWorkspace_sptr executeAlgorithm(MatrixWorkspace_sptr testInput)
+  void testSpectraDivide()
+  {    //Need a workspace to correct
+    MatrixWorkspace_sptr testInput = 
+      WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "SpectrumNumber", "Divide");
+
+    // the tests aren't extensive because the algorithm just calls the LoadRKH and Divide algorithms and these already have tests
+    TS_ASSERT(data);
+    TS_ASSERT_EQUALS( data->getNumberHistograms(), 102 );
+
+    //Sizes are correct
+    TS_ASSERT_EQUALS( static_cast<int>(data->readX(0).size()), 33);
+    TS_ASSERT_EQUALS( static_cast<int>(data->readY(0).size()), 32);
+    TS_ASSERT_EQUALS( static_cast<int>(data->readE(0).size()), 32);
+
+    //value at a single point
+    TS_ASSERT_DELTA( data->readY(1)[13], 8.7000, 0.0001 );
+    TS_ASSERT_DELTA( data->readY(1)[13], 8.7000, 0.0001 );
+
+    //cleanup the output workspace
+    AnalysisDataService::Instance().remove(data->getName());
+  }
+
+
+  void testSpectraMultip()
+  {    //Need a workspace to correct
+    MatrixWorkspace_sptr testInput = 
+      WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "SpectrumNumber", "Multiply", false);
+
+    // the tests aren't extensive because the algorithm just calls the LoadRKH and Multiply algorithms and these already have tests
+    TS_ASSERT(data);
+    TS_ASSERT_EQUALS( data->getNumberHistograms(), 102 );
+
+    //Sizes are correct
+    TS_ASSERT_EQUALS( static_cast<int>(data->readX(0).size()), 33);
+    TS_ASSERT_EQUALS( static_cast<int>(data->readY(0).size()), 32);
+    TS_ASSERT_EQUALS( static_cast<int>(data->readE(0).size()), 32);
+
+    //value at a single point
+    TS_ASSERT_DELTA( data->readY(7)[5], 0.2791, 0.0001 );
+    TS_ASSERT_DELTA( data->readY(7)[5], 0.2791, 0.0001 );
+
+    //cleanup the output workspace
+    AnalysisDataService::Instance().remove(data->getName());
+  }
+
+  MatrixWorkspace_sptr executeAlgorithm(MatrixWorkspace_sptr testInput, const std::string & unit, const std::string & operation, bool newWksp = true)
   {
 
     if( !correctToFile.isInitialized() ) correctToFile.initialize();
@@ -97,9 +146,10 @@ public:
     //Set the properties
     TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("WorkspaceToCorrect", "CorrectThis"));
     TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("Filename", inputFile));
-    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("FirstColumnValue", "Wavelength"));
-    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("WorkspaceOperation", "Divide"));
-    std::string outputSpace("outputTest");
+    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("FirstColumnValue", unit));
+    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("WorkspaceOperation", operation));
+    std::string outputSpace("CorrectToFileOutputTest");
+    if ( ! newWksp ) outputSpace = correctToFile.getPropertyValue("WorkspaceToCorrect");
     TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("OutputWorkspace", outputSpace));
 
     //check that retrieving the filename and output workspace gets the correct value

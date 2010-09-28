@@ -155,6 +155,10 @@ void SANSRunWindow::initLayout()
   m_uiForm.trans_opt->setItemData(1,"Linear");
   m_uiForm.trans_opt->setItemData(2,"Off");
 
+  //the file widget always has a *.* filter, passing an empty list means we get only that
+  m_uiForm.floodFile->setAlgorithmProperty("CorrectToFile|Filename");
+  m_uiForm.floodFile->isOptional(true);
+
   if( ! m_addFilesTab )
   {//sets up the AddFiles tab which must be deleted in the destructor
     m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
@@ -281,6 +285,8 @@ void SANSRunWindow::connectChangeSignals()
 
   // Default transmission switch
   connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+
+  connect(m_uiForm.enableFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
 }
 /**
  * Initialize the widget maps
@@ -404,6 +410,11 @@ void SANSRunWindow::readSettings()
   //Set old file extension
   m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
 
+  m_uiForm.enableFlood_ck->setChecked(
+                   value_store.value("enable_flood_correct",true).toBool());
+  m_uiForm.floodFile->setEnabled(m_uiForm.enableFlood_ck->isChecked());
+  m_uiForm.floodFile->readSettings("flood_correct");
+
   value_store.endGroup();
   readSaveSettings(value_store);
 
@@ -445,6 +456,10 @@ void SANSRunWindow::saveSettings()
 
   value_store.setValue("instrument", m_uiForm.inst_opt->currentIndex());
   value_store.setValue("fileextension", m_uiForm.file_opt->currentIndex());
+
+  value_store.setValue("enable_flood_correct", m_uiForm.enableFlood_ck->isChecked());
+  m_uiForm.floodFile->saveSettings("flood_correct");
+
   unsigned int mode_id(0);
   if( m_uiForm.single_mode_btn->isChecked() )
   {
@@ -493,7 +508,8 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 
   if ( allOutput.count() < 2 )
   {
-    throw std::runtime_error("Error reported by Python script: " + pythonOut.toStdString());
+    QMessageBox::critical(this, "Fatal error found during reduction", "Error reported by Python script " + pythonOut);
+    return "Error";
   }
 
   return allOutput[0];
@@ -595,6 +611,11 @@ bool SANSRunWindow::loadUserFile()
   //Direct efficiency correction
   m_uiForm.direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE_R'),"));
   m_uiForm.front_direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE_F'),"));
+
+  QString file = runReduceScriptFunction("printParameter('NORMALISATION_FILE'),");
+  //Check if the file name is set to Python's None object
+  file = file == "None " ? "" : file;
+  m_uiForm.floodFile->setFileText(file);
 
   //Scale factor
   dbl_param = runReduceScriptFunction("printParameter('RESCALE'),").toDouble();
@@ -1478,11 +1499,29 @@ bool SANSRunWindow::handleLoadButtonClick()
     if( run_no.isEmpty() ) 
     {
       m_workspace_names.insert(key, "");
-      //Clear any that are assigned
-      runAssign(key, logs);
+      try
+      {
+        //Clear any that are assigned
+        runAssign(key, logs);
+      }
+      catch(std::runtime_error)
+      {//the user should already have seen an error message box pop up
+        g_log.error() << "Problem loading file\n";
+        is_loaded = false;
+        break;
+      }
       continue;
     }
-    is_loaded &= runAssign(key, logs);
+    try
+    {
+      is_loaded &= runAssign(key, logs);
+    }
+    catch(std::runtime_error)
+    {//the user should already have seen an error message box pop up
+      g_log.error() << "Problem loading file\n";
+      is_loaded = false;
+      break;
+     }
     // Check if the last LoadRaw algorithm was run successfully. If so then any problem with
     // loading is with the log files for the first 2 keys
     Mantid::API::IAlgorithm_sptr last_run = Mantid::API::AlgorithmManager::Instance().algorithms().back();
@@ -1641,6 +1680,9 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   {
     exec_reduce += ", False)\n";
   }
+  QString floodFile =
+    m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename() : "";
+  exec_reduce += "SetDetectorFloodFile('"+floodFile+"')\n";
 
   //Transmission behaviour
   exec_reduce += "TransFit('" + m_uiForm.trans_opt->itemData(m_uiForm.trans_opt->currentIndex()).toString() + "'," +
@@ -1660,6 +1702,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   }
   //Sample offset
   exec_reduce += "SetSampleOffset(" + m_uiForm.smpl_offset->text() + ")\n";
+
   //Monitor spectrum
   exec_reduce += "SetMonitorSpectrum(" + m_uiForm.monitor_spec->text() + ",";
   exec_reduce += m_uiForm.monitor_interp->isChecked() ? "True" : "False";
@@ -1699,7 +1742,10 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     // Currently the components are moved with each reduce click. Check if a load is necessary
     // This must be done before the script is written as we need to get correct values from the
     // loaded raw data
-    handleLoadButtonClick();
+    if ( ! handleLoadButtonClick() )
+    {
+      return;
+    }
   }
 
   QString py_code = createAnalysisDetailsScript(type);
@@ -1770,13 +1816,16 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   if ( runMode == SingleMode )
   {
     QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
-    if ( pythonDiag.count() < 2 )
+    if ( pythonDiag.count() > 1 )
     {
-      throw std::runtime_error("Python error: "+pythonStdOut.toStdString());
+      QString reducedWS = pythonDiag[1];
+      reducedWS = reducedWS.split("\n")[0];
+      resetDefaultOutput(reducedWS);
     }
-    QString reducedWS = pythonDiag[1];
-    reducedWS = reducedWS.split("\n")[0];
-    resetDefaultOutput(reducedWS);
+    else
+    {
+      QMessageBox::critical(this, "Reduction aborted", "Error running script "+pythonStdOut);
+    }
   }
 
   // Mark that a reload is necessary to rerun the same reduction
@@ -2063,6 +2112,13 @@ void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
     }
   }  
 }
+/** Enables or disables the floodFile run widget
+*  @param state Qt::CheckState enum value, Checked means enable otherwise disabled
+*/
+void SANSRunWindow::prepareFlood(int state)
+{
+  m_uiForm.floodFile->setEnabled(state == Qt::Checked);
+}
 /**Enables  the default save button, saveDefault_Btn, if there is an output workspace
 * stored in m_outputWS and text in outfile_edit
 */
@@ -2292,6 +2348,10 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     //assign the workspace name to a Python variable and read back some details
     QString pythonC="t1, t2 = " + assign_fn + ";print t1,'"+PYTHON_SEP+"',t2";
     QString ws_names = runReduceScriptFunction(pythonC);
+    if (ws_names.startsWith("error", Qt::CaseInsensitive))
+    {
+      throw std::runtime_error("Couldn't load a transmission file");
+    }
     //read the informtion returned from Python
     QString trans_ws = ws_names.section(PYTHON_SEP, 0,0).trimmed();
     QString direct_ws = ws_names.section(PYTHON_SEP, 1).trimmed();
@@ -2337,6 +2397,10 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     //assign the workspace name to a Python variable and read back some details
     QString run_info = "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
     run_info = runReduceScriptFunction(run_info);
+    if (run_info.startsWith("error", Qt::CaseInsensitive))
+    {
+      throw std::runtime_error("Couldn't sample or can");
+    }
     //read the informtion returned from Python
     QString base_workspace = run_info.section(PYTHON_SEP, 0, 0).trimmed();
 
