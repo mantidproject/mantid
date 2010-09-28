@@ -348,14 +348,6 @@ class InstrumentDescription(BaseScriptElement):
             raise RuntimeError, "Trying to generate reduction script without a data file."
         
         return script
-
-    def apply(self, reducer):
-        """
-            The equivalent of the command line implementation, directly
-            applied to a SANSReducer object
-            @param reducer: SANSReducer object
-        """
-        return NotImplemeted    
     
     def to_xml(self):
         """
@@ -460,7 +452,7 @@ class BeamFinder(BaseScriptElement):
                 script += "ScatteringBeamCenter(\"%s\", %g)\n" % (self.beam_file, self.beam_radius)
         return script
 
-    def apply(self, reducer):
+    def apply(self, reducer=None):
         """
             The equivalent of the command line implementation, directly
             applied to a SANSReducer object

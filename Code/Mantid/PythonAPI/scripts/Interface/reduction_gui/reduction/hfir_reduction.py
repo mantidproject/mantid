@@ -6,6 +6,16 @@ import time
 import copy
 import hfir_reduction_steps
 
+# Check whether Mantid is available
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    from HFIRCommandInterface import *
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False  
+
+
 class BaseScriptElement(object):
     """
         Base class for each script element (panel on the UI).
@@ -171,7 +181,7 @@ class ReductionScripter(object):
         script += "from HFIRCommandInterface import *\n"
         script += "\n"
         
-        # Instrument dsecription
+        # Instrument description
         if self.instrument is None:
             raise RuntimeError, "An instrument description was not established before starting reduction."
         script += str(self.instrument)
@@ -196,13 +206,20 @@ class ReductionScripter(object):
             f.write(script)
             f.close()
         
+        script += "SaveIqAscii()\n"
+        script += "Reduce1D()\n"
+        
         return script
         
     def apply(self):
         """
             Apply the reduction process to a Mantid SANSReducer
         """
-        
-        return script
+        if HAS_MANTID:
+            script = self.to_script(None)
+            exec script
+            return ReductionSingleton().log_text
+            
+            
 
     

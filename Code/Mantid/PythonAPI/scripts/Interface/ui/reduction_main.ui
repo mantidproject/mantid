@@ -61,6 +61,9 @@
       <height>27</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>Click to execute reduction.</string>
+    </property>
     <property name="text">
      <string>Reduce</string>
     </property>
@@ -73,6 +76,9 @@
       <width>93</width>
       <height>27</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Click to export the reduction parameters to a python script that can be run in MantidPlot.</string>
     </property>
     <property name="text">
      <string>Export</string>

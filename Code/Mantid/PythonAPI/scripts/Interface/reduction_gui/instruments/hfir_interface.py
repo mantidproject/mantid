@@ -4,12 +4,14 @@
     The actual view/layout is define in .ui files. The state of the reduction
     process is kept elsewhere (HFIRReduction object)
 """
+import sys
+import traceback
 from PyQt4 import QtGui, uic, QtCore
 from reduction_gui.widgets.beam_finder import BeamFinderWidget
 from reduction_gui.widgets.instrument import SANSInstrumentWidget
 from reduction_gui.widgets.transmission import TransmissionWidget
 from reduction_gui.widgets.background import BackgroundWidget
-from reduction_gui.widgets.data_sets import DataWidget
+from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.reduction.hfir_reduction import ReductionScripter
 
 
@@ -29,6 +31,8 @@ class HFIRInterface(object):
         self._transmission_widget = None
         # Background
         self._background_widget = None
+        # Reduction output
+        self._output_widget = None
         
         # General settings
         self._settings = settings
@@ -87,6 +91,12 @@ class HFIRInterface(object):
         
         # Print the script for now
         print self.export(None)
+        try:
+            log = self.scripter.apply()
+            self._output_widget.set_log(log)
+        except:
+            msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
+            QtGui.QMessageBox.warning(self._instrument_widget, "Reduction failed", msg)
         
     def get_tabs(self):
         """
@@ -105,8 +115,12 @@ class HFIRInterface(object):
         # Background
         self._background_widget = BackgroundWidget(settings = self._settings)
         
+        # Reduction output
+        self._output_widget = OutputWidget(settings = self._settings)
+        
         return [["Instrument", self._instrument_widget],
                 ["Beam Center", self._beam_finder_widget],
                 ["Transmission", self._transmission_widget],
-                ["Background", self._background_widget]]
+                ["Background", self._background_widget],
+                ['Output', self._output_widget]]
         

@@ -331,7 +331,7 @@ def start(argv=[]):
     uic.loadUi(f, reducer)
     reducer.setup_layout()
     reducer.show()
-    sys.exit(app.exec_())   
+    app.exec_() 
         
 if __name__ == '__main__':
     start(argv=sys.argv)

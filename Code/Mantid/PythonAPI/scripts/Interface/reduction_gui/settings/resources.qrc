@@ -6,7 +6,7 @@
 		<file alias="hfir_beam_finder.ui">../../ui/hfir_beam_finder.ui</file>
 		<file alias="hfir_background.ui">../../ui/hfir_background.ui</file>
 		<file alias="hfir_data_summary.ui">../../ui/hfir_data_summary.ui</file>
-		<file alias="hfir_data.ui">../../ui/hfir_data.ui</file>
+		<file alias="hfir_output.ui">../../ui/hfir_output.ui</file>
 		<file alias="trans_direct_beam.ui">../../ui/trans_direct_beam.ui</file>
 		<file alias="trans_spreader.ui">../../ui/trans_spreader.ui</file>
 	</qresource>
