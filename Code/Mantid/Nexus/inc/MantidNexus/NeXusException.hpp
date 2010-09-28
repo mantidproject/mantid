@@ -4,7 +4,8 @@
 #include <string>
 #include <stdexcept>
 
-namespace NeXusAPI{
+namespace NeXus
+{
   class Exception : public std::runtime_error
   {
   public:
@@ -16,6 +17,7 @@ namespace NeXusAPI{
     std::string m_what;
     int m_status;
   };
-};
+
+};//namespace
 
 #endif

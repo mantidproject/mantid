@@ -47,7 +47,7 @@
 #include <vector>
 #include "NeXusFile.hpp"
 
-namespace NeXusAPI
+namespace NeXus
 {
 namespace Stream
 {
@@ -212,7 +212,7 @@ namespace Stream
 	DataHolder(const std::string& name, const std::vector<NumT>& value);
 	DataHolder(std::vector<NumT>& value);
 	DataHolder(const std::vector<NumT>& value);
-	NXnumtype getType() { return NeXusAPI::getType<NumT>(); }
+	NXnumtype getType() { return ::NeXus::getType<NumT>(); }
 	virtual void readFromFile(File& nf) const;
 	virtual void writeToFile(File& nf) const;
 	DataHolder* clone() { return new DataHolder(m_name, m_c_value, m_value); }

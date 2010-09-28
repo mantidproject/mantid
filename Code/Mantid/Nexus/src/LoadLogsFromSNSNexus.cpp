@@ -39,7 +39,7 @@ void LoadLogsFromSNSNexus::init()
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-    "The name of the workspace in which to inport the sample logs." );
+    "The name of the workspace in which to import the sample logs." );
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
 		  "The name (including its full or relative path) of the Nexus file to\n"
@@ -64,7 +64,7 @@ void LoadLogsFromSNSNexus::exec()
 
 
   // top level file information
-  NeXusAPI::File file(m_filename);
+  ::NeXus::File file(m_filename);
   g_log.information() << "NeXus file found: " << file.inquireFile() << endl;
 
   //Start with the base entry
@@ -79,7 +79,7 @@ void LoadLogsFromSNSNexus::exec()
   // print out the entry level fields
   map<string, string> entries = file.getEntries();
 
-  NeXusAPI::Info info;
+  ::NeXus::Info info;
   map<string,string>::const_iterator it = entries.begin();
   for (; it != entries.end(); it++)
   {
@@ -105,7 +105,7 @@ void LoadLogsFromSNSNexus::exec()
  *    occurs a segfault.
  * @param entry_name, entry_class: name and class of NXlog to open.
  */
-void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry_name, std::string entry_class)
+void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_name, std::string entry_class)
 {
   file.openGroup(entry_name, entry_class);
 
@@ -119,7 +119,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
   }
 
 
-  NeXusAPI::Info info;
+  ::NeXus::Info info;
   //Two possible types of properties:
   vector<double> values;
   vector<int> values_int;
@@ -136,7 +136,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
     file.getAttr("units", units);
     //std::cout << entry_name << " has units " << units << "." << std::endl;
   }
-  catch (NeXusAPI::Exception ex)
+  catch (::NeXus::Exception ex)
   {
     //Ignore missing units field.
     //std::cout << entry_name << " has no units " << std::endl;
@@ -168,7 +168,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(NeXusAPI::File& file, std::string entry
         WS->mutableRun().addProperty(entry_name, values[0], units);
       }
     }
-    catch (NeXusAPI::Exception)
+    catch (::NeXus::Exception)
     {
       g_log.warning() << "NXlog entry " << entry_name << " has an unsupported 'value' data type.\n";
       file.closeData();

@@ -7,7 +7,7 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
 
-using namespace NeXusAPI;
+using namespace ::NeXus;
 using std::map;
 using std::pair;
 using std::string;
@@ -63,7 +63,7 @@ static string toString(const vector<NumT>& data) {
   return result.str();
 }
 
-namespace NeXusAPI {
+namespace NeXus {
 
   // catch for undefined types
   template <typename NumT>
@@ -170,7 +170,7 @@ static void inner_free(void* & data) {
   }
 }
 
-namespace NeXusAPI {
+namespace NeXus {
 File::File(NXhandle handle, bool close_handle) : m_file_id(handle), m_close_handle(close_handle) {
 
 }

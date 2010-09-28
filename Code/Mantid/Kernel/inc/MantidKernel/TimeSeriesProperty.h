@@ -831,18 +831,12 @@ public:
   ///Not used in this class and always returns false
   bool isDefault() const { return false; }
 
-  /// static reference to the logger class
-  //static Kernel::Logger& g_log;
 };
 
 
 
 //================================================================================================
 DLLExport TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<double> * tsp);
-
-//TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<int> * tsp);
-//template<typename TYPE>
-//TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<TYPE> * tsp);
 
 
 } // namespace Kernel

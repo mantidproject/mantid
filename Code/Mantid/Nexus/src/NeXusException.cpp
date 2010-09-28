@@ -1,6 +1,6 @@
 #include "MantidNexus/NeXusException.hpp"
 
-namespace NeXusAPI
+namespace NeXus
 {
 
 Exception::Exception(const std::string& msg, const int status) :

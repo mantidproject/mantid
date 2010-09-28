@@ -35,7 +35,7 @@
  * \ingroup cpp_main
  */
 
-namespace NeXusAPI {
+namespace NeXus {
   /**
    * The primitive types published by this API.
    * \li FLOAT32 float.

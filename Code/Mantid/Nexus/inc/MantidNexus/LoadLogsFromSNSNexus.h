@@ -87,7 +87,7 @@ namespace API
 
       void exec();
 
-      void loadSampleLog(NeXusAPI::File& file, std::string entry_name, std::string entry_class);
+      void loadSampleLog(::NeXus::File& file, std::string entry_name, std::string entry_class);
 
       /// The name and path of the input file
       std::string m_filename;

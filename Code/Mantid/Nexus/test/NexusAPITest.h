@@ -78,7 +78,7 @@ public:
    */
   int writeTest(const string& filename, NXaccess create_code)
   {
-    NeXusAPI::File file(filename, create_code);
+    ::NeXus::File file(filename, create_code);
     // create group
     file.makeGroup("entry", "NXentry", true);
     // group attributes
@@ -89,7 +89,7 @@ public:
     char c1_array[5][4] = {{'a', 'b', 'c' ,'d'}, {'e', 'f', 'g' ,'h'},
                            {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'},
                            {'q', 'r', 's' , 't'}};
-    file.makeData("c1_data", NeXusAPI::CHAR, array_dims, true);
+    file.makeData("c1_data", ::NeXus::CHAR, array_dims, true);
     file.putData(c1_array);
     file.closeData();
 
@@ -105,7 +105,7 @@ public:
     file.writeData("r8_data_noslab", r8_array, array_dims);
 
     // 2d double data - slab test
-    file.makeData("r8_data", NeXusAPI::FLOAT64, array_dims, true);
+    file.makeData("r8_data", ::NeXus::FLOAT64, array_dims, true);
     vector<int> slab_start;
     slab_start.push_back(4);
     slab_start.push_back(0);
@@ -163,7 +163,7 @@ public:
     vector<int> cdims;
     cdims.push_back(20);
     cdims.push_back(20);
-    file.writeCompData("comp_data", comp_array, array_dims, NeXusAPI::LZW, cdims);
+    file.writeCompData("comp_data", comp_array, array_dims, ::NeXus::LZW, cdims);
 
     return 0;
   }
@@ -178,8 +178,8 @@ public:
 
     const string SDS("SDS");
     // top level file information
-    NeXusAPI::File file(filename);
-    vector<NeXusAPI::AttrInfo> attr_infos = file.getAttrInfos();
+    ::NeXus::File file(filename);
+    vector< ::NeXus::AttrInfo> attr_infos = file.getAttrInfos();
     // check group attributes
     file.openGroup("entry", "NXentry");
 
@@ -233,12 +233,12 @@ public:
     //Now make it throw Exception by trying to put a double in an int.
     file.openData("r8_data");
     TS_ASSERT( !file.isDataInt() );
-    TS_ASSERT_THROWS(file.getDataCoerce(ires), NeXusAPI::Exception);
+    TS_ASSERT_THROWS(file.getDataCoerce(ires), ::NeXus::Exception);
     file.closeData();
 
     file.openData("r4_data");
     TS_ASSERT( !file.isDataInt() );
-    TS_ASSERT_THROWS(file.getDataCoerce(ires), NeXusAPI::Exception);
+    TS_ASSERT_THROWS(file.getDataCoerce(ires), ::NeXus::Exception);
     file.closeData();
 
   }
