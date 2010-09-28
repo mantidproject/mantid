@@ -35,7 +35,7 @@ public:
     using namespace Mantid::API;
     Mantid::DataHandling::LoadRaw3 loader1;
     loader1.initialize();
-    loader1.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39182.RAW");
+    loader1.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39182.raw");
     loader1.setPropertyValue("OutputWorkspace", "sample");
     loader1.setPropertyValue("SpectrumMin","1");
     loader1.setPropertyValue("SpectrumMax","10");
@@ -43,7 +43,7 @@ public:
     
     Mantid::DataHandling::LoadRaw3 loader2;
     loader2.initialize();
-    loader2.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39191.RAW");
+    loader2.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP39191.raw");
     loader2.setPropertyValue("OutputWorkspace", "vanadium");
     loader2.setPropertyValue("SpectrumMin","1");
     loader2.setPropertyValue("SpectrumMax","10");
