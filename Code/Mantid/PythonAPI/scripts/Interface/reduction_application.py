@@ -1,10 +1,18 @@
 import sys, os
 from PyQt4 import QtGui, QtCore, uic
 
-from instruments.instrument_factory import instrument_factory
-from reduction.hfir_reduction import ReductionScripter
-from application_settings import GeneralSettings
-import qrc_resources
+from reduction_gui.instruments.instrument_factory import instrument_factory
+from reduction_gui.reduction.hfir_reduction import ReductionScripter
+from reduction_gui.settings.application_settings import GeneralSettings
+import reduction_gui.settings.qrc_resources
+
+# Check whether Mantid is available
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False    
 
 class ReductionGUI(QtGui.QMainWindow):
     def __init__(self, instrument=None):
@@ -73,6 +81,12 @@ class ReductionGUI(QtGui.QMainWindow):
             self._set_window_title()
         else:
             self.close()
+            
+        # Event connections
+        if not HAS_MANTID:
+            self.reduce_button.hide()
+        self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
+        self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
 
     def _update_file_menu(self):
         """
@@ -294,9 +308,9 @@ class ReductionGUI(QtGui.QMainWindow):
         fname = unicode(QtGui.QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
                                                           self._last_export_directory, 
                                                           "Python script (*.py)"))
-        
-        if fname is not None:
-            if '.' not in fname:
+               
+        if len(fname)>0:
+            if not fname.endswith('.py'):
                 fname += ".py"
             (folder, file_name) = os.path.split(fname)
             self._last_export_directory = folder
