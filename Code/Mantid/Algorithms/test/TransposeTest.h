@@ -43,7 +43,7 @@ public:
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/Data/irs21360.raw");
+    loader->setPropertyValue("Filename", "../../../../Test/AutoTestData/IRS21360.raw");
     loader->setPropertyValue("OutputWorkspace", "transpose_irs_r");
     loader->setPropertyValue("SpectrumMin", "3");
     loader->setPropertyValue("SpectrumMax", "13");
