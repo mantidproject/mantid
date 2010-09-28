@@ -47,7 +47,7 @@ public:
 	{
     Mantid::DataHandling::LoadRaw loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "../../../../Test/Data/HRP38692.RAW");
+    loader.setPropertyValue("Filename", "../../../../Test/AutoTestData/HRP38692.raw");
 
     std::string outputSpace = "tofocus";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -61,13 +61,13 @@ public:
     align.initialize();
     align.setPropertyValue("InputWorkspace",outputSpace);
     align.setPropertyValue("OutputWorkspace",outputSpace);
-    align.setPropertyValue("CalibrationFile","../../../../Test/Data/hrpd_new_072_01.cal");
+    align.setPropertyValue("CalibrationFile","../../../../Test/AutoTestData/hrpd_new_072_01.cal");
     TS_ASSERT_THROWS_NOTHING( align.execute() );
     TS_ASSERT( align.isExecuted() );
 
     focus.setPropertyValue("InputWorkspace", outputSpace);
     focus.setPropertyValue("OutputWorkspace", "focusedWS" );
-    focus.setPropertyValue("GroupingFileName","../../../../Test/Data/hrpd_new_072_01.cal");
+    focus.setPropertyValue("GroupingFileName","../../../../Test/AutoTestData/hrpd_new_072_01.cal");
 
 	  TS_ASSERT_THROWS_NOTHING( focus.execute() );
 	  TS_ASSERT( focus.isExecuted() );
@@ -88,9 +88,9 @@ public:
     LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat");
-    eventLoader->setProperty("PulseidFilename",  "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat");
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
+    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat");
+    eventLoader->setProperty("PulseidFilename",  "../../../../Test/AutoTestData/REF_L_32035_pulseid.dat");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "refl");
     TS_ASSERT( eventLoader->execute() );
 
@@ -121,7 +121,7 @@ public:
     focus.setPropertyValue("OutputWorkspace", outputws);
 
     //This fake calibration file was generated using DiffractionFocussing2Test_helper.py
-    focus.setPropertyValue("GroupingFileName","../../../../Test/Data/refl_fake.cal");
+    focus.setPropertyValue("GroupingFileName","../../../../Test/AutoTestData/refl_fake.cal");
 
     //OK, run the algorithm
     focus.execute();
@@ -224,8 +224,8 @@ public:
     LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
-    eventLoader->setProperty("PulseidFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_pulseid.dat");
+    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/PG3_732_neutron_event.dat" );
+    eventLoader->setProperty("PulseidFilename", "../../../../Test/AutoTestData/PG3_732_pulseid.dat");
     eventLoader->setPropertyValue("MappingFilename","");
 //    eventLoader->setProperty("InstrumentFilename", "../../../../Test/Instrument/PG3_Definition.xml");
     eventLoader->setMaxEventsToLoad(100000); //This makes loading events faster.
@@ -243,14 +243,14 @@ public:
     align.initialize();
     align.setPropertyValue("InputWorkspace", outputws);
     align.setPropertyValue("OutputWorkspace", outputws);
-    align.setPropertyValue("CalibrationFile","../../../../Test/Data/sns_event_prenexus/pg3_mantid_det.cal");
+    align.setPropertyValue("CalibrationFile","../../../../Test/AutoTestData/pg3_mantid_det.cal");
     TS_ASSERT_THROWS_NOTHING( align.execute() );
     TS_ASSERT( align.isExecuted() );
 
     // Now do the focussing
     focus.setPropertyValue("InputWorkspace", outputws);
     focus.setPropertyValue("OutputWorkspace", outputws);
-    focus.setPropertyValue("GroupingFileName","../../../../Test/Data/sns_event_prenexus/pg3_mantid_det.cal");
+    focus.setPropertyValue("GroupingFileName","../../../../Test/AutoTestData/pg3_mantid_det.cal");
     focus.execute();
     TS_ASSERT( focus.isExecuted() );
 

@@ -149,9 +149,9 @@ public:
     LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat");
-    eventLoader->setProperty("PulseidFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat");
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
+    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat");
+    eventLoader->setProperty("PulseidFilename", "../../../../Test/AutoTestData/REF_L_32035_pulseid.dat");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", workspaceName);
     TS_ASSERT( eventLoader->execute() );
 
@@ -185,9 +185,9 @@ public:
     LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_32035_neutron_event.dat");
-    eventLoader->setProperty("PulseidFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_32035_pulseid.dat");
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/REF_L_TS_2010_02_19.dat");
+    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat");
+    eventLoader->setProperty("PulseidFilename", "../../../../Test/AutoTestData/REF_L_32035_pulseid.dat");
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
     eventLoader->setPropertyValue("OutputWorkspace", workspaceName);
     TS_ASSERT( eventLoader->execute() );
 

@@ -37,7 +37,7 @@ public:
 
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/GEM40979.raw");
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/GEM40979.raw");
     inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumMin","1000");
@@ -87,7 +87,7 @@ public:
 
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/IRS38633.raw");
+    loader.setPropertyValue("Filename","../../../../Test/AutoTestData/IRS38633.raw");
     const std::string inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumList","10,100");
