@@ -155,7 +155,7 @@ namespace Mantid
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
-
+      /// Handles distribution of Poco signals.
       mutable Poco::NotificationCenter m_notificationCenter;
 
       // Private constructors and destructor for singleton class
