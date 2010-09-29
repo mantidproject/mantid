@@ -81,6 +81,7 @@ void ConvertUnits::exec()
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != NULL)
   {
+    g_log.information() << "Executing ConvertUnits for Eventworkspace" << std::endl;
     this->execEvent();
     return;
   }
@@ -286,39 +287,38 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
   std::vector<double> emptyVec;
   const bool needEfixed = ( outputUnit->unitID().find("DeltaE") != std::string::npos );
   double efixedProp = getProperty("Efixed");
-  if ( needEfixed )
+  if ( emode == 1 )
   {
-    if ( emode == 1 )
+    //... direct efixed gather
+    if ( efixedProp == EMPTY_DBL() )
     {
-      //... direct efixed gather
-      if ( efixedProp == EMPTY_DBL() )
+      // try and get the value from the run parameters
+      const API::Run & run = outputWS->run();
+      if ( run.hasProperty("Ei") )
       {
-        // try and get the value from the run parameters
-        const API::Run & run = outputWS->run();
-        if ( run.hasProperty("Ei") )
-        {
-          Kernel::Property* prop = run.getProperty("Ei");
-          efixedProp = boost::lexical_cast<double,std::string>(prop->value());
-        }
-        else
-        {
-          if ( needEfixed ) throw std::invalid_argument("Could not retrieve incident energy from run object");
-          else efixedProp = 0.0;
-        }
+        Kernel::Property* prop = run.getProperty("Ei");
+        efixedProp = boost::lexical_cast<double,std::string>(prop->value());
       }
       else
       {
-        // set the Ei value in the run parameters
-        API::Run & run = outputWS->mutableRun();
-        run.addProperty<double>("Ei", efixedProp, true);
+        if ( needEfixed )
+        {
+          throw std::invalid_argument("Could not retrieve incident energy from run object");
+        }
+        else
+        {
+          efixedProp = 0.0;
+        }
       }
     }
-    else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
+    else
     {
-      efixedProp = 0.0;
+      // set the Ei value in the run parameters
+      API::Run & run = outputWS->mutableRun();
+      run.addProperty<double>("Ei", efixedProp, true);
     }
   }
-  else
+  else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
   {
     efixedProp = 0.0;
   }
@@ -600,7 +600,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
           efixed = DBL_MIN;
         }
       }
-    
+
       // Convert the input unit to time-of-flight
       fromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit

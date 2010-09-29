@@ -285,6 +285,32 @@ public:
     TS_ASSERT_DIFFERS(a_x, WS->getEventList(0).dataX()[1]);
   }
 
+  void testExecEvent_TwoStepConversionWithDeltaE()
+  {
+    // Test to make sure the TOF->DeltaE->Other Quantity works for
+    // EventWorkspaces
+    this->setup_Event();
+
+    ConvertUnits conv;
+    conv.initialize();
+    conv.setPropertyValue("InputWorkspace", this->inputSpace);
+    conv.setPropertyValue("OutputWorkspace", this->inputSpace);
+    conv.setPropertyValue("Target","DeltaE");
+    conv.setPropertyValue("Emode","Direct");
+    conv.setPropertyValue("Efixed","15.0");
+    conv.execute();
+
+    ConvertUnits conv2;
+    conv2.initialize();
+    conv2.setPropertyValue("InputWorkspace", this->inputSpace);
+    conv2.setPropertyValue("OutputWorkspace", this->inputSpace);
+    conv2.setPropertyValue("Target","Wavelength");
+    conv2.setPropertyValue("Emode","Direct");
+    conv2.setPropertyValue("Efixed","15.0");
+    TS_ASSERT_THROWS_NOTHING( conv2.execute() );
+    TS_ASSERT( conv2.isExecuted() );
+  }
+
 private:
   ConvertUnits alg;
   std::string inputSpace;
