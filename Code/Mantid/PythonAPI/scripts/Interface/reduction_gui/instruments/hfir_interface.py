@@ -89,11 +89,10 @@ class HFIRInterface(object):
         """
         self._push_to_scripter()
         
-        # Print the script for now
-        print self.export(None)
         try:
             log = self.scripter.apply()
             self._output_widget.set_log(log)
+            self._output_widget.plot_data(self.scripter.get_data())
         except:
             msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             QtGui.QMessageBox.warning(self._instrument_widget, "Reduction failed", msg)

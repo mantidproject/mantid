@@ -2,9 +2,9 @@
 from SANSReduction import *
 
 # Set a default data path where we look for raw data
-DataPath("C:/Mantid/Test/Data/SANS2D")
+DataPath("/home/m2d/workspace/mantid/Test/Data/SANS2D")
 # Set a user path where we look for the mask file
-UserPath("C:/Mantid/Test/Data/SANS2D/")
+UserPath("/home/m2d/workspace/mantid/Test/Data/SANS2D")
 # Set instrument. SANS2D() or LOQ()
 SANS2D()
 #Set reduction to 1D (note that if this is left out, 1D is the default)
@@ -66,11 +66,11 @@ FindBeamCentre(50., 170., 2)
 wav1 = 2.0
 wav2 = wav1 + 2.0
 reduced = WavRangeReduction(wav1, wav2, DefaultTrans)
-ws_list = [reduced]
-plt = plotSpectrum(reduced, 0)
-for i in range(2,7):
-    wav1 = i*2.0
-    wav2 = wav1 + 2.0
-    reduced = WavRangeReduction(wav1, wav2, DefaultTrans)
-    ws_list.append(reduced)
+#ws_list = [reduced]
+#plt = plotSpectrum(reduced, 0)
+#for i in range(2,7):
+#    wav1 = i*2.0
+#    wav2 = wav1 + 2.0
+#    reduced = WavRangeReduction(wav1, wav2, DefaultTrans)
+#    ws_list.append(reduced)
 #plotSpectrum(ws_list,0)

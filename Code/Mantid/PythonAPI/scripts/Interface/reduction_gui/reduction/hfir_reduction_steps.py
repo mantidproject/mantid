@@ -5,6 +5,7 @@
 """
 import xml.dom.minidom
 import copy
+import os
 from hfir_reduction import BaseScriptElement
 
 class Transmission(BaseScriptElement):
@@ -288,6 +289,7 @@ class InstrumentDescription(BaseScriptElement):
     detector_offset = 0
     # Wavelength value to force on the data set [Angstrom]
     wavelength = 0
+    wavelength_spread = 0.1
     
     # Flag to perform the solid angle correction
     solid_angle_corr = True
@@ -298,6 +300,12 @@ class InstrumentDescription(BaseScriptElement):
     # Minimum allowed relative sensitivity
     min_sensitivity = 0.5
     max_sensitivity = 1.5
+    
+    # Q range
+    q_min = 0.01
+    q_step = 0.001
+    q_max = 0.11
+    
     
     NORMALIZATION_NONE = 0
     NORMALIZATION_TIME = 1
@@ -315,7 +323,7 @@ class InstrumentDescription(BaseScriptElement):
         if self.detector_offset != 0:
             script += "SetSampleDetectorOffset(%g)\n" % self.detector_offset 
         if self.wavelength != 0:
-            script += "SetWavelength(%g)\n" % self.wavelength 
+            script += "SetWavelength(%g, %g)\n" % (self.wavelength, self.wavelength_spread)
         
         if self.solid_angle_corr:
             script += "SolidAngle()\n"
@@ -341,8 +349,16 @@ class InstrumentDescription(BaseScriptElement):
         # Mask
         script += "Mask(nx_low=%d, nx_high=%d, ny_low=%d, ny_high=%d)\n" % (self.mask_left, self.mask_right, self.mask_bottom, self.mask_top)
         
+        # Q binning
+        if self.q_min > self.q_max:
+            raise RuntimeError, "Q range has minimum Q larger than maximum Q"
+        script += "AzimuthalAverage(binning=\"%g, %g, %g\")\n" % (self.q_min, self.q_step, self.q_max)        
+        
         # Data file
         if len(str(self.data_file).strip())>0:
+            
+            parts = os.path.split(str(self.data_file))
+            script += "DataPath(\"%s\")\n" % parts[0]
             script += "AppendDataFile(\"%s\")\n" % self.data_file
         else:
             raise RuntimeError, "Trying to generate reduction script without a data file."
@@ -368,12 +384,17 @@ class InstrumentDescription(BaseScriptElement):
         xml += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
         xml += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
         xml += "  <wavelength>%g</wavelength>\n" % self.wavelength
+        xml += "  <wavelength_spread>%g</wavelength_spread>\n" % self.wavelength_spread
         
         xml += "  <solid_angle_corr>%s</solid_angle_corr>\n" % str(self.solid_angle_corr)
         xml += "  <sensitivity_corr>%s</sensitivity_corr>\n" % str(self.sensitivity_corr)
         xml += "  <sensitivity_data>%s</sensitivity_data>\n" % self.sensitivity_data
         xml += "  <sensitivity_min>%s</sensitivity_min>\n" % self.min_sensitivity
         xml += "  <sensitivity_max>%s</sensitivity_max>\n" % self.max_sensitivity
+
+        xml += "  <q_min>%g</q_min>\n" % self.q_min
+        xml += "  <q_step>%g</q_step>\n" % self.q_step
+        xml += "  <q_max>%g</q_max>\n" % self.q_max
 
         xml += "  <normalization>%d</normalization>\n" % self.normalization
         
@@ -412,6 +433,8 @@ class InstrumentDescription(BaseScriptElement):
                                                                  default=InstrumentDescription.detector_offset)
         self.wavelength = BaseScriptElement.getFloatElement(instrument_dom, "wavelength",
                                                             default=InstrumentDescription.wavelength)
+        self.wavelength_spread = BaseScriptElement.getFloatElement(instrument_dom, "wavelength_spread",
+                                                            default=InstrumentDescription.wavelength_spread)
         
         self.solid_angle_corr = BaseScriptElement.getBoolElement(instrument_dom, "solid_angle_corr",
                                                                  default = InstrumentDescription.solid_angle_corr)
@@ -422,6 +445,13 @@ class InstrumentDescription(BaseScriptElement):
                                                             default=InstrumentDescription.min_sensitivity)
         self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
                                                             default=InstrumentDescription.max_sensitivity)
+        
+        self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min",
+                                                       default=InstrumentDescription.q_min)
+        self.q_step = BaseScriptElement.getFloatElement(instrument_dom, "q_step",
+                                                       default=InstrumentDescription.q_step)
+        self.q_max = BaseScriptElement.getFloatElement(instrument_dom, "q_max",
+                                                       default=InstrumentDescription.q_max)
         
         self.normalization = BaseScriptElement.getIntElement(instrument_dom, "normalization",
                                                              default=InstrumentDescription.normalization)

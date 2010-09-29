@@ -18,6 +18,7 @@
     
 """
 import os
+import time
 import SANSInsts
 
 ## Version number
@@ -37,6 +38,8 @@ class Reducer(object):
     _data_files = {}
     ## List of reduction steps
     _reduction_steps = []
+    ## Log
+    log_text = ''
         
     def __init__(self):
         self._data_files = {}
@@ -114,6 +117,8 @@ class Reducer(object):
         """
             Go through the list of reduction steps
         """
+        # Log text
+        self.log_text = "%s reduction - %s\n" % (self.instrument.name(), time.ctime())
         # Check that an instrument was specified
         if self.instrument is None:
             raise RuntimeError, "Reducer: trying to run a reduction with an instrument specified"
@@ -124,10 +129,14 @@ class Reducer(object):
         # Go through the list of files to be reduced
         for file_ws in self._data_files:
             for item in self._reduction_steps:
-                item.execute(self, file_ws)        
+                result = item.execute(self, file_ws)
+                if result is not None and len(str(result))>0:
+                    self.log_text += "%s\n" % str(result)        
 
         #any clean up, possibly removing workspaces 
         self.post_process()
+    
+        return self.log_text
     
     
 class ReductionStep(object):

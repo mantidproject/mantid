@@ -61,7 +61,7 @@ def SetBeamCenter(x,y):
     ReductionSingleton().set_beam_finder(SANSReductionSteps.BaseBeamFinder(x,y))
     
 def Reduce1D():
-    ReductionSingleton().reduce()
+    return ReductionSingleton().reduce()
         
 def AppendDataFile(datafile, workspace=None):
     """
@@ -134,8 +134,10 @@ def Background(datafile):
 def NoBackground():
     ReductionSingleton().set_background(None) 
 
-def SaveIqAscii():
-    ReductionSingleton().set_save_Iq(SANSReductionSteps.SaveIqAscii())
+def SaveIqAscii(reducer=None):
+    if reducer is None:
+        reducer = ReductionSingleton()
+    reducer.set_save_Iq(SANSReductionSteps.SaveIqAscii())
 
 def NoSaveIq():
     ReductionSingleton().set_save_Iq(None)

@@ -229,13 +229,13 @@ class SANSReducer(Reducer):
             the list of reduction steps.
         """
         if self._beam_finder is not None:
-            self._beam_finder.execute(self)
+            result = self._beam_finder.execute(self)
+            self.log_text += "%s\n" % str(result)     
             
         # Create the list of reduction steps
         self._to_steps()            
     
-    def post_process(self):
-        pass
+    def post_process(self): return NotImplemented
     
     def _2D_steps(self):
         """

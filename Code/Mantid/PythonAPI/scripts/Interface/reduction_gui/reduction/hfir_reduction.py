@@ -201,13 +201,13 @@ class ReductionScripter(object):
             raise RuntimeError, "A background option was not established before starting reduction."
         script += str(self.background)
         
+        script += "SaveIqAscii()\n"
+        script += "Reduce1D()\n"
+        
         if file_name is not None:
             f = open(file_name, 'w')
             f.write(script)
             f.close()
-        
-        script += "SaveIqAscii()\n"
-        script += "Reduce1D()\n"
         
         return script
         
@@ -220,6 +220,8 @@ class ReductionScripter(object):
             exec script
             return ReductionSingleton().log_text
             
-            
+    def get_data(self):
+        #TODO: fix this
+        return ReductionSingleton()._azimuthal_averager.get_data(ReductionSingleton()._data_files.keys()[0])
 
     

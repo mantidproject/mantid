@@ -126,6 +126,11 @@ class Instrument(object):
         """
         self.SAMPLE_Z_CORR = float(value)/1000.
         
+    def name(self):
+        """
+            Return the name of the instrument
+        """
+        return self._NAME
         
 class ISISInstrument(Instrument):
     # Essentially an enumeration

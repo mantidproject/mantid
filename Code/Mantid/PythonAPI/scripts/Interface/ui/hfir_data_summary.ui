@@ -248,24 +248,27 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>310</y>
-     <width>361</width>
-     <height>141</height>
+     <y>320</y>
+     <width>351</width>
+     <height>179</height>
     </rect>
    </property>
    <property name="title">
-    <string>Geometry Options</string>
+    <string>Experiment Options</string>
    </property>
    <widget class="QWidget" name="formLayoutWidget_3">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>341</width>
-      <height>101</height>
+      <width>351</width>
+      <height>138</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout_3">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+     </property>
      <item row="0" column="0">
       <widget class="QCheckBox" name="detector_offset_chk">
        <property name="toolTip">
@@ -281,6 +284,18 @@
      </item>
      <item row="0" column="1">
       <widget class="QLineEdit" name="detector_offset_edit">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Enter the detector distance offset in mm.</string>
        </property>
@@ -298,6 +313,24 @@
      </item>
      <item row="1" column="1">
       <widget class="QLineEdit" name="sample_dist_edit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Enter the value of the sample-to-detector distance in mm.</string>
        </property>
@@ -315,8 +348,49 @@
      </item>
      <item row="2" column="1">
       <widget class="QLineEdit" name="wavelength_edit">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Enter the value of the neutron wavelength.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="wavelength_spread_edit">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Enter the value of the neutron wavelength spread.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Wavelength spread [Angstrom]</string>
+       </property>
+       <property name="indent">
+        <number>23</number>
        </property>
       </widget>
      </item>
@@ -439,6 +513,130 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetFixedSize</enum>
      </property>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>500</y>
+     <width>351</width>
+     <height>127</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Output Q Range</string>
+   </property>
+   <widget class="QWidget" name="horizontalLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>27</y>
+      <width>321</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Q min</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Q step</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Q max</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>321</width>
+      <height>45</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLineEdit" name="q_min_edit">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Enter the value of the minimum Q-value for the output I(Q) in 1/Angstrom.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="q_step_edit">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Enter the value of Q step for the output I(Q) in 1/Angstrom. Enter a negative value for logarithmic binning.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="q_max_edit">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Enter the value of the maximum Q-value for the output I(Q) in 1/Angstrom.</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>

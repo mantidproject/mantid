@@ -1,10 +1,13 @@
 from PyQt4 import QtGui, uic, QtCore
 import util
+import math
 import os
 from reduction_gui.reduction.hfir_reduction_steps import InstrumentDescription
 from reduction_gui.settings.application_settings import GeneralSettings
+from reduction_gui.reduction.mantid_util import DataFileProxy
 from base_widget import BaseWidget
 from mask import MaskWidget
+import functools
 
 class SANSInstrumentWidget(BaseWidget):    
     """
@@ -64,6 +67,31 @@ class SANSInstrumentWidget(BaseWidget):
 
         # Data file
         self.connect(self._summary.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_browse)
+        
+        # Q range
+        self._summary.q_min_edit.setText(QtCore.QString("0.01"))
+        self._summary.q_step_edit.setText(QtCore.QString("0.001"))
+        self._summary.q_max_edit.setText(QtCore.QString("0.11"))
+        self.connect(self._summary.q_min_edit, QtCore.SIGNAL("editingFinished()"),
+                     functools.partial(self._q_range_changed, "QMIN"))
+        self.connect(self._summary.q_step_edit, QtCore.SIGNAL("editingFinished()"),
+                     functools.partial(self._q_range_changed, "QSTEP"))
+        self.connect(self._summary.q_max_edit, QtCore.SIGNAL("editingFinished()"),
+                     functools.partial(self._q_range_changed, "QMAX"))
+        
+    def _q_range_changed(self, field=None):
+        
+        # Check that the range is valid
+        qmin = util._check_and_get_float_line_edit(self._summary.q_min_edit)
+        qstep = util._check_and_get_float_line_edit(self._summary.q_step_edit)
+        qmax = util._check_and_get_float_line_edit(self._summary.q_max_edit)
+        
+        #TODO: need to display status bar message to user
+        f_step = (qmax-qmin)/qstep
+        n_step = math.floor(f_step)
+        if f_step-n_step>10e-10:
+            new_qmax = qmin+qstep*n_step
+            self._summary.q_max_edit.setText(QtCore.QString(str(new_qmax)))
             
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)
@@ -81,6 +109,7 @@ class SANSInstrumentWidget(BaseWidget):
 
     def _wavelength_clicked(self, is_checked):
         self._summary.wavelength_edit.setEnabled(is_checked)
+        self._summary.wavelength_spread_edit.setEnabled(is_checked)
         
     def _sensitivity_clicked(self, is_checked):
         self._summary.sensitivity_file_edit.setEnabled(is_checked)
@@ -96,7 +125,8 @@ class SANSInstrumentWidget(BaseWidget):
     def _data_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._summary.data_file_edit.setText(fname)    
+            self._summary.data_file_edit.setText(fname)   
+            self.get_data_info()
             
             # Set the mask background
             self._find_background_image(fname)       
@@ -130,14 +160,6 @@ class SANSInstrumentWidget(BaseWidget):
         #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
         #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
 
-        # Data file
-        self._summary.data_file_edit.setText(QtCore.QString(state.data_file))
-        self._find_background_image(state.data_file)
-        # Store the location of the loaded file
-        if len(state.data_file)>0:
-            (folder, file_name) = os.path.split(state.data_file)
-            self._settings.data_path = folder
-
         # Mask
         self._mask_widget.topSpinBox.setValue(state.mask_top)
         self._mask_widget.bottomSpinBox.setValue(state.mask_bottom)
@@ -160,7 +182,9 @@ class SANSInstrumentWidget(BaseWidget):
         self._prepare_field(state.wavelength != 0, 
                             state.wavelength, 
                             self._summary.wavelength_chk, 
-                            self._summary.wavelength_edit)
+                            self._summary.wavelength_edit,
+                            state.wavelength_spread,
+                            self._summary.wavelength_spread_edit)
         
         # Solid angle correction flag
         self._summary.solid_angle_chk.setChecked(state.solid_angle_corr)
@@ -180,12 +204,28 @@ class SANSInstrumentWidget(BaseWidget):
         elif state.normalization == state.NORMALIZATION_MONITOR:
             self._summary.normalization_monitor_radio.setChecked(True)
         
+        # Q range
+        self._summary.q_min_edit.setText(QtCore.QString(str(state.q_min)))
+        self._summary.q_step_edit.setText(QtCore.QString(str(state.q_step)))
+        self._summary.q_max_edit.setText(QtCore.QString(str(state.q_max)))
+        
+        # Data file
+        self._summary.data_file_edit.setText(QtCore.QString(state.data_file))
+        self._find_background_image(state.data_file)
+        # Store the location of the loaded file
+        if len(state.data_file)>0:
+            (folder, file_name) = os.path.split(state.data_file)
+            self._settings.data_path = folder
+            self.get_data_info()
 
-    def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget):
+    def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
         #to_display = str(stored_value) if is_enabled else ''
         edit_widget.setEnabled(is_enabled)
         chk_widget.setChecked(is_enabled)
         edit_widget.setText(QtCore.QString(str(stored_value)))
+        if suppl_value is not None and suppl_edit is not None:
+            suppl_edit.setEnabled(is_enabled)
+            suppl_edit.setText(QtCore.QString(str(suppl_value)))
 
     def get_state(self):
         """
@@ -205,20 +245,15 @@ class SANSInstrumentWidget(BaseWidget):
         # Detector offset input
         if self._summary.detector_offset_chk.isChecked():
             m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
-        else:
-            m.detector_offset = 0
             
         # Sample-detector distance
         if self._summary.sample_dist_chk.isChecked():
             m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-        else:
-            m.sample_detector_distance = 0
             
         # Wavelength value
         if self._summary.wavelength_chk.isChecked():
             m.wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit)
-        else:
-            m.wavelength = 0
+            m.wavelength_spread = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
             
         # Solid angle correction
         m.solid_angle_corr = self._summary.solid_angle_chk.isChecked()
@@ -236,5 +271,27 @@ class SANSInstrumentWidget(BaseWidget):
             m.normalization = m.NORMALIZATION_TIME
         elif self._summary.normalization_monitor_radio.isChecked():
             m.normalization = m.NORMALIZATION_MONITOR
+            
+        # Q range
+        m.q_min = util._check_and_get_float_line_edit(self._summary.q_min_edit)
+        m.q_step = util._check_and_get_float_line_edit(self._summary.q_step_edit)
+        m.q_max = util._check_and_get_float_line_edit(self._summary.q_max_edit)
         
         return m
+    
+    def get_data_info(self):
+        if not self._summary.sample_dist_chk.isChecked() or not self._summary.wavelength_chk.isChecked():
+            fname = self._summary.data_file_edit.text()
+            if len(str(fname).strip())>0:
+                dataproxy = DataFileProxy(str(self._summary.data_file_edit.text()))
+                if dataproxy.sample_detector_distance is not None and not self._summary.sample_dist_chk.isChecked():
+                    self._summary.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
+                if not self._summary.wavelength_chk.isChecked():
+                    if dataproxy.wavelength is not None:
+                        self._summary.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
+                    if dataproxy.wavelength_spread is not None:
+                        self._summary.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
+                    if len(dataproxy.errors)>0:
+                        print dataproxy.errors
+            
+        

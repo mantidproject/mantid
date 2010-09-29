@@ -177,13 +177,14 @@ class ReductionGUI(QtGui.QMainWindow):
         """
             Executed when the application closes
         """
-        reply = QtGui.QMessageBox.question(self, 'Message',
-            "Are you sure you want to quit this application?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-
-        if reply == QtGui.QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
+        if False:
+            reply = QtGui.QMessageBox.question(self, 'Message',
+                "Are you sure you want to quit this application?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+    
+            if reply == QtGui.QMessageBox.Yes:
+                event.accept()
+            else:
+                event.ignore()
                 
         # Save application settings
         if self._clear_and_restart:
@@ -286,9 +287,9 @@ class ReductionGUI(QtGui.QMainWindow):
                                                           self._last_directory, 
                                                           "Settings files (*.xml)"))
         
-        if fname is not None:
-            if '.' not in fname:
-                fname += ".xml"
+        if len(fname)>0:
+            if not fname.endswith('.py'):
+                fname += ".py"
             self._recent_files.append(fname)
             (folder, file_name) = os.path.split(fname)
             self._last_directory = folder

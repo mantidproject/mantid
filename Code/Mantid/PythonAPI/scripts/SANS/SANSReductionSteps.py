@@ -27,7 +27,7 @@ class BaseBeamFinder(ReductionStep):
         return [self._beam_center_x, self._beam_center_y]
     
     def execute(self, reducer, workspace=None):
-        pass
+        return "Beam Center set at: %g %g" % (self._beam_center_x, self._beam_center_y)
         
     def _find_beam(self, direct_beam, reducer, workspace=None):
         """
@@ -49,6 +49,8 @@ class BaseBeamFinder(ReductionStep):
         
         self._beam_center_x = float(ctr[0])
         self._beam_center_y = float(ctr[1])
+        
+        return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
 
 class ScatteringBeamCenter(BaseBeamFinder):
@@ -66,7 +68,7 @@ class ScatteringBeamCenter(BaseBeamFinder):
             Find the beam center.
             @param reducer: Reducer object for which this step is executed
         """
-        super(ScatteringBeamCenter, self)._find_beam(False, reducer, workspace)
+        return super(ScatteringBeamCenter, self)._find_beam(False, reducer, workspace)
 
 class DirectBeamCenter(BaseBeamFinder):
     """
@@ -82,7 +84,7 @@ class DirectBeamCenter(BaseBeamFinder):
             Find the beam center.
             @param reducer: Reducer object for which this step is executed
         """
-        super(DirectBeamCenter, self)._find_beam(True, reducer, workspace)
+        return super(DirectBeamCenter, self)._find_beam(True, reducer, workspace)
 
 class BaseTransmission(ReductionStep):
     """
@@ -92,8 +94,8 @@ class BaseTransmission(ReductionStep):
     """
     def __init__(self, trans=0.0, error=0.0):
         super(BaseTransmission, self).__init__()
-        self._trans = trans
-        self._error = error
+        self._trans = float(trans)
+        self._error = float(error)
         
     def get_transmission(self):
         return [self._trans, self._error]
@@ -104,6 +106,7 @@ class BaseTransmission(ReductionStep):
                                     TransmissionError=self._error, 
                                     OutputWorkspace=workspace) 
         
+        return "[%s] Transmission correction applied for T = %g +- %g" % (workspace, self._trans, self._error)
   
 class BeamSpreaderTransmission(BaseTransmission):
     """
@@ -175,7 +178,13 @@ class BeamSpreaderTransmission(BaseTransmission):
         ApplyTransmissionCorrection(InputWorkspace=workspace, 
                                     TransmissionWorkspace=self._transmission_ws, 
                                     OutputWorkspace=workspace)                
-            
+        
+        trans_ws = mtd[self._transmission_ws]
+        self._trans = trans_ws.dataY(0)[0]
+        self._error = trans_ws.dataE(0)[0]
+
+        return "[%s] Transmission correction applied for T = %g +- %g" % (workspace, self._trans, self._error)
+          
             
 class DirectBeamTransmission(BaseTransmission):
     """
@@ -250,6 +259,12 @@ class DirectBeamTransmission(BaseTransmission):
         ApplyTransmissionCorrection(InputWorkspace=workspace, 
                                     TransmissionWorkspace=self._transmission_ws, 
                                     OutputWorkspace=workspace)            
+
+        trans_ws = mtd[self._transmission_ws]
+        self._trans = trans_ws.dataY(0)[0]
+        self._error = trans_ws.dataE(0)[0]
+
+        return "[%s] Transmission correction applied for T = %g +- %g" % (workspace, self._trans, self._error)
             
 
 class SubtractDarkCurrent(ReductionStep):
@@ -316,7 +331,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Perform subtraction
         Minus(workspace, scaled_dark_ws, workspace)  
         
-        
+        return "[%s] Dark current subtracted [%s]" % (workspace, self._dark_current_file)
           
 class LoadRun(ReductionStep):
     """
@@ -366,13 +381,21 @@ class LoadRun(ReductionStep):
                         WavelengthSpread=reducer.instrument.wavelength_spread)
         
         # Store the sample-detector distance
-        if self._sample_det_dist is None:
-            reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getNumberParameter("sample-detector-distance")[0]        
-            mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
-        else:
-            reducer.instrument.sample_detector_distance = self._sample_det_dist
+        reducer.instrument.sample_detector_distance = mtd[workspace].getInstrument().getNumberParameter("sample-detector-distance")[0]
         
-        reducer.instrument.sample_detector_distance += self._sample_det_offset
+        if self._sample_det_dist is not None:
+            original_distance = reducer.instrument.sample_detector_distance
+            reducer.instrument.sample_detector_distance = self._sample_det_dist
+            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID,
+                                    Z = (self._sample_det_dist-original_distance)/1000.0, 
+                                    RelativePosition="1")
+        elif not self._sample_det_offset == 0:
+            reducer.instrument.sample_detector_distance += self._sample_det_offset
+            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID,
+                                    Z = self._sample_det_offset/1000.0, 
+                                    RelativePosition="1")
+        
+        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, reducer.instrument.sample_detector_distance))
         
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
@@ -381,6 +404,8 @@ class LoadRun(ReductionStep):
                                 Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
                                 RelativePosition="1")
         
+        return "[%s] Data file loaded [%s]" % (workspace, self._data_file)
+    
 class Normalize(ReductionStep):
     """
         Normalize the data to timer or a spectrum, typically a monitor, 
@@ -407,11 +432,12 @@ class Normalize(ReductionStep):
 
         Divide(workspace, norm_ws, workspace)
         
-        mtd.deleteWorkspace(norm_ws)
-        
         # HFIR-specific: If we count for monitor we need to multiply by 1e8
         if self._normalization_spectrum == reducer.NORMALIZATION_MONITOR:         
             Scale(workspace, workspace, 1.0e8, 'Multiply')
+            
+    def clean(self):
+        mtd.deleteWorkspace(norm_ws)
             
 class WeightedAzimuthalAverage(ReductionStep):
     """
@@ -432,6 +458,18 @@ class WeightedAzimuthalAverage(ReductionStep):
         
     def get_output_workspace(self, workspace):
         return workspace+str(self._suffix)
+    
+    def get_data(self, workspace):
+        class DataSet(object):
+            x=[]
+            y=[]
+            dy=[]
+        
+        d = DataSet()
+        d.x = mtd[self.get_output_workspace(workspace)].dataX(0)[1:]
+        d.y = mtd[self.get_output_workspace(workspace)].dataY(0)
+        d.dx = mtd[self.get_output_workspace(workspace)].dataE(0)
+        return d
             
 class SolidAngle(ReductionStep):
     """
@@ -439,6 +477,8 @@ class SolidAngle(ReductionStep):
     """
     def execute(self, reducer, workspace):
         SolidAngleCorrection(workspace, workspace)
+        
+        return "[%s] Solid angle correction applied" % workspace
             
 class SensitivityCorrection(ReductionStep):
     """
@@ -492,6 +532,7 @@ class SensitivityCorrection(ReductionStep):
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
         MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
     
+        return "[%s] Sensitivity correction applied [%s]" % (workspace, self._flood_data)
 
 class Mask(ReductionStep):
     """
@@ -575,6 +616,8 @@ class Mask(ReductionStep):
         
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
+            
+        return "[%s] Mask applied" % workspace
 
 class CorrectToFileStep(ReductionStep):
     def __init__(self, file = '', corr_type = '', operation = ''):
@@ -598,6 +641,7 @@ class SaveIqAscii(ReductionStep):
             filename = os.path.join(reducer._data_path, output_ws+'.txt')
             SaveAscii(Filename=filename, Workspace=output_ws)
             
+            return "[%s] I(q) saved in %s" % (workspace, filename)
             
 class SubtractBackground(ReductionStep):
     """
@@ -642,6 +686,8 @@ class SubtractBackground(ReductionStep):
                 self._transmission.execute(reducer, self._background_ws) 
         
         Minus(workspace, self._background_ws, workspace)
+        
+        return "[%s] Background subtracted [%s]" % (workspace, self._background_file)
         
  
 class SampleGeomCor(ReductionStep):
