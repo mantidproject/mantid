@@ -70,6 +70,9 @@ public:
   void remove(const std::string& name);
   void removeAll();
   void deepRemoveAll();
+
+  /// This method returns true if the group is empty (no member workspace)
+  bool isEmpty();
  
 private:
   /// Private, unimplemented copy constructor

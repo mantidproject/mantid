@@ -117,5 +117,13 @@ void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotificat
   }
 }
 
+/**
+ * This method returns true if the workspace group is empty
+ */
+bool WorkspaceGroup::isEmpty()
+{
+	return m_wsNames.empty();
+}
+
 } // namespace API
 } // namespace Mantid

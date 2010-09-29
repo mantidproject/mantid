@@ -457,7 +457,7 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
         return;
       }
       int childCounts=topItem->childCount();
-      for(int chIndex=0;chIndex<childCounts;++chIndex)
+	  for(int chIndex=0;chIndex<childCounts;++chIndex)
       {
         QTreeWidgetItem* childItem= topItem->child(chIndex);
         if(!childItem)
@@ -468,7 +468,9 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
         if(!ws_name.compare(childItem->text(0)))
         {
           topItem->takeChild(chIndex);
-	  parent_item = topItem;
+		  parent_item = topItem;
+		  deleteGroupWorkspaceIfEmpty(topItem);
+		 
         }
       }
     }
@@ -488,6 +490,43 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
  
 }
 
+void MantidDockWidget::deleteGroupWorkspaceIfEmpty(QTreeWidgetItem* item)
+{
+//if there are no members in the group workspace delete the group workspace
+ if(item->childCount()==1)//workspace id
+ {
+	 
+	 Workspace_sptr ws_sptr;
+	 try
+	 {
+		 ws_sptr= Mantid::API::AnalysisDataService::Instance().retrieve(item->text(0).toStdString());
+	 }
+	 catch(Mantid::Kernel::Exception::NotFoundError &)
+	 {
+		 return;
+	 }
+	 WorkspaceGroup_sptr wsgrp_sptr;
+	 try
+	 {
+	   wsgrp_sptr = boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
+	 }
+	 catch(std::runtime_error&)
+	 {
+		 return;
+	 }
+	if(!wsgrp_sptr) 
+	{ 
+		return;
+	}
+	if(wsgrp_sptr->isEmpty())
+	{
+		//if the  group workspace is empty
+		m_mantidUI->deleteWorkspace(item->text(0));
+	}
+	
+ }
+
+}
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
 
