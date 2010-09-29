@@ -504,8 +504,7 @@ HEADERS  += src/ApplicationWindow.h \
 		src/Mantid/InstrumentWidget/ObjComponentActor.h \
 		src/Mantid/InstrumentWidget/InstrumentActor.h \
 		src/Mantid/InstrumentWidget/MantidColorMap.h \
-		src/Mantid/ManageCustomMenus.h \
-		src/Mantid/ManageUserDirectories.h
+		src/Mantid/ManageCustomMenus.h
 
 ###################### FORMS ##############################################
 
@@ -515,7 +514,6 @@ FORMS += src/Mantid/MantidAbout.ui
 FORMS += src/Mantid/RemoveErrorsDialog.ui
 FORMS += src/Mantid/SequentialFitDialog.ui
 FORMS += src/Mantid/ManageCustomMenus.ui
-FORMS += src/Mantid/ManageUserDirectories.ui
 
 ###################### SOURCES ##############################################
 
@@ -687,8 +685,7 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/InstrumentActor.cpp \
 		src/Mantid/InstrumentWidget/MantidColorMap.cpp \
 		src/Mantid/ManageCustomMenus.cpp \
-		src/pixmaps.cpp \
-		src/Mantid/ManageUserDirectories.cpp
+		src/pixmaps.cpp
 
 
 ###############################################################
@@ -778,9 +775,9 @@ contains(SCRIPTING_LANGS, Python) {
   }
 
   win32 {
-    INCLUDEPATH += $$system(call python-includepath.py)
-    #LIBS        += $$system(call python-libs-win.py)
-    system($$system(call python-sipcmd.py) -c $${SIP_DIR} -w src/qti.sip)
+    INCLUDEPATH += $$system(call python python-includepath.py)
+    #LIBS        += $$system(call python python-libs-win.py)
+    system($$system(call python python-sipcmd.py) -c $${SIP_DIR} -w src/qti.sip)
   }
 
 ##################### SIP generated files #####################

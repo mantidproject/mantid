@@ -26,7 +26,8 @@ SOURCES = \
   $$SRCDIR/AlgorithmDialog.cpp \
   $$SRCDIR/GenericDialog.cpp \
   $$SRCDIR/UserSubWindow.cpp \
-  $$SRCDIR/MantidQtDialog.cpp
+  $$SRCDIR/MantidQtDialog.cpp \
+  $$SRCDIR/ManageUserDirectories.cpp
 
   
 HEADERS = \
@@ -38,9 +39,15 @@ HEADERS = \
   $$HEADERDIR/GenericDialog.h \
   $$HEADERDIR/UserSubWindow.h \
   $$HEADERDIR/MantidQtDialog.h \
-  $$HEADERDIR/FileDialogHandler.h
+  $$HEADERDIR/FileDialogHandler.h \
+  $$HEADERDIR/ManageUserDirectories.h
+
+UI_DIR = $$HEADERDIR
+
+FORMS = \
+  $$HEADERDIR/ManageUserDirectories.ui
   
-  
+UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtAPI"
 #-----------------------------
 # Target and dependancies
 #-----------------------------
