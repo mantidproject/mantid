@@ -47,6 +47,8 @@ class DetectorBank:
             self._num_pixels = int(self.n_columns*n_rows)
         
         self.last_spec_num = self.first_spec_num + self._num_pixels - 1
+        #this can be set to the name of a file with correction factor against wavelength
+        correction_file = ''
 
     def place_after(self, previousDet):
         self.first_spec_num = previousDet.last_spec_num + 1
@@ -204,6 +206,11 @@ class ISISInstrument(Instrument):
         if not self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
     
+    def getDetector(self, requested) :
+        for n, detect in self.DETECTORS.iteritems():
+            if detect.isAlias(requested):
+                return detect
+
     def listDetectors(self) :
         return self.cur_detector().name(), self.otherDetector().name()
         
@@ -235,6 +242,18 @@ class ISISInstrument(Instrument):
         
     def get_orientation(self):
         return self._orientation
+    
+    def copy_correction_files(self):
+        """
+            Check if one of the efficiency files hasn't been set and assume the other is to be used
+        """
+        a = self.cur_detector()
+        b = self.otherDetector()
+        if a.correction_file == '' and b.correction_file != '':
+            a.correction_file = b.correction_file != ''
+        if b.correction_file == '' and a.correction_file != '':
+            b.correction_file = a.correction_file != ''
+
         
 class LOQ(ISISInstrument):
     

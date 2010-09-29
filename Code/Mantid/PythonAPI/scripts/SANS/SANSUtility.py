@@ -115,7 +115,7 @@ class Orientation(object):
     # This is for the empty instrument
     HorizontalFlipped = 4
 ##END REMOVED to SANSInsts
-
+##START REMOVED to SANSReductionSteps
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
     '''Compile a list of spectrum IDs for rectangular block of size xdim by ydim'''
@@ -150,7 +150,6 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
 		 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
-##START REMOVED to SANSReductionSteps
 # Convert a mask string to a spectra list
 # 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
 def ConvertToSpecList(maskstring, firstspec, dimension, orientation):

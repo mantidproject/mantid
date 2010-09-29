@@ -33,9 +33,6 @@ class ISISReducer(SANSReducer):
     DEF_RMIN = None
     DEF_RMAX = None
     
-    WAV1 = None
-    WAV2 = None
-    DWAV = None
     Q_REBIN = None
     QXY2 = None
     DQY = None
@@ -48,8 +45,6 @@ class ISISReducer(SANSReducer):
     
     lowAngDetSet = True
     
-    DIRECT_BEAM_FILE_R = None
-    DIRECT_BEAM_FILE_F = None
     NORMALISATION_FILE = None
     
     # Component positions
@@ -72,13 +67,38 @@ class ISISReducer(SANSReducer):
     
     def __init__(self):
         super(ISISReducer, self).__init__()
-        self._transmission_calculator = ISISReductionSteps.Transmission()
-        # Default data loader
-        self._data_loader = ISISReductionSteps.LoadSample()
-        self.geometry_correcter = SANSReductionSteps.SampleGeomCor()
-        
-        self._final_workspace = ''
-        
+
+        self._init_steps()
+
+    def _init_steps(self):
+        self._data_loader = self.append_step(
+                            ISISReductionSteps.LoadSample())
+        self._trans_loader = self.append_step(
+                            ISISReductionSteps.LoadTransmissions())
+        self._norm_mon = self.append_step(
+                            ISISReductionSteps.NormalizeToMonitor())
+        self.to_wavelen = self.append_step(
+                            ISISReductionSteps.UnitsConvert('Wavelength'))
+#        self._add(ISISReductionSteps.CalculateTransmission())
+        self.append_step(
+                            ISISReductionSteps.CorDetectorAndISISScalings())
+
+        self._to_Q = self.append_step(
+                            ISISReductionSteps.ConvertToQ())
+        self.geometry_correcter = self.append_step(
+                            SANSReductionSteps.SampleGeomCor())
+
+    def pre_process(self): 
+        """
+            Reduction steps that are meant to be executed only once per set
+            of data files. After this is executed, all files will go through
+            the list of reduction steps.
+        """
+        pass
+
+    def _to_steps(self):
+        pass
+
     def set_user_path(self, path):
         """
             Set the path for user files
@@ -136,12 +156,6 @@ class ISISReducer(SANSReducer):
             raise RuntimeError, "ISISReducer.set_trans_can: transmission calculator not set"
         self._transmission_calculator.set_trans_can(can, direct, reload, period)
         
-    def set_gravity(self, flag):
-        if isinstance(flag, bool) or isinstance(flag, int):
-            self._use_gravity = flag
-        else:
-            _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
-                   
     def set_monitor_spectrum(self, specNum, interp=False):
         self.instrument.set_incident_mon(specNum)
         #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
@@ -170,8 +184,8 @@ class ISISReducer(SANSReducer):
 
         self.mask('MASK/CLEAR')
         self.mask('MASK/CLEAR/TIME')
-        self.DIRECT_BEAM_FILE_F = None
-        self.DIRECT_BEAM_FILE_R = None
+        self.instrument.cur_detector().correction_file = ''
+        self.instrument.otherDetector().correction_file = ''
         self.NORMALISATION_FILE = None
 
         self.RMIN = None
@@ -179,19 +193,16 @@ class ISISReducer(SANSReducer):
         self.DEF_RMIN = None
         self.DEF_RMAX = None
        
-        self.WAV1 = None
-        self.WAV2 = None
-        self.DWAV = None
+        self.to_wavelen.wav_low = None
+        self.to_wavelen.wav_high = None
+        self.to_wavelen.wav_step = None
         self.Q_REBIN = None
         self.QXY = None
         self.DQY = None
          
         self.BACKMON_END = None
         self.BACKMON_START = None
-        
-        if self.geometry_correcter is not None:
-            self.geometry_correcter = SANSReductionSteps.SampleGeomCor()
-        
+
         self.RESCALE = 100.0
 
     def mask(self, instruction):
@@ -201,10 +212,9 @@ class ISISReducer(SANSReducer):
         self._mask.parse_instruction(instruction)
     
     def set_wavelength_range(self, start, end):
-        self.WAV1 = start
-        self.WAV2 = end
-        
-        
+        self.to_wavlen.wav_low = start
+        self.to_wavlen.wav_high = end
+
     def reduce(self):
         """
             Go through the list of reduction steps
@@ -224,9 +234,11 @@ class ISISReducer(SANSReducer):
             
             #TODO: set up the final workspace name
             if finding_centre == False:
-                self._final_workspace = file_ws + '_' + str(self.WAV1) + '_' + str(self.WAV2)
+                self.final_workspace = file_ws
+                self.final_workspace += '_' + str(self.to_wavelen.wav_low)
+                self.final_workspace += '_' + str(self.to_wavelen.wav_high)
             else:
-                self._final_workspace = file_ws.split('_')[0] + '_quadrants'
+                self.final_workspace = file_ws.split('_')[0] + '_quadrants'
             #self._data_files[final_workspace] = self._data_files[file_ws]
             #del self._data_files[file_ws]
             #----> can_setup.setReducedWorkspace(tmp_can)
@@ -243,32 +255,18 @@ class ISISReducer(SANSReducer):
             if False:
                 if finding_centre == False:
                     # Replaces NANs with zeroes
-                    ReplaceSpecialValues(InputWorkspace = self._final_workspace, OutputWorkspace = self._final_workspace, NaNValue="0", InfinityValue="0")
+                    ReplaceSpecialValues(InputWorkspace = self.final_workspace, OutputWorkspace = self.final_workspace, NaNValue="0", InfinityValue="0")
                     if self.CORRECTION_TYPE == '1D':
-                        SANSUtility.StripEndZeroes(self._final_workspace)
+                        SANSUtility.StripEndZeroes(self.final_workspace)
                     # Store the mask file within the final workspace so that it is saved to the CanSAS file
-                    AddSampleLog(self._final_workspace, "UserFile", self.MASKFILE)
+                    AddSampleLog(self.final_workspace, "UserFile", self.MASKFILE)
                 else:
                     quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
                     for key, value in quadrants.iteritems():
-                        old_name = self._final_workspace + '_' + str(key)
+                        old_name = self.final_workspace + '_' + str(key)
                         RenameWorkspace(old_name, value)
                         AddSampleLog(value, "UserFile", self._maskfile)       
-                        
-    def pre_process(self): 
-        """
-            Reduction steps that are meant to be executed only once per set
-            of data files. After this is executed, all files will go through
-            the list of reduction steps.
-        """
-        # from SANSReduction._initReduction
-        self.DIMENSION, self.SPECMIN, self.SPECMAX  = SANSUtility.GetInstrumentDetails(self.instrument)
-        # End of _initReduction    
 
-        # Create the list of reduction steps
-        self._to_steps()  
-    
-        
     def read_mask_file(self, filename):
         """
             Reads a SANS mask file
@@ -324,12 +322,12 @@ class ISISReducer(SANSReducer):
             elif upper_line.startswith('GRAVITY'):
                 flag = upper_line[8:]
                 if flag == 'ON':
-                    self.set_gravity(True)
+                    self._to_Q.set_gravity(True)
                 elif flag == 'OFF':
-                    self.set_gravity(False)
+                    self._to_Q.set_gravity(False)
                 else:
                     _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
-                    self.set_gravity(False)
+                    self._to_Q.set_gravity(False)
             
             elif upper_line.startswith('BACK/MON/TIMES'):
                 tokens = upper_line.split()
@@ -358,10 +356,7 @@ class ISISReducer(SANSReducer):
         # Close the handle
         file_handle.close()
         # Check if one of the efficency files hasn't been set and assume the other is to be used
-        if self.DIRECT_BEAM_FILE_R == None and self.DIRECT_BEAM_FILE_F != None:
-            self.DIRECT_BEAM_FILE_R = self.DIRECT_BEAM_FILE_F
-        if self.DIRECT_BEAM_FILE_F == None and self.DIRECT_BEAM_FILE_R != None:
-            self.DIRECT_BEAM_FILE_F = self.DIRECT_BEAM_FILE_R
+        self.instrument.copy_correction_files()
             
         # just print the name, remove the path
         filename = os.path.basename(filename)
@@ -407,9 +402,9 @@ class ISISReducer(SANSReducer):
             minval = maxval = step_type = step_size = None
     
         if limit_type.upper() == 'WAV':
-            self.WAV1 = float(minval)
-            self.WAV2 = float(maxval)
-            self.DWAV = float(step_type + step_size)
+            self.to_wavelen.wav_low = float(minval)
+            self.to_wavelen.wav_high = float(maxval)
+            self.to_wavelen.wav_step = float(step_type + step_size)
         elif limit_type.upper() == 'Q':
             if not rebin_str is None:
                 self.Q_REBIN = rebin_str
@@ -465,10 +460,13 @@ class ISISReducer(SANSReducer):
                 parts = type.split("/")
                 if len(parts) == 1:
                     if parts[0].upper() == 'DIRECT':
-                        self.DIRECT_BEAM_FILE_R = filepath
-                        self.DIRECT_BEAM_FILE_F = filepath
+                        self.instrument.cur_detector().correction_file \
+                            = filepath
+                        self.instrument.otherDetector().correction_file \
+                           = filepath
                     elif parts[0].upper() == 'HAB':
-                        self.DIRECT_BEAM_FILE_F = filepath
+                        self.instrument.getDetector('HAB').correction_file \
+                            = filepath
                     elif parts[0].upper() == 'FLAT':
                         self.NORMALISATION_FILE = filepath
                     else:
@@ -476,9 +474,11 @@ class ISISReducer(SANSReducer):
                 elif len(parts) == 2:
                     detname = parts[1]
                     if detname.upper() == 'REAR':
-                        self.DIRECT_BEAM_FILE_R = filepath
+                        self.instrument.getDetector('REAR').correction_file \
+                            = filepath
                     elif detname.upper() == 'FRONT' or detname.upper() == 'HAB':
-                        self.DIRECT_BEAM_FILE_F = filepath
+                        self.instrument.getDetector('FRONT').correction_file \
+                            = filepath
                     else:
                         _issueWarning('Incorrect detector specified for efficiency file "' + line + '"')
                 else:
@@ -513,7 +513,7 @@ class ISISReducer(SANSReducer):
 
 
     def set_workspace_name(self, name):
-        RenameWorkspace(self._final_workspace, name)
+        RenameWorkspace(self.final_workspace, name)
 
     def _restore_defaults():
         Mask('MASK/CLEAR')
@@ -521,7 +521,7 @@ class ISISReducer(SANSReducer):
         SetRearEfficiencyFile(None)
         SetFrontEfficiencyFile(None)
         self.RMIN = self.RMAX = self.DEF_RMIN = self.DEF_RMAX
-        self.WAV1 = self.WAV2 = self.DWAV = self.Q_REBIN = self.QXY = self.DQY = None
+        self.Q_REBIN = self.QXY = self.DQY = None
         global RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS
         # Scaling values
         self.RESCALE = 100.  # percent
@@ -529,4 +529,9 @@ class ISISReducer(SANSReducer):
         INSTRUMENT.REAR_DET_Z_CORR = INSTRUMENT.REAR_DET_X_CORR = 0.0
         
         self.BACKMON_START = self.BACKMON_END = None
-    
+        self._init_steps()
+        
+    def post_process(self):
+        if not self._norm_mon.prenormed is None:
+            mtd.deleteWorkspace(self._norm_mon.prenormed)
+ 

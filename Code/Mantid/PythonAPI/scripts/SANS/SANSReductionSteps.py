@@ -513,7 +513,7 @@ class Mask(ReductionStep):
         self._ny_low = ny_low
         self._ny_high = ny_high
         
-        #the region to be masked expressed as xml that can be passed to MaskDetectorsInShape 
+        #the region to be masked expressed as xml that can be passed to MaskDetectorsInShape (syntax in NORMALISATION_FILE)
         self._xml = {'shape_defs' : '', 'sum_shapes': '<algebra val="'}
         #these spectra will be masked by the algorithm MaskDetectors
         self.spec_list = ''
@@ -576,6 +576,18 @@ class Mask(ReductionStep):
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
 
+class CorrectToFileStep(ReductionStep):
+    def __init__(self, file = '', corr_type = '', operation = ''):
+        super(CorrectToFileStep, self).__init__()
+        self.filename = file
+        self._corr_type = corr_type
+        self._operation = operation
+
+    def execute(self, reducer, workspace):
+        CorrectToFile(workspace, self.filename, workspace,
+                                self._corr_type, self._operation)
+            
+            
 class SaveIqAscii(ReductionStep):
     def __init__(self):
         super(SaveIqAscii, self).__init__()

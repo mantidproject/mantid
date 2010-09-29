@@ -10,6 +10,11 @@ import SANSInsts
 from CommandInterface import *
 import ISISReducer
 Clear()
+
+#remove the following
+DEL__FINDING_CENTRE_ = False
+
+
 # disable plotting if running outside Mantidplot
 try:
     from mantidplot import plotSpectrum, mergePlots
@@ -109,7 +114,7 @@ def SetSampleOffset(value):
     ReductionSingleton().instrument.set_sample_offset(value)
     
 def Gravity(flag):
-    ReductionSingleton().set_gravity(flag)
+    ReductionSingleton()._to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
     ReductionSingleton().set_trans_fit(lambda_min=lambdamin, 
@@ -133,9 +138,6 @@ def AssignSample(sample_run, reload = True, period = -1):
     #loader = LoadSample()
     #loader.execute(ReductionSingleton(), None)
     
-    
-def AppendDataFile(datafile, workspace=None):
-    AssignSample(datafile)
     
 def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
@@ -170,129 +172,72 @@ def _applyMasking(workspace, maskStep, limitphi = True, useActiveDetector = True
 
     SANSUtility.MaskByBinRange(workspace, timestring)
 
-def _correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False):
-    Reduce1D()
-    global SPECMIN, SPECMAX
-    sample_raw = run_setup.getRawWorkspace()
-#but does the full run still exist at this point, doesn't matter  I'm changing the meaning of RawWorkspace get all references to it
-#but then what do we call the workspaces?
+def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True):
+    if not wav_start is None:
+        ReductionSingleton().to_wavelen.wav_low = wav_start
+    if not wav_end is None:
+        ReductionSingleton().to_wavelen.wav_high = wav_end
 
-#    period = run_setup.getPeriod()
-
-    ReductionSingleton().instrument.set_up_for_run(sample_raw.getRunNumber())
-
-    sample_name = sample_raw.getName()
+    _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
     
-    # Get the bank we are looking at
-    final_result = run_setup.getReducedWorkspace()
-    CropWorkspace(sample_name, final_result,
-        StartWorkspaceIndex = ReductionSingleton().instrument.first_spec_num - 1,
-        EndWorkspaceIndex = ReductionSingleton().instrument.last_spec_num - 1)
+    # Run correction function
+    if DEL__FINDING_CENTRE_ == True:
+        final_workspace = wsname_cache.split('_')[0] + '_quadrants'
+#    else:
+#        final_workspace = wsname_cache + '_' + str(wav_start) + '_' + str(wav_end)
+#    sample_setup.setReducedWorkspace(final_workspace)
 
-    montor_spec = ReductionSingleton().instrument.get_incident_mon()
-    norm_step = ISISReductionSteps.NormalizeToMonitor(montor_spec)
-    ReductionSingleton().set_normalizer(norm_step)
+#    ########################## Masking  ################################################
+#    # Mask the corners and beam stop if radius parameters are given
+#    masking = ISISReductionSteps.Mask_ISIS()
 
-    _printMessage('monitor ' + str(montor_spec), True)
-    ########################## Masking  ################################################
-    # Mask the corners and beam stop if radius parameters are given
-    masking = ISISReductionSteps.Mask_ISIS()
+#    maskpt_rmin = run_setup.getMaskPtMin()
+#    maskpt_rmax = run_setup.getMaskPtMax()
+#    if finding_centre == True:
+#        if RMIN > 0.0: 
+#            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
+#        if RMAX > 0.0:
+#            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmin[0], maskpt_rmin[1])
+#    else:
+#        if RMIN > 0.0: 
+#            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
+#        if RMAX > 0.0:
+#            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
-    maskpt_rmin = run_setup.getMaskPtMin()
-    maskpt_rmax = run_setup.getMaskPtMax()
-    if finding_centre == True:
-        if RMIN > 0.0: 
-            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
-        if RMAX > 0.0:
-            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmin[0], maskpt_rmin[1])
-    else:
-        if RMIN > 0.0: 
-            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
-        if RMAX > 0.0:
-            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
-
-    _applyMasking(final_result, True ,True)
+#    _applyMasking(final_result, True ,True)
     
-    ReductionSingleton().set_mask(masking)
+#    ReductionSingleton().set_mask(masking)
 
-
-    ConvertUnits(final_result,final_result,"Wavelength")
-    Rebin(final_result,final_result,wavbin)
 
     ###################################################################################
 
-    ############################ Transmission correction ##############################
-    trans_ws = CalculateTransmissionCorrection(run_setup, wav_start, wav_end, use_def_trans)
-    if trans_ws != None:
-        Divide(tmpWS, trans_ws, tmpWS)
     ##################################################################################   
         
-    ############################ Efficiency correction ################################
-    if INSTRUMENT.lowAngDetSet :
-        CorrectToFile(tmpWS, DIRECT_BEAM_FILE_R, tmpWS, "Wavelength", "Divide")
-    else:
-        CorrectToFile(tmpWS, DIRECT_BEAM_FILE_F, tmpWS, "Wavelength", "Divide")
     ###################################################################################
         
     ############################# Scale by volume #####################################
-    scalefactor = RESCALE
-    # Data reduced with Mantid is a factor of ~pi higher than colette.
-    # For LOQ only, divide by this until we understand why.
-    if INSTRUMENT.name() == 'LOQ':
-        rescaleToColette = math.pi
-        scalefactor /= rescaleToColette
-    
     ################################################## ################################
         
     ################################ Correction in Q space ############################
     # 1D
-    if CORRECTION_TYPE == '1D':
-        if finding_centre == True:
+    if ReductionSingleton().CORRECTION_TYPE == '1D':
+        if DEL__FINDING_CENTRE_ == True:
             GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
             return
-        else:
-            conv = RunQ1D()
-            conv.execute(ReductionSingleton, tmpWS,final_result,Q_REBIN, GRAVITY)
-    # 2D    
-    else:
-        if finding_centre == True:
-            raise Exception('Running center finding in 2D analysis is not possible, set1D() first.') 
-        # Run 2D algorithm
-        conv = RunQxy()
-        conv.execute(tmpWS, final_result, QXY2, DQXY)
-
-    mantid.deleteWorkspace(tmpWS)
-    return
-
-def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True, finding_centre = False):
-    if wav_start == None:
-        wav_start = ReductionSingleton().WAV1
-    if wav_end == None:
-        wav_end = ReductionSingleton().WAV2
-
-    if finding_centre == False:
-        _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ',' + str(use_def_trans) + ',' + str(finding_centre) + ')')
-        _printMessage("Running reduction for wavelength range " + str(wav_start) + '-' + str(wav_end))
+    ReductionSingleton().reduce()
     
-    # This only performs the init if it needs to
-    sample_setup, can_setup = _initReduction()
-
-    wsname_cache = sample_setup.getReducedWorkspace()
-    # Run correction function
-    if finding_centre == True:
-        final_workspace = wsname_cache.split('_')[0] + '_quadrants'
-    else:
-        final_workspace = wsname_cache + '_' + str(wav_start) + '_' + str(wav_end)
-    sample_setup.setReducedWorkspace(final_workspace)
-    # Perform correction
-    _correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
-
 def SetWavelengthRange(start, end):
     ReductionSingleton().set_wavelength_range(start, end)
 
 def SetWorkspaceName(name):
     ReductionSingleton().set_workspace_name(name)
 
+
+def Set1D():
+    ReductionSingleton()._to_Q.set_output_type('1D')
+
+def Set2D():
+    ReductionSingleton()._to_Q.set_output_type('2D')
 
 def SetSampleOffset(value):
     INSTRUMENT.set_sample_offset(value)
@@ -305,9 +250,9 @@ def SetFrontEfficiencyFile(filename):
     global DIRECT_BEAM_FILE_F
     DIRECT_BEAM_FILE_F = filename
 
-def displayMaskFile():
+def displayUserFile():
     print '-- Mask file defaults --'
-    print '    Wavelength range: ',WAV1, WAV2, DWAV
+    print ReductionSingleton().to_wavlen
     print '    Q range: ', Q_REBIN
     print '    QXY range: ', QXY2, DQXY
     print '    radius', RMIN, RMAX
@@ -319,6 +264,9 @@ def displayMaskFile():
     print '    global time mask: ', TIMEMASKSTRING
     print '    rear time mask: ', TIMEMASKSTRING_R
     print '    front time mask: ', TIMEMASKSTRING_F
+
+def displayMaskFile():
+    displayUserFile()
 
 def SetPhiLimit(phimin,phimax, phimirror=True):
     maskStep = ReductionSingleton().get_mask()
@@ -337,53 +285,6 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
         ReductionSingleton()._readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax))
 
-
-def _initReduction():
-    # *** Sample setup first ***
-    if SCATTER_SAMPLE == None:
-        exit('Error: No sample run has been set')
-
-    xcentre, ycentre = ReductionSingleton().get_beam_center()
-
-    global _SAMPLE_SETUP    
-    if _SAMPLE_SETUP == None:
-        _SAMPLE_SETUP = _init_run(SCATTER_SAMPLE, [xcentre, ycentre], False)
-    
-    global _CAN_SETUP
-    if SCATTER_CAN.getName() != '' and _CAN_SETUP == None:
-        _CAN_SETUP = _init_run(SCATTER_CAN, [xcentre, ycentre], True)
-
-    # Instrument specific information using function in utility file
-    global DIMENSION, SPECMIN, SPECMAX, INSTRUMENT
-    DIMENSION, SPECMIN, SPECMAX  = SANSUtility.GetInstrumentDetails(INSTRUMENT)
-
-    return _SAMPLE_SETUP, _CAN_SETUP
-
-def _init_run(raw_ws, beamcoords, emptycell):
-    if raw_ws == '':
-        return None
-
-    if emptycell:
-        _printMessage('Initializing can workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
-    else:
-        _printMessage('Initializing sample workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
-
-    if emptycell == True:
-        final_ws = "can_temp_workspace"
-    else:
-        final_ws = raw_ws.getName().split('_')[0]
-        final_ws += INSTRUMENT.cur_detector().name('short')
-        final_ws += '_' + CORRECTION_TYPE
-
-    # Put the components in the correct positions
-    currentDet = INSTRUMENT.cur_detector().name() 
-    maskpt_rmin, maskpt_rmax = INSTRUMENT.set_component_positions(raw_ws.getName(), beamcoords[0], beamcoords[1])
-    
-    # Create a run details object
-    if emptycell == True:
-        return SANSUtility.RunDetails(raw_ws, final_ws, TRANS_CAN, DIRECT_CAN, maskpt_rmin, maskpt_rmax, 'can')
-    else:
-        return SANSUtility.RunDetails(raw_ws, final_ws, TRANS_SAMPLE, DIRECT_SAMPLE, maskpt_rmin, maskpt_rmax, 'sample')
 # These variables keep track of the centre coordinates that have been used so that we can calculate a relative shift of the
 # detector
 XVAR_PREV = 0.0
@@ -403,7 +304,7 @@ def _create_quadrant(reduced_ws, rawcount_ws, quadrant, xcentre, ycentre, q_bins
 
     flag_value = -10.0
     ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
-    if CORRECTION_TYPE == '1D':
+    if ReductionSingleton().CORRECTION_TYPE == '1D':
         SANSUtility.StripEndZeroes(output, flag_value)
 
 # Create 4 quadrants for the centre finding algorithm and return their names
@@ -479,7 +380,7 @@ def CalculateResidue():
     return residueX, residueY
 
 def PlotResult(workspace):
-    if CORRECTION_TYPE == '1D':
+    if ReductionSingleton().CORRECTION_TYPE == '1D':
         plotSpectrum(workspace,0)
     else:
         qti.app.mantidUI.importMatrixWorkspace(workspace).plotGraph2D()
@@ -543,7 +444,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     # For the moment treat the rebin string as min/max/step
     qbins = q_REBEIN.split(",")
     nbins = len(qbins)
-    if CORRECTION_TYPE == '1D':
+    if ReductionSingleton().CORRECTION_TYPE == '1D':
         script += '[COLETTE]  LIMIT/Q ' + str(qbins[0]) + ' ' + str(qbins[nbins-1]) + '\n'
         dq = float(qbins[1])
         if dq <  0:

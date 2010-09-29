@@ -85,6 +85,7 @@ class Reducer(object):
             self._reduction_steps.append(reduction_step)
         else:
             raise RuntimeError, "Reducer.append_step expects an object of class ReductionStep"
+        return reduction_step
         
     def append_data_file(self, data_file, workspace=None):
         """
@@ -124,6 +125,9 @@ class Reducer(object):
         for file_ws in self._data_files:
             for item in self._reduction_steps:
                 item.execute(self, file_ws)        
+
+        #any clean up, possibly removing workspaces 
+        self.post_process()
     
     
 class ReductionStep(object):

@@ -234,7 +234,8 @@ class SANSReducer(Reducer):
         # Create the list of reduction steps
         self._to_steps()            
     
-    def post_process(self): raise NotImplemented
+    def post_process(self):
+        pass
     
     def _2D_steps(self):
         """

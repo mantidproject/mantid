@@ -114,8 +114,6 @@ class LoadRun(ReductionStep):
                 mantid.sendLogMessage("::SANS::Warning: "+str(details))
                 return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
 
-        if not reducer.NORMALISATION_FILE is None:
-            CorrectToFile(wkspname, reducer.NORMALISATION_FILE, 'SpectrumNumber', 'Divide', wkspname)
         inWS = SANSUtility.WorkspaceDetails(wkspname, run_no)
         
         return inWS,True, reducer.instrument.name() + logname, filepath, nPeriods
@@ -147,7 +145,7 @@ class LoadRun(ReductionStep):
             if mtd.workspaceExists(inWS) and (not inWS in others):
                 mtd.deleteWorkspace(inWS)
                 
-class Transmission(SANSReductionSteps.BaseTransmission, LoadRun):
+class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
     """
         Transmission calculation for ISIS SANS instruments
     """
@@ -190,7 +188,7 @@ class Transmission(SANSReductionSteps.BaseTransmission, LoadRun):
     def __init__(self):
         """
         """
-        super(Transmission, self).__init__()
+        super(LoadTransmissions, self).__init__()
     
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
         self._lambda_min = lambda_min
@@ -255,7 +253,6 @@ class Transmission(SANSReductionSteps.BaseTransmission, LoadRun):
  
         #TODO: Call CalculateTransmission
 
-        
 class CanSubtraction(LoadRun):
     """
         Subtract the can after correcting it.
@@ -309,10 +306,6 @@ class CanSubtraction(LoadRun):
         if reset == True:
             self._CAN_SETUP  = None
             
-        
-        if not NORMALISATION_FILE is None:
-            if not NORMALISATION_FILE == "":
-                CorrectToFile(self.SCATTER_CAN.getName(), NORMALISATION_FILE, self.SCATTER_CAN.getName(), 'SpectrumNumber', 'Divide')
 
         try:
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
@@ -519,8 +512,8 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             return ''
         masklist = maskstring.split(',')
         
-        orientation = ReductionSingleton().instrument.get_orientation
-        detector = ReductionSingleton().instrument.cur_detector()
+        orientation = reducer.instrument.get_orientation
+        detector = reducer.instrument.cur_detector()
         firstspec = detector.first_spec_num
         dimension = detector.n_columns
         speclist = ''
@@ -676,7 +669,7 @@ class LoadSample(LoadRun):
     """
     #TODO: we don't need a dictionary here
     PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
-    
+
     def __init__(self, sample_run=None, reload=True, period=-1):
         super(LoadRun, self).__init__()
         self.SCATTER_SAMPLE = None
@@ -709,17 +702,20 @@ class LoadSample(LoadRun):
             self.SCATTER_SAMPLE = None
             return '', '()'
         
+        #!!!!!REMOVE THE next line
         self._SAMPLE_RUN = self._sample_run
+        
+        
         self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(self._sample_run, False, self._reload, self._period, reducer)
         if self.SCATTER_SAMPLE.getName() == '':
             _issueWarning('Unable to load SANS sample run, cannot continue.')
             return '','()'
         if reset == True:
             self._SAMPLE_SETUP = None
-
-#STEVES include this!!!        if not NORMALISATION_FILE is None:
-#            if not NORMALISATION_FILE == "":
-#                CorrectToFile(self.SCATTER_SAMPLE.getName(), NORMALISATION_FILE, self.SCATTER_SAMPLE.getName(), 'SpectrumNumber', 'Divide')
+            
+        p_run_ws = mtd[self.SCATTER_SAMPLE.getName()]
+        run_num = p_run_ws.getSampleDetails().getLogData('run_number').value()
+        reducer.instrument.set_up_for_run(run_num)
 
         try:
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
@@ -756,7 +752,6 @@ class LoadSample(LoadRun):
         final_ws += '_' + reducer.CORRECTION_TYPE
 
         # Put the components in the correct positions
-        currentDet = reducer.instrument.cur_detector().name() 
         maskpt_rmin, maskpt_rmax = reducer.instrument.set_component_positions(self.SCATTER_SAMPLE.getName(), beamcoords[0], beamcoords[1])
         
         # Create a run details object
@@ -771,10 +766,12 @@ class LoadSample(LoadRun):
                                               TRANS_SAMPLE, DIRECT_SAMPLE, maskpt_rmin, maskpt_rmax, 'sample')
         # End of _init_run
         #TODO: 
-        sample_setup.setReducedWorkspace(workspace + '_' + str(reducer.WAV1) + '_' + str(reducer.WAV2))
-        
-    
-        return self.SCATTER_SAMPLE.getName(), logvalues
+        sample_setup.setReducedWorkspace(reducer.final_workspace)
+
+        # Get the bank we are looking at
+        CropWorkspace(self.SCATTER_SAMPLE.getName(), self._sample_run,
+            StartWorkspaceIndex = reducer.instrument.cur_detector().first_spec_num - 1,
+            EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
 
 def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8):
     pieces = run_string.split('.')
@@ -810,36 +807,78 @@ def _padRunNumber(run_no, field_width):
         return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
 
 
-class RunQ1D(ReductionStep):
+class UnitsConvert(ReductionStep):
+    def __init__(self, units, w_low = None, w_high = None, w_step = None):
+        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
+        super(UnitsConvert, self).__init__()
+        self._units = units
+        self.wav_low = w_low
+        self.wav_high = w_high
+        self.wav_step = w_step
+
+    def execute(self, reducer, workspace):
+        ConvertUnits(workspace, workspace, self._units)
+        bins = str(self.wav_low)+','+str(self.wav_high)+','+str(self.wav_step)
+        Rebin(workspace, workspace, bins)
+
+    def get_rebin(self):
+        return str(self.wav_low)+', ' + str(self.wav_step) + ', ' + str(self.wav_high)
+
+    def __str__(self):
+        return '    Wavelength range: ' + self.get_rebin()
+
+class ConvertToQ(ReductionStep):
     def __init__(self):
         #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
-        super(RunQ1D, self).__init__()
-
-    def execute(self, reducer, tmpWS,final_result,Q_REBIN, GRAVITY):
-        Q1D(tmpWS,final_result,final_result,Q_REBIN, AccountForGravity=GRAVITY)
-
-class RunQxy(ReductionStep):
-    def __init__(self):
-        #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
-        super(RunQxy, self).__init__()
-
-    def execute(self, tmpWS, final_result, QXY2, DQXY):
-        Qxy(tmpWS, final_result, QXY2, DQXY)
+        super(ConvertToQ, self).__init__()
+        
+        #this should be set to 1D or 2D
+        self._output_type = None
+        self._output_types = {'1D' : 'Q1D', '2D': 'Qxy'}
+        #if true gravity is taken into account in the Q1D calculation
+        self._use_gravity = False
+    
+    def set_output_type(self, output):
+        self._output_type = self.output_types[output]
+        
+    def set_gravity(self, flag):
+        if isinstance(flag, bool) or isinstance(flag, int):
+            self._use_gravity = bool(flag)
+        else:
+            _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
+                   
+    def execute(self, reducer, workspace):
+        #Steve, I'm not sure how this works
+        errorsWS = reducer._norm_mon.prenormed
+        if self._output_type == 'Q1D':
+            Q1D(workspace, errorsWS, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
+        if self.output_type == 'Qxy':
+            Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY)
 
 class NormalizeToMonitor(SANSReductionSteps.Normalize):
     """
-        This step runs a LOQ specific
-        correction if the current instrument is LOQ and
-        performs background removal on the monitor spectrum
-        used for normalization
+        This step performs background removal on the monitor spectrum
+        used for normalization and, for LOQ runs, executes a LOQ specific
+        correction. It's input workspace is copied and accessible later
+        as prenomed 
     """
+    def __init__(self):
+        super(NormalizeToMonitor, self).__init__()
+        #Steve is unsure about why this is need. It is used later in the calculation of errors on Q
+        self.prenormed = None
+
     def execute(self, reducer, workspace):
+        # At this point need to fork off workspace name to keep a workspace containing raw counts
+        self.prenormed = 'to_delete_'+workspace+'_prenormed'
+        RenameWorkspace(workspace, self.prenormed)
+
         if self._normalization_spectrum is None:
             self._normalization_spectrum = reducer.instrument.get_incident_mon()
         
+        mtd.sendLogMessage('::SANS::Normalizing to monitor ' + str(self._normalization_spectrum))
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
-        CropWorkspace(workspace, norm_ws,
+        CropWorkspace(self.prenormed, norm_ws,
                       StartWorkspaceIndex = str(self._normalization_spectrum), 
                       EndWorkspaceIndex   = str(self._normalization_spectrum))
     
@@ -853,12 +892,114 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
                 EndX = reducer.BACKMON_END, WorkspaceIndexList = '0')
     
         ConvertUnits(norm_ws, norm_ws, "Wavelength")
-        wavbin = str(wav_start) + "," + str(DWAV) + "," + str(wav_end)
+        
+        wavbin = str(reducer.to_wavelen.get_rebin())
+        
         if reducer.instrument.is_interpolating_norm():
             InterpolatingRebin(norm_ws, norm_ws, wavbin)
         else :
             Rebin(norm_ws, norm_ws, wavbin)
-    
-        Divide(workspace, norm_ws, workspace)
-            
+
+        Divide(self.prenormed, norm_ws, workspace)
+
         mtd.deleteWorkspace(norm_ws)
+
+# Setup the transmission workspace
+##
+class CalculateTransmission(ReductionStep):
+    def __init__(self, run_setup, use_def_trans):
+        super(CalcTransmissionCorr, self).__init__()
+    
+    def execute(self, reducer, workspace):
+        trans_raw = run_setup.getTransRaw()
+        direct_raw = run_setup.getDirectRaw()
+        if trans_raw == '' or direct_raw == '':
+            return None
+    
+        if use_def_trans == DefaultTrans:
+            wavbin = str(TRANS_WAV1_FULL) 
+            wavbin = + ',' + str(ReductionSingleton().to_wavelen.wav_step)
+            wavbin = + ',' + str(TRANS_WAV2_FULL)
+            translambda_min = TRANS_WAV1_FULL
+            translambda_max = TRANS_WAV2_FULL
+        else:
+            translambda_min = TRANS_WAV1
+            translambda_max = TRANS_WAV2
+            wavbin = str(Reducer.to_wavelen.get_rebin())
+    
+        fittedtransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(translambda_min) + '_' + str(translambda_max)
+        unfittedtransws = fittedtransws + "_unfitted"
+        if use_def_trans == False or \
+        (TRANS_FIT != 'Off' and mtd.workspaceExists(fittedtransws) == False) or \
+        (TRANS_FIT == 'Off' and mtd.workspaceExists(unfittedtransws) == False):
+            # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
+            if TRANS_FIT == 'Off':
+                fit_type = 'Linear'
+            else:
+                fit_type = TRANS_FIT
+            #retrieve the user setting that tells us whether Rebin or InterpolatingRebin will be used during the normalisation 
+            if reducer.instrument.name() == 'LOQ':
+                # Change the instrument definition to the correct one in the LOQ case
+                LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
+                LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
+                
+                trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
+                    '1,2', BACKMON_START, BACKMON_END, wavbin, 
+                    reducer.instrument.use_interpol_trans_calc, True)
+                
+                direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
+                    '1,2', BACKMON_START, BACKMON_END, wavbin,
+                    reducer.instrument.use_interpol_trans_calc, True)
+                
+                CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength = translambda_min, MaxWavelength =  translambda_max, \
+                                      FitMethod = fit_type, OutputUnfittedData=True)
+            else:
+                trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
+                    '1,2', BACKMON_START, BACKMON_END, wavbin,
+                    reducer.instrument.use_interpol_trans_calc, False)
+                
+                direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
+                    '1,2', BACKMON_START, BACKMON_END, wavbin,
+                    reducer.instrument.use_interpol_trans_calc, False)
+                
+                CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
+                    reducer.instrument.incid_mon_4_trans_calc, reducer.instrument.trans_monitor,
+                    MinWavelength = translambda_min, MaxWavelength = translambda_max,
+                    FitMethod = fit_type, OutputUnfittedData=True)
+            # Remove temporaries
+            mantid.deleteWorkspace(trans_tmp_out)
+            mantid.deleteWorkspace(direct_tmp_out)
+            
+        if TRANS_FIT == 'Off':
+            result = unfittedtransws
+            mantid.deleteWorkspace(fittedtransws)
+        else:
+            result = fittedtransws
+    
+        if self.use_def_trans == DefaultTrans:
+            tmp_ws = 'trans_' + run_setup.getSuffix() + '_' + str(reducer.to_wavelen.wav_low) + '_' + str(reducer.to_wavelen.wav_high)
+            CropWorkspace(result, tmp_ws, XMin = str(reducer.to_wavelen.wav_low), XMax = str(reducer.to_wavelen.wav_high))
+            trans_ws = tmp_ws
+        else: 
+            trans_ws = result
+
+        Divide(workspace, trans_ws, workspace)
+
+class CorDetectorAndISISScalings(SANSReductionSteps.CorrectToFileStep):
+    def __init__(self, corr_type = '', operation = ''):
+        super(CorDetectorAndISISScalings, self).__init__('', "Wavelength", "Divide")
+
+    def execute(self, reducer, workspace):
+        super(CorDetectorAndISISScalings, self).execute(reducer, workspace)
+
+        self.filename = reducer.instrument.cur_detector().correction_file
+        scalefactor = RESCALE
+        # Data reduced with Mantid is a factor of ~pi higher than colette.
+        # For LOQ only, divide by this until we understand why.
+        if reducer.instrument.name() == 'LOQ':
+            rescaleToColette = math.pi
+            scalefactor /= rescaleToColette
+
+        ws = mtd[workspace]
+        ws *= scalefactor
+
