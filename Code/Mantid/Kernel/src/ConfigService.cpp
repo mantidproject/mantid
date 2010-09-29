@@ -141,7 +141,11 @@ ConfigServiceImpl::ConfigServiceImpl() :
       != std::string::npos)
   {
     if (Poco::Environment::has("MANTIDPATH"))
-       m_strBaseDir = Poco::Environment::get("MANTIDPATH");
+    {
+      // Here we have to follow the convention of the rest of this code and add a trailing slash.
+      // Note: adding it to the MANTIDPATH itself will make other parts of the code crash.
+      m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+    }
     else
       m_strBaseDir = Poco::Path::current();
   }
