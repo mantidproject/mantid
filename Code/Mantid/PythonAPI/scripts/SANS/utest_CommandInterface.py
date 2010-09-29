@@ -127,11 +127,23 @@ class TestCommands(unittest.TestCase):
         HFIRSANS()
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
+        SetSampleDetectorOffset(500.0)
+        Reduce1D()
+        
+        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 6500.0)
+        
+    def test_set_distandce_and_detector_offset(self):
+        """
+            If both detector distance and offset are set, use only the distance
+        """
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        AppendDataFile("BioSANS_test_data.xml")
         SetSampleDetectorDistance(2500.0)
         SetSampleDetectorOffset(500.0)
         Reduce1D()
         
-        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 3000.0)
+        self.assertEqual(ReductionSingleton().instrument.sample_detector_distance, 2500.0)
         
     def test_set_wavelength(self):
         HFIRSANS()
@@ -190,7 +202,7 @@ class TestCommands(unittest.TestCase):
         
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_calculated.txt"))
     
-    def skip_test_reduction_1(self):
+    def test_reduction_1(self):
         HFIRSANS()
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
@@ -269,7 +281,7 @@ class TestCommands(unittest.TestCase):
         deltas = map(_diff_iq, data, check)
         delta  = reduce(_add, deltas)/len(deltas)
         self.assertTrue(math.fabs(delta)<0.00001)
-        
+                
     def skip_test_spreader_transmission(self):
         HFIRSANS()
         DataPath(TEST_DIR)
