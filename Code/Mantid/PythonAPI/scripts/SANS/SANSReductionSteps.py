@@ -106,7 +106,7 @@ class BaseTransmission(ReductionStep):
                                     TransmissionError=self._error, 
                                     OutputWorkspace=workspace) 
         
-        return "[%s] Transmission correction applied for T = %g +- %g" % (workspace, self._trans, self._error)
+        return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
   
 class BeamSpreaderTransmission(BaseTransmission):
     """
@@ -183,7 +183,7 @@ class BeamSpreaderTransmission(BaseTransmission):
         self._trans = trans_ws.dataY(0)[0]
         self._error = trans_ws.dataE(0)[0]
 
-        return "[%s] Transmission correction applied for T = %g +- %g" % (workspace, self._trans, self._error)
+        return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
           
             
 class DirectBeamTransmission(BaseTransmission):
@@ -264,7 +264,7 @@ class DirectBeamTransmission(BaseTransmission):
         self._trans = trans_ws.dataY(0)[0]
         self._error = trans_ws.dataE(0)[0]
 
-        return "[%s] Transmission correction applied for T = %g +- %g" % (workspace, self._trans, self._error)
+        return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
             
 
 class SubtractDarkCurrent(ReductionStep):
@@ -331,7 +331,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Perform subtraction
         Minus(workspace, scaled_dark_ws, workspace)  
         
-        return "[%s] Dark current subtracted [%s]" % (workspace, self._dark_current_file)
+        return "Dark current subtracted [%s]" % (self._dark_current_file)
           
 class LoadRun(ReductionStep):
     """
@@ -404,7 +404,7 @@ class LoadRun(ReductionStep):
                                 Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
                                 RelativePosition="1")
         
-        return "[%s] Data file loaded [%s]" % (workspace, self._data_file)
+        return "Data file loaded: %s" % (self._data_file)
     
 class Normalize(ReductionStep):
     """
@@ -478,7 +478,7 @@ class SolidAngle(ReductionStep):
     def execute(self, reducer, workspace):
         SolidAngleCorrection(workspace, workspace)
         
-        return "[%s] Solid angle correction applied" % workspace
+        return "Solid angle correction applied" 
             
 class SensitivityCorrection(ReductionStep):
     """
@@ -532,7 +532,7 @@ class SensitivityCorrection(ReductionStep):
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
         MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
     
-        return "[%s] Sensitivity correction applied [%s]" % (workspace, self._flood_data)
+        return "Sensitivity correction applied [%s]" % (self._flood_data)
 
 class Mask(ReductionStep):
     """
@@ -617,7 +617,7 @@ class Mask(ReductionStep):
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
             
-        return "[%s] Mask applied" % workspace
+        return "Mask applied"
 
 class CorrectToFileStep(ReductionStep):
     def __init__(self, file = '', corr_type = '', operation = ''):
@@ -641,7 +641,7 @@ class SaveIqAscii(ReductionStep):
             filename = os.path.join(reducer._data_path, output_ws+'.txt')
             SaveAscii(Filename=filename, Workspace=output_ws)
             
-            return "[%s] I(q) saved in %s" % (workspace, filename)
+            return "I(q) saved in %s" % (filename)
             
 class SubtractBackground(ReductionStep):
     """
@@ -687,7 +687,7 @@ class SubtractBackground(ReductionStep):
         
         Minus(workspace, self._background_ws, workspace)
         
-        return "[%s] Background subtracted [%s]" % (workspace, self._background_file)
+        return "Background subtracted [%s]" % (self._background_file)
         
  
 class SampleGeomCor(ReductionStep):
