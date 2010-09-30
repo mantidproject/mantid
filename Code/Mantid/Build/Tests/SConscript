@@ -30,8 +30,8 @@ dirList = os.listdir(path)
 cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
 
 for fname in dirList:
-  # Disable ICAT tests while the server is down and we have no way of killing a connection so that the rest of the unit tests can run.
-  if fname == 'MDDataObjects':
+  # Disable tests that are to do with multi-dimensional objects/algorithms until something useful is there
+  if fname.startswith('MD'):
     continue
   if os.path.isdir(path + fname):
       #does folder contain /test?
