@@ -14,11 +14,19 @@
 #include <omp.h>
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
-*		This includes no checks to see if workspaces are suitable 
-*		and therefore should not be used in any loops that access workspaces.
+*   This includes an arbirary check: condition.
+*   "condition" must evaluate to TRUE in order for the
+*   code to be executed in parallel
+*/
+#define PARALLEL_FOR_IF(condition) \
+    PRAGMA(omp parallel for if (condition) )
+
+/** Includes code to add OpenMP commands to run the next for loop in parallel.
+*   This includes no checks to see if workspaces are suitable
+*   and therefore should not be used in any loops that access workspaces.
 */
 #define PARALLEL_FOR_NO_WSP_CHECK() \
-		PRAGMA(omp parallel for)
+    PRAGMA(omp parallel for)
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
 *		The workspace is checked to ensure it is suitable for multithreaded access.
@@ -107,6 +115,7 @@
 
 #else //_OPENMP
 ///Empty definitions - to enable set your complier to enable openMP
+#define PARALLEL_FOR_IF(condition)
 #define PARALLEL_FOR_NO_WSP_CHECK()
 #define PARALLEL_FOR1(workspace1)
 #define PARALLEL_FOR2(workspace1, workspace2)
