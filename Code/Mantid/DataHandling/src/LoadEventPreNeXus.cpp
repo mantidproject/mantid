@@ -786,7 +786,7 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
   Run& run = workspace->mutableRun();
 
   //Add the proton charge entries.
-  TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("ProtonCharge");
+  TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("proton_charge");
   log->setUnits("picoCoulombs");
   size_t num = this->proton_charge.size();
   for (size_t i = 0; i < num; i++)

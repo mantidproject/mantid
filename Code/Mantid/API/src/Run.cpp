@@ -176,7 +176,7 @@ using namespace Kernel;
   //-----------------------------------------------------------------------------------------------
   /**
    * Calculate the total proton charge by summing up all the entries in the
-   * "ProtonCharge" time series log. This is then saved in the log entry
+   * "proton_charge" time series log. This is then saved in the log entry
    * using setProtonCharge().
    *
    * @return the total charge in microAmp*hours
@@ -186,7 +186,7 @@ using namespace Kernel;
     /// Conversion factor between picoColumbs and microAmp*hours
     const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
-    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( this->getProperty("ProtonCharge") );
+    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( this->getProperty("proton_charge") );
     if (log)
     {
       double total = log->getTotalValue() * CURRENT_CONVERSION;

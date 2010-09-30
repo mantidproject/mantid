@@ -70,11 +70,8 @@ void LoadLogsFromSNSNexus::exec()
   //Start with the base entry
   file.openGroup("entry", "NXentry");
 
-  //TODO: Load run title and other info.
-
   //Now go to the DAS logs
   file.openGroup("DASlogs", "NXgroup");
-
 
   // print out the entry level fields
   map<string, string> entries = file.getEntries();
@@ -93,6 +90,15 @@ void LoadLogsFromSNSNexus::exec()
 
   file.closeGroup();
 
+  try
+  {
+    //Use the DAS logs to integrate the proton charge (if any).
+    WS->mutableRun().integrateProtonCharge();
+  }
+  catch (Exception::NotFoundError e)
+  {
+    //Ignore not found property error.
+  }
 
   return;
 }
@@ -114,7 +120,8 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
   if ((entries.find("value") == entries.end()) ||
       (entries.find("time") == entries.end()) )
   {
-    g_log.warning() << "Invalid NXlog entry " << entry_name << " found.\n";
+    g_log.warning() << "Invalid NXlog entry " << entry_name << " found. Did not contain 'value' and 'time'.\n";
+    file.closeGroup();
     return;
   }
 
@@ -134,12 +141,10 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
   try
   {
     file.getAttr("units", units);
-    //std::cout << entry_name << " has units " << units << "." << std::endl;
   }
   catch (::NeXus::Exception ex)
   {
     //Ignore missing units field.
-    //std::cout << entry_name << " has no units " << std::endl;
     units = "";
   }
 
@@ -147,19 +152,20 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
   info = file.getInfo();
   isTimeSeries = (info.dims[0] > 1);
 
-  //Get the data (convert types if necessary)
-  if (file.isDataInt())
+  try
   {
-    isInt = true;
-    file.getDataCoerce(values_int);
-    if (values_int.size() == 1)
+    //Get the data (convert types if necessary)
+    if (file.isDataInt())
     {
-      WS->mutableRun().addProperty(entry_name, values_int[0], units);
+      isInt = true;
+      file.getDataCoerce(values_int);
+      if (values_int.size() == 1)
+      {
+        WS->mutableRun().addProperty(entry_name, values_int[0], units);
+      }
+
     }
-  }
-  else
-  {
-    try
+    else
     {
       //Try to get as doubles.
       file.getDataCoerce(values);
@@ -168,15 +174,15 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
         WS->mutableRun().addProperty(entry_name, values[0], units);
       }
     }
-    catch (::NeXus::Exception)
-    {
-      g_log.warning() << "NXlog entry " << entry_name << " has an unsupported 'value' data type.\n";
-      file.closeData();
-      file.closeGroup();
-      return;
-
-    }
   }
+  catch (::NeXus::Exception e)
+  {
+    g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading 'value' data:'" << e.what() << "'.\n";
+    file.closeData();
+    file.closeGroup();
+    return;
+  }
+
 
   file.closeData();
 
@@ -188,11 +194,35 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     vector<double> time_double;
     vector<dateAndTime> times;
 
-    file.openData("time");
+    try {
+      file.openData("time");
+    }
+    catch (::NeXus::Exception e)
+    {
+      g_log.warning() << "NXlog entry " << entry_name << " gave an error when opening the time field '" << e.what() << "'.\n";
+      file.closeGroup();
+      return;
+    }
 
-    //Start time is an ISO8601 string date and time.
+    //----- Start time is an ISO8601 string date and time. ------
     std::string start;
-    file.getAttr("start", start);
+    try {
+      file.getAttr("start", start);
+    }
+    catch (::NeXus::Exception e)
+    {
+      //Some logs have "offset" instead of start
+      try {
+        file.getAttr("offset", start);
+      }
+      catch (::NeXus::Exception e)
+      {
+        g_log.warning() << "NXlog entry " << entry_name << " has no start time indicated.\n";
+        file.closeData();
+        file.closeGroup();
+        return;
+      }
+    }
 
     //Convert to date and time
     Kernel::dateAndTime start_time = Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(start);
@@ -207,9 +237,19 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
       return;
     }
 
-    //Load the seconds into a double array
-    file.getDataCoerce(time_double);
+    //--- Load the seconds into a double array ---
+    try {
+      file.getDataCoerce(time_double);
+    }
+    catch (::NeXus::Exception e)
+    {
+      g_log.warning() << "NXlog entry " << entry_name << "'s time field could not be loaded: '" << e.what() << "'.\n";
+      file.closeData();
+      file.closeGroup();
+      return;
+    }
     file.closeData();
+
 
     if (isInt)
     {

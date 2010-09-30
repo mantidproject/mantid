@@ -65,7 +65,7 @@ public:
     alg->setPropertyValue("InputWorkspace", inputWS);
     outputWS = "eventWS_relative";
     alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("LogName", "ProtonCharge");
+    alg->setPropertyValue("LogName", "proton_charge");
     //We set the minimum high enough to cut out some real charge too, not just zeros.
     alg->setPropertyValue("MinimumValue", "1.33e7");
     alg->setPropertyValue("MaximumValue", "1e20");
@@ -132,7 +132,7 @@ public:
     alg->setPropertyValue("InputWorkspace", inputWS);
     outputWS = "eventWS_relative";
     alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("LogName", "ProtonCharge");
+    alg->setPropertyValue("LogName", "proton_charge");
     //We set the minimum high enough to cut out some real charge too, not just zeros.
     alg->setPropertyValue("MinimumValue", "5e6");
     alg->setPropertyValue("MaximumValue", "1e20");
@@ -161,7 +161,7 @@ public:
     TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), WS->run().getProtonCharge() );
 
     //Check the log entries
-    TimeSeriesProperty<double> * log = dynamic_cast<TimeSeriesProperty<double> * >(outWS->run().getProperty("ProtonCharge"));
+    TimeSeriesProperty<double> * log = dynamic_cast<TimeSeriesProperty<double> * >(outWS->run().getProperty("proton_charge"));
     TS_ASSERT(log);
     for (std::size_t i=0; i<log->realSize(); i++)
       TS_ASSERT_LESS_THAN( 0, log->nthValue(i));

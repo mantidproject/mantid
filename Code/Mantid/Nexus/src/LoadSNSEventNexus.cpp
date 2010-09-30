@@ -79,7 +79,7 @@ void LoadSNSEventNexus::exec()
 
   // top level file information
   ::NeXus::File file(m_filename);
-  g_log.information() << "NeXus file found: " << file.inquireFile() << endl;
+  //g_log.information() << "NeXus file found: " << file.inquireFile() << endl;
 
   //TODO: Here load any other data?
 
@@ -129,25 +129,34 @@ void LoadSNSEventNexus::exec()
       }
     }
   }
-//
-//  // --------------------- Load DAS Logs -----------------
-//  // do the actual work
-//  IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
-//
-//  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-//  bool executionSuccessful(true);
-//  try
-//  {
-//    loadLogs->setPropertyValue("Filename", filename);
-//    loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", WS);
-//    loadLogs->execute();
-//  }
-//  catch (std::string error_msg)
-//  {
-//    g_log.error() << "Error while loading Logs from SNS Nexus. No sample logs will be loaded.\n" << error_msg << std::endl;
-//  }
 
+  //The pulse times will be empty if not specified in the DAS logs.
+  pulseTimes.clear();
 
+  // --------------------- Load DAS Logs -----------------
+  // do the actual work
+  IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
+
+  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    g_log.information() << "Loading logs from NeXus file..." << endl;
+    loadLogs->setPropertyValue("Filename", m_filename);
+    loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", WS);
+    loadLogs->execute();
+
+    //If successful, we can try to load the pulse times
+    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
+    std::map<dateAndTime, double> logMap = log->valueAsMap();
+    std::map<dateAndTime, double>::iterator it;
+    //Convert the dateAndTime to PulseTimeType, and save as a vector array.
+    for (it = logMap.begin(); it != logMap.end(); it++)
+      pulseTimes.push_back( DateAndTime::get_from_absolute_time(it->first) );
+  }
+  catch (...)
+  {
+    g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
+  }
 
   //Count the limits to time of flight
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -159,7 +168,7 @@ void LoadSNSEventNexus::exec()
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
   //PARALLEL_FOR_NO_WSP_CHECK()
-  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
+  //PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     this->loadBankEventData(bankNames[i]);
@@ -290,12 +299,35 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
     return;
   }
 
-  //Todo: find the pulse times
-  Mantid::Kernel::PulseTimeType pulsetime;
+  //Default pulse time if none are found
+  Mantid::Kernel::PulseTimeType pulsetime = 0;
 
+  // Index into the pulse array
+  std::size_t pulse_i = 0;
+
+  // And there are this many pulses
+  std::size_t numPulses = pulseTimes.size();
+  if (numPulses > event_index.size())
+  {
+    g_log.warning() << "Entry " << entry_name << "'s event_index vector is smaller than the proton_charge DAS log. This is inconsistent, so we cannot find pulse times for this entry.\n";
+    //This'll make the code skip looking for any pulse times.
+    pulse_i = numPulses + 1;
+  }
+
+  //Go through all events in the list
   std::size_t numEvents = event_pixel_id.size();
   for (std::size_t i = 0; i < numEvents; i++)
   {
+    //Find the pulse time for this event index
+    if (pulse_i < numPulses-1)
+    {
+      //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
+      while ( !((i >= event_index[pulse_i]) && (i < event_index[pulse_i+1])) && (pulse_i < numPulses-1))
+        pulse_i++;
+      //Save the pulse time at this index for creating those events
+      pulsetime = pulseTimes[pulse_i];
+    }
+
     //Create the tofevent
     double tof = static_cast<double>( event_time_of_flight[i] );
     TofEvent event(tof, pulsetime);

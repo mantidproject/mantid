@@ -76,11 +76,13 @@ time_t utc_mktime(struct tm *utctime)
     return (time_t)-1;
 
   // loop until match
-  while(  check.tm_year != utctime->tm_year ||
+  int counter = 0;
+  while( counter < 15 &&
+  ( check.tm_year != utctime->tm_year ||
     check.tm_mon != utctime->tm_mon ||
     check.tm_mday != utctime->tm_mday ||
     check.tm_hour != utctime->tm_hour ||
-    check.tm_min != utctime->tm_min )
+    check.tm_min != utctime->tm_min ) )
   {
     tmp.tm_min  += utctime->tm_min - check.tm_min;
     tmp.tm_hour += utctime->tm_hour - check.tm_hour;
@@ -94,8 +96,9 @@ time_t utc_mktime(struct tm *utctime)
     gmtime_r_portable(&result, &check);
     if( gmtime_r_portable(&result, &check) == NULL )
       return (time_t)-1;
+    //Seems like there can be endless loops at the end of a month? E.g. sep 30, 2010 at 4:40 pm. This is to avoid it.
+    counter++;
   }
-
   return result;
 }
 
@@ -137,17 +140,90 @@ time_duration duration_from_seconds(double duration)
 }
 
 //-----------------------------------------------------------------------------------------------
-/// Create dateAndTime instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
+/// Create dateAndTime instance from a ISO 8601 yyyy-mm-ddThh:mm:ss[Z+-]tz:tz input string
 dateAndTime create_DateAndTime_FromISO8601_String(const std::string& str)
 {
   //Make a copy
   std::string time = str;
+
+  //Default of no timezone offset
+  bool positive_offset = true;
+  time_duration tz_offset = boost::posix_time::seconds(0);
+
   //Replace "T" with a space
   size_t n = time.find('T');
   if (n != std::string::npos)
+  {
+    //Take out the T, for later
     time[n] = ' ';
-  //The boost conversion will handle it
-  return boost::posix_time::time_from_string(time);
+
+    //Adjust for time zones. Fun!
+    //Look for the time zone marker
+    size_t n2;
+    n2 = time.find('Z', n);
+    if (n2 != std::string::npos)
+    {
+      //Found a Z. Remove it, and no timezone fix
+      time = time.substr(0, n2);
+    }
+    else
+    {
+      //Look for a + or - indicating time zone offset
+      size_t n_plus,n_minus,n5;
+      n_plus = time.find('+', n);
+      n_minus = time.find('-', n);
+      if ((n_plus != std::string::npos) || (n_minus != std::string::npos))
+      {
+        //Either a - or a + was found
+        if (n_plus != std::string::npos)
+        {
+          positive_offset = true;
+          n5 = n_plus;
+        }
+        else
+        {
+          positive_offset = false;
+          n5 = n_minus;
+        }
+
+        //Now, parse the offset time
+        std::string offset_str = time.substr(n5+1, time.size()-n5-1);
+
+        //Take out the offset from time string
+        time = time.substr(0, n5);
+
+        //Separate into minutes and hours
+        size_t n6;
+        std::string hours_str("0"), minutes_str("0");
+        n6 = offset_str.find(':');
+        if ((n6 != std::string::npos))
+        {
+          //Yes, minutes offset are specified
+          minutes_str = offset_str.substr(n6+1, offset_str.size()-n6-1);
+          hours_str = offset_str.substr(0, n6);
+        }
+        else
+          //Just hours
+          hours_str = offset_str;
+
+        //Convert to a time_duration
+        tz_offset = boost::posix_time::hours( boost::lexical_cast<long>(hours_str)) +
+            boost::posix_time::minutes( boost::lexical_cast<long>(minutes_str));
+
+      }
+    }
+
+  }
+
+
+  //The boost conversion will convert the string, then we subtract the time zone offset
+  if (positive_offset)
+    //The timezone is + so we need to subtract the hours
+    return boost::posix_time::time_from_string(time) - tz_offset;
+  else
+    //The timezone is - so we need to ADD the hours
+    return boost::posix_time::time_from_string(time) + tz_offset;
+
 }
 
 //-----------------------------------------------------------------------------------------------

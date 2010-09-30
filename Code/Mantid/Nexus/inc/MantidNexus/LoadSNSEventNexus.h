@@ -89,6 +89,9 @@ namespace Mantid
       //Limits found to tof
       double longest_tof, shortest_tof;
 
+      ///List of the absolute time of each pulse
+      std::vector<Kernel::PulseTimeType> pulseTimes;
+
       void loadBankEventData(std::string entry_name);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
 

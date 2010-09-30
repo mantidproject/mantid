@@ -68,8 +68,9 @@ public:
     std::time_t utc_time_t =  Mantid::Kernel::DateAndTime::utc_mktime ( timeinfo );
     //This will be the local time
     std::time_t local_time_t =  std::mktime( timeinfo );
+
     //our format, as utc
-    dateAndTime utc_time = Mantid::Kernel::DateAndTime::from_time_t(utc_time_t);
+    dateAndTime utc_time = DateAndTime::from_time_t(utc_time_t);
 
     //Timezone offset in hours (sorry, newfoundland and labrador - half time zones are crazy! )
     int tz_offset = difftime(utc_time_t, local_time_t) / 3600;
@@ -91,6 +92,33 @@ public:
     //Now the string
     TS_ASSERT_EQUALS( Mantid::Kernel::DateAndTime::to_simple_string(utc_time), "2008-Feb-29 12:00:00");
 
+  }
+
+  void test_ISO8601_string_with_timezones()
+  {
+    //Time without timezone : UTC assumed
+    dateAndTime time_no_tz = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T14:12:51.562");
+    dateAndTime time_no_fraction = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T14:12:51");
+
+    //The conversion should handle the fraction
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::durationInSeconds( time_no_tz-time_no_fraction ), 0.562, 0.0005);
+
+    //ZULU specified
+    dateAndTime time_z = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T14:12:51.562Z");
+    //Positive time offset (also a fraction like Newfoundland (crazy newfies ;) )
+    dateAndTime time_positive_tz = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T19:42:51.562+05:30");
+    dateAndTime time_positive_tz2 = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T16:12:51.562+02");
+    //Negative time offset
+    dateAndTime time_negative_tz = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T10:12:51.562-04:00");
+    dateAndTime time_negative_tz2 = Mantid::Kernel::DateAndTime::create_DateAndTime_FromISO8601_String("2010-03-24T06:12:51.562-08");
+
+
+    //Now check the time zone difference
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::durationInSeconds( time_no_tz-time_z ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::durationInSeconds( time_no_tz-time_positive_tz ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::durationInSeconds( time_no_tz-time_negative_tz ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::durationInSeconds( time_no_tz-time_positive_tz2 ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::durationInSeconds( time_no_tz-time_negative_tz2 ),  0.0, 1e-4);
   }
 
 

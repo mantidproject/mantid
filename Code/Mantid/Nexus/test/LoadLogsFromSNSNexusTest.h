@@ -31,6 +31,7 @@ public:
         std::string outws_name = "topaz_instrument";
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/AutoTestData/TOPAZ_900.nxs");
+        //ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
 
 
         //Create an empty workspace with some fake size, to start from.

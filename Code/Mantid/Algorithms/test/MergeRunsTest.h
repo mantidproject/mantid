@@ -58,7 +58,7 @@ public:
     delete eventLoader;
 
     output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs1"));
-    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("ProtonCharge") );
+    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("proton_charge") );
     log1 = log->realSize();
     nev1 = output->getNumberEvents();
     pc1 = output->mutableRun().getProtonCharge();
@@ -73,7 +73,7 @@ public:
     delete eventLoader;
 
     output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs2"));
-    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("ProtonCharge") );
+    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("proton_charge") );
     log2 = log->realSize();
     nev2 = output->getNumberEvents();
     pc2 = output->mutableRun().getProtonCharge();
@@ -89,7 +89,7 @@ public:
     //This many pixels total at CNCS
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 51200);
 
-    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("ProtonCharge") );
+    log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("proton_charge") );
     logTot = log->realSize();
     nevTot = output->getNumberEvents();
     pcTot = output->mutableRun().getProtonCharge();
