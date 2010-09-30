@@ -13,6 +13,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidDataHandling/LoadInstrument.h"
+
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
