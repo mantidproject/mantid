@@ -42,7 +42,7 @@ public:
      MDPixels(void);
     ~MDPixels(void);
      void set_shape(const SlicingData &trf){
-         this->alloc_dnd_arrays(trf);
+         this->alloc_mdd_arrays(trf);
          if(pix_array){
              delete [] pix_array;
              pix_array=NULL;

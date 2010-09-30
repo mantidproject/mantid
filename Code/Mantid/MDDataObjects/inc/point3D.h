@@ -13,13 +13,13 @@ struct coordinate{
   double x,y,z;
 };
 
-class point3D
+class DLLExport point3D
 {
 
     friend class MDData;
 public:
     point3D(void);
-    ~point3D(void);
+    ~point3D();
 private:
     coordinate r;
     data_point data;

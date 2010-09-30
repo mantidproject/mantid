@@ -17,6 +17,9 @@ public:
     void  setName(const char *name){
           Dimension::setName(name);
     }
+    void  setName(const std::string & name){
+          Dimension::setName(name);
+    }
     void setIntegrated(){
         Dimension::setIntegrated();
     }
@@ -54,7 +57,7 @@ public:
 
       try{
           tDimension  Dim1(en);
-              // wrong limits
+          // wrong limits
           TS_ASSERT_THROWS_ANYTHING(Dim1.setRange(20,-200,200))
           // wrong bins (too many)
           TS_ASSERT_THROWS_ANYTHING(Dim1.setRange(20,-200,200000000))
@@ -63,7 +66,7 @@ public:
           TS_ASSERT_THROWS_NOTHING(Dim1.setRange(-200,200,200));
           // should get axis points withour any problem
           std::vector<double> points;
- //Why this fails????         TS_ASSERT_THROWS_NOTHING(Dim1.getAxisPoints(points));
+          TS_ASSERT_THROWS_NOTHING(Dim1.getAxisPoints(points));
 
           TS_ASSERT_DELTA(Dim1.getRange(),400,FLT_EPSILON);
 
@@ -75,8 +78,10 @@ public:
           TS_ASSERT_SAME_DATA(Dim1.getName().c_str(),NAME,3);
 
           // set axis name
- //Why this fails????      TS_ASSERT_THROWS_NOTHING(Dim1.setName("MY new axis name"));
- //        TS_ASSERT_SAME_DATA(Dim1.getName().c_str(),"MY new axis name",strlen(Dim1.getName().c_str()));
+
+         std::string name("MY new axis name");
+         TS_ASSERT_THROWS_NOTHING(Dim1.setName(name));   
+         TS_ASSERT_SAME_DATA(Dim1.getName().c_str(),"MY new axis name",strlen(Dim1.getName().c_str()));
 
           // is integrated?, false by default nBins > 1 so it is not integrated
           TS_ASSERT_EQUALS(Dim1.getIntegrated(),false);

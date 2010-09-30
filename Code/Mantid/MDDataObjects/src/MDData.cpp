@@ -286,6 +286,7 @@ DND::rescale_transformations(const transf_matrix &trf,
 void
 MDData::select_file_reader(const char *file_name)
 {
+    
 // check if the file exist;
     std::ifstream infile;
     infile.open(file_name);
@@ -310,17 +311,17 @@ MDData::select_file_reader(const char *file_name)
 //
 /*
 void 
-DND::write_dnd(const char *file_name){
+DND::write_mdd(const char *file_name){
      // pick up current default file reader/writer;
     if (this->theFile){
         if(!this->theFile->is_open()){
             delete this->theFile;
-            this->theFile=new dnd_hdf(file_name);
+            this->theFile=new mdd_hdf(file_name);
         }
     }else{
-         this->theFile=new dnd_hdf(file_name);
+         this->theFile=new mdd_hdf(file_name);
     }
-    this->write_dnd();
+    this->write_mdd();
 }
 
 
@@ -365,7 +366,7 @@ MDData::reshape_geometry(const SlicingData &transf)
     return data_size;
 }
 void 
-MDData::alloc_dnd_arrays(const SlicingData &transf)
+MDData::alloc_mdd_arrays(const SlicingData &transf)
 {
 
 // initiate initial dimensions
@@ -402,10 +403,10 @@ nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
     this->dimSizes.assign(nDims,0);
     this->dimStride.assign(nDims+1,0);
 }
-
-MDData::~MDData(void)
+//
+MDData::~MDData()
 {
-    clear_class();
+    this->clear_class();
 }
 //***************************************************************************************
 void

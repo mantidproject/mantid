@@ -3,13 +3,22 @@
 namespace Mantid{
     namespace MDDataObjects{
         using namespace Mantid::Kernel;
-// dnd dataset name;
-const char * MD_File_hdfMatlab::DatasetName="Signals";
-// dataset descriptors:
-const char * MD_File_hdfMatlab::descriptor ="spe_header";
-//
-const char *MD_File_hdfMatlab::pixels      ="pix";
 
+
+/// enum to identify fields, used in MATALB Horace DND-hdf file
+enum matlab_mdd_fields_list{
+    DatasetName,
+    DataDescriptor,
+    Pixels,
+    N_DND_FIELDS
+};
+/// enum to identify attributes, used in MATLAB horace DND-hdf file;
+enum matlab_mdd_attributes_list{
+    nDND_dims,
+    range,
+    axis,
+    N_MATLAB_FIELD_ATTRIBUTES
+};
 // MATLAB datatypes which may be written into hdf HORACE file
 enum matlab_attrib_kind
 {
@@ -48,17 +57,22 @@ pixel_dataspace_h(-1)
     if (file_handler<0){
         throw(" error opening existing hdf5 file");
     }
-    this->MATLAB_dnd_fields = new std::string*[n_MATLAB_DND_fields];
-    this->MATLAB_dnd_fields[nDND_dims]=new std::string("signal_dims");
-    this->MATLAB_dnd_fields[range]    =new std::string("urange");
-    this->MATLAB_dnd_fields[axis]     =new std::string("p");
+/// mdd dataset names in MATLAB HDF file;
+    this->mdd_field_names.resize(N_DND_FIELDS);
+    this->mdd_field_names[DatasetName].assign("Signals");        // mdd dataset name;
+    this->mdd_field_names[DataDescriptor].assign("spe_header");  // dataset descriptors: contains information about various parts of the dataset
+    this->mdd_field_names[Pixels].assign("pix");                 // pixels dataset name
 
-
-
+/// mdd dataset arrtibutes in MATLAB HDF file  
+    this->mdd_attrib_names.resize(N_MATLAB_FIELD_ATTRIBUTES);
+    this->mdd_attrib_names[nDND_dims].assign("signal_dims");
+    this->mdd_attrib_names[range].assign("urange");
+    this->mdd_attrib_names[axis].assign("p");
+ 
 }
 //***************************************************************************************
 bool
-read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind)
+read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name)
 {
 /*
   The function is the interface to the attributes written by MATLAB horace hdf
@@ -120,7 +134,9 @@ if(!H5Aexists(group_ID, field_name.c_str())){ // then may be the dataset is empt
 // open
 hid_t attr     = H5Aopen(group_ID, field_name.c_str(), H5P_DEFAULT);
 if (attr<=0){
-    throw("error opening existing attribute");
+    std::stringstream err;
+    err<<"read_matlab_field_attr: error opening existing attribute: "<<field_name<<std::endl;
+    throw(Exception::FileError(err.str(),file_name));
 }
 // learn all about the dataset; MATLAB written datasets are simple arrays or scalars or characters
 // as this is the attribute, the size of the array can be only limited;
@@ -144,7 +160,7 @@ if (attr<=0){
      rank             = H5Sget_simple_extent_dims(space,t_dims,NULL) ;
      kind             = double_array;
      if (rank>2){
-         throw("MATLAB HORACE reader does not currently understand arrays of more then 2 dimesions");
+         throw(Exception::FileError("MATLAB HORACE reader does not currently understand arrays of more then 2 dimesions",file_name));
      }
 
  }
@@ -170,12 +186,16 @@ if (attr<=0){
 
         hid_t attr_f = H5Aopen(group_ID, filler_name.c_str(),H5P_DEFAULT);
         if (attr_f<=0){
-            throw("can not open existing Filler attribute;");
+              std::stringstream err;
+              err<<"read_matlab_field_attr: error opening existing Filler attribute: "<<filler_name<<std::endl;
+              throw(Exception::FileError(err.str(),file_name));
         }
         hid_t type_f = H5Aget_type(attr_f);
         herr_t err = H5Aread(attr_f, type_f,&filler_buf);
         if(err<0){
-            throw("error reading filler attribute");
+              std::stringstream err;
+              err<<"read_matlab_field_attr: error reading existing Filler attribute: "<<filler_name<<std::endl;
+              throw(Exception::FileError(err.str(),file_name));
         }
 //
 //        rez = transform_array2cells(rez,filler,type_name);
@@ -199,7 +219,9 @@ if (attr<=0){
  }
  herr_t err = H5Aread(attr, type,data);
  if (err<0){
-    throw("error reading attribute");
+     std::stringstream err;
+     err<<"read_matlab_field_attr: error reading attribute: "<<field_name<<std::endl;
+     throw(Exception::FileError(err.str(),file_name));
  }
 
 
@@ -270,7 +292,7 @@ function cellarray=transform_array2cells(rdata,filler,type_name)
             return (void **)rez;
 
         }
-        default: throw("transform array2cells: unsupported datatype");
+        default: throw(std::invalid_argument("transform array2cells: unsupported datatype"));
     }
     return NULL;
 }
@@ -280,9 +302,9 @@ MD_File_hdfMatlab::check_or_open_pix_dataset(void)
 {
     bool was_opened(false); 
     if(this->pixel_dataset_h<0){
-        this->pixel_dataset_h    = H5Dopen(this->file_handler,this->pixels,this->file_access_mode);
+        this->pixel_dataset_h    = H5Dopen(this->file_handler,this->mdd_field_names[Pixels].c_str(),this->file_access_mode);
         if(this->pixel_dataset_h<0){
-            throw("can not open pixels dataset");
+            throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open pixels dataset",this->File_name));
         }
     }else{
         was_opened        = true;
@@ -291,112 +313,119 @@ MD_File_hdfMatlab::check_or_open_pix_dataset(void)
     return was_opened;
 }
 void 
-MD_File_hdfMatlab::read_dnd(MDData & dnd)
+MD_File_hdfMatlab::read_mdd(MDData & dnd)
 {
 // The function accepts full 4D dataset only!!!
-hid_t h_signal_DSID=H5Dopen(file_handler,this->DatasetName,H5P_DEFAULT);
-if (h_signal_DSID<0){
-    throw("can not open the hdf dnd dataset");
-}
-std::vector<int> arr_dims_vector;
-int    rank;
-unsigned int nDims,i;
-void  *data;
-herr_t err;
-matlab_attrib_kind kind;
-bool ok;
+    hid_t h_signal_DSID=H5Dopen(file_handler,this->mdd_field_names[DatasetName].c_str(),H5P_DEFAULT);
+    if (h_signal_DSID<0){
+        throw(Exception::FileError("MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the hdf mdd dataset",this->File_name));
+    }
+    std::vector<int> arr_dims_vector;
+    int    rank;
+    unsigned int nDims,i;
+    void  *data;
+    herr_t err;
+    matlab_attrib_kind kind;
+    bool ok;
 
 
-// find and read the dimensions of the dnd dataset
-ok=read_matlab_field_attr(h_signal_DSID,*MATLAB_dnd_fields[nDND_dims],data,arr_dims_vector,rank,kind);
-if(!ok){
-    throw("error reading signal dimensions attribute");
-}
-nDims= arr_dims_vector[0];
-SlicingData dnd_shape(nDims);
+    // find and read the dimensions of the mdd dataset
+    ok=read_matlab_field_attr(h_signal_DSID,this->mdd_attrib_names[nDND_dims].c_str(),data,arr_dims_vector,rank,kind,this->File_name);
+    if(!ok){
+        std::stringstream err;
+        err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Error reading signal dimensions attribute: "<<mdd_attrib_names[nDND_dims]<<std::endl;
+        throw(Exception::FileError(err.str(),this->File_name));
+    }
+    nDims= arr_dims_vector[0];
+    SlicingData dnd_shape(nDims);
 
-for(i=0;i<nDims;i++){
-    unsigned int dim_size=(unsigned int)*((double*)(data)+i);
-    dnd_shape.setNumBins(i,dim_size);
-}
-delete [] data;
-arr_dims_vector.clear();
-
-
-// read other dataset descriptors
-hid_t descriptors_DSID=H5Gopen(file_handler,this->descriptor,H5P_DEFAULT);
-if (descriptors_DSID<0){
-    throw("can not open the the data descriptors field in the dataset");
-}
-// read data limits
-ok=read_matlab_field_attr(descriptors_DSID,*MATLAB_dnd_fields[range],data,arr_dims_vector,rank,kind);
-if(!ok){
-    throw("error reading dnd data range attribute");
-}
-for(i=0;i<nDims;i++){
-    dnd_shape.setCutMin(i,*((double*)(data)+2*i));
-    dnd_shape.setCutMax(i,*((double*)(data)+2*i+1));
-}
-delete [] data;
-arr_dims_vector.clear();
-
-// read axis
-ok=read_matlab_field_attr(descriptors_DSID,*MATLAB_dnd_fields[axis],data,arr_dims_vector,rank,kind);
-if(!ok){
-    throw("error reading data axis attribute");
-}
-if (kind!=double_cellarray){
-    throw("wrong type identifyed reading data axis");
-}
-// transform 2D array of axis into N-D vector of axis vectors;
-int nData=arr_dims_vector[0]*arr_dims_vector[1];
-double filler = *((double *)(data)+nData);
-std::vector<double> **rez    =(std::vector<double> **)transform_array2cells(data,arr_dims_vector,rank,kind,&filler);
-if(MAX_NDIMS_POSSIBLE<=arr_dims_vector[0]){
-    throw("file_hdf_Matlab::read_dnd=>algorithm error: number of the data axis in dnd structure residing in file has to be less then MAX_NDIMS_POSSIBLE");
-}
-/* This is absolutely unnesessary for linear axis as n-bins has been already defined;
-for(i=0;i<nDims;i++){
-    unsigned int dim_lentgh=(unsigned int)rez[i]->size();
-    delete rez[i];
-    dnd_shape.setNumBins(i,dim_lentgh);
-}
-*/
-delete [] data;
-delete [] rez;
-arr_dims_vector.clear();
+    for(i=0;i<nDims;i++){
+        unsigned int dim_size=(unsigned int)*((double*)(data)+i);
+        dnd_shape.setNumBins(i,dim_size);
+    }
+    delete [] data;
+    arr_dims_vector.clear();
 
 
-H5Gclose(descriptors_DSID);
+    // read other dataset descriptors
+    hid_t descriptors_DSID=H5Gopen(file_handler,this->mdd_field_names[DataDescriptor].c_str(),H5P_DEFAULT);
+    if (descriptors_DSID<0){
+        std::stringstream err;
+        err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Can not open the the data descriptors field in the dataset: "<<mdd_attrib_names[DataDescriptor]<<std::endl;
+        throw(Exception::FileError(err.str(),this->File_name));
+    }
+    // read data limits
+    ok=read_matlab_field_attr(descriptors_DSID,this->mdd_attrib_names[range],data,arr_dims_vector,rank,kind,this->File_name);
+    if(!ok){
+        std::stringstream err;
+        err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Error reading mdd data range attribute: "<<mdd_attrib_names[range]<<std::endl;
+        throw(Exception::FileError(err.str(),this->File_name));
+    }
+    for(i=0;i<nDims;i++){
+        dnd_shape.setCutMin(i,*((double*)(data)+2*i));
+        dnd_shape.setCutMax(i,*((double*)(data)+2*i+1));
+    }
+    delete [] data;
+    arr_dims_vector.clear();
+
+    // read axis
+    ok=read_matlab_field_attr(descriptors_DSID,this->mdd_attrib_names[axis],data,arr_dims_vector,rank,kind,this->File_name);
+    if(!ok){
+       std::stringstream err;
+        err<<"MD_File_hdfMatlab::check_or_open_pix_dataset: Error reading mdd data axis attribute: "<<mdd_attrib_names[axis]<<std::endl;
+        throw(Exception::FileError(err.str(),this->File_name));
+    }
+    if (kind!=double_cellarray){
+        throw(Exception::FileError("wrong type identifyed reading data axis",this->File_name));
+    }
+    // transform 2D array of axis into N-D vector of axis vectors;
+    int nData=arr_dims_vector[0]*arr_dims_vector[1];
+    double filler = *((double *)(data)+nData);
+    std::vector<double> **rez    =(std::vector<double> **)transform_array2cells(data,arr_dims_vector,rank,kind,&filler);
+    if(MAX_NDIMS_POSSIBLE<=arr_dims_vector[0]){
+        throw(Exception::FileError("file_hdf_Matlab::read_mdd=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE",this->File_name));
+    }
+    /* This is absolutely unnesessary for linear axis as n-bins has been already defined;
+        for(i=0;i<nDims;i++){
+          unsigned int dim_lentgh=(unsigned int)rez[i]->size();
+          delete rez[i];
+          mdd_shape.setNumBins(i,dim_lentgh);
+    }   */
+    delete [] data;
+    delete [] rez;
+    arr_dims_vector.clear();
+
+
+    H5Gclose(descriptors_DSID);
 
 // ***> because of this operator the function accepts full 4D dataset only; if we want accept 1,2 and 3D dataset we need to read pax 
 // iax,iint and variable number of p and process them properly;
 
 
-dnd.alloc_dnd_arrays(dnd_shape);
+    dnd.alloc_mdd_arrays(dnd_shape);
 
 //-------------------------------------------------------------------------
 // read the dataset itself
 // 1) create mem datatype to read data into. 
 
-hsize_t arr_dims_buf_[MAX_NDIMS_POSSIBLE];
-arr_dims_buf_[0] = 3;
-hid_t   memtype = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, arr_dims_buf_);
+    hsize_t arr_dims_buf_[MAX_NDIMS_POSSIBLE];
+    arr_dims_buf_[0] = 3;
+    hid_t   memtype = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, arr_dims_buf_);
 
 /* TO DO: write this check!!!
-// check if the datasize has been calculated properly
-if(real_data_size!=dnd.data_size){
-    std::stringstream err;
-    err<<"file_hdf_Matlab::read_dnd: dataSize calculated from dimensions= "<<dnd.data_size<<" But real dataSize="<<real_data_size<<std::endl;
-    throw(errorMantid(err.str()));
-}
+    // check if the datasize has been calculated properly
+    if(real_data_size!=dnd.data_size){
+        std::stringstream err;
+        err<<"file_hdf_Matlab::read_dnd: dataSize calculated from dimensions= "<<dnd.data_size<<" But real dataSize="<<real_data_size<<std::endl;
+        throw(errorMantid(err.str()));
+    }
 */
-double *buf = new double[3*(dnd.data_size+1)];
-//** Read the data.   
-err = H5Dread (h_signal_DSID, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-if (err){
-    throw("error reading signal data from the dataset");
-}
+    double *buf = new double[3*(dnd.data_size+1)];
+    //** Read the data.   
+    err = H5Dread (h_signal_DSID, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    if (err){
+        throw(Exception::FileError("error reading signal data from the dataset",this->File_name));
+    }
 // transform the data into the format specified 
 for(unsigned long i=0;i<dnd.data_size;i++){
     dnd.data[i].s   =buf[i*3+0];
@@ -423,10 +452,10 @@ MD_File_hdfMatlab::getNPix(void)
     matlab_attrib_kind   kind;
 
 
-// Find and read n-pixels attribute to indentify number of the pixels contributed into the dnd dataset
-    bool ok=read_matlab_field_attr(this->pixel_dataset_h,"n_pixels",data,arr_dims_vector,rank,kind);
+// Find and read n-pixels attribute to indentify number of the pixels contributed into the mdd dataset
+    bool ok=read_matlab_field_attr(this->pixel_dataset_h,"n_pixels",data,arr_dims_vector,rank,kind,this->File_name);
     if(!ok){
-        throw("error reading npix sqw attribute");
+        throw(Exception::FileError("Error reading npix sqw attribute",this->File_name));
     }
     hsize_t nPixels=(hsize_t)*((double*)(data));
     delete [] data;
@@ -458,7 +487,7 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
         throw("the pixel dataspace format differs from the one expected");
     }
     H5Sget_simple_extent_dims(pixel_dataspace_h,pix_dims,pix_dims_max);    
-// Find and read n-pixels attribute to indentify number of the pixels contributed into the dnd dataset
+// Find and read n-pixels attribute to indentify number of the pixels contributed into the mdd dataset
     bool ok=read_matlab_field_attr(this->pixel_dataset_h,"n_pixels",data,arr_dims_vector,rank,kind);
     if(!ok){
         throw("error reading npix sqw attribute");
@@ -470,7 +499,7 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
 
 
     if(pix_dims[0]!=SQW.nPixels){
-        throw("number of pixels contributed into dnd dataset does not correspond to number of sqw pixels");
+        throw("number of pixels contributed into mdd dataset does not correspond to number of sqw pixels");
     }
     hid_t type      = H5Dget_type(this->pixel_dataset_h);
     if(type<0){
@@ -669,20 +698,14 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &
 */
 MD_File_hdfMatlab::~MD_File_hdfMatlab(void)
 {
-    int i;
-
     if(this->pixel_dataspace_h>0){  H5Sclose(pixel_dataspace_h);
     }
 
     if(this->pixel_dataset_h>0){    H5Dclose(pixel_dataset_h);
     }
-    if(this->file_handler>0){       H5Fclose(this->file_handler);
+    if(this->file_handler>0)   {    H5Fclose(this->file_handler);
     }
 
-    for(i=0;i<n_MATLAB_DND_fields;i++){
-        delete this->MATLAB_dnd_fields[i];
-    }
-    delete [] this->MATLAB_dnd_fields;
  }
 
 }

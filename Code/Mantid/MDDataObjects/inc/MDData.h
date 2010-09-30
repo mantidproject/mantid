@@ -9,7 +9,7 @@
 #include "point3D.h"
 
 
-/** the kernel of the main class for visualisation and analysis operations, which keeps the data and brief information about the data dimensions
+/** the kernel of the main class for visualisation and analysis operations, which keeps the data itself and brief information about the data dimensions
 *
 *   This is equivalent of multidimensional Horace dataset without detailed pixel information
 
@@ -39,7 +39,7 @@
 namespace Mantid{
     namespace MDDataObjects{
 //
-class MDData:public MDGeometry
+class DLLExport MDData:public MDGeometry
 {
 public:
     // default constructor
@@ -56,22 +56,19 @@ public:
     /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3 
     void getPointData(std::vector<point3D> & image_data)const;
 
-    /// dangerous function, which clears internal memory allocated for the image points returned by the previous function; Should be used with care as it invalidares
-    /// the points returned by the function getPointData, but using this function may be necessary for efficiency reasons.
-    void clearPointsMemory(); 
-
-    void read_dnd(const char *file_name){
+  
+    void read_mdd(const char *file_name){
         // select a file reader which corresponds to the proper file format of the data file
         this->select_file_reader(file_name);
-        this->read_dnd();
+        this->read_mdd();
     }
-    void write_dnd(const char *file_name);
-    bool read_dnd(void){if(this->theFile){
-                           this->theFile->read_dnd(*this); return true;
+    void write_mdd(const char *file_name);
+    bool read_mdd(void){if(this->theFile){
+                           this->theFile->read_mdd(*this); return true;
                         }else{return false;}
     }
-    bool write_dnd(void){if(this->theFile){
-                          this->theFile->write_dnd(*this);return true;
+    bool write_mdd(void){if(this->theFile){
+                          this->theFile->write_mdd(*this);return true;
                         }else{return false;}
     }
 
@@ -85,8 +82,8 @@ protected:
     std::vector<unsigned long>dimSizes ;
 
 
-   // interface to alloc_dnd_arrays below in case of full not collapsed dnd dataset
-    void alloc_dnd_arrays(const SlicingData &transf);
+   // interface to alloc_mdd_arrays below in case of full not collapsed mdd dataset
+    void alloc_mdd_arrays(const SlicingData &transf);
 
 /// clear all allocated memory as in the destructor; neded for reshaping the object for e.g. changing from defaults to something else. generally this is bad desighn. 
     void clear_class();
@@ -95,14 +92,14 @@ protected:
 // FILE OPERATIONS:
 /// the name of the file with DND and SQW data;
     std::string fileName;
-// the pointer to a class with describes correspondent dnd file format;
+// the pointer to a class with describes correspondent mdd file format;
     MD_FileFormat *theFile;
-//  function selects the file reader given existing dnd or sqw file and sets up above pointer to the proper file reader;
+//  function selects the file reader given existing mdd or sqw file and sets up above pointer to the proper file reader;
 //  throws if can not find the file, the file format is not supported or any other error;
     void select_file_reader(const char *file_name);
-// class to read MATLAB written dnd_hdf
+// class to read MATLAB written mdd_hdf
     friend class MD_File_hdfMatlab;
-// cass to read binary HORACE dnd ***> not written yet;
+// cass to read binary HORACE mdd ***> not written yet;
     friend class MD_File_binMatlab;
 // class to read/write our HDF files ***> not written yet;
     friend class MD_File_hdfV1;

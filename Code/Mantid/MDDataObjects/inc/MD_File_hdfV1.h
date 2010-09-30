@@ -36,8 +36,8 @@ public:
     MD_File_hdfV1(const char *file_name){throw("this format is not written yet");}
     virtual ~MD_File_hdfV1(void){};
     virtual bool is_open(void)const{return false;}
-    virtual void read_dnd(MDData &){};
-    virtual void write_dnd(const MDData &){};
+    virtual void read_mdd(MDData &){};
+    virtual void write_mdd(const MDData &){};
     virtual bool read_pix(MDPixels &){return false; }
     virtual size_t read_pix_subset(const MDPixels &,const std::vector<long> &selected_cells,long starting_cell,sqw_pixel *& pix_buf, long &nPixels){
         return selected_cells.size();}

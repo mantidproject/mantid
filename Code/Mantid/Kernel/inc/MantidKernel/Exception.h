@@ -94,7 +94,7 @@ FileError : public std::runtime_error
   std::string outMessage;
 
  public:
-  FileError(const std::string&,const std::string&);
+  FileError(const std::string& Description,const std::string& FileName);
   FileError(const FileError& A);
   /// Assignment operator
   FileError& operator=(const FileError& A);

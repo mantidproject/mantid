@@ -58,7 +58,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -94,10 +94,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>MDDataObjects.lib;hMantidAPI.lib;MantidKernel.lib;MantidGeometry.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="testMDData.cpp" />
     <ClCompile Include="testMDDimension.cpp" />
     <ClCompile Include="test_sqw.cpp" />
     <ClCompile Include="testWorkspaceGeometry.cpp" />
@@ -139,6 +140,16 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building test suite for MDGeometry</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(Filename).h"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building test suite for MDGeometry</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="testMDData.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(Filename).h"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">building test for MDData</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(Filename).h"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">building test for MDData</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>

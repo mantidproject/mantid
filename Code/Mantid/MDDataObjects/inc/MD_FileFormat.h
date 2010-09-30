@@ -43,11 +43,11 @@ class MD_FileFormat
 public:
     MD_FileFormat(void){};
     virtual bool is_open(void)const{return false;}
-    virtual void read_dnd(MDData &)=0;
+    virtual void read_mdd(MDData &)=0;
     virtual bool read_pix(MDPixels &)=0; 
     virtual size_t read_pix_subset(const MDPixels &,const std::vector<long> &selected_cells,long starting_cell,sqw_pixel *& pix_buf, long &nPixels)=0; 
     virtual hsize_t getNPix(void)=0;
-    virtual void write_dnd(const MDData &)=0;
+    virtual void write_mdd(const MDData &)=0;
     virtual ~MD_FileFormat(void){};
 };
 //
