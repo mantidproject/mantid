@@ -1,6 +1,9 @@
-#ifndef LOADLOGSFROMSNSNEXUSTEST_H_
-#define LOADLOGSFROMSNSNEXUSTEST_H_
+#ifndef LOADSNSEVENTNEXUSTEST_H_
+#define LOADSNSEVENTNEXUSTEST_H_
 
+#include <cxxtest/TestSuite.h>
+#include "MantidAPI/WorkspaceGroup.h"
+#include <iostream>
 #include "MantidNexus/LoadSNSEventNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,11 +18,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
-using namespace Mantid::DataObjects;
+//using namespace Mantid::DataObjects;
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceGroup.h"
-#include <iostream>
 
 class LoadSNSEventNexusTest : public CxxTest::TestSuite
 {
@@ -39,7 +39,7 @@ public:
         ld.execute();
         TS_ASSERT( ld.isExecuted() );
 
-        EventWorkspace_sptr WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+        DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
         //Valid WS and it is an EventWorkspace
         TS_ASSERT( WS );
         //Pixels have to be padded
@@ -55,4 +55,7 @@ public:
     }
 };
 
-#endif /*LOADLOGSFROMSNSNEXUSTEST_H_*/
+#endif /*LOADSNSEVENTNEXUSTEST_H_*/
+
+
+
