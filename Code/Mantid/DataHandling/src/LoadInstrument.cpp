@@ -228,20 +228,6 @@ namespace Mantid
                 " even if it is just an empty location element of the form <location />", m_filename);
             }
 
-            // read detertor IDs into idlist if required
-            if ( pElem->hasAttribute("idlist") )
-            {
-              std::string idlist = pElem->getAttribute("idlist");
-              Element* pFound = pDoc->getElementById(idlist, "idname");
-
-              if ( pFound == NULL )
-              {
-                throw Kernel::Exception::InstrumentDefinitionError(
-                  "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", m_filename);
-              }       
-
-              populateIdList(pFound, idList);
-            }
 
             if ( isAssembly(pElem->getAttribute("type")) )
             {		
@@ -431,6 +417,30 @@ namespace Mantid
       Element* pCompElem = getParentComponent(pLocElem);
 
 
+      // Read detertor IDs into idlist if required
+      // Note idlist may be defined for any component
+      // Note any new idlist found will take presedence. 
+
+      if ( pCompElem->hasAttribute("idlist") )
+      {
+        std::string idlist = pCompElem->getAttribute("idlist");
+
+        if ( idlist.compare(idList.idname) )
+        {
+          Element* pFound = pCompElem->ownerDocument()->getElementById(idlist, "idname");
+
+          if ( pFound == NULL )
+          {
+            throw Kernel::Exception::InstrumentDefinitionError(
+              "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", m_filename);
+          }
+
+          idList.reset(); 
+          populateIdList(pFound, idList);
+        }
+      }
+
+
       Geometry::CompAssembly *ass = new Geometry::CompAssembly;
       ass->setParent(parent);
       parent->add(ass);
@@ -513,6 +523,31 @@ namespace Mantid
       // The location element is required to be a child of a component element. Get this component element
 
       Element* pCompElem = getParentComponent(pLocElem);
+
+
+      // Read detertor IDs into idlist if required
+      // Note idlist may be defined for any component
+      // Note any new idlist found will take presedence. 
+
+      if ( pCompElem->hasAttribute("idlist") )
+      {
+        std::string idlist = pCompElem->getAttribute("idlist");
+
+        if ( idlist.compare(idList.idname) )
+        {
+          Element* pFound = pCompElem->ownerDocument()->getElementById(idlist, "idname");
+
+          if ( pFound == NULL )
+          {
+            throw Kernel::Exception::InstrumentDefinitionError(
+              "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", m_filename);
+          }
+
+          idList.reset(); 
+          populateIdList(pFound, idList);
+        }
+      }
+
 
       // get the type element of the component element in order to determine if the type
       // belong to the catogory: "detector", "SamplePos or "Source".

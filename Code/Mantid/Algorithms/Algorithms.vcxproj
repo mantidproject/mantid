@@ -376,6 +376,7 @@
     <ClInclude Include="inc\MantidAlgorithms\MultiplyRange.h" />
     <ClInclude Include="test\MultiplyTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\MuonAsymmetryCalc.h" />
+    <ClInclude Include="test\MuonAlphaCalcTest.h" />
     <ClInclude Include="test\MuonAsymmetryCalcTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\MuonRemoveExpDecay.h" />
     <ClInclude Include="test\MuonRemoveExpDecayTest.h" />

@@ -97,15 +97,21 @@ namespace API
       /// Structure for holding detector IDs
       struct IdList
       {
-        ///Counted
+        /// Used to count the number of detector encounted so far
         int counted;
-        ///Vector of the values of the ID list
+        /// list of detector IDs
         std::vector<int> vec;
         /// name of idlist
         std::string idname;
 
         ///Constructor
         IdList() : counted(0) {};
+
+        /// return true if empty
+        bool empty() { return vec.empty();};  
+
+        /// reset idlist
+        void reset() { counted=0; vec.clear();};  
       };
 
       /// Reads the contents of the \<defaults\> element to set member variables,

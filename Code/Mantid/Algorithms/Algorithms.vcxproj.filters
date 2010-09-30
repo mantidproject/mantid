@@ -327,6 +327,9 @@
     <ClCompile Include="src\ExtractFFTSpectrum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MuonAlphaCalc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h">
@@ -822,6 +825,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\ExtractFFTSpectrumTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\MuonAlphaCalc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MuonAlphaCalcTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
