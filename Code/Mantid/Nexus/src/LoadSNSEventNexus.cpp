@@ -140,8 +140,9 @@ void LoadSNSEventNexus::exec()
   Progress prog(this,0.0,1.0, 1.0/bankNames.size());
 
   // Now go through each bank.
-  // This'll be parallelized
+  // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
   //PARALLEL_FOR_NO_WSP_CHECK()
+  PRAGMA(omp parallel for if(this->instrument_loaded_correctly) )
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     this->loadBankEventData(bankNames[i]);
@@ -195,7 +196,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
   //The vectors we will be filling
   std::vector<uint64_t> event_index;
   std::vector<uint32_t> event_pixel_id;
-  std::vector<uint32_t> event_time_of_flight;
+  std::vector<float> event_time_of_flight;
 
   // Get the event_index (a list of size of # of pulses giving the index in the event list for that pulse)
   file.openData("event_index");
@@ -204,7 +205,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
     file.getData(event_index);
   else
   {
-   g_log.warning() << "Entry " << entry_name << "'s event_index field is not uint64!\n";
+   g_log.warning() << "Entry " << entry_name << "'s event_index field is not uint64! It will be skipped.\n";
     file.closeData(); file.closeGroup(); file.close();
     return;
   }
@@ -217,7 +218,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
     file.getData(event_pixel_id);
   else
   {
-    g_log.warning() << "Entry " << entry_name << "'s event_pixel_id field is not uint32!\n";
+    g_log.warning() << "Entry " << entry_name << "'s event_pixel_id field is not uint32! It will be skipped.\n";
     file.closeData(); file.closeGroup(); file.close();
     return;
   }
@@ -225,12 +226,20 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
 
   // Get the list of event_time_of_flight's
   file.openData("event_time_of_flight");
-  //Must be uint32
-  if (file.getInfo().type == ::NeXus::UINT32)
+  //Check that the type is what it is supposed to be
+  if (file.getInfo().type == ::NeXus::FLOAT32)
     file.getData(event_time_of_flight);
   else
   {
-    g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight field is not uint32!\n";
+    g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight field is not FLOAT32! It will be skipped.\n";
+    file.closeData(); file.closeGroup(); file.close();
+    return;
+  }
+  std::string units;
+  file.getAttr("units", units);
+  if (units != "microsecond")
+  {
+    g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight field's units are not microsecond. It will be skipped.\n";
     file.closeData(); file.closeGroup(); file.close();
     return;
   }
@@ -243,7 +252,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
   // Two arrays must be the same size
   if (event_pixel_id.size() != event_time_of_flight.size())
   {
-    g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight and event_pixel_id vectors are not the same size!\n";
+    g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight and event_pixel_id vectors are not the same size! It will be skipped.\n";
     return;
   }
 
