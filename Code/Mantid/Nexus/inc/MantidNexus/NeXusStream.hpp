@@ -117,7 +117,7 @@ namespace Stream
 	Attr(const std::string& name, Attr& d) { m_holder = d.m_holder->clone(); setName(name); }
 	Attr(const std::string& name, const Attr& d) { m_holder = d.m_holder->clone(); setName(name); }
         Attr(const Attr& a) : m_holder(NULL) {  m_holder = a.m_holder->clone(); }
-	Attr& operator=(const Attr& a) { if (this != &a) { delete m_holder; m_holder = a.m_holder->clone(); return *this; } }
+	Attr& operator=(const Attr& a) { if (this != &a) { delete m_holder; m_holder = a.m_holder->clone(); } return *this; }
 	void setName(const std::string& name) { m_holder->setName(name); }
 	virtual void readFromFile(File& nf) const { m_holder->readFromFile(nf); }
 	virtual void writeToFile(File& nf) const { m_holder->writeToFile(nf); }
@@ -245,7 +245,7 @@ namespace Stream
 	    m_holder = new DataHolder<NumT>(name, data);
 	  }
 	Data(const Data& d) : ObjectWithAttr(d), m_holder(NULL) { m_holder = d.m_holder->clone(); }
-	Data& operator=(const Data& d) { if (this != &d) { delete m_holder; m_holder = d.m_holder->clone(); return *this; } }
+	Data& operator=(const Data& d) { if (this != &d) { delete m_holder; m_holder = d.m_holder->clone(); } return *this; }
 	virtual void readFromFile(File& nf) const;
 	virtual void writeToFile(File& nf) const;
 	virtual ~Data() { delete m_holder; }
