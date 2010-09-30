@@ -62,8 +62,8 @@ class DirectBeam(BaseWidget):
         """
         m = Transmission.DirectBeam()
         m.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
-        m.sample_file = self._content.sample_edit.text()
-        m.direct_beam = self._content.direct_edit.text()
+        m.sample_file = unicode(self._content.sample_edit.text())
+        m.direct_beam = unicode(self._content.direct_edit.text())
         return m
     
     def _sample_browse(self):
@@ -139,10 +139,10 @@ class BeamSpreader(BaseWidget):
         m = Transmission.BeamSpreader()
         m.spreader_trans = util._check_and_get_float_line_edit(self._content.spreader_trans_edit)
         m.spreader_trans_spread = util._check_and_get_float_line_edit(self._content.spreader_trans_spread_edit)
-        m.sample_scatt = self._content.sample_scatt_edit.text()
-        m.direct_scatt = self._content.direct_scatt_edit.text()
-        m.sample_spreader = self._content.sample_spread_edit.text()
-        m.direct_spreader = self._content.direct_spread_edit.text()
+        m.sample_scatt = unicode(self._content.sample_scatt_edit.text())
+        m.direct_scatt = unicode(self._content.direct_scatt_edit.text())
+        m.sample_spreader = unicode(self._content.sample_spread_edit.text())
+        m.direct_spreader = unicode(self._content.direct_spread_edit.text())
         return m    
     
     def _sample_scatt_browse(self):

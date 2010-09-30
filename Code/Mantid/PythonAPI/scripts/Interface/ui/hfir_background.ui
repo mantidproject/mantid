@@ -166,7 +166,7 @@
     <string>Calculate background transmission</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="bck_trans_label">
    <property name="geometry">
     <rect>
      <x>80</x>
@@ -217,7 +217,7 @@
     <string>Beam spreader</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="bck_trans_err_label">
    <property name="geometry">
     <rect>
      <x>390</x>
@@ -231,6 +231,9 @@
    </property>
   </widget>
   <widget class="QLineEdit" name="dtransmission_edit">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>420</x>
@@ -244,6 +247,9 @@
    </property>
   </widget>
   <widget class="QLineEdit" name="transmission_edit">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>270</x>

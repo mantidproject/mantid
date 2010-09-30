@@ -28,7 +28,7 @@ class BeamFinderFrame(QtGui.QFrame):
         m.y_position = util._check_and_get_float_line_edit(self.y_pos_edit)
         m.beam_radius = util._check_and_get_float_line_edit(self.beam_radius_edit)
         m.use_finder = self.use_beam_finder_checkbox.isChecked()
-        m.beam_file = self.beam_data_file_edit.text()
+        m.beam_file = unicode(self.beam_data_file_edit.text())
         m.use_direct_beam = self.direct_beam.isChecked()    
         
         return m

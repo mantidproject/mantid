@@ -46,11 +46,7 @@ class HFIRInterface(object):
         """
         self.scripter = ReductionScripter(name=self.scripter.instrument_name)
         self.scripter.from_xml(file_name)
-        
-        self._beam_finder_widget.set_state(self.scripter.beam_finder)
-        self._instrument_widget.set_state(self.scripter.instrument)
-        self._transmission_widget.set_state(self.scripter.transmission)
-        self._background_widget.set_state(self.scripter.background)
+        self._update_from_scripter()
         
     def save_file(self, file_name):
         """
@@ -83,6 +79,15 @@ class HFIRInterface(object):
         self.scripter.transmission = self._transmission_widget.get_state()
         self.scripter.background = self._background_widget.get_state()
         
+    def _update_from_scripter(self):
+        """
+            Update the interface with the scripter data
+        """
+        self._beam_finder_widget.set_state(self.scripter.beam_finder)
+        self._instrument_widget.set_state(self.scripter.instrument)
+        self._transmission_widget.set_state(self.scripter.transmission)
+        self._background_widget.set_state(self.scripter.background)
+        
     def reduce(self):
         """
             Pass the interface data to the scripter and reduce
@@ -91,6 +96,10 @@ class HFIRInterface(object):
         
         try:
             log = self.scripter.apply()
+            
+            # Update widgets
+            self._update_from_scripter()
+            
             self._output_widget.set_log(log)
             self._output_widget.plot_data(self.scripter.get_data())
         except:

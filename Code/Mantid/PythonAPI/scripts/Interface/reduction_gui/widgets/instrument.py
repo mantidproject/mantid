@@ -234,8 +234,8 @@ class SANSInstrumentWidget(BaseWidget):
         m = InstrumentDescription()
         
         # Data file
-        m.data_file = self._summary.data_file_edit.text()
-        
+        m.data_file = unicode(self._summary.data_file_edit.text())
+
         # Mask
         m.mask_top = int(self._mask_widget.topSpinBox.value())
         m.mask_bottom = int(self._mask_widget.bottomSpinBox.value())
@@ -260,7 +260,7 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Sensitivity correction
         m.sensitivity_corr = self._summary.sensitivity_chk.isChecked() 
-        m.sensitivity_data = self._summary.sensitivity_file_edit.text()
+        m.sensitivity_data = unicode(self._summary.sensitivity_file_edit.text())
         m.min_sensitivity = util._check_and_get_float_line_edit(self._summary.min_sensitivity_edit)
         m.max_sensitivity = util._check_and_get_float_line_edit(self._summary.max_sensitivity_edit)
         
@@ -280,6 +280,9 @@ class SANSInstrumentWidget(BaseWidget):
         return m
     
     def get_data_info(self):
+        """
+            Retrieve information from the data file and update the display
+        """
         if not self._summary.sample_dist_chk.isChecked() or not self._summary.wavelength_chk.isChecked():
             fname = self._summary.data_file_edit.text()
             if len(str(fname).strip())>0:

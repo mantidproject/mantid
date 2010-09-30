@@ -8,15 +8,28 @@ import copy
 import os
 from hfir_reduction import BaseScriptElement
 
+# Check whether Mantid is available
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    from HFIRCommandInterface import *
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False  
+
 class Transmission(BaseScriptElement):
 
-    class DirectBeam(object):
+    class DirectBeam(BaseScriptElement):
         sample_file = ''
         direct_beam = ''
         # Beam radius in pixels
         beam_radius = 3.0
         
-        def __str__(self):
+        def to_script(self):
+            """
+                Generate reduction script
+                @param execute: if true, the script will be executed
+            """
             return "DirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
             
@@ -48,7 +61,7 @@ class Transmission(BaseScriptElement):
                 self.beam_radius = BaseScriptElement.getFloatElement(instrument_dom, "beam_radius",
                                                                      default=Transmission.DirectBeam.beam_radius)           
         
-    class BeamSpreader(object):
+    class BeamSpreader(BaseScriptElement):
         sample_scatt = ''
         sample_spreader = ''
         direct_scatt = ''
@@ -56,7 +69,11 @@ class Transmission(BaseScriptElement):
         spreader_trans = 1.0
         spreader_trans_spread = 0.0
         
-        def __str__(self):
+        def to_script(self):
+            """
+                Generate reduction script
+                @param execute: if true, the script will be executed
+            """
             return "BeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
             (self.sample_spreader, self.direct_spreader, 
              self.sample_scatt, self.direct_scatt, 
@@ -103,7 +120,11 @@ class Transmission(BaseScriptElement):
     calculate_transmission = False
     calculation_method = DirectBeam()
             
-    def __str__(self):
+    def to_script(self):
+        """
+            Generate reduction script
+            @param execute: if true, the script will be executed
+        """
         script = ""
         if not self.calculate_transmission:
             script += "SetTransmission(%g, %g)\n" % (self.transmission, self.transmission_spread)
@@ -111,6 +132,16 @@ class Transmission(BaseScriptElement):
             script += str(self.calculation_method)
             
         return script
+
+    def update(self):
+        """
+            Update transmission from reduction output
+        """
+        if HAS_MANTID:
+            trans = ReductionSingleton()._transmission_calculator.get_transmission()
+            self.transmission = trans[0]
+            self.transmission_spread = trans[1]
+            
 
     def to_xml(self):
         """
@@ -159,7 +190,11 @@ class Background(BaseScriptElement):
                 self.direct_beam = state.direct_beam
                 self.beam_radius = state.beam_radius
 
-        def __str__(self):
+        def to_script(self):
+            """
+                Generate reduction script
+                @param execute: if true, the script will be executed
+            """
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
         
@@ -174,7 +209,11 @@ class Background(BaseScriptElement):
                 self.spreader_trans = state.spreader_trans
                 self.spreader_trans_spread = state.spreader_trans_spread
 
-        def __str__(self):
+        def to_script(self):
+            """
+                Generate reduction script
+                @param execute: if true, the script will be executed
+            """
             return "BckBeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
             (self.sample_spreader, self.direct_spreader, 
              self.sample_scatt, self.direct_scatt, 
@@ -190,8 +229,12 @@ class Background(BaseScriptElement):
     bck_transmission_spread = 0.0
     calculate_transmission = False 
     trans_calculation_method = DirectBeam()
-    
-    def __str__(self):
+        
+    def to_script(self):
+        """
+            Generate reduction script
+            @param execute: if true, the script will be executed
+        """
         script = ""
         
         # Dark current
@@ -208,8 +251,18 @@ class Background(BaseScriptElement):
             else:
                 script += str(self.trans_calculation_method)
             
-        return script
+        return script           
     
+    def update(self):
+        """
+            Update data member from reduction output
+        """
+        if HAS_MANTID:
+            trans = ReductionSingleton()._background_subtracter.get_transmission()
+            if trans is not None:
+                self.bck_transmission = trans[0]
+                self.bck_transmission_spread = trans[1]
+            
     def to_xml(self):
         """
             Create XML from the current data.
@@ -312,9 +365,10 @@ class InstrumentDescription(BaseScriptElement):
     NORMALIZATION_MONITOR = 2
     normalization = NORMALIZATION_MONITOR
         
-    def __str__(self):
+    def to_script(self):
         """
-            Representation as a Mantid script
+            Generate reduction script
+            @param execute: if true, the script will be executed
         """
         script  = "HFIRSANS()\n"
         
@@ -363,7 +417,7 @@ class InstrumentDescription(BaseScriptElement):
         else:
             raise RuntimeError, "Trying to generate reduction script without a data file."
         
-        return script
+        return script           
     
     def to_xml(self):
         """
@@ -468,9 +522,10 @@ class BeamFinder(BaseScriptElement):
     beam_radius = 3.0
     use_direct_beam = True
     
-    def __str__(self):
+    def to_script(self):
         """
-            Representation as a Mantid script
+            Generate reduction script
+            @param execute: if true, the script will be executed
         """
         script = ""
         if not self.use_finder:
@@ -481,14 +536,15 @@ class BeamFinder(BaseScriptElement):
             else:
                 script += "ScatteringBeamCenter(\"%s\", %g)\n" % (self.beam_file, self.beam_radius)
         return script
-
-    def apply(self, reducer=None):
+        
+    def update(self):
         """
-            The equivalent of the command line implementation, directly
-            applied to a SANSReducer object
-            @param reducer: SANSReducer object
+            Update data members according to reduction results
         """
-        return NotImplemeted
+        if HAS_MANTID:
+            pos = ReductionSingleton()._beam_finder.get_beam_center()
+            self.x_position = pos[0]
+            self.y_position = pos[1]
     
     def to_xml(self):
         """

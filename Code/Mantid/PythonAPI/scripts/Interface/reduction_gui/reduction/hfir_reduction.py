@@ -26,7 +26,19 @@ class BaseScriptElement(object):
             Script representation of the object.
             The output is meant to be executable as a Mantid python script
         """
+        return self.to_script()
+    
+    def to_script(self):
+        """
+            Generate reduction script
+        """
         return ""
+    
+    def update(self):
+        """
+            Update data member after the reduction has been executed
+        """
+        return NotImplemented
     
     def apply(self):
         """
@@ -217,8 +229,17 @@ class ReductionScripter(object):
         """
         if HAS_MANTID:
             script = self.to_script(None)
-            exec script
+            exec script               
+            
+            # Update scripter
+            self.instrument.update()
+            self.beam_finder.update()
+            self.transmission.update()
+            self.background.update()
+            
             return ReductionSingleton().log_text
+        else:
+            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
             
     def get_data(self):
         #TODO: fix this

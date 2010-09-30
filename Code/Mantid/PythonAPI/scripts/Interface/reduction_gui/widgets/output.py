@@ -54,6 +54,7 @@ class OutputWidget(BaseWidget):
                         
     def plot_data(self, data):
         if HAS_MPL:
+            self.axes.cla()
             self.axes.plot(data.x, data.y, 'r')
             self.axes.set_xlabel("Q [Angstrom^{-1}]")
             self.axes.set_ylabel("I(Q) [a.u.]")

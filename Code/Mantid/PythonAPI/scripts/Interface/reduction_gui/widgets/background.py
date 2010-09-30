@@ -118,10 +118,10 @@ class BackgroundWidget(BaseWidget):
         m = Background()
         
         m.dark_current_corr = self._content.dark_current_chk.isChecked()
-        m.dark_current_file = self._content.dark_current_edit.text()
+        m.dark_current_file = unicode(self._content.dark_current_edit.text())
         
         m.background_corr = self._content.background_chk.isChecked()
-        m.background_file = self._content.background_edit.text()
+        m.background_file = unicode(self._content.background_edit.text())
         
         m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
         m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
@@ -166,6 +166,9 @@ class BackgroundWidget(BaseWidget):
         self._content.background_edit.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
         self._content.calculate_trans_chk.setEnabled(is_checked)
+        self._content.bck_trans_label.setEnabled(is_checked)
+        self._content.bck_trans_err_label.setEnabled(is_checked)
+        
         self._calculate_clicked(is_checked and self._content.calculate_trans_chk.isChecked())
         
     def _background_browse(self):
@@ -179,6 +182,8 @@ class BackgroundWidget(BaseWidget):
         if self._method_box is not None:
             self._method_box.setEnabled(is_checked)
             
-        self._content.transmission_edit.setEnabled(not is_checked)
-        self._content.dtransmission_edit.setEnabled(not is_checked)
+        self._content.transmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
+        self._content.dtransmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
+        
+        
         
