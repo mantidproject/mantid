@@ -133,13 +133,6 @@ void FilterByLogValue::exec()
 
   g_log.information() << splitter.size() << " entries in the filter.\n";
 
-//  if (splitter.size() > 0)
-//  {
-//    PulseTimeType first_time = splitter[0].start();
-//    for (size_t i=0; i<splitter.size(); i++)
-//      std::cout << i << ": " << (splitter[i].start()-first_time) << " to " << (splitter[i].stop()-first_time) << "\n";
-//  }
-
   int numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object

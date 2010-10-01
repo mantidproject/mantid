@@ -1789,7 +1789,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   Mantid::Kernel::LogFilter flt(logData);
 
-  //Get a map of time/value. This greatly speeds up display
+  //Get a map of time/value. This greatly speeds up display.
+  // NOTE: valueAsMap() skips repeated values.
   std::map<dateAndTime, double> time_value_map = flt.data()->valueAsMap();
   int rowcount = time_value_map.size();
   int colCount = 2;

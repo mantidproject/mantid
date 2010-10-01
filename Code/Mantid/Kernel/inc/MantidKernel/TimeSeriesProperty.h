@@ -323,6 +323,174 @@ public:
 
 
   //-----------------------------------------------------------------------------------------------
+  /**  Return the time series as a correct C++ map<dateAndTime, TYPE>. All values
+   * are included.
+   *
+   * @return time series property values as map
+   */
+  std::map<dateAndTime, TYPE> valueAsCorrectMap() const
+  {
+    std::map<dateAndTime, TYPE> asMap;
+    if (m_propertySeries.size() == 0)
+      return asMap;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    for (; p != m_propertySeries.end(); p++)
+      asMap[p->first] = p->second;
+
+    return asMap;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**  Return the time series's values as a vector<TYPE>
+   *
+   */
+  std::vector<TYPE> valuesAsVector() const
+  {
+    std::vector<TYPE> out;
+    if (m_propertySeries.size() == 0)
+      return out;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    for (; p != m_propertySeries.end(); p++)
+      out.push_back(p->second);
+    return out;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**  Return the time series's times as a vector<dateAndTime>
+    */
+  std::vector<dateAndTime> timesAsVector() const
+  {
+    std::vector<dateAndTime> out;
+    if (m_propertySeries.size() == 0)
+      return out;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    for (; p != m_propertySeries.end(); p++)
+      out.push_back(p->first);
+    return out;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**  Return the time series's times as a vector<PulseTimeType>; converts from
+   * the dateAndTime type (internal) to PulseTimeType
+    */
+  std::vector<PulseTimeType> pulseTimesAsVector() const
+  {
+    std::vector<PulseTimeType> out;
+    if (m_propertySeries.size() == 0)
+      return out;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    for (; p != m_propertySeries.end(); p++)
+      out.push_back( DateAndTime::get_from_absolute_time(p->first) );
+    return out;
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a value to the map
+   *  @param time The time as a boost::posix_time::ptime value
+   *  @param value The associated value
+   *  @return True if insertion successful (i.e. identical time not already in map
+   */
+  bool addValue(const Kernel::dateAndTime &time, const TYPE value)
+  {
+    m_size++;
+    return m_propertySeries.insert(typename timeMap::value_type(time, value)) != m_propertySeries.end();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a value to the map
+   *  @param time The time as a string in the format: (ISO 8601) yyyy-mm-ddThh:mm:ss
+   *  @param value The associated value
+   *  @return True if insertion successful (i.e. identical time not already in map
+   */
+  bool addValue(const std::string &time, const TYPE value)
+  {
+    return addValue(Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(time), value);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a value to the map
+   *  @param time The time as a time_t value
+   *  @param value The associated value
+   *  @return True if insertion successful (i.e. identical time not already in map
+   */
+  bool addValue(const std::time_t &time, const TYPE value)
+  {
+    return addValue(Kernel::DateAndTime::from_time_t(time), value);
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the last time
+   *  @return Value
+   */
+  dateAndTime lastTime() const
+  {
+    if (m_propertySeries.empty())
+      throw std::runtime_error("TimeSeriesProperty is empty");
+    return m_propertySeries.rbegin()->first;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the first value
+   *  @return Value
+   */
+  TYPE firstValue() const
+  {
+    if (m_propertySeries.empty())
+      throw std::runtime_error("TimeSeriesProperty is empty");
+    return m_propertySeries.begin()->second;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the first time
+   *  @return Value
+   */
+  dateAndTime firstTime() const
+  {
+    if (m_propertySeries.empty())
+      throw std::runtime_error("TimeSeriesProperty is empty");
+    return m_propertySeries.begin()->first;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /// Clones the property
+  TimeSeriesProperty<TYPE>* clone() const
+  {
+    TimeSeriesProperty<TYPE>* p = new TimeSeriesProperty<TYPE> (name());
+    p->m_propertySeries = m_propertySeries;
+    p->m_size = m_size;
+    return p;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /// Returns the number of values at UNIQUE time intervals in the time series
+  int size() const
+  {
+    return m_size;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the real size of the time series property map:
+   * the number of entries, including repeated ones.
+   */
+  int realSize() const
+  {
+    return m_propertySeries.size();
+  }
+
+
+
+
+
+  // ==== The following functions are specific to the odd mechanism of FilterByLogValue =========
+
+
+
+  //-----------------------------------------------------------------------------------------------
   /* Get the time series property as a string of 'time  value'
    *
    * @return time series property as a string
@@ -375,7 +543,9 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /**  Return the time series as a C++ map<dateAndTime, TYPE>
-   * WARNING: THIS MAY NOT BE CORRECT AND SEEMS TO OUTPUT FEWER ENTRIES THAN IT SHOULD!!! USE AT YOUR OWN RISK!!!
+   *
+   * WARNING: THIS ONLY RETURNS UNIQUE VALUES, AND SKIPS ANY REPEATED VALUES!
+   *   USE AT YOUR OWN RISK! Try valueAsCorrectMap() instead.
    * @return time series property values as map
    */
   std::map<dateAndTime, TYPE> valueAsMap() const
@@ -395,56 +565,6 @@ public:
 
     return asMap;
   }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /**  Return the time series as a correct C++ map<dateAndTime, TYPE>
-   *
-   * @return time series property values as map
-   */
-  std::map<dateAndTime, TYPE> valueAsCorrectMap() const
-  {
-    std::map<dateAndTime, TYPE> asMap;
-    if (m_propertySeries.size() == 0)
-      return asMap;
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-    for (; p != m_propertySeries.end(); p++)
-      asMap[p->first] = p->second;
-
-    return asMap;
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /**  Return the time series's values as a vector<TYPE>
-   *
-   */
-  std::vector<TYPE> valuesAsVector() const
-  {
-    std::vector<TYPE> out;
-    if (m_propertySeries.size() == 0)
-      return out;
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-    for (; p != m_propertySeries.end(); p++)
-      out.push_back(p->second);
-    return out;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /**  Return the time series's values as a vector<TYPE>
-   *
-    */
-  std::vector<dateAndTime> timesAsVector() const
-  {
-    std::vector<dateAndTime> out;
-    if (m_propertySeries.size() == 0)
-      return out;
-    typename timeMap::const_iterator p = m_propertySeries.begin();
-    for (; p != m_propertySeries.end(); p++)
-      out.push_back(p->first);
-    return out;
-  }
-
 
 
   //-----------------------------------------------------------------------------------------------
@@ -483,40 +603,6 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Add a value to the map
-   *  @param time The time as a boost::posix_time::ptime value
-   *  @param value The associated value
-   *  @return True if insertion successful (i.e. identical time not already in map
-   */
-  bool addValue(const Kernel::dateAndTime &time, const TYPE value)
-  {
-    m_size++;
-    return m_propertySeries.insert(typename timeMap::value_type(time, value)) != m_propertySeries.end();
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a value to the map
-   *  @param time The time as a string in the format: (ISO 8601) yyyy-mm-ddThh:mm:ss
-   *  @param value The associated value
-   *  @return True if insertion successful (i.e. identical time not already in map
-   */
-  bool addValue(const std::string &time, const TYPE value)
-  {
-    return addValue(Kernel::DateAndTime::create_DateAndTime_FromISO8601_String(time), value);
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a value to the map
-   *  @param time The time as a time_t value
-   *  @param value The associated value
-   *  @return True if insertion successful (i.e. identical time not already in map
-   */
-  bool addValue(const std::time_t &time, const TYPE value)
-  {
-    return addValue(Kernel::DateAndTime::from_time_t(time), value);
-  }
-
-  //-----------------------------------------------------------------------------------------------
   /** Returns the value at a particular time
    *  @param t time
    *  @return Value at time \a t
@@ -547,21 +633,7 @@ public:
     return total;
   }
 
-  //-----------------------------------------------------------------------------------------------
-  /// Returns the number of values at UNIQUE time intervals in the time series
-  int size() const
-  {
-    return m_size;
-  }
 
-  //-----------------------------------------------------------------------------------------------
-  /** Returns the real size of the time series property map:
-   * the number of entries, including repeated ones.
-   */
-  int realSize() const
-  {
-    return m_propertySeries.size();
-  }
   //-----------------------------------------------------------------------------------------------
   /** Returns n-th value in an incredibly inefficient way.
    *  @param n index
@@ -596,41 +668,6 @@ public:
     return m_propertySeries.rbegin()->second;
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  /** Returns the last time
-   *  @return Value 
-   */
-  dateAndTime lastTime() const
-  {
-    if (m_propertySeries.empty())
-      throw std::runtime_error("TimeSeriesProperty is empty");
-    return m_propertySeries.rbegin()->first;
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Returns the first value
-   *  @return Value 
-   */
-  TYPE firstValue() const
-  {
-    if (m_propertySeries.empty())
-      throw std::runtime_error("TimeSeriesProperty is empty");
-    return m_propertySeries.begin()->second;
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Returns the first time
-   *  @return Value 
-   */
-  dateAndTime firstTime() const
-  {
-    if (m_propertySeries.empty())
-      throw std::runtime_error("TimeSeriesProperty is empty");
-    return m_propertySeries.begin()->first;
-  }
 
 
   //-----------------------------------------------------------------------------------------------
@@ -804,16 +841,6 @@ public:
     }
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  /// Clones the property
-  TimeSeriesProperty<TYPE>* clone() const
-  {
-    TimeSeriesProperty<TYPE>* p = new TimeSeriesProperty<TYPE> (name());
-    p->m_propertySeries = m_propertySeries;
-    p->m_size = m_size;
-    return p;
-  }
 
 
   //-----------------------------------------------------------------------------------------------
