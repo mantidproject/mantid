@@ -512,8 +512,12 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
       //This is the total offset into the file
       size_t total_i = i + fileOffset;
       //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-      while ( !((total_i >= event_indices[pulse_i]) && (total_i < event_indices[pulse_i+1])) && (pulse_i < numPulses-1))
+      while (!((total_i >= event_indices[pulse_i]) && (total_i < event_indices[pulse_i+1])) )
+      {
         pulse_i++;
+        if (pulse_i >= (numPulses-1))
+          break;
+      }
 
       //if (pulsetimes[pulse_i] != pulsetime)    std::cout << pulse_i << " at " << pulsetimes[pulse_i] << "\n";
 

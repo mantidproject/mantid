@@ -320,8 +320,12 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
     if (pulse_i < numPulses-1)
     {
       //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-      while ( !((i >= event_index[pulse_i]) && (i < event_index[pulse_i+1])) && (pulse_i < numPulses-1))
+      while ( !((i >= event_index[pulse_i]) && (i < event_index[pulse_i+1])))
+      {
         pulse_i++;
+        if (pulse_i >= (numPulses-1))
+          break;
+      }
       //Save the pulse time at this index for creating those events
       pulsetime = pulseTimes[pulse_i];
     }
