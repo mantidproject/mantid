@@ -48,6 +48,7 @@ namespace Mantid
 			API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
 			CSearchHelper searchobj;	
 			int ret_advsearch=searchobj.getDataFiles(investigationId,bDataFiles,ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,outputws);
+			(void) ret_advsearch;
 			return outputws;
 		}
 		

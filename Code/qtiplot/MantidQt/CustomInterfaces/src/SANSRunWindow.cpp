@@ -2520,7 +2520,7 @@ Mantid::API::MatrixWorkspace_sptr SANSRunWindow::getGroupMember(Mantid::API::Wor
   
   const std::vector<std::string> gNames = group->getNames();
   //currently the names array starts with the name of the group
-  if ( gNames.size() < member + 1 )
+  if ( static_cast<int>(gNames.size()) < member + 1 )
   {
     throw Mantid::Kernel::Exception::NotFoundError("Workspace group" + in->getName() + " doesn't have " + boost::lexical_cast<std::string>(member) + " entries", member);
   }

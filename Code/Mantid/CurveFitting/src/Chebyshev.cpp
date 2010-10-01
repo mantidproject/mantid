@@ -29,7 +29,7 @@ void Chebyshev::function(double* out, const double* xValues, const int& nData)co
   }
   double b = 2./(m_EndX - m_StartX);
   double a = 1. - b * m_EndX;
-  if (m_b.size() != m_n + 3)
+  if (static_cast<int>(m_b.size()) != m_n + 3)
   {
     m_b.resize(m_n + 3);
   }

@@ -585,7 +585,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   i_center = 0;
   //The guess is within the X axis?
   if (X[0] < center_guess)
-    for (i_center=0; i_center<X.size()-1; i_center++)
+    for (i_center=0; i_center<static_cast<int>(X.size()-1); i_center++)
     {
       if ((center_guess >= X[i_center]) && (center_guess < X[i_center+1]))
         break;

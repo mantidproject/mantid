@@ -608,6 +608,7 @@ void MuonAnalysis::runPairTablePlotButton()
  */
 void MuonAnalysis::groupTableClicked(int row, int column)
 {
+  (void) column;
   if ( m_uiForm.groupTable->item(row,2) != NULL )
   {
     m_groupTableRowInFocus = row;
@@ -623,6 +624,7 @@ void MuonAnalysis::groupTableClicked(int row, int column)
  */
 void MuonAnalysis::pairTableClicked(int row, int column)
 {
+  (void) column;
   if ( m_uiForm.pairTable->item(row,3) != NULL )
   {
     m_pairTableRowInFocus = row;
@@ -957,9 +959,9 @@ int MuonAnalysis::numOfDetectors(std::string str)
     typedef Poco::StringTokenizer tokenizer;
     tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
-  for (int i = 0; i < values.count(); i++)
+  for (int i = 0; i < static_cast<int>(values.count()); i++)
   {
-    int found= values[0].find("-");
+    std::size_t found= values[0].find("-");
     if (found!=std::string::npos)
     {
       tokenizer aPart(values[0], "-", tokenizer::TOK_TRIM);

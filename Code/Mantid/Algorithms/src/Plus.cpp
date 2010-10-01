@@ -93,8 +93,6 @@ namespace Mantid
       lhs_name = getPropertyValue(inputPropName1());
       rhs_name = getPropertyValue(inputPropName2());
       out_name = getPropertyValue(outputPropName());
-      //If names match, we will be adding in place
-      bool addingInPlace = (lhs_name == out_name) || (rhs_name == out_name);
 
       EventWorkspace_const_sptr event_lhs = boost::dynamic_pointer_cast<const EventWorkspace>(lhs);
       EventWorkspace_const_sptr event_rhs = boost::dynamic_pointer_cast<const EventWorkspace>(rhs);

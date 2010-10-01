@@ -135,7 +135,7 @@ void LoadGSS::exec()
   // Set workspace title
   outputWorkspace->setTitle(wsTitle);
   // Put data from MatidVec's into outputWorkspace
-  for ( unsigned int i = 0; i < nHist; ++i )
+  for ( int i = 0; i < nHist; ++i )
   {
     // Move data across
     outputWorkspace->dataX(i) = *gsasDataX[i];

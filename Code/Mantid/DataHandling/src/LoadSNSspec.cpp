@@ -57,14 +57,14 @@ namespace Mantid
 	  std::string str;
 
 	  std::vector<DataObjects::Histogram1D> spectra;
-	  size_t iLine=0;    // line number
+	  //size_t iLine=0;    // line number
 	  size_t ncols = 3;  // number of columns
 	  size_t nSpectra = 0;
 	  size_t nBins = 0; //number of rows
 	  std::string first_character;
 	  std::string axes_infos;
 
-	  bool numeric = true;
+	  //bool numeric = true;
 	  std::vector<double> input;
 
 	  //determine the number of lines starting by #L
@@ -108,7 +108,7 @@ namespace Mantid
 	    {
 		  if (working_with_spectrum_nbr != -1)
 		  {
-		    for(int j=0; j<(input.size()-1); j++)
+		    for(int j=0; j<static_cast<int>(input.size()-1); j++)
 		    {
 		      spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
 			  j++;
@@ -131,7 +131,7 @@ namespace Mantid
 
 		if (working_with_spectrum_nbr == (spectra_nbr-1))
 		{
-		  for(int j=0; j<(input.size()-1); j++)
+		  for(int j=0; j<static_cast<int>(input.size()-1); j++)
 		  {
 		    spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
 			j++;

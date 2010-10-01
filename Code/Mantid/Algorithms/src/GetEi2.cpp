@@ -553,7 +553,7 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
   }
 
   double xneff(0.0), sneff(0.0), eneff;
-  if( mu < nx - 1)
+  if( mu < static_cast<int>(nx - 1))
   {
     xneff = (xmax*(x[mu+1]-xmax) + x[mu+1]*(xmax - x[mu]))/(x[mu+1] - x[mu]);
     const double fraction = (xmax - x[mu])/((x[mu+1] - x[mu]) + (x[mu+1]-xmax));

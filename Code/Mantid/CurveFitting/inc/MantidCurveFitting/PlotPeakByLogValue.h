@@ -73,9 +73,9 @@ namespace Mantid
           i(data.i),
           spec(data.spec),
           period(data.period),
-          ws(data.ws),
           start(data.start),
-          end(data.end)
+          end(data.end),
+          ws(data.ws)
         {
           indx.assign(data.indx.begin(),data.indx.end());
         }

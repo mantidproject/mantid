@@ -513,7 +513,7 @@ std::string Expression::str()const
         prec1 = 0; // unary operator
         isItUnary = true;
       }
-      bool bk = prec > 0 && prec1 > 0 && prec > prec1;
+      bool bk = prec > 0 && prec1 > 0  &&  static_cast<int>(prec) > prec1;
       if (bk) res << '(' ;
       if (isItUnary) res << ' ';
       res << m_terms[i].str();

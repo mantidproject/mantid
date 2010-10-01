@@ -359,6 +359,7 @@ void Indirect::setIDFValues(const QString & prefix)
 }
 void Indirect::closeEvent(QCloseEvent* close)
 {
+  (void) close;
   //saveSettings();
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }

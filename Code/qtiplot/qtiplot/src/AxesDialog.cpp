@@ -3105,6 +3105,7 @@ int AxesDialog::exec()
 
 void AxesDialog::updateMinorTicksList(int scaleType)
 {
+  (void) scaleType;
 }
 
 
@@ -3113,14 +3114,18 @@ slot called when the  To spinbox value changed
 */
 void AxesDialog::endvalueChanged(double endVal)
 {
+  (void) endVal;
 	if(d_graph)
 		d_graph->changeIntensity( true);
 }
+
 void AxesDialog::startvalueChanged(double startVal)
 {
+  (void) startVal;
 	if(d_graph)
 		d_graph->changeIntensity( true);
-  }
+}
+
 void AxesDialog::showAxis(int axis, int type, const QString& labelsColName, bool axisOn,
 		int majTicksType, int minTicksType, bool labelsOn, const QColor& c, int format,
 		int prec, int rotation, int baselineDist, const QString& formula, const QColor& labelsColor)

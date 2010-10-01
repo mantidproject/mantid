@@ -98,7 +98,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
     // further we make the assumption that no need to recalculate this vector if
     // it already has the right size
 
-    if (m_waveLength.size() != nData)
+    if (static_cast<int>(m_waveLength.size()) != nData)
     {
       // This peak shape requires the fit to be done in TOF units
 

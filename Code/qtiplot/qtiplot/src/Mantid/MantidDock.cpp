@@ -529,6 +529,7 @@ void MantidDockWidget::deleteGroupWorkspaceIfEmpty(QTreeWidgetItem* item)
 }
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
+  (void) item; //Avoid unused warning
 
 
 }
@@ -790,6 +791,7 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e)
   drag->setMimeData(mimeData);
 
   Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+  (void) dropAction;
 }
 
 void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
@@ -1171,6 +1173,7 @@ void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e)
   drag->setMimeData(mimeData);
 
   Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+  (void) dropAction;
 }
 
 void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)

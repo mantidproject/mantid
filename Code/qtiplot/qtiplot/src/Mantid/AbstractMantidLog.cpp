@@ -27,5 +27,6 @@ void AbstractMantidLog::connect()
 
 void AbstractMantidLog::log(const Poco::Message& msg)
 {
+  (void) msg;
 }
 

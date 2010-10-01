@@ -261,23 +261,23 @@ Quadratic::distance(const Geometry::V3D& Pt) const
   Geometry::V3D xvec;
   std::vector<double>::const_iterator vc;
   for(vc=TRange.begin();vc!=TRange.end();vc++)
+  {
+    const double daI=1.0+2* (*vc) *da;
+    const double dbI=1.0+2* (*vc) *db;
+    const double dcI=1.0+2* (*vc) *dc;
+    if ((daI*daI)>Tolerance || (dbI*dbI)>Tolerance
+        && (dcI*dcI)<Tolerance)
     {
-      const double daI=1.0+2* (*vc) *da;
-      const double dbI=1.0+2* (*vc) *db;
-      const double dcI=1.0+2* (*vc) *dc;
-      if ((daI*daI)>Tolerance || (dbI*dbI)>Tolerance 
-	  && (dcI*dcI)<Tolerance)
-        {
-	  Geometry::Matrix<double> DI(3,3);
-	  DI[0][0]=1.0/daI;
-	  DI[1][1]=1.0/dbI;
-	  DI[2][2]=1.0/dcI;
-	  xvec = R*(DI*(alpha-beta* *vc));  // care here: to avoid 9*9 +9*3 in favour of 9*3+9*3 ops.
-	  const double Dist=xvec.distance(Pt);
-	  if (Out<0 || Out>Dist)
-	    Out=Dist;
-	}
+      Geometry::Matrix<double> DI(3,3);
+      DI[0][0]=1.0/daI;
+      DI[1][1]=1.0/dbI;
+      DI[2][2]=1.0/dcI;
+      xvec = R*(DI*(alpha-beta* *vc));  // care here: to avoid 9*9 +9*3 in favour of 9*3+9*3 ops.
+      const double Dist=xvec.distance(Pt);
+      if (Out<0 || Out>Dist)
+        Out=Dist;
     }
+  }
   return Out;
 }
 

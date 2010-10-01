@@ -36,12 +36,12 @@ namespace Mantid
 			
 			API::ITableWorkspace_sptr outputws;
 			ns1__searchByAdvancedResponse response;*/
-
-			double dstartRun=getProperty("StartRun");
-			double dendRun=getProperty("EndRun");
-			
+//
+//			double dstartRun=getProperty("StartRun");
+//			double dendRun=getProperty("EndRun");
+//
 			API::ITableWorkspace_sptr outputws;
-			CSearchHelper searchobj;	
+//			CSearchHelper searchobj;
 			//int ret_advsearch=searchobj.doSearchByRunNumber(dstartRun,dendRun,ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,outputws);
 			//int ret_advsearch=searchobj.doSearchByRunNumber(instrList,dstartRun,dendRun,outputws);
 			//if(ret_advsearch!=0)

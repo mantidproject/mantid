@@ -95,6 +95,7 @@ void PRConjugateGradientMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix
   holdCalculatedJacobian =  gsl_matrix_alloc (m_gslLeastSquaresContainer.n, m_gslLeastSquaresContainer.p);
 
   int dummy = m_gslLeastSquaresContainer.df(m_gslSolver->x, m_gslLeastSquaresContainer.params, holdCalculatedJacobian);
+  (void) dummy;
   gsl_multifit_covar (holdCalculatedJacobian, epsrel, covar);
 
   gsl_matrix_free (holdCalculatedJacobian);

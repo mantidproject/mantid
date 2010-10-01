@@ -51,6 +51,7 @@ namespace Mantid
 		{			
 			ICATPortBindingProxy icat;
 			int ret=doDownload(icat);
+			(void) ret;
 		}
 
 	  /**This method gets the location string for the selected file from isis archive using Icat api.
@@ -365,7 +366,7 @@ namespace Mantid
 			indexDot = fileName.find_last_of (".");
 			if(indexDot!= npos)
 			{
-				for (int i=0;i<=indexDot-1;++i)
+				for (int i=0;i<=static_cast<int>(indexDot-1);++i)
 				{
 					int intval=(int)fileName.at(i);
 					if( (intval>=65 && intval<=90) || (intval>=97 && intval<=122) )
@@ -389,7 +390,7 @@ namespace Mantid
 		bool CDownloadDataFile::isDataFile(const std::string & fileName)
 		{			
 			std::basic_string <char>::size_type dotIndex;
-			const std::basic_string <char>::size_type npos = -1;
+			//const std::basic_string <char>::size_type npos = -1;
 			//find the position of .in row file
 			dotIndex = fileName.find_last_of (".");
 			std::string fextn=fileName.substr(dotIndex+1,fileName.size()-dotIndex);

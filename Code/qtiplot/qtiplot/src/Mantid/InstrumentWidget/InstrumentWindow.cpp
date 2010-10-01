@@ -845,6 +845,7 @@ void InstrumentWindow::clearADSHandle()
  */
 QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTemplate)
 {
+  (void) saveAsTemplate;
 	QString s="<instrumentwindow>\n";
 	s+="WorkspaceName\t"+QString::fromStdString(mWorkspaceName)+"\n";
 	s+=geometry;

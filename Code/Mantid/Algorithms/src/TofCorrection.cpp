@@ -27,7 +27,7 @@ void TofCorrection::exec()
   // Get the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   const int nHist = inputWS->getNumberHistograms();
-  const int nBins = inputWS->blocksize();
+
   // Create the output workspace to be a duplicate of the input one
   MatrixWorkspace_sptr outputWS;
   outputWS = WorkspaceFactory::Instance().create(inputWS);

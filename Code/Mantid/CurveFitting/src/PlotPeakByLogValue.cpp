@@ -83,7 +83,7 @@ namespace Mantid
       const std::vector<InputData> wsNames = makeNames();
 
       std::string fun = getPropertyValue("Function");
-      int wi = getProperty("WorkspaceIndex");
+      //int wi = getProperty("WorkspaceIndex");
       std::string logName = getProperty("LogValue");
       bool sequential = getPropertyValue("FitType") == "Sequential";
 
@@ -112,7 +112,7 @@ namespace Mantid
 
       double dProg = 1./wsNames.size();
       double Prog = 0.;
-      for(int i=0;i<wsNames.size();++i)
+      for(int i=0;i<static_cast<int>(wsNames.size());++i)
       {
         InputData data = getWorkspace(wsNames[i]);
 

@@ -19,6 +19,7 @@ FileFinderPlugin::FileFinderPlugin(QObject *parent) : QObject(parent), m_initial
  */
 void FileFinderPlugin::initialize(QDesignerFormEditorInterface * formEditor)
 {
+  (void) formEditor;
   if (m_initialized)
   {
     return;

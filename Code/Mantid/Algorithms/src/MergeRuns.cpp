@@ -251,7 +251,7 @@ void MergeRuns::execEvent()
   m_progress=new Progress(this,0.0,1.0,n);
 
   // Note that we start at 1, since we already have the 0th workspace
-  for (int workspaceNum=1; workspaceNum < inEventWS.size(); workspaceNum++)
+  for (int workspaceNum=1; workspaceNum < static_cast<int>(inEventWS.size()); workspaceNum++)
   {
     //You are adding this one here
     EventWorkspace_sptr addee = inEventWS[workspaceNum];

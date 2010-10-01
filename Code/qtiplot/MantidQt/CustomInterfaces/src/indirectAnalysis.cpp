@@ -29,6 +29,7 @@ UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true)
 }
 void indirectAnalysis::closeEvent(QCloseEvent* close)
 {
+  (void) close;
   saveSettings();
 }
 

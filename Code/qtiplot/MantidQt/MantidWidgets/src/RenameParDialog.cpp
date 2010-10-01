@@ -19,7 +19,7 @@ m_new_params(new_params)
   m_uiForm.setupUi(this);
   QAbstractItemModel* model = m_uiForm.tableWidget->model();
   model->insertRows(0,new_params.size());
-  for(int row = 0;row < new_params.size(); ++row)
+  for(int row = 0;row < static_cast<int>(new_params.size()); ++row)
   {
     QString par = QString::fromStdString(new_params[row]);
     model->setData(model->index(row,0),par);

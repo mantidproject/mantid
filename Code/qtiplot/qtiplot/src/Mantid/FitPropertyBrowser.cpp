@@ -65,6 +65,7 @@ public:
 protected:
   QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
   {
+    (void) manager; //Avoid unused warning
     return new FormulaDialogEditor(property,parent);
   }
 };
@@ -86,9 +87,9 @@ m_changeSlotsEnabled(false),
 m_peakToolOn(false),
 m_auto_back(false),
 m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
-m_autoBackground(NULL),
 m_logValue(NULL),
-m_decimals(-1)
+m_decimals(-1),
+m_autoBackground(NULL)
 {
   // Make sure plugins are loaded
   std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
@@ -192,7 +193,7 @@ m_decimals(-1)
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
-  QtDoubleSpinBoxFactory *doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(w);
+  //QtDoubleSpinBoxFactory *doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(w); //unused now
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
   StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
@@ -1364,7 +1365,7 @@ void FitPropertyBrowser::getFitResults()
  */
 void FitPropertyBrowser::undoFit()
 {
-  if (m_initialParameters.size() == compositeFunction()->nParams())
+  if (static_cast<int>(m_initialParameters.size()) == compositeFunction()->nParams())
   {
     for(int i=0;i<compositeFunction()->nParams();i++)
     {
@@ -1385,7 +1386,7 @@ void FitPropertyBrowser::disableUndo()
 /// Tells if undo can be done
 bool FitPropertyBrowser::isUndoEnabled()const
 {
-  return m_initialParameters.size() && compositeFunction()->nParams() == m_initialParameters.size();
+  return m_initialParameters.size() && compositeFunction()->nParams() == static_cast<int>(m_initialParameters.size());
 }
 
 /// Enable/disable the Fit button;
@@ -1764,9 +1765,9 @@ QString FitPropertyBrowser::getStringPropertyValue(QtProperty* prop)const
 {
   QtStringPropertyManager* manager = dynamic_cast<QtStringPropertyManager*>(prop->propertyManager());
   if (manager)
-  {
     return manager->value(prop);
-  }
+  else
+    return QString("");
 }
 
 const Mantid::API::IFunction* FitPropertyBrowser::theFunction()const
@@ -1974,7 +1975,7 @@ void FitPropertyBrowser::setLogValue(const QString& lv)
       if (ws)
       {
         const std::vector<Mantid::Kernel::Property*> logs = ws->run().getLogData();
-        for(int i=0;i<logs.size();++i)
+        for(int i=0;i<static_cast<int>(logs.size()); ++i)
         {
           m_logs << QString::fromStdString(logs[i]->name());
         }

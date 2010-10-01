@@ -141,7 +141,7 @@ void SequentialFitDialog::addFile()
 
     int row = ui.tWorkspaces->rowCount();
     ui.tWorkspaces->model()->insertRows(row,fileNames.size());
-    int wi = m_fitBrowser->workspaceIndex();
+    //int wi = m_fitBrowser->workspaceIndex();
     QAbstractItemModel* model = ui.tWorkspaces->model();
     foreach(QString name,fileNames)
     {
@@ -182,7 +182,7 @@ bool SequentialFitDialog::validateLogs(const QString wsName)
   {
     const std::vector<Mantid::Kernel::Property*> logs = ws->run().getLogData();
     QStringList logNames;
-    for(int i=0;i<logs.size();++i)
+    for(int i=0;i<static_cast<int>(logs.size());++i)
     {
       Mantid::Kernel::TimeSeriesProperty<double>* p = 
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>*>(logs[i]);
@@ -322,6 +322,7 @@ void SequentialFitDialog::functionChanged()
 
 void SequentialFitDialog::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
+  (void) alg; //Avoid unused warning
   emit needShowPlot();
 }
 

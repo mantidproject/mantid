@@ -339,7 +339,7 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
 			//erasing the last "," from the parameter list
 			//as concatenation is done in loop last "," is erasing 
 			int nIndex=algParam.find_last_of(",");
-			if(string::npos!=nIndex)
+			if(static_cast<int>(string::npos) != nIndex)
 				algParam=algParam.erase(nIndex);
 			//script string
 			tempScript=tempScript+name+"(";

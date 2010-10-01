@@ -91,7 +91,7 @@ namespace Mantid
       {
         const Axis& axis = *inputWS->getAxis(1);
         const std::string commentLine = "### " + axis.unit()->caption() + " Grid\n";
-        fprintf(outSPE_File,commentLine.c_str());
+        fprintf(outSPE_File,"%s",commentLine.c_str());
         const int axisLength = axis.length();
         phiPoints = (axisLength==nHist) ? axisLength+1 : axisLength;
         for (int i = 0; i < phiPoints; i++)
@@ -206,10 +206,10 @@ namespace Mantid
     */
     void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const
     {
-      fprintf(outFile, Y_HEADER);
+      fprintf(outFile,"%s", Y_HEADER);
       writeBins(WS->readY(specIn), outFile);
 
-      fprintf(outFile, E_HEADER);
+      fprintf(outFile,"%s", E_HEADER);
       writeBins(WS->readE(specIn), outFile);
     }
     /** Write the mask flags for in a histogram entry
@@ -217,10 +217,10 @@ namespace Mantid
     */
     void SaveSPE::writeMaskFlags(FILE * const outFile) const
     {
-      fprintf(outFile, Y_HEADER);
+      fprintf(outFile,"%s", Y_HEADER);
       writeValue(MASK_FLAG, outFile);
 
-      fprintf(outFile, E_HEADER);
+      fprintf(outFile,"%s", E_HEADER);
       writeValue(MASK_ERROR, outFile);
     }
     /** Write the the values in the array to the file in the correct format

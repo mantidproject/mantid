@@ -278,7 +278,7 @@ namespace Mantid
 
       //Prepare the binfinder class
       BinFinder binner( getProperty("BinParams") );
-      if (binner.lastBinIndex() != XValues_new.access().size()-1)
+      if (binner.lastBinIndex() != static_cast<int>(XValues_new.access().size()-1))
       {
         std::stringstream msg;
         msg << "GhostCorrection: The binner found " << binner.lastBinIndex()+1 << " bins, but the X axis has "

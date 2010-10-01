@@ -23,6 +23,7 @@ InstrumentSelectorPlugin::InstrumentSelectorPlugin(QObject *parent) : QObject(pa
  */
 void InstrumentSelectorPlugin::initialize(QDesignerFormEditorInterface * formEditor)
 {
+  (void) formEditor;
   if (m_initialized)
   {
     return;

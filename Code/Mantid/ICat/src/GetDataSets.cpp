@@ -49,7 +49,7 @@ namespace Mantid
 			//search datasets for a given investigation id using ICat api.
 			int ret_advsearch = searchobj.doDataSetsSearch(investigationId,
 				ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,outputws);
-			
+			(void) ret_advsearch;
            	return outputws;
 		}
 		

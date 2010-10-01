@@ -132,7 +132,7 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
         dltF += df->getParameter("Height");
       }
     }
-    if (dltFuns.size() == cf->nFunctions())
+    if (static_cast<int>(dltFuns.size()) == cf->nFunctions())
     {// all delta functions - return scaled reslution
       getFunction(0)->function(out,xValues,nData);
       std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dltF));
@@ -156,7 +156,7 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
   HalfComplex res(m_resolution,nData);
   HalfComplex fun(out,nData);
 
-  double df = nData > 1? 1./(xValues[nData-1] - xValues[0]): 1.;
+  //double df = nData > 1? 1./(xValues[nData-1] - xValues[0]): 1.;
   //std::cerr<<"df="<<df<<'\n';
   //std::ofstream ftrans("trans.txt");
   for(int i = 0; i <= res.size(); i++)

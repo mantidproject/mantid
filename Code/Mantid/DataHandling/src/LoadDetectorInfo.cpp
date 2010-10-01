@@ -276,11 +276,11 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
   
   // there are different formats for where pressures and wall thinknesses are stored check the number of user tables
   detectDatForm tableForm;
-  if ( iraw.i_use == MARI_TYPE.totalNumTabs )
+  if ( iraw.i_use == static_cast<int>(MARI_TYPE.totalNumTabs) )
   {
     tableForm = MARI_TYPE;
   }
-  else if ( iraw.i_use == MAPS_MER_TYPE.totalNumTabs )
+  else if ( iraw.i_use == static_cast<int>(MAPS_MER_TYPE.totalNumTabs) )
   {
     tableForm = MAPS_MER_TYPE;
   }
@@ -427,7 +427,7 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
 void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int> &detectIDs, const std::vector<float> &delays)
 {
   // a spectra wont be adjusted if their detector wasn't included in the input file. So for differentDelays to false there need to be at least as many detectors in the data file as in the workspace
-  differentDelays = differentDelays || ( delays.size() < m_numHists );
+  differentDelays = differentDelays || ( static_cast<int>(delays.size()) < m_numHists );
   // if we don't have a list of delays then we have no choice
   differentDelays = delays.size() > 0 && differentDelays;
   // see if adjusting the TOF Xbin boundaries requires knowledge of individual detectors or if they are all the same

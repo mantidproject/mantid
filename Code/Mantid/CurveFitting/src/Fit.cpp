@@ -218,7 +218,7 @@ namespace CurveFitting
     // check if histogram data in which case use mid points of histogram bins
 
     const bool isHistogram = localworkspace->isHistogramData();
-    for (unsigned int i = 0; i < nData; ++i)
+    for (int i = 0; i < nData; ++i)
     {
       if (isHistogram)
         X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take mid-point if histogram bin
@@ -231,7 +231,7 @@ namespace CurveFitting
 
     // check that no error is negative or zero
 
-    for (unsigned int i = 0; i < nData; ++i)
+    for (int i = 0; i < nData; ++i)
     {
       if (YErrors[m_minX+i] <= 0.0)
         sqrtWeightData[i] = 1.0;
@@ -423,11 +423,11 @@ namespace CurveFitting
           }
         }
 
-        for(size_t i=0;i<nParam;i++) 
+        for(int i=0; i<nParam; i++)
         {
           Mantid::API::TableRow row = m_covariance->appendRow();
           row << paramThatAreFitted[i];
-          for(size_t j=0;j<nParam;j++)
+          for(int j=0; j<nParam; j++)
           {
             if (j == i)
               row << 1.0;
@@ -505,7 +505,7 @@ namespace CurveFitting
       double* lOut = new double[nData];  // to capture output from call to function()
       m_function->function( lOut, X, nData);
 
-      for(unsigned int i=0; i<nData; i++) 
+      for(int i=0; i<nData; i++)
       {
         Ycal[i] = lOut[i]; 
         E[i] = Y[i] - Ycal[i];

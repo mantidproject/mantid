@@ -3638,6 +3638,7 @@ void Graph::closeEvent(QCloseEvent *e)
 
 void Graph::hideEvent(QHideEvent* e)
 {
+  (void) e;
   for(int i=0;i<curves();++i)
   {
     PlotCurve* c = dynamic_cast<PlotCurve*>(curve(i));

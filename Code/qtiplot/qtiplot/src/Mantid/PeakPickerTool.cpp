@@ -311,6 +311,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
 
 void PeakPickerTool::windowStateChanged( Qt::WindowStates, Qt::WindowStates newState )
 {
+  (void) newState;
 }
 
 void PeakPickerTool::functionCleared()
@@ -573,7 +574,7 @@ void PeakPickerTool::workspaceNameChanged(const QString& wsName)
     if (wsg)
     {
       std::vector<std::string> names = wsg->getNames();
-      for(int i=0;i<names.size();++i)
+      for(int i=0;i<static_cast<int>(names.size());++i)
       {
         if (names[i] == m_wsName.toStdString()) 
         {// accept the new name

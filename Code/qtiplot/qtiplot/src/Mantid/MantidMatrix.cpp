@@ -50,8 +50,8 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
     m_histogram(false),
     m_min(0),m_max(0),
     m_are_min_max_set(false),
-    m_funct(this),
     m_boundingRect(),
+    m_funct(this),
     m_selectedRows(),
     m_selectedCols()
 {
@@ -503,7 +503,7 @@ void MantidMatrix::goToColumn(int col)
 
 double MantidMatrix::dataX(int row, int col) const
 {
-  if (!m_workspace || row >= numRows() || col >= m_workspace->readX(row + m_startRow).size()) return 0.;
+  if (!m_workspace || row >= numRows() || col >= static_cast<int>(m_workspace->readX(row + m_startRow).size())) return 0.;
   double res = m_workspace->readX(row + m_startRow)[col];
   return res;
 
@@ -652,7 +652,7 @@ QwtDoubleRect MantidMatrix::boundingRect()
             if (!isANumber(xe)) continue;
             x_end = xe;
           }
-          for(int j=1;j<X.size();++j)
+          for(int j=1;j<static_cast<int>(X.size());++j)
           {
             double d = X[j] - X[j-1];
             if (ddx == 0 && d < ddx)
@@ -796,7 +796,7 @@ int MantidMatrix::indexX(int row,double s)const
 {
   int n = m_workspace->blocksize();
 
-  bool isHistogram = m_workspace->isHistogramData();
+  //bool isHistogram = m_workspace->isHistogramData();
 
   const Mantid::MantidVec& X = m_workspace->readX(row + m_startRow);
   if (n == 0 || s < X[0] || s > X[n-1]) return -1;
@@ -1269,7 +1269,7 @@ void MantidMatrix::setNumberFormat(const QChar& f,int prec, bool all)
 
 void MantidMatrix::setNumberFormat(int i,const QChar& f,int prec, bool all)
 {
-
+  (void) all; //Avoid unused warning
   switch (i)
   {
   case 0: m_modelY->setFormat(f,prec);
@@ -1308,6 +1308,8 @@ void MantidMatrix::setMatrixProperties()
 
 void MantidMatrix::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
+  (void) ws; //Avoid unused warning
+  (void) wsName; //Avoid unused warning
   if (m_workspace.get() == ws.get())
   {
     emit needToClose();
@@ -1328,6 +1330,7 @@ void MantidMatrix::closeMatrix()
 
 void MantidMatrix::selfClosed(MdiSubWindow* w)
 {
+  (void) w; //Avoid unused warning
   closeDependants();
 }
 
@@ -1355,6 +1358,8 @@ void MantidMatrix::goToTab(const QString & name)
 }
 QString MantidMatrix::saveToString(const QString &geometry, bool saveAsTemplate)
 {
+  (void) saveAsTemplate; //Avoid unused warning
+
   QString s="<mantidmatrix>\n";
   s+="WorkspaceName\t"+QString::fromStdString(m_strName)+"\n";
   s+=geometry;
