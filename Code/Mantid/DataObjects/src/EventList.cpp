@@ -763,8 +763,8 @@ using Kernel::PulseTimeType;
       outputs[i]->refX = this->refX;
     }
 
-    //Do nothing if there are no entries, or only one
-    if (splitter.size() <= 1)
+    //Do nothing if there are no entries
+    if (splitter.size() <= 0)
       return;
 
     //Iterate through all events (sorted by tof)

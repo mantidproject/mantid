@@ -244,18 +244,8 @@ void LoadEventPreNeXus::exec()
   }
   this->loadPixelMap(mapping_filename);
 
-#ifdef LOADEVENTPRENEXUS_ALLOW_PARALLEL
-  clock_t start = clock();
-#endif
-
   //Process the events into pixels
   this->procEvents(localWorkspace);
-
-#ifdef LOADEVENTPRENEXUS_ALLOW_PARALLEL
-  clock_t stop = clock();
-  double elapsed = double(stop - start)/CLOCKS_PER_SEC;
-  std::cout << "procEvents (Parallel = " << this->parallelProcessing << ") took " << elapsed << " seconds.\n";
-#endif
 
   //Save output
   this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);

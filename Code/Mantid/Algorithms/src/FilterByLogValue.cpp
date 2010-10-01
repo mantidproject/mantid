@@ -145,7 +145,7 @@ void FilterByLogValue::exec()
   Progress prog(this,0.0,1.0,numberOfSpectra);
 
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR_NO_WSP_CHECK()
+  //PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
