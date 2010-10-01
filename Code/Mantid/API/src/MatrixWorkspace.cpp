@@ -495,7 +495,9 @@ void MatrixWorkspace::setYUnitLabel(const std::string& newLabel)
   m_YUnitLabel = newLabel;
 }
 
-/// Are the Y-values in this workspace dimensioned?
+/** Are the Y-values in this workspace dimensioned?
+ * TODO: For example: ????
+ */
 const bool& MatrixWorkspace::isDistribution() const
 {
   return m_isDistribution;

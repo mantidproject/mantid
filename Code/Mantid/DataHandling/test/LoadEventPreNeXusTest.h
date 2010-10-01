@@ -15,6 +15,8 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 //#include "boost/date_time/gregorian/gregorian.hpp"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include <sys/stat.h>
 
@@ -91,59 +93,6 @@ public:
 
   }
 
-#ifdef LOADEVENTPRENEXUS_ALLOW_PARALLEL
-//  void test_LoadPreNeXus_TOPAZ_Parallel()
-//  {
-//    //std::string eventfile( "/home/janik/data/TOPAZ_1241/preNeXus/TOPAZ_1241_neutron_event.dat" );
-//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
-//    eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setPropertyValue("UseParallelProcessing", "1");
-//    eventLoader->setPropertyValue("MappingFilename", "");
-//    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
-//    TS_ASSERT( eventLoader->execute() );
-//    checkWorkspace(eventfile, "topaz1249", 199824);
-//  }
-//
-//  void test_LoadPreNeXus_TOPAZ_Linear()
-//  {
-//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/TOPAZ_1249_neutron_event.dat" );
-//    eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setPropertyValue("UseParallelProcessing", "0");
-//    eventLoader->setPropertyValue("MappingFilename", "");
-//    eventLoader->setPropertyValue("OutputWorkspace", "topaz1249");
-//    TS_ASSERT( eventLoader->execute() );
-//    checkWorkspace(eventfile, "topaz1249", 199824);
-//  }
-//
-//
-//  //These two tests are very slow
-//  void xtest_LoadPreNeXus_PG3_Parallel()
-//  {
-//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
-//    eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setPropertyValue("UseParallelProcessing", "1");
-//    eventLoader->setPropertyValue("MappingFilename", "");
-//    eventLoader->setPropertyValue("LoadingBlockSize", "10000000");
-//    eventLoader->setPropertyValue("OutputWorkspace", "pg3_732");
-//    TS_ASSERT( eventLoader->execute() );
-//    checkWorkspace(eventfile, "pg3_732", 14616);
-//  }
-//
-//  void xtest_LoadPreNeXus_PG3_Serial()
-//  {
-//    std::string eventfile( "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat" );
-//    eventLoader->setPropertyValue("EventFilename", eventfile);
-//    eventLoader->setPropertyValue("UseParallelProcessing", "0");
-//    eventLoader->setPropertyValue("MappingFilename", "");
-//    eventLoader->setPropertyValue("LoadingBlockSize", "1000000");
-//    eventLoader->setPropertyValue("OutputWorkspace", "pg3_732");
-//    TS_ASSERT( eventLoader->execute() );
-//    checkWorkspace(eventfile, "pg3_732", 14616);
-//  }
-
-#endif
-
-
 
   void test_LoadPreNeXus_REFL()
   {
@@ -205,6 +154,40 @@ public:
     //And the spectramap length matches the # of pixels with events
     TS_ASSERT_EQUALS( ew->spectraMap().nElements(), numpixels_with_events);
 
+  }
+
+
+  void xtest_LoadPreNeXus_CNCS_7850()
+  {
+    std::string eventfile( "../../../../Test/AutoTestData/CNCS_7850_neutron_event.dat" );
+    eventLoader->setPropertyValue("EventFilename", eventfile);
+    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/CNCS_TS_2008_08_18.dat");
+    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
+    eventLoader->setProperty<bool>("PadEmptyPixels", true);
+
+    //Get the event file size
+    struct stat filestatus;
+    stat(eventfile.c_str(), &filestatus);
+
+    //std::cout << "***** executing *****" << std::endl;
+    TS_ASSERT( eventLoader->execute() );
+
+    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
+            (AnalysisDataService::Instance().retrieve("cncs"));
+
+
+    //Get the start time of all pulses
+    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( ew->mutableRun().getProperty("proton_charge") );
+    std::map<dateAndTime, double> logMap = log->valueAsMap();
+    std::map<dateAndTime, double>::iterator it, it2;
+    it = logMap.begin();
+    Kernel::PulseTimeType start = DateAndTime::get_from_absolute_time(it->first);
+
+    std::vector<TofEvent> events1 = ew->getEventListPtr(1000)->getEvents();
+    for (int i=0; i < events1.size(); i++)
+    {
+      std::cout << (events1[i].pulseTime()-start)/1e9 << " sec \n";
+    }
   }
 
 

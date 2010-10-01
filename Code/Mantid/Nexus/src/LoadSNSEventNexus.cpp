@@ -147,11 +147,9 @@ void LoadSNSEventNexus::exec()
 
     //If successful, we can try to load the pulse times
     Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
-    std::map<dateAndTime, double> logMap = log->valueAsMap();
-    std::map<dateAndTime, double>::iterator it;
-    //Convert the dateAndTime to PulseTimeType, and save as a vector array.
-    for (it = logMap.begin(); it != logMap.end(); it++)
-      pulseTimes.push_back( DateAndTime::get_from_absolute_time(it->first) );
+    std::vector<Kernel::dateAndTime> temp = log->timesAsVector();
+    for (size_t i =0; i < temp.size(); i++)
+      pulseTimes.push_back( Kernel::DateAndTime::get_from_absolute_time( temp[i] ) );
   }
   catch (...)
   {

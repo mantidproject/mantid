@@ -374,19 +374,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   parallelProcessing = false;
   loadBlockSize = Mantid::Kernel::DEFAULT_BLOCK_SIZE;
 
-#ifdef LOADEVENTPRENEXUS_ALLOW_PARALLEL
-  parallelProcessing = this->getProperty(PARALLEL_PARAM);
-
-  //Get the block size
-  int temp = this->getProperty(BLOCK_SIZE_PARAM);
-  loadBlockSize = static_cast<size_t>( temp );
-  if (loadBlockSize < Mantid::Kernel::MIN_BLOCK_SIZE)
-    loadBlockSize = Mantid::Kernel::MIN_BLOCK_SIZE;
-  if (loadBlockSize > Mantid::Kernel::MAX_BLOCK_SIZE)
-    loadBlockSize = Mantid::Kernel::MAX_BLOCK_SIZE;
-  g_log.information() << "Loading events with a block size of " << loadBlockSize << "\n.";
-#endif
-
   shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
   longest_tof = 0.;
 
@@ -417,16 +404,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     //Load a block into the buffer directly, up to loadBlockSize elements
     size_t current_event_buffer_size = eventfile->loadBlock(event_buffer, loadBlockSize);
 
-    if (parallelProcessing)
-    {
-      //First we need to pre-treat the event buffer
-      makeIntermediateEventBuffer(event_buffer, current_event_buffer_size, intermediate_buffer, fileOffset);
-
-      //and now process the intermediate buffer
-      procEventsParallel(workspace, intermediate_buffer, current_event_buffer_size);
-    }
-    else
-      procEventsLinear(workspace, event_buffer, current_event_buffer_size, fileOffset);
+    //This processes the events
+    procEventsLinear(workspace, event_buffer, current_event_buffer_size, fileOffset);
 
     //Report progress
     prog.report();
@@ -461,18 +440,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     }
   }
 
-
-//  if (parallelProcessing)
-//  {
-//    //TODO: Pad pixels
-//    //Finalize for the parallel mode
-//    workspace->doneAddingEventLists();
-//  }
-//  else
-//  {
-    //finalize loading; this condenses the pixels into a 0-based, dense vector.
-    workspace->doneLoadingData(1);
-//  }
+  //finalize loading; this condenses the pixels into a 0-based, dense vector.
+  workspace->doneLoadingData(1);
 
 
   this->setProtonCharge(workspace);
@@ -506,8 +475,11 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
 
   DasEvent temp;
   uint32_t period;
-  size_t frame_index(0);
-  PulseTimeType pulse_time = 0;
+
+  //Starting pulse time
+  PulseTimeType pulsetime = 0;
+  std::size_t pulse_i = 0;
+  std::size_t numPulses = this->pulsetimes.size();
 
   // process the individual events
   for (size_t i = 0; i < current_event_buffer_size; i++)
@@ -539,17 +511,21 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
 
     // work with the good guys
 
-    //Frame index (typically starts at 0)
-    frame_index = this->getFrameIndex(fileOffset + i, frame_index);
-    //Retrieve the absolute time in nanosec.
-    if ((frame_index >= 0) && (frame_index < num_pulses))
-      pulse_time = this->pulsetimes[frame_index];
-    else
-      pulse_time = 0;
+    //Find the pulse time for this event index
+    if (pulse_i < numPulses-1)
+    {
+      //This is the total offset into the file
+      size_t total_i = i + fileOffset;
+      //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
+      while ( !((total_i >= event_indices[pulse_i]) && (total_i < event_indices[pulse_i+1])) && (pulse_i < numPulses-1))
+        pulse_i++;
+      //Save the pulse time at this index for creating those events
+      pulsetime = pulsetimes[pulse_i];
+    }
 
     double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
     TofEvent event;
-    event = TofEvent(tof, pulse_time);
+    event = TofEvent(tof, pulsetime);
 
     //Find the overall max/min tof
     if (tof < shortest_tof)
@@ -573,201 +549,6 @@ bool intermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y)
   return (x.pid < y.pid);
 }
 
-
-//-----------------------------------------------------------------------------
-/** Take the DASevent buffer and convert to the intermediate event structure for procEventsParallel.
- * The intermediate structure holds the frame index (which would be lost otherwise)
- *
- * @param event_buffer: the array of DasEvent loaded from disk
- * @param current_event_buffer_size: how much of the buffer was loaded (reference: will be modified
- *        if some of the events are in error)
- * @param intermediate_buffer: pointer to an array of IntermediateEvent's that will be filled up to
- *        current_event_buffer_size. Must have been allocated before!
- */
-void LoadEventPreNeXus::makeIntermediateEventBuffer(DasEvent * event_buffer, size_t& current_event_buffer_size,
-    IntermediateEvent * intermediate_buffer, size_t fileOffset)
-{
-  DasEvent dasTemp;
-  size_t frame_index = 0;
-  size_t i;
-  uint32_t period;
-
-  //Offset into the file
-  size_t total_event_offset = 0;
-
-  size_t bad_events = 0;
-
-  for (i = 0; i < current_event_buffer_size; i++)
-  {
-    //This is the DASevent
-    dasTemp = *(event_buffer + i);
-    //And this is where it was in the file
-    total_event_offset = fileOffset + i;
-
-    PixelType pid = dasTemp.pid;
-    if ((pid & ERROR_PID) == ERROR_PID)
-    {
-      // Marked as bad
-      bad_events++;
-    }
-    else
-    {
-      // NOT marked as bad
-
-      //Covert the pixel ID from DAS pixel to our pixel ID
-      this->fixPixelId(pid, period);
-
-      //Now find the frame index
-      if (frame_index < this->num_pulses-1)
-      {
-        //We are not at the end of the pulse ID list.
-        //Is the current event offset now pushing us higher than the next frame?
-        if (total_event_offset >= this->event_indices[frame_index+1])
-        {
-          // search for the frame that gives the right pulse id
-          for ( ; frame_index < this->num_pulses-1; frame_index++)
-          {
-            //The next up pulse's offset is higher than us; so this must be right
-            if (this->event_indices[frame_index+1] > total_event_offset)
-              break;
-          }
-
-          //Check for the very last pulse
-          if ((frame_index == this->num_pulses-2) &&
-              (total_event_offset >= event_indices[num_pulses-1]))
-            frame_index = num_pulses-1;
-        }
-      }
-
-      //Copy the das event stuff and add the frame index
-      intermediate_buffer[i].pid = pid;
-      intermediate_buffer[i].tof = dasTemp.tof;
-      intermediate_buffer[i].period = period;
-      intermediate_buffer[i].frame_index = frame_index;
-
-      //And this is a good event
-      this->num_good_events ++;
-    } //(all good pixels)
-  }
-
-  //Increment the bad events
-  this->num_error_events += bad_events;
-  //And fix the buffer size if any bad events were found
-  current_event_buffer_size -= bad_events;
-}
-
-//-----------------------------------------------------------------------------
-/** Parallel-version of the procedure to process the event file properly.
- * @param workspace EventWorkspace to write to.
- */
-void LoadEventPreNeXus::procEventsParallel(DataObjects::EventWorkspace_sptr & workspace, IntermediateEvent * intermediate_buffer, size_t current_event_buffer_size)
-{
-  IntermediateEvent temp;
-
-  //Start by sorting events by DAS pixel IDs
-  std::sort( intermediate_buffer, intermediate_buffer + current_event_buffer_size, intermediatePixelIDComp );
-
-  //This vector contains a list of pairs:
-  //  pair->first = pid
-  //  pair->second = index in event_buffer where pid _ENDS_
-  typedef std::pair<PixelType, size_t> IndexPair;
-  std::vector< IndexPair > indices;
-
-  //Start at the lowest possible pixel ID
-  PixelType lastpid = std::numeric_limits<PixelType>::min();
-  size_t i;
-  for (i = 0; i < current_event_buffer_size; i++)
-  {
-    PixelType pid = intermediate_buffer[i].pid;
-    if (pid > lastpid)
-    {
-      //Switching to a new set of events
-      //Put in the vector where that change was
-      indices.push_back( IndexPair(lastpid, i) );
-      lastpid = pid;
-    }
-  }
-  //And save the last one
-  indices.push_back( IndexPair(lastpid, i) );
-  int num_indices = indices.size();
-
-//  // Now we go and create all the workspace indices
-//  int old_max = workspace->getNumberHistograms();
-//  int maxPid = static_cast<int>(  indices.back().first  );
-//  EventList newEL;
-//  workspace->getOrAddEventList(maxPid).addDetectorID(i);
-//  for (int i=old_max; i < maxPid ; i++)
-//  {
-//    workspace->getOrAddEventList(i).addDetectorID(i);
-//  }
-
-
-  // To prepare the workspace, we need to create all the needed event lists FIRST!
-  //  (but not in parallel)
-  for (int i_indices=1; i_indices < num_indices; i_indices++)
-  {
-    PixelType pid = indices[i_indices].first;
-    //This call creates the event list as needed.
-    //  And then allocates and event list of the size of # of events in here.
-    workspace->getEventListAtPixelID(pid).allocateMoreEvents(indices[i_indices].second - indices[i_indices-1].second);
-  }
-
-
-
-  //Start the OpenMP parallel run. We are not checking that the WS is thread-safe,
-  //  because it returns False at this point.
-
-  //The first entry in the indices list is useless, so we start at 1
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i_indices=1; i_indices < num_indices; i_indices++)
-  {
-    PARALLEL_START_INTERUPT_REGION
-
-    IndexPair myIndex = indices[i_indices];
-    PixelType pid = myIndex.first;
-    size_t end = myIndex.second;
-    size_t start = indices[i_indices-1].second;
-
-    //Now check if this pid we want to load.
-    if (loadOnlySomeSpectra)
-    {
-      std::map<int, bool>::iterator it;
-      it = spectraLoadMap.find(pid);
-      if (it == spectraLoadMap.end())
-      {
-        //Pixel ID was not found, so the event is being ignored.
-        this->num_ignored_events++;
-        continue;
-      }
-    }
-
-    //Ok, now we can go through the N events and add them all
-    for (size_t j = start; j < end; j++)
-    {
-      //This is the intermediate event at this point
-      temp = intermediate_buffer[j];
-
-      //Convert the TOF
-      double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
-      //Create an event with that calculated tof and the previously found frame index
-      TofEvent event(tof, temp.frame_index);
-
-      //The addEventQuickly method does not clear the cache, making things slightly faster.
-      workspace->getEventListAtPixelID(pid).addEventQuickly(event);
-      //workspace->getEventList(pid).addEventQuickly(event);
-
-      //Find the overall max/min tof
-      if (tof < shortest_tof)
-        shortest_tof = tof;
-      if (tof > longest_tof)
-        longest_tof = tof;
-    }
-
-    PARALLEL_END_INTERUPT_REGION
-  } //Looping through the index pairs
-  PARALLEL_CHECK_INTERUPT_REGION
-
-}
 
 
 
@@ -805,32 +586,6 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
 
 }
 
-//-----------------------------------------------------------------------------
-/**
- * Determine the frame index from the event index.
- * @param event_index The index of the event in the event data
- * @param last_frame_index Last frame found. This parameter reduces the
- *        search to be from the current point forward.
- */
-size_t LoadEventPreNeXus::getFrameIndex(const std::size_t event_index, const std::size_t last_frame_index)
-{
-  // if at the end of the file return the last frame_index
-  if (last_frame_index + 1 >= this->num_pulses)
-    return last_frame_index;
-
-  // search for the next frame that increases the event index
-  size_t next_frame_index = last_frame_index + 1;
-  for ( ; next_frame_index < this->num_pulses - 1; next_frame_index++)
-  {
-    if (this->event_indices[next_frame_index] > this->event_indices[last_frame_index])
-      break;
-  }
-  // determine the frame index
-  if (this->event_indices[next_frame_index] <= event_index)
-    return next_frame_index;
-  else
-    return last_frame_index;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -873,6 +628,7 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   //Let's assume that the # of pixels in the instrument matches the mapping file length.
   this->numpixel = pixelmapFile.getNumElements();
 }
+
 
 //-----------------------------------------------------------------------------
 /** Open an event file

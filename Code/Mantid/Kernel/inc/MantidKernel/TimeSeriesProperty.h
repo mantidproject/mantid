@@ -375,7 +375,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /**  Return the time series as a C++ map<dateAndTime, TYPE>
-   *
+   * WARNING: THIS MAY NOT BE CORRECT AND SEEMS TO OUTPUT FEWER ENTRIES THAN IT SHOULD!!! USE AT YOUR OWN RISK!!!
    * @return time series property values as map
    */
   std::map<dateAndTime, TYPE> valueAsMap() const
@@ -394,6 +394,55 @@ public:
     }
 
     return asMap;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /**  Return the time series as a correct C++ map<dateAndTime, TYPE>
+   *
+   * @return time series property values as map
+   */
+  std::map<dateAndTime, TYPE> valueAsCorrectMap() const
+  {
+    std::map<dateAndTime, TYPE> asMap;
+    if (m_propertySeries.size() == 0)
+      return asMap;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    for (; p != m_propertySeries.end(); p++)
+      asMap[p->first] = p->second;
+
+    return asMap;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /**  Return the time series's values as a vector<TYPE>
+   *
+   */
+  std::vector<TYPE> valuesAsVector() const
+  {
+    std::vector<TYPE> out;
+    if (m_propertySeries.size() == 0)
+      return out;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    for (; p != m_propertySeries.end(); p++)
+      out.push_back(p->second);
+    return out;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**  Return the time series's values as a vector<TYPE>
+   *
+    */
+  std::vector<dateAndTime> timesAsVector() const
+  {
+    std::vector<dateAndTime> out;
+    if (m_propertySeries.size() == 0)
+      return out;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    for (; p != m_propertySeries.end(); p++)
+      out.push_back(p->first);
+    return out;
   }
 
 
