@@ -5,6 +5,7 @@
 import time
 import copy
 import hfir_reduction_steps
+from scripter import BaseReductionScripter
 
 # Check whether Mantid is available
 try:
@@ -16,102 +17,7 @@ except:
     HAS_MANTID = False  
 
 
-class BaseScriptElement(object):
-    """
-        Base class for each script element (panel on the UI).
-        Contains only data and is UI implementation agnostic.
-    """
-    def __str__(self):
-        """
-            Script representation of the object.
-            The output is meant to be executable as a Mantid python script
-        """
-        return self.to_script()
-    
-    def to_script(self):
-        """
-            Generate reduction script
-        """
-        return ""
-    
-    def update(self):
-        """
-            Update data member after the reduction has been executed
-        """
-        return NotImplemented
-    
-    def apply(self):
-        """
-            Method called to apply the reduction script element
-            to a Mantid Reducer
-        """
-        return NotImplemented
-    
-    def to_xml(self):
-        """
-            Return an XML representation of the data / state of the object
-        """
-        return ""
-    
-    def from_xml(self, xml_str):
-        """
-            Parse the input text as XML to populate the data members
-            of this object
-        """
-        return NotImplemented
-    
-    @classmethod
-    def getText(cls, nodelist):
-        """
-            Utility method to extract text out of an XML node
-        """
-        rc = ""
-        for node in nodelist:
-            if node.nodeType == node.TEXT_NODE:
-                rc = rc + node.data
-        return rc       
-
-    @classmethod
-    def getContent(cls, dom, tag):
-        element_list = dom.getElementsByTagName(tag)
-        if len(element_list)>0:
-            return BaseScriptElement.getText(element_list[0].childNodes)
-        else:
-            return None
-        
-    @classmethod
-    def getIntElement(cls, dom, tag, default=None):
-        value = BaseScriptElement.getContent(dom, tag)
-        if value is not None:
-            return int(value)
-        else:
-            return default
-
-    @classmethod
-    def getFloatElement(cls, dom, tag, default=None):
-        value = BaseScriptElement.getContent(dom, tag)
-        if value is not None:
-            return float(value)
-        else:
-            return default
-        
-    @classmethod
-    def getStringElement(cls, dom, tag, default=''):
-        value = BaseScriptElement.getContent(dom, tag)
-        if value is not None:
-            return value
-        else:
-            return default
-
-    @classmethod
-    def getBoolElement(cls, dom, tag, true_tag='true', default=False):
-        value = BaseScriptElement.getContent(dom, tag)
-        if value is not None:
-            return value.lower()==true_tag.lower()
-        else:
-            return default
-
-class ReductionScripter(object):
+class HFIRReductionScripter(BaseReductionScripter):
     """
         Organizes the set of reduction parameters that will be used to
         create a reduction script. Parameters are organized by groups that
@@ -127,6 +33,8 @@ class ReductionScripter(object):
     background = None
     
     def __init__(self, name="BIOSANS"):
+        super(HFIRReductionScripter, self).__init__(name=name)
+        
         self.instrument_name = name
         self.beam_finder = hfir_reduction_steps.BeamFinder()
         self.instrument = hfir_reduction_steps.InstrumentDescription()

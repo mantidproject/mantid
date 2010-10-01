@@ -2,7 +2,6 @@ import sys, os
 from PyQt4 import QtGui, QtCore, uic
 
 from reduction_gui.instruments.instrument_factory import instrument_factory
-from reduction_gui.reduction.hfir_reduction import ReductionScripter
 from reduction_gui.settings.application_settings import GeneralSettings
 import reduction_gui.settings.qrc_resources
 

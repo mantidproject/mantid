@@ -6,7 +6,7 @@
 import xml.dom.minidom
 import copy
 import os
-from hfir_reduction import BaseScriptElement
+from scripter import BaseScriptElement
 
 # Check whether Mantid is available
 try:
@@ -137,7 +137,7 @@ class Transmission(BaseScriptElement):
         """
             Update transmission from reduction output
         """
-        if HAS_MANTID:
+        if HAS_MANTID and ReductionSingleton()._transmission_calculator is not None:
             trans = ReductionSingleton()._transmission_calculator.get_transmission()
             self.transmission = trans[0]
             self.transmission_spread = trans[1]
@@ -257,7 +257,7 @@ class Background(BaseScriptElement):
         """
             Update data member from reduction output
         """
-        if HAS_MANTID:
+        if HAS_MANTID and ReductionSingleton()._background_subtracter is not None:
             trans = ReductionSingleton()._background_subtracter.get_transmission()
             if trans is not None:
                 self.bck_transmission = trans[0]
@@ -541,7 +541,7 @@ class BeamFinder(BaseScriptElement):
         """
             Update data members according to reduction results
         """
-        if HAS_MANTID:
+        if HAS_MANTID and ReductionSingleton()._beam_finder is not None:
             pos = ReductionSingleton()._beam_finder.get_beam_center()
             self.x_position = pos[0]
             self.y_position = pos[1]
