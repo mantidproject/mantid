@@ -570,7 +570,6 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
     Mantid::Kernel::dateAndTime time = Mantid::Kernel::DateAndTime::get_time_from_pulse_time( this->pulsetimes[i] );
     log->addValue(time, this->proton_charge[i]);
   }
-  log->countSize();
 
   /// TODO set the units for the log
   run.addLogData(log);

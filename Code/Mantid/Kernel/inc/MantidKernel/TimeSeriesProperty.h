@@ -114,8 +114,8 @@ public:
     //Concatenate the maps!
     m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
 
-    //m_size = m_propertySeries.size();
-    this->countSize();
+    //Count the REAL size.
+    m_size = m_propertySeries.size();
 
     return *this;
   }
@@ -144,8 +144,8 @@ public:
         m_propertySeries.erase(it_current);
       }
     }
-    //The function below is stupid. Should be removed or fixed.
-    this->countSize();
+    //Cache the size for later. Any filtered TSP's will have to fend for themselves.
+    m_size = sm_propertySeries.size();
   }
 
 
@@ -225,15 +225,6 @@ public:
         break;
 
     } //Looping through entries in the splitter vector
-
-
-    //Count the sizes (this function is still stupid and slow and should not be necessary, but I don't know if I should take it out)
-    for (int i=0; i < numOutputs; i++)
-    {
-      TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[i];
-      if (myOutput)
-        myOutput->countSize();
-    }
 
   }
 
