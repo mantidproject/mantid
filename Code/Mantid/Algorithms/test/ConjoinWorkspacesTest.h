@@ -143,7 +143,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  void testExecEvent()
+  void xtestExecEvent()
   {
     //Save some initial data
     EventWorkspace_sptr in1, in2, out;
