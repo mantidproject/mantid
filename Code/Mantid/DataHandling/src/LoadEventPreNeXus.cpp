@@ -470,6 +470,11 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
   PulseTimeType pulsetime = 0;
   std::size_t pulse_i = 0;
   std::size_t numPulses = this->pulsetimes.size();
+  if (event_indices.size() < numPulses)
+  {
+    g_log.warning() << "Event_indices vector is smaller than the pulsetimes array.\n";
+    numPulses = event_indices.size();
+  }
 
   // process the individual events
   for (size_t i = 0; i < current_event_buffer_size; i++)

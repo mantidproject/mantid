@@ -145,7 +145,7 @@ public:
       }
     }
     //Cache the size for later. Any filtered TSP's will have to fend for themselves.
-    m_size = sm_propertySeries.size();
+    m_size = m_propertySeries.size();
   }
 
 
