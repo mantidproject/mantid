@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "stdafx.h"
+#include "MDWorkspaceConstants.h"
 
 /** The class is the part of the VisualisationWorkspace and describes the basic multidimentional geometry of the object, 
 *   e.g. the dimensions of the reciprocal space and other possible dimenions  
@@ -44,29 +45,6 @@ namespace Mantid
     {
         /// The constand defines the maximal number of dimensions, which N-D workspace could ever have. 
 
-/** The enum lists various dimensions ID, which can be found in the dataset
-*   list is not comprehansive and created to simplify the dimensions identification.
-*   in the program. 
-*   The agreement is that the first three ID-s are the special dimensions which can be non-orthogonal 
-*   and all higher dimensions are orthogonal to  that and to each other 
-*   (polarisation needs further clarification)
-*/
-    enum DimensionsID
-    {
-        eh,  //! ! Three special dimensions h,k,l
-        ek,  //! ! named after Miller indexes
-        el,  //! !
-        /// The orded of this indexes is important as number of algorithms deal with it trying to (UGLY! Redesighn!!!)
-        en,  //* Energy
-        u1,  //* something else e.g. Sample temperature
-        u2,  //* something else e.g. sample pressure
-        u3,  //* something else e.g. longnitudional component of polarisation
-        u4,  //* something else e.g. transversal component of polarisation
-        u5,   /// 
-        u6,   /// something else
-        u7,   /// something else
-        MAX_NDIMS_POSSIBLE
-    };
 
 
     class DLLExport WorkspaceGeometry

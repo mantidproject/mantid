@@ -1,6 +1,33 @@
-#ifndef H_SQW
-#define H_SQW
+#ifndef H_MD_Pixels
+#define H_MD_Pixels
+
 #include "MDData.h"
+/** Class to support operations on single data pixels, as obtained from the instrument. Currently it contains information on the location of the pixel in 
+    the reciprocal space but this can chane as this information can be computed in the run time
+    
+    @author Alex Buts, RAL ISIS
+    @date 01/10/2010
+
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+	Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
 namespace Mantid{
     namespace MDDataObjects{
@@ -28,10 +55,8 @@ struct pix_location
 {
     long chunk_file_location0;
     std::vector<sqw_pixel>  cell_memPixels;
-    std::vector<long>     * data_chunks;
+    std::auto_ptr<std::vector<long> *> data_chunks;
 };
-// the size of the buffer to read pixels while reading parts of datasets --should be optimized for performance;
-#define PIX_BUFFER_SIZE 1000000
 
 
 //**********************************************************************************************************************
@@ -39,8 +64,8 @@ struct pix_location
 class MDPixels :  public MDData
 {
 public:
-     MDPixels(void);
-    ~MDPixels(void);
+     MDPixels(unsigned int nDims);
+    ~MDPixels();
      void set_shape(const SlicingData &trf){
          this->alloc_mdd_arrays(trf);
          if(pix_array){
@@ -55,15 +80,15 @@ public:
     void read_pix(void);
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
-    void rebin_dataset4D(const SlicingData &transf,MDPixels &newsqw);
+    //void rebin_dataset4D(const SlicingData &transf,MDPixels &newsqw);
 private:
     // the parameter identify if the class data are file or memory based
    // usually it is file based and memory used for small datasets, debugging or in a future when PC are big
     bool      memBased;
    
-// number of real pixels contributed in the dataset (rather sqw parameter) (should be moved there?)
+/// number of real pixels contributed in the dataset (rather sqw parameter) (should be moved there?)
     size_t nPixels;      
-// the array of structures, describing the detector pixels
+/// the array of structures, describing the detector pixels
     pix_location *pix_array;
    // boolean values identifying the way to treat NaN-s and Inf-s in the pixel data
     bool   ignore_inf,ignore_nan;     
@@ -75,9 +100,9 @@ private:
    MDPixels(const MDPixels& p);
    MDPixels & operator = (const MDPixels & other);
 // rebin pixels in the pix_aray and add them to the current dataset ;
-    long rebin_dataset4D(const SlicingData &transf, const sqw_pixel *pix_array, long nPix_cell);
-    void complete_rebinning(void);
-    void extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted);
+//    long rebin_dataset4D(const SlicingData &transf, const sqw_pixel *pix_array, long nPix_cell);
+//    void complete_rebinning(void);
+//    void extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted);
 };
     }
 }

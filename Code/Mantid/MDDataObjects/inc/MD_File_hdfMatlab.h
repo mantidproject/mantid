@@ -5,6 +5,30 @@
 #include "SlicingData.h"
 /**    Class supports MATLAB-written hdf5 mdd data format and will be used at the initial stage of the development;
 *      to read the data initially provided by MATLAB, Horace
+
+    @author Alex Buts, RAL ISIS
+    @date 01/10/2010
+
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+
 */
 
 namespace Mantid{
@@ -16,17 +40,15 @@ class MD_File_hdfMatlab :    public MD_FileFormat
 public:
     MD_File_hdfMatlab(const char *file_name);
 
-    virtual bool is_open(void)const{
-        if(this->file_handler>0){return true;
-        }else{                   return false;}
-    }
+    virtual bool is_open(void)const{return (bool)this->file_handler;}
+
     virtual void read_mdd(MDData & mdd);
-    
+   
     /// read whole pixels information in memory; usually impossible, then returns false;
     virtual bool read_pix(MDPixels & sqw);
-    // read the information from the data pixels, specified by the selected cells, returns the number of cells actually processed 
+    /// read the information from the data pixels, specified by the selected cells, returns the number of cells actually processed 
     /// by this read operation
-    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<long> &selected_cells,long starting_cell,sqw_pixel *& pix_buf, long &nPixels){return 0;}
+    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPixels){return 0;}
     /// get number of data pixels contributing into the dataset;
     virtual hsize_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format

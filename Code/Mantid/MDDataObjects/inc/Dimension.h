@@ -4,10 +4,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "stdafx.h"
+#include "MDWorkspaceConstants.h"
 #include "WorkspaceGeometry.h"
-/// we are not going to rebin data on more than some number of bins. Lets set this constant as the limit for checks 
-/// (in case of wrong word padding or -int casted to unsigned int)
-#define MAX_REASONABLE_BIN_NUMBER 1000000
 
 /*! The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
 *

@@ -39,7 +39,7 @@ public:
     virtual void read_mdd(MDData &){};
     virtual void write_mdd(const MDData &){};
     virtual bool read_pix(MDPixels &){return false; }
-    virtual size_t read_pix_subset(const MDPixels &,const std::vector<long> &selected_cells,long starting_cell,sqw_pixel *& pix_buf, long &nPixels){
+    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPixels){
         return selected_cells.size();}
     virtual hsize_t getNPix(void){return -1;}
 

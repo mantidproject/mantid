@@ -8,7 +8,6 @@
 #include "MDGeometry.h"
 #include "point3D.h"
 
-
 /** the kernel of the main class for visualisation and analysis operations, which keeps the data itself and brief information about the data dimensions
 *
 *   This is equivalent of multidimensional Horace dataset without detailed pixel information
