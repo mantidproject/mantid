@@ -79,22 +79,22 @@ public:
   void setData(const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E) { Histogram1D::setData(Y,E); }  
   
   ///Returns the x data
-  virtual MantidVec& dataX(int const index) { return Histogram1D::dataX(); }
+  virtual MantidVec& dataX(int const index) { (void) index; return Histogram1D::dataX(); }
   ///Returns the y data
-  virtual MantidVec& dataY(int const index) { return Histogram1D::dataY(); }
+  virtual MantidVec& dataY(int const index) { (void) index; return Histogram1D::dataY(); }
   ///Returns the error data
-  virtual MantidVec& dataE(int const index) { return Histogram1D::dataE(); }
+  virtual MantidVec& dataE(int const index) { (void) index; return Histogram1D::dataE(); }
   /// Returns the x data const
-  virtual const MantidVec& dataX(int const index) const {return dataX();}
+  virtual const MantidVec& dataX(int const index) const { (void) index; return dataX();}
   /// Returns the y data const
-  virtual const MantidVec& dataY(int const index) const {return dataY();}
+  virtual const MantidVec& dataY(int const index) const { (void) index; return dataY();}
   /// Returns the error const
-  virtual const MantidVec& dataE(int const index) const {return dataE();}
+  virtual const MantidVec& dataE(int const index) const { (void) index; return dataE();}
 
   /// Returns a pointer to the x data
-  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const {return Histogram1D::ptrX(); }
+  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const { (void) index; return Histogram1D::ptrX(); }
   /// Set the specified X array to point to the given existing array
-  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { setX(X); }
+  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; setX(X); }
 
   ///Returns non-const vector of the x data
   virtual MantidVec& dataX() { return Histogram1D::dataX(); }

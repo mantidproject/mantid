@@ -75,7 +75,7 @@ private:
 
   virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
-  virtual const int getHistogramNumberHelper() const;
+  virtual int getHistogramNumberHelper() const;
 
   ManagedDataBlock2D* getDataBlock(const int index) const;
 

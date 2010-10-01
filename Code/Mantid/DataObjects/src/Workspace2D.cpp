@@ -239,7 +239,7 @@ namespace Mantid
     For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
     being virtual so it now just calls this private (and virtual) method which does the work.
     */
-    const int Workspace2D::getHistogramNumberHelper() const
+    int Workspace2D::getHistogramNumberHelper() const
     {
       return static_cast<const int>(data.size());
     }

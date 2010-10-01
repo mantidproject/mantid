@@ -226,7 +226,7 @@ Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const int index) const
 For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
 being virtual so it now just calls this private (and virtual) method which does the work.
 */
-const int AbsManagedWorkspace2D::getHistogramNumberHelper() const
+int AbsManagedWorkspace2D::getHistogramNumberHelper() const
 {
   return m_noVectors;
 }

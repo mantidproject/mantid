@@ -73,9 +73,16 @@ namespace Mantid
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
       /// Function evaluation method to be implemented in the inherited classes
-      virtual void functionLocal(double* out, const double* xValues, const int& nData)const{}
+      virtual void functionLocal(double* out, const double* xValues, const int& nData)const
+      {
+        (void) out; (void) xValues; (void) nData;
+      }
+
       /// Derivative evaluation method to be implemented in the inherited classes
-      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData){}
+      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData)
+      {
+        (void) out; (void) xValues; (void) nData;
+      }
 
     };
 

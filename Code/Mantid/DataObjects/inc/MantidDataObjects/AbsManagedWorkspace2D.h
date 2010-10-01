@@ -121,7 +121,7 @@ namespace DataObjects
     /// Private copy assignment operator
     AbsManagedWorkspace2D& operator=(const AbsManagedWorkspace2D&);
 
-    virtual const int getHistogramNumberHelper() const;
+    virtual int getHistogramNumberHelper() const;
 
     ManagedDataBlock2D* getDataBlock(const int index) const;
 

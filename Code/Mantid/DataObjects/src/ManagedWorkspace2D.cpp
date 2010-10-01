@@ -250,7 +250,7 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
     For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
     being virtual so it now just calls this private (and virtual) method which does the work.
 */
-const int ManagedWorkspace2D::getHistogramNumberHelper() const
+int ManagedWorkspace2D::getHistogramNumberHelper() const
 {
   return m_noVectors;
 }

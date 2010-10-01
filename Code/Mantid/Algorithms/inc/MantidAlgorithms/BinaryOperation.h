@@ -119,7 +119,12 @@ namespace Mantid
        *  @param rhs The second input workspace
        *  @param out The output workspace
        */
-      virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out) {}
+      virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
+      {
+        (void) lhs; //Avoid compiler warning
+        (void) rhs;
+        (void) out;
+      }
 
       /** Only overridden by operations that affect the properties of the run (e.g. Plus
        *  where the proton currents (charges) are added). Otherwise it does nothing.
@@ -127,7 +132,12 @@ namespace Mantid
        *  @param rhs the other workspace
        *  @param ans the output workspace
        */
-      virtual void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run& ans) const {};
+      virtual void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run& ans) const
+      {
+        (void) lhs; //Avoid compiler warning
+        (void) rhs;
+        (void) ans;
+      };
 
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);

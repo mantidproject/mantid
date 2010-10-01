@@ -84,9 +84,16 @@ namespace Mantid
       void exec();
 
       /// Option for providing intelligent range starting value based e.g. on the user input parameter values
-      virtual void modifyStartOfRange(double& startX) {}
+      virtual void modifyStartOfRange(double& startX)
+      {
+        (void) startX;
+      }
+
       /// Option for providing intelligent range finishing value based e.g. on the user input parameter values
-      virtual void modifyEndOfRange(double& endX) {}
+      virtual void modifyEndOfRange(double& endX)
+      {
+        (void) endX;
+      }
 
       /** Called after the data ranged has been determined but before the fitting starts.
        *  For example may be used to create wavelength array for each TOF data-point.
@@ -95,7 +102,11 @@ namespace Mantid
        *  @param m_minX Start array index.
        *  @param m_maxX End array index.
        */
-      virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
+      virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX)
+      {
+        (void) m_minX;
+        (void) m_maxX;
+      };
 
       // Process input parameters and create the fitting function.
       void processParameters();

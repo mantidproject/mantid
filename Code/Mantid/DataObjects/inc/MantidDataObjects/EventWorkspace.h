@@ -58,12 +58,14 @@ private:
   /// Copy constructor
   MantidVecWithMarker(const MantidVecWithMarker &other)
   {
+    (void) other; //Avoid compiler warning
     throw Kernel::Exception::NotImplementedError("Cannot copy MantidVecWithMarker.");
   }
 
   /// Assignment operator
   MantidVecWithMarker& operator=(const MantidVecWithMarker &other)
   {
+    (void) other; //Avoid compiler warning
     throw Kernel::Exception::NotImplementedError("Cannot assign to MantidVecWithMarker.");
 //    m_index = other.m_index;
 //    m_data.assign(other.m_data.begin(), other.m_data.end());

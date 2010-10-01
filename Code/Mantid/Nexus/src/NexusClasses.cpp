@@ -383,6 +383,7 @@ std::vector<char>& NXBinary::binary()
       int n = dims[0];
       m_binary.resize(n);
       NXstatus stat = NXgetdata(m_fileID,&m_binary[0]);
+      (void) stat; //Avoid unused variable compiler warning
       NXclosedata(m_fileID);
     }
     return m_binary;
