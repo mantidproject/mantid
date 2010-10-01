@@ -61,7 +61,7 @@ struct pix_location
 
 //**********************************************************************************************************************
 
-class MDPixels :  public MDData
+class DLLExport MDPixels :  public MDData
 {
 public:
      MDPixels(unsigned int nDims);
@@ -74,7 +74,8 @@ public:
          }
          alloc_pix_array();
     }
-
+    /// check if the pixels are all in memory;
+    bool isMemoryBased(void)const{return memBased;}
 
     /// read the whole pixels dataset in the memory
     void read_pix(void);

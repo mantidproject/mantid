@@ -5,7 +5,7 @@
 //* class describes slicing and rebinning matrix;
 namespace Mantid{
     namespace MDDataObjects{
-class SlicingData
+class DLLExport SlicingData
 {
 public:
     SlicingData(std::vector<DimensionsID> &IDs);

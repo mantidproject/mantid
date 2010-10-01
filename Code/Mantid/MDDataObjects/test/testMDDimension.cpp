@@ -11,12 +11,12 @@
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/RealDescriptions.h>
 
-#include "testMDDimension.h"
+#include "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDDimension.h"
 
 static testMDDimension suite_testMDDimension;
 
 static CxxTest::List Tests_testMDDimension = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testMDDimension( "testMDDimension.h", 51, "testMDDimension", suite_testMDDimension, Tests_testMDDimension );
+CxxTest::StaticSuiteDescription suiteDescription_testMDDimension( "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDDimension.h", 51, "testMDDimension", suite_testMDDimension, Tests_testMDDimension );
 
 static class TestDescription_testMDDimension_testDimensionPars : public CxxTest::RealTestDescription {
 public:

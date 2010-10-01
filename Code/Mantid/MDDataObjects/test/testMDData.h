@@ -13,9 +13,10 @@ class testDND :    public CxxTest::TestSuite
 public:
     void testDNDRead(void){
       try{
-      // define an object 
+      // define an wrong object 
         MDData dnd_obj(5);
-        TS_ASSERT_THROWS_NOTHING(dnd_obj.read_mdd("c:/mantid/Test/VATES/fe_demo.sqw"));
+        // read correct object
+        TS_ASSERT_THROWS_NOTHING(dnd_obj.read_mdd("../../../../Test/VATES/fe_demo.sqw"));
 
         std::vector<unsigned int> selection(2,1);
         std::vector<point3D> img;

@@ -5,8 +5,8 @@
 namespace Mantid{
     namespace MDDataObjects{
         using namespace Mantid::Kernel;
-MDPixels::MDPixels(void):
-MDData(),
+MDPixels::MDPixels(unsigned int nDims):
+MDData(nDims),
 ignore_inf(false),
 ignore_nan(true),
 memBased(false),
@@ -42,12 +42,10 @@ if(!this->pix_array){
     this->pix_array = new pix_location[this->data_size];
     this->pix_array[0].chunk_file_location0=0;
     this->pix_array[0].cell_memPixels.clear();
-    this->pix_array[0].data_chunks         = NULL;
+
 
     for(size_t i=0;i<this->data_size;i++){
         this->pix_array[i].chunk_file_location0= this->pix_array[i-1].chunk_file_location0+this->data[i].npix;
-        //this->pix_array[i].cell_memPixels.clear();
-        this->pix_array[i].data_chunks   = NULL;
     }
     if(this->theFile){
         this->nPixels = this->theFile->getNPix();
@@ -56,19 +54,18 @@ if(!this->pix_array){
 }
 }
 //***************************************************************************************
-MDPixels::~MDPixels(void)
+MDPixels::~MDPixels()
 {
     if(pix_array){
         for(size_t i=0;i<this->data_size;i++){
-            if(this->pix_array[i].data_chunks)delete this->pix_array[i].data_chunks;
-            this->pix_array[i].data_chunks=NULL;
-            this->pix_array[i].cell_memPixels.clear();
+               this->pix_array[i].cell_memPixels.clear();
         }
         delete [] pix_array;
     }
 }
 
 //***************************************************************************************
+/*
 void
 MDPixels::complete_rebinning()
 {

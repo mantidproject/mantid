@@ -467,8 +467,8 @@ MD_File_hdfMatlab::getNPix(void)
 bool
 MD_File_hdfMatlab::read_pix(MDPixels & sqw)
 { 
-/*
-    long i;
+
+    unsigned long i;
     matlab_attrib_kind kind;
     std::vector<int> arr_dims_vector;
 
@@ -484,32 +484,34 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
 
     int rank         = H5Sget_simple_extent_ndims(pixel_dataspace_h);
     if(rank!=1){
-        throw("the pixel dataspace format differs from the one expected");
+        throw(Exception::FileError("MD_File_hdfMatlab::read_pix: the pixel dataspace format differs from the one expected",this->File_name));
     }
     H5Sget_simple_extent_dims(pixel_dataspace_h,pix_dims,pix_dims_max);    
 // Find and read n-pixels attribute to indentify number of the pixels contributed into the mdd dataset
-    bool ok=read_matlab_field_attr(this->pixel_dataset_h,"n_pixels",data,arr_dims_vector,rank,kind);
+    bool ok=read_matlab_field_attr(this->pixel_dataset_h,"n_pixels",data,arr_dims_vector,rank,kind,this->File_name);
     if(!ok){
-        throw("error reading npix sqw attribute");
+        throw(Exception::FileError("MD_File_hdfMatlab::read_pix: Error reading npix sqw attribute",this->File_name));
     }
 // checks if proper parameter has been read are needed
-    SQW.nPixels=(unsigned long)*((double*)(data));
+    sqw.nPixels=(unsigned long)*((double*)(data));
     delete [] data;
     arr_dims_vector.clear();
 
 
-    if(pix_dims[0]!=SQW.nPixels){
-        throw("number of pixels contributed into mdd dataset does not correspond to number of sqw pixels");
+    if(pix_dims[0]!=sqw.nPixels){
+        std::stringstream err;
+        err<<"MD_File_hdfMatlab::read_pix: Number of pixels contributed into mdd dataset= "<<sqw.nPixels<<" and does not correspond to number of sqw pixels: "<<pix_dims[0]<<std::endl;
+        throw(std::invalid_argument(err.str()));
     }
     hid_t type      = H5Dget_type(this->pixel_dataset_h);
     if(type<0){
-        throw("can not obtain pixels dataset datatype");
+        throw(Exception::FileError("MD_File_hdfMatlab::read_pix: can not obtain pixels dataset datatype",this->File_name));
     }
     void *pix_buf;
     bool data_double;
     hid_t data_type=H5Tget_native_type(type,H5T_DIR_ASCEND);
     if(data_type<0){
-        throw("can not identify native datatype for pixels dataset");
+        throw(Exception::FileError("can not identify native datatype for pixels dataset",this->File_name));
     }
 
     bool type_error(false);
@@ -532,7 +534,7 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
         if(type_error){
             throw("pixel dataset uses datatype different from native float or native double");
         }else{
-            return false;
+            return false; // bad alloc thrown
         }
     }
     
@@ -543,34 +545,34 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
     long nCellPic(0);
     long nPixel(0);
     long j;
-    sqw_pixel thePix;
-    for(i=0;i<SQW.data_size;i++){
-        if(SQW.data[i].npix>0){
-            nCellPic  =SQW.data[i].npix;
-            SQW.pix_array[i].cell_memPixels.reserve(nCellPic);
+ 
+    for(i=0;i<sqw.data_size;i++){
+        if(sqw.data[i].npix>0){
+            nCellPic  =sqw.data[i].npix;
+            sqw.pix_array[i].cell_memPixels.resize(nCellPic);
             for(j=0;j<nCellPic;j++){
                 if (data_double){
-                    thePix.qx   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
-                    thePix.qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
-                    thePix.qz   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
-                    thePix.En   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-                    thePix.s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-                    thePix.err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-                    thePix.irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-                    thePix.idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-                    thePix.ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+                    sqw.pix_array[i].cell_memPixels[j].qx   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
+                    sqw.pix_array[i].cell_memPixels[j].qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
+                    sqw.pix_array[i].cell_memPixels[j].qz   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
+                    sqw.pix_array[i].cell_memPixels[j].En   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
+                    sqw.pix_array[i].cell_memPixels[j].s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+                    sqw.pix_array[i].cell_memPixels[j].err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+                    sqw.pix_array[i].cell_memPixels[j].irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+                    sqw.pix_array[i].cell_memPixels[j].idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+                    sqw.pix_array[i].cell_memPixels[j].ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
                 }else{
-                    thePix.qx   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
-                    thePix.qy   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
-                    thePix.qz   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
-                    thePix.En   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-                    thePix.s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-                    thePix.err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-                    thePix.irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-                    thePix.idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-                    thePix.ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+                    sqw.pix_array[i].cell_memPixels[j].qx   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
+                    sqw.pix_array[i].cell_memPixels[j].qy   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
+                    sqw.pix_array[i].cell_memPixels[j].qz   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
+                    sqw.pix_array[i].cell_memPixels[j].En   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
+                    sqw.pix_array[i].cell_memPixels[j].s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+                    sqw.pix_array[i].cell_memPixels[j].err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+                    sqw.pix_array[i].cell_memPixels[j].irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+                    sqw.pix_array[i].cell_memPixels[j].idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+                    sqw.pix_array[i].cell_memPixels[j].ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
                 }
-                SQW.pix_array[i].cell_memPixels.push_back(thePix);
+
                 nPixel++;
             }
         } // data[i].npix>0;
@@ -584,7 +586,6 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
         this->pixel_dataset_h=-1;
         this->pixel_dataspace_h=-1;
     }
-*/    
     return true;
 }
 /*

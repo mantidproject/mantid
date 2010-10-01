@@ -1,5 +1,5 @@
-#ifndef H_TEST_MAIN
-#define H_TEST_MAIN
+#ifndef H_TEST_MAIN_SQW
+#define H_TEST_MAIN_SQW
 
 #include <cxxtest/TestSuite.h>
 class tmain: public CxxTest::TestSuite
