@@ -210,6 +210,7 @@
     <ClCompile Include="src\GetEi.cpp" />
     <ClCompile Include="src\GetEi2.cpp" />
     <ClCompile Include="src\GhostCorrection.cpp" />
+    <ClCompile Include="src\He3TubeEfficiency.cpp" />
     <ClCompile Include="src\HRPDSlabCanAbsorption.cpp" />
     <ClCompile Include="src\InputWSDetectorInfo.cpp" />
     <ClCompile Include="src\InterpolatingRebin.cpp" />
@@ -276,6 +277,7 @@
     <ClInclude Include="inc\MantidAlgorithms\FilterByLogValue.h" />
     <ClInclude Include="inc\MantidAlgorithms\FilterByTime.h" />
     <ClInclude Include="inc\MantidAlgorithms\GhostCorrection.h" />
+    <ClInclude Include="inc\MantidAlgorithms\He3TubeEfficiency.h" />
     <ClInclude Include="inc\MantidAlgorithms\MultipleScatteringAbsorption.h" />
     <ClInclude Include="inc\MantidAlgorithms\MuonAlphaCalc.h" />
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
@@ -362,6 +364,7 @@
     <ClInclude Include="inc\MantidAlgorithms\InputWSDetectorInfo.h" />
     <ClInclude Include="inc\MantidAlgorithms\InterpolatingRebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Logarithm.h" />
+    <ClInclude Include="test\He3TubeEfficiencyTest.h" />
     <ClInclude Include="test\LogarithmTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\MaskBins.h" />
     <ClInclude Include="inc\MantidAlgorithms\MaskDetectorsIf.h" />

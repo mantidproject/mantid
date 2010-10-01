@@ -330,6 +330,9 @@
     <ClCompile Include="src\MuonAlphaCalc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\He3TubeEfficiency.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h">
@@ -831,6 +834,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\MuonAlphaCalcTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidAlgorithms\He3TubeEfficiency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\He3TubeEfficiencyTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
