@@ -57,7 +57,7 @@ void He3TubeEfficiency::exec()
     //g_log.error() << "EventWorkspaces are not supported!" << std::endl;
     throw Kernel::Exception::NotImplementedError("EventWorkspaces are not supported!");
   }
-  std::cout << "Help!!!!" << std::endl;
+
   this->outputWS = this->getProperty("OutputWorkspace");
 
   if (this->outputWS != this->inputWS)
