@@ -48,7 +48,7 @@ public:
 
 
 
-  void xtestExec()
+  void testExec()
   {
     std::string outputWS;
     this->setUp_Event();
@@ -68,19 +68,23 @@ public:
     alg->setPropertyValue("OutputWorkspace", outputWS);
     alg->setPropertyValue("LogName", "proton_charge");
     //We set the minimum high enough to cut out some real charge too, not just zeros.
-    alg->setPropertyValue("MinimumValue", "-1.30e6");
+    alg->setPropertyValue("MinimumValue", "1.33e7");
     alg->setPropertyValue("MaximumValue", "1e20");
-    alg->setPropertyValue("TimeTolerance", "1e-2");
+    alg->setPropertyValue("TimeTolerance", "4e-2");
 
     alg->execute();
     TS_ASSERT( alg->isExecuted() );
-
-//    std::cout << Mantid::Kernel::DateAndTime::to_simple_string( Mantid::Kernel::DateAndTime::get_time_from_pulse_time( WS->getFirstPulseTime() ) ) << "\n";
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;
     outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
     TS_ASSERT( outWS ); //workspace is loaded
+
+//    TimeSeriesProperty<double> * log = dynamic_cast<TimeSeriesProperty<double> * >(outWS->run().getProperty("proton_charge"));
+//    std::vector<dateAndTime> times = log->timesAsVector();
+//    for (std::size_t i=0; i<times.size(); i++)
+//      std::cout << times[i] << " = " << DateAndTime::get_from_absolute_time(times[i]) << "\n";
+
 
     //Things that haven't changed
     TS_ASSERT_EQUALS( outWS->blocksize(), WS->blocksize());
@@ -89,9 +93,8 @@ public:
     //There should be some events
     TS_ASSERT_LESS_THAN( 0, outWS->getNumberEvents());
 
-    // Not many events left: 34612
     TS_ASSERT_LESS_THAN( outWS->getNumberEvents(), WS->getNumberEvents());
-    TS_ASSERT_DELTA(  outWS->getNumberEvents() , 34612, 100);
+    TS_ASSERT_DELTA(  outWS->getNumberEvents() , 547346, 100);
 
     //Proton charge is lower
     TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), WS->run().getProtonCharge() );

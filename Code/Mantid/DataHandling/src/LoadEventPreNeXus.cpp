@@ -509,6 +509,9 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
       //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
       while ( !((total_i >= event_indices[pulse_i]) && (total_i < event_indices[pulse_i+1])) && (pulse_i < numPulses-1))
         pulse_i++;
+
+      //if (pulsetimes[pulse_i] != pulsetime)    std::cout << pulse_i << " at " << pulsetimes[pulse_i] << "\n";
+
       //Save the pulse time at this index for creating those events
       pulsetime = pulsetimes[pulse_i];
     }
@@ -525,6 +528,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
 
     //The addEventQuickly method does not clear the cache, making things slightly faster.
     workspace->getEventListAtPixelID(pid).addEventQuickly(event);
+
 
     // TODO work with period
     this->num_good_events++;
