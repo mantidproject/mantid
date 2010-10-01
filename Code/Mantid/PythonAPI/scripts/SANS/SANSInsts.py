@@ -14,64 +14,6 @@ def instrument_factory(name):
     else:
         raise RuntimeError, "Instrument %s doesn't exist\n  %s" % (name, sys.exc_value)
 
-class DetectorBank:
-    def __init__(self, instr, det_type) :
-        self.parent = instr
-        #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
-        self._names = {
-          'uni' : det_type,
-          'long': instr.getStringParameter(det_type+'-detector-name')[0],
-          'short': instr.getStringParameter(det_type+'-detector-short-name')[0]}
-        
-        spec_entry = instr.getNumberParameter('first-low-angle-spec-number')
-        if len(spec_entry) > 0 :
-            self.first_spec_num = int(spec_entry[0])
-        else :
-            #'first-low-angle-spec-number' is an optimal instrument parameter
-            self.first_spec_num = 0
-        
-        self.n_columns = None
-        cols_data = instr.getNumberParameter(det_type+'-detector-num-columns')
-        if len(cols_data) > 0 : self.n_columns = int(cols_data[0])
-
-        n_rows = None
-        rows_data = instr.getNumberParameter(det_type+'-detector-num-rows')
-        if len(rows_data) > 0 : n_rows = int(rows_data[0])
-
-        #deal with LOQ's non-square front detector 
-        if (self.n_columns == None) or (n_rows == None) :
-            if (instr.getName() == 'LOQ') and (det_type == 'high-angle') :
-                self._num_pixels = 1406
-            else : raise LogicError('Number of columns or rows data missing for instrument ' + instr.name())
-        else :
-            self._num_pixels = int(self.n_columns*n_rows)
-        
-        self.last_spec_num = self.first_spec_num + self._num_pixels - 1
-        #this can be set to the name of a file with correction factor against wavelength
-        correction_file = ''
-
-    def place_after(self, previousDet):
-        self.first_spec_num = previousDet.last_spec_num + 1
-        self.last_spec_num = self.first_spec_num + self._num_pixels - 1
-
-    def name(self, form = 'long') :
-        if form.lower() == 'inst_view' : form = 'long'
-        if not self._names.has_key(form) : form = 'long'
-        
-        return self._names[form]
-
-    def isAlias(self, guess) :        
-        """
-            Detectors are often referred to by more than one name, check
-            if the supplied name is in the list
-            @param guess: this name will be searched for in the list
-            @return : True if the name was found, otherwise false
-        """
-        for name in self._names.values() :
-            if guess.lower() == name.lower() :
-                return True
-        return False
-    
 class Instrument(object):
     def __init__(self):
         """
@@ -79,11 +21,12 @@ class Instrument(object):
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """ 
     
+        self._definition_file = \
+            mtd.getConfigProperty('instrumentDefinition.directory')+'/'+self._NAME+'_Definition.xml'
         temp_WS_name = '_'+self._NAME+'instrument_definition'
         #read the information about the instrument that stored in it's xml
         LoadEmptyInstrument(
-            mtd.getConfigProperty('instrumentDefinition.directory')+'/'+self._NAME+'_Definition.xml',
-            temp_WS_name)
+            self._definition_file, temp_WS_name)
         definitionWS = mtd[temp_WS_name]  
         self.definition = definitionWS.getInstrument()
         mtd.deleteWorkspace(temp_WS_name)
@@ -131,7 +74,133 @@ class Instrument(object):
             Return the name of the instrument
         """
         return self._NAME
+    
+    def view(self, workspace_name = None):
+        """
+            Opens Mantidplot's InstrumentView displaying the current instrument
+        """
+        if workspace_name is None:
+            workspace_name = self._NAME+'_instrument_view'
+            
+        LoadEmptyInstrument(self._definition_file, workspace_name)
+        instrument_win = qti.app.mantidUI.getInstrumentView(workspace_name)
+        instrument_win.showWindow()
+
+        return workspace_name
+
+class DetectorBank:
+    def __init__(self, instr, det_type) :
+        self.parent = instr
+        #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
+        self._names = {
+          'uni' : det_type,
+          'long': instr.getStringParameter(det_type+'-detector-name')[0],
+          'short': instr.getStringParameter(det_type+'-detector-short-name')[0]}
+        #the bank is often also referred to by its location, as seen by the sample 
+        if det_type.startswith('low'):
+            position = 'rear'
+        else:
+            position = 'front'
+        self._names['position'] = position
+            
+        spec_entry = instr.getNumberParameter('first-low-angle-spec-number')
+        if len(spec_entry) > 0 :
+            self.first_spec_num = int(spec_entry[0])
+        else :
+            #'first-low-angle-spec-number' is an optimal instrument parameter
+            self.first_spec_num = 0
         
+        self.n_columns = None
+        cols_data = instr.getNumberParameter(det_type+'-detector-num-columns')
+        if len(cols_data) > 0 : self.n_columns = int(cols_data[0])
+
+        n_rows = None
+        rows_data = instr.getNumberParameter(det_type+'-detector-num-rows')
+        if len(rows_data) > 0 : n_rows = int(rows_data[0])
+
+        #deal with LOQ's non-square front detector 
+        if (self.n_columns == None) or (n_rows == None) :
+            if (instr.getName() == 'LOQ') and (det_type == 'high-angle') :
+                self._num_pixels = 1406
+            else : raise LogicError('Number of columns or rows data missing for instrument ' + instr.name())
+        else :
+            self._num_pixels = int(self.n_columns*n_rows)
+        
+        self.last_spec_num = self.first_spec_num + self._num_pixels - 1
+        #this can be set to the name of a file with correction factor against wavelength
+        correction_file = ''
+        #this corrections are set by the mask file
+        self.z_corr = 0.0
+        self.x_corr = 0.0 
+        self._y_corr = 0.0 
+        self._rot_corr = 0.0
+
+    def disable_y_and_rot_corrs(self):
+        """
+            Not all corrections are supported on all detectors
+        """
+        self._y_corr = None
+        self._rot_corr = None
+
+    def get_y_corr(self):
+        if not self._y_corr is None:
+            return self._y_corr
+        else:
+            raise NotImplemented('y correction isn''t used for this detector')
+
+    
+    def set_y_corr(self, value):
+        """
+            Only set the value if it isn't disabled
+            @param value: set y_corr to this value, unless it's disabled
+        """
+        if not self._y_corr is None:
+            self._y_corr = value
+
+    def get_rot_corr(self):
+        if not self._rot_corr is None:
+            return self._rot_corr
+        else:
+            raise NotImplemented('rot correction isn''t used for this detector')
+
+    def set_rot_corr(self, value):
+        """
+            Only set the value if it isn't disabled
+            @param value: set rot_corr to this value, unless it's disabled
+        """
+        if not self._rot_corr is None:
+            self._rot_corr = value
+
+    y_corr = property(get_y_corr, set_y_corr, None, None)
+    rot_corr = property(get_rot_corr , set_rot_corr, None, None)
+
+    def place_after(self, previousDet):
+        self.first_spec_num = previousDet.last_spec_num + 1
+        self.last_spec_num = self.first_spec_num + self._num_pixels - 1
+
+    def name(self, form = 'long') :
+        if form.lower() == 'inst_view' : form = 'long'
+        if not self._names.has_key(form) : form = 'long'
+        
+        return self._names[form]
+
+    def isAlias(self, guess) :        
+        """
+            Detectors are often referred to by more than one name, check
+            if the supplied name is in the list
+            @param guess: this name will be searched for in the list
+            @return : True if the name was found, otherwise false
+        """
+        for name in self._names.values() :
+            if guess.lower() == name.lower() :
+                return True
+        return False
+
+    def clear_corrs(self):
+        self.z_corr = self.x_corr = 0.0
+        self.y_corr = 0.0
+        self.rot_corr = 0.0
+
 class ISISInstrument(Instrument):
     # Essentially an enumeration
     class Orientation:
@@ -147,9 +216,10 @@ class ISISInstrument(Instrument):
         firstDetect = DetectorBank(self.definition, 'low-angle')
         secondDetect = DetectorBank(self.definition, 'high-angle')
         secondDetect.place_after(firstDetect)
+        secondDetect.disable_y_and_rot_corrs()
         self.DETECTORS = {'low-angle' : firstDetect}
         self.DETECTORS['high-angle'] = secondDetect
-    
+
         self.setDefaultDetector()
         # if this is set InterpolationRebin will be used on the monitor spectrum used to normalize the sample, useful because wavelength resolution in the monitor spectrum can be course in the range of interest 
         self._use_interpol_norm = False
@@ -171,13 +241,6 @@ class ISISInstrument(Instrument):
         
         # Rear_Det_X  Will Be Needed To Calc Relative X Translation Of Front Detector 
         self.REAR_DET_X = 0
-
-        self.FRONT_DET_Z_CORR = 0.0
-        self.FRONT_DET_Y_CORR = 0.0 
-        self.FRONT_DET_X_CORR = 0.0 
-        self.FRONT_DET_ROT_CORR = 0.0
-        self.REAR_DET_Z_CORR = 0.0 
-        self.REAR_DET_X_CORR = 0.0
 
         #used in transmission calculations
         self.trans_monitor = int(self.definition.getNumberParameter(
@@ -207,7 +270,7 @@ class ISISInstrument(Instrument):
         if self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
     
-    def otherDetector(self) :
+    def other_detector(self) :
         if not self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
     
@@ -217,20 +280,20 @@ class ISISInstrument(Instrument):
                 return detect
 
     def listDetectors(self) :
-        return self.cur_detector().name(), self.otherDetector().name()
+        return self.cur_detector().name(), self.other_detector().name()
         
     def isHighAngleDetector(self, detName) :
         if self.DETECTORS['high-angle'].isAlias(detName) :
             return True
 
     def isDetectorName(self, detName) :
-        if self.otherDetector().isAlias(detName) :
+        if self.other_detector().isAlias(detName) :
             return True
         
         return self.cur_detector().isAlias(detName)
 
     def setDetector(self, detName) :
-        if self.otherDetector().isAlias(detName) :
+        if self.other_detector().isAlias(detName) :
             self.lowAngDetSet = not self.lowAngDetSet
             return True
         else:
@@ -253,7 +316,7 @@ class ISISInstrument(Instrument):
             Check if one of the efficiency files hasn't been set and assume the other is to be used
         """
         a = self.cur_detector()
-        b = self.otherDetector()
+        b = self.other_detector()
         if a.correction_file == '' and b.correction_file != '':
             a.correction_file = b.correction_file != ''
         if b.correction_file == '' and a.correction_file != '':
@@ -335,13 +398,15 @@ class SANS2D(ISISInstrument):
             yshift = (self.FRONT_DET_Y_CORR /1000.  - ybeam)
             # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
             # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-            zshift = (self.FRONT_DET_Z + self.FRONT_DET_Z_CORR + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000. - self.FRONT_DET_DEFAULT_SD_M
+            zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000.
+            zshift -= self.FRONT_DET_DEFAULT_SD_M
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0, 0.0], [0.0, 0.0]
         else:
             xshift = -xbeam
             yshift = -ybeam
-            zshift = (self.REAR_DET_Z + self.REAR_DET_Z_CORR)/1000. - self.REAR_DET_DEFAULT_SD_M
+            zshift = (self.REAR_DET_Z + self.cur_detector().z_corr)/1000.
+            zshift -= self.REAR_DET_DEFAULT_SD_M
             mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0,0.0], [xshift, yshift]

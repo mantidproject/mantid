@@ -364,7 +364,7 @@ class RunDetails(object):
 
 	def getDirectRaw(self):
 		return self._direct_raw
-
+##START REMOVED
  	def getMaskPtMin(self):
 		return self._maskrmin
 
@@ -376,7 +376,7 @@ class RunDetails(object):
 
  	def setMaskPtMax(self, rmax):
 		self._maskrmax = rmax
-	
+##END REMOVED
 	def getSuffix(self):
 		return self._suffix
 		

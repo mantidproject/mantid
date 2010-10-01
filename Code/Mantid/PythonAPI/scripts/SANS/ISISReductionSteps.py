@@ -12,6 +12,9 @@ import SANSInsts
 import os
 import math
 
+#TODO: remove when center finding is working 
+DEL__FINDING_CENTRE_ = False
+
 def _issueWarning(msg):
     """
         Issues a Mantid message
@@ -138,7 +141,6 @@ class LoadRun(ReductionStep):
         return newName
     
     def _clearPrevious(self, inWS, others = []):
-        print type(inWS)
         if inWS != None:
             if type(inWS) == SANSUtility.WorkspaceDetails:
                 inWS = inWS.getName()
@@ -425,18 +427,29 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         self._specmask_f=specmask_f
         self.lim_phi_xml = ''
         
-    def execute(self, reducer, workspace):
-        SANSReductionSteps.Mask.execute(self, reducer, workspace)
+        ########################## Masking  ################################################
+        # Mask the corners and beam stop if radius parameters are given
 
-        self._ConvertToSpecList(self._specmask)
-        # Finally apply masking to get the correct phi range
-        if self.lim_phi == True:
-        # Detector has been moved such that beam centre is at [0,0,0]
-            self.mask_phi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
-            
-        if self.lim_phi_xml != '':
-            MaskDetectorsInShape(workspace, self.lim_phi_xml)
-    
+        self.maskpt_rmin = [0.0,0.0]
+        self.maskpt_rmax = [xcentre, ycentre]
+        self.min_radius = None
+        self.max_radius = None
+
+    def set_radi(self, min, max):
+        self.min_radius = float(min)/1000.
+        self.max_radius = float(max)/1000.
+
+        if DEL__FINDING_CENTRE_ == True:
+            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+                self.add_cylinder('center_find_beam_cen', self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
+            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+                self.add_outside_cylinder('center_find_beam_cen', self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
+        else:
+            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+                self.add_cylinder('beam_stop', self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
+            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+                self.add_outside_cylinder('beam_area', self.max_radius, self._maskpt_rmax[0], self._maskpt_rmax[1])
+
     def parse_instruction(self, details):
         """
             Parse an instruction line from an ISIS mask file
@@ -502,7 +515,7 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         else:
             pass
 
-    def _ConvertToSpecList(self, maskstring):
+    def _ConvertToSpecList(self, maskstring, detector):
         '''
             Convert a mask string to a spectra list
             6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
@@ -513,7 +526,6 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         masklist = maskstring.split(',')
         
         orientation = reducer.instrument.get_orientation
-        detector = reducer.instrument.cur_detector()
         firstspec = detector.first_spec_num
         dimension = detector.n_columns
         speclist = ''
@@ -664,6 +676,47 @@ class Mask_ISIS(SANSReductionSteps.Mask):
     
         self._mask_phi('unique phi', [0,0,0], phimin,phimax,phimirror)
 
+    def execute(self, reducer, workspace):
+        #set up the spectra lists and shape xml to mask
+        detector = ReductionSingleton().getDetector('rear')
+        #rear specific masking
+        self._ConvertToSpecList(self._specmask_r)
+        #masking for both detectors
+        self._ConvertToSpecList(self._specmask)
+        #Time mask
+        SANSUtility.MaskByBinRange(workspace,self._timemask_r)
+        SANSUtility.MaskByBinRange(workspace,self._timemask)
+
+        detector = ReductionSingleton().getDetector('front')
+        #front specific masking
+        self._ConvertToSpecList(self._specmask_f)
+        #masking for both detectors
+        self._ConvertToSpecList(self._specmask)
+        #Time mask
+        SANSUtility.MaskByBinRange(workspace,self._timemask_f)
+        SANSUtility.MaskByBinRange(workspace,self._timemask)
+
+        #now do the masking
+        SANSReductionSteps.Mask.execute(self, reducer, workspace)
+
+        # Finally apply masking to get the correct phi range
+        if self.lim_phi == True:
+        # Detector has been moved such that beam centre is at [0,0,0]
+            self.mask_phi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
+            
+        if self.lim_phi_xml != '':
+            MaskDetectorsInShape(workspace, self.lim_phi_xml)
+            
+    def __str__(self):
+        return '    radius', self.min_radius, self.max_radius+'\n'+\
+            '    global spectrum mask: ', str(self._specmask)+'\n'+\
+            '    rear spectrum mask: ', str(self._specmask_r)+'\n'+\
+            '    front spectrum mask: ', str(self._specmask_f)+'\n'+\
+            '    global time mask: ', str(self._timemask)+'\n'+\
+            '    rear time mask: ', str(self._timemask_r)+'\n'+\
+            '    front time mask: ', str(self._timemask_f)+'\n'
+
+
 class LoadSample(LoadRun):   
     """
     """
@@ -808,21 +861,35 @@ def _padRunNumber(run_no, field_width):
 
 
 class UnitsConvert(ReductionStep):
-    def __init__(self, units, w_low = None, w_high = None, w_step = None):
+    def __init__(self, units, w_low = None, w_step = None, w_high = None):
         #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(UnitsConvert, self).__init__()
         self._units = units
-        self.wav_low = w_low
-        self.wav_high = w_high
-        self.wav_step = w_step
+        self.wav_low = None
+        self.wav_high = None
+        self.wav_step = None
+        self.set_rebin(w_low, w_step, w_high)
 
     def execute(self, reducer, workspace):
         ConvertUnits(workspace, workspace, self._units)
-        bins = str(self.wav_low)+','+str(self.wav_high)+','+str(self.wav_step)
-        Rebin(workspace, workspace, bins)
+        Rebin(workspace, workspace, self.get_rebin())
 
     def get_rebin(self):
         return str(self.wav_low)+', ' + str(self.wav_step) + ', ' + str(self.wav_high)
+    
+    def set_rebin(self, w_low = None, w_step = None, w_high = None):
+        if not w_low is None:
+            self.wav_low = float(w_low)
+        if not w_step is None:
+            self.wav_step = float(w_step)
+        if not w_high is None:
+            self.wav_high = float(w_high)
+
+    def get_range(self):
+        return str(self.wav_low)+'_'+'_'+str(self.wav_high)
+
+    def set_range(self, w_low = None, w_high = None):
+        self.set_rebin(w_low, None, w_high)
 
     def __str__(self):
         return '    Wavelength range: ' + self.get_rebin()
@@ -838,8 +905,8 @@ class ConvertToQ(ReductionStep):
         #if true gravity is taken into account in the Q1D calculation
         self._use_gravity = False
     
-    def set_output_type(self, output):
-        self._output_type = self.output_types[output]
+    def set_output_type(self, discript):
+        self._output_type = self._output_types[discript]
         
     def set_gravity(self, flag):
         if isinstance(flag, bool) or isinstance(flag, int):
@@ -848,12 +915,18 @@ class ConvertToQ(ReductionStep):
             _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
                    
     def execute(self, reducer, workspace):
-        #Steve, I'm not sure how this works
-        errorsWS = reducer._norm_mon.prenormed
+        #Steve, I'm not sure this contains good error values 
+        errorsWS = reducer.norm_mon.prenormed
         if self._output_type == 'Q1D':
             Q1D(workspace, errorsWS, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
-        if self.output_type == 'Qxy':
+            rem_zeros = SANSReductionSteps.StripEndZeros()
+            rem_zeros.execute(reducer, workspace)
+
+        elif self._output_type == 'Qxy':
             Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY)
+
+        else:
+            raise NotImplementedError('The type of Q reduction hasn''t been set, e.g. 1D or 2D')
 
 class NormalizeToMonitor(SANSReductionSteps.Normalize):
     """
@@ -893,7 +966,7 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
     
         ConvertUnits(norm_ws, norm_ws, "Wavelength")
         
-        wavbin = str(reducer.to_wavelen.get_rebin())
+        wavbin = reducer.to_wavelen.get_rebin()
         
         if reducer.instrument.is_interpolating_norm():
             InterpolatingRebin(norm_ws, norm_ws, wavbin)
@@ -977,7 +1050,7 @@ class CalculateTransmission(ReductionStep):
             result = fittedtransws
     
         if self.use_def_trans == DefaultTrans:
-            tmp_ws = 'trans_' + run_setup.getSuffix() + '_' + str(reducer.to_wavelen.wav_low) + '_' + str(reducer.to_wavelen.wav_high)
+            tmp_ws = 'trans_' + run_setup.getSuffix() + '_' + reducer.to_wavelen.get_range()
             CropWorkspace(result, tmp_ws, XMin = str(reducer.to_wavelen.wav_low), XMax = str(reducer.to_wavelen.wav_high))
             trans_ws = tmp_ws
         else: 
@@ -985,15 +1058,21 @@ class CalculateTransmission(ReductionStep):
 
         Divide(workspace, trans_ws, workspace)
 
-class CorDetectorAndISISScalings(SANSReductionSteps.CorrectToFileStep):
+class ISISCorrections(SANSReductionSteps.CorrectToFileStep):
     def __init__(self, corr_type = '', operation = ''):
-        super(CorDetectorAndISISScalings, self).__init__('', "Wavelength", "Divide")
+        super(ISISCorrections, self).__init__('', "Wavelength", "Divide")
+
+        # Scaling values [%]
+        self.rescale= 100.0
+    
+    def set_filename(self, filename):
+        raise AttributeError('The correction must be set in the instrument, or use the CorrectionToFileStep instead')
 
     def execute(self, reducer, workspace):
+        self.filename = reducer.instrument.cur_detector().correction_file
         super(CorDetectorAndISISScalings, self).execute(reducer, workspace)
 
-        self.filename = reducer.instrument.cur_detector().correction_file
-        scalefactor = RESCALE
+        scalefactor = self.rescale
         # Data reduced with Mantid is a factor of ~pi higher than colette.
         # For LOQ only, divide by this until we understand why.
         if reducer.instrument.name() == 'LOQ':

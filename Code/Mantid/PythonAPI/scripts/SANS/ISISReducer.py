@@ -28,18 +28,13 @@ class ISISReducer(SANSReducer):
         TODO: need documentation for all the data member
         TODO: need to see whether all those data members really belong here
     """
-    RMIN = None
-    RMAX = None
     DEF_RMIN = None
     DEF_RMAX = None
     
     Q_REBIN = None
     QXY2 = None
     DQY = None
-    
-    # Scaling values [%]
-    RESCALE = 100.0
-    
+
     BACKMON_START = None
     BACKMON_END = None
     
@@ -75,13 +70,15 @@ class ISISReducer(SANSReducer):
                             ISISReductionSteps.LoadSample())
         self._trans_loader = self.append_step(
                             ISISReductionSteps.LoadTransmissions())
-        self._norm_mon = self.append_step(
-                            ISISReductionSteps.NormalizeToMonitor())
+        self.mask = self.append_step(
+                            ISISReductionSteps.Mask_ISIS())
         self.to_wavelen = self.append_step(
                             ISISReductionSteps.UnitsConvert('Wavelength'))
+        self.norm_mon = self.append_step(
+                            ISISReductionSteps.NormalizeToMonitor())
 #        self._add(ISISReductionSteps.CalculateTransmission())
-        self.append_step(
-                            ISISReductionSteps.CorDetectorAndISISScalings())
+        self._corr_and_scale = self.append_step(
+                            ISISReductionSteps.ISISCorrections())
 
         self._to_Q = self.append_step(
                             ISISReductionSteps.ConvertToQ())
@@ -175,27 +172,13 @@ class ISISReducer(SANSReducer):
             self.instrument.use_interpol_trans_calc = True                    
                       
     def _initialize_mask(self):
-        self.instrument.FRONT_DET_Z_CORR = 0.0
-        self.instrument.FRONT_DET_Y_CORR = 0.0
-        self.instrument.FRONT_DET_X_CORR = 0.0
-        self.instrument.FRONT_DET_ROT_CORR = 0.0
-        self.instrument.REAR_DET_Z_CORR = 0.0
-        self.instrument.REAR_DET_X_CORR = 0.0
-
-        self.mask('MASK/CLEAR')
-        self.mask('MASK/CLEAR/TIME')
-        self.instrument.cur_detector().correction_file = ''
-        self.instrument.otherDetector().correction_file = ''
+        self._restore_defaults()
+        
         self.NORMALISATION_FILE = None
 
-        self.RMIN = None
-        self.RMAX = None
         self.DEF_RMIN = None
         self.DEF_RMAX = None
        
-        self.to_wavelen.wav_low = None
-        self.to_wavelen.wav_high = None
-        self.to_wavelen.wav_step = None
         self.Q_REBIN = None
         self.QXY = None
         self.DQY = None
@@ -203,17 +186,7 @@ class ISISReducer(SANSReducer):
         self.BACKMON_END = None
         self.BACKMON_START = None
 
-        self.RESCALE = 100.0
-
-    def mask(self, instruction):
-        if self._mask is None:
-            masker = ISISReductionSteps.Mask_ISIS()
-            self.set_mask(masker)
-        self._mask.parse_instruction(instruction)
-    
-    def set_wavelength_range(self, start, end):
-        self.to_wavlen.wav_low = start
-        self.to_wavlen.wav_high = end
+        self._corr_and_scale.rescale = 100.0
 
     def reduce(self):
         """
@@ -234,9 +207,7 @@ class ISISReducer(SANSReducer):
             
             #TODO: set up the final workspace name
             if finding_centre == False:
-                self.final_workspace = file_ws
-                self.final_workspace += '_' + str(self.to_wavelen.wav_low)
-                self.final_workspace += '_' + str(self.to_wavelen.wav_high)
+                self.final_workspace = file_ws + self.to_wavelen.get_range()
             else:
                 self.final_workspace = file_ws.split('_')[0] + '_quadrants'
             #self._data_files[final_workspace] = self._data_files[file_ws]
@@ -265,7 +236,7 @@ class ISISReducer(SANSReducer):
                     for key, value in quadrants.iteritems():
                         old_name = self.final_workspace + '_' + str(key)
                         RenameWorkspace(old_name, value)
-                        AddSampleLog(value, "UserFile", self._maskfile)       
+                        AddSampleLog(value, "UserFile", self.maskfile)       
 
     def read_mask_file(self, filename):
         """
@@ -297,7 +268,7 @@ class ISISReducer(SANSReducer):
                 self._readMONValues(line)
             
             elif upper_line.startswith('MASK'):
-                self.mask(upper_line)
+                self.mask.parse_instruction(upper_line)
             
             elif upper_line.startswith('SET CENTRE'):
                 values = upper_line.split()
@@ -305,7 +276,7 @@ class ISISReducer(SANSReducer):
             
             elif upper_line.startswith('SET SCALES'):
                 values = upper_line.split()
-                self.RESCALE = float(values[2]) * 100.0
+                self._corr_and_scale.rescale = float(values[2]) * 100.0
             
             elif upper_line.startswith('SAMPLE/OFFSET'):
                 values = upper_line.split()
@@ -402,9 +373,7 @@ class ISISReducer(SANSReducer):
             minval = maxval = step_type = step_size = None
     
         if limit_type.upper() == 'WAV':
-            self.to_wavelen.wav_low = float(minval)
-            self.to_wavelen.wav_high = float(maxval)
-            self.to_wavelen.wav_step = float(step_type + step_size)
+            self.to_wavelen.set_rebin(minval, step_type + step_size, maxval)
         elif limit_type.upper() == 'Q':
             if not rebin_str is None:
                 self.Q_REBIN = rebin_str
@@ -414,10 +383,9 @@ class ISISReducer(SANSReducer):
             self.QXY2 = float(maxval)
             self.DQXY = float(step_type + step_size)
         elif limit_type.upper() == 'R':
-            self.RMIN = float(minval)/1000.
-            self.RMAX = float(maxval)/1000.
-            self.DEF_RMIN = self.RMIN
-            self.DEF_RMAX = self.RMAX
+            self.mask.set_radi(minval, maxval)
+            self.DEF_RMIN = float(minval)/1000.
+            self.DEF_RMAX = float(maxval)/1000.
         elif limit_type.upper() == 'PHI':
             self.set_phi_limit(float(minval), float(maxval), True) 
         elif limit_type.upper() == 'PHI/NOMIRROR':
@@ -462,7 +430,7 @@ class ISISReducer(SANSReducer):
                     if parts[0].upper() == 'DIRECT':
                         self.instrument.cur_detector().correction_file \
                             = filepath
-                        self.instrument.otherDetector().correction_file \
+                        self.instrument.other_detector().correction_file \
                            = filepath
                     elif parts[0].upper() == 'HAB':
                         self.instrument.getDetector('HAB').correction_file \
@@ -485,53 +453,42 @@ class ISISReducer(SANSReducer):
                     _issueWarning('Unable to parse monitor line "' + line + '"')
             else:
                 _issueWarning('Unable to parse monitor line "' + line + '"')
-                            
+
     def _readDetectorCorrections(self, details):
         values = details.split()
         det_name = values[0]
         det_axis = values[1]
         shift = float(values[2])
     
-        if det_name == 'REAR':
-            if det_axis == 'X':
-                self.instrument.REAR_DET_X_CORR = shift
-            elif det_axis == 'Z':
-                self.instrument.REAR_DET_Z_CORR = shift
-            else:
-                pass
+        detector = self.instrument.getDetector(det_name)
+        if det_axis == 'X':
+            detector.x_corr = shift
+        elif det_axis == 'Y':
+            detector.y_corr = shift
+        elif det_axis == 'Z':
+            detector.z_corr = shift
+        elif det_axis == 'ROT':
+            detector.rot_corr = shift
         else:
-            if det_axis == 'X':
-                self.instrument.FRONT_DET_X_CORR = shift
-            elif det_axis == 'Y':
-                self.instrument.FRONT_DET_Y_CORR = shift
-            elif det_axis == 'Z':
-                self.instrument.FRONT_DET_Z_CORR = shift
-            elif det_axis == 'ROT':
-                self.instrument.FRONT_DET_ROT_CORR = shift
-            else:
-                pass
-
+            raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
     def set_workspace_name(self, name):
         RenameWorkspace(self.final_workspace, name)
 
-    def _restore_defaults():
-        Mask('MASK/CLEAR')
-        Mask('MASK/CLEAR/TIME')
-        SetRearEfficiencyFile(None)
-        SetFrontEfficiencyFile(None)
-        self.RMIN = self.RMAX = self.DEF_RMIN = self.DEF_RMAX
+    def _restore_defaults(self):
+        self.mask.parse_instruction('MASK/CLEAR')
+        self.mask.parse_instruction('MASK/CLEAR/TIME')
+
+        self.DEF_RMIN = self.DEF_RMAX
         self.Q_REBIN = self.QXY = self.DQY = None
-        global RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS
+        global SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS
         # Scaling values
-        self.RESCALE = 100.  # percent
-        INSTRUMENT.FRONT_DET_Z_CORR = INSTRUMENT.FRONT_DET_Y_CORR = INSTRUMENT.FRONT_DET_X_CORR = INSTRUMENT.FRONT_DET_ROT_CORR = 0.0
-        INSTRUMENT.REAR_DET_Z_CORR = INSTRUMENT.REAR_DET_X_CORR = 0.0
+        self._corr_and_scale.rescale = 100.  # percent
         
         self.BACKMON_START = self.BACKMON_END = None
-        self._init_steps()
         
     def post_process(self):
-        if not self._norm_mon.prenormed is None:
-            mtd.deleteWorkspace(self._norm_mon.prenormed)
+        print 'Preparing to delete' + self.norm_mon.prenormed
+        if not self.norm_mon.prenormed is None:
+            mtd.deleteWorkspace(self.norm_mon.prenormed)
  

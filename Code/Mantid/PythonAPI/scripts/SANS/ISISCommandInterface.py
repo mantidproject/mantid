@@ -9,7 +9,6 @@ import os
 import SANSInsts
 from CommandInterface import *
 import ISISReducer
-Clear()
 
 #remove the following
 DEL__FINDING_CENTRE_ = False
@@ -135,8 +134,6 @@ def AssignSample(sample_run, reload = True, period = -1):
     _printMessage('AssignSample("' + sample_run + '")')
     ReductionSingleton().append_data_file(sample_run)
     ReductionSingleton().load_set_options(reload, period)
-    #loader = LoadSample()
-    #loader.execute(ReductionSingleton(), None)
     
     
 def SetCentre(XVAL, YVAL):
@@ -149,76 +146,17 @@ def GetMismatchedDetList():
     """
     return ReductionSingleton().instrument.get_marked_dets()
 
-def _applyMasking(workspace, maskStep, limitphi = True, useActiveDetector = True):
-    # mask areas both detectors
-    maskStep.ConvertToSpecList(SPECMASKSTRING)
-
-    #Time mask
-    SANSUtility.MaskByBinRange(workspace,TIMEMASKSTRING)
-    
-    #this function only masks one detector, find out which one that should be
-    setLowAngle = ReductionSingleton().instrument.lowAngDetSet
-    if not useActiveDetector :
-        setLowAngle = not ReductionSingleton().instrument.lowAngDetSet
-        
-    if setLowAngle :
-        specstring = SPECMASKSTRING_R
-        timestring = TIMEMASKSTRING_R
-    else:
-        specstring = SPECMASKSTRING_F
-        timestring = TIMEMASKSTRING_F
-
-    maskStep.ConvertToSpecList(specstring) 
-
-    SANSUtility.MaskByBinRange(workspace, timestring)
-
 def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True):
-    if not wav_start is None:
-        ReductionSingleton().to_wavelen.wav_low = wav_start
-    if not wav_end is None:
-        ReductionSingleton().to_wavelen.wav_high = wav_end
+    ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
 
     _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
     
-    # Run correction function
+
     if DEL__FINDING_CENTRE_ == True:
         final_workspace = wsname_cache.split('_')[0] + '_quadrants'
-#    else:
-#        final_workspace = wsname_cache + '_' + str(wav_start) + '_' + str(wav_end)
 #    sample_setup.setReducedWorkspace(final_workspace)
 
-#    ########################## Masking  ################################################
-#    # Mask the corners and beam stop if radius parameters are given
-#    masking = ISISReductionSteps.Mask_ISIS()
 
-#    maskpt_rmin = run_setup.getMaskPtMin()
-#    maskpt_rmax = run_setup.getMaskPtMax()
-#    if finding_centre == True:
-#        if RMIN > 0.0: 
-#            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
-#        if RMAX > 0.0:
-#            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmin[0], maskpt_rmin[1])
-#    else:
-#        if RMIN > 0.0: 
-#            masking.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
-#        if RMAX > 0.0:
-#            masking.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
-
-#    _applyMasking(final_result, True ,True)
-    
-#    ReductionSingleton().set_mask(masking)
-
-
-    ###################################################################################
-
-    ##################################################################################   
-        
-    ###################################################################################
-        
-    ############################# Scale by volume #####################################
-    ################################################## ################################
-        
-    ################################ Correction in Q space ############################
     # 1D
     if ReductionSingleton().CORRECTION_TYPE == '1D':
         if DEL__FINDING_CENTRE_ == True:
@@ -226,10 +164,10 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True):
             return
     ReductionSingleton().reduce()
     
-def SetWavelengthRange(start, end):
-    ReductionSingleton().set_wavelength_range(start, end)
+def _SetWavelengthRange(start, end):
+    ReductionSingleton().to_wavelen.set_range(start, end)
 
-def SetWorkspaceName(name):
+def _SetWorkspaceName(name):
     ReductionSingleton().set_workspace_name(name)
 
 
@@ -258,9 +196,6 @@ def displayUserFile():
     print '    radius', RMIN, RMAX
     print '    direct beam file rear:', DIRECT_BEAM_FILE_R
     print '    direct beam file front:', DIRECT_BEAM_FILE_F
-    print '    global spectrum mask: ', SPECMASKSTRING
-    print '    rear spectrum mask: ', SPECMASKSTRING_R
-    print '    front spectrum mask: ', SPECMASKSTRING_F
     print '    global time mask: ', TIMEMASKSTRING
     print '    rear time mask: ', TIMEMASKSTRING_R
     print '    front time mask: ', TIMEMASKSTRING_F
@@ -388,32 +323,10 @@ def PlotResult(workspace):
 ##################### View mask details #####################################################
 
 def ViewCurrentMask():
-    top_layer = 'CurrentMask'
-    LoadEmptyInstrument(INSTR_DIR + '/' + INSTRUMENT.name() + "_Definition.xml",top_layer)
-    if RMIN > 0.0: 
-        SANSUtility.MaskInsideCylinder(top_layer, RMIN, XBEAM_CENTRE, YBEAM_CENTRE)
-    if RMAX > 0.0:
-        SANSUtility.MaskOutsideCylinder(top_layer, RMAX, 0.0, 0.0)
+    #get the reducer to run the mask step if it hasn't already
+    ReductionSingleton().reduce(mask)
+    ReductionSingleton().mask.view_mask()
 
-    dimension = SANSUtility.GetInstrumentDetails(INSTRUMENT)[0]
-
-    #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
-    #start with the currently selected detector
-    firstSpec1 = INSTRUMENT.cur_detector().firstSpec
-    _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
-    #now the other detector
-    firstSpec2 = INSTRUMENT.otherDetector().firstSpec
-    _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
-    
-    # Mark up "dead" detectors with error value 
-    FindDeadDetectors(top_layer, top_layer, DeadValue=500)
-
-    # Visualise the result
-    instrument_win = qti.app.mantidUI.getInstrumentView(top_layer)
-    instrument_win.showWindow()
-############################################################################################################################
-
-############################################################################################
 # Print a test script for Colette if asked
 def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvfile = '', savepath = ''):
     script = ''

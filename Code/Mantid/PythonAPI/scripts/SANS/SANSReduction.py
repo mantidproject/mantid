@@ -23,8 +23,8 @@ import SANSUtility
 import SANSInsts
 import math
 from mantidsimple import *
-# disable plotting if running outside Mantidplot
 ##START REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
+# disable plotting if running outside Mantidplot
 try:
     from mantidplot import plotSpectrum, mergePlots
 except ImportError:
@@ -42,6 +42,7 @@ except ImportError:
         return []
 ##END REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 
+NORMALISATION_FILE = None
 # The workspaces
 SCATTER_SAMPLE = None
 SCATTER_CAN = SANSUtility.WorkspaceDetails('', -1)
@@ -138,11 +139,11 @@ TRANS_WAV2_FULL = None
 #                              Interface functions (to be called from scripts or the GUI)
 #
 ###################################################################################################################
-_NOPRINT_ = False
-_VERBOSE_ = False
 DefaultTrans = True
 NewTrans = False
 ##START REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
+_NOPRINT_ = False
+_VERBOSE_ = False
 def SetNoPrintMode(quiet = True):
     global _NOPRINT_
     _NOPRINT_ = quiet
@@ -313,7 +314,8 @@ def AssignCan(can_run, reload = True, period = -1):
         return '','()'
     if reset == True:
         _CAN_SETUP  = None
-    
+
+
     try:
         logvalues = INSTRUMENT.load_detector_logs(logname,filepath)
         if logvalues == None:
@@ -452,7 +454,8 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
         except RuntimeError, details:
             _issueWarning(str(details))
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
-            
+
+
     inWS = SANSUtility.WorkspaceDetails(wkspname, shortrun_no)
     return inWS,True, INSTRUMENT.name() + logname, filepath, nPeriods
 
@@ -567,7 +570,7 @@ def LimitsQ(*args):
 def LimitsQXY(qmin, qmax, step, type):
     _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
-    
+##REMOVED START
 def LimitsPhi(phimin, phimax, use_mirror=True):
     if use_mirror :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
@@ -575,7 +578,7 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
     else :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
         _readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax))
-
+##REMOVED END
 def Gravity(flag):
     _printMessage('Gravity(' + str(flag) + ')')
     if isinstance(flag, bool) or isinstance(flag, int):
@@ -670,7 +673,6 @@ def SetCentre(XVAL, YVAL):
     global XBEAM_CENTRE, YBEAM_CENTRE
     XBEAM_CENTRE = XVAL/1000.
     YBEAM_CENTRE = YVAL/1000.
-##END REMOVED STEVE (ISISCOmmandInterface.py)
 
 #####################################
 # Set the phi limit
@@ -696,7 +698,7 @@ def SetPhiLimit(phimin,phimax, phimirror=True):
     PHIMIN = phimin
     PHIMAX = phimax
     PHIMIRROR = phimirror
-    
+##END REMOVED STEVE (ISISCOmmandInterface.py)
 ##START REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
 def _restore_defaults():
 
@@ -718,6 +720,9 @@ def _restore_defaults():
     
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
+    
+    global NORMALISATION_FILE
+    NORMALISATION_FILE = None
 ##START REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
 ####################################
 # Add a mask to the correct string
@@ -967,7 +972,7 @@ def _readMONValues(line):
             _issueWarning('Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=')
         SetTransSpectrum(int(parts[1]), interpolate)
 
-    elif 'DIRECT' in details.upper():
+    elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
         parts = details.split("=")
         if len(parts) == 2:
             filepath = parts[1].rstrip()
@@ -984,6 +989,8 @@ def _readMONValues(line):
                     SetFrontEfficiencyFile(filepath)
                 elif parts[0].upper() == 'HAB':
                     SetFrontEfficiencyFile(filepath)
+                elif parts[0].upper() == 'FLAT':
+                    SetDetectorFloodFile(filepath)
                 else:
                     pass
             elif len(parts) == 2:
@@ -1053,6 +1060,10 @@ def SetRearEfficiencyFile(filename):
 def SetFrontEfficiencyFile(filename):
     global DIRECT_BEAM_FILE_F
     DIRECT_BEAM_FILE_F = filename
+
+def SetDetectorFloodFile(filename):
+    global NORMALISATION_FILE
+    NORMALISATION_FILE = filename
 
 def displayMaskFile():
     print '-- Mask file defaults --'
@@ -1191,7 +1202,7 @@ def _init_run(raw_ws, beamcoords, emptycell):
     else:
         return SANSUtility.RunDetails(raw_ws, final_ws, TRANS_SAMPLE, DIRECT_SAMPLE, maskpt_rmin, maskpt_rmax, 'sample')
 ##REMOVED STEVE 08 September 2010
-##
+##START REMOVED ISISReductionSteps
 # Setup the transmission workspace
 ##
 def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_trans):
@@ -1264,8 +1275,8 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         return tmp_ws
     else: 
         return result
-
-
+##END REMOVE (ISISReductionSteps
+##REMOVED STEVE 08 September 2010
 ##
 # Apply the spectrum and time masks to one detector in a given workspace
 ##
@@ -1293,12 +1304,13 @@ def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orien
     SANSUtility.MaskBySpecNumber(workspace, speclist)
 
     SANSUtility.MaskByBinRange(workspace, timestring)
-##REMOVED STEVE 08 September 2010
+##END REMOVED STEVE
+##START REMOVED STEVE
     # Finally apply masking to get the correct phi range
     if limitphi == True:
         # Detector has been moved such that beam centre is at [0,0,0]
         SANSUtility.LimitPhi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
-##REMOVED STEVE 08 September 2010
+##END REMOVED STEVE
 ##START REMOVED STEVE 13 September 2010 (ISISCommandInterface.py)
 def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False):
     '''Performs the data reduction steps'''
@@ -1341,9 +1353,15 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     if BACKMON_START != None and BACKMON_END != None:
         FlatBackground(monitorWS, monitorWS, StartX = BACKMON_START, EndX = BACKMON_END, WorkspaceIndexList = '0')
     
-    # Get the bank we are looking at
     final_result = run_setup.getReducedWorkspace()
-    CropWorkspace(sample_name, final_result,
+    normalised = SCATTER_SAMPLE.getName()
+    if not NORMALISATION_FILE is None:
+        if not NORMALISATION_FILE == "":
+            normalised = final_result
+            CorrectToFile(SCATTER_SAMPLE.getName(), NORMALISATION_FILE, normalised, 'SpectrumNumber', 'Divide')
+
+    # Get the bank we are looking at
+    CropWorkspace(normalised, final_result,
         StartWorkspaceIndex = (SPECMIN - 1), EndWorkspaceIndex = str(SPECMAX - 1))
     #####################################################################################
         
@@ -1543,12 +1561,13 @@ def RunReduction(coords):
         if SCATTER_CAN.getName() != '':
             MoveInstrumentComponent(SCATTER_CAN.getName(),
              ComponentName=currentDet, X=xshift, Y=yshift, RelativePosition="1")
-
+##START REMOVED
     _SAMPLE_SETUP.setMaskPtMin([0.0,0.0])
     _SAMPLE_SETUP.setMaskPtMax([xcentre, ycentre])
     if _CAN_SETUP != None:
         _CAN_SETUP.setMaskPtMin([0.0, 0.0])
         _CAN_SETUP.setMaskPtMax([xcentre, ycentre])
+##END REMOVED
 
     WavRangeReduction(WAV1, WAV2, DefaultTrans, finding_centre = True)
     return CalculateResidue()
@@ -1642,7 +1661,7 @@ def ViewCurrentMask():
     firstSpec1 = INSTRUMENT.cur_detector().firstSpec
     _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
     #now the other detector
-    firstSpec2 = INSTRUMENT.otherDetector().firstSpec
+    firstSpec2 = INSTRUMENT.other_detector().firstSpec
     _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
     
     # Mark up "dead" detectors with error value 

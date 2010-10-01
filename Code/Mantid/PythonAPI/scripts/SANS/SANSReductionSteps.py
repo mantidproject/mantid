@@ -586,7 +586,7 @@ class Mask(ReductionStep):
             '</infinite-cylinder>\n'
 
     def add_cylinder(self, id, radius, xcentre, ycentre):
-        '''Mask a cylinder on the input workspace.'''
+        '''Mask the inside of a cylinder on the input workspace.'''
         self.add_xml_shape(id,
             self._infinite_cylinder(id, [xcentre, ycentre, 0.0], radius, [0,0,1]))
 
@@ -619,15 +619,29 @@ class Mask(ReductionStep):
             
         return "Mask applied"
 
+    def view_mask(self):
+        """
+            Display the masked detectors in the bank in a different color
+            in instrument view
+        """
+        ws_name = 'CurrentMask'
+        ReductionSingleton().instrument.view(ws_name)
+        # Mark up "dead" detectors with error value 
+        FindDeadDetectors(ws_name, ws_name, DeadValue=500)
+
 class CorrectToFileStep(ReductionStep):
     def __init__(self, file = '', corr_type = '', operation = ''):
         super(CorrectToFileStep, self).__init__()
-        self.filename = file
+        self._filename = file
         self._corr_type = corr_type
         self._operation = operation
 
+    def set_filename(self, filename):
+        self._filename = filename
+
     def execute(self, reducer, workspace):
-        CorrectToFile(workspace, self.filename, workspace,
+        if self.filename != '':
+            CorrectToFile(workspace, self._filename, workspace,
                                 self._corr_type, self._operation)
             
             
@@ -794,6 +808,9 @@ class StripEndZeros(ReductionStep):
         
     def execute(self, reducer, workspace):
         result_ws = mantid.getMatrixWorkspace(workspace)
+        if ws.getNumberHistograms() != 1:
+            raise NotImplementedError('Strip zeros is only possible on 1D workspaces')
+
         y_vals = result_ws.readY(0)
         length = len(y_vals)
         # Find the first non-zero value
