@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "DimensionIDS.h"
 namespace Mantid{
     namespace MDDataObjects{
