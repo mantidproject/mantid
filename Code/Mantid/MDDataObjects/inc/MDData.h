@@ -7,6 +7,7 @@
 #include "MD_FileFormat.h"
 #include "MDGeometry.h"
 #include "point3D.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 /** the kernel of the main class for visualisation and analysis operations, which keeps the data itself and brief information about the data dimensions
 *
@@ -37,8 +38,10 @@
 */
 namespace Mantid{
     namespace MDDataObjects{
+
+using namespace Mantid::API;
 //
-class DLLExport MDData:public MDGeometry
+class DLLExport MDData:public MDGeometry,public IMDWorkspace
 {
 public:
     // default constructor
@@ -54,6 +57,8 @@ public:
     void getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> & image_data)const;
     /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3 
     void getPointData(std::vector<point3D> & image_data)const;
+    /// return number of dimensions in MD workspace
+    virtual unsigned int getNumDims(void)const{return WorkspaceGeometry::getNumDims();}
 
   
     void read_mdd(const char *file_name){

@@ -221,6 +221,7 @@
     <ClInclude Include="inc\mantidapi\filefinder.h" />
     <ClInclude Include="inc\MantidAPI\FileProperty.h" />
     <ClInclude Include="inc\mantidapi\iarchivesearch.h" />
+    <ClInclude Include="inc\MantidAPI\IMDWorkspace.h" />
     <ClInclude Include="inc\mantidapi\run.h" />
     <ClInclude Include="test\AlgorithmHistoryTest.h" />
     <ClInclude Include="inc\MantidAPI\AlgorithmManager.h" />

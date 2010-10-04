@@ -118,6 +118,10 @@ public:
     TS_ASSERT_EQUALS( ws->getTitle(), "something" );
     ws->setTitle("");
   }
+ void testGetNDIM()
+  {
+    TS_ASSERT_EQUALS( ws->getNumDims(), 2 );
+  }
 
   void testGetSetComment()
   {

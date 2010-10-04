@@ -12,7 +12,9 @@ public:
     publicWorkspaceGeometry(unsigned int nDims):WorkspaceGeometry(nDims){};
     DimensionsID getDimensionID(unsigned int nDim)const{return WorkspaceGeometry::getDimensionID(nDim);}
     void reinit_WorkspaceGeometry(const std::vector<DimensionsID> &ID){WorkspaceGeometry::reinit_WorkspaceGeometry(ID);}
+    unsigned int getNumDims(void)const{return WorkspaceGeometry::getNumDims();}
 };
+
 
 class testWorkspaceGm :   public CxxTest::TestSuite
 {

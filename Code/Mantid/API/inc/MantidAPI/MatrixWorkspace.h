@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+//#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
@@ -62,9 +63,11 @@ class SpectraDetectorMap;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MatrixWorkspace : public Workspace
+class DLLExport MatrixWorkspace : public IMDWorkspace
 {
 public:
+  /// the function returns number of dimensions in matrix workspace;
+  virtual unsigned int getNumDims(void)const{return 2;}
   // The Workspace Factory create-from-parent method needs direct access to the axes.
   friend class WorkspaceFactoryImpl;
   /// Typedef for the workspace_iterator to use with a Workspace

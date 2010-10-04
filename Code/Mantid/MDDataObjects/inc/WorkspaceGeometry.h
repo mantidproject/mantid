@@ -61,10 +61,7 @@ namespace Mantid
     ~WorkspaceGeometry(void);
 
 
-    /// return the numbers of dimensions in current geometry
-    unsigned int getNumDims(void)const{return n_total_dim;}
-
-    /// function rerutns the reference coordinate of the dimension, ID requested;
+     /// function rerutns the reference coordinate of the dimension, ID requested;
     const std::vector<double> & getOrt(DimensionsID id)const;
 
     /** return the number of the space dimension which corresponds to the ID provided
@@ -82,6 +79,9 @@ namespace Mantid
     WorkspaceGeometry(const WorkspaceGeometry&);                 
 
 protected: 
+   /// return the numbers of dimensions in current geometry; Protected as been referenced from virtual function in MDData;
+    unsigned int getNumDims(void)const{return n_total_dim;}
+
     /// number of total dimensions in dataset;
     unsigned int n_total_dim;
     /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)

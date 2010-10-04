@@ -15,8 +15,13 @@ public:
       try{
       // define an wrong object 
         MDData dnd_obj(5);
+        // 5-dim object;
+        TS_ASSERT_EQUALS(dnd_obj.getNumDims(),5);
+
         // read correct object
         TS_ASSERT_THROWS_NOTHING(dnd_obj.read_mdd("../../../../Test/VATES/fe_demo.sqw"));
+
+        TS_ASSERT_EQUALS(dnd_obj.getNumDims(),4);
 
         std::vector<unsigned int> selection(2,1);
         std::vector<point3D> img;
@@ -32,7 +37,7 @@ public:
         // returns 3D image with 4-th dimension selected at 20;
         selection.assign(1,20);
         TS_ASSERT_THROWS_NOTHING(dnd_obj.getPointData(selection,img) );
-        TS_ASSERT_EQUALS(img.size(),50*50*50);
+        TS_ASSERT_EQUALS(img.size(),50*50*50); 
  
 
         // this should return single point at (20,20,20,20)

@@ -53,9 +53,9 @@ struct sqw_pixel{
 
 struct pix_location
 {
-    long chunk_file_location0;
+    size_t chunk_file_location0;
     std::vector<sqw_pixel>  cell_memPixels;
-    std::auto_ptr<std::vector<long> *> data_chunks;
+    std::auto_ptr<std::vector<size_t> *> data_chunks;
 };
 
 

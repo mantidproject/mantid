@@ -20,7 +20,7 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
 
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : 
-  Workspace(), m_axes(), m_isInitialized(false),
+  IMDWorkspace(), m_axes(), m_isInitialized(false),
   sptr_instrument(new Instrument), m_spectramap(), m_sample(), m_run(),
   m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(), m_masks()
 {}
