@@ -330,22 +330,25 @@ def AssignCan(can_run, reload = True, period = -1):
         return SCATTER_CAN.getName(), ""
 
     smp_values = []
-    smp_values.append(INSTRUMENT.FRONT_DET_Z + INSTRUMENT.FRONT_DET_Z_CORR)
-    smp_values.append(INSTRUMENT.FRONT_DET_X + INSTRUMENT.FRONT_DET_X_CORR)
-    smp_values.append(INSTRUMENT.FRONT_DET_ROT + INSTRUMENT.FRONT_DET_ROT_CORR)
-    smp_values.append(INSTRUMENT.REAR_DET_Z + INSTRUMENT.REAR_DET_Z_CORR)
-    smp_values.append(INSTRUMENT.REAR_DET_X + INSTRUMENT.REAR_DET_X_CORR)
+    front_det = INSTRUMENT.getDetector('front')
+    smp_values.append(INSTRUMENT.FRONT_DET_Z + front_det.z_corr)
+    smp_values.append(INSTRUMENT.FRONT_DET_X + front_det.x_corr)
+    smp_values.append(INSTRUMENT.FRONT_DET_ROT + front_det.rot_corr)
+    rear_det = INSTRUMENT.getDetector('rear')
+    smp_values.append(INSTRUMENT.REAR_DET_Z + rear_det.z_corr)
+    smp_values.append(INSTRUMENT.REAR_DET_X + rear_det.x_corr)
+
 
     # Check against sample values and warn if they are not the same but still continue reduction
     if len(logvalues) == 0:
         return  SCATTER_CAN.getName(), logvalues
     
     can_values = []
-    can_values.append(float(logvalues['Front_Det_Z']) + INSTRUMENT.FRONT_DET_Z_CORR)
-    can_values.append(float(logvalues['Front_Det_X']) + INSTRUMENT.FRONT_DET_X_CORR)
-    can_values.append(float(logvalues['Front_Det_Rot']) + INSTRUMENT.FRONT_DET_ROT_CORR)
-    can_values.append(float(logvalues['Rear_Det_Z']) + INSTRUMENT.REAR_DET_Z_CORR)
-    can_values.append(float(logvalues['Rear_Det_X']) + INSTRUMENT.REAR_DET_X_CORR)
+    can_values.append(float(logvalues['Front_Det_Z']) + front_det.z_corr)
+    can_values.append(float(logvalues['Front_Det_X']) + front_det.x_corr)
+    can_values.append(float(logvalues['Front_Det_Rot']) + front_det.rot_corr)
+    can_values.append(float(logvalues['Rear_Det_Z']) + rear_det.z_corr)
+    can_values.append(float(logvalues['Rear_Det_X']) + rear_det.x_corr)
 
 
     det_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
@@ -715,8 +718,10 @@ def _restore_defaults():
     RESCALE = 100.  # percent
     SAMPLE_GEOM = 3
     SAMPLE_WIDTH = SAMPLE_HEIGHT = SAMPLE_THICKNESS = 1.0
-    INSTRUMENT.FRONT_DET_Z_CORR = INSTRUMENT.FRONT_DET_Y_CORR = INSTRUMENT.FRONT_DET_X_CORR = INSTRUMENT.FRONT_DET_ROT_CORR = 0.0
-    INSTRUMENT.REAR_DET_Z_CORR = INSTRUMENT.REAR_DET_X_CORR = 0.0
+    front_det = INSTRUMENT.getDetector('rear')
+    front_det.z_corr = front_det.y_corr = front_det.x_corr = front_det.rot_corr = 0.0
+    rear_det = INSTRUMENT.getDetector('rear')
+    rear_det.z_corr = rear_det.x_corr = 0.0
     
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
@@ -1012,24 +1017,17 @@ def _readDetectorCorrections(details):
     det_axis = values[1]
     shift = float(values[2])
 
-    if det_name == 'REAR':
-        if det_axis == 'X':
-            INSTRUMENT.REAR_DET_X_CORR = shift
-        elif det_axis == 'Z':
-            INSTRUMENT.REAR_DET_Z_CORR = shift
-        else:
-            pass
+    detector = INSTRUMENT.getDetector(det_name)
+    if det_axis == 'X':
+        detector.x_corr = shift
+    elif det_axis == 'Y':
+        detector.y_corr = shift
+    elif det_axis == 'Z':
+        detector.z_corr = shift
+    elif det_axis == 'ROT':
+        detector.rot_corr = shift
     else:
-        if det_axis == 'X':
-            INSTRUMENT.FRONT_DET_X_CORR = shift
-        elif det_axis == 'Y':
-            INSTRUMENT.FRONT_DET_Y_CORR = shift
-        elif det_axis == 'Z':
-            INSTRUMENT.FRONT_DET_Z_CORR = shift
-        elif det_axis == 'ROT':
-            INSTRUMENT.FRONT_DET_ROT_CORR = shift
-        else:
-            pass
+        raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 ##END REMOVED (ISISReducer.py)
 ##START REMOVED STEVE 13 September 2010 (ISISSANSReductionSteps.py)
 def SetSampleOffset(value):
@@ -1354,14 +1352,14 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         FlatBackground(monitorWS, monitorWS, StartX = BACKMON_START, EndX = BACKMON_END, WorkspaceIndexList = '0')
     
     final_result = run_setup.getReducedWorkspace()
-    normalised = SCATTER_SAMPLE.getName()
+    to_crop = sample_name
     if not NORMALISATION_FILE is None:
         if not NORMALISATION_FILE == "":
-            normalised = final_result
-            CorrectToFile(SCATTER_SAMPLE.getName(), NORMALISATION_FILE, normalised, 'SpectrumNumber', 'Divide')
+            to_crop = final_result
+            CorrectToFile(sample_name, NORMALISATION_FILE, to_crop, 'SpectrumNumber', 'Divide')
 
     # Get the bank we are looking at
-    CropWorkspace(normalised, final_result,
+    CropWorkspace(to_crop, final_result,
         StartWorkspaceIndex = (SPECMIN - 1), EndWorkspaceIndex = str(SPECMAX - 1))
     #####################################################################################
         
