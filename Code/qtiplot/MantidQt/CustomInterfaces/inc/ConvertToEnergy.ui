@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>503</width>
-    <height>703</height>
+    <width>489</width>
+    <height>604</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -2333,6 +2333,267 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabTimeSlice" >
+      <attribute name="title" >
+       <string>Time Slice</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_34" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_36" >
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
+           <property name="findRunFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="label" stdset="0" >
+            <string>Input Files</string>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>.raw</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="slice_pbPlotRaw" >
+           <property name="text" >
+            <string>Plot Raw</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_37" >
+         <item>
+          <widget class="QCheckBox" name="slice_ckUseCalib" >
+           <property name="text" >
+            <string>Use Calibration File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="findRunFiles" stdset="0" >
+            <bool>false</bool>
+           </property>
+           <property name="label" stdset="0" >
+            <string/>
+           </property>
+           <property name="multipleFiles" stdset="0" >
+            <bool>false</bool>
+           </property>
+           <property name="optional" stdset="0" >
+            <bool>true</bool>
+           </property>
+           <property name="fileExtensions" >
+            <stringlist>
+             <string>_calib.nxs</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_38" >
+         <item>
+          <widget class="QLabel" name="slice_lbRange1" >
+           <property name="text" >
+            <string>TOF Range 1</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="slice_leRange0" />
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_valRange0" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_lbTo1" >
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="slice_leRange1" />
+         </item>
+         <item>
+          <widget class="QLabel" name="slice_valRange1" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string>*</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="slice_ckUseTwoRanges" >
+         <property name="text" >
+          <string>Use Two Time of Flight Ranges and Subtract</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout" >
+         <item row="2" column="1" >
+          <widget class="QLineEdit" name="slice_leRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4" >
+          <widget class="QLineEdit" name="slice_leRange3" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2" >
+          <widget class="QLabel" name="slice_valRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3" >
+          <widget class="QLabel" name="slice_lbTo2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" >
+          <widget class="QLabel" name="slice_lbRange2" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>TOF Range 2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="5" >
+          <widget class="QLabel" name="slice_valRange3" >
+           <property name="styleSheet" >
+            <string notr="true" >color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text" >
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_39" >
+         <item>
+          <widget class="QCheckBox" name="slice_ckVerbose" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>Verbose</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="slice_ckPlot" >
+           <property name="text" >
+            <string>Plot Result</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="slice_ckSave" >
+           <property name="text" >
+            <string>Save Result</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_40" >
+         <item>
+          <spacer name="horizontalSpacer_10" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="slice_pbRun" >
+           <property name="text" >
+            <string>Run Slice</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_11" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabSofQW" >
       <attribute name="title" >
        <string>S(Q, w)</string>
@@ -2579,7 +2840,7 @@ p, li { white-space: pre-wrap; }
                <string notr="true" >color: rgb(255, 0, 4)</string>
               </property>
               <property name="text" >
-               <string> </string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -2609,7 +2870,7 @@ p, li { white-space: pre-wrap; }
                <string notr="true" >color: rgb(255, 0, 4)</string>
               </property>
               <property name="text" >
-               <string>  </string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -2639,15 +2900,13 @@ p, li { white-space: pre-wrap; }
                <string notr="true" >color: rgb(255, 0, 4)</string>
               </property>
               <property name="text" >
-               <string>  </string>
+               <string/>
               </property>
              </widget>
             </item>
            </layout>
           </item>
          </layout>
-         <zorder>sqw_ckRebinE</zorder>
-         <zorder>sqw_gbInput</zorder>
         </widget>
        </item>
        <item>
@@ -3144,6 +3403,13 @@ p, li { white-space: pre-wrap; }
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbManageDirectories" >
+       <property name="text" >
+        <string>Manage Directories</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

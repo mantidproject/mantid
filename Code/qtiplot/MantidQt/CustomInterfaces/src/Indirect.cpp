@@ -26,7 +26,6 @@ UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(tru
 {
   // Constructor
 }
-
 /**
 * This function performs any one-time actions needed when the Inelastic interface
 * is first selected, such as connecting signals to slots.
@@ -41,15 +40,12 @@ void Indirect::initLayout()
   connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
   connect(m_uiForm.cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
   connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
-  // action buttons
   connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
   connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
   connect(m_uiForm.rebin_pbRebin, SIGNAL(clicked()), this, SLOT(rebinData()));
-  // check boxes
   connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinCheck(bool)));
   connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
 
-  // line edits,etc (for isDirty)
   connect(m_uiForm.ind_runFiles, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.ind_calibFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
@@ -60,14 +56,13 @@ void Indirect::initLayout()
   connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
   connect(m_uiForm.ckCleanUp, SIGNAL(pressed()), this, SLOT(setasDirty()));
 
-  // line edits,etc (for isDirtyRebin)
   connect(m_uiForm.rebin_leELow, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.rebin_leEWidth, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.rebin_leEHigh, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.ind_mapFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirtyRebin()));
-
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+
   // "Calibration" tab
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calibPlot()));
   connect(m_uiForm.cal_pbCreate, SIGNAL(clicked()), this, SLOT(calibCreate()));
@@ -79,6 +74,12 @@ void Indirect::initLayout()
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
   connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(sOfQwInputType(const QString&)));
   connect(m_uiForm.sqw_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+
+  // "Slice" tab
+  connect(m_uiForm.slice_pbRun, SIGNAL(clicked()), this, SLOT(sliceRun()));
+  connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
+  connect(m_uiForm.slice_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(sliceTwoRanges(bool)));
+  connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
   // create validators
   m_valInt = new QIntValidator(this);
@@ -93,6 +94,7 @@ void Indirect::initLayout()
   m_uiForm.rebin_leELow->setValidator(m_valDbl);
   m_uiForm.rebin_leEWidth->setValidator(m_valDbl);
   m_uiForm.rebin_leEHigh->setValidator(m_valDbl);
+
   m_uiForm.cal_lePeakMin->setValidator(m_valInt);
   m_uiForm.cal_lePeakMax->setValidator(m_valInt);
   m_uiForm.cal_leBackMin->setValidator(m_valInt);
@@ -104,12 +106,18 @@ void Indirect::initLayout()
   m_uiForm.cal_leELow->setValidator(m_valDbl);
   m_uiForm.cal_leEWidth->setValidator(m_valDbl);
   m_uiForm.cal_leEHigh->setValidator(m_valDbl);
+
   m_uiForm.sqw_leELow->setValidator(m_valDbl);
   m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leEHigh->setValidator(m_valDbl);
   m_uiForm.sqw_leQLow->setValidator(m_valDbl);
   m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
+
+  m_uiForm.slice_leRange0->setValidator(m_valInt);
+  m_uiForm.slice_leRange1->setValidator(m_valInt);
+  m_uiForm.slice_leRange2->setValidator(m_valInt);
+  m_uiForm.slice_leRange3->setValidator(m_valInt);
 
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
@@ -119,7 +127,6 @@ void Indirect::initLayout()
 
   refreshWSlist();
 }
-
 /**
 * This function will hold any Python-dependent setup actions for the interface.
 */
@@ -136,11 +143,13 @@ void Indirect::helpClicked()
   QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
   QString url = "http://www.mantidproject.org/ConvertToEnergy#";
   if ( tabName == "Energy Transfer" )
-    url += "Energy_transfer_tab";
+    url += "Energy Transfer";
   else if ( tabName == "Calibration" )
-    url += "Calibration_tab";
+    url += "Calibration";
   else if ( tabName == "S(Q, w)" )
-    url += "SofQW_tab";
+    url += "SofQW";
+  else if ( tabName == "Time Slice" )
+    url += "Slice";
   QDesktopServices::openUrl(QUrl(url));
 }
 /**
@@ -335,21 +344,26 @@ void Indirect::setIDFValues(const QString & prefix)
     for (int i = 0; i< analysers.count(); i++ )
     {
       QString text; // holds Text field of combo box (name of analyser)
-      QVariant data; // holds Data field of combo box (list of reflections)
 
-      QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
-
-      text = analyser[0];
-
-      if ( analyser.count() > 1 )
+      if ( text != "diffraction" ) // do not put diffraction into the analyser list
       {
-        QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
-        data = QVariant(reflections);
-        m_uiForm.cbAnalyser->addItem(text, data);
-      }
-      else
-      {
-        m_uiForm.cbAnalyser->addItem(text);
+
+        QVariant data; // holds Data field of combo box (list of reflections)
+
+        QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
+
+        text = analyser[0];
+
+        if ( analyser.count() > 1 )
+        {
+          QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
+          data = QVariant(reflections);
+          m_uiForm.cbAnalyser->addItem(text, data);
+        }
+        else
+        {
+          m_uiForm.cbAnalyser->addItem(text);
+        }
       }
     }
     getSpectraRanges();
@@ -363,8 +377,6 @@ void Indirect::closeEvent(QCloseEvent* close)
   //saveSettings();
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
-
-
 void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
 {
   std::string key = pNf->key();
@@ -376,8 +388,6 @@ void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification
     loadSettings();
   }
 }
-
-
 /**
 * This function loads the min and max values for the analysers spectra and
 * displays this in the "Calibration" tab.
@@ -435,7 +445,6 @@ void Indirect::getSpectraRanges()
     }
   }
 }
-
 /**
 * This function clears the values of the QLineEdit objects used to hold Reflection-specific
 * information.
@@ -455,7 +464,6 @@ void Indirect::clearReflectionInfo()
 
   isDirty(true);
 }
-
 /**
 * This function creates the mapping/grouping file for the data analysis.
 * @param groupType Type of grouping (All, Group, Indiviual)
@@ -507,7 +515,6 @@ QString Indirect::createMapFile(const QString& groupType)
 
   return pyOutput;
 }
-
 /**
 * This function creates the Python script necessary to set the variables used for saving data
 * in the main convert_to_energy script.
@@ -974,6 +981,71 @@ bool Indirect::validateSofQw()
   }
   return valid;
 }
+
+bool Indirect::validateSlice()
+{
+  bool valid = true;
+
+  if ( ! m_uiForm.slice_inputFile->isValid() )
+  {
+    valid = false;
+  }
+
+  if ( m_uiForm.slice_ckUseCalib->isChecked() && ! m_uiForm.slice_calibFile->isValid() )
+  {
+    valid = false;
+  }
+
+  if ( m_uiForm.slice_leRange0->text() == "" )
+  {
+    m_uiForm.slice_valRange0->setText("*");
+    valid = false;
+  }
+  else
+  {
+    m_uiForm.slice_valRange0->setText(" ");
+  }
+
+  if ( m_uiForm.slice_leRange1->text() == "" )
+  {
+    m_uiForm.slice_valRange1->setText("*");
+    valid = false;
+  }
+  else
+  {
+    m_uiForm.slice_valRange1->setText(" ");
+  }
+
+  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
+  {
+    if ( m_uiForm.slice_leRange2->text() == "" )
+    {
+      m_uiForm.slice_valRange2->setText("*");
+      valid = false;
+    }
+    else
+    {
+      m_uiForm.slice_valRange2->setText(" ");
+    }
+
+    if ( m_uiForm.slice_leRange3->text() == "" )
+    {
+      m_uiForm.slice_valRange3->setText("*");
+      valid = false;
+    }
+    else
+    {
+      m_uiForm.slice_valRange3->setText(" ");
+    }
+  }
+  else
+  {
+    m_uiForm.slice_valRange2->setText(" ");
+    m_uiForm.slice_valRange3->setText(" ");
+  }
+
+  return valid;
+}
 /**
 * Used to check whether any changes have been made by the user to the interface.
 * @return boolean m_isDirty
@@ -1039,7 +1111,6 @@ void Indirect::saveSettings()
   // The only settings that we want to keep are the instrument / analyser / reflection ones
   // Instrument is handled in ConvertToEnergy class
 }
-
 void Indirect::refreshWSlist()
 {
   m_uiForm.sqw_cbWorkspace->clear();
@@ -1053,7 +1124,6 @@ void Indirect::refreshWSlist()
     }
   }
 }
-
 /**
 * This function is called when the user selects an analyser from the cbAnalyser QComboBox
 * object. It's main purpose is to initialise the values for the Reflection ComboBox.
@@ -1086,8 +1156,6 @@ void Indirect::analyserSelected(int index)
 
   reflectionSelected(m_uiForm.cbReflection->currentIndex());
 }
-
-
 /**
 * This function is called when the user selects a reflection from the cbReflection QComboBox
 * object.
@@ -1137,31 +1205,12 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.cal_leBackMin->clear();
       m_uiForm.cal_leBackMax->clear();
     }
-
-    bool state;
-    if ( analysisType == "diffraction" )
-      state = false;
-    else
-      state = true;
-
-    if ( state != m_uiForm.gbExperiment->isEnabled() )
-    {
-      m_uiForm.tabCalibration->setEnabled(state);
-      m_uiForm.tabSofQW->setEnabled(state);
-      m_uiForm.gbExperiment->setEnabled(state);
-      m_uiForm.gbAnalysis->setEnabled(state);
-      m_uiForm.gbCtoE->setEnabled(state);
-      m_uiForm.gbRebin->setEnabled(state);
-      m_uiForm.gbSave->setEnabled(state);
-      m_uiForm.pbRun->setEnabled(state);
-    }
   }
 
   // clear validation markers
   validateInput();
   validateCalib();
 }
-
 /**
 * This function runs when the user makes a selection on the cbMappingOptions QComboBox.
 * @param groupType Value of selection made by user.
@@ -1191,14 +1240,12 @@ void Indirect::mappingOptionSelected(const QString& groupType)
 
   isDirtyRebin(true);
 }
-
 void Indirect::tabChanged(int index)
 {
   QString tabName = m_uiForm.tabWidget->tabText(index);
   bool state = ( tabName == "Energy Transfer" );
   m_uiForm.pbRun->setEnabled(state);
 }
-
 /**
 * Select location to save file.
 */
@@ -1213,7 +1260,6 @@ void Indirect::browseSave()
     isDirty(true); 
   }
 }
-
 /**
 * This function is called when the user clicks on the Background Removal button. It
 * displays the Background Removal dialog, initialising it if it hasn't been already.
@@ -1232,7 +1278,6 @@ void Indirect::backgroundClicked()
     m_backgroundDialog->show();
   }
 }
-
 /**
 * Slot called when m_backgroundDialog is closed. Assesses whether user desires background removal.
 */
@@ -1250,7 +1295,6 @@ void Indirect::backgroundRemoval()
   }
   isDirty(true);
 }
-
 /**
 * Plots raw time data from .raw file before any data conversion has been performed.
 */
@@ -1355,7 +1399,6 @@ void Indirect::resPlotInput()
     showInformationBox("Run number not valid.");
   }
 }
-
 /**
 * This function enables/disables the display of the options involved in creating the RES file.
 * @param state whether checkbox is checked or unchecked
@@ -1373,7 +1416,6 @@ void Indirect::resCheck(bool state)
     m_uiForm.cal_pbCreate->setText("Create Calibration File");
   }
 }
-
 /**
 * This function just calls the runClicked slot, but with tryToSave being 'false'
 */
@@ -1381,13 +1423,11 @@ void Indirect::rebinData()
 {
   runClicked(false);
 }
-
 void Indirect::useCalib(bool state)
 {
   m_uiForm.ind_calibFile->isOptional(!state);
   m_uiForm.ind_calibFile->setEnabled(state);
 }
-
 /**
 * This function plots the raw data entered onto the "Calibration" tab, without performing any of the data
 * modification steps.
@@ -1422,7 +1462,6 @@ void Indirect::calibPlot()
     }
   }
 }
-
 /**
 * This function is called when the user clicks on the "Create Calibration File" button.
 * Pretty much does what it says on the tin.
@@ -1474,7 +1513,6 @@ void Indirect::calibCreate()
     }
   }
 }
-
 /**
 * Sets interface as "Dirty" - catches all relevant user changes that don't need special action
 */
@@ -1504,7 +1542,6 @@ void Indirect::calibFileChanged(const QString & calib)
     m_uiForm.ckUseCalib->setChecked(true);
   }
 }
-
 void Indirect::sOfQwClicked()
 {
   if ( validateSofQw() )
@@ -1563,7 +1600,6 @@ void Indirect::sOfQwRebinE(bool state)
   m_uiForm.sqw_lbEWidth->setEnabled(state);
   m_uiForm.sqw_lbEHigh->setEnabled(state);
 }
-
 void Indirect::sOfQwInputType(const QString& input)
 {
   if ( input == "File" )
@@ -1571,3 +1607,94 @@ void Indirect::sOfQwInputType(const QString& input)
   else
     m_uiForm.sqw_swInput->setCurrentIndex(1);
 }
+
+
+// SLICE
+void Indirect::sliceRun()
+{
+  if ( ! validateSlice() )
+  {
+    showInformationBox("Please check your input.");
+    return;
+  }
+
+  QString pyInput =
+    "from IndirectDataAnalysis import slice\n"
+    "tofRange = [" + m_uiForm.slice_leRange0->text() + ","
+    + m_uiForm.slice_leRange1->text();
+  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
+  {
+    pyInput +=
+      "," + m_uiForm.slice_leRange2->text() + ","
+      + m_uiForm.slice_leRange3->text() + "]\n";
+  }
+  else
+  {
+    pyInput += "]\n";
+  }
+  if ( m_uiForm.slice_ckUseCalib->isChecked() )
+  {
+    pyInput +=
+      "calib = r'" + m_uiForm.slice_calibFile->getFirstFilename() + "'\n";
+  }
+  else
+  {
+    pyInput +=
+      "calib = ''\n";
+  }
+  QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
+  pyInput +=
+    "rawfile = [r'" + filenames + "']\n"
+    "spectra = ["+m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text() +"]\n";
+
+  if ( m_uiForm.slice_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
+  if ( m_uiForm.slice_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.slice_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
+
+  pyInput +=
+    "slice(rawfile, calib, tofRange, spectra, Save=save, Verbose=verbose, Plot=plot)";
+
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+void Indirect::slicePlotRaw()
+{
+  if ( m_uiForm.slice_inputFile->isValid() )
+  {
+    QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
+    QString pyInput =
+      "from IndirectDataAnalysis import plotRaw\n"
+      "spec = ["+m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text() +"]\n"
+      "files = [r'" + filenames + "']\n"
+      "plotRaw(files, spectra=spec)\n";
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+  else
+  {
+    showInformationBox("Selected input files are invalid.");
+  }
+}
+void Indirect::sliceTwoRanges(bool state)
+{
+  QString val;
+  if ( state ) val = "*";
+  else val = " ";
+  m_uiForm.slice_lbRange2->setEnabled(state);
+  m_uiForm.slice_lbTo2->setEnabled(state);
+  m_uiForm.slice_leRange2->setEnabled(state);
+  m_uiForm.slice_leRange3->setEnabled(state);
+  m_uiForm.slice_valRange2->setEnabled(state);
+  m_uiForm.slice_valRange2->setText(val);
+  m_uiForm.slice_valRange3->setEnabled(state);
+  m_uiForm.slice_valRange3->setText(val);
+}
+void Indirect::sliceCalib(bool state)
+{
+  m_uiForm.slice_calibFile->setEnabled(state);
+  m_uiForm.slice_calibFile->isOptional(!state);
+}
+

@@ -5,6 +5,8 @@
 #include "MantidQtCustomInterfaces/Homer.h" // user interface for Direct instruments
 #include "MantidQtCustomInterfaces/Indirect.h" // user interface for Indirect instruments
 
+#include "MantidQtApi/ManageUserDirectories.h"
+
 #include "MantidKernel/ConfigService.h"
 
 #include <QMessageBox>
@@ -107,6 +109,8 @@ void ConvertToEnergy::initLayout()
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   // connect the "Run" button
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  // connect the "Manage User Directories" Button
+  connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
 
 }
 
@@ -119,6 +123,11 @@ void ConvertToEnergy::initLocalPython()
 {
   // select starting instrument
   readSettings();
+
+  if ( m_curInterfaceSetup == "" )
+  {
+    userSelectInstrument(m_uiForm.cbInst->currentText());
+  }
 }
 
 /**
@@ -265,12 +274,12 @@ ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString&
   QString pyInput =
     "from mantidsimple import *\n"
     "import sys\n"
-    "LoadEmptyInstrument(\"%1\", \"instrument\")\n"
+    "LoadEmptyInstrument(r'%1', 'instrument')\n"
     "instrument = mtd['instrument'].getInstrument()\n"
     "try:\n"
     "    print instrument.getStringParameter('deltaE-mode')[0]\n"
     "except IndexError, message:\n" // the above line will raise an IndexError in Python
-    "    print \"\"\n"				// if the instrument doesn't have this parameter.
+    "    print ''\n"				// if the instrument doesn't have this parameter.
     "mtd.deleteWorkspace('instrument')";
 
   pyInput = pyInput.arg(defFile);
@@ -303,6 +312,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
   case Direct:
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabCalibration));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabSofQW));
+    m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabTimeSlice));
     m_uiForm.tabWidget->addTab(m_uiForm.tabDiagnoseDetectors, "Diagnose Detectors");
     m_uiForm.tabWidget->addTab(m_uiForm.tabAbsoluteUnits, "Absolute Units");
 
@@ -326,6 +336,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabDiagnoseDetectors));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabAbsoluteUnits));
     m_uiForm.tabWidget->addTab(m_uiForm.tabCalibration, "Calibration");
+    m_uiForm.tabWidget->addTab(m_uiForm.tabTimeSlice, "Time Slice");
     m_uiForm.tabWidget->addTab(m_uiForm.tabSofQW, "S(Q, w)");
 
     if ( m_indirectInstruments == NULL )
@@ -375,4 +386,13 @@ void ConvertToEnergy::userSelectInstrument(const QString& prefix)
   {
     m_uiForm.pbRun->setEnabled(true);
   }
+}
+
+
+void ConvertToEnergy::openDirectoryDialog()
+{
+  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+  ad->setAttribute(Qt::WA_DeleteOnClose);
+  ad->show();
+  ad->setFocus();
 }
