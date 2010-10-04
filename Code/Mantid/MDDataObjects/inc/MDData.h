@@ -59,7 +59,10 @@ public:
     void getPointData(std::vector<point3D> & image_data)const;
     /// return number of dimensions in MD workspace
     virtual unsigned int getNumDims(void)const{return WorkspaceGeometry::getNumDims();}
-
+    /// return ID specifying the workspace kind
+    virtual const std::string id() const { return "MD-Workspace"; }
+    /// overload to return the memory size of main visualisation datata ;  may need further clarification
+    virtual long int getMemorySize()const{return this->data_size*sizeof(data_point);}
   
     void read_mdd(const char *file_name){
         // select a file reader which corresponds to the proper file format of the data file

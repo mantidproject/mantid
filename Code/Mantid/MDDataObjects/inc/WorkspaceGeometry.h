@@ -77,10 +77,10 @@ namespace Mantid
     double getScale(unsigned int nDim);
     /// copy constructor
     WorkspaceGeometry(const WorkspaceGeometry&);                 
+   /// return the numbers of dimensions in current geometry; 
+    unsigned int getNumDims(void)const{return n_total_dim;}
 
 protected: 
-   /// return the numbers of dimensions in current geometry; Protected as been referenced from virtual function in MDData;
-    unsigned int getNumDims(void)const{return n_total_dim;}
 
     /// number of total dimensions in dataset;
     unsigned int n_total_dim;

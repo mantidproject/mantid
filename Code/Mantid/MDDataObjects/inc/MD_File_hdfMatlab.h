@@ -46,9 +46,9 @@ public:
    
     /// read whole pixels information in memory; usually impossible, then returns false;
     virtual bool read_pix(MDPixels & sqw);
-    /// read the information from the data pixels, specified by the selected cells, returns the number of cells actually processed 
-    /// by this read operation
-    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPixels){return 0;}
+    /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
+    /// by this read operation and number of pixels found in these cells;
+    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPixels);
     /// get number of data pixels contributing into the dataset;
     virtual hsize_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format

@@ -16,11 +16,11 @@
 static testWorkspaceGm suite_testWorkspaceGm;
 
 static CxxTest::List Tests_testWorkspaceGm = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testWorkspaceGm( "c:/Mantid/Code/Mantid/MDDataObjects/test/testWorkspaceGeometry.h", 17, "testWorkspaceGm", suite_testWorkspaceGm, Tests_testWorkspaceGm );
+CxxTest::StaticSuiteDescription suiteDescription_testWorkspaceGm( "c:/Mantid/Code/Mantid/MDDataObjects/test/testWorkspaceGeometry.h", 19, "testWorkspaceGm", suite_testWorkspaceGm, Tests_testWorkspaceGm );
 
 static class TestDescription_testWorkspaceGm_testWorkspaceGeometry : public CxxTest::RealTestDescription {
 public:
- TestDescription_testWorkspaceGm_testWorkspaceGeometry() : CxxTest::RealTestDescription( Tests_testWorkspaceGm, suiteDescription_testWorkspaceGm, 20, "testWorkspaceGeometry" ) {}
+ TestDescription_testWorkspaceGm_testWorkspaceGeometry() : CxxTest::RealTestDescription( Tests_testWorkspaceGm, suiteDescription_testWorkspaceGm, 22, "testWorkspaceGeometry" ) {}
  void runTest() { suite_testWorkspaceGm.testWorkspaceGeometry(); }
 } testDescription_testWorkspaceGm_testWorkspaceGeometry;
 

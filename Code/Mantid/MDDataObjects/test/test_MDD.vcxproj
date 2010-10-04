@@ -51,15 +51,23 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\Mantid.props" />
+    <Import Project="..\..\Mantid-win32.props" />
+    <Import Project="..\..\Mantid-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\Mantid.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\Mantid-win32.props" />
+    <Import Project="..\..\Mantid-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\Mantid-win32.props" />
+    <Import Project="..\..\Mantid-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -81,12 +89,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\inc;C:\Mantid\Code\Mantid\Kernel\inc;C:\Mantid\Code\Mantid\API\inc;C:\Mantid\Code\Third_Party\include\hdf5;C:\Mantid\Code\Third_Party\include\hdf5\win32;..\..\..\Third_Party\src\cxxtest;..\..\..ThirdParty\src\cxxtest</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\inc;C:\Mantid\Code\Mantid\Kernel\inc;C:\Mantid\Code\Mantid\API\inc;C:\Mantid\Code\Third_Party\include\hdf5;C:\Mantid\Code\Third_Party\include\hdf5\win32;..\..\..\Third_Party\Include;..\..\..\Third_Party\src\cxxtest;..\..\..ThirdParty\src\cxxtest</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);..\..\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);..\..\Debug;..\..\..\Third_Party\lib\win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

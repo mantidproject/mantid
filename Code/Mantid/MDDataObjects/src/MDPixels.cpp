@@ -63,7 +63,14 @@ MDPixels::~MDPixels()
         delete [] pix_array;
     }
 }
-
+size_t 
+MDPixels::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size)
+{
+    if(!this->theFile){
+        throw(std::bad_alloc("MDPixels::read_selected_pix: file reader has not been defined"));
+    }
+    return this->theFile->read_pix_subset(*this,cells_nums,start_cell,pix_buf,pix_buf_size);
+}
 //***************************************************************************************
 /*
 void

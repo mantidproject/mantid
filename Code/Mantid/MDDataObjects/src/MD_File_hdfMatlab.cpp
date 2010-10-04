@@ -532,7 +532,7 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
        // }
     }catch(...){
         if(type_error){
-            throw("pixel dataset uses datatype different from native float or native double");
+            throw(Exception::FileError("pixel dataset uses datatype different from native float or native double",this->File_name));
         }else{
             return false; // bad alloc thrown
         }
@@ -540,7 +540,7 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
     
     herr_t err=H5Dread(this->pixel_dataset_h, type,H5S_ALL, H5S_ALL, this->file_access_mode,pix_buf);   
     if(err){
-        throw("Error reading the pixels dataset");
+        throw(Exception::FileError("Error reading the pixels dataset",this->File_name));
     }
     long nCellPic(0);
     long nPixel(0);
@@ -588,9 +588,9 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
     }
     return true;
 }
-/*
+
 size_t 
-MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &selected_cells,long starting_cell,sqw_pixel *& pix_buf, long &nPixels)
+MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPix_buf_size)
 {
 // open pixel dataset and dataspace if it has not been opened before;
     this->check_or_open_pix_dataset();
@@ -600,10 +600,10 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &
     
         this->pixel_dataspace_h  = H5Dget_space(this->pixel_dataset_h);
         if(this->pixel_dataspace_h<0){
-            throw("can not get pixels dataspace");
+            throw(Exception::FileError("MD_File_hdfMatlab::read_pix_subset: can not get pixels dataspace",this->File_name));
         }
     }
-// identify the cells to read and maximal buffer size necessary to do preselection;
+// identify the cells to read and maximal buffer size necessary to do the preselection;
     size_t max_npix_fit(0),max_npix_selected,npix_tt;
     size_t n_cells_processed(starting_cell),i,j,n_cur_cells;
     size_t n_cells_final(selected_cells.size());
@@ -612,11 +612,13 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &
         npix_tt          =SQW.data[selected_cells[i]].npix; 
         max_npix_fit    +=npix_tt;
 
-        if(max_npix_fit<=nPixels){
+        if(max_npix_fit<=nPix_buf_size){
             max_npix_selected=max_npix_fit;
         }else{
             if(i==starting_cell){
-                throw("pixels buffer is too small to read even one cell, increase it");
+                delete [] pix_buf;
+                pix_buf       = new sqw_pixel[npix_tt];
+                nPix_buf_size = npix_tt;
             }
             break;
         }
@@ -626,13 +628,14 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &
 
     hid_t type      = H5Dget_type(this->pixel_dataset_h);
     if(type<0){
-        throw("can not obtain pixels dataset datatype");
+        throw(Exception::FileError("MD_File_hdfMatlab::read_pix_subset: can not obtain pixels dataset datatype",this->File_name));
     }
     time_t start,end;
     time(&start);  //***********************************************>>>
 
    // identify the indexes of the preselected pixels;
-    hsize_t *cells_preselection_buf=new hsize_t[max_npix_selected];
+    std::vector<hsize_t> cells_preselection_buf;
+    cells_preselection_buf.resize(max_npix_selected);
     long ic(0);
     for(i=starting_cell;i<n_cells_processed;i++){
         npix_tt          =SQW.data[selected_cells[i]].npix; 
@@ -641,10 +644,9 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &
             ic++;
         }
     }
-    herr_t err=H5Sselect_elements(this->pixel_dataspace_h, H5S_SELECT_SET,ic,cells_preselection_buf);
-    delete [] cells_preselection_buf;
-    if(err<0){
-        throw("error while doing pixels preselection");
+    herr_t err=H5Sselect_elements(this->pixel_dataspace_h, H5S_SELECT_SET,ic,&cells_preselection_buf[0]);
+     if(err<0){
+        throw(Exception::FileError("MD_File_hdfMatlab::read_pix_subset: error while doing pixels preselection",this->File_name));
     }
     hsize_t max_npix[2];
     max_npix[0]=max_npix_selected;
@@ -659,7 +661,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &
  //  herr_t H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t xfer_plist_id, void * buf  ) 
     err  =  H5Dread(this->pixel_dataset_h, type,mem_space, this->pixel_dataspace_h, this->file_access_mode,bin_pix_buf);   
     if(err){
-        throw("Error reading the pixels dataset");
+        throw(Exception::FileError("MD_File_hdfMatlab::read_pix_subset: Error reading the pixels dataset",this->File_name));
     }
     time(&end); //***********************************************<<<<
     std::cout<<" Dataset read  in: "<<difftime (end,start)<<" sec\n";
@@ -690,13 +692,13 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<long> &
      
 
 
-    nPixels=max_npix_selected;
+    nPix_buf_size=max_npix_selected;
     time(&end); //***********************************************<<<<
     std::cout<<" closing all while returning from file_hdf_read : "<<difftime (end,start)<<" sec\n";
 
     return n_cells_processed;
 }
-*/
+
 MD_File_hdfMatlab::~MD_File_hdfMatlab(void)
 {
     if(this->pixel_dataspace_h>0){  H5Sclose(pixel_dataspace_h);

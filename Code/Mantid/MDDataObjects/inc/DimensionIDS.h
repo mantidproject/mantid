@@ -8,6 +8,7 @@
 /** The class is the part of the VisualisationWorkspace and provides a default name, Identifuer and numerator for a dimension
 *   set of dimensions forms workspace geometry and some dimensions have to be treated differently from others
 *
+TO DO: not implemented yet;
 
     @author Alex Buts, RAL ISIS
     @date 27/09/2010

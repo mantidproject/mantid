@@ -44,7 +44,7 @@ public:
     /// interface  to get number of dimensions in the worspace
     virtual unsigned int getNumDims(void)const=0;
 
-    IMDWorkspace(void){};
+    IMDWorkspace(void):Workspace(){}
     virtual ~IMDWorkspace(void){};
 };
 }

@@ -76,9 +76,15 @@ public:
     }
     /// check if the pixels are all in memory;
     bool isMemoryBased(void)const{return memBased;}
+    /// function returns numnber of pixels contributiong into the MD-data
+    size_t genNumPixels(void)const{return nPixels;}
 
     /// read the whole pixels dataset in the memory
     void read_pix(void);
+
+   /// read the the pixels corresponding to cells in the vector cell_num
+    size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size);
+ 
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
     //void rebin_dataset4D(const SlicingData &transf,MDPixels &newsqw);

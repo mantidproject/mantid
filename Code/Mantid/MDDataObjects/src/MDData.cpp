@@ -392,6 +392,7 @@ MDData::alloc_mdd_arrays(const SlicingData &transf)
 }
 MDData::MDData(unsigned int nDims):
 MDGeometry(nDims),
+IMDWorkspace(),
 data_size(0),
 data(NULL),
 theFile(NULL),
