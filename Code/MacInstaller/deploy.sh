@@ -96,9 +96,7 @@ cp ../qtiplot/qtiplot/mantidplotrc.py MantidPlot.app/Contents/MacOS/
 cp ../qtiplot/qtiplot/mantidplot.py MantidPlot.app/Contents/MacOS/
 # ...the sip and PyQt stuff
 cp /Library/Python/2.5/site-packages/sip.so MantidPlot.app/Contents/MacOS/
-mkdir MantidPlot.app/Contents/MacOS/PyQt4
-cp /Library/Python/2.5/site-packages/PyQt4/Qt*.so MantidPlot.app/Contents/MacOS/PyQt4/
-cp /Library/Python/2.5/site-packages/PyQt4/__init__.py MantidPlot.app/Contents/MacOS/PyQt4/
+cp -R /Library/Python/2.5/site-packages/PyQt4 MantidPlot.app/Contents/MacOS/
 
 # Need to point PyQt libraries to local ones
 cd MantidPlot.app/Contents/MacOS/PyQt4
