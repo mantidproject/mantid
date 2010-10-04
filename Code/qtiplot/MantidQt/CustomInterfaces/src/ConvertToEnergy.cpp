@@ -5,7 +5,7 @@
 #include "MantidQtCustomInterfaces/Homer.h" // user interface for Direct instruments
 #include "MantidQtCustomInterfaces/Indirect.h" // user interface for Indirect instruments
 
-#include "MantidQtApi/ManageUserDirectories.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 
 #include "MantidKernel/ConfigService.h"
 
