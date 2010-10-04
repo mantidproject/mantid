@@ -557,6 +557,18 @@ void testCheckIfVariousInstrumentsLoad()
 
     AnalysisDataService::Instance().remove(wsName);
 
+    LoadEmptyInstrument loaderEMU2;
+    loaderEMU2.initialize();
+    loaderEMU2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
+    inputFile = loaderEMU2.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamEMU2Test";
+    loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderEMU2.execute());
+    TS_ASSERT( loaderEMU2.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+
   }
 
 
