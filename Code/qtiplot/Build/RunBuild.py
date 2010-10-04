@@ -50,6 +50,14 @@ buildlog = open(log_dir + "qtiplot/build.log","w")
 errorlog = open(log_dir + "qtiplot/error.log","w")
 
 buildStart = time.time()
+#Build QtPropertyBrowser
+sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
+ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
+if ret != 0:
+    outcome = "QtPropertyBrowser build failed"
+    buildlog.write(outcome)
+    sys.exit(0)
+
 # Build MantidQt
 # Updates to UI files alone don't always seem to get picked up without a clean first, so do that until we can figure out why
 sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
@@ -61,13 +69,6 @@ if ret != 0:
     buildlog.write(outcome)
     sys.exit(0)
 
-#Build QtPropertyBrowser
-sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
-ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
-if ret != 0:
-    outcome = "QtPropertyBrowser build failed"
-    buildlog.write(outcome)
-    sys.exit(0)
 
 #Now build MantidPlot
 sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")

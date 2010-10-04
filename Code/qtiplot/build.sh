@@ -33,13 +33,13 @@ python release_date.py $VERSION $SVN_VERSION
 # The top-level directory 
 ROOTDIR=`pwd`
 
-# First, build dialog library
-cd $ROOTDIR/MantidQt
-build_library "MantidQt" $CLEAN
-
 # QtPropertyBrowser library
 cd $ROOTDIR/QtPropertyBrowser
 build_library "QtPropertyBrowser" $CLEAN
+
+# Build dialog library
+cd $ROOTDIR/MantidQt
+build_library "MantidQt" $CLEAN
 
 # Now build qtiplot
 cd $ROOTDIR/qtiplot

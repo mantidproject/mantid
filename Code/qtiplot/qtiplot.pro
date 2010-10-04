@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS = MantidQt QtPropertyBrowser qtiplot 
+SUBDIRS = QtPropertyBrowser MantidQt qtiplot 
 CONFIG += ordered
 
 

@@ -69,6 +69,7 @@ INCLUDEPATH += "$$MANTIDPATH/Kernel/inc/"
 INCLUDEPATH += "$$MANTIDPATH/Geometry/inc/"
 INCLUDEPATH += "$$MANTIDPATH/API/inc/"
 INCLUDEPATH += "$$MANTIDQTINCLUDES"
+INCLUDEPATH += "$$TOPBUILDDIR/../QtPropertyBrowser/src/"
 
 macx {
   INCLUDEPATH += "$$THIRDPARTY/include"
@@ -80,6 +81,7 @@ unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidKernel
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
   LIBS += -L$$MANTIDLIBPATH -lMantidGeometry
+  LIBS += -L$$MANTIDLIBPATH -lQtPropertyBrowser
 
   CONFIG(debug, debug|release) {
   LIBS	+= -lPocoFoundationd
@@ -113,10 +115,12 @@ CONFIG(build64)  {
   build_pass:CONFIG(release, debug|release) {
     LIBS += "PocoFoundation.lib"
     LIBS += "PocoXML.lib"
+    LIBS += "QtPropertyBrowser.lib"
   }
   build_pass:CONFIG(debug, debug|release) {
     LIBS += "PocoFoundationd.lib"
     LIBS += "PocoXMLd.lib"
+    LIBS += "QtPropertyBrowserd.lib"
   }
 }
 

@@ -19,19 +19,20 @@ CALL "%VCINSTALLDIR%"\vcvarsall.bat %ARCH%
 :: The top-level directory
 SET ROOTDIR=%CD%
 
-:: First, build dialog library
-cd "%ROOTDIR%\MantidQt"
-qmake %QMAKE_ARGS%
-nmake clean
-nmake
-IF %ERRORLEVEL% NEQ 0 goto mantidqterr
-
 :: Now build QtPropertyBrowser
 cd "%ROOTDIR%\QtPropertyBrowser"
 qmake %QMAKE_ARGS%
 nmake clean
 nmake
 IF %ERRORLEVEL% NEQ 0 goto qtpropertyerr
+
+
+:: First, build dialog library
+cd "%ROOTDIR%\MantidQt"
+qmake %QMAKE_ARGS%
+nmake clean
+nmake
+IF %ERRORLEVEL% NEQ 0 goto mantidqterr
 
 :: Now build qtiplot
 cd "%ROOTDIR%\qtiplot"
