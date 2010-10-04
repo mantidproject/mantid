@@ -51,6 +51,7 @@ cp ../Mantid/release/libMantidWidgets.1.dylib MantidPlot.app/Contents/MacOS/
 install_name_tool -change libMantidQtAPI.1.dylib @executable_path/./libMantidQtAPI.1.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.1.dylib
 install_name_tool -change @executable_path/../Frameworks/libMantidWidgets.1.dylib @executable_path/./libMantidWidgets.1.dylib MantidPlot.app/Contents/MacOS/MantidPlot
 cp ../Mantid/release/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/Frameworks/
+install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.1.dylib
 
 # Now lots of dependencies
 # ...third party directory. Specific required versions only.
