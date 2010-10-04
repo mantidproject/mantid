@@ -29,6 +29,7 @@ void Logarithm::retrieveProperties()
 
 void Logarithm::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut)
 {
+  (void) XIn; //Avoid compiler warning
   if (YIn<=0){  
     YOut = this->log_Min;
     EOut = 0;

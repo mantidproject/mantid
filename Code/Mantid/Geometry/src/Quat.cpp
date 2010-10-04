@@ -217,6 +217,7 @@ void Quat::operator()(const Quat& q)
 void Quat::operator()(const V3D& rX, const V3D& rY, const V3D& rZ)
 {
   //The quaternion will combine two quaternions.
+  (void) rZ; //Avoid compiler warning
 
   //These are the original axes
   V3D oX = V3D(1.,0.,0.);

@@ -16,7 +16,7 @@ namespace Geometry
      *   @param map A pointer to the parameter map 
      */
     ParObjComponent::ParObjComponent(const ObjComponent* base, const ParameterMap& map)
-        :ParametrizedComponent(base,map)
+        :ParametrizedComponent(base,map), IObjComponent()
     {
     }
     /**  Copy constructor.

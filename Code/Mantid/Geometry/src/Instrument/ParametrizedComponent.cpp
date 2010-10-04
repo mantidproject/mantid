@@ -43,6 +43,7 @@ namespace Mantid
     */
     void ParametrizedComponent::setParent(IComponent* comp)
     {
+      (void) comp; //Avoid compiler warnings
       //  parent=comp;
     }
 
@@ -76,6 +77,7 @@ namespace Mantid
     */
     void ParametrizedComponent::setName(const std::string& s)
     {
+      (void) s; //Avoid compiler warnings
       //  name=s;
     }
 
@@ -96,6 +98,9 @@ namespace Mantid
     void ParametrizedComponent::setPos(double x, double y, double z)
     {
       //  pos(x,y,z);
+      (void) x; //Avoid compiler warning
+      (void) y; //Avoid compiler warning
+      (void) z; //Avoid compiler warning
     }
 
     /*! Set the position of the ParametrizedComponent
@@ -104,6 +109,7 @@ namespace Mantid
     */
     void ParametrizedComponent::setPos(const V3D& v)
     {
+      (void) v; //Avoid compiler warning
       //  pos=v;
     }
 
@@ -113,6 +119,7 @@ namespace Mantid
     */
     void ParametrizedComponent::setRot(const Quat& q)
     {
+      (void) q; //Avoid compiler warning
       //  rot=q;
     }
 
@@ -121,6 +128,7 @@ namespace Mantid
     */
     void ParametrizedComponent::copyRot(const IComponent& comp)
     {
+      (void) comp; //Avoid compiler warning
       //  rot=comp.rot;
     }
 
@@ -135,6 +143,9 @@ namespace Mantid
       //  pos[0]+=x;
       //  pos[1]+=y;
       //  pos[2]+=z;
+      (void) x; //Avoid compiler warning
+      (void) y; //Avoid compiler warning
+      (void) z; //Avoid compiler warning
       return;
     }
 
@@ -144,6 +155,7 @@ namespace Mantid
     void ParametrizedComponent::translate(const V3D& v)
     {
       //  pos+=v;
+      (void) v; //Avoid compiler warning
       return;
     }
 
@@ -153,6 +165,7 @@ namespace Mantid
     void ParametrizedComponent::rotate(const Quat& r)
     {
       //  rot=r*rot;
+      (void) r; //Avoid compiler warning
     }
 
     /*! Rotate the ParametrizedComponent by an angle in degrees with respect to an axis.
@@ -162,6 +175,8 @@ namespace Mantid
     void ParametrizedComponent::rotate(double angle, const V3D& axis)
     {
       //  throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been implemented");
+      (void) angle; //Avoid compiler warning
+      (void) axis; //Avoid compiler warning
     }
 
     /** Gets the position relative to the parent

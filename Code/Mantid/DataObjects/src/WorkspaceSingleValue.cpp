@@ -31,10 +31,13 @@ namespace Mantid
     *  @param YLength The number of data/error points
     */
     void WorkspaceSingleValue::init(const int &NVectors, const int &XLength, const int &YLength)
-    {}
+    {
+      (void) NVectors; (void) XLength; (void) YLength; //Avoid compiler warning
+    }
 
     Kernel::cow_ptr<MantidVec> WorkspaceSingleValue::refX(const int index) const
     {
+      (void) index; //Avoid compiler warning
       Kernel::cow_ptr<MantidVec> ret;
       ret.access() = _X;
       return ret;

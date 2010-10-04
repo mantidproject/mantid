@@ -173,6 +173,7 @@ namespace Mantid
      */
     bool BinaryOperation::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs)
     {
+      (void) lhs; (void) rhs; //Avoid compiler warning
       return false;
     }
 

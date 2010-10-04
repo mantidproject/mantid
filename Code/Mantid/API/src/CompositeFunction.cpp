@@ -775,6 +775,8 @@ void CompositeFunction::addTie(ParameterTie* tie)
  */
 void CompositeFunction::declareParameter(const std::string& name,double initValue )
 {
+  (void) name; //Avoid compiler warning
+  (void) initValue; //Avoid compiler warning
   throw Kernel::Exception::NotImplementedError("CompositeFunction cannot not have its own parameters.");
 }
 

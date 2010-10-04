@@ -647,7 +647,7 @@ namespace CurveFitting
 
     std::string::size_type i = input.find_last_not_of(" \t\n\r");
     if (i == std::string::npos) return;
-    if (i >= 0 && input[i] == ';')
+    if (input[i] == ';')
     {
       input.erase(i);
     }
@@ -664,7 +664,7 @@ namespace CurveFitting
         input += ",";
       }
       std::string::size_type i = inputConstraints.find_last_not_of(" \t\n\r");
-      if (i >= 0 && inputConstraints[i] == ',')
+      if (inputConstraints[i] == ',')
       {
         inputConstraints.erase(i);
       }
@@ -689,7 +689,7 @@ namespace CurveFitting
         input += ",";
       }
       std::string::size_type i = inputTies.find_last_not_of(" \t\n\r");
-      if (i >= 0 && inputTies[i] == ',')
+      if (inputTies[i] == ',')
       {
         inputTies.erase(i);
       }

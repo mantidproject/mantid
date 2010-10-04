@@ -1055,6 +1055,8 @@ CompObj::setLeaves(Rule* aR,Rule* oR)
     \param oR :: Null other rule
   */
 {
+  (void) oR; //Avoid compiler warning
+
   CompObj* newX = dynamic_cast<CompObj*>(aR);
   if (newX)
     *this = *newX;
@@ -1071,6 +1073,7 @@ CompObj::findKey(const int i)
     \return 0
   */
 {
+  (void) i; //Avoid compiler warning
   return 0;
 }
 
@@ -1277,6 +1280,7 @@ BoolValue::setLeaves(Rule* aR,Rule* oR)
     \param oR :: Null other rule
   */
 {
+  (void) oR; //Avoid compiler warning
   //std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
   BoolValue* newX = dynamic_cast<BoolValue*>(aR);
   if (newX)
@@ -1298,6 +1302,7 @@ BoolValue::isValid(const Geometry::V3D& pt) const
     \returns status
   */
 {
+  (void) pt; //Avoid compiler warning
   return status;
 }
 
@@ -1309,6 +1314,7 @@ BoolValue::isValid(const std::map<int,int>& map) const
     \returns :: status
   */
 {
+  (void) map; //Avoid compiler warning
   return status;
 }
 
@@ -1366,7 +1372,14 @@ BoolValue::displayAddress() const
 void BoolValue::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
 	//Returns what ever bounding box it gets
+  (void) xmax; //Avoid compiler warning
+  (void) ymax; //Avoid compiler warning
+  (void) zmax; //Avoid compiler warning
+  (void) xmin; //Avoid compiler warning
+  (void) ymin; //Avoid compiler warning
+  (void) zmin; //Avoid compiler warning
 }
+
 //----------------------------------------
 //       COMPGRP
 //----------------------------------------
@@ -1455,6 +1468,7 @@ CompGrp::setLeaf(Rule* nR,const int side)
     \param side :: side to use 
   */
 {
+  (void) side; //Avoid compiler warning
   A=nR;
   if (A)
     A->setParent(this);
@@ -1470,6 +1484,7 @@ CompGrp::setLeaves(Rule* aR,Rule* oR)
     \param oR :: Null other rule
   */
 {
+  (void) oR; //Avoid compiler warning
   A=aR;
   if (A)
     A->setParent(this);
@@ -1486,6 +1501,7 @@ CompGrp::findKey(const int i)
     \return 0
   */
 {
+  (void) i; //Avoid compiler warning
   return 0;
 }
 

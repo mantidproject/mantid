@@ -50,6 +50,7 @@ Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
  */
 void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
+  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
   throw Kernel::Exception::NotImplementedError("No derivative IFunction provided");
 }
 

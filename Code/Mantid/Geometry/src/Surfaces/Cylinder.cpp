@@ -366,6 +366,8 @@ Cylinder::lineIntersect(const Geometry::V3D& Pt,
     \retval -1 Failed to intersect
   */
 {
+  (void) Pt; //Avoid compiler warning
+  (void) uVec; //Avoid compiler warning
   return -1;
 }
 

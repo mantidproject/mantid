@@ -19,6 +19,7 @@ namespace Mantid
     void Plus::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
+      (void) lhsX; //Avoid compiler warning
       std::transform(lhsY.begin(),lhsY.end(),rhsY.begin(),YOut.begin(),std::plus<double>());
       std::transform(lhsE.begin(),lhsE.end(),rhsE.begin(),EOut.begin(),VectorHelper::SumGaussError<double>());
     }
@@ -27,6 +28,7 @@ namespace Mantid
     void Plus::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
+      (void) lhsX; //Avoid compiler warning
       std::transform(lhsY.begin(),lhsY.end(),YOut.begin(),std::bind2nd(std::plus<double>(),rhsY));
       // Only do E if non-zero, otherwise just copy
       if (rhsE != 0)

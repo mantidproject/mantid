@@ -56,11 +56,13 @@ namespace Mantid
 
 		void CacheGeometryRenderer::Render(int noPts,int noFaces,double* points,int* faces) const
 		{
+      (void) noPts; (void) noFaces; (void) points; (void) faces; //Avoid compiler warning
 			glCallList(iDisplaylistId);
 		}
 
 		void CacheGeometryRenderer::Initialize(int noPts,int noFaces,double* points,int* faces)
 		{
+      (void) noPts; //Avoid compiler warning
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
 				iDisplaylistId=glGenLists(1);

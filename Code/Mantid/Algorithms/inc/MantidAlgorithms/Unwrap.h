@@ -60,8 +60,8 @@ private:
   void init();
   void exec();
 
-  const double getPrimaryFlightpath() const;
-  const double calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const;
+  double getPrimaryFlightpath() const;
+  double calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const;
   const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const double& Ld);
   std::pair<int,int> handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX);
   void unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds);

@@ -163,6 +163,7 @@ void Property::setUnits(std::string unit)
  */
 Property& Property::operator+=( Property * rhs )
 {
+  (void) rhs; //Avoid compiler warning
   std::stringstream msg;
   msg << "Property object '" << m_name << "' of type '" << type() << "' has not implemented a operator+=() method.";
   throw Exception::NotImplementedError(msg.str());
@@ -173,6 +174,8 @@ Property& Property::operator+=( Property * rhs )
 /** Filter out a property by time. Will be overridden by TimeSeriesProperty (only) */
 void Property::filterByTime(const Kernel::dateAndTime start, const Kernel::dateAndTime stop)
 {
+  (void) start; //Avoid compiler warning
+  (void) stop; //Avoid compiler warning
   //Do nothing in general
   return;
 }
@@ -184,6 +187,8 @@ void Property::filterByTime(const Kernel::dateAndTime start, const Kernel::dateA
  * */
 void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
 {
+  (void) splitter; //Avoid compiler warning
+  (void) outputs; //Avoid compiler warning
   return;
 }
 

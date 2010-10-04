@@ -63,6 +63,7 @@ Kernel::Unit_sptr& Axis::unit()
  */
 const int& Axis::spectraNo(const int& index) const
 {
+  (void) index; //Avoid compiler warning
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 
@@ -73,6 +74,7 @@ const int& Axis::spectraNo(const int& index) const
  */
 int& Axis::spectraNo(const int& index)
 {
+  (void) index; //Avoid compiler warning
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 

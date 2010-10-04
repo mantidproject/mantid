@@ -392,6 +392,7 @@ std::vector<int> DetectorEfficiencyVariation::findBad(
 */
 void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums)
 {
+  (void) SpecNums; //Avoid compiler warning
   //it's not an error if the name is "", we just don't write anything
   if ( fname.empty() )
   {

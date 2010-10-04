@@ -31,8 +31,8 @@ namespace Geometry
     size_t foundMinPercentage, foundMaxPercentage;
     foundMinPercentage = m_constraintMin.find('%');
     foundMaxPercentage = m_constraintMax.find('%');
-    double min;
-    double max;
+    double min=0;
+    double max=0;
     if ( m_constraintMin.compare("") )
     {
       if ( foundMinPercentage != std::string::npos )

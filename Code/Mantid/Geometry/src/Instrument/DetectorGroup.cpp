@@ -233,6 +233,7 @@ int  DetectorGroup::getPointInObject(V3D& point) const
 */
 std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const
 {
+  (void) recursive; //Avoid compiler warning
   return std::set<std::string>();
 }
 
@@ -245,6 +246,8 @@ std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const
 */
 bool DetectorGroup::hasParameter(const std::string & name, bool recursive) const
 {
+  (void) recursive; //Avoid compiler warning
+  (void) name; //Avoid compiler warning
   return false;
 }
 

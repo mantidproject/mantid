@@ -28,6 +28,7 @@ namespace Mantid
     void PoissonErrors::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                                const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
+      (void) lhsX; //Avoid compiler warning
       // Just copy over the lhs data
       YOut = lhsY;
       // Now make the fractional error the same as it was on the rhs
@@ -42,6 +43,8 @@ namespace Mantid
     void PoissonErrors::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                                const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
+      (void) lhsE; //Avoid compiler warning
+
       assert( lhsX.size() == 1 );
       // If we get here we've got two single column workspaces so it's easy.
       YOut[0] = lhsY[0];

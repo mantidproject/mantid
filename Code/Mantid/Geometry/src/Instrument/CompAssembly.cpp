@@ -12,7 +12,10 @@ class NoDeleting
 {
 public:
     /// deleting operator. Does nothing
-    void operator()(void*p){}
+    void operator()(void*p)
+    {
+      (void) p; //Avoid compiler warnings
+    }
 };
 
 /*! Empty constructor

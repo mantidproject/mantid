@@ -75,22 +75,22 @@ public:
 
   //inheritance redirections
   ///Returns the x data
-  virtual MantidVec& dataX(int const index) { return _X; }
+  virtual MantidVec& dataX(int const index) { (void) index; return _X; }
   ///Returns the y data
-  virtual MantidVec& dataY(int const index) { return _Y; }
+  virtual MantidVec& dataY(int const index) { (void) index; return _Y; }
   ///Returns the error data
-  virtual MantidVec& dataE(int const index) { return _E; }
+  virtual MantidVec& dataE(int const index) { (void) index; return _E; }
   /// Returns the x data const
-  virtual const MantidVec& dataX(int const index) const {return _X;}
+  virtual const MantidVec& dataX(int const index) const { (void) index; return _X;}
   /// Returns the y data const
-  virtual const MantidVec& dataY(int const index) const {return _Y;}
+  virtual const MantidVec& dataY(int const index) const { (void) index; return _Y;}
   /// Returns the error const
-  virtual const MantidVec& dataE(int const index) const {return _E;}
+  virtual const MantidVec& dataE(int const index) const { (void) index; return _E;}
   
   /// Returns a pointer to the x data
   virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
   /// Set the specified X array to point to the given existing array
-  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { _X = *X; }
+  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; _X = *X; }
 
   ///Returns non-const vector of the x data
   virtual MantidVec& dataX() { return _X; }

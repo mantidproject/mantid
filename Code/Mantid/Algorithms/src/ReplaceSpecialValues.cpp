@@ -59,6 +59,7 @@ void ReplaceSpecialValues::retrieveProperties()
 void ReplaceSpecialValues::performUnaryOperation(const double XIn, const double YIn,
     const double EIn, double& YOut, double& EOut)
 {
+  (void) XIn; //Avoid compiler warning
   YOut = YIn;
   EOut = EIn;
 

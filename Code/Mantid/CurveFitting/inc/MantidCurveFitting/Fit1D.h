@@ -83,9 +83,15 @@ namespace Mantid
       void exec();
 
       /// Option for providing intelligent range starting value based e.g. on the user input parameter values
-      virtual void modifyStartOfRange(double& startX) {}
+      virtual void modifyStartOfRange(double& startX)
+      {
+        (void) startX; //Avoid compiler warning
+      }
       /// Option for providing intelligent range finishing value based e.g. on the user input parameter values
-      virtual void modifyEndOfRange(double& endX) {}
+      virtual void modifyEndOfRange(double& endX)
+      {
+        (void) endX; //Avoid compiler warning
+      }
 
       /// Declare additional properties other than fitting parameters
       virtual void declareAdditionalProperties(){};
@@ -99,7 +105,10 @@ namespace Mantid
        *  @param m_minX Start array index.
        *  @param m_maxX End array index.
        */
-      virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
+      virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX)
+      {
+        (void) m_minX; (void) m_maxX; //Avoid compiler warning
+      };
 
       /// Declare parameters specific to fitting function
       virtual void declareParameters() = 0;

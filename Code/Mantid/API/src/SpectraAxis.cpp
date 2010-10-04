@@ -23,6 +23,7 @@ SpectraAxis::SpectraAxis(const int& length): Axis()
  */
 Axis* SpectraAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
+  (void) parentWorkspace; //Avoid compiler warning
   return new SpectraAxis(*this);
 }
 
@@ -34,6 +35,7 @@ Axis* SpectraAxis::clone(const MatrixWorkspace* const parentWorkspace)
  */
 double SpectraAxis::operator()(const int& index, const int& verticalIndex) const
 {
+  (void) verticalIndex; //Avoid compiler warning
   if (index < 0 || index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");

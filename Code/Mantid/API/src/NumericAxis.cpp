@@ -23,6 +23,7 @@ NumericAxis::NumericAxis(const int& length): Axis()
  */
 Axis* NumericAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
+  (void) parentWorkspace; //Avoid compiler warning
   return new NumericAxis(*this);
 }
 
@@ -34,6 +35,7 @@ Axis* NumericAxis::clone(const MatrixWorkspace* const parentWorkspace)
  */
 double NumericAxis::operator()(const int& index, const int& verticalIndex) const
 {
+  (void) verticalIndex; //Avoid compiler warning
   if (index < 0 || index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "NumericAxis: Index out of range.");

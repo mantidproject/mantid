@@ -431,7 +431,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   }
 
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
-  workspace->doneLoadingData(1);
+  workspace->doneLoadingData();
 
 
   this->setProtonCharge(workspace);

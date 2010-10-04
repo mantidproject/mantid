@@ -197,7 +197,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void doneAddingEventLists();
 
   /// Call this method when loading event data is complete.
-  void doneLoadingData(int makeSpectraMap = 1);
+  void doneLoadingData();
 
 
   //------------------------------------------------------------

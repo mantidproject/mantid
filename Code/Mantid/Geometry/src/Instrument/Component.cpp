@@ -198,6 +198,8 @@ void Component::rotate(const Quat& r)
  */
 void Component::rotate(double angle, const V3D& axis)
 {
+  (void) angle; //Avoid compiler warning
+  (void) axis; //Avoid compiler warning
   throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been implemented");
 }
 
@@ -270,6 +272,7 @@ double Component::getDistance(const IComponent& comp) const
 */
 std::set<std::string> Component::getParameterNames(bool recursive) const
 {
+  (void) recursive; //Avoid compiler warning
   return std::set<std::string>();
 }
 
@@ -282,6 +285,8 @@ std::set<std::string> Component::getParameterNames(bool recursive) const
 */
 bool Component::hasParameter(const std::string & name, bool recursive) const
 {
+  (void) name; //Avoid compiler warning
+  (void) recursive; //Avoid compiler warning
   return false;
 }
 

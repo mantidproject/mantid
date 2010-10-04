@@ -137,6 +137,7 @@ void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
 	  \param zmin :: as for xmin
       //TODO: Implement bounding box for General
 	*/
+
 }
 
 }  // NAMESPACE MonteCarlo

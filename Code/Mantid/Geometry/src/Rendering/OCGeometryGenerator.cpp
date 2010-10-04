@@ -152,6 +152,7 @@ namespace Mantid
 		}
 		TopoDS_Shape OCGeometryGenerator::AnalyzeRule(BoolValue* rule)
 		{
+      (void) rule; //Avoid compiler warning
 			return TopoDS_Shape();
 		}
 		TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Rule* rule)

@@ -131,6 +131,7 @@ RotaryCounter::operator++(int a)
     \return ++operator
    */
 {
+  (void) a; //Avoid compiler warning
   return this->operator++();
 }
 
@@ -169,6 +170,7 @@ RotaryCounter::operator--(int a)
     \return --operator
    */
 {
+  (void) a; //Avoid compiler warning
   return this->operator--();
 }
 

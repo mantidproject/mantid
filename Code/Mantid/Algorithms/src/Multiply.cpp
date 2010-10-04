@@ -16,6 +16,7 @@ namespace Mantid
     void Multiply::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
+      (void) lhsX; //Avoid compiler warning
       const int bins = lhsE.size();
       for (int j=0; j<bins; ++j)
       {
@@ -37,6 +38,7 @@ namespace Mantid
     void Multiply::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
+      (void) lhsX; //Avoid compiler warning
       const int bins = lhsE.size();
       for (int j=0; j<bins; ++j)
       {

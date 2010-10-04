@@ -239,6 +239,7 @@ void DllOpen::CloseDllImpl(void* libName)
  **/
 void DllOpen::addSearchDirectoryImpl(const std::string& dir)
 {
+  (void) dir; //Avoid compiler warning
 }
 
 #endif /* _WIN32 */

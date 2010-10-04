@@ -67,9 +67,10 @@ using namespace Mantid::Kernel;
     *  @param XLength The number of X data points/bin boundaries in each vector (ignored)
     *  @param YLength The number of data/error points in each vector (ignored)
    */
-  void EventWorkspace::init(const int &NVectors, const int &XLength,
-          const int &YLength)
+  void EventWorkspace::init(const int &NVectors, const int &XLength, const int &YLength)
   {
+    (void) YLength; //Avoid compiler warning
+
     // Check validity of arguments
     if (NVectors <= 0)
     {
@@ -374,9 +375,8 @@ using namespace Mantid::Kernel;
    *
    * The map of pixelid to spectrum # is generated.
    * Also, a simple 1:1 map of spectrum # to pixel id (detector #) is generated
-   * @param makeSpectraMap Generate a spectramap (0=No, otherwise yes). Default = YES
    * */
-  void EventWorkspace::doneLoadingData(int makeSpectraMap)
+  void EventWorkspace::doneLoadingData()
   {
     //Ok, we need to take the data_map, and turn it into a data[] vector.
 

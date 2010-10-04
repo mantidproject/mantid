@@ -31,6 +31,7 @@ void Power::retrieveProperties()
 void Power::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut,
     double& EOut)
 {
+  (void) XIn; //Avoid compiler warning
   YOut = calculatePower(YIn, m_exponent);
   EOut = std::fabs(m_exponent * YOut * (EIn / YIn));
 }

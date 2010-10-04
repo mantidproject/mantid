@@ -28,6 +28,7 @@ void DeltaFunction::function(double* out, const double* xValues, const int& nDat
 
 void DeltaFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
+  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
   std::runtime_error("Cannot compute derivative of a delta function");
 }
 

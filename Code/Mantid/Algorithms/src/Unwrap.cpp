@@ -136,7 +136,7 @@ void Unwrap::exec()
  *  @return L1
  *  @throw Kernel::Exception::InstrumentDefinitionError if L1 is not available
  */
-const double Unwrap::getPrimaryFlightpath() const
+double Unwrap::getPrimaryFlightpath() const
 {
   // Get a pointer to the instrument contained in the input workspace
   IInstrument_const_sptr instrument = m_inputWS->getInstrument();
@@ -164,7 +164,7 @@ const double Unwrap::getPrimaryFlightpath() const
  *  @return The flightpath (Ld) for the detector linked to spectrum
  *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position can't be obtained
  */
-const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const
+double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const
 {
   double Ld = -1.0;
   try

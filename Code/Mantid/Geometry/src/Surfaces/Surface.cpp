@@ -107,6 +107,7 @@ Surface::write(std::ostream& out) const
     \param out :: The output stream 
   */
 {
+  (void) out; //Avoid compiler warning
   throw Kernel::Exception::AbsObjMethod("Surface::write");
 }
   

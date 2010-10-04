@@ -35,6 +35,7 @@ LineIntersectVisit::Accept(const Surface& Surf)
     \param Surf :: Surface to use int line Interesect
   */
 {
+  (void) Surf; //Avoid compiler warning
   throw std::runtime_error("LineIntersectVisit::Accept Surface");
   return;
 }

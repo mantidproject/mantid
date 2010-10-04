@@ -45,6 +45,7 @@ namespace Mantid
 		*/
 		void OCGeometryRenderer::Render(TopoDS_Shape* ObjSurf)
 		{
+      (void) ObjSurf; //Avoid compiler warning
 			glCallList(iDisplaylistId);
 		}
 
@@ -112,7 +113,7 @@ namespace Mantid
 		 */
 		void OCGeometryRenderer::RenderTopoDS(TopoDS_Shape* ObjSurf)
 		{
-			if(ObjSurf!=NULL&&!ObjSurf->IsNull())
+			if((ObjSurf!=NULL) && !ObjSurf->IsNull())
 			{
 				TopExp_Explorer Ex;
 				for(Ex.Init(*ObjSurf,TopAbs_FACE);Ex.More();Ex.Next())

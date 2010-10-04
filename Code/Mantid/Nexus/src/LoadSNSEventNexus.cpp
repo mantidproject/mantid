@@ -174,7 +174,7 @@ void LoadSNSEventNexus::exec()
   }
 
   //Now all the event lists have been made for all pixel ids
-  WS->doneLoadingData(1);
+  WS->doneLoadingData();
 
   //Info reporting
   g_log.information() << "Read " << WS->getNumberEvents() << " events"

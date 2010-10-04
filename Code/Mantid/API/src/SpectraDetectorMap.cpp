@@ -118,7 +118,7 @@ namespace Mantid
       m_s2dmap.clear();
     }
     
-    const int SpectraDetectorMap::ndet(const int spectrum_number) const
+    int SpectraDetectorMap::ndet(const int spectrum_number) const
     {
       return m_s2dmap.count(spectrum_number);
     }

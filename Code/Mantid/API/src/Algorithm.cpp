@@ -731,6 +731,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
  */ 
 void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int nPeriod)
 {
+  (void) nPeriod; //Avoid compiler warning
   if(alg) alg->setPropertyValue(propertyName,propertyValue);
 }
 

@@ -17,9 +17,16 @@ namespace
     const std::string caption() const { return "Scattering angle"; }
     const std::string label() const { return "degrees"; }
     void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const {}
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+    {
+      (void) xdata; (void) ydata; (void) l1; (void)l2; (void)twoTheta; (void)emode; (void)efixed; (void)delta;
+    }
+
     void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const {}
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+    {
+      (void) xdata; (void) ydata; (void) l1; (void)l2; (void)twoTheta; (void)emode; (void)efixed; (void)delta;
+    }
   };
 } // end anonynmous namespace
 /// @endcond

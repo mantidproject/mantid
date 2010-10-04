@@ -49,17 +49,25 @@ namespace Mantid
       /// Returns the centre of the function, which may be something as simple as the centre of
       /// the fitting range in the case of a background function or peak shape function this 
       /// return value reflects the centre of the peak
-      double centre()const{return 0.;}
+      double centre() const
+      {return 0.;}
 
       /// Returns the height of the function. For a background function this may return an average
       /// height of the background. For a peak function this return value is the height of the peak
-      double height()const{return 0.;}
+      double height() const
+      {return 0.;}
 
       /// Sets the parameters such that centre == c
-      void setCentre(const double c){}
+      void setCentre(const double c)
+      {
+        (void) c; //Avoid compiler warning
+      }
 
       /// Sets the parameters such that height == h
-      void setHeight(const double h){}
+      void setHeight(const double h)
+      {
+        (void) h; //Avoid compiler warning
+      }
 
       void fit(const std::vector<double>& X,const std::vector<double>& Y);
     };

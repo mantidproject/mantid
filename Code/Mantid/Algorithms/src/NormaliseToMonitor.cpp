@@ -240,6 +240,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::Matrix
  */
 bool NormaliseToMonitor::setIntegrationProps(API::MatrixWorkspace_const_sptr inputWorkspace)
 {
+  (void) inputWorkspace; //Avoid compiler warning
   //get the values if set the default values of the m_inter*s and the properties are EMPTY_DBL()
   m_integrationMin = getProperty("IntegrationRangeMin");
   m_integrationMax = getProperty("IntegrationRangeMax");

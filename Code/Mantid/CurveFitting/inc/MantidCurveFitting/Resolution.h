@@ -49,7 +49,10 @@ public:
   std::string name()const{return "Resolution";}
   void function(double* out, const double* xValues, const int& nData)const;
   ///  function derivatives
-  void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData)const{}
+  void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData)const
+  {
+    (void) out; (void) xValues; (void) nData; //Avoid compiler warning
+  }
 
   /// Returns the number of attributes associated with the function
   int nAttributes()const{return 1;}

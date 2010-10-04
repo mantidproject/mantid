@@ -39,6 +39,7 @@ bool WeightedMean::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr 
 void WeightedMean::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
 {
+  (void) lhsX; //Avoid compiler warning
   const int bins = lhsY.size();
   for (int j=0; j<bins; ++j)
   {

@@ -21,6 +21,7 @@ TextAxis::TextAxis(const int& length): Axis()
  */
 Axis* TextAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
+  (void) parentWorkspace; //Avoid compiler warning
   return new TextAxis(*this);
 }
 
@@ -32,6 +33,7 @@ Axis* TextAxis::clone(const MatrixWorkspace* const parentWorkspace)
  */
 double TextAxis::operator()(const int& index, const int& verticalIndex) const
 {
+  (void) verticalIndex; //Avoid compiler warning
   if (index < 0 || index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "TextAxis: Index out of range.");
@@ -47,6 +49,8 @@ double TextAxis::operator()(const int& index, const int& verticalIndex) const
  */
 void TextAxis::setValue(const int& index, const double& value)
 {
+  (void) index; //Avoid compiler warning
+  (void) value; //Avoid compiler warning
   throw std::domain_error("setValue method cannot be used on a TextAxis.");
 }
 

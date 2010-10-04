@@ -78,6 +78,7 @@ PolyFunction::write(std::ostream& OX) const
     \param OX :: output stream
   */
 {
+  (void) OX; //Avoid compiler warning
   return;
 }  
 

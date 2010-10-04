@@ -564,6 +564,7 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
   {
     xneff = x.back();
     sneff = 0.0;
+    eneff = 0.0; //Make sure to initialize to a value.
   }
 
   //xmin -> x[ml]
