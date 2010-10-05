@@ -6,8 +6,10 @@
 namespace Mantid{
     namespace MDDataObjects{
 //
+    using namespace Mantid::API;
     using namespace Mantid::Kernel;
 //
+ Logger& MDData::g_log=Logger::get("FrameworkManager");
 void
 MDData::getPointData(std::vector<point3D> &image_points)const{
     std::vector<unsigned int> selection;

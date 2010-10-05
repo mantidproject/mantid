@@ -1,6 +1,6 @@
 #ifndef H_FILE_HDF
 #define H_FILE_HDF
-#include "MD_FileFormat.h"
+#include "IMD_FileFormat.h"
 /** stub for a future binary (hdf) file format reader/writer which will be used for datasets.
 
     @author Alex Buts, RAL ISIS
@@ -30,16 +30,16 @@
 namespace Mantid{
     namespace MDDataObjects{
 //*****************************************************************************
-class MD_File_hdfV1 :    public MD_FileFormat
+class MD_File_hdfV1 :    public IMD_FileFormat
 {
 public:
-    MD_File_hdfV1(const char *file_name){throw("this format is not written yet");}
+    MD_File_hdfV1(const char  *file_name){throw("this format is not written yet");}
     virtual ~MD_File_hdfV1(void){};
     virtual bool is_open(void)const{return false;}
     virtual void read_mdd(MDData &){};
     virtual void write_mdd(const MDData &){};
     virtual bool read_pix(MDPixels &){return false; }
-    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPixels){
+    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &buf_size,size_t &n_pix_in_buffer){
         return selected_cells.size();}
     virtual hsize_t getNPix(void){return -1;}
 

@@ -54,8 +54,8 @@ struct sqw_pixel{
 struct pix_location
 {
     size_t chunk_file_location0;
-    std::vector<sqw_pixel>  cell_memPixels;
-    std::auto_ptr<std::vector<size_t> *> data_chunks;
+    std::auto_ptr<std::vector<sqw_pixel>> cell_memPixels;
+    std::auto_ptr<std::vector<size_t>>  data_chunks;
 };
 
 
@@ -74,16 +74,18 @@ public:
          }
          alloc_pix_array();
     }
+    /// function reads image part of sqw file and prepares class to work with pixels information
+    void read_mdd(const char *file_name);
     /// check if the pixels are all in memory;
     bool isMemoryBased(void)const{return memBased;}
     /// function returns numnber of pixels contributiong into the MD-data
-    size_t genNumPixels(void)const{return nPixels;}
+    long getNumPixels(void);
 
     /// read the whole pixels dataset in the memory
     void read_pix(void);
 
    /// read the the pixels corresponding to cells in the vector cell_num
-    size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size);
+    size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size,size_t &n_pix_in_buffer);
  
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
@@ -94,7 +96,7 @@ private:
     bool      memBased;
    
 /// number of real pixels contributed in the dataset (rather sqw parameter) (should be moved there?)
-    size_t nPixels;      
+    long nPixels;      
 /// the array of structures, describing the detector pixels
     pix_location *pix_array;
    // boolean values identifying the way to treat NaN-s and Inf-s in the pixel data

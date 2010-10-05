@@ -1,8 +1,10 @@
 #ifndef H_FILE_HDF_MATLAB
 #define H_FILE_HDF_MATLAB
-#include "MD_FileFormat.h"
+//
+#include "IMD_FileFormat.h"
 #include "MDPixels.h"
 #include "SlicingData.h"
+
 /**    Class supports MATLAB-written hdf5 mdd data format and will be used at the initial stage of the development;
 *      to read the data initially provided by MATLAB, Horace
 
@@ -35,12 +37,12 @@ namespace Mantid{
     namespace MDDataObjects{
         using namespace Mantid::Kernel;
 //
-class MD_File_hdfMatlab :    public MD_FileFormat
+class MD_File_hdfMatlab :    public IMD_FileFormat
 {
 public:
     MD_File_hdfMatlab(const char *file_name);
 
-    virtual bool is_open(void)const{return (bool)this->file_handler;}
+    virtual bool is_open(void)const{return (this->file_handler>0)?true:false;}
 
     virtual void read_mdd(MDData & mdd);
    
@@ -48,7 +50,7 @@ public:
     virtual bool read_pix(MDPixels & sqw);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
-    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPixels);
+    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &buf_size,size_t &n_pix_in_buffer);
     /// get number of data pixels contributing into the dataset;
     virtual hsize_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
@@ -83,7 +85,7 @@ private:
 
    // function checks if pixel dataset is opened and if not opens it. true if it was already opened, false if did nothing
    bool check_or_open_pix_dataset(void);
-
+ 
 };
 //
     }

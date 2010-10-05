@@ -4,14 +4,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "stdafx.h"
-#include "MD_FileFormat.h"
+#include "IMD_FileFormat.h"
 #include "MDGeometry.h"
 #include "point3D.h"
 #include "MantidAPI/IMDWorkspace.h"
+//#include "c:/Mantid/Code/Mantid/API/inc/MantidAPI/IMDWorkspace.h"
 
-/** the kernel of the main class for visualisation and analysis operations, which keeps the data itself and brief information about the data dimensions
+
+/** the kernel of the main class for visualisation and analysis operations, which keeps the data itself and brief information about the data dimensions (its organisation in the 1D array)
 *
-*   This is equivalent of multidimensional Horace dataset without detailed pixel information
+*   This is equivalent of multidimensional Horace dataset without detailed pixel information (the largest part of dnd dataset)
 
     @author Alex Buts, RAL ISIS
     @date 28/09/2010
@@ -40,6 +42,7 @@ namespace Mantid{
     namespace MDDataObjects{
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 //
 class DLLExport MDData:public MDGeometry,public IMDWorkspace
 {
@@ -63,20 +66,18 @@ public:
     virtual const std::string id() const { return "MD-Workspace"; }
     /// overload to return the memory size of main visualisation datata ;  may need further clarification
     virtual long int getMemorySize()const{return this->data_size*sizeof(data_point);}
-  
-    void read_mdd(const char *file_name){
-        // select a file reader which corresponds to the proper file format of the data file
-        this->select_file_reader(file_name);
-        this->read_mdd();
-    }
-    void write_mdd(const char *file_name);
-    bool read_mdd(void){if(this->theFile){
+ //****************************************************************************************************** 
+    /// 
+   bool read_mdd(void){if(this->theFile){
                            this->theFile->read_mdd(*this); return true;
                         }else{return false;}
     }
+    /// function writes the MDD data using current file reader; if the file is not opened, a default file reader is used. 
+    void write_mdd(const char *file_name);
+    /// function writes back MDD data to the existing dataset attached to the class;  Should throw if the size of the data changed (and this should not happen)
     bool write_mdd(void){if(this->theFile){
                           this->theFile->write_mdd(*this);return true;
-                        }else{return false;}
+                          }else{return false;}
     }
 
 protected:
@@ -100,7 +101,7 @@ protected:
 /// the name of the file with DND and SQW data;
     std::string fileName;
 // the pointer to a class with describes correspondent mdd file format;
-    MD_FileFormat *theFile;
+    IMD_FileFormat *theFile;
 //  function selects the file reader given existing mdd or sqw file and sets up above pointer to the proper file reader;
 //  throws if can not find the file, the file format is not supported or any other error;
     void select_file_reader(const char *file_name);
@@ -110,6 +111,14 @@ protected:
     friend class MD_File_binMatlab;
 // class to read/write our HDF files ***> not written yet;
     friend class MD_File_hdfV1;
+
+   /// function selects a reader, which is appropriate to the file described by the file_name and reads dnd data into memory
+    void read_mdd(const char *file_name){
+        // select a file reader which corresponds to the proper file format of the data file
+        this->select_file_reader(file_name);
+        this->read_mdd();
+    }
+ 
 //*************************************************
  //
  // location of cell in 1D data array shaped as 4 or less dimensional array;
@@ -124,6 +133,8 @@ protected:
      data_point thePoint(int i,int j,int k)       const{   return data[nCell(i,j,k)];}
      data_point thePoint(int i,int j,int k, int n)const{   return data[nCell(i,j,k,n)];}
 
+  /// logger -> to provide logging, mainly for file operations
+  static Logger& g_log;
 private:
     /** function reshapes the geomerty of the array according to the pAxis array request; returns the total array size */
     size_t reshape_geometry(const SlicingData &transf);
@@ -134,6 +145,7 @@ private:
      MDData & operator = (const MDData & other);
     // copy constructor;
      MDData(const MDData & other);
+
 
 };
 // 

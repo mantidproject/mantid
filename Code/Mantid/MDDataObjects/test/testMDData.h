@@ -7,6 +7,13 @@
 
 using namespace Mantid;
 using namespace MDDataObjects;
+class tDND : public MDData
+{
+public:
+    tDND(unsigned int nDims):MDData(nDims){};
+
+    void read_mdd(const char *file_name){MDData::read_mdd(file_name);}
+};
 
 class testDND :    public CxxTest::TestSuite
 {
@@ -14,7 +21,7 @@ public:
     void testDNDRead(void){
       try{
       // define an wrong object 
-        MDData dnd_obj(5);
+        tDND dnd_obj(5);
         // 5-dim object;
         TS_ASSERT_EQUALS(dnd_obj.getNumDims(),5);
 

@@ -166,11 +166,11 @@
     <ClInclude Include="inc\DimensionIDS.h" />
     <ClInclude Include="inc\DimensionRes.h" />
     <ClInclude Include="inc\Hexahedron.h" />
+    <ClInclude Include="inc\IMD_FileFormat.h" />
     <ClInclude Include="inc\MDData.h" />
     <ClInclude Include="inc\MDGeometry.h" />
     <ClInclude Include="inc\MDPixels.h" />
     <ClInclude Include="inc\MDWorkspaceConstants.h" />
-    <ClInclude Include="inc\MD_FileFormat.h" />
     <ClInclude Include="inc\MD_File_hdfMatlab.h" />
     <ClInclude Include="inc\MD_File_hdfV1.h" />
     <ClInclude Include="inc\point3D.h" />

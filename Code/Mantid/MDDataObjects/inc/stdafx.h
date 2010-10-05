@@ -20,6 +20,8 @@
 #include <limits>
 #include <time.h>
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include "MantidAPI/Workspace.h"
 
 
 #ifdef __GNUC__

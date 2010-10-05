@@ -11,12 +11,12 @@
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/RealDescriptions.h>
 
-#include "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h"
+#include "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h"
 
 static testGeometry suite_testGeometry;
 
 static CxxTest::List Tests_testGeometry = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testGeometry( "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h", 18, "testGeometry", suite_testGeometry, Tests_testGeometry );
+CxxTest::StaticSuiteDescription suiteDescription_testGeometry( "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h", 18, "testGeometry", suite_testGeometry, Tests_testGeometry );
 
 static class TestDescription_testGeometry_testGeometryC : public CxxTest::RealTestDescription {
 public:

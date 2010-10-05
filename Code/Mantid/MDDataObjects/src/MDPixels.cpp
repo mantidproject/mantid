@@ -10,9 +10,32 @@ MDData(nDims),
 ignore_inf(false),
 ignore_nan(true),
 memBased(false),
-nPixels(0),
+nPixels(-1),
 pix_array(NULL)
 {
+}
+long
+MDPixels::getNumPixels(void)
+{
+    if(this->nPixels>=0){   return nPixels;
+    }
+
+    if(this->theFile){
+        this->nPixels=this->theFile->getNPix();
+    }else{
+        MDData::g_log.information("MDPixels::getNumPixels: Attemting to get number of pixels from undefined dataset");
+        
+    }
+    return nPixels;
+}
+// 
+void 
+MDPixels::read_mdd(const char *file_name)
+{
+    // select file reader and read image part of the data
+    this->MDData::read_mdd(file_name);
+    // alocate memory for pixels;
+    this->alloc_pix_array();
 }
 //
 void
@@ -41,15 +64,12 @@ MDPixels::alloc_pix_array()
 if(!this->pix_array){
     this->pix_array = new pix_location[this->data_size];
     this->pix_array[0].chunk_file_location0=0;
-    this->pix_array[0].cell_memPixels.clear();
 
 
     for(size_t i=0;i<this->data_size;i++){
         this->pix_array[i].chunk_file_location0= this->pix_array[i-1].chunk_file_location0+this->data[i].npix;
     }
-    if(this->theFile){
-        this->nPixels = this->theFile->getNPix();
-    }
+    this->nPixels = this->pix_array[this->data_size-1].chunk_file_location0+this->data[this->data_size-1].npix;
 
 }
 }
@@ -57,19 +77,16 @@ if(!this->pix_array){
 MDPixels::~MDPixels()
 {
     if(pix_array){
-        for(size_t i=0;i<this->data_size;i++){
-               this->pix_array[i].cell_memPixels.clear();
-        }
         delete [] pix_array;
     }
 }
 size_t 
-MDPixels::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size)
+MDPixels::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,sqw_pixel *& pix_buf,size_t &pix_buf_size,size_t &n_pix_in_buffer)
 {
     if(!this->theFile){
         throw(std::bad_alloc("MDPixels::read_selected_pix: file reader has not been defined"));
     }
-    return this->theFile->read_pix_subset(*this,cells_nums,start_cell,pix_buf,pix_buf_size);
+    return this->theFile->read_pix_subset(*this,cells_nums,start_cell,pix_buf,pix_buf_size,n_pix_in_buffer);
 }
 //***************************************************************************************
 /*

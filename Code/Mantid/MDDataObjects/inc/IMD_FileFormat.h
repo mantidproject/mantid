@@ -38,17 +38,17 @@ class MDData;
 class MDPixels;
 struct sqw_pixel; // TO DO: this will probably change
 //
-class MD_FileFormat
+class IMD_FileFormat
 {
 public:
-    MD_FileFormat(void){};
+    IMD_FileFormat(void){};
     virtual bool is_open(void)const{return false;}
     virtual void read_mdd(MDData &)=0;
     virtual bool read_pix(MDPixels &)=0; 
-    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &nPixels)=0; 
+    virtual size_t read_pix_subset(const MDPixels &sqw,const std::vector<size_t> &selected_cells,size_t starting_cell,sqw_pixel *& pix_buf, size_t &buf_size,size_t &n_pix_in_buffer)=0; 
     virtual hsize_t getNPix(void)=0;
     virtual void write_mdd(const MDData &)=0;
-    virtual ~MD_FileFormat(void){};
+    virtual ~IMD_FileFormat(void){};
 };
 //
     }
