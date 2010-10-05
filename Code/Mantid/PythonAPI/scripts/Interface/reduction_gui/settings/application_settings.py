@@ -28,4 +28,4 @@ class GeneralSettings(object):
             Get the settings from a QSettings object
             @param settings: QSettings object
         """
-        self.data_path = unicode(settings.value("general_data_path", '.').toString())
+        self.data_path = unicode(settings.value("general_data_path", QtCore.QVariant('.')).toString())

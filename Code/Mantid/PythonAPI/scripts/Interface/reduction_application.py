@@ -22,7 +22,7 @@ class ReductionGUI(QtGui.QMainWindow):
         
         # Name handle for the instrument
         if instrument is None:
-            instrument = unicode(settings.value("instrument_name", '').toString())
+            instrument = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
 
         self._instrument = instrument
         
@@ -30,11 +30,11 @@ class ReductionGUI(QtGui.QMainWindow):
         self._interface = None
         
         # Recent files
-        self._recent_files = settings.value("recent_files", []).toStringList()
+        self._recent_files = settings.value("recent_files", QtCore.QVariant([])).toStringList()
         
         # Folder to open files in
-        self._last_directory = unicode(settings.value("last_directory", '.').toString())
-        self._last_export_directory = unicode(settings.value("last_export_directory", '.').toString())
+        self._last_directory = unicode(settings.value("last_directory", QtCore.QVariant('.')).toString())
+        self._last_export_directory = unicode(settings.value("last_export_directory", QtCore.QVariant('.')).toString())
         
         # Current file name
         self._filename = None   
