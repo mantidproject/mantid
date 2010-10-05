@@ -39,7 +39,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DataHandling/inc}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.744625349" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC -fopenmp" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.66115927" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.66115927" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"/>
+								</option>
 								<option id="gnu.cpp.compiler.option.warnings.pedantic.643440123" name="Pedantic (-pedantic)" superClass="gnu.cpp.compiler.option.warnings.pedantic" value="false" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1303449812" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -531,6 +533,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DataObjects/inc}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1738137935" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC -fopenmp" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1270104264" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1010757092" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.1708289982" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">

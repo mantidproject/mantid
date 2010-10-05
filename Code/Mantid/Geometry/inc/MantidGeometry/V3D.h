@@ -69,6 +69,7 @@ namespace Mantid
       V3D& operator/=(const double D);
       // Simple Comparison
       bool operator==(const V3D&) const;
+      bool operator!=(const V3D&) const;
       bool operator<(const V3D&) const;
       // Access
       // Setting x, y and z values

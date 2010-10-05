@@ -35,7 +35,7 @@ g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I
 echo
 
 echo "Running the tests..."
-ln ../../Build/Tests/*.properties .
+#ln ../../Build/Tests/*.properties .
 LD_LIBRARY_PATH=$mantid_libpath:$LD_LIBRARY_PATH ./runner.exe
 echo
 

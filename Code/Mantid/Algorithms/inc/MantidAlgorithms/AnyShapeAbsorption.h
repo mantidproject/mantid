@@ -83,6 +83,7 @@ private:
   void retrieveProperties();
   std::string sampleXML();
   void initialiseCachedDistances();
+  Geometry::Object constructGaugeVolume();
 
   double m_cubeSide;  ///< The length of the side of an element cube in m
 };

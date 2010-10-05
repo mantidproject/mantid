@@ -75,15 +75,20 @@ protected:
   virtual void retrieveProperties() { /*Empty in base class*/ }
   /// Returns the XML string describing the sample, which can be used by the ShapeFactory
   virtual std::string sampleXML() = 0;
-  /// Calculate the distances for L1 and element size for each element in the sample
+  /** Calculate the distances for L1 and element size for each element in the sample.
+   *  Also calculate element position, assuming sample is at origin (they are shifted in exec if
+   *  this is not the case).
+   */
   virtual void initialiseCachedDistances() = 0;
 
-  const Geometry::Object* m_sampleObject;  ///< Local cache of sample object.
-  std::vector<double> m_L1s,               ///< Cached L1 distances
-                      m_elementVolumes;    ///< Cached element volumes
+  API::MatrixWorkspace_const_sptr m_inputWS;     ///< A pointer to the input workspace
+  const Geometry::Object* m_sampleObject;        ///< Local cache of sample object.
+  Geometry::V3D m_beamDirection;                 ///< The direction of the beam.
+  std::vector<double> m_L1s,                     ///< Cached L1 distances
+                      m_elementVolumes;          ///< Cached element volumes
   std::vector<Geometry::V3D> m_elementPositions; ///< Cached element positions
-  int m_numVolumeElements;                 ///< The number of volume elements
-  double m_sampleVolume;                   ///< The total volume of the sample
+  int m_numVolumeElements;                       ///< The number of volume elements
+  double m_sampleVolume;                         ///< The total volume of the sample
 
 private:
   /// Initialisation code

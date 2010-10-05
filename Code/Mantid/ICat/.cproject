@@ -38,8 +38,10 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1249753884" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.786118586" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="HAVE_STDINT_H"/>
 									<listOptionValue builtIn="false" value="WITH_OPENSSL"/>
 									<listOptionValue builtIn="false" value="WITH_NONAMESPACES"/>
+									<listOptionValue builtIn="false" value="BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1995691452" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -529,6 +531,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.532312185" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_OPENSSL"/>
 									<listOptionValue builtIn="false" value="WITH_NONAMESPACES"/>
+									<listOptionValue builtIn="false" value="BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1483538659" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
 namespace Mantid
 {
@@ -44,10 +45,17 @@ std::string AnyShapeAbsorption::sampleXML()
 /// Calculate the distances for L1 and element size for each element in the sample
 void AnyShapeAbsorption::initialiseCachedDistances()
 {
-  // First up, construct the trial set of elements from the object's bounding box
+  // First, check if a 'gauge volume' has been defined. If not, it's the same as the sample.
+  Object integrationVolume = *m_sampleObject;
+  if ( m_inputWS->run().hasProperty("GaugeVolume") )
+  {
+    integrationVolume = constructGaugeVolume();
+  }
+
+  // Construct the trial set of elements from the object's bounding box
   const double big(10.0); // Seems like bounding box code searches inwards, 10m should be enough!
   double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
-  m_sampleObject->getBoundingBox(maxX,maxY,maxZ,minX,minY,minZ);
+  integrationVolume.getBoundingBox(maxX,maxY,maxZ,minX,minY,minZ);
   assert(maxX > minX);
   assert(maxY > minY);
   assert(maxZ > minZ);
@@ -90,11 +98,10 @@ void AnyShapeAbsorption::initialiseCachedDistances()
         // Set the current position in the sample in Cartesian coordinates.
         const V3D currentPosition(x,y,z);
         // Check if the current point is within the object. If not, skip.
-        if ( m_sampleObject->isValid(currentPosition) )
+        if ( integrationVolume.isValid(currentPosition) )
         {
           // Create track for distance in sample before scattering point
-          // Remember beam along Z direction
-          Track incoming(currentPosition, V3D(0.0, 0.0, -1.0));
+          Track incoming(currentPosition, m_beamDirection*-1.0);
           // We have an issue where occasionally, even though a point is within
           // the object a track segment to the surface isn't correctly created.
           // In the context of this algorithm I think it's safe to just chuck away
@@ -114,6 +121,22 @@ void AnyShapeAbsorption::initialiseCachedDistances()
   // Record the number of elements we ended up with
   m_numVolumeElements = m_L1s.size();
   m_sampleVolume = m_numVolumeElements * XSliceThickness * YSliceThickness * ZSliceThickness;
+}
+
+Geometry::Object AnyShapeAbsorption::constructGaugeVolume()
+{
+  g_log.information("Calculating scattering within the gauge volume defined on the input workspace");
+
+  // Retrieve and create the gauge volume shape
+  boost::shared_ptr<const Geometry::Object> volume = ShapeFactory().createShape(m_inputWS->run().getProperty("GaugeVolume")->value());
+  // Although DefineGaugeVolume algorithm will have checked validity of XML, do so again here
+  if ( !(volume->topRule()) && volume->getSurfacePtr().empty() )
+  {
+    g_log.error("Invalid gauge volume definition. Unable to construct integration volume.");
+    throw std::invalid_argument("Invalid gauge volume definition.");
+  }
+
+  return *volume;
 }
 
 } // namespace Algorithms

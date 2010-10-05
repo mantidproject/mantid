@@ -23,7 +23,7 @@ namespace API
     @author Anders Markvardsen, ISIS, RAL
     @date 1/4/2008
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -56,6 +56,8 @@ public:
   virtual Geometry::IObjComponent_sptr getSource() const = 0;
   /// Returns a pointer to the geometrical object representing the sample
   virtual Geometry::IObjComponent_sptr getSample() const = 0;
+  /// Returns a unit vector pointing in the direction of the beam
+  Geometry::V3D getBeamDirection() const;
   /// Returns a pointer to the geometrical object for the detector with the given ID
   virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const = 0;
 

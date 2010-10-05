@@ -142,14 +142,10 @@ namespace Mantid
       int m_lengthIn;
       /// boolean for list spectra options
       bool m_bmspeclist;
-      /// TimeSeriesProperty<int> containing data periods.
-      boost::shared_ptr<Kernel::Property> m_perioids;
-	  /// time channels vector
-	  std::vector<boost::shared_ptr<MantidVec> > m_timeChannelsVec;
-	  /// total number of specs
-	  int m_total_specs;
-	   
-
+      /// time channels vector
+      std::vector<boost::shared_ptr<MantidVec> > m_timeChannelsVec;
+      /// total number of specs
+      int m_total_specs;
     };
 
   } // namespace DataHandling

@@ -117,9 +117,8 @@ void CylinderAbsorption::initialiseCachedDistances()
         m_elementPositions[counter](R * sin(phi), z, R * cos(phi));
         assert(m_sampleObject->isValid(m_elementPositions[counter]));
         // Create track for distance in cylinder before scattering point
-        // Remember beam along Z direction
-        Track incoming(m_elementPositions[counter], V3D(0.0, 0.0, -1.0));
-	
+        Track incoming(m_elementPositions[counter], m_beamDirection*-1.0);
+
         m_sampleObject->interceptSurface(incoming);
         m_L1s[counter] = incoming.begin()->Dist;
 

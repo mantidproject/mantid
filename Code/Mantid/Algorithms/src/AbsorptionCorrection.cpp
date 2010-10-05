@@ -16,7 +16,7 @@ using namespace Kernel;
 using namespace Geometry;
 using namespace API;
 
-AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(),
+AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(), m_inputWS(),
   m_sampleObject(NULL), m_L1s(), m_elementVolumes(), m_elementPositions(),
   m_numVolumeElements(0), m_sampleVolume(0.0),
   m_refAtten(0.0), m_scattering(0), n_lambda(0), x_step(0)
@@ -70,23 +70,25 @@ void AbsorptionCorrection::init()
 void AbsorptionCorrection::exec()
 {
   // Retrieve the input workspace
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  m_inputWS = getProperty("InputWorkspace");
+  // Cache the beam direction
+  m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
   // Get a reference to the parameter map (used for indirect instruments)
-  const ParameterMap& pmap = inputWS->constInstrumentParameters();
+  const ParameterMap& pmap = m_inputWS->constInstrumentParameters();
 
   // Get the input parameters
   retrieveBaseProperties();
 
   // Create the output workspace
-  MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
+  MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(m_inputWS);
   correctionFactors->isDistribution(true); // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");
 
   constructSample(correctionFactors->mutableSample());
 
-  const int numHists = inputWS->getNumberHistograms();
-  const int specSize = inputWS->blocksize();
+  const int numHists = m_inputWS->getNumberHistograms();
+  const int specSize = m_inputWS->blocksize();
 
   // If the number of wavelength points has not been given, use them all
   if ( isEmpty(n_lambda) ) n_lambda = specSize;
@@ -100,27 +102,37 @@ void AbsorptionCorrection::exec()
   g_log.information(message.str());
   message.str("");
 
-  const bool isHist = inputWS->isHistogramData();
+  const bool isHist = m_inputWS->isHistogramData();
 
-  //calculate the cached values of L1 and element volumes
+  // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
+  // If sample not at origin, shift cached positions.
+  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  if ( samplePos != V3D(0,0,0) )
+  {
+    std::vector<V3D>::iterator it = m_elementPositions.begin();
+    for ( ; it != m_elementPositions.end(); ++it )
+    {
+      (*it) += samplePos;
+    }
+  }
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
-  PARALLEL_FOR2(inputWS,correctionFactors)
+  PARALLEL_FOR2(m_inputWS,correctionFactors)
   for (int i = 0; i < numHists; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy over bin boundaries
-    const MantidVec& X = inputWS->readX(i);
+    const MantidVec& X = m_inputWS->readX(i);
     correctionFactors->dataX(i) = X;
 
     // Get detector position
     IDetector_sptr det;
     try
     {
-      det = inputWS->getDetector(i);
+      det = m_inputWS->getDetector(i);
     } catch (Exception::NotFoundError)
     {
       // Catch when a spectrum doesn't have an attached detector and go to next one
@@ -270,9 +282,8 @@ void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sp
   for (int i = 0; i < m_numVolumeElements; ++i)
   {
     // We need to make sure this is right for grouped detectors - should use average theta & phi
-    // *** ASSUMES THAT SAMPLE AT ORIGIN AND BEAM ALONG Z ***
     detectorPos.spherical(detector->getDistance(Component("dummy",m_elementPositions[i])),
-      detector->getTwoTheta(m_elementPositions[i],V3D(0.0,0.0,1.0))*180.0/M_PI,detector->getPhi()*180.0/M_PI);
+      detector->getTwoTheta(m_elementPositions[i],m_beamDirection)*180.0/M_PI,detector->getPhi()*180.0/M_PI);
     // Create track for distance in cylinder between scattering point and detector
     V3D direction = detectorPos - m_elementPositions[i];
     direction.normalize();

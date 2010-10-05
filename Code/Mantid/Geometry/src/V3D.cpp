@@ -304,6 +304,15 @@ V3D::operator==(const V3D& v) const
     false : true;
 }
 
+/** Not equals operator with tolerance factor.
+ *  @param other The V3D to compare against
+ *  @returns True if the vectors are different
+ */
+bool V3D::operator!=(const V3D& other) const
+{
+  return !(this->operator==(other));
+}
+
   /**
     compare
     \return true if V is greater

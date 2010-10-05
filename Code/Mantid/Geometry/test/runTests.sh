@@ -11,8 +11,6 @@
 
 # Clean up any old executable
 rm -rf runner.*
-#Make sure you remove the old library
-rm ../Debug/libMantidGeometry.so
 
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
@@ -32,7 +30,7 @@ echo "Compiling the test executable..."
 mantid_libpath=../../debug
 g++ -O0 -g3 -o runner.exe runner.cpp -I../../Kernel/inc -I ../inc \
     -I ../../../Third_Party/src/cxxtest \
-    -L$mantid_libpath  -lMantidKernel -lMantidGeometry -lboost_date_time
+    -L$mantid_libpath  -lMantidKernel -lMantidGeometry
 echo
 
 echo "Running the tests..."

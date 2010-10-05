@@ -2,20 +2,33 @@
 // Includes
 //--------------------------------------
 #include "MantidAPI/IInstrument.h"
-#include "MantidGeometry/IComponent.h"
 #include <deque>
 
-using namespace Mantid::API;
+namespace Mantid
+{
+namespace API
+{
+
+using namespace Geometry;
+
+/** Gets the beam direction (i.e. source->sample direction).
+ *  Not virtual because it relies the getSample() & getPos() virtual functions
+ *  @returns A unit vector denoting the direction of the beam
+ */
+Geometry::V3D IInstrument::getBeamDirection() const
+{
+  V3D retval = getSample()->getPos() - getSource()->getPos();
+  retval.normalize();
+  return retval;
+}
 
 /**
- * Find the first component in an Instrument Definition File (IDF) with a given name. Use this method if 
- * you know that a given component in an IDF has a unique name. Otherwise use getAllComponentsWithName().
+ * Find a component by name.
  * @param cname The name of the component. If there are multiple matches, the first one found is returned.
  * @returns A shared pointer to the component
 */
-boost::shared_ptr<Mantid::Geometry::IComponent> IInstrument::getComponentByName(const std::string & cname)
+boost::shared_ptr<Geometry::IComponent> IInstrument::getComponentByName(const std::string & cname)
 {
-  using namespace Mantid::Geometry;
   boost::shared_ptr<IComponent> node = boost::shared_ptr<IComponent>(this, NoDeleting());
   // Check the instrument name first
   if( this->getName() == cname ) 
@@ -55,7 +68,6 @@ boost::shared_ptr<Mantid::Geometry::IComponent> IInstrument::getComponentByName(
   // If we have reached here then the search failed
   return boost::shared_ptr<IComponent>();
 }
-
 
 /**
  * Find all components in an Instrument Definition File (IDF) with a given name. If you know a component
@@ -105,3 +117,6 @@ std::vector<boost::shared_ptr<Mantid::Geometry::IComponent> > IInstrument::getAl
   // If we have reached here then the search failed
   return retVec;
 }
+
+} // API namespace
+} // Mantid namespace

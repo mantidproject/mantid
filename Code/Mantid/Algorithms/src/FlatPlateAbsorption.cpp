@@ -104,8 +104,7 @@ void FlatPlateAbsorption::initialiseCachedDistances()
         m_elementPositions[counter](x,y,z);
         assert(m_sampleObject->isValid(m_elementPositions[counter]));
         // Create track for distance in sample before scattering point
-        // Remember beam along Z direction
-        Track incoming(m_elementPositions[counter], V3D(0.0, 0.0, -1.0));
+        Track incoming(m_elementPositions[counter], m_beamDirection*-1.0);
         m_sampleObject->interceptSurface(incoming);
         m_L1s[counter] = incoming.begin()->Dist;
 

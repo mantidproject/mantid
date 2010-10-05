@@ -10,10 +10,6 @@
 
 namespace Mantid
 {
-  //-------------------------------------------------------------------
-  // Forward declarations
-  //-------------------------------------------------------------------
-
   namespace API
   {
 
@@ -66,11 +62,11 @@ namespace Mantid
       void addProperty(Kernel::Property *prop, bool overwrite = false);
       /// Add a property of given type
       template<class TYPE>
-	void addProperty(const std::string & name, const TYPE & value, bool overwrite = false);
+      void addProperty(const std::string & name, const TYPE & value, bool overwrite = false);
 
       template<class TYPE>
-	void addProperty(const std::string & name, const TYPE & value, const std::string & units, 
-			 bool overwrite = false);
+      void addProperty(const std::string & name, const TYPE & value, const std::string & units,
+                       bool overwrite = false);
 
       /// Does the property exist on the object
       bool hasProperty(const std::string & name) const { return m_manager.existsProperty(name); }
