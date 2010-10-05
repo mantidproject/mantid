@@ -426,9 +426,10 @@ class Normalize(ReductionStep):
         
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
+        spec_index = self._normalization_spectrum-1
         CropWorkspace(workspace, norm_ws,
-                      StartWorkspaceIndex = str(self._normalization_spectrum), 
-                      EndWorkspaceIndex   = str(self._normalization_spectrum))      
+                      StartWorkspaceIndex = spec_index, 
+                      EndWorkspaceIndex   = spec_index)      
 
         Divide(workspace, norm_ws, workspace)
         
@@ -602,17 +603,18 @@ class Mask(ReductionStep):
                 self._xml['sum_shapes'] = self._xml['sum_shapes'].rpartition(':')[0]
             xml_string = self._xml['shape_defs'] + self._xml['sum_shapes'] +'"/>'
             MaskDetectorsInShape(workspace, xml_string)
+        
         # Get a list of detector pixels to mask
-        masked_pixels = reducer.instrument.get_masked_pixels(self._nx_low,
+        if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:
+            masked_pixels = reducer.instrument.get_masked_pixels(self._nx_low,
                                                              self._nx_high,
                                                              self._ny_low,
                                                              self._ny_high)
-
-        # Transform the list of pixels into a list of Mantid detector IDs
-        masked_detectors = reducer.instrument.get_masked_detectors(masked_pixels)
-        
-        # Mask the pixels by passing the list of IDs
-        MaskDetectors(workspace, None, masked_detectors)
+            # Transform the list of pixels into a list of Mantid detector IDs
+            masked_detectors = reducer.instrument.get_masked_detectors(masked_pixels)
+            
+            # Mask the pixels by passing the list of IDs
+            MaskDetectors(workspace, None, masked_detectors)
         
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
@@ -640,8 +642,7 @@ class CorrectToFileStep(ReductionStep):
         self._filename = filename
 
     def execute(self, reducer, workspace):
-        if self.filename != '':
-            CorrectToFile(workspace, self._filename, workspace,
+        CorrectToFile(workspace, self._filename, workspace,
                                 self._corr_type, self._operation)
             
             
@@ -704,56 +705,33 @@ class SubtractBackground(ReductionStep):
         return "Background subtracted [%s]" % (self._background_file)
         
  
-class SampleGeomCor(ReductionStep):
+class GetSampleGeom(ReductionStep):
     """
-        Correct the neutron count rates for the size of the sample
+        Loads, stores, retrieves, etc. data about the geometry of the sample
+        On initialisation this class returns default geometry values (compatible with the Colette software)
+        There are functions to override these settings
+        If there is geometry information in the workspace this will override any unset attributes
     """
+    # IDs for each shape as used by the Colette software
+    _shape_ids = {1 : 'cylinder-axis-up',
+                  2 : 'cuboid',
+                  3 : 'cylinder-axis-along'}
+    _default_shape = 'cylinder-axis-along'
+    
     def __init__(self):
-        super(SampleGeomCor, self).__init__()
+        super(GetSampleGeom, self).__init__()
 
         # string specifies the sample's shape
-        self._default_shape = 'cylinder-axis-along'
-        self._shape = self._default_shape
-        self._width = self._thickness = self._height = 1.0
-        # dictionary contains the list of all shapes that can be calculated and the id number for them
-        self._shape_ids = {1 : 'cylinder-axis-up',
-                           2 : 'cuboid',
-                           3 : 'cylinder-axis-along'}
+        self._shape = None
+        self._width = self._thickness = self._height = None
 
-    def execute(self, reducer, workspace):
-        """
-            Divide the counts by the volume of the sample
-        """
-        
-        try:
-            if self._shape == 'cylinder-axis-up':
-    		    # Volume = circle area * height
-    		    # Factor of four comes from radius = width/2
-    		    scale_factor = self._height*math.pi*math.pow(self._width,2)/4.0
-            elif self._shape == 'cuboid':
-    		    scale_factor = (self._width*self._height*self._thickness)
-            elif self._shape == 'cylinder-axis-along':
-    		    # Factor of four comes from radius = width/2
-    		    scale_factor = self._thickness*math.pi*math.pow(self._width, 2)/4.0
-            else:
-                raise NotImplemented('Shape "'+self._shape+'" is not in the list of supported shapes')
-        except TypeError:
-            raise TypeError('Error calculating sample volume with width='+str(self._width) + ' height='+str(self._height) + 'and thickness='+str(self._thickness)) 
-        
-        # Multiply by the calculated correction factor
-	    #ws = mtd[workspace]
-	    #ws *= scalefactor
-        CreateSingleValuedWorkspace('temp', scale_factor)
-        Divide(workspace, 'temp', workspace)
-    
-    def read_from_workspace(self, workspace):
-        sample_details = mtd[workspace].getSampleInfo()
-        self.set_geometry(sample_details.getGeometryFlag())
-        self.set_thickness(sample_details.getThickness())
-        self.set_height(sample_details.getHeight())
-        self.set_width(sample_details.getWidth())
-        
-    def set_geometry(self, shape):
+    def _get_default(self, attrib):
+        if attrib == 'shape':
+            return self._default_shape
+        elif attrib == 'width' or attrib == 'thickness' or attrib == 'height':
+            return 1.0
+
+    def set_shape(self, shape):
         """
             Sets the sample's shape from a string or an ID. If the ID is not
             in the list of allowed values the shape is set to the default but
@@ -769,12 +747,24 @@ class SampleGeomCor(ReductionStep):
             mantid.sendLogMessage("::SANS::Warning: Invalid geometry type for sample: " + str(shape) + ". Setting default to " + self._default_shape)
             shape = self._default_shape
         self._shape = shape
+    
+    def get_shape(self):
+        if self._shape is None:
+            return self._get_default('shape')
+        else:
+            return self._shape
         
     def set_width(self, width):
         self._width = float(width)
         # For a disk the height=width
         if self._shape.startswith('cylinder'):
             self._height = self._width
+
+    def get_width(self):
+        if self._width is None:
+            return self._get_default('width')
+        else:
+            return self._width
             
     def set_height(self, height):
         self._height = float(height)
@@ -783,23 +773,102 @@ class SampleGeomCor(ReductionStep):
         if self._shape.startswith('cylinder'):
             self._width = self._height
 
+    def get_height(self):
+        if self._height is None:
+            return self._get_default('height')
+        else:
+            return self._height
+
     def set_thickness(self, thickness):
         """
             Simply sets the variable _thickness to the value passed
         """
         if not self._shape == 'cuboid':
-            mantid.sendLogMessage('::SANS::Warning: Can''t set thickness for shape "'+self._shape+'"')
+            mantid.sendLogMessage('::SANS::Warning: Can\'t set thickness for shape "'+self._shape+'"')
         self._thickness = float(thickness)
-    
+
+    def get_thickness(self):
+        if self._thickness is None:
+            return self._get_default('thickness')
+        else:
+            return self._thickness
+
+    shape = property(get_shape, set_shape, None, None)
+    width = property(get_width, set_width, None, None)
+    height = property(get_height, set_height, None, None)
+    thickness = property(get_thickness, set_thickness, None, None)
+
     def set_dimensions_to_unity(self):
         self._width = self._thickness = self._height = 1.0
 
+    def execute(self, reducer, workspace):
+        """
+            Reads the geometry information stored in the workspace
+            but doesn't replace values that have been previously set
+        """
+        sample_details = mtd[workspace].getSampleInfo()
+
+        if not self.shape is None:
+            self.shape = sample_details.getGeometryFlag()
+        if not self.thickness is None:
+            self.thickness = sample_details.getThickness()
+        if not self.height is None:
+            self.height = sample_details.getHeight()
+        if not self.width is None:
+            self.width = sample_details.getWidth()
+
     def __str__(self):
         return '-- Sample Geometry --\n' + \
-               '    Shape: ' + self._shape+'\n'+\
-               '    Width: ' + str(self._width)+'\n'+\
-               '    Height: ' + str(self._height)+'\n'+\
-               '    Thickness: ' + str(self._thickness)+'\n'
+               '    Shape: ' + self.shape+'\n'+\
+               '    Width: ' + str(self.width)+'\n'+\
+               '    Height: ' + str(self.height)+'\n'+\
+               '    Thickness: ' + str(self.thickness)+'\n'
+
+class SampleGeomCor(ReductionStep):
+    """
+        Correct the neutron count rates for the size of the sample
+    """
+    def __init__(self, geometry):
+        """
+            Takes a reference to the sample geometry
+            @param geometry: A GetSampleGeom object to load the sample dimensions from
+            @raise TypeError: if an object of the wrong type is passed to it
+        """
+        super(SampleGeomCor, self).__init__()
+
+        if issubclass(geometry.__class__, GetSampleGeom):
+            self._dim = geometry
+        else:
+            raise TypeError, 'Sample geometry correction requires a GetSampleGeom object'
+
+    def execute(self, reducer, workspace):
+        """
+            Divide the counts by the volume of the sample
+        """
+
+        try:
+            if self._dim.shape == 'cylinder-axis-up':
+                # Volume = circle area * height
+                # Factor of four comes from radius = width/2
+                scale_factor = self._dim.height*math.pi
+                scale_factor *= math.pow(self._dim.width,2)/4.0
+            elif self._dim.shape == 'cuboid':
+                scale_factor = self._dim.width
+                scale_factor *= self._dim.height*self._dim.thickness
+            elif self._dim.shape == 'cylinder-axis-along':
+                # Factor of four comes from radius = width/2
+                scale_factor = self._dim.thickness*math.pi
+                scale_factor *= math.pow(self._dim.width, 2)/4.0
+            else:
+                raise NotImplemented('Shape "'+self._shape+'" is not in the list of supported shapes')
+        except TypeError:
+            raise TypeError('Error calculating sample volume with width='+str(self._width) + ' height='+str(self._height) + 'and thickness='+str(self._thickness)) 
+        
+        # Multiply by the calculated correction factor
+        #ws = mtd[workspace]
+        #ws *= scalefactor
+        CreateSingleValuedWorkspace('temp', scale_factor)
+        Divide(workspace, 'temp', workspace)
 
 class StripEndZeros(ReductionStep):
     def __init__(self, flag_value = 0.0):
@@ -808,7 +877,7 @@ class StripEndZeros(ReductionStep):
         
     def execute(self, reducer, workspace):
         result_ws = mantid.getMatrixWorkspace(workspace)
-        if ws.getNumberHistograms() != 1:
+        if result_ws.getNumberHistograms() != 1:
             raise NotImplementedError('Strip zeros is only possible on 1D workspaces')
 
         y_vals = result_ws.readY(0)

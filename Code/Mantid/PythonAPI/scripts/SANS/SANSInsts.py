@@ -407,7 +407,7 @@ class SANS2D(ISISInstrument):
             yshift = -ybeam
             zshift = (self.REAR_DET_Z + self.cur_detector().z_corr)/1000.
             zshift -= self.REAR_DET_DEFAULT_SD_M
-            mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))
+            mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0,0.0], [xshift, yshift]
         

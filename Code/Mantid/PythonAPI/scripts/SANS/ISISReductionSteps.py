@@ -68,9 +68,7 @@ class LoadRun(ReductionStep):
         
         # Return the file path actually used to load the data
         fullpath = alg.getPropertyValue("Filename")
-        
-        reducer.geometry_correcter.read_from_workspace(workspace)
-        
+
         return [ os.path.dirname(fullpath), workspace, numPeriods]        
 
     # Helper function
@@ -323,22 +321,24 @@ class CanSubtraction(LoadRun):
             return self.SCATTER_CAN.getName(), ""
         
         smp_values = []
-        smp_values.append(reducer.instrument.FRONT_DET_Z + reducer.instrument.FRONT_DET_Z_CORR)
-        smp_values.append(reducer.instrument.FRONT_DET_X + reducer.instrument.FRONT_DET_X_CORR)
-        smp_values.append(reducer.instrument.FRONT_DET_ROT + reducer.instrument.FRONT_DET_ROT_CORR)
-        smp_values.append(reducer.instrument.REAR_DET_Z + reducer.instrument.REAR_DET_Z_CORR)
-        smp_values.append(reducer.instrument.REAR_DET_X + reducer.instrument.REAR_DET_X_CORR)
+        front_det = reducer.instrument.getDetector('front')
+        smp_values.append(reducer.instrument.FRONT_DET_Z + front_det.z_corr)
+        smp_values.append(reducer.instrument.FRONT_DET_X + front_det.x_corr)
+        smp_values.append(reducer.instrument.FRONT_DET_ROT + front_det.rot_corr)
+        rear_det = reducer.instrument.getDetector('rear')
+        smp_values.append(reducer.instrument.REAR_DET_Z + rear_det.z_corr)
+        smp_values.append(reducer.instrument.REAR_DET_X + rear_det.x_corr)
     
         # Check against sample values and warn if they are not the same but still continue reduction
         if len(logvalues) == 0:
             return  self.SCATTER_CAN.getName(), logvalues
         
         can_values = []
-        can_values.append(float(logvalues['Front_Det_Z']) + reducer.instrument.FRONT_DET_Z_CORR)
-        can_values.append(float(logvalues['Front_Det_X']) + reducer.instrument.FRONT_DET_X_CORR)
-        can_values.append(float(logvalues['Front_Det_Rot']) + reducer.instrument.FRONT_DET_ROT_CORR)
-        can_values.append(float(logvalues['Rear_Det_Z']) + reducer.instrument.REAR_DET_Z_CORR)
-        can_values.append(float(logvalues['Rear_Det_X']) + reducer.instrument.REAR_DET_X_CORR)
+        can_values.append(float(logvalues['Front_Det_Z']) + front_det.z_corr)
+        can_values.append(float(logvalues['Front_Det_X']) + front_det.x_corr)
+        can_values.append(float(logvalues['Front_Det_Rot']) + front_det.rot_corr)
+        can_values.append(float(logvalues['Rear_Det_Z']) + rear_det.z_corr)
+        can_values.append(float(logvalues['Rear_Det_X']) + rear_det.x_corr)
     
     
         det_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
@@ -403,8 +403,9 @@ class CanSubtraction(LoadRun):
                 ReplaceSpecialValues(InputWorkspace = tmp_smp,OutputWorkspace = tmp_smp, NaNValue="0", InfinityValue="0")
                 ReplaceSpecialValues(InputWorkspace = tmp_can,OutputWorkspace = tmp_can, NaNValue="0", InfinityValue="0")
                 if reducer.CORRECTION_TYPE == '1D':
-                    _strip_end_zeros(tmp_smp)
-                    _strip_end_zeros(tmp_can)
+                    rem_zeros = SANSReductionSteps.StripEndZeros()
+                    rem_zeros.execute(reducer, tmp_smp)
+                    rem_zeros.execute(reducer, tmp_can)
             else:
                 mantid.deleteWorkspace(tmp_smp)
                 mantid.deleteWorkspace(tmp_can)
@@ -425,30 +426,18 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         self._specmask=specmask
         self._specmask_r=specmask_r
         self._specmask_f=specmask_f
-        self.lim_phi_xml = ''
+        self._lim_phi_xml = ''
         
         ########################## Masking  ################################################
         # Mask the corners and beam stop if radius parameters are given
 
-        self.maskpt_rmin = [0.0,0.0]
-        self.maskpt_rmax = [xcentre, ycentre]
-        self.min_radius = None
-        self.max_radius = None
+        self._maskpt_rmin = [0.0,0.0]
+        self._min_radius = None
+        self._max_radius = None
 
     def set_radi(self, min, max):
-        self.min_radius = float(min)/1000.
-        self.max_radius = float(max)/1000.
-
-        if DEL__FINDING_CENTRE_ == True:
-            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-                self.add_cylinder('center_find_beam_cen', self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
-            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-                self.add_outside_cylinder('center_find_beam_cen', self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
-        else:
-            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-                self.add_cylinder('beam_stop', self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
-            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-                self.add_outside_cylinder('beam_area', self.max_radius, self._maskpt_rmax[0], self._maskpt_rmax[1])
+        self._min_radius = float(min)/1000.
+        self._max_radius = float(max)/1000.
 
     def parse_instruction(self, details):
         """
@@ -632,22 +621,22 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         phimax = math.pi*phimax/180.0
         
         id = str(id)
-        self.lim_phi_xml = (
+        self._lim_phi_xml = (
             self._infinite_cylinder(id+'_plane1',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0])
             + self._infinite_cylinder(id+'_plane2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0])
             + self._infinite_cylinder(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0])
             + self._infinite_cylinder(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]))
         
         if use_mirror : 
-            self.lim_phi_xml += '<algebra val="#((pla pla2):(pla3 pla4))" />'
+            self._lim_phi_xml += '<algebra val="#((pla pla2):(pla3 pla4))" />'
         else:
             #the formula is different for acute verses obstruse angles
             if phimax-phimin > math.pi :
               # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
-                self.lim_phi_xml += '<algebra val="#(pla:pla2)" />'
+                self._lim_phi_xml += '<algebra val="#(pla:pla2)" />'
             else :
               # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
-                self.lim_phi_xml += '<algebra val="#(pla pla2)" />'
+                self._lim_phi_xml += '<algebra val="#(pla pla2)" />'
 
     def _normalizePhi(self, phi):
         if phi > 90.0:
@@ -658,7 +647,7 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             pass
         return phi
 
-    def SetPhiLimit(self, phimin, phimax, phimirror):
+    def set_phi_limit(self, phimin, phimax, phimirror):
         if phimirror :
             if phimin > phimax:
                 phimin, phimax = phimax, phimin
@@ -678,34 +667,41 @@ class Mask_ISIS(SANSReductionSteps.Mask):
 
     def execute(self, reducer, workspace):
         #set up the spectra lists and shape xml to mask
-        detector = ReductionSingleton().getDetector('rear')
+        detector = reducer.instrument.getDetector('rear')
         #rear specific masking
-        self._ConvertToSpecList(self._specmask_r)
+        self._ConvertToSpecList(self._specmask_r, detector)
         #masking for both detectors
-        self._ConvertToSpecList(self._specmask)
+        self._ConvertToSpecList(self._specmask, detector)
         #Time mask
         SANSUtility.MaskByBinRange(workspace,self._timemask_r)
         SANSUtility.MaskByBinRange(workspace,self._timemask)
 
-        detector = ReductionSingleton().getDetector('front')
+        detector = reducer.instrument.getDetector('front')
         #front specific masking
-        self._ConvertToSpecList(self._specmask_f)
+        self._ConvertToSpecList(self._specmask_f, detector)
         #masking for both detectors
-        self._ConvertToSpecList(self._specmask)
+        self._ConvertToSpecList(self._specmask, detector)
         #Time mask
         SANSUtility.MaskByBinRange(workspace,self._timemask_f)
         SANSUtility.MaskByBinRange(workspace,self._timemask)
 
+        if DEL__FINDING_CENTRE_ == True:
+            if ( not self._min_radius is None) and (self._min_radius > 0.0):
+                self.add_cylinder('center_find_beam_cen', self._min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
+            if ( not self._max_radius is None) and (self._max_radius > 0.0):
+                self.add_outside_cylinder('center_find_beam_cen', self._max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
+        else:
+            if ( not self._min_radius is None) and (self._min_radius > 0.0):
+                self.add_cylinder('beam_stop', self._min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1])
+            xcenter = reducer.data_loader.maskpt_rmax[0]
+            ycentre = reducer.data_loader.maskpt_rmax[1]
+            if ( not self._max_radius is None) and (self._max_radius > 0.0):
+                self.add_outside_cylinder('beam_area', self._max_radius, xcentre, ycentre)
         #now do the masking
         SANSReductionSteps.Mask.execute(self, reducer, workspace)
 
-        # Finally apply masking to get the correct phi range
-        if self.lim_phi == True:
-        # Detector has been moved such that beam centre is at [0,0,0]
-            self.mask_phi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
-            
-        if self.lim_phi_xml != '':
-            MaskDetectorsInShape(workspace, self.lim_phi_xml)
+        if self._lim_phi_xml != '':
+            MaskDetectorsInShape(workspace, self._lim_phi_xml)
             
     def __str__(self):
         return '    radius', self.min_radius, self.max_radius+'\n'+\
@@ -732,6 +728,12 @@ class LoadSample(LoadRun):
         self._sample_run = sample_run
         self._reload = reload
         self._period = period
+        
+        self.maskpt_rmin = None
+        self.maskpt_rmax = None
+        
+        #This is set to the name of the workspace that was loaded, with some changes made to it 
+        self.uncropped = None
     
     def set_options(self, reload=True, period=-1):
         self._reload = reload
@@ -740,11 +742,7 @@ class LoadSample(LoadRun):
     def execute(self, reducer, workspace):
         # If we don't have a data file, look up the workspace handle
         if self._sample_run is None:
-            if workspace in reducer._data_files:
-                self._sample_run = reducer._data_files[workspace]
-            else:
-                raise RuntimeError, "ISISReductionSteps.LoadSample doesn't recognize workspace handle %s" % workspace        
-        
+            self._sample_run = reducer._data_files.values()[0]
         # Code from AssignSample
         self._clearPrevious(self.SCATTER_SAMPLE)
         self._SAMPLE_N_PERIODS = -1
@@ -754,19 +752,16 @@ class LoadSample(LoadRun):
             self._SAMPLE_RUN = ''
             self.SCATTER_SAMPLE = None
             return '', '()'
-        
-        #!!!!!REMOVE THE next line
-        self._SAMPLE_RUN = self._sample_run
-        
-        
+
         self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(self._sample_run, False, self._reload, self._period, reducer)
         if self.SCATTER_SAMPLE.getName() == '':
             _issueWarning('Unable to load SANS sample run, cannot continue.')
             return '','()'
         if reset == True:
             self._SAMPLE_SETUP = None
-            
-        p_run_ws = mtd[self.SCATTER_SAMPLE.getName()]
+
+        self.uncropped  = self.SCATTER_SAMPLE.getName()
+        p_run_ws = mtd[self.uncropped ]
         run_num = p_run_ws.getSampleDetails().getLogData('run_number').value()
         reducer.instrument.set_up_for_run(run_num)
 
@@ -790,23 +785,19 @@ class LoadSample(LoadRun):
         reducer.instrument.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
         reducer.instrument.REAR_DET_X = float(logvalues['Rear_Det_X'])
         # End of AssignSample
-        
-        # Start code from WaveRangeReduction
-        # SANSReduction._initReduction
-        beamcoords = reducer._beam_finder.get_beam_center()
-        
-        # SANSReduction._init_run. This should go in LoadSample
-        #sample_setup = _init_run(SCATTER_SAMPLE, beam_center, False)    
-        mantid.sendLogMessage('::SANS:: Initializing sample workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
-    
-        final_ws = self.SCATTER_SAMPLE.getName().split('_')[0]
-        final_ws += reducer.instrument.cur_detector().name('short')
-        #TODO: Need to do something about CORRECTION_TYPE
-        final_ws += '_' + reducer.CORRECTION_TYPE
 
         # Put the components in the correct positions
-        maskpt_rmin, maskpt_rmax = reducer.instrument.set_component_positions(self.SCATTER_SAMPLE.getName(), beamcoords[0], beamcoords[1])
-        
+        beamcoords = reducer._beam_finder.get_beam_center()
+        self.maskpt_rmin, self.maskpt_rmax = reducer.instrument.set_component_positions(self.SCATTER_SAMPLE.getName(), beamcoords[0], beamcoords[1])
+        # SANSReduction._init_run. This should go in LoadSample
+        #sample_setup = _init_run(SCATTER_SAMPLE, beam_center, False)    
+        mantid.sendLogMessage('::SANS:: Initialized sample workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
+
+        # Get the detector bank that is to be used in this analysis leave the complete workspace
+        CropWorkspace(self.uncropped, workspace,
+            StartWorkspaceIndex = reducer.instrument.cur_detector().first_spec_num - 1,
+            EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
+
         # Create a run details object
         TRANS_SAMPLE = ''
         DIRECT_SAMPLE = ''
@@ -815,16 +806,11 @@ class LoadSample(LoadRun):
         if reducer._transmission_calculator is not None:
             DIRECT_SAMPLE = reducer._transmission_calculator.DIRECT_SAMPLE
             
-        sample_setup = SANSUtility.RunDetails(self.SCATTER_SAMPLE, final_ws, 
-                                              TRANS_SAMPLE, DIRECT_SAMPLE, maskpt_rmin, maskpt_rmax, 'sample')
+        sample_setup = SANSUtility.RunDetails(self.SCATTER_SAMPLE, workspace, 
+                                              TRANS_SAMPLE, DIRECT_SAMPLE, self.maskpt_rmin, self.maskpt_rmax, 'sample')
         # End of _init_run
         #TODO: 
-        sample_setup.setReducedWorkspace(reducer.final_workspace)
-
-        # Get the bank we are looking at
-        CropWorkspace(self.SCATTER_SAMPLE.getName(), self._sample_run,
-            StartWorkspaceIndex = reducer.instrument.cur_detector().first_spec_num - 1,
-            EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
+        sample_setup.setReducedWorkspace(workspace)
 
 def extract_workspace_name(run_string, is_trans=False, prefix='', run_number_width=8):
     pieces = run_string.split('.')
@@ -865,14 +851,17 @@ class UnitsConvert(ReductionStep):
         #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(UnitsConvert, self).__init__()
         self._units = units
-        self.wav_low = None
-        self.wav_high = None
-        self.wav_step = None
-        self.set_rebin(w_low, w_step, w_high)
+        self.wav_low = w_low
+        self.wav_high = w_high
+        self.wav_step = w_step
 
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, workspace, rebin_alg = 'use default'):
         ConvertUnits(workspace, workspace, self._units)
-        Rebin(workspace, workspace, self.get_rebin())
+        
+        if rebin_alg == 'use default':
+            rebin_alg = 'Rebin' 
+        rebin_com = rebin_alg+'(workspace, workspace, "'+self.get_rebin()+'")'
+        eval(rebin_com)
 
     def get_rebin(self):
         return str(self.wav_low)+', ' + str(self.wav_step) + ', ' + str(self.wav_high)
@@ -886,7 +875,7 @@ class UnitsConvert(ReductionStep):
             self.wav_high = float(w_high)
 
     def get_range(self):
-        return str(self.wav_low)+'_'+'_'+str(self.wav_high)
+        return str(self.wav_low)+'_'+str(self.wav_high)
 
     def set_range(self, w_low = None, w_high = None):
         self.set_rebin(w_low, None, w_high)
@@ -919,12 +908,13 @@ class ConvertToQ(ReductionStep):
         errorsWS = reducer.norm_mon.prenormed
         if self._output_type == 'Q1D':
             Q1D(workspace, errorsWS, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
+            ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
             rem_zeros = SANSReductionSteps.StripEndZeros()
             rem_zeros.execute(reducer, workspace)
 
         elif self._output_type == 'Qxy':
             Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY)
-
+            ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
         else:
             raise NotImplementedError('The type of Q reduction hasn''t been set, e.g. 1D or 2D')
 
@@ -951,9 +941,12 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
         mtd.sendLogMessage('::SANS::Normalizing to monitor ' + str(self._normalization_spectrum))
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
-        CropWorkspace(self.prenormed, norm_ws,
-                      StartWorkspaceIndex = str(self._normalization_spectrum), 
-                      EndWorkspaceIndex   = str(self._normalization_spectrum))
+        norm_ws = 'Monitor'
+        spec_index = self._normalization_spectrum-1
+
+        CropWorkspace(reducer.data_loader.uncropped, norm_ws,
+                      StartWorkspaceIndex = spec_index, 
+                      EndWorkspaceIndex   = spec_index)
     
         if reducer.instrument.name() == 'LOQ':
             RemoveBins(norm_ws, norm_ws, '19900', '20500',
@@ -964,14 +957,12 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
             FlatBackground(norm_ws, norm_ws, StartX = reducer.BACKMON_START,
                 EndX = reducer.BACKMON_END, WorkspaceIndexList = '0')
     
-        ConvertUnits(norm_ws, norm_ws, "Wavelength")
-        
-        wavbin = reducer.to_wavelen.get_rebin()
-        
+        #perform the sample conversion on the monitor spectrum as was applied to the workspace
         if reducer.instrument.is_interpolating_norm():
-            InterpolatingRebin(norm_ws, norm_ws, wavbin)
+            rebin_alg = 'InterpolatingRebin'
         else :
-            Rebin(norm_ws, norm_ws, wavbin)
+            rebin_alg = 'use default'
+        reducer.to_wavelen.execute(reducer, norm_ws, rebin_alg)
 
         Divide(self.prenormed, norm_ws, workspace)
 
@@ -1069,8 +1060,10 @@ class ISISCorrections(SANSReductionSteps.CorrectToFileStep):
         raise AttributeError('The correction must be set in the instrument, or use the CorrectionToFileStep instead')
 
     def execute(self, reducer, workspace):
-        self.filename = reducer.instrument.cur_detector().correction_file
-        super(CorDetectorAndISISScalings, self).execute(reducer, workspace)
+        #use the instrument's correction file
+        self._filename = reducer.instrument.cur_detector().correction_file
+        #do the correct to file
+        super(ISISCorrections, self).execute(reducer, workspace)
 
         scalefactor = self.rescale
         # Data reduced with Mantid is a factor of ~pi higher than colette.

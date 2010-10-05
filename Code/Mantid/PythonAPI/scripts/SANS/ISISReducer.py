@@ -66,7 +66,7 @@ class ISISReducer(SANSReducer):
         self._init_steps()
 
     def _init_steps(self):
-        self._data_loader = self.append_step(
+        self.data_loader = self.append_step(
                             ISISReductionSteps.LoadSample())
         self._trans_loader = self.append_step(
                             ISISReductionSteps.LoadTransmissions())
@@ -82,8 +82,10 @@ class ISISReducer(SANSReducer):
 
         self._to_Q = self.append_step(
                             ISISReductionSteps.ConvertToQ())
-        self.geometry_correcter = self.append_step(
-                            SANSReductionSteps.SampleGeomCor())
+        self.geometry = self.append_step(
+                            SANSReductionSteps.GetSampleGeom())
+#        self.append_step(
+#                            SANSReductionSteps.SampleGeomCor(self.geometry))
 
     def pre_process(self): 
         """
@@ -107,9 +109,9 @@ class ISISReducer(SANSReducer):
             raise RuntimeError, "ISISReducer.set_user_path: provided path is not a directory (%s)" % path
 
     def load_set_options(self, reload=True, period=-1):
-        if not issubclass(self._data_loader.__class__, ISISReductionSteps.LoadSample):
+        if not issubclass(self.data_loader.__class__, ISISReductionSteps.LoadSample):
             raise RuntimeError, "ISISReducer.load_set_options: method called with wrong loader class"
-        self._data_loader.set_options(reload, period)
+        self.data_loader.set_options(reload, period)
 
     def append_data_file(self, data_file, workspace=None):
         """
@@ -205,9 +207,13 @@ class ISISReducer(SANSReducer):
         # Go through the list of files to be reduced
         for file_ws in self._data_files:
             
-            #TODO: set up the final workspace name
             if finding_centre == False:
-                self.final_workspace = file_ws + self.to_wavelen.get_range()
+                run = self._data_files.values()[0]
+                final_ws = ISISReductionSteps.extract_workspace_name(run)[0]
+                final_ws += self.instrument.cur_detector().name('short')
+                final_ws += '_' + self.CORRECTION_TYPE
+                final_ws += '_' + self.to_wavelen.get_range()
+
             else:
                 self.final_workspace = file_ws.split('_')[0] + '_quadrants'
             #self._data_files[final_workspace] = self._data_files[file_ws]
@@ -218,7 +224,7 @@ class ISISReducer(SANSReducer):
             #TODO: all reduction steps from Correct() should go in _2D_steps()
             #Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
             for item in self._reduction_steps:
-                item.execute(self, file_ws)    
+                item.execute(self, final_ws)    
                      
                  
             # Crop Workspace to remove leading and trailing zeroes
@@ -387,9 +393,9 @@ class ISISReducer(SANSReducer):
             self.DEF_RMIN = float(minval)/1000.
             self.DEF_RMAX = float(maxval)/1000.
         elif limit_type.upper() == 'PHI':
-            self.set_phi_limit(float(minval), float(maxval), True) 
+            self.mask.set_phi_limit(float(minval), float(maxval), True) 
         elif limit_type.upper() == 'PHI/NOMIRROR':
-            self.set_phi_limit(float(minval), float(maxval), False)
+            self.mask.set_phi_limit(float(minval), float(maxval), False)
         else:
             pass
 

@@ -193,12 +193,9 @@ def displayUserFile():
     print ReductionSingleton().to_wavlen
     print '    Q range: ', Q_REBIN
     print '    QXY range: ', QXY2, DQXY
-    print '    radius', RMIN, RMAX
     print '    direct beam file rear:', DIRECT_BEAM_FILE_R
     print '    direct beam file front:', DIRECT_BEAM_FILE_F
-    print '    global time mask: ', TIMEMASKSTRING
-    print '    rear time mask: ', TIMEMASKSTRING_R
-    print '    front time mask: ', TIMEMASKSTRING_F
+    print ReductionSingleton().mask
 
 def displayMaskFile():
     displayUserFile()
@@ -206,7 +203,7 @@ def displayMaskFile():
 def SetPhiLimit(phimin,phimax, phimirror=True):
     maskStep = ReductionSingleton().get_mask()
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
-    maskStep.SetPhiLimit(phimin, phimax, phimirror)
+    maskStep.set_phi_limit(phimin, phimax, phimirror)
     
 def LimitsPhi(phimin, phimax, use_mirror=True):
     '''
