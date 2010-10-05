@@ -301,11 +301,11 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
   Mantid::Kernel::PulseTimeType pulsetime = 0;
 
   // Index into the pulse array
-  std::size_t pulse_i = 0;
+  int pulse_i = 0;
 
   // And there are this many pulses
-  std::size_t numPulses = pulseTimes.size();
-  if (numPulses > event_index.size())
+  int numPulses = static_cast<int>(pulseTimes.size());
+  if (numPulses > static_cast<int>(event_index.size()))
   {
     g_log.warning() << "Entry " << entry_name << "'s event_index vector is smaller than the proton_charge DAS log. This is inconsistent, so we cannot find pulse times for this entry.\n";
     //This'll make the code skip looking for any pulse times.
