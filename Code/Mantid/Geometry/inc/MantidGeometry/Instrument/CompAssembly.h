@@ -70,6 +70,11 @@ public:
   int addCopy(IComponent*, const std::string&);
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
+  /// Returns a child component at the given X/Y pixel index.
+  virtual boost::shared_ptr<IComponent> getChildAtXY(int X, int Y) const;
+  /// Set the pixel size of the detector (optional)
+  virtual void setNumPixels(int num_xPixels, int num_yPixels);
+
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
@@ -79,6 +84,12 @@ private:
 
   ///the group of child components
   std::vector< IComponent* > group;
+
+  /// The number of pixels in the X (horizontal) direction; optional; for area detectors
+  int xPixels;
+  /// The number of pixels in the Y (vertical) direction; optional; for area detectors
+  int yPixels;
+
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);

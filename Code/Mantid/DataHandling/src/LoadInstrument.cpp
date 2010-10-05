@@ -38,6 +38,7 @@ using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 
+static bool VERBOSE = false;
 
 namespace Mantid
 {
@@ -204,6 +205,7 @@ namespace Mantid
         API::Progress prog(this,0,1,pNL_comp_length);
         for (unsigned int i = 0; i < pNL_comp_length; i++)
         {
+          if (VERBOSE) std::cout << "exec(): Node = "<< pNL_comp->item(i)->nodeName() << "\n";
           prog.report();
           // we are only interest in the top level component elements hence
           // the reason for the if statement below
@@ -216,7 +218,6 @@ namespace Mantid
             IdList idList; // structure to possibly be populated with detector IDs
 
             // get all location elements contained in component element
-
             NodeList* pNL_location = pElem->getElementsByTagName("location");
             unsigned int pNL_location_length = pNL_location->length();
             if (pNL_location_length == 0)
@@ -230,7 +231,9 @@ namespace Mantid
 
 
             if ( isAssembly(pElem->getAttribute("type")) )
-            {		
+            {
+              if (VERBOSE) std::cout << "exec(): This element has a type that is an assembly\n";
+
               for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
                 Element* pLocElem = static_cast<Element*>(pNL_location->item(i_loc));
@@ -247,9 +250,10 @@ namespace Mantid
                 }
                 pNLexclude->release();
 
+                if (VERBOSE) std::cout << "exec(): AppendAssembly of " << pLocElem->nodeName() << "\n";
+
                 appendAssembly(m_instrument, pLocElem, idList, newExcludeList);
               }
-
 
               // a check
               if (idList.counted != static_cast<int>(idList.vec.size()) )
@@ -267,6 +271,7 @@ namespace Mantid
             }
             else
             {	
+
               for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
                 appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
@@ -399,8 +404,10 @@ namespace Mantid
         m_instrument->setDefaultViewAxis(defaultView->getAttribute("axis-view"));
       }
     }
+
+
     /** Assumes second argument is a XML location element and its parent is a component element
-    *  which is assigned to be an assemble. This method appends the parent component element of
+    *  which is assigned to be an assembly. This method appends the parent component element of
     %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
     %  itself, i.e. it may act recursively.
     *
@@ -412,12 +419,12 @@ namespace Mantid
     void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList, 
       const std::vector<std::string> excludeList)
     {
-      // The location element is required to be a child of a component element. Get this component element
+      if (VERBOSE) std::cout << "appendAssembly() starting for parent " << parent->getName() << "\n";
 
+      // The location element is required to be a child of a component element. Get this component element
       Element* pCompElem = getParentComponent(pLocElem);
 
-
-      // Read detertor IDs into idlist if required
+      // Read detector IDs into idlist if required
       // Note idlist may be defined for any component
       // Note any new idlist found will take presedence. 
 
@@ -434,7 +441,6 @@ namespace Mantid
             throw Kernel::Exception::InstrumentDefinitionError(
               "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", m_filename);
           }
-
           idList.reset(); 
           populateIdList(pFound, idList);
         }
@@ -447,13 +453,14 @@ namespace Mantid
 
       ass->setName( getNameOfLocationElement(pLocElem) );
 
+      if (VERBOSE) std::cout << "appendAssembly() is creating an assembly called " << ass->getName() << "\n";
 
       // set location for this newly added comp and set facing if specified in instrument def. file. Also
       // check if any logfiles are referred to through the <parameter> element.
 
       setLocation(ass, pLocElem);
       setFacing(ass, pLocElem);
-      setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component> 
+      setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component>
       setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
 
@@ -463,6 +470,34 @@ namespace Mantid
 
       Element* pType = getTypeElement[pCompElem->getAttribute("type")];
       NodeIterator it(pType, NodeFilter::SHOW_ELEMENT);
+
+
+      //--- Get the detector's X/Y pixel sizes (optional) ---
+      if (VERBOSE) std::cout << "\nappendAssembly(): I am " << pLocElem->getAttribute("name") << " . " <<
+          "My xpixels=" << pLocElem->getAttribute("xpixels") <<
+          ". My parent's xpixels=" << pCompElem->getAttribute("xpixels") <<
+          "\n";
+
+      //These strings will be empty if nothing is specified. This is fine.
+      std::string xpixels = pLocElem->getAttribute("xpixels");
+      std::string ypixels = pLocElem->getAttribute("ypixels");
+      if ((xpixels.size() > 0) && (ypixels.size() > 0))
+      {
+        //Default of 0,0 pixels
+        ass->setNumPixels(0,0);
+        //Both have to be specified
+        try
+        {
+          int xpix = boost::lexical_cast<int>(xpixels);
+          int ypix = boost::lexical_cast<int>(ypixels);
+          ass->setNumPixels(xpix,ypix);
+        }
+        catch (boost::bad_lexical_cast e)
+        {
+          //If there was an error here, default to 0, set previously
+        }
+      }
+
 
       Node* pNode = it.nextNode();
       while (pNode)
@@ -478,8 +513,11 @@ namespace Mantid
 
             std::string typeName = (getParentComponent(pElem))->getAttribute("type");
 
+            if (VERBOSE) std::cout << "appendAssembly() has found that its parent's type = " << typeName << "\n";
+
             if ( isAssembly(typeName) )
             {
+
               // check if <exclude> sub-elements for this location and create new exclude list to pass on 
               NodeList* pNLexclude = pElem->getElementsByTagName("exclude");
               unsigned int numberExcludeEle = pNLexclude->length();
@@ -500,8 +538,20 @@ namespace Mantid
         }
         pNode = it.nextNode();
       }
+
+
     }
 
+    /** Assumes second argument is a XML location element and its parent is a component element
+    *  which is assigned to be an assemble. This method appends the parent component element of
+    %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
+    %  itself, i.e. it may act recursively.
+    *
+    *  @param parent CompAssembly to append new component to
+    *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
+    *  @param idList The current IDList
+    *  @param excludeList The exclude List
+    */
     void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList,
       const std::vector<std::string> excludeList)
     {
@@ -521,11 +571,15 @@ namespace Mantid
     void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
     {
       // The location element is required to be a child of a component element. Get this component element
-
       Element* pCompElem = getParentComponent(pLocElem);
 
+      //--- Get the detector's X/Y pixel sizes (optional) ---
+      if (VERBOSE) std::cout << "AppendLeaf: I am " << pLocElem->getAttribute("name") << " . " <<
+          "My xpixels=" << pLocElem->getAttribute("xpixels") <<
+          ". My parent's xpixels=" << pCompElem->getAttribute("xpixels") <<
+          "\n";
 
-      // Read detertor IDs into idlist if required
+      // Read detector IDs into idlist if required
       // Note idlist may be defined for any component
       // Note any new idlist found will take presedence. 
 
@@ -989,11 +1043,10 @@ namespace Mantid
     }
 
 
-    /** Method for populating IdList.
-    *
-    *  @param type  name of the type of a component in XML instrument definition
-    *
-    *  @throw InstrumentDefinitionError Thrown if type not defined in XML definition
+    /** Returns True if the (string) type given is an assembly.
+     *
+     *  @param type  name of the type of a component in XML instrument definition
+     *  @throw InstrumentDefinitionError Thrown if type not defined in XML definition
     */
     bool LoadInstrument::isAssembly(std::string type)
     {
@@ -1522,7 +1575,8 @@ namespace Mantid
     }
 
 
-    /** get name of location element
+    /** get name of location element. Will be the name attribute, or the
+     * parent's name attribute, or the parent's type, if all else fails.
     *
     *  @param pElem  Poco::XML element that points to a location element
     *  @return name of location element

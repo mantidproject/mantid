@@ -129,6 +129,9 @@ private:
   IComponent& operator=(const IComponent&);
 };
 
+///Typedef of a shared pointer to a IComponent
+typedef boost::shared_ptr<Mantid::Geometry::IComponent> IComponent_sptr;
+
 /** Prints a text representation
  */
 DLLExport std::ostream& operator<<(std::ostream&, const IComponent&);

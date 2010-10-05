@@ -74,10 +74,10 @@ public:
     loader.setPropertyValue("Workspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
@@ -127,13 +127,13 @@ public:
     // Check running algorithm for same XML file leads to same instrument object being attached
     boost::shared_ptr<Instrument> instr(new Instrument());
     output->setInstrument(instr);
-    TS_ASSERT_EQUALS( output->getInstrument(), instr )
+    TS_ASSERT_EQUALS( output->getInstrument(), instr );
     LoadInstrument loadAgain;
-    TS_ASSERT_THROWS_NOTHING( loadAgain.initialize() )
+    TS_ASSERT_THROWS_NOTHING( loadAgain.initialize() );
     loadAgain.setPropertyValue("Filename", inputFile);
     loadAgain.setPropertyValue("Workspace", wsName);
-    TS_ASSERT_THROWS_NOTHING( loadAgain.execute() )
-    TS_ASSERT_EQUALS( output->getInstrument(), i )
+    TS_ASSERT_THROWS_NOTHING( loadAgain.execute() );
+    TS_ASSERT_EQUALS( output->getInstrument(), i );
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -159,10 +159,10 @@ public:
     loaderGEM.setPropertyValue("Workspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
@@ -233,10 +233,10 @@ public:
     loaderSLS.setPropertyValue("Workspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
@@ -295,10 +295,10 @@ public:
     loaderNIMROD.setPropertyValue("Workspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderNIMROD.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderNIMROD.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderNIMROD.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderNIMROD.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderNIMROD.execute());
@@ -344,10 +344,10 @@ public:
     loaderHRP.setPropertyValue("Workspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderHRP.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderHRP.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderHRP.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderHRP.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderHRP.execute());
@@ -408,10 +408,10 @@ public:
     loaderIDF.setPropertyValue("Workspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderIDF.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderIDF.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderIDF.execute());
@@ -492,7 +492,7 @@ public:
     TS_ASSERT( !ptrDet5->isValid(V3D(0.0,0.0,0.02)+ptrDet5->getPos()) );
     TS_ASSERT( !ptrDet5->isValid(V3D(0.0,0.0,-0.02)+ptrDet5->getPos()) );
 
-    // test of infinite-cone. 
+    // test of infinite-cone.
     boost::shared_ptr<IDetector> ptrDet6 = i->getDetector(6);
     TS_ASSERT( !ptrDet6->isValid(V3D(0.02,0.0,0.0)+ptrDet6->getPos()) );
     TS_ASSERT( !ptrDet6->isValid(V3D(-0.02,0.0,0.0)+ptrDet6->getPos()) );
@@ -502,7 +502,7 @@ public:
     TS_ASSERT( ptrDet6->isValid(V3D(0.0,0.0,-0.02)+ptrDet6->getPos()) );
     TS_ASSERT( ptrDet6->isValid(V3D(0.0,0.0,-1.02)+ptrDet6->getPos()) );
 
-    // test of (finite) cone. 
+    // test of (finite) cone.
     boost::shared_ptr<IDetector> ptrDet7 = i->getDetector(7);
     TS_ASSERT( !ptrDet7->isValid(V3D(0.02,0.0,0.0)+ptrDet7->getPos()) );
     TS_ASSERT( !ptrDet7->isValid(V3D(-0.02,0.0,0.0)+ptrDet7->getPos()) );
@@ -512,7 +512,7 @@ public:
     TS_ASSERT( ptrDet7->isValid(V3D(0.0,0.0,-0.02)+ptrDet7->getPos()) );
     TS_ASSERT( !ptrDet7->isValid(V3D(0.0,0.0,-1.02)+ptrDet7->getPos()) );
 
-    // test of hexahedron. 
+    // test of hexahedron.
     boost::shared_ptr<IDetector> ptrDet8 = i->getDetector(8);
     TS_ASSERT( ptrDet8->isValid(V3D(0.4,0.4,0.0)+ptrDet8->getPos()) );
     TS_ASSERT( ptrDet8->isValid(V3D(0.8,0.8,0.0)+ptrDet8->getPos()) );
@@ -522,7 +522,7 @@ public:
     TS_ASSERT( !ptrDet8->isValid(V3D(0.0,0.0,2.02)+ptrDet8->getPos()) );
     TS_ASSERT( ptrDet8->isValid(V3D(0.5,0.5,0.1)+ptrDet8->getPos()) );
 
-    // test for "cuboid-rotating-test". 
+    // test for "cuboid-rotating-test".
     boost::shared_ptr<IDetector> ptrDet10 = i->getDetector(10);
     TS_ASSERT( ptrDet10->isValid(V3D(0.0,0.0,0.1)+ptrDet10->getPos()) );
     TS_ASSERT( ptrDet10->isValid(V3D(0.0,0.0,-0.1)+ptrDet10->getPos()) );
@@ -542,7 +542,7 @@ public:
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.01,0.05)+ptrDet11->getPos()) );
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.01,-0.05)+ptrDet11->getPos()) );
 
-    // test for "infinite-cylinder-test". 
+    // test for "infinite-cylinder-test".
     boost::shared_ptr<IDetector> ptrDet12 = i->getDetector(12);
     TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,0.1)+ptrDet12->getPos()) );
     TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,-0.1)+ptrDet12->getPos()) );
@@ -553,7 +553,7 @@ public:
     TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,0.0)+ptrDet12->getPos()) );
     TS_ASSERT( !ptrDet12->isValid(V3D(2.0,0.0,0.0)+ptrDet12->getPos()) );
 
-    // test for "finite-cylinder-test". 
+    // test for "finite-cylinder-test".
     boost::shared_ptr<IDetector> ptrDet13 = i->getDetector(13);
     TS_ASSERT( ptrDet13->isValid(V3D(0.0,0.0,0.1)+ptrDet13->getPos()) );
     TS_ASSERT( !ptrDet13->isValid(V3D(0.0,0.0,-0.1)+ptrDet13->getPos()) );
@@ -564,7 +564,7 @@ public:
     TS_ASSERT( ptrDet13->isValid(V3D(0.0,0.0,0.0)+ptrDet13->getPos()) );
     TS_ASSERT( !ptrDet13->isValid(V3D(2.0,0.0,0.0)+ptrDet13->getPos()) );
 
-    // test for "complement-test". 
+    // test for "complement-test".
     boost::shared_ptr<IDetector> ptrDet14 = i->getDetector(14);
     TS_ASSERT( !ptrDet14->isValid(V3D(0.0,0.0,0.0)+ptrDet14->getPos()) );
     TS_ASSERT( !ptrDet14->isValid(V3D(0.0,0.0,-0.04)+ptrDet14->getPos()) );
@@ -576,7 +576,7 @@ public:
     TS_ASSERT( !ptrDet14->isValid(V3D(0.0,0.51,0.0)+ptrDet14->getPos()) );
     TS_ASSERT( !ptrDet14->isValid(V3D(0.0,0.0,0.51)+ptrDet14->getPos()) );
 
-    // test for "rotation-of-element-test". 
+    // test for "rotation-of-element-test".
     boost::shared_ptr<IDetector> ptrDet15 = i->getDetector(15);
     TS_ASSERT( !ptrDet15->isValid(V3D(0.0,0.09,0.01)+ptrDet15->getPos()) );
     TS_ASSERT( !ptrDet15->isValid(V3D(0.0,-0.09,0.01)+ptrDet15->getPos()) );
@@ -629,10 +629,10 @@ public:
     loaderIDF2.setPropertyValue("Workspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderIDF2.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF2.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderIDF2.getPropertyValue("Workspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF2.getPropertyValue("Workspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
@@ -669,6 +669,66 @@ public:
     TS_ASSERT( !ptrMonShape->isValid(V3D(-0.0621,0.0651,0.01)+ptrMonShape->getPos()) );
 
     AnalysisDataService::Instance().remove(wsName);
+  }
+
+    void testExecIDF_for_unit_testing3() // IDF stands for Instrument Definition File
+    {
+      LoadInstrument loaderIDF2;
+      loaderIDF2.initialize();
+      //create a workspace with some sample data
+      wsName = "LoadInstrumentTestIDF2";
+      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+      //put this workspace in the data service
+      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+      // Path to test input file assumes Test directory checked out from SVN
+      loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING3.xml");
+      inputFile = loaderIDF2.getPropertyValue("Filename");
+      loaderIDF2.setPropertyValue("Workspace", wsName);
+      TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
+      TS_ASSERT( loaderIDF2.isExecuted() );
+
+      // Get back the saved workspace
+      MatrixWorkspace_sptr output;
+      TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
+      boost::shared_ptr<IInstrument> i = output->getInstrument();
+
+      // Now the XY detector in bank1
+      boost::shared_ptr<ICompAssembly> bank1 = boost::dynamic_pointer_cast<ICompAssembly>( i->getComponentByName("bank1") );
+      TS_ASSERT( bank1 );
+      //std::cout << "nelements" << bank1->nelements() << "\n";
+      TS_ASSERT_DELTA( bank1->getChildAtXY(0,0)->getPos().X(), 0.0, 1e-3 );
+      TS_ASSERT_DELTA( bank1->getChildAtXY(1,0)->getPos().X(), 1.0, 1e-3 );
+      TS_ASSERT_DELTA( bank1->getChildAtXY(2,0)->getPos().X(), 2.0, 1e-3 );
+      TS_ASSERT_DELTA( bank1->getChildAtXY(0,0)->getPos().Y(), 0.0, 1e-3 );
+      TS_ASSERT_DELTA( bank1->getChildAtXY(0,1)->getPos().Y(), 1.0, 1e-3 );
+
+      //Outside limits
+      TS_ASSERT_THROWS( bank1->getChildAtXY(3,0), std::runtime_error);
+      TS_ASSERT_THROWS( bank1->getChildAtXY(0,2), std::runtime_error);
+
+      AnalysisDataService::Instance().remove(wsName);
+  }
+
+
+  void xtestExecSNAP() // IDF stands for Instrument Definition File
+  {
+    LoadInstrument loaderIDF2;
+    TS_ASSERT_THROWS_NOTHING(loaderIDF2.initialize());
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestIDF2";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    // Path to test input file assumes Test directory checked out from SVN
+    loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/SNAP_Definition.xml");
+    inputFile = loaderIDF2.getPropertyValue("Filename");
+    loaderIDF2.setPropertyValue("Workspace", wsName);
+    std::string result;
+    loaderIDF2.execute();
+    TS_ASSERT( loaderIDF2.isExecuted() );
+
   }
 
 

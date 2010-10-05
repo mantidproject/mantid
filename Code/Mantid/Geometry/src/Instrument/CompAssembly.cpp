@@ -163,6 +163,43 @@ boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
   return boost::shared_ptr<IComponent>(group[i],NoDeleting());
 }
 
+
+
+/** Return a pointer to the component in the assembly at the
+ * (X,Y) pixel position. The index into the list is calculated by:
+ *        index = X*yPixels + Y;
+ * meaning that Y has to be the fast-moving index and X the slow-moving.
+ *
+ * @param X index from 0..xPixels-1
+ * @param Y index from 0..yPixels-1
+ * @throws runtime_error if the x/y pixel width is not set, or X/Y are out of range
+ */
+boost::shared_ptr<IComponent> CompAssembly::getChildAtXY(int X, int Y) const
+{
+  if ((xPixels <= 0) || (yPixels <= 0))
+  {
+    std::cout << "xPixels " << xPixels << " yPixels " << yPixels << "\n";
+    throw std::runtime_error("CompAssembly::getChildAtXY: invalid X or Y width set in the object.");
+  }
+  if ((X < 0) || (X >= xPixels))
+    throw std::runtime_error("CompAssembly::getChildAtXY: X specified is out of range.");
+  if ((Y < 0) || (Y >= yPixels))
+    throw std::runtime_error("CompAssembly::getChildAtXY: Y specified is out of range.");
+  //Find the index and return that.
+  int i = X*yPixels + Y;
+  return this->operator[](i);
+}
+
+
+/// Set the pixel size of the detector (optional)
+void CompAssembly::setNumPixels(int num_xPixels, int num_yPixels)
+{
+  xPixels = num_xPixels;
+  yPixels = num_yPixels;
+}
+
+
+
 /*! Print information about elements in the assembly to a stream
  * @param os :: output stream 
  * 
@@ -193,7 +230,7 @@ void CompAssembly::printTree(std::ostream& os) const
   for (const_comp_it it=group.begin();it!=group.end();it++)
   {
     const CompAssembly* test=dynamic_cast<CompAssembly*>(*it);
-    os << "Element " << i++ << " in the assembly : ";
+    os << "Element " << i++ << " in the assembly. ";
     if (test)
     {
       os << test->getName() << std::endl;

@@ -45,6 +45,8 @@ class DLLExport ICompAssembly : public virtual IComponent
 public:
   ///String description of the type of component
   virtual std::string type() const { return "ICompAssembly";}
+  //ICompAssembly();
+
   virtual ~ICompAssembly(){}
   //! Make a clone of the present component
   virtual IComponent* clone() const = 0;
@@ -65,9 +67,16 @@ public:
    *  and call printSelf(os). 
    */
   virtual void printTree(std::ostream&) const = 0;
+  /// Returns a child component at the given X/Y pixel index.
+  virtual boost::shared_ptr<IComponent> getChildAtXY(int X, int Y) const = 0;
+  /// Set the pixel size of the detector (optional)
+  virtual void setNumPixels(int num_xPixels, int num_yPixels) = 0;
+
 private:
   /// Private copy assignment operator
   ICompAssembly& operator=(const ICompAssembly&);
+
+
 };
 
 //DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);
