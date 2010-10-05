@@ -83,6 +83,8 @@ namespace Mantid
       /// The workspace being filled out
       DataObjects::EventWorkspace_sptr WS;
 
+      double filter_tof_min, filter_tof_max;
+
       /// Was the instrument loaded?
       bool instrument_loaded_correctly;
 

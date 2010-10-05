@@ -49,6 +49,15 @@ void LoadSNSEventNexus::init()
     new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "", Direction::Output),
     "The name of the output EventWorkspace in which to load the EventNexus file." );
 
+  declareProperty(
+      new PropertyWithValue<double>("FilterByTof_Min", EMPTY_DBL(), Direction::Input),
+    "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
+    "This is the minimum accepted value in microseconds." );
+
+  declareProperty(
+      new PropertyWithValue<double>("FilterByTof_Max", EMPTY_DBL(), Direction::Input),
+    "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
+    "This is the maximum accepted value in microseconds." );
 }
 
 
@@ -63,6 +72,23 @@ void LoadSNSEventNexus::exec()
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
+  //Get the limits to the filter
+  filter_tof_min = getProperty("FilterByTof_Min");
+  filter_tof_max = getProperty("FilterByTof_Max");
+  if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
+  {
+    //Nothing specified. Include everything
+    filter_tof_min = -1e20;
+    filter_tof_max = +1e20;
+  }
+  else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
+  {
+    //Both specified. Keep these values
+  }
+  else
+    throw std::invalid_argument("You must specify both the min and max of time of flight to filter, or neither!");
+
+
   // Create the output workspace
   WS = EventWorkspace_sptr(new EventWorkspace());
 
@@ -73,6 +99,11 @@ void LoadSNSEventNexus::exec()
   // Set the units
   WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   WS->setYUnit("Counts");
+
+  //Initialize progress reporting.
+  Progress prog(this,0.0,0.3,  3); //3 calls for the first part
+
+  prog.report(0, "Loading instrument");
 
   //Load the instrument
   runLoadInstrument(m_filename, WS);
@@ -106,6 +137,8 @@ void LoadSNSEventNexus::exec()
   file.closeGroup();
   file.close();
 
+  prog.report(1, "Initializing all pixels");
+
   //----------------- Pad Empty Pixels -------------------------------
   if (true)
   {
@@ -132,6 +165,8 @@ void LoadSNSEventNexus::exec()
 
   //The pulse times will be empty if not specified in the DAS logs.
   pulseTimes.clear();
+
+  prog.report(1, "Loading DAS logs");
 
   // --------------------- Load DAS Logs -----------------
   // do the actual work
@@ -160,17 +195,16 @@ void LoadSNSEventNexus::exec()
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  //Initialize progress reporting.
-  Progress prog(this,0.0,1.0, bankNames.size());
+  Progress prog2(this,0.3,1.0, bankNames.size());
 
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
   //PARALLEL_FOR_NO_WSP_CHECK()
-  //PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
+  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
+    prog2.report("Loading " + bankNames[i]);
     this->loadBankEventData(bankNames[i]);
-    prog.report();
   }
 
   //Now all the event lists have been made for all pixel ids
@@ -332,14 +366,18 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
 
     //Create the tofevent
     double tof = static_cast<double>( event_time_of_flight[i] );
-    TofEvent event(tof, pulsetime);
+    if ((tof >= filter_tof_min) && (tof <= filter_tof_max))
+    {
+      //The event TOF passes the filter.
+      TofEvent event(tof, pulsetime);
 
-    //Add it to the list at that pixel ID
-    WS->getEventListAtPixelID( event_pixel_id[i] ).addEventQuickly( event );
+      //Add it to the list at that pixel ID
+      WS->getEventListAtPixelID( event_pixel_id[i] ).addEventQuickly( event );
 
-    //Local tof limits
-    if (tof < my_shortest_tof) { my_shortest_tof = tof;}
-    if (tof > my_longest_tof) { my_longest_tof = tof;}
+      //Local tof limits
+      if (tof < my_shortest_tof) { my_shortest_tof = tof;}
+      if (tof > my_longest_tof) { my_longest_tof = tof;}
+    }
 
   }
 
