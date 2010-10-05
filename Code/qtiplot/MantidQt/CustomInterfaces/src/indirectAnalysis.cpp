@@ -4,9 +4,21 @@
 #include "MantidQtCustomInterfaces/indirectAnalysis.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
+
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <QLineEdit>
 #include <QValidator>
+
+#include <QStandardItemModel>
+#include <QStandardItem>
+#include "qttreepropertybrowser.h"
+#include "qtpropertymanager.h"
+#include "qteditorfactory.h"
+#include "StringDialogEditorFactory.h"
+#include "DoubleEditorFactory.h"
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -38,6 +50,13 @@ void indirectAnalysis::initLayout()
 {
   m_uiForm.setupUi(this);
 
+  m_propBrowser = new QtTreePropertyBrowser();
+  m_uiForm.furyfit_hlTreePlace->addWidget(m_propBrowser);
+  setupTreePropertyBrowser();
+
+  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
+
   // settings
   connect(m_uiForm.set_cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentChanged(int)));
   connect(m_uiForm.set_cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
@@ -47,15 +66,15 @@ void indirectAnalysis::initLayout()
   connect(m_uiForm.fury_pbRun, SIGNAL(clicked()), this, SLOT(furyRun()));
   connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
   connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
+
+  // fury fit
+  connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfit_typeSelection(int)));
+  connect(m_uiForm.furyfit_pbRun, SIGNAL(clicked()), this, SLOT(runFuryFit()));
+
   // elwin
   connect(m_uiForm.elwin_pbRun, SIGNAL(clicked()), this, SLOT(elwinRun()));
   connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
   connect(m_uiForm.elwin_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(elwinTwoRanges(bool)));
-  // slice
-  connect(m_uiForm.slice_pbRun, SIGNAL(clicked()), this, SLOT(sliceRun()));
-  connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
-  connect(m_uiForm.slice_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(sliceTwoRanges(bool)));
-  connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
   // msd
   connect(m_uiForm.msd_pbRun, SIGNAL(clicked()), this, SLOT(msdRun()));
   connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
@@ -82,16 +101,13 @@ void indirectAnalysis::initLayout()
   m_uiForm.fury_leELow->setValidator(m_valDbl);
   m_uiForm.fury_leEWidth->setValidator(m_valDbl);
   m_uiForm.fury_leEHigh->setValidator(m_valDbl);
+  // apply validators - furyfit
+  m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
   // apply validators - elwin
   m_uiForm.elwin_leEStart->setValidator(m_valDbl);
   m_uiForm.elwin_leEEnd->setValidator(m_valDbl);
   m_uiForm.elwin_leRangeTwoStart->setValidator(m_valDbl);
   m_uiForm.elwin_leRangeTwoEnd->setValidator(m_valDbl);
-  // apply validators - slice
-  m_uiForm.slice_leRange0->setValidator(m_valInt);
-  m_uiForm.slice_leRange1->setValidator(m_valInt);
-  m_uiForm.slice_leRange2->setValidator(m_valInt);
-  m_uiForm.slice_leRange3->setValidator(m_valInt);
   // apply validators - msd
   m_uiForm.msd_leStartX->setValidator(m_valDbl);
   m_uiForm.msd_leEndX->setValidator(m_valDbl);
@@ -119,14 +135,8 @@ void indirectAnalysis::loadSettings()
 {
   QSettings settings;
 
-  settings.beginGroup(m_settingsGroup + "DataFiles");
-  settings.setValue("last_directory", m_dataDir);
-  m_uiForm.slice_inputFile->readSettings(settings.group());
-  settings.endGroup();
-
   settings.beginGroup(m_settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", m_saveDir);
-  m_uiForm.slice_calibFile->readSettings(settings.group());
   m_uiForm.fury_iconFile->readSettings(settings.group());
   m_uiForm.fury_resFile->readSettings(settings.group());
   m_uiForm.elwin_inputFile->readSettings(settings.group());
@@ -180,6 +190,35 @@ void indirectAnalysis::saveSettings()
   settings.setValue("analyser", analyser);
   settings.setValue("reflection", reflection);
 }
+
+void indirectAnalysis::setupTreePropertyBrowser()
+{
+  m_groupManager    = new QtGroupPropertyManager();
+  m_doubleManager   = new QtDoublePropertyManager();
+  //m_stringManager   = new QtStringPropertyManager();
+  //m_enumManager     = new QtEnumPropertyManager();
+  //m_intManager      = new QtIntPropertyManager();
+  //m_boolManager     = new QtBoolPropertyManager();
+  //m_filenameManager = new QtStringPropertyManager();
+
+  //QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory();
+  //QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory();
+  //QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory();
+  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  //QtLineEditFactory *lineEditFactory = new QtLineEditFactory();
+  //StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory();
+
+  //m_propBrowser->setFactoryForManager(m_enumManager, comboBoxFactory);
+  //m_propBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
+  //m_propBrowser->setFactoryForManager(m_intManager, spinBoxFactory);
+  m_propBrowser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
+  //m_propBrowser->setFactoryForManager(m_stringManager, lineEditFactory);
+  //m_propBrowser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
+
+  furyfit_typeSelection(m_uiForm.furyfit_cbFitType->currentIndex());
+}
+
+
 bool indirectAnalysis::validateFury()
 {
   bool valid = true;
@@ -273,70 +312,6 @@ bool indirectAnalysis::validateElwin()
     {
       m_uiForm.elwin_valRangeTwoEnd->setText(" ");
     }
-  }
-
-  return valid;
-}
-bool indirectAnalysis::validateSlice()
-{
-  bool valid = true;
-  // ...
-  if ( ! m_uiForm.slice_inputFile->isValid() )
-  {
-    valid = false;
-  }
-
-  if ( m_uiForm.slice_ckUseCalib->isChecked() && ! m_uiForm.slice_calibFile->isValid() )
-  {
-    valid = false;
-  }
-
-  if ( m_uiForm.slice_leRange0->text() == "" )
-  {
-    m_uiForm.slice_valRange0->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.slice_valRange0->setText(" ");
-  }
-
-  if ( m_uiForm.slice_leRange1->text() == "" )
-  {
-    m_uiForm.slice_valRange1->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.slice_valRange1->setText(" ");
-  }
-
-  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
-  {
-    if ( m_uiForm.slice_leRange2->text() == "" )
-    {
-      m_uiForm.slice_valRange2->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.slice_valRange2->setText(" ");
-    }
-
-    if ( m_uiForm.slice_leRange3->text() == "" )
-    {
-      m_uiForm.slice_valRange3->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.slice_valRange3->setText(" ");
-    }
-  }
-  else
-  {
-    m_uiForm.slice_valRange2->setText(" ");
-    m_uiForm.slice_valRange3->setText(" ");
   }
 
   return valid;
@@ -505,6 +480,80 @@ bool indirectAnalysis::validateDemon()
 {
   return m_uiForm.dem_rawFiles->isValid();
 }
+
+Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
+{
+  Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
+
+  // QString message;
+  QList<QtBrowserItem*> items = m_propBrowser->topLevelItems();
+
+  for ( int i = 0; i < items.size(); i++ )
+  {
+    QtProperty* item = items[i]->property(); 
+    // message += "Name: " + item->propertyName() + "\n";
+    QList<QtProperty*> sub = item->subProperties();
+
+    if ( sub.size() > 0 )
+    {
+      Mantid::API::IFunction* func;
+      std::string name = item->propertyName().toStdString();
+      if ( name == "Stressed Exponential" )
+      {
+        // create user function
+        func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+        // set the necessary properties
+        std::string formula = "A0*exp(A1*(x^A2))";
+        Mantid::API::IFunction::Attribute att(formula);
+        func->setAttribute("Formula", att);
+      }
+      else
+      {
+        func = Mantid::API::FunctionFactory::Instance().createFunction(name);
+      }
+    for ( int j = 0; j < sub.size(); j++ )
+    {
+      // message += "\tSub: " + sub[j]->propertyName() + ", value: " + sub[j]->valueText() + "\n";
+      func->setParameter(sub[j]->propertyName().toStdString(), sub[j]->valueText().toDouble());
+    }
+    result->addFunction(func);
+    }
+    else
+    {
+      m_baseProperties[item->propertyName()] = item->valueText().toDouble();
+    }
+  }
+  //showInformationBox(message);
+
+  return result;
+}
+
+void indirectAnalysis::addLorentz()
+{
+  QtProperty* lorentzGroup = m_groupManager->addProperty("Lorentzian");
+  QtProperty* lzA0 = m_doubleManager->addProperty("Height");
+  m_doubleManager->setRange(lzA0, 0.0, 1.0); // 0 < Height < 1
+  QtProperty* lzA1 = m_doubleManager->addProperty("PeakCentre");
+  QtProperty* lzA2 = m_doubleManager->addProperty("HWHM");
+  lorentzGroup->addSubProperty(lzA0);
+  lorentzGroup->addSubProperty(lzA1);
+  lorentzGroup->addSubProperty(lzA2);
+  m_propBrowser->addProperty(lorentzGroup);
+}
+
+void indirectAnalysis::addStressed()
+{
+  QtProperty* stressedGroup = m_groupManager->addProperty("Stressed Exponential");
+  QtProperty* stA0 = m_doubleManager->addProperty("A0");
+  m_doubleManager->setRange(stA0, 0.0, 1.0);  // 0 < Height < 1
+  QtProperty* stA1 = m_doubleManager->addProperty("A1");
+  QtProperty* stA2 = m_doubleManager->addProperty("A2");
+  stressedGroup->addSubProperty(stA0);
+  stressedGroup->addSubProperty(stA1);
+  stressedGroup->addSubProperty(stA2);
+  m_propBrowser->addProperty(stressedGroup);
+}
+
 void indirectAnalysis::instrumentChanged(int index)
 {
   m_uiForm.set_cbAnalyser->blockSignals(true);
@@ -590,19 +639,10 @@ void indirectAnalysis::reflectionSelected(int index)
   if ( values.count() == 8 )
   {
     m_uiForm.set_leEFixed->setText(values[3]);
-    // Also set defaults in "Slice" tab
-    m_uiForm.slice_leRange0->setText(values[4]);
-    m_uiForm.slice_leRange1->setText(values[5]);
-    m_uiForm.slice_leRange2->setText(values[6]);
-    m_uiForm.slice_leRange3->setText(values[7]);
   }
   else
   {
     m_uiForm.set_leEFixed->clear();
-    m_uiForm.slice_leRange0->clear();
-    m_uiForm.slice_leRange1->clear();
-    m_uiForm.slice_leRange2->clear();
-    m_uiForm.slice_leRange3->clear();
   }
   bool state;
   if ( analysisType == "diffraction" )
@@ -613,7 +653,6 @@ void indirectAnalysis::reflectionSelected(int index)
   {
     state = true;
   }
-  m_uiForm.tabSlice->setEnabled(state);
   m_uiForm.tabElwin->setEnabled(state);
   m_uiForm.tabMSD->setEnabled(state);
   m_uiForm.tabFury->setEnabled(state);
@@ -675,6 +714,79 @@ void indirectAnalysis::furyPlotInput()
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 }
+
+// FURYFIT
+
+void indirectAnalysis::runFuryFit()
+{
+  // First create the function
+  Mantid::API::CompositeFunction* function = createFunction();
+
+  // Now load up the input workspace
+  QString pyInput = "from mantidsimple import *\n"
+    "LoadNexus(r'" + m_uiForm.furyfit_inputFile->getFirstFilename() + "', 'furyfit')\n";
+  QString pyOutput = runPythonCode(pyInput);
+
+  // Create the Fit Algorithm
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+  alg->initialize();
+  alg->setPropertyValue("InputWorkspace", "furyfit");
+  alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
+  alg->setProperty("StartX", m_baseProperties["StartX"]);
+  alg->setProperty("EndX", m_baseProperties["EndX"]);
+  alg->setPropertyValue("Function", *function);
+  alg->setPropertyValue("Output","furyfit_output");
+  alg->execute();
+}
+
+
+void indirectAnalysis::furyfit_typeSelection(int index)
+{
+  m_propBrowser->clear();
+
+  // StartX and EndX
+  QtProperty* startX = m_doubleManager->addProperty("StartX");
+  QtProperty* endX = m_doubleManager->addProperty("EndX");
+  m_propBrowser->addProperty(startX);
+  m_propBrowser->addProperty(endX);
+
+  // LinearBackground
+  QtProperty* backgroundGroup = m_groupManager->addProperty("LinearBackground");
+  QtProperty* bgA0 = m_doubleManager->addProperty("A0");
+  QtProperty* bgA1 = m_doubleManager->addProperty("A1");
+  backgroundGroup->addSubProperty(bgA0);
+  backgroundGroup->addSubProperty(bgA1);
+  m_propBrowser->addProperty(backgroundGroup);
+
+  switch ( index )
+  {
+  case 0:
+    addLorentz();
+    break;
+  case 1:
+    addLorentz();
+    addLorentz();
+    break;
+  case 2:
+    addStressed();
+    break;
+  case 3:
+    addLorentz();
+    addStressed();
+    break;
+  default:
+    showInformationBox("Something very bad has happened.");
+    return;
+    break;
+  }
+  // LinearBackground
+  // AND
+  // 1 Lorentzian OR (0)
+  // 2 Lorentzian OR (1)
+  // 1 Stressed OR (2)
+  // 1 Lorentzian and 1 Stressed (3)
+}
+
 void indirectAnalysis::elwinRun()
 {
   if ( ! validateElwin() )
@@ -733,93 +845,6 @@ void indirectAnalysis::elwinTwoRanges(bool state)
   m_uiForm.elwin_valRangeTwoEnd->setEnabled(state);
   m_uiForm.elwin_valRangeTwoStart->setText(val);
   m_uiForm.elwin_valRangeTwoEnd->setText(val);
-}
-void indirectAnalysis::sliceRun()
-{
-  if ( ! validateSlice() )
-  {
-    showInformationBox("Please check your input.");
-    return;
-  }
-
-  QString pyInput =
-    "from IndirectDataAnalysis import slice\n"
-    "tofRange = [" + m_uiForm.slice_leRange0->text() + ","
-    + m_uiForm.slice_leRange1->text();
-  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
-  {
-    pyInput +=
-      "," + m_uiForm.slice_leRange2->text() + ","
-      + m_uiForm.slice_leRange3->text() + "]\n";
-  }
-  else
-  {
-    pyInput += "]\n";
-  }
-  if ( m_uiForm.slice_ckUseCalib->isChecked() )
-  {
-    pyInput +=
-      "calib = r'" + m_uiForm.slice_calibFile->getFirstFilename() + "'\n";
-  }
-  else
-  {
-    pyInput +=
-      "calib = ''\n";
-  }
-  QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
-  pyInput +=
-    "rawfile = [r'" + filenames + "']\n"
-    "spectra = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n";
-
-  if ( m_uiForm.slice_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-  else pyInput += "verbose = False\n";
-
-  if ( m_uiForm.slice_ckPlot->isChecked() ) pyInput += "plot = True\n";
-  else pyInput += "plot = False\n";
-
-  if ( m_uiForm.slice_ckSave->isChecked() ) pyInput += "save = True\n";
-  else pyInput += "save = False\n";
-
-  pyInput +=
-    "slice(rawfile, calib, tofRange, spectra, Save=save, Verbose=verbose, Plot=plot)";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-}
-void indirectAnalysis::slicePlotRaw()
-{
-  if ( m_uiForm.slice_inputFile->isValid() )
-  {
-    QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
-    QString pyInput =
-      "from IndirectDataAnalysis import plotRaw\n"
-      "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n"
-      "files = [r'" + filenames + "']\n"
-      "plotRaw(files, spectra=spec)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-  }
-  else
-  {
-    showInformationBox("Selected input files are invalid.");
-  }
-}
-void indirectAnalysis::sliceTwoRanges(bool state)
-{
-  QString val;
-  if ( state ) val = "*";
-  else val = " ";
-  m_uiForm.slice_lbRange2->setEnabled(state);
-  m_uiForm.slice_lbTo2->setEnabled(state);
-  m_uiForm.slice_leRange2->setEnabled(state);
-  m_uiForm.slice_leRange3->setEnabled(state);
-  m_uiForm.slice_valRange2->setEnabled(state);
-  m_uiForm.slice_valRange2->setText(val);
-  m_uiForm.slice_valRange3->setEnabled(state);
-  m_uiForm.slice_valRange3->setText(val);
-}
-void indirectAnalysis::sliceCalib(bool state)
-{
-  m_uiForm.slice_calibFile->setEnabled(state);
-  m_uiForm.slice_calibFile->isOptional(!state);
 }
 void indirectAnalysis::msdRun()
 {
@@ -937,4 +962,15 @@ void indirectAnalysis::demonRun()
   {
     showInformationBox("Input invalid.");
   }
+}
+void indirectAnalysis::openDirectoryDialog()
+{
+  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+  ad->setAttribute(Qt::WA_DeleteOnClose);
+  ad->show();
+  ad->setFocus();
+}
+void indirectAnalysis::help()
+{
+  showInformationBox("Not yet written.");
 }
