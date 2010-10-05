@@ -29,28 +29,21 @@ def absorption(input, mode, sample, can, efixed, Save=False, Verbose=False, Plot
 		graph = plotSpectrum(outWS_n,0)
 
 def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True, Verbose=False, Plot=False, Save=True):
-	'''
-	DEMON function for unit conversion on diffraction backs of IRIS/OSIRIS.
-	MANDATORY PARAMS:
-	@param rawFiles list of files to load (list[string])
-	@param calFile CalFile/Grouping file (string)
-	@param first first spectra number of diffraction block (integer)
-	@param last last spectra number of diffraction block (integer)
-	OPTIONAL PARAMS:
-	@param SumFiles whether to sum input files, or run through them sequentially (boolean)
-	@param CleanUp whether to remove intermediate workspaces from memory (boolean)
-	@param plotOpt whether to plot the spectra of the result (boolean)
-		-- WARNING - with large numbers of spectra and/or lots of input files plotOpt will slow down the script significantly
-	'''
 	ws_list, ws_names = loadData(rawFiles, Sum=SumFiles)
 	runNos = []
 	workspaces = []
 	(direct, filename) = os.path.split(rawFiles[0])
 	(root, ext) = os.path.splitext(filename)
+	try:
+		inst = mtd[ws_names[0]].getInstrument()
+		area = inst.getNumberParameter('mon-area')[0]
+		thickness = inst.getNumberParameter('mon-thickness')[0]
+	except IndexError:
+		sys.exit('Monitor area and thickness (unt and zz) are not defined in the Instrument Parameter File.')
 	for i in range(0, len(ws_names)):
 		# Get Monitor WS
 		MonitorWS = timeRegime(inWS=ws_names[i], Smooth=Smooth)
-		monitorEfficiency(inWS_n=MonitorWS)
+		monitorEfficiency(MonitorWS, area, thickness)
 		# Get Run no, crop file
 		runNo = ws_list[i].getRun().getLogData("run_number").value()
 		runNos.append(runNo)

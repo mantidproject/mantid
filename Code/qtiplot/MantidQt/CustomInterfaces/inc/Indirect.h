@@ -56,7 +56,8 @@ namespace MantidQt
       /// open the wiki page for this interface in a web browser
       void helpClicked();
       /// perform whatever operations needed for analysis
-      void runClicked(bool tryToSave=true);
+      void runClicked();
+      void runConvertToEnergy(bool tryToSave=true);
       /// gather necessary information from Instument Definition Files
       virtual void setIDFValues(const QString & prefix);
     protected:

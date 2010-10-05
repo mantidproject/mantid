@@ -61,22 +61,20 @@ void Indirect::initLayout()
   connect(m_uiForm.rebin_leEHigh, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
   connect(m_uiForm.ind_mapFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirtyRebin()));
+
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
 
   // "Calibration" tab
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calibPlot()));
-  connect(m_uiForm.cal_pbCreate, SIGNAL(clicked()), this, SLOT(calibCreate()));
   connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(resPlotInput()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
   // "SofQW" tab
-  connect(m_uiForm.sqw_pbRun, SIGNAL(clicked()), this, SLOT(sOfQwClicked()));
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
   connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(sOfQwInputType(const QString&)));
   connect(m_uiForm.sqw_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
 
   // "Slice" tab
-  connect(m_uiForm.slice_pbRun, SIGNAL(clicked()), this, SLOT(sliceRun()));
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(sliceTwoRanges(bool)));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
@@ -146,10 +144,10 @@ void Indirect::helpClicked()
     url += "Energy Transfer";
   else if ( tabName == "Calibration" )
     url += "Calibration";
+  else if ( tabName == "Diagnostics" )
+    url += "Time Slice";
   else if ( tabName == "S(Q, w)" )
     url += "SofQW";
-  else if ( tabName == "Time Slice" )
-    url += "Slice";
   QDesktopServices::openUrl(QUrl(url));
 }
 /**
@@ -157,7 +155,29 @@ void Indirect::helpClicked()
 * "Run" button is clicked by the user.
 * @param tryToSave whether to try and save the output. Generally true, false when user has clicked on the "Rebin" button instead of "Run"
 */
-void Indirect::runClicked(bool tryToSave)
+void Indirect::runClicked()
+{
+  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+
+  if ( tabName == "Energy Transfer" )
+  {
+    runConvertToEnergy();
+  }
+  else if ( tabName == "Calibration" )
+  {
+    calibCreate();
+  }
+  else if ( tabName == "Diagnostics" )
+  {
+    sliceRun();
+  }
+  else if ( tabName == "S(Q, w)" )
+  {
+    sOfQwClicked();
+  }
+}
+
+void Indirect::runConvertToEnergy(bool tryToSave)
 {
   if ( ! validateInput() )
   {
@@ -295,7 +315,7 @@ void Indirect::runClicked(bool tryToSave)
     if ( pyOutput == "No intermediate workspaces were found. Run with 'Keep Intermediate Workspaces' checked." )
     {
       isDirty(true);
-      runClicked(tryToSave=tryToSave);
+      runConvertToEnergy(tryToSave=tryToSave);
     }
     else
     {
@@ -461,6 +481,13 @@ void Indirect::clearReflectionInfo()
 
   m_uiForm.cal_leResSpecMin->clear();
   m_uiForm.cal_leResSpecMax->clear();
+
+  m_uiForm.slice_leSpecMin->clear();
+  m_uiForm.slice_leSpecMax->clear();
+  m_uiForm.slice_leRange0->clear();
+  m_uiForm.slice_leRange1->clear();
+  m_uiForm.slice_leRange2->clear();
+  m_uiForm.slice_leRange3->clear();
 
   isDirty(true);
 }
@@ -996,6 +1023,26 @@ bool Indirect::validateSlice()
     valid = false;
   }
 
+  if ( m_uiForm.slice_leSpecMin->text() == "" )
+  {
+    m_uiForm.slice_valSpecMin->setText("*");
+    valid = false;
+  }
+  else
+  {
+    m_uiForm.slice_valSpecMin->setText(" ");
+  }
+
+  if ( m_uiForm.slice_leSpecMax->text() == "" )
+  {
+    m_uiForm.slice_valSpecMax->setText("*");
+    valid = false;
+  }
+  else
+  {
+    m_uiForm.slice_valSpecMax->setText(" ");
+  }
+
   if ( m_uiForm.slice_leRange0->text() == "" )
   {
     m_uiForm.slice_valRange0->setText("*");
@@ -1095,12 +1142,14 @@ void Indirect::loadSettings()
   settings.setValue("last_directory", m_dataDir);
   m_uiForm.ind_runFiles->readSettings(settings.group());
   m_uiForm.cal_leRunNo->readSettings(settings.group());
+  m_uiForm.slice_inputFile->readSettings(settings.group());
   settings.endGroup();
 
   settings.beginGroup(m_settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", m_saveDir);
   m_uiForm.ind_calibFile->readSettings(settings.group());
   m_uiForm.ind_mapFile->readSettings(settings.group());
+  m_uiForm.slice_calibFile->readSettings(settings.group());
   m_uiForm.sqw_inputFile->readSettings(settings.group());
   settings.endGroup();
 
@@ -1189,6 +1238,8 @@ void Indirect::reflectionSelected(int index)
     m_uiForm.leSpectraMax->setText(values[2]);
     m_uiForm.cal_leResSpecMin->setText(values[1]);
     m_uiForm.cal_leResSpecMax->setText(values[2]);
+    m_uiForm.slice_leSpecMin->setText(values[1]);
+    m_uiForm.slice_leSpecMax->setText(values[2]);
     if ( values.count() == 8 )
     {
       m_uiForm.leEfixed->setText(values[3]);
@@ -1196,6 +1247,11 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.cal_lePeakMax->setText(values[5]);
       m_uiForm.cal_leBackMin->setText(values[6]);
       m_uiForm.cal_leBackMax->setText(values[7]);
+
+      m_uiForm.slice_leRange0->setText(values[4]);
+      m_uiForm.slice_leRange1->setText(values[5]);
+      m_uiForm.slice_leRange2->setText(values[6]);
+      m_uiForm.slice_leRange3->setText(values[7]);
     }
     else
     {
@@ -1204,12 +1260,17 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.cal_lePeakMax->clear();
       m_uiForm.cal_leBackMin->clear();
       m_uiForm.cal_leBackMax->clear();
+      m_uiForm.slice_leRange0->clear();
+      m_uiForm.slice_leRange1->clear();
+      m_uiForm.slice_leRange2->clear();
+      m_uiForm.slice_leRange3->clear();
     }
   }
 
   // clear validation markers
   validateInput();
   validateCalib();
+  validateSlice();
 }
 /**
 * This function runs when the user makes a selection on the cbMappingOptions QComboBox.
@@ -1243,8 +1304,7 @@ void Indirect::mappingOptionSelected(const QString& groupType)
 void Indirect::tabChanged(int index)
 {
   QString tabName = m_uiForm.tabWidget->tabText(index);
-  bool state = ( tabName == "Energy Transfer" );
-  m_uiForm.pbRun->setEnabled(state);
+  m_uiForm.pbRun->setText("Run " + tabName);
 }
 /**
 * Select location to save file.
@@ -1409,11 +1469,11 @@ void Indirect::resCheck(bool state)
   m_uiForm.cal_gbRES->setEnabled(state);
   if ( state )
   {
-    m_uiForm.cal_pbCreate->setText("Create Calibration && Res files");
+    // m_uiForm.pbRun->setText("Create Calibration && Res files");
   }
   else
   {
-    m_uiForm.cal_pbCreate->setText("Create Calibration File");
+    // m_uiForm.pbRun->setText("Create Calibration File");
   }
 }
 /**
@@ -1421,7 +1481,7 @@ void Indirect::resCheck(bool state)
 */
 void Indirect::rebinData()
 {
-  runClicked(false);
+  runConvertToEnergy(false);
 }
 void Indirect::useCalib(bool state)
 {
@@ -1645,7 +1705,7 @@ void Indirect::sliceRun()
   QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
   pyInput +=
     "rawfile = [r'" + filenames + "']\n"
-    "spectra = ["+m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text() +"]\n";
+    "spectra = ["+m_uiForm.slice_leSpecMin->text() + "," + m_uiForm.slice_leSpecMax->text() +"]\n";
 
   if ( m_uiForm.slice_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
   else pyInput += "verbose = False\n";

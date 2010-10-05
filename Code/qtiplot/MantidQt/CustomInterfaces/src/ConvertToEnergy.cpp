@@ -336,7 +336,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabDiagnoseDetectors));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabAbsoluteUnits));
     m_uiForm.tabWidget->addTab(m_uiForm.tabCalibration, "Calibration");
-    m_uiForm.tabWidget->addTab(m_uiForm.tabTimeSlice, "Time Slice");
+    m_uiForm.tabWidget->addTab(m_uiForm.tabTimeSlice, "Diagnostics");
     m_uiForm.tabWidget->addTab(m_uiForm.tabSofQW, "S(Q, w)");
 
     if ( m_indirectInstruments == NULL )

@@ -70,10 +70,9 @@ def timeRegime(inWS='Rawfile', outWS_n='MonWS', Smooth=True):
 	mantid.deleteWorkspace('MonIn')
 	return outWS_n
 
-def monitorEfficiency(inWS_n='MonWS', unt=1.276e-3, zz=0.025):
-	#value 1.276e-3 (unt)- what is it?
-	OneMinusExponentialCor(inWS_n, inWS_n, (8.3 * zz), (1.0/unt), Operation='Multiply' ) #values 8.3 (?), 0.025 (zz) - what is it?
-	return inWS_n
+def monitorEfficiency(inWS, area, thickness):
+	OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
+	return inWS
 
 def getReferenceLength(inWS, fdi):
 	workspace = mtd[inWS]
@@ -140,60 +139,71 @@ def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
 		ConvertFromDistribution(outWS_n)
 	return outWS_n
 
-def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', reflection = '', SumFiles=False, bgremove = [0, 0], tempK=-1, calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='', saveFormats = [], savedir=''):
-	'''
-	This function, when passed the proper arguments, will run through the steps of convert to energy
-	for the indirect instruments and put out a workspace title IconCompleted.
-	This "optional" steps can be avoided by not passing in the tempK (for detailed balance), calib (for calibration)
-	rebinParam (for rebinning), or bgremove (for background removal) arguments.
-	NOTE: Unlike the MantidPlot GUI, this will not create a map file. You can create a map file either by hand
-	or with the createMappingFile function.
-	'''
+def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', reflection = '', \
+		SumFiles=False, bgremove = [0, 0], tempK=-1, calib='', rebinParam='', CleanUp = True, \
+		instrument='', savesuffix='', saveFormats = [], savedir='', Verbose = False):
 	output_workspace_names = []
 	runNos = []
-	mtd.sendLogMessage(">> Loading RAW Files: " + ", ".join(rawfiles))
+	if Verbose:
+		mtd.sendLogMessage(">> Loading RAW Files: " + ", ".join(rawfiles))
 	workspace, ws_name = loadData(rawfiles, Sum=SumFiles)
-	mtd.sendLogMessage(">> Raw files loaded into workspaces: " + ", ".join(ws_name))
+	if Verbose:
+			mtd.sendLogMessage(">> Raw files loaded into workspaces: " + ", ".join(ws_name))
+	try:
+		inst = mtd[ws_name[0]].getInstrument()
+		area = inst.getNumberParameter('mon-area')[0]
+		thickness = inst.getNumberParameter('mon-thickness')[0]
+	except IndexError:
+		sys.exit('Monitor area and thickness (unt and zz) are not defined in the Instrument Parameter File.')
 	for ws in ws_name:
 		runNo = mtd[ws].getRun().getLogData("run_number").value()
 		runNos.append(runNo)
 		name = ws[:3].lower() + runNo + '_' + analyser + reflection
 		MonitorWS_n = timeRegime(inWS = ws)
-		MonWS_n = monitorEfficiency()
-		mtd.sendLogMessage(">> Monitor Workspace for " +ws+" is " + MonWS_n)
+		MonWS_n = monitorEfficiency('MonWS', area, thickness)
+		if Verbose:
+			mtd.sendLogMessage(">> Monitor Workspace for " +ws+" is " + MonWS_n)
 		CropWorkspace(ws, 'Time', StartWorkspaceIndex= (first - 1), EndWorkspaceIndex=( last - 1))
 		mantid.deleteWorkspace(ws)
 		if ( bgremove != [0, 0] ):
 			backgroundRemoval(bgremove[0], bgremove[1])
 		if ( calib != '' ):
-			mtd.sendLogMessage('>> Applying Calibration File: ' + calib)
+			if Verbose:
+						mtd.sendLogMessage('>> Applying Calibration File: ' + calib)
 			calibrated = useCalib(calib)
 		normalised = normToMon()
-		mtd.sendLogMessage('>> Converting workspace ' + normalised + ' to units of deltaE.')
+		if Verbose:
+			mtd.sendLogMessage('>> Converting workspace ' + normalised + ' to units of deltaE.')
 		cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
 		if ( rebinParam != ''):
-			mtd.sendLogMessage('>> Rebinning workspace ' + cte + ' with parameters (' +rebinParam+ ')')
+			if Verbose:
+				mtd.sendLogMessage('>> Rebinning workspace ' + cte + ' with parameters (' +rebinParam+ ')')
 			rebin = rebinData(rebinParam, inWS_n=cte)
 			if CleanUp:
-				mtd.sendLogMessage('>> Removing intermediate workspace: ' + cte)
+				if Verbose:
+					mtd.sendLogMessage('>> Removing intermediate workspace: ' + cte)
 				mantid.deleteWorkspace(cte)
 		else:
 			if CleanUp:
-				mtd.sendLogMessage('>> Removing intermediate workspace: ' + cte)
+				if Verbose:
+					mtd.sendLogMessage('>> Removing intermediate workspace: ' + cte)
 				RenameWorkspace(cte, 'Energy')
 			else:
 				CloneWorkspace(cte, 'Energy')
 		if ( tempK != -1 ):
-			mtd.sendLogMessage('>> Adjusting for "detailed balance" at temperature: ' + str(tempK) + 'K')
+			if Verbose:
+				mtd.sendLogMessage('>> Adjusting for "detailed balance" at temperature: ' + str(tempK) + 'K')
 			db = detailedBalance(tempK)
 		group = groupData(mapfile, outWS_n=name)
 		output_workspace_names.append(group)
 	if ( saveFormats != [] ):
 		saveItems(output_workspace_names, runNos, saveFormats, instrument, savesuffix, directory = savedir)
-		mtd.sendLogMessage(">> Saved workspaces: " + ", ".join(output_workspace_names) +" in formats: "+ ", ".join(saveFormats))
-	else:
+		if Verbose:
+			mtd.sendLogMessage(">> Saved workspaces: " + ", ".join(output_workspace_names) +" in formats: "+ ", ".join(saveFormats))
+	elif Verbose:
 		mtd.sendLogMessage(">> Workspaces were not saved.")
-	mtd.sendLogMessage(">> Convert to Energy completed with the following output workspaces: " + ", ".join(output_workspace_names))
+	if Verbose:
+		mtd.sendLogMessage(">> Convert to Energy completed with the following output workspaces: " + ", ".join(output_workspace_names))
 	return output_workspace_names, runNos
 
 def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, savesuffix, saveFormats, savedir, CleanUp=False):
@@ -284,7 +294,7 @@ def res(file, iconOpt, rebinParam, background, plotOpt = False, Res = True):
 		name = root[:3].lower() + mantid.getMatrixWorkspace(workspace_list[0]).getRun().getLogData("run_number").value() + '_res'
 		Rebin(iconWS, iconWS, rebinParam)
 		FFTSmooth(iconWS,iconWS,0)
-		FlatBackground(iconWS, name, background[0], background[1])
+		FlatBackground(iconWS, name, background[0], background[1], Mode='Mean')
 		mantid.deleteWorkspace(iconWS)
 		SaveNexusProcessed(name, name+'.nxs')
 		if plotOpt:
