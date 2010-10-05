@@ -426,10 +426,10 @@ class Normalize(ReductionStep):
         
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
-        spec_index = self._normalization_spectrum-1
+
         CropWorkspace(workspace, norm_ws,
-                      StartWorkspaceIndex = spec_index, 
-                      EndWorkspaceIndex   = spec_index)      
+                      StartWorkspaceIndex = self._normalization_spectrum, 
+                      EndWorkspaceIndex   = self._normalization_spectrum)      
 
         Divide(workspace, norm_ws, workspace)
         
