@@ -1440,7 +1440,7 @@ namespace Mantid
     }
 
 
-    /** Add/overwrite any parameters specified in instrument with param values specified in \<component-link\> XML elements
+    /** Apply parameters specified in \<component-link\> XML elements.
     *
     *  @param instrument Instrument
     *  @param pRootElem  Associated Poco::XML element to component that may hold a \<parameter\> element
@@ -1453,18 +1453,21 @@ namespace Mantid
       {
         Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
         std::string name = pLinkElem->getAttribute("name");
-        boost::shared_ptr<Geometry::IComponent> sharedIComp = instrument->getComponentByName(name);
+        std::vector<boost::shared_ptr<Geometry::IComponent> > sharedIComp = instrument->getAllComponentsWithName(name);
 
-        if ( sharedIComp != boost::shared_ptr<Geometry::IComponent>() )
+        for (unsigned int i = 0; i < sharedIComp.size(); i++)
         {
-          if ( boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp) )
+          if ( sharedIComp[i] != boost::shared_ptr<Geometry::IComponent>() )
           {
-            boost::shared_ptr<Geometry::ParametrizedComponent> sharedParamComp = boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp);
-            setLogfile(sharedParamComp->base(), pLinkElem, instrument->getLogfileCache());
-          }
-          else
-          {
-            setLogfile(sharedIComp.get(), pLinkElem, instrument->getLogfileCache());
+            if ( boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp[i]) )
+            {
+              boost::shared_ptr<Geometry::ParametrizedComponent> sharedParamComp = boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp[i]);
+              setLogfile(sharedParamComp->base(), pLinkElem, instrument->getLogfileCache());
+            }
+            else
+            {
+              setLogfile(sharedIComp[i].get(), pLinkElem, instrument->getLogfileCache());
+            }
           }
         }
       }

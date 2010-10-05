@@ -517,6 +517,53 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+
+  void test_DUM_Instrument()
+  {
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyDUMInstrumentTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+
+    IDetector_sptr det = ws->getDetector(1);  
+    TS_ASSERT_EQUALS( det->getID(), 1);
+    TS_ASSERT_EQUALS( det->getName(), "pixel");
+    Parameter_sptr param = paramMap.get(&(*det), "tube_pressure");
+    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
+    param = paramMap.get(&(*det), "tube_thickness");
+    TS_ASSERT_DELTA( param->value<double>(), 0.0008, 0.0001);
+    param = paramMap.get(&(*det), "tube_temperature");
+    TS_ASSERT_DELTA( param->value<double>(), 290.0, 0.0001);
+
+    det = ws->getDetector(2);  
+    TS_ASSERT_EQUALS( det->getID(), 2);
+    TS_ASSERT_EQUALS( det->getName(), "pixel");
+    param = paramMap.get(&(*det), "tube_pressure");
+    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
+    
+    det = ws->getDetector(3);  
+    TS_ASSERT_EQUALS( det->getID(), 3);
+    TS_ASSERT_EQUALS( det->getName(), "pixel");
+    param = paramMap.get(&(*det), "tube_pressure");
+    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
+
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 void testCheckIfVariousInstrumentsLoad()
   {
     LoadEmptyInstrument loader;
