@@ -76,16 +76,15 @@ public:
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
+
 private:
   /// Private copy assignment operator
   CompAssembly& operator=(const ICompAssembly&);
 
+protected:
   ///the group of child components
   std::vector< IComponent* > m_children;
-  /// The number of pixels in the X (horizontal) direction; optional; for area detectors
-  int xPixels;
-  /// The number of pixels in the Y (vertical) direction; optional; for area detectors
-  int yPixels;
+
   /// A cached bounding box 
   mutable BoundingBox *m_cachedBoundingBox;
 };

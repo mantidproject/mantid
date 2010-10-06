@@ -55,6 +55,8 @@ namespace Mantid
       m_haveDefaultFacing(false), m_deltaOffsets(false)
     {}
 
+
+    //------------------------------------------------------------------------------------------------------------------------------
     /// Initialisation method.
     void LoadInstrument::init()
     {
@@ -72,6 +74,8 @@ namespace Mantid
         "List of detector ids of monitors loaded in to the workspace", Direction::Output);
     }
 
+
+    //------------------------------------------------------------------------------------------------------------------------------
     /** Executes the algorithm. Reading in the file and creating and populating
     *  the output workspace
     *
@@ -377,6 +381,8 @@ namespace Mantid
       // release XML document
       pDoc->release();
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Reads the contents of the \<defaults\> element to set member variables,
     *  requires m_instrument to be already set
     *  @param defaults points to the data read from the \<defaults\> element
@@ -406,6 +412,7 @@ namespace Mantid
     }
 
 
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Assumes second argument is a XML location element and its parent is a component element
     *  which is assigned to be an assembly. This method appends the parent component element of
     %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
@@ -446,7 +453,7 @@ namespace Mantid
         }
       }
 
-
+      //Create the assembly that will be appended into the parent.
       Geometry::CompAssembly *ass = new Geometry::CompAssembly;
       ass->setParent(parent);
       parent->add(ass);
@@ -470,34 +477,6 @@ namespace Mantid
 
       Element* pType = getTypeElement[pCompElem->getAttribute("type")];
       NodeIterator it(pType, NodeFilter::SHOW_ELEMENT);
-
-
-//      //--- Get the detector's X/Y pixel sizes (optional) ---
-//      if (VERBOSE) std::cout << "\nappendAssembly(): I am " << pLocElem->getAttribute("name") << " . " <<
-//          "My xpixels=" << pLocElem->getAttribute("xpixels") <<
-//          ". My parent's xpixels=" << pCompElem->getAttribute("xpixels") <<
-//          "\n";
-//
-//      //These strings will be empty if nothing is specified. This is fine.
-//      std::string xpixels = pLocElem->getAttribute("xpixels");
-//      std::string ypixels = pLocElem->getAttribute("ypixels");
-//      if ((xpixels.size() > 0) && (ypixels.size() > 0))
-//      {
-//        //Default of 0,0 pixels
-//        ass->setNumPixels(0,0);
-//        //Both have to be specified
-//        try
-//        {
-//          int xpix = boost::lexical_cast<int>(xpixels);
-//          int ypix = boost::lexical_cast<int>(ypixels);
-//          ass->setNumPixels(xpix,ypix);
-//        }
-//        catch (boost::bad_lexical_cast e)
-//        {
-//          //If there was an error here, default to 0, set previously
-//        }
-//      }
-
 
       Node* pNode = it.nextNode();
       while (pNode)
@@ -542,6 +521,8 @@ namespace Mantid
 
     }
 
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Assumes second argument is a XML location element and its parent is a component element
     *  which is assigned to be an assemble. This method appends the parent component element of
     %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
@@ -558,6 +539,8 @@ namespace Mantid
       appendAssembly(parent.get(), pLocElem, idList, excludeList);
     }
 
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Assumes second argument is pointing to a leaf, which here means the location element (indirectly
     *  representing a component element) that contains no sub-components. This component is appended
     %  to the parent (1st argument).
@@ -618,6 +601,7 @@ namespace Mantid
 
       if ( category.compare("detector") == 0 )
       {
+        //-------------- Create a Detector ------------------------------------------------
         std::string name = getNameOfLocationElement(pLocElem);
 
         Geometry::Detector* detector = new Geometry::Detector(name, mapTypeNameToShape[typeName], parent);
@@ -694,12 +678,26 @@ namespace Mantid
       }
     }
 
+
+
+    //-----------------------------------------------------------------------------------------------------------------------
+    /** Assumes second argument is pointing to a leaf, which here means the location element (indirectly
+    *  representing a component element) that contains no sub-components. This component is appended
+    %  to the parent (1st argument).
+    *
+    *  @param parent pointer to the CompAssembly to append component to
+    *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add
+    *  @param idList The current IDList
+    *
+    *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+    */
     void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
     {
       appendLeaf(parent.get(), pLocElem, idList);
     }
 
 
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Set location (position) of comp as specified in XML location element.
     *
     *  @param comp To set position/location off
@@ -908,6 +906,7 @@ namespace Mantid
     }
 
 
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Get parent component element of location element.
     *
     *  @param pLocElem  Poco::XML element that points a location element in the XML doc
@@ -946,6 +945,8 @@ namespace Mantid
       return pCompElem;
     }
 
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Method for populating IdList.
     *
     *  @param pE  Poco::XML element that points to an \<idlist\>
@@ -1043,6 +1044,8 @@ namespace Mantid
     }
 
 
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Returns True if the (string) type given is an assembly.
      *
      *  @param type  name of the type of a component in XML instrument definition
@@ -1063,6 +1066,7 @@ namespace Mantid
     }
 
 
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Make the shape defined in 1st argument face the component in the second argument,
     *  by rotating the z-axis of the component passed in 1st argument so that it points in the
     *  direction: from the component as specified 2nd argument to the component as specified in 1st argument.
@@ -1078,6 +1082,8 @@ namespace Mantid
     }
 
 
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Make the shape defined in 1st argument face the position in the second argument,
     *  by rotating the z-axis of the component passed in 1st argument so that it points in the
     *  direction: from the position (as specified 2nd argument) to the component (1st argument).
@@ -1120,6 +1126,7 @@ namespace Mantid
     }
 
 
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Parse position of facing element to V3D
     *
     *  @param pElem  Facing type element to parse
@@ -1161,6 +1168,7 @@ namespace Mantid
     }
 
 
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Set facing of comp as specified in XML facing element (which must be sub-element of a location element).
     *
     *  @param comp To set facing of
@@ -1208,6 +1216,8 @@ namespace Mantid
           makeXYplaneFaceComponent(comp, m_defaultFacing);
     }
 
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Set parameter/logfile info (if any) associated with component
     *
     *  @param comp Some component
@@ -1493,6 +1503,7 @@ namespace Mantid
     }
 
 
+    //-----------------------------------------------------------------------------------------------------------------------
     /** Apply parameters specified in \<component-link\> XML elements.
     *
     *  @param instrument Instrument
@@ -1528,6 +1539,9 @@ namespace Mantid
     }
 
 
+
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
     void LoadInstrument::runLoadParameterFile()
     {
@@ -1575,6 +1589,8 @@ namespace Mantid
     }
 
 
+
+    //-----------------------------------------------------------------------------------------------------------------------
     /** get name of location element. Will be the name attribute, or the
      * parent's name attribute, or the parent's type, if all else fails.
     *

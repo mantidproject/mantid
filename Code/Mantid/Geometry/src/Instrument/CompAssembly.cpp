@@ -20,7 +20,7 @@ public:
 
 /*! Empty constructor
  */
-CompAssembly::CompAssembly() : Component(), m_children(), xPixels(0), yPixels(0), m_cachedBoundingBox(NULL)
+CompAssembly::CompAssembly() : Component(), m_children(), m_cachedBoundingBox(NULL)
 {
 }
 
@@ -34,7 +34,7 @@ CompAssembly::CompAssembly() : Component(), m_children(), xPixels(0), yPixels(0)
  *  this is registered as a children of reference.
  */
 CompAssembly::CompAssembly(const std::string& n, Component* reference) :
-  Component(n, reference), m_children(), xPixels(0), yPixels(0), m_cachedBoundingBox(NULL)
+  Component(n, reference), m_children(), m_cachedBoundingBox(NULL)
 {
   if (reference)
   {
@@ -50,7 +50,7 @@ CompAssembly::CompAssembly(const std::string& n, Component* reference) :
  *  @param ass :: assembly to copy
  */
 CompAssembly::CompAssembly(const CompAssembly& assem) :
-  Component(assem), m_children(assem.m_children), xPixels(assem.xPixels), yPixels(assem.yPixels), m_cachedBoundingBox(assem.m_cachedBoundingBox)
+  Component(assem), m_children(assem.m_children), m_cachedBoundingBox(assem.m_cachedBoundingBox)
 {
   // Need to do a deep copy
   comp_it it;
