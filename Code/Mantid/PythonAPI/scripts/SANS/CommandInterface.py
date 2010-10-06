@@ -35,10 +35,8 @@ class ReductionSingleton:
         
     @classmethod
     def run(cls):
-        if ReductionSingleton.__instance is None:
-            return
-        
-        ReductionSingleton.__instance._reduce()
+        if ReductionSingleton.__instance is not None:
+            ReductionSingleton.__instance._reduce()
         ReductionSingleton.clean(ReductionSingleton.__instance.__class__)
         
     def __getattr__(self, attr):
