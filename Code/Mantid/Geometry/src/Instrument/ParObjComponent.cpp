@@ -16,7 +16,7 @@ namespace Mantid
     *   @param map A pointer to the parameter map 
     */
     ParObjComponent::ParObjComponent(const ObjComponent* base, const ParameterMap& map)
-        :ParametrizedComponent(base,map), IObjComponent()
+        :IObjComponent(), ParametrizedComponent(base,map)
     {
     }
     /**  Copy constructor.

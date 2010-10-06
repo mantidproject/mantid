@@ -43,7 +43,7 @@ namespace Mantid
     {
     public:
       /// Default constructor constructs a zero-sized box
-      BoundingBox() : m_maxPoint(), m_minPoint() 
+      BoundingBox() : m_minPoint(), m_maxPoint()
       {
       }
 
@@ -56,7 +56,7 @@ namespace Mantid
       * @param zmin Value of minimum in Z. It must be less than zmax.
       */
       BoundingBox(double xmax, double ymax, double zmax, double xmin, double ymin, double zmin)
-        : m_maxPoint(xmax, ymax, zmax), m_minPoint(xmin,ymin,zmin)
+        : m_minPoint(xmin,ymin,zmin), m_maxPoint(xmax, ymax, zmax)
       {
         // Sanity check
         if( xmax < xmin || ymax < ymin || zmax < zmin )
