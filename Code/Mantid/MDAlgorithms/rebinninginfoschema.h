@@ -87,7 +87,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
     
     private: ::System::Data::DataRelation^  relationFunction_Function;
     
-    private: ::System::Data::DataRelation^  relationOperation_Function;
+    private: ::System::Data::DataRelation^  relationCompositeInstruction_Function;
     
     private: ::System::Data::DataRelation^  relationFunction_ParameterList;
     
@@ -377,7 +377,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         
         private: ::System::Data::DataColumn^  columnFunction_Id_0;
         
-        private: ::System::Data::DataColumn^  columnOperation_Id;
+        private: ::System::Data::DataColumn^  columnCompositeInstruction_Id;
         
         public: [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
         event NewDataSet::FunctionRowChangeEventHandler^  FunctionRowChanging;
@@ -420,7 +420,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
         System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        property ::System::Data::DataColumn^  Operation_IdColumn {
+        property ::System::Data::DataColumn^  CompositeInstruction_IdColumn {
             ::System::Data::DataColumn^  get();
         }
         
@@ -444,7 +444,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
         NewDataSet::FunctionRow^  AddFunctionRow(System::String^  Name, NewDataSet::FunctionRow^  parentFunctionRowByFunction_Function, 
-                    NewDataSet::OperationRow^  parentOperationRowByOperation_Function);
+                    NewDataSet::CompositeInstructionRow^  parentCompositeInstructionRowByCompositeInstruction_Function);
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
@@ -1796,11 +1796,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
     System::Xml::Serialization::XmlSchemaProviderAttribute(L"GetTypedTableSchema")]
     ref class OperationDataTable : public ::System::Data::DataTable, public ::System::Collections::IEnumerable {
         
-        private: ::System::Data::DataColumn^  columnPrecedence;
-        
         private: ::System::Data::DataColumn^  columnType;
-        
-        private: ::System::Data::DataColumn^  columnOperation_Id;
         
         private: ::System::Data::DataColumn^  columnCompositeInstruction_Id;
         
@@ -1827,19 +1823,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         OperationDataTable(::System::Runtime::Serialization::SerializationInfo^  info, ::System::Runtime::Serialization::StreamingContext context);
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
         System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        property ::System::Data::DataColumn^  PrecedenceColumn {
-            ::System::Data::DataColumn^  get();
-        }
-        
-        public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
-        System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
         property ::System::Data::DataColumn^  TypeColumn {
-            ::System::Data::DataColumn^  get();
-        }
-        
-        public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
-        System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        property ::System::Data::DataColumn^  Operation_IdColumn {
             ::System::Data::DataColumn^  get();
         }
         
@@ -1868,7 +1852,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        NewDataSet::OperationRow^  AddOperationRow(System::Int64 Precedence, System::String^  Type, NewDataSet::CompositeInstructionRow^  parentCompositeInstructionRowByCompositeInstruction_Operation);
+        NewDataSet::OperationRow^  AddOperationRow(System::String^  Type, NewDataSet::CompositeInstructionRow^  parentCompositeInstructionRowByCompositeInstruction_Operation);
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
@@ -1960,7 +1944,7 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
         System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        property System::Int32 Operation_Id {
+        property System::Int32 CompositeInstruction_Id {
             System::Int32 get();
             System::Void set(System::Int32 value);
         }
@@ -1974,9 +1958,9 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
         System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        property NewDataSet::OperationRow^  OperationRow {
-            NewDataSet::OperationRow^  get();
-            System::Void set(NewDataSet::OperationRow^  value);
+        property NewDataSet::CompositeInstructionRow^  CompositeInstructionRow {
+            NewDataSet::CompositeInstructionRow^  get();
+            System::Void set(NewDataSet::CompositeInstructionRow^  value);
         }
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -1989,11 +1973,11 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        ::System::Boolean IsOperation_IdNull();
+        ::System::Boolean IsCompositeInstruction_IdNull();
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        ::System::Void SetOperation_IdNull();
+        ::System::Void SetCompositeInstruction_IdNull();
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
@@ -2259,6 +2243,10 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
         cli::array< NewDataSet::OperationRow^  >^  GetOperationRows();
+        
+        public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
+        cli::array< NewDataSet::FunctionRow^  >^  GetFunctionRows();
     };
     
     public : /// <summary>
@@ -2525,23 +2513,9 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         OperationRow(::System::Data::DataRowBuilder^  rb);
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
         System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        property System::Int64 Precedence {
-            System::Int64 get();
-            System::Void set(System::Int64 value);
-        }
-        
-        public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
-        System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
         property System::String^  Type {
             System::String^  get();
             System::Void set(System::String^  value);
-        }
-        
-        public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
-        System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        property System::Int32 Operation_Id {
-            System::Int32 get();
-            System::Void set(System::Int32 value);
         }
         
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute, 
@@ -2565,10 +2539,6 @@ public ref class NewDataSet : public ::System::Data::DataSet {
         public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
         [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
         ::System::Void SetCompositeInstruction_IdNull();
-        
-        public: [System::Diagnostics::DebuggerNonUserCodeAttribute]
-        [System::CodeDom::Compiler::GeneratedCodeAttribute(L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")]
-        cli::array< NewDataSet::FunctionRow^  >^  GetFunctionRows();
     };
     
     public : /// <summary>
@@ -3186,7 +3156,7 @@ inline ::System::Void NewDataSet::InitVars(::System::Boolean initTable) {
         }
     }
     this->relationFunction_Function = this->Relations[L"Function_Function"];
-    this->relationOperation_Function = this->Relations[L"Operation_Function"];
+    this->relationCompositeInstruction_Function = this->Relations[L"CompositeInstruction_Function"];
     this->relationFunction_ParameterList = this->Relations[L"Function_ParameterList"];
     this->relationParameterList_Parameter = this->Relations[L"ParameterList_Parameter"];
     this->relationGeometry_Dimension = this->Relations[L"Geometry_Dimension"];
@@ -3236,8 +3206,8 @@ inline ::System::Void NewDataSet::InitClass() {
     fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
     fkc->DeleteRule = ::System::Data::Rule::Cascade;
     fkc->UpdateRule = ::System::Data::Rule::Cascade;
-    fkc = (gcnew ::System::Data::ForeignKeyConstraint(L"Operation_Function", gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableOperation->Operation_IdColumn}, 
-        gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableFunction->Operation_IdColumn}));
+    fkc = (gcnew ::System::Data::ForeignKeyConstraint(L"CompositeInstruction_Function", gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableCompositeInstruction->CompositeInstruction_IdColumn}, 
+        gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableFunction->CompositeInstruction_IdColumn}));
     this->tableFunction->Constraints->Add(fkc);
     fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
     fkc->DeleteRule = ::System::Data::Rule::Cascade;
@@ -3306,10 +3276,10 @@ inline ::System::Void NewDataSet::InitClass() {
         gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableFunction->Function_Id_0Column}, false));
     this->relationFunction_Function->Nested = true;
     this->Relations->Add(this->relationFunction_Function);
-    this->relationOperation_Function = (gcnew ::System::Data::DataRelation(L"Operation_Function", gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableOperation->Operation_IdColumn}, 
-        gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableFunction->Operation_IdColumn}, false));
-    this->relationOperation_Function->Nested = true;
-    this->Relations->Add(this->relationOperation_Function);
+    this->relationCompositeInstruction_Function = (gcnew ::System::Data::DataRelation(L"CompositeInstruction_Function", gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableCompositeInstruction->CompositeInstruction_IdColumn}, 
+        gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableFunction->CompositeInstruction_IdColumn}, false));
+    this->relationCompositeInstruction_Function->Nested = true;
+    this->Relations->Add(this->relationCompositeInstruction_Function);
     this->relationFunction_ParameterList = (gcnew ::System::Data::DataRelation(L"Function_ParameterList", gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableFunction->Function_IdColumn}, 
         gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->tableParameterList->Function_IdColumn}, false));
     this->relationFunction_ParameterList->Nested = true;
@@ -3491,8 +3461,8 @@ inline ::System::Data::DataColumn^  NewDataSet::FunctionDataTable::Function_Id_0
     return this->columnFunction_Id_0;
 }
 
-inline ::System::Data::DataColumn^  NewDataSet::FunctionDataTable::Operation_IdColumn::get() {
-    return this->columnOperation_Id;
+inline ::System::Data::DataColumn^  NewDataSet::FunctionDataTable::CompositeInstruction_IdColumn::get() {
+    return this->columnCompositeInstruction_Id;
 }
 
 inline ::System::Int32 NewDataSet::FunctionDataTable::Count::get() {
@@ -3508,15 +3478,15 @@ inline ::System::Void NewDataSet::FunctionDataTable::AddFunctionRow(NewDataSet::
 }
 
 inline NewDataSet::FunctionRow^  NewDataSet::FunctionDataTable::AddFunctionRow(System::String^  Name, NewDataSet::FunctionRow^  parentFunctionRowByFunction_Function, 
-            NewDataSet::OperationRow^  parentOperationRowByOperation_Function) {
+            NewDataSet::CompositeInstructionRow^  parentCompositeInstructionRowByCompositeInstruction_Function) {
     NewDataSet::FunctionRow^  rowFunctionRow = (cli::safe_cast<NewDataSet::FunctionRow^  >(this->NewRow()));
     cli::array< ::System::Object^  >^  columnValuesArray = gcnew cli::array< ::System::Object^  >(4) {Name, nullptr, nullptr, 
         nullptr};
     if (parentFunctionRowByFunction_Function != nullptr) {
         columnValuesArray[2] = parentFunctionRowByFunction_Function[1];
     }
-    if (parentOperationRowByOperation_Function != nullptr) {
-        columnValuesArray[3] = parentOperationRowByOperation_Function[2];
+    if (parentCompositeInstructionRowByCompositeInstruction_Function != nullptr) {
+        columnValuesArray[3] = parentCompositeInstructionRowByCompositeInstruction_Function[2];
     }
     rowFunctionRow->ItemArray = columnValuesArray;
     this->Rows->Add(rowFunctionRow);
@@ -3541,7 +3511,7 @@ inline ::System::Void NewDataSet::FunctionDataTable::InitVars() {
     this->columnName = __super::Columns[L"Name"];
     this->columnFunction_Id = __super::Columns[L"Function_Id"];
     this->columnFunction_Id_0 = __super::Columns[L"Function_Id_0"];
-    this->columnOperation_Id = __super::Columns[L"Operation_Id"];
+    this->columnCompositeInstruction_Id = __super::Columns[L"CompositeInstruction_Id"];
 }
 
 inline ::System::Void NewDataSet::FunctionDataTable::InitClass() {
@@ -3551,8 +3521,9 @@ inline ::System::Void NewDataSet::FunctionDataTable::InitClass() {
     __super::Columns->Add(this->columnFunction_Id);
     this->columnFunction_Id_0 = (gcnew ::System::Data::DataColumn(L"Function_Id_0", ::System::Int32::typeid, nullptr, ::System::Data::MappingType::Hidden));
     __super::Columns->Add(this->columnFunction_Id_0);
-    this->columnOperation_Id = (gcnew ::System::Data::DataColumn(L"Operation_Id", ::System::Int32::typeid, nullptr, ::System::Data::MappingType::Hidden));
-    __super::Columns->Add(this->columnOperation_Id);
+    this->columnCompositeInstruction_Id = (gcnew ::System::Data::DataColumn(L"CompositeInstruction_Id", ::System::Int32::typeid, 
+        nullptr, ::System::Data::MappingType::Hidden));
+    __super::Columns->Add(this->columnCompositeInstruction_Id);
     this->Constraints->Add((gcnew ::System::Data::UniqueConstraint(L"Constraint1", gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->columnFunction_Id}, 
             true)));
     this->columnName->AllowDBNull = false;
@@ -5735,16 +5706,8 @@ inline NewDataSet::OperationDataTable::OperationDataTable(::System::Runtime::Ser
     this->InitVars();
 }
 
-inline ::System::Data::DataColumn^  NewDataSet::OperationDataTable::PrecedenceColumn::get() {
-    return this->columnPrecedence;
-}
-
 inline ::System::Data::DataColumn^  NewDataSet::OperationDataTable::TypeColumn::get() {
     return this->columnType;
-}
-
-inline ::System::Data::DataColumn^  NewDataSet::OperationDataTable::Operation_IdColumn::get() {
-    return this->columnOperation_Id;
 }
 
 inline ::System::Data::DataColumn^  NewDataSet::OperationDataTable::CompositeInstruction_IdColumn::get() {
@@ -5763,13 +5726,11 @@ inline ::System::Void NewDataSet::OperationDataTable::AddOperationRow(NewDataSet
     this->Rows->Add(row);
 }
 
-inline NewDataSet::OperationRow^  NewDataSet::OperationDataTable::AddOperationRow(System::Int64 Precedence, System::String^  Type, 
-            NewDataSet::CompositeInstructionRow^  parentCompositeInstructionRowByCompositeInstruction_Operation) {
+inline NewDataSet::OperationRow^  NewDataSet::OperationDataTable::AddOperationRow(System::String^  Type, NewDataSet::CompositeInstructionRow^  parentCompositeInstructionRowByCompositeInstruction_Operation) {
     NewDataSet::OperationRow^  rowOperationRow = (cli::safe_cast<NewDataSet::OperationRow^  >(this->NewRow()));
-    cli::array< ::System::Object^  >^  columnValuesArray = gcnew cli::array< ::System::Object^  >(4) {Precedence, Type, nullptr, 
-        nullptr};
+    cli::array< ::System::Object^  >^  columnValuesArray = gcnew cli::array< ::System::Object^  >(2) {Type, nullptr};
     if (parentCompositeInstructionRowByCompositeInstruction_Operation != nullptr) {
-        columnValuesArray[3] = parentCompositeInstructionRowByCompositeInstruction_Operation[2];
+        columnValuesArray[1] = parentCompositeInstructionRowByCompositeInstruction_Operation[2];
     }
     rowOperationRow->ItemArray = columnValuesArray;
     this->Rows->Add(rowOperationRow);
@@ -5791,29 +5752,17 @@ inline ::System::Data::DataTable^  NewDataSet::OperationDataTable::CreateInstanc
 }
 
 inline ::System::Void NewDataSet::OperationDataTable::InitVars() {
-    this->columnPrecedence = __super::Columns[L"Precedence"];
     this->columnType = __super::Columns[L"Type"];
-    this->columnOperation_Id = __super::Columns[L"Operation_Id"];
     this->columnCompositeInstruction_Id = __super::Columns[L"CompositeInstruction_Id"];
 }
 
 inline ::System::Void NewDataSet::OperationDataTable::InitClass() {
-    this->columnPrecedence = (gcnew ::System::Data::DataColumn(L"Precedence", ::System::Int64::typeid, nullptr, ::System::Data::MappingType::Element));
-    __super::Columns->Add(this->columnPrecedence);
     this->columnType = (gcnew ::System::Data::DataColumn(L"Type", ::System::String::typeid, nullptr, ::System::Data::MappingType::Element));
     __super::Columns->Add(this->columnType);
-    this->columnOperation_Id = (gcnew ::System::Data::DataColumn(L"Operation_Id", ::System::Int32::typeid, nullptr, ::System::Data::MappingType::Hidden));
-    __super::Columns->Add(this->columnOperation_Id);
     this->columnCompositeInstruction_Id = (gcnew ::System::Data::DataColumn(L"CompositeInstruction_Id", ::System::Int32::typeid, 
         nullptr, ::System::Data::MappingType::Hidden));
     __super::Columns->Add(this->columnCompositeInstruction_Id);
-    this->Constraints->Add((gcnew ::System::Data::UniqueConstraint(L"Constraint1", gcnew cli::array< ::System::Data::DataColumn^  >(1) {this->columnOperation_Id}, 
-            true)));
-    this->columnPrecedence->AllowDBNull = false;
     this->columnType->AllowDBNull = false;
-    this->columnOperation_Id->AutoIncrement = true;
-    this->columnOperation_Id->AllowDBNull = false;
-    this->columnOperation_Id->Unique = true;
 }
 
 inline NewDataSet::OperationRow^  NewDataSet::OperationDataTable::NewOperationRow() {
@@ -5958,17 +5907,17 @@ inline System::Void NewDataSet::FunctionRow::Function_Id_0::set(System::Int32 va
     this[this->tableFunction->Function_Id_0Column] = value;
 }
 
-inline System::Int32 NewDataSet::FunctionRow::Operation_Id::get() {
+inline System::Int32 NewDataSet::FunctionRow::CompositeInstruction_Id::get() {
     try {
-        return (cli::safe_cast<::System::Int32 >(this[this->tableFunction->Operation_IdColumn]));
+        return (cli::safe_cast<::System::Int32 >(this[this->tableFunction->CompositeInstruction_IdColumn]));
     }
     catch (::System::InvalidCastException^ e) {
-        throw (gcnew ::System::Data::StrongTypingException(L"The value for column \'Operation_Id\' in table \'Function\' is DBNull.", 
+        throw (gcnew ::System::Data::StrongTypingException(L"The value for column \'CompositeInstruction_Id\' in table \'Function\' is DBNull.", 
             e));
     }
 }
-inline System::Void NewDataSet::FunctionRow::Operation_Id::set(System::Int32 value) {
-    this[this->tableFunction->Operation_IdColumn] = value;
+inline System::Void NewDataSet::FunctionRow::CompositeInstruction_Id::set(System::Int32 value) {
+    this[this->tableFunction->CompositeInstruction_IdColumn] = value;
 }
 
 inline NewDataSet::FunctionRow^  NewDataSet::FunctionRow::FunctionRowParent::get() {
@@ -5978,11 +5927,11 @@ inline System::Void NewDataSet::FunctionRow::FunctionRowParent::set(NewDataSet::
     this->SetParentRow(value, this->Table->ParentRelations[L"Function_Function"]);
 }
 
-inline NewDataSet::OperationRow^  NewDataSet::FunctionRow::OperationRow::get() {
-    return (cli::safe_cast<NewDataSet::OperationRow^  >(this->GetParentRow(this->Table->ParentRelations[L"Operation_Function"])));
+inline NewDataSet::CompositeInstructionRow^  NewDataSet::FunctionRow::CompositeInstructionRow::get() {
+    return (cli::safe_cast<NewDataSet::CompositeInstructionRow^  >(this->GetParentRow(this->Table->ParentRelations[L"CompositeInstruction_Function"])));
 }
-inline System::Void NewDataSet::FunctionRow::OperationRow::set(NewDataSet::OperationRow^  value) {
-    this->SetParentRow(value, this->Table->ParentRelations[L"Operation_Function"]);
+inline System::Void NewDataSet::FunctionRow::CompositeInstructionRow::set(NewDataSet::CompositeInstructionRow^  value) {
+    this->SetParentRow(value, this->Table->ParentRelations[L"CompositeInstruction_Function"]);
 }
 
 inline ::System::Boolean NewDataSet::FunctionRow::IsFunction_Id_0Null() {
@@ -5993,12 +5942,12 @@ inline ::System::Void NewDataSet::FunctionRow::SetFunction_Id_0Null() {
     this[this->tableFunction->Function_Id_0Column] = ::System::Convert::DBNull;
 }
 
-inline ::System::Boolean NewDataSet::FunctionRow::IsOperation_IdNull() {
-    return this->IsNull(this->tableFunction->Operation_IdColumn);
+inline ::System::Boolean NewDataSet::FunctionRow::IsCompositeInstruction_IdNull() {
+    return this->IsNull(this->tableFunction->CompositeInstruction_IdColumn);
 }
 
-inline ::System::Void NewDataSet::FunctionRow::SetOperation_IdNull() {
-    this[this->tableFunction->Operation_IdColumn] = ::System::Convert::DBNull;
+inline ::System::Void NewDataSet::FunctionRow::SetCompositeInstruction_IdNull() {
+    this[this->tableFunction->CompositeInstruction_IdColumn] = ::System::Convert::DBNull;
 }
 
 inline cli::array< NewDataSet::ParameterListRow^  >^  NewDataSet::FunctionRow::GetParameterListRows() {
@@ -6292,6 +6241,15 @@ inline cli::array< NewDataSet::OperationRow^  >^  NewDataSet::CompositeInstructi
     }
     else {
         return (cli::safe_cast<cli::array< NewDataSet::OperationRow^  >^  >(__super::GetChildRows(this->Table->ChildRelations[L"CompositeInstruction_Operation"])));
+    }
+}
+
+inline cli::array< NewDataSet::FunctionRow^  >^  NewDataSet::CompositeInstructionRow::GetFunctionRows() {
+    if (this->Table->ChildRelations[L"CompositeInstruction_Function"] == nullptr) {
+        return gcnew cli::array< NewDataSet::FunctionRow^  >(0);
+    }
+    else {
+        return (cli::safe_cast<cli::array< NewDataSet::FunctionRow^  >^  >(__super::GetChildRows(this->Table->ChildRelations[L"CompositeInstruction_Function"])));
     }
 }
 
@@ -6607,25 +6565,11 @@ inline NewDataSet::OperationRow::OperationRow(::System::Data::DataRowBuilder^  r
     this->tableOperation = (cli::safe_cast<NewDataSet::OperationDataTable^  >(this->Table));
 }
 
-inline System::Int64 NewDataSet::OperationRow::Precedence::get() {
-    return (cli::safe_cast<::System::Int64 >(this[this->tableOperation->PrecedenceColumn]));
-}
-inline System::Void NewDataSet::OperationRow::Precedence::set(System::Int64 value) {
-    this[this->tableOperation->PrecedenceColumn] = value;
-}
-
 inline System::String^  NewDataSet::OperationRow::Type::get() {
     return (cli::safe_cast<::System::String^  >(this[this->tableOperation->TypeColumn]));
 }
 inline System::Void NewDataSet::OperationRow::Type::set(System::String^  value) {
     this[this->tableOperation->TypeColumn] = value;
-}
-
-inline System::Int32 NewDataSet::OperationRow::Operation_Id::get() {
-    return (cli::safe_cast<::System::Int32 >(this[this->tableOperation->Operation_IdColumn]));
-}
-inline System::Void NewDataSet::OperationRow::Operation_Id::set(System::Int32 value) {
-    this[this->tableOperation->Operation_IdColumn] = value;
 }
 
 inline System::Int32 NewDataSet::OperationRow::CompositeInstruction_Id::get() {
@@ -6654,15 +6598,6 @@ inline ::System::Boolean NewDataSet::OperationRow::IsCompositeInstruction_IdNull
 
 inline ::System::Void NewDataSet::OperationRow::SetCompositeInstruction_IdNull() {
     this[this->tableOperation->CompositeInstruction_IdColumn] = ::System::Convert::DBNull;
-}
-
-inline cli::array< NewDataSet::FunctionRow^  >^  NewDataSet::OperationRow::GetFunctionRows() {
-    if (this->Table->ChildRelations[L"Operation_Function"] == nullptr) {
-        return gcnew cli::array< NewDataSet::FunctionRow^  >(0);
-    }
-    else {
-        return (cli::safe_cast<cli::array< NewDataSet::FunctionRow^  >^  >(__super::GetChildRows(this->Table->ChildRelations[L"Operation_Function"])));
-    }
 }
 
 
