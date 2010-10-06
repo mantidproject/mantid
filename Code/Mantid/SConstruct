@@ -292,7 +292,8 @@ if platform.system() == 'Linux':
     lpts.append('-Wl,-rpath,' + dest_dir)
   print 'LINKFLAGS: ',lpts
   env.Append(LINKFLAGS=lpts)
-
+elif platform.system() == 'Darwin':
+  env.Append(LINKFLAGS='headerpad_max_install_names')
 elif os.name == 'nt': 
   if int(win64):
     lpts.append('/MACHINE:X64')
