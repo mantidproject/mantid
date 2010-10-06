@@ -3,7 +3,7 @@
 
 
 #include <cxxtest/TestSuite.h>
-#include "MDPixels.h"
+#include "MDDataObjects/MDPixels.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;
@@ -31,7 +31,7 @@ public:
              size_t nPixels;
              TS_ASSERT_THROWS_NOTHING(nPixels=pSQW->getNumPixels());
 
-             // the dataset seems has wrong parameters -- this is question to HORACE hdf;
+             // the dataset seems has wrong parameters -- this is question to HORACE hdf so better not to test it here;
              //TS_ASSERT_EQUALS(nPixels,18287130);
              
     }

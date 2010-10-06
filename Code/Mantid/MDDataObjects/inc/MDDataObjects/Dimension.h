@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "stdafx.h"
-#include "MDWorkspaceConstants.h"
-#include "WorkspaceGeometry.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/MDWorkspaceConstants.h"
+#include "MDDataObjects/WorkspaceGeometry.h"
 
 /*! The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
 *

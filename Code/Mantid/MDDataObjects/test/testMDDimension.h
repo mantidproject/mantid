@@ -2,7 +2,7 @@
 #define H_TEST_DIMENSION
 
 #include <cxxtest/TestSuite.h>
-#include "DimensionRes.h"
+#include "MDDataObjects/DimensionRes.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;

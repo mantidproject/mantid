@@ -1,6 +1,6 @@
 #ifndef H_DIMENSIONRES
 #define H_DIMENSIONRES
-#include "Dimension.h"
+#include "MDDataObjects/Dimension.h"
 namespace Mantid{
     namespace MDDataObjects{
 /** This is the dimension which corresponds to reciprocal dimension

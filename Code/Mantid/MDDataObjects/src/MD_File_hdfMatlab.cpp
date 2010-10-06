@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "MD_File_hdfMatlab.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/MD_File_hdfMatlab.h"
 namespace Mantid{
     namespace MDDataObjects{
 //        using namespace Mantid::Kernel;

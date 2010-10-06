@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "stdafx.h"
-#include "MDWorkspaceConstants.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/MDWorkspaceConstants.h"
 
 /** The class is the part of the VisualisationWorkspace and describes the basic multidimentional geometry of the object, 
 *   e.g. the dimensions of the reciprocal space and other possible dimenions  

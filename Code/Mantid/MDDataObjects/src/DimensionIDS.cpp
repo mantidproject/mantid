@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "DimensionIDS.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/DimensionIDS.h"
 namespace Mantid{
     namespace MDDataObjects{
 

@@ -162,23 +162,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="inc\Dimension.h" />
-    <ClInclude Include="inc\DimensionIDS.h" />
-    <ClInclude Include="inc\DimensionRes.h" />
-    <ClInclude Include="inc\Hexahedron.h" />
-    <ClInclude Include="inc\IMD_FileFormat.h" />
-    <ClInclude Include="inc\MDData.h" />
-    <ClInclude Include="inc\MDGeometry.h" />
-    <ClInclude Include="inc\MDPixels.h" />
-    <ClInclude Include="inc\MDWorkspaceConstants.h" />
-    <ClInclude Include="inc\MD_File_hdfMatlab.h" />
-    <ClInclude Include="inc\MD_File_hdfV1.h" />
-    <ClInclude Include="inc\point3D.h" />
-    <ClInclude Include="inc\SlicingData.h" />
-    <ClInclude Include="inc\stdafx.h" />
-    <ClInclude Include="inc\WorkspaceGeometry.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\Dimension.cpp" />
     <ClCompile Include="src\DimensionIDS.cpp" />
     <ClCompile Include="src\DimensionRes.cpp" />
@@ -191,6 +174,44 @@
     <ClCompile Include="src\SlicingData.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\WorkspaceGeometry.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\CenterpieceRebinning.h" />
+    <ClInclude Include="inc\Dimension.h" />
+    <ClInclude Include="inc\DimensionIDS.h" />
+    <ClInclude Include="inc\DimensionRes.h" />
+    <ClInclude Include="inc\H5pubconf.h" />
+    <ClInclude Include="inc\Hexahedron.h" />
+    <ClInclude Include="inc\IMD_FileFormat.h" />
+    <ClInclude Include="inc\MDData.h" />
+    <ClInclude Include="inc\MDDataObjects\CenterpieceRebinning.h" />
+    <ClInclude Include="inc\MDDataObjects\Dimension.h" />
+    <ClInclude Include="inc\MDDataObjects\DimensionIDS.h" />
+    <ClInclude Include="inc\MDDataObjects\DimensionRes.h" />
+    <ClInclude Include="inc\MDDataObjects\Hexahedron.h" />
+    <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h" />
+    <ClInclude Include="inc\MDDataObjects\MDData.h" />
+    <ClInclude Include="inc\MDDataObjects\MDGeometry.h" />
+    <ClInclude Include="inc\MDDataObjects\MDPixels.h" />
+    <ClInclude Include="inc\MDDataObjects\MDWorkspaceConstants.h" />
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
+    <ClInclude Include="inc\MDDataObjects\point3D.h" />
+    <ClInclude Include="inc\MDDataObjects\SlicingData.h" />
+    <ClInclude Include="inc\MDDataObjects\stdafx.h" />
+    <ClInclude Include="inc\MDDataObjects\WorkspaceGeometry.h" />
+    <ClInclude Include="inc\MDGeometry.h" />
+    <ClInclude Include="inc\MDPixels.h" />
+    <ClInclude Include="inc\MDWorkspaceConstants.h" />
+    <ClInclude Include="inc\MD_File_hdfMatlab.h" />
+    <ClInclude Include="inc\MD_File_hdfV1.h" />
+    <ClInclude Include="inc\point3D.h" />
+    <ClInclude Include="inc\SlicingData.h" />
+    <ClInclude Include="inc\stdafx.h" />
+    <ClInclude Include="inc\WorkspaceGeometry.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MDDataObjects.vcxproj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

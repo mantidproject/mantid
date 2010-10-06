@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "WorkspaceGeometry.h"
-#include "Dimension.h"
-#include "DimensionRes.h"
+#include "MDDataObjects/WorkspaceGeometry.h"
+#include "MDDataObjects/Dimension.h"
+#include "MDDataObjects/DimensionRes.h"
 /** The class describes the geometry of the N-D visualisation workspace and provides interface and convenient container to sizes and shapes of DND object
 *
 *   It is specific workspace geometry, which is used for visualisation and analysis. 

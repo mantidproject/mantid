@@ -4,7 +4,7 @@
 // Includes
 //----------------------------------------------------------------------
 //#include "MantidAPI/MatrixWorkspace.h"
-#include "stdafx.h"
+#include "MDDataObjects/stdafx.h"
 /** The class is the part of the VisualisationWorkspace and provides a default name, Identifuer and numerator for a dimension
 *   set of dimensions forms workspace geometry and some dimensions have to be treated differently from others
 *

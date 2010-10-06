@@ -1,6 +1,6 @@
 #ifndef H_FILE_HDF
 #define H_FILE_HDF
-#include "IMD_FileFormat.h"
+#include "MDDataObjects/IMD_FileFormat.h"
 /** stub for a future binary (hdf) file format reader/writer which will be used for datasets.
 
     @author Alex Buts, RAL ISIS

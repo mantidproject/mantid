@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "MDGeometry.h"
-#include "SlicingData.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/MDGeometry.h"
+#include "MDDataObjects/SlicingData.h"
 
 using namespace Mantid::Kernel;
 

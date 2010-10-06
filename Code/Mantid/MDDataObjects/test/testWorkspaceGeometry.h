@@ -2,7 +2,7 @@
 #define H_TEST_WORKSPACE_GEOMETRY
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceGeometry.h"
+#include "MDDataObjects/WorkspaceGeometry.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;

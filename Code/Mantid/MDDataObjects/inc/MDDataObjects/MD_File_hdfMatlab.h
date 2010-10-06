@@ -1,9 +1,9 @@
 #ifndef H_FILE_HDF_MATLAB
 #define H_FILE_HDF_MATLAB
 //
-#include "IMD_FileFormat.h"
-#include "MDPixels.h"
-#include "SlicingData.h"
+#include "MDDataObjects/IMD_FileFormat.h"
+#include "MDDataObjects/MDPixels.h"
+#include "MDDataObjects/SlicingData.h"
 
 /**    Class supports MATLAB-written hdf5 mdd data format and will be used at the initial stage of the development;
 *      to read the data initially provided by MATLAB, Horace

@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "MDData.h"
-#include "MD_File_hdfMatlab.h"
-#include "MD_File_hdfV1.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/MDData.h"
+#include "MDDataObjects/MD_File_hdfMatlab.h"
+#include "MDDataObjects/MD_File_hdfV1.h"
 
 namespace Mantid{
     namespace MDDataObjects{

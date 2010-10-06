@@ -3,10 +3,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "stdafx.h"
-#include "IMD_FileFormat.h"
-#include "MDGeometry.h"
-#include "point3D.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/IMD_FileFormat.h"
+#include "MDDataObjects/MDGeometry.h"
+#include "MDDataObjects/point3D.h"
 #include "MantidAPI/IMDWorkspace.h"
 //#include "c:/Mantid/Code/Mantid/API/inc/MantidAPI/IMDWorkspace.h"
 

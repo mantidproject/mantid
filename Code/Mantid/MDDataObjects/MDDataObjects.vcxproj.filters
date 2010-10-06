@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\Dimension.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WorkspaceGeometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DimensionIDS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DimensionRes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SlicingData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\point3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDGeometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MD_File_hdfMatlab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MDPixels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hexahedron.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{c3d7079f-459e-4bdf-b8fd-fb2ae521aea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4a09d69e-51dc-4ed5-9e95-d65c66a3dc35}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\CenterpieceRebinning.h" />
+    <ClInclude Include="inc\WorkspaceGeometry.h" />
+    <ClInclude Include="inc\Dimension.h" />
+    <ClInclude Include="inc\DimensionIDS.h" />
+    <ClInclude Include="inc\DimensionRes.h" />
+    <ClInclude Include="inc\H5pubconf.h" />
+    <ClInclude Include="inc\Hexahedron.h" />
+    <ClInclude Include="inc\IMD_FileFormat.h" />
+    <ClInclude Include="inc\MD_File_hdfMatlab.h" />
+    <ClInclude Include="inc\MD_File_hdfV1.h" />
+    <ClInclude Include="inc\MDData.h" />
+    <ClInclude Include="inc\MDGeometry.h" />
+    <ClInclude Include="inc\MDPixels.h" />
+    <ClInclude Include="inc\MDWorkspaceConstants.h" />
+    <ClInclude Include="inc\point3D.h" />
+    <ClInclude Include="inc\SlicingData.h" />
+    <ClInclude Include="inc\stdafx.h" />
+    <ClInclude Include="inc\MDDataObjects\WorkspaceGeometry.h" />
+    <ClInclude Include="inc\MDDataObjects\CenterpieceRebinning.h" />
+    <ClInclude Include="inc\MDDataObjects\Dimension.h" />
+    <ClInclude Include="inc\MDDataObjects\DimensionIDS.h" />
+    <ClInclude Include="inc\MDDataObjects\DimensionRes.h" />
+    <ClInclude Include="inc\MDDataObjects\Hexahedron.h" />
+    <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h" />
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
+    <ClInclude Include="inc\MDDataObjects\MDData.h" />
+    <ClInclude Include="inc\MDDataObjects\MDGeometry.h" />
+    <ClInclude Include="inc\MDDataObjects\MDPixels.h" />
+    <ClInclude Include="inc\MDDataObjects\MDWorkspaceConstants.h" />
+    <ClInclude Include="inc\MDDataObjects\point3D.h" />
+    <ClInclude Include="inc\MDDataObjects\SlicingData.h" />
+    <ClInclude Include="inc\MDDataObjects\stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MDDataObjects.vcxproj" />
+  </ItemGroup>
+</Project>

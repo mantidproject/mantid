@@ -1,7 +1,7 @@
 #ifndef H_MD_Pixels
 #define H_MD_Pixels
 
-#include "MDData.h"
+#include "MDDataObjects/MDData.h"
 /** Class to support operations on single data pixels, as obtained from the instrument. Currently it contains information on the location of the pixel in 
     the reciprocal space but this can chane as this information can be computed in the run time
     
@@ -66,6 +66,7 @@ class DLLExport MDPixels :  public MDData
 public:
      MDPixels(unsigned int nDims);
     ~MDPixels();
+    /* not used at the moment --> reconsile with algorithms. 
      void set_shape(const SlicingData &trf){
          this->alloc_mdd_arrays(trf);
          if(pix_array){
@@ -74,6 +75,7 @@ public:
          }
          alloc_pix_array();
     }
+    */
     /// function reads image part of sqw file and prepares class to work with pixels information
     void read_mdd(const char *file_name);
     /// check if the pixels are all in memory;

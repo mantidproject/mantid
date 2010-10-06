@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "SlicingData.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/SlicingData.h"
 /// the function returns the rotation vector which allows to transform vector inumber i into the basis;
 namespace Mantid{
     namespace MDDataObjects{

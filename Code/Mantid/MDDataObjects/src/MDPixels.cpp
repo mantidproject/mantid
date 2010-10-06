@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "MDPixels.h"
+#include "MDDataObjects/stdafx.h"
+#include "MDDataObjects/MDPixels.h"
 
                
 namespace Mantid{

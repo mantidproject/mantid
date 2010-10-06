@@ -3,7 +3,7 @@
 
 
 #include <cxxtest/TestSuite.h>
-#include "MDData.h"
+#include "MDDataObjects/MDData.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;
