@@ -51,13 +51,9 @@ public:
 
   void testFunctionAddition()
   {
-
-	  FakeIImplicitFunction* a = new FakeIImplicitFunction();
-	  FakeIImplicitFunction* b = new FakeIImplicitFunction();
-
 	  FakeCompositeImplicitFunction composite;
-	  composite.AddFunction(a);
-	  composite.AddFunction(b);
+	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(new FakeIImplicitFunction()));
+	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(new FakeIImplicitFunction()));
 	  TSM_ASSERT_EQUALS("Two functions should have been added to composite", 2, composite.getFunctionsCount());
   }
 
@@ -68,8 +64,8 @@ public:
 	  bool dummyOutCome = true;
 	  FakeIImplicitFunction* a = new FakeIImplicitFunction(dummyOutCome);
 	  FakeIImplicitFunction* b = new FakeIImplicitFunction(dummyOutCome);
-	  composite.AddFunction(a);
-	  composite.AddFunction(b);
+	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(a));
+	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(b));
 	  composite.Evaluate(new Mantid::MDDataObjects::Hexahedron());
 
 	  int callResult = a->getEvaluateCount() + b->getEvaluateCount();
@@ -81,8 +77,8 @@ public:
 	  CompositeImplicitFunction composite;
 	  FakeIImplicitFunction* a = new FakeIImplicitFunction(false);
 	  FakeIImplicitFunction* b = new FakeIImplicitFunction(false);
-	  composite.AddFunction(a);
-	  composite.AddFunction(b);
+	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(a));
+	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(b));
 	  composite.Evaluate(new Mantid::MDDataObjects::Hexahedron());
 
 	  int callResult = a->getEvaluateCount() + b->getEvaluateCount();

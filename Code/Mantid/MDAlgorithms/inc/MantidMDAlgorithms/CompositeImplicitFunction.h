@@ -64,7 +64,7 @@ namespace Mantid
 			CompositeImplicitFunction();
 			
 			~CompositeImplicitFunction();
-			void AddFunction(IImplicitFunction* constituentFunction);
+			void AddFunction(boost::shared_ptr<IImplicitFunction> constituentFunction);
 			bool Evaluate(MDDataObjects::Hexahedron* pHexahedron);
 		protected:
 			std::vector<boost::shared_ptr<IImplicitFunction>> m_Functions;

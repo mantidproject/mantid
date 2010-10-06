@@ -1,5 +1,5 @@
 #include "CompositeImplicitFunction.h"
-#include "Hexahedron.h"
+#include "MDDataObjects/Hexahedron.h"
 
 namespace Mantid
 {
@@ -14,9 +14,9 @@ namespace Mantid
 		{
 		}
 
-		void CompositeImplicitFunction::AddFunction(IImplicitFunction* constituentFunction)
+		void CompositeImplicitFunction::AddFunction(boost::shared_ptr<IImplicitFunction> constituentFunction)
 		{
-			this->m_Functions.push_back(boost::shared_ptr<IImplicitFunction>(constituentFunction));
+			this->m_Functions.push_back(constituentFunction);
 		}
 
 		bool CompositeImplicitFunction::Evaluate(MDDataObjects::Hexahedron* pHexahedron)
