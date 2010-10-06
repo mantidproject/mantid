@@ -12,57 +12,6 @@ include(../mantidqt.pri)
 }
 
 
-### Include qwt
-
-unix:!macx {
-	exists(/usr/include/qwt-qt4) {
-	INCLUDEPATH += /usr/include/qwt-qt4/
-	} else {
-	INCLUDEPATH += /usr/include/qwt/
-	}
-} else {
-	INCLUDEPATH += ../../3rdparty/qwt/src
-}
-
-### Link qwt
-
-# POSIX
-unix {
-	
-	macx {
-		LIBS += -L../../3rdparty/qwt/lib -lqwt
-	} else {
-		exists ( /usr/lib64/libqwt-qt4.so ) {
-			LIBS += -lqwt-qt4
-		} else {
-			exists ( /usr/lib/libqwt-qt4.so ) {
-				LIBS += -lqwt-qt4
-			} else {
-				LIBS += -lqwt
-			}
-		}
-	}
-}
-#WINDOWS
-
-win32 {
-
-	# LIBPATH
-
-	CONFIG(build64) {
-		LIBPATH += ../../../Third_Party/lib/win64
-	} else {
-		LIBPATH += ../../../Third_Party/lib/win32
-	}
-
-	build_pass:CONFIG(debug, debug|release) {
-		LIBS += qwtd.lib
-	} else {
-		LIBS += qwt.lib
-	}
-}
-
-
 # Link with the libraries it is CustomInterfaces uses
 unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI -lMantidWidgets
 win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib"

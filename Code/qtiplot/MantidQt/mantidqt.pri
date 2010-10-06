@@ -71,6 +71,17 @@ INCLUDEPATH += "$$MANTIDPATH/API/inc/"
 INCLUDEPATH += "$$MANTIDQTINCLUDES"
 INCLUDEPATH += "$$TOPBUILDDIR/../QtPropertyBrowser/src/"
 
+unix:!macx {
+	exists(/usr/include/qwt-qt4) {
+	INCLUDEPATH += /usr/include/qwt-qt4/
+	} else {
+	INCLUDEPATH += /usr/include/qwt/
+	}
+} else {
+	INCLUDEPATH += "$$TOPBUILDDIR/../3rdparty/qwt/src/"
+}
+
+
 macx {
   INCLUDEPATH += "$$THIRDPARTY/include"
 
@@ -92,9 +103,19 @@ unix {
  }
 
   macx{
-   LIBS += -lboost_signals
- } else{
-   LIBS += -lboost_signals-mt
+	LIBS += -lboost_signals
+	LIBS += -L$$TOPBUILDIR/../3rdparty/qwt/lib -lqwt
+ } else {
+	LIBS += -lboost_signals-mt
+	exists ( /usr/lib64/libqwt-qt4.so ) {
+		LIBS += -lqwt-qt4
+	} else {
+		exists ( /usr/lib/libqwt-qt4.so ) {
+			LIBS += -lqwt-qt4
+		} else {
+			LIBS += -lqwt
+		}
+	}
  }
 }
 
@@ -116,11 +137,15 @@ CONFIG(build64)  {
     LIBS += "PocoFoundation.lib"
     LIBS += "PocoXML.lib"
     LIBS += "QtPropertyBrowser.lib"
+	LIBS += "qwt.lib"
   }
   build_pass:CONFIG(debug, debug|release) {
+	# Make sure we don't link to the non-debug runtime
+	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrt.lib
     LIBS += "PocoFoundationd.lib"
     LIBS += "PocoXMLd.lib"
     LIBS += "QtPropertyBrowserd.lib"
+	LIBS += "qwtd.lib"
   }
 }
 
