@@ -23,7 +23,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/Workspace.h"
 
-
 #ifdef __GNUC__
 #   if __GNUC__ <= 4
 #		 if __GNUC_MINOR__ < 2  // then the compiler do not undertand OpenMP functions, let's define them

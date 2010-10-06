@@ -4,6 +4,7 @@
 #define CXXTEST_RUNNING
 #endif
 
+#define _CXXTEST_HAVE_STD
 #include <cxxtest/TestListener.h>
 #include <cxxtest/TestTracker.h>
 #include <cxxtest/TestRunner.h>
@@ -18,11 +19,11 @@ int main() {
 static tmain suite_tmain;
 
 static CxxTest::List Tests_tmain = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_tmain( "c:/Mantid/Code/Mantid/MDDataObjects/test/test_sqw.h", 5, "tmain", suite_tmain, Tests_tmain );
+CxxTest::StaticSuiteDescription suiteDescription_tmain( "c:/Mantid/Code/Mantid/MDDataObjects/test/test_sqw.h", 6, "tmain", suite_tmain, Tests_tmain );
 
 static class TestDescription_tmain_testTMain : public CxxTest::RealTestDescription {
 public:
- TestDescription_tmain_testTMain() : CxxTest::RealTestDescription( Tests_tmain, suiteDescription_tmain, 8, "testTMain" ) {}
+ TestDescription_tmain_testTMain() : CxxTest::RealTestDescription( Tests_tmain, suiteDescription_tmain, 9, "testTMain" ) {}
  void runTest() { suite_tmain.testTMain(); }
 } testDescription_tmain_testTMain;
 

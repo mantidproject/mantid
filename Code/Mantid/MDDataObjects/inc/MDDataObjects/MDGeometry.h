@@ -55,7 +55,7 @@ public:
 
     /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. 
     Dimension * getDimension(unsigned int i)const;
-    /// functions return the pointer to the dimension requested as the dimension ID. Returns NULL if no such dimension present in the Geometry or throws is ID is not casted properly;
+    /// functions return the pointer to the dimension requested as the dimension ID. Returns NULL if no such dimension present in the Geometry or throws if ID is not casted properly;
     Dimension * getDimension(DimensionsID ID)const;
 
     /// function returns an axis vector of the dimension, specified by ID; it is 1 for orthogonal dimensions and triplet for the reciprocal 

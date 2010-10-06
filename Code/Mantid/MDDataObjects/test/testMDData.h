@@ -4,9 +4,12 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDData.h"
+#include "find_mantid.h"
 
 using namespace Mantid;
+using namespace API;
 using namespace MDDataObjects;
+
 class tDND : public MDData
 {
 public:
@@ -20,13 +23,20 @@ class testDND :    public CxxTest::TestSuite
 public:
     void testDNDRead(void){
       try{
+        std::string path=FileFinder::Instance().getFullPath("Mantid.properties");
+        std::cout << " test properties location: "<< path<< std::endl;
+
+        std::string test_file=findTestFileLocation();
+        std::cout << " test file location: "<< test_file<< std::endl;
+
       // define an wrong object 
         tDND dnd_obj(5);
         // 5-dim object;
         TS_ASSERT_EQUALS(dnd_obj.getNumDims(),5);
-
+       
+  
         // read correct object
-        TS_ASSERT_THROWS_NOTHING(dnd_obj.read_mdd("../../../../Test/VATES/fe_demo.sqw"));
+        TS_ASSERT_THROWS_NOTHING(dnd_obj.read_mdd(test_file.c_str()));
 
         TS_ASSERT_EQUALS(dnd_obj.getNumDims(),4);
 

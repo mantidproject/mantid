@@ -4,6 +4,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDPixels.h"
+#include "find_mantid.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;
@@ -19,8 +20,10 @@ public:
     }
     void testSQWDNDread(void){
        
+        std::string test_file=findTestFileLocation();
+        std::cout << " test file location: "<< test_file<< std::endl;
        // read DND object
-             TS_ASSERT_THROWS_NOTHING(pSQW->read_mdd("../../../../Test/VATES/fe_demo.sqw"));
+        TS_ASSERT_THROWS_NOTHING(pSQW->read_mdd(test_file.c_str()));
              // it can throw if the pixels do not fit into memory
              //std::cout<<"\n start reading all pixels in memory and this can be long\n";
              //TS_ASSERT_THROWS_NOTHING(sqw_data.read_pix());

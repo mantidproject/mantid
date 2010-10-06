@@ -28,7 +28,8 @@ cl runner.cpp /I "..\inc\MDDataDataObjects" /I "..\..\..\Third_Party\include" /I
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" hdf5ddll.lib Mantidkernel.lib Mantidapi.lib Mantidalgorithms.lib MantidCurveFitting.lib Mantiddatahandling.lib Mantiddataobjects.lib MDDataObjects.lib Mantidgeometry.lib MantidNexus.lib runner.obj
 
 echo "Copying in properties files..."
-copy /Y ..\..\Build\Tests\*properties
+rem copy /Y ..\..\Build\Tests\*properties
+rem copy /Y .\Debug\*properties
 echo "Running the tests..."
 runner.exe
 
