@@ -67,10 +67,6 @@ public:
    *  and call printSelf(os). 
    */
   virtual void printTree(std::ostream&) const = 0;
-  /// Returns a child component at the given X/Y pixel index.
-  virtual boost::shared_ptr<IComponent> getChildAtXY(int X, int Y) const = 0;
-  /// Set the pixel size of the detector (optional)
-  virtual void setNumPixels(int num_xPixels, int num_yPixels) = 0;
 
 private:
   /// Private copy assignment operator

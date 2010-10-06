@@ -13,7 +13,9 @@ namespace Mantid
 namespace Geometry
 {
 
-/** An extension of the ObjectComponent class to add a detector id.
+/**
+ * This class represents a detector - i.e. a single pixel in an instrument.
+ * It is An extension of the ObjectComponent class to add a detector id.
 
   @class Detector
   @version A

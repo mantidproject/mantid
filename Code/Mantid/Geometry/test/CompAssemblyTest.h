@@ -83,32 +83,6 @@ public:
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
   }
 
-  void test_getChildAtXY()
-  {
-    CompAssembly bank("BankName");
-    Component* det1 = new Component("Det00");
-    Component* det2 = new Component("Det01");
-    Component* det3 = new Component("Det10");
-    Component* det4 = new Component("Det11");
-    TS_ASSERT_EQUALS(bank.nelements(), 0);
-    TS_ASSERT_THROWS(bank[0], std::runtime_error);
-    bank.add(det1);
-    bank.add(det2);
-    bank.add(det3);
-    bank.add(det4);
-    TS_ASSERT_EQUALS(bank.nelements(), 4);
-
-    bank.setNumPixels(2,2);
-    boost::shared_ptr<IComponent> ret;
-    TS_ASSERT_EQUALS(bank.getChildAtXY(0,0)->getName(), "Det00");
-    TS_ASSERT_EQUALS(bank.getChildAtXY(0,1)->getName(), "Det01");
-    TS_ASSERT_EQUALS(bank.getChildAtXY(1,0)->getName(), "Det10");
-    TS_ASSERT_EQUALS(bank.getChildAtXY(1,1)->getName(), "Det11");
-    TS_ASSERT_THROWS(bank.getChildAtXY(-1,0), std::runtime_error);
-    TS_ASSERT_THROWS(bank.getChildAtXY(0,-1), std::runtime_error);
-    TS_ASSERT_THROWS(bank.getChildAtXY(2,0), std::runtime_error);
-    TS_ASSERT_THROWS(bank.getChildAtXY(0,2), std::runtime_error);
-  }
 
   void testAddCopy()
   {

@@ -472,31 +472,31 @@ namespace Mantid
       NodeIterator it(pType, NodeFilter::SHOW_ELEMENT);
 
 
-      //--- Get the detector's X/Y pixel sizes (optional) ---
-      if (VERBOSE) std::cout << "\nappendAssembly(): I am " << pLocElem->getAttribute("name") << " . " <<
-          "My xpixels=" << pLocElem->getAttribute("xpixels") <<
-          ". My parent's xpixels=" << pCompElem->getAttribute("xpixels") <<
-          "\n";
-
-      //These strings will be empty if nothing is specified. This is fine.
-      std::string xpixels = pLocElem->getAttribute("xpixels");
-      std::string ypixels = pLocElem->getAttribute("ypixels");
-      if ((xpixels.size() > 0) && (ypixels.size() > 0))
-      {
-        //Default of 0,0 pixels
-        ass->setNumPixels(0,0);
-        //Both have to be specified
-        try
-        {
-          int xpix = boost::lexical_cast<int>(xpixels);
-          int ypix = boost::lexical_cast<int>(ypixels);
-          ass->setNumPixels(xpix,ypix);
-        }
-        catch (boost::bad_lexical_cast e)
-        {
-          //If there was an error here, default to 0, set previously
-        }
-      }
+//      //--- Get the detector's X/Y pixel sizes (optional) ---
+//      if (VERBOSE) std::cout << "\nappendAssembly(): I am " << pLocElem->getAttribute("name") << " . " <<
+//          "My xpixels=" << pLocElem->getAttribute("xpixels") <<
+//          ". My parent's xpixels=" << pCompElem->getAttribute("xpixels") <<
+//          "\n";
+//
+//      //These strings will be empty if nothing is specified. This is fine.
+//      std::string xpixels = pLocElem->getAttribute("xpixels");
+//      std::string ypixels = pLocElem->getAttribute("ypixels");
+//      if ((xpixels.size() > 0) && (ypixels.size() > 0))
+//      {
+//        //Default of 0,0 pixels
+//        ass->setNumPixels(0,0);
+//        //Both have to be specified
+//        try
+//        {
+//          int xpix = boost::lexical_cast<int>(xpixels);
+//          int ypix = boost::lexical_cast<int>(ypixels);
+//          ass->setNumPixels(xpix,ypix);
+//        }
+//        catch (boost::bad_lexical_cast e)
+//        {
+//          //If there was an error here, default to 0, set previously
+//        }
+//      }
 
 
       Node* pNode = it.nextNode();
