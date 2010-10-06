@@ -20,7 +20,7 @@ public:
 
 /*! Empty constructor
  */
-CompAssembly::CompAssembly() : Component()
+CompAssembly::CompAssembly() : Component(), m_children(), xPixels(0), yPixels(0), m_cachedBoundingBox(NULL)
 {
 }
 
@@ -34,28 +34,29 @@ CompAssembly::CompAssembly() : Component()
  *  this is registered as a children of reference.
  */
 CompAssembly::CompAssembly(const std::string& n, Component* reference) :
-  Component(n, reference)
+  Component(n, reference), m_children(), xPixels(0), yPixels(0), m_cachedBoundingBox(NULL)
 {
   if (reference)
   {
     CompAssembly* test=dynamic_cast<CompAssembly*>(reference);
     if (test)
+    {
       test->add(this);
+    }
   }
 }
 
 /*! Copy constructor
  *  @param ass :: assembly to copy
  */
-CompAssembly::CompAssembly(const CompAssembly& ass) :
-  Component(ass)
+CompAssembly::CompAssembly(const CompAssembly& assem) :
+  Component(assem), m_children(assem.m_children), xPixels(assem.xPixels), yPixels(assem.yPixels), m_cachedBoundingBox(assem.m_cachedBoundingBox)
 {
-  group=ass.group;
   // Need to do a deep copy
   comp_it it;
-  for (it = group.begin(); it != group.end(); ++it)
+  for (it = m_children.begin(); it != m_children.end(); ++it)
   {
-    *it =  (*it)->clone() ;
+    *it = (*it)->clone() ;
     // Move copied component object's parent from old to new CompAssembly
     (*it)->setParent(this);
   }
@@ -65,13 +66,13 @@ CompAssembly::CompAssembly(const CompAssembly& ass) :
  */
 CompAssembly::~CompAssembly()
 {
-  // Iterate over pointers in group, deleting them
-  //std::vector<IComponent*>::iterator it;
-  for (comp_it it = group.begin(); it != group.end(); ++it)
+  if( m_cachedBoundingBox ) delete m_cachedBoundingBox;
+  // Iterate over pointers in m_children, deleting them
+  for (comp_it it = m_children.begin(); it != m_children.end(); ++it)
   {
     delete *it;
   }
-  group.clear();
+  m_children.clear();
 }
 
 /*! Clone method
@@ -94,9 +95,9 @@ int CompAssembly::add(IComponent* comp)
   if (comp)
   {
     comp->setParent(this);
-    group.push_back(comp);
+    m_children.push_back(comp);
   }
-  return group.size();
+  return m_children.size();
 }
 
 /*! AddCopy method
@@ -113,9 +114,9 @@ int CompAssembly::addCopy(IComponent* comp)
   {
     IComponent* newcomp=comp->clone();
     newcomp->setParent(this);
-    group.push_back(newcomp);
+    m_children.push_back(newcomp);
   }
-  return group.size();
+  return m_children.size();
 }
 
 /*! AddCopy method
@@ -134,17 +135,17 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
     IComponent* newcomp=comp->clone();
     newcomp->setParent(this);
     newcomp->setName(n);
-    group.push_back(newcomp);
+    m_children.push_back(newcomp);
   }
-  return group.size();
+  return m_children.size();
 }
 
 /*! Return the number of components in the assembly
- * @return group.size() 
+ * @return m_children.size() 
  */
 int CompAssembly::nelements() const
 {
-  return group.size();
+  return m_children.size();
 }
 
 /*! Get a pointer to the ith component in the assembly. Note standard C/C++
@@ -152,15 +153,15 @@ int CompAssembly::nelements() const
  *  N is the number of component in the assembly.
  *
  * @param i The index of the component you want
- * @return group[i] 
+ * @return m_children[i] 
  * 
  *  Throws if i is not in range
  */
 boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
 {
-  if (i<0 || i> static_cast<int>(group.size()-1))
+  if (i<0 || i> static_cast<int>(m_children.size()-1))
   throw std::runtime_error("CompAssembly::operator[] range not valid");
-  return boost::shared_ptr<IComponent>(group[i],NoDeleting());
+  return boost::shared_ptr<IComponent>(m_children[i],NoDeleting());
 }
 
 
@@ -198,7 +199,26 @@ void CompAssembly::setNumPixels(int num_xPixels, int num_yPixels)
   yPixels = num_yPixels;
 }
 
-
+/**
+ * Get the bounding box for this assembly. It is simply the sum of the bounding boxes of its children
+ * @param assemblyBox [Out] The resulting bounding box is stored here.
+ */
+void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
+{
+  if( !m_cachedBoundingBox )
+  {
+    m_cachedBoundingBox = new BoundingBox();
+    // Loop over the children and define a box large enough for all of them
+    for (const_comp_it it = m_children.begin(); it != m_children.end(); ++it)
+    {
+      BoundingBox compBox;
+      (*it)->getBoundingBox(compBox);
+      m_cachedBoundingBox->grow(compBox);
+    }
+  }
+  // Use cached box
+  assemblyBox = *m_cachedBoundingBox;
+}
 
 /*! Print information about elements in the assembly to a stream
  * @param os :: output stream 
@@ -210,7 +230,7 @@ void CompAssembly::printChildren(std::ostream& os) const
 {
   //std::vector<IComponent*>::const_iterator it;
   int i=0;
-  for (const_comp_it it=group.begin();it!=group.end();it++)
+  for (const_comp_it it=m_children.begin();it!=m_children.end();it++)
   {
     os << "Component " << i++ <<" : **********" <<std::endl;
     (*it)->printSelf(os);
@@ -227,7 +247,7 @@ void CompAssembly::printTree(std::ostream& os) const
 {
   //std::vector<IComponent*>::const_iterator it;
   int i=0;
-  for (const_comp_it it=group.begin();it!=group.end();it++)
+  for (const_comp_it it=m_children.begin();it!=m_children.end();it++)
   {
     const CompAssembly* test=dynamic_cast<CompAssembly*>(*it);
     os << "Element " << i++ << " in the assembly. ";

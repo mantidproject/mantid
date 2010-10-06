@@ -315,7 +315,7 @@ namespace Mantid
     ///Sets a cached location on the location cache
     /// @param comp The Component to set the location of
     /// @param location The location 
-    void ParameterMap::setCachedLocation(const IComponent* comp, V3D& location) const
+    void ParameterMap::setCachedLocation(const IComponent* comp, const V3D& location) const
     {
       // Call to setCachedLocation is a write so not thread-safe
       PARALLEL_CRITICAL(positionCache)
@@ -336,7 +336,7 @@ namespace Mantid
     ///Sets a cached rotation on the rotation cache
     /// @param comp The Component to set the rotation of
     /// @param rotation The rotation as a quaternion 
-    void ParameterMap::setCachedRotation(const IComponent* comp, Quat& rotation) const
+    void ParameterMap::setCachedRotation(const IComponent* comp, const Quat& rotation) const
     {
       // Call to setCachedRotation is a write so not thread-safe
       PARALLEL_CRITICAL(rotationCache)
@@ -352,6 +352,27 @@ namespace Mantid
     bool ParameterMap::getCachedRotation(const IComponent* comp, Quat& rotation) const
     {
       return m_cacheRotMap.getCache(comp->getComponentID(),rotation);
+    }
+
+    ///Sets a cached bounding box
+    /// @param comp The Component to set the rotation of
+    /// @param box A reference to the bounding box
+    void ParameterMap::setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const
+    {
+      // Call to setCachedRotation is a write so not thread-safe
+      PARALLEL_CRITICAL(boundingBoxCache)
+      {
+        m_boundingBoxMap.setCache(comp->getComponentID(), box);
+      }
+    }
+
+    ///Attempts to retreive a bounding box from the cache
+    /// @param comp The Component to find the bounding box of
+    /// @param box If the bounding box is found it's value will be set here
+    /// @returns true if the bounding is in the map, otherwise false
+    bool ParameterMap::getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const
+    {
+      return m_boundingBoxMap.getCache(comp->getComponentID(),box);
     }
 
 

@@ -75,6 +75,8 @@ public:
   /// Set the pixel size of the detector (optional)
   virtual void setNumPixels(int num_xPixels, int num_yPixels);
 
+  /// Get the bounding box for this component and store it in the given argument
+  virtual void getBoundingBox(BoundingBox& boundingBox) const;
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
@@ -83,13 +85,13 @@ private:
   CompAssembly& operator=(const ICompAssembly&);
 
   ///the group of child components
-  std::vector< IComponent* > group;
-
+  std::vector< IComponent* > m_children;
   /// The number of pixels in the X (horizontal) direction; optional; for area detectors
   int xPixels;
   /// The number of pixels in the Y (vertical) direction; optional; for area detectors
   int yPixels;
-
+  /// A cached bounding box 
+  mutable BoundingBox *m_cachedBoundingBox;
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);

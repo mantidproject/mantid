@@ -266,6 +266,15 @@ double Component::getDistance(const IComponent& comp) const
 }
 
 /**
+ * Get the bounding box for this component. A component has no shape therefore this constructs an empty bouding box
+ * @param boundingBox [Out] The resulting bounding box is stored here.
+ */
+void Component::getBoundingBox(BoundingBox & boundingBox) const
+{
+  boundingBox = BoundingBox();
+}
+
+/**
 * Get the names of the parameters for this component.
 * @param recursive If true, the parameters for all of the parent components are also included
 * @returns A set of strings giving the parameter names for this component

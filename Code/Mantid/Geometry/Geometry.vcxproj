@@ -168,6 +168,7 @@
     <ClCompile Include="src\Math\Acomp.cpp" />
     <ClCompile Include="src\Math\Algebra.cpp" />
     <ClCompile Include="src\Math\BnId.cpp" />
+    <ClCompile Include="src\Objects\BoundingBox.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryGenerator.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryHandler.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryRenderer.cpp" />
@@ -245,6 +246,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h" />
+    <ClInclude Include="inc\MantidGeometry\Objects\BoundingBox.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\OpenCascadeConfig.h" />
     <ClInclude Include="test\AcompTest.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Algebra.h" />
@@ -257,6 +259,7 @@
     <ClInclude Include="inc\MantidGeometry\Rendering\CacheGeometryHandler.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\CacheGeometryRenderer.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\CompAssembly.h" />
+    <ClInclude Include="test\BoundingBoxTest.h" />
     <ClInclude Include="test\CompAssemblyTest.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\Component.h" />
     <ClInclude Include="test\ComponentTest.h" />
@@ -368,6 +371,9 @@
       <Project>{902cb04f-8893-4fe8-83b8-09f9db20a82a}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\ComponentCreationHelpers.hh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

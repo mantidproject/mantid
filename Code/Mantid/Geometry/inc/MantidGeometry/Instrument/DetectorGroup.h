@@ -67,6 +67,8 @@ public:
   virtual bool isOnSide(const V3D& point) const;
   ///Try to find a point that lies within (or on) the object
   int getPointInObject(V3D& point) const;
+  /// Get the bounding box for this component and store it in the given argument
+  virtual void getBoundingBox(BoundingBox& boundingBox) const;
 
   /// What detectors are contained in the group?
   std::vector<int> getDetectorIDs();

@@ -261,6 +261,15 @@ namespace Mantid
     {
       return getPos().distance(comp.getPos());
     }
+    
+    /**
+    * Get the bounding box for this component. It is no shape so gives an empty box.
+    * @param boundingBox [Out] The resulting bounding box is stored here.
+    */
+    void ParametrizedComponent::getBoundingBox(BoundingBox & boundingBox) const
+    {
+      boundingBox = BoundingBox();
+    }
 
     /**
     * Get the names of the parameters for this component.

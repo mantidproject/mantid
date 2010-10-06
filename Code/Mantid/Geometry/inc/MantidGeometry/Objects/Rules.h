@@ -86,9 +86,9 @@ namespace Mantid
 
 
 			/// Abstract: The point is within the object
-			virtual int isValid(const Geometry::V3D&) const =0;           
+			virtual bool isValid(const Geometry::V3D&) const = 0;           
 			/// Abstract Validity based on surface true/false map
-			virtual int isValid(const std::map<int,int>&) const =0; 
+			virtual bool isValid(const std::map<int,int>&) const = 0; 
 			/// Abstract: Can the rule be simplified 
 			virtual int simplify() =0;
 
@@ -148,8 +148,8 @@ namespace Mantid
 			std::string display() const;
 			std::string displayAddress() const;
 
-			int isValid(const Geometry::V3D&) const;
-			int isValid(const std::map<int,int>&) const;    
+			bool isValid(const Geometry::V3D&) const;
+			bool isValid(const std::map<int,int>&) const;    
 			int simplify();      ///< apply general intersection simplification
 			void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 		};
@@ -198,8 +198,8 @@ namespace Mantid
 			int type() const { return -1; }   ///< effective name
 
 
-			int isValid(const Geometry::V3D&) const;
-			int isValid(const std::map<int,int>&) const;    
+			bool isValid(const Geometry::V3D&) const;
+			bool isValid(const std::map<int,int>&) const;    
 			std::string display() const;
 			std::string displayAddress() const;
 			int simplify();      ///< apply general intersection simplification
@@ -247,8 +247,8 @@ namespace Mantid
 
 			void setKeyN(const int Ky);             ///< set keyNumber
 			void setKey(Surface*);
-			int isValid(const Geometry::V3D&) const;
-			int isValid(const std::map<int,int>&) const;    
+			bool isValid(const Geometry::V3D&) const;
+			bool isValid(const std::map<int,int>&) const;    
 			int getSign() const { return sign; }         ///< Get Sign
 			int getKeyN() const { return keyN; }         ///< Get Key
 			int simplify();
@@ -299,8 +299,8 @@ namespace Mantid
 
 			void setObjN(const int Ky);             ///< set object Number
 			void setObj(Object*);               ///< Set a Object state
-			int isValid(const Geometry::V3D&) const;
-			int isValid(const std::map<int,int>&) const;    
+			bool isValid(const Geometry::V3D&) const;
+			bool isValid(const std::map<int,int>&) const;    
 			/// Get object number of component
 			int getObjN() const { return objN; } 
 			int simplify();
@@ -351,8 +351,8 @@ namespace Mantid
 			int type() const { return 0; }   ///< Is it a branched object
 			int isComplementary() const { return 1; }   ///< Always returns true (1)
 
-			int isValid(const Geometry::V3D&) const;
-			int isValid(const std::map<int,int>&) const;    
+			bool isValid(const Geometry::V3D&) const;
+			bool isValid(const std::map<int,int>&) const;    
 			int simplify();
 
 			std::string display() const;      
@@ -398,8 +398,8 @@ namespace Mantid
 
 			///< write val into status, if in valid range
 			void setStatus(int val){ if(val==0||val==1||val==-1)status=val;}
-			int isValid(const Geometry::V3D&) const;
-			int isValid(const std::map<int,int>&) const;  ///< isValue :: Based on a surface status map
+			bool isValid(const Geometry::V3D&) const;
+			bool isValid(const std::map<int,int>&) const;  ///< isValue :: Based on a surface status map
 			int simplify();                             
 
 

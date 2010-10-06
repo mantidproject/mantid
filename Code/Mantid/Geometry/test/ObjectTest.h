@@ -19,6 +19,7 @@
 #include "MantidGeometry/Surfaces/SurfaceFactory.h" 
 #include "MantidGeometry/Objects/Track.h" 
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -38,6 +39,10 @@ public:
     Object_sptr geom_obj = createUnitCube();
 
     TS_ASSERT_EQUALS(geom_obj->str(),"68 -1 0 -6 5 -4 3 -2 1");
+
+    double xmin(0.0), xmax(0.0), ymin(0.0), ymax(0.0), zmin(0.0), zmax(0.0);
+    geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymax,zmin);
+
   }
 
   void testIsOnSideCappedCylinder()
@@ -172,6 +177,32 @@ public:
     //not quite on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1,0,0),V3D(0.5,0.5,0)),1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1,0,0),V3D(0.5,0.5,0)),-1);
+  }
+
+  void testGetBoundingBoxForSphere()
+  {
+    Object_sptr geom_obj = createSphere();    
+    const double tolerance(1e-10);
+
+    double xmax,ymax,zmax,xmin,ymin,zmin;
+    xmax=ymax=zmax=20;
+    xmin=ymin=zmin=-20;
+    geom_obj->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    TS_ASSERT_DELTA(xmax,4.1,tolerance);
+    TS_ASSERT_DELTA(ymax,4.1,tolerance);
+    TS_ASSERT_DELTA(zmax,4.1,tolerance);
+    TS_ASSERT_DELTA(xmin,-4.1,tolerance);
+    TS_ASSERT_DELTA(ymin,-4.1,tolerance);
+    TS_ASSERT_DELTA(zmin,-4.1,tolerance);
+
+    boost::shared_ptr<BoundingBox> bbox = geom_obj->getBoundingBox();
+
+    TS_ASSERT_DELTA(bbox->xMax(),4.1,tolerance);
+    TS_ASSERT_DELTA(bbox->yMax(),4.1,tolerance);
+    TS_ASSERT_DELTA(bbox->zMax(),4.1,tolerance);
+    TS_ASSERT_DELTA(bbox->xMin(),-4.1,tolerance);
+    TS_ASSERT_DELTA(bbox->yMin(),-4.1,tolerance);
+    TS_ASSERT_DELTA(bbox->zMin(),-4.1,tolerance);
   }
 
   void testCalcValidTypeCappedCylinder()
@@ -640,7 +671,7 @@ public:
 
   }
 
-  void testGetBoundingBox()
+  void testGetBoundingBoxForCylinder()
     /*!
     Test bounding box for a object capped cylinder
     */
@@ -658,7 +689,7 @@ public:
     TS_ASSERT_DELTA(zmin,-3.0,0.0001);
   }
 
-  void defineBoundingBox()
+  void testdefineBoundingBox()
     /*!
     Test use of defineBoundingBox
     */
@@ -667,16 +698,21 @@ public:
     double xmax,ymax,zmax,xmin,ymin,zmin;
     xmax=1.2;ymax=3.0;zmax=3.0;
     xmin=-3.2;ymin=-3.0;zmin=-3.0;
-    geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-    geom_obj->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-    TS_ASSERT_EQUALS(xmax,1.2);
-    TS_ASSERT_EQUALS(ymax,3.0);
-    TS_ASSERT_EQUALS(zmax,3.0);
-    TS_ASSERT_EQUALS(xmin,-3.2);
-    TS_ASSERT_EQUALS(ymin,-3.0);
-    TS_ASSERT_EQUALS(zmin,-3.0);
+
+    TS_ASSERT_THROWS_NOTHING(geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin));
+    
+    boost::shared_ptr<BoundingBox> boundBox = geom_obj->getBoundingBox();
+
+    TS_ASSERT_EQUALS(boundBox->xMax(),1.2);
+    TS_ASSERT_EQUALS(boundBox->yMax(),3.0);
+    TS_ASSERT_EQUALS(boundBox->zMax(),3.0);
+    TS_ASSERT_EQUALS(boundBox->xMin(),-3.2);
+    TS_ASSERT_EQUALS(boundBox->yMin(),-3.0);
+    TS_ASSERT_EQUALS(boundBox->zMin(),-3.0);
+
+    //Inconsistent bounding box
     xmax=1.2;xmin=3.0;
-    TS_ASSERT_THROWS(geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin),std::invalid_argument&);
+    TS_ASSERT_THROWS(geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin),std::invalid_argument);
 
   }
   void testSurfaceTriangulation()

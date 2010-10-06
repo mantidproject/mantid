@@ -122,6 +122,32 @@ void ParCompAssembly::setNumPixels(int num_xPixels, int num_yPixels)
   yPixels = num_yPixels;
 }
 
+/**
+* Get the bounding box for this assembly and store it in the given argument. Note that the bounding box
+* is cached in the ParameterMap after the first call
+* @param assemblyBox [Out] The resulting bounding box is stored here.
+*/
+void ParCompAssembly::getBoundingBox(BoundingBox& assemblyBox) const
+{
+  // Check cache for assembly
+  if( m_map.getCachedBoundingBox(this, assemblyBox ) )
+  {
+    return;
+  }
+  // Loop over the children and define a box large enough for all of them
+  assemblyBox = BoundingBox();
+  int nchildren = nelements();
+  for(int i = 0; i < nchildren; ++i)
+  {
+    IComponent_sptr comp = this->operator[](i);
+    BoundingBox compBox;
+    comp->getBoundingBox(compBox);
+    assemblyBox.grow(compBox);
+  }
+  //Set the cache
+  m_map.setCachedBoundingBox(this, assemblyBox);
+}
+
 /*! Print information about elements in the assembly to a stream
  * @param os :: output stream 
  * 

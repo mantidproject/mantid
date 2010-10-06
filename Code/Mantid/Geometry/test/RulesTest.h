@@ -370,11 +370,11 @@ public:
 		TS_ASSERT_EQUALS(A.leaf(0),S1);
 		TS_ASSERT_EQUALS(A.leaf(1),S2);
 		TS_ASSERT_EQUALS(A.display(),"10 -11");
-		TS_ASSERT_EQUALS(A.isValid(V3D(5.0,0.0,0.0)),1); //on surface
-		TS_ASSERT_EQUALS(A.isValid(V3D(5.1,0.0,0.0)),1); //inside surface
-		TS_ASSERT_EQUALS(A.isValid(V3D(4.9,0.0,0.0)),0);//just outside surface
-		TS_ASSERT_EQUALS(A.isValid(V3D(10,0.0,0.0)),1);
-		TS_ASSERT_EQUALS(A.isValid(V3D(10.1,0.0,0.0)),0);//on other side of the plane
+		TS_ASSERT_EQUALS(A.isValid(V3D(5.0,0.0,0.0)),true); //on surface
+		TS_ASSERT_EQUALS(A.isValid(V3D(5.1,0.0,0.0)),true); //inside surface
+		TS_ASSERT_EQUALS(A.isValid(V3D(4.9,0.0,0.0)),false);//just outside surface
+		TS_ASSERT_EQUALS(A.isValid(V3D(10,0.0,0.0)),true);
+		TS_ASSERT_EQUALS(A.isValid(V3D(10.1,0.0,0.0)),false);//on other side of the plane
 	}
 
 	void testBoundingBox(){
@@ -645,10 +645,10 @@ public:
 		TS_ASSERT_EQUALS(A.display(),"10 : -11");
 		TS_ASSERT_EQUALS(A.leaf(0),S1);
 		TS_ASSERT_EQUALS(A.leaf(1),S2);
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,0.0)),1); //on surface
-		TS_ASSERT_EQUALS(A.isValid(V3D(5.0,0.0,0.0)),1); //inside surface
-		TS_ASSERT_EQUALS(A.isValid(V3D(-0.1,0.0,0.0)),0);//just outside surface
-		TS_ASSERT_EQUALS(A.isValid(V3D(10.1,1.0,1.0)),1);//on other side of the plane
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,0.0)),true); //on surface
+		TS_ASSERT_EQUALS(A.isValid(V3D(5.0,0.0,0.0)),true); //inside surface
+		TS_ASSERT_EQUALS(A.isValid(V3D(-0.1,0.0,0.0)),false);//just outside surface
+		TS_ASSERT_EQUALS(A.isValid(V3D(10.1,1.0,1.0)),true);//on other side of the plane
 	}
 
 	void testIsValidMap(){
@@ -673,12 +673,12 @@ public:
 		input[11]=1;
 		input[15]=0;
 		input[20]=-1;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		input[10]=0;
 		input[11]=0;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		input[11]=1;
-		TS_ASSERT_EQUALS(A.isValid(input),0);
+		TS_ASSERT_EQUALS(A.isValid(input),false);
 	}
 };
 //---------------------------------------------------End of Union-------------------------------------------------
@@ -887,9 +887,9 @@ public:
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.getSign(),1);
-		TS_ASSERT_EQUALS(A.isValid(V3D(4.9,0.0,0.0)),0);
-		TS_ASSERT_EQUALS(A.isValid(V3D(5,0.0,0.0)),1);
-		TS_ASSERT_EQUALS(A.isValid(V3D(5.1,0.0,0.0)),1);
+		TS_ASSERT_EQUALS(A.isValid(V3D(4.9,0.0,0.0)),false);
+		TS_ASSERT_EQUALS(A.isValid(V3D(5,0.0,0.0)),true);
+		TS_ASSERT_EQUALS(A.isValid(V3D(5.1,0.0,0.0)),true);
 	}
 
 	void testIsValidMap(){
@@ -907,11 +907,11 @@ public:
 		input[10]=1;
 		input[15]=0;
 		input[20]=-1;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		A.setKeyN(15);
-		TS_ASSERT_EQUALS(A.isValid(input),0);
+		TS_ASSERT_EQUALS(A.isValid(input),false);
 		A.setKeyN(20);
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 	}
 };
 //---------------------------------End of SurfPoint-------------------------------------
@@ -1025,19 +1025,19 @@ public:
 		CompObj A;
 		A.setObj(&cpCylinder);
 		A.setObjN(10);
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,0.0)),0); //center is inside the cylinder so it will return complement
-		TS_ASSERT_EQUALS(A.isValid(V3D(1.3,0.0,0.0)),1); //outside cap cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(1.2,0.0,0.0)),0); //on the cap end of cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(1.1,0.0,0.0)),0); //inside the cap end of cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(-3.3,0.0,0.0)),1); //outside other end of cap cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(-3.2,0.0,0.0)),0); //on end of cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(-3.1,0.0,0.0)),0); //inside the cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,3.1,0.0)),1); //outside cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,3.0,0.0)),0); //on the cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,2.9,0.0)),0); //inside cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,3.1)),1); //outside cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,3.0)),0); //on the cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,2.9)),0); //inside cylinder		
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,0.0)),false); //center is inside the cylinder so it will return complement
+		TS_ASSERT_EQUALS(A.isValid(V3D(1.3,0.0,0.0)),true); //outside cap cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(1.2,0.0,0.0)),false); //on the cap end of cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(1.1,0.0,0.0)),false); //inside the cap end of cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(-3.3,0.0,0.0)),true); //outside other end of cap cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(-3.2,0.0,0.0)),false); //on end of cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(-3.1,0.0,0.0)),false); //inside the cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,3.1,0.0)),true); //outside cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,3.0,0.0)),false); //on the cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,2.9,0.0)),false); //inside cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,3.1)),true); //outside cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,3.0)),false); //on the cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,2.9)),false); //inside cylinder		
 	}
 
 	void testIsValidMap(){
@@ -1050,17 +1050,17 @@ public:
 		input[31]=1;
 		input[32]=1;
 		input[33]=1;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		input[31]=0;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		input[32]=0;
-		TS_ASSERT_EQUALS(A.isValid(input),0);
+		TS_ASSERT_EQUALS(A.isValid(input),false);
 		input[33]=0;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		input[32]=1;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		input[33]=1;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 	}
 
 	void testSimplyfy(){
@@ -1182,13 +1182,13 @@ public:
 		Rule *uSC=createUnionSphereAndCylinder();
 		A.setLeaf(uSC,0);
 		TS_ASSERT_EQUALS(A.leaf(0),uSC);
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,0.0)),0); //inside the sphere and cylinder 
-		TS_ASSERT_EQUALS(A.isValid(V3D(4.1,0.0,0.0)),1); //outside sphere
-		TS_ASSERT_EQUALS(A.isValid(V3D(4.0,0.0,0.0)),0); //on sphere
-		TS_ASSERT_EQUALS(A.isValid(V3D(3.9,0.0,0.0)),0); //inside sphere
-		TS_ASSERT_EQUALS(A.isValid(V3D(1.1,4.0,0.0)),1); //outside cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(1.0,4.0,0.0)),0); //on cylinder
-		TS_ASSERT_EQUALS(A.isValid(V3D(0.9,4.0,0.0)),0); //inside cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.0,0.0,0.0)),false); //inside the sphere and cylinder 
+		TS_ASSERT_EQUALS(A.isValid(V3D(4.1,0.0,0.0)),true); //outside sphere
+		TS_ASSERT_EQUALS(A.isValid(V3D(4.0,0.0,0.0)),false); //on sphere
+		TS_ASSERT_EQUALS(A.isValid(V3D(3.9,0.0,0.0)),false); //inside sphere
+		TS_ASSERT_EQUALS(A.isValid(V3D(1.1,4.0,0.0)),true); //outside cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(1.0,4.0,0.0)),false); //on cylinder
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.9,4.0,0.0)),false); //inside cylinder
 	}
 
 	void testIsValidMap(){
@@ -1199,13 +1199,13 @@ public:
 		std::map<int,int> input;
 		input[10]=1;
 		input[11]=1;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		input[10]=0;
-		TS_ASSERT_EQUALS(A.isValid(input),0);
+		TS_ASSERT_EQUALS(A.isValid(input),false);
 		input[11]=0;
-		TS_ASSERT_EQUALS(A.isValid(input),0);
+		TS_ASSERT_EQUALS(A.isValid(input),false);
 		input[10]=1;
-		TS_ASSERT_EQUALS(A.isValid(input),0);
+		TS_ASSERT_EQUALS(A.isValid(input),false);
 	}
 
 	void testSimplyfy(){
@@ -1337,11 +1337,11 @@ public:
 		TS_ASSERT_EQUALS(A.leaf(1),(Rule*)0);
 		A.setStatus(0);
 		TS_ASSERT_EQUALS(A.display()," False ");
-		TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),0);
+		TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),false);
 		A.setStatus(-1);
-		TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),-1);
+		TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),false);
 		A.setStatus(1);
-		TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),1);
+		TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),true);
 
 		std::map<int,int> input;
 		input[0]=0;
@@ -1349,9 +1349,9 @@ public:
 		input[10]=1;
 		input[15]=0;
 		input[20]=-1;
-		TS_ASSERT_EQUALS(A.isValid(input),1);
+		TS_ASSERT_EQUALS(A.isValid(input),true);
 		A.setStatus(0);
-		TS_ASSERT_EQUALS(A.isValid(input),0);
+		TS_ASSERT_EQUALS(A.isValid(input),false);
 	}
 	void testSimplyfy(){
 		BoolValue A;

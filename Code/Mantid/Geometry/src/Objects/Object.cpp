@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
@@ -27,7 +28,7 @@ namespace Geometry
 Kernel::Logger& Object::PLog(Kernel::Logger::get("Object"));
 
 Object::Object() :
-  ObjName(0), MatN(-1), Tmp(300), density(0.0), TopRule(0), AABBxMax(0), AABByMax(0), AABBzMax(0),
+  ObjName(0), MatN(-1), Tmp(300), density(0.0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
           vtkGeometryCacheWriter>())
@@ -388,7 +389,7 @@ CompGrp* Object::procComp(Rule* RItem) const
   return CG;
 }
 
-int Object::isOnSide(const Geometry::V3D& Pt) const
+bool Object::isOnSide(const Geometry::V3D& Pt) const
 /*!
  - (a) Uses the Surface list to check those surface
  that the point is on.
@@ -420,7 +421,7 @@ int Object::isOnSide(const Geometry::V3D& Pt) const
       // can check direct normal here since one success
       // means that we can return 1 and finish
       if (!checkSurfaceValid(Pt, Snorms.back()))
-        return 1;
+        return true;
     }
   }
   std::list<Geometry::V3D>::const_iterator xs, ys;
@@ -431,10 +432,10 @@ int Object::isOnSide(const Geometry::V3D& Pt) const
       NormPair = (*ys) + (*xs);
       NormPair.normalize();
       if (!checkSurfaceValid(Pt, NormPair))
-        return 1;
+        return true;
     }
   // Ok everthing failed return 0;
-  return 0;
+  return false;
 }
 
 int Object::checkSurfaceValid(const Geometry::V3D& C, const Geometry::V3D& Nm) const
@@ -457,7 +458,7 @@ int Object::checkSurfaceValid(const Geometry::V3D& C, const Geometry::V3D& Nm) c
   return status / 2;
 }
 
-int Object::isValid(const Geometry::V3D& Pt) const
+bool Object::isValid(const Geometry::V3D& Pt) const
 /*!
  Determines is Pt is within the object
  or on the surface
@@ -466,11 +467,11 @@ int Object::isValid(const Geometry::V3D& Pt) const
  */
 {
   if (!TopRule)
-    return 0;
+    return false;
   return TopRule->isValid(Pt);
 }
 
-int Object::isValid(const std::map<int, int>& SMap) const
+bool Object::isValid(const std::map<int, int>& SMap) const
 /*!
  Determines is group of surface maps are valid
  \param SMap :: map of SurfaceNumber : status
@@ -478,7 +479,7 @@ int Object::isValid(const std::map<int, int>& SMap) const
  */
 {
   if (!TopRule)
-    return 0;
+    return false;
   return TopRule->isValid(SMap);
 }
 
@@ -892,26 +893,19 @@ double Object::rayTraceSolidAngle(const Geometry::V3D& observer) const
   if (this->isOnSide(observer))
     return 2 * M_PI; // this is wrong if on an edge
   // Use BB if available, and if observer not within it
-  const double big(1e10);
-  double xmin, ymin, zmin, xmax, ymax, zmax, thetaMax = M_PI;
+  BoundingBox_sptr boundingBox = getBoundingBox();
+  double thetaMax = M_PI;
   bool useBB = false, usePt = false;
   Geometry::V3D ptInObject, axis;
   Quat zToPt;
 
-  xmin = ymin = zmin = -big;
-  xmax = ymax = zmax = big;
-  getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   // Is the bounding box a reasonable one?
-  if (xmax < big && ymax < big && zmax < big && xmin > -big && ymin > -big && zmin > -big)
+  if(boundingBox && !boundingBox->isPointInside(observer))
   {
-    // If observer not inside bounding box, then can make use of it
-    if (!inBoundingBox(observer, xmax, ymax, zmax, xmin, ymin, zmin))
-    {
-      useBB = usePt = true;
-      thetaMax = bbAngularWidth(observer, xmax, ymax, zmax, xmin, ymin, zmin);
-      ptInObject = Geometry::V3D(0.5 * (xmin + xmax), 0.5 * (ymin + ymax), 0.5 * (zmin + zmax));
-      res = resBB;
-    }
+    useBB = usePt = true;
+    thetaMax = boundingBox->angularWidth(observer);
+    ptInObject = boundingBox->centrePoint();
+    res = resBB;
   }
   // Try and find a point in the object if useful bounding box not found
   if (!useBB)
@@ -948,7 +942,7 @@ double Object::rayTraceSolidAngle(const Geometry::V3D& observer) const
       Geometry::V3D dir(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
       if (usePt)
         zToPt.rotate(dir);
-      if (!useBB || lineHitsBoundingBox(observer, dir, xmax, ymax, zmax, xmin, ymin, zmin))
+      if (!useBB || boundingBox->doesLineIntersect(observer, dir))
       {
         Track tr(observer, dir);
         if (this->interceptSurface(tr) > 0)
@@ -1042,14 +1036,8 @@ double Object::triangleSolidAngle(const V3D& observer) const
   // Because the triangles from OC are not consistently ordered wrt their outward normal
   // internal points give incorrect solid angle. Surface points are difficult to get right
   // with the triangle based method. Hence catch these two (unlikely) cases.
-  if (!boolBounded)
-  {
-    const double big(1e8);
-    AABBxMax = AABByMax = AABBzMax = big;
-    AABBxMin = AABByMin = AABBzMin = -big;
-    getBoundingBox(AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin, AABBzMin);
-  }
-  if (inBoundingBox(observer, AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin, AABBzMin))
+  BoundingBox_sptr boundingBox = this->getBoundingBox();
+  if( boundingBox && boundingBox->isPointInside(observer) )
   {
     if (isValid(observer))
     {
@@ -1118,16 +1106,10 @@ double Object::triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) c
   // Because the triangles from OC are not consistently ordered wrt their outward normal
   // internal points give incorrect solid angle. Surface points are difficult to get right
   // with the triangle based method. Hence catch these two (unlikely) cases.
-  if (!boolBounded)
-  {
-    const double big(1e8);
-    AABBxMax = AABByMax = AABBzMax = big;
-    AABBxMin = AABByMin = AABBzMin = -big;
-    getBoundingBox(AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin, AABBzMin);
-  }
+  BoundingBox_sptr boundingBox = this->getBoundingBox();
   double sx = scaleFactor[0], sy = scaleFactor[1], sz = scaleFactor[2];
   V3D sObserver = observer / scaleFactor;
-  if (inBoundingBox(sObserver, AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin, AABBzMin))
+  if( boundingBox && boundingBox->isPointInside(sObserver) )
   {
     if (isValid(sObserver))
     {
@@ -1137,6 +1119,7 @@ double Object::triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) c
         return (4.0 * M_PI);
     }
   }
+
   int nTri = this->NumberOfTriangles();
   //
   // If triangulation is not available fall back to ray tracing method, unless
@@ -1582,6 +1565,38 @@ double Object::ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D 
 }
 
 /**
+ * Returns an axis-aligned bounding box that will fit the shape
+ * @returns A shared pointer to a bounding box for this shape.
+ */
+boost::shared_ptr<BoundingBox> Object::getBoundingBox() const
+{
+  if( !TopRule )
+  {
+    // If we don't know the extent of the object, the bounding box doesn't mean anything
+    return BoundingBox_sptr();
+  }
+  if( !m_boundingBox )
+  {
+    // First up, construct the trial set of elements from the object's bounding box
+    const double big(1e10); 
+    double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
+    TopRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+    //If the object is not axis aligned then the bounding box will be poor, in particular the minima are left at the trial start so return 
+    // a null object here
+    if( minX == -big || minY == -big || minZ == -big )
+    {
+      return BoundingBox_sptr();
+    }
+
+    // This member function is const given that from a user's perspective it is perfecly reasonable 
+    // to call it on a const object. We need to call a non-const function here to update the cache,
+    // which is just an implementation detail
+    const_cast<Object*>(this)->defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  }
+  return m_boundingBox;
+}
+
+/**
  * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
  * object and returns them back in max and min points.
  *
@@ -1638,8 +1653,7 @@ void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xm
 void Object::defineBoundingBox(const double &xMax, const double &yMax, const double &zMax,
     const double &xMin, const double &yMin, const double &zMin)
 {
-  if (xMax < xMin || yMax < yMin || zMax < zMin)
-    throw std::invalid_argument("Invalid range in Object::defineBoundingBox");
+
   AABBxMax = xMax;
   AABByMax = yMax;
   AABBzMax = zMax;
@@ -1647,6 +1661,8 @@ void Object::defineBoundingBox(const double &xMax, const double &yMax, const dou
   AABByMin = yMin;
   AABBzMin = zMin;
   boolBounded = true;
+
+  m_boundingBox = boost::shared_ptr<BoundingBox>(new BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin));
 }
 
 /*!
@@ -1666,25 +1682,18 @@ int Object::getPointInObject(Geometry::V3D& point) const
     point = testPt;
     return 1;
   }
-  //
-  // Try centre of bounding box as initial guess, if one can be found
-  // Note that if initial bounding box estimate greater than ~O(1e16) times
-  // actual size, boundingBox may be wrong.
-  //
-  const double big(1e10);
-  double xmin, ymin, zmin, xmax, ymax, zmax;
-  xmin = ymin = zmin = -big;
-  xmax = ymax = zmax = big;
-  this->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
-  if (xmax < big && ymax < big && zmax < big && xmin > -big && ymin > -big && zmin > -big)
+  // Try centre of bounding box as initial guess, if we have one.
+  BoundingBox_sptr boundingBox = getBoundingBox();
+  if(boundingBox)
   {
-    testPt = Geometry::V3D(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
+    testPt = boundingBox->centrePoint();
     if (searchForObject(testPt) > 0)
     {
       point = testPt;
       return 1;
     }
   }
+
   return 0;
 }
 
@@ -1721,153 +1730,6 @@ int Object::searchForObject(Geometry::V3D& point) const
     }
   }
   return 0;
-}
-
-/*!
- Fast test to determine if Line hits BoundingBox.
- \param orig :: Origin of line to test
- \param dir  :: direction of line
- \param xmax :: Maximum value for the bounding box in x direction
- \param ymax :: Maximum value for the bounding box in y direction
- \param zmax :: Maximum value for the bounding box in z direction
- \param xmin :: Minimum value for the bounding box in x direction
- \param ymin :: Minimum value for the bounding box in y direction
- \param zmin :: Minimum value for the bounding box in z direction
- \return 1 if line hits, 0 otherwise
- */
-int Object::lineHitsBoundingBox(const Geometry::V3D& orig, const Geometry::V3D& dir, const double& xmax,
-    const double& ymax, const double& zmax, const double& xmin, const double& ymin, const double& zmin) const
-{
-  //
-  // Method - Loop through planes looking for ones that are visible and check intercept
-  // Assume that orig is outside of BoundingBox.
-  //
-  double lambda;
-  const double tol = Tolerance;
-  if (orig.X() > xmax)
-  {
-    if (dir.X() < -tol)
-    {
-      lambda = (xmax - orig.X()) / dir.X();
-      if (ymin < orig.Y() + lambda * dir.Y() && ymax > orig.Y() + lambda * dir.Y())
-        if (zmin < orig.Z() + lambda * dir.Z() && zmax > orig.Z() + lambda * dir.Z())
-          return 1;
-    }
-  }
-  if (orig.X() < xmin)
-  {
-    if (dir.X() > tol)
-    {
-      lambda = (xmin - orig.X()) / dir.X();
-      if (ymin < orig.Y() + lambda * dir.Y() && ymax > orig.Y() + lambda * dir.Y())
-        if (zmin < orig.Z() + lambda * dir.Z() && zmax > orig.Z() + lambda * dir.Z())
-          return 1;
-    }
-  }
-  if (orig.Y() > ymax)
-  {
-    if (dir.Y() < -tol)
-    {
-      lambda = (ymax - orig.Y()) / dir.Y();
-      if (xmin < orig.X() + lambda * dir.X() && xmax > orig.X() + lambda * dir.X())
-        if (zmin < orig.Z() + lambda * dir.Z() && zmax > orig.Z() + lambda * dir.Z())
-          return 1;
-    }
-  }
-  if (orig.Y() < ymin)
-  {
-    if (dir.Y() > tol)
-    {
-      lambda = (ymin - orig.Y()) / dir.Y();
-      if (xmin < orig.X() + lambda * dir.X() && xmax > orig.X() + lambda * dir.X())
-        if (zmin < orig.Z() + lambda * dir.Z() && zmax > orig.Z() + lambda * dir.Z())
-          return 1;
-    }
-  }
-  if (orig.Z() > zmax)
-  {
-    if (dir.Z() < -tol)
-    {
-      lambda = (zmax - orig.Z()) / dir.Z();
-      if (ymin < orig.Y() + lambda * dir.Y() && ymax > orig.Y() + lambda * dir.Y())
-        if (xmin < orig.X() + lambda * dir.X() && xmax > orig.X() + lambda * dir.X())
-          return 1;
-    }
-  }
-  if (orig.Z() < zmin)
-  {
-    if (dir.Z() > tol)
-    {
-      lambda = (zmin - orig.Z()) / dir.Z();
-      if (ymin < orig.Y() + lambda * dir.Y() && ymax > orig.Y() + lambda * dir.Y())
-        if (xmin < orig.X() + lambda * dir.X() && xmax > orig.X() + lambda * dir.X())
-          return 1;
-    }
-  }
-  return 0;
-
-}
-
-
-/*!
- Test point in BoundingBox
- \param point :: Point to test
- \param xmax :: Maximum value for the bounding box in x direction
- \param ymax :: Maximum value for the bounding box in y direction
- \param zmax :: Maximum value for the bounding box in z direction
- \param xmin :: Minimum value for the bounding box in x direction
- \param ymin :: Minimum value for the bounding box in y direction
- \param zmin :: Minimum value for the bounding box in z direction
- \return 1 if in, 0 otherwise
- */
-int Object::inBoundingBox(const Geometry::V3D& point, const double& xmax, const double& ymax,
-    const double& zmax, const double& xmin, const double& ymin, const double& zmin) const
-{
-  //
-  const double tol = Tolerance;
-  if (point.X() <= xmax + tol && point.X() >= xmin - tol && point.Y() <= ymax + tol && point.Y() >= ymin
-      - tol && point.Z() <= zmax + tol && point.Z() >= zmin - tol)
-    return 1;
-  return 0;
-}
-
-/*!
- Find maximum angular half width of the bounding box from the observer, that is
- the greatest angle between the centre point and any corner point
- \param observer :: Viewing point
- \param xmax :: Maximum value for the bounding box in x direction
- \param ymax :: Maximum value for the bounding box in y direction
- \param zmax :: Maximum value for the bounding box in z direction
- \param xmin :: Minimum value for the bounding box in x direction
- \param ymin :: Minimum value for the bounding box in y direction
- \param zmin :: Minimum value for the bounding box in z direction
- \return 1 if in, 0 otherwise
- */
-double Object::bbAngularWidth(const Geometry::V3D& observer, const double& xmax, const double& ymax,
-    const double& zmax, const double& xmin, const double& ymin, const double& zmin) const
-{
-  double theta, thetaMax = -1;
-  Geometry::V3D centre = Geometry::V3D(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin))
-      - observer;
-  std::vector<Geometry::V3D> pts;
-  pts.reserve(8);
-  pts.push_back(Geometry::V3D(xmin, ymin, zmin) - observer);
-  pts.push_back(Geometry::V3D(xmin, ymin, zmax) - observer);
-  pts.push_back(Geometry::V3D(xmin, ymax, zmin) - observer);
-  pts.push_back(Geometry::V3D(xmin, ymax, zmax) - observer);
-  pts.push_back(Geometry::V3D(xmax, ymin, zmin) - observer);
-  pts.push_back(Geometry::V3D(xmax, ymin, zmax) - observer);
-  pts.push_back(Geometry::V3D(xmin, ymax, zmin) - observer);
-  pts.push_back(Geometry::V3D(xmin, ymax, zmax) - observer);
-  std::vector<Geometry::V3D>::const_iterator ip;
-  double centre_norm = centre.norm();
-  for (ip = pts.begin(); ip != pts.end(); ip++)
-  {
-    theta = acos((ip)->scalar_prod(centre) / ((ip)->norm() * centre_norm));
-    if (theta > thetaMax)
-      thetaMax = theta;
-  }
-  return thetaMax;
 }
 
 /**

@@ -71,6 +71,7 @@ public:
   int interceptSurface(Track& track) const;
   double solidAngle(const V3D& observer) const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
+  void getBoundingBox(BoundingBox& absoluteBB) const;
   int getPointInObject(V3D& point) const;
   //Rendering member functions
   void draw() const;

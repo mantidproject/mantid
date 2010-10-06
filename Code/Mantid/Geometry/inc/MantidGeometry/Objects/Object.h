@@ -32,6 +32,7 @@ namespace Mantid
     class CacheGeometryHandler;
     class vtkGeometryCacheReader;
     class vtkGeometryCacheWriter;
+    class BoundingBox;
     
     /*!
     \class Object
@@ -78,6 +79,9 @@ namespace Mantid
       int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
       CompGrp* procComp(Rule*) const;
       int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
+      boost::shared_ptr<BoundingBox> m_boundingBox;
+
+      // -- DEPRECATED --
       mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
         AABByMax,  ///< ymax of Axis aligned bounding box cache
         AABBzMax,  ///< zmax of Axis aligned bounding box cache
@@ -85,16 +89,9 @@ namespace Mantid
         AABByMin,  ///< xmin of Axis aligned bounding box cache
         AABBzMin;  ///< zmin of Axis Aligned Bounding Box Cache
       mutable bool  boolBounded; ///< flag true if a bounding box exists, either by getBoundingBox or defineBoundingBox
+      // -- --
+
       int searchForObject(Geometry::V3D&) const;
-      int inBoundingBox(const Geometry::V3D&,
-        const double&, const double&, const double&,
-        const double&, const double&, const double& ) const;
-      int lineHitsBoundingBox(const Geometry::V3D&, const Geometry::V3D&,
-        const double&, const double&, const double&,
-        const double&, const double&, const double& ) const;
-      double bbAngularWidth(const Geometry::V3D&,
-        const double&, const double&, const double&,
-        const double&, const double&, const double& ) const;
       double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
       double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
       double SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const;
@@ -160,9 +157,9 @@ namespace Mantid
       virtual void print() const;
       void printTree() const;
 
-      int isValid(const Geometry::V3D&) const;    ///< Check if a point is valid
-      int isValid(const std::map<int,int>&) const;  ///< Check if a set of surfaces are valid.
-      int isOnSide(const Geometry::V3D&) const;
+      bool isValid(const Geometry::V3D&) const;    ///< Check if a point is valid
+      bool isValid(const std::map<int,int>&) const;  ///< Check if a set of surfaces are valid.
+      bool isOnSide(const Geometry::V3D&) const;
       int calcValidType(const Geometry::V3D& Pt,const Geometry::V3D& uVec) const;
 
       std::vector<int> getSurfaceIndex() const;
@@ -191,10 +188,12 @@ namespace Mantid
       // solid angle via ray tracing
       double rayTraceSolidAngle(const Geometry::V3D& observer) const;
 
-      // Calculate (or return cached value of) Axis Aligned Bounding box
+      /// Calculate (or return cached value of) Axis Aligned Bounding box (DEPRECATED)
       void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
 
-      // Define Axis Aligned Bounding box
+      /// Calculate (or return cached value of) axis-aligned bounding box
+      boost::shared_ptr<BoundingBox> Object::getBoundingBox() const;
+      /// Define axis-aligned bounding box
       void defineBoundingBox(const double& xmax,const double& ymax,const double& zmax,const double& xmin,const double& ymin,const double& zmin);
 
       // find internal point to object

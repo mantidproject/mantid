@@ -192,6 +192,9 @@
     <ClCompile Include="src\Rendering\vtkGeometryCacheWriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Objects\BoundingBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h">
@@ -548,5 +551,16 @@
     <ClInclude Include="inc\MantidGeometry\Rendering\OpenCascadeConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Objects\BoundingBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\BoundingBoxTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\ComponentCreationHelpers.hh">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

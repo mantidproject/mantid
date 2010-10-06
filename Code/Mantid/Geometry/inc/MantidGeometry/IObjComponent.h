@@ -88,7 +88,7 @@ public:
    * @param zmin :: Minimum value for the bounding box in z direction
    */
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const = 0;
-
+  
   ///Try to find a point that lies within (or on) the object
   virtual int getPointInObject(V3D& point) const = 0;
 

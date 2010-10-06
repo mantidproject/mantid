@@ -186,6 +186,9 @@
     <ClCompile Include="src\LoadSpec.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\DefineGaugeVolume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test\AlignDetectorsTest.h">
@@ -450,6 +453,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidDataHandling\LoadSpec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidDataHandling\DefineGaugeVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
+#include "ComponentCreationHelpers.hh"
+
 
 using namespace Mantid::Geometry;
 
@@ -378,6 +380,24 @@ public:
   {
     CompAssembly comp;
     TS_ASSERT_EQUALS(comp.type(), "CompAssembly");
+  }
+
+  void test_That_The_Bounding_Box_Is_The_Correct_Size_For_All_Of_The_Constituents()
+  {
+    CompAssembly * bank = ComponentCreationHelper::createTestAssemblyOfFourCylinders();
+    TS_ASSERT(bank);
+    TS_ASSERT_EQUALS(bank->nelements(), 4);
+
+    BoundingBox bbox;
+    bank->getBoundingBox(bbox);
+    TS_ASSERT_DELTA(bbox.xMin(), 0.5, 1e-08);
+    TS_ASSERT_DELTA(bbox.xMax(), 4.5, 1e-08);
+    TS_ASSERT_DELTA(bbox.yMin(), 0.0, 1e-08);
+    TS_ASSERT_DELTA(bbox.yMax(), 1.5, 1e-08);
+    TS_ASSERT_DELTA(bbox.zMin(), -0.5, 1e-08);
+    TS_ASSERT_DELTA(bbox.zMax(), 0.5, 1e-08);
+
+    delete bank;
   }
 
 };

@@ -66,6 +66,9 @@ public:
   /// Set the pixel size of the detector (optional)
   virtual void setNumPixels(int num_xPixels, int num_yPixels);
 
+  /// Get the bounding box for this assembly and store it in the given argument
+  virtual void getBoundingBox(BoundingBox& boundingBox) const;
+
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;

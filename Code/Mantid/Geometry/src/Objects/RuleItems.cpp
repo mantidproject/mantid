@@ -285,7 +285,7 @@ Intersection::displayAddress() const
   return cx.str();
 }
 
-int
+bool 
 Intersection::isValid(const Geometry::V3D& Vec) const
   /*!
     Calculates if Vec is within the object
@@ -295,11 +295,11 @@ Intersection::isValid(const Geometry::V3D& Vec) const
   */
 {
   if (!A || !B)
-    return 0;
-  return (A->isValid(Vec) && B->isValid(Vec)) ? 1 : 0;
+    return false;
+  return (A->isValid(Vec) && B->isValid(Vec)) ? true : false;
 }
 
-int
+bool
 Intersection::isValid(const std::map<int,int>& MX) const
   /*!
     Use MX to determine if the surface truth etc is 
@@ -310,8 +310,8 @@ Intersection::isValid(const std::map<int,int>& MX) const
   */
 {
   if (!A || !B)
-    return 0;
-  return (A->isValid(MX) && B->isValid(MX)) ? 1 : 0;
+    return false;
+  return (A->isValid(MX) && B->isValid(MX)) ? true : false;
 }
 
 int
@@ -590,7 +590,7 @@ Union::simplify()
   return 0;
 }
 
-int
+bool 
 Union::isValid(const Geometry::V3D& Vec) const
   /*!
     Calculates if Vec is within the object
@@ -600,10 +600,10 @@ Union::isValid(const Geometry::V3D& Vec) const
   */
 {
   return ((A && A->isValid(Vec)) ||
-	  (B && B->isValid(Vec))) ? 1 : 0;
+	  (B && B->isValid(Vec))) ? true : false;
 }
 
-int
+bool 
 Union::isValid(const std::map<int,int>& MX) const
   /*!
     Use MX to determine if the surface truth etc is 
@@ -614,7 +614,7 @@ Union::isValid(const std::map<int,int>& MX) const
   */
 {
   return ((A && A->isValid(MX)) ||
-	  (B && B->isValid(MX))) ? 1 : 0;
+	  (B && B->isValid(MX))) ? true : false;
 }
 
 
@@ -843,7 +843,7 @@ SurfPoint::simplify()
   return 0;
 }
 
-int
+bool 
 SurfPoint::isValid(const Geometry::V3D& Pt) const
   /*! 
     Determines if a point  is valid.  
@@ -854,12 +854,12 @@ SurfPoint::isValid(const Geometry::V3D& Pt) const
   */
 {
   if (key)
-    return (key->side(Pt)*sign)>=0 ? 1 : 0;
+    return (key->side(Pt)*sign)>=0 ? true : false;
   else
-    return 0;
+    return false;
 }
 
-int
+bool 
 SurfPoint::isValid(const std::map<int,int>& MX) const
   /*! 
     Use MX to determine if the surface truth etc is 
@@ -870,9 +870,9 @@ SurfPoint::isValid(const std::map<int,int>& MX) const
 {
   std::map<int,int>::const_iterator lx=MX.find(keyN);
   if (lx==MX.end())
-    return 0;
+    return false;
   const int rtype=(lx->second) ? 1 : -1;
-  return (rtype*sign)>=0 ? 1 : 0;
+  return (rtype*sign)>=0 ? true : false;
 }
 
 std::string
@@ -1088,7 +1088,7 @@ CompObj::findLeaf(const Rule* A) const
   return (this==A) ? 0 : -1;
 }
 
-int
+bool
 CompObj::isValid(const Geometry::V3D& Pt) const
   /*! 
     Determines if a point  is valid.  
@@ -1100,11 +1100,11 @@ CompObj::isValid(const Geometry::V3D& Pt) const
   */
 {
   if (key)
-    return (key->isValid(Pt)) ? 0 : 1;
-  return 1;
+    return (key->isValid(Pt)) ? false : true;
+  return true;
 }
 
-int
+bool
 CompObj::isValid(const std::map<int,int>& SMap) const
   /*! 
     Determines if a point  is valid.  
@@ -1112,7 +1112,7 @@ CompObj::isValid(const std::map<int,int>& SMap) const
     \returns :: status
   */
 {
-  return (key) ? !(key->isValid(SMap)) : 1;
+  return (key) ? !(key->isValid(SMap)) : true;
 }
 
 int
@@ -1294,7 +1294,7 @@ BoolValue::findLeaf(const Rule* A) const
   return (this==A) ? 0 : -1;
 }
 
-int
+bool
 BoolValue::isValid(const Geometry::V3D& pt) const
   /*! 
     Determines if a point  is valid.  
@@ -1303,10 +1303,10 @@ BoolValue::isValid(const Geometry::V3D& pt) const
   */
 {
   (void) pt; //Avoid compiler warning
-  return status;
+  return (status > 0 ) ? true : false;
 }
 
-int
+bool
 BoolValue::isValid(const std::map<int,int>& map) const
   /*! 
     Determines if a point  is valid.  
@@ -1315,7 +1315,7 @@ BoolValue::isValid(const std::map<int,int>& map) const
   */
 {
   (void) map; //Avoid compiler warning
-  return status;
+  return (status > 0 ) ? true : false;
 }
 
 int
@@ -1516,7 +1516,7 @@ CompGrp::findLeaf(const Rule* R) const
   return (A==R) ? 0 : -1;
 }
 
-int
+bool
 CompGrp::isValid(const Geometry::V3D& Pt) const
   /*! 
     Determines if a point  is valid.  
@@ -1530,11 +1530,11 @@ CompGrp::isValid(const Geometry::V3D& Pt) const
 {
   // Note:: if isValid is true then return 0:
   if (A)
-    return (A->isValid(Pt)) ? 0 : 1;
-  return 1;
+    return (A->isValid(Pt)) ? false : true;
+  return true;
 }
 
-int
+bool
 CompGrp::isValid(const std::map<int,int>& SMap) const
   /*! 
     Determines if a point  is valid.  
@@ -1544,8 +1544,8 @@ CompGrp::isValid(const std::map<int,int>& SMap) const
 {
   // Note:: if isValid is true then return 0:
   if (A)
-    return (A->isValid(SMap)) ? 0 : 1;
-  return 1;
+    return (A->isValid(SMap)) ? false : true;
+  return true;
 }
 
 int
@@ -1643,13 +1643,5 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
 }
 
 }  // NAMESPACE Geometry
-
-
-/// \Cond TEMPLATE
-
-// template class DTriple<Mantid::Geometry::Rule*,int,Mantid::Geometry::Rule*>;
-
-/// \Endcond TEMPLATE
-
 
 }  // NAMESPACE Mantid

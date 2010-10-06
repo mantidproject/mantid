@@ -8,15 +8,24 @@
 #include <set>
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/System.h"
 
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
-namespace Geometry
-{
-/** @class IComponent
+  namespace Geometry
+  {
+    //---------------------------------------------------------
+    // Forward declarations
+    //---------------------------------------------------------
+    class IComponent;
+
+    /// Define a type for a unique component identifier.
+    typedef IComponent* ComponentID;
+
+    /** @class IComponent
     @brief base class for Geometric IComponent
     @version A
     @author Laurent C Chapon, ISIS RAL
@@ -50,103 +59,104 @@ namespace Geometry
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class IComponent;
-/// Define a type for a unique component identifier.
-typedef IComponent* ComponentID;
+    */
 
-class DLLExport IComponent
-{
-public:
-  /// Returns a string representation of the IComponent type
-  virtual std::string type() const {return "LogicalIComponent";}
-  //! Return a clone to the current object
-  virtual IComponent* clone() const=0;
-  /// Destructor
-  virtual ~IComponent(){}
-  //! Returns the ComponentID - a unique identifier of the component.
-  virtual ComponentID getComponentID()const = 0;
-  //! Assign a parent IComponent. Previous parent link is lost
-  virtual void setParent(IComponent*)= 0;
-  //! Return a pointer to the current parent.
-  virtual boost::shared_ptr<const IComponent> getParent() const = 0;
-  //! Return an array of all ancestors, the nearest first
-  virtual std::vector<boost::shared_ptr<const IComponent> > getAncestors() const = 0;
-  //! Set the IComponent name
-  virtual void setName(const std::string&) = 0;
-  //! Get the IComponent name
-  virtual std::string getName() const = 0;
-  //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
-  virtual void setPos(double, double, double) = 0;
-  /*! Set the position of the component
-  *  The position is with respect to the parent component
-  */
-  virtual void setPos(const V3D&) = 0;
-  //! Set the orientation quaternion relative to parent (if present) otherwise absolute
-  virtual void setRot(const Quat&) = 0;
-  //! Copy the Rotation from another IComponent
-  virtual void copyRot(const IComponent&) = 0;
-  //! Translate the IComponent (vector form). This is relative to parent if present.
-  virtual void translate(const V3D&) = 0;
-  //! Translate the IComponent (x,y,z form). This is relative to parent if present.
-  virtual void translate(double, double, double) = 0;
-  //! Rotate the IComponent. This is relative to parent.
-  virtual void rotate(const Quat&) = 0;
-  //! Rotate the IComponent by an angle in degrees with respect to an axis.
-  virtual void rotate(double,const V3D&) = 0;
-  //! Get the position relative to the parent IComponent (absolute if no parent)
-  virtual V3D getRelativePos() const = 0;
-  //! Get the position of the IComponent. Tree structure is traverse through the parent chain
-  virtual V3D getPos() const = 0;
-  //! Get the relative Orientation
-  virtual const Quat& getRelativeRot() const = 0;
-  //! Get the absolute orientation of the IComponent
-  virtual const Quat getRotation() const = 0;
-  //! Get the distance to another IComponent
-  virtual double getDistance(const IComponent&) const = 0;
-  /** @name ParameterMap access */
-  //@{
-  /// Return the names of the parameters for this component
-  virtual std::set<std::string> getParameterNames(bool recursive = true) const = 0;
-  /// Returns a boolean indicating if the component has the named parameter
-  virtual bool hasParameter(const std::string & name, bool recursive = true) const = 0;
-  // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
-  // one for each type, luckily there won't be too many
-  /// Get a parameter defined as a double
-  virtual std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const = 0;
-  /// Get a parameter defined as a V3D
-  virtual std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const = 0;
-  /// Get a parameter defined as a Quaternion
-  virtual std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const = 0;
-  /// Get a parameter defined as a string
-  virtual std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const = 0;
-  //@}
-  /** Prints a text representation of itself
-   */
-  virtual void printSelf(std::ostream&) const = 0;
-private:
-  /// Private, unimplemented copy assignment operator
-  IComponent& operator=(const IComponent&);
-};
 
-///Typedef of a shared pointer to a IComponent
-typedef boost::shared_ptr<Mantid::Geometry::IComponent> IComponent_sptr;
+    class DLLExport IComponent
+    {
+    public:
+      /// Returns a string representation of the IComponent type
+      virtual std::string type() const {return "LogicalIComponent";}
+      //! Return a clone to the current object
+      virtual IComponent* clone() const=0;
+      /// Destructor
+      virtual ~IComponent(){}
+      //! Returns the ComponentID - a unique identifier of the component.
+      virtual ComponentID getComponentID()const = 0;
+      //! Assign a parent IComponent. Previous parent link is lost
+      virtual void setParent(IComponent*)= 0;
+      //! Return a pointer to the current parent.
+      virtual boost::shared_ptr<const IComponent> getParent() const = 0;
+      //! Return an array of all ancestors, the nearest first
+      virtual std::vector<boost::shared_ptr<const IComponent> > getAncestors() const = 0;
+      //! Set the IComponent name
+      virtual void setName(const std::string&) = 0;
+      //! Get the IComponent name
+      virtual std::string getName() const = 0;
+      //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
+      virtual void setPos(double, double, double) = 0;
+      /*! Set the position of the component
+      *  The position is with respect to the parent component
+      */
+      virtual void setPos(const V3D&) = 0;
+      //! Set the orientation quaternion relative to parent (if present) otherwise absolute
+      virtual void setRot(const Quat&) = 0;
+      //! Copy the Rotation from another IComponent
+      virtual void copyRot(const IComponent&) = 0;
+      //! Translate the IComponent (vector form). This is relative to parent if present.
+      virtual void translate(const V3D&) = 0;
+      //! Translate the IComponent (x,y,z form). This is relative to parent if present.
+      virtual void translate(double, double, double) = 0;
+      //! Rotate the IComponent. This is relative to parent.
+      virtual void rotate(const Quat&) = 0;
+      //! Rotate the IComponent by an angle in degrees with respect to an axis.
+      virtual void rotate(double,const V3D&) = 0;
+      //! Get the position relative to the parent IComponent (absolute if no parent)
+      virtual V3D getRelativePos() const = 0;
+      //! Get the position of the IComponent. Tree structure is traverse through the parent chain
+      virtual V3D getPos() const = 0;
+      //! Get the relative Orientation
+      virtual const Quat& getRelativeRot() const = 0;
+      //! Get the absolute orientation of the IComponent
+      virtual const Quat getRotation() const = 0;
+      //! Get the distance to another IComponent
+      virtual double getDistance(const IComponent&) const = 0;
+      /// Get the bounding box for this component and store it in the given argument
+      virtual void getBoundingBox(BoundingBox& boundingBox) const = 0;
 
-/** Prints a text representation
- */
-DLLExport std::ostream& operator<<(std::ostream&, const IComponent&);
+      /** @name ParameterMap access */
+      //@{
+      /// Return the names of the parameters for this component
+      virtual std::set<std::string> getParameterNames(bool recursive = true) const = 0;
+      /// Returns a boolean indicating if the component has the named parameter
+      virtual bool hasParameter(const std::string & name, bool recursive = true) const = 0;
+      // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
+      // one for each type, luckily there won't be too many
+      /// Get a parameter defined as a double
+      virtual std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as a V3D
+      virtual std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as a Quaternion
+      virtual std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as a string
+      virtual std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const = 0;
+      //@}
+      /** Prints a text representation of itself
+      */
+      virtual void printSelf(std::ostream&) const = 0;
+    private:
+      /// Private, unimplemented copy assignment operator
+      IComponent& operator=(const IComponent&);
+    };
 
-} //Namespace Geometry
+    ///Typedef of a shared pointer to a IComponent
+    typedef boost::shared_ptr<Mantid::Geometry::IComponent> IComponent_sptr;
 
-/// An object for constructing a shared_ptr that won't ever delete its pointee
-class NoDeleting
-{
-public:
-  /// Does nothing
-  void operator()(void*){}
-  /// Does nothing
-  void operator()(const void*){}
-};
+    /** Prints a text representation
+    */
+    DLLExport std::ostream& operator<<(std::ostream&, const IComponent&);
+
+  } //Namespace Geometry
+
+  /// An object for constructing a shared_ptr that won't ever delete its pointee
+  class NoDeleting
+  {
+  public:
+    /// Does nothing
+    void operator()(void*){}
+    /// Does nothing
+    void operator()(const void*){}
+  };
 
 } //Namespace Mantid
 

@@ -10,6 +10,8 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Exception.h"
 
+#include "MantidKernel/Timer.h"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
@@ -40,43 +42,43 @@ public:
   void testIsValid()
   {
     ObjComponent ocyl("ocyl", createCappedCylinder());
-	
+
     ocyl.setPos(10,0,0);
     ocyl.setRot(Quat(90.0,V3D(0,0,1)));
     // Check centre point
     TS_ASSERT( ocyl.isValid(V3D(10,0,0)) )
-    // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
-    TS_ASSERT( ocyl.isValid(V3D(10,-2.5,0)) )
-    // Check that a point is not inside, that would be if no rotation
-    TS_ASSERT( ! ocyl.isValid(V3D(11,0,0)) )
-    // Now add a parent with a rotation of its own;
-    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+      // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
+      TS_ASSERT( ocyl.isValid(V3D(10,-2.5,0)) )
+      // Check that a point is not inside, that would be if no rotation
+      TS_ASSERT( ! ocyl.isValid(V3D(11,0,0)) )
+      // Now add a parent with a rotation of its own;
+      Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
 
     // Check centre point
     TS_ASSERT( ocyl.isValid(V3D(0,10,-10)) )
-    // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
-    TS_ASSERT( ocyl.isValid(V3D(0,11.1,-10.5)) )
-    TS_ASSERT( ocyl.isValid(V3D(0.5,7,-10)) )
-    // Check that a point is not inside, that would be if no rotation
-    TS_ASSERT( ! ocyl.isValid(V3D(0,10,-11.1)) )
-    TS_ASSERT( ! ocyl.isValid(V3D(1,10,-10)) )
-    // Take out component's rotation - it should make no difference because it's about the cylinder axis
-    ocyl.setRot(Quat(1,0,0,0));
+      // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
+      TS_ASSERT( ocyl.isValid(V3D(0,11.1,-10.5)) )
+      TS_ASSERT( ocyl.isValid(V3D(0.5,7,-10)) )
+      // Check that a point is not inside, that would be if no rotation
+      TS_ASSERT( ! ocyl.isValid(V3D(0,10,-11.1)) )
+      TS_ASSERT( ! ocyl.isValid(V3D(1,10,-10)) )
+      // Take out component's rotation - it should make no difference because it's about the cylinder axis
+      ocyl.setRot(Quat(1,0,0,0));
     // and repeat tests above
     TS_ASSERT( ocyl.isValid(V3D(0,10,-10)) )
-    TS_ASSERT( ocyl.isValid(V3D(0,10.5,-11.1)) )
-    TS_ASSERT( ocyl.isValid(V3D(0.5,10,-7)) )
-    TS_ASSERT( ! ocyl.isValid(V3D(0,11.1,-10)) )
-    TS_ASSERT( ! ocyl.isValid(V3D(1,10,-10)) )
+      TS_ASSERT( ocyl.isValid(V3D(0,10.5,-11.1)) )
+      TS_ASSERT( ocyl.isValid(V3D(0.5,10,-7)) )
+      TS_ASSERT( ! ocyl.isValid(V3D(0,11.1,-10)) )
+      TS_ASSERT( ! ocyl.isValid(V3D(1,10,-10)) )
 
-    // An ObjComponent without an associated geometric object is regarded as a point
-    ObjComponent comp("noShape");
+      // An ObjComponent without an associated geometric object is regarded as a point
+      ObjComponent comp("noShape");
     comp.setPos(1,2,3);
     // Check the exact point passes
     TS_ASSERT( comp.isValid(V3D(1,2,3)) )
-    // But that slightly off fails
-    TS_ASSERT( ! comp.isValid(V3D(1.0001,2,3)) )
+      // But that slightly off fails
+      TS_ASSERT( ! comp.isValid(V3D(1.0001,2,3)) )
   }
 
   void testIsOnSide()
@@ -85,40 +87,40 @@ public:
     ocyl.setPos(10,0,0);
     ocyl.setRot(Quat(90.0,V3D(0,0,1)));
     TS_ASSERT( ocyl.isOnSide(V3D(10.5,0,0)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(9.5,0,0)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(10,1,0.5)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(10,-3,-0.5)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(9.7,1.2,0.3)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(10,-3.2,0)) )
-    TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
-    // Now add a parent with a rotation of its own;
-    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+      TS_ASSERT( ocyl.isOnSide(V3D(9.5,0,0)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(10,1,0.5)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(10,-3,-0.5)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(9.7,1.2,0.3)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(10,-3.2,0)) )
+      TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
+      // Now add a parent with a rotation of its own;
+      Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
     TS_ASSERT( ocyl.isOnSide(V3D(0.5,10,-10)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0,9,-10.5)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0,11.2,-10)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0.2,6.8,-9.6)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(-0.5,11.2,-10)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0,6.8,-9.5)) )
-    TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
-    // Take out component's rotation - it should make no difference because it's about the cylinder axis
-    ocyl.setRot(Quat(1,0,0,0));
+      TS_ASSERT( ocyl.isOnSide(V3D(0,9,-10.5)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(0,11.2,-10)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(0.2,6.8,-9.6)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(-0.5,11.2,-10)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(0,6.8,-9.5)) )
+      TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
+      // Take out component's rotation - it should make no difference because it's about the cylinder axis
+      ocyl.setRot(Quat(1,0,0,0));
     // and repeat tests above
     TS_ASSERT( ocyl.isOnSide(V3D(0.5,10,-10)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0,10.5,-9)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0,10,-11.2)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0.2,9.6,-6.8)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(-0.5,10,-11.2)) )
-    TS_ASSERT( ocyl.isOnSide(V3D(0,9.5,-6.8)) )
-    TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(0,10.5,-9)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(0,10,-11.2)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(0.2,9.6,-6.8)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(-0.5,10,-11.2)) )
+      TS_ASSERT( ocyl.isOnSide(V3D(0,9.5,-6.8)) )
+      TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
 
-    // An ObjComponent without an associated geometric object is regarded as a point
-    ObjComponent comp("noShape");
+      // An ObjComponent without an associated geometric object is regarded as a point
+      ObjComponent comp("noShape");
     comp.setPos(1,2,3);
     // Check the exact point passes
     TS_ASSERT( comp.isOnSide(V3D(1,2,3)) )
-    // But that slightly off fails
-    TS_ASSERT( ! comp.isOnSide(V3D(1.0001,2,3)) )
+      // But that slightly off fails
+      TS_ASSERT( ! comp.isOnSide(V3D(1.0001,2,3)) )
   }
 
   void testInterceptSurface()
@@ -129,29 +131,29 @@ public:
     Track track(V3D(0,0,0),V3D(1,0,0));
 
     TS_ASSERT_EQUALS( ocyl.interceptSurface(track), 1 )
-    Track::LType::const_iterator it = track.begin();
+      Track::LType::const_iterator it = track.begin();
     if (it == track.end()) return;
     TS_ASSERT_EQUALS( it->Dist, 10.5 )
-    TS_ASSERT_DELTA( it->Length, 1, 0.0001 )
-    TS_ASSERT_EQUALS( it->PtA, V3D(9.5,0,0) )
-    TS_ASSERT_EQUALS( it->PtB, V3D(10.5,0,0) )
-    // Now add a parent with a rotation of its own;
-    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+      TS_ASSERT_DELTA( it->Length, 1, 0.0001 )
+      TS_ASSERT_EQUALS( it->PtA, V3D(9.5,0,0) )
+      TS_ASSERT_EQUALS( it->PtB, V3D(10.5,0,0) )
+      // Now add a parent with a rotation of its own;
+      Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
     // Check original track misses
     TS_ASSERT_EQUALS( ocyl.interceptSurface(track), 0 )
-    // Create a new test track going from the origin down the line y = -x
-    Track track2(V3D(0,0,0),V3D(0,1,-1));
+      // Create a new test track going from the origin down the line y = -x
+      Track track2(V3D(0,0,0),V3D(0,1,-1));
     TS_ASSERT_EQUALS( ocyl.interceptSurface(track2), 1 )
-    Track::LType::const_iterator it2 = track2.begin();
+      Track::LType::const_iterator it2 = track2.begin();
     if (it2 == track2.end()) return;
     TS_ASSERT_DELTA( it2->Dist, sqrt(2*10.5*10.5), 0.0001 )
-    TS_ASSERT_DELTA( it2->Length, sqrt(2.0), 0.0001 )
-    TS_ASSERT_EQUALS( it2->PtA, V3D(0,9.5,-9.5) )
-    TS_ASSERT_EQUALS( it2->PtB, V3D(0,10.5,-10.5) )
+      TS_ASSERT_DELTA( it2->Length, sqrt(2.0), 0.0001 )
+      TS_ASSERT_EQUALS( it2->PtA, V3D(0,9.5,-9.5) )
+      TS_ASSERT_EQUALS( it2->PtB, V3D(0,10.5,-10.5) )
 
-    // Calling on an ObjComponent without an associated geometric object will throw
-    ObjComponent comp("noShape");
+      // Calling on an ObjComponent without an associated geometric object will throw
+      ObjComponent comp("noShape");
     TS_ASSERT_THROWS( comp.interceptSurface(track), Exception::NullPointerException )
   }
 
@@ -182,30 +184,63 @@ public:
     ObjComponent B("noShape");
     TS_ASSERT_THROWS( B.solidAngle(V3D(1,2,3)), Exception::NullPointerException )
   }
-void testBoundingBoxCappedCylinder()
+  void testBoundingBoxCappedCylinder()
   {
     // Check that getBoundingBox transforms input guess to Object coordinates and
     // result back to ObjComponent
     ObjComponent A("ocyl", createCappedCylinder());
     A.setPos(10,0,0);
     A.setRot(Quat(90.0,V3D(0,0,1)));
-	const double big=1e6;
-	double xmax,ymax,zmax,xmin,ymin,zmin;
-	xmax=15; ymax=15; zmax=3;
-	xmin=5;  ymin=-5; zmin=-3;
-	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	TS_ASSERT_DELTA(xmax,10.5,1e-5);
+    const double big=1e6;
+    double xmax,ymax,zmax,xmin,ymin,zmin;
+    xmax=15; ymax=15; zmax=3;
+    xmin=5;  ymin=-5; zmin=-3;
+    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    TS_ASSERT_DELTA(xmax,10.5,1e-5);
+    TS_ASSERT_DELTA(ymax,1.2,1e-5);
+    TS_ASSERT_DELTA(zmax,0.5, 1e-5);
+    TS_ASSERT_DELTA(xmin,9.5,1e-5);
+    TS_ASSERT_DELTA(ymin,-3.2,1e-5);
+    TS_ASSERT_DELTA(zmin,-0.5,1e-5);
+
     // Add a parent with a rotation of its own;
     Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     A.setParent(&parent);
-	// note that input values are ignored in this case as cached results used.
-	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	// consistent with the solid angle results
+    // note that input values are ignored in this case as cached results used.
+    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    // consistent with the solid angle results
     TS_ASSERT_DELTA(zmax,-9.5,1e-5);
     TS_ASSERT_DELTA(zmin,-10.5,1e-5);
   }
 
-void testgetPointInObject()
+  void testBoundingBoxCappedCylinder_with_AlternateImplemetation()
+  {
+    // Check that getBoundingBox transforms input guess to Object coordinates and
+    // result back to ObjComponent
+    ObjComponent A("ocyl", createCappedCylinder());
+    A.setPos(10,0,0);
+    A.setRot(Quat(90.0,V3D(0,0,1)));
+
+    BoundingBox boundingBox;
+    A.getBoundingBox(boundingBox);
+    TS_ASSERT_DELTA(boundingBox.xMax(),10.5,1e-5);
+    TS_ASSERT_DELTA(boundingBox.yMax(),1.2,1e-5);
+    TS_ASSERT_DELTA(boundingBox.zMax(),0.5, 1e-5);
+    TS_ASSERT_DELTA(boundingBox.xMin(),9.5,1e-5);
+    TS_ASSERT_DELTA(boundingBox.yMin(),-3.2,1e-5);
+    TS_ASSERT_DELTA(boundingBox.zMin(),-0.5,1e-5);
+
+    // Add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    A.setParent(&parent);
+    // note that input values are ignored in this case as cached results used.
+    A.getBoundingBox(boundingBox);
+    // consistent with the solid angle results
+    TS_ASSERT_DELTA(boundingBox.zMax(),-9.5,1e-5);
+    TS_ASSERT_DELTA(boundingBox.zMin(),-10.5,1e-5);
+  }
+
+  void testgetPointInObject()
   {
     // Check that getPointInObject transforms result back to ObjComponent
     ObjComponent A("ocyl", createCappedCylinder());
@@ -247,40 +282,40 @@ void testgetPointInObject()
   void testIsValidWithScaleFactor()
   {
     ObjComponent ocyl("ocyl", createCappedCylinder());
-	//set the scale factor
-	ocyl.setScaleFactor(2.0,1.0,1.0);
-	TS_ASSERT(ocyl.isValid(V3D(2.4,0.0,0.0)));
-	TS_ASSERT(ocyl.isValid(V3D(-6.4,0.0,0.0)));
-	TS_ASSERT(!ocyl.isValid(V3D(2.5,0.0,0.0)));
-	TS_ASSERT(!ocyl.isValid(V3D(-6.5,0.0,0.0)));
-	TS_ASSERT(ocyl.isValid(V3D(2.3,0.0,0.0)));
-	TS_ASSERT(ocyl.isValid(V3D(-6.3,0.0,0.0)));
+    //set the scale factor
+    ocyl.setScaleFactor(2.0,1.0,1.0);
+    TS_ASSERT(ocyl.isValid(V3D(2.4,0.0,0.0)));
+    TS_ASSERT(ocyl.isValid(V3D(-6.4,0.0,0.0)));
+    TS_ASSERT(!ocyl.isValid(V3D(2.5,0.0,0.0)));
+    TS_ASSERT(!ocyl.isValid(V3D(-6.5,0.0,0.0)));
+    TS_ASSERT(ocyl.isValid(V3D(2.3,0.0,0.0)));
+    TS_ASSERT(ocyl.isValid(V3D(-6.3,0.0,0.0)));
   }
 
   void testIsOnSideWithScaleFactor()
   {
     ObjComponent ocyl("ocyl", createCappedCylinder());
-	//set the scale factor
-	ocyl.setScaleFactor(2.0,1.0,1.0);
-	TS_ASSERT(ocyl.isOnSide(V3D(2.4,0.0,0.0)));
-	TS_ASSERT(ocyl.isOnSide(V3D(-6.4,0.0,0.0)));
-	TS_ASSERT(!ocyl.isOnSide(V3D(2.5,0.0,0.0)));
-	TS_ASSERT(!ocyl.isOnSide(V3D(-6.5,0.0,0.0)));
-	TS_ASSERT(!ocyl.isOnSide(V3D(2.3,0.0,0.0)));
-	TS_ASSERT(!ocyl.isOnSide(V3D(-6.3,0.0,0.0)));
+    //set the scale factor
+    ocyl.setScaleFactor(2.0,1.0,1.0);
+    TS_ASSERT(ocyl.isOnSide(V3D(2.4,0.0,0.0)));
+    TS_ASSERT(ocyl.isOnSide(V3D(-6.4,0.0,0.0)));
+    TS_ASSERT(!ocyl.isOnSide(V3D(2.5,0.0,0.0)));
+    TS_ASSERT(!ocyl.isOnSide(V3D(-6.5,0.0,0.0)));
+    TS_ASSERT(!ocyl.isOnSide(V3D(2.3,0.0,0.0)));
+    TS_ASSERT(!ocyl.isOnSide(V3D(-6.3,0.0,0.0)));
   }
 
   void testIntercepSurfaceWithScaleFactor()
   {
     ObjComponent ocyl("ocyl", createCappedCylinder());
-	//set the scale factor
-	ocyl.setScaleFactor(2.0,1.0,1.0);
+    //set the scale factor
+    ocyl.setScaleFactor(2.0,1.0,1.0);
     Track trackScale(V3D(-6.5,0,0),V3D(1.0,0,0));
     TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScale), 1 );
-	Track::LType::const_iterator itscale=trackScale.begin();
-	TS_ASSERT_EQUALS(itscale->Dist, 8.9);
-	TS_ASSERT_EQUALS(itscale->PtA, V3D(-6.4,0.0,0.0));
-	TS_ASSERT_EQUALS(itscale->PtB, V3D( 2.4,0.0,0.0));
+    Track::LType::const_iterator itscale=trackScale.begin();
+    TS_ASSERT_EQUALS(itscale->Dist, 8.9);
+    TS_ASSERT_EQUALS(itscale->PtA, V3D(-6.4,0.0,0.0));
+    TS_ASSERT_EQUALS(itscale->PtB, V3D( 2.4,0.0,0.0));
 
     Track trackScaleY(V3D(-6.0,-1,0),V3D(0,1.0,0));
     TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScaleY), 1 );
@@ -300,26 +335,26 @@ void testgetPointInObject()
   void testBoundingBoxWithScaleFactor()
   {
     ObjComponent A("ocyl", createCappedCylinder());
-	//set the scale factor
-	A.setScaleFactor(2.0,1.0,1.0);
-	double xmax,ymax,zmax,xmin,ymin,zmin;
-	xmax=100; ymax=100; zmax=100;
-	xmin=-100;  ymin=-100; zmin=-100;
-	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);	
-	TS_ASSERT_DELTA(xmax, 2.4,0.00001);
-	TS_ASSERT_DELTA(xmin,-6.4,0.00001);
+    //set the scale factor
+    A.setScaleFactor(2.0,1.0,1.0);
+    double xmax,ymax,zmax,xmin,ymin,zmin;
+    xmax=100; ymax=100; zmax=100;
+    xmin=-100;  ymin=-100; zmin=-100;
+    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);	
+    TS_ASSERT_DELTA(xmax, 2.4,0.00001);
+    TS_ASSERT_DELTA(xmin,-6.4,0.00001);
   }
 
   void testPointInObjectWithScaleFactor()
   {
     ObjComponent A("ocyl", createCappedCylinder());
-	//set the scale factor
-	V3D scalept;
-	A.setScaleFactor(2.0,1.0,1.0);
-	TS_ASSERT_EQUALS(A.getPointInObject(scalept),1);
-	TS_ASSERT_DELTA(scalept.X(),0.0,1e-6);
-	TS_ASSERT_DELTA(scalept.Y(),0.0,1e-6);
-	TS_ASSERT_DELTA(scalept.Z(),0.0,1e-6);
+    //set the scale factor
+    V3D scalept;
+    A.setScaleFactor(2.0,1.0,1.0);
+    TS_ASSERT_EQUALS(A.getPointInObject(scalept),1);
+    TS_ASSERT_DELTA(scalept.X(),0.0,1e-6);
+    TS_ASSERT_DELTA(scalept.Y(),0.0,1e-6);
+    TS_ASSERT_DELTA(scalept.Z(),0.0,1e-6);
   }
 
   void testPointInObjectWithScaleFactor2()
@@ -429,7 +464,7 @@ private:
     return retVal;
   }
 
-boost::shared_ptr<Object> createCuboid(std::vector<std::string>& planes)
+  boost::shared_ptr<Object> createCuboid(std::vector<std::string>& planes)
   {
     std::string C1=planes[0];
     std::string C2=planes[1];

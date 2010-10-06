@@ -161,6 +161,36 @@ void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, doub
 }
 
 /**
+ * Get the bounding box for this object-component. The underlying shape has a bounding box defined in its own coorindate
+ * system. This needs to be adjusted for the actual position and rotation of this ObjComponent.
+ * @param [Out] The bounding box for this object component will be stored here.
+ */
+void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
+{
+  // Start with the box in the shape's coordinates and
+  // modify in place for speed
+  absoluteBB = BoundingBox(*shape->getBoundingBox());
+  // Scale
+  absoluteBB.xMin() *= m_ScaleFactor.X();
+  absoluteBB.xMax() *= m_ScaleFactor.X();
+  absoluteBB.yMin() *= m_ScaleFactor.Y(); 
+  absoluteBB.yMax() *= m_ScaleFactor.Y();
+  absoluteBB.zMin() *= m_ScaleFactor.Z(); 
+  absoluteBB.zMax() *= m_ScaleFactor.Z();
+  // Rotate
+  (this->getRotation()).rotateBB(absoluteBB.xMin(),absoluteBB.yMin(),absoluteBB.zMin(),
+                                 absoluteBB.xMax(),absoluteBB.yMax(),absoluteBB.zMax());
+  // Shift
+  const V3D localPos = this->getPos();
+  absoluteBB.xMin() += localPos.X(); 
+  absoluteBB.xMax() += localPos.X();
+  absoluteBB.yMin() += localPos.Y(); 
+  absoluteBB.yMax() += localPos.Y();
+  absoluteBB.zMin() += localPos.Z(); 
+  absoluteBB.zMax() += localPos.Z();
+}
+
+/**
  * Try to find a point that lies within (or on) the object
  * @param point On exit, set to the point value (if found)
  * @return 1 if point found, 0 otherwise

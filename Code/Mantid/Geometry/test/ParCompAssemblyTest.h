@@ -128,6 +128,25 @@ public:
     TS_ASSERT_EQUALS(pcomp.type(), "ParCompAssembly");
   }
 
+  //void test_That_The_Bounding_Box_Is_In_The_Correct_Position()
+  //{
+  //  ParCompAssembly *bank = createTestParAssembly();
+  //}
+
+  //private:
+
+  //  ParCompAssembly * createTestParAssembly()
+  //  {
+  //    boost::shared_ptr<CompAssembly> bank = boost::shared_ptr<CompAssembly>(new CompAssembly("Bank"));
+  //    m_det1 = boost::shared_ptr<Component>(new Component("Det1Name"));
+  //    m_det2 = boost::shared_ptr<Component>(new Component("Det2Name"));
+  //    m_det3 = boost::shared_ptr<Component>(new Component("Det3Name"));
+  //    bank->add(det1.get());
+  //    bank->add(det2.get());
+  //    bank->add(det3.get());
+  //  }
+  //  // Keep references to detectors alive
+  //  boost::shared_ptr<Component> m_det1, m_det2, m_det3
 };
 
 #endif

@@ -72,6 +72,7 @@ namespace Mantid
 	  int spectra_nbr = 0;
 	  while(getline(file,str))
 	  {
+     if (str.empty() ) continue;
 		 if (str[0] == '#' && str[1] == 'L')
 		 {
 		   spectra_nbr++;

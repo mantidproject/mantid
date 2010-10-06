@@ -277,19 +277,21 @@ public:
     {
       m_cacheLocMap.clear();
       m_cacheRotMap.clear();
+      m_boundingBoxMap.clear();
     }
  
     ///Sets a cached location on the location cache
-    void setCachedLocation(const IComponent* comp, V3D& location) const;
-    
+    void setCachedLocation(const IComponent* comp, const V3D& location) const;
     ///Attempts to retreive a location from the location cache
     bool getCachedLocation(const IComponent* comp, V3D& location) const;
-
     ///Sets a cached rotation on the rotation cache
-    void setCachedRotation(const IComponent* comp, Quat& rotation) const;
-    
+    void setCachedRotation(const IComponent* comp, const Quat& rotation) const;
     ///Attempts to retreive a rotation from the rotation cache
     bool getCachedRotation(const IComponent* comp, Quat& rotation) const;
+    ///Sets a cached bounding box
+    void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
+    ///Attempts to retrieve a bounding box from the cache
+    bool getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const;
 
 private:
   ///Assignment operator
@@ -303,7 +305,8 @@ private:
   mutable Kernel::Cache<const ComponentID,V3D > m_cacheLocMap;
   /// internal cache map instance for cached rotation values
   mutable Kernel::Cache<const ComponentID,Quat > m_cacheRotMap;
-
+  ///internal cache map for cached bounding boxes
+  mutable Kernel::Cache<const ComponentID,BoundingBox> m_boundingBoxMap;
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };
