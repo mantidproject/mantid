@@ -102,21 +102,21 @@ unix {
   LIBS  += -lPocoXML
  }
 
-  macx{
+  macx {
 	LIBS += -lboost_signals
-	LIBS += -L$$TOPBUILDIR/../3rdparty/qwt/lib -lqwt
- } else {
-	LIBS += -lboost_signals-mt
-	exists ( /usr/lib64/libqwt-qt4.so ) {
-		LIBS += -lqwt-qt4
+	LIBS += -L../3rdparty/qwt/lib -lqwt
 	} else {
-		exists ( /usr/lib/libqwt-qt4.so ) {
+		LIBS += -lboost_signals-mt
+		exists ( /usr/lib64/libqwt-qt4.so ) {
 			LIBS += -lqwt-qt4
 		} else {
-			LIBS += -lqwt
+			exists ( /usr/lib/libqwt-qt4.so ) {
+				LIBS += -lqwt-qt4
+			} else {
+				LIBS += -lqwt
+			}
 		}
 	}
- }
 }
 
 win32 {
