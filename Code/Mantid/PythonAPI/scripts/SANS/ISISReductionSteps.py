@@ -149,21 +149,6 @@ class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
     """
         Transmission calculation for ISIS SANS instruments
     """
-    # Map input values to Mantid options
-    TRANS_FIT_OPTIONS = {
-        'YLOG' : 'Log',
-        'STRAIGHT' : 'Linear',
-        'CLEAR' : 'Off',
-        # Add Mantid ones as well
-        'LOG' : 'Log',
-        'LINEAR' : 'Linear',
-        'LIN' : 'Linear',
-        'OFF' : 'Off'
-    }  
-    _lambda_min = None
-    _lambda_max = None
-    _fit_method = 'Log'
-    
     # Transmission sample parameters
     _direct_sample = None
     _trans_sample = None
@@ -190,16 +175,6 @@ class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
         """
         super(LoadTransmissions, self).__init__()
     
-    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
-        self._lambda_min = lambda_min
-        self._lambda_max = lambda_max
-        fit_method = fit_method.upper()
-        if fit_method in self.TRANS_FIT_OPTIONS.keys():
-            self._fit_method = self.TRANS_FIT_OPTIONS[fit_method]
-        else:
-            self._fit_method = 'Log'      
-            mantid.sendLogMessage("ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default LOG method")
-    
     def set_trans_sample(self, sample, direct, reload=True, period=-1):            
         self._trans_sample = sample
         self._direct_sample = direct
@@ -213,14 +188,6 @@ class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
         self._can_period = period
     
     def execute(self, reducer, workspace):
-        """
-            Calls the CalculateTransmission algorithm
-        """ 
-        if self._lambda_max == None:
-            self._lambda_max = reducer.instrument.TRANS_WAV1_FULL
-        if self._lambda_min == None:
-            self._lambda_min = reducer.instrument.TRANS_WAV2_FULL
-        
         # Load transmission sample
         self._clearPrevious(self.TRANS_SAMPLE)
         self._clearPrevious(self.DIRECT_SAMPLE)
@@ -251,8 +218,6 @@ class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
                 self._assignHelper(self._direct_can, True, self._can_reload, self._can_period, reducer)
             self.DIRECT_CAN = direct_can_ws.getName()
  
-        #TODO: Call CalculateTransmission
-
 class CanSubtraction(LoadRun):
     """
         Subtract the can after correcting it.
@@ -402,7 +367,7 @@ class CanSubtraction(LoadRun):
             if finding_centre == False:
                 ReplaceSpecialValues(InputWorkspace = tmp_smp,OutputWorkspace = tmp_smp, NaNValue="0", InfinityValue="0")
                 ReplaceSpecialValues(InputWorkspace = tmp_can,OutputWorkspace = tmp_can, NaNValue="0", InfinityValue="0")
-                if reducer.CORRECTION_TYPE == '1D':
+                if reducer.to_Q.output_type == '1D':
                     rem_zeros = SANSReductionSteps.StripEndZeros()
                     rem_zeros.execute(reducer, tmp_smp)
                     rem_zeros.execute(reducer, tmp_can)
@@ -802,9 +767,9 @@ class LoadSample(LoadRun):
         TRANS_SAMPLE = ''
         DIRECT_SAMPLE = ''
         if reducer._transmission_calculator is not None:
-            TRANS_SAMPLE = reducer._transmission_calculator.TRANS_SAMPLE
+            TRANS_SAMPLE = reducer.trans_loader.TRANS_SAMPLE
         if reducer._transmission_calculator is not None:
-            DIRECT_SAMPLE = reducer._transmission_calculator.DIRECT_SAMPLE
+            DIRECT_SAMPLE = reducer.trans_loader.DIRECT_SAMPLE
             
         sample_setup = SANSUtility.RunDetails(self.SCATTER_SAMPLE, workspace, 
                                               TRANS_SAMPLE, DIRECT_SAMPLE, self.maskpt_rmin, self.maskpt_rmax, 'sample')
@@ -884,19 +849,29 @@ class UnitsConvert(ReductionStep):
         return '    Wavelength range: ' + self.get_rebin()
 
 class ConvertToQ(ReductionStep):
-    def __init__(self):
+    _OUTPUT_TYPES = {'1D' : 'Q1D', '2D': 'Qxy'}
+    
+    def __init__(self, type = '1D'):
         #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(ConvertToQ, self).__init__()
         
         #this should be set to 1D or 2D
         self._output_type = None
-        self._output_types = {'1D' : 'Q1D', '2D': 'Qxy'}
+        #the algorithm that corrosponds to the above choice
+        self._Q_alg = None
+        self.set_output_type(type)
         #if true gravity is taken into account in the Q1D calculation
         self._use_gravity = False
     
     def set_output_type(self, discript):
-        self._output_type = self._output_types[discript]
+        self._Q_alg = self._OUTPUT_TYPES[discript]
+        self._output_type = discript
         
+    def get_output_type(self):
+        return self._output_type
+
+    output_type = property(get_output_type, set_output_type, None, None)
+
     def set_gravity(self, flag):
         if isinstance(flag, bool) or isinstance(flag, int):
             self._use_gravity = bool(flag)
@@ -906,13 +881,13 @@ class ConvertToQ(ReductionStep):
     def execute(self, reducer, workspace):
         #Steve, I'm not sure this contains good error values 
         errorsWS = reducer.norm_mon.prenormed
-        if self._output_type == 'Q1D':
+        if self._Q_alg == 'Q1D':
             Q1D(workspace, errorsWS, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
             ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
             rem_zeros = SANSReductionSteps.StripEndZeros()
             rem_zeros.execute(reducer, workspace)
 
-        elif self._output_type == 'Qxy':
+        elif self._Q_alg == 'Qxy':
             Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY)
             ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
         else:
@@ -925,8 +900,12 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
         correction. It's input workspace is copied and accessible later
         as prenomed 
     """
-    def __init__(self):
-        super(NormalizeToMonitor, self).__init__()
+    def __init__(self, spectrum_number=None):
+        if not spectrum_number is None:
+            index_num = spectrum_number - 1
+        else:
+            index_num = None
+        super(NormalizeToMonitor, self).__init__(index_num)
         #Steve is unsure about why this is need. It is used later in the calculation of errors on Q
         self.prenormed = None
 
@@ -936,17 +915,17 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
         RenameWorkspace(workspace, self.prenormed)
 
         if self._normalization_spectrum is None:
-            self._normalization_spectrum = reducer.instrument.get_incident_mon()
+            #the -1 converts from spectrum number to spectrum index
+            self._normalization_spectrum = reducer.instrument.get_incident_mon()-1
         
         mtd.sendLogMessage('::SANS::Normalizing to monitor ' + str(self._normalization_spectrum))
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
         norm_ws = 'Monitor'
-        spec_index = self._normalization_spectrum-1
 
         CropWorkspace(reducer.data_loader.uncropped, norm_ws,
-                      StartWorkspaceIndex = spec_index, 
-                      EndWorkspaceIndex   = spec_index)
+                      StartWorkspaceIndex = self._normalization_spectrum, 
+                      EndWorkspaceIndex   = self._normalization_spectrum)
     
         if reducer.instrument.name() == 'LOQ':
             RemoveBins(norm_ws, norm_ws, '19900', '20500',
@@ -970,11 +949,43 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
 
 # Setup the transmission workspace
 ##
-class CalculateTransmission(ReductionStep):
-    def __init__(self, run_setup, use_def_trans):
-        super(CalcTransmissionCorr, self).__init__()
+class CalculateTransmission(SANSReductionSteps.BaseTransmission):
+        # Map input values to Mantid options
+    TRANS_FIT_OPTIONS = {
+        'YLOG' : 'Log',
+        'STRAIGHT' : 'Linear',
+        'CLEAR' : 'Off',
+        # Add Mantid ones as well
+        'LOG' : 'Log',
+        'LINEAR' : 'Linear',
+        'LIN' : 'Linear',
+        'OFF' : 'Off'
+    }  
+
+    def __init__(self):
+        super(CalculateTransmission, self).__init__()
+        self._lambda_min = None
+        self._lambda_max = None
+        self._fit_method = 'Log'
     
+
+    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
+        self._lambda_min = lambda_min
+        self._lambda_max = lambda_max
+        fit_method = fit_method.upper()
+        if fit_method in self.TRANS_FIT_OPTIONS.keys():
+            self._fit_method = self.TRANS_FIT_OPTIONS[fit_method]
+        else:
+            self._fit_method = 'Log'      
+            mantid.sendLogMessage("ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default LOG method")
+    
+
     def execute(self, reducer, workspace):
+        if self._lambda_max == None:
+            self._lambda_max = reducer.instrument.TRANS_WAV1_FULL
+        if self._lambda_min == None:
+            self._lambda_min = reducer.instrument.TRANS_WAV2_FULL
+        
         trans_raw = run_setup.getTransRaw()
         direct_raw = run_setup.getDirectRaw()
         if trans_raw == '' or direct_raw == '':

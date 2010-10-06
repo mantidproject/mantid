@@ -747,6 +747,11 @@ class GetSampleGeom(ReductionStep):
             mantid.sendLogMessage("::SANS::Warning: Invalid geometry type for sample: " + str(shape) + ". Setting default to " + self._default_shape)
             shape = self._default_shape
         self._shape = shape
+        #check that the dimensions that we have make sense for our new shape
+        if not self._width is None:
+            self.width = self._width
+        if not self._thickness is None:
+            self.thickness = self._thickness
     
     def get_shape(self):
         if self._shape is None:
@@ -757,7 +762,7 @@ class GetSampleGeom(ReductionStep):
     def set_width(self, width):
         self._width = float(width)
         # For a disk the height=width
-        if self._shape.startswith('cylinder'):
+        if (not self._shape is None) and (self._shape.startswith('cylinder')):
             self._height = self._width
 
     def get_width(self):
@@ -770,7 +775,7 @@ class GetSampleGeom(ReductionStep):
         self._height = float(height)
         
         # For a cylinder and sphere the height=width=radius
-        if self._shape.startswith('cylinder'):
+        if (not self._shape is None) and (self._shape.startswith('cylinder')):
             self._width = self._height
 
     def get_height(self):
@@ -783,7 +788,7 @@ class GetSampleGeom(ReductionStep):
         """
             Simply sets the variable _thickness to the value passed
         """
-        if not self._shape == 'cuboid':
+        if (not self._shape is None) and (not self._shape == 'cuboid'):
             mantid.sendLogMessage('::SANS::Warning: Can\'t set thickness for shape "'+self._shape+'"')
         self._thickness = float(thickness)
 
@@ -837,7 +842,7 @@ class SampleGeomCor(ReductionStep):
         super(SampleGeomCor, self).__init__()
 
         if issubclass(geometry.__class__, GetSampleGeom):
-            self._dim = geometry
+            self.geo = geometry
         else:
             raise TypeError, 'Sample geometry correction requires a GetSampleGeom object'
 
@@ -847,18 +852,18 @@ class SampleGeomCor(ReductionStep):
         """
 
         try:
-            if self._dim.shape == 'cylinder-axis-up':
+            if self.geo.shape == 'cylinder-axis-up':
                 # Volume = circle area * height
                 # Factor of four comes from radius = width/2
-                scale_factor = self._dim.height*math.pi
-                scale_factor *= math.pow(self._dim.width,2)/4.0
-            elif self._dim.shape == 'cuboid':
-                scale_factor = self._dim.width
-                scale_factor *= self._dim.height*self._dim.thickness
-            elif self._dim.shape == 'cylinder-axis-along':
+                scale_factor = self.geo.height*math.pi
+                scale_factor *= math.pow(self.geo.width,2)/4.0
+            elif self.geo.shape == 'cuboid':
+                scale_factor = self.geo.width
+                scale_factor *= self.geo.height*self.geo.thickness
+            elif self.geo.shape == 'cylinder-axis-along':
                 # Factor of four comes from radius = width/2
-                scale_factor = self._dim.thickness*math.pi
-                scale_factor *= math.pow(self._dim.width, 2)/4.0
+                scale_factor = self.geo.thickness*math.pi
+                scale_factor *= math.pow(self.geo.width, 2)/4.0
             else:
                 raise NotImplemented('Shape "'+self._shape+'" is not in the list of supported shapes')
         except TypeError:

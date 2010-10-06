@@ -47,7 +47,6 @@ class ISISReducer(SANSReducer):
     PHIMAX=90.0
     PHIMIRROR=True
     
-    CORRECTION_TYPE = '1D'
     DIMENSION = None
     SPECMIN = None
     SPECMAX = None
@@ -68,19 +67,18 @@ class ISISReducer(SANSReducer):
     def _init_steps(self):
         self.data_loader = self.append_step(
                             ISISReductionSteps.LoadSample())
-        self._trans_loader = self.append_step(
-                            ISISReductionSteps.LoadTransmissions())
+        self.trans_loader =ISISReductionSteps.LoadTransmissions()
         self.mask = self.append_step(
                             ISISReductionSteps.Mask_ISIS())
         self.to_wavelen = self.append_step(
                             ISISReductionSteps.UnitsConvert('Wavelength'))
         self.norm_mon = self.append_step(
                             ISISReductionSteps.NormalizeToMonitor())
-#        self._add(ISISReductionSteps.CalculateTransmission())
+        self._transmission_calculator =ISISReductionSteps.CalculateTransmission()
         self._corr_and_scale = self.append_step(
                             ISISReductionSteps.ISISCorrections())
 
-        self._to_Q = self.append_step(
+        self.to_Q = self.append_step(
                             ISISReductionSteps.ConvertToQ())
         self.geometry = self.append_step(
                             SANSReductionSteps.GetSampleGeom())
@@ -146,14 +144,14 @@ class ISISReducer(SANSReducer):
         self._transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method)
         
     def set_trans_sample(self, sample, direct, reload=True, period=-1):
-        if not issubclass(self._transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
+        if not issubclass(self.trans_loader.__class__, SANSReductionSteps.BaseTransmission):
             raise RuntimeError, "ISISReducer.set_trans_sample: transmission calculator not set"
-        self._transmission_calculator.set_trans_sample(sample, direct, reload, period)
+        self.trans_loader.set_trans_sample(sample, direct, reload, period)
         
     def set_trans_can(self, can, direct, reload = True, period = -1):
-        if not issubclass(self._transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
+        if not issubclass(self.trans_loader.__class__, SANSReductionSteps.BaseTransmission):
             raise RuntimeError, "ISISReducer.set_trans_can: transmission calculator not set"
-        self._transmission_calculator.set_trans_can(can, direct, reload, period)
+        self.trans_loader.set_trans_can(can, direct, reload, period)
         
     def set_monitor_spectrum(self, specNum, interp=False):
         self.instrument.set_incident_mon(specNum)
@@ -209,9 +207,9 @@ class ISISReducer(SANSReducer):
             
             if finding_centre == False:
                 run = self._data_files.values()[0]
-                final_ws = ISISReductionSteps.extract_workspace_name(run)[0]
+                final_ws = run.split('.')[0]
                 final_ws += self.instrument.cur_detector().name('short')
-                final_ws += '_' + self.CORRECTION_TYPE
+                final_ws += '_' + self.to_Q.output_type
                 final_ws += '_' + self.to_wavelen.get_range()
 
             else:
@@ -233,7 +231,7 @@ class ISISReducer(SANSReducer):
                 if finding_centre == False:
                     # Replaces NANs with zeroes
                     ReplaceSpecialValues(InputWorkspace = self.final_workspace, OutputWorkspace = self.final_workspace, NaNValue="0", InfinityValue="0")
-                    if self.CORRECTION_TYPE == '1D':
+                    if self.to_Q.output_type == '1D':
                         SANSUtility.StripEndZeroes(self.final_workspace)
                     # Store the mask file within the final workspace so that it is saved to the CanSAS file
                     AddSampleLog(self.final_workspace, "UserFile", self.MASKFILE)
@@ -243,6 +241,9 @@ class ISISReducer(SANSReducer):
                         old_name = self.final_workspace + '_' + str(key)
                         RenameWorkspace(old_name, value)
                         AddSampleLog(value, "UserFile", self.maskfile)       
+
+        #any clean up, possibly removing workspaces 
+        self.post_process()
 
     def read_mask_file(self, filename):
         """
@@ -299,12 +300,12 @@ class ISISReducer(SANSReducer):
             elif upper_line.startswith('GRAVITY'):
                 flag = upper_line[8:]
                 if flag == 'ON':
-                    self._to_Q.set_gravity(True)
+                    self.to_Q.set_gravity(True)
                 elif flag == 'OFF':
-                    self._to_Q.set_gravity(False)
+                    self.to_Q.set_gravity(False)
                 else:
                     _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
-                    self._to_Q.set_gravity(False)
+                    self.to_Q.set_gravity(False)
             
             elif upper_line.startswith('BACK/MON/TIMES'):
                 tokens = upper_line.split()

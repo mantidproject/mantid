@@ -113,7 +113,7 @@ def SetSampleOffset(value):
     ReductionSingleton().instrument.set_sample_offset(value)
     
 def Gravity(flag):
-    ReductionSingleton()._to_Q.set_gravity(flag)
+    ReductionSingleton().to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
     ReductionSingleton().set_trans_fit(lambda_min=lambdamin, 
@@ -158,7 +158,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True):
 
 
     # 1D
-    if ReductionSingleton().CORRECTION_TYPE == '1D':
+    if ReductionSingleton().to_Q.output_type == '1D':
         if DEL__FINDING_CENTRE_ == True:
             GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
             return
@@ -172,10 +172,10 @@ def _SetWorkspaceName(name):
 
 
 def Set1D():
-    ReductionSingleton()._to_Q.set_output_type('1D')
+    ReductionSingleton().to_Q.output_type = '1D'
 
 def Set2D():
-    ReductionSingleton()._to_Q.set_output_type('2D')
+    ReductionSingleton().to_Q.output_type = '2D'
 
 def SetSampleOffset(value):
     INSTRUMENT.set_sample_offset(value)
@@ -236,7 +236,7 @@ def _create_quadrant(reduced_ws, rawcount_ws, quadrant, xcentre, ycentre, q_bins
 
     flag_value = -10.0
     ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
-    if ReductionSingleton().CORRECTION_TYPE == '1D':
+    if ReductionSingleton().to_Q.output_type == '1D':
         SANSUtility.StripEndZeroes(output, flag_value)
 
 # Create 4 quadrants for the centre finding algorithm and return their names
@@ -312,7 +312,7 @@ def CalculateResidue():
     return residueX, residueY
 
 def PlotResult(workspace):
-    if ReductionSingleton().CORRECTION_TYPE == '1D':
+    if ReductionSingleton().to_Q.output_type == '1D':
         plotSpectrum(workspace,0)
     else:
         qti.app.mantidUI.importMatrixWorkspace(workspace).plotGraph2D()
@@ -354,7 +354,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     # For the moment treat the rebin string as min/max/step
     qbins = q_REBEIN.split(",")
     nbins = len(qbins)
-    if ReductionSingleton().CORRECTION_TYPE == '1D':
+    if ReductionSingleton().to_Q.output_type == '1D':
         script += '[COLETTE]  LIMIT/Q ' + str(qbins[0]) + ' ' + str(qbins[nbins-1]) + '\n'
         dq = float(qbins[1])
         if dq <  0:

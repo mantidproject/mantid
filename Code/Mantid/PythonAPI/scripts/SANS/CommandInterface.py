@@ -144,27 +144,35 @@ def NoSaveIq():
     
 def SampleGeometry(shape):
     if not isinstance(ReductionSingleton().geometry_correcter, SANSReductionSteps.SampleGeomCor):
-        ReductionSingleton().set_geometry_correcter(SANSReductionSteps.SampleGeomCor())
+        defGeom = SANSReductionSteps.GetSampleGeom()
+        ReductionSingleton().set_geometry_correcter(
+            SANSReductionSteps.SampleGeomCor(defGeom))
     
-    ReductionSingleton().geometry_correcter.set_geometry(shape)
+    ReductionSingleton().geometry_correcter.geo.shape = shape
     
 def SampleThickness(thickness):
     if not isinstance(ReductionSingleton().geometry_correcter, SANSReductionSteps.SampleGeomCor):
-        ReductionSingleton().set_geometry_correcter(SANSReductionSteps.SampleGeomCor())
+        defGeom = SANSReductionSteps.GetSampleGeom()
+        ReductionSingleton().set_geometry_correcter(
+            SANSReductionSteps.SampleGeomCor(defGeom))
 
-    ReductionSingleton().geometry_correcter.set_thickness(thickness)
+    ReductionSingleton().geometry_correcter.geo.thickness = thickness
     
 def SampleHeight(height):
     if not isinstance(ReductionSingleton().geometry_correcter, SANSReductionSteps.SampleGeomCor):
-        ReductionSingleton().set_geometry_correcter(SANSReductionSteps.SampleGeomCor())
+        defGeom = SANSReductionSteps.GetSampleGeom()
+        ReductionSingleton().set_geometry_correcter(
+            SANSReductionSteps.SampleGeomCor(defGeom))
         
-    ReductionSingleton().geometry_correcter.set_height(height)
+    ReductionSingleton().geometry_correcter.geo.height = height
 
 def SampleWidth(width):
     if not isinstance(ReductionSingleton().geometry_correcter, SANSReductionSteps.SampleGeomCor):
-        ReductionSingleton().set_geometry_correcter(SANSReductionSteps.SampleGeomCor())
+        defGeom = SANSReductionSteps.GetSampleGeom()
+        ReductionSingleton().set_geometry_correcter(
+            SANSReductionSteps.SampleGeomCor(defGeom))
         
-    ReductionSingleton().geometry_correcter.set_width(width)
+    ReductionSingleton().geometry_correcter.geo.width = width
 
     
     
