@@ -833,11 +833,11 @@ class UnitsConvert(ReductionStep):
     
     def set_rebin(self, w_low = None, w_step = None, w_high = None):
         if not w_low is None:
-            self.wav_low = float(w_low)
+            self.wav_low = w_low
         if not w_step is None:
-            self.wav_step = float(w_step)
+            self.wav_step = w_step
         if not w_high is None:
-            self.wav_high = float(w_high)
+            self.wav_high = w_high
 
     def get_range(self):
         return str(self.wav_low)+'_'+str(self.wav_high)

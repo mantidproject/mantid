@@ -84,6 +84,9 @@ class ISISReducer(SANSReducer):
                             SANSReductionSteps.GetSampleGeom())
         self.append_step(
                             SANSReductionSteps.SampleGeomCor(self.geometry))
+        
+        #if set to an integer only that period will be extracted from the run file and processed 
+        self._period_num = None
 
     def pre_process(self): 
         """
@@ -115,6 +118,8 @@ class ISISReducer(SANSReducer):
         if not issubclass(self.data_loader.__class__, ISISReductionSteps.LoadSample):
             raise RuntimeError, "ISISReducer.load_set_options: method called with wrong loader class"
         self.data_loader.set_options(reload, period)
+        if period > 0:
+            self._period_num = period
 
     def append_data_file(self, data_file, workspace=None):
         """
@@ -193,7 +198,7 @@ class ISISReducer(SANSReducer):
 
         self._corr_and_scale.rescale = 100.0
 
-    def reduce(self):
+    def _reduce(self):
         """
             Go through the list of reduction steps
         """
@@ -213,6 +218,8 @@ class ISISReducer(SANSReducer):
             if finding_centre == False:
                 run = self._data_files.values()[0]
                 final_ws = run.split('.')[0]
+                if not self._period_num is None:
+                    final_ws += 'p'+str(self._period_num)
                 final_ws += self.instrument.cur_detector().name('short')
                 final_ws += '_' + self.to_Q.output_type
                 final_ws += '_' + self.to_wavelen.get_range()

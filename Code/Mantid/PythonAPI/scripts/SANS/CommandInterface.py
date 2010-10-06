@@ -33,6 +33,14 @@ class ReductionSingleton:
         else:
             ReductionSingleton.__instance = reducer_cls()
         
+    @classmethod
+    def run(cls):
+        if ReductionSingleton.__instance is None:
+            return
+        
+        ReductionSingleton.__instance._reduce()
+        ReductionSingleton.clean(ReductionSingleton.__instance.__class__)
+        
     def __getattr__(self, attr):
         """ Delegate access to implementation """
         return getattr(self.__instance, attr)

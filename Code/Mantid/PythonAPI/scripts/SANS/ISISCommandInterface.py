@@ -61,7 +61,6 @@ def UserPath(path):
     ReductionSingleton().user_path = path
         
 def SANS2D():
-    Clear(ISISReducer.ISISReducer)
     instrument = SANSInsts.SANS2D()
     
     #TODO: this should probably be part of __init__. Leave it for now
@@ -73,7 +72,6 @@ def SANS2D():
     ReductionSingleton().set_instrument(instrument)
 
 def LOQ():
-    Clear(ISISReducer.ISISReducer)
     instrument = SANSInsts.LOQ()
     
     #TODO: refactor this away
@@ -163,7 +161,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = True):
         if DEL__FINDING_CENTRE_ == True:
             GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
             return
-    ReductionSingleton().reduce()
+    ReductionSingleton.run()
     
 def _SetWavelengthRange(start, end):
     ReductionSingleton().to_wavelen.set_range(start, end)
@@ -377,6 +375,8 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath + '\n'
         
     return script
+
+ReductionSingleton.clean(ISISReducer.ISISReducer)
 
 #this is like a #define I'd like to get rid of it because it means nothing here
 DefaultTrans = 'True'
