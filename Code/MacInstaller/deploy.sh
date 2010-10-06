@@ -53,6 +53,8 @@ install_name_tool -change @executable_path/../Frameworks/libMantidWidgets.1.dyli
 cp ../Mantid/release/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/Frameworks/
 install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.1.dylib
 install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.1.dylib
+install_name_tool -change libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.1.dylib
+install_name_tool -change libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.1.dylib
 
 # Now lots of dependencies
 # ...third party directory. Specific required versions only.
@@ -132,3 +134,5 @@ PLUGINSLIBS='MantidPlot.app/plugins/qtplugins/mantid/*.dylib'
 update_lib_paths "$PLUGINSLIBS" "$MACOSLIBS" "$QTLIBS" "../../.."
 install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../../../Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
 install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../../../Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
+install_name_tool -change libqwt.5.dylib @loader_path/../../../Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
+install_name_tool -change libqwt.5.dylib @loader_path/../../../Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
