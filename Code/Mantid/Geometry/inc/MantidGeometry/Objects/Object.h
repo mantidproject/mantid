@@ -192,7 +192,7 @@ namespace Mantid
       void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
 
       /// Calculate (or return cached value of) axis-aligned bounding box
-      boost::shared_ptr<BoundingBox> Object::getBoundingBox() const;
+      boost::shared_ptr<BoundingBox> getBoundingBox() const;
       /// Define axis-aligned bounding box
       void defineBoundingBox(const double& xmax,const double& ymax,const double& zmax,const double& xmin,const double& ymin,const double& zmin);
 
