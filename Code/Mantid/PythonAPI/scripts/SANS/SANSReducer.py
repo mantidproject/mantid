@@ -89,7 +89,7 @@ class SANSReducer(Reducer):
             Set the ReductionStep object that takes care of the geometry correction
             @param subtracter: ReductionStep object
         """
-        if issubclass(correcter.__class__, ReductionStep) or subtracter is None:
+        if issubclass(correcter.__class__, ReductionStep) or correcter is None:
             self.geometry_correcter = correcter
         else:
             raise RuntimeError, "Reducer.set_geometry_correcter expects an object of class ReductionStep"
