@@ -6,6 +6,8 @@ class BaseWidget(QtGui.QWidget):
     """
         Base widget for reduction UI
     """
+    ## Widget name
+    name = ""      
     
     def __init__(self, parent=None, state=None, settings=None):
         QtGui.QWidget.__init__(self, parent)

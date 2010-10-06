@@ -170,6 +170,9 @@ class TransmissionWidget(BaseWidget):
         Widget that presents the transmission options to the user
     """
     _method_box = None
+
+    ## Widget name
+    name = "Transmission"      
     
     def __init__(self, parent=None, state=None, settings=None):
         BaseWidget.__init__(self, parent=parent, state=state, settings=settings)

@@ -2,6 +2,14 @@
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
 """
+# Check whether Mantid is available
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    from HFIRCommandInterface import *
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False  
 
 class BaseScriptElement(object):
     """
@@ -105,9 +113,48 @@ class BaseReductionScripter(object):
         create a reduction script. Parameters are organized by groups that
         will each have their own UI representation.
     """
+    _observers = []
+    
+    class ReductionObserver(object):
+        
+        ## Script element class (for type checking)
+        _state_cls = None
+        ## Script element object
+        _state = None
+        ## Observed widget object
+        _subject = None
+        
+        def __init__(self, subject):
+            self._subject = subject
+            self.update(True)
+         
+        def update(self, init=False):
+            self._state = self._subject.get_state()
+            
+            # If we are initializing, store the object class
+            if init:
+                self._state_cls = self._state.__class__
+  
+            # check that the object class is consistent with what was initially stored 
+            elif not self._state.__class__ == self._state_cls:
+                raise RuntimeError, "State class changed at runtime, was %s, now %s" % (self._state_cls, self._state.__class__)
+            
+        def state(self):
+            if self._state == NotImplemented:
+                return None
+            elif self._state is None:
+                raise RuntimeError, "Error with %s widget: state not initialized" % self._subject.__class__
+            return self._state
+            
     
     def __init__(self, name=""):
         self.instrument_name = name
+        self._observers = []
+
+    def attach(self, subject):
+        observer = BaseReductionScripter.ReductionObserver(subject)
+        self._observers.append(observer)
+        return observer
 
     def to_xml(self, file_name=None):
         """
@@ -115,9 +162,17 @@ class BaseReductionScripter(object):
             @param file_name: name of the file to write the parameters to 
         """
         xml_str = "<Reduction>\n"
+        
+        for item in self._observers:
+            if item.state() is not None:
+                xml_str += item.state().to_xml()
+            
         xml_str += "</Reduction>\n"
             
-        self._write_to_file(file_name, xml_str)
+        if file_name is not None:
+            f = open(file_name, 'w')
+            f.write(xml_str)
+            f.close()
             
         return xml_str
     
@@ -137,18 +192,48 @@ class BaseReductionScripter(object):
             Read in reduction parameters from XML
             @param file_name: name of the XML file to read
         """
-        return NotImplemented
+        f = open(file_name, 'r')
+        xml_str = f.read()
+        for item in self._observers:
+            if item.state() is not None:
+                item.state().from_xml(xml_str)
 
     def to_script(self, file_name=None):
         """
             Spits out the text of a reduction script with the current state.
             @param file_name: name of the file to write the script to
         """
-        return ""
+        script = "# Reduction script\n"
+        script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
+        
+        script += "from MantidFramework import *\n"
+        script += "mtd.initialise(False)\n"
+        script += "\n"
+        
+        for item in self._observers:
+            if item.state() is not None:
+                script += str(item.state())
+        
+        if file_name is not None:
+            f = open(file_name, 'w')
+            f.write(script)
+            f.close()
+        
+        return script
     
     def apply(self):
         """
-            Apply the reduction process to a Mantid SANSReducer.
-            Returns a log of the reduction process.
+            Apply the reduction process to a Mantid SANSReducer
         """
-        return ""
+        if HAS_MANTID:
+            script = self.to_script(None)
+            exec script               
+            
+            # Update scripter
+            for item in self._observers:
+                if item.state() is not None:
+                    item.state().update()
+            
+            return ReductionSingleton().log_text
+        else:
+            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"

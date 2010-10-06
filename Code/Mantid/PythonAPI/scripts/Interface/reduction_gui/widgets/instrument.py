@@ -14,7 +14,10 @@ class SANSInstrumentWidget(BaseWidget):
         Widget that present instrument details to the user
     """
     # Mask widget    
-    _mask_widget = None        
+    _mask_widget = None   
+    
+    ## Widget name
+    name = "Instrument"      
     
     def __init__(self, parent=None, state=None, settings=None):      
         QtGui.QWidget.__init__(self, parent)

@@ -78,6 +78,9 @@ class BeamFinderFrame(QtGui.QFrame):
         self.beam_radius_edit.setEnabled(False)
             
 class BeamFinderWidget(BaseWidget):    
+    ## Widget name
+    name = "Beam Center"      
+    
     def __init__(self, parent=None, state=None, settings=None):
         QtGui.QWidget.__init__(self, parent)
         self._layout = QtGui.QHBoxLayout()

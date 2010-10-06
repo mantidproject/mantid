@@ -1,4 +1,5 @@
 from PyQt4 import QtGui, uic, QtCore
+from reduction_gui.reduction.hfir_reduction_steps import Output
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget
 
@@ -14,6 +15,9 @@ class OutputWidget(BaseWidget):
         Widget that presents the transmission options to the user
     """
     _plot = None
+
+    ## Widget name
+    name = "Output"      
     
     def __init__(self, parent=None, state=None, settings=None):
         BaseWidget.__init__(self, parent=parent, state=state, settings=settings)
@@ -23,9 +27,6 @@ class OutputWidget(BaseWidget):
         uic.loadUi(f, self._content)
         self.initialize_content()
         
-    def set_log(self, log_text):
-        self._content.output_text_edit.setText(QtCore.QString(log_text))
-    
     def initialize_content(self):
         """
             Declare the validators and event connections for the 
@@ -63,6 +64,13 @@ class OutputWidget(BaseWidget):
             self.axes.grid(True)
             self.canvas.draw()
             
+    def set_state(self, state):
+        self._content.output_text_edit.setText(QtCore.QString(state.log_text))
+        if state.data is not None:
+            self.plot_data(state.data)
             
-            
-    
+    def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
+        return Output()

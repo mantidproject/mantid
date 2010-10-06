@@ -582,4 +582,16 @@ class BeamFinder(BaseScriptElement):
                                                                default = BeamFinder.use_direct_beam) 
             
         
-        
+class Output(BaseScriptElement):
+    log_text = ''
+    data = None
+    
+    def update(self):
+        """
+            Update data members according to reduction results
+        """
+        self.log_text = ReductionSingleton().log_text
+        if HAS_MANTID and ReductionSingleton()._azimuthal_averager is not None:
+            self.data = ReductionSingleton()._azimuthal_averager.get_data(ReductionSingleton()._data_files.keys()[0])
+    
+       

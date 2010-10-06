@@ -314,8 +314,11 @@ class ReductionGUI(QtGui.QMainWindow):
                 fname += ".py"
             (folder, file_name) = os.path.split(fname)
             self._last_export_directory = folder
-            self._interface.export(fname)
-            self.statusBar().showMessage("Saved as %s" % fname)
+            script = self._interface.export(fname)
+            if script is not None:
+                self.statusBar().showMessage("Saved as %s" % fname)
+            else:
+                self.statusBar().showMessage("Could not save file")
 
         
 def start(argv=[]):
