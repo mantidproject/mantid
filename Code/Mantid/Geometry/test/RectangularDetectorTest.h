@@ -108,6 +108,8 @@ public:
     TS_ASSERT_EQUALS(det->getAtXY(1,0)->getPos(), V3D( 1000-50.+1., 2000-100., 3000.) );
     TS_ASSERT_EQUALS(det->getAtXY(1,1)->getPos(), V3D( 1000-50.+1., 2000-100.+1., 3000.) );
 
+    //Name
+    TS_ASSERT_EQUALS(det->getAtXY(1,2)->getName(), "MyRectangle(1,2)");
   }
 
 

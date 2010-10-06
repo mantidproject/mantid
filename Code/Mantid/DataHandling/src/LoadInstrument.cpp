@@ -9,6 +9,7 @@
 #include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -38,6 +39,7 @@ using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 
+/// For debugging...
 static bool VERBOSE = false;
 
 namespace Mantid
@@ -558,8 +560,8 @@ namespace Mantid
 
       //--- Get the detector's X/Y pixel sizes (optional) ---
       if (VERBOSE) std::cout << "AppendLeaf: I am " << pLocElem->getAttribute("name") << " . " <<
-          "My xpixels=" << pLocElem->getAttribute("xpixels") <<
-          ". My parent's xpixels=" << pCompElem->getAttribute("xpixels") <<
+          "Parent is=" << pCompElem->getAttribute("is") <<
+          ". Parent type=" << pCompElem->getAttribute("type") <<
           "\n";
 
       // Read detector IDs into idlist if required
@@ -598,8 +600,71 @@ namespace Mantid
 
 
       // do stuff a bit differently depending on which category the type belong to
+      if ( category.compare("rectangular_detector") == 0  || category.compare("rectangularDetector") == 0  || category.compare("rectangulardetector") == 0 || category.compare("RectangularDetector") == 0 )
+      {
+        //-------------- Create a RectangularDetector ------------------------------------------------
+        std::string name = getNameOfLocationElement(pLocElem);
 
-      if ( category.compare("detector") == 0 )
+        if (VERBOSE) std::cout << "AppendLeaf: Creating RectangularDetector " << name << ".\n";
+
+        //Create the bank with the given parent.
+        Geometry::RectangularDetector * bank = new Geometry::RectangularDetector(name, parent);
+
+        // set location for this newly added comp and set facing if specified in instrument def. file. Also
+        // check if any logfiles are referred to through the <parameter> element.
+        setLocation(bank, pLocElem);
+        setFacing(bank, pLocElem);
+        setLogfile(bank, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
+        setLogfile(bank, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
+
+        //Extract all the parameters from the XML attributes
+        int xpixels=0; double xstart=0.; double xstep=0.;
+        int ypixels=0; double ystart=0.; double ystep=0.;
+        int idstart=0; bool idfillbyfirst_y=true; int idstepbyrow=0;
+
+        //The shape!
+        boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[typeName];
+
+        //These parameters are in the TYPE defining RectangularDetector
+        if ( pType->hasAttribute("xpixels") ) xpixels = atoi((pType->getAttribute("xpixels")).c_str());
+        if ( pType->hasAttribute("xstart") )  xstart  = atof((pType->getAttribute("xstart")).c_str());
+        if ( pType->hasAttribute("xstep") )   xstep   = atof((pType->getAttribute("xstep")).c_str());
+        if ( pType->hasAttribute("ypixels") ) ypixels = atoi((pType->getAttribute("ypixels")).c_str());
+        if ( pType->hasAttribute("ystart") )  ystart  = atof((pType->getAttribute("ystart")).c_str());
+        if ( pType->hasAttribute("ystep") )   ystep   = atof((pType->getAttribute("ystep")).c_str());
+
+        //THESE parameters are in the INSTANCE of this type - since they will change.
+        if ( pCompElem->hasAttribute("idstart") ) idstart = atoi((pCompElem->getAttribute("idstart")).c_str());
+        if ( pCompElem->hasAttribute("idfillbyfirst") )
+          idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
+        //Default ID step size
+        if (idfillbyfirst_y) idstepbyrow = ypixels;
+          else idstepbyrow = xpixels;
+        if ( pCompElem->hasAttribute("idstepbyrow") ) idstepbyrow = atoi((pCompElem->getAttribute("idstepbyrow")).c_str());
+
+        if (VERBOSE) std::cout << "AppendLeaf: Initializing RectangularDetector with parameters : " <<
+            "shape " << typeName << ", " << xpixels << ", " << xstart << ", " << xstep << ", " << ypixels << ", " << ystart << ", " << ystep << ", " << idstart << ", " << idfillbyfirst_y << ", " << idstepbyrow << ".\n";
+
+        // Now, initialize all the pixels in the bank
+        bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep, idstart, idfillbyfirst_y, idstepbyrow );
+
+        //Loop through all detectors in the newly created bank and mark those in the instrument.
+        try
+        {
+          for (int i=0; i < bank->nelements(); i++)
+          {
+            boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*bank)[i]);
+            if (detector)
+              m_instrument->markAsDetector(detector.get());
+          }
+        }
+        catch(Kernel::Exception::ExistsError&)
+        {
+          throw Kernel::Exception::InstrumentDefinitionError(
+              "Duplicate detector ID found when adding RectangularDetector " + name + " in XML instrument file" + m_filename);
+        }
+      }
+      else if ( category.compare("detector") == 0 )
       {
         //-------------- Create a Detector ------------------------------------------------
         std::string name = getNameOfLocationElement(pLocElem);
@@ -653,6 +718,7 @@ namespace Mantid
       }
       else
       {
+        //-------------- Not a Detector nor a RectangularDetector ------------------------------
         std::string name = getNameOfLocationElement(pLocElem);
 
         Geometry::ObjComponent *comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);

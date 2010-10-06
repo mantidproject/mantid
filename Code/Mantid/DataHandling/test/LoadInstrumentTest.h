@@ -15,6 +15,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include <vector>
 #include <iostream>
@@ -671,44 +672,54 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-//    void testExecIDF_for_unit_testing3() // IDF stands for Instrument Definition File
-//    {
-//      LoadInstrument loaderIDF2;
-//      loaderIDF2.initialize();
-//      //create a workspace with some sample data
-//      wsName = "LoadInstrumentTestIDF2";
-//      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-//      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-//      //put this workspace in the data service
-//      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-//      // Path to test input file assumes Test directory checked out from SVN
-//      loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING3.xml");
-//      inputFile = loaderIDF2.getPropertyValue("Filename");
-//      loaderIDF2.setPropertyValue("Workspace", wsName);
-//      TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
-//      TS_ASSERT( loaderIDF2.isExecuted() );
-//
-//      // Get back the saved workspace
-//      MatrixWorkspace_sptr output;
-//      TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
-//      boost::shared_ptr<IInstrument> i = output->getInstrument();
-//
-//      // Now the XY detector in bank1
-//      boost::shared_ptr<ICompAssembly> bank1 = boost::dynamic_pointer_cast<ICompAssembly>( i->getComponentByName("bank1") );
-//      TS_ASSERT( bank1 );
-//      //std::cout << "nelements" << bank1->nelements() << "\n";
-//      TS_ASSERT_DELTA( bank1->getChildAtXY(0,0)->getPos().X(), 0.0, 1e-3 );
-//      TS_ASSERT_DELTA( bank1->getChildAtXY(1,0)->getPos().X(), 1.0, 1e-3 );
-//      TS_ASSERT_DELTA( bank1->getChildAtXY(2,0)->getPos().X(), 2.0, 1e-3 );
-//      TS_ASSERT_DELTA( bank1->getChildAtXY(0,0)->getPos().Y(), 0.0, 1e-3 );
-//      TS_ASSERT_DELTA( bank1->getChildAtXY(0,1)->getPos().Y(), 1.0, 1e-3 );
-//
-//      //Outside limits
-//      TS_ASSERT_THROWS( bank1->getChildAtXY(3,0), std::runtime_error);
-//      TS_ASSERT_THROWS( bank1->getChildAtXY(0,2), std::runtime_error);
-//
-//      AnalysisDataService::Instance().remove(wsName);
-//  }
+    void testExec_RectangularDetector()
+    {
+      LoadInstrument loaderIDF2;
+      loaderIDF2.initialize();
+      //create a workspace with some sample data
+      wsName = "RectangularDetector";
+      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+      //put this workspace in the data service
+      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+      // Path to test input file assumes Test directory checked out from SVN
+      loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_RECTANGULAR_UNIT_TESTING.xml");
+      inputFile = loaderIDF2.getPropertyValue("Filename");
+      loaderIDF2.setPropertyValue("Workspace", wsName);
+      TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
+      TS_ASSERT( loaderIDF2.isExecuted() );
+
+      // Get back the saved workspace
+      MatrixWorkspace_sptr output;
+      TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
+      boost::shared_ptr<IInstrument> i = output->getInstrument();
+
+      // Now the XY detector in bank1
+      boost::shared_ptr<RectangularDetector> bank1 = boost::dynamic_pointer_cast<RectangularDetector>( i->getComponentByName("bank1") );
+      TS_ASSERT( bank1 );
+      if (!bank1) return;
+
+      //Right # of elements?
+      TS_ASSERT_EQUALS( bank1->nelements(), 100*200);
+
+      //Positions according to formula
+      TS_ASSERT_DELTA( bank1->getAtXY(0,0)->getPos().X(), -0.1, 1e-4 );
+      TS_ASSERT_DELTA( bank1->getAtXY(0,0)->getPos().Y(), -0.2, 1e-4 );
+      TS_ASSERT_DELTA( bank1->getAtXY(1,0)->getPos().X(), -0.098, 1e-4 );
+      TS_ASSERT_DELTA( bank1->getAtXY(1,1)->getPos().Y(), -0.198, 1e-4 );
+
+      //Some IDs
+      TS_ASSERT_EQUALS( bank1->getAtXY(0,0)->getID(), 1000);
+      TS_ASSERT_EQUALS( bank1->getAtXY(0,1)->getID(), 1001);
+      TS_ASSERT_EQUALS( bank1->getAtXY(1,0)->getID(), 1300);
+      TS_ASSERT_EQUALS( bank1->getAtXY(1,1)->getID(), 1301);
+
+      //The total number of detectors
+      TS_ASSERT_EQUALS( i->getDetectors().size(), 100*200 * 2);
+
+      AnalysisDataService::Instance().remove(wsName);
+  }
 
 
 
@@ -741,3 +752,4 @@ private:
 };
 
 #endif /*LOADINSTRUMENTTEST_H_*/
+

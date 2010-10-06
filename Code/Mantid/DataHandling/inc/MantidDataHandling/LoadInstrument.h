@@ -161,6 +161,7 @@ namespace API
 
       /// Container to hold all detectors and monitors added to the instrument. Used for
       /// 'facing' these to component specified under \<defaults\>
+      /// NOTE: Seems unused, ever.
       std::vector< Geometry::ObjComponent* > m_facingComponent;
 
       /// Parse position of facing element to V3D
