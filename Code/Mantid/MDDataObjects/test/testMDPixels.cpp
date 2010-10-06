@@ -18,9 +18,33 @@ static testMDPixels suite_testMDPixels;
 static CxxTest::List Tests_testMDPixels = { 0, 0 };
 CxxTest::StaticSuiteDescription suiteDescription_testMDPixels( "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDPixels.h", 11, "testMDPixels", suite_testMDPixels, Tests_testMDPixels );
 
-static class TestDescription_testMDPixels_testSQW : public CxxTest::RealTestDescription {
+static class TestDescription_testMDPixels_testSQWConstructor : public CxxTest::RealTestDescription {
 public:
- TestDescription_testMDPixels_testSQW() : CxxTest::RealTestDescription( Tests_testMDPixels, suiteDescription_testMDPixels, 14, "testSQW" ) {}
- void runTest() { suite_testMDPixels.testSQW(); }
-} testDescription_testMDPixels_testSQW;
+ TestDescription_testMDPixels_testSQWConstructor() : CxxTest::RealTestDescription( Tests_testMDPixels, suiteDescription_testMDPixels, 17, "testSQWConstructor" ) {}
+ void runTest() { suite_testMDPixels.testSQWConstructor(); }
+} testDescription_testMDPixels_testSQWConstructor;
+
+static class TestDescription_testMDPixels_testSQWDNDread : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testMDPixels_testSQWDNDread() : CxxTest::RealTestDescription( Tests_testMDPixels, suiteDescription_testMDPixels, 20, "testSQWDNDread" ) {}
+ void runTest() { suite_testMDPixels.testSQWDNDread(); }
+} testDescription_testMDPixels_testSQWDNDread;
+
+static class TestDescription_testMDPixels_testSQWnPix : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testMDPixels_testSQWnPix() : CxxTest::RealTestDescription( Tests_testMDPixels, suiteDescription_testMDPixels, 28, "testSQWnPix" ) {}
+ void runTest() { suite_testMDPixels.testSQWnPix(); }
+} testDescription_testMDPixels_testSQWnPix;
+
+static class TestDescription_testMDPixels_testSQWreadEmptySelection : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testMDPixels_testSQWreadEmptySelection() : CxxTest::RealTestDescription( Tests_testMDPixels, suiteDescription_testMDPixels, 38, "testSQWreadEmptySelection" ) {}
+ void runTest() { suite_testMDPixels.testSQWreadEmptySelection(); }
+} testDescription_testMDPixels_testSQWreadEmptySelection;
+
+static class TestDescription_testMDPixels_testSQWreadDataSelection : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testMDPixels_testSQWreadDataSelection() : CxxTest::RealTestDescription( Tests_testMDPixels, suiteDescription_testMDPixels, 49, "testSQWreadDataSelection" ) {}
+ void runTest() { suite_testMDPixels.testSQWreadDataSelection(); }
+} testDescription_testMDPixels_testSQWreadDataSelection;
 

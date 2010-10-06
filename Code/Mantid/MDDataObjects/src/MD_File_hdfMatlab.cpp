@@ -627,13 +627,19 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
             max_npix_selected=max_npix_fit;
         }else{
             if(i==starting_cell){
-                delete [] pix_buf;
+                if(pix_buf){
+                    delete [] pix_buf;
+                }
                 pix_buf       = new sqw_pixel[npix_tt];
                 nPix_buf_size = npix_tt;
             }
             break;
         }
         n_cur_cells=i;
+    }
+    if(!pix_buf){
+        pix_buf       = new sqw_pixel[npix_tt];
+        nPix_buf_size = npix_tt;
     }
     n_cells_processed=n_cur_cells+1;
     if(max_npix_fit==0){
