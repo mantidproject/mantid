@@ -104,7 +104,7 @@ unix {
 
   macx {
 	LIBS += -lboost_signals
-	LIBS += -L../3rdparty/qwt/lib -lqwt
+	LIBS += -L$$TOPBUILDDIR/../3rdparty/qwt/lib -lqwt
 	} else {
 		LIBS += -lboost_signals-mt
 		exists ( /usr/lib64/libqwt-qt4.so ) {
