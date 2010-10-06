@@ -58,7 +58,7 @@ def _issueWarning(msg):
     mantid.sendLogMessage('::SANS::Warning: ' + msg)
                 
 def UserPath(path):
-    ReductionSingleton().set_user_path(path)
+    ReductionSingleton().user_path = path
         
 def SANS2D():
     Clear(ISISReducer.ISISReducer)
@@ -146,7 +146,8 @@ def GetMismatchedDetList():
     """
     return ReductionSingleton().instrument.get_marked_dets()
 
-def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = True):
+def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = True):
+    ReductionSingleton().transmission_calculator.set_full_wav(full_trans_wav)
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
 
     _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
@@ -376,3 +377,6 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath + '\n'
         
     return script
+
+#this is like a #define I'd like to get rid of it because it means nothing here
+DefaultTrans = 'True'

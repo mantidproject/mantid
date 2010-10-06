@@ -74,7 +74,7 @@ class ISISReducer(SANSReducer):
                             ISISReductionSteps.UnitsConvert('Wavelength'))
         self.norm_mon = self.append_step(
                             ISISReductionSteps.NormalizeToMonitor())
-        self._transmission_calculator =ISISReductionSteps.CalculateTransmission()
+        self.transmission_calculator =ISISReductionSteps.CalculateTransmission()
         self._corr_and_scale = self.append_step(
                             ISISReductionSteps.ISISCorrections())
 
@@ -82,8 +82,8 @@ class ISISReducer(SANSReducer):
                             ISISReductionSteps.ConvertToQ())
         self.geometry = self.append_step(
                             SANSReductionSteps.GetSampleGeom())
-#        self.append_step(
-#                            SANSReductionSteps.SampleGeomCor(self.geometry))
+        self.append_step(
+                            SANSReductionSteps.SampleGeomCor(self.geometry))
 
     def pre_process(self): 
         """
@@ -105,6 +105,11 @@ class ISISReducer(SANSReducer):
             self._user_path = path
         else:
             raise RuntimeError, "ISISReducer.set_user_path: provided path is not a directory (%s)" % path
+
+    def get_user_path(self):
+        return self._user_path
+    
+    user_path = property(get_user_path, set_user_path, None, None)
 
     def load_set_options(self, reload=True, period=-1):
         if not issubclass(self.data_loader.__class__, ISISReductionSteps.LoadSample):
@@ -139,9 +144,9 @@ class ISISReducer(SANSReducer):
             self._background_subtracter = ISISReductionSteps.CanSubtraction(can_run, reload=reload, period=period)
 
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
-        if not issubclass(self._transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
+        if not issubclass(self.transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
             raise RuntimeError, "ISISReducer.set_trans_fit: transmission calculator not set"
-        self._transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method)
+        self.transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method)
         
     def set_trans_sample(self, sample, direct, reload=True, period=-1):
         if not issubclass(self.trans_loader.__class__, SANSReductionSteps.BaseTransmission):
@@ -249,19 +254,21 @@ class ISISReducer(SANSReducer):
         """
             Reads a SANS mask file
             
-            TODO: filename now really expects a file path. Need to use a default directory to look into
-            
             @param filename: file path of the mask file to be read
         """
-        self._maskfile = filename
+        user_file = filename
         #Check that the file exists.
-        if not os.path.isfile(filename):
-            raise RuntimeError, "Cannot read mask. File path '%s' does not exist." % filename
+        if not os.path.isfile(user_file):
+            user_file = os.path.join(self.user_path, filename)
+            if not os.path.isfile(user_file):
+                user_file = self._full_file_path(filename)
+                if not os.path.isfile(user_file):
+                    raise RuntimeError, "Cannot read mask. File path '%s' does not exist or is not in the user path." % filename
             
         # Re-initializes default values
         self._initialize_mask()
     
-        file_handle = open(filename, 'r')
+        file_handle = open(user_file, 'r')
         for line in file_handle:
             if line.startswith('!'):
                 continue
@@ -321,12 +328,12 @@ class ISISReducer(SANSReducer):
                 params = upper_line[10:].split()
                 if len(params) == 3:
                     fit_type, lambdamin, lambdamax = params
-                    self._transmission_calculator.set_trans_fit(lambda_min=lambdamin, 
+                    self.transmission_calculator.set_trans_fit(lambda_min=lambdamin, 
                                                                 lambda_max=lambdamax, 
                                                                 fit_method=fit_type)
                 else:
                     _issueWarning('Incorrectly formatted FIT/TRANS line, setting defaults to LOG and full range')
-                    self._transmission_calculator = ISISReductionSteps.Transmission()
+                    self.transmission_calculator = ISISReductionSteps.Transmission()
             
             else:
                 continue
@@ -495,7 +502,6 @@ class ISISReducer(SANSReducer):
         self.BACKMON_START = self.BACKMON_END = None
         
     def post_process(self):
-        print 'Preparing to delete' + self.norm_mon.prenormed
         if not self.norm_mon.prenormed is None:
             mtd.deleteWorkspace(self.norm_mon.prenormed)
  

@@ -57,7 +57,7 @@ class LoadRun(ReductionStep):
             #get the number of periods in a group using the fact that each period has a different name
             nNames = len(pWorksp.getNames())
             numPeriods = nNames - 1
-            workspace = _leaveSinglePeriod(pWorksp, self._period)
+            workspace = self._leaveSinglePeriod(pWorksp, self._period)
             pWorksp = mtd[workspace]
         else :
             #if the work space isn't a group there is only one period
@@ -967,6 +967,7 @@ class CalculateTransmission(SANSReductionSteps.BaseTransmission):
         self._lambda_min = None
         self._lambda_max = None
         self._fit_method = 'Log'
+        self._use_full_range = True
     
 
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
@@ -978,7 +979,9 @@ class CalculateTransmission(SANSReductionSteps.BaseTransmission):
         else:
             self._fit_method = 'Log'      
             mantid.sendLogMessage("ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default LOG method")
-    
+
+    def set_full_wav(self, is_full):
+        self._use_full_range = is_full
 
     def execute(self, reducer, workspace):
         if self._lambda_max == None:
@@ -991,7 +994,7 @@ class CalculateTransmission(SANSReductionSteps.BaseTransmission):
         if trans_raw == '' or direct_raw == '':
             return None
     
-        if use_def_trans == DefaultTrans:
+        if self._use_full_range:
             wavbin = str(TRANS_WAV1_FULL) 
             wavbin = + ',' + str(ReductionSingleton().to_wavelen.wav_step)
             wavbin = + ',' + str(TRANS_WAV2_FULL)
