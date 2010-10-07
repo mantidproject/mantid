@@ -559,8 +559,8 @@ public:
     TS_ASSERT_EQUALS( det->getName(), "pixel");
     param = paramMap.get(&(*det), "tube_pressure");
     TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
-    param = paramMap.getRecursive(&(*det), "tube_pressure2");
-    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
+//    param = paramMap.getRecursive(&(*det), "tube_pressure2");
+//    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
     
     det = ws->getDetector(3);  
     TS_ASSERT_EQUALS( det->getID(), 3);
