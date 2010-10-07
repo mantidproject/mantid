@@ -17,9 +17,11 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/IDetector.h"
 #include <vector>
 #include <iostream>
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -723,25 +725,71 @@ public:
 
 
 
-  void xtestExecSNAP() // IDF stands for Instrument Definition File
+  /** Compare the old and new SNAP instrument definitions **/
+  void xtestExecSNAPComparison_SLOW() // This test is slow!
   {
-    LoadInstrument loaderIDF2;
-    TS_ASSERT_THROWS_NOTHING(loaderIDF2.initialize());
-    //create a workspace with some sample data
-    wsName = "LoadInstrumentTestIDF2";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-    // Path to test input file assumes Test directory checked out from SVN
-    loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/SNAP_Definition.xml");
-    inputFile = loaderIDF2.getPropertyValue("Filename");
-    loaderIDF2.setPropertyValue("Workspace", wsName);
-    std::string result;
-    loaderIDF2.execute();
-    TS_ASSERT( loaderIDF2.isExecuted() );
+    LoadInstrument * loaderIDF2;
+    MatrixWorkspace_sptr output;
+    Workspace_sptr ws;
+    Workspace2D_sptr ws2D;
 
-  }
+    std::cout << "Loading the NEW snap geometry\n";
+    loaderIDF2 = new LoadInstrument();
+    loaderIDF2->initialize();
+    wsName = "SNAP_NEW";
+    ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/SNAPNEW_Definition.xml");
+    inputFile = loaderIDF2->getPropertyValue("Filename");
+    loaderIDF2->setPropertyValue("Workspace", wsName);
+    loaderIDF2->execute();
+    TS_ASSERT( loaderIDF2->isExecuted() );
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    boost::shared_ptr<IInstrument> i_new = output->getInstrument();
+
+    TS_ASSERT_EQUALS( i_new->nelements(), 21);
+
+    std::cout << "Loading the OLD snap geometry\n";
+    loaderIDF2 = new LoadInstrument();
+    loaderIDF2->initialize();
+    wsName = "SNAP_OLD";
+    ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/SNAP_Definition.xml");
+    inputFile = loaderIDF2->getPropertyValue("Filename");
+    loaderIDF2->setPropertyValue("Workspace", wsName);
+    loaderIDF2->execute();
+    TS_ASSERT( loaderIDF2->isExecuted() );
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    boost::shared_ptr<IInstrument> i_old = output->getInstrument();
+
+    std::cout << "Comparing\n";
+
+    TS_ASSERT_EQUALS( i_new->nelements(), i_old->nelements());
+
+    //Compare the list of detectors
+    std::map<int, Geometry::IDetector_sptr> bank_new = i_new->getDetectors();
+    std::map<int, Geometry::IDetector_sptr> bank_old = i_new->getDetectors();
+    TS_ASSERT_EQUALS( bank_new.size(), bank_old.size());
+    TS_ASSERT_EQUALS( bank_new.size(), 65536*18 + 1); //Plus one for the monitor
+
+    std::map<int, Geometry::IDetector_sptr>::iterator it;
+    int count = 0;
+    for (it = bank_new.begin(); it != bank_new.end(); it++)
+    {
+      count++;
+      Geometry::IDetector_sptr det_new = it->second;
+      Geometry::IDetector_sptr det_old = bank_old[it->first];
+      //Compare their positions
+      TS_ASSERT_EQUALS( det_new->getPos(), det_old->getPos() );
+    }
+
+    TS_ASSERT_LESS_THAN( 65536*18, count);
+
+
+}
 
 
 private:

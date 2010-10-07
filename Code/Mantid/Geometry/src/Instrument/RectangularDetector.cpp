@@ -100,6 +100,18 @@ boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
   return boost::dynamic_pointer_cast<Detector>( this->operator[](i) );
 }
 
+/// Returns the number of pixels in the X direction.
+int RectangularDetector::xpixels() const
+{
+  return this->xPixels;
+}
+
+/// Returns the number of pixels in the X direction.
+int RectangularDetector::ypixels() const
+{
+  return this->yPixels;
+}
+
 
 
 /** Initialize a RectangularDetector by creating all of the pixels

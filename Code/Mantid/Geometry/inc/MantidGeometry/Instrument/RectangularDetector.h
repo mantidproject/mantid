@@ -70,6 +70,9 @@ public:
   /// Get a detector at given XY indices.
   boost::shared_ptr<Detector> getAtXY(int X, int Y) const;
 
+  int xpixels() const;
+  int ypixels() const;
+
 private:
   /// Private copy assignment operator
   RectangularDetector& operator=(const ICompAssembly&);

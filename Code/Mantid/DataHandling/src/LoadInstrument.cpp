@@ -655,7 +655,13 @@ namespace Mantid
           {
             boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*bank)[i]);
             if (detector)
+            {
+              //Make default facing for the pixel
+              Geometry::Component* comp = (Geometry::Component*) detector.get();
+              makeXYplaneFaceComponent(comp, m_defaultFacing);
+              //Mark it as a detector (add to the instrument cache)
               m_instrument->markAsDetector(detector.get());
+            }
           }
         }
         catch(Kernel::Exception::ExistsError&)
