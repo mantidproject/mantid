@@ -28,6 +28,7 @@ std::string findTestFileLocation(void){
         }else{
             root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
         }
+        std::cout << " test file location: "<< root_path<< std::endl;
         return root_path;
 }
 #endif

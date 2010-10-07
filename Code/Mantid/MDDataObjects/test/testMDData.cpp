@@ -11,16 +11,46 @@
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/RealDescriptions.h>
 
-#include "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDData.h"
+#include "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDData.h"
 
 static testDND suite_testDND;
 
 static CxxTest::List Tests_testDND = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testDND( "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDData.h", 21, "testDND", suite_testDND, Tests_testDND );
+CxxTest::StaticSuiteDescription suiteDescription_testDND( "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDData.h", 21, "testDND", suite_testDND, Tests_testDND );
 
-static class TestDescription_testDND_testDNDRead : public CxxTest::RealTestDescription {
+static class TestDescription_testDND_testMDDataContstructor : public CxxTest::RealTestDescription {
 public:
- TestDescription_testDND_testDNDRead() : CxxTest::RealTestDescription( Tests_testDND, suiteDescription_testDND, 24, "testDNDRead" ) {}
- void runTest() { suite_testDND.testDNDRead(); }
-} testDescription_testDND_testDNDRead;
+ TestDescription_testDND_testMDDataContstructor() : CxxTest::RealTestDescription( Tests_testDND, suiteDescription_testDND, 28, "testMDDataContstructor" ) {}
+ void runTest() { suite_testDND.testMDDataContstructor(); }
+} testDescription_testDND_testMDDataContstructor;
+
+static class TestDescription_testDND_testDNDPrivateRead : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testDND_testDNDPrivateRead() : CxxTest::RealTestDescription( Tests_testDND, suiteDescription_testDND, 40, "testDNDPrivateRead" ) {}
+ void runTest() { suite_testDND.testDNDPrivateRead(); }
+} testDescription_testDND_testDNDPrivateRead;
+
+static class TestDescription_testDND_testDNDGet2DData : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testDND_testDNDGet2DData() : CxxTest::RealTestDescription( Tests_testDND, suiteDescription_testDND, 47, "testDNDGet2DData" ) {}
+ void runTest() { suite_testDND.testDNDGet2DData(); }
+} testDescription_testDND_testDNDGet2DData;
+
+static class TestDescription_testDND_testGet3DData : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testDND_testGet3DData() : CxxTest::RealTestDescription( Tests_testDND, suiteDescription_testDND, 58, "testGet3DData" ) {}
+ void runTest() { suite_testDND.testGet3DData(); }
+} testDescription_testDND_testGet3DData;
+
+static class TestDescription_testDND_testGet1Ddata : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testDND_testGet1Ddata() : CxxTest::RealTestDescription( Tests_testDND, suiteDescription_testDND, 65, "testGet1Ddata" ) {}
+ void runTest() { suite_testDND.testGet1Ddata(); }
+} testDescription_testDND_testGet1Ddata;
+
+static class TestDescription_testDND_testGet2Ddata : public CxxTest::RealTestDescription {
+public:
+ TestDescription_testDND_testGet2Ddata() : CxxTest::RealTestDescription( Tests_testDND, suiteDescription_testDND, 71, "testGet2Ddata" ) {}
+ void runTest() { suite_testDND.testGet2Ddata(); }
+} testDescription_testDND_testGet2Ddata;
 

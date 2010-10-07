@@ -1,6 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{c3d7079f-459e-4bdf-b8fd-fb2ae521aea9}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4a09d69e-51dc-4ed5-9e95-d65c66a3dc35}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{c2755aaf-2540-4bd5-bf8b-c99278d6f9ad}</UniqueIdentifier>
+      <Extensions>test*.h</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\Dimension.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,47 +53,72 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{c3d7079f-459e-4bdf-b8fd-fb2ae521aea9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4a09d69e-51dc-4ed5-9e95-d65c66a3dc35}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="inc\CenterpieceRebinning.h" />
-    <ClInclude Include="inc\WorkspaceGeometry.h" />
-    <ClInclude Include="inc\Dimension.h" />
-    <ClInclude Include="inc\DimensionIDS.h" />
-    <ClInclude Include="inc\DimensionRes.h" />
-    <ClInclude Include="inc\H5pubconf.h" />
-    <ClInclude Include="inc\Hexahedron.h" />
-    <ClInclude Include="inc\IMD_FileFormat.h" />
-    <ClInclude Include="inc\MD_File_hdfMatlab.h" />
-    <ClInclude Include="inc\MD_File_hdfV1.h" />
-    <ClInclude Include="inc\MDData.h" />
-    <ClInclude Include="inc\MDGeometry.h" />
-    <ClInclude Include="inc\MDPixels.h" />
-    <ClInclude Include="inc\MDWorkspaceConstants.h" />
-    <ClInclude Include="inc\point3D.h" />
-    <ClInclude Include="inc\SlicingData.h" />
-    <ClInclude Include="inc\stdafx.h" />
-    <ClInclude Include="inc\MDDataObjects\WorkspaceGeometry.h" />
-    <ClInclude Include="inc\MDDataObjects\CenterpieceRebinning.h" />
-    <ClInclude Include="inc\MDDataObjects\Dimension.h" />
-    <ClInclude Include="inc\MDDataObjects\DimensionIDS.h" />
-    <ClInclude Include="inc\MDDataObjects\DimensionRes.h" />
-    <ClInclude Include="inc\MDDataObjects\Hexahedron.h" />
-    <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h" />
-    <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
-    <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
-    <ClInclude Include="inc\MDDataObjects\MDData.h" />
-    <ClInclude Include="inc\MDDataObjects\MDGeometry.h" />
-    <ClInclude Include="inc\MDDataObjects\MDPixels.h" />
-    <ClInclude Include="inc\MDDataObjects\MDWorkspaceConstants.h" />
-    <ClInclude Include="inc\MDDataObjects\point3D.h" />
-    <ClInclude Include="inc\MDDataObjects\SlicingData.h" />
-    <ClInclude Include="inc\MDDataObjects\stdafx.h" />
+    <ClInclude Include="inc\MDDataObjects\WorkspaceGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\CenterpieceRebinning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\Dimension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\DimensionIDS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\DimensionRes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\Hexahedron.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\IMD_FileFormat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDPixels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDWorkspaceConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\point3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\SlicingData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\test_sqw.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testMDData.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testMDDimension.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testMDGeometry.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testMDPixels.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testWorkspaceGeometry.h">
+      <Filter>tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="MDDataObjects.vcxproj" />

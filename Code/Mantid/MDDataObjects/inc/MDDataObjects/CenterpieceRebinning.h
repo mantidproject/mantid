@@ -1,5 +1,6 @@
 #ifndef H_CENTERPIECE_REBINNING
 #define H_CENTERPIECE_REBINNING
+/* NOT IMPLEMENTED HERE
 #include "SQW.h"
 #include "SlicingData.h"
 
@@ -25,4 +26,5 @@ private:
     std::vector<double> cut_max;
 
 };
+*/
 #endif

@@ -11,12 +11,12 @@
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/RealDescriptions.h>
 
-#include "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDPixels.h"
+#include "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDPixels.h"
 
 static testMDPixels suite_testMDPixels;
 
 static CxxTest::List Tests_testMDPixels = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testMDPixels( "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDPixels.h", 12, "testMDPixels", suite_testMDPixels, Tests_testMDPixels );
+CxxTest::StaticSuiteDescription suiteDescription_testMDPixels( "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDPixels.h", 12, "testMDPixels", suite_testMDPixels, Tests_testMDPixels );
 
 static class TestDescription_testMDPixels_testSQWConstructor : public CxxTest::RealTestDescription {
 public:

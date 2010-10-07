@@ -176,14 +176,6 @@
     <ClCompile Include="src\WorkspaceGeometry.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\CenterpieceRebinning.h" />
-    <ClInclude Include="inc\Dimension.h" />
-    <ClInclude Include="inc\DimensionIDS.h" />
-    <ClInclude Include="inc\DimensionRes.h" />
-    <ClInclude Include="inc\H5pubconf.h" />
-    <ClInclude Include="inc\Hexahedron.h" />
-    <ClInclude Include="inc\IMD_FileFormat.h" />
-    <ClInclude Include="inc\MDData.h" />
     <ClInclude Include="inc\MDDataObjects\CenterpieceRebinning.h" />
     <ClInclude Include="inc\MDDataObjects\Dimension.h" />
     <ClInclude Include="inc\MDDataObjects\DimensionIDS.h" />
@@ -200,15 +192,12 @@
     <ClInclude Include="inc\MDDataObjects\SlicingData.h" />
     <ClInclude Include="inc\MDDataObjects\stdafx.h" />
     <ClInclude Include="inc\MDDataObjects\WorkspaceGeometry.h" />
-    <ClInclude Include="inc\MDGeometry.h" />
-    <ClInclude Include="inc\MDPixels.h" />
-    <ClInclude Include="inc\MDWorkspaceConstants.h" />
-    <ClInclude Include="inc\MD_File_hdfMatlab.h" />
-    <ClInclude Include="inc\MD_File_hdfV1.h" />
-    <ClInclude Include="inc\point3D.h" />
-    <ClInclude Include="inc\SlicingData.h" />
-    <ClInclude Include="inc\stdafx.h" />
-    <ClInclude Include="inc\WorkspaceGeometry.h" />
+    <ClInclude Include="test\testMDData.h" />
+    <ClInclude Include="test\testMDDimension.h" />
+    <ClInclude Include="test\testMDGeometry.h" />
+    <ClInclude Include="test\testMDPixels.h" />
+    <ClInclude Include="test\testWorkspaceGeometry.h" />
+    <ClInclude Include="test\test_sqw.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MDDataObjects.vcxproj" />
