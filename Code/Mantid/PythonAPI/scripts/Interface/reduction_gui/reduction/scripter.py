@@ -113,6 +113,7 @@ class BaseReductionScripter(object):
         create a reduction script. Parameters are organized by groups that
         will each have their own UI representation.
     """
+    ## List of observers
     _observers = []
     
     class ReductionObserver(object):
@@ -129,6 +130,10 @@ class BaseReductionScripter(object):
             self.update(True)
          
         def update(self, init=False):
+            """
+                Retrieve state from observed widget
+                @param init: if True, the state class will be kept for later type checking
+            """
             self._state = self._subject.get_state()
             
             # If we are initializing, store the object class
@@ -139,7 +144,16 @@ class BaseReductionScripter(object):
             elif not self._state.__class__ == self._state_cls:
                 raise RuntimeError, "State class changed at runtime, was %s, now %s" % (self._state_cls, self._state.__class__)
             
+        def push(self):
+            """
+                Push the state to update the observed widget
+            """
+            self._subject.set_state(self.state())
+            
         def state(self):
+            """
+                Returns the state, if one is defined.
+            """
             if self._state == NotImplemented:
                 return None
             elif self._state is None:
@@ -152,9 +166,27 @@ class BaseReductionScripter(object):
         self._observers = []
 
     def attach(self, subject):
+        """
+            Append a new widget to be observed
+            @param subject: BaseWidget object
+        """
         observer = BaseReductionScripter.ReductionObserver(subject)
         self._observers.append(observer)
         return observer
+
+    def update(self):
+        """
+            Tell all observers to update their state.
+        """
+        for item in self._observers:
+            item.update()
+            
+    def push_state(self):
+        """
+            Tell the observers to push their state to the their observed widget
+        """
+        for item in self._observers:
+            item.push()
 
     def to_xml(self, file_name=None):
         """
