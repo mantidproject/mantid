@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/V3D.h"
 #include <vector>
 
 namespace Mantid
@@ -16,7 +17,7 @@ namespace Algorithms
     @author Michael Reuter
     @date 30/09/2010
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -57,6 +58,12 @@ private:
 
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(int spectraIndex);
+  /// Sets the detector geometry cache if necessary
+  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det,
+      double & detRadius, Geometry::V3D & detAxis);
+  /// Computes the distance to the given shape from a starting point
+  double distToSurface(const Geometry::V3D start,
+      const Geometry::Object *shape) const;
   /// Calculate the detector efficiency
   double detectorEfficiency() const;
   /// Log any errors with spectra that occurred
@@ -68,6 +75,10 @@ private:
   API::MatrixWorkspace_sptr outputWS;
   /// Map that stores additional properties for detectors
   const Geometry::ParameterMap *paraMap;
+  /// A lookup of previously seen shape objects used to save calculation time as most detectors have the same shape
+  std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> > shapeCache;
+  /// Sample position
+  Geometry::V3D samplePos;
   /// The spectra numbers that were skipped
   std::vector<int> spectraSkipped;
 };
