@@ -165,6 +165,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Instrument\RectangularDetector.cpp" />
     <ClCompile Include="src\Math\Acomp.cpp" />
     <ClCompile Include="src\Math\Algebra.cpp" />
     <ClCompile Include="src\Math\BnId.cpp" />
@@ -245,6 +246,7 @@
     <ClCompile Include="src\Rendering\vtkGeometryCacheWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidGeometry\Instrument\RectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h" />
     <ClInclude Include="inc\MantidGeometry\Objects\BoundingBox.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\OpenCascadeConfig.h" />
