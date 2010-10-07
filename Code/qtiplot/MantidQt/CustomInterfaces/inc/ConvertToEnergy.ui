@@ -2674,7 +2674,14 @@ p, li { white-space: pre-wrap; }
                    </widget>
                   </item>
                   <item>
-                   <widget class="QComboBox" name="sqw_cbWorkspace" />
+                   <widget class="QComboBox" name="sqw_cbWorkspace" >
+                    <property name="sizePolicy" >
+                     <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
                   </item>
                   <item>
                    <widget class="QLabel" name="sqw_valWorkspace" >
@@ -2685,19 +2692,6 @@ p, li { white-space: pre-wrap; }
                      <string>*</string>
                     </property>
                    </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_40" >
-                    <property name="orientation" >
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0" >
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                   <item>
                    <widget class="QPushButton" name="sqw_pbRefresh" >
@@ -2713,7 +2707,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="sqw_plotInput" >
+             <widget class="QPushButton" name="sqw_pbPlotInput" >
               <property name="text" >
                <string>Plot Input</string>
               </property>

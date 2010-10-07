@@ -73,6 +73,7 @@ void Indirect::initLayout()
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
   connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(sOfQwInputType(const QString&)));
   connect(m_uiForm.sqw_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
 
   // "Slice" tab
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
@@ -1663,11 +1664,48 @@ void Indirect::sOfQwRebinE(bool state)
 void Indirect::sOfQwInputType(const QString& input)
 {
   if ( input == "File" )
+  {
     m_uiForm.sqw_swInput->setCurrentIndex(0);
+  }
   else
+  {
     m_uiForm.sqw_swInput->setCurrentIndex(1);
+    refreshWSlist();
+  }
 }
 
+void Indirect::sOfQwPlotInput()
+{
+  QString pyInput = "from mantidsimple import *\n"
+    "from mantidplot import *\n";
+
+  //...
+  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+  {
+    // get filename
+    if ( m_uiForm.sqw_inputFile->isValid() )
+    {
+      pyInput += "input = 'SofQWInput'\n"
+        "filename = r'" + m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
+        "LoadNexus(filename, input)\n";
+    }
+    else
+    {
+      showInformationBox("Invalid filename.");
+      return;
+    }
+  }
+  else
+  {
+    pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+  }
+
+  pyInput += "nHist = mtd[input].getNumberHistograms()\n"
+    "plotSpectrum(input, range(0,nHist))\n";
+
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+
+}
 
 // SLICE
 void Indirect::sliceRun()

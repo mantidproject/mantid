@@ -106,6 +106,7 @@ namespace MantidQt
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
       void sOfQwRebinE(bool state);
       void sOfQwInputType(const QString& input);
+      void sOfQwPlotInput();
 
       void sliceRun();
       void slicePlotRaw();
