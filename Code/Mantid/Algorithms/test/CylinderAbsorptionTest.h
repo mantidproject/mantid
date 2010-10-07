@@ -119,12 +119,12 @@ public:
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
                                 (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
-    TS_ASSERT_DELTA( result->readY(0).front(), 0.3438, 0.0001 )
-    TS_ASSERT_DELTA( result->readY(0).back(), 0.2991, 0.0001 )
-    TS_ASSERT_DELTA( result->readY(0)[1111], 0.3180, 0.0001 )
-    TS_ASSERT_DELTA( result->readY(1).front(), 0.4763, 0.0001 )
-    TS_ASSERT_DELTA( result->readY(1).back(), 0.4250, 0.0001 )
-    TS_ASSERT_DELTA( result->readY(1)[555], 0.4612, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(0).front(), 0.3442, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(0).back(), 0.2996, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(0)[1111], 0.3184, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(1).front(), 0.4766, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(1).back(), 0.4253, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(1)[555], 0.4616, 0.0001 )
     
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
