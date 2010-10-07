@@ -6,7 +6,6 @@
 """
 #TODO: pull HFIR-specific commands in a separate module.
 
-import SANSInsts
 from SANSReducer import SANSReducer
 import SANSReductionSteps
 

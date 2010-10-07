@@ -53,7 +53,9 @@ def _check_result(ws, test_file, tolerance=1e-6):
     data_igor = _read_IGOR(test_file)
     
     # Check length
-    assert(len(data_mantid)==len(data_igor))
+    if not len(data_mantid)==len(data_igor):
+        print "Incompatible data lengths"
+        return False
     
     # Utility methods for manipulating the lists
     def _diff_chi2(x,y): return (x[1]-y[1])*(x[1]-y[1])/(x[2]*x[2])

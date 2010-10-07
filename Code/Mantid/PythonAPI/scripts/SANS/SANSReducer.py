@@ -56,6 +56,9 @@ class SANSReducer(Reducer):
     ## Data loader
     _data_loader = None
     
+    ## Extra data files
+    _extra_files = {}
+    
     geometry_correcter = None
     
     def __init__(self):

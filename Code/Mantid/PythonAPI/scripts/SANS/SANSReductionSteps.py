@@ -367,12 +367,16 @@ class LoadRun(ReductionStep):
         # If we don't have a data file, look up the workspace handle
         if self._data_file is None:
             if workspace in reducer._data_files:
-                self._data_file = reducer._data_files[workspace]
+                data_file = reducer._data_files[workspace]
+            elif workspace in reducer._extra_files:
+                data_file = reducer._extra_files[workspace]
             else:
                 raise RuntimeError, "SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+        else:
+            data_file = self._data_file
         
         # Load data
-        filepath = reducer._full_file_path(self._data_file)
+        filepath = reducer._full_file_path(data_file)
         if reducer.instrument.wavelength is None:
             LoadSpice2D(filepath, workspace)
         else:
@@ -404,7 +408,7 @@ class LoadRun(ReductionStep):
                                 Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
                                 RelativePosition="1")
         
-        return "Data file loaded: %s" % (self._data_file)
+        return "Data file loaded: %s" % (data_file)
     
 class Normalize(ReductionStep):
     """
@@ -690,11 +694,15 @@ class SubtractBackground(ReductionStep):
             return None
         
     def execute(self, reducer, workspace):
+        log_text = ''
         if self._background_ws is None:
             # Apply the reduction steps that we normally apply to the data
             self._background_ws = extract_workspace_name(self._background_file)
+            reducer._extra_files[self._background_ws] = self._background_file
             for item in reducer._2D_steps():
-                item.execute(reducer, self._background_ws)
+                output = item.execute(reducer, self._background_ws)
+                if output is not None:
+                    log_text = log_text + '  ' + str(output) 
         
             # The transmission correction is set separately
             if self._transmission is not None:
@@ -702,7 +710,7 @@ class SubtractBackground(ReductionStep):
         
         Minus(workspace, self._background_ws, workspace)
         
-        return "Background subtracted [%s]" % (self._background_file)
+        return "Background subtracted [%s]\n%s" % (self._background_ws, log_text)
         
  
 class GetSampleGeom(ReductionStep):
