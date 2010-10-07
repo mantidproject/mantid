@@ -44,9 +44,9 @@ public:
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
     // Check some detector values
-    TS_ASSERT_DELTA(result->readY(1).back(), 10.0, 1e-6);
-    TS_ASSERT_DELTA(result->readY(2)[2], 10.0, 1e-6);
-    TS_ASSERT_DELTA(result->readY(3).front(), 10.0, 1e-6);
+    TS_ASSERT_DELTA(result->readY(1).back(), 25.774742, 1e-6);
+    TS_ASSERT_DELTA(result->readY(2)[2], 37.2655834, 1e-6);
+    TS_ASSERT_DELTA(result->readY(3).front(), 57.960343, 1e-6);
   }
 
   void testEventCorrection()
@@ -84,11 +84,11 @@ private:
     e.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i)
     {
-      x.access()[i] = static_cast<double>((1 + i) / 10);
+      x.access()[i] = static_cast<double>((1. + i) / 10.);
       y.access()[i] = 10.0;
       e.access()[i] = sqrt(5.0);
     }
-    x.access()[nbins] = static_cast<double>((1 + nbins) / 10);
+    x.access()[nbins] = static_cast<double>((1. + nbins) / 10.);
 
     int *specNums = new int[nspecs];
     int *detIDs = new int[nspecs];

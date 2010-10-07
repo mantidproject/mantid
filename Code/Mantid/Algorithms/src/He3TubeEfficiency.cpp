@@ -2,7 +2,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Exception.h"
-//#include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/cow_ptr.h"
 #include <algorithm>
 #include <cmath>
 
@@ -10,7 +10,7 @@
 const double DIST_TO_UNIVERSE_EDGE = 1e3;
 
 // Scalar constant for exponential in units of K / (m Angstroms atm)
-const double EXP_SCALAR_CONST = 2175.48686;
+const double EXP_SCALAR_CONST = 2175.486863864;
 
 namespace Mantid
 {
@@ -117,6 +117,7 @@ void He3TubeEfficiency::exec()
 
   this->logErrors();
   this->setProperty("OutputWorkspace", this->outputWS);
+  g_log.information() << "I'm done!" << std::endl;
 }
 
 /**
@@ -144,6 +145,7 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
+  // Get the parameters for the current associated tube
   Geometry::Parameter_sptr par = this->paraMap->get(det.get(), "tube_pressure");
   if ( !par )
   {
@@ -152,6 +154,13 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   g_log.information() << "Detector " << spectraIndex << ", Tube Pressure "
       << par->value<double>() << std::endl;
   double pressure = par->value<double>();
+
+  par = this->paraMap->get(det.get(), "tube_thickness");
+  if ( !par )
+  {
+    throw Kernel::Exception::NotFoundError("tube_thickness", spectraIndex);
+  }
+  double tubethickness = par->value<double>();
 
   par = this->paraMap->get(det.get(), "tube_temperature");
   if ( !par )
@@ -176,22 +185,31 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   detAxis.normalize();
   // Scalar product is quicker than cross product
   double cosTheta = detAxis.scalar_prod(vectorFromSample);
-  double sinTheta = std::sqrt(1.0 - cosTheta*cosTheta);
+  double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
   g_log.information() << "Detector " << spectraIndex << ", Tube Radius "
-      << detRadius << std::endl;
+      << detRadius << ", sinTheta " << sinTheta << std::endl;
+
+  const double pathlength = (detRadius - tubethickness) / sinTheta;
+  const double exp_constant = EXP_SCALAR_CONST * (pressure / temperature) * pathlength;
+
+  g_log.information() << "Detector " << spectraIndex << ", Constant "
+       << exp_constant << std::endl;
 
   std::vector<double>::const_iterator yinItr = yValues.begin();
   std::vector<double>::const_iterator einItr = eValues.begin();
+  Mantid::MantidVec::const_iterator xItr = this->inputWS->readX(spectraIndex).begin();
   Mantid::MantidVec::iterator youtItr = yout.begin();
   Mantid::MantidVec::iterator eoutItr = eout.begin();
 
   for( ; youtItr != yout.end(); ++youtItr, ++eoutItr)
   {
-    const double effcorr = detectorEfficiency();
+    const double wavelength = (*xItr + *(xItr + 1)) / 2.0;
+    const double effcorr = detectorEfficiency(exp_constant * wavelength);
     *youtItr = (*yinItr) * effcorr;
     *eoutItr = (*einItr) * effcorr;
     ++yinItr; ++einItr;
+    ++xItr;
   }
 
   return;
@@ -305,11 +323,14 @@ double He3TubeEfficiency::distToSurface(const Geometry::V3D start,
 /**
  * Calculate the detector efficiency from the detector parameters and the
  * spectrum's x-axis.
+ * @param alpha the value to feed to the exponential
+ * @param scale_factor an overall value for scaling the efficiency
+ * @return the calculated efficiency
  */
-double He3TubeEfficiency::detectorEfficiency() const
+double He3TubeEfficiency::detectorEfficiency(const double alpha,
+    const double scale_factor) const
 {
-  double x = 1.0;
-  return x;
+  return (scale_factor / (1.0 - std::exp(-alpha)));
 }
 
 /**
