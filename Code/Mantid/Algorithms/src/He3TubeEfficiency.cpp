@@ -21,9 +21,9 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency() : Algorithm(), inputWS(),
-outputWS(), paraMap(NULL), spectraSkipped()
+outputWS(), paraMap(NULL), spectraSkipped(), samplePos(), shapeCache()
 {
-
+  this->shapeCache.clear();
 }
 
 /// Destructor
@@ -117,7 +117,6 @@ void He3TubeEfficiency::exec()
 
   this->logErrors();
   this->setProperty("OutputWorkspace", this->outputWS);
-  g_log.information() << "I'm done!" << std::endl;
 }
 
 /**
@@ -151,8 +150,6 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   {
     throw Kernel::Exception::NotFoundError("tube_pressure", spectraIndex);
   }
-  g_log.information() << "Detector " << spectraIndex << ", Tube Pressure "
-      << par->value<double>() << std::endl;
   double pressure = par->value<double>();
 
   par = this->paraMap->get(det.get(), "tube_thickness");
@@ -187,14 +184,8 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   double cosTheta = detAxis.scalar_prod(vectorFromSample);
   double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
-  g_log.information() << "Detector " << spectraIndex << ", Tube Radius "
-      << detRadius << ", sinTheta " << sinTheta << std::endl;
-
   const double pathlength = (detRadius - tubethickness) / sinTheta;
   const double exp_constant = EXP_SCALAR_CONST * (pressure / temperature) * pathlength;
-
-  g_log.information() << "Detector " << spectraIndex << ", Constant "
-       << exp_constant << std::endl;
 
   std::vector<double>::const_iterator yinItr = yValues.begin();
   std::vector<double>::const_iterator einItr = eValues.begin();
