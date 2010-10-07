@@ -16,6 +16,8 @@
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 
+#include <qwt_plot.h>
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -45,6 +47,7 @@ namespace MantidQt
       void saveSettings();
 
       void setupTreePropertyBrowser();
+      void setupFFPlotArea();
 
       bool validateFury();
       bool validateElwin();
@@ -54,8 +57,9 @@ namespace MantidQt
 
       Mantid::API::CompositeFunction* createFunction();
 
-      void addLorentz();
-      void addStressed();
+      QtProperty* createLorentzian();
+      QtProperty* createStretchedExp();
+      QtProperty* createExponential();
 
     private slots:
 
@@ -68,6 +72,7 @@ namespace MantidQt
 
       void runFuryFit();
       void furyfit_typeSelection(int index);
+      void furyfitPlotInput();
 
       void elwinRun();
       void elwinPlotInput();
@@ -80,6 +85,8 @@ namespace MantidQt
 
       void openDirectoryDialog();
       void help();
+
+      void pointSelected(const QwtDoublePoint & pos);
 
     private:
       Ui::indirectAnalysis m_uiForm;
@@ -96,16 +103,12 @@ namespace MantidQt
 
       QtGroupPropertyManager* m_groupManager;
       QtDoublePropertyManager* m_doubleManager;
-      // QtStringPropertyManager* m_stringManager;
-      // QtEnumPropertyManager* m_enumManager;
-      // QtIntPropertyManager* m_intManager;
-      // QtBoolPropertyManager* m_boolManager;
-      // QtStringPropertyManager* m_filenameManager;
 
       bool m_furyResFileType;
+      
+      QMap<QString, QtProperty*> m_fitProperties;
 
-      // QList<QPair<QString,double> > m_baseProperties;
-      QMap<QString, double> m_baseProperties;
+      QwtPlot* m_furyFitPlotWindow;
 
     };
   }

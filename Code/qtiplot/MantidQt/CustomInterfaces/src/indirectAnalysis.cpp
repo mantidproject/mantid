@@ -8,6 +8,8 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QLineEdit>
 #include <QValidator>
@@ -19,6 +21,10 @@
 #include "qteditorfactory.h"
 #include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
+
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_picker.h>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -54,6 +60,8 @@ void indirectAnalysis::initLayout()
   m_uiForm.furyfit_hlTreePlace->addWidget(m_propBrowser);
   setupTreePropertyBrowser();
 
+  setupFFPlotArea();
+
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
 
@@ -70,6 +78,7 @@ void indirectAnalysis::initLayout()
   // fury fit
   connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfit_typeSelection(int)));
   connect(m_uiForm.furyfit_pbRun, SIGNAL(clicked()), this, SLOT(runFuryFit()));
+  connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
 
   // elwin
   connect(m_uiForm.elwin_pbRun, SIGNAL(clicked()), this, SLOT(elwinRun()));
@@ -195,27 +204,48 @@ void indirectAnalysis::setupTreePropertyBrowser()
 {
   m_groupManager    = new QtGroupPropertyManager();
   m_doubleManager   = new QtDoublePropertyManager();
-  //m_stringManager   = new QtStringPropertyManager();
-  //m_enumManager     = new QtEnumPropertyManager();
-  //m_intManager      = new QtIntPropertyManager();
-  //m_boolManager     = new QtBoolPropertyManager();
-  //m_filenameManager = new QtStringPropertyManager();
-
-  //QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory();
-  //QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory();
-  //QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory();
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
-  //QtLineEditFactory *lineEditFactory = new QtLineEditFactory();
-  //StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory();
-
-  //m_propBrowser->setFactoryForManager(m_enumManager, comboBoxFactory);
-  //m_propBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
-  //m_propBrowser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_propBrowser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  //m_propBrowser->setFactoryForManager(m_stringManager, lineEditFactory);
-  //m_propBrowser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
+
+  m_fitProperties["StartX"] = m_doubleManager->addProperty("StartX");
+  m_doubleManager->setDecimals(m_fitProperties["StartX"], 10);
+  m_fitProperties["EndX"] = m_doubleManager->addProperty("EndX");
+  m_doubleManager->setDecimals(m_fitProperties["EndX"], 10);
+
+  m_fitProperties["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
+  QtProperty* bgA0 = m_doubleManager->addProperty("A0");
+  QtProperty* bgA1 = m_doubleManager->addProperty("A1");
+  m_doubleManager->setDecimals(bgA0, 10);
+  m_doubleManager->setDecimals(bgA1, 10);
+  m_doubleManager->setRange(bgA1, 0.0, 0.0);
+  m_fitProperties["LinearBackground"]->addSubProperty(bgA0);
+  m_fitProperties["LinearBackground"]->addSubProperty(bgA1);
+  
+  m_fitProperties["Lorentzian1"] = createLorentzian();
+  m_fitProperties["Lorentzian2"] = createLorentzian();
+
+  m_fitProperties["Exponential1"] = createExponential();
+  m_fitProperties["Exponential2"] = createExponential();
+  
+  m_fitProperties["StretchedExp"] = createStretchedExp();
 
   furyfit_typeSelection(m_uiForm.furyfit_cbFitType->currentIndex());
+}
+
+
+void indirectAnalysis::setupFFPlotArea()
+{
+  m_furyFitPlotWindow = new QwtPlot(this);
+  m_uiForm.furyfit_vlPlot->addWidget(m_furyFitPlotWindow);
+  
+  QwtPlotPicker* picker = new QwtPlotPicker(m_furyFitPlotWindow->canvas());
+  picker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
+  picker->setRubberBandPen(QColor(Qt::blue));
+  picker->setRubberBand(QwtPicker::CrossRubberBand);
+  picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
+
+  connect(picker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(pointSelected(const QwtDoublePoint&)));
+
 }
 
 
@@ -491,67 +521,88 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
   for ( int i = 0; i < items.size(); i++ )
   {
     QtProperty* item = items[i]->property(); 
-    // message += "Name: " + item->propertyName() + "\n";
     QList<QtProperty*> sub = item->subProperties();
 
     if ( sub.size() > 0 )
     {
       Mantid::API::IFunction* func;
       std::string name = item->propertyName().toStdString();
-      if ( name == "Stressed Exponential" )
+      if ( name == "Stretched Exponential" )
       {
         // create user function
         func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
         // set the necessary properties
-        std::string formula = "A0*exp(A1*(x^A2))";
+        std::string formula = "Intensity*exp(-Exponent*(x^Beta))";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
+      }
+      else if ( name == "Exponential" )
+      {
+      // create user function
+      func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+      // set the necessary properties
+      std::string formula = "Intensity*exp(-(x*Exponent))";
+      Mantid::API::IFunction::Attribute att(formula);
+      func->setAttribute("Formula", att);
       }
       else
       {
         func = Mantid::API::FunctionFactory::Instance().createFunction(name);
       }
-    for ( int j = 0; j < sub.size(); j++ )
-    {
-      // message += "\tSub: " + sub[j]->propertyName() + ", value: " + sub[j]->valueText() + "\n";
-      func->setParameter(sub[j]->propertyName().toStdString(), sub[j]->valueText().toDouble());
-    }
-    result->addFunction(func);
-    }
-    else
-    {
-      m_baseProperties[item->propertyName()] = item->valueText().toDouble();
+      for ( int j = 0; j < sub.size(); j++ )
+      {
+        func->setParameter(sub[j]->propertyName().toStdString(), sub[j]->valueText().toDouble());
+      }
+      result->addFunction(func);
     }
   }
-  //showInformationBox(message);
-
   return result;
 }
 
-void indirectAnalysis::addLorentz()
+QtProperty* indirectAnalysis::createLorentzian()
 {
   QtProperty* lorentzGroup = m_groupManager->addProperty("Lorentzian");
   QtProperty* lzA0 = m_doubleManager->addProperty("Height");
   m_doubleManager->setRange(lzA0, 0.0, 1.0); // 0 < Height < 1
   QtProperty* lzA1 = m_doubleManager->addProperty("PeakCentre");
   QtProperty* lzA2 = m_doubleManager->addProperty("HWHM");
+  m_doubleManager->setDecimals(lzA0, 10);
+  m_doubleManager->setDecimals(lzA1, 10);
+  m_doubleManager->setDecimals(lzA2, 10);
   lorentzGroup->addSubProperty(lzA0);
   lorentzGroup->addSubProperty(lzA1);
   lorentzGroup->addSubProperty(lzA2);
-  m_propBrowser->addProperty(lorentzGroup);
+  return lorentzGroup;
 }
 
-void indirectAnalysis::addStressed()
+QtProperty* indirectAnalysis::createExponential()
 {
-  QtProperty* stressedGroup = m_groupManager->addProperty("Stressed Exponential");
-  QtProperty* stA0 = m_doubleManager->addProperty("A0");
+  QtProperty* expGroup = m_groupManager->addProperty("Exponential");
+  QtProperty* expA0 = m_doubleManager->addProperty("Intensity");
+  m_doubleManager->setRange(expA0, 0.0, 1.0); // 0 < Height < 1
+  m_doubleManager->setDecimals(expA0, 10);
+  QtProperty* expA1 = m_doubleManager->addProperty("Exponent");
+  m_doubleManager->setDecimals(expA1, 10);
+  expGroup->addSubProperty(expA0);
+  expGroup->addSubProperty(expA1);
+  return expGroup;
+}
+
+QtProperty* indirectAnalysis::createStretchedExp()
+{
+  QtProperty* prop = m_groupManager->addProperty("Stretched Exponential");
+  QtProperty* stA0 = m_doubleManager->addProperty("Intensity");
   m_doubleManager->setRange(stA0, 0.0, 1.0);  // 0 < Height < 1
-  QtProperty* stA1 = m_doubleManager->addProperty("A1");
-  QtProperty* stA2 = m_doubleManager->addProperty("A2");
-  stressedGroup->addSubProperty(stA0);
-  stressedGroup->addSubProperty(stA1);
-  stressedGroup->addSubProperty(stA2);
-  m_propBrowser->addProperty(stressedGroup);
+  QtProperty* stA1 = m_doubleManager->addProperty("Exponent");
+  QtProperty* stA2 = m_doubleManager->addProperty("Beta");
+  m_doubleManager->setDecimals(stA0, 10);
+  m_doubleManager->setDecimals(stA1, 10);
+  m_doubleManager->setDecimals(stA2, 10);
+  m_doubleManager->setRange(stA2, 0.0, 1.0);
+  prop->addSubProperty(stA0);
+  prop->addSubProperty(stA1);
+  prop->addSubProperty(stA2);
+  return prop;
 }
 
 void indirectAnalysis::instrumentChanged(int index)
@@ -719,72 +770,106 @@ void indirectAnalysis::furyPlotInput()
 
 void indirectAnalysis::runFuryFit()
 {
-  // First create the function
-  Mantid::API::CompositeFunction* function = createFunction();
 
-  // Now load up the input workspace
-  QString pyInput = "from mantidsimple import *\n"
-    "LoadNexus(r'" + m_uiForm.furyfit_inputFile->getFirstFilename() + "', 'furyfit')\n";
-  QString pyOutput = runPythonCode(pyInput);
+  if ( m_uiForm.furyfit_inputFile->isValid() )
+  {
+    // First create the function
+    Mantid::API::CompositeFunction* function = createFunction();
 
-  // Create the Fit Algorithm
-  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-  alg->initialize();
-  alg->setPropertyValue("InputWorkspace", "furyfit");
-  alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
-  alg->setProperty("StartX", m_baseProperties["StartX"]);
-  alg->setProperty("EndX", m_baseProperties["EndX"]);
-  alg->setPropertyValue("Function", *function);
-  alg->setPropertyValue("Output","furyfit_output");
-  alg->execute();
+    // Now load up the input workspace
+    QString pyInput = "from mantidsimple import *\n"
+      "LoadNexus(r'" + m_uiForm.furyfit_inputFile->getFirstFilename() + "', 'furyfit')\n";
+    QString pyOutput = runPythonCode(pyInput);
+
+    // Create the Fit Algorithm
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "furyfit");
+    alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
+    alg->setProperty("StartX", m_doubleManager->value(m_fitProperties["StartX"]));
+    alg->setProperty("EndX", m_doubleManager->value(m_fitProperties["EndX"]));
+    alg->setPropertyValue("Function", *function);
+    alg->setPropertyValue("Output","furyfit_output");
+    alg->execute();
+  }
+  else
+  {
+    showInformationBox("You must select an input file.");
+  }
 }
-
 
 void indirectAnalysis::furyfit_typeSelection(int index)
 {
   m_propBrowser->clear();
 
   // StartX and EndX
-  QtProperty* startX = m_doubleManager->addProperty("StartX");
-  QtProperty* endX = m_doubleManager->addProperty("EndX");
-  m_propBrowser->addProperty(startX);
-  m_propBrowser->addProperty(endX);
+  //m_doubleManager->setDecimals(startX, 10);
+  //m_doubleManager->setDecimals(endX, 10);
+  m_propBrowser->addProperty(m_fitProperties["StartX"]);
+  m_propBrowser->addProperty(m_fitProperties["EndX"]);
 
-  // LinearBackground
-  QtProperty* backgroundGroup = m_groupManager->addProperty("LinearBackground");
-  QtProperty* bgA0 = m_doubleManager->addProperty("A0");
-  QtProperty* bgA1 = m_doubleManager->addProperty("A1");
-  backgroundGroup->addSubProperty(bgA0);
-  backgroundGroup->addSubProperty(bgA1);
-  m_propBrowser->addProperty(backgroundGroup);
+  m_propBrowser->addProperty(m_fitProperties["LinearBackground"]);
 
   switch ( index )
   {
   case 0:
-    addLorentz();
+    m_propBrowser->addProperty(m_fitProperties["Exponential1"]);
     break;
   case 1:
-    addLorentz();
-    addLorentz();
+    m_propBrowser->addProperty(m_fitProperties["Exponential1"]);
+    m_propBrowser->addProperty(m_fitProperties["Exponential2"]);
     break;
   case 2:
-    addStressed();
+    m_propBrowser->addProperty(m_fitProperties["StretchedExp"]);
     break;
   case 3:
-    addLorentz();
-    addStressed();
+    m_propBrowser->addProperty(m_fitProperties["Exponential1"]);
+    m_propBrowser->addProperty(m_fitProperties["StretchedExp"]);
     break;
   default:
     showInformationBox("Something very bad has happened.");
     return;
     break;
   }
-  // LinearBackground
-  // AND
-  // 1 Lorentzian OR (0)
-  // 2 Lorentzian OR (1)
-  // 1 Stressed OR (2)
-  // 1 Lorentzian and 1 Stressed (3)
+}
+
+void indirectAnalysis::furyfitPlotInput()
+{
+  if ( ! m_uiForm.furyfit_inputFile->isValid() )
+  {
+    return;
+  }
+  else
+  {
+    // first we want to clear any previous curves off
+    m_furyFitPlotWindow->detachItems();
+
+    std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
+
+    // LoadNexus
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
+    alg->initialize();
+    alg->setPropertyValue("Filename", filename);
+    alg->setPropertyValue("OutputWorkspace","furyfit_input");
+    alg->execute();
+
+    // Get spectra number
+    int specNo = m_uiForm.furyfit_leSpecNo->text().toInt();
+
+    // get the output workspace
+    Mantid::API::MatrixWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("furyfit_input"));
+
+    // get the data of that spectra number
+    const QVector<double> dataX = QVector<double>::fromStdVector(inputWS->readX(specNo));
+    const QVector<double> dataY = QVector<double>::fromStdVector(inputWS->readY(specNo));
+
+    // create the QwtPlotCurve
+    QwtPlotCurve* curve = new QwtPlotCurve();
+    curve->setData(dataX, dataY);
+
+    curve->attach(m_furyFitPlotWindow);
+    m_furyFitPlotWindow->replot();
+  }
 }
 
 void indirectAnalysis::elwinRun()
@@ -973,4 +1058,18 @@ void indirectAnalysis::openDirectoryDialog()
 void indirectAnalysis::help()
 {
   showInformationBox("Not yet written.");
+}
+
+void indirectAnalysis::pointSelected(const QwtDoublePoint & pos)
+{
+  QtBrowserItem* item = m_propBrowser->currentItem();
+  if ( item == NULL )
+    return;
+
+  QtProperty* prop = item->property();
+  if ( prop->propertyManager() == m_doubleManager )
+  {
+    m_doubleManager->setValue(prop, pos.x());
+  }
+
 }
