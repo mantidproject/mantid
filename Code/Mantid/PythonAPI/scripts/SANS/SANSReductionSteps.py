@@ -331,7 +331,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Perform subtraction
         Minus(workspace, scaled_dark_ws, workspace)  
         
-        return "Dark current subtracted [%s]" % (self._dark_current_file)
+        return "Dark current subtracted [%s]" % (scaled_dark_ws)
           
 class LoadRun(ReductionStep):
     """
@@ -408,7 +408,7 @@ class LoadRun(ReductionStep):
                                 Y = -(reducer.get_beam_center()[1]-reducer.instrument.ny_pixels/2.0+0.5) * reducer.instrument.pixel_size_y/1000.0, 
                                 RelativePosition="1")
         
-        return "Data file loaded: %s" % (data_file)
+        return "Data file loaded: %s" % (workspace)
     
 class Normalize(ReductionStep):
     """
@@ -449,17 +449,50 @@ class WeightedAzimuthalAverage(ReductionStep):
         ReductionStep class that performs azimuthal averaging
         and transforms the 2D reduced data set into I(Q).
     """
-    def __init__(self, binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=False):
+    def __init__(self, binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1):
         super(WeightedAzimuthalAverage, self).__init__()
         self._binning = binning
         self._suffix = suffix
         self._error_weighting = error_weighting
+        self._nbins = n_bins
+        self._nsubpix = n_subpix
         
     def execute(self, reducer, workspace):
+        # Q range                        
+        beam_ctr = reducer._beam_finder.get_beam_center()
+        
+        if self._binning is None:
+            # Wavelength
+            x = mtd[workspace].dataX(0)
+            wavelength = (x[0]+x[1])/2.0
+                    
+            # Q min is one pixel from the center
+            qmin = 4*math.pi/wavelength*math.sin(0.5*math.atan(reducer.instrument.pixel_size_x/reducer.instrument.sample_detector_distance))
+            dxmax = max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
+            dymax = max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
+            maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
+            qmax = 4*math.pi/wavelength*math.sin(0.5*math.atan(reducer.instrument.pixel_size_x*maxdist/reducer.instrument.sample_detector_distance))
+            qstep = (qmax-qmin)/self._nbins
+            
+            f_step = (qmax-qmin)/qstep
+            n_step = math.floor(f_step)
+            if f_step-n_step>10e-10:
+                qmax = qmin+qstep*n_step
+                
+            self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
+        else:
+            toks = self._binning.split(',')
+            if len(toks)<3:
+                raise RuntimeError, "Invalid binning provided: %s" % str(self._binning)
+            qmin = float(toks[0])
+            qmax = float(toks[2])
+            
         output_ws = workspace+str(self._suffix)    
-        Q1DWeighted(workspace, output_ws, self._binning, 
+        Q1DWeighted(workspace, output_ws, self._binning,
+                    NPixelDivision=self._nsubpix,
                     PixelSizeX=reducer.instrument.pixel_size_x,
                     PixelSizeY=reducer.instrument.pixel_size_y, ErrorWeighting=self._error_weighting)  
+        return "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         
     def get_output_workspace(self, workspace):
         return workspace+str(self._suffix)
@@ -537,7 +570,7 @@ class SensitivityCorrection(ReductionStep):
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
         MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
     
-        return "Sensitivity correction applied [%s]" % (self._flood_data)
+        return "Sensitivity correction applied [%s]" % (flood_ws)
 
 class Mask(ReductionStep):
     """

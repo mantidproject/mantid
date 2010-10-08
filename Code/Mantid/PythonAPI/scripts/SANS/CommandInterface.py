@@ -104,7 +104,7 @@ def SolidAngle():
 def NoSolidAngle():
     ReductionSingleton().set_solid_angle_correcter(None)
     
-def AzimuthalAverage(binning="0.01,0.001,0.11", suffix="_Iq", error_weighting=False):
+def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1):
     ReductionSingleton().set_azimuthal_averager(SANSReductionSteps.WeightedAzimuthalAverage(binning=binning,
                                                                                             suffix=suffix,
                                                                                             error_weighting=error_weighting))

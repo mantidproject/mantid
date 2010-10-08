@@ -59,6 +59,8 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
         self._summary.min_sensitivity_edit.setValidator(QtGui.QDoubleValidator(self._summary.min_sensitivity_edit))
         self._summary.max_sensitivity_edit.setValidator(QtGui.QDoubleValidator(self._summary.max_sensitivity_edit))
+        self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
+        self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
         
         # Event connections
         self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
@@ -72,29 +74,8 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_browse)
         
         # Q range
-        self._summary.q_min_edit.setText(QtCore.QString("0.01"))
-        self._summary.q_step_edit.setText(QtCore.QString("0.001"))
-        self._summary.q_max_edit.setText(QtCore.QString("0.11"))
-        self.connect(self._summary.q_min_edit, QtCore.SIGNAL("editingFinished()"),
-                     functools.partial(self._q_range_changed, "QMIN"))
-        self.connect(self._summary.q_step_edit, QtCore.SIGNAL("editingFinished()"),
-                     functools.partial(self._q_range_changed, "QSTEP"))
-        self.connect(self._summary.q_max_edit, QtCore.SIGNAL("editingFinished()"),
-                     functools.partial(self._q_range_changed, "QMAX"))
-        
-    def _q_range_changed(self, field=None):
-        
-        # Check that the range is valid
-        qmin = util._check_and_get_float_line_edit(self._summary.q_min_edit)
-        qstep = util._check_and_get_float_line_edit(self._summary.q_step_edit)
-        qmax = util._check_and_get_float_line_edit(self._summary.q_max_edit)
-        
-        #TODO: need to display status bar message to user
-        f_step = (qmax-qmin)/qstep
-        n_step = math.floor(f_step)
-        if f_step-n_step>10e-10:
-            new_qmax = qmin+qstep*n_step
-            self._summary.q_max_edit.setText(QtCore.QString(str(new_qmax)))
+        self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
+        self._summary.n_sub_pix_edit.setText(QtCore.QString("1"))
             
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)
@@ -119,6 +100,10 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.sensitivity_browse_button.setEnabled(is_checked)
         self._summary.min_sensitivity_edit.setEnabled(is_checked)
         self._summary.max_sensitivity_edit.setEnabled(is_checked)
+        self._summary.sensivity_file_label.setEnabled(is_checked)
+        self._summary.sensitivity_range_label.setEnabled(is_checked)
+        self._summary.sensitivity_min_label.setEnabled(is_checked)
+        self._summary.sensitivity_max_label.setEnabled(is_checked)
         
     def _sensitivity_browse(self):
         fname = self.data_browse_dialog()
@@ -151,7 +136,10 @@ class SANSInstrumentWidget(BaseWidget):
             # Check that we have an image for the chosen data file
             if os.path.isfile(file_name):
                 self._mask_widget.set_background(file_name)
-                self._summary.repaint()        
+                self._summary.repaint()  
+            else:
+                self._mask_widget.set_background(None)
+                self._summary.repaint()  
             
     def set_state(self, state):
         """
@@ -208,9 +196,8 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.normalization_monitor_radio.setChecked(True)
         
         # Q range
-        self._summary.q_min_edit.setText(QtCore.QString(str(state.q_min)))
-        self._summary.q_step_edit.setText(QtCore.QString(str(state.q_step)))
-        self._summary.q_max_edit.setText(QtCore.QString(str(state.q_max)))
+        self._summary.n_q_bins_edit.setText(QtCore.QString(str(state.n_q_bins)))
+        self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
         
         # Data file
         self._summary.data_file_edit.setText(QtCore.QString(state.data_file))
@@ -276,9 +263,8 @@ class SANSInstrumentWidget(BaseWidget):
             m.normalization = m.NORMALIZATION_MONITOR
             
         # Q range
-        m.q_min = util._check_and_get_float_line_edit(self._summary.q_min_edit)
-        m.q_step = util._check_and_get_float_line_edit(self._summary.q_step_edit)
-        m.q_max = util._check_and_get_float_line_edit(self._summary.q_max_edit)
+        m.n_q_bins = util._check_and_get_int_line_edit(self._summary.n_q_bins_edit)
+        m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         
         return m
     

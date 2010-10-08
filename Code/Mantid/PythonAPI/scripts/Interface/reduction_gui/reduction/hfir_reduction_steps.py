@@ -339,7 +339,7 @@ class InstrumentDescription(BaseScriptElement):
     # Sample-detector distance to force on the data set [mm]
     sample_detector_distance = 0
     # Detector distance offset [mm]
-    detector_offset = 0
+    detector_offset = 837.9
     # Wavelength value to force on the data set [Angstrom]
     wavelength = 0
     wavelength_spread = 0.1
@@ -355,9 +355,8 @@ class InstrumentDescription(BaseScriptElement):
     max_sensitivity = 1.5
     
     # Q range
-    q_min = 0.01
-    q_step = 0.001
-    q_max = 0.11
+    n_q_bins = 100
+    n_sub_pix = 1
     
     
     NORMALIZATION_NONE = 0
@@ -404,13 +403,10 @@ class InstrumentDescription(BaseScriptElement):
         script += "Mask(nx_low=%d, nx_high=%d, ny_low=%d, ny_high=%d)\n" % (self.mask_left, self.mask_right, self.mask_bottom, self.mask_top)
         
         # Q binning
-        if self.q_min > self.q_max:
-            raise RuntimeError, "Q range has minimum Q larger than maximum Q"
-        script += "AzimuthalAverage(binning=\"%g, %g, %g\")\n" % (self.q_min, self.q_step, self.q_max)        
+        script += "AzimuthalAverage(n_bins=%g, n_subpix=%g)\n" % (self.n_q_bins, self.n_sub_pix)        
         
         # Data file
         if len(str(self.data_file).strip())>0:
-            
             parts = os.path.split(str(self.data_file))
             script += "DataPath(\"%s\")\n" % parts[0]
             script += "AppendDataFile(\"%s\")\n" % self.data_file
@@ -446,9 +442,8 @@ class InstrumentDescription(BaseScriptElement):
         xml += "  <sensitivity_min>%s</sensitivity_min>\n" % self.min_sensitivity
         xml += "  <sensitivity_max>%s</sensitivity_max>\n" % self.max_sensitivity
 
-        xml += "  <q_min>%g</q_min>\n" % self.q_min
-        xml += "  <q_step>%g</q_step>\n" % self.q_step
-        xml += "  <q_max>%g</q_max>\n" % self.q_max
+        xml += "  <n_q_bins>%g</n_q_bins>\n" % self.n_q_bins
+        xml += "  <n_sub_pix>%g</n_sub_pix>\n" % self.n_sub_pix
 
         xml += "  <normalization>%d</normalization>\n" % self.normalization
         
@@ -500,12 +495,10 @@ class InstrumentDescription(BaseScriptElement):
         self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
                                                             default=InstrumentDescription.max_sensitivity)
         
-        self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min",
-                                                       default=InstrumentDescription.q_min)
-        self.q_step = BaseScriptElement.getFloatElement(instrument_dom, "q_step",
-                                                       default=InstrumentDescription.q_step)
-        self.q_max = BaseScriptElement.getFloatElement(instrument_dom, "q_max",
-                                                       default=InstrumentDescription.q_max)
+        self.n_q_bins = BaseScriptElement.getIntElement(instrument_dom, "n_q_bins",
+                                                       default=InstrumentDescription.n_q_bins)
+        self.n_sub_pix = BaseScriptElement.getIntElement(instrument_dom, "n_sub_pix",
+                                                       default=InstrumentDescription.n_sub_pix)
         
         self.normalization = BaseScriptElement.getIntElement(instrument_dom, "normalization",
                                                              default=InstrumentDescription.normalization)
