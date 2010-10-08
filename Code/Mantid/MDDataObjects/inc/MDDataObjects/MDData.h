@@ -91,7 +91,7 @@ protected:
 
 
    // interface to alloc_mdd_arrays below in case of full not collapsed mdd dataset
-    void alloc_mdd_arrays(const SlicingData &transf);
+    void alloc_mdd_arrays(const SlicingProperty &transf);
 
 /// clear all allocated memory as in the destructor; neded for reshaping the object for e.g. changing from defaults to something else. generally this is bad desighn. 
     void clear_class();
@@ -137,7 +137,7 @@ protected:
   static Logger& g_log;
 private:
     /** function reshapes the geomerty of the array according to the pAxis array request; returns the total array size */
-    size_t reshape_geometry(const SlicingData &transf);
+    size_t reshape_geometry(const SlicingProperty &transf);
    /// the pointer for vector returning the image points for visualisation
 
  //*************************************************

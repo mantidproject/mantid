@@ -337,7 +337,7 @@ MD_File_hdfMatlab::read_mdd(MDData & dnd)
         throw(Exception::FileError(err.str(),this->File_name));
     }
     nDims= arr_dims_vector[0];
-    SlicingData dnd_shape(nDims);
+    SlicingProperty dnd_shape(nDims);
 
     for(i=0;i<nDims;i++){
         unsigned int dim_size=(unsigned int)*((double*)(data)+i);

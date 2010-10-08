@@ -41,7 +41,7 @@ namespace Mantid{
     namespace MDDataObjects{
 
 // predefine helper class which keeps all information about the requested transformation 
-    class SlicingData;
+    class SlicingProperty;
 
 class DLLExport MDGeometry :   public WorkspaceGeometry
 {
@@ -74,7 +74,7 @@ protected:
      std::vector<int>          theDimensionIDNum;
 
      /** function sets ranges of the data as in transformation request; Useless without real change of the ranges */
-     void setRanges(const SlicingData &trf);
+     void setRanges(const SlicingProperty &trf);
 
    /** function used to reset dimensions according to the requested transformaton and to arrange them properly, e.g. according to the order of the 
        dimensions in IDs   plus all non-collapsped dimensions first */
@@ -86,7 +86,7 @@ protected:
     *   if any ID in the list is different from existing or just resets the structure into new ID shape if new ID-s list includes all from the old one;
     *   when the structure is indeed 
     */
-    void reinit_Geometry(const SlicingData &trf);
+    void reinit_Geometry(const SlicingProperty &trf);
 private:
     void init_empty_dimensions(const std::vector<DimensionsID> &IDS);
 

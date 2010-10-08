@@ -171,7 +171,7 @@
     <ClCompile Include="src\MDPixels.cpp" />
     <ClCompile Include="src\MD_File_hdfMatlab.cpp" />
     <ClCompile Include="src\point3D.cpp" />
-    <ClCompile Include="src\SlicingData.cpp" />
+    <ClCompile Include="src\SlicingProperty.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\WorkspaceGeometry.cpp" />
   </ItemGroup>
@@ -189,7 +189,7 @@
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
     <ClInclude Include="inc\MDDataObjects\point3D.h" />
-    <ClInclude Include="inc\MDDataObjects\SlicingData.h" />
+    <ClInclude Include="inc\MDDataObjects\SlicingProperty.h" />
     <ClInclude Include="inc\MDDataObjects\stdafx.h" />
     <ClInclude Include="inc\MDDataObjects\WorkspaceGeometry.h" />
     <ClInclude Include="test\testMDData.h" />

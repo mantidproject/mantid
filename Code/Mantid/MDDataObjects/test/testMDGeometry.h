@@ -1,6 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDGeometry.h"
-#include "MDDataObjects/SlicingData.h"
+#include "MDDataObjects/SlicingProperty.h"
 
 using namespace Mantid;
 using namespace MDDataObjects;
@@ -10,15 +10,15 @@ class tMDGeometry: public MDGeometry
 {
 public:
     tMDGeometry(unsigned int nDims=4):MDGeometry(nDims){};
-    void setRanges(const SlicingData &slice){MDGeometry::setRanges(slice);}
-    void reinit_Geometry(const SlicingData &slice){MDGeometry::reinit_Geometry(slice);}
+    void setRanges(const SlicingProperty &slice){MDGeometry::setRanges(slice);}
+    void reinit_Geometry(const SlicingProperty &slice){MDGeometry::reinit_Geometry(slice);}
 
 };
 //
 class testMDGeometry : public CxxTest::TestSuite
 {
     tMDGeometry *tDND_geometry;
-    SlicingData *pSlice;
+    SlicingProperty *pSlice;
 public:
     void testGeometryConstr(void)
     {
@@ -54,8 +54,8 @@ public:
         TS_ASSERT_THROWS_NOTHING(pDim0=tDND_geometry->getDimension(eh));
         TS_ASSERT_EQUALS(pDim0,pDim);
     }
-    void testSlicingData(void){
-         TS_ASSERT_THROWS_NOTHING(pSlice = new SlicingData(*tDND_geometry));
+    void testSlicingProperty(void){
+         TS_ASSERT_THROWS_NOTHING(pSlice = new SlicingProperty(*tDND_geometry));
 
 //       we want these data to be non-integrated;
          TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins(en,100));

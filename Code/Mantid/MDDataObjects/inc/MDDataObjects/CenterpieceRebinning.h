@@ -2,18 +2,18 @@
 #define H_CENTERPIECE_REBINNING
 /* NOT IMPLEMENTED HERE
 #include "SQW.h"
-#include "SlicingData.h"
+#include "SlicingProperty.h"
 
 class CenterpieceRebinning
 {
     
 public:
-    CenterpieceRebinning(const SQW &origin,const SlicingData &trf);
+    CenterpieceRebinning(const SQW &origin,const SlicingProperty &trf);
     void run_rebinning(SQW &target);
     virtual ~CenterpieceRebinning(void);
 private:
     SQW const *const origin;
-    SlicingData const*const trf;
+    SlicingProperty const*const trf;
 
  // function builds the vector of cell indexes which can contribute into the cut, described by the transformation matrix supplied;
     void preselect_cells(std::vector<long> &selected_cells,long &n_preselected_pix);

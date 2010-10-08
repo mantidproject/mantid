@@ -1,6 +1,6 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDGeometry.h"
-#include "MDDataObjects/SlicingData.h"
+#include "MDDataObjects/SlicingProperty.h"
 
 using namespace Mantid::Kernel;
 
@@ -8,7 +8,7 @@ namespace Mantid{
     namespace MDDataObjects{
 //----------------------------------------------------------------
 void 
-MDGeometry::reinit_Geometry(const SlicingData &trf)
+MDGeometry::reinit_Geometry(const SlicingProperty &trf)
 {
     unsigned int i;
     std::vector<DimensionsID> ID(trf.getPAxis());
@@ -148,7 +148,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<DimensionsID> &IDS)
 
 };
 void
-MDGeometry::setRanges(const SlicingData &trf)
+MDGeometry::setRanges(const SlicingProperty &trf)
 {
     unsigned int i;
     unsigned int n_new_dims=trf.getNumDims();

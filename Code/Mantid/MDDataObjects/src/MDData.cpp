@@ -331,7 +331,7 @@ DND::write_mdd(const char *file_name){
 */
 //*******************************************************************************************************
 size_t
-MDData::reshape_geometry(const SlicingData &transf)
+MDData::reshape_geometry(const SlicingProperty &transf)
 {
    unsigned int i;
 
@@ -368,7 +368,7 @@ MDData::reshape_geometry(const SlicingData &transf)
     return data_size;
 }
 void 
-MDData::alloc_mdd_arrays(const SlicingData &transf)
+MDData::alloc_mdd_arrays(const SlicingProperty &transf)
 {
 
 // initiate initial dimensions

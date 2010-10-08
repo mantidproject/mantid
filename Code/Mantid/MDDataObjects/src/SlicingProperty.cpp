@@ -1,11 +1,11 @@
 #include "MDDataObjects/stdafx.h"
-#include "MDDataObjects/SlicingData.h"
+#include "MDDataObjects/SlicingProperty.h"
 /// the function returns the rotation vector which allows to transform vector inumber i into the basis;
 namespace Mantid{
     namespace MDDataObjects{
 
 std::vector<double> 
-SlicingData::rotations(unsigned int i,const std::vector<double> basis[3])const
+SlicingProperty::rotations(unsigned int i,const std::vector<double> basis[3])const
 {
 // STUB  !!! 
     this->check_index(i,"rotations");
@@ -19,7 +19,7 @@ SlicingData::rotations(unsigned int i,const std::vector<double> basis[3])const
     return tmp;
 }
 /// this extracts the size and shape of the current DND object
-SlicingData::SlicingData(const MDGeometry &origin)
+SlicingProperty::SlicingProperty(const MDGeometry &origin)
 {
     Dimension *pDim;
 
@@ -66,22 +66,22 @@ SlicingData::SlicingData(const MDGeometry &origin)
 
 //****** SET *******************************************************************************
 void 
-SlicingData::setCoord(unsigned int i,const std::vector<double> &coord)
+SlicingProperty::setCoord(unsigned int i,const std::vector<double> &coord)
 {
     this->check_index(i,"setCoord");
     if(i<3){
         if(coord.size()!=3){
-            throw(std::invalid_argument("SlicingData::setCoord wrong parameter, index<3 and attempting to set a non-3 point coordinate"));
+            throw(std::invalid_argument("SlicingProperty::setCoord wrong parameter, index<3 and attempting to set a non-3 point coordinate"));
         }
         this->coordinates[i]=coord;
     }else{
         if(coord.size()!=1){
-            throw(std::invalid_argument("SlicingData::setCoord wrong parameter, index>=3 and attempting to set a coordinate of orthogonal dimension"));
+            throw(std::invalid_argument("SlicingProperty::setCoord wrong parameter, index>=3 and attempting to set a coordinate of orthogonal dimension"));
         }
     }
 }
 void 
-SlicingData::setPAxis(unsigned int i, DimensionsID ID)
+SlicingProperty::setPAxis(unsigned int i, DimensionsID ID)
 {
    this->check_index(i,"setPAxis");
 
@@ -116,34 +116,34 @@ SlicingData::setPAxis(unsigned int i, DimensionsID ID)
 
 }
 void
-SlicingData::setShift(unsigned int i,double Val)
+SlicingProperty::setShift(unsigned int i,double Val)
 {
    this->check_index(i,"setShift");
    this->trans_bott_left[i]=Val;
 }
 void
-SlicingData::setCutMin(unsigned int i,double Val)
+SlicingProperty::setCutMin(unsigned int i,double Val)
 {
     this->check_index(i,"setCutMin");
     this->cut_min[i]=Val;
 }
 void
-SlicingData::setCutMax(unsigned int i,double Val)
+SlicingProperty::setCutMax(unsigned int i,double Val)
 {
     this->check_index(i,"setCutMax");
     this->cut_max[i]=Val;
 }
 void
-SlicingData::setNumBins(unsigned int i,unsigned int Val)
+SlicingProperty::setNumBins(unsigned int i,unsigned int Val)
 {
     this->check_index(i,"setNumBins");
     if(Val>MAX_REASONABLE_BIN_NUMBER){
-        throw(std::invalid_argument("SlicingData::setNumBins value bin requested is larger than MAX_REASONABLE_BIN_NUMBER"));
+        throw(std::invalid_argument("SlicingProperty::setNumBins value bin requested is larger than MAX_REASONABLE_BIN_NUMBER"));
     }
     this->nBins[i]=Val;
 }
 void
-SlicingData::setAxisName(unsigned int i,const std::string &Name)
+SlicingProperty::setAxisName(unsigned int i,const std::string &Name)
 {
     this->check_index(i,"setAxisName");
     this->AxisName[i]=Name;
@@ -151,27 +151,27 @@ SlicingData::setAxisName(unsigned int i,const std::string &Name)
 //*************************************************************************************
 
 double 
-SlicingData::cutMin(unsigned int i)const
+SlicingProperty::cutMin(unsigned int i)const
 {
     this->check_index(i,"cutMin");
     return this->cut_min[i];
 }
 double
-SlicingData::cutMax(unsigned int i)const
+SlicingProperty::cutMax(unsigned int i)const
 {
     this->check_index(i,"cutMax");
     return this->cut_max[i];
 
 }
 unsigned int 
-SlicingData::numBins(unsigned int i)const
+SlicingProperty::numBins(unsigned int i)const
 {
     this->check_index(i,"numBins");
     return this->nBins[i];
 
 }
 bool
-SlicingData::isAxisNamePresent(unsigned int i)const
+SlicingProperty::isAxisNamePresent(unsigned int i)const
 {
     this->check_index(i,"isAxisNamePresent");
 
@@ -182,26 +182,26 @@ SlicingData::isAxisNamePresent(unsigned int i)const
     }
 }
 std::string 
-SlicingData::getAxisName(unsigned int i)const
+SlicingProperty::getAxisName(unsigned int i)const
 {
     this->check_index(i,"getAxisName");
     return (this->AxisName.at(i));
 }
 DimensionsID 
-SlicingData::getPAxis(unsigned int i)const
+SlicingProperty::getPAxis(unsigned int i)const
 {
     this->check_index(i,"getPAxis");
     return this->pAxis[i];
 }
 
 
-SlicingData::SlicingData(unsigned int numDims):
+SlicingProperty::SlicingProperty(unsigned int numDims):
 nDimensions(numDims)
 {
     this->intit_default_slicing(numDims);
 
 }
-SlicingData::SlicingData(std::vector<DimensionsID> &IDs)
+SlicingProperty::SlicingProperty(std::vector<DimensionsID> &IDs)
 {
     unsigned int i;
     unsigned int nDims=(unsigned int)IDs.size();
@@ -227,10 +227,10 @@ SlicingData::SlicingData(std::vector<DimensionsID> &IDs)
 }
 
 void
-SlicingData::intit_default_slicing(unsigned int nDims)
+SlicingProperty::intit_default_slicing(unsigned int nDims)
 {
     if(nDims>MAX_NDIMS_POSSIBLE){
-        throw(std::invalid_argument("SlicingData::intit_default_slicing: attemting to init more dimension that it is actually possible "));
+        throw(std::invalid_argument("SlicingProperty::intit_default_slicing: attemting to init more dimension that it is actually possible "));
     }
     nDimensions=nDims;
 
@@ -255,20 +255,20 @@ SlicingData::intit_default_slicing(unsigned int nDims)
 
 }
 std::vector<double> 
-SlicingData::getCoord(DimensionsID id)const
+SlicingProperty::getCoord(DimensionsID id)const
 {
     if(id>2){
-        throw(std::invalid_argument("SlicingData::getCoord attemt to get coordinate of non-reciprocal dimension"));
+        throw(std::invalid_argument("SlicingProperty::getCoord attemt to get coordinate of non-reciprocal dimension"));
     }
     return this->coordinates[id];
 }
 
 
-SlicingData::~SlicingData(void)
+SlicingProperty::~SlicingProperty(void)
 {
 }
 void 
-SlicingData::check_index(unsigned int i,const char *fName)const
+SlicingProperty::check_index(unsigned int i,const char *fName)const
 {
     if(i>=this->nDimensions){
         std::stringstream err;

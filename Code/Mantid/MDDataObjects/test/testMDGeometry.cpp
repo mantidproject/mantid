@@ -11,12 +11,12 @@
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/RealDescriptions.h>
 
-#include "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h"
+#include "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h"
 
 static testMDGeometry suite_testMDGeometry;
 
 static CxxTest::List Tests_testMDGeometry = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testMDGeometry( "C:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h", 18, "testMDGeometry", suite_testMDGeometry, Tests_testMDGeometry );
+CxxTest::StaticSuiteDescription suiteDescription_testMDGeometry( "c:/Mantid/Code/Mantid/MDDataObjects/test/testMDGeometry.h", 18, "testMDGeometry", suite_testMDGeometry, Tests_testMDGeometry );
 
 static class TestDescription_testMDGeometry_testGeometryConstr : public CxxTest::RealTestDescription {
 public:
@@ -42,11 +42,11 @@ public:
  void runTest() { suite_testMDGeometry.testMDGeomDimAcessors(); }
 } testDescription_testMDGeometry_testMDGeomDimAcessors;
 
-static class TestDescription_testMDGeometry_testSlicingData : public CxxTest::RealTestDescription {
+static class TestDescription_testMDGeometry_testSlicingProperty : public CxxTest::RealTestDescription {
 public:
- TestDescription_testMDGeometry_testSlicingData() : CxxTest::RealTestDescription( Tests_testMDGeometry, suiteDescription_testMDGeometry, 57, "testSlicingData" ) {}
- void runTest() { suite_testMDGeometry.testSlicingData(); }
-} testDescription_testMDGeometry_testSlicingData;
+ TestDescription_testMDGeometry_testSlicingProperty() : CxxTest::RealTestDescription( Tests_testMDGeometry, suiteDescription_testMDGeometry, 57, "testSlicingProperty" ) {}
+ void runTest() { suite_testMDGeometry.testSlicingProperty(); }
+} testDescription_testMDGeometry_testSlicingProperty;
 
 static class TestDescription_testMDGeometry_testMDGeomSetFromSlice : public CxxTest::RealTestDescription {
 public:

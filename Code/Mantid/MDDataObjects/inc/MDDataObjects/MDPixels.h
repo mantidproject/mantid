@@ -67,7 +67,7 @@ public:
      MDPixels(unsigned int nDims);
     ~MDPixels();
     /* not used at the moment --> reconsile with algorithms. 
-     void set_shape(const SlicingData &trf){
+     void set_shape(const SlicingProperty &trf){
          this->alloc_mdd_arrays(trf);
          if(pix_array){
              delete [] pix_array;
@@ -91,7 +91,7 @@ public:
  
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
-    //void rebin_dataset4D(const SlicingData &transf,MDPixels &newsqw);
+    //void rebin_dataset4D(const SlicingProperty &transf,MDPixels &newsqw);
 private:
     // the parameter identify if the class data are file or memory based
    // usually it is file based and memory used for small datasets, debugging or in a future when PC are big
@@ -111,7 +111,7 @@ private:
    MDPixels(const MDPixels& p);
    MDPixels & operator = (const MDPixels & other);
 // rebin pixels in the pix_aray and add them to the current dataset ;
-//    long rebin_dataset4D(const SlicingData &transf, const sqw_pixel *pix_array, long nPix_cell);
+//    long rebin_dataset4D(const SlicingProperty &transf, const sqw_pixel *pix_array, long nPix_cell);
 //    void complete_rebinning(void);
 //    void extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted);
 };

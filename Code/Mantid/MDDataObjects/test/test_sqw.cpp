@@ -14,12 +14,12 @@
 int main() {
  return CxxTest::ParenPrinter().run();
 }
-#include "C:/Mantid/Code/Mantid/MDDataObjects/test/test_sqw.h"
+#include "c:/Mantid/Code/Mantid/MDDataObjects/test/test_sqw.h"
 
 static tmain suite_tmain;
 
 static CxxTest::List Tests_tmain = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_tmain( "C:/Mantid/Code/Mantid/MDDataObjects/test/test_sqw.h", 6, "tmain", suite_tmain, Tests_tmain );
+CxxTest::StaticSuiteDescription suiteDescription_tmain( "c:/Mantid/Code/Mantid/MDDataObjects/test/test_sqw.h", 6, "tmain", suite_tmain, Tests_tmain );
 
 static class TestDescription_tmain_testTMain : public CxxTest::RealTestDescription {
 public:
