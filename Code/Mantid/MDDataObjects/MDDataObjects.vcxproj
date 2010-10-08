@@ -95,7 +95,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_USRDLL;MDDATAOBJECTS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>inc;..\Kernel\inc;..\API\inc;..\..\Third_Party\Include;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;..\Kernel\inc;..\Geometry\inc;..\API\inc;..\..\Third_Party\Include;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -132,7 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_USRDLL;MDDATAOBJECTS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>inc;..\Kernel\inc;..\API\inc;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;..\Kernel\inc;..\Geometry\inc;..\API\inc;..\..\Third_Party\Include;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -169,6 +169,7 @@
     <ClCompile Include="src\MDData.cpp" />
     <ClCompile Include="src\MDGeometry.cpp" />
     <ClCompile Include="src\MDPixels.cpp" />
+    <ClCompile Include="src\MDWorkspace.cpp" />
     <ClCompile Include="src\MD_File_hdfMatlab.cpp" />
     <ClCompile Include="src\point3D.cpp" />
     <ClCompile Include="src\SlicingProperty.cpp" />
@@ -176,7 +177,6 @@
     <ClCompile Include="src\WorkspaceGeometry.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MDDataObjects\CenterpieceRebinning.h" />
     <ClInclude Include="inc\MDDataObjects\Dimension.h" />
     <ClInclude Include="inc\MDDataObjects\DimensionIDS.h" />
     <ClInclude Include="inc\MDDataObjects\DimensionRes.h" />
@@ -185,6 +185,7 @@
     <ClInclude Include="inc\MDDataObjects\MDData.h" />
     <ClInclude Include="inc\MDDataObjects\MDGeometry.h" />
     <ClInclude Include="inc\MDDataObjects\MDPixels.h" />
+    <ClInclude Include="inc\MDDataObjects\MDWorkspace.h" />
     <ClInclude Include="inc\MDDataObjects\MDWorkspaceConstants.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfMatlab.h" />
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
@@ -201,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MDDataObjects.vcxproj" />
+    <None Include="temp.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

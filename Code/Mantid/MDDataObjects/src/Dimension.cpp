@@ -113,8 +113,8 @@ Dimension::setIntegrated(void)
   this->nBins=1;
   this->Axis.clear();
   this->Axis.assign(2,0);
-  this->Axis.front()= this->rMin;
-  this->Axis.back() = this->rMax;
+  this->Axis[0] = this->rMin;
+  this->Axis[1] = this->rMax;
 }
 void
 Dimension::setIntegrated(double rxMin){

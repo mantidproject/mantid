@@ -107,7 +107,7 @@ private:
     bool isIntegrated;
     /// number of bins the axis have
     unsigned int nBins;
-    /// vector of left bin ranges plus rightmost value;  
+    /// vector of leftmost bin ranges plus rightmost value;  
     std::vector<double> Axis;
      /// min and maximum values along this dimension;
     double rMin,rMax;

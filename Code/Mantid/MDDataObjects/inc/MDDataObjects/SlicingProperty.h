@@ -1,7 +1,7 @@
 #ifndef H_SLICICNG_DATA
 #define H_SLICICNG_DATA
 #include "MDDataObjects/MDGeometry.h"
-#include "CenterpieceRebinning.h"
+
 
 //* class describes slicing and rebinning matrix;
 namespace Mantid{

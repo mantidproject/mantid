@@ -51,12 +51,12 @@
     <ClCompile Include="src\SlicingProperty.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MDWorkspace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MDDataObjects\WorkspaceGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\CenterpieceRebinning.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\Dimension.h">
@@ -119,8 +119,12 @@
     <ClInclude Include="inc\MDDataObjects\SlicingProperty.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MDDataObjects\MDWorkspace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="MDDataObjects.vcxproj" />
+    <None Include="temp.cd" />
   </ItemGroup>
 </Project>
