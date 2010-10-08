@@ -480,8 +480,7 @@ HEADERS += \
     src/Mantid/InstrumentWidget/ObjComponentActor.h \
     src/Mantid/InstrumentWidget/InstrumentActor.h \
     src/Mantid/InstrumentWidget/MantidColorMap.h \
-    src/Mantid/ManageCustomMenus.h \
-	src/Mantid/InstrumentWidget/RectangularDetectorActor.h 
+    src/Mantid/ManageCustomMenus.h 
 
 # ##################### FORMS ##############################################
 # FORMS += src/Mantid/WorkspaceMgr.ui
@@ -661,7 +660,6 @@ SOURCES += \
     src/Mantid/InstrumentWidget/InstrumentActor.cpp \
     src/Mantid/InstrumentWidget/MantidColorMap.cpp \
     src/Mantid/ManageCustomMenus.cpp \
-    src/Mantid/InstrumentWidget/RectangularDetectorActor.cpp \
     src/pixmaps.cpp
 
 # ##############################################################
