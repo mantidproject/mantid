@@ -2,13 +2,14 @@
 #define MANTID_API_ICATLOG_H_
 #include "MantidAPI/ITableWorkspace.h"
 
-
 namespace Mantid
 {
-	namespace ICat
-	{
-		class CSearchParam;
-	}
+	//forward declarations
+   namespace ICat
+   {
+	 
+     class CSearchParam;
+    }
 	namespace API
 	{  
 		
@@ -30,13 +31,13 @@ namespace Mantid
 			/// get datafiles
 			virtual void getDataFiles(const long long&,ITableWorkspace_sptr &)=0;
 			///  instrument list
-			virtual void listInstruments(boost::shared_ptr<std::vector<std::string> >& )=0;
+			virtual void listInstruments(std::vector<std::string>& )=0;
 			/// get investigationtype lists
-			virtual void listInvestigationTypes(boost::shared_ptr<std::vector<std::string> >&)=0;
+			virtual void listInvestigationTypes(std::vector<std::string>&)=0;
 			/// get file locations
-			virtual void getFileLocation(const std::vector<long long>&,boost::shared_ptr<std::vector<std::string>>&)=0;
+			virtual void getFileLocation(const long long&,std::string& )=0;
 			/// get URLs of the files
-			virtual void getDownloadURL(const std::vector<long long> &,boost::shared_ptr<std::vector<std::string>>&)=0;
+			virtual void getDownloadURL(const long long& fileid,std::string&)=0;
 			/// keep alive
 			virtual void keepAlive()=0;
 			//keep alive in minutes
@@ -44,6 +45,9 @@ namespace Mantid
 
 
 		};
+
+		typedef boost::shared_ptr<ICatalog> ICatalog_sptr;
+		typedef boost::shared_ptr<const ICatalog> ICatalog_const_sptr;
 	}
 }
 #endif
