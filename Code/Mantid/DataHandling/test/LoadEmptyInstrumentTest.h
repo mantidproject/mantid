@@ -552,22 +552,14 @@ public:
     TS_ASSERT_DELTA( (det->getNumberParameter("tube_pressure"))[0], 10.0, 0.0001);
     TS_ASSERT_DELTA( (det->getNumberParameter("tube_thickness"))[0], 0.0008, 0.0001);
     TS_ASSERT_DELTA( (det->getNumberParameter("tube_temperature"))[0], 290.0, 0.0001);
-
-
-    det = ws->getDetector(2);  
-    TS_ASSERT_EQUALS( det->getID(), 2);
-    TS_ASSERT_EQUALS( det->getName(), "pixel");
-    param = paramMap.get(&(*det), "tube_pressure");
-    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
-//    param = paramMap.getRecursive(&(*det), "tube_pressure2");
-//    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
-    
-    det = ws->getDetector(3);  
-    TS_ASSERT_EQUALS( det->getID(), 3);
-    TS_ASSERT_EQUALS( det->getName(), "pixel");
-    param = paramMap.get(&(*det), "tube_pressure");
-    TS_ASSERT_DELTA( param->value<double>(), 10.0, 0.0001);
-
+    det = ws->getDetector(2);
+    TS_ASSERT_DELTA( (det->getNumberParameter("tube_pressure"))[0], 10.0, 0.0001);
+    TS_ASSERT_DELTA( (det->getNumberParameter("tube_thickness"))[0], 0.0008, 0.0001);
+    TS_ASSERT_DELTA( (det->getNumberParameter("tube_temperature"))[0], 290.0, 0.0001);
+    det = ws->getDetector(3);
+    TS_ASSERT_DELTA( (det->getNumberParameter("tube_pressure"))[0], 10.0, 0.0001);
+    TS_ASSERT_DELTA( (det->getNumberParameter("tube_thickness"))[0], 0.0008, 0.0001);
+    TS_ASSERT_DELTA( (det->getNumberParameter("tube_temperature"))[0], 290.0, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
