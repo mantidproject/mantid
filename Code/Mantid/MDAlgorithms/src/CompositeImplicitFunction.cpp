@@ -1,4 +1,4 @@
-#include "CompositeImplicitFunction.h"
+#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MDDataObjects/Hexahedron.h"
 
 namespace Mantid

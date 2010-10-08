@@ -19,17 +19,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Xsd Include="..\..\..\..\Users\spu92482\Documents\Visual Studio 2010\Projects\RebinInformationSchema\RebinInformationSchema\rebinninginfoschema.xsd">
-      <Filter>Resource Files</Filter>
-    </Xsd>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testCPrebinning.h">
+      <Filter>tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CompositeImplicitFunction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CenterpieceRebinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

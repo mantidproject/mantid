@@ -34,6 +34,8 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
+
+
 namespace Mantid
 {
 namespace API

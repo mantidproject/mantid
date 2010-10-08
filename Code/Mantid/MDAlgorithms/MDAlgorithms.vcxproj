@@ -78,12 +78,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\Kernel\inc;..\API\inc;..\MDDataObjects\inc;inc\MantidMDAlgorithms;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\inc;..\Kernel\inc;..\Geometry\inc;..\API\inc;..\MDDataObjects\inc;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>MDDataObjects.lib;$(SolutionName)Kernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -107,8 +107,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>MDDataObjects.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -125,12 +125,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Xsd Include="..\..\..\..\Users\spu92482\Documents\Visual Studio 2010\Projects\RebinInformationSchema\RebinInformationSchema\rebinninginfoschema.xsd" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
+    <ClInclude Include="test\testCPrebinning.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CenterpieceRebinning.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

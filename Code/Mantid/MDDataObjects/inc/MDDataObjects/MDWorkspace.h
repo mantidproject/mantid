@@ -1,6 +1,7 @@
 #ifndef H_MD_WORKSPACE
 #define H_MD_WORKSPACE
 #include "MDDataObjects/MDPixels.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 
 /** Class is empty to provide calling name for all MD-workspace components and provide interfaces to all workspace  public set functions 
@@ -39,7 +40,7 @@ namespace Mantid
 class DLLExport MDWorkspace :  public MDPixels
 {
     public:
-     MDWorkspace(unsigned int nDimensions):MDPixels(nDimensions){};
+     MDWorkspace(unsigned int nDimensions=4):MDPixels(nDimensions){};
      virtual ~MDWorkspace(void){};
 };
 

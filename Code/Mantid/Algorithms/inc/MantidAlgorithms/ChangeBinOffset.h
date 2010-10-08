@@ -19,7 +19,7 @@ namespace Mantid
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     <LI> Offset - The number by which to change the time bins by</LI>
     </UL>
-	  
+      
     @author 
     @date 11/07/2008
 

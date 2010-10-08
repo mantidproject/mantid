@@ -1,6 +1,8 @@
 #ifndef H_TEST_MAIN_SQW
 #define H_TEST_MAIN_SQW
 #include "find_mantid.h"
+#include "MantidKernel/System.h"
+
 
 #include <cxxtest/TestSuite.h>
 class tmain: public CxxTest::TestSuite
@@ -14,7 +16,7 @@ public:
 
 std::string findTestFileLocation(void){
 
-       std::string path=FileFinder::Instance().getFullPath("Mantid.properties");
+       std::string path = Mantid::Kernel::getDirectoryOfExecutable();
         
         char pps[2];
         pps[0]=Poco::Path::separator();
@@ -24,6 +26,7 @@ std::string findTestFileLocation(void){
         std::string root_path;
         size_t   nPos = path.find("Mantid"+sps+"Code");
         if(nPos==std::string::npos){
+            std::cout <<" can not identify application location\n";
             root_path="../../../../Test/VATES/fe_demo.sqw";
         }else{
             root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
