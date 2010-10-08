@@ -37,23 +37,25 @@ namespace Mantid
 				glDeleteLists(iDisplaylistId,1);
 		}
 
-	    void GluGeometryRenderer::RenderSphere(const V3D& center,double radius)
+		void GluGeometryRenderer::RenderSphere(const V3D& center,double radius)
 		{
-			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
-			{
-				while(glGetError() != GL_NO_ERROR);
-				iDisplaylistId=glGenLists(1);
-				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-				CreateSphere(center,radius);
-				glEndList();
-				boolDisplaylistCreated=true;
-				mErrorCode=glGetError();
-			}else if(mErrorCode == GL_NO_ERROR){
-				glCallList(iDisplaylistId);
-			}else{
-				CreateSphere(center,radius);
-			}
+		  if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
+		  {
+		    while(glGetError() != GL_NO_ERROR);
+		    iDisplaylistId=glGenLists(1);
+		    glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+		    CreateSphere(center,radius);
+		    glEndList();
+		    boolDisplaylistCreated=true;
+		    mErrorCode=glGetError();
+		  }else if(mErrorCode == GL_NO_ERROR){
+		    glCallList(iDisplaylistId);
+		  }else{
+		    CreateSphere(center,radius);
+		  }
 		}
+
+
 		void GluGeometryRenderer::RenderCube(const V3D& Point1,const V3D& Point2,const V3D& Point3,const V3D& Point4)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
@@ -71,6 +73,8 @@ namespace Mantid
 				CreateCube(Point1,Point2,Point3,Point4);
 			}
 		}
+
+
 		void GluGeometryRenderer::RenderCone(const V3D& center,const V3D& axis,double radius,double height)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
@@ -88,6 +92,8 @@ namespace Mantid
 				CreateCone(center,axis,radius,height);
 			}
 		}
+
+
 		void GluGeometryRenderer::RenderCylinder(const V3D& center,const V3D& axis,double radius,double height)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)

@@ -1,5 +1,9 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
+#include "MantidKernel/Exception.h"
 
 #include <algorithm>
 #include <stdexcept> 
@@ -32,7 +36,7 @@ std::ostream& operator<<(std::ostream& os, const RectangularDetector& ass)
 
 /*! Empty constructor
  */
-RectangularDetector::RectangularDetector() : CompAssembly()
+RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(new BitmapGeometryHandler(this))
 {
 }
 
@@ -46,8 +50,9 @@ RectangularDetector::RectangularDetector() : CompAssembly()
  *  this is registered as a children of reference.
  */
 RectangularDetector::RectangularDetector(const std::string& n, Component* reference) :
-    CompAssembly(n, reference)
+    CompAssembly(n, reference), IObjComponent(new BitmapGeometryHandler(this))
 {
+  this->setName(n);
 }
 
 /*! Copy constructor
@@ -77,6 +82,7 @@ IComponent* RectangularDetector::clone() const
 
 
 
+//-------------------------------------------------------------------------------------------------
 /** Return a pointer to the component in the assembly at the
  * (X,Y) pixel position.
  *
@@ -100,20 +106,33 @@ boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
   return boost::dynamic_pointer_cast<Detector>( this->operator[](i) );
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the X direction.
 int RectangularDetector::xpixels() const
 {
   return this->xPixels;
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the X direction.
 int RectangularDetector::ypixels() const
 {
   return this->yPixels;
 }
 
+//-------------------------------------------------------------------------------------------------
+/** Returns the position of the pixel at x,y, relative to the center
+ * of the RectangularDetector.
+ */
+V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
+{
+  return V3D( m_xstart + m_xstep * x, m_ystart + m_ystep * y, 0);
+}
 
 
+//-------------------------------------------------------------------------------------------------
 /** Initialize a RectangularDetector by creating all of the pixels
  * contained within it. You should have set the name, position
  * and rotation and facing of this object BEFORE calling this.
@@ -140,6 +159,13 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
 {
   xPixels = xpixels;
   yPixels = ypixels;
+  m_xsize = xpixels * xstep;
+  m_ysize = ypixels * ystep;
+  m_xstart = xstart;
+  m_ystart = ystart;
+  m_xstep = xstep;
+  m_ystep = ystep;
+  mShape = shape;
   //TODO: some safety checks
 
   std::string name = this->getName();
@@ -177,6 +203,187 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+// ------------ IObjComponent methods ----------------
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------
+/// Does the point given lie within this object component?
+bool RectangularDetector::isValid(const V3D& point) const
+{
+  //TODO: Implement
+  throw Kernel::Exception::NotImplementedError("RectangularDetector::isValid() is not implemented.");
+  return false;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Does the point given lie on the surface of this object component?
+bool RectangularDetector::isOnSide(const V3D& point) const
+{
+  //TODO: Implement
+  throw Kernel::Exception::NotImplementedError("RectangularDetector::isOnSide() is not implemented.");
+  return false;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+///Checks whether the track given will pass through this Component.
+int RectangularDetector::interceptSurface(Track& track) const
+{
+  //TODO: Implement
+  throw Kernel::Exception::NotImplementedError("RectangularDetector::interceptSurface() is not implemented.");
+  return 0;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/// Finds the approximate solid angle covered by the component when viewed from the point given
+double RectangularDetector::solidAngle(const V3D& observer) const
+{
+  //TODO: Implement
+  throw Kernel::Exception::NotImplementedError("RectangularDetector::solidAngle() is not implemented.");
+  return 0;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+///Try to find a point that lies within (or on) the object
+int RectangularDetector::getPointInObject(V3D& point) const
+{
+ //TODO: Implement
+  throw Kernel::Exception::NotImplementedError("RectangularDetector::getPointInObject() is not implemented.");
+  return 0;
+}
+
+//-------------------------------------------------------------------------------------------------
+void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
+{
+  if( !m_cachedBoundingBox )
+  {
+    m_cachedBoundingBox = new BoundingBox();
+    BoundingBox compBox;
+    this->getAtXY(0,0)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    this->getAtXY(xPixels-1,0)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    this->getAtXY(xPixels-1,yPixels-1)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    this->getAtXY(0,yPixels-1)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+  }
+  // Use cached box
+  BoundingBox box = *m_cachedBoundingBox;
+
+  xmax = box.xMax();
+  xmin = box.xMin();
+  ymax = box.yMax();
+  ymin = box.yMin();
+  zmax = box.zMax();
+  zmin = box.zMin();
+
+//  xmin = -100;
+//  xmax = +100;
+//  ymin = -100;
+//  ymax = +100;
+//  zmin = -100;
+//  zmax = +100;
+  std::cout << "RectangularDetector::getBoundingBox() called for " << this->getName() << ":" << box << "\n";
+
+}
+
+
+/**
+ * Draws the objcomponent, If the handler is not set then this function does nothing.
+ */
+void RectangularDetector::draw() const
+{
+  std::cout << "RectangularDetector::draw() called for " << this->getName() << "\n";
+  if(Handle()==NULL)return;
+  //Render the ObjComponent and then render the object
+  Handle()->Render();
+}
+
+/**
+ * Draws the Object
+ */
+void RectangularDetector::drawObject() const
+{
+  std::cout << "RectangularDetector::drawObject() called for " << this->getName() << "\n";
+  //if(shape!=NULL)    shape->draw();
+}
+
+/**
+ * Initializes the ObjComponent for rendering, this function should be called before rendering.
+ */
+void RectangularDetector::initDraw() const
+{
+  std::cout << "RectangularDetector::initDraw() called for " << this->getName() << "\n";
+  if(Handle()==NULL)return;
+  //Render the ObjComponent and then render the object
+  //if(shape!=NULL)    shape->initDraw();
+  Handle()->Initialize();
+}
+
+
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the shape of the Object
+const boost::shared_ptr<const Object> RectangularDetector::Shape() const
+{
+  std::cout << "RectangularDetector::Shape() called.\n";
+  //throw Kernel::Exception::NotImplementedError("RectangularDetector::Shape() is not implemented.");
+
+
+      // --- Create a cuboid shape for your pixels ----
+      double szX=xPixels;
+      double szY=yPixels;
+      double szZ=0.5;
+      std::ostringstream xmlShapeStream;
+      xmlShapeStream
+          << " <cuboid id=\"detector-shape\"> "
+          << "<left-front-bottom-point x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
+          << "<left-front-top-point  x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<szZ<<"\"  /> "
+          << "<left-back-bottom-point  x=\""<<-szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> "
+          << "<right-front-bottom-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> "
+          << "</cuboid>";
+
+      std::string xmlCuboidShape(xmlShapeStream.str());
+      Geometry::ShapeFactory shapeCreator;
+      boost::shared_ptr<Geometry::Object> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+
+  //TODO: Create the object of the right shape
+  Geometry::Object baseObj();
+  //Looks like the object doesn't really contain any shape data; that is all in the GeometryHandler (i think)!
+
+  //TODO: Create a shared pointer to this base object.
+
+  //TODO: Here create the real shape of the detector and somehow get the texture on there.
+
+
+  //TODO: Write a special geometry handler for RectangularDetector
+//  boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+//  Obj->setGeometryHandler(handler);
+
+  return cuboidShape;
+}
+
+
+
 
 
 } // Namespace Geometry

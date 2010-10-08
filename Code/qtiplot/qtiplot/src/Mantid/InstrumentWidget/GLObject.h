@@ -39,30 +39,30 @@
 class GLObject
 {
 public:
-	/// Type of the GL object
-	static const std::string type() {return "GLObject";}
-	/// Construct a GLObject in direct rendering mode (withDisplayList=false)
-	/// or using a display list (withDisplayList=true).
-	/// @param name: name of the object
-	GLObject(bool withDisplayList,const std::string& name="");
-	/// Destructor
-	virtual ~GLObject();
-	/// Draw the object in direct mode or using glCallList
-    void draw();
-    /// Define the drawing here.
-    virtual void define();
-    /// Don't know about this
-	virtual void init();
-	/// Set the name of the GLObject
-	void setName(const std::string& name);
-	/// Get the name of the GLObject
-	std::string getName() const;
+  /// Type of the GL object
+  static const std::string type() {return "GLObject";}
+  /// Construct a GLObject in direct rendering mode (withDisplayList=false)
+  /// or using a display list (withDisplayList=true).
+  /// @param name: name of the object
+  GLObject(bool withDisplayList,const std::string& name="");
+  /// Destructor
+  virtual ~GLObject();
+  /// Draw the object in direct mode or using glCallList
+  void draw();
+  /// Define the drawing here.
+  virtual void define();
+  /// Don't know about this
+  virtual void init();
+  /// Set the name of the GLObject
+  void setName(const std::string& name);
+  /// Get the name of the GLObject
+  std::string getName() const;
 protected:
-	/// Name
-	std::string mName;
-    void construct();
-    GLuint mDisplayListId;                   ///< OpengGL Display list id
-    bool mChanged;                         ///< Flag holding the change in the object
+  /// Name
+  std::string mName;
+  void construct();
+  GLuint mDisplayListId;                   ///< OpengGL Display list id
+  bool mChanged;                         ///< Flag holding the change in the object
 };
 #endif /*MANTIDPLOT_GLOBJECT_H*/
 

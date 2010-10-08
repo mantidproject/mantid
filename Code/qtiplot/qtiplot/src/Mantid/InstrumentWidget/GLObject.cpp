@@ -3,9 +3,11 @@
 #endif
 #include "GLObject.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/System.h"
+#include <iostream>
 
 int icount;
-GLObject::GLObject(bool withDisplayList,const std::string& name):mChanged(true),mName(name)
+GLObject::GLObject(bool withDisplayList,const std::string& name):mName(name), mChanged(true)
 {
 	if(withDisplayList)
 	{
@@ -27,13 +29,14 @@ GLObject::~GLObject()
  */
 void GLObject::draw()
 {
-    if (mChanged) construct();
-	if (mDisplayListId!=0)
-	{
-		glCallList(mDisplayListId);
-	}
-	else
-		define();
+  //std::cout << "GLObject::draw() for " << this->mName << "\n";
+  if (mChanged) construct();
+  if (mDisplayListId!=0)
+  {
+    glCallList(mDisplayListId);
+  }
+  else
+    define();
 }
 
 /**
@@ -47,13 +50,13 @@ void GLObject::construct()
 		return;
 	}
 	init();
-    glNewList(mDisplayListId,GL_COMPILE); //Construct display list for object representation
-         define();
-    glEndList();
+	glNewList(mDisplayListId,GL_COMPILE); //Construct display list for object representation
+	define();
+	glEndList();
 
-    if(glGetError()==GL_OUT_OF_MEMORY) //Throw an exception
-		throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
-    mChanged=false;  //Object Marked as changed.
+	if(glGetError()==GL_OUT_OF_MEMORY) //Throw an exception
+	  throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
+	mChanged=false;  //Object Marked as changed.
 }
 
 /**

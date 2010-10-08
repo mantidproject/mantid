@@ -47,19 +47,19 @@
 class GLActorCollection: public GLObject
 {
 public:
-	GLActorCollection(); ///< Default Constructor
-	virtual ~GLActorCollection(); ///< Destructor
-    void addActor(GLActor*);
-    void removeActor(GLActor*);
-	int  getNumberOfActors();
-	GLActor* getActor(int index);
-    void define();
-    GLActor* findColorID(unsigned char[3]);
-	void refresh();
+  GLActorCollection(); ///< Default Constructor
+  virtual ~GLActorCollection(); ///< Destructor
+  void addActor(GLActor*);
+  void removeActor(GLActor*);
+  int  getNumberOfActors();
+  GLActor* getActor(int index);
+  void define();
+  GLActor* findColorID(unsigned char[3]);
+  void refresh();
 private:
-	void init();
-    std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.
-	unsigned char referenceColorID[3];
+  void init();
+  std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.
+  unsigned char referenceColorID[3];
 };
 
 

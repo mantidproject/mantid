@@ -25,8 +25,8 @@
   \date   August 2008
   \version 1.0
 
-  Base class for all objects in a 3D Scene. Methods are provide to position and rotate the objects.
-  The objects can also be set as active or not. Actors maintian safe pointer to a GLObject.
+  Base class for all objects in a 3D Scene. Methods are provided to position and rotate the objects.
+  The objects can also be set as active or not. Actors maintain safe pointer to a GLObject.
 
   Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -50,25 +50,25 @@
 class GLActor : public GLObject
 {
 public:
-	GLActor(bool withDisplayList);          ///< Constructor with name of actor as input string
-	GLActor(const GLActor&);        ///< Constructor with another actor as input
-	virtual ~GLActor();             ///< Virtual destructor
-    void setColor(boost::shared_ptr<GLColor>);
-	const boost::shared_ptr<GLColor> getColor(){return mColor;}
-    void markPicked();
-    void markUnPicked();
-	void setVisibility(bool);
-	bool getVisibility();
-	virtual int  setStartingReferenceColor(int){return 1;}
-    friend std::ostream& operator<<(std::ostream& os,const GLActor& a)
-    {
-        os << "Actor Name:" << a.type() << std::endl;
-        return os;
-    } ///< Printing Actor object
+  GLActor(bool withDisplayList);          ///< Constructor with name of actor as input string
+  GLActor(const GLActor&);        ///< Constructor with another actor as input
+  virtual ~GLActor();             ///< Virtual destructor
+  void setColor(boost::shared_ptr<GLColor>);
+  const boost::shared_ptr<GLColor> getColor(){return mColor;}
+  void markPicked();
+  void markUnPicked();
+  void setVisibility(bool);
+  bool getVisibility();
+  virtual int  setStartingReferenceColor(int){return 1;}
+  friend std::ostream& operator<<(std::ostream& os,const GLActor& a)
+  {
+    os << "Actor Name:" << a.type() << std::endl;
+    return os;
+  } ///< Printing Actor object
 protected:
-    boost::shared_ptr<GLColor> mColor;           ///< Color of the geometry object
-    bool  mPicked;                   ///< Flag Whether the actor is picked by mouse click or not
-	bool  mVisible;					 ///< Flag whether the actor is visible or not
+  boost::shared_ptr<GLColor> mColor;           ///< Color of the geometry object
+  bool  mPicked;                   ///< Flag Whether the actor is picked by mouse click or not
+  bool  mVisible;					 ///< Flag whether the actor is visible or not
 };
 
 #endif /*GLACTOR_H_*/

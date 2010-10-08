@@ -331,7 +331,7 @@ Intersection::simplify()
 }
 
 /**
- * find the common bounding box with the two childs of inntersection
+ * find the common bounding box with the two childs of intersection
  * @param xmax :: Maximum value for the bounding box in x direction
  * @param ymax :: Maximum value for the bounding box in y direction
  * @param zmax :: Maximum value for the bounding box in z direction

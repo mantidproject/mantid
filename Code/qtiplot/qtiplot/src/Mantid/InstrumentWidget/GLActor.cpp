@@ -3,10 +3,12 @@
 
 boost::shared_ptr<GLColor> redColor(new GLColor(1.0,0.5,0.0,1.0));
 
-GLActor::GLActor(bool withDisplayList): GLObject(withDisplayList),mPicked(false),mVisible(true)
+GLActor::GLActor(bool withDisplayList):
+    GLObject(withDisplayList), mPicked(false), mVisible(true)
 {
 	mColor=redColor;
 }
+
 GLActor::~GLActor()
 {
 }

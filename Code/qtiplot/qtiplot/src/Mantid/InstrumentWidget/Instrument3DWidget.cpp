@@ -202,11 +202,11 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
     
       if( xtest < mWkspBinMin )
       {
-	mWkspBinMin = xtest;
+        mWkspBinMin = xtest;
       }
       else if( xtest > mWkspBinMax )
       {
-	mWkspBinMax = xtest;
+        mWkspBinMax = xtest;
       }
       else {}
     }
@@ -216,11 +216,11 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
     {
       if( xtest < mWkspBinMin )
       {
-	mWkspBinMin = xtest;
+        mWkspBinMin = xtest;
       }
       else if( xtest > mWkspBinMax )
       {
-	mWkspBinMax = xtest;
+        mWkspBinMax = xtest;
       }
       else {}
     }
@@ -278,11 +278,11 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
       integrated_values[i] = sum;
       if( sum < mWkspDataMin )
       {
-	mWkspDataMin = sum;
+        mWkspDataMin = sum;
       }
       else if( sum > mWkspDataMax )
       {
-	mWkspDataMax = sum;
+        mWkspDataMax = sum;
       }
       else continue;
 
@@ -316,7 +316,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   std::vector<double>::const_iterator val_end = integrated_values.end();
   int idx(0);
   for( std::vector<double>::const_iterator val_itr = integrated_values.begin(); val_itr != val_end;
-       ++val_itr, ++idx )
+      ++val_itr, ++idx )
   {
     unsigned char c_index(mColorMap.getTopCIndex());
     if( (*val_itr) < 0.0 )
@@ -329,11 +329,11 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
       short index = std::floor( mColorMap.normalize(user_interval, *val_itr)*max_ncols );
       if( index >= max_ncols )
       {
-	index = max_ncols;
+        index = max_ncols;
       }
       else if( index < 0 )
       {
-	index = 0;
+        index = 0;
       }
       else {}
       mScaledValues[idx] = static_cast<unsigned char>(index);
@@ -345,6 +345,12 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   mInstrumentActor->setDetectorColors(colorlist);
 }
 
+//------------------------------------------------------------------------------------------------
+/** Returns the sum of all bins in a given spectrum
+ *
+ * @param workspace workspace to use.
+ * @param wksp_index index into the workspace to sum up.
+ */
 double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_sptr workspace, const int wksp_index)
 {
 	// If the index is not valid for this workspace
@@ -377,6 +383,8 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
 	return sum;
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Run a recount for the current workspace
  */
@@ -387,6 +395,8 @@ void Instrument3DWidget::recount()
   update();
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * For a change in the colour map, just update the color indices
  */
@@ -402,7 +412,7 @@ void Instrument3DWidget::updateColorsForNewMap()
     std::vector<unsigned char>::const_iterator val_end = mScaledValues.end();
     int idx(0);
     for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin();
-	 val_itr != val_end; ++val_itr, ++idx )
+        val_itr != val_end; ++val_itr, ++idx )
     {
       colorlist[idx] = mColorMap.getColor(*val_itr);
     }
@@ -413,7 +423,7 @@ void Instrument3DWidget::updateColorsForNewMap()
     int idx(0);
     const double ratio = (double)ncols / max_ncols;
     for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin();
-	 val_itr != val_end; ++val_itr, ++idx )
+        val_itr != val_end; ++val_itr, ++idx )
     {
       short cache_value = static_cast<short>(*val_itr);
       short c_index = std::ceil((cache_value + 1)*ratio);
@@ -429,6 +439,8 @@ void Instrument3DWidget::updateColorsForNewMap()
   update();
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Update the colors based on a change in the maximum data value
  */
@@ -438,6 +450,8 @@ void Instrument3DWidget::setMaxData(const double new_max)
   setDataMaxEdited(true);
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Update the colors based on a change in the minimum data value
  */
@@ -447,6 +461,8 @@ void Instrument3DWidget::setMinData(const double new_min)
   setDataMinEdited(true);
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Mark the min data as bein user edited
  * @param If true the data min value has been set by the user
@@ -456,6 +472,7 @@ void Instrument3DWidget::setDataMinEdited(bool state)
   mDataMinEdited = state;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Mark the min data as bein user edited
  * @param If true the data min value has been set by the user
@@ -465,6 +482,7 @@ void Instrument3DWidget::setDataMaxEdited(bool state)
   mDataMaxEdited = state;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * This method returns the Spectra Index list for the input dectector id list.
  * @param idDecVec is list of detector id's
@@ -505,6 +523,7 @@ void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_i
 
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * This method sets the Time bin values. the value has to be greater than zero
  * @param value input is the time bin value
@@ -517,6 +536,7 @@ void Instrument3DWidget::setTimeBin(int value)
   }
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Returns workspace name
  */
@@ -525,6 +545,7 @@ QString Instrument3DWidget::getWorkspaceName() const
   return mWorkspaceName;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Returns a reference to the constant colormap
  */
@@ -533,6 +554,7 @@ const MantidColorMap & Instrument3DWidget::getColorMap() const
   return mColorMap;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Returns a reference to the colormap
  */
@@ -760,6 +782,7 @@ void Instrument3DWidget::setView(const V3D& pos,double xmax,double ymax,double z
 	update();
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * This method draws the scene using color id. this method is called in pick mode
  */
@@ -784,6 +807,7 @@ void Instrument3DWidget::setSceneHighResolution()
 	mInstrumentActor->setObjectResolutionToHigh();
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Returns the boundig box of the scene
  * @param minBound :: output min point of the bounding box of scene
@@ -792,4 +816,6 @@ void Instrument3DWidget::setSceneHighResolution()
 void Instrument3DWidget::getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound)
 {
 	mInstrumentActor->getBoundingBox(minBound,maxBound);
+  std::cout << "min bounding box " << minBound << "\n";
+  std::cout << "max bounding box " << maxBound << "\n";
 }

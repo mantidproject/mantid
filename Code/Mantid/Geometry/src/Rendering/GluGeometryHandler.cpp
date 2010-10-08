@@ -68,41 +68,41 @@ namespace Mantid
 			}
 		}
 
-        void GluGeometryHandler::GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight)
-        {
-	  mytype=0;
-	  if(Obj!=NULL)
-	  {
-	    switch(type){
-	    case CUBOID:
-	      mytype=1;
-	      vectors.push_back(Point1);
-	      vectors.push_back(Point2);
-	      vectors.push_back(Point3);
-	      vectors.push_back(Point4);
-	      break;
-	    case SPHERE:
-	      mytype = 2;
-	      vectors.push_back(center);
-	      myradius=radius;
-	      break;
-	    case CYLINDER:
-	      mytype = 3;
-	      vectors.push_back(center);
-	      vectors.push_back(axis);
-	      myradius = radius;
-	      myheight = height;
-	      break;
-	    case CONE:
-	      mytype = 4;
-	      vectors.push_back(center);
-	      vectors.push_back(axis);
-	      myradius = radius;
-	      myheight = height;
-	      break;
-	    }
-	  }
-        }
+		void GluGeometryHandler::GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight)
+		{
+		  mytype=0;
+		  if(Obj!=NULL)
+		  {
+		    switch(type){
+		    case CUBOID:
+		      mytype=1;
+		      vectors.push_back(Point1);
+		      vectors.push_back(Point2);
+		      vectors.push_back(Point3);
+		      vectors.push_back(Point4);
+		      break;
+		    case SPHERE:
+		      mytype = 2;
+		      vectors.push_back(center);
+		      myradius=radius;
+		      break;
+		    case CYLINDER:
+		      mytype = 3;
+		      vectors.push_back(center);
+		      vectors.push_back(axis);
+		      myradius = radius;
+		      myheight = height;
+		      break;
+		    case CONE:
+		      mytype = 4;
+		      vectors.push_back(center);
+		      vectors.push_back(axis);
+		      myradius = radius;
+		      myheight = height;
+		      break;
+		    }
+		  }
+		}
 
 		void GluGeometryHandler::Initialize()
 		{

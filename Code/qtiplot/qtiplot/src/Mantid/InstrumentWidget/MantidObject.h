@@ -38,17 +38,17 @@ namespace Mantid{
 class MantidObject : public GLObject
 {
 private:
-    boost::shared_ptr<const Mantid::Geometry::Object> Obj; ///< Holder for Object
-	bool mHighResolution;
+  boost::shared_ptr<const Mantid::Geometry::Object> Obj; ///< Holder for Object
+  bool mHighResolution;
 public:
-	MantidObject(const boost::shared_ptr<const Mantid::Geometry::Object> obj,bool withDisplayList=true); ///< Default Constructor
-	~MantidObject();								   ///< Destructor
-	virtual std::string type()const {return "MantidObject";} ///< Type of the GL object
-    void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-	const boost::shared_ptr<const Mantid::Geometry::Object> getObject(); ///< Returns the objcomponent held in this object
-	void defineBoundingBox();
-	void setResolutionToHigh();
-	void setResolutionToLow();
+  MantidObject(const boost::shared_ptr<const Mantid::Geometry::Object> obj,bool withDisplayList=true); ///< Default Constructor
+  ~MantidObject();								   ///< Destructor
+  virtual std::string type()const {return "MantidObject";} ///< Type of the GL object
+  void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+  const boost::shared_ptr<const Mantid::Geometry::Object> getObject(); ///< Returns the objcomponent held in this object
+  void defineBoundingBox();
+  void setResolutionToHigh();
+  void setResolutionToLow();
 };
 
 #endif /*GLTRIANGLE_H_*/

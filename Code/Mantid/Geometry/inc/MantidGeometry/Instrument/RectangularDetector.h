@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid
 {
@@ -43,7 +44,7 @@ namespace Geometry
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport RectangularDetector : public CompAssembly
+class DLLExport RectangularDetector : public CompAssembly, public IObjComponent
 {
 public:
   ///String description of the type of component
@@ -70,8 +71,48 @@ public:
   /// Get a detector at given XY indices.
   boost::shared_ptr<Detector> getAtXY(int X, int Y) const;
 
+
   int xpixels() const;
   int ypixels() const;
+
+  // ------------ IObjComponent methods ----------------
+
+  /// Does the point given lie within this object component?
+  bool isValid(const V3D& point) const ;
+
+  /// Does the point given lie on the surface of this object component?
+  bool isOnSide(const V3D& point) const ;
+
+  ///Checks whether the track given will pass through this Component.
+  int interceptSurface(Track& track) const ;
+
+  /// Finds the approximate solid angle covered by the component when viewed from the point given
+  double solidAngle(const V3D& observer) const;
+
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
+
+  ///Try to find a point that lies within (or on) the object
+  int getPointInObject(V3D& point) const;
+
+  //Rendering member functions
+  ///Draws the objcomponent.
+  void draw() const;
+
+  /// Draws the Object.
+  void drawObject() const;
+
+  /// Initializes the ObjComponent for rendering, this function should be called before rendering.
+  void initDraw() const;
+
+  /// Returns the shape of the Object
+  const boost::shared_ptr<const Object> Shape() const;
+
+  ///Size in X of the detector
+  double xsize() const { return m_xsize; }
+  ///Size in Y of the detector
+  double ysize() const { return m_xsize; }
+
+  V3D getRelativePosAtXY(int x, int y) const;
 
 private:
   /// Private copy assignment operator
@@ -81,6 +122,13 @@ private:
   int xPixels;
   /// The number of pixels in the Y (vertical) direction;
   int yPixels;
+
+  double m_xsize, m_ysize;
+  double m_xstart, m_ystart;
+  double m_xstep, m_ystep;
+
+  /// Pointer to the shape of the pixels in this detector array.
+  boost::shared_ptr<Object> mShape;
 
 
 };

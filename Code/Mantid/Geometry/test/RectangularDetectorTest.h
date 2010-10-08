@@ -7,6 +7,7 @@
 #include <string>
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Quat.h"
 #include "ComponentCreationHelpers.hh"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -110,6 +111,10 @@ public:
 
     //Name
     TS_ASSERT_EQUALS(det->getAtXY(1,2)->getName(), "MyRectangle(1,2)");
+
+//    BoundingBox box;
+//    det->getBoundingBox(box);
+//    std::cout << box << "\n";
   }
 
 

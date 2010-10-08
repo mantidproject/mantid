@@ -178,8 +178,11 @@ void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
     for (const_comp_it it = m_children.begin(); it != m_children.end(); ++it)
     {
       BoundingBox compBox;
-      (*it)->getBoundingBox(compBox);
-      m_cachedBoundingBox->grow(compBox);
+      if (*it)
+      {
+        (*it)->getBoundingBox(compBox);
+        m_cachedBoundingBox->grow(compBox);
+      }
     }
   }
   // Use cached box

@@ -22,6 +22,9 @@ class GeometryHandler;
 /** Object Component class, this class brings together the physical attributes of the component
     to the positioning and geometry tree.
 
+    Notably, this contains a GeometryHandler and methods used to render the component in
+    the instrument 3D view.
+
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007
     @author Russell Taylor, Tessella Support Services plc
@@ -54,6 +57,9 @@ public:
   virtual std::string type() {return "IObjComponent";}
 
   IObjComponent();
+
+  IObjComponent(GeometryHandler* the_handler);
+
   // Looking to get rid of the first of these constructors in due course (and probably add others)
   virtual ~IObjComponent();
 
@@ -106,8 +112,10 @@ public:
   virtual const boost::shared_ptr<const Object> Shape()const = 0;
 
   void setScaleFactor(double xFactor,double yFactor, double zFactor);
+
   ///Gets the scaling factor of the object for the Object Component.
   V3D  getScaleFactor(){return m_ScaleFactor;}
+
   /// Gets the GeometryHandler
   GeometryHandler* Handle()const{return handle;}
 

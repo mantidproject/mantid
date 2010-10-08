@@ -11,10 +11,18 @@
 using namespace Mantid;
 using namespace Geometry;
 
-ObjComponentActor::ObjComponentActor(MantidObject *obj,boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp,bool withDisplayList):GLActor(withDisplayList)
+ObjComponentActor::ObjComponentActor(bool withDisplayList)
+  :GLActor(withDisplayList)
+{
+}
+
+
+ObjComponentActor::ObjComponentActor(MantidObject *obj, boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp, bool withDisplayList)
+  : GLActor(withDisplayList)
 {
 	mObjComp=objComp;
 	mObject=obj;
+	this->setName( objComp->getName() );
 }
 
 ObjComponentActor::~ObjComponentActor()
@@ -28,13 +36,13 @@ void ObjComponentActor::define()
 {
 	glPushMatrix();
 	// Translation first
-	V3D pos  =mObjComp->getPos();
+	V3D pos = mObjComp->getPos();
 	if (!(pos.nullVector()))
 	{
 		glTranslated(pos[0],pos[1],pos[2]);
 	}
 	//Rotation
-	Quat rot =mObjComp->getRotation();
+	Quat rot = mObjComp->getRotation();
 	if (!(rot.isNull()))
 	{
 		double deg,ax0,ax1,ax2;
@@ -42,12 +50,21 @@ void ObjComponentActor::define()
 		glRotated(deg,ax0,ax1,ax2);
 	}
 	//Scale
-	V3D scaleFactor=mObjComp->getScaleFactor();
+	V3D scaleFactor = mObjComp->getScaleFactor();
 	if (!(scaleFactor==V3D(1,1,1)))
 	{
 		glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
 	}
-	mObject->draw();
+
+	//std::cout << "ObjComponentActor::define() called with pos=" << pos << " and rot=" << rot << " and scale=" << scaleFactor << ".\n";
+
+	//If a mantidObject was specified, call ITS draw routine
+	if (mObject)
+	  mObject->draw();
+	else
+	  //Otherwise, use the ObjComponent draw routine. This is what RectangularDetector will use.
+	  mObjComp->draw();
+
 	glPopMatrix();
 }
 

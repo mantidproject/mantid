@@ -4,10 +4,12 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidObject.h"
 #include "CompAssemblyActor.h"
 #include "ObjComponentActor.h"
+//#include "RectangularDetectorActor.h"
 #include <cfloat>
 using namespace Mantid;
 using namespace Geometry;
@@ -33,6 +35,7 @@ CompAssemblyActor::CompAssemblyActor(boost::shared_ptr<std::map<const boost::sha
   mId=id;
   mInstrument=ins;
   mObjects=objs;
+  this->setName( ins->getName() );
   //Create the subcomponent actors
   initChilds(withDisplayList);
 }
@@ -61,22 +64,33 @@ void CompAssemblyActor::define()
   mColor->paint(GLColor::PLAIN);
   //Only draw the CompAssembly Children only if they are visible
   if(mVisible)
+  {
+    //Iterate through the ObjCompActor children and draw them
+    for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
     {
-      //Iterate through the ObjCompActor children and draw them
-      for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
-	{
-	  (*itrObjComp)->getColor()->paint(GLColor::MATERIAL);
-	  (*itrObjComp)->getColor()->paint(GLColor::PLAIN);
-	  //Only draw the ObjCompActor if its visible
-	  if((*itrObjComp)->getVisibility())
-	    (*itrObjComp)->draw();
-	}
-      //Iterate through the CompAssemblyActor children and draw them
-      for(std::vector<CompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
-	{
-	  (*itrObjAssem)->draw();
-	}
+      (*itrObjComp)->getColor()->paint(GLColor::MATERIAL);
+      (*itrObjComp)->getColor()->paint(GLColor::PLAIN);
+      //Only draw the ObjCompActor if its visible
+      if((*itrObjComp)->getVisibility())
+      {
+        //std::cout << (*itrObjComp)->getName() << " is gonna draw. From define()\n";
+        (*itrObjComp)->draw();
+      }
+      else
+      {
+        //std::cout << (*itrObjComp)->getName() << " is not visible\n";
+      }
     }
+    //Iterate through the CompAssemblyActor children and draw them
+    for(std::vector<CompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+    {
+      (*itrObjAssem)->draw();
+    }
+  }
+  else
+  {
+    //std::cout << this->getName() << " is not visible\n";
+  }
 }
 
 /**
@@ -86,25 +100,25 @@ void CompAssemblyActor::drawUsingColorID()
 {
   //Check whether this assembly and its child components can be drawn
   if(mVisible)
+  {
+    //Iterate throught the children with the starting reference color mColorStartID and incrementing
+    int rgb=mColorStartID;
+    int r,g,b;
+    for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
     {
-      //Iterate throught the children with the starting reference color mColorStartID and incrementing
-      int rgb=mColorStartID;
-      int r,g,b;
-      for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
-	{
-	  r=(rgb/65536);
-	  g=((rgb%65536)/256);
-	  b=((rgb%65536)%256);
-	  glColor3f(r/255.0,g/255.0,b/255.0);
-	  if((*itrObjComp)->getVisibility())
-	    (*itrObjComp)->draw();
-	  rgb++;
-	}
-      for(std::vector<CompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
-	{
-	  (*itrObjAssem)->drawUsingColorID();
-	}
+      r=(rgb/65536);
+      g=((rgb%65536)/256);
+      b=((rgb%65536)%256);
+      glColor3f(r/255.0,g/255.0,b/255.0);
+      if((*itrObjComp)->getVisibility())
+        (*itrObjComp)->draw();
+      rgb++;
     }
+    for(std::vector<CompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+    {
+      (*itrObjAssem)->drawUsingColorID();
+    }
+  }
 }
 
 /**
@@ -124,32 +138,63 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
   //Iterate through CompAssembly children
   boost::shared_ptr<Mantid::Geometry::ICompAssembly> CompAssemPtr=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(CompPtr);
   if(CompAssemPtr!=boost::shared_ptr<Mantid::Geometry::ICompAssembly>())
+  {
+    int nChild=CompAssemPtr->nelements();
+    for(int i=0;i<nChild;i++)
     {
-      int nChild=CompAssemPtr->nelements();
-      for(int i=0;i<nChild;i++)
-	{
-	  boost::shared_ptr<Mantid::Geometry::IComponent> ChildCompPtr=(*CompAssemPtr)[i];
-	  boost::shared_ptr<Mantid::Geometry::ICompAssembly> ChildCAPtr=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(ChildCompPtr);
-	  //If the child is a CompAssembly then create a CompAssemblyActor for the child
-	  if(ChildCAPtr!=boost::shared_ptr<Mantid::Geometry::ICompAssembly>())
-	    {
-	      CompAssemblyActor* iActor=new CompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
-	      iActor->getBoundingBox(minBound,maxBound);
-	      AppendBoundingBox(minBound,maxBound);
-	      mNumberOfDetectors+=iActor->getNumberOfDetectors();
-	      mChildCompAssemActors.push_back(iActor);
-	    }
-	  else //it has to be a ObjComponent child, create a ObjComponentActor for the child use the same display list attribute
-	    {
-	      boost::shared_ptr<Mantid::Geometry::IObjComponent> ChildObjPtr=boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
-	      ObjComponentActor* iActor=new ObjComponentActor(getMantidObject(ChildObjPtr->Shape(),withDisplayList),ChildObjPtr,false);
-	      iActor->getBoundingBox(minBound,maxBound);
-	      AppendBoundingBox(minBound,maxBound);
-	      mChildObjCompActors.push_back(iActor);
-	      mNumberOfDetectors++;
-	    }
-	}
+      boost::shared_ptr<Mantid::Geometry::IComponent> ChildCompPtr=(*CompAssemPtr)[i];
+      boost::shared_ptr<Mantid::Geometry::ICompAssembly> ChildCAPtr=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(ChildCompPtr);
+      boost::shared_ptr<Mantid::Geometry::RectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>(ChildCompPtr);
+
+      if (ChildRDPtr)
+      {
+        //If the child is a RectangularDetector, then create a RectangularDetectorActor for it.
+        boost::shared_ptr<Mantid::Geometry::IObjComponent> ChildObjPtr = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
+        if (ChildObjPtr)
+        {
+          //MantidObject * mantObj = getMantidObject(ChildObjPtr->Shape(),withDisplayList);
+          //MantidObject * mantObj;
+          //RectangularDetectorActor* iActor = new RectangularDetectorActor(ChildRDPtr, mantObj, ChildObjPtr,false);
+
+          std::cout << "Creating the actor for " << ChildRDPtr->getName() << "\n";
+          ObjComponentActor* iActor = new ObjComponentActor(NULL, ChildObjPtr, false);
+
+          std::cout << "Getting bounding boxes for " << ChildRDPtr->getName() << "\n";
+          iActor->getBoundingBox(minBound,maxBound);
+//          minBound = V3D(-60,-60,-60);
+//          maxBound = V3D(60,60,60);
+          AppendBoundingBox(minBound,maxBound);
+
+          //mNumberOfDetectors+=iActor->getNumberOfDetectors();
+
+          //TODO: Track the rectangular objects
+          mChildObjCompActors.push_back(iActor);
+
+        }
+        else
+          std::cout << " ChildObjPtr is null for " << ChildRDPtr->getName() << "\n";
+      }
+      //If the child is a CompAssembly then create a CompAssemblyActor for the child
+      else
+      if(ChildCAPtr!=boost::shared_ptr<Mantid::Geometry::ICompAssembly>())
+      {
+        CompAssemblyActor* iActor=new CompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
+        iActor->getBoundingBox(minBound,maxBound);
+        AppendBoundingBox(minBound,maxBound);
+        mNumberOfDetectors+=iActor->getNumberOfDetectors();
+        mChildCompAssemActors.push_back(iActor);
+      }
+      else //it has to be a ObjComponent child, create a ObjComponentActor for the child use the same display list attribute
+      {
+        boost::shared_ptr<Mantid::Geometry::IObjComponent> ChildObjPtr = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
+        ObjComponentActor* iActor = new ObjComponentActor(getMantidObject(ChildObjPtr->Shape(),withDisplayList), ChildObjPtr,false);
+        iActor->getBoundingBox(minBound,maxBound);
+        AppendBoundingBox(minBound,maxBound);
+        mChildObjCompActors.push_back(iActor);
+        mNumberOfDetectors++;
+      }
     }
+  }
 }
 
 /**
@@ -159,20 +204,20 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
  * @param withDisplayList :: whether the new MantidObject if needed uses the display list attribute
  * @return  the MantidObject corresponding to the obj.
  */
-MantidObject*	CompAssemblyActor::getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object> obj,bool withDisplayList)
+MantidObject*	CompAssemblyActor::getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object> obj, bool withDisplayList)
 {
   if (!obj)
-    {
-      throw std::runtime_error("An instrument component does not have a shape.");
-    }
+  {
+    throw std::runtime_error("An instrument component does not have a shape.");
+  }
   std::map<const boost::shared_ptr<const Object>,MantidObject*>::iterator iObj=mObjects->find(obj);
   if(iObj==mObjects->end()) //create an new Mantid Object
-    {
-      MantidObject* retObj=new MantidObject(obj,withDisplayList);
-      retObj->draw();
-      mObjects->insert(mObjects->begin(),std::pair<const boost::shared_ptr<const Object>,MantidObject*>(obj,retObj));
-      return retObj;
-    }
+  {
+    MantidObject* retObj=new MantidObject(obj,withDisplayList);
+    retObj->draw();
+    mObjects->insert(mObjects->begin(),std::pair<const boost::shared_ptr<const Object>,MantidObject*>(obj,retObj));
+    return retObj;
+  }
   return (*iObj).second;
 }
 
@@ -213,27 +258,27 @@ void CompAssemblyActor::init()
 void CompAssemblyActor::appendObjCompID(std::vector<int>& idList)
 {
   for(std::vector<ObjComponentActor*>::const_iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end(); ++iObjComp)
+  {
+    //check the component type if its detector or not
+    const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
+    if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
     {
-      //check the component type if its detector or not
-      const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
-      if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
-	{
-	  if( !detector->isMonitor() )
-	    {
-	      idList.push_back(detector->getID());
-	    }
-	  else
-	    {
-	      idList.push_back(-1);
-	    }
-	}
-
+      if( !detector->isMonitor() )
+      {
+        idList.push_back(detector->getID());
+      }
+      else
+      {
+        idList.push_back(-1);
+      }
     }
+
+  }
 
   for(std::vector<CompAssemblyActor*>::const_iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end(); ++iAssem)
-    {
-      (*iAssem)->appendObjCompID(idList);
-    }
+  {
+    (*iAssem)->appendObjCompID(idList);
+  }
 }
 
 /**
@@ -245,23 +290,25 @@ int CompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<G
 {
   int count=0;
   for(std::vector<ObjComponentActor*>::iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end();iObjComp++)
+  {
+    const boost::shared_ptr<Mantid::Geometry::IDetector>  detector =
+        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
+    if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
     {
-      const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
-      if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
-	{
-	  (*iObjComp)->setColor((*list));
-	  count++;
-	  list++;
-	  continue;
-	}
+      (*iObjComp)->setColor((*list));
+      count++;
+      list++;
+      continue;
     }
+  }
   for(std::vector<CompAssemblyActor*>::iterator iAssem = mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
-    {
-      int num=(*iAssem)->setInternalDetectorColors(list);
-      list+=num;
-      count+=num;
+  {
+    int num=(*iAssem)->setInternalDetectorColors(list);
+    list+=num;
+    count+=num;
 
-    }
+  }
+  std::cout << "CompAssemblyActor::setInternalDetectorColors() called with "<< count << " entries added.\n";
   return count;
 }
 
@@ -286,23 +333,23 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
 {
   size_t n_comp_actors = mChildObjCompActors.size();
   if(rgb > 0 && rgb <= n_comp_actors)
+  {
+    const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
+    if(iDec!=boost::shared_ptr<Mantid::Geometry::IDetector>())
     {
-      const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
-      if(iDec!=boost::shared_ptr<Mantid::Geometry::IDetector>())
-	{
-	  return iDec->getID();
-	}
+      return iDec->getID();
     }
+  }
   rgb -= n_comp_actors;
 
   for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+  {
+    if(rgb > 0 && rgb <= (*iAssem)->getNumberOfDetectors() )
     {
-      if(rgb > 0 && rgb <= (*iAssem)->getNumberOfDetectors() )
-	{
-	  return (*iAssem)->findDetectorIDUsingColor(rgb);
-	}
-      rgb -= (*iAssem)->getNumberOfDetectors();
+      return (*iAssem)->findDetectorIDUsingColor(rgb);
     }
+    rgb -= (*iAssem)->getNumberOfDetectors();
+  }
   return -1;
 }
 

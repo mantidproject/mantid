@@ -40,15 +40,17 @@ class MantidObject;
 class ObjComponentActor : public GLActor
 {
 private:
-	MantidObject *mObject;
-	boost::shared_ptr<Mantid::Geometry::IObjComponent> mObjComp;
+  MantidObject *mObject;
+  boost::shared_ptr<Mantid::Geometry::IObjComponent> mObjComp;
 public:
-	ObjComponentActor(MantidObject *obj,boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp,bool withDisplayList=false); ///< Default Constructor
-	~ObjComponentActor();								   ///< Destructor
-	virtual std::string type()const {return "ObjComponentActor";} ///< Type of the GL object
-    void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-	const boost::shared_ptr<Mantid::Geometry::IObjComponent> getObjComponent() const{return mObjComp;}
-	void  getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
+  ObjComponentActor(bool withDisplayList=false); ///< Default Constructor
+  ObjComponentActor(MantidObject *obj, boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp, bool withDisplayList=false); ///< Default Constructor
+  ~ObjComponentActor();								   ///< Destructor
+  virtual std::string type()const {return "ObjComponentActor";} ///< Type of the GL object
+  virtual void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+  virtual void  getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
+
+  const boost::shared_ptr<Mantid::Geometry::IObjComponent> getObjComponent() const{return mObjComp;}
 };
 
 #endif /*OBJCOMPONENT_ACTOR_H_*/

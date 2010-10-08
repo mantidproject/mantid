@@ -168,8 +168,10 @@ void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, doub
 void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
 {
   // Start with the box in the shape's coordinates and
+  boost::shared_ptr<BoundingBox> BB = shape->getBoundingBox();
+  if (!BB) return;
   // modify in place for speed
-  absoluteBB = BoundingBox(*shape->getBoundingBox());
+  absoluteBB = BoundingBox(*BB);
   // Scale
   absoluteBB.xMin() *= m_ScaleFactor.X();
   absoluteBB.xMax() *= m_ScaleFactor.X();

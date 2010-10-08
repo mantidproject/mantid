@@ -51,30 +51,30 @@ public:
   Detector(const std::string& name, boost::shared_ptr<Object> shape, Component* parent);
 	virtual ~Detector();
 	//empty functions inherited from IObjectComponent
-  virtual Component* clone() const {return new Detector(*this);}
+	virtual Component* clone() const {return new Detector(*this);}
 	void setID(int);
-    V3D getPos() const;
+	V3D getPos() const;
 
-    // IDetector methods
-    int getID() const;
-    double getDistance(const IComponent& comp) const;
-    double getTwoTheta(const V3D& observer, const V3D& axis) const;
-    double getPhi() const;
-    double solidAngle(const V3D& observer) const;	
-    bool isMasked() const;
-    bool isMonitor() const;
-    /// Returns a reference to itself
-    IComponent* getComponent(){return static_cast<IComponent*>(this);}
+	// IDetector methods
+	int getID() const;
+	double getDistance(const IComponent& comp) const;
+	double getTwoTheta(const V3D& observer, const V3D& axis) const;
+	double getPhi() const;
+	double solidAngle(const V3D& observer) const;
+	bool isMasked() const;
+	bool isMonitor() const;
+	/// Returns a reference to itself
+	IComponent* getComponent(){return static_cast<IComponent*>(this);}
 	// end IDetector methods
 
 	void markAsMonitor(const bool flag = true);
 
 protected:
-  Detector(const Detector&);
+	Detector(const Detector&);
 
 private:
-  /// Private, unimplemented copy assignment operator
-  Detector& operator=(const Detector&);
+	/// Private, unimplemented copy assignment operator
+	Detector& operator=(const Detector&);
 
 	/// The detector id
 	int m_id;
