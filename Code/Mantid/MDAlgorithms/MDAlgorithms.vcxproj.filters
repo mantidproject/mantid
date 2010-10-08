@@ -13,6 +13,10 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{646b021a-8f7e-4ed2-a00a-1d41f2e7ba5a}</UniqueIdentifier>
+      <Extensions>test*.h</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Xsd Include="..\..\..\..\Users\spu92482\Documents\Visual Studio 2010\Projects\RebinInformationSchema\RebinInformationSchema\rebinninginfoschema.xsd">

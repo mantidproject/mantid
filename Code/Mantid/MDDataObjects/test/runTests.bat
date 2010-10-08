@@ -25,9 +25,10 @@ GOTO COMPILE
 echo "Compiling the test executable..."
 cl runner.cpp /I "..\inc\MDDataDataObjects" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\Include\hdf5" /I "..\..\..\Third_Party\Include\hdf5\win32" /I "..\..\..\Third_Party\src\cxxtest" /I "..\..\kernel\inc" /I "..\..\DataHandling\inc" /I "..\..\DataObjects\inc" /I "..\..\Geometry\inc" /I "..\..\API\inc" /I "../../Nexus/inc" /I "../../CurveFitting\inc" /I "..\inc\MantidMDAlgorithms" /I "..\..\MDDataObjects\inc" /DBOOST_ALL_DYN_LINK /DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG /EHsc /MDd /W3 /wd4275 /nologo /c /ZI /TP
 
-link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" hdf5ddll.lib Mantidkernel.lib Mantidapi.lib Mantidalgorithms.lib MantidCurveFitting.lib Mantiddatahandling.lib Mantiddataobjects.lib MDDataObjects.lib Mantidgeometry.lib MantidNexus.lib runner.obj
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"./Debug" /LIBPATH:"../../debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" hdf5ddll.lib Mantidkernel.lib Mantidapi.lib Mantidalgorithms.lib MantidCurveFitting.lib Mantiddatahandling.lib Mantiddataobjects.lib MDDataObjects.lib Mantidgeometry.lib MantidNexus.lib runner.obj
 
 echo "Copying in properties files..."
+copy /Y .\debug\*.dll
 rem copy /Y ..\..\Build\Tests\*properties
 rem copy /Y .\Debug\*properties
 echo "Running the tests..."
