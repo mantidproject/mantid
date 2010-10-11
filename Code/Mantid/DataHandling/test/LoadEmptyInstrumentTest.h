@@ -561,6 +561,18 @@ public:
     TS_ASSERT_DELTA( (det->getNumberParameter("tube_thickness"))[0], 0.0008, 0.0001);
     TS_ASSERT_DELTA( (det->getNumberParameter("tube_temperature"))[0], 290.0, 0.0001);
 
+    // demonstrate recursive look-up: tube_pressure2 defined in 'dummy' but accessed from 'pixel'
+    det = ws->getDetector(1);
+    TS_ASSERT_DELTA( (det->getNumberParameter("tube_pressure2"))[0], 35.0, 0.0001);
+
+    // Alternative way of doing a recursive look-up 
+    param = paramMap.getRecursive(&(*det), "tube_pressure2");
+    TS_ASSERT_DELTA( param->value<double>(), 35.0, 0.0001);
+
+    // And finally demonstrate that the get() method does not perform recursive look-up 
+    param = paramMap.get(&(*det), "tube_pressure2");
+    TS_ASSERT( param == NULL );
+
     AnalysisDataService::Instance().remove(wsName);
   }
 
