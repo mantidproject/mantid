@@ -1,10 +1,10 @@
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/cow_ptr.h"
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 // this should be a big number but not so big that there are rounding errors
 const double DIST_TO_UNIVERSE_EDGE = 1e3;
@@ -91,7 +91,7 @@ void He3TubeEfficiency::exec()
     {
       this->correctForEfficiency(i);
     }
-    catch (Kernel::Exception::NotFoundError &)
+    catch (std::out_of_range &)
     {
       // if we don't have all the data there will be spectra we can't correct,
       // avoid leaving the workspace part corrected
@@ -145,26 +145,9 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
   // Get the parameters for the current associated tube
-  Geometry::Parameter_sptr par = this->paraMap->get(det.get(), "tube_pressure");
-  if ( !par )
-  {
-    throw Kernel::Exception::NotFoundError("tube_pressure", spectraIndex);
-  }
-  double pressure = par->value<double>();
-
-  par = this->paraMap->get(det.get(), "tube_thickness");
-  if ( !par )
-  {
-    throw Kernel::Exception::NotFoundError("tube_thickness", spectraIndex);
-  }
-  double tubethickness = par->value<double>();
-
-  par = this->paraMap->get(det.get(), "tube_temperature");
-  if ( !par )
-  {
-    throw Kernel::Exception::NotFoundError("tube_temperature", spectraIndex);
-  }
-  double temperature = par->value<double>();
+  double pressure = det->getNumberParameter("tube_pressure").at(0);
+  double tubethickness = det->getNumberParameter("tube_thickness").at(0);
+  double temperature = det->getNumberParameter("tube_temperature").at(0);
 
   double detRadius(0.0);
   Geometry::V3D detAxis;
