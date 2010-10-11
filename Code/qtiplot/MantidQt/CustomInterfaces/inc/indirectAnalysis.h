@@ -7,6 +7,8 @@
 #include "MantidQtCustomInterfaces/ui_indirectAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
+#include "MantidQtMantidWidgets/RangeSelector.h"
+
 #include "MantidAPI/CompositeFunction.h"
 
 #include <QIntValidator>
@@ -17,6 +19,7 @@
 #include "qteditorfactory.h"
 
 #include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 namespace MantidQt
 {
@@ -73,6 +76,9 @@ namespace MantidQt
       void runFuryFit();
       void furyfit_typeSelection(int index);
       void furyfitPlotInput();
+      void furyfitXMinSelected(double val);
+      void furyfitXMaxSelected(double val);
+      void furyfitRangePropChanged(QtProperty*, double);
 
       void elwinRun();
       void elwinPlotInput();
@@ -86,7 +92,6 @@ namespace MantidQt
       void openDirectoryDialog();
       void help();
 
-      void pointSelected(const QwtDoublePoint & pos);
 
     private:
       Ui::indirectAnalysis m_uiForm;
@@ -103,12 +108,15 @@ namespace MantidQt
 
       QtGroupPropertyManager* m_groupManager;
       QtDoublePropertyManager* m_doubleManager;
+      QtDoublePropertyManager* m_ffRangeManager;
 
       bool m_furyResFileType;
       
       QMap<QString, QtProperty*> m_fitProperties;
 
       QwtPlot* m_furyFitPlotWindow;
+      QwtPlotCurve* m_ffDataCurve;
+      MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
 
     };
   }

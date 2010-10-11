@@ -2,9 +2,11 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/indirectAnalysis.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
+
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -24,7 +26,6 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
-#include <qwt_plot_picker.h>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -42,7 +43,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 indirectAnalysis::indirectAnalysis(QWidget *parent) :
-UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true)
+UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true), m_ffDataCurve(0)
 {
 }
 void indirectAnalysis::closeEvent(QCloseEvent* close)
@@ -148,6 +149,7 @@ void indirectAnalysis::loadSettings()
   settings.setValue("last_directory", m_saveDir);
   m_uiForm.fury_iconFile->readSettings(settings.group());
   m_uiForm.fury_resFile->readSettings(settings.group());
+  m_uiForm.furyfit_inputFile->readSettings(settings.group());
   m_uiForm.elwin_inputFile->readSettings(settings.group());
   m_uiForm.elwin_inputFile->readSettings(settings.group());
   m_uiForm.msd_inputFile->readSettings(settings.group());
@@ -204,13 +206,17 @@ void indirectAnalysis::setupTreePropertyBrowser()
 {
   m_groupManager    = new QtGroupPropertyManager();
   m_doubleManager   = new QtDoublePropertyManager();
+  m_ffRangeManager = new QtDoublePropertyManager();
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
   m_propBrowser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
+  m_propBrowser->setFactoryForManager(m_ffRangeManager, doubleEditorFactory);
 
-  m_fitProperties["StartX"] = m_doubleManager->addProperty("StartX");
-  m_doubleManager->setDecimals(m_fitProperties["StartX"], 10);
-  m_fitProperties["EndX"] = m_doubleManager->addProperty("EndX");
-  m_doubleManager->setDecimals(m_fitProperties["EndX"], 10);
+  m_fitProperties["StartX"] = m_ffRangeManager->addProperty("StartX");
+  m_ffRangeManager->setDecimals(m_fitProperties["StartX"], 10);
+  m_fitProperties["EndX"] = m_ffRangeManager->addProperty("EndX");
+  m_ffRangeManager->setDecimals(m_fitProperties["EndX"], 10);
+
+  connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyfitRangePropChanged(QtProperty*, double)));
 
   m_fitProperties["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
   QtProperty* bgA0 = m_doubleManager->addProperty("A0");
@@ -237,14 +243,11 @@ void indirectAnalysis::setupFFPlotArea()
 {
   m_furyFitPlotWindow = new QwtPlot(this);
   m_uiForm.furyfit_vlPlot->addWidget(m_furyFitPlotWindow);
+  m_furyFitPlotWindow->setCanvasBackground(QColor(255,255,255));
   
-  QwtPlotPicker* picker = new QwtPlotPicker(m_furyFitPlotWindow->canvas());
-  picker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
-  picker->setRubberBandPen(QColor(Qt::blue));
-  picker->setRubberBand(QwtPicker::CrossRubberBand);
-  picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
-
-  connect(picker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(pointSelected(const QwtDoublePoint&)));
+  m_ffRangeS = new MantidQt::MantidWidgets::RangeSelector(m_furyFitPlotWindow);
+  connect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
+  connect(m_ffRangeS, SIGNAL(xMaxValueChanged(double)), this, SLOT(furyfitXMaxSelected(double)));
 
 }
 
@@ -786,8 +789,8 @@ void indirectAnalysis::runFuryFit()
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "furyfit");
     alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
-    alg->setProperty("StartX", m_doubleManager->value(m_fitProperties["StartX"]));
-    alg->setProperty("EndX", m_doubleManager->value(m_fitProperties["EndX"]));
+    alg->setProperty("StartX", m_ffRangeManager->value(m_fitProperties["StartX"]));
+    alg->setProperty("EndX", m_ffRangeManager->value(m_fitProperties["EndX"]));
     alg->setPropertyValue("Function", *function);
     alg->setPropertyValue("Output","furyfit_output");
     alg->execute();
@@ -841,8 +844,11 @@ void indirectAnalysis::furyfitPlotInput()
   }
   else
   {
-    // first we want to clear any previous curves off
-    m_furyFitPlotWindow->detachItems();
+    if ( m_ffDataCurve != NULL )
+    {
+      m_ffDataCurve->attach(0);
+      delete m_ffDataCurve;
+    }
 
     std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
 
@@ -863,14 +869,45 @@ void indirectAnalysis::furyfitPlotInput()
     const QVector<double> dataX = QVector<double>::fromStdVector(inputWS->readX(specNo));
     const QVector<double> dataY = QVector<double>::fromStdVector(inputWS->readY(specNo));
 
+    // get xMin and xMax range
+    const double & lower = dataX.first();
+    const double & upper = dataX.last();
+    m_ffRangeS->setRange(lower, upper);
+            
     // create the QwtPlotCurve
-    QwtPlotCurve* curve = new QwtPlotCurve();
-    curve->setData(dataX, dataY);
+    m_ffDataCurve = new QwtPlotCurve();
+    m_ffDataCurve->setData(dataX, dataY);
+    m_ffDataCurve->attach(m_furyFitPlotWindow);
 
-    curve->attach(m_furyFitPlotWindow);
     m_furyFitPlotWindow->replot();
   }
 }
+
+void indirectAnalysis::furyfitXMinSelected(double val)
+{
+  m_ffRangeManager->blockSignals(true);
+  m_ffRangeManager->setValue(m_fitProperties["StartX"], val);
+  m_ffRangeManager->blockSignals(false);
+}
+void indirectAnalysis::furyfitXMaxSelected(double val)
+{
+  m_ffRangeManager->blockSignals(true);
+  m_ffRangeManager->setValue(m_fitProperties["EndX"], val);
+  m_ffRangeManager->blockSignals(false);
+}
+
+void indirectAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
+{
+  if ( prop == m_fitProperties["StartX"] )
+  {
+    m_ffRangeS->setMinimum(val);
+  }
+  else if ( prop == m_fitProperties["EndX"] )
+  {
+    m_ffRangeS->setMaximum(val);
+  }
+}
+
 
 void indirectAnalysis::elwinRun()
 {
@@ -1058,18 +1095,4 @@ void indirectAnalysis::openDirectoryDialog()
 void indirectAnalysis::help()
 {
   showInformationBox("Not yet written.");
-}
-
-void indirectAnalysis::pointSelected(const QwtDoublePoint & pos)
-{
-  QtBrowserItem* item = m_propBrowser->currentItem();
-  if ( item == NULL )
-    return;
-
-  QtProperty* prop = item->property();
-  if ( prop->propertyManager() == m_doubleManager )
-  {
-    m_doubleManager->setValue(prop, pos.x());
-  }
-
 }

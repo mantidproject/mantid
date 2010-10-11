@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>562</width>
-    <height>437</height>
+    <height>356</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -799,7 +799,7 @@
            </item>
            <item>
             <property name="text" >
-             <string>1 Stretched Exponential and 1 Exponentail</string>
+             <string>1 Stretched Exponential and 1 Exponential</string>
             </property>
            </item>
           </widget>
