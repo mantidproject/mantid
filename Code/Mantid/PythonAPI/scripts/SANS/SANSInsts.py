@@ -89,6 +89,45 @@ class Instrument(object):
         return workspace_name
 
 class DetectorBank:
+    class _DectShape:
+        """
+            Stores the dimensions of the detector, normally this is a square
+            which is easy, but it can have a hole in it which is harder!
+        """
+        def __init__(self, width, height, isRect = True, n_pixels = None):
+            """
+                Sets the dimensions of the detector
+                @param width: the detector's width, spectra numbers along the width should increase in intervals of one
+                @param height: the detector's height, spectra numbers along the down the height should increase in intervals of width
+                @param isRect: true for rectangular or square detectors, i.e. number of pixels = width * height
+                @param n_pixels: optional for rectangular shapes because if it is not given it is calculated from the height and width in that case
+            """
+            self._width = width
+            self._height = height
+            self._isRect = bool(isRect)
+            self._n_pixels = n_pixels
+            if n_pixels is None:
+                if self._isRect:
+                    self._n_pixels = self._width*self._height
+                else:
+                    raise LogicError('Number of pixels in the detector unknown, you must state the number of pixels for non-rectangular detectors')
+
+                
+        def width(self):
+            """
+                read-only property getter, this object can't be altered
+            """
+            return self._width
+
+        def height(self):
+            return self._height
+        
+        def isRectangle(self):
+            return self._isRect
+
+        def n_pixels(self):
+            return self._n_pixels
+
     def __init__(self, instr, det_type) :
         self.parent = instr
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
@@ -110,23 +149,37 @@ class DetectorBank:
             #'first-low-angle-spec-number' is an optimal instrument parameter
             self.first_spec_num = 0
         
-        self.n_columns = None
         cols_data = instr.getNumberParameter(det_type+'-detector-num-columns')
-        if len(cols_data) > 0 : self.n_columns = int(cols_data[0])
-
-        n_rows = None
-        rows_data = instr.getNumberParameter(det_type+'-detector-num-rows')
-        if len(rows_data) > 0 : n_rows = int(rows_data[0])
-
-        #deal with LOQ's non-square front detector 
-        if (self.n_columns == None) or (n_rows == None) :
-            if (instr.getName() == 'LOQ') and (det_type == 'high-angle') :
-                self._num_pixels = 1406
-            else : raise LogicError('Number of columns or rows data missing for instrument ' + instr.name())
+        if len(cols_data) > 0 :
+            rectanglar_shape = True
+            width = int(cols_data[0])
         else :
-            self._num_pixels = int(self.n_columns*n_rows)
+            rectanglar_shape = False
+            width = instr.getNumberParameter(det_type+'-detector-non-rectangle-width')[0]
+
+        rows_data = instr.getNumberParameter(det_type+'-detector-num-rows')
+        if len(rows_data) > 0 :
+            height = int(rows_data[0])
+        else:
+            rectanglar_shape = False
+            height = instr.getNumberParameter(det_type+'-detector-non-rectangle-height')[0]
+
+        n_pixels = None
+        n_pixels_override = instr.getNumberParameter(det_type+'-detector-num-pixels')
+        if len(n_pixels_override) > 0 :
+            n_pixels = int(n_pixels_override[0])
+        #n_pixels is normally None and calculated by DectShape but LOQ (at least) has a detector with a hole 
+        self._shape = self._DectShape(width, height, rectanglar_shape, n_pixels)
         
-        self.last_spec_num = self.first_spec_num + self._num_pixels - 1
+        
+        
+        #needed for compatibility with SANSReduction and SANSUtily, remove
+        self.n_columns = width
+        
+        
+        
+        
+        self.last_spec_num = self.first_spec_num + self._shape.n_pixels() - 1
         #this can be set to the name of a file with correction factor against wavelength
         correction_file = ''
         #this corrections are set by the mask file
@@ -134,6 +187,10 @@ class DetectorBank:
         self.x_corr = 0.0 
         self._y_corr = 0.0 
         self._rot_corr = 0.0
+        
+        #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
+        self._orientation = 'HorizontalFlipped'
+
 
     def disable_y_and_rot_corrs(self):
         """
@@ -148,7 +205,6 @@ class DetectorBank:
         else:
             raise NotImplemented('y correction isn''t used for this detector')
 
-    
     def set_y_corr(self, value):
         """
             Only set the value if it isn't disabled
@@ -176,7 +232,7 @@ class DetectorBank:
 
     def place_after(self, previousDet):
         self.first_spec_num = previousDet.last_spec_num + 1
-        self.last_spec_num = self.first_spec_num + self._num_pixels - 1
+        self.last_spec_num = self.first_spec_num + self._shape.n_pixels() - 1
 
     def name(self, form = 'long') :
         if form.lower() == 'inst_view' : form = 'long'
@@ -201,16 +257,70 @@ class DetectorBank:
         self.y_corr = 0.0
         self.rot_corr = 0.0
 
-class ISISInstrument(Instrument):
-    # Essentially an enumeration
-    class Orientation:
-        Horizontal = 1
-        Vertical = 2
-        Rotated = 3
-        # This is for the empty instrument
-        HorizontalFlipped = 4
+    def spectrum_block(self, ylow, xlow, ydim, xdim):
+        """
+            Compile a list of spectrum IDs for rectangular block of size xdim by ydim
+        """
+        if ydim == 'all':
+            ydim = self._shape.height()
+        if xdim == 'all':
+            xdim = self._shape.width()
+        det_dimension = self._shape.width()
+        base = self.first_spec_num
 
-    def __init__(self) :
+        if not self._shape.isRectangle():
+            mantid.sendLogMessage('::SANS::Warning: Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
+            
+        output = ''
+        if self._orientation == 'Horizontal':
+            start_spec = base + ylow*det_dimension + xlow
+            for y in range(0, ydim):
+                for x in range(0, xdim):
+                    output += str(start_spec + x + (y*det_dimension)) + ','
+        elif self._orientation == 'Vertical':
+            start_spec = base + xlow*det_dimension + ylow
+            for x in range(det_dimension - 1, det_dimension - xdim-1,-1):
+                for y in range(0, ydim):
+                    std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
+            output += str(std_i ) + ','
+        elif self._orientation == 'Rotated':
+            # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
+            start_spec = base + ylow*det_dimension + xlow
+            max_spec = det_dimension*det_dimension + base - 1
+            for y in range(0, ydim):
+                for x in range(0, xdim):
+                    std_i = start_spec + x + (y*det_dimension)
+                    output += str(max_spec - (std_i - base)) + ','
+        elif self._orientation == 'HorizontalFlipped':
+            start_spec = base + ylow*det_dimension + xlow
+        for y in range(0,ydim):
+            max_row = base + (y+1)*det_dimension - 1
+            min_row = base + (y)*det_dimension
+            for x in range(0,xdim):
+                std_i = start_spec + x + (y*det_dimension)
+            diff_s = std_i - min_row
+            output += str(max_row - diff_s) + ','
+
+        return output.rstrip(",")
+    
+    # Used to constrain the possible values of orientation 
+    _ORIENTED = {
+        'Horizontal' : None,        #most runs have the detectors in this state
+        'Vertical' : None,
+        'Rotated' : None,
+        'HorizontalFlipped' : None} # This is for the empty instrument
+    
+    def set_orien(self, orien):
+        #throw if it's not in the list of allowed
+        dummy = _ORIENTED[orien]
+        self._orientation = orien
+        
+    #write only property, client code probably shouldn't depend on detector orientation
+    orientation = property(None, set_orien, None, None)
+
+
+class ISISInstrument(Instrument):
+    def __init__(self,) :
         Instrument.__init__(self)
     
         firstDetect = DetectorBank(self.definition, 'low-angle')
@@ -246,8 +356,6 @@ class ISISInstrument(Instrument):
         self.trans_monitor = int(self.definition.getNumberParameter(
             'default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
-        #used to handle runs in which the detector bank was rotated
-        self._orientation = self.Orientation.Horizontal
 
     def name(self):
         return self._NAME
@@ -307,10 +415,7 @@ class ISISInstrument(Instrument):
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
-        
-    def get_orientation(self):
-        return self._orientation
-    
+
     def copy_correction_files(self):
         """
             Check if one of the efficiency files hasn't been set and assume the other is to be used
@@ -332,12 +437,6 @@ class LOQ(ISISInstrument):
         self._NAME = 'LOQ'
         super(LOQ, self).__init__()
 
-    def set_up_for_run(self, base_runno):
-        """
-            LOQ doesn't have any per run setup so don't do anything
-        """
-        pass
-
     def set_component_positions(self, ws, xbeam, ybeam):
         """
             @param ws: workspace containing the instrument information
@@ -355,7 +454,13 @@ class LOQ(ISISInstrument):
     def get_marked_dets(self):
         raise NotImplementedError('The marked detector list isn\'t stored for instrument '+self._NAME)
 
-        
+    def set_up_for_sample(self, base_runno):
+        """
+            Needs to run whenever a sample is loaded
+        """
+        low = self.DETECTORS['low-angle'].orientation = 'Horizontal'
+        high = self.DETECTORS['high-angle'].orientation = 'Horizontal'
+
 class SANS2D(ISISInstrument): 
 
     # Number of digits in standard file name
@@ -367,18 +472,27 @@ class SANS2D(ISISInstrument):
         
         self._marked_dets = []
     
-    def set_up_for_run(self, base_runno):
+    def set_up_for_sample(self, base_runno):
+        """
+            Handles changes required when a sample is loaded, both generic
+            and run specific
+        """
+        low = self.DETECTORS['low-angle']
+        high = self.DETECTORS['high-angle']
         if base_runno < 568:
             self.set_incident_mon(73730)
-            self._orientation = self.Orientation.Vertical
-            self.DETECTORS['high-angle'].first_spec_num = (self._num_pixels*self._num_pixels) + 1 
-            self.DETECTORS['high-angle'].last_spec_num = self._num_pixels*self._num_pixels*2
-            self.DETECTORS['low-angle'].first_spec_num = 1
-            self.DETECTORS['low-angle'].last_spec_num = self._num_pixels*self._num_pixels
+            low.orientation = 'Vertical'
+            low.first_spec_num = 1
+            low.last_spec_num = self._num_pixels*self._num_pixels
+            high.orientation = 'Vertical'
+            high.first_spec_num = (self._num_pixels*self._num_pixels) + 1 
+            high.last_spec_num = self._num_pixels*self._num_pixels*2
         elif (base_runno >= 568 and base_runno < 684):
-            self._orientation = self.Orientation.Rotated
+            low.orientation = 'Rotated'
+            high.orientation = 'Rotated'
         else:
-            pass
+            low.orientation = 'Horizontal'
+            high.orientation = 'Horizontal'
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -391,11 +505,11 @@ class SANS2D(ISISInstrument):
         MoveInstrumentComponent(ws, 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition="1")
         
         if self.cur_detector().name() == 'front-detector':
-            rotateDet = (-self.FRONT_DET_ROT - self.FRONT_DET_ROT_CORR)
+            rotateDet = (-self.FRONT_DET_ROT - self.cur_detector().rot_corr)
             RotateInstrumentComponent(ws, self.cur_detector().name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)
-            RotRadians = math.pi*(self.FRONT_DET_ROT + self.FRONT_DET_ROT_CORR)/180.
-            xshift = (self.REAR_DET_X + self.REAR_DET_X_CORR - self.FRONT_DET_X - self.FRONT_DET_X_CORR + self.FRONT_DET_RADIUS*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
-            yshift = (self.FRONT_DET_Y_CORR /1000.  - ybeam)
+            RotRadians = math.pi*(self.FRONT_DET_ROT + self.cur_detector().rot_corr)/180.
+            xshift = (self.REAR_DET_X + self.other_detector().x_corr - self.FRONT_DET_X - self.cur_detector().x_corr + self.FRONT_DET_RADIUS*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
+            yshift = (self.cur_detector().y_corr/1000.  - ybeam)
             # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
             # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
             zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000.
@@ -440,6 +554,13 @@ class SANS2D(ISISInstrument):
                 logvalues[component] = parts[2]
 
         file_handle.close()
+        
+        self.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
+        self.FRONT_DET_X = float(logvalues['Front_Det_X'])
+        self.FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
+        self.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
+        self.REAR_DET_X = float(logvalues['Rear_Det_X'])
+
         return logvalues
     
     def append_marked(self, detNames):

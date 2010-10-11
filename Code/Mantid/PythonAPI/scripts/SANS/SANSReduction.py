@@ -1656,10 +1656,10 @@ def ViewCurrentMask():
 
     #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
     #start with the currently selected detector
-    firstSpec1 = INSTRUMENT.cur_detector().firstSpec
+    firstSpec1 = INSTRUMENT.cur_detector().first_spec_num
     _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
     #now the other detector
-    firstSpec2 = INSTRUMENT.other_detector().firstSpec
+    firstSpec2 = INSTRUMENT.other_detector().first_spec_num
     _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
     
     # Mark up "dead" detectors with error value 

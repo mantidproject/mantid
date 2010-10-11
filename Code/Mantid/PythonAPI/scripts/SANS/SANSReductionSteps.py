@@ -592,54 +592,53 @@ class Mask(ReductionStep):
         self._ny_low = ny_low
         self._ny_high = ny_high
         
-        #the region to be masked expressed as xml that can be passed to MaskDetectorsInShape (syntax in NORMALISATION_FILE)
-        self._xml = {'shape_defs' : '', 'sum_shapes': '<algebra val="'}
+        self._xml = []
+
         #these spectra will be masked by the algorithm MaskDetectors
         self.spec_list = ''
         
-    def add_xml_shape(self, id, complete_xml_element, operation='add'):
+    def add_xml_shape(self, complete_xml_element):
         if not complete_xml_element.startswith('<') :
             raise ValueError('Excepted xml string but found: ' + str(complete_xml_element))
-        self._xml['shape_defs'] += complete_xml_element
-        
-        if operation == 'add':
-            sum = str(id)
-        elif operation == 'add complement':
-            sum = ':(# ' + id+')'
+        self._xml.append(complete_xml_element)
+
+    def _infinite_plane(self, id, plane_pt, normal_pt, complement = False):
+        if complement:
+            addition = '#'
         else:
-            raise NotImplementedError('Operation "'+operation+'" not supported by add_xml_shape()')
-        self._xml['sum_shapes'] += sum+':'
-        
-    def _infinite_plane(self, id, plane_pt, normal_pt):
+            addition = ''
         return '<infinite-plane id="' + str(id) + '">' + \
             '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
             '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-            '</infinite-plane>\n'
+            '</infinite-plane><algebra val="'+addition+str(id)+'"/>\n'
 
-    def _infinite_cylinder(self, id, centre, radius, axis):
+    def _infinite_cylinder(self, centre, radius, axis, complement=False, id='shape'):
+        if complement:
+            addition = '#'
+        else:
+            addition = ''
         return '<infinite-cylinder id="' + str(id) + '">' + \
             '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
             '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
             '<radius val="' + str(radius) + '" />' + \
-            '</infinite-cylinder>\n'
+            '</infinite-cylinder><algebra val="'+addition+str(id)+'"/>\n'
 
-    def add_cylinder(self, id, radius, xcentre, ycentre):
+    def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
         '''Mask the inside of a cylinder on the input workspace.'''
-        self.add_xml_shape(id,
-            self._infinite_cylinder(id, [xcentre, ycentre, 0.0], radius, [0,0,1]))
+        self.add_xml_shape(
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
+            complement=False, id=ID))
+            
 
-    def add_outside_cylinder(self, id, radius, xcentre = 0.0, ycentre = 0.0):
+    def add_outside_cylinder(self, radius, xcentre = 0.0, ycentre = 0.0, ID='shape'):
         '''Mask out the outside of a cylinder or specified radius'''
-        self.add_xml_shape(id,
-            self._infinite_cylinder(id, [xcentre, ycentre, 0.0], radius, [0,0,1]),
-            'add complement')
+        self.add_xml_shape(
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
+            complement=True, id=ID))
 
     def execute(self, reducer, workspace):
-        if self._xml['shape_defs'] != '':
-            if self._xml['sum_shapes'].endswith(':'):
-                self._xml['sum_shapes'] = self._xml['sum_shapes'].rpartition(':')[0]
-            xml_string = self._xml['shape_defs'] + self._xml['sum_shapes'] +'"/>'
-            MaskDetectorsInShape(workspace, xml_string)
+        for shape in self._xml:
+            MaskDetectorsInShape(workspace, shape)
         
         # Get a list of detector pixels to mask
         if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:
@@ -652,7 +651,7 @@ class Mask(ReductionStep):
             
             # Mask the pixels by passing the list of IDs
             MaskDetectors(workspace, None, masked_detectors)
-        
+
         if self.spec_list != '':
             MaskDetectors(workspace, SpectraList = self.spec_list)
             
@@ -749,9 +748,9 @@ class SubtractBackground(ReductionStep):
 class GetSampleGeom(ReductionStep):
     """
         Loads, stores, retrieves, etc. data about the geometry of the sample
-        On initialisation this class returns default geometry values (compatible with the Colette software)
+        On initialisation this class will return default geometry values (compatible with the Colette software)
         There are functions to override these settings
-        If there is geometry information in the workspace this will override any unset attributes
+        On execute if there is geometry information in the workspace this will override any unset attributes
     """
     # IDs for each shape as used by the Colette software
     _shape_ids = {1 : 'cylinder-axis-up',
@@ -854,14 +853,14 @@ class GetSampleGeom(ReductionStep):
         """
         sample_details = mtd[workspace].getSampleInfo()
 
-        if not self.shape is None:
+        if self.shape is None:
             self.shape = sample_details.getGeometryFlag()
-        if not self.thickness is None:
+        if self.thickness is None:
             self.thickness = sample_details.getThickness()
-        if not self.height is None:
-            self.height = sample_details.getHeight()
-        if not self.width is None:
+        if self.width is None:
             self.width = sample_details.getWidth()
+        if self.height is None:
+            self.height = sample_details.getHeight()
 
     def __str__(self):
         return '-- Sample Geometry --\n' + \
@@ -924,7 +923,8 @@ class StripEndZeros(ReductionStep):
     def execute(self, reducer, workspace):
         result_ws = mantid.getMatrixWorkspace(workspace)
         if result_ws.getNumberHistograms() != 1:
-            raise NotImplementedError('Strip zeros is only possible on 1D workspaces')
+            #Strip zeros is only possible on 1D workspaces
+            return
 
         y_vals = result_ws.readY(0)
         length = len(y_vals)
