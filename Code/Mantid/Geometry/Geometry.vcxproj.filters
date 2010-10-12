@@ -198,6 +198,9 @@
     <ClCompile Include="src\Instrument\RectangularDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Rendering\BitmapGeometryHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h">
@@ -561,6 +564,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidGeometry\Instrument\RectangularDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Rendering\BitmapGeometryHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

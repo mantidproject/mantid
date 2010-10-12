@@ -170,6 +170,7 @@
     <ClCompile Include="src\Math\Algebra.cpp" />
     <ClCompile Include="src\Math\BnId.cpp" />
     <ClCompile Include="src\Objects\BoundingBox.cpp" />
+    <ClCompile Include="src\Rendering\BitmapGeometryHandler.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryGenerator.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryHandler.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryRenderer.cpp" />
@@ -249,6 +250,7 @@
     <ClInclude Include="inc\MantidGeometry\Instrument\RectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h" />
     <ClInclude Include="inc\MantidGeometry\Objects\BoundingBox.h" />
+    <ClInclude Include="inc\MantidGeometry\Rendering\BitmapGeometryHandler.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\OpenCascadeConfig.h" />
     <ClInclude Include="test\AcompTest.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Algebra.h" />
