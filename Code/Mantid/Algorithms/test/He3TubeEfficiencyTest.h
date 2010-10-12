@@ -44,9 +44,9 @@ public:
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
     // Check some detector values
-    TS_ASSERT_DELTA(result->readY(1).back(), 25.774742, 1e-6);
-    TS_ASSERT_DELTA(result->readY(2)[2], 37.2655834, 1e-6);
-    TS_ASSERT_DELTA(result->readY(3).front(), 57.960343, 1e-6);
+    TS_ASSERT_DELTA(result->readY(1).back(), 15.989063, 1e-6);
+    TS_ASSERT_DELTA(result->readY(2)[2], 21.520201, 1e-6);
+    TS_ASSERT_DELTA(result->readY(3).front(), 31.716197, 1e-6);
   }
 
   void testEventCorrection()

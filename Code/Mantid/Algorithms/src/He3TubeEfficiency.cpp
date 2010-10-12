@@ -152,6 +152,8 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   double detRadius(0.0);
   Geometry::V3D detAxis;
   this->getDetectorGeometry(det, detRadius, detAxis);
+  double detDiameter = 2.0 * detRadius;
+  double twiceTubeThickness = 2.0 * tubethickness;
 
   // now get the sin of the angle, it's the magnitude of the cross product of
   // unit vector along the detector tube axis and a unit vector directed from
@@ -167,7 +169,7 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   double cosTheta = detAxis.scalar_prod(vectorFromSample);
   double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
-  const double pathlength = (detRadius - tubethickness) / sinTheta;
+  const double pathlength = (detDiameter - twiceTubeThickness) / sinTheta;
   const double exp_constant = EXP_SCALAR_CONST * (pressure / temperature) * pathlength;
 
   std::vector<double>::const_iterator yinItr = yValues.begin();
@@ -192,7 +194,7 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
 /**
  * Update the shape cache if necessary
  * @param det a pointer to the detector to query
- * @param detRadius An output paramater that contains the detector radius
+ * @param detRadius An output parameter that contains the detector radius
  * @param detAxis An output parameter that contains the detector axis vector
  */
 void He3TubeEfficiency::getDetectorGeometry(\
@@ -212,7 +214,7 @@ void He3TubeEfficiency::getDetectorGeometry(\
     {
       detRadius = zDist / 2.0;
       detAxis = Geometry::V3D(0, 1, 0);
-      // assume radi in z and x and the axis is in the y
+      // assume radii in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea)
       {
         this->shapeCache.insert(std::pair<const Geometry::Object *,
@@ -227,7 +229,7 @@ void He3TubeEfficiency::getDetectorGeometry(\
     {
       detRadius = yDist / 2.0;
       detAxis = Geometry::V3D(1, 0, 0);
-      // assume that y and z are radi of the cylinder's circular cross-section
+      // assume that y and z are radii of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb)
       {
