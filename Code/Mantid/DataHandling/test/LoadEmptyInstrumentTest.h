@@ -39,10 +39,10 @@ public:
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") );
     TS_ASSERT_EQUALS( result, inputFile);
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("OutputWorkspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
@@ -70,10 +70,10 @@ public:
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") );
     TS_ASSERT_EQUALS( result, inputFile);
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("OutputWorkspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
@@ -100,10 +100,10 @@ public:
     loaderMUSR.setPropertyValue("OutputWorkspace", wsName);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderMUSR.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderMUSR.getPropertyValue("Filename") );
     TS_ASSERT_EQUALS( result, inputFile);
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderMUSR.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderMUSR.getPropertyValue("OutputWorkspace") );
     TS_ASSERT( ! result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderMUSR.execute());
