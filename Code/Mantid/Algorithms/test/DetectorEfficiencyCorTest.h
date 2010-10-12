@@ -54,11 +54,11 @@ public:
   {
 
     DetectorEfficiencyCor grouper;
-    TS_ASSERT_EQUALS( grouper.name(), "DetectorEfficiencyCor" )
-    TS_ASSERT_EQUALS( grouper.version(), 1 )
-    TS_ASSERT_EQUALS( grouper.category(), "CorrectionFunctions" )
-    TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
-    TS_ASSERT( grouper.isInitialized() )
+    TS_ASSERT_EQUALS( grouper.name(), "DetectorEfficiencyCor" );
+    TS_ASSERT_EQUALS( grouper.version(), 1 );
+    TS_ASSERT_EQUALS( grouper.category(), "CorrectionFunctions" );
+    TS_ASSERT_THROWS_NOTHING( grouper.initialize() );
+    TS_ASSERT( grouper.isInitialized() );
   }
 
   void testFromRaw()
@@ -71,8 +71,8 @@ public:
     loadDetInfo(inName, m_rawFile);
     ConvertToDeltaE(inName, m_Ei);
     DetectorEfficiencyCor grouper;
-    TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
-    TS_ASSERT( grouper.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( grouper.initialize() );
+    TS_ASSERT( grouper.isInitialized() );
     grouper.setPropertyValue("InputWorkspace", inName);
     grouper.setPropertyValue("OutputWorkspace", inName);
     grouper.setProperty("IncidentEnergy", m_Ei);
@@ -81,21 +81,21 @@ public:
 
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inName));
 
-    TS_ASSERT( result->getNumberHistograms() > 0 )
-    TS_ASSERT( result->readY(0).size() > 0 )
+    TS_ASSERT( result->getNumberHistograms() > 0 );
+    TS_ASSERT( result->readY(0).size() > 0 );
     int firstNonMonitor = 5;
 
     // Test some values
     // Unaffected monitors
-    TS_ASSERT_DELTA(result->readY(0).front(), 38006., 1e-6)
-    TS_ASSERT_DELTA(result->readY(0).back(), 577803., 1e-6)
+    TS_ASSERT_DELTA(result->readY(0).front(), 38006., 1e-6);
+    TS_ASSERT_DELTA(result->readY(0).back(), 577803., 1e-6);
 
     //Affected spectra
-    TS_ASSERT_DELTA(result->readY(firstNonMonitor).front(), 0.0, 1e-6)
-    TS_ASSERT_DELTA(result->readY(firstNonMonitor).back(), 2339.218280, 1e-6)
+    TS_ASSERT_DELTA(result->readY(firstNonMonitor).front(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->readY(firstNonMonitor).back(), 2339.218280, 1e-6);
     // Random spectra
-    TS_ASSERT_DELTA(result->readY(42).front(), 0.276367, 1e-6)
-    TS_ASSERT_DELTA(result->readY(42)[1225],1.077892 , 1e-6)
+    TS_ASSERT_DELTA(result->readY(42).front(), 0.276367, 1e-6);
+    TS_ASSERT_DELTA(result->readY(42)[1225],1.077892 , 1e-6);
 
     AnalysisDataService::Instance().remove(inName);
   }
