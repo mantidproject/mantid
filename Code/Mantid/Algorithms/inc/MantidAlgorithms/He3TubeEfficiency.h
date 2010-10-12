@@ -13,7 +13,19 @@ namespace Algorithms
 /**
     Corrects the input workspace for helium3 tube efficiency based on an
     exponential parameterization. The algorithm expects the input workspace
-    units to be wavelength.
+    units to be wavelength. The formula for the efficiency is given here.
+
+    \f[
+    \epsilon = \frac{A}{1-e^{\frac{-\alpha P (L - 2W) \lambda}{T sin(\theta)}}}
+    \f]
+
+    where \f$A\f$ is a dimensionless scaling factor, \f$\alpha\f$ is a constant
+    with units \f$(Kelvin / (metres\: \AA\: atm))\f$, \f$P\f$ is pressure in
+    units of \f$atm\f$, \f$L\f$ is the tube diameter in units of \f$metres\f$,
+    \f$W\f$ is the tube thickness in units of \f$metres\f$, \f$T\f$ is the
+    temperature in units of \f$Kelvin\f$, \f$sin(\theta)\f$ is the angle of
+    the neutron trajectory with respect to the long axis of the He3 tube and
+    \f$\lambda\f$ is in units of \f$\AA\f$.
 
     @author Michael Reuter
     @date 30/09/2010
