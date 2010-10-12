@@ -16,12 +16,9 @@
 #include <QLineEdit>
 #include <QValidator>
 
-#include <QStandardItemModel>
-#include <QStandardItem>
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
-#include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 
 #include <qwt_plot.h>
@@ -222,7 +219,7 @@ void indirectAnalysis::setupTreePropertyBrowser()
   QtProperty* bgA0 = m_doubleManager->addProperty("A0");
   QtProperty* bgA1 = m_doubleManager->addProperty("A1");
   m_doubleManager->setDecimals(bgA0, 10);
-  m_doubleManager->setDecimals(bgA1, 10);
+  m_doubleManager->setDecimals(bgA1, 1);
   m_doubleManager->setRange(bgA1, 0.0, 0.0);
   m_fitProperties["LinearBackground"]->addSubProperty(bgA0);
   m_fitProperties["LinearBackground"]->addSubProperty(bgA1);
@@ -873,27 +870,31 @@ void indirectAnalysis::furyfitPlotInput()
     const double & lower = dataX.first();
     const double & upper = dataX.last();
     m_ffRangeS->setRange(lower, upper);
+    m_ffRangeManager->setRange(m_fitProperties["StartX"], lower, upper);
+    m_ffRangeManager->setRange(m_fitProperties["EndX"], lower, upper);
             
     // create the QwtPlotCurve
     m_ffDataCurve = new QwtPlotCurve();
     m_ffDataCurve->setData(dataX, dataY);
     m_ffDataCurve->attach(m_furyFitPlotWindow);
 
+    m_furyFitPlotWindow->setAxisScale(QwtPlot::xBottom, lower, upper);
+    m_furyFitPlotWindow->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
     m_furyFitPlotWindow->replot();
   }
 }
 
 void indirectAnalysis::furyfitXMinSelected(double val)
 {
-  m_ffRangeManager->blockSignals(true);
+  disconnect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
   m_ffRangeManager->setValue(m_fitProperties["StartX"], val);
-  m_ffRangeManager->blockSignals(false);
+  connect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
 }
 void indirectAnalysis::furyfitXMaxSelected(double val)
 {
-  m_ffRangeManager->blockSignals(true);
+  disconnect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
   m_ffRangeManager->setValue(m_fitProperties["EndX"], val);
-  m_ffRangeManager->blockSignals(false);
+  connect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
 }
 
 void indirectAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
