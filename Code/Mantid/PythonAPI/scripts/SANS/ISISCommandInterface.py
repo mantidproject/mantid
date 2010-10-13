@@ -58,7 +58,7 @@ def _issueWarning(msg):
     mantid.sendLogMessage('::SANS::Warning: ' + msg)
                 
 def UserPath(path):
-    ReductionSingleton().user_path = path
+    ReductionSingleton().user_file_path = path
         
 def SANS2D():
     instrument = SANSInsts.SANS2D()
@@ -89,7 +89,7 @@ def Mask(details):
     ReductionSingleton().mask(details)
     
 def MaskFile(file_name):
-    ReductionSingleton().read_mask_file(file_name)
+    ReductionSingleton().user_settings.filename = file_name
     
 def SetMonitorSpectrum(specNum, interp=False):
     ReductionSingleton().set_monitor_spectrum(specNum, interp)
@@ -133,7 +133,6 @@ def AssignSample(sample_run, reload = True, period = -1):
     ReductionSingleton().append_data_file(sample_run)
     ReductionSingleton().load_set_options(reload, period)
     
-    
 def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
     SetBeamCenter(XVAL/1000.0, YVAL/1000.0)
@@ -145,7 +144,9 @@ def GetMismatchedDetList():
     return ReductionSingleton().instrument.get_marked_dets()
 
 def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = True):
-    ReductionSingleton().transmission_calculator.set_full_wav(full_trans_wav)
+    if not ReductionSingleton().transmission_calculator is None:
+        ReductionSingleton().transmission_calculator.set_full_wav(full_trans_wav)
+
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
 
     _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
@@ -165,9 +166,6 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = True):
     
 def _SetWavelengthRange(start, end):
     ReductionSingleton().to_wavelen.set_range(start, end)
-
-def _SetWorkspaceName(name):
-    ReductionSingleton().set_workspace_name(name)
 
 
 def Set1D():
@@ -190,8 +188,7 @@ def SetFrontEfficiencyFile(filename):
 def displayUserFile():
     print '-- Mask file defaults --'
     print ReductionSingleton().to_wavlen
-    print '    Q range: ', Q_REBIN
-    print '    QXY range: ', QXY2, DQXY
+    print ReductionSingleton().to_Q
     print '    direct beam file rear:', DIRECT_BEAM_FILE_R
     print '    direct beam file front:', DIRECT_BEAM_FILE_F
     print ReductionSingleton().mask
@@ -361,11 +358,11 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         else:
             script += '[COLETTE]  STEP/Q/LINEAR ' + str(dq) + '\n'
     else:
-        script += '[COLETTE]  LIMIT/QXY ' + str(0.0) + ' ' + str(QXY2) + '\n'
-        if DQXY <  0:
-            script += '[COLETTE]  STEP/QXY/LOGARITHMIC ' + str(DQXY)[1:] + '\n'
+        script += '[COLETTE]  LIMIT/QXY ' + str(0.0) + ' ' + str(ReductionSingleton().QXY2) + '\n'
+        if ReductionSingleton().DQXY <  0:
+            script += '[COLETTE]  STEP/QXY/LOGARITHMIC ' + str(ReductionSingleton().DQXY)[1:] + '\n'
         else:
-            script += '[COLETTE]  STEP/QXY/LINEAR ' + str(DQXY) + '\n'
+            script += '[COLETTE]  STEP/QXY/LINEAR ' + str(ReductionSingleton().DQXY) + '\n'
     
     # Correct
     script += '[COLETTE] CORRECT\n'

@@ -552,13 +552,13 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.mask_table->removeRow(i);
   }
 
+  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
+
   // Use python function to read the file and then extract the fields
   if ( runReduceScriptFunction("print MaskFile(r'"+filetext+"')") != "True\n" )
   {
     return false;
   }
-
-  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
 
   double unit_conv(1000.);
   // Radius
@@ -633,7 +633,7 @@ bool SANSRunWindow::loadUserFile()
 
   //Gravity switch
   QString param = runReduceScriptFunction("printParameter('GRAVITY')");
-  if( param == "True" )
+  if( param.trimmed() == "True" )
   {
     m_uiForm.gravity_check->setChecked(true);
   }
@@ -643,9 +643,10 @@ bool SANSRunWindow::loadUserFile()
   }
   
   ////Detector bank
-  param = runReduceScriptFunction(
+  QString detName = runReduceScriptFunction(
     "printParameter('INSTRUMENT.cur_detector().name()')");
-  index = m_uiForm.detbank_sel->findText(param);  
+  detName = detName.trimmed();
+  index = m_uiForm.detbank_sel->findText(detName);  
   if( index >= 0 && index < 2 )
   {
     m_uiForm.detbank_sel->setCurrentIndex(index);
@@ -1450,10 +1451,6 @@ bool SANSRunWindow::handleLoadButtonClick()
     showInformationBox("Please load the relevant user file.");
     return false;
   }
-  //ensure the Python objects are up to date with our instrument selection
-  QString pythonSetInst =
-    m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString();
-  runReduceScriptFunction(pythonSetInst);
 
   setProcessingState(true, -1);
   m_uiForm.load_dataBtn->setText("Loading ...");
@@ -1637,8 +1634,7 @@ bool SANSRunWindow::handleLoadButtonClick()
 QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
 {
   //Construct a run script based upon the current values within the various widgets
-  QString exec_reduce = m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString() + 
-      "\nDetector('" + m_uiForm.detbank_sel->currentText() + "')\n";
+  QString exec_reduce = "Detector('" + m_uiForm.detbank_sel->currentText() + "')\n";
 
   //Add the path in the single mode data box if it is not empty
   QString data_path = m_uiForm.datadir_edit->text();

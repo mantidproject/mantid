@@ -61,7 +61,7 @@ class Instrument(object):
         self._incid_monitor = int(spectrum_number)
         self._incid_monitor_lckd = True
         
-    def set_component_positions(self, ws, xbeam, ybeam): raise NotImplemented
+    def set_component_positions(self, ws, xbeam, ybeam): raise NotImplementedError
         
     def set_sample_offset(self, value):
         """
@@ -203,7 +203,7 @@ class DetectorBank:
         if not self._y_corr is None:
             return self._y_corr
         else:
-            raise NotImplemented('y correction isn''t used for this detector')
+            raise NotImplementedError('y correction is not used for this detector')
 
     def set_y_corr(self, value):
         """
@@ -217,7 +217,7 @@ class DetectorBank:
         if not self._rot_corr is None:
             return self._rot_corr
         else:
-            raise NotImplemented('rot correction isn''t used for this detector')
+            raise NotImplementedError('rot correction is not used for this detector')
 
     def set_rot_corr(self, value):
         """
@@ -282,7 +282,7 @@ class DetectorBank:
             for x in range(det_dimension - 1, det_dimension - xdim-1,-1):
                 for y in range(0, ydim):
                     std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
-            output += str(std_i ) + ','
+                    output += str(std_i ) + ','
         elif self._orientation == 'Rotated':
             # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
             start_spec = base + ylow*det_dimension + xlow
@@ -293,13 +293,13 @@ class DetectorBank:
                     output += str(max_spec - (std_i - base)) + ','
         elif self._orientation == 'HorizontalFlipped':
             start_spec = base + ylow*det_dimension + xlow
-        for y in range(0,ydim):
-            max_row = base + (y+1)*det_dimension - 1
-            min_row = base + (y)*det_dimension
-            for x in range(0,xdim):
-                std_i = start_spec + x + (y*det_dimension)
-            diff_s = std_i - min_row
-            output += str(max_row - diff_s) + ','
+            for y in range(0,ydim):
+                max_row = base + (y+1)*det_dimension - 1
+                min_row = base + (y)*det_dimension
+                for x in range(0,xdim):
+                    std_i = start_spec + x + (y*det_dimension)
+                    diff_s = std_i - min_row
+                    output += str(max_row - diff_s) + ','
 
         return output.rstrip(",")
     
@@ -312,21 +312,17 @@ class DetectorBank:
     
     def set_orien(self, orien):
         #throw if it's not in the list of allowed
-        dummy = _ORIENTED[orien]
+        dummy = self._ORIENTED[orien]
         self._orientation = orien
-        
-    #write only property, client code probably shouldn't depend on detector orientation
-    orientation = property(None, set_orien, None, None)
-
 
 class ISISInstrument(Instrument):
     def __init__(self,) :
         Instrument.__init__(self)
     
         firstDetect = DetectorBank(self.definition, 'low-angle')
+        firstDetect.disable_y_and_rot_corrs()
         secondDetect = DetectorBank(self.definition, 'high-angle')
         secondDetect.place_after(firstDetect)
-        secondDetect.disable_y_and_rot_corrs()
         self.DETECTORS = {'low-angle' : firstDetect}
         self.DETECTORS['high-angle'] = secondDetect
 
@@ -458,8 +454,8 @@ class LOQ(ISISInstrument):
         """
             Needs to run whenever a sample is loaded
         """
-        low = self.DETECTORS['low-angle'].orientation = 'Horizontal'
-        high = self.DETECTORS['high-angle'].orientation = 'Horizontal'
+        self.DETECTORS['low-angle'].set_orien('Horizontal')
+        self.DETECTORS['high-angle'].set_orien('Horizontal')
 
 class SANS2D(ISISInstrument): 
 
@@ -481,18 +477,18 @@ class SANS2D(ISISInstrument):
         high = self.DETECTORS['high-angle']
         if base_runno < 568:
             self.set_incident_mon(73730)
-            low.orientation = 'Vertical'
+            low.set_orien('Vertical')
             low.first_spec_num = 1
             low.last_spec_num = self._num_pixels*self._num_pixels
-            high.orientation = 'Vertical'
+            high.set_orien('Vertical')
             high.first_spec_num = (self._num_pixels*self._num_pixels) + 1 
             high.last_spec_num = self._num_pixels*self._num_pixels*2
         elif (base_runno >= 568 and base_runno < 684):
-            low.orientation = 'Rotated'
-            high.orientation = 'Rotated'
+            low.set_orien('Rotated')
+            high.set_orien('Rotated')
         else:
-            low.orientation = 'Horizontal'
-            high.orientation = 'Horizontal'
+            low.set_orien('Horizontal')
+            high.set_orien('Horizontal')
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
