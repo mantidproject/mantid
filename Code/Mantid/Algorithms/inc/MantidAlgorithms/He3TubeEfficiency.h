@@ -98,6 +98,8 @@ private:
   Geometry::V3D samplePos;
   /// The spectra numbers that were skipped
   std::vector<int> spectraSkipped;
+  /// Algorithm progress keeper
+  API::Progress *progress;
 };
 
 } // namespace Algorithms

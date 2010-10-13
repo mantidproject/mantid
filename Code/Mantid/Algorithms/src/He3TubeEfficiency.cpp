@@ -22,7 +22,8 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency() : Algorithm(), inputWS(),
-outputWS(), paraMap(NULL), shapeCache(), samplePos(), spectraSkipped()
+outputWS(), paraMap(NULL), shapeCache(), samplePos(), spectraSkipped(),
+progress(NULL)
 {
   this->shapeCache.clear();
 }
@@ -30,6 +31,10 @@ outputWS(), paraMap(NULL), shapeCache(), samplePos(), spectraSkipped()
 /// Destructor
 He3TubeEfficiency::~He3TubeEfficiency()
 {
+  if (this->progress)
+  {
+    delete this->progress;
+  }
 }
 
 /**
@@ -94,7 +99,7 @@ void He3TubeEfficiency::exec()
   this->samplePos = this->inputWS->getInstrument()->getSample()->getPos();
 
   int numHists = this->inputWS->getNumberHistograms();
-  const int progStep = static_cast<int>(ceil(numHists/100.0));
+  this->progress = new API::Progress(this, 0.0, 1.0, numHists);
 
   PARALLEL_FOR2(inputWS, outputWS)
   for (int i = 0; i < numHists; ++i )
@@ -119,10 +124,11 @@ void He3TubeEfficiency::exec()
       }
     }
 
-    // make regular progress reports and check for canceling the algorithm
-    if ( i % progStep == 0 )
+    // make regular progress reports
+    this->progress->report();
+    // check for canceling the algorithm
+    if ( i % 1000 == 0 )
     {
-      progress(static_cast<double>(i)/numHists);
       interruption_point();
     }
 
