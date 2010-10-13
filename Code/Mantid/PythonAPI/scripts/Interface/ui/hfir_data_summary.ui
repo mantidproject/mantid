@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>813</width>
+    <width>822</width>
     <height>799</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
     <rect>
      <x>30</x>
      <y>100</y>
-     <width>731</width>
+     <width>741</width>
      <height>226</height>
     </rect>
    </property>
@@ -425,7 +425,7 @@ in each direction and will create 9 sub-pixels.</string>
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>331</width>
+      <width>341</width>
       <height>138</height>
      </rect>
     </property>
@@ -657,8 +657,8 @@ in each direction and will create 9 sub-pixels.</string>
     <rect>
      <x>410</x>
      <y>330</y>
-     <width>671</width>
-     <height>308</height>
+     <width>361</width>
+     <height>297</height>
     </rect>
    </property>
    <property name="title">
