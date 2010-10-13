@@ -92,7 +92,7 @@ void SumSpectra::exec()
     newSpectrumNo = spectraAxis->spectraNo(m_MinSpec);
     outputWorkspace->getAxis(1)->spectraNo(0) = newSpectrumNo;
   }
-  g_log.information() << "Spectra ramapping gives single spectra with spectra number: " << newSpectrumNo << "\n";
+  g_log.information() << "Spectra remapping gives single spectra with spectra number: " << newSpectrumNo << "\n";
 
   // Loop over spectra
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
