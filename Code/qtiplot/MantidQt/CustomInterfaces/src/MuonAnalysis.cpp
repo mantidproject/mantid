@@ -93,7 +93,7 @@ void MuonAnalysis::initLayout()
 
 
   // connect exit button
-  connect(m_uiForm.runButton, SIGNAL(clicked()), this, SLOT(runClicked())); 
+  connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(close())); 
 
 	// signal/slot connections to respond to changes in instrument selection combo boxes
 	connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
@@ -206,7 +206,8 @@ void MuonAnalysis::runFrontPlotButton()
 
 
 /**
-* If the instrument selection has changed, calls instrumentSelectChanged
+* If the instrument selection has changed, calls instrumentSelectChanged (slot)
+*
 * @param prefix instrument name from QComboBox object
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix) 
@@ -228,89 +229,7 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
 
 
 /**
- * Return number of groups
- */
-int MuonAnalysis::numGroups()
-{
-  int numRows = m_uiForm.groupTable->rowCount();
-  int retVal = 0;
-  for (int i = 0; i < numRows; i++)
-  {
-    QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
-
-    retVal++;
-  }
-  return retVal;
-}
-
-/**
- * Return number of pair
- */
-int MuonAnalysis::numPairs()
-{
-  int numRows = m_uiForm.pairTable->rowCount();
-  int retVal = 0;
-  for (int i = 0; i < numRows; i++)
-  {
-    QTableWidgetItem *item = m_uiForm.pairTable->item(i,0);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
-    item = m_uiForm.pairTable->item(i,3);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
-
-    retVal++;
-  }
-  return retVal;
-}
-
-
-/**
- * Update front "group / group-pair" combo-box based on what the currentIndex now is
- */
-void MuonAnalysis::updateFront()
-{
-  // get current index
-  int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
-
-  m_uiForm.frontPlotFuncs->clear();
-  int numG = numGroups();
-  if (numG)
-  {
-    if (index >= numG && numG >= 2)
-    {
-      // i.e. index points to a pair
-      m_uiForm.frontPlotFuncs->addItems(m_pairPlotFunc);
-
-      m_uiForm.frontAlphaLabel->setVisible(true);
-      m_uiForm.frontAlphaNumber->setVisible(true);
-
-      m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(index-numG,3)->text());
-      m_pairTableRowInFocus = index-numG;
-    }
-    else
-    {
-      // i.e. index points to a group
-      m_uiForm.frontPlotFuncs->addItems(m_groupPlotFunc);
-
-      m_uiForm.frontAlphaLabel->setVisible(false);
-      m_uiForm.frontAlphaNumber->setVisible(false);
-      m_groupTableRowInFocus = index;
-    }
-  }
-}
-
-
-/**
- * Save grouping button
+ * Save grouping button (slot)
  */
 void MuonAnalysis::runSaveGroupButton()
 {
@@ -338,7 +257,7 @@ void MuonAnalysis::runSaveGroupButton()
 
 
 /**
- * Load grouping button
+ * Load grouping button (slot)
  */
 void MuonAnalysis::runLoadGroupButton()
 {
@@ -405,7 +324,7 @@ void MuonAnalysis::runLoadGroupButton()
 }
 
 /**
- * Clear grouping button  (slot)
+ * Clear grouping button (slot)
  */
 void MuonAnalysis::runClearGroupingButton()
 {
@@ -413,35 +332,7 @@ void MuonAnalysis::runClearGroupingButton()
 }
 
 /**
- * Clear tables and front combo box
- */
-void MuonAnalysis::clearTablesAndCombo()
-{
-  m_uiForm.groupTable->clearContents();
-  m_uiForm.pairTable->clearContents();
-  m_uiForm.frontGroupGroupPairComboBox->clear();
-  m_uiForm.frontPlotFuncs->clear();
-
-  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-  {
-    m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
-    m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
-  }
-}
-
-
-/**
- * convert int to string
- */
-std::string MuonAnalysis::iToString(int i)
-{
-  std::stringstream str;
-  str << i;
-  return str.str();
-}
-
-/**
- * change group table plotting choice
+ * change group table plotting choice (slot)
  */
 void MuonAnalysis::runGroupTablePlotChoice(const QString str)
 {
@@ -449,85 +340,15 @@ void MuonAnalysis::runGroupTablePlotChoice(const QString str)
 }
 
 /**
- * change pair table plotting choice
+ * change pair table plotting choice (slot)
  */
 void MuonAnalysis::runPairTablePlotChoice(const QString str)
 {
   m_pairTablePlotChoice = str.toStdString();
 }
 
-
 /**
- * Plot group
- */
-void MuonAnalysis::plotGroup(std::string& plotType)
-{
-  if ( m_groupTableRowInFocus >= 0 )
-  {
-    // only plot if group name available
-    QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
-    QString groupName;
-    if (!itemName)
-      return;
-    else
-      groupName = itemName->text();
-
-    // create cropped workspace of relevant workspace
-
-    QString periodStr = "";
-    if (m_period > 0)
-    {    
-      periodStr += QString("_") + iToString(m_period).c_str();
-    }
-    QString cropWS = m_workspace_name.c_str() + QString("_") + groupName + periodStr;
-    QString cropStr = "CropWorkspace(\"";
-    cropStr += m_workspace_name.c_str() + periodStr;
-    cropStr += "\",\"";
-    cropStr += cropWS;
-    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
-    runPythonCode( cropStr ).trimmed();
-
-
-    // create plotting Python string 
-
-    QString rowNum = QString(iToString(m_groupTableRowInFocus).c_str());
-    QString pyString;
-    if (plotType.compare("Counts") == 0)
-    {
-      pyString += "plotSpectrum(\"" + cropWS + "\"," 
-        + rowNum + ");";
-    }
-    else if (plotType.compare("Asymmetry") == 0)
-    {
-      QString outputName = cropWS + "_asym";
-      pyString += "RemoveExpDecay(\"" + cropWS + "\",\"" 
-        + outputName + "\","
-        + rowNum + "); plotSpectrum(\"" + outputName
-        + "\"," + rowNum + ");";
-    }
-    else if (plotType.compare("Logorithm") == 0)
-    {
-      QString outputName = cropWS + "_log";
-      pyString += "Logarithm(\"" + cropWS + "\",\"" 
-        + outputName + "\","
-        + rowNum + "); plotSpectrum(\"" + outputName
-        + "\"," + rowNum + ");";
-    }
-    else
-    {
-      g_log.error("Unknown group table plot function");
-      return;
-    }
-
-    // run python script
-    QString pyOutput = runPythonCode( pyString ).trimmed();
-  }  
-
-}
-
-
-/**
- * Group table plot button
+ * Group table plot button (slot)
  */
 void MuonAnalysis::runGroupTablePlotButton()
 {
@@ -535,76 +356,15 @@ void MuonAnalysis::runGroupTablePlotButton()
 }
 
 /**
- * Plot pair
- */
-void MuonAnalysis::plotPair(std::string& plotType)
-{
-  if ( m_pairTableRowInFocus >= 0 )
-  {
-    // only plot if alpha defined in table
-    QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
-    if (!item)
-      return;
-
-    // create cropped workspace of relevant workspace
-
-    QString periodStr = "";
-    if (m_period > 0)
-    {    
-      periodStr += QString("_") + iToString(m_period).c_str();
-    }
-    QString cropWS = m_workspace_name.c_str() + QString("_crop");
-    QString cropStr = "CropWorkspace(\"";
-    cropStr += m_workspace_name.c_str() + periodStr;
-    cropStr += "\",\"";
-    cropStr += cropWS;
-    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
-    runPythonCode( cropStr ).trimmed();
-
-
-    // create plotting Python string 
-
-    QString pyString;
-    if (plotType.compare("Asymmetry") == 0)
-    {
-      QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
-      QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
-
-      QString pairName;
-      QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
-      if (itemName)
-        pairName = itemName->text();
-
-      QString outputWS_Name = m_workspace_name.c_str() + QString("_") + pairName + periodStr;
-
-      pyString += "AsymmetryCalc(\"" + cropWS + "\",\"" 
-        + outputWS_Name + "\","
-        + iToString(qw1->currentIndex()).c_str() + "," + iToString(qw2->currentIndex()).c_str()
-        + "," + item->text() + "); plotSpectrum(\"" + outputWS_Name
-        + "\",0);";
-    }
-    else
-    {
-      g_log.error("Unknown pair table plot function");
-      return;
-    }
-
-    // run python script
-    QString pyOutput = runPythonCode( pyString ).trimmed();
-  }
-}
-
-/**
- * Pair table plot button
+ * Pair table plot button (slot)
  */
 void MuonAnalysis::runPairTablePlotButton()
 {
   plotPair(m_pairTablePlotChoice);
 }
 
-
 /**
- * Group table clicked
+ * Group table clicked (slot)
  */
 void MuonAnalysis::groupTableClicked(int row, int column)
 {
@@ -620,7 +380,7 @@ void MuonAnalysis::groupTableClicked(int row, int column)
 }
 
 /**
- * Group table clicked
+ * Group table clicked (slot)
  */
 void MuonAnalysis::pairTableClicked(int row, int column)
 {
@@ -636,7 +396,7 @@ void MuonAnalysis::pairTableClicked(int row, int column)
 }
 
 /**
- * Group table changed
+ * Group table changed (slot)
  */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
@@ -678,70 +438,6 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     }  
   }   
 }
-
-
-/**
- * Is Grouping set.
- * @return true if set
- */
-bool MuonAnalysis::isGroupingSet()
-{
-  QTableWidgetItem *item = m_uiForm.groupTable->item(0,1);
-  if (item)
-    if ( !item->text().isEmpty() )
-      return true;
-  
-  return false;
-}
-
-/**
- * Apply grouping to workspace. 
- */
-void MuonAnalysis::applyGroupingToWS( const std::string& wsName, std::string filename)
-{
-  QString pyString = "GroupDetectors('";
-  pyString.append(wsName.c_str());
-  pyString.append("','");
-  pyString.append(wsName.c_str());
-  pyString.append("','");
-  pyString.append(filename.c_str());
-  pyString.append("');");
-  
-  // run python script
-  QString pyOutput = runPythonCode( pyString ).trimmed();
-}
-
-/**
- * Apply whatever grouping is specified in GUI tables to workspace. 
- */
-void MuonAnalysis::applyGroupingToWS( const std::string& wsName)
-{
-  if ( isGroupingSet() )
-  {
-    saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-    applyGroupingToWS(wsName, m_groupingTempFilename);
-  }
-}
-
-/**
- * Save grouping to file. If filename is empty string save
- * to temporary grouping file
- *
- * @param filename Filename to save grouping to
- */
-/*void MuonAnalysis::saveGrouping( std::string filename )
-{
-  if ( isGroupingSet() ) 
-  {
-    if ( filename.compare("") == 0 )
-    {
-      filename = m_groupingTempFilename;
-    }
-  }
-
-  // save grouping to xml grouping file
-
-}*/
 
 /**
  * Input file changed. Update information accordingly
@@ -989,10 +685,293 @@ int MuonAnalysis::numOfDetectors(std::string str)
 
 
 /**
- * Test
+ * Exit the interface (slot)
  */
-void MuonAnalysis::runClicked()
+void MuonAnalysis::exitClicked()
 {
-
   QMessageBox::information(this, "MantidPlot", "Run clicked!!!!!");
+}
+
+/**
+ * Return number of groups defined (not including pairs)
+ *
+ * @return number of groups
+ */
+int MuonAnalysis::numGroups()
+{
+  int numRows = m_uiForm.groupTable->rowCount();
+  int retVal = 0;
+  for (int i = 0; i < numRows; i++)
+  {
+    QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
+    if (!item)
+      break;
+    if ( item->text().isEmpty() )
+      break;
+
+    retVal++;
+  }
+  return retVal;
+}
+
+/**
+ * Return number of pairs
+ *
+ * @return number of pairs
+ */
+int MuonAnalysis::numPairs()
+{
+  int numRows = m_uiForm.pairTable->rowCount();
+  int retVal = 0;
+  for (int i = 0; i < numRows; i++)
+  {
+    QTableWidgetItem *item = m_uiForm.pairTable->item(i,0);
+    if (!item)
+      break;
+    if ( item->text().isEmpty() )
+      break;
+    item = m_uiForm.pairTable->item(i,3);
+    if (!item)
+      break;
+    if ( item->text().isEmpty() )
+      break;
+
+    retVal++;
+  }
+  return retVal;
+}
+
+/**
+ * Update front "group / group-pair" combo-box based on what the currentIndex now is
+ */
+void MuonAnalysis::updateFront()
+{
+  // get current index
+  int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+
+  m_uiForm.frontPlotFuncs->clear();
+  int numG = numGroups();
+  if (numG)
+  {
+    if (index >= numG && numG >= 2)
+    {
+      // i.e. index points to a pair
+      m_uiForm.frontPlotFuncs->addItems(m_pairPlotFunc);
+
+      m_uiForm.frontAlphaLabel->setVisible(true);
+      m_uiForm.frontAlphaNumber->setVisible(true);
+
+      m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(index-numG,3)->text());
+      m_pairTableRowInFocus = index-numG;
+    }
+    else
+    {
+      // i.e. index points to a group
+      m_uiForm.frontPlotFuncs->addItems(m_groupPlotFunc);
+
+      m_uiForm.frontAlphaLabel->setVisible(false);
+      m_uiForm.frontAlphaNumber->setVisible(false);
+      m_groupTableRowInFocus = index;
+    }
+  }
+}
+
+/**
+ * Clear tables and front combo box
+ */
+void MuonAnalysis::clearTablesAndCombo()
+{
+  m_uiForm.groupTable->clearContents();
+  m_uiForm.pairTable->clearContents();
+  m_uiForm.frontGroupGroupPairComboBox->clear();
+  m_uiForm.frontPlotFuncs->clear();
+
+  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
+  {
+    m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
+    m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
+  }
+}
+
+/**
+ * convert int to string
+ *
+ * return string representation of integer
+ */
+std::string MuonAnalysis::iToString(int i)
+{
+  std::stringstream str;
+  str << i;
+  return str.str();
+}
+
+/**
+ * Plot group
+ */
+void MuonAnalysis::plotGroup(std::string& plotType)
+{
+  if ( m_groupTableRowInFocus >= 0 )
+  {
+    // only plot if group name available
+    QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
+    QString groupName;
+    if (!itemName)
+      return;
+    else
+      groupName = itemName->text();
+
+    // create cropped workspace of relevant workspace
+
+    QString periodStr = "";
+    if (m_period > 0)
+    {    
+      periodStr += QString("_") + iToString(m_period).c_str();
+    }
+    QString cropWS = m_workspace_name.c_str() + QString("_") + groupName + periodStr;
+    QString cropStr = "CropWorkspace(\"";
+    cropStr += m_workspace_name.c_str() + periodStr;
+    cropStr += "\",\"";
+    cropStr += cropWS;
+    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
+    runPythonCode( cropStr ).trimmed();
+
+
+    // create plotting Python string 
+
+    QString rowNum = QString(iToString(m_groupTableRowInFocus).c_str());
+    QString pyString;
+    if (plotType.compare("Counts") == 0)
+    {
+      pyString += "plotSpectrum(\"" + cropWS + "\"," 
+        + rowNum + ");";
+    }
+    else if (plotType.compare("Asymmetry") == 0)
+    {
+      QString outputName = cropWS + "_asym";
+      pyString += "RemoveExpDecay(\"" + cropWS + "\",\"" 
+        + outputName + "\","
+        + rowNum + "); plotSpectrum(\"" + outputName
+        + "\"," + rowNum + ");";
+    }
+    else if (plotType.compare("Logorithm") == 0)
+    {
+      QString outputName = cropWS + "_log";
+      pyString += "Logarithm(\"" + cropWS + "\",\"" 
+        + outputName + "\","
+        + rowNum + "); plotSpectrum(\"" + outputName
+        + "\"," + rowNum + ");";
+    }
+    else
+    {
+      g_log.error("Unknown group table plot function");
+      return;
+    }
+
+    // run python script
+    QString pyOutput = runPythonCode( pyString ).trimmed();
+  }  
+}
+
+/**
+ * Plot pair
+ */
+void MuonAnalysis::plotPair(std::string& plotType)
+{
+  if ( m_pairTableRowInFocus >= 0 )
+  {
+    // only plot if alpha defined in table
+    QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
+    if (!item)
+      return;
+
+    // create cropped workspace of relevant workspace
+
+    QString periodStr = "";
+    if (m_period > 0)
+    {    
+      periodStr += QString("_") + iToString(m_period).c_str();
+    }
+    QString cropWS = m_workspace_name.c_str() + QString("_crop");
+    QString cropStr = "CropWorkspace(\"";
+    cropStr += m_workspace_name.c_str() + periodStr;
+    cropStr += "\",\"";
+    cropStr += cropWS;
+    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
+    runPythonCode( cropStr ).trimmed();
+
+
+    // create plotting Python string 
+
+    QString pyString;
+    if (plotType.compare("Asymmetry") == 0)
+    {
+      QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
+      QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
+
+      QString pairName;
+      QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
+      if (itemName)
+        pairName = itemName->text();
+
+      QString outputWS_Name = m_workspace_name.c_str() + QString("_") + pairName + periodStr;
+
+      pyString += "AsymmetryCalc(\"" + cropWS + "\",\"" 
+        + outputWS_Name + "\","
+        + iToString(qw1->currentIndex()).c_str() + "," + iToString(qw2->currentIndex()).c_str()
+        + "," + item->text() + "); plotSpectrum(\"" + outputWS_Name
+        + "\",0);";
+    }
+    else
+    {
+      g_log.error("Unknown pair table plot function");
+      return;
+    }
+
+    // run python script
+    QString pyOutput = runPythonCode( pyString ).trimmed();
+  }
+}
+
+/**
+ * Is Grouping set.
+ *
+ * @return true if set
+ */
+bool MuonAnalysis::isGroupingSet()
+{
+  QTableWidgetItem *item = m_uiForm.groupTable->item(0,1);
+  if (item)
+    if ( !item->text().isEmpty() )
+      return true;
+  
+  return false;
+}
+
+/**
+ * Apply grouping to workspace. 
+ */
+void MuonAnalysis::applyGroupingToWS( const std::string& wsName, std::string filename)
+{
+  QString pyString = "GroupDetectors('";
+  pyString.append(wsName.c_str());
+  pyString.append("','");
+  pyString.append(wsName.c_str());
+  pyString.append("','");
+  pyString.append(filename.c_str());
+  pyString.append("');");
+  
+  // run python script
+  QString pyOutput = runPythonCode( pyString ).trimmed();
+}
+
+/**
+ * Apply whatever grouping is specified in GUI tables to workspace. 
+ */
+void MuonAnalysis::applyGroupingToWS( const std::string& wsName)
+{
+  if ( isGroupingSet() )
+  {
+    saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
+    applyGroupingToWS(wsName, m_groupingTempFilename);
+  }
 }

@@ -49,7 +49,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="runButton" >
+         <widget class="QPushButton" name="exitButton" >
           <property name="text" >
            <string>Exit</string>
           </property>
@@ -149,7 +149,7 @@
           <height>20</height>
          </rect>
         </property>
-        <property name="techniques" >
+        <property name="techniques" stdset="0" >
          <stringlist>
           <string>Muon spectroscopy</string>
          </stringlist>
@@ -195,7 +195,7 @@
         </property>
         <layout class="QHBoxLayout" name="fileInputLayout" >
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="mwRunFiles" >
            <property name="findRunFiles" stdset="0" >
             <bool>true</bool>
            </property>
