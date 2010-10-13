@@ -318,7 +318,7 @@ public:
       TS_ASSERT_EQUALS((*m)[i], i+100);
     delete m;
 
-    m = wsm->getDetectorIDToWorkspaceIndexMap();
+    m = wsm->getDetectorIDToWorkspaceIndexMap(true);
     for (int i=0; i < 10; i++)
       TS_ASSERT_EQUALS((*m)[i+100], i);
     delete m;

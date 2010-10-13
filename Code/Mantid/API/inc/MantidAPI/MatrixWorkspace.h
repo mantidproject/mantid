@@ -90,7 +90,7 @@ public:
   IndexToIndexMap * getWorkspaceIndexToSpectrumMap() const;
   IndexToIndexMap * getSpectrumToWorkspaceIndexMap() const;
   IndexToIndexMap * getWorkspaceIndexToDetectorIDMap() const;
-  IndexToIndexMap * getDetectorIDToWorkspaceIndexMap() const;
+  IndexToIndexMap * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
   void getIndicesFromSpectra(const std::vector<int>& spectraList, std::vector<int>& indexList) const;
 
 

@@ -160,7 +160,7 @@ public:
       int numevents = 0;
 
       //This is to find the workspace index for a given original spectrum #
-      Mantid::API::IndexToIndexMap * mymap = inputW->getDetectorIDToWorkspaceIndexMap();
+      Mantid::API::IndexToIndexMap * mymap = inputW->getDetectorIDToWorkspaceIndexMap(true);
 
       for (int i=0; i<mylist.size(); i++)
       {

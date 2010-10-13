@@ -166,13 +166,15 @@ IndexToIndexMap * MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
 /** Return a map where:
  *    KEY is the DetectorID (pixel ID)
  *    VALUE is the Workspace Index
- *  @throws runtime_error if there is more than one detector per spectrum, or other incompatibilities.
+ *  @param throwIfMultipleDets set to true to make the algorithm throw an error
+ *         if there is more than one detector for a specific workspace index.
+ *  @throws runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
  */
-IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap() const
+IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
 {
   SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
   if (!ax)
-    throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+    throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): axis[1] is not a SpectraAxis, so I cannot generate a map.");
 
   IndexToIndexMap * map = new IndexToIndexMap();
   //Loop through the workspace index
@@ -183,15 +185,24 @@ IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap() const
 
     //Now the list of detectors
     std::vector<int> detList = this->m_spectramap->getDetectors(specNo);
-    if (detList.size() > 1)
+    if (throwIfMultipleDets)
     {
-      delete map;
-      throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
-    }
+      if (detList.size() > 1)
+      {
+        delete map;
+        throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
+      }
 
-    //Set the KEY to the detector ID and the VALUE to the workspace index.
-    if (detList.size() == 1)
-      (*map)[ detList[0] ] = ws;
+      //Set the KEY to the detector ID and the VALUE to the workspace index.
+      if (detList.size() == 1)
+        (*map)[ detList[0] ] = ws;
+    }
+    else
+    {
+      //Allow multiple detectors per workspace index
+      for (std::vector<int>::iterator it = detList.begin(); it != detList.end(); it++)
+        (*map)[ *it ] = ws;
+    }
 
     //Ignore if the detector list is empty.
   }

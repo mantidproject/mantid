@@ -8,11 +8,11 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 
-
 namespace Mantid
 {
 namespace Geometry
 {
+
 
   BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
   : GeometryHandler(dynamic_cast<IObjComponent*>(comp))
@@ -83,6 +83,8 @@ namespace Geometry
     glTexCoord2f (0.0, 1.0);
     pos = mRectDet->getRelativePosAtXY(0, mRectDet->ypixels()-1);
     glVertex3f( pos.X(), pos.Y(), pos.Z());
+
+
     glEnd ();
 
   }

@@ -119,7 +119,7 @@ void MergeRuns::buildAdditionTables()
   IndexToIndexMap * lhs_det_to_wi = NULL;
   try
   {
-    lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap();
+    lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap(true);
   }
   catch (std::runtime_error err)
   {
@@ -218,6 +218,9 @@ void MergeRuns::buildAdditionTables()
     tables.push_back(table);
 
   } //each of the workspaces being added
+
+  //Free up memory
+  delete lhs_det_to_wi;
 
   if (tables.size() != inEventWS.size()-1)
     throw std::runtime_error("MergeRuns::buildAdditionTables: Mismatch between the number of addition tables and the number of workspaces");
