@@ -7,7 +7,7 @@
 
 using namespace MantidQt::MantidWidgets;
 
-RangeSelector::RangeSelector(QwtPlot* plot) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot)
+RangeSelector::RangeSelector(QwtPlot* plot, Range range) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot), m_range(range)
 {
   m_canvas->installEventFilter(this);
 
@@ -16,22 +16,50 @@ RangeSelector::RangeSelector(QwtPlot* plot) : QwtPlotPicker(plot->canvas()), m_c
   m_mrkMin = new QwtPlotMarker();
   m_mrkMax = new QwtPlotMarker();
 
-  m_mrkMin->setLineStyle(QwtPlotMarker::VLine);
-  m_mrkMin->attach(m_plot);
-  m_mrkMin->setYValue(0.0);
+  QwtPlotMarker::LineStyle lineStyle;
+  
+  switch ( m_range )
+  {
+  case XMINMAX:
+  case XSINGLE:
+    lineStyle = QwtPlotMarker::VLine;
+    m_movCursor = Qt::SizeHorCursor;
+    break;
+  case YMINMAX:
+  case YSINGLE:
+    lineStyle = QwtPlotMarker::HLine;
+    m_movCursor = Qt::SizeVerCursor;
+    break;
+  default:
+    lineStyle = QwtPlotMarker::Cross;
+    break;
+  }
 
-  m_mrkMax->setLineStyle(QwtPlotMarker::VLine);
-  m_mrkMax->attach(m_plot);
-  m_mrkMax->setYValue(1.0);
+  switch ( m_range )
+  {
+  case XMINMAX:
+  case YMINMAX:
+    m_mrkMax->setLineStyle(lineStyle);
+    m_mrkMax->attach(m_plot);
+    m_mrkMax->setYValue(1.0);
+  case XSINGLE:
+  case YSINGLE:
+    m_mrkMin->setLineStyle(lineStyle);
+    m_mrkMin->attach(m_plot);
+    m_mrkMin->setYValue(0.0);
+    break;
+  }
 
-  connect(this, SIGNAL(xMinValueChanged(double)), this, SLOT(xMinChanged(double)));
-  connect(this, SIGNAL(xMaxValueChanged(double)), this, SLOT(xMaxChanged(double)));
 
-  m_xMinChanging = false;
-  m_xMaxChanging = false;
 
-  setXMin(100); // known starting values
-  setXMax(200);
+  connect(this, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+  connect(this, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+
+  m_minChanging = false;
+  m_maxChanging = false;
+
+  setMin(100); // known starting values
+  setMax(200);
 
   /// Setup pen with default values
   /// @todo Add constructor options for pen settings and other functions to change it
@@ -51,23 +79,35 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
   case QEvent::MouseButtonPress: // User has started moving something (perhaps)
     {
     QPoint p = ((QMouseEvent*)evn)->pos();
-    double x = m_plot->invTransform(QwtPlot::xBottom, p.x());
-    double dx = m_plot->invTransform(QwtPlot::xBottom, p.x()+3);
+    double x, dx;
+    switch ( m_range )
+    {
+    case XMINMAX:
+    case XSINGLE:
+      x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+      dx = m_plot->invTransform(QwtPlot::xBottom, p.x()+3);
+      break;
+    case YMINMAX:
+    case YSINGLE:
+      x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+      dx = m_plot->invTransform(QwtPlot::yLeft, p.y()+3);
+      break;
+    }
     if ( inRange(x) )
     {
-      if ( changingXMin(x, dx) )
+      if ( changingMin(x, dx) )
       {
-        m_xMinChanging = true;
-        m_canvas->setCursor(Qt::SizeHorCursor);
-        setXMin(x);
+        m_minChanging = true;
+        m_canvas->setCursor(m_movCursor);
+        setMin(x);
         m_plot->replot();
         return true;
       }
-      else if ( changingXMax(x, dx) )
+      else if ( changingMax(x, dx) )
       {
-        m_xMaxChanging = true;
-        m_canvas->setCursor(Qt::SizeHorCursor);
-        setXMax(x);
+        m_maxChanging = true;
+        m_canvas->setCursor(m_movCursor);
+        setMax(x);
         m_plot->replot();
         return true;
       }
@@ -80,30 +120,41 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     }
   case QEvent::MouseMove: // User is in the process of moving something (perhaps)
     {
-    if ( m_xMinChanging || m_xMaxChanging )
+    if ( m_minChanging || m_maxChanging )
     {
     QPoint p = ((QMouseEvent*)evn)->pos();
-    double x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+    double x;
+    switch ( m_range )
+    {
+    case XMINMAX:
+    case XSINGLE:
+      x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+      break;
+    case YMINMAX:
+    case YSINGLE:
+      x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+      break;
+    }
     if ( inRange(x) )
     {
-      if ( m_xMinChanging )
+      if ( m_minChanging )
       {
-        setXMin(x);
-        if ( x > m_xMax )
-          setXMax(x);
+        setMin(x);
+        if ( x > m_max )
+          setMax(x);
       }
       else
       {
-        setXMax(x);
-        if ( x < m_xMin )
-          setXMin(x);
+        setMax(x);
+        if ( x < m_min )
+          setMin(x);
       }
     }
     else
     {
       m_canvas->setCursor(Qt::PointingHandCursor);
-      m_xMinChanging = false;
-      m_xMaxChanging = false;
+      m_minChanging = false;
+      m_maxChanging = false;
     }
     m_plot->replot();
     return true;
@@ -116,21 +167,32 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     }
   case QEvent::MouseButtonRelease: // User has finished moving something (perhaps)
     {
-    if ( m_xMinChanging || m_xMaxChanging )
+    if ( m_minChanging || m_maxChanging )
     {
     m_canvas->setCursor(Qt::PointingHandCursor);
     QPoint p = ((QMouseEvent*)evn)->pos();
-    double x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+    double x;
+    switch ( m_range )
+    {
+    case XMINMAX:
+    case XSINGLE:
+      x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+      break;
+    case YMINMAX:
+    case YSINGLE:
+      x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+      break;
+    }
     if ( inRange(x) )
     {
-    if ( m_xMinChanging )
-      setXMin(x);
+    if ( m_minChanging )
+      setMin(x);
     else
-      setXMax(x);
+      setMax(x);
     }
     m_plot->replot();
-    m_xMinChanging = false;
-    m_xMaxChanging = false;
+    m_minChanging = false;
+    m_maxChanging = false;
     return true;
     }
     else
@@ -151,25 +213,45 @@ void RangeSelector::setRange(double min, double max)
   verify();
 }
 
-void RangeSelector::xMinChanged(double val)
+void RangeSelector::minChanged(double val)
 {
-  m_mrkMin->setValue(val, 0.0);
+  switch ( m_range )
+  {
+  case XMINMAX:
+  case XSINGLE:
+    m_mrkMin->setValue(val, 1.0);
+    break;
+  case YMINMAX:
+  case YSINGLE:
+    m_mrkMin->setValue(1.0, val);
+    break;
+  }
   m_plot->replot();
 }
 
-void RangeSelector::xMaxChanged(double val)
+void RangeSelector::maxChanged(double val)
 {
-  m_mrkMax->setValue(val, 1.0);
+  switch ( m_range )
+  {
+  case XMINMAX:
+  case XSINGLE:
+    m_mrkMax->setValue(val, 1.0);
+    break;
+  case YMINMAX:
+  case YSINGLE:
+    m_mrkMax->setValue(1.0, val);
+    break;
+  }
   m_plot->replot();
 }
 
 void RangeSelector::setMinimum(double val)
 {
-  setXMin(val);
+  setMin(val);
 }
 void RangeSelector::setMaximum(double val)
 {
-  setXMax(val);
+  setMax(val);
 }
 
 void RangeSelector::reapply()
@@ -178,40 +260,40 @@ void RangeSelector::reapply()
   m_mrkMax->attach(m_plot);
 }
 
-void RangeSelector::setXMin(double val)
+void RangeSelector::setMin(double val)
 {
-  m_xMin = val;
-  emit xMinValueChanged(val);
+  m_min = val;
+  emit minValueChanged(val);
 }
 
-void RangeSelector::setXMax(double val)
+void RangeSelector::setMax(double val)
 {
-  m_xMax = val;
-  emit xMaxValueChanged(val);
+  m_max = val;
+  emit maxValueChanged(val);
 }
 
-bool RangeSelector::changingXMin(double x, double dx)
+bool RangeSelector::changingMin(double x, double dx)
 {
-  return ( fabs(x - m_xMin) <= fabs(dx-x) );
+  return ( fabs(x - m_min) <= fabs(dx-x) );
 }
 
-bool RangeSelector::changingXMax(double x, double dx)
+bool RangeSelector::changingMax(double x, double dx)
 {
-  return ( fabs(x - m_xMax) <= fabs(dx-x) );
+  return ( fabs(x - m_max) <= fabs(dx-x) );
 }
 
 void RangeSelector::verify()
 {
-  if ( m_xMin < m_lower || m_xMin > m_higher )
-    setXMin(m_lower);
-  if ( m_xMax < m_lower || m_xMax > m_higher )
-    setXMax(m_higher);
+  if ( m_min < m_lower || m_min > m_higher )
+    setMin(m_lower);
+  if ( m_max < m_lower || m_max > m_higher )
+    setMax(m_higher);
 
-  if ( m_xMin > m_xMax )
+  if ( m_min > m_max )
   {
-    double tmp = m_xMin;
-    setXMin(m_xMax);
-    setXMax(tmp);
+    double tmp = m_min;
+    setMin(m_max);
+    setMax(tmp);
   }
 }
 

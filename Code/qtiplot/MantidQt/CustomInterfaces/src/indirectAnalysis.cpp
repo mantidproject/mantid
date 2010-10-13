@@ -7,7 +7,6 @@
 
 #include "MantidKernel/ConfigService.h"
 
-
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -15,6 +14,7 @@
 
 #include <QLineEdit>
 #include <QValidator>
+#include <QFileInfo>
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -223,7 +223,7 @@ void indirectAnalysis::setupTreePropertyBrowser()
   m_doubleManager->setRange(bgA1, 0.0, 0.0);
   m_fitProperties["LinearBackground"]->addSubProperty(bgA0);
   m_fitProperties["LinearBackground"]->addSubProperty(bgA1);
-  
+  m_fitProperties["BackgroundA0"] = bgA0;
   m_fitProperties["Lorentzian1"] = createLorentzian();
   m_fitProperties["Lorentzian2"] = createLorentzian();
 
@@ -243,8 +243,13 @@ void indirectAnalysis::setupFFPlotArea()
   m_furyFitPlotWindow->setCanvasBackground(QColor(255,255,255));
   
   m_ffRangeS = new MantidQt::MantidWidgets::RangeSelector(m_furyFitPlotWindow);
-  connect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
-  connect(m_ffRangeS, SIGNAL(xMaxValueChanged(double)), this, SLOT(furyfitXMaxSelected(double)));
+  connect(m_ffRangeS, SIGNAL(minValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
+  connect(m_ffRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(furyfitXMaxSelected(double)));
+
+  m_ffBackRangeS = new MantidQt::MantidWidgets::RangeSelector(m_furyFitPlotWindow,
+    MantidQt::MantidWidgets::RangeSelector::YSINGLE);
+  m_ffBackRangeS->setRange(0.0,1.0);
+  connect(m_ffBackRangeS, SIGNAL(minValueChanged(double)), this, SLOT(furyfitBackgroundSelected(double)));
 
 }
 
@@ -518,6 +523,10 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
   // QString message;
   QList<QtBrowserItem*> items = m_propBrowser->topLevelItems();
 
+  m_furyfitConstraints = "";
+
+  int funcIndex = 0;
+
   for ( int i = 0; i < items.size(); i++ )
   {
     QtProperty* item = items[i]->property(); 
@@ -535,15 +544,21 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
         std::string formula = "Intensity*exp(-Exponent*(x^Beta))";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
+        if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
+        m_furyfitConstraints += "0< f%1.Intensity < 1";
+        m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
       }
       else if ( name == "Exponential" )
       {
-      // create user function
-      func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
-      // set the necessary properties
-      std::string formula = "Intensity*exp(-(x*Exponent))";
-      Mantid::API::IFunction::Attribute att(formula);
-      func->setAttribute("Formula", att);
+        // create user function
+        func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+        // set the necessary properties
+        std::string formula = "Intensity*exp(-(x*Exponent))";
+        Mantid::API::IFunction::Attribute att(formula);
+        func->setAttribute("Formula", att);
+        if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
+        m_furyfitConstraints += "0< f%1.Intensity < 1";
+        m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
       }
       else
       {
@@ -554,6 +569,8 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
         func->setParameter(sub[j]->propertyName().toStdString(), sub[j]->valueText().toDouble());
       }
       result->addFunction(func);
+
+      funcIndex++;
     }
   }
   return result;
@@ -770,7 +787,6 @@ void indirectAnalysis::furyPlotInput()
 
 void indirectAnalysis::runFuryFit()
 {
-
   if ( m_uiForm.furyfit_inputFile->isValid() )
   {
     // First create the function
@@ -781,6 +797,8 @@ void indirectAnalysis::runFuryFit()
       "LoadNexus(r'" + m_uiForm.furyfit_inputFile->getFirstFilename() + "', 'furyfit')\n";
     QString pyOutput = runPythonCode(pyInput);
 
+    /// @todo some check here to make sure the spectra number isn't out of range
+
     // Create the Fit Algorithm
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
@@ -788,6 +806,8 @@ void indirectAnalysis::runFuryFit()
     alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
     alg->setProperty("StartX", m_ffRangeManager->value(m_fitProperties["StartX"]));
     alg->setProperty("EndX", m_ffRangeManager->value(m_fitProperties["EndX"]));
+    alg->setProperty("Ties", "f0.A1=0");
+    alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
     alg->setPropertyValue("Function", *function);
     alg->setPropertyValue("Output","furyfit_output");
     alg->execute();
@@ -847,24 +867,29 @@ void indirectAnalysis::furyfitPlotInput()
       delete m_ffDataCurve;
     }
 
-    std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
+    QFileInfo fi(m_uiForm.furyfit_inputFile->getFirstFilename());
+    std::string wsname = fi.baseName().toStdString();
 
-    // LoadNexus
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
-    alg->initialize();
-    alg->setPropertyValue("Filename", filename);
-    alg->setPropertyValue("OutputWorkspace","furyfit_input");
-    alg->execute();
+    if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
+    {
+      std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
+      // LoadNexus
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
+      alg->initialize();
+      alg->setPropertyValue("Filename", filename);
+      alg->setPropertyValue("OutputWorkspace",wsname);
+      alg->execute();
+      // get the output workspace
+      m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+    }
+    m_ffInputWSName = wsname;
 
-    // Get spectra number
+    /// @todo some check here to make sure the spectra number isn't out of range
     int specNo = m_uiForm.furyfit_leSpecNo->text().toInt();
 
-    // get the output workspace
-    Mantid::API::MatrixWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("furyfit_input"));
-
     // get the data of that spectra number
-    const QVector<double> dataX = QVector<double>::fromStdVector(inputWS->readX(specNo));
-    const QVector<double> dataY = QVector<double>::fromStdVector(inputWS->readY(specNo));
+    const QVector<double> dataX = QVector<double>::fromStdVector(m_ffInputWS->readX(specNo));
+    const QVector<double> dataY = QVector<double>::fromStdVector(m_ffInputWS->readY(specNo));
 
     // get xMin and xMax range
     const double & lower = dataX.first();
@@ -886,15 +911,20 @@ void indirectAnalysis::furyfitPlotInput()
 
 void indirectAnalysis::furyfitXMinSelected(double val)
 {
-  disconnect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
+  disconnect(m_ffRangeS, SIGNAL(minValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
   m_ffRangeManager->setValue(m_fitProperties["StartX"], val);
-  connect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
+  connect(m_ffRangeS, SIGNAL(minValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
 }
 void indirectAnalysis::furyfitXMaxSelected(double val)
 {
-  disconnect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
+  disconnect(m_ffRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(furyfitXMaxSelected(double)));
   m_ffRangeManager->setValue(m_fitProperties["EndX"], val);
-  connect(m_ffRangeS, SIGNAL(xMinValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
+  connect(m_ffRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(furyfitXMaxSelected(double)));
+}
+
+void indirectAnalysis::furyfitBackgroundSelected(double val)
+{
+  m_doubleManager->setValue(m_fitProperties["BackgroundA0"], val);
 }
 
 void indirectAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
@@ -1020,8 +1050,8 @@ void indirectAnalysis::absorptionRun()
     "efixed = " + m_uiForm.set_leEFixed->text() + "\n"
     "file = r'" + m_uiForm.abs_inputFile->getFirstFilename() + "'\n"
     "mode = '" + m_uiForm.abs_cbShape->currentText() + "'\n"
-    "sample = [ %0, %1, %2 ]\n"
-    "can = [ %3, %4, %5, %6 ]\n";
+    "sample = [ %1, %2, %3 ]\n"
+    "can = [ %4, %5, %6, %7 ]\n";
 
   pyInput = pyInput.arg(m_uiForm.abs_leAttenuation->text());
   pyInput = pyInput.arg(m_uiForm.abs_leScatter->text());

@@ -22,49 +22,56 @@ namespace MantidWidgets
   {
     Q_OBJECT
   public:
-    RangeSelector(QwtPlot*);
+    enum Range { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
+
+    RangeSelector(QwtPlot* plot, Range range=XMINMAX);
     ~RangeSelector() {};
 
     bool eventFilter(QObject*, QEvent*);
     
     void setRange(double, double);
-    bool changingXMin(double, double);
-    bool changingXMax(double, double);
+    bool changingMin(double, double);
+    bool changingMax(double, double);
 
   signals:
-    void xMinValueChanged(double);
-    void xMaxValueChanged(double);
+    void minValueChanged(double);
+    void maxValueChanged(double);
 
   public slots:
-    void xMinChanged(double);
-    void xMaxChanged(double);
-    void setMinimum(double);
-    void setMaximum(double);
+    void minChanged(double);
+    void maxChanged(double);
+    void setMinimum(double); ///< outside setting of value
+    void setMaximum(double); ///< outside setting of value
     void reapply(); ///< re-apply the range selector lines
 
   private:
-    void setXMin(double val);
-    void setXMax(double val);
+    void setMin(double val);
+    void setMax(double val);
     void verify();
     bool inRange(double);
 
-    double m_xMin;
-    double m_xMax;
 
+    // MEMBER ATTRIBUTES
+    Range m_range; ///< type of selection widget is for
+
+    double m_min;
+    double m_max;
     double m_lower; ///< lowest allowed value for range
     double m_higher; ///< highest allowed value for range
-
-
+    
     QwtPlotCanvas* m_canvas;
     QwtPlot* m_plot;
 
     QwtPlotMarker* m_mrkMin;
     QwtPlotMarker* m_mrkMax;
 
-    bool m_xMinChanging;
-    bool m_xMaxChanging;
+    bool m_minChanging;
+    bool m_maxChanging;
+
+    /** Strictly UI options and settings below this point **/
 
     QPen* m_pen; ///< pen object used to define line style, colour, etc
+    QCursor m_movCursor; ///< the cursor object to display when an item is being moved
 
   };
 

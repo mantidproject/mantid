@@ -10,6 +10,7 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QIntValidator>
 #include <QDoubleValidator>
@@ -78,6 +79,7 @@ namespace MantidQt
       void furyfitPlotInput();
       void furyfitXMinSelected(double val);
       void furyfitXMaxSelected(double val);
+      void furyfitBackgroundSelected(double val);
       void furyfitRangePropChanged(QtProperty*, double);
 
       void elwinRun();
@@ -104,11 +106,11 @@ namespace MantidQt
       QIntValidator *m_valInt;
       QDoubleValidator *m_valDbl;
 
-      QtTreePropertyBrowser* m_propBrowser;
+      QtTreePropertyBrowser* m_propBrowser; ///< FuryFit Property Browser
 
       QtGroupPropertyManager* m_groupManager;
       QtDoublePropertyManager* m_doubleManager;
-      QtDoublePropertyManager* m_ffRangeManager;
+      QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
 
       bool m_furyResFileType;
       
@@ -117,6 +119,14 @@ namespace MantidQt
       QwtPlot* m_furyFitPlotWindow;
       QwtPlotCurve* m_ffDataCurve;
       MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
+      MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
+      
+      /// keep a pointer to the input workspace once it's loaded so we don't have to
+      Mantid::API::MatrixWorkspace_const_sptr m_ffInputWS; ///< load it again and again etc
+      std::string m_ffInputWSName;
+
+      QString m_furyfitTies;
+      QString m_furyfitConstraints;
 
     };
   }

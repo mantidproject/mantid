@@ -157,6 +157,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_16" >
          <item>
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>41</verstretch>
+            </sizepolicy>
+           </property>
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -393,6 +399,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_18" >
          <item>
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>41</verstretch>
+            </sizepolicy>
+           </property>
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -461,6 +473,19 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8" >
@@ -538,6 +563,12 @@
         <layout class="QGridLayout" name="fury_layoutFiles" >
          <item row="0" column="0" >
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>41</verstretch>
+            </sizepolicy>
+           </property>
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -556,6 +587,12 @@
          </item>
          <item row="2" column="0" >
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>41</verstretch>
+            </sizepolicy>
+           </property>
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -746,6 +783,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_23" >
          <item>
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>41</verstretch>
+            </sizepolicy>
+           </property>
            <property name="findRunFiles" stdset="0" >
             <bool>false</bool>
            </property>
@@ -912,6 +955,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_10" >
        <item>
         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abs_inputFile" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+           <horstretch>0</horstretch>
+           <verstretch>41</verstretch>
+          </sizepolicy>
+         </property>
          <property name="findRunFiles" stdset="0" >
           <bool>false</bool>
          </property>
@@ -1275,6 +1324,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_14" >
        <item>
         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+           <horstretch>0</horstretch>
+           <verstretch>41</verstretch>
+          </sizepolicy>
+         </property>
          <property name="label" stdset="0" >
           <string>Run Number</string>
          </property>
@@ -1282,6 +1337,19 @@
           <bool>true</bool>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_22" >
@@ -1381,7 +1449,6 @@
       <widget class="QPushButton" name="pbManageDirs" >
        <property name="text" >
         <string>Manage
-User
 Directories</string>
        </property>
       </widget>
