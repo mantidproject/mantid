@@ -82,6 +82,9 @@ private:
       const double scale_fac = 1.0) const;
   /// Log any errors with spectra that occurred
   void logErrors() const;
+  /// Retrieve the detector parameters from workspace or detector properties
+  double getParameter(std::string wsPropName, int currentIndex,
+      std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;

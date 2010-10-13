@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/cow_ptr.h"
 #include <algorithm>
 #include <cmath>
@@ -44,6 +45,20 @@ void He3TubeEfficiency::init()
   this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
       "", Kernel::Direction::Output),
       "Name of the output workspace, can be the same as the input" );
+  Kernel::BoundedValidator<double> *mustBePositive = new Kernel::BoundedValidator<double>();
+  mustBePositive->setLower(0.0);
+  this->declareProperty(new Kernel::PropertyWithValue<double>("ScaleFactor",
+      1.0, mustBePositive), "Constant factor with which to scale the calculated"
+      "detector efficiency. Same factor applies to all efficiencies.");
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubePressure"),
+      "Provide overriding the default tube pressure. The pressure must "
+      "be specified in atm.");
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubeThickness"),
+      "Provide overriding the default tube thickness. The thickness must "
+      "be specified in metres.");
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubeTemperature"),
+      "Provide overriding the default tube temperature. The temperature must "
+      "be specified in Kelvin.");
 }
 
 /**
@@ -144,10 +159,14 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
+
   // Get the parameters for the current associated tube
-  double pressure = det->getNumberParameter("tube_pressure").at(0);
-  double tubethickness = det->getNumberParameter("tube_thickness").at(0);
-  double temperature = det->getNumberParameter("tube_temperature").at(0);
+  double pressure = this->getParameter("TubePressure", spectraIndex,
+      "tube_pressure", det);
+  double tubethickness = this->getParameter("TubeThickness", spectraIndex,
+      "tube_thickness", det);
+  double temperature = this->getParameter("TubeTemperature", spectraIndex,
+      "tube_temperature", det);
 
   double detRadius(0.0);
   Geometry::V3D detAxis;
@@ -178,10 +197,12 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   Mantid::MantidVec::iterator youtItr = yout.begin();
   Mantid::MantidVec::iterator eoutItr = eout.begin();
 
+  const double scale = this->getProperty("ScaleFactor");
+
   for( ; youtItr != yout.end(); ++youtItr, ++eoutItr)
   {
     const double wavelength = (*xItr + *(xItr + 1)) / 2.0;
-    const double effcorr = detectorEfficiency(exp_constant * wavelength);
+    const double effcorr = detectorEfficiency(exp_constant * wavelength, scale);
     *youtItr = (*yinItr) * effcorr;
     *eoutItr = (*einItr) * effcorr;
     ++yinItr; ++einItr;
@@ -326,6 +347,38 @@ void He3TubeEfficiency::logErrors() const
     }
     g_log.debug() << std::endl;
   }
+}
+
+/**
+ * Retrieve the detector parameter either from the workspace property or from
+ * the associated detector property.
+ * @param wsPropName the workspace property name for the detector parameter
+ * @param currentIndex the currently requested spectra index
+ * @param detPropName the detector property name for the detector parameter
+ * @param idet the current detector
+ * @return the value of the detector property
+ */
+double He3TubeEfficiency::getParameter(std::string wsPropName, int currentIndex,
+    std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet)
+{
+  std::vector<double> wsProp = this->getProperty(wsPropName);
+
+  if (wsProp.empty())
+  {
+    return idet->getNumberParameter(detPropName).at(0);
+  }
+  else
+  {
+    if (wsProp.size() == 1)
+    {
+      return wsProp.at(0);
+    }
+    else
+    {
+      return wsProp.at(currentIndex);
+    }
+  }
+
 }
 } // namespace Algorithms
 } // namespace Mantid
