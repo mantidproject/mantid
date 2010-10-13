@@ -121,6 +121,20 @@ namespace Kernel
             throw std::runtime_error(message);
         }
     }
+	 template<> DLLExport
+    std::vector<long long> IPropertyManager::getValue<std::vector<long long> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<long long> > *prop = dynamic_cast<PropertyWithValue<std::vector<long long> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            throw std::runtime_error(message);
+        }
+    }
 
     template <> DLLExport
     const char* IPropertyManager::getValue<const char*>(const std::string &name) const
@@ -149,6 +163,7 @@ namespace Kernel
     {
         this->setPropertyValue(name, value);
     }
+	
 
     // Definitions for TypedValue cast operators
     // Have to come after getValue definitions above to keep MSVS2010 happy

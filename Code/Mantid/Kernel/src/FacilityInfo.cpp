@@ -72,6 +72,25 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
     }
 
   }
+   Poco::XML::NodeList* pNL_catalogs = elem->getElementsByTagName("catalog");
+   if(!pNL_catalogs)
+   {
+	   throw std::runtime_error("Facilities.xml file  must have catalog information");
+   }
+  if (pNL_catalogs->length() > 1)
+  {
+    g_log.error("Facility must have only one catalog tag");
+    throw std::runtime_error("Facility must have only one catalog tag");
+  }
+  else if (pNL_catalogs->length() == 1)
+  {
+	  Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
+	  if(!elem->getAttribute("name").empty())
+	  {
+	     m_catalogName= elem->getAttribute("name");
+	  }
+    
+  }
 
   Poco::XML::NodeList* pNL_instrument = elem->getElementsByTagName("instrument");
   unsigned int n = pNL_instrument->length();

@@ -72,6 +72,9 @@ public:
   std::vector<InstrumentInfo> Instruments(const std::string& tech)const;
   /// Returns instruments with given name
   const InstrumentInfo & Instrument(const std::string& iName = "")const;
+
+  ///returns the catalog name
+  const std::string  catalogName()const {return m_catalogName;}
 private:
   ///Default constructor
   FacilityInfo();
@@ -83,6 +86,7 @@ private:
   std::vector<std::string> m_extensions;       ///< file extensions in order of preference
   std::set<std::string> m_archiveSearch;       ///< names of the archive search interface
   std::vector<InstrumentInfo> m_instruments;   ///< list of istruments of thsi facility
+  std::string m_catalogName;
   static Logger& g_log;                        ///< logger
 };
 
