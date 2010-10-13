@@ -287,8 +287,8 @@ class ReductionGUI(QtGui.QMainWindow):
                                                           "Settings files (*.xml)"))
         
         if len(fname)>0:
-            if not fname.endswith('.py'):
-                fname += ".py"
+            if not fname.endswith('.xml'):
+                fname += ".xml"
             self._recent_files.append(fname)
             (folder, file_name) = os.path.split(fname)
             self._last_directory = folder
