@@ -8,7 +8,7 @@ namespace API
 
 /// Constructor
 CatalogFactoryImpl::CatalogFactoryImpl() :
-  DynamicFactory<ICatalog>(), m_createdCatalogs(), m_log(Kernel::Logger::get("CatalogFactory"))
+  Kernel::DynamicFactory<ICatalog>(), m_createdCatalogs(), m_log(Kernel::Logger::get("CatalogFactory"))
 {
 }
 
@@ -34,7 +34,7 @@ boost::shared_ptr<ICatalog> CatalogFactoryImpl::create(const std::string& classN
   else
   {
     // Otherwise create & return a new instance and store the pointer in the internal map for next time
-    return m_createdCatalogs[className] = DynamicFactory<API::ICatalog>::create(className);
+    return m_createdCatalogs[className] = Kernel::DynamicFactory<API::ICatalog>::create(className);
   }
 }
 
