@@ -30,7 +30,7 @@
     <rect>
      <x>30</x>
      <y>100</y>
-     <width>741</width>
+     <width>751</width>
      <height>226</height>
     </rect>
    </property>
@@ -655,9 +655,9 @@ in each direction and will create 9 sub-pixels.</string>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>410</x>
+     <x>400</x>
      <y>330</y>
-     <width>361</width>
+     <width>381</width>
      <height>297</height>
     </rect>
    </property>
