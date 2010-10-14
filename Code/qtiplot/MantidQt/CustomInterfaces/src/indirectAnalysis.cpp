@@ -15,6 +15,8 @@
 #include <QLineEdit>
 #include <QValidator>
 #include <QFileInfo>
+#include <QUrl>
+#include <QDesktopServices>
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -239,6 +241,8 @@ void indirectAnalysis::setupTreePropertyBrowser()
 void indirectAnalysis::setupFFPlotArea()
 {
   m_furyFitPlotWindow = new QwtPlot(this);
+  m_furyFitPlotWindow->setAxisFont(QwtPlot::xBottom, this->font());
+  m_furyFitPlotWindow->setAxisFont(QwtPlot::yLeft, this->font());
   m_uiForm.furyfit_vlPlot->addWidget(m_furyFitPlotWindow);
   m_furyFitPlotWindow->setCanvasBackground(QColor(255,255,255));
   
@@ -525,6 +529,7 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
 
   m_furyfitConstraints = "";
 
+
   int funcIndex = 0;
 
   for ( int i = 0; i < items.size(); i++ )
@@ -545,7 +550,7 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
-        m_furyfitConstraints += "0< f%1.Intensity < 1";
+        m_furyfitConstraints += "0 <= f%1.Intensity <= 1";
         m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
       }
       else if ( name == "Exponential" )
@@ -557,17 +562,17 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
-        m_furyfitConstraints += "0< f%1.Intensity < 1";
+        m_furyfitConstraints += "0 <= f%1.Intensity <= 1";
         m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
       }
       else
       {
         func = Mantid::API::FunctionFactory::Instance().createFunction(name);
-      }
+      } /*
       for ( int j = 0; j < sub.size(); j++ )
       {
         func->setParameter(sub[j]->propertyName().toStdString(), sub[j]->valueText().toDouble());
-      }
+      } */
       result->addFunction(func);
 
       funcIndex++;
@@ -792,6 +797,33 @@ void indirectAnalysis::runFuryFit()
     // First create the function
     Mantid::API::CompositeFunction* function = createFunction();
 
+    // Create the ties to values:
+
+    // Background level
+    m_furyfitTies = "f0.A0 = %1, f0.A1 = 0";
+    m_furyfitTies = m_furyfitTies.arg(m_doubleManager->value(m_fitProperties["BackgroundA0"]));
+
+    // Constrain intensities checkbox
+    if ( m_uiForm.furyfit_ckConstrainIntensities->isChecked() )
+    {
+      switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
+      {
+      case 0: // 1 Exponential
+        m_furyfitTies += ", f1.Intensity = 1-f0.A0";
+        break;
+      case 1: // 2 Exponentials
+        m_furyfitTies += ",f1.Intensity=1-f2.Intensity-f0.A0";
+        break;
+      case 2: // 1 Stretched
+        break;
+      case 3: // 1 Exp + 1 Str
+        m_furyfitTies += ", f1.Intensity = 1-f0.A0";
+        break;
+      default:
+        break;
+      }
+    }
+
     // Now load up the input workspace
     QString pyInput = "from mantidsimple import *\n"
       "LoadNexus(r'" + m_uiForm.furyfit_inputFile->getFirstFilename() + "', 'furyfit')\n";
@@ -806,7 +838,7 @@ void indirectAnalysis::runFuryFit()
     alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
     alg->setProperty("StartX", m_ffRangeManager->value(m_fitProperties["StartX"]));
     alg->setProperty("EndX", m_ffRangeManager->value(m_fitProperties["EndX"]));
-    alg->setProperty("Ties", "f0.A1=0");
+    alg->setProperty("Ties", m_furyfitTies.toStdString());
     alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
     alg->setPropertyValue("Function", *function);
     alg->setPropertyValue("Output","furyfit_output");
@@ -1125,5 +1157,23 @@ void indirectAnalysis::openDirectoryDialog()
 }
 void indirectAnalysis::help()
 {
-  showInformationBox("Not yet written.");
+  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+  QString url = "http://www.mantidproject.org/IDA#";
+  if ( tabName == "Initial Settings" )
+    url += "";
+  else if ( tabName == "Elwin" )
+    url += "Elwin";
+  else if ( tabName == "MSD Fit" )
+    url += "MSD";
+  else if ( tabName == "Fury" )
+    url += "Fury";
+  else if ( tabName == "FuryFit" )
+    url += "FuryFit";
+  else if ( tabName == "ConvFit" )
+    url += "ConvFit";
+  else if ( tabName == "Absorption" )
+    url += "Absorption";
+  else if ( tabName == "DEMON" )
+    url += "Demon";
+  QDesktopServices::openUrl(QUrl(url));
 }

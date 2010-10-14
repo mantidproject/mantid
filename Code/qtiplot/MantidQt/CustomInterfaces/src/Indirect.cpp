@@ -533,7 +533,7 @@ QString Indirect::createMapFile(const QString& groupType)
 
   QString pyInput =
     "import IndirectEnergyConversion as ind\n"
-    "mapfile = ind.createMappingFile('"+groupFile+"', %0, %1, %2)\n"
+    "mapfile = ind.createMappingFile('"+groupFile+"', %1, %2, %3)\n"
     "print mapfile\n";
   pyInput = pyInput.arg(ngroup);
   pyInput = pyInput.arg(nspec);
@@ -1506,7 +1506,7 @@ void Indirect::calibPlot()
       "from mantidsimple import *\n"
       "from mantidplot import *\n"
       "try:\n"
-      "   LoadRaw(r'"+file+"', 'Raw', SpectrumMin=%0, SpectrumMax=%1)\n"
+      "   LoadRaw(r'"+file+"', 'Raw', SpectrumMin=%1, SpectrumMax=%2)\n"
       "except:\n"
       "   print 'Could not load .raw file. Please check run number.'\n"
       "   sys.exit('Could not load .raw file.')\n"
@@ -1547,7 +1547,7 @@ void Indirect::calibCreate()
       pyInput += "False\n";
 
     pyInput +=
-      "file = createCalibFile(r'"+file+"', '"+suffix+"', %0, %1, %2, %3, %4, %5, PlotOpt=plot)\n"
+      "file = createCalibFile(r'"+file+"', '"+suffix+"', %1, %2, %3, %4, %5, %6, PlotOpt=plot)\n"
       "print file\n";
 
     pyInput = pyInput.arg(m_uiForm.cal_lePeakMin->text());
@@ -1795,4 +1795,3 @@ void Indirect::sliceCalib(bool state)
   m_uiForm.slice_calibFile->setEnabled(state);
   m_uiForm.slice_calibFile->isOptional(!state);
 }
-

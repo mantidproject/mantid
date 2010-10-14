@@ -228,6 +228,12 @@
                  <layout class="QVBoxLayout" name="verticalLayout_6" >
                   <item>
                    <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" >
+                    <property name="sizePolicy" >
+                     <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                      <horstretch>0</horstretch>
+                      <verstretch>41</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="label" stdset="0" >
                      <string>Run Files</string>
                     </property>
@@ -237,6 +243,12 @@
                    <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" >
                     <property name="enabled" >
                      <bool>false</bool>
+                    </property>
+                    <property name="sizePolicy" >
+                     <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                      <horstretch>0</horstretch>
+                      <verstretch>41</verstretch>
+                     </sizepolicy>
                     </property>
                     <property name="findRunFiles" stdset="0" >
                      <bool>false</bool>
@@ -348,6 +360,12 @@
                    <layout class="QHBoxLayout" name="horizontalLayout_5" >
                     <item>
                      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" >
+                      <property name="sizePolicy" >
+                       <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                        <horstretch>0</horstretch>
+                        <verstretch>41</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="findRunFiles" stdset="0" >
                        <bool>false</bool>
                       </property>
@@ -1441,6 +1459,12 @@ p, li { white-space: pre-wrap; }
            <layout class="QHBoxLayout" name="horizontalLayout_18" >
             <item>
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>41</verstretch>
+               </sizepolicy>
+              </property>
               <property name="label" stdset="0" >
                <string>Run No</string>
               </property>
@@ -2308,6 +2332,12 @@ p, li { white-space: pre-wrap; }
            <layout class="QHBoxLayout" name="horizontalLayout_36" >
             <item>
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>41</verstretch>
+               </sizepolicy>
+              </property>
               <property name="findRunFiles" stdset="0" >
                <bool>true</bool>
               </property>
@@ -2346,6 +2376,12 @@ p, li { white-space: pre-wrap; }
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" >
               <property name="enabled" >
                <bool>false</bool>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>41</verstretch>
+               </sizepolicy>
               </property>
               <property name="findRunFiles" stdset="0" >
                <bool>false</bool>
@@ -2646,6 +2682,12 @@ p, li { white-space: pre-wrap; }
                <layout class="QVBoxLayout" name="verticalLayout_21" >
                 <item>
                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                    <horstretch>0</horstretch>
+                    <verstretch>41</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="findRunFiles" stdset="0" >
                    <bool>false</bool>
                   </property>
@@ -2668,6 +2710,12 @@ p, li { white-space: pre-wrap; }
                  <layout class="QHBoxLayout" name="horizontalLayout_31" >
                   <item>
                    <widget class="QLabel" name="sqw_lbWorkspace" >
+                    <property name="sizePolicy" >
+                     <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                      <horstretch>0</horstretch>
+                      <verstretch>41</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text" >
                      <string>Workspace: </string>
                     </property>
@@ -2685,6 +2733,12 @@ p, li { white-space: pre-wrap; }
                   </item>
                   <item>
                    <widget class="QLabel" name="sqw_valWorkspace" >
+                    <property name="sizePolicy" >
+                     <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                      <horstretch>0</horstretch>
+                      <verstretch>41</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="styleSheet" >
                      <string notr="true" >color: rgb(255, 0, 4)</string>
                     </property>

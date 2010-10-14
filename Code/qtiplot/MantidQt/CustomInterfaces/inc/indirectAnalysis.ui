@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>562</width>
-    <height>356</height>
+    <width>516</width>
+    <height>342</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -48,16 +48,6 @@
          <item row="0" column="3" >
           <widget class="QComboBox" name="set_cbAnalyser" />
          </item>
-         <item row="1" column="0" >
-          <widget class="QLabel" name="set_lbReflection" >
-           <property name="text" >
-            <string>Reflection</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1" >
-          <widget class="QComboBox" name="set_cbReflection" />
-         </item>
          <item row="0" column="1" >
           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="set_cbInst" >
            <property name="techniques" >
@@ -66,6 +56,16 @@
             </stringlist>
            </property>
           </widget>
+         </item>
+         <item row="0" column="4" >
+          <widget class="QLabel" name="set_lbReflection" >
+           <property name="text" >
+            <string>Reflection</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5" >
+          <widget class="QComboBox" name="set_cbReflection" />
          </item>
         </layout>
        </item>
@@ -818,6 +818,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_24" >
          <item>
           <widget class="QLabel" name="furyfit_lbFitType" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text" >
             <string>Fit Type:</string>
            </property>
@@ -852,7 +858,18 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_25" >
          <item>
-          <layout class="QHBoxLayout" name="furyfit_hlTreePlace" />
+          <layout class="QVBoxLayout" name="furyfit_vlTreeProp" >
+           <item>
+            <widget class="QCheckBox" name="furyfit_ckConstrainIntensities" >
+             <property name="text" >
+              <string>Constrain Intensities</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="furyfit_hlTreePlace" />
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_6" >
@@ -887,16 +904,6 @@
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="furyfit_pbOpenPlot" >
-               <property name="enabled" >
-                <bool>false</bool>
-               </property>
-               <property name="text" >
-                <string>Open</string>
-               </property>
-              </widget>
              </item>
             </layout>
            </item>
@@ -1425,7 +1432,19 @@
      <item>
       <widget class="QPushButton" name="pbHelp" >
        <property name="enabled" >
-        <bool>false</bool>
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
        </property>
        <property name="text" >
         <string>?</string>
@@ -1478,7 +1497,6 @@ Directories</string>
   <tabstop>msd_leStartX</tabstop>
   <tabstop>msd_leEndX</tabstop>
   <tabstop>set_cbAnalyser</tabstop>
-  <tabstop>set_cbReflection</tabstop>
  </tabstops>
  <resources/>
  <connections/>
