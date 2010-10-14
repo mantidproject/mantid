@@ -195,6 +195,9 @@ class Background(BaseScriptElement):
                 Generate reduction script
                 @param execute: if true, the script will be executed
             """
+            if len(str(self.sample_file).strip())==0 or len(str(self.direct_beam).strip())==0:
+                raise RuntimeError, "Direct beam method for background transmission was selected but was selected but all the appropriate data files were not entered."    
+            
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
         
@@ -214,6 +217,12 @@ class Background(BaseScriptElement):
                 Generate reduction script
                 @param execute: if true, the script will be executed
             """
+            if len(str(self.sample_scatt).strip())==0\
+                or len(str(self.sample_spreader).strip())==0\
+                or len(str(self.direct_scatt).strip())==0\
+                or len(str(self.direct_spreader).strip())==0:
+                raise RuntimeError, "Beam spreader method for background transmission was selected but all the appropriate data files were not entered."    
+                    
             return "BckBeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
             (self.sample_spreader, self.direct_spreader, 
              self.sample_scatt, self.direct_scatt, 
@@ -239,10 +248,14 @@ class Background(BaseScriptElement):
         
         # Dark current
         if self.dark_current_corr:
+            if len(str(self.dark_current_file).strip())==0:
+                raise RuntimeError, "Dark current subtraction was selected but no dark current data file was entered."            
             script += "DarkCurrent(\"%s\")\n" % self.dark_current_file
         
         # Background
         if self.background_corr:
+            if len(str(self.background_file).strip())==0:
+                raise RuntimeError, "Background subtraction was selected but no background data file was entered."            
             script += "Background(\"%s\")\n" % self.background_file
             
             # Background transmission
