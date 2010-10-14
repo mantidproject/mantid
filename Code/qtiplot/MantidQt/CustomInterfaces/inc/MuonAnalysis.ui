@@ -561,7 +561,7 @@
         <string>Plot</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_11" >
+      <widget class="QPushButton" name="guessAlphaButton" >
        <property name="enabled" >
         <bool>false</bool>
        </property>

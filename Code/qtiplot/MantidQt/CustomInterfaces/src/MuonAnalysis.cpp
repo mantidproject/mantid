@@ -66,7 +66,8 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_period(0), m_groupTableRowInFocus(-1), m_pairTableRowInFocus(-1),
-  m_groupTablePlotChoice("Counts"), m_pairTablePlotChoice("Asymmetry"), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml")
+  m_groupTablePlotChoice("Counts"), m_pairTablePlotChoice("Asymmetry"), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"),
+  m_dataLoaded(false)
 {
 }
 
@@ -93,7 +94,10 @@ void MuonAnalysis::initLayout()
 
 
   // connect exit button
-  connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(close())); 
+  connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(exitClicked())); 
+
+  // connect guess alpha 
+  connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked())); 
 
 	// signal/slot connections to respond to changes in instrument selection combo boxes
 	connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
@@ -440,7 +444,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
 }
 
 /**
- * Input file changed. Update information accordingly
+ * Input file changed. Update information accordingly (slot)
  */
 void MuonAnalysis::inputFileChanged()
 {
@@ -639,57 +643,63 @@ void MuonAnalysis::inputFileChanged()
 
     m_groupTableRowInFocus = 0;
     updateFront();
+    nowDataAvailable();
   } // end isGroupingSet()
 }
-
-/**
- * Calculate number of detectors from string of type 1-3, 5, 10-15
- *
- * @param str String of type "1-3, 5, 10-15"
- * @return Number of detectors
- */
-int MuonAnalysis::numOfDetectors(std::string str)
-{
-  int retVal = 0;
-
-    typedef Poco::StringTokenizer tokenizer;
-    tokenizer values(str, ",", tokenizer::TOK_TRIM);
-
-  for (int i = 0; i < static_cast<int>(values.count()); i++)
-  {
-    std::size_t found= values[0].find("-");
-    if (found!=std::string::npos)
-    {
-      tokenizer aPart(values[0], "-", tokenizer::TOK_TRIM);
-
-      int leftInt;
-      std::stringstream leftRead(aPart[0]);
-      leftRead >> leftInt;
-      int rightInt;
-      std::stringstream rightRead(aPart[1]);
-      rightRead >> rightInt;
-
-      if (leftInt > rightInt)
-      {
-        throw;
-      }
-      retVal += rightInt-leftInt+1;
-    }
-    else
-    {
-      retVal++;
-    }
-  }
-  return retVal;
-}
-
 
 /**
  * Exit the interface (slot)
  */
 void MuonAnalysis::exitClicked()
 {
-  QMessageBox::information(this, "MantidPlot", "Run clicked!!!!!");
+  close();
+  this->close();
+  QObject * obj=parent();
+  QWidget * widget = qobject_cast<QWidget*>(obj);
+  if (widget)
+  {
+    widget->close();
+  }
+}
+
+/**
+ * Guess Alpha (slot)
+ */
+void MuonAnalysis::guessAlphaClicked()
+{
+  if ( m_pairTableRowInFocus >= 0 )
+  {
+
+    QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
+    QComboBox* qwB = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
+
+    if (qwF || qwB)
+      return;
+
+    QTableWidgetItem *idsF = m_uiForm.groupTable->item(qwF->currentIndex(),1);
+    QTableWidgetItem *idsB = m_uiForm.groupTable->item(qwB->currentIndex(),1);
+
+    if (idsF || idsB)
+      return;
+
+    QString periodStr = "";
+    if (m_period > 0)  
+      periodStr += QString("_") + iToString(m_period).c_str();
+
+    QString inputWS = m_workspace_name.c_str() + periodStr;
+
+    QString pyString;
+
+    pyString += "AlphaCalc(\"" + inputWS + "\",\"" 
+        + idsF->text() + "\",\""
+        + idsB->text() + "\",\"" 
+        + m_uiForm.firstGoodBinFront->text() + "\);";
+
+    std::cout << pyString.toStdString() << std::endl;
+
+    // run python script
+    QString pyOutput = runPythonCode( pyString ).trimmed();
+  }
 }
 
 /**
@@ -948,7 +958,9 @@ bool MuonAnalysis::isGroupingSet()
 }
 
 /**
- * Apply grouping to workspace. 
+ * Apply grouping specified in xml file to workspace
+ *
+ * @param filename Name of grouping file
  */
 void MuonAnalysis::applyGroupingToWS( const std::string& wsName, std::string filename)
 {
@@ -975,3 +987,78 @@ void MuonAnalysis::applyGroupingToWS( const std::string& wsName)
     applyGroupingToWS(wsName, m_groupingTempFilename);
   }
 }
+
+/**
+ * Calculate number of detectors from string of type 1-3, 5, 10-15
+ *
+ * @param str String of type "1-3, 5, 10-15"
+ * @return Number of detectors
+ */
+int MuonAnalysis::numOfDetectors(std::string str)
+{
+  int retVal = 0;
+
+    typedef Poco::StringTokenizer tokenizer;
+    tokenizer values(str, ",", tokenizer::TOK_TRIM);
+
+  for (int i = 0; i < static_cast<int>(values.count()); i++)
+  {
+    std::size_t found= values[0].find("-");
+    if (found!=std::string::npos)
+    {
+      tokenizer aPart(values[0], "-", tokenizer::TOK_TRIM);
+
+      int leftInt;
+      std::stringstream leftRead(aPart[0]);
+      leftRead >> leftInt;
+      int rightInt;
+      std::stringstream rightRead(aPart[1]);
+      rightRead >> rightInt;
+
+      if (leftInt > rightInt)
+      {
+        throw;
+      }
+      retVal += rightInt-leftInt+1;
+    }
+    else
+    {
+      retVal++;
+    }
+  }
+  return retVal;
+}
+
+/**
+ * When no data loaded set various buttons etc to inactive
+ */
+void MuonAnalysis::noDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(false);
+  m_uiForm.groupTablePlotButton->setEnabled(false);
+  m_uiForm.pairTablePlotButton->setEnabled(false);
+  m_dataLoaded = false;
+
+  m_uiForm.guessAlphaButton->setEnabled(false);
+}
+
+/**
+ * When data loaded set various buttons etc to active
+ */
+void MuonAnalysis::nowDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(true);
+  m_uiForm.groupTablePlotButton->setEnabled(true);
+  m_uiForm.pairTablePlotButton->setEnabled(true);
+  m_dataLoaded = true;
+
+  m_uiForm.guessAlphaButton->setEnabled(true);
+}
+
+/**
+ * Return a none empty string if the data and group detector info are inconsistent
+ */
+ QString MuonAnalysis::dataAndTablesConsistent()
+ {
+   return QString();
+ }

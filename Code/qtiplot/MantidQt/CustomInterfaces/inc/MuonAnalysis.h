@@ -33,6 +33,9 @@ private slots:
   /// Exit the interface
   void exitClicked();
 
+  /// Guess Alpha clicked
+  void guessAlphaClicked();
+
   /// Input file changed
   void inputFileChanged();
 
@@ -88,7 +91,7 @@ private:
   /// is grouping set
   bool isGroupingSet();
 
-  /// Apply grouping to workspace
+  /// Apply grouping specified in xml file to workspace
   void applyGroupingToWS( const std::string& wsName, std::string filename);
 
   /// Apply whatever grouping is specified in GUI tables to workspace
@@ -102,6 +105,18 @@ private:
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
+
+  /// When no data loaded set various buttons etc to inactive
+  void noDataAvailable();
+
+  /// When data loaded set various buttons etc to active
+  void nowDataAvailable();
+
+  /// Is data loaded?
+  bool m_dataLoaded;
+
+  /// Return a none empty string if the data and group detector info are inconsistent
+  QString dataAndTablesConsistent();
 
   /// Return number of pairs
   int numPairs();
