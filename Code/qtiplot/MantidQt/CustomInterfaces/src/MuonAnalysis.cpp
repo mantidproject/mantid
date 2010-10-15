@@ -76,21 +76,8 @@ void MuonAnalysis::initLayout()
 {
   m_uiForm.setupUi(this);
 
-  // populate group plot functions. Get these from relevant combobox 
-  for (int i = 0; i < m_uiForm.groupTablePlotChoice->count(); i++)
-    m_groupPlotFunc.append(m_uiForm.groupTablePlotChoice->itemText(i));
-
-  // pair plot functions. Get these from relevant combobox
-  for (int i = 0; i < m_uiForm.pairTablePlotChoice->count(); i++)
-    m_pairPlotFunc.append(m_uiForm.pairTablePlotChoice->itemText(i));
-
-  //
-  m_uiForm.frontAlphaLabel->setVisible(false);
-  m_uiForm.frontAlphaNumber->setVisible(false);
-  m_uiForm.frontAlphaNumber->setEnabled(false);
-
-  m_uiForm.homePeriodBox2->setEditable(false);
-  m_uiForm.homePeriodBox2->setEnabled(false);
+  // Further set initial look
+  startUpLook();
 
 
   // connect exit button
@@ -105,11 +92,9 @@ void MuonAnalysis::initLayout()
   // If group table change
   connect(m_uiForm.groupTable, SIGNAL(cellChanged(int, int)), this, SLOT(groupTableChanged(int, int))); 
   connect(m_uiForm.groupTable, SIGNAL(cellClicked(int, int)), this, SLOT(groupTableClicked(int, int))); 
-  m_uiForm.groupTable->setColumnWidth(1, 2*m_uiForm.groupTable->columnWidth(1));
-  m_uiForm.groupTable->setColumnWidth(3, 0.5*m_uiForm.groupTable->columnWidth(3));
-
-  // group table plot button and choice
+  // group table plot button
   connect(m_uiForm.groupTablePlotButton, SIGNAL(clicked()), this, SLOT(runGroupTablePlotButton())); 
+  // Store selected group-plot-choice in local variable
   connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(const QString)), this, 
     SLOT(runGroupTablePlotChoice(const QString))); 
 
@@ -370,68 +355,114 @@ void MuonAnalysis::runPairTablePlotButton()
 /**
  * Group table clicked (slot)
  */
-void MuonAnalysis::groupTableClicked(int row, int column)
+void MuonAnalysis::pairTableClicked(int row, int column)
 {
   (void) column;
-  if ( m_uiForm.groupTable->item(row,2) != NULL )
+
+  m_pairTableRowInFocus = row;
+
+
+  // if something sensible in row then update front
+
+  if ( m_uiForm.pairTable->item(row,0) != NULL )
   {
-    m_groupTableRowInFocus = row;
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(row);
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(row+numGroups());
     updateFront();
   }
-  else
-    m_groupTableRowInFocus = -1;
 }
 
 /**
  * Group table clicked (slot)
  */
-void MuonAnalysis::pairTableClicked(int row, int column)
+void MuonAnalysis::groupTableClicked(int row, int column)
 {
   (void) column;
-  if ( m_uiForm.pairTable->item(row,3) != NULL )
+
+  m_groupTableRowInFocus = row;
+
+
+  // if something sensible in row then update front
+
+  if ( m_uiForm.groupTable->item(row,2) != NULL && m_uiForm.groupTable->item(row,0) != NULL)
   {
-    m_pairTableRowInFocus = row;
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(row+numGroups());
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(row);
     updateFront();
   }
-  else
-    m_pairTableRowInFocus = -1;
 }
 
 /**
- * Group table changed (slot)
+ * Group table changed, e.g. if:         (slot)
+ *
+ *    1) user changed detector sequence 
+ *    2) user type in a group name
+ *
+ * @param row 
+ * @param column
  */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
   if ( column == 1 )
   {
-    if ( m_uiForm.groupTable->item(row,2) == NULL )
-      return;
-
-
+    QTableWidgetItem* itemNdet = m_uiForm.groupTable->item(row,2);
     QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
 
+    int numDet = numOfDetectors(item->text().toStdString());
     std::stringstream detNumRead;
-    try
+    if (numDet >= 0 )
     {
-      detNumRead << numOfDetectors(item->text().toStdString());
-      m_uiForm.groupTable->item(row, 2)->setText(detNumRead.str().c_str());
+      detNumRead << numDet;
+      if (itemNdet == NULL)
+        m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem(detNumRead.str().c_str()));
+      else
+        m_uiForm.groupTable->item(row, 2)->setText(detNumRead.str().c_str());
     }
-    catch (...)
+    else
     {
-      m_uiForm.groupTable->item(row, 2)->setText("Invalid");
+      if (itemNdet == NULL)
+        m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem("Invalid IDs string"));
+      else
+        m_uiForm.groupTable->item(row, 2)->setText("Invalid IDs string");
     }
   }   
 
+
+  // Change to group name
+
   if ( column == 0 )
   {
-    if ( m_uiForm.groupTable->item(row,2) == NULL )
-      return;
+    //if ( m_uiForm.groupTable->item(row,2) == NULL )
+    //  return;
 
 
-    QTableWidgetItem *item = m_uiForm.groupTable->item(row,0);
+    QTableWidgetItem *itemName = m_uiForm.groupTable->item(row,0);
 
+    if ( itemName == NULL || itemName->text() == "" )
+      return; // I can't see this ever happening but for safety...
+
+
+    // check that the group name entered does not already exist
+
+    for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
+    {
+      if (i==row)
+        continue;
+
+      QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
+      if (item)
+      {
+        QString kk = item->text();
+        QString kdk = itemName->text();
+
+        if ( item->text() == itemName->text() )
+        {
+          QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Group names must be unique. Please re-enter Group name.");
+          itemName->setText("");
+          return;
+        }
+      }
+    }
+
+    /*
     for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
     {
       QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
@@ -439,7 +470,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
 
       qw1->setItemText(row, item->text());
       qw2->setItemText(row, item->text());
-    }  
+    } */ 
   }   
 }
 
@@ -693,7 +724,7 @@ void MuonAnalysis::guessAlphaClicked()
     pyString += "AlphaCalc(\"" + inputWS + "\",\"" 
         + idsF->text() + "\",\""
         + idsB->text() + "\",\"" 
-        + m_uiForm.firstGoodBinFront->text() + "\);";
+        + m_uiForm.firstGoodBinFront->text() + "\");";
 
     std::cout << pyString.toStdString() << std::endl;
 
@@ -992,21 +1023,32 @@ void MuonAnalysis::applyGroupingToWS( const std::string& wsName)
  * Calculate number of detectors from string of type 1-3, 5, 10-15
  *
  * @param str String of type "1-3, 5, 10-15"
- * @return Number of detectors
+ * @return Number of detectors. Return -1 if not recognised
  */
-int MuonAnalysis::numOfDetectors(std::string str)
+int MuonAnalysis::numOfDetectors(std::string str) const
 {
   int retVal = 0;
 
-    typedef Poco::StringTokenizer tokenizer;
-    tokenizer values(str, ",", tokenizer::TOK_TRIM);
+  if (str.empty())
+    return 0;
+
+  typedef Poco::StringTokenizer tokenizer;
+  tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
   for (int i = 0; i < static_cast<int>(values.count()); i++)
   {
-    std::size_t found= values[0].find("-");
+    std::size_t found= values[i].find("-");
     if (found!=std::string::npos)
     {
-      tokenizer aPart(values[0], "-", tokenizer::TOK_TRIM);
+      tokenizer aPart(values[i], "-", tokenizer::TOK_TRIM);
+
+      if ( aPart.count() != 2 )
+        return -1;
+      else
+      {
+        if ( !(isNumber(aPart[0]) && isNumber(aPart[1])) )
+          return -1;
+      }
 
       int leftInt;
       std::stringstream leftRead(aPart[0]);
@@ -1023,10 +1065,40 @@ int MuonAnalysis::numOfDetectors(std::string str)
     }
     else
     {
-      retVal++;
+
+      if (isNumber(values[i]))
+        retVal++;
+      else
+        return -1;
     }
   }
   return retVal;
+}
+
+
+/** Is input string a number?
+ *
+ *  @param s The input string
+ *  @return True is input string is a number
+ */
+bool MuonAnalysis::isNumber(const std::string& s) const
+{
+  if( s.empty() )
+  {
+    return false;
+  }
+
+  const std::string allowed("0123456789");
+
+  for (unsigned int i = 0; i < s.size(); i++)
+  {
+    if (allowed.find_first_of(s[i]) == std::string::npos)
+    {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -1061,4 +1133,31 @@ void MuonAnalysis::nowDataAvailable()
  QString MuonAnalysis::dataAndTablesConsistent()
  {
    return QString();
+ }
+
+ /**
+ * Set start up interface look and populate local attributes 
+ * initiated from info set in QT designer
+ */
+ void MuonAnalysis::startUpLook()
+ {
+  // populate group plot functions. Get these from relevant combobox 
+  for (int i = 0; i < m_uiForm.groupTablePlotChoice->count(); i++)
+    m_groupPlotFunc.append(m_uiForm.groupTablePlotChoice->itemText(i));
+
+  // pair plot functions. Get these from relevant combobox
+  for (int i = 0; i < m_uiForm.pairTablePlotChoice->count(); i++)
+    m_pairPlotFunc.append(m_uiForm.pairTablePlotChoice->itemText(i));
+
+  //
+  m_uiForm.frontAlphaLabel->setVisible(false);
+  m_uiForm.frontAlphaNumber->setVisible(false);
+  m_uiForm.frontAlphaNumber->setEnabled(false);
+
+  m_uiForm.homePeriodBox2->setEditable(false);
+  m_uiForm.homePeriodBox2->setEnabled(false);
+
+  m_uiForm.groupTable->setColumnWidth(1, 2*m_uiForm.groupTable->columnWidth(1));
+  m_uiForm.groupTable->setColumnWidth(3, 0.5*m_uiForm.groupTable->columnWidth(3));
+
  }

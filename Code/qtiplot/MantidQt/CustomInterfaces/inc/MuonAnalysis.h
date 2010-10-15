@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include <map>
 
 namespace MantidQt
 {
@@ -88,6 +89,9 @@ private:
   /// Initialize the layout
   virtual void initLayout();
 
+  /// Set start up interface look
+  void startUpLook();
+
   /// is grouping set
   bool isGroupingSet();
 
@@ -101,7 +105,10 @@ private:
   void updateFront();
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
-  int numOfDetectors(std::string str);
+  int numOfDetectors(std::string str) const;
+
+  /// is string a number?
+  bool MuonAnalysis::isNumber(const std::string& s) const;
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
@@ -175,6 +182,9 @@ private:
 
   /// Currently selected instrument
   QString m_curInterfaceSetup;
+
+  ///
+  ///std::map<int, QString> m_groupNameMap;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
