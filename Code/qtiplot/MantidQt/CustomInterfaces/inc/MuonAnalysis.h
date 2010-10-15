@@ -108,7 +108,7 @@ private:
   int numOfDetectors(std::string str) const;
 
   /// is string a number?
-  bool MuonAnalysis::isNumber(const std::string& s) const;
+  bool isNumber(const std::string& s) const;
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
