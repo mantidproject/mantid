@@ -496,6 +496,9 @@ using Kernel::PulseTimeType;
       //if tof < X[0], that means that you need to skip some events
       while ((itev != this->events.end()) && (itev->tof() < X[0]))
         itev++;
+      // The above can still take you to end() if no events above X[0], so check again.
+      // Better fix would be to use a binary search instead of the linear one used here.
+      if (itev == this->events.end()) return;
 
       //Find the first bin
       size_t bin=0;
