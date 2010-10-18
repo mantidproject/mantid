@@ -173,11 +173,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AdvancedSearch.cpp" />
     <ClCompile Include="src\DownloadDataFile.cpp" />
     <ClCompile Include="src\FileList.cpp" />
     <ClCompile Include="src\GetDataFiles.cpp" />
     <ClCompile Include="src\GetDataSets.cpp" />
+    <ClCompile Include="src\ListInstruments.cpp" />
+    <ClCompile Include="src\ListInvestigationTypes.cpp" />
     <ClCompile Include="src\Login.cpp" />
+    <ClCompile Include="src\Logout.cpp" />
+    <ClCompile Include="src\MyDataSearch.cpp" />
     <ClCompile Include="src\SearchByRunNumber.cpp" />
     <ClCompile Include="src\SearchHelper.cpp" />
     <ClCompile Include="src\GSoap\stdsoap2.cpp" />

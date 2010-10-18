@@ -1,13 +1,12 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDWorkspace.h"
 
-
-DECLARE_MD_WORKSPACE(MDWorkspace)
-
 namespace Mantid{
-    namespace MDDataObjects{
-        using namespace Mantid::Kernel;
+  namespace MDDataObjects{
 
+    // Register the workspace into the WorkspaceFactory
+    DECLARE_WORKSPACE(MDWorkspace)
 
+    using namespace Mantid::Kernel;
 }
 }

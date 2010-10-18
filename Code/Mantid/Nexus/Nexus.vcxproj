@@ -82,7 +82,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IN_MANTID_DATA_OBJECTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_NEXUS=1;IN_NEXUS_CPP_LIBRARY=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -99,7 +99,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IN_MANTID_DATA_OBJECTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_NEXUS=1;IN_NEXUS_CPP_LIBRARY=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -120,7 +120,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IN_MANTID_DATA_OBJECTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_NEXUS=1;IN_NEXUS_CPP_LIBRARY=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -137,7 +137,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IN_MANTID_DATA_OBJECTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IN_MANTID_NEXUS=1;IN_NEXUS_CPP_LIBRARY=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -158,16 +158,21 @@
     <ClCompile Include="src\LoadInstrumentFromSNSNexus.cpp" />
     <ClCompile Include="src\LoadISISNexus.cpp" />
     <ClCompile Include="src\LoadISISNexus2.cpp" />
+    <ClCompile Include="src\LoadLogsFromSNSNexus.cpp" />
     <ClCompile Include="src\LoadMuonLog.cpp" />
     <ClCompile Include="src\LoadMuonNexus.cpp" />
     <ClCompile Include="src\LoadMuonNexus2.cpp" />
     <ClCompile Include="src\LoadNeXus.cpp" />
     <ClCompile Include="src\LoadNexusProcessed.cpp" />
+    <ClCompile Include="src\LoadSNSEventNexus.cpp" />
     <ClCompile Include="src\LoadSNSNexus.cpp" />
     <ClCompile Include="src\LoadTOFRawNeXus.cpp" />
     <ClCompile Include="src\MuonNexusReader.cpp" />
     <ClCompile Include="src\NexusClasses.cpp" />
+    <ClCompile Include="src\NeXusException.cpp" />
+    <ClCompile Include="src\NeXusFile.cpp" />
     <ClCompile Include="src\NexusFileIO.cpp" />
+    <ClCompile Include="src\NeXusStream.cpp" />
     <ClCompile Include="src\SaveNeXus.cpp" />
     <ClCompile Include="src\SaveNexusProcessed.cpp" />
   </ItemGroup>
@@ -176,7 +181,12 @@
     <ClInclude Include="inc\MantidNexus\LoadInstrumentFromSNSNexus.h" />
     <ClInclude Include="inc\MantidNexus\LoadISISNexus.h" />
     <ClInclude Include="inc\MantidNexus\LoadISISNexus2.h" />
+    <ClInclude Include="inc\mantidnexus\loadlogsfromsnsnexus.h" />
+    <ClInclude Include="inc\MantidNexus\LoadSNSEventNexus.h" />
     <ClInclude Include="inc\mantidnexus\loadtofrawnexus.h" />
+    <ClInclude Include="inc\mantidnexus\nexusexception.hpp" />
+    <ClInclude Include="inc\mantidnexus\nexusfile.hpp" />
+    <ClInclude Include="inc\mantidnexus\nexusstream.hpp" />
     <ClInclude Include="test\LoadISISNexusTest.h" />
     <ClInclude Include="inc\MantidNexus\LoadMuonLog.h" />
     <ClInclude Include="test\LoadMuonLogTest.h" />

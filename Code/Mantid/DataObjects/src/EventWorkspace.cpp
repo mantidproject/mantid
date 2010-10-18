@@ -10,17 +10,17 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MultiThreaded.h"
 
-DECLARE_WORKSPACE(EventWorkspace)
-
 using namespace boost::posix_time;
 
 namespace Mantid
 {
-
 namespace DataObjects
 {
-using Kernel::Exception::NotImplementedError;
-using namespace Mantid::Kernel;
+
+  DECLARE_WORKSPACE(EventWorkspace)
+
+  using Kernel::Exception::NotImplementedError;
+  using namespace Mantid::Kernel;
 
   // get a reference to the logger
   Kernel::Logger& EventWorkspace::g_log

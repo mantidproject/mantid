@@ -15,16 +15,15 @@
   #endif
 #endif
 
-DECLARE_WORKSPACE(CompressedWorkspace2D)
-
 namespace Mantid
 {
 namespace DataObjects
 {
 
+DECLARE_WORKSPACE(CompressedWorkspace2D)
+
 // Get a reference to the logger
 Kernel::Logger& CompressedWorkspace2D::g_log = Kernel::Logger::get("CompressedWorkspace2D");
-
 
 /// Constructor
 CompressedWorkspace2D::CompressedWorkspace2D() :

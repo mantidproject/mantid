@@ -63,6 +63,21 @@
     <ClCompile Include="src\GSoapGenerated\soapICATPortBindingProxy.cpp">
       <Filter>src\GSoapGenerated</Filter>
     </ClCompile>
+    <ClCompile Include="src\AdvancedSearch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ListInstruments.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ListInvestigationTypes.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logout.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyDataSearch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidICat\GetDataFiles.h">

@@ -1,7 +1,7 @@
 @echo off
 
 IF "%VCINSTALLDIR%"=="" CALL "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
-IF "%MANTIDTESTSETUP%"=="" SET PATH=%CD%\..\..\..\Third_Party\lib\win32;%CD%\..\..\Debug;%PATH%
+IF "%MANTIDTESTSETUP%"=="" SET PATH=%CD%\..\..\..\Third_Party\lib\win64;%CD%\..\..\Debug;%PATH%
 IF "%MANTIDTESTSETUP%"=="" SET MANTIDTESTSETUP=1
 REM Simple script to build and run the tests.
 REM Have kept separate from the makefile since that's automatically generated
@@ -23,9 +23,9 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "..\..\..\Third_Party\include\muParser" /I "..\..\kernel\inc" /I "..\..\DataHandling\inc" /I "..\..\Algorithms\inc" /I "..\..\DataObjects\inc" /I "..\..\Geometry\inc" /I "..\..\API\inc" /I "../../Nexus\inc" /I "..\inc" /DBOOST_ALL_DYN_LINK /DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG /EHsc /MDd /W3 /wd4275 /nologo /c /ZI /TP 
+cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "..\..\..\Third_Party\include\muParser" /I "..\..\kernel\inc" /I "..\..\DataHandling\inc" /I "..\..\Algorithms\inc" /I "..\..\DataObjects\inc" /I "..\..\Geometry\inc" /I "..\..\API\inc" /I "../../Nexus\inc" /I "..\inc" /DBOOST_ALL_DYN_LINK /DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG /EHsc /MDd /W3 /wd4275 /nologo /c /Zi /TP 
 
-link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /Debug /PDB:".\runner.pdb" Mantidkernel.lib Mantidapi.lib MantidICat.lib MantidGeometry.lib MantidDataObjects.lib runner.obj 
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win64" /Debug /PDB:".\runner.pdb" Mantidkernel.lib Mantidapi.lib MantidICat.lib MantidGeometry.lib MantidDataObjects.lib runner.obj 
   
 echo "Copying in properties files..."
 copy /Y ..\..\Build\Tests\*properties
@@ -41,5 +41,5 @@ del *.pdb
 del runner.lib
 del runner.ilk
 del runner.exp
-del vc100.idb
+REM del vc100.idb
 del runner.exe

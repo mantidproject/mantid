@@ -6,12 +6,12 @@
 
 #include <iostream>
 
-DECLARE_WORKSPACE(TableWorkspace)
-
 namespace Mantid
 {
   namespace DataObjects
   {
+
+    DECLARE_WORKSPACE(TableWorkspace)
 
     // Get a reference to the logger
     Kernel::Logger& TableWorkspace::g_log = Kernel::Logger::get("TableWorkspace");

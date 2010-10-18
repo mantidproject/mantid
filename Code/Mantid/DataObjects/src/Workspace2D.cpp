@@ -8,12 +8,12 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-DECLARE_WORKSPACE(Workspace2D)
-
 namespace Mantid
 {
   namespace DataObjects
   {
+
+    DECLARE_WORKSPACE(Workspace2D)
 
     // Get a reference to the logger
     Kernel::Logger& Workspace2D::g_log = Kernel::Logger::get("Workspace2D");

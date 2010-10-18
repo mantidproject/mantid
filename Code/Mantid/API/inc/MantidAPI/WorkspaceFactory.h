@@ -9,16 +9,7 @@
 #define DECLARE_WORKSPACE(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_ws_##classname( \
-       ((Mantid::API::WorkspaceFactory::Instance().subscribe<Mantid::DataObjects::classname>(#classname)) \
-       , 0)); \
-  }
-
-/*???? 
- */
-#define DECLARE_MD_WORKSPACE(classname) \
-  namespace { \
-    Mantid::Kernel::RegistrationHelper register_ws_##classname( \
-       ((Mantid::API::WorkspaceFactory::Instance().subscribe<Mantid::MDDataObjects::classname>(#classname)) \
+       ((Mantid::API::WorkspaceFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
   }
 

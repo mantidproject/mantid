@@ -9,12 +9,12 @@
 #include <limits>
 #include "Poco/File.h"
 
-DECLARE_WORKSPACE(ManagedWorkspace2D)
-
 namespace Mantid
 {
 namespace DataObjects
 {
+
+DECLARE_WORKSPACE(ManagedWorkspace2D)
 
 // Initialise the instance count
 int ManagedWorkspace2D::g_uniqueID = 1;
