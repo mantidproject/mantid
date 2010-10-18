@@ -176,7 +176,7 @@ class MaskWidget(QWidget):
                 # Assume standard HFIR image
                 source = QRect(48,29,298,299)
                 image = QImage(self._background_file)
-                image.scaled(side, side, aspectRatioMode=Qt.KeepAspectRatio)
+                image.scaled(side, side, Qt.KeepAspectRatio)
                 painter.drawImage(target, image, source)
             except:
                 raise RuntimeError, "Could not process image file %s\n  %s" % (str(self._background_file), sys.exc_value)
