@@ -1,6 +1,5 @@
-// Note that this file had been modified to work with Mantid. See inline comments around lines 668 & 762.
 /*
-	stdsoap2.h 2.7.16
+	stdsoap2.h 2.7.17
 
 	gSOAP runtime engine
 
@@ -681,6 +680,10 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 # endif
 #endif
 
+#ifdef WITH_GNUTLS
+# include <gnutls/gnutls.h>
+#endif
+
 #ifdef WITH_GZIP
 # ifndef WITH_ZLIB
 #  define WITH_ZLIB
@@ -703,7 +706,7 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 # endif
 #endif
 
- //#define DEBUG  /* Uncomment to debug sending (in file SENT.log) receiving (in file RECV.log) and messages (in file TEST.log) */
+/* #define DEBUG */ /* Uncomment to debug sending (in file SENT.log) receiving (in file RECV.log) and messages (in file TEST.log) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -1404,6 +1407,7 @@ struct soap_clist
 /* attributes */
 struct soap_attribute
 { struct soap_attribute *next;
+  short flag;	/* soap_set_attr: 1 = normal, 2 = utf content */
   char *value;
   size_t size;
   char *ns;
@@ -1846,14 +1850,14 @@ struct SOAP_STD_API soap
 #endif
 #endif
   size_t peerlen;
-#ifdef WITH_OPENSSL
+#if defined(WITH_OPENSSL)	/* OpenSSL */
   int (*fsslauth)(struct soap*);
   int (*fsslverify)(int, X509_STORE_CTX*);
   BIO *bio;
   SSL *ssl;
   SSL_CTX *ctx;
   SSL_SESSION *session;
-#else
+#else				/* No SSL/TLS */
   void *fsslauth;		/* dummy members, to preserve struct size */
   void *fsslverify;
   void *bio;
@@ -2151,6 +2155,7 @@ SOAP_FMAC1 void SOAP_FMAC2 soap_free(struct soap*);
 SOAP_FMAC1 struct soap *SOAP_FMAC2 soap_copy(const struct soap*);
 SOAP_FMAC1 struct soap *SOAP_FMAC2 soap_copy_context(struct soap*, const struct soap*);
 SOAP_FMAC1 void SOAP_FMAC2 soap_copy_stream(struct soap*, struct soap*);
+SOAP_FMAC1 void SOAP_FMAC2 soap_free_stream(struct soap*);
 SOAP_FMAC1 void SOAP_FMAC2 soap_init(struct soap*);
 SOAP_FMAC1 void SOAP_FMAC2 soap_init1(struct soap*, soap_mode);
 SOAP_FMAC1 void SOAP_FMAC2 soap_init2(struct soap*, soap_mode, soap_mode);
@@ -2199,7 +2204,7 @@ SOAP_FMAC1 void SOAP_FMAC2 soap_revert(struct soap*);
 
 SOAP_FMAC1 char* SOAP_FMAC2 soap_strdup(struct soap*, const char*);
 SOAP_FMAC1 wchar_t* SOAP_FMAC2 soap_wstrdup(struct soap*, const wchar_t*);
-SOAP_FMAC1 const char * SOAP_FMAC2 soap_strsearch(const char *big, const char *little);
+SOAP_FMAC1 const char * SOAP_FMAC2 soap_tagsearch(const char *big, const char *little);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_string_out(struct soap*, const char *s, int flag);
 SOAP_FMAC1 char* SOAP_FMAC2 soap_string_in(struct soap*, int, long, long);
@@ -2388,7 +2393,7 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_register_plugin_arg(struct soap*, int (*fcreate)(
 SOAP_FMAC1 void* SOAP_FMAC2 soap_lookup_plugin(struct soap*, const char*);
 
 SOAP_FMAC1 const char* SOAP_FMAC2 soap_attr_value(struct soap *soap, const char *name, int flag);
-SOAP_FMAC1 int SOAP_FMAC2 soap_set_attr(struct soap *soap, const char *name, const char *value);
+SOAP_FMAC1 int SOAP_FMAC2 soap_set_attr(struct soap *soap, const char *name, const char *value, int flag);
 SOAP_FMAC1 void SOAP_FMAC2 soap_clr_attr(struct soap *soap);
 
 #ifdef WITH_COOKIES
@@ -2406,6 +2411,8 @@ SOAP_FMAC1 extern void SOAP_FMAC2 soap_clr_cookie(struct soap*, const char*, con
 SOAP_FMAC1 extern int SOAP_FMAC2 soap_getenv_cookies(struct soap*);
 SOAP_FMAC1 extern struct soap_cookie* SOAP_FMAC2 soap_copy_cookies(struct soap*, const struct soap*);
 SOAP_FMAC1 extern void SOAP_FMAC2 soap_free_cookies(struct soap*);
+SOAP_FMAC1 int SOAP_FMAC2 soap_putsetcookies(struct soap *soap);
+SOAP_FMAC1 int SOAP_FMAC2 soap_putcookies(struct soap *soap, const char *domain, const char *path, int secure);
 #endif
 
 #ifdef __cplusplus
