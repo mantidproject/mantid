@@ -4,6 +4,8 @@
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 
+#include "MantidQtAPI/UserSubWindow.h"
+
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/DOMWriter.h"
 #include "Poco/DOM/Element.h"
@@ -27,8 +29,11 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+namespace Muon
+{
 
   using namespace Poco::XML;
+  using namespace MantidQt::API;
 
 /**
  * save XML grouping file
@@ -271,5 +276,7 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 
 }
 
+
+}
 }
 }

@@ -21,12 +21,16 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+namespace Muon
+{
 
   /// save XML grouping file
   void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filename);
 
   /// load XML grouping file
   void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filename);
+
+}
 }
 }
 

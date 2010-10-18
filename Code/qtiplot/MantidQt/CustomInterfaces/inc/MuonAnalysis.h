@@ -186,6 +186,16 @@ private:
   ///
   ///std::map<int, QString> m_groupNameMap;
 
+  /// tell which group is in which row
+  std::vector<int> m_groupToRow;
+
+  ///
+  void createCropWS();
+
+  /// set grouping in table from information from nexus raw file
+  void setGroupingFromNexus(const QString& nexusFile); 
+
+
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 };

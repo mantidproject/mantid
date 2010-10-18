@@ -54,6 +54,7 @@ namespace CustomInterfaces
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
@@ -406,6 +407,13 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     QTableWidgetItem* itemNdet = m_uiForm.groupTable->item(row,2);
     QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
 
+    if (item->text() == "")
+    {
+      if (itemNdet)
+        itemNdet->setText("");
+      return;
+    }
+
     int numDet = numOfDetectors(item->text().toStdString());
     std::stringstream detNumRead;
     if (numDet >= 0 )
@@ -482,29 +490,24 @@ void MuonAnalysis::inputFileChanged()
   if ( !m_uiForm.mwRunFiles->isValid() )
     return;
 
-  QString m_previousFsdafilename = m_uiForm.mwRunFiles->getFirstFilename();
-
   if ( m_previousFilename.compare(m_uiForm.mwRunFiles->getFirstFilename()) == 0 )
     return;
 
   m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
 
-  // create Python string to load muon Nexus file
+  // Load nexus file with no grouping
   QString pyString = "LoadMuonNexus('";
-  pyString.append(m_uiForm.mwRunFiles->getFirstFilename());
+  pyString.append(m_previousFilename);
   pyString.append("','");
   pyString.append(m_workspace_name.c_str());
-
-  if ( isGroupingSet() )
-    pyString.append("');");  // don't less use grouping in nexus
-  else
-    pyString.append("', AutoGroup=\"1\");");
-  
-  // run python script
+  pyString.append("', AutoGroup=\"0\");");
   runPythonCode( pyString ).trimmed();
 
+  if ( !isGroupingSet() )
+    setGroupingFromNexus(m_previousFilename);
+
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
-  //AnalysisDataService::Instance().doExist(m_workspace_name);
+
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
   WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
   MatrixWorkspace_sptr matrix_workspace;
@@ -512,23 +515,17 @@ void MuonAnalysis::inputFileChanged()
   if (wsPeriods)
   {
     numPeriods = wsPeriods->getNumberOfEntries() - 1;  // note getNumberOfEntries returns one more # of periods 
-    if ( isGroupingSet() )
-    {
-      for ( int i = 1; i <= numPeriods; i++)
-      {
-        // apply grouping if specified in group table
-        applyGroupingToWS( m_workspace_name + "_" + iToString(i));
-      }
-    }
+
+    for ( int i = 1; i <= numPeriods; i++)
+      applyGroupingToWS( m_workspace_name + "_" + iToString(i));
+
     Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
     m_period = 1;
   }
   else
   {
-    // apply grouping if specified in group table
-    if ( isGroupingSet() )
-      applyGroupingToWS(m_workspace_name);
+    applyGroupingToWS(m_workspace_name);
 
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
   }
@@ -592,90 +589,6 @@ void MuonAnalysis::inputFileChanged()
   }*/
 
   // Populate grouping table and front combobox
-
-  if ( !isGroupingSet() )
-  {
-    for (int wsIndex = 0; wsIndex < matrix_workspace->getNumberHistograms(); wsIndex++)
-    {
-      IDetector_sptr det = matrix_workspace->getDetector(wsIndex);
-
-      if( boost::dynamic_pointer_cast<DetectorGroup>(det) )
-      {
-        // prepare IDs string
-
-        boost::shared_ptr<DetectorGroup> detG = boost::dynamic_pointer_cast<DetectorGroup>(det);
-        std::vector<int> detIDs = detG->getDetectorIDs();
-        std::stringstream idstr;
-        int leftInt = detIDs[0];  // meaning left as in the left number of the range 8-18 for instance
-        int numIDs = static_cast<int>(detIDs.size());
-        idstr << detIDs[0];
-        for (int i = 1; i < numIDs; i++)
-        {
-          if (detIDs[i] != detIDs[i-1]+1 )
-          {
-            if (detIDs[i-1] == leftInt)
-            {
-                idstr << ", " << detIDs[i];
-                leftInt = detIDs[i];
-            }
-            else
-              {
-                idstr << "-" << detIDs[i-1] << ", " << detIDs[i];
-                leftInt = detIDs[i];
-              }
-            }
-          else if ( i == numIDs-1 )
-          {
-            idstr << "-" << detIDs[i];
-          }
-        }
-
-        // prepare group name string
-
-        std::stringstream gName;
-        gName << wsIndex;
-
-        // create table row
-
-        m_uiForm.frontGroupGroupPairComboBox->addItems(QStringList(gName.str().c_str()));
-        m_uiForm.groupTable->setItem(wsIndex, 0, new QTableWidgetItem(gName.str().c_str()));
-        m_uiForm.groupTable->setItem(wsIndex, 1, new QTableWidgetItem(idstr.str().c_str()));
-
-        std::stringstream detNumRead;
-        try
-        {
-          detNumRead << numOfDetectors(idstr.str());
-          m_uiForm.groupTable->setItem(wsIndex, 2, new QTableWidgetItem(detNumRead.str().c_str()));
-        }
-        catch (...)
-        {
-          m_uiForm.groupTable->setItem(wsIndex, 2, new QTableWidgetItem("Invalid"));
-        }
-        m_uiForm.groupTable->item(wsIndex,2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-
-       // populate pair table combo boxes
-       int rowNum = m_uiForm.pairTable->rowCount();
-       for (int i = 0; i < rowNum; i++)
-       {
-         QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
-         QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
-
-          qw1->addItem( gName.str().c_str() );
-          qw2->addItem( gName.str().c_str() );
-       
-   
-        if ( qw2->count() > 1 )
-          qw2->setCurrentIndex(1);
-       }
-      }
-    }
-  
-
-
-    m_groupTableRowInFocus = 0;
-    updateFront();
-    nowDataAvailable();
-  } // end isGroupingSet()
 }
 
 /**
@@ -846,6 +759,30 @@ std::string MuonAnalysis::iToString(int i)
   return str.str();
 }
 
+
+/**
+ * Take the MuonAnalysisGrouped WS and reduce(crop) histograms according to e.g. first-good-bin.
+ * If period data then the resulting cropped WS is on for the period selected by the user
+ * on the front panel. The outputted WS is named MuonAnalysisCropped.
+ */
+void MuonAnalysis::createCropWS()
+{
+  QString periodStr = "";  // used to pick out the WS representing the period selected by user
+  if (m_period > 0)
+  {    
+    periodStr += QString("_") + iToString(m_period).c_str();
+  }
+
+  QString outputWS = "MuonAnalysisCropped";
+  QString cropStr = "CropWorkspace(\"";
+  cropStr += m_workspace_name.c_str() + periodStr;
+  cropStr += "\",\"";
+  cropStr += outputWS;
+  cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
+  runPythonCode( cropStr ).trimmed();
+}
+
+
 /**
  * Plot group
  */
@@ -861,7 +798,8 @@ void MuonAnalysis::plotGroup(std::string& plotType)
     else
       groupName = itemName->text();
 
-    // create cropped workspace of relevant workspace
+
+    // create workspace which starts at first-good-bin 
 
     QString periodStr = "";
     if (m_period > 0)
@@ -1161,3 +1099,165 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.groupTable->setColumnWidth(3, 0.5*m_uiForm.groupTable->columnWidth(3));
 
  }
+
+
+ /**
+ * set grouping in table from information from nexus raw file
+ */
+void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
+{
+  if (isGroupingSet())
+    return;
+
+  std::string groupedWS = m_workspace_name+"Grouping";
+
+  // Load nexus file with grouping
+  QString pyString = "LoadMuonNexus('";
+  pyString.append(nexusFile);
+  pyString.append("','");
+  pyString.append( groupedWS.c_str());
+  pyString.append("', AutoGroup=\"1\");");
+  runPythonCode( pyString ).trimmed();
+
+  // get hold of a matrix-workspace. If period data assume each period has 
+  // the same grouping
+  Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(groupedWS);
+  WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(ws_ptr);
+  MatrixWorkspace_sptr matrix_workspace;
+  if (wsPeriods)
+  {
+    Workspace_sptr ws_ptr1 = AnalysisDataService::Instance().retrieve(groupedWS + "_1");
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr1);
+  }
+  else
+  {
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+  }
+
+  // check if there is any grouping in nexus file
+  bool thereIsGrouping = false;
+  int numOfHist = matrix_workspace->getNumberHistograms();
+  for (int wsIndex = 0; wsIndex < numOfHist; wsIndex++)
+  {
+    IDetector_sptr det = matrix_workspace->getDetector(wsIndex);
+
+    if( boost::dynamic_pointer_cast<DetectorGroup>(det) )
+    {
+      // prepare IDs string
+
+      boost::shared_ptr<DetectorGroup> detG = boost::dynamic_pointer_cast<DetectorGroup>(det);
+      std::vector<int> detIDs = detG->getDetectorIDs();
+      if (detIDs.size() > 1)
+      {
+        thereIsGrouping = true;
+        break;
+      }
+    }
+  }
+
+  // if no grouping in nexus then set dummy grouping and display warning to user
+  if ( thereIsGrouping == false )
+  {
+    std::stringstream idstr;
+    idstr << "1-" << matrix_workspace->getNumberHistograms();
+    m_uiForm.frontGroupGroupPairComboBox->addItems(QStringList("NoGroupingDetected"));
+    m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
+    m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
+
+    m_groupTableRowInFocus = 0;
+    updateFront();
+    nowDataAvailable();
+
+    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "No grouping detected in Nexus.");
+
+    return;
+  }
+
+
+  // Add info about grouping from Nexus file to group table
+  for (int wsIndex = 0; wsIndex < matrix_workspace->getNumberHistograms(); wsIndex++)
+  {
+    IDetector_sptr det = matrix_workspace->getDetector(wsIndex);
+
+    if( boost::dynamic_pointer_cast<DetectorGroup>(det) )
+    {
+      // prepare IDs string
+
+      boost::shared_ptr<DetectorGroup> detG = boost::dynamic_pointer_cast<DetectorGroup>(det);
+      std::vector<int> detIDs = detG->getDetectorIDs();
+      std::stringstream idstr;
+      int leftInt = detIDs[0];  // meaning left as in the left number of the range 8-18 for instance
+      int numIDs = static_cast<int>(detIDs.size());
+      idstr << detIDs[0];
+      for (int i = 1; i < numIDs; i++)
+      {
+        if (detIDs[i] != detIDs[i-1]+1 )
+        {
+          if (detIDs[i-1] == leftInt)
+          {
+              idstr << ", " << detIDs[i];
+              leftInt = detIDs[i];
+          }
+          else
+            {
+              idstr << "-" << detIDs[i-1] << ", " << detIDs[i];
+              leftInt = detIDs[i];
+            }
+          }
+        else if ( i == numIDs-1 )
+        {
+          idstr << "-" << detIDs[i];
+        }
+      }
+
+      // prepare group name string
+
+      std::stringstream gName;
+      gName << wsIndex;
+
+      // create table row
+
+      m_uiForm.frontGroupGroupPairComboBox->addItems(QStringList(gName.str().c_str()));
+      m_uiForm.groupTable->setItem(wsIndex, 0, new QTableWidgetItem(gName.str().c_str()));
+      m_uiForm.groupTable->setItem(wsIndex, 1, new QTableWidgetItem(idstr.str().c_str()));
+
+     /* std::stringstream detNumRead;
+      try
+      {
+        detNumRead << numOfDetectors(idstr.str());
+        m_uiForm.groupTable->setItem(wsIndex, 2, new QTableWidgetItem(detNumRead.str().c_str()));
+      }
+      catch (...)
+      {
+        m_uiForm.groupTable->setItem(wsIndex, 2, new QTableWidgetItem("Invalid"));
+      }
+
+
+      m_uiForm.groupTable->item(wsIndex,2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);*/
+
+      // populate pair table combo boxes
+      int rowNum = m_uiForm.pairTable->rowCount();
+      for (int i = 0; i < rowNum; i++)
+      {
+        QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
+        QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+
+        qw1->addItem( gName.str().c_str() );
+        qw2->addItem( gName.str().c_str() );
+       
+   
+      if ( qw2->count() > 1 )
+        qw2->setCurrentIndex(1);
+      }
+    }
+  }  // end loop over wsIndex
+  
+
+
+  m_groupTableRowInFocus = 0;
+  updateFront();
+  nowDataAvailable();
+
+
+
+}
