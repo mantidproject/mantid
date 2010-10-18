@@ -18,6 +18,7 @@ namespace Mantid
 		\version 1.0
 
 		This is an implementation class for handling geometry without triangulating and using opengl glu methods.
+    This class can render cube, sphere, cone and cylinder.
 
 		Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -64,7 +65,7 @@ namespace Mantid
 			V3D Point4; ///<cube coordinates
 			double radius; ///<Radius for the sphere, cone and cylinder
 			double height; ///<height for cone and cylinder;
-			V3D axis; ///< ¦¦ to axis
+			V3D axis; ///< ï¿½ï¿½ to axis
 			GEOMETRY_TYPE type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 		public:
 			GluGeometryHandler(IObjComponent* obj); ///< Constructor

@@ -23,6 +23,8 @@ namespace Mantid
 
 		This class supports drawing RectangularDetector - as a bitmap plotted by openGL rather
 		than a million individual pixels rendered as cubes.
+		A texture will have been created by the RectangularDetectorActor (in MantidPlot)
+		and this is what will be mapped.
 
 		Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

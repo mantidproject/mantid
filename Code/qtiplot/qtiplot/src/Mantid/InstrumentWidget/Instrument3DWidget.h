@@ -123,6 +123,9 @@ private:
   DataMappingType mDataMapping;
   MantidColorMap mColorMap;
   
+  /// List of detector IDs used by the color mapping algorithms.
+  std::vector<int> detector_list;
+
   InstrumentActor* mInstrumentActor;
   Mantid::Geometry::V3D mAxisDirection;
   Mantid::Geometry::V3D mAxisUpVector;

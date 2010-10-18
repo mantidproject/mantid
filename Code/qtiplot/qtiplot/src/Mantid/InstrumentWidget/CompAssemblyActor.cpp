@@ -9,7 +9,7 @@
 #include "MantidObject.h"
 #include "CompAssemblyActor.h"
 #include "ObjComponentActor.h"
-//#include "RectangularDetectorActor.h"
+#include "RectangularDetectorActor.h"
 #include <cfloat>
 using namespace Mantid;
 using namespace Geometry;
@@ -93,6 +93,7 @@ void CompAssemblyActor::define()
   }
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * This method draws the children with the ColorID rather than the children actual color. used in picking the component
  */
@@ -121,6 +122,7 @@ void CompAssemblyActor::drawUsingColorID()
   }
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Initialises the CompAssembly Children and creates actors for each children
  * @param withDisplayList :: the new actors for the children with same display list attribute as parent
@@ -132,7 +134,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
     CompPtr=mInstrument;
   else
     CompPtr=mInstrument->getComponentByID(mId);
-  //bounding box
+  //bounding box of the overall instrument
   Mantid::Geometry::V3D minBound;
   Mantid::Geometry::V3D maxBound;
   //Iterate through CompAssembly children
@@ -154,12 +156,11 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
         {
           //MantidObject * mantObj = getMantidObject(ChildObjPtr->Shape(),withDisplayList);
           //MantidObject * mantObj;
-          //RectangularDetectorActor* iActor = new RectangularDetectorActor(ChildRDPtr, mantObj, ChildObjPtr,false);
 
-          std::cout << "Creating the actor for " << ChildRDPtr->getName() << "\n";
-          ObjComponentActor* iActor = new ObjComponentActor(NULL, ChildObjPtr, false);
+          //std::cout << "Creating the actor for " << ChildRDPtr->getName() << "\n";
+          RectangularDetectorActor* iActor = new RectangularDetectorActor(ChildRDPtr);
 
-          std::cout << "Getting bounding boxes for " << ChildRDPtr->getName() << "\n";
+          //std::cout << "Getting bounding boxes for " << ChildRDPtr->getName() << "\n";
           iActor->getBoundingBox(minBound,maxBound);
 //          minBound = V3D(-60,-60,-60);
 //          maxBound = V3D(60,60,60);
@@ -197,6 +198,8 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
   }
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * This method checks the list of Objects in mObjects for obj, if found returns the MantidObject. if the obj is not found
  * then creates a new MantidObject for obj and adds to the list of mObjects and returns the newly created MantidObject.
@@ -221,6 +224,8 @@ MantidObject*	CompAssemblyActor::getMantidObject(const boost::shared_ptr<const M
   return (*iObj).second;
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Set the starting color reference for CompAssembly
  * @param rgb :: input color id
@@ -242,6 +247,8 @@ int CompAssemblyActor::setStartingReferenceColor(int rgb)
   return val-rgb;
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Concrete implementation of init method of GLObject. this method draws the children
  */
@@ -251,6 +258,7 @@ void CompAssemblyActor::init()
   for_each(mChildCompAssemActors.begin(),mChildCompAssemActors.end(),std::mem_fun(&GLActor::draw));
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * This method adds the detector ids of the children of CompAssembly to the input idList.
  * @param idList :: output list of detector ids for child detectors
@@ -259,20 +267,8 @@ void CompAssemblyActor::appendObjCompID(std::vector<int>& idList)
 {
   for(std::vector<ObjComponentActor*>::const_iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end(); ++iObjComp)
   {
-    //check the component type if its detector or not
-    const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
-    if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
-    {
-      if( !detector->isMonitor() )
-      {
-        idList.push_back(detector->getID());
-      }
-      else
-      {
-        idList.push_back(-1);
-      }
-    }
-
+    //If the object is a detector or a RectangularDetector, it will append the ID(s)
+    (*iObjComp)->appendObjCompID(idList);
   }
 
   for(std::vector<CompAssemblyActor*>::const_iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end(); ++iAssem)
@@ -281,37 +277,37 @@ void CompAssemblyActor::appendObjCompID(std::vector<int>& idList)
   }
 }
 
+//------------------------------------------------------------------------------------------------
 /**
- * The colors are set using the iterator of the color list.
+ * The colors are set using the iterator of the color list. The order of the detectors
+ * in this color list was defined by the calls to appendObjCompID().
+ *
  * @param list :: Color list iterator
  * @return the number of detectors
  */
-int CompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator list)
+int CompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator & list)
 {
   int count=0;
   for(std::vector<ObjComponentActor*>::iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end();iObjComp++)
   {
-    const boost::shared_ptr<Mantid::Geometry::IDetector>  detector =
-        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
-    if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
-    {
-      (*iObjComp)->setColor((*list));
-      count++;
-      list++;
-      continue;
-    }
+    //Each child will set its color and increment the list
+    int num=(*iObjComp)->setInternalDetectorColors(list);
+    count+=num;
   }
+
   for(std::vector<CompAssemblyActor*>::iterator iAssem = mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
   {
+    //Each assembly does the same
     int num=(*iAssem)->setInternalDetectorColors(list);
-    list+=num;
+    //list+=num;
     count+=num;
-
   }
-  std::cout << "CompAssemblyActor::setInternalDetectorColors() called with "<< count << " entries added.\n";
+  //std::cout << "CompAssemblyActor::setInternalDetectorColors() called with "<< count << " entries added.\n";
   return count;
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * This method redraws the CompAssembly children compassembly actors redraw. this method is used to redraw all the children
  */
@@ -323,6 +319,8 @@ void CompAssemblyActor::redraw()
   construct();
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
  * detector is not found then returns -1.
@@ -331,7 +329,7 @@ void CompAssemblyActor::redraw()
  */
 int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
 {
-  size_t n_comp_actors = mChildObjCompActors.size();
+  int n_comp_actors = static_cast<int>(mChildObjCompActors.size());
   if(rgb > 0 && rgb <= n_comp_actors)
   {
     const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
@@ -353,6 +351,8 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
   return -1;
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Return the bounding box
  * @param minBound :: min point of the bounding box
@@ -364,6 +364,8 @@ void CompAssemblyActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::G
   maxBound=maxBoundBox;
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * Append the bounding box CompAssembly bounding box
  * @param minBound :: min point of the bounding box

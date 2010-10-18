@@ -17,6 +17,9 @@ namespace Mantid
 		\version 1.0
 
 		This is an implementation class for handling geometry using OpenCascade(www.opencascade.org).
+		Unlike the GluGeometryHandler, it can handle more complex shapes.
+		It uses OpenCascade to generate a mesh defining the surface of an Object (shape).
+		This shape is saved along with the instrument definition as a .vtp file (for speed-ups).
 
 		Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

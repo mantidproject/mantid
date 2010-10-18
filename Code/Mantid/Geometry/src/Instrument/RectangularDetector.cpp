@@ -271,23 +271,55 @@ int RectangularDetector::getPointInObject(V3D& point) const
 }
 
 //-------------------------------------------------------------------------------------------------
+/** Return the bounding box (as a BoundingBox object.
+ * Saves the calculated bounding box in the cache.
+ */
+BoundingBox RectangularDetector::getBoundingBox() const
+{
+  //  if( !m_cachedBoundingBox )
+//  {
+//    m_cachedBoundingBox = new BoundingBox();
+//    BoundingBox compBox;
+//    this->getAtXY(0,0)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//    this->getAtXY(xPixels-1,0)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//    this->getAtXY(xPixels-1,yPixels-1)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//    this->getAtXY(0,yPixels-1)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//  }
+
+    if( !m_cachedBoundingBox )
+    {
+      m_cachedBoundingBox = new BoundingBox();
+//      V3D totalMinBound, totalMaxBound;
+      //Get the bounding boxes of all 4 corners
+      for (int x=0; x < this->xpixels(); x += this->xpixels()-1)
+        for (int y=0; y < this->ypixels(); y += this->ypixels()-1)
+        {
+          //Get the BB of the detector at that corner
+          double xmin,ymin,zmin,xmax,ymax,zmax;
+          xmin=ymin=zmin=-1000;
+          xmax=ymax=zmax=1000;
+          this->getAtXY(x,y)->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+          BoundingBox localBox(xmax,ymax,zmax,xmin,ymin,zmin);
+          m_cachedBoundingBox->grow(localBox);
+        }
+    }
+  //Copy to the result
+  return *m_cachedBoundingBox;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/** Return the bounding box (as 6 double values)
+ *
+ */
 void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
 {
-  if( !m_cachedBoundingBox )
-  {
-    m_cachedBoundingBox = new BoundingBox();
-    BoundingBox compBox;
-    this->getAtXY(0,0)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    this->getAtXY(xPixels-1,0)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    this->getAtXY(xPixels-1,yPixels-1)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    this->getAtXY(0,yPixels-1)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-  }
   // Use cached box
-  BoundingBox box = *m_cachedBoundingBox;
+  BoundingBox box = this->getBoundingBox();
 
   xmax = box.xMax();
   xmin = box.xMin();
@@ -295,15 +327,6 @@ void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zma
   ymin = box.yMin();
   zmax = box.zMax();
   zmin = box.zMin();
-
-//  xmin = -100;
-//  xmax = +100;
-//  ymin = -100;
-//  ymax = +100;
-//  zmin = -100;
-//  zmax = +100;
-  std::cout << "RectangularDetector::getBoundingBox() called for " << this->getName() << ":" << box << "\n";
-
 }
 
 
@@ -312,7 +335,7 @@ void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zma
  */
 void RectangularDetector::draw() const
 {
-  std::cout << "RectangularDetector::draw() called for " << this->getName() << "\n";
+  //std::cout << "RectangularDetector::draw() called for " << this->getName() << "\n";
   if(Handle()==NULL)return;
   //Render the ObjComponent and then render the object
   Handle()->Render();
@@ -323,7 +346,7 @@ void RectangularDetector::draw() const
  */
 void RectangularDetector::drawObject() const
 {
-  std::cout << "RectangularDetector::drawObject() called for " << this->getName() << "\n";
+  //std::cout << "RectangularDetector::drawObject() called for " << this->getName() << "\n";
   //if(shape!=NULL)    shape->draw();
 }
 
@@ -332,7 +355,7 @@ void RectangularDetector::drawObject() const
  */
 void RectangularDetector::initDraw() const
 {
-  std::cout << "RectangularDetector::initDraw() called for " << this->getName() << "\n";
+  //std::cout << "RectangularDetector::initDraw() called for " << this->getName() << "\n";
   if(Handle()==NULL)return;
   //Render the ObjComponent and then render the object
   //if(shape!=NULL)    shape->initDraw();
@@ -345,7 +368,7 @@ void RectangularDetector::initDraw() const
 /// Returns the shape of the Object
 const boost::shared_ptr<const Object> RectangularDetector::Shape() const
 {
-  std::cout << "RectangularDetector::Shape() called.\n";
+  //std::cout << "RectangularDetector::Shape() called.\n";
   //throw Kernel::Exception::NotImplementedError("RectangularDetector::Shape() is not implemented.");
 
 

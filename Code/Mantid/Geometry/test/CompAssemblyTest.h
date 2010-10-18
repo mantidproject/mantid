@@ -346,8 +346,8 @@ public:
     TS_ASSERT_EQUALS(compOrigin.getDistance(comp1), 10);
     TS_ASSERT_EQUALS(compOrigin.getDistance(comp2), 10);
     TS_ASSERT_EQUALS(compOrigin.getDistance(comp3), 5);
-    TS_ASSERT_DELTA(compOrigin.getDistance(comp4), 17.3205, 0.001)
-    TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001)
+    TS_ASSERT_DELTA(compOrigin.getDistance(comp4), 17.3205, 0.001);
+    TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001);
   }
 
   void testType()

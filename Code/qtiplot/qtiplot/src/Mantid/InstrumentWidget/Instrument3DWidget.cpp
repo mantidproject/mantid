@@ -60,6 +60,8 @@ void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction)
 	mAxisDirection = direction;
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * This method is the slot when the detectors are picked using mouse. This method emits
  * signals the ids of the detector and the spectra index(not spectra number).
@@ -99,6 +101,8 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
 
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * This method is the slot when the detector is highlighted using mouse move. This method emits
  * signals the id of the detector and the spectra index(not spectra number).
@@ -135,6 +139,8 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 
 }
 
+
+//------------------------------------------------------------------------------------------------
 /**
  * This method sets the workspace name input to the widget.
  * @param wsName input workspace name
@@ -173,6 +179,7 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
 }
 
 
+//------------------------------------------------------------------------------------------------
 /**
  * This method parses the instrument information and creates the actors relating to the detectors.
  */
@@ -185,6 +192,7 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
   this->setActorCollection(scene);
 }
 
+//------------------------------------------------------------------------------------------------
 /**
  * Calculate the minimum and maximum values of the bins for the set workspace
  */
@@ -252,16 +260,24 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
 
 }
 
+//------------------------------------------------------------------------------------------------
 /**
- * Integrate the workspace
+ * Integrate the workspace. This calculates the total counts
+ * in all spectra and makes the color list for each pixel, using
+ * the current color map.
  */
 void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
 {
   if( !workspace ) return;
+
   // This looks like a strange way of doing this but the CompAssemblyActor needs the colours in the same
   // order as it fills its detector lists!
-  std::vector<int> detector_list(0);
-  mInstrumentActor->getDetectorIDList(detector_list);
+  if (detector_list.size() == 0)
+  {
+    //Only load the detector ID list once per instance
+    mInstrumentActor->getDetectorIDList(detector_list);
+  }
+
   if( detector_list.empty() ) return;
   createWorkspaceIndexList(detector_list);
 
@@ -345,6 +361,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   mInstrumentActor->setDetectorColors(colorlist);
 }
 
+
 //------------------------------------------------------------------------------------------------
 /** Returns the sum of all bins in a given spectrum
  *
@@ -396,9 +413,10 @@ void Instrument3DWidget::recount()
 }
 
 
+
 //------------------------------------------------------------------------------------------------
 /**
- * For a change in the colour map, just update the color indices
+ * For a change in the colour map, just update the color indices.
  */
 void Instrument3DWidget::updateColorsForNewMap()
 {
@@ -406,6 +424,7 @@ void Instrument3DWidget::updateColorsForNewMap()
   const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
   const short ncols = mColorMap.getTopCIndex() + 1;
 
+  //Create a list of GLColor objects for every spectrum in the workspace
   std::vector<boost::shared_ptr<GLColor> > colorlist(mScaledValues.size());
   if( max_ncols == ncols )
   {
@@ -816,6 +835,4 @@ void Instrument3DWidget::setSceneHighResolution()
 void Instrument3DWidget::getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound)
 {
 	mInstrumentActor->getBoundingBox(minBound,maxBound);
-  std::cout << "min bounding box " << minBound << "\n";
-  std::cout << "max bounding box " << maxBound << "\n";
 }

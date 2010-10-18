@@ -48,7 +48,9 @@ public:
   ~ObjComponentActor();								   ///< Destructor
   virtual std::string type()const {return "ObjComponentActor";} ///< Type of the GL object
   virtual void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  virtual void  getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
+  virtual void appendObjCompID(std::vector<int>& idList);
+  virtual int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator & list);
+  virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
 
   const boost::shared_ptr<Mantid::Geometry::IObjComponent> getObjComponent() const{return mObjComp;}
 };

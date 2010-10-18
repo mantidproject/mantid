@@ -60,8 +60,8 @@ void SumNeighbours::exec()
   SumX = getProperty("SumX");
   SumY = getProperty("SumY");
 
-  if ((XPixels % SumX != 0) || (YPixels % SumY != 0))
-    throw std::invalid_argument("SumX must evenly divide XPixels and SumY must evenly divide YPixels for SumNeighbours to work.");
+//  if ((XPixels % SumX != 0) || (YPixels % SumY != 0))
+//    throw std::invalid_argument("SumX must evenly divide XPixels and SumY must evenly divide YPixels for SumNeighbours to work.");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr matrixInWS = getProperty("InputWorkspace");

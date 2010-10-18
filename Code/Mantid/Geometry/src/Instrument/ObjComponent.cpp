@@ -167,6 +167,13 @@ void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, doub
  */
 void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
 {
+//  double xmin,ymin,zmin,xmax,ymax,zmax;
+//  this->getBoundingBox(xmax,ymax,zmax, xmin,ymin,zmin);
+//  absoluteBB = BoundingBox(xmax,ymax,zmax, xmin,ymin,zmin);
+//  return;
+
+  //TODO: There may be a bug with the following code - my BB always returned 0, for a pixel inside a RectangularDetector. Janik Zikovsky, Oct 18, 2010
+
   // Start with the box in the shape's coordinates and
   boost::shared_ptr<BoundingBox> BB = shape->getBoundingBox();
   if (!BB) return;

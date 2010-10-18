@@ -112,9 +112,8 @@ public:
     //Name
     TS_ASSERT_EQUALS(det->getAtXY(1,2)->getName(), "MyRectangle(1,2)");
 
-//    BoundingBox box;
-//    det->getBoundingBox(box);
-//    std::cout << box << "\n";
+    BoundingBox box= det->getBoundingBox();
+    //std::cout << box << "\n";
   }
 
 

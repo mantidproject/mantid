@@ -4,6 +4,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/IDetector.h"
 #include "ObjComponentActor.h"
 #include "MantidObject.h"
 #include <GL/gl.h>
@@ -29,6 +30,7 @@ ObjComponentActor::~ObjComponentActor()
 {
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Concrete implementation of rendering ObjComponent.
  */
@@ -68,6 +70,56 @@ void ObjComponentActor::define()
 	glPopMatrix();
 }
 
+
+//-------------------------------------------------------------------------------------------------
+/** Append the detector ID of this object to the list, if it is a detector.
+ *
+ * @param idList sequential list of detector IDs.
+ */
+void ObjComponentActor::appendObjCompID(std::vector<int>& idList)
+{
+  //check the component type if its detector or not
+  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(this->getObjComponent());
+  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
+  {
+    if( !detector->isMonitor() )
+    {
+      idList.push_back(detector->getID());
+    }
+    else
+    {
+      idList.push_back(-1);
+    }
+  }
+}
+
+
+//------------------------------------------------------------------------------------------------
+/**
+ * The colors are set using the iterator of the color list. The order of the detectors
+ * in this color list was defined by the calls to appendObjCompID().
+ *
+ * @param list :: Color list iterator
+ * @return the number of detectors
+ */
+int ObjComponentActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator & list)
+{
+  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector =
+      boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(this->getObjComponent());
+  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
+  {
+    this->setColor((*list));
+    //Increment for the next one
+    list++;
+    return 1;
+  }
+  else
+    return 0;
+}
+
+
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Return the bounding box
  * @param minBound :: min point of the bounding box

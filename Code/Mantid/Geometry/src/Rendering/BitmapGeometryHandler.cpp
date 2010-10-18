@@ -52,20 +52,26 @@ namespace Geometry
    */
   void BitmapGeometryHandler::Triangulate()
   {
-    std::cout << "BitmapGeometryHandler::Triangulate() called\n";
+    //std::cout << "BitmapGeometryHandler::Triangulate() called\n";
   }
 
   //----------------------------------------------------------------------------------------------
   ///< Render Object or ObjComponent
   void BitmapGeometryHandler::Render()
   {
-    std::cout << "BitmapGeometryHandler::Render() called\n";
+    //std::cout << "BitmapGeometryHandler::Render() called\n";
     V3D pos;
 
     //Wait for no error
     while(glGetError() != GL_NO_ERROR);
 
-    glBindTexture (GL_TEXTURE_2D, 13);
+    glEnable (GL_TEXTURE_2D); // enable texture mapping
+
+    //Point to the ID of the texture that was created before - in RectangularDetectorActor.
+    int texture_id = mRectDet->getAtXY(0,0)->getID();
+    glBindTexture (GL_TEXTURE_2D, texture_id);
+    if (glGetError()>0) std::cout << "OpenGL error in glBindTexture \n";
+
     glBegin (GL_QUADS);
 
     glTexCoord2f (0.0, 0.0);
@@ -84,8 +90,10 @@ namespace Geometry
     pos = mRectDet->getRelativePosAtXY(0, mRectDet->ypixels()-1);
     glVertex3f( pos.X(), pos.Y(), pos.Z());
 
-
     glEnd ();
+    if (glGetError()>0) std::cout << "OpenGL error in BitmapGeometryHandler::Render \n";
+
+    glDisable (GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
 
   }
 
@@ -93,7 +101,7 @@ namespace Geometry
  ///< Prepare/Initialize Object/ObjComponent to be rendered
   void BitmapGeometryHandler::Initialize()
   {
-    std::cout << "BitmapGeometryHandler::Initialize() called\n";
+    //std::cout << "BitmapGeometryHandler::Initialize() called\n";
   }
 
 
