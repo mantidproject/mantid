@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>868</width>
-    <height>773</height>
+    <width>872</width>
+    <height>819</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,7 +35,7 @@
       <x>20</x>
       <y>10</y>
       <width>831</width>
-      <height>671</height>
+      <height>701</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -56,7 +56,7 @@
     <property name="geometry">
      <rect>
       <x>650</x>
-      <y>690</y>
+      <y>730</y>
       <width>93</width>
       <height>27</height>
      </rect>
@@ -72,7 +72,7 @@
     <property name="geometry">
      <rect>
       <x>750</x>
-      <y>690</y>
+      <y>730</y>
       <width>93</width>
       <height>27</height>
      </rect>
@@ -90,7 +90,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>868</width>
+     <width>872</width>
      <height>23</height>
     </rect>
    </property>
