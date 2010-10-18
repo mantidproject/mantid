@@ -97,11 +97,12 @@ private:
   int spec;
   int m_NVectors;
 };
+
+DECLARE_WORKSPACE(WorkspaceTester)
+
 }}// namespace
 
 
-
-DECLARE_WORKSPACE(WorkspaceTester)
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite
 {
