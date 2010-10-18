@@ -57,30 +57,61 @@ class ISISReducer(SANSReducer):
 
         self._init_steps()
         self.wksp_name = None
+        self.full_trans_wav = True
+
+
+    def _to_steps(self):
+        """
+            Defines the steps that are run and their order
+        """
+        self._reduction_steps.append(self.data_loader)
+        self._reduction_steps.append(self.user_settings)
+        self._reduction_steps.append(self.place_det_sam)
+        self._reduction_steps.append(self._geometry)
+        self._reduction_steps.append(self._out_name)
+        #---- the can special reducer uses the steps starting with the next one
+        self._reduction_steps.append(self.flood_file)
+        self._reduction_steps.append(self.crop_detector)
+        self._reduction_steps.append(self.trans_loader)
+        self._reduction_steps.append(self.mask)
+        self._reduction_steps.append(self.to_wavelen)
+        self._reduction_steps.append(self.norm_mon)
+        self._reduction_steps.append(self.transmission_calculator)
+        self._reduction_steps.append(self._corr_and_scale)
+        self._reduction_steps.append(self._geo_corr)
+        self._reduction_steps.append(self.to_Q)
+        #---- the can special reducer ends on the previous step
+        self._reduction_steps.append(self.background_subtracter)
+        self._reduction_steps.append(self._zero_errors)
+        self._reduction_steps.append(self._rem_zeros)
+        
+        #if set to an integer only that period will be extracted from the run file and processed 
+        self._period_num = None
 
     def _init_steps(self):
         """
-            Declares all steps that can be run. Compulsory steps are to be initialised
-            here, optional ones are set to None.
+            Initialises all steps that can be run in an ISIS SANS reduction.
         """
         #_to_steps() defines the order the steps are run in, any steps not in that list wont be run  
         
-        #TODO: set all optional steps to None
         self.data_loader =     ISISReductionSteps.LoadSample()
         self.user_settings =   ISISReductionSteps.ReadUserFile()
         self.place_det_sam =   ISISReductionSteps.MoveComponents()
+        self._geometry =       SANSReductionSteps.GetSampleGeom()
         self._out_name =       ISISReductionSteps.GetOutputName()
-        self.crop_detector =   ISISReductionSteps.CropDetBank(self._out_name)
-        self.flood_file =      None
+        self.flood_file =      ISISReductionSteps.CorrectToFileISIS(
+            '', 'SpectrumNumber','Divide', self._out_name.name_holder)
+        self.crop_detector =   ISISReductionSteps.CropDetBank(
+            self._out_name.name_holder)
         self.trans_loader =    None
         self.mask =            ISISReductionSteps.Mask_ISIS(both_dets=False)
         self.to_wavelen =      ISISReductionSteps.UnitsConvert('Wavelength')
         self.norm_mon =        ISISReductionSteps.NormalizeToMonitor()
-        self.transmission_calculator = None
+        self.transmission_calculator =\
+                               ISISReductionSteps.TransmissionCalc(run=False)
         self._corr_and_scale = ISISReductionSteps.ISISCorrections()
         self.to_Q =            ISISReductionSteps.ConvertToQ()
         self.background_subtracter = None
-        self._geometry =       SANSReductionSteps.GetSampleGeom()
         self._geo_corr =       SANSReductionSteps.SampleGeomCor(self._geometry)
         self._zero_errors =    ISISReductionSteps.ReplaceErrors()
         self._rem_zeros =      SANSReductionSteps.StripEndZeros()
@@ -95,29 +126,6 @@ class ISISReducer(SANSReducer):
             the list of reduction steps.
         """
         self._to_steps()
-
-    def _to_steps(self):
-        self._reduction_steps.append(self.data_loader)
-        self._reduction_steps.append(self.user_settings)
-        self._reduction_steps.append(self.place_det_sam)
-        self._reduction_steps.append(self._out_name)
-        self._reduction_steps.append(self.crop_detector)
-        self._reduction_steps.append(self.flood_file)
-        self._reduction_steps.append(self.trans_loader)
-        self._reduction_steps.append(self.mask)
-        self._reduction_steps.append(self.to_wavelen)
-        self._reduction_steps.append(self.norm_mon)
-        self._reduction_steps.append(self.transmission_calculator)
-        self._reduction_steps.append(self._corr_and_scale)
-        self._reduction_steps.append(self.to_Q)
-        self._reduction_steps.append(self.background_subtracter)
-        self._reduction_steps.append(self._geometry)
-        self._reduction_steps.append(self._geo_corr)
-        self._reduction_steps.append(self._zero_errors)
-        self._reduction_steps.append(self._rem_zeros)
-        
-        #if set to an integer only that period will be extracted from the run file and processed 
-        self._period_num = None
 
     def set_user_path(self, path):
         """
@@ -169,20 +177,18 @@ class ISISReducer(SANSReducer):
             self.background_subtracter = ISISReductionSteps.CanSubtraction(can_run, reload=reload, period=period)
 
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
-        if not issubclass(self.transmission_calculator.__class__, SANSReductionSteps.BaseTransmission):
-            raise RuntimeError, "ISISReducer.set_trans_fit: transmission calculator not set"
-        self.transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method)
+        self.transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method, override=True)
+        self.transmission_calculator.enabled = True
         
     def set_trans_sample(self, sample, direct, reload=True, period=-1):
         if not issubclass(self.trans_loader.__class__, SANSReductionSteps.BaseTransmission):
-            raise RuntimeError, "ISISReducer.set_trans_sample: transmission calculator not set"
-        self.trans_loader = ISISReductionSteps.LoadTransmissions()
+            self.trans_loader = ISISReductionSteps.LoadTransmissions()
         self.trans_loader.set_trans_sample(sample, direct, reload, period)
-        self.transmission_calculator =ISISReductionSteps.CalculateTransmission()
-        
+        self.transmission_calculator.enabled = True
+
     def set_trans_can(self, can, direct, reload = True, period = -1):
         if not issubclass(self.trans_loader.__class__, SANSReductionSteps.BaseTransmission):
-            raise RuntimeError, "ISISReducer.set_trans_can: transmission calculator not set"
+            self.trans_loader = ISISReductionSteps.LoadTransmissions()
         self.trans_loader.set_trans_can(can, direct, reload, period)
         
     def set_monitor_spectrum(self, specNum, interp=False):

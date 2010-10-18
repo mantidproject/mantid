@@ -176,7 +176,16 @@ class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
         """
         """
         super(LoadTransmissions, self).__init__()
-    
+        self.trans_name = None
+        self.direct_name = None
+        self.trans_can_name = None
+        self.direct_can_name = None
+
+        self.TRANS_SAMPLE_N_PERIODS = None
+        self.DIRECT_SAMPLE_N_PERIODS = None
+        self.TRANS_CAN_N_PERIODS = None
+        self.DIRECT_CAN_N_PERIODS = None
+
     def set_trans_sample(self, sample, direct, reload=True, period=-1):            
         self._trans_sample = sample
         self._direct_sample = direct
@@ -197,12 +206,12 @@ class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
         if self._trans_sample not in [None, '']:
             trans_ws, dummy1, dummy2, dummy3, self.TRANS_SAMPLE_N_PERIODS = \
                 self._assignHelper(reducer, self._trans_sample, True, self._sample_reload, self._sample_period)
-            self.TRANS_SAMPLE = trans_ws.getName()
+            self.trans_name = trans_ws.getName()
         
         if self._direct_sample not in [None, '']:
             direct_sample_ws, dummy1, dummy2, dummy3, self.DIRECT_SAMPLE_N_PERIODS = \
                 self._assignHelper(reducer, self._direct_sample, True, self._sample_reload, self._sample_period)
-            self.DIRECT_SAMPLE = direct_sample_ws.getName()
+            self.direct_name = direct_sample_ws.getName()
         
         # Load transmission can
         self._clearPrevious(self.TRANS_CAN)
@@ -211,14 +220,14 @@ class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
         if self._trans_can not in [None, '']:
             can_ws, dummy1, dummy2, dummy3, self.TRANS_CAN_N_PERIODS = \
                 self._assignHelper(reducer, self._trans_can, True, self._can_reload, self._can_period)
-            self.TRANS_CAN = can_ws.getName()
-            
+            self.trans_can_name = can_ws.getName()
+
         if self._direct_can in [None, '']:
-            self.DIRECT_CAN, self.DIRECT_CAN_N_PERIODS = self.DIRECT_SAMPLE, self.DIRECT_SAMPLE_N_PERIODS
+            self.direct_can_name, self.DIRECT_CAN_N_PERIODS = self.DIRECT_SAMPLE, self.DIRECT_SAMPLE_N_PERIODS
         else:
             direct_can_ws, dummy1, dummy2, dummy3, self.DIRECT_CAN_N_PERIODS = \
                 self._assignHelper(reducer, self._direct_can, True, self._can_reload, self._can_period)
-            self.DIRECT_CAN = direct_can_ws.getName()
+            self.direct_can_name = direct_can_ws.getName()
  
 class CanSubtraction(LoadRun):
     """
@@ -352,27 +361,38 @@ class CanSubtraction(LoadRun):
         RenameWorkspace(workspace, tmp_smp)
         # Run correction function
         # was  Correct(SCATTER_CAN, can_setup[0], can_setup[1], wav_start, wav_end, can_setup[2], can_setup[3], finding_centre)
-        tmp_can = workspace+"_can_tmp_new"
+        tmp_can = workspace+"_can_tmp"
 
         # Can correction
         #replaces Correct(can_setup, wav_start, wav_end, use_def_trans, finding_centre)
         reduce_can = copy.copy(reducer)
         #this will be the first command that is run in the new chain
-        crop = reduce_can._reduction_steps.index(reduce_can.crop_detector)
-        norm = reduce_can._reduction_steps.index(reduce_can.norm_mon)
+        start = reduce_can._reduction_steps.index(reduce_can.flood_file)
         #stop before this current step
         end = reduce_can._reduction_steps.index(self)-1
-        #some things are going to be changed, make deep copies of these
+        
+        #some things are going to be changed, make deep copies
+        reduce_can._reduction_steps = copy.deepcopy(reducer._reduction_steps)
+        #the workspace is again branched with a new name
+        reduce_can._reduction_steps[start].out_container[0] = tmp_can
+        #the line below is required if the step above is optional
+        ch = reducer._reduction_steps.index(reducer.crop_detector)
+        reduce_can._reduction_steps[ch].out_container[0] = tmp_can
+        if not reducer.transmission_calculator is None:
+            ch =reducer._reduction_steps.index(reducer.transmission_calculator)
+            reduce_can._reduction_steps[ch].set_is_can()
+
+        ch = reducer._reduction_steps.index(reducer.norm_mon)
+        reduce_can._reduction_steps[ch]\
+            = NormalizeToMonitor(raw_ws = self.SCATTER_CAN.getName())
+
         reduce_can._data_files = copy.deepcopy(reducer._data_files)
         #set the workspace that we've been setting up as the one to be processed 
         reduce_can.set_process_single_workspace(self.SCATTER_CAN.getName())
-        #the workspace is again branched with a new name
-        reduce_can._reduction_steps = copy.deepcopy(reducer._reduction_steps)
-        reduce_can._reduction_steps[crop] = CropDetBank(tmp_can)
-        reduce_can._reduction_steps[norm]\
-            = NormalizeToMonitor(raw_ws = self.SCATTER_CAN.getName())
-        reduce_can.run_steps(start_ind=crop, stop_ind=end)
+
+        reduce_can.run_steps(start_ind=start, stop_ind=end)
         
+
         #we now have the can workspace, use it
         Minus(tmp_smp, tmp_can, workspace)
     
@@ -699,11 +719,11 @@ class LoadSample(LoadRun):
             self._SAMPLE_SETUP = None
             self._SAMPLE_RUN = ''
             self.SCATTER_SAMPLE = None
-            raise RunTimeError('Sample needs to be assigned as run_number.file_type')
+            raise RuntimeError('Sample needs to be assigned as run_number.file_type')
 
         self.SCATTER_SAMPLE, reset, logname, filepath, self._SAMPLE_N_PERIODS = self._assignHelper(reducer, self._sample_run, False, self._reload, self._period)
         if self.SCATTER_SAMPLE.getName() == '':
-            raise RunTimeError('Unable to load SANS sample run, cannot continue.')
+            raise RuntimeError('Unable to load SANS sample run, cannot continue.')
         if reset == True:
             self._SAMPLE_SETUP = None
 
@@ -716,7 +736,7 @@ class LoadSample(LoadRun):
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
             if logvalues == None:
                 mantid.deleteWorkspace(self.SCATTER_SAMPLE.getName())
-                raise RunTimeError('Sample logs cannot be loaded, cannot continue')
+                raise RuntimeError('Sample logs cannot be loaded, cannot continue')
         except AttributeError:
             if not reducer.instrument.name() == 'LOQ': raise
         
@@ -752,7 +772,7 @@ class CropDetBank(ReductionStep):
         changing the name of the output workspace, which is more efficient than
         running clone workspace to do that
     """ 
-    def __init__(self, name_change=None):
+    def __init__(self, name_container=[]):
         """
             If a name is passed to this function this reduction step
             will branch to a new output workspace. The name could be
@@ -760,24 +780,15 @@ class CropDetBank(ReductionStep):
             @param name_change: an object that contains the new name
         """
         super(CropDetBank, self).__init__()
-        self._name_object = name_change
+        self.out_container = name_container
 
-    def execute(self, reducer, workspace, rebin_alg = 'use default'):
-        out_name = workspace
-        if not self._name_object is None:
-            if type(self._name_object) is GetOutputName:
-                out_name = self._name_object.name
-            elif type(self._name_object) is str:
-                out_name = self._name_object
-            else:
-                mantid.sendLogMessage('Could not get the name of the output workspace, the output workspace won\'t be renamed (wrong type passed to CropDetBank)')
-
-        # Get the detector bank that is to be used in this analysis leave the complete workspace
-        CropWorkspace(workspace, out_name,
+    def execute(self, reducer, workspace):
+        if len(self.out_container) > 0:
+            reducer.wksp_name = self.out_container[0]
+         # Get the detector bank that is to be used in this analysis leave the complete workspace
+        CropWorkspace(workspace, reducer.wksp_name,
             StartWorkspaceIndex = reducer.instrument.cur_detector().first_spec_num - 1,
             EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
-
-        reducer.wksp_name = out_name
 
 class UnitsConvert(ReductionStep):
     def __init__(self, units, w_low = None, w_step = None, w_high = None):
@@ -926,8 +937,8 @@ class NormalizeToMonitor(SANSReductionSteps.Normalize):
 
 # Setup the transmission workspace
 ##
-class CalculateTransmission(SANSReductionSteps.BaseTransmission):
-        # Map input values to Mantid options
+class TransmissionCalc(SANSReductionSteps.BaseTransmission):
+    # Map input values to Mantid options
     TRANS_FIT_OPTIONS = {
         'YLOG' : 'Log',
         'STRAIGHT' : 'Linear',
@@ -936,85 +947,125 @@ class CalculateTransmission(SANSReductionSteps.BaseTransmission):
         'LOG' : 'Log',
         'LINEAR' : 'Linear',
         'LIN' : 'Linear',
-        'OFF' : 'Off'
-    }  
+        'OFF' : 'Off'}
 
-    def __init__(self):
-        super(CalculateTransmission, self).__init__()
+    #map to restrict the possible values of _trans_type
+    CAN_SAMPLE_SUFFIXES = {
+        False : 'sample',
+        True : 'can'}
+    
+    DEFAULT_FIT = 'Log'
+
+    def __init__(self, run = True):
+        super(TransmissionCalc, self).__init__()
+        self.enabled = run
+        self._is_can = False
+        #set these variables to None, which means they haven't been set and defaults will be set further down
         self._lambda_min = None
         self._lambda_max = None
-        self._fit_method = 'Log'
-        self._use_full_range = True
-    
+        self._fit_method = None
+        self._use_full_range = None
 
-    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
-        self._lambda_min = lambda_min
-        self._lambda_max = lambda_max
-        fit_method = fit_method.upper()
-        if fit_method in self.TRANS_FIT_OPTIONS.keys():
-            self._fit_method = self.TRANS_FIT_OPTIONS[fit_method]
-        else:
-            self._fit_method = 'Log'      
-            mantid.sendLogMessage("ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default LOG method")
+    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method=None, override=True):
+        if not lambda_min is None:
+            if (self._lambda_min is None) or override:
+                self._lambda_min = lambda_min
+        if not lambda_max is None:
+            if (self._lambda_max is None) or override:
+                self._lambda_max = lambda_max
+
+        if not fit_method is None:
+            if (self._fit_method is None) or override:
+                fit_method = fit_method.upper()
+                if fit_method in self.TRANS_FIT_OPTIONS.keys():
+                    self._fit_method = self.TRANS_FIT_OPTIONS[fit_method]
+                else:
+                    self._fit_method = self.DEFAULT_FIT
+                    mantid.sendLogMessage('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
 
     def set_full_wav(self, is_full):
         self._use_full_range = is_full
 
+    def set_is_can(self, is_can=True):
+        self._is_can = is_can
+
     def execute(self, reducer, workspace):
-        if self._lambda_max == None:
-            self._lambda_max = reducer.instrument.TRANS_WAV1_FULL
-        if self._lambda_min == None:
-            self._lambda_min = reducer.instrument.TRANS_WAV2_FULL
-        
-        trans_raw = run_setup.getTransRaw()
-        direct_raw = run_setup.getDirectRaw()
-        if trans_raw == '' or direct_raw == '':
-            return None
-    
-        if self._use_full_range:
-            wavbin = str(TRANS_WAV1_FULL) 
-            wavbin = + ',' + str(ReductionSingleton().to_wavelen.wav_step)
-            wavbin = + ',' + str(TRANS_WAV2_FULL)
-            translambda_min = TRANS_WAV1_FULL
-            translambda_max = TRANS_WAV2_FULL
+        if not self.enabled:
+            return
+
+        if self._is_can:
+            trans_raw = reducer.trans_loader.trans_can_name
+            direct_raw = reducer.trans_loader.direct_can_name
         else:
-            translambda_min = TRANS_WAV1
-            translambda_max = TRANS_WAV2
-            wavbin = str(Reducer.to_wavelen.get_rebin())
+            trans_raw = reducer.trans_loader.trans_name
+            direct_raw = reducer.trans_loader.direct_name
+        if not trans_raw:
+            raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % CAN_SAMPLE_SUFFIXES[self._is_can])
+        if not direct_raw:
+            raise RuntimeError('Attempting transmission correction with no direct file')
+
+        instrum = reducer.instrument
+
+        #set the defaults where no value had be set
+        if self._lambda_max is None:
+            self._lambda_max = instrum.WAV_RANGE_MAX
+        if self._lambda_min is None:
+            self._lambda_min = instrum.WAV_RANGE_MIN
+        
+        if self._fit_method is None:
+            self._fit_method = self.DEFAULT_FIT
+            
+        if self._use_full_range is None:
+            use_full_range = reducer.full_trans_wav
+        else:
+            use_full_range = self._use_full_range
+        if use_full_range:
+            wavbin = str(instrum.WAV_RANGE_MIN) 
+            wavbin = + ',' + str(ReductionSingleton().to_wavelen.wav_step)
+            wavbin = + ',' + str(instrum.WAV_RANGE_MAX)
+            translambda_min = instrum.WAV_RANGE_MIN
+            translambda_max = instrum.WAV_RANGE_MAX
+        else:
+            translambda_min = self._lambda_min
+            translambda_max = self._lambda_max
+            wavbin = str(reducer.to_wavelen.get_rebin())
     
-        fittedtransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(translambda_min) + '_' + str(translambda_max)
+        fittedtransws = trans_raw.split('_')[0] + '_trans_'
+        fittedtransws += self.CAN_SAMPLE_SUFFIXES[self._is_can]
+        fittedtransws += '_'+str(translambda_min)+'_'+str(translambda_max)
         unfittedtransws = fittedtransws + "_unfitted"
-        if use_def_trans == False or \
-        (TRANS_FIT != 'Off' and mantid.workspaceExists(fittedtransws) == False) or \
-        (TRANS_FIT == 'Off' and mantid.workspaceExists(unfittedtransws) == False):
+        
+        if (not use_full_range) or \
+        (self._fit_method != 'Off' and mantid.workspaceExists(fittedtransws) == False) or \
+        (self._fit_method == 'Off' and mantid.workspaceExists(unfittedtransws) == False):
             # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-            if TRANS_FIT == 'Off':
+            if self._fit_method == 'Off':
                 fit_type = 'Linear'
             else:
-                fit_type = TRANS_FIT
-            #retrieve the user setting that tells us whether Rebin or InterpolatingRebin will be used during the normalisation 
+                fit_type = self._fit_method
+
             if reducer.instrument.name() == 'LOQ':
-                # Change the instrument definition to the correct one in the LOQ case
-                LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
-                LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
+                # Load in the instrument setup used for LOQ transmission runs
+                instrum.load_transmission_inst(trans_raw)
+                instrum.load_transmission_inst(direct_raw)
                 
                 trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
-                    '1,2', BACKMON_START, BACKMON_END, wavbin, 
+                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
                     reducer.instrument.use_interpol_trans_calc, True)
                 
                 direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
-                    '1,2', BACKMON_START, BACKMON_END, wavbin,
+                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
                     reducer.instrument.use_interpol_trans_calc, True)
                 
                 CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength = translambda_min, MaxWavelength =  translambda_max, \
                                       FitMethod = fit_type, OutputUnfittedData=True)
             else:
                 trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
-                    '1,2', BACKMON_START, BACKMON_END, wavbin,
+                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
                     reducer.instrument.use_interpol_trans_calc, False)
-                
+
                 direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
-                    '1,2', BACKMON_START, BACKMON_END, wavbin,
+                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
                     reducer.instrument.use_interpol_trans_calc, False)
                 
                 CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
@@ -1025,14 +1076,15 @@ class CalculateTransmission(SANSReductionSteps.BaseTransmission):
             mantid.deleteWorkspace(trans_tmp_out)
             mantid.deleteWorkspace(direct_tmp_out)
             
-        if TRANS_FIT == 'Off':
+        if self._fit_method == 'Off':
             result = unfittedtransws
             mantid.deleteWorkspace(fittedtransws)
         else:
             result = fittedtransws
     
-        if self.use_def_trans == DefaultTrans:
-            tmp_ws = 'trans_' + run_setup.getSuffix() + '_' + reducer.to_wavelen.get_range()
+        if use_full_range:
+            tmp_ws = 'trans_' + self.CAN_SAMPLE_SUFFIXES[self._is_can]
+            tmp_ws += '_' + reducer.to_wavelen.get_range()
             CropWorkspace(result, tmp_ws, XMin = str(reducer.to_wavelen.wav_low), XMax = str(reducer.to_wavelen.wav_high))
             trans_ws = tmp_ws
         else: 
@@ -1041,11 +1093,12 @@ class CalculateTransmission(SANSReductionSteps.BaseTransmission):
         Divide(workspace, trans_ws, workspace)
 
 class ISISCorrections(SANSReductionSteps.CorrectToFileStep):
+    DEFAULT_SCALING = 100.0
     def __init__(self, corr_type = '', operation = ''):
         super(ISISCorrections, self).__init__('', "Wavelength", "Divide")
 
         # Scaling values [%]
-        self.rescale= 100.0
+        self.rescale= self.DEFAULT_SCALING
     
     def set_filename(self, filename):
         raise AttributeError('The correction must be set in the instrument, or use the CorrectionToFileStep instead')
@@ -1065,6 +1118,22 @@ class ISISCorrections(SANSReductionSteps.CorrectToFileStep):
 
         ws = mantid[workspace]
         ws *= scalefactor
+
+class CorrectToFileISIS(SANSReductionSteps.CorrectToFileStep):
+    """
+        Adds the ability to change the name of the output workspace to
+        it CorrectToFileStep, its base ReductionStep 
+    """
+    def __init__(self, file='', corr_type='', operation='', name_container=[]):
+        super(CorrectToFileISIS, self).__init__(file, corr_type, operation)
+        self.out_container = name_container
+
+    def execute(self, reducer, workspace):
+        if self._filename:
+            if len(self.out_container) > 0:
+                reducer.wksp_name = self.out_container[0]
+                CorrectToFile(workspace, self._filename, reducer.wksp_name,
+                              self._corr_type, self._operation)
 
 class ReadUserFile(ReductionStep):
     def __init__(self):
@@ -1111,7 +1180,8 @@ class ReadUserFile(ReductionStep):
             
             elif upper_line.startswith('SET SCALES'):
                 values = upper_line.split()
-                reducer._corr_and_scale.rescale = float(values[2]) * 100.0
+                reducer._corr_and_scale.rescale = \
+                    float(values[2])*reducer._corr_and_scale.DEFAULT_SCALING
             
             elif upper_line.startswith('SAMPLE/OFFSET'):
                 values = upper_line.split()
@@ -1149,15 +1219,11 @@ class ReadUserFile(ReductionStep):
                 params = upper_line[10:].split()
                 if len(params) == 3:
                     fit_type, lambdamin, lambdamax = params
-                    if reducer.transmission_calculator is None:
-                         reducer.transmission_calculator = CalculateTransmission()
                     reducer.transmission_calculator.set_trans_fit(lambda_min=lambdamin, 
-                                                                lambda_max=lambdamax, 
-                                                                fit_method=fit_type)
+                        lambda_max=lambdamax, fit_method=fit_type, override=False)
                 else:
-                    _issueWarning('Incorrectly formatted FIT/TRANS line, setting defaults to LOG and full range')
-                    reducer.transmission_calculator = CalculateTransmission()
-            
+                    _issueWarning('Incorrectly formatted FIT/TRANS line, $s, line ignored' % upper_line)
+
             else:
                 continue
     
@@ -1287,8 +1353,7 @@ class ReadUserFile(ReductionStep):
                         reducer.instrument.getDetector('HAB').correction_file \
                             = filepath
                     elif parts[0].upper() == 'FLAT':
-                        reducer.flood_file =\
-                            SANSReductionSteps.CorrectToFileStep(filepath, 'SpectrumNumber','Divide')
+                        reducer.flood_file.set_filename(filepath)
                     else:
                         pass
                 elif len(parts) == 2:
@@ -1343,7 +1408,7 @@ class GetOutputName(ReductionStep):
             Reads a SANS mask file
         """
         super(GetOutputName, self).__init__()
-        self.name = None
+        self.name_holder = []
 
     def execute(self, reducer, workspace=None):
         """
@@ -1353,13 +1418,14 @@ class GetOutputName(ReductionStep):
             @param workspace un-used
         """
         run = reducer._data_files.values()[0]
-        self.name = run.split('.')[0]
+        name = run.split('.')[0]
         
         if (not reducer._period_num is None) and (reducer._period_num > 0):
-            self.name += 'p'+str(reducer._period_num)
-        self.name += reducer.instrument.cur_detector().name('short')
-        self.name += '_' + reducer.to_Q.output_type
-        self.name += '_' + reducer.to_wavelen.get_range()
+            name += 'p'+str(reducer._period_num)
+        name += reducer.instrument.cur_detector().name('short')
+        name += '_' + reducer.to_Q.output_type
+        name += '_' + reducer.to_wavelen.get_range()
+        self.name_holder.append(name)
 
 class ReplaceErrors(ReductionStep):
     def __init__(self):

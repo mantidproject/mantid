@@ -62,23 +62,12 @@ def UserPath(path):
         
 def SANS2D():
     instrument = SANSInsts.SANS2D()
-    
-    #TODO: this should probably be part of __init__. Leave it for now
-    # so we don't create problems with the current code.
-    instrument.TRANS_WAV1_FULL = instrument.TRANS_WAV1 = 2.0
-    instrument.TRANS_WAV2_FULL = instrument.TRANS_WAV2 = 14.0
-    instrument.lowAngDetSet = True
-    
+        
     ReductionSingleton().set_instrument(instrument)
 
 def LOQ():
     instrument = SANSInsts.LOQ()
-    
-    #TODO: refactor this away
-    instrument.TRANS_WAV1_FULL = instrument.TRANS_WAV1 = 2.2
-    instrument.TRANS_WAV2_FULL = instrument.TRANS_WAV2 = 10.0
-    instrument.lowAngDetSet = True
-    
+
     ReductionSingleton().set_instrument(instrument)
     
 def Detector(det_name):
@@ -114,9 +103,7 @@ def Gravity(flag):
     ReductionSingleton().to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
-    ReductionSingleton().set_trans_fit(lambda_min=lambdamin, 
-                                       lambda_max=lambdamax, 
-                                       fit_method=mode)
+    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
     
 def AssignCan(can_run, reload = True, period = -1):
     ReductionSingleton().set_background(can_run, reload = reload, period = period)
@@ -143,9 +130,9 @@ def GetMismatchedDetList():
     """
     return ReductionSingleton().instrument.get_marked_dets()
 
-def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = True):
-    if not ReductionSingleton().transmission_calculator is None:
-        ReductionSingleton().transmission_calculator.set_full_wav(full_trans_wav)
+def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None):
+    if not full_trans_wav is None:
+        ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
 
@@ -154,14 +141,10 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = True):
 
     if DEL__FINDING_CENTRE_ == True:
         final_workspace = wsname_cache.split('_')[0] + '_quadrants'
-#    sample_setup.setReducedWorkspace(final_workspace)
-
-
-    # 1D
-    if ReductionSingleton().to_Q.output_type == '1D':
-        if DEL__FINDING_CENTRE_ == True:
-            GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
-            return
+        if ReductionSingleton().to_Q.output_type == '1D':
+                GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
+                return
+    #run the chain that has been created so far
     ReductionSingleton.run()
     
 def _SetWavelengthRange(start, end):

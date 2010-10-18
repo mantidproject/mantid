@@ -668,7 +668,17 @@ class Mask(ReductionStep):
         FindDeadDetectors(ws_name, ws_name, DeadValue=500)
 
 class CorrectToFileStep(ReductionStep):
-    def __init__(self, file = '', corr_type = '', operation = ''):
+    """
+        Runs the algorithm CorrectToFile()
+    """
+    def __init__(self, file='', corr_type='', operation=''):
+        """
+            Parameters passed to this function are passed to
+            the CorrectToFile() algorithm
+            @param file: full path of the correction file
+            @param corr_type: "deltaE", "TOF", "SpectrumNumber" or any valid setting for CorrectToFile()'s as FirstColumnValue property
+            @param operation: set to "Divide" or "Multiply"
+        """
         super(CorrectToFileStep, self).__init__()
         self._filename = file
         self._corr_type = corr_type
@@ -678,8 +688,9 @@ class CorrectToFileStep(ReductionStep):
         self._filename = filename
 
     def execute(self, reducer, workspace):
-        CorrectToFile(workspace, self._filename, workspace,
-                                self._corr_type, self._operation)
+        if self._filename:
+            CorrectToFile(workspace, self._filename, workspace,
+                          self._corr_type, self._operation)
             
             
 class SaveIqAscii(ReductionStep):
@@ -771,7 +782,7 @@ class GetSampleGeom(ReductionStep):
         elif attrib == 'width' or attrib == 'thickness' or attrib == 'height':
             return 1.0
 
-    def set_shape(self, shape):
+    def set_shape(self, new_shape):
         """
             Sets the sample's shape from a string or an ID. If the ID is not
             in the list of allowed values the shape is set to the default but
@@ -779,14 +790,14 @@ class GetSampleGeom(ReductionStep):
         """
         try:
             # deal with ID numbers as arguments
-            shape = self._shape_ids[int(shape)]
+            new_shape = self._shape_ids[int(new_shape)]
         except ValueError:
             # means that we weren't passed an ID number, the code below treats it as a shape name
             pass
         except KeyError:
-            mantid.sendLogMessage("::SANS::Warning: Invalid geometry type for sample: " + str(shape) + ". Setting default to " + self._default_shape)
-            shape = self._default_shape
-        self._shape = shape
+            mantid.sendLogMessage("::SANS::Warning: Invalid geometry type for sample: " + str(new_shape) + ". Setting default to " + self._default_shape)
+            new_shape = self._default_shape
+        self._shape = new_shape
         #check that the dimensions that we have make sense for our new shape
         if not self._width is None:
             self.width = self._width
@@ -853,13 +864,13 @@ class GetSampleGeom(ReductionStep):
         """
         sample_details = mtd[workspace].getSampleInfo()
 
-        if self.shape is None:
+        if self._shape is None:
             self.shape = sample_details.getGeometryFlag()
-        if self.thickness is None:
+        if self._thickness is None:
             self.thickness = sample_details.getThickness()
-        if self.width is None:
+        if self._width is None:
             self.width = sample_details.getWidth()
-        if self.height is None:
+        if self._height is None:
             self.height = sample_details.getHeight()
 
     def __str__(self):
@@ -895,25 +906,22 @@ class SampleGeomCor(ReductionStep):
             if self.geo.shape == 'cylinder-axis-up':
                 # Volume = circle area * height
                 # Factor of four comes from radius = width/2
-                scale_factor = self.geo.height*math.pi
-                scale_factor *= math.pow(self.geo.width,2)/4.0
+                volume = self.geo.height*math.pi
+                volume *= math.pow(self.geo.width,2)/4.0
             elif self.geo.shape == 'cuboid':
-                scale_factor = self.geo.width
-                scale_factor *= self.geo.height*self.geo.thickness
+                volume = self.geo.width
+                volume *= self.geo.height*self.geo.thickness
             elif self.geo.shape == 'cylinder-axis-along':
                 # Factor of four comes from radius = width/2
-                scale_factor = self.geo.thickness*math.pi
-                scale_factor *= math.pow(self.geo.width, 2)/4.0
+                volume = self.geo.thickness*math.pi
+                volume *= math.pow(self.geo.width, 2)/4.0
             else:
-                raise NotImplemented('Shape "'+self._shape+'" is not in the list of supported shapes')
+                raise NotImplemented('Shape "'+self.geo.shape+'" is not in the list of supported shapes')
         except TypeError:
             raise TypeError('Error calculating sample volume with width='+str(self._width) + ' height='+str(self._height) + 'and thickness='+str(self._thickness)) 
         
-        # Multiply by the calculated correction factor
-        #ws = mtd[workspace]
-        #ws *= scalefactor
-        CreateSingleValuedWorkspace('temp', scale_factor)
-        Divide(workspace, 'temp', workspace)
+        ws = mtd[workspace]
+        ws /= volume
 
 class StripEndZeros(ReductionStep):
     def __init__(self, flag_value = 0.0):

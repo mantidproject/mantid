@@ -428,10 +428,13 @@ class LOQ(ISISInstrument):
     
     # Number of digits in standard file name
     run_number_width = 5
+    WAV_RANGE_MIN = 2.2
+    WAV_RANGE_MAX = 10.0
     
     def __init__(self):
         self._NAME = 'LOQ'
         super(LOQ, self).__init__()
+
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -457,10 +460,21 @@ class LOQ(ISISInstrument):
         self.DETECTORS['low-angle'].set_orien('Horizontal')
         self.DETECTORS['high-angle'].set_orien('Horizontal')
 
+    def load_transmission_inst(self, workspace):
+        """
+            Loads information about the setup used for LOQ transmission runs
+        """
+        trans_definition_file = mtd.getConfigProperty('instrumentDefinition.directory')
+        trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
+        LoadInstrument(workspace, trans_definition_file)
+
+
 class SANS2D(ISISInstrument): 
 
     # Number of digits in standard file name
     run_number_width = 8
+    WAV_RANGE_MIN = 2.0
+    WAV_RANGE_MAX = 14.0
 
     def __init__(self):
         self._NAME = 'SANS2D'
