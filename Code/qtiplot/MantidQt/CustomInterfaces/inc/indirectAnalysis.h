@@ -38,9 +38,6 @@ namespace MantidQt
       /// Default Constructor
       indirectAnalysis(QWidget *parent = 0);
 
-    protected:
-      virtual void closeEvent(QCloseEvent* close);
-
     private:
       /// Initialize the layout
       virtual void initLayout();
@@ -60,20 +57,19 @@ namespace MantidQt
       bool validateDemon();
 
       Mantid::API::CompositeFunction* createFunction();
-
       QtProperty* createLorentzian();
       QtProperty* createStretchedExp();
       QtProperty* createExponential();
 
-    private slots:
+      virtual void closeEvent(QCloseEvent* close);
 
+    private slots:
       void instrumentChanged(int index);
       void analyserSelected(int index);
       void reflectionSelected(int index);
       void furyRun();
       void furyResType(const QString& type);
       void furyPlotInput();
-
       void runFuryFit();
       void furyfit_typeSelection(int index);
       void furyfitPlotInput();
@@ -81,7 +77,6 @@ namespace MantidQt
       void furyfitXMaxSelected(double val);
       void furyfitBackgroundSelected(double val);
       void furyfitRangePropChanged(QtProperty*, double);
-
       void elwinRun();
       void elwinPlotInput();
       void elwinTwoRanges(bool state);
@@ -90,44 +85,33 @@ namespace MantidQt
       void absorptionRun();
       void absorptionShape(int index);
       void demonRun();
-
       void openDirectoryDialog();
       void help();
-
-
+      
     private:
       Ui::indirectAnalysis m_uiForm;
-
       QString m_settingsGroup;
-      
       QString m_dataDir;
       QString m_saveDir;
-
       QIntValidator *m_valInt;
       QDoubleValidator *m_valDbl;
-
       QtTreePropertyBrowser* m_propBrowser; ///< FuryFit Property Browser
-
       QtGroupPropertyManager* m_groupManager;
       QtDoublePropertyManager* m_doubleManager;
       QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
-
       bool m_furyResFileType;
-      
       QMap<QString, QtProperty*> m_fitProperties;
-
       QwtPlot* m_furyFitPlotWindow;
       QwtPlotCurve* m_ffDataCurve;
+      QwtPlotCurve* m_ffFitCurve;
       MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
       MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
-      
       /// keep a pointer to the input workspace once it's loaded so we don't have to
       Mantid::API::MatrixWorkspace_const_sptr m_ffInputWS; ///< load it again and again etc
+      Mantid::API::MatrixWorkspace_const_sptr m_ffOutputWS;
       std::string m_ffInputWSName;
-
       QString m_furyfitTies;
       QString m_furyfitConstraints;
-
     };
   }
 }

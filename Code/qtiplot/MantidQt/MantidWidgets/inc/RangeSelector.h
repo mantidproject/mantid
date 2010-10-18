@@ -22,9 +22,9 @@ namespace MantidWidgets
   {
     Q_OBJECT
   public:
-    enum Range { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
+    enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
-    RangeSelector(QwtPlot* plot, Range range=XMINMAX);
+    RangeSelector(QwtPlot* plot, SelectType type=XMINMAX);
     ~RangeSelector() {};
 
     bool eventFilter(QObject*, QEvent*);
@@ -36,13 +36,14 @@ namespace MantidWidgets
   signals:
     void minValueChanged(double);
     void maxValueChanged(double);
-
+    
   public slots:
     void minChanged(double);
     void maxChanged(double);
     void setMinimum(double); ///< outside setting of value
     void setMaximum(double); ///< outside setting of value
     void reapply(); ///< re-apply the range selector lines
+    void setColour(QColor colour);
 
   private:
     void setMin(double val);
@@ -52,7 +53,7 @@ namespace MantidWidgets
 
 
     // MEMBER ATTRIBUTES
-    Range m_range; ///< type of selection widget is for
+    SelectType m_type; ///< type of selection widget is for
 
     double m_min;
     double m_max;

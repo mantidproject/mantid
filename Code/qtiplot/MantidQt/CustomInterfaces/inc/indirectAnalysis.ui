@@ -1467,8 +1467,7 @@
      <item>
       <widget class="QPushButton" name="pbManageDirs" >
        <property name="text" >
-        <string>Manage
-Directories</string>
+        <string>Manage Directories</string>
        </property>
       </widget>
      </item>

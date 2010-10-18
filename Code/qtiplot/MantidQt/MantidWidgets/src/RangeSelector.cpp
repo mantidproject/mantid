@@ -7,7 +7,7 @@
 
 using namespace MantidQt::MantidWidgets;
 
-RangeSelector::RangeSelector(QwtPlot* plot, Range range) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot), m_range(range)
+RangeSelector::RangeSelector(QwtPlot* plot, SelectType type) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot), m_type(type)
 {
   m_canvas->installEventFilter(this);
 
@@ -18,7 +18,7 @@ RangeSelector::RangeSelector(QwtPlot* plot, Range range) : QwtPlotPicker(plot->c
 
   QwtPlotMarker::LineStyle lineStyle;
   
-  switch ( m_range )
+  switch ( m_type )
   {
   case XMINMAX:
   case XSINGLE:
@@ -35,7 +35,7 @@ RangeSelector::RangeSelector(QwtPlot* plot, Range range) : QwtPlotPicker(plot->c
     break;
   }
 
-  switch ( m_range )
+  switch ( m_type )
   {
   case XMINMAX:
   case YMINMAX:
@@ -49,8 +49,6 @@ RangeSelector::RangeSelector(QwtPlot* plot, Range range) : QwtPlotPicker(plot->c
     m_mrkMin->setYValue(0.0);
     break;
   }
-
-
 
   connect(this, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
   connect(this, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
@@ -80,7 +78,7 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     {
     QPoint p = ((QMouseEvent*)evn)->pos();
     double x, dx;
-    switch ( m_range )
+    switch ( m_type )
     {
     case XMINMAX:
     case XSINGLE:
@@ -116,6 +114,10 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
         return false;
       }
     }
+    else
+    {
+      return false;
+    }
     break;
     }
   case QEvent::MouseMove: // User is in the process of moving something (perhaps)
@@ -124,7 +126,7 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     {
     QPoint p = ((QMouseEvent*)evn)->pos();
     double x;
-    switch ( m_range )
+    switch ( m_type )
     {
     case XMINMAX:
     case XSINGLE:
@@ -172,7 +174,7 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     m_canvas->setCursor(Qt::PointingHandCursor);
     QPoint p = ((QMouseEvent*)evn)->pos();
     double x;
-    switch ( m_range )
+    switch ( m_type )
     {
     case XMINMAX:
     case XSINGLE:
@@ -215,7 +217,7 @@ void RangeSelector::setRange(double min, double max)
 
 void RangeSelector::minChanged(double val)
 {
-  switch ( m_range )
+  switch ( m_type )
   {
   case XMINMAX:
   case XSINGLE:
@@ -231,7 +233,7 @@ void RangeSelector::minChanged(double val)
 
 void RangeSelector::maxChanged(double val)
 {
-  switch ( m_range )
+  switch ( m_type )
   {
   case XMINMAX:
   case XSINGLE:
@@ -258,6 +260,21 @@ void RangeSelector::reapply()
 {
   m_mrkMin->attach(m_plot);
   m_mrkMax->attach(m_plot);
+}
+
+void RangeSelector::setColour(QColor colour)
+{
+  m_pen->setColor(colour);
+  switch ( m_type )
+  {
+  case XMINMAX:
+  case YMINMAX:
+    m_mrkMax->setLinePen(*m_pen);
+  case XSINGLE:
+  case YSINGLE:
+    m_mrkMin->setLinePen(*m_pen);
+    break;
+  }
 }
 
 void RangeSelector::setMin(double val)
