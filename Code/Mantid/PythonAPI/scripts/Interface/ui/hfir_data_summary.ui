@@ -658,7 +658,7 @@ in each direction and will create 9 sub-pixels.</string>
      <x>400</x>
      <y>330</y>
      <width>381</width>
-     <height>297</height>
+     <height>327</height>
     </rect>
    </property>
    <property name="title">
@@ -668,7 +668,7 @@ in each direction and will create 9 sub-pixels.</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>10</y>
       <width>311</width>
       <height>291</height>
      </rect>
