@@ -14,6 +14,7 @@
 from __future__ import division
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+import sys
 
 
 class MaskWidget(QWidget):
@@ -178,7 +179,7 @@ class MaskWidget(QWidget):
                 image.scaled(side, side, aspectRatioMode=Qt.KeepAspectRatio)
                 painter.drawImage(target, image, source)
             except:
-                raise RuntimeError, "Could not process image file %s" % str(self._background_file)
+                raise RuntimeError, "Could not process image file %s\n  %s" % (str(self._background_file), sys.exc_value)
     
         # Mask
         top = self.topSpinBox.value()
