@@ -23,7 +23,9 @@ InstrumentTreeModel::~InstrumentTreeModel()
 }
 
 /**
- * Column count for the instrument tree. count is 1 for the Component Assembly and 0 for the ObjComponent.
+ * Column count for the instrument tree.
+ *  Returns a count of 1 for the Component Assembly = I think this means "I have child nodes"
+ *  Returns 0 for the ObjComponent = I'm an end point.
  */
 int InstrumentTreeModel::columnCount(const QModelIndex &parent) const
 {
@@ -32,10 +34,10 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const
 		if (parent.isValid())
 		{
 			boost::shared_ptr<Mantid::Geometry::IComponent> comp=mInstrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));
-			boost::shared_ptr<Mantid::Geometry::IObjComponent> objcomp=boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(comp);
-			if(objcomp!=boost::shared_ptr<Mantid::Geometry::IObjComponent>())
-				return 0;
-			return 1;
+			boost::shared_ptr<Mantid::Geometry::ICompAssembly> objcomp=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(comp);
+			if(objcomp!=boost::shared_ptr<Mantid::Geometry::ICompAssembly>())
+				return 1;
+			return 0;
 		}
 		else
 			return 1;
@@ -120,7 +122,7 @@ QModelIndex InstrumentTreeModel::index(int row, int column, const QModelIndex &p
 	}
 	catch(...)
 	{
-	  //std::cout<<"Exception: in index"<<std::endl;
+	  std::cout << "InstrumentTreeModel::index(" << row << "," << column << ") threw an exception." << std::endl;
 	}
 	return QModelIndex();
 }
@@ -153,7 +155,7 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const
 	}
 	catch(...)
 	{
-	  //		std::cout<<"Excpetion: in parent"<<std::endl;
+	  //		std::cout<<"Exception: in parent"<<std::endl;
 	}
 	return QModelIndex();
 }
