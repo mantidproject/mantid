@@ -182,6 +182,7 @@
     <ClCompile Include="src\CorrectToFile.cpp" />
     <ClCompile Include="src\CreateCalFileByNames.cpp" />
     <ClCompile Include="src\CreateSingleValuedWorkspace.cpp" />
+    <ClCompile Include="src\CreateWorkspace.cpp" />
     <ClCompile Include="src\CropWorkspace.cpp" />
     <ClCompile Include="src\CrossCorrelate.cpp" />
     <ClCompile Include="src\CylinderAbsorption.cpp" />
@@ -258,6 +259,7 @@
     <ClCompile Include="src\Sort.cpp" />
     <ClCompile Include="src\StripPeaks.cpp" />
     <ClCompile Include="src\StripVanadiumPeaks.cpp" />
+    <ClCompile Include="src\SumNeighbours.cpp" />
     <ClCompile Include="src\SumRowColumn.cpp" />
     <ClCompile Include="src\SumSpectra.cpp" />
     <ClCompile Include="src\TofCorrection.cpp" />
@@ -272,6 +274,7 @@
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\AddSampleLog.h" />
     <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h" />
+    <ClInclude Include="inc\MantidAlgorithms\CreateWorkspace.h" />
     <ClInclude Include="inc\MantidAlgorithms\ExtractFFTSpectrum.h" />
     <ClInclude Include="inc\MantidAlgorithms\FFTSmooth2.h" />
     <ClInclude Include="inc\MantidAlgorithms\FilterByLogValue.h" />
@@ -283,6 +286,7 @@
     <ClInclude Include="inc\MantidAlgorithms\Rebin.h" />
     <ClInclude Include="inc\MantidAlgorithms\Sort.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripVanadiumPeaks.h" />
+    <ClInclude Include="inc\MantidAlgorithms\SumNeighbours.h" />
     <ClInclude Include="inc\MantidAlgorithms\TofCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\Transpose.h" />
     <ClInclude Include="inc\MantidDataHandling\AlignDetectors.h" />
@@ -321,6 +325,7 @@
     <ClInclude Include="inc\MantidAlgorithms\CreateSingleValuedWorkspace.h" />
     <ClInclude Include="test\CreateSingleValuedWorkspaceTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\CropWorkspace.h" />
+    <ClInclude Include="test\CreateWorkspaceTest.h" />
     <ClInclude Include="test\CropWorkspaceTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\CrossCorrelate.h" />
     <ClInclude Include="inc\MantidAlgorithms\CylinderAbsorption.h" />
@@ -425,11 +430,13 @@
     <ClInclude Include="inc\MantidAlgorithms\SofQW.h" />
     <ClInclude Include="inc\MantidAlgorithms\SolidAngle.h" />
     <ClInclude Include="inc\MantidAlgorithms\SolidAngleCorrection.h" />
+    <ClInclude Include="test\SofQWTest.h" />
     <ClInclude Include="test\SolidAngleTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\StripPeaks.h" />
     <ClInclude Include="test\StripPeaksTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\SumRowColumn.h" />
     <ClInclude Include="inc\MantidAlgorithms\SumSpectra.h" />
+    <ClInclude Include="test\SumNeighboursTest.h" />
     <ClInclude Include="test\SumSpectraTest.h" />
     <ClInclude Include="inc\MantidAlgorithms\UnaryOperation.h" />
     <ClInclude Include="inc\MantidAlgorithms\UnGroupWorkspaces.h" />
