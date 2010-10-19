@@ -1,11 +1,15 @@
 #include  "MantidICat/Logout.h"
-#include"MantidICat/SearchHelper.h"
-#include "MantidICat/Session.h"
+#include "MantidAPI/CatalogFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/ICatalog.h"
+
 namespace Mantid
 {
 	namespace ICat
 	{
-		
+		using namespace Kernel;
+		using namespace API;
 		DECLARE_ALGORITHM(CLogout)
 
 		/// Init method to declare algorithm properties
@@ -15,21 +19,23 @@ namespace Mantid
 		/// execute the algorithm
 		void CLogout::exec()
 		{
-			//progress(m_prog, "Connecting to ICat DataBase...");
-			doLogout();
+			ICatalog_sptr catalog_sptr;
+			try
+			{			
+			 catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().Facility().catalogName());
+			
+			}
+			catch(Kernel::Exception::NotFoundError&)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+			} 
+			if(!catalog_sptr)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
+			}
+			catalog_sptr->logout();
+	
 		}
 
-	  /**This method calls the ICat Logout api and disconnects from DB
-		*/
-		void CLogout::doLogout()
-		{
-			if(Session::Instance().getSessionId().empty())
-			{
-				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
-			}
-			CSearchHelper searchobj;
-			searchobj.doLogout();
-			Session::Instance().setSessionId("");//clearing the session id saved to Mnatid after log out
-		}
-	}
+	 }
 }

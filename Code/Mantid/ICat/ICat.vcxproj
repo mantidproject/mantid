@@ -175,35 +175,43 @@
   <ItemGroup>
     <ClCompile Include="src\AdvancedSearch.cpp" />
     <ClCompile Include="src\DownloadDataFile.cpp" />
-    <ClCompile Include="src\FileList.cpp" />
+    <ClCompile Include="src\ErrorHandling.cpp" />
     <ClCompile Include="src\GetDataFiles.cpp" />
     <ClCompile Include="src\GetDataSets.cpp" />
+    <ClCompile Include="src\ICat3Catalog.cpp" />
+    <ClCompile Include="src\ICatHelper.cpp" />
     <ClCompile Include="src\ListInstruments.cpp" />
     <ClCompile Include="src\ListInvestigationTypes.cpp" />
     <ClCompile Include="src\Login.cpp" />
     <ClCompile Include="src\Logout.cpp" />
     <ClCompile Include="src\MyDataSearch.cpp" />
-    <ClCompile Include="src\SearchByRunNumber.cpp" />
-    <ClCompile Include="src\SearchHelper.cpp" />
+    <ClCompile Include="src\Search.cpp" />
     <ClCompile Include="src\GSoap\stdsoap2.cpp" />
     <ClCompile Include="src\GSoapGenerated\soapC.cpp" />
     <ClCompile Include="src\GSoapGenerated\soapICATPortBindingProxy.cpp" />
+    <ClCompile Include="src\SearchParam.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidICat\AdvancedSearch.h" />
+    <ClInclude Include="inc\MantidICat\ErrorHandling.h" />
     <ClInclude Include="inc\MantidICat\GetDataFiles.h" />
     <ClInclude Include="inc\MantidICat\DownloadDataFile.h" />
-    <ClInclude Include="inc\MantidICat\FileList.h" />
+    <ClInclude Include="inc\MantidICat\GetDataSets.h" />
+    <ClInclude Include="inc\MantidICat\ICat3Catalog.h" />
     <ClInclude Include="inc\MantidICat\ICatExport.h" />
+    <ClInclude Include="inc\MantidICat\ICatHelper.h" />
+    <ClInclude Include="inc\MantidICat\ListInstruments.h" />
+    <ClInclude Include="inc\MantidICat\ListInvestigationTypes.h" />
     <ClInclude Include="inc\MantidICat\Login.h" />
-    <ClInclude Include="inc\MantidICat\SearchByRunNumber.h" />
-    <ClInclude Include="inc\MantidICat\SearchHelper.h" />
-    <ClInclude Include="inc\MantidICat\Session.h" />
+    <ClInclude Include="inc\MantidICat\Logout.h" />
+    <ClInclude Include="inc\MantidICat\MyDataSearch.h" />
+    <ClInclude Include="inc\MantidICat\Search.h" />
     <ClInclude Include="inc\MantidICat\GSoapGenerated\soapH.h" />
     <ClInclude Include="inc\MantidICat\GSoapGenerated\soapICATPortBindingProxy.h" />
     <ClInclude Include="inc\MantidICat\GSoapGenerated\soapStub.h" />
     <ClInclude Include="inc\MantidICat\GSoap\stdsoap2.h" />
+    <ClInclude Include="inc\MantidICat\SearchParam.h" />
     <ClInclude Include="test\DownloadDataFileTest.h" />
-    <ClInclude Include="test\FileListTest.h" />
     <ClInclude Include="test\LoginTest.h" />
     <ClInclude Include="test\SearchByRunNumberTest.h" />
   </ItemGroup>

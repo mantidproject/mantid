@@ -6,6 +6,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Logger.h"
+#include "MantidICat/SearchParam.h"
 
 /**  CSearchHelper is a utility class used in Mantid-ICat algorithms to do ICat searching.
      
@@ -203,36 +204,33 @@ namespace Mantid
 			std::string m_datafileName;
 
 		};
-		class CSearchHelper
+		class CICatHelper
 		{
 		public:
-			//Mantid::Kernel::Logger & CSearchHelper::g_log=Mantid::Kernel::Logger::get("CSearchHelper");
+			//Mantid::Kernel::Logger & CICatHelper::g_log=Mantid::Kernel::Logger::get("CICatHelper");
 			/// constructor
-			CSearchHelper():g_log(Kernel::Logger::get("CSearchHelper"))
+			CICatHelper():g_log(Kernel::Logger::get("CICatHelper"))
 			{}
 			/// destructor
-			~CSearchHelper(){}
+			~CICatHelper(){}
 			
 			/// search method
 			int doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response);
-			
-			
-			//int doSearchByRunNumber(const double& dstartRun,const double& dendRun,bool bCase,const std::string& instrName,const time_t& startDate,const time_t& endDate, ns1__investigationInclude einclude,
-			//	API::ITableWorkspace_sptr& responsews_sptr);
+		
 			/// method to search isis basic search
-			int doISISSearch(CSearchInput& input,API::ITableWorkspace_sptr &outputws);
+			void doISISSearch(const CSearchParam& input,API::ITableWorkspace_sptr &outputws);
 
 			/// calls getInvestigationIncludes api's
-			int getDataFiles(long long invId,bool bDataFiles,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
+			int getDataFiles(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
 
 			/// this method calls Icat api getInvestigationIncludes and returns datasets for the given investigation id.
 			int doDataSetsSearch(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
 
 			/// This method lists the isntruments
-			void  listInstruments(API::ITableWorkspace_sptr & ws_sptr);
+			void  listInstruments(std::vector<std::string>& instruments);
 
 			/// This method lists the investigation types
-			void listInvestigationTypes(API::ITableWorkspace_sptr & ws_sptr);
+			void listInvestigationTypes(std::vector<std::string>& investTypes);
 
 			/// This method disconnects last connected  session from icat DB
 			int doLogout();
@@ -243,9 +241,21 @@ namespace Mantid
             /// do advanced search 
 			void doAdvancedSearch(CSearchInput& inputs,API::ITableWorkspace_sptr &outputws);
 
+			// do login
+			void doLogin(const std::string& name,const std::string& password,const std::string& url);
+
 			
 			/// Thsi method returns the time_t value for a Date which is in "DD/MM/YYYY" format
 			time_t getTimevalue(const std::string& sDate);
+
+			/// thsi method returns true if the  session id is valid
+			bool isvalidSession();
+
+			/// get the url of the given file id
+			void getdownloadURL(const long long& fileId,std::string& url);
+			
+			/// get location of data file  or download method
+			void  getlocationString(const long long& fileid,std::string& filelocation);
 
 							
 		private:
@@ -266,7 +276,7 @@ namespace Mantid
 			void saveSearchRessults(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws);
 
 			/// this method saves investigation include response to a table workspace
-			void  saveInvestigationIncludesResponse(bool bDataFiles,
+			void  saveInvestigationIncludesResponse(
 				const ns1__getInvestigationIncludesResponse& response,
 				API::ITableWorkspace_sptr& outputws);
 
@@ -276,12 +286,7 @@ namespace Mantid
 			/// This method sets the request parameters
 			void setReqparamforlistInstruments(ns1__listInstruments& request);
 
-			/// This method saves Instrument List to a table workspace
-			void  saveInstrumentList(const ns1__listInstrumentsResponse& response,API::ITableWorkspace_sptr & ws_sptr);
-
-			/// This method saves the investigations types to a table workspace
-			void saveInvestigationsTypesList(const ns1__listInvestigationTypesResponse& response,API::ITableWorkspace_sptr &outputws);
-
+				
 			/// This method creates table workspace
 			API::ITableWorkspace_sptr createTableWorkspace();
 			
@@ -296,7 +301,8 @@ namespace Mantid
 
 			///saves 
 			void saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t);
-		       
+
+				       
 
 			/* This is a template method to save data to table workspace
 			 * @param input pointer to input value

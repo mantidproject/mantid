@@ -1,11 +1,11 @@
 #include "MantidICat/GetDataSets.h"
-#include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidICat/SearchHelper.h"
-#include "MantidICat/ErrorHandling.h" 
-#include "MantidICat/Session.h"
+#include "MantidAPI/CatalogFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/ICatalog.h"
 
 namespace Mantid
 {
@@ -20,39 +20,33 @@ namespace Mantid
 			BoundedValidator<long long>* mustBePositive = new BoundedValidator<long long>();
 			mustBePositive->setLower(0);
 			declareProperty<long long>("InvestigationId",-1,mustBePositive,"Id of the selected investigation");
-
-			//declareProperty("Title","","The title of the investigation to do data sets search ");
-			//declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("InputWorkspace","",Direction::Input),
-			//	"The name of the workspace which stored the last icat investigations search result");
-
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
                             "The name of the workspace to store the result of datasets search ");
 		}
 		/// exec methods
 		void CGetDataSets::exec()
 		{
-			if(Session::Instance().getSessionId().empty())
-			{
-				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+						
+			ICatalog_sptr catalog_sptr;
+			try
+			{			
+			 catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().Facility().catalogName());
+			
 			}
-		   API::ITableWorkspace_sptr ws_sptr = doDataSetsSearch();
+			catch(Kernel::Exception::NotFoundError&)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+			} 
+			if(!catalog_sptr)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
+			}
+						
+		   API::ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace");
+		   long long investigationId = getProperty("InvestigationId");
+		   catalog_sptr->getDataSets(investigationId,ws_sptr);
 		   setProperty("OutputWorkspace",ws_sptr);
 		}
-		/// This method gets the data sets for a given investigation id
-		API::ITableWorkspace_sptr CGetDataSets::doDataSetsSearch()
-		{
-			long long investigationId = getProperty("InvestigationId");
 			
-			API::ITableWorkspace_sptr outputws =WorkspaceFactory::Instance().createTable("TableWorkspace");
-
-			CSearchHelper searchobj;
-			//search datasets for a given investigation id using ICat api.
-			int ret_advsearch = searchobj.doDataSetsSearch(investigationId,
-				ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,outputws);
-			(void) ret_advsearch;
-           	return outputws;
-		}
-		
-		
 	}
 }

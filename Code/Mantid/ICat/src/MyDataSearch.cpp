@@ -1,6 +1,8 @@
 #include "MantidICat/MyDataSearch.h"
-#include "MantidICat/SearchHelper.h"
-#include "MantidICat/Session.h"
+#include "MantidAPI/CatalogFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/ICatalog.h"
 
 namespace Mantid
 {
@@ -19,24 +21,29 @@ namespace Mantid
 		}
 		/// Execution method.
 		void CMyDataSearch::exec()
-		{	
-			if(Session::Instance().getSessionId().empty())
-			{
-				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+		{
+
+						
+			ICatalog_sptr catalog_sptr;
+			try
+			{			
+			 catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().Facility().catalogName());
+			
 			}
+			catch(Kernel::Exception::NotFoundError&)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+			} 
+			if(!catalog_sptr)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
+			}
+			
 			API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
-			doMyDataSearch(outputws);
+			catalog_sptr->myData(outputws);
 			setProperty("OutputWorkspace",outputws);
 		
 		}
-		/* This method does logged in users investigations search.
-		 * @param outputws pointer to table workspace which stores the data
-		 */
-		void  CMyDataSearch::doMyDataSearch(API::ITableWorkspace_sptr& outputws)
-		{			 
-			CSearchHelper searchobj;
-			searchobj.doMyDataSearch(outputws);
-			
-		}
+		
 	}
 }

@@ -1,7 +1,10 @@
 #include "MantidICat/ListInstruments.h"
-#include "MantidICat/SearchHelper.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidICat/Session.h"
+#include "MantidAPI/CatalogFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/ICatalog.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidICat/ErrorHandling.h"
 
 namespace Mantid
 {
@@ -14,30 +17,42 @@ namespace Mantid
 		/// Init method
 		void CListInstruments::init()
 		{
-			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
-				"The name of the table workspace that will be created to store the instruments list");
+			declareProperty( new ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),new NullValidator<std::vector<std::string>>, 
+				Direction::Output),"A list containing instrument names");
+		
+			declareProperty("isValid",true,"Boolean option used to check the validity of login session", Direction::Output);
 		}
 		/// exec method
 		void CListInstruments::exec()
-		{
-			//API::ITableWorkspace_sptr ws_sptr=
-			if(Session::Instance().getSessionId().empty())
+		{			
+			ICatalog_sptr catalog_sptr;
+			try
 			{
-				throw std::runtime_error("Please login to ICat using the ICat:Login menu provided to access ICat data.");
+			
+			 catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().Facility().catalogName());
+			
 			}
-			ITableWorkspace_sptr ws_sptr= WorkspaceFactory::Instance().createTable("TableWorkspace");
-			listInstruments(ws_sptr); 
-			setProperty("OutputWorkspace",ws_sptr);
+			catch(Kernel::Exception::NotFoundError&)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+			} 
+			if(!catalog_sptr)
+			{
+				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
+			}
+		    std::vector<std::string> intruments;
+			try
+			{
+			catalog_sptr->listInstruments(intruments);
+			}
+			catch(SessionException& )
+			{			   
+				setProperty("isValid",false);
+				throw std::runtime_error("Invalid Session");
+			}
+			setProperty("InstrumentList",intruments);
 		}
-
-		/**This method returns list of instruments from ICat DB
-		 *@param ws_sptr - shared pointer to table workspace
-		 */
-		void CListInstruments::listInstruments(ITableWorkspace_sptr& ws_sptr)
-		{
-			CSearchHelper searchObj;
-			searchObj.listInstruments(ws_sptr);
-		}
+				
 
 	}
 }

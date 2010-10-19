@@ -1,11 +1,12 @@
-#ifndef MANTID_ICAT_CSEARCHBYRUNNUMBER_H_
-#define MANTID_ICAT_CSEARCHBYRUNNUMBER_H_
+#ifndef MANTID_ICAT_CSEARCH_H_
+#define MANTID_ICAT_CSEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include"MantidICat/SearchHelper.h"
+#include"MantidICat/ICatHelper.h"
+#include "MantidICat/SearchParam.h"
 
-/** CSearchByRunNumber is a class responsible for SearchByRunNumber algorithm.
+/** CSearch is a class responsible for SearchByRunNumber algorithm.
   * This algorithm does the basic search and returns the investigations record
 
     Required Properties:
@@ -48,17 +49,17 @@ namespace Mantid
 {
 	namespace ICat
 	{
-		class DLLExport CSearchByRunNumber: public API::Algorithm
+		class DLLExport CSearch: public API::Algorithm
 		{
 		public:
 			///constructor
-			CSearchByRunNumber():API::Algorithm(){}
+			CSearch():API::Algorithm(){}
 			///destructor
-			~CSearchByRunNumber()
+			~CSearch()
 			{
 			}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "SearchByRunNumber"; }
+			virtual const std::string name() const { return "Search"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method
@@ -69,11 +70,8 @@ namespace Mantid
 			/// Overwrites Algorithm exec method
 			void exec();
 			
-			/// Search method 
-			void  doSearchByRunNumber(API::ITableWorkspace_sptr &outputws);
-		
-             /// get all inputs for the algorithm
-			 void getInputProperties(CSearchHelper& helper,CSearchInput& inputs);
+			 /// get all inputs for the algorithm
+			 void getInputProperties(CSearchParam& params);
 
 											
 		};

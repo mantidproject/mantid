@@ -62,10 +62,7 @@ namespace Mantid
 			void init();
 			/// Overwrites Algorithm exec method
 			void exec();
-			
-			/// Search method 
-			void doMyDataSearch(API::ITableWorkspace_sptr& outputws);
-												
+															
 		};
 	}
 }

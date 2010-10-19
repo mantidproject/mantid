@@ -36,9 +36,6 @@
     <ClCompile Include="src\DownloadDataFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\FileList.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\GetDataFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -46,12 +43,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Login.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SearchByRunNumber.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SearchHelper.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\GSoap\stdsoap2.cpp">
@@ -78,30 +69,30 @@
     <ClCompile Include="src\MyDataSearch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ICat3Catalog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Search.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SearchParam.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ICatHelper.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ErrorHandling.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MantidICat\GetDataFiles.h">
-      <Filter>inc</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidICat\DownloadDataFile.h">
-      <Filter>inc\MantidIcat</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidICat\FileList.h">
       <Filter>inc\MantidIcat</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidICat\ICatExport.h">
       <Filter>inc\MantidIcat</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidICat\Login.h">
-      <Filter>inc\MantidIcat</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidICat\SearchByRunNumber.h">
-      <Filter>inc\MantidIcat</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidICat\SearchHelper.h">
-      <Filter>inc\MantidIcat</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidICat\Session.h">
       <Filter>inc\MantidIcat</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidICat\GSoapGenerated\soapH.h">
@@ -119,14 +110,47 @@
     <ClInclude Include="test\DownloadDataFileTest.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="test\FileListTest.h">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="test\LoginTest.h">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="test\SearchByRunNumberTest.h">
       <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\AdvancedSearch.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\GetDataSets.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\ErrorHandling.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\ListInstruments.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\ListInvestigationTypes.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\MyDataSearch.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\Logout.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\GetDataFiles.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\ICat3Catalog.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\Search.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\SearchParam.h">
+      <Filter>inc\MantidIcat</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidICat\ICatHelper.h">
+      <Filter>inc\MantidIcat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -33,7 +33,7 @@ public:
 		TS_ASSERT( loginobj.isExecuted() );
 
 		if (!invstTypesList.isInitialized() ) invstTypesList.initialize();
-		invstTypesList.setPropertyValue("OutputWorkspace","investigationtypes_list");
+		//invstTypesList.setPropertyValue("OutputWorkspace","investigationtypes_list");
 						
 		TS_ASSERT_THROWS_NOTHING(invstTypesList.execute());
 		TS_ASSERT( invstTypesList.isExecuted() );

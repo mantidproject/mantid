@@ -5,7 +5,7 @@
 #include "MantidICat/GetDataFiles.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
-#include "MantidICat/SearchByRunNumber.h"
+#include "MantidICat/Search.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid;
@@ -54,7 +54,7 @@ public:
 	}
 private:
 	Login loginobj;
-	CSearchByRunNumber searchobj;
+	CSearch searchobj;
 	CGetDataFiles invstObj;
 };
 #endif

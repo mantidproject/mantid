@@ -55,9 +55,6 @@ namespace Mantid
 			void init();
 			/// Overwrites Algorithm exec method
 			void exec();
-
-			/// List instruments method 
-			void  listInstruments(API::ITableWorkspace_sptr& ws_sptr);
 		};
 	}
 }

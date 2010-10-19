@@ -1,8 +1,7 @@
 #ifndef MANTID_ICAT_ERRORHANDLING_H_
 #define MANTID_ICAT_ERRORHANDLING_H_
-
+#include <stdexcept>
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
-
 /** CErrorHandling class responsible for handling errors in Mantid-ICat Algorithms.
   * This algorithm  gives the datsets for a given investigations record
        
@@ -37,31 +36,32 @@ namespace Mantid
 		{
 		public:
 			/// Constructors
-			CErrorHandling(){}
+			CErrorHandling();
 			/// Destructors
-			~CErrorHandling(){}
+			~CErrorHandling();
 			
-			/* *This method throws the error string returned by gsoap to mantid upper layer
-			   *@param iact -ICat proxy object 
+			/**This method throws the error string returned by gsoap to mantid upper layer
+			  *@param iact -ICat proxy object 
 			*/
-			static void throwErrorMessages(ICATPortBindingProxy& icat)
-			{
-				char buf[600];
-				const int len=600;
-				icat.soap_sprint_fault(buf,len);
-				std::string error(buf);
-				std::string begmsg("<message>");
-				std::string endmsg("</message>");
-				
-				std::basic_string <char>::size_type index1=error.find(begmsg);
-				std::basic_string <char>::size_type index2=error.find(endmsg);
-				std::string exception;
-				if(index1!=std::string::npos && index2!=std::string::npos)
-				{	
-					exception = error.substr(index1+begmsg.length(),index2-(index1+begmsg.length()));
-				}
-				throw std::runtime_error(exception);
-			}
+			static void throwErrorMessages(ICATPortBindingProxy& icat);
+			
+
+		};
+		// a class for throwing Session exception
+		class SessionException: public std::runtime_error
+		{
+
+		private:
+			std::string m_error;
+		public:
+			/// constructor
+			SessionException(const std::string& error);
+			///destructor
+			~SessionException(){}
+		   ///return the error message
+			const std::string& what();
+
+
 
 		};
 	}

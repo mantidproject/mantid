@@ -6,7 +6,7 @@
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
 #include "MantidICat/GetDataFiles.h"
-#include "MantidICat/SearchByRunNumber.h"
+#include "MantidICat/Search.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -25,9 +25,7 @@ public:
 		TS_ASSERT( downloadobj.isInitialized() );
 	}
 	void xtestDownLoadDataFile()
-	{
-		//std::string str;
-		//std::getline(std::cin,str);
+	{		
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -50,7 +48,6 @@ public:
 
 		if ( !invstObj.isInitialized() ) invstObj.initialize();
 		invstObj.setPropertyValue("InvestigationId","13539191");
-		//invstObj.setPropertyValue("InputWorkspace", "investigations");//records of investigations
 		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
 		//		
 		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
@@ -60,7 +57,6 @@ public:
 		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
 
 		downloadobj.setPropertyValue("Filenames","HET00097.RAW");
-		downloadobj.setPropertyValue("InputWorkspace","investigation");
 		
 		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
 
@@ -111,10 +107,8 @@ public:
 		TS_ASSERT( searchobj.isExecuted() );
 
 		if ( !invstObj.isInitialized() ) invstObj.initialize();
-	//	invstObj.setPropertyValue("Title", "Polythene T=290 F=922" );
-
+	
 		invstObj.setPropertyValue("InvestigationId", "24070400");
-		//invstObj.setPropertyValue("InputWorkspace", "investigations");
 
 		invstObj.setPropertyValue("OutputWorkspace","investigation");
 		//		
@@ -125,7 +119,6 @@ public:
 		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
 
 		downloadobj.setPropertyValue("Filenames","EMU00017452.nxs");
-		downloadobj.setPropertyValue("InputWorkspace","investigation");
 		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
 
 		clock_t end=clock();
@@ -151,8 +144,7 @@ public:
 
 	void xtestDownLoadDataFile_Merlin()
 	{
-		//std::string str;
-		//std::getline(std::cin,str);
+		
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -184,8 +176,7 @@ public:
 		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
 
 		downloadobj.setPropertyValue("Filenames","MER00599.raw");
-		downloadobj.setPropertyValue("InputWorkspace","investigation");
-		
+			
 		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
 
 		clock_t end=clock();
@@ -203,8 +194,6 @@ public:
 		
 						
 		TS_ASSERT( downloadobj.isExecuted() );
-		//delete the file after execution
-		//remove("MER00599.RAW");
 		AnalysisDataService::Instance().remove("investigations");
 		AnalysisDataService::Instance().remove("investigation");
 
@@ -232,7 +221,7 @@ public:
 
 	}
 private:
-	    CSearchByRunNumber searchobj;
+	    CSearch searchobj;
 	    CGetDataFiles invstObj;
 		CDownloadDataFile downloadobj;
 		Login loginobj;

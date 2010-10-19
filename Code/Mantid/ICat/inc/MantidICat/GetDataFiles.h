@@ -51,7 +51,7 @@ namespace Mantid
 			~CGetDataFiles(){}
 
 		    /// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "GetInvestigation"; }
+			virtual const std::string name() const { return "GetDataFiles"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method
@@ -64,6 +64,11 @@ namespace Mantid
 			void exec();
 			/// do datafile search
 			API::ITableWorkspace_sptr doDataFilesSearch();
+			/// This method returns true if  the given file name is raw file or nexus file otherwise false
+			bool isDataFile(const std::string& fileName);
+
+			/// This method filters the log files from the workspace
+			void filterLogFiles(API::ITableWorkspace_sptr& ws_sptr);
 
 
 		};

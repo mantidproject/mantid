@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidAPI/ICatalog.h"
 
 /** CDownloadDataFile class is responsible for GetDataFile algorithms.
   * This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
@@ -51,7 +52,7 @@ namespace Mantid
 			/// Destructor
 			~CDownloadDataFile(){}
 			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "GetDataFiles"; }
+			virtual const std::string name() const { return "DownloadDataFiles"; }
 			/// Algorithm's version for identification overriding a virtual method
 			virtual int version() const { return 1; }
 			/// Algorithm's category for identification overriding a virtual method
@@ -72,21 +73,9 @@ namespace Mantid
 			void exec();
 			/// get location of data file  or download method
 			int doDownload( ICATPortBindingProxy & icat);
-			/// Setting the request parameters for getDataFile API
-			void setRequestParameters(const std::string fileName,API::ITableWorkspace_sptr ws_sptr,ns1__getDatafile& request);
-
-			/// Setting the request parameters for downloaddatafile api
-			void setRequestParameters(const std::string fileName,API::ITableWorkspace_sptr ws_sptr,ns1__downloadDatafile& request);
-
-			/// This method gives all the log files associated with the row file to download
-			void getFileListtoDownLoad(const std::string & fileName,const API::ITableWorkspace_sptr& ws_sptr,
-				                       std::vector<std::string>& downLoadList);
-
+						
 			/// This method is used when the download is done over internet
-			void downloadFileOverInternet(ICATPortBindingProxy &icat,const std::vector<std::string>& fileList,API::ITableWorkspace_sptr ws_ptr);
-
-			///This method gives the run number associated to the file
-			void getRunNumberfromFileName(const std::string& fileName, std::string& runNumber);
+			void downloadFileOverInternet(const std::string& url,const std::string& fileName);
 
 			/// If the extn of the file .raw it returns true
 			bool isDataFile(const std::string& fileName);
@@ -100,9 +89,6 @@ namespace Mantid
 			/// This method replaces backwardslash with forward slashes - for linux
 			void replaceBackwardSlash(std::string& inputString);
 
-            /// This method checks the file is already downled by looking at the file name in downlaoded file list.
-			bool isFileDownloaded(const std::string& fileName,std::vector<std::string>& downloadedList );
-		
 		private:
 			/// progree indicator
 			double m_prog;

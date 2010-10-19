@@ -2,7 +2,7 @@
 #define SEARCHBYADVANCED_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/SearchByRunNumber.h"
+#include "MantidICat/Search.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -15,16 +15,17 @@ public:
 	
 	void testInit()
 	{
-		CSearchByRunNumber searchobj;
+		CSearch searchobj;
 		Login loginobj;
 		TS_ASSERT_THROWS_NOTHING( searchobj.initialize());
 		TS_ASSERT( searchobj.isInitialized() );
 	}
 	void testSearchByRunNumberandInstrument()
 	{
-		CSearchByRunNumber searchobj;
+		
+		CSearch searchobj;
 		Login loginobj;
-		Session::Instance();
+		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -48,12 +49,9 @@ public:
 	void testSearchByKeywords()
 	{
 		
-	/*	std::string s;
-		std::getline(std::cin,s);*/
-		
-		CSearchByRunNumber searchobj;
+		CSearch searchobj;
 		Login loginobj;
-		Session::Instance();
+		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -75,9 +73,9 @@ public:
 	}
 	void testSearchByStartDateEndDate()
 	{
-		CSearchByRunNumber searchobj;
+		CSearch searchobj;
 		Login loginobj;
-		Session::Instance();
+		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -99,7 +97,7 @@ public:
 	void testSearchByRunNumberInvalidInput()
 	{		
 		Login loginobj;
-		Session::Instance();
+		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Now set it...
@@ -109,7 +107,7 @@ public:
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
-		CSearchByRunNumber searchobj;
+		CSearch searchobj;
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
 		// start run number > end run number
@@ -124,15 +122,11 @@ public:
 
 	}
 
-	void xtestSearchByInvalidDates1()
+	void testSearchByInvalidDates1()
 	{
-
-		std::string s;
-		std::getline(std::cin,s);
-
-		CSearchByRunNumber searchobj;
+		CSearch searchobj;
 		Login loginobj;
-		Session::Instance();
+		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -148,21 +142,15 @@ public:
 		
 		errorMsg="Invalid value for property StartDate (string) ""aaaaa"": Invalid Date:date format must be DD/MM/YYYY";
 		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","aaaaa"),std::invalid_argument(errorMsg));
-		searchobj.setPropertyValue("OutputWorkspace","Investigations");
-		
-		TS_ASSERT_THROWS(searchobj.execute(),std::runtime_error);
-
-		//should fail
-		TS_ASSERT( !searchobj.isExecuted() );
 
 	}
 
 	void xtestSearchByInvalidDates2()
 	{
 
-		CSearchByRunNumber searchobj;
+		CSearch searchobj;
 		Login loginobj;
-		Session::Instance();
+		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");

@@ -1,6 +1,6 @@
 // WorkspaceFactory include must be first otherwise you get a bizarre Poco-related compilation error on Windows
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidICat/SearchHelper.h"
+#include "MantidICat/ICatHelper.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/ErrorHandling.h" 
 #include <iomanip>
@@ -20,7 +20,7 @@ namespace Mantid
 		 * @param request request object
 		 * @param response response object
 		 */
-		int CSearchHelper::doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response)
+		int CICatHelper::doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response)
 		{
 			// Define ssl authentication scheme
 			if (soap_ssl_client_context(&icat,
@@ -52,7 +52,7 @@ namespace Mantid
 		 * @param inputs reference to class containing search inputs
 		 * @param outputws shared pointer to output workspace
 		 */
-		int CSearchHelper::doISISSearch(CSearchInput& inputs,API::ITableWorkspace_sptr &outputws)
+		void CICatHelper::doISISSearch(const CSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
 		{
 			//ICAt proxy object
 			ICATPortBindingProxy icat;
@@ -68,11 +68,11 @@ namespace Mantid
 			boost::shared_ptr<ns1__advancedSearchDetails>adv_sptr(new ns1__advancedSearchDetails);
 			req_sptr->advancedSearchDetails=adv_sptr.get();
 			//run start
-			//boost::shared_ptr<double>runstart_sptr(new double);
+			boost::shared_ptr<double>runstart_sptr(new double);
 			if(inputs.getRunStart()>0)
 			{
-				//req_sptr->advancedSearchDetails->runStart=runstart_sptr.get();
-			   req_sptr->advancedSearchDetails->runStart=& inputs.getRunStart();
+				req_sptr->advancedSearchDetails->runStart=runstart_sptr.get();
+			   *req_sptr->advancedSearchDetails->runStart= inputs.getRunStart();
 			}
 			//run end
 			boost::shared_ptr<double>runend_sptr(new double);
@@ -100,7 +100,7 @@ namespace Mantid
 			// investigation include
             boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
 			req_sptr->advancedSearchDetails->investigationInclude=invstInculde_sptr.get();
-			*req_sptr->advancedSearchDetails->investigationInclude=inputs.getInvestigationInclude();
+			*req_sptr->advancedSearchDetails->investigationInclude=ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
          
 			//instrument name
 			if(!inputs.getInstrument().empty())
@@ -114,9 +114,57 @@ namespace Mantid
 				req_sptr->advancedSearchDetails->keywords.push_back(inputs.getKeywords());
 			}
 
-			//setting the input parameters
-			//setReqParamforSearchByRunNumber(inputs,req_sptr);
-		
+			//invetigation name
+			boost::shared_ptr<std::string > investName_sptr(new std::string);
+			if(!inputs.getInvestigationName().empty())
+			{
+				req_sptr->advancedSearchDetails->investigationName = investName_sptr.get();
+				*req_sptr->advancedSearchDetails->investigationName = inputs.getInvestigationName();
+			}
+
+			//invetigation abstarct
+			boost::shared_ptr<std::string > investAbstract_sptr(new std::string);
+			if(!inputs.getInvestigationAbstract().empty())
+			{
+				req_sptr->advancedSearchDetails->investigationAbstract = investAbstract_sptr.get();
+				*req_sptr->advancedSearchDetails->investigationAbstract = inputs.getInvestigationAbstract();
+			}
+			std::string invstType=inputs.getInvestigationType();
+			req_sptr->advancedSearchDetails->investigationType = &invstType;
+			
+
+			//sample name
+			boost::shared_ptr<std::string > sample_sptr(new std::string);
+			if(!inputs.getSampleName().empty())
+			{
+				req_sptr->advancedSearchDetails->sampleName = sample_sptr.get();
+				*req_sptr->advancedSearchDetails->sampleName = inputs.getSampleName();
+			}
+
+			//investigator's surname
+			boost::shared_ptr<std::string > investigator_sptr(new std::string);
+			if(!inputs.getInvestigatorSurName().empty())
+			{
+				req_sptr->advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
+			}
+
+			//datafile name
+			boost::shared_ptr<std::string > datafilename_sptr(new std::string);
+			if(!inputs.getDatafileName().empty())
+			{
+				req_sptr->advancedSearchDetails->datafileName = datafilename_sptr.get();
+				*req_sptr->advancedSearchDetails->datafileName = inputs.getDatafileName();
+			}
+
+			//rb number 
+			boost::shared_ptr<std::string > RbNumber_sptr(new std::string);
+			if(!inputs.getRbNumber().empty())
+			{
+				req_sptr->advancedSearchDetails->experimentNumber = RbNumber_sptr.get();
+				*req_sptr->advancedSearchDetails->experimentNumber = inputs.getRbNumber();
+			}
+
+						
 			//response object
 			ns1__searchByAdvancedResponse response;
 			// do  search
@@ -129,19 +177,17 @@ namespace Mantid
 			if(response.return_.empty())
 			{	
 				g_log.information()<<"ICat investigations search is complete.There are no results to display"<<std::endl;
-				return -1;
-        		//throw std::runtime_error("ICat investigations search is complete.There are no results to display");
+				return ;
+        		
 			}
 			//save response to a table workspace
 			saveSearchRessults(response,outputws);
-			//saveData(response.return_,outputws2);
-			return ret_search;
 		}
 	   /**This method sets the input request parameters for search 
 		* @param input Refrence to input class
 		* @request refrence to request object
 		*/
-		void CSearchHelper::setReqParamforSearchByRunNumber(CSearchInput& input,boost::shared_ptr<ns1__searchByAdvanced>& request)
+		void CICatHelper::setReqParamforSearchByRunNumber(CSearchInput& input,boost::shared_ptr<ns1__searchByAdvanced>& request)
 		{
 			//get the sessionid which is cached in session class during login
 			*request->sessionId=Session::Instance().getSessionId();
@@ -185,7 +231,7 @@ namespace Mantid
 		*  @param response const reference to response object
 		*  @param outputws shared pointer to output workspace
 		*/
-		void  CSearchHelper::saveSearchRessults(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws)
+		void  CICatHelper::saveSearchRessults(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws)
 		{
 			//create table workspace
 		
@@ -217,7 +263,7 @@ namespace Mantid
 		*  @param investigations a vector containing investigation data
 		*  @param outputws shared pointer to output workspace
 		*/
-		void CSearchHelper::saveInvestigations(const std::vector<ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws)
+		void CICatHelper::saveInvestigations(const std::vector<ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws)
 		{
 	
 			try
@@ -227,25 +273,18 @@ namespace Mantid
 				{
 					API::TableRow t = outputws->appendRow();
 					//investigation id
-					
 					savetoTableWorkspace((*citr)->id,t);
-					
-					//std::cout<<"investigation id is "<<(*(*citr)->id)<<std::endl;
-										
+								
 					//rb number
 					savetoTableWorkspace((*citr)->invNumber,t);
 
-					//std::cout<<"rb number is "<<*(*citr)->invNumber<<std::endl;
-					//title
+       				//title
 					savetoTableWorkspace((*citr)->title,t);
-
-					//std::cout<<"title  is "<<*(*citr)->title<<std::endl;
-                   				
+							
 					//type 
 					savetoTableWorkspace((*citr)->invType,t);
 
 					savetoTableWorkspace((*citr)->instrument,t);
-					//std::cout<<"instrument is "<<*(*citr)->instrument<<std::endl;
 					//investigator
 					savetoTableWorkspace((*citr)->bcatInvStr,t);
 					// run range
@@ -281,7 +320,7 @@ namespace Mantid
 		*  @param investigation pointer to a single investigation data
 		*  @param t reference to a row in a table workspace
 		*/
-		void CSearchHelper::saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t)
+		void CICatHelper::saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t)
 		{
 			
 			try
@@ -365,7 +404,7 @@ namespace Mantid
 		 * @param response const reference to response object
 		 * @returns shared pointer to table workspace which stores the data
 		 */
-		API::ITableWorkspace_sptr CSearchHelper::saveFileSearchResponse(const ns1__searchByAdvancedResponse& response)
+		API::ITableWorkspace_sptr CICatHelper::saveFileSearchResponse(const ns1__searchByAdvancedResponse& response)
 		{
 			//create table workspace
 			API::ITableWorkspace_sptr outputws =createTableWorkspace();
@@ -446,7 +485,7 @@ namespace Mantid
 		 * @param include - enum parameter to retrieve dat from DB
 		 * @param request - request object
 		*/
-		void CSearchHelper::setReqParamforInvestigationIncludes(long long invstId,ns1__investigationInclude include,ns1__getInvestigationIncludes& request)
+		void CICatHelper::setReqParamforInvestigationIncludes(long long invstId,ns1__investigationInclude include,ns1__getInvestigationIncludes& request)
 		{
 			//get the sessionid which is cached in session class during login
 			*request.sessionId=Session::Instance().getSessionId();;
@@ -456,12 +495,11 @@ namespace Mantid
 		}
 	   /**This method calls ICat API getInvestigationIncludes and returns investigation details for a given investigation Id
 		* @param invstId - investigation id
-		* @param bDataFiles boolean option to select data files
 		* @param include - enum parameter for selecting the response data from the db.
 		* @param responsews_sptr - table workspace to save the response data
-		* @param return the number which iact api returns if this is zero it's success
+		* @param returns zero if success
 		*/
-		int CSearchHelper::getDataFiles(long long invstId,bool bDataFiles,ns1__investigationInclude include,
+		int CICatHelper::getDataFiles(long long invstId,ns1__investigationInclude include,
 			               API::ITableWorkspace_sptr& responsews_sptr)
 		{
 			//ICAt proxy object
@@ -504,14 +542,12 @@ namespace Mantid
 			stream<<invstId;
 			if(!response.return_)
 			{
-				//throw std::runtime_error("No data files exists in the ICat database for the selected investigation");
 				g_log.information()<<"No data files exists in the ICat database for the selected investigation"<<std::endl;
 				return -1;
 			}
 			try
 			{
-				//responsews_sptr=saveInvestigationIncludesResponse(bDataFiles,response);
-				saveInvestigationIncludesResponse(bDataFiles,response,responsews_sptr);
+				saveInvestigationIncludesResponse(response,responsews_sptr);
 			}
 			catch(std::runtime_error)
 			{				
@@ -524,12 +560,10 @@ namespace Mantid
 		 * @param bloadonlyData boolean to load only data files
 		 * @param outputws shared pointer to table workspace which stores the data
 		*/
-		void  CSearchHelper::saveInvestigationIncludesResponse(bool bloadonlyData,
-			const ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
+		void  CICatHelper::saveInvestigationIncludesResponse(const ns1__getInvestigationIncludesResponse& response,
+			API::ITableWorkspace_sptr& outputws)
 		{
-			//create table workspace
-			//API::ITableWorkspace_sptr outputws =createTableWorkspace();
-
+			
 			outputws->addColumn("str","Name");//File name
 			outputws->addColumn("int","File Size (B)");//File Size
 			outputws->addColumn("long64","File Id");//File id
@@ -559,19 +593,8 @@ namespace Mantid
 						for(datafile_citr=datafileVec.begin();datafile_citr!=datafileVec.end();++datafile_citr)
 						{
 
-                           if(bloadonlyData)
-						   {
-							if(!isDataFile((*datafile_citr)->name))
-							{
-								continue;
-							}
-						   }
 							API::TableRow t = outputws->appendRow();
-							
-							//instrument name
-							//savetoTableWorkspace(response.return_->instrument,t);
-							//investigation Id
-							//savetoTableWorkspace(response.return_->id,t);
+										
 							// File Name
 							savetoTableWorkspace((*datafile_citr)->name,t);
 						    // File Size
@@ -636,18 +659,19 @@ namespace Mantid
 		 * @return bool - returns true if it's a raw file or nexus file
 		 */
 
-		bool CSearchHelper::isDataFile(const std::string* fileName)
+		bool CICatHelper::isDataFile(const std::string* fileName)
 		{	
 			if(!fileName)
 			{
 				return false;
 			}
 			std::basic_string <char>::size_type dotIndex;
-			//find the position of .in row file
+			//find the position of '.' in raw/nexus file name
 			dotIndex = (*fileName).find_last_of (".");
 			std::string fextn=(*fileName).substr(dotIndex+1,(*fileName).size()-dotIndex);
+			std::transform(fextn.begin(),fextn.end(),fextn.begin(),std::tolower);
 			bool bData;
-			(!fextn.compare("raw")|| !fextn.compare("RAW")|| !fextn.compare("nxs")|| !fextn.compare("NXS")) ? bData = true : bData = false;
+			(!fextn.compare("raw")|| !fextn.compare("nxs")) ? bData = true : bData = false;
 			return bData;
 		}
 
@@ -656,7 +680,7 @@ namespace Mantid
 		 * @param include - enum parameter for selecting the response data from iact db.
 		 * @param responsews_sptr - table workspace to save the response data
 		 */
-		int CSearchHelper::doDataSetsSearch(long long invstId,ns1__investigationInclude include,
+		int CICatHelper::doDataSetsSearch(long long invstId,ns1__investigationInclude include,
 			               API::ITableWorkspace_sptr& responsews_sptr)
 		{
 			//ICAt proxy object
@@ -723,7 +747,7 @@ namespace Mantid
 		 * @param outputws  shred pointer to workspace
 		 * @returns shared pointer to table workspace which stores the data
 		 */
-		void  CSearchHelper::saveDataSets(const ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
+		void  CICatHelper::saveDataSets(const ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
 		{
 			//create table workspace
 			//API::ITableWorkspace_sptr outputws =createTableWorkspace();
@@ -767,10 +791,9 @@ namespace Mantid
 		}
 
 		/**This method calls ICat api listruments and returns the list of instruments a table workspace
-		 * @param ws_sptr - shared pointer to table workspace
-		 *@return API::ITableWorkspace_sptr
+		 *@param instruments  list of instruments
 		 */
-		void  CSearchHelper::listInstruments(API::ITableWorkspace_sptr & ws_sptr)
+		void CICatHelper::listInstruments(std::vector<std::string>& instruments)
 		{		
 			//ICAt proxy object
 			ICATPortBindingProxy icat;
@@ -788,8 +811,8 @@ namespace Mantid
 				CErrorHandling::throwErrorMessages(icat);
 			}
 
+			
 			ns1__listInstruments request;
-
 			//get the sessionid which is cached in session class during login
 			boost::shared_ptr<std::string >sessionId_sptr(new std::string);
 			request.sessionId=sessionId_sptr.get();
@@ -801,57 +824,41 @@ namespace Mantid
 
 			 int ret=icat.listInstruments(&request,&response);
 			 if(ret!=0)
-			 {
-				 CErrorHandling::throwErrorMessages(icat);
+			 {				
+				// 
+				 if(isvalidSession())
+				 {					
+					 CErrorHandling::throwErrorMessages(icat);
+				 }
+				 else
+				 {					
+					 throw SessionException("Invalid Session");
+				 }
+
 			 }
 			 if(response.return_.empty())
 			 {
-				 //std::runtime_error("There are no instruments entry in the ICat data base");
-				 g_log.information()<<"Instruments List is empty"<<std::endl;
+				 g_log.error()<<"Instruments List is empty"<<std::endl;
 				 return ;
 			 }
-	
-			 saveInstrumentList(response,ws_sptr);
+			 
+			 instruments.assign(response.return_.begin(),response.return_.end());
+			 						
 		}
 
 	  /**This method sets the request parameter for ICat api list isnturments
 		* @param request - reference to request object
 		*/
-		void CSearchHelper::setReqparamforlistInstruments(ns1__listInstruments& request)
+		void CICatHelper::setReqparamforlistInstruments(ns1__listInstruments& request)
 		{
 			*request.sessionId=Session::Instance().getSessionId();
 		}
 
-		/**This method saves the response data for ICat api list isnturments
-		 * @param response - reference to response object
-		 * @param outputws - shared pointer to table workspace
-		 */
-		void  CSearchHelper::saveInstrumentList(const ns1__listInstrumentsResponse& response,
-			API::ITableWorkspace_sptr & outputws)
-		{			
-			//API::ITableWorkspace_sptr outputws =createTableWorkspace();
-			outputws->addColumn("str","Instrument Name");
-			try
-			{			
-				std::vector<std::string>::const_iterator inst_citr;
-				for(inst_citr=response.return_.begin();inst_citr!=response.return_.end();++inst_citr)
-				{						
-					API::TableRow t = outputws->appendRow();
-					// instrument  Name
-					t<<*inst_citr;
-				}
-			}
-			catch(std::runtime_error& )
-			{
-				throw;
-			}
-
-		}
-
+		
 		/**This method calls ICat api listruments and returns the list of instruments a table workspace
-		 *@return API::ITableWorkspace_sptr
+		 *@param investTypes  list of investigationtypes
 		 */
-		void  CSearchHelper::listInvestigationTypes(API::ITableWorkspace_sptr &ws_sptr)
+		void  CICatHelper::listInvestigationTypes(std::vector<std::string>& investTypes)
 		{		
 			//ICAt proxy object
 			ICATPortBindingProxy icat;
@@ -869,8 +876,8 @@ namespace Mantid
 				CErrorHandling::throwErrorMessages(icat);
 			}
 
+			
 			ns1__listInvestigationTypes request;
-
 			//get the sessionid which is cached in session class during login
 			boost::shared_ptr<std::string >sessionId_sptr(new std::string);
 			request.sessionId=sessionId_sptr.get();
@@ -879,51 +886,31 @@ namespace Mantid
 			// response object
 			 ns1__listInvestigationTypesResponse response;
 
-			 int ret=icat.listInvestigationTypes(&request,&response);
+			int ret=icat.listInvestigationTypes(&request,&response);
 			 if(ret!=0)
 			 {
-				 CErrorHandling::throwErrorMessages(icat);
+				// 
+				 if(isvalidSession())
+				 {					
+					 CErrorHandling::throwErrorMessages(icat);
+				 }
+				 else
+				 {					
+					 throw SessionException("Invalid Session");
+				 }
 			 }
 			 if(response.return_.empty())
 			 {
-				 //std::runtime_error("There are no instruments entry in the ICat data base");
-				 g_log.information()<<"Invetgation types is empty"<<std::endl;
+				 g_log.information()<<"Investigation types is empty"<<std::endl;
 				 return ;
 			 }
-	
-			 saveInvestigationsTypesList(response,ws_sptr);
+	    	 investTypes.assign(response.return_.begin(),response.return_.end());
 		}
 
-	 
-		/**This method saves the response data for ICat api list isnturments
-		 *@param response - reference to response object
-		 *@param outputws - shared pointer to table workspace
-		 * @return API::ITableWorkspace_sptr - shared pointer to table workspace
-		 */
-		void  CSearchHelper::saveInvestigationsTypesList(const ns1__listInvestigationTypesResponse& response,
-			API::ITableWorkspace_sptr &outputws)
-		{			
-			//API::ITableWorkspace_sptr outputws =createTableWorkspace();
-			outputws->addColumn("str","Investigation Type");
-			try
-			{			
-				std::vector<std::string>::const_iterator inst_citr;
-				for(inst_citr=response.return_.begin();inst_citr!=response.return_.end();++inst_citr)
-				{						
-					API::TableRow t = outputws->appendRow();
-					// instrument  Name
-					t<<*inst_citr;
-				}
-			}
-			catch(std::runtime_error& )
-			{
-				throw;
-			}
-			
-		}
+	 		
 
 		/// This method creates table workspace
-		API::ITableWorkspace_sptr CSearchHelper::createTableWorkspace()
+		API::ITableWorkspace_sptr CICatHelper::createTableWorkspace()
 		{
 			//create table workspace
 			API::ITableWorkspace_sptr outputws ;
@@ -942,7 +929,7 @@ namespace Mantid
 			return outputws;
 		}
         /// This method calls ICat api logoutand disconnects from ICat DB
-		int CSearchHelper::doLogout()
+		int CICatHelper::doLogout()
 		{
 			ICATPortBindingProxy icat;
 			// Define ssl authentication scheme
@@ -977,7 +964,7 @@ namespace Mantid
 		/**This method calls ICat api getmyinvestigations and do returns the investigations of the logged in user
 		 * @param ws_sptr - shared pointer to table workspace which stores the investigations search result
 		 */
-		void CSearchHelper::doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr)
+		void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr)
 		{
 			ICATPortBindingProxy icat;
 			// Define ssl authentication scheme
@@ -1025,7 +1012,7 @@ namespace Mantid
 		 * @param response - reference to response  object 
 		 * @param outputws - shared pointer to table workspace which stores the investigations search result
 		 */
-		void CSearchHelper::saveMyInvestigations( const ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
+		void CICatHelper::saveMyInvestigations( const ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
 		{
 			outputws->addColumn("long64","InvestigationId");
 			outputws->addColumn("str","RbNumber");
@@ -1048,7 +1035,7 @@ namespace Mantid
 		 * @param inputs reference to class containing search inputs
 		 * @param outputws shared pointer to output workspace
 		 */
-		void CSearchHelper::doAdvancedSearch(CSearchInput& inputs,API::ITableWorkspace_sptr &outputws)
+		void CICatHelper::doAdvancedSearch(CSearchInput& inputs,API::ITableWorkspace_sptr &outputws)
 		{
 
 			//ICAt proxy object
@@ -1185,7 +1172,7 @@ namespace Mantid
 		 *@param sDate string containing the date 
 		 *@return time_t value of date 
 		 */
-		time_t CSearchHelper::getTimevalue(const std::string& sDate)
+		time_t CICatHelper::getTimevalue(const std::string& sDate)
 		{
 
 			if(!sDate.compare(""))
@@ -1203,7 +1190,6 @@ namespace Mantid
 				throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
 			}
 			//get day part of the date
-			//day=atoi(sDate.substr(off,index-off).c_str());
 			try
 			{
 				day=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
@@ -1223,7 +1209,6 @@ namespace Mantid
 				throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
 			}
 			//now get the month part
-			//month=atoi(sDate.substr(off,index-off).c_str());
 			try
 			{
 				month=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
@@ -1237,8 +1222,6 @@ namespace Mantid
 			//change the offset to the position after "/"
 			off=index+1;
 			//now get the year part from the date string
-			//year=atoi(sDate.substr(off,4).c_str());
-
 			try
 			{
 				year=boost::lexical_cast<int>(sDate.substr(off,4).c_str());
@@ -1256,7 +1239,196 @@ namespace Mantid
 			//timeinfo->tm_isdst=-1;
 			return std::mktime (&timeinfo );
 		}
+		/**This method checks the given session is valid
+		  *@return returns true if the session id is valid,otherwise false;
+		 */
+		bool CICatHelper::isvalidSession()
+		{
+			
+			ICATPortBindingProxy icat;
+			// Define ssl authentication scheme
+			if (soap_ssl_client_context(&icat,
+				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+				NULL,       /* keyfile: required only when client must authenticate to
+							server (see SSL docs on how to obtain this file) */
+							NULL,       /* password to read the keyfile */
+							NULL,      /* optional cacert file to store trusted certificates */
+							NULL,      /* optional capath to directory with trusted certificates */
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
+							))
+			{
+				
+				CErrorHandling::throwErrorMessages(icat);
+			}
 
+			bool bret;
+			ns1__isSessionValid request;
+			ns1__isSessionValidResponse response;
+			std::string sessionId=Session::Instance().getSessionId();
+			request.sessionId = &sessionId;
+			
+			int ret=icat.isSessionValid(&request,&response);
+			//if(ret!=0)
+			{				
+				response.return_? bret= true:bret= false;
+			  		//CErrorHandling::throwErrorMessages(icat);
+			}
+			
+			return bret;
+			
+
+		}
 		
+		/**This method uses ICat API login to connect to catalog 
+		  *@param name login name of the user
+		  *@param password of the user
+		  *@param url endpoint url of the catalog
+		*/
+		void CICatHelper::doLogin(const std::string& name,const std::string& password,const std::string & url)
+		{
+			//m_prog=0.2;
+			//progress(m_prog, "Getting username and password ...");
+             ICATPortBindingProxy icat;
+			// Define ssl authentication scheme
+			if (soap_ssl_client_context(&icat,
+				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+				NULL,       /* keyfile: required only when client must authenticate to 
+							server (see SSL docs on how to obtain this file) */
+							NULL,       /* password to read the keyfile */
+							NULL,      /* optional cacert file to store trusted certificates */
+							NULL,      /* optional capath to directory with trusted certificates */
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
+							))
+			{ 
+				//icat.soap_stream_fault(std::cerr);
+				CErrorHandling::throwErrorMessages(icat);
+			}
+
+			// Login to icat
+			ns1__login login;
+			ns1__loginResponse loginResponse;
+
+			std::string userName(name);
+			std::string passWord(password);
+			login.username = &userName;
+			login.password = &passWord;
+			
+			std::string session_id;
+
+			int query_id = icat.login(&login, &loginResponse);
+			if( query_id == 0 )
+			{
+				session_id = *(loginResponse.return_);
+				//save session id
+				ICat::Session::Instance().setSessionId(session_id);
+				//save user name
+				ICat::Session::Instance().setUserName(userName);
+			}
+			else
+			{ 
+				CErrorHandling::throwErrorMessages(icat);
+				return;
+			}
+			
+		}
+
+		void CICatHelper::getdownloadURL(const long long& fileId,std::string& url)
+		{
+
+			ICATPortBindingProxy icat;
+			// Define ssl authentication scheme
+			if (soap_ssl_client_context(&icat,
+				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+				NULL,       /* keyfile: required only when client must authenticate to 
+							server (see SSL docs on how to obtain this file) */
+							NULL,       /* password to read the keyfile */
+							NULL,      /* optional cacert file to store trusted certificates */
+							NULL,      /* optional capath to directory with trusted certificates */
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
+							))
+			{ 
+				CErrorHandling::throwErrorMessages(icat);
+			}
+
+			    ns1__downloadDatafile request;
+
+				boost::shared_ptr<std::string >sessionId_sptr(new std::string);
+				request.sessionId = sessionId_sptr.get();
+				*request.sessionId = Session::Instance().getSessionId();
+
+				boost::shared_ptr<LONG64>fileId_sptr(new LONG64 );
+				request.datafileId=fileId_sptr.get();
+				*request.datafileId= fileId;
+
+				//set request parameters
+				
+				ns1__downloadDatafileResponse response;
+				// get the URL using ICAT API
+				int ret=icat.downloadDatafile(&request,&response);
+				
+				//m_prog +=(double(++counter)/double(fileList.size()))/2.0;
+				//progress(m_prog, "downloading the file from data.isis server...");
+				if(ret!=0)
+				{
+					CErrorHandling::throwErrorMessages(icat);
+				}
+				if(!response.URL)
+				{
+					throw std::runtime_error("Empty URL returned from ICat3 Catalog");
+				}
+				url=*response.URL;
+
+		}
+
+		void CICatHelper::getlocationString(const long long& fileid,std::string& filelocation)
+		{
+
+			    ICATPortBindingProxy icat;
+			// Define ssl authentication scheme
+			if (soap_ssl_client_context(&icat,
+				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+				NULL,       /* keyfile: required only when client must authenticate to 
+							server (see SSL docs on how to obtain this file) */
+							NULL,       /* password to read the keyfile */
+							NULL,      /* optional cacert file to store trusted certificates */
+							NULL,      /* optional capath to directory with trusted certificates */
+							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
+							))
+			   { 
+				//icat.soap_stream_fault(std::cerr);
+				CErrorHandling::throwErrorMessages(icat);
+			    }
+
+			    ns1__getDatafile request;
+
+				boost::shared_ptr<std::string >sessionId_sptr(new std::string);
+				request.sessionId=sessionId_sptr.get();
+				*request.sessionId = Session::Instance().getSessionId();
+
+				boost::shared_ptr<LONG64>fileId_sptr(new LONG64 );
+				request.datafileId=fileId_sptr.get();
+				*request.datafileId=fileid;
+					
+				ns1__getDatafileResponse response;
+				int ret=icat.getDatafile(&request,&response);
+				if(ret==0)
+				{
+					if(response.return_->location)
+					{
+						filelocation=*response.return_->location;
+					}
+				}
+			   std::basic_string <char>::iterator iter;
+			   for(iter=filelocation.begin();iter!=filelocation.end();++iter)
+			   {
+				  if((*iter)=='\\')
+				  {
+					(*iter)='/';
+				  }
+			  }
+		}
+
+
+		 		
 	}
 }

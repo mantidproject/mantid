@@ -5,6 +5,7 @@
 #include "MantidICat/Session.h"
 #include "MantidKernel/DateValidator.h"
 
+
 namespace Mantid
 {
 	namespace ICat
@@ -56,7 +57,7 @@ namespace Mantid
 		*/
 		void CAdvancedSearch::doAdvancedSearch(ITableWorkspace_sptr& outputws)
 		{
-			CSearchInput inputs;CSearchHelper searchobj;
+			CSearchInput inputs;CICatHelper searchobj;
 			getInputProperties(searchobj,inputs);
 			
 			searchobj.doAdvancedSearch(inputs,outputws);
@@ -65,7 +66,7 @@ namespace Mantid
 		/** This method gets the input properties of the algorithm
 		  *@param inputs reference to searchinput class.
 		*/
-		void CAdvancedSearch::getInputProperties(CSearchHelper& helper,CSearchInput& inputs)
+		void CAdvancedSearch::getInputProperties(CICatHelper& helper,CSearchInput& inputs)
 		{
 			double dstartRun=getProperty("StartRun");
 			if(dstartRun<0)

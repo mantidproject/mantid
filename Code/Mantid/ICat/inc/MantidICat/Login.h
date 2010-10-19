@@ -2,8 +2,6 @@
 #define MANTID_ICAT_LOGIN_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
-
 
 /**  Login class for logging into ICat DB .This class written as a Mantid algorithm. 
      This class uses Gsoap generated ProxyObject to connect to ICat and uses Login API .
@@ -45,7 +43,7 @@ namespace Mantid
 		{
 		public:
 			/// constructor
-			Login():API::Algorithm(),m_prog(0){}
+			Login():API::Algorithm(){}
 			/// Destructor
 			~Login(){}
 			/// Algorithm's name for identification overriding a virtual method
@@ -60,13 +58,7 @@ namespace Mantid
 			void init();
 			/// Overwrites Algorithm method
 			void exec();
-			/// login method
-			void doLogin( ICATPortBindingProxy & icat);
-
-			/// attributes
-			double m_prog;
 			
-
 		};
 	}
 }

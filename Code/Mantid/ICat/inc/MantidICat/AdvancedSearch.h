@@ -5,7 +5,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include"MantidICat/SearchHelper.h"
+#include"MantidICat/ICatHelper.h"
 
 /** CAdvancedSearch is a class responsible for searching investigatiosns.
   * This algorithm does the adavanced  search and returns the investigations record
@@ -78,7 +78,7 @@ namespace Mantid
 			void  doAdvancedSearch(API::ITableWorkspace_sptr &outputws);
 
 			/// method to get input properties for the algorithm and setting to Csearch input class.
-			void getInputProperties(CSearchHelper& helper,CSearchInput& inputs);
+			void getInputProperties(CICatHelper& helper,CSearchInput& inputs);
 
 
 		};

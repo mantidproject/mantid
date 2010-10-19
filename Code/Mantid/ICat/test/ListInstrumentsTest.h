@@ -22,6 +22,8 @@ public:
 
 	void testListInstruments()
 	{
+		/*std::string s;
+		std::getline(std::cin,s);*/
 	
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
@@ -33,7 +35,7 @@ public:
 		TS_ASSERT( loginobj.isExecuted() );
 
 		if (!instrList.isInitialized() ) instrList.initialize();
-		instrList.setPropertyValue("OutputWorkspace","instrument_list");
+		//instrList.setPropertyValue("OutputWorkspace","instrument_list");
 						
 		TS_ASSERT_THROWS_NOTHING(instrList.execute());
 		TS_ASSERT( instrList.isExecuted() );
