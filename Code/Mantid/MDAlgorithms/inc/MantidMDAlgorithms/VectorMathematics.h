@@ -1,33 +1,24 @@
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
+#ifndef MANTID_ALGORITHMS_VECTORMATHEMATICS
+#define MANTID_ALGORITHMS_VECTORMATHEMATICS
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidKernel/System.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
-#include "IImplicitFunction.h"
-
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
+#include <cmath>
 
 namespace Mantid
 {
-	namespace MDDataObjects
-	{
-		class point3D;
-	}
 	namespace MDAlgorithms
 	{
 		/** A base class for absorption correction algorithms.
 
 
-		This class represents a composite implicit function used for communicating and implementing an operation against 
-		an MDWorkspace.
+		Grouping of static methods used to perform vector mathematics required for MDAlgorithm support. If this collection proves 
+		useful elsewhere, it should be moved down the package structure.
 
 		@author Owen Arnold, Tessella plc
-		@date 01/10/2010
+		@date 19/10/2010
 
 		Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -50,21 +41,20 @@ namespace Mantid
 		Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		//TODO. This should be constructed via a factory
-		class DLLExport CompositeImplicitFunction : IImplicitFunction
+		template<typename T>
+		void static DotProduct(T a1, T a2, T a3, T b1, T b2, T b3, std::vector<T>& result)
 		{
-		public:
-			CompositeImplicitFunction();
-			
-			~CompositeImplicitFunction();
-			void AddFunction(boost::shared_ptr<IImplicitFunction> constituentFunction);
-			bool Evaluate(MDDataObjects::point3D const * const pPoint3D) const;
-		protected:
-			std::vector<boost::shared_ptr<IImplicitFunction>> m_Functions;
-		private:
-			CompositeImplicitFunction(const CompositeImplicitFunction& other);
-			CompositeImplicitFunction& operator=(const CompositeImplicitFunction& other);
-		};
+			result.push_back(a1 * b1);
+			result.push_back(a2 * b2);
+			result.push_back(a3 * b3);
+		}
+
+		template<typename T>
+		T static Absolute(T a1, T a2, T a3)
+		{
+			return sqrt((a1 * a1) + (a2 * a2) + (a3 * a3));
+		}
+
 	}
 }
 

@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
+#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_H_
+#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,7 +8,7 @@
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
 #include "IImplicitFunction.h"
-
+#include "VectorMathematics.h"
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -23,7 +23,7 @@ namespace Mantid
 		/** A base class for absorption correction algorithms.
 
 
-		This class represents a composite implicit function used for communicating and implementing an operation against 
+		This class represents a plane implicit function used for communicating and implementing an operation against 
 		an MDWorkspace.
 
 		@author Owen Arnold, Tessella plc
@@ -51,19 +51,29 @@ namespace Mantid
 		*/
 
 		//TODO. This should be constructed via a factory
-		class DLLExport CompositeImplicitFunction : IImplicitFunction
+		class DLLExport PlaneImplicitFunction : IImplicitFunction
 		{
 		public:
-			CompositeImplicitFunction();
-			
-			~CompositeImplicitFunction();
-			void AddFunction(boost::shared_ptr<IImplicitFunction> constituentFunction);
-			bool Evaluate(MDDataObjects::point3D const * const pPoint3D) const;
-		protected:
-			std::vector<boost::shared_ptr<IImplicitFunction>> m_Functions;
+			PlaneImplicitFunction::PlaneImplicitFunction(std::vector<double> normal, std::vector<double> origin);
+			~PlaneImplicitFunction();
+			bool Evaluate(MDDataObjects::point3D const * const pPoint) const;
+			double GetOriginX() const;
+			double GetOriginY() const;
+			double GetOriginZ() const;
+			double GetNormalX() const;
+			double GetNormalY() const;
+			double GetNormalZ() const;
+
 		private:
-			CompositeImplicitFunction(const CompositeImplicitFunction& other);
-			CompositeImplicitFunction& operator=(const CompositeImplicitFunction& other);
+			PlaneImplicitFunction(const PlaneImplicitFunction& other);
+			PlaneImplicitFunction& operator=(const PlaneImplicitFunction& other);
+			double originX;
+			double originY;
+			double originZ;
+			double normalX;
+			double normalY;
+			double normalZ;
+
 		};
 	}
 }

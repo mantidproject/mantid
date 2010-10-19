@@ -78,7 +78,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\inc;..\Kernel\inc;..\Geometry\inc;..\API\inc;..\MDDataObjects\inc;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\inc;..\MDAlgorithms\inc\MDAlgorithms;..\Kernel\inc;..\Geometry\inc;..\API\inc;..\MDDataObjects\inc;..\..\Third_Party\Include\hdf5;..\..\Third_Party\Include\hdf5\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -125,13 +125,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\IImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
     <ClInclude Include="test\testCPrebinning.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\CenterpieceRebinning.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
+    <ClCompile Include="src\PlaneImplicitFunction.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

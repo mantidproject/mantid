@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
+#ifndef IIMPLICITFUNCTION_H_
+#define IIMPLICITFUNCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,22 +8,21 @@
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
 #include "IImplicitFunction.h"
-
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid
 {
+
 	namespace MDDataObjects
 	{
 		class point3D;
 	}
-	namespace MDAlgorithms
+
+	namespace API
 	{
 		/** A base class for absorption correction algorithms.
 
-
-		This class represents a composite implicit function used for communicating and implementing an operation against 
+		This class represents the abstract implicit function type used for communicating and implementing an operation against 
 		an MDWorkspace.
 
 		@author Owen Arnold, Tessella plc
@@ -50,23 +49,14 @@ namespace Mantid
 		Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		//TODO. This should be constructed via a factory
-		class DLLExport CompositeImplicitFunction : IImplicitFunction
+		class DLLExport IImplicitFunction
 		{
 		public:
-			CompositeImplicitFunction();
-			
-			~CompositeImplicitFunction();
-			void AddFunction(boost::shared_ptr<IImplicitFunction> constituentFunction);
-			bool Evaluate(MDDataObjects::point3D const * const pPoint3D) const;
-		protected:
-			std::vector<boost::shared_ptr<IImplicitFunction>> m_Functions;
-		private:
-			CompositeImplicitFunction(const CompositeImplicitFunction& other);
-			CompositeImplicitFunction& operator=(const CompositeImplicitFunction& other);
+			virtual bool Evaluate(MDDataObjects::point3D const * const pPoint3D) const = 0;
+			virtual ~IImplicitFunction(){
+			};
 		};
 	}
 }
-
 
 #endif

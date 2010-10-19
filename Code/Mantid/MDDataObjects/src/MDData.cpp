@@ -98,9 +98,9 @@ MDData::getPointData(const std::vector<unsigned int> &selection,std::vector<poin
             indexY =indexZ+nd2*j;
             for(i=iMin;i<iMax;i++){
                 index=indexY+i;
-                image_points[ic].r.x=xx[i];                
-                image_points[ic].r.y=yy[j];                
-                image_points[ic].r.z=zz[k];                
+                image_points[ic].position.x=xx[i];                
+                image_points[ic].position.y=yy[j];                
+                image_points[ic].position.z=zz[k];                
                 image_points[ic].data= this->data[index];
                     
                 ic++;

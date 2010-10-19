@@ -6,7 +6,7 @@
 
 
 #include "CompositeImplicitFunction.h"
-#include "Hexahedron.h"
+#include "MDDataObjects/point3D.h"
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDDataObjects;
@@ -19,13 +19,13 @@ private:
 	class FakeIImplicitFunction : public IImplicitFunction
 	{
 	private:
-		int  m_evaluateCount;
+		mutable int  m_evaluateCount;
 		bool m_setOutput;
 	public:
 		FakeIImplicitFunction(bool setOutput=false) : m_setOutput(setOutput), m_evaluateCount(0)
 		{
 		}
-		bool Evaluate(Hexahedron* hexahedron)
+		bool Evaluate(point3D const * const pPoint) const
 		{
 			m_evaluateCount += 1;
 			return m_setOutput;
@@ -66,7 +66,7 @@ public:
 	  FakeIImplicitFunction* b = new FakeIImplicitFunction(dummyOutCome);
 	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(a));
 	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(b));
-	  composite.Evaluate(new Mantid::MDDataObjects::Hexahedron());
+	  composite.Evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
 
 	  int callResult = a->getEvaluateCount() + b->getEvaluateCount();
 	  TSM_ASSERT_EQUALS("Two Functions should have been executed",2, callResult);
@@ -79,7 +79,7 @@ public:
 	  FakeIImplicitFunction* b = new FakeIImplicitFunction(false);
 	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(a));
 	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(b));
-	  composite.Evaluate(new Mantid::MDDataObjects::Hexahedron());
+	  composite.Evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
 
 	  int callResult = a->getEvaluateCount() + b->getEvaluateCount();
 	  TSM_ASSERT_EQUALS("Should have aborted after first function evaluation", 1, callResult);

@@ -13,6 +13,7 @@ struct coordinate{
   double x,y,z;
 };
 
+class MDData;
 class DLLExport point3D
 {
 
@@ -20,8 +21,12 @@ class DLLExport point3D
 public:
     point3D(void);
     ~point3D();
+	point3D(double x, double y, double z);
+	inline double GetX() const;
+	inline double GetY() const;
+	inline double GetZ() const;
 private:
-    coordinate r;
+    coordinate position;
     data_point data;
 
 
