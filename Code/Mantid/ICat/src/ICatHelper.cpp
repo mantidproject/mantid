@@ -378,7 +378,6 @@ namespace Mantid
 					std::string sName;
 					if((*sItr)->name)
 					{
-						//savetoTableWorkspace((*sItr)->name,t);
 						sName=*((*sItr)->name);
 					}
 					if(!sNames.empty())
@@ -527,8 +526,6 @@ namespace Mantid
 			boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
 			request.investigationInclude=invstInculde_sptr.get();
 
-			//boost::shared_ptr<long long>invstId_sptr(new long long);
-		   // request.investigationId=invstId_sptr.get();
 			request.investigationId=new LONG64;
 			setReqParamforInvestigationIncludes(invstId,include,request);
 
@@ -669,10 +666,9 @@ namespace Mantid
 			//find the position of '.' in raw/nexus file name
 			dotIndex = (*fileName).find_last_of (".");
 			std::string fextn=(*fileName).substr(dotIndex+1,(*fileName).size()-dotIndex);
-			std::transform(fextn.begin(),fextn.end(),fextn.begin(),std::tolower);
-			bool bData;
-			(!fextn.compare("raw")|| !fextn.compare("nxs")) ? bData = true : bData = false;
-			return bData;
+			std::transform(fextn.begin(),fextn.end(),fextn.begin(),tolower);
+			
+			return((!fextn.compare("raw")|| !fextn.compare("nxs")) ? true :  false);
 		}
 
 		/**This method calls ICat API getInvestigationIncludes and returns datasets details for a given investigation Id
@@ -724,13 +720,11 @@ namespace Mantid
 			stream<<invstId;
 			if(!(response.return_)|| (response.return_)->datasetCollection.empty())
 			{
-				//throw std::runtime_error("No datasets  exists in the ICat database for the inestigation id "+ stream.str());
 				g_log.information()<<"No datasets  exists in the ICat database for the inevstigation id "+ stream.str()<<std::endl;
 				return -1 ;
 			}
 			try
 			{
-				//responsews_sptr=saveDataSets(response);
 				saveDataSets(response,responsews_sptr);
 			}
 			catch(std::runtime_error)
@@ -750,7 +744,6 @@ namespace Mantid
 		void  CICatHelper::saveDataSets(const ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
 		{
 			//create table workspace
-			//API::ITableWorkspace_sptr outputws =createTableWorkspace();
 			//adding columns
 			outputws->addColumn("str","Name");//File name
 			outputws->addColumn("str","Status");
@@ -1001,7 +994,6 @@ namespace Mantid
 			{	
 				g_log.information()<<"ICat Mydata search is complete.There are no results to display"<<std::endl;
 				return ;
-        		//throw std::runtime_error("ICat investigations search is complete.There are no results to display");
 			}
 			//save response to a table workspace
 			saveMyInvestigations(response,ws_sptr);
@@ -1261,20 +1253,14 @@ namespace Mantid
 				CErrorHandling::throwErrorMessages(icat);
 			}
 
-			bool bret;
 			ns1__isSessionValid request;
 			ns1__isSessionValidResponse response;
 			std::string sessionId=Session::Instance().getSessionId();
 			request.sessionId = &sessionId;
 			
 			int ret=icat.isSessionValid(&request,&response);
-			//if(ret!=0)
-			{				
-				response.return_? bret= true:bret= false;
-			  		//CErrorHandling::throwErrorMessages(icat);
-			}
 			
-			return bret;
+			return (response.return_? true: false);
 			
 
 		}
@@ -1286,9 +1272,7 @@ namespace Mantid
 		*/
 		void CICatHelper::doLogin(const std::string& name,const std::string& password,const std::string & url)
 		{
-			//m_prog=0.2;
-			//progress(m_prog, "Getting username and password ...");
-             ICATPortBindingProxy icat;
+			ICATPortBindingProxy icat;
 			// Define ssl authentication scheme
 			if (soap_ssl_client_context(&icat,
 				SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
@@ -1300,7 +1284,6 @@ namespace Mantid
 							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
 							))
 			{ 
-				//icat.soap_stream_fault(std::cerr);
 				CErrorHandling::throwErrorMessages(icat);
 			}
 
@@ -1365,9 +1348,6 @@ namespace Mantid
 				ns1__downloadDatafileResponse response;
 				// get the URL using ICAT API
 				int ret=icat.downloadDatafile(&request,&response);
-				
-				//m_prog +=(double(++counter)/double(fileList.size()))/2.0;
-				//progress(m_prog, "downloading the file from data.isis server...");
 				if(ret!=0)
 				{
 					CErrorHandling::throwErrorMessages(icat);
@@ -1395,8 +1375,7 @@ namespace Mantid
 							NULL      /* if randfile!=NULL: use a file with random data to seed randomness */ 
 							))
 			   { 
-				//icat.soap_stream_fault(std::cerr);
-				CErrorHandling::throwErrorMessages(icat);
+						CErrorHandling::throwErrorMessages(icat);
 			    }
 
 			    ns1__getDatafile request;
