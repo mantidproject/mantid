@@ -92,7 +92,7 @@ namespace Mantid
 			//find the position of '.' in raw/nexus file name
 			dotIndex = fileName.find_last_of (".");
 			std::string fextn=fileName.substr(dotIndex+1,fileName.size()-dotIndex);
-			std::transform(fextn.begin(),fextn.end(),fextn.begin(),std::tolower);
+			std::transform(fextn.begin(),fextn.end(),fextn.begin(),tolower);
 			bool bData;
 			(!fextn.compare("raw")|| !fextn.compare("nxs")) ? bData = true : bData = false;
 			return bData;
