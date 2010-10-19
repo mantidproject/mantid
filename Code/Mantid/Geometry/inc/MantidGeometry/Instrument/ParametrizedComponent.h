@@ -119,7 +119,7 @@ namespace Mantid
       /// Get the bounding box for this component and store it in the given argument
       virtual void getBoundingBox(BoundingBox& boundingBox) const;
 
-      /** @name ParamaterMap access */
+      /** @name ParameterMap access */
       //@{
       // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
       // one for each type, luckily there won't be too many

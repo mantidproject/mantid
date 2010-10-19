@@ -60,41 +60,41 @@ public:
     ocyl.setPos(10,0,0);
     ocyl.setRot(Quat(90.0,V3D(0,0,1)));
     // Check centre point
-    TS_ASSERT( pocyl.isValid(V3D(10,0,0)) )
-      // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
-      TS_ASSERT( pocyl.isValid(V3D(10,-2.5,0)) )
-      // Check that a point is not inside, that would be if no rotation
-      TS_ASSERT( ! pocyl.isValid(V3D(11,0,0)) )
-      // Now add a parent with a rotation of its own;
-      Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    TS_ASSERT( pocyl.isValid(V3D(10,0,0)) );
+    // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
+    TS_ASSERT( pocyl.isValid(V3D(10,-2.5,0)) );
+    // Check that a point is not inside, that would be if no rotation
+    TS_ASSERT( ! pocyl.isValid(V3D(11,0,0)) );
+    // Now add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
     // Check centre point
-    TS_ASSERT( pocyl.isValid(V3D(0,10,-10)) )
-      // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
-      TS_ASSERT( pocyl.isValid(V3D(0,11.1,-10.5)) )
-      TS_ASSERT( pocyl.isValid(V3D(0.5,7,-10)) )
-      // Check that a point is not inside, that would be if no rotation
-      TS_ASSERT( ! pocyl.isValid(V3D(0,10,-11.1)) )
-      TS_ASSERT( ! pocyl.isValid(V3D(1,10,-10)) )
-      // Take out component's rotation - it should make no difference because it's about the cylinder axis
-      ocyl.setRot(Quat(1,0,0,0));
+    TS_ASSERT( pocyl.isValid(V3D(0,10,-10)) );
+    // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
+    TS_ASSERT( pocyl.isValid(V3D(0,11.1,-10.5)) );
+    TS_ASSERT( pocyl.isValid(V3D(0.5,7,-10)) );
+    // Check that a point is not inside, that would be if no rotation
+    TS_ASSERT( ! pocyl.isValid(V3D(0,10,-11.1)) );
+    TS_ASSERT( ! pocyl.isValid(V3D(1,10,-10)) );
+    // Take out component's rotation - it should make no difference because it's about the cylinder axis
+    ocyl.setRot(Quat(1,0,0,0));
     // and repeat tests above
-    TS_ASSERT( pocyl.isValid(V3D(0,10,-10)) )
-      TS_ASSERT( pocyl.isValid(V3D(0,10.5,-11.1)) )
-      TS_ASSERT( pocyl.isValid(V3D(0.5,10,-7)) )
-      TS_ASSERT( ! pocyl.isValid(V3D(0,11.1,-10)) )
-      TS_ASSERT( ! pocyl.isValid(V3D(1,10,-10)) )
+    TS_ASSERT( pocyl.isValid(V3D(0,10,-10)) );
+    TS_ASSERT( pocyl.isValid(V3D(0,10.5,-11.1)) );
+    TS_ASSERT( pocyl.isValid(V3D(0.5,10,-7)) );
+    TS_ASSERT( ! pocyl.isValid(V3D(0,11.1,-10)) );
+    TS_ASSERT( ! pocyl.isValid(V3D(1,10,-10)) );
 
-      // An ObjComponent without an associated geometric object is regarded as a point
-      ObjComponent comp("noShape");
+    // An ObjComponent without an associated geometric object is regarded as a point
+    ObjComponent comp("noShape");
     comp.setPos(1,2,3);
 
     ParObjComponent pcomp(&comp,pmap);
 
     // Check the exact point passes
-    TS_ASSERT( pcomp.isValid(V3D(1,2,3)) )
-      // But that slightly off fails
-      TS_ASSERT( ! pcomp.isValid(V3D(1.0001,2,3)) )
+    TS_ASSERT( pcomp.isValid(V3D(1,2,3)) );
+    // But that slightly off fails
+    TS_ASSERT( ! pcomp.isValid(V3D(1.0001,2,3)) );
   }
 
   void testIsOnSide()
@@ -106,44 +106,44 @@ public:
     ParameterMap pmap;
     ParObjComponent pocyl(&ocyl,pmap);
 
-    TS_ASSERT( pocyl.isOnSide(V3D(10.5,0,0)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(9.5,0,0)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(10,1,0.5)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(10,-3,-0.5)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(9.7,1.2,0.3)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(10,-3.2,0)) )
-      TS_ASSERT( ! pocyl.isOnSide(V3D(0,0,0)) )
-      // Now add a parent with a rotation of its own;
-      Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    TS_ASSERT( pocyl.isOnSide(V3D(10.5,0,0)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(9.5,0,0)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(10,1,0.5)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(10,-3,-0.5)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(9.7,1.2,0.3)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(10,-3.2,0)) );
+    TS_ASSERT( ! pocyl.isOnSide(V3D(0,0,0)) );
+    // Now add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
-    TS_ASSERT( pocyl.isOnSide(V3D(0.5,10,-10)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0,9,-10.5)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0,11.2,-10)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0.2,6.8,-9.6)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(-0.5,11.2,-10)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0,6.8,-9.5)) )
-      TS_ASSERT( ! pocyl.isOnSide(V3D(0,0,0)) )
-      // Take out component's rotation - it should make no difference because it's about the cylinder axis
-      ocyl.setRot(Quat(1,0,0,0));
+    TS_ASSERT( pocyl.isOnSide(V3D(0.5,10,-10)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0,9,-10.5)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0,11.2,-10)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0.2,6.8,-9.6)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(-0.5,11.2,-10)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0,6.8,-9.5)) );
+    TS_ASSERT( ! pocyl.isOnSide(V3D(0,0,0)) );
+    // Take out component's rotation - it should make no difference because it's about the cylinder axis
+    ocyl.setRot(Quat(1,0,0,0));
     // and repeat tests above
-    TS_ASSERT( pocyl.isOnSide(V3D(0.5,10,-10)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0,10.5,-9)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0,10,-11.2)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0.2,9.6,-6.8)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(-0.5,10,-11.2)) )
-      TS_ASSERT( pocyl.isOnSide(V3D(0,9.5,-6.8)) )
-      TS_ASSERT( ! pocyl.isOnSide(V3D(0,0,0)) )
+    TS_ASSERT( pocyl.isOnSide(V3D(0.5,10,-10)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0,10.5,-9)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0,10,-11.2)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0.2,9.6,-6.8)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(-0.5,10,-11.2)) );
+    TS_ASSERT( pocyl.isOnSide(V3D(0,9.5,-6.8)) );
+    TS_ASSERT( ! pocyl.isOnSide(V3D(0,0,0)) );
 
-      // An ObjComponent without an associated geometric object is regarded as a point
-      ObjComponent comp("noShape");
+    // An ObjComponent without an associated geometric object is regarded as a point
+    ObjComponent comp("noShape");
     comp.setPos(1,2,3);
 
     ParObjComponent pcomp(&comp,pmap);
 
     // Check the exact point passes
-    TS_ASSERT( pcomp.isOnSide(V3D(1,2,3)) )
-      // But that slightly off fails
-      TS_ASSERT( ! pcomp.isOnSide(V3D(1.0001,2,3)) )
+    TS_ASSERT( pcomp.isOnSide(V3D(1,2,3)) );
+    // But that slightly off fails
+    TS_ASSERT( ! pcomp.isOnSide(V3D(1.0001,2,3)) );
   }
 
   void testInterceptSurface()
@@ -157,34 +157,34 @@ public:
     ParameterMap pmap;
     ParObjComponent pocyl(&ocyl,pmap);
 
-    TS_ASSERT_EQUALS( pocyl.interceptSurface(track), 1 )
-      Track::LType::const_iterator it = track.begin();
+    TS_ASSERT_EQUALS( pocyl.interceptSurface(track), 1 );
+    Track::LType::const_iterator it = track.begin();
     if (it == track.end()) return;
-    TS_ASSERT_EQUALS( it->Dist, 10.5 )
-      TS_ASSERT_DELTA( it->Length, 1, 0.0001 )
-      TS_ASSERT_EQUALS( it->PtA, V3D(9.5,0,0) )
-      TS_ASSERT_EQUALS( it->PtB, V3D(10.5,0,0) )
-      // Now add a parent with a rotation of its own;
-      Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    TS_ASSERT_EQUALS( it->Dist, 10.5 );
+    TS_ASSERT_DELTA( it->Length, 1, 0.0001 );
+    TS_ASSERT_EQUALS( it->PtA, V3D(9.5,0,0) );
+    TS_ASSERT_EQUALS( it->PtB, V3D(10.5,0,0) );
+    // Now add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
     // Check original track misses
-    TS_ASSERT_EQUALS( pocyl.interceptSurface(track), 0 )
-      // Create a new test track going from the origin down the line y = -x
-      Track track2(V3D(0,0,0),V3D(0,1,-1));
-    TS_ASSERT_EQUALS( pocyl.interceptSurface(track2), 1 )
-      Track::LType::const_iterator it2 = track2.begin();
+    TS_ASSERT_EQUALS( pocyl.interceptSurface(track), 0 );
+    // Create a new test track going from the origin down the line y = -x
+    Track track2(V3D(0,0,0),V3D(0,1,-1));
+    TS_ASSERT_EQUALS( pocyl.interceptSurface(track2), 1 );
+    Track::LType::const_iterator it2 = track2.begin();
     if (it2 == track2.end()) return;
-    TS_ASSERT_DELTA( it2->Dist, sqrt(2*10.5*10.5), 0.0001 )
-      TS_ASSERT_DELTA( it2->Length, sqrt(2.0), 0.0001 )
-      TS_ASSERT_EQUALS( it2->PtA, V3D(0,9.5,-9.5) )
-      TS_ASSERT_EQUALS( it2->PtB, V3D(0,10.5,-10.5) )
+    TS_ASSERT_DELTA( it2->Dist, sqrt(2*10.5*10.5), 0.0001 );
+    TS_ASSERT_DELTA( it2->Length, sqrt(2.0), 0.0001 );
+    TS_ASSERT_EQUALS( it2->PtA, V3D(0,9.5,-9.5) );
+    TS_ASSERT_EQUALS( it2->PtB, V3D(0,10.5,-10.5) );
 
-      // Calling on an ObjComponent without an associated geometric object will throw
-      ObjComponent comp("noShape");
+    // Calling on an ObjComponent without an associated geometric object will throw
+    ObjComponent comp("noShape");
 
     ParObjComponent pcomp(&comp,pmap);
 
-    TS_ASSERT_THROWS( pcomp.interceptSurface(track), Exception::NullPointerException )
+    TS_ASSERT_THROWS( pcomp.interceptSurface(track), Exception::NullPointerException );
   }
 
   void testSolidAngleCappedCylinder()
@@ -219,7 +219,7 @@ public:
 
     ParObjComponent pB(&B,pmap);
 
-    TS_ASSERT_THROWS( pB.solidAngle(V3D(1,2,3)), Exception::NullPointerException )
+    TS_ASSERT_THROWS( pB.solidAngle(V3D(1,2,3)), Exception::NullPointerException );
   }
 
   void testBoundingBoxCappedCylinder()
