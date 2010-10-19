@@ -169,6 +169,7 @@
     <ClCompile Include="src\AnalysisDataService.cpp" />
     <ClCompile Include="src\ArchiveSearchFactory.cpp" />
     <ClCompile Include="src\Axis.cpp" />
+    <ClCompile Include="src\CatalogFactory.cpp" />
     <ClCompile Include="src\CloneableAlgorithm.cpp" />
     <ClCompile Include="src\Column.cpp" />
     <ClCompile Include="src\ColumnFactory.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="inc\MantidAPI\AlgorithmFactory.h" />
     <ClInclude Include="inc\MantidAPI\AlgorithmHistory.h" />
     <ClInclude Include="inc\mantidapi\archivesearchfactory.h" />
+    <ClInclude Include="inc\MantidAPI\CatalogFactory.h" />
     <ClInclude Include="inc\mantidapi\filefinder.h" />
     <ClInclude Include="inc\MantidAPI\FileProperty.h" />
     <ClInclude Include="inc\mantidapi\iarchivesearch.h" />
