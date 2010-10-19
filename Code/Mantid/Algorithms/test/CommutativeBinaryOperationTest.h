@@ -17,6 +17,10 @@ public:
   CommutativeBinaryOpHelper() : CommutativeBinaryOperation() {};
   /// Destructor
   virtual ~CommutativeBinaryOpHelper() {};
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "CommutativeBinaryOperationHelper"; }
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const { return 1; }
   const bool checkSizeCompatibility(const MatrixWorkspace_sptr ws1,const MatrixWorkspace_sptr ws2) const
   {
     return CommutativeBinaryOperation::checkSizeCompatibility(ws1,ws2);

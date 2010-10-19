@@ -45,10 +45,6 @@ namespace Mantid
       CommutativeBinaryOperation() : BinaryOperation() {};
       /// Destructor
       virtual ~CommutativeBinaryOperation() {};
-      /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "CommutativeBinaryOperation"; }
-      /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1; }
 
     protected:
       // Overridden BinaryOperation method
