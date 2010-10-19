@@ -1,5 +1,7 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/SlicingProperty.h"
+//slicing property will go out
+
 /// the function returns the rotation vector which allows to transform vector inumber i into the basis;
 namespace Mantid{
     namespace MDDataObjects{
