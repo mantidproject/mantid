@@ -604,9 +604,9 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.trans_monitor->setText(runReduceScriptFunction(
     "printParameter('INSTRUMENT.incid_mon_4_trans_calc'),"));
   m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
-    "printParameter('INSTRUMENT.is_interpolating_norm'),") == "True");
+    "printParameter('INSTRUMENT.is_interpolating_norm')").trimmed() == "True");
   m_uiForm.trans_interp->setChecked(
-    runReduceScriptFunction("printParameter('INSTRUMENT.use_interpol_trans_calc'),") == "True");
+    runReduceScriptFunction("printParameter('INSTRUMENT.use_interpol_trans_calc'),").trimmed() == "True");
 
   //Direct efficiency correction
   m_uiForm.direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE_R'),"));
@@ -659,7 +659,7 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.phi_min->setText(runReduceScriptFunction("printParameter('PHIMIN')"));
   m_uiForm.phi_max->setText(runReduceScriptFunction("printParameter('PHIMAX')"));
 
-  if ( runReduceScriptFunction("printParameter('PHIMIRROR')") == "True" )
+  if ( runReduceScriptFunction("printParameter('PHIMIRROR')").trimmed() == "True" )
   {
     m_uiForm.mirror_phi->setChecked(true);
   }
@@ -2049,7 +2049,7 @@ void SANSRunWindow::handleInstrumentChange(int index)
 
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
-    "printParameter('INSTRUMENT.cur_detector().name()')");
+    "printParameter('INSTRUMENT.cur_detector().name()')").trimmed();
   int ind = m_uiForm.detbank_sel->findText(detect);  
   if( ind >= 0 && ind < 2 )
   {
@@ -2077,8 +2077,8 @@ void SANSRunWindow::handleInstrumentChange(int index)
 
     //File extensions
     m_uiForm.file_opt->clear();
-    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
     m_uiForm.file_opt->addItem("nexus", QVariant(".nxs"));
+    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   }
 
   m_cfg_loaded = false;
@@ -2268,8 +2268,8 @@ void SANSRunWindow::updateTransInfo(int state)
 {
   if( state == Qt::Checked )
   {
-    m_uiForm.trans_min->setText(runReduceScriptFunction("printParameter('TRANS_WAV1_FULL'),"));
-    m_uiForm.trans_max->setText(runReduceScriptFunction("printParameter('TRANS_WAV2_FULL'),"));
+    m_uiForm.trans_min->setText(runReduceScriptFunction("printParameter('TRANS_WAV1_FULL'),").trimmed());
+    m_uiForm.trans_max->setText(runReduceScriptFunction("printParameter('TRANS_WAV2_FULL'),").trimmed());
   }
 }
 /** Record the output workspace name, if there is no output

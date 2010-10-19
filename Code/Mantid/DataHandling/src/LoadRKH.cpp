@@ -20,9 +20,12 @@ DECLARE_ALGORITHM(LoadRKH)
  * Initialise the algorithm
  */
 void LoadRKH::init()
-{
-  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load),
-    "Name of the RKH file to load" );
+{  
+  std::vector<std::string> exts;
+  exts.push_back(".txt");
+  exts.push_back(".Q");
+  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load, exts),
+    "Name of the RKH file to load");
   declareProperty(
     new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
     "The name to use for the output workspace" );

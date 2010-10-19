@@ -202,7 +202,7 @@ private slots:
   /// Called when the show mask button has been clicked
   void handleShowMaskButtonClick();
   ///Handle the change in instrument 
-  void handleInstrumentChange(int);
+  void handleInstrumentChange(const int index);
   ///Record if that user has changed the default filename
   void setUserFname();
   /// Update the centre finding progress

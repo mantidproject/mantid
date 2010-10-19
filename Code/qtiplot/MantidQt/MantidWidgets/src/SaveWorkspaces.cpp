@@ -94,6 +94,7 @@ void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const Q
   }
   //allow users to select more than one workspace in the list
   m_workspaces->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  connect(m_workspaces, SIGNAL(currentRowChanged(int)), this, SLOT(setFileName(int)));
 
   QPushButton *save = new QPushButton("Save");
   connect(save, SIGNAL(clicked()), this, SLOT(saveSel()));
@@ -211,9 +212,10 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const 
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if (toAppend)
+    if ( algorithm != "SaveCSV" )
     {
-      saveCommands += ", Append=True";
+      saveCommands += ", Append=";
+      saveCommands += toAppend ? "True" : "False";
     }
     //finally finish the algorithm call
     saveCommands += ")\n";
@@ -247,7 +249,7 @@ void SaveWorkspaces::saveSel()
 {
   QString saveCommands;
   for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
-  {//the key a pointer to the check box that the user may have clicked
+  {//the key to a pointer to the check box that the user may have clicked
     if (i.key()->isChecked())
     {//we need to save in this format
       
@@ -273,6 +275,12 @@ void SaveWorkspaces::saveSel()
     }//end if save in this format
   }//end loop over formats
   emit runAsPythonScript(saveCommands);
+}
+/** Sets the filename to the name of the selected workspace
+*/
+void SaveWorkspaces::setFileName(int row)
+{
+  m_fNameEdit->setText(m_workspaces->item(row)->text());
 }
 /** Raises a browse dialog and inserts the selected file into the
 *  save text edit box, outfile_edit

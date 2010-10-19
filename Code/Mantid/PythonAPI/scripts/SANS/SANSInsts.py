@@ -423,6 +423,10 @@ class ISISInstrument(Instrument):
         if b.correction_file == '' and a.correction_file != '':
             b.correction_file = a.correction_file != ''
 
+    def detector_file(self, det_name):
+        det = ReductionSingleton().instrument.getDetector(det_name)
+        return det.correction_file
+
         
 class LOQ(ISISInstrument):
     

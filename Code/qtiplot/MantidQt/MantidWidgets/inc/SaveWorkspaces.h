@@ -77,6 +77,7 @@ namespace MantidQt
 
     private slots:
       void saveSel();
+      void setFileName(int row);
       void saveFileBrowse();
 
     };

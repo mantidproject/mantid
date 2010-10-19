@@ -38,7 +38,10 @@ void SaveRKH::init()
   declareProperty(
     new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace to save");
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
+  std::vector<std::string> exts;
+  exts.push_back(".txt");
+  exts.push_back(".Q");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save, exts),
 		"The name to use when saving the file");
   declareProperty("Append",true,"If true and Filename already exists, append, else overwrite");
 }

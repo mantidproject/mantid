@@ -764,7 +764,7 @@ def Mask(details):
             det_type = detname[0]
             if INSTRUMENT.isDetectorName(det_type) :
                 spectra = detname[1]
-                if INSTRUMENT.isHighAngleDetector(type) :
+                if INSTRUMENT.isHighAngleDetector(det_type) :
                     SPECMASKSTRING_F += ',' + spectra
                 else:
                     SPECMASKSTRING_R += ',' + spectra
