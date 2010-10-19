@@ -17,7 +17,7 @@ namespace Mantid
 		/// Init method
 		void CListInstruments::init()
 		{
-			declareProperty( new ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),new NullValidator<std::vector<std::string>>, 
+			declareProperty( new ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),new NullValidator<std::vector<std::string> >, 
 				Direction::Output),"A list containing instrument names");
 		
 			declareProperty("isValid",true,"Boolean option used to check the validity of login session", Direction::Output);

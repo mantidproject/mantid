@@ -2,6 +2,7 @@
 #define MANTID_ICAT_SAERCHPARAM_H_
 
 #include <string>
+#include <stdexcept>
 
 namespace Mantid
 {

@@ -16,7 +16,7 @@ namespace Mantid
 		/// Init method
 		void CListInvestigationTypes::init()
 		{
-			declareProperty( new ArrayProperty<std::string>("InvestigationTypes",std::vector<std::string>(),new NullValidator<std::vector<std::string>>, 
+			declareProperty( new ArrayProperty<std::string>("InvestigationTypes",std::vector<std::string>(),new NullValidator<std::vector<std::string> >, 
 				Direction::Output),"List of investigation types obtained from Catalog");
 			declareProperty("isValid",true,"Boolean option used to check the validity of login session", Direction::Output);
 		}
