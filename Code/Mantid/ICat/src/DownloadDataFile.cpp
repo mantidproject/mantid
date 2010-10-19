@@ -43,7 +43,7 @@ namespace Mantid
 		{			
 			declareProperty(new ArrayProperty<long long> ("FileIds"),"List of fileids to download from ISIS data server");
 			declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from ISIS data server");
-			declareProperty( new ArrayProperty<std::string>("FileLocations",new NullValidator<std::vector<std::string>>, Direction::Output),"List of filenames downloaded from data server");
+			declareProperty( new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(),new NullValidator<std::vector<std::string> >, Direction::Output),"List of filenames downloaded from data server");
 		}
 		/// Execute the algorithm
 		void CDownloadDataFile::exec()
