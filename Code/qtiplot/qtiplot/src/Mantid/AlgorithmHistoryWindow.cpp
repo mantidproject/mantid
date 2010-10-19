@@ -11,7 +11,7 @@ Mantid::Kernel::Logger& AlgHistoryTreeWidget::g_log = Mantid::Kernel::Logger::ge
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w):QGroupBox(title,w),
 m_execDurationlabel(NULL),m_execDurationEdit(NULL),m_Datelabel(NULL),m_execDateTimeEdit(NULL),
-m_algexecDuration(NULL)
+m_algexecDuration()
 {
 	m_execDurationEdit=new QLineEdit("",this);
 	if(m_execDurationEdit){

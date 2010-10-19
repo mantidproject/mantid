@@ -127,7 +127,7 @@ class ShapeDetails : public QWidget
 
 public:
   ///Constructor
-  ShapeDetails(QWidget *parent = 0) : QWidget(parent), m_idvalue(0), m_isComplement(false) {}
+  ShapeDetails(QWidget *parent = 0) : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
   ///Constructor
   virtual ~ShapeDetails() {}
 
