@@ -58,6 +58,16 @@ void LoadSNSEventNexus::init()
       new PropertyWithValue<double>("FilterByTof_Max", EMPTY_DBL(), Direction::Input),
     "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
     "This is the maximum accepted value in microseconds." );
+
+  declareProperty(
+      new PropertyWithValue<double>("FilterByTime_Start", EMPTY_DBL(), Direction::Input),
+    "Optional: To only include events after the provided start time, in seconds (relative to the start of the run");
+
+  declareProperty(
+      new PropertyWithValue<double>("FilterByTime_Stop", EMPTY_DBL(), Direction::Input),
+    "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run");
+
+
 }
 
 
@@ -191,6 +201,37 @@ void LoadSNSEventNexus::exec()
     g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
   }
 
+  // -- Time filtering --
+  double filter_time_start_sec, filter_time_stop_sec;
+  filter_time_start_sec = getProperty("FilterByTime_Start");
+  filter_time_stop_sec = getProperty("FilterByTime_Stop");
+
+  //Default to ALL pulse times
+  bool is_time_filtered = false;
+  filter_time_start = Kernel::DateAndTime::getMinimumPulseTime();
+  filter_time_stop = Kernel::DateAndTime::getMaximumPulseTime();
+
+  if (pulseTimes.size() > 0)
+  {
+    //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
+    if (filter_time_start_sec != EMPTY_DBL())
+    {
+      filter_time_start = pulseTimes[0] + filter_time_start_sec*1e9; //TODO: Use a function in Kernel::DateAndTime::
+      is_time_filtered = true;
+    }
+
+    if (filter_time_stop_sec != EMPTY_DBL())
+    {
+      filter_time_stop = pulseTimes[0] + filter_time_stop_sec*1e9; //TODO: Use a function in Kernel::DateAndTime::
+      is_time_filtered = true;
+    }
+
+    //Silly values?
+    if (filter_time_stop < filter_time_start)
+      throw std::invalid_argument("Your filter for time's Stop value is smaller than the Start value.");
+  }
+
+
   //Count the limits to time of flight
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
@@ -209,6 +250,14 @@ void LoadSNSEventNexus::exec()
 
   //Now all the event lists have been made for all pixel ids
   WS->doneLoadingData();
+
+  if (is_time_filtered)
+  {
+    //Now filter out the run, using the dateAndTime type.
+    WS->mutableRun().filterByTime(
+        Kernel::DateAndTime::get_time_from_pulse_time(filter_time_start),
+        Kernel::DateAndTime::get_time_from_pulse_time(filter_time_stop) );
+  }
 
   //Info reporting
   g_log.information() << "Read " << WS->getNumberEvents() << " events"
@@ -364,19 +413,23 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
       pulsetime = pulseTimes[pulse_i];
     }
 
-    //Create the tofevent
-    double tof = static_cast<double>( event_time_of_flight[i] );
-    if ((tof >= filter_tof_min) && (tof <= filter_tof_max))
+    //Does this event pass the time filter?
+    if ((pulsetime < filter_time_stop) && (pulsetime >= filter_time_start))
     {
-      //The event TOF passes the filter.
-      TofEvent event(tof, pulsetime);
+      //Create the tofevent
+      double tof = static_cast<double>( event_time_of_flight[i] );
+      if ((tof >= filter_tof_min) && (tof <= filter_tof_max))
+      {
+        //The event TOF passes the filter.
+        TofEvent event(tof, pulsetime);
 
-      //Add it to the list at that pixel ID
-      WS->getEventListAtPixelID( event_pixel_id[i] ).addEventQuickly( event );
+        //Add it to the list at that pixel ID
+        WS->getEventListAtPixelID( event_pixel_id[i] ).addEventQuickly( event );
 
-      //Local tof limits
-      if (tof < my_shortest_tof) { my_shortest_tof = tof;}
-      if (tof > my_longest_tof) { my_longest_tof = tof;}
+        //Local tof limits
+        if (tof < my_shortest_tof) { my_shortest_tof = tof;}
+        if (tof > my_longest_tof) { my_longest_tof = tof;}
+      }
     }
 
   }

@@ -183,6 +183,19 @@ public:
 
   }
 
+  void test_limits()
+  {
+    PulseTimeType in,back;
+    in = Kernel::DateAndTime::getMaximumPulseTime();
+    back = Kernel::DateAndTime::get_from_absolute_time( Kernel::DateAndTime::get_time_from_pulse_time(in) );
+    TS_ASSERT_EQUALS( in, back );
+
+    in = Kernel::DateAndTime::getMinimumPulseTime();
+    back = Kernel::DateAndTime::get_from_absolute_time( Kernel::DateAndTime::get_time_from_pulse_time(in) );
+    TS_ASSERT_EQUALS( in, back );
+
+  }
+
 
 
 };

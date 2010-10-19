@@ -117,6 +117,33 @@ public:
 
 
     }
+
+    void testExec_Filtered()
+    {
+        Mantid::API::FrameworkManager::Instance();
+        LoadSNSEventNexus ld;
+        std::string outws_name = "cncs";
+        ld.initialize();
+        ld.setPropertyValue("OutputWorkspace",outws_name);
+        //ld.setPropertyValue("Filename","/home/janik/data/PG3_732_event.nxs");
+        ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+        ld.setPropertyValue("FilterByTime_Start", "300.0");
+        ld.setPropertyValue("FilterByTime_Stop", "600.0");
+
+        ld.execute();
+        TS_ASSERT( ld.isExecuted() );
+
+        DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+        //Valid WS and it is an EventWorkspace
+        TS_ASSERT( WS );
+        //Pixels have to be padded
+        TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
+        //Events
+        TS_ASSERT_EQUALS( WS->getNumberEvents(), 83774);
+
+        //Check one event from one pixel - does it have a reasonable pulse time
+        TS_ASSERT( WS->getEventListPtr(7)->getEvents()[0].pulseTime() > 1e9*365*10 );
+    }
 };
 
 #endif /*LOADSNSEVENTNEXUSTEST_H_*/

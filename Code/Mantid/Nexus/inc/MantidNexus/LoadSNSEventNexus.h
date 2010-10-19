@@ -85,6 +85,9 @@ namespace Mantid
 
       double filter_tof_min, filter_tof_max;
 
+      //Filter by start/stop times
+      Kernel::PulseTimeType filter_time_start, filter_time_stop;
+
       /// Was the instrument loaded?
       bool instrument_loaded_correctly;
 

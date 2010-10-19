@@ -310,13 +310,16 @@ PulseTimeType get_from_absolute_time(dateAndTime time)
 /// Returns the maximum value the PulseTime can take.
 PulseTimeType getMaximumPulseTime()
 {
-  return std::numeric_limits<int64_t>::max();
+  //return std::numeric_limits<int64_t>::max()-1;
+  //return std::numeric_limits<int64_t>::max();
+  return static_cast<int64_t>( 1e18 );
 }
 
 /// Returns the minimum value the PulseTime can take.
 PulseTimeType getMinimumPulseTime()
 {
-  return std::numeric_limits<int64_t>::min();
+  //return std::numeric_limits<int64_t>::min()+1;
+  return static_cast<int64_t>( -1e18 );
 }
 
 

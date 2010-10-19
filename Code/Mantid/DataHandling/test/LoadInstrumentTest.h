@@ -793,6 +793,74 @@ public:
 //
 //    }
 
+
+//    /** Compare the old and new PG3 instrument definitions **/
+//    void testExecPG3Comparison_SLOW() // This test is slow!
+//    {
+//      LoadInstrument * loaderIDF2;
+//      MatrixWorkspace_sptr output;
+//      Workspace_sptr ws;
+//      Workspace2D_sptr ws2D;
+//
+//      std::cout << "Loading the NEW geometry\n";
+//      loaderIDF2 = new LoadInstrument();
+//      loaderIDF2->initialize();
+//      wsName = "PG3_NEW";
+//      ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+//      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+//      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/PG3NEW_Definition.xml");
+//      inputFile = loaderIDF2->getPropertyValue("Filename");
+//      loaderIDF2->setPropertyValue("Workspace", wsName);
+//      loaderIDF2->execute();
+//      TS_ASSERT( loaderIDF2->isExecuted() );
+//      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+//      boost::shared_ptr<IInstrument> i_new = output->getInstrument();
+//      TS_ASSERT_EQUALS( i_new->getName(), "PG3NEW");
+//
+//      TS_ASSERT_EQUALS( i_new->nelements(), 21);
+//
+//      std::cout << "Loading the OLD geometry\n";
+//      loaderIDF2 = new LoadInstrument();
+//      loaderIDF2->initialize();
+//      wsName = "PG3_OLD";
+//      ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+//      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+//      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/PG3_Definition.xml");
+//      inputFile = loaderIDF2->getPropertyValue("Filename");
+//      loaderIDF2->setPropertyValue("Workspace", wsName);
+//      loaderIDF2->execute();
+//      TS_ASSERT( loaderIDF2->isExecuted() );
+//      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+//      boost::shared_ptr<IInstrument> i_old = output->getInstrument();
+//      TS_ASSERT_EQUALS( i_old->getName(), "PG3");
+//
+//      std::cout << "Comparing\n";
+//
+//      TS_ASSERT_EQUALS( i_new->nelements(), i_old->nelements());
+//
+//      //Compare the list of detectors
+//      std::map<int, Geometry::IDetector_sptr> bank_new = i_new->getDetectors();
+//      std::map<int, Geometry::IDetector_sptr> bank_old = i_old->getDetectors();
+//      TS_ASSERT_EQUALS( bank_new.size(), bank_old.size());
+//
+//      std::map<int, Geometry::IDetector_sptr>::iterator it;
+//      int count = 0;
+//      for (it = bank_new.begin(); it != bank_new.end(); it++)
+//      {
+//        count++;
+//        Geometry::IDetector_sptr det_new = it->second;
+//        Geometry::IDetector_sptr det_old = bank_old[it->first];
+//        //Compare their positions
+//        TS_ASSERT_EQUALS( det_new->getPos(), det_old->getPos() );
+//      }
+//    }
+
+
+
+
+
 private:
   LoadInstrument loader;
   std::string inputFile;
