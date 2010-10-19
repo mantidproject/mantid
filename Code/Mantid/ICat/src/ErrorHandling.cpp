@@ -40,9 +40,9 @@ namespace Mantid
 			{
 			}
 
-			const std::string& SessionException::what()
+			const char* SessionException::what() const throw()
 			{		
-				return m_error;
+				return m_error.c_str();
 			}
 	}
 }

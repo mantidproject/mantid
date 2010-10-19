@@ -57,9 +57,9 @@ namespace Mantid
 			/// constructor
 			SessionException(const std::string& error);
 			///destructor
-			~SessionException(){}
+			~SessionException() throw() {}
 		   ///return the error message
-			const std::string& what();
+			const char* what() const throw();
 
 
 
