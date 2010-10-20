@@ -22,7 +22,7 @@ public:
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( atten.category(), "General" )
+    TS_ASSERT_EQUALS( atten.category(), "Absorption Corrections" )
   }
 
   void testInit()

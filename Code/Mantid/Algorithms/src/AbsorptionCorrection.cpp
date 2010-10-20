@@ -142,7 +142,7 @@ void AbsorptionCorrection::exec()
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det,L2s);
 
-    // If an indirect instrument, see if there's an efixed in the paramter map
+    // If an indirect instrument, see if there's an efixed in the parameter map
     double lambda_f = m_lambdaFixed;
     if (m_emode==2)
     {
@@ -327,7 +327,7 @@ double AbsorptionCorrection::doIntegration(const double& lambda, const std::vect
   for (int i = 0; i < el; ++i)
   {
     // Equation is exponent * element volume
-    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
+    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
     const double exponent = ((m_refAtten * lambda) + m_scattering) * (m_L1s[i]+L2s[i]);
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
   }
@@ -345,7 +345,7 @@ double AbsorptionCorrection::doIntegration(const double& lambda_i,const double& 
   for (int i = 0; i < el; ++i)
   {
     // Equation is exponent * element volume
-    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
+    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
     double exponent = ((m_refAtten * lambda_i) + m_scattering) * m_L1s[i];
     exponent += ((m_refAtten * lambda_f) + m_scattering) * L2s[i];
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));

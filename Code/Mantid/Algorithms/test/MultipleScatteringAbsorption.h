@@ -26,7 +26,7 @@ public:
   
   void testCategory()
   {
-    TS_ASSERT_EQUALS( algorithm.category(), "General" )
+    TS_ASSERT_EQUALS( algorithm.category(), "Absorption Corrections" )
   }
   
   void testInit()

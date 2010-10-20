@@ -59,7 +59,13 @@ void FlatPlateAbsorption::retrieveProperties()
 
 std::string FlatPlateAbsorption::sampleXML()
 {
-  double szX = m_slabWidth/2, szY = m_slabHeight/2, szZ = m_slabThickness/2;
+  //Get the sample position, which is typically the origin but we should be generic
+  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  // Shift so that plate is centered at sample position
+  const double szX = (m_slabWidth/2)+samplePos.X();
+  const double szY = (m_slabHeight/2)+samplePos.Y();
+  const double szZ = (m_slabThickness/2)+samplePos.Z();
+
   std::ostringstream xmlShapeStream;
   xmlShapeStream 
       << " <cuboid id=\"sample-shape\"> " 

@@ -76,10 +76,17 @@ void CylinderAbsorption::retrieveProperties()
 
 std::string CylinderAbsorption::sampleXML()
 {
+  //Get the sample position, which is typically the origin but we should be generic
+  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  // Shift so that cylinder is centered at sample position
+  const double cylinderBase = (-0.5*m_cylHeight)+samplePos.Y();
+
   std::ostringstream xmlShapeStream;
   xmlShapeStream 
     << "<cylinder id=\"detector-shape\"> " 
-    << "<centre-of-bottom-base x=\"0.0\" y=\"" << -0.5*m_cylHeight << "\" z=\"0.0\" /> "
+    << "<centre-of-bottom-base x=\"" << samplePos.X()
+                       << "\" y=\"" << cylinderBase
+                       << "\" z=\"" << samplePos.Z() << "\" /> "
     << "<axis x=\"0\" y=\"1\" z=\"0\" /> " 
     << "<radius val=\"" << m_cylRadius << "\" /> "
     << "<height val=\"" << m_cylHeight << "\" /> "
