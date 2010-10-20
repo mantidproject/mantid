@@ -4,14 +4,18 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-/** CGetDataFiles is a class responsible for GetInvestigation algorithm.
-  * This algorithm does the basic search and returns the investigations record
 
+namespace Mantid
+{
+	namespace ICat
+	{
+ /**CGetDataFiles is a class responsible for GetInvestigation algorithm.
+    This algorithm does the basic search and returns the investigations record
     Required Properties:
     <UL>
     <LI> InvestigationId - The id of the investigation to display</LI>
     <LI> InputWorkspace -  Input workspace which saved last search</LI>
-	<LI> OutputWorkspace - The putput workspace to store  </LI>
+	  <LI> OutputWorkspace - The putput workspace to store  </LI>
     </UL>
    
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -37,10 +41,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     
 	*/	
-namespace Mantid
-{
-	namespace ICat
-	{
+
 		class DLLExport CGetDataFiles:public API::Algorithm
 		{
 		public:

@@ -2,6 +2,12 @@
 #define MANTID_ICAT_ERRORHANDLING_H_
 #include <stdexcept>
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
+
+namespace Mantid
+{
+	namespace ICat
+	{
+
 /** CErrorHandling class responsible for handling errors in Mantid-ICat Algorithms.
   * This algorithm  gives the datsets for a given investigations record
        
@@ -28,10 +34,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     
 */
-namespace Mantid
-{
-	namespace ICat
-	{
 		class CErrorHandling
 		{
 		public:

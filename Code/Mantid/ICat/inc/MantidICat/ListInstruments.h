@@ -5,7 +5,13 @@
 #include "MantidAPI/ITableWorkspace.h"
 
 
-/** CListInstruments class is responsible for loading  instruments list from ICat DB .
+
+namespace Mantid
+{
+	namespace ICat
+	{
+
+    /** CListInstruments class is responsible for loading  instruments list from ICat DB .
     This class written as a Mantid algorithm. This algorithm is used to poulate the
     ICat Search Interface instrument box
       
@@ -32,10 +38,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
 
-namespace Mantid
-{
-	namespace ICat
-	{
 		class DLLExport CListInstruments:public API::Algorithm
 		{
 		public:

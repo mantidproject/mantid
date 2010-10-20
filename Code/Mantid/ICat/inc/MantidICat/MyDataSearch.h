@@ -4,6 +4,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
+namespace Mantid
+{
+	namespace ICat
+	{
 
 /** CMyDataSearch is a class responsible for searching investigations of the logged in user.
   * This algorithm does Icat search and returns the investigations record
@@ -36,12 +40,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     
 	*/	
-
-
-namespace Mantid
-{
-	namespace ICat
-	{
 		class DLLExport CMyDataSearch: public API::Algorithm
 		{
 		public:

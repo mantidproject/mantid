@@ -57,7 +57,8 @@ namespace Mantid
 		*/
 		void CAdvancedSearch::doAdvancedSearch(ITableWorkspace_sptr& outputws)
 		{
-			CSearchInput inputs;CICatHelper searchobj;
+			CSearchParam inputs;
+      CICatHelper searchobj;
 			getInputProperties(searchobj,inputs);
 			
 			searchobj.doAdvancedSearch(inputs,outputws);
@@ -66,7 +67,7 @@ namespace Mantid
 		/** This method gets the input properties of the algorithm
 		  *@param inputs reference to searchinput class.
 		*/
-		void CAdvancedSearch::getInputProperties(CICatHelper& helper,CSearchInput& inputs)
+		void CAdvancedSearch::getInputProperties(CICatHelper& helper,CSearchParam& inputs)
 		{
 			double dstartRun=getProperty("StartRun");
 			if(dstartRun<0)
@@ -100,8 +101,7 @@ namespace Mantid
 				throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
 			}
 			
-
-			date = getPropertyValue("EndDate");
+      date = getPropertyValue("EndDate");
 			time_t endDate = helper.getTimevalue(date);
 			if(endDate==-1)
 			{
@@ -121,8 +121,7 @@ namespace Mantid
 
 			bool bCase=getProperty("Case Sensitive");
 			inputs.setCaseSensitive(bCase);
-
-
+      
 			std::string invstName=getPropertyValue("Investigation Name");
 			inputs.setInvestigationName(invstName);
 
@@ -140,8 +139,7 @@ namespace Mantid
 
 			std::string dataFileName=getPropertyValue("DataFile Name");
 			inputs.setDatafileName(dataFileName);
-
-			inputs.setInvestigationInclude(ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES);
+      		
 		}
 
 	}

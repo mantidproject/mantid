@@ -6,18 +6,26 @@
 #include"MantidICat/ICatHelper.h"
 #include "MantidICat/SearchParam.h"
 
+
+
+
+namespace Mantid
+{
+	namespace ICat
+	{
+    
 /** CSearch is a class responsible for SearchByRunNumber algorithm.
-  * This algorithm does the basic search and returns the investigations record
+    This algorithm does the basic search and returns the investigations record
 
     Required Properties:
     <UL>
     <LI> StartRun - The the start run number for search </LI>
     <LI> EndRun - The end run number for search </LI>
-	<LI> Instruments - The list of instruments used for search </LI>
-	<LI> StartDate - The start date used for search </LI>
-	<LI> EndDate - The end date used for search </LI>
-	<LI> Keywords - The keyswords used for search </LI>
-	<LI> Case Sensitive - The case ensitive boolean flag used for search </LI>
+	  <LI> Instruments - The list of instruments used for search </LI>
+	  <LI> StartDate - The start date used for search </LI>
+	  <LI> EndDate - The end date used for search </LI>
+	  <LI> Keywords - The keyswords used for search </LI>
+	  <LI> Case Sensitive - The case ensitive boolean flag used for search </LI>
     </UL>
    
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -43,12 +51,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     
 	*/	
-
-
-namespace Mantid
-{
-	namespace ICat
-	{
 		class DLLExport CSearch: public API::Algorithm
 		{
 		public:

@@ -4,14 +4,20 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
+
+
+namespace Mantid
+{
+	namespace ICat
+	{
 /** CGetDataSets is a class responsible for GetDataSets algorithm.
-  * This algorithm  gives the datsets for a given investigations record
+   This algorithm  gives the datsets for a given investigations record
 
     Required Properties:
     <UL>
     <LI> InvestigationId - The id of the investigation to display</LI>
     <LI> InputWorkspace -  Input workspace which saved last search</LI>
-	<LI> OutputWorkspace - The putput workspace to store  </LI>
+	  <LI> OutputWorkspace - The putput workspace to store  </LI>
     </UL>
    
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -37,11 +43,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     
 */
-
-namespace Mantid
-{
-	namespace ICat
-	{
 		class DLLExport CGetDataSets:public API::Algorithm
 		{
 		public:

@@ -5,17 +5,22 @@
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 #include "MantidAPI/ICatalog.h"
 
+
+namespace Mantid
+{
+	namespace ICat
+	{
 /** CDownloadDataFile class is responsible for GetDataFile algorithms.
-  * This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
-  * If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
-  * Then uses POCO http methods to download over internet.
+    * This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
+    * If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
+    * Then uses POCO http methods to download over internet.
      
-	 Required Properties:
+	  Required Properties:
     <UL>
     <LI> Filenames - List of files to download </LI>
     <LI> InputWorkspace - The name of the workspace whioch stored the last investigation search results </LI>
-	<LI> FileLocations - List of files with location which is downloaded </LI>
-	</UL>
+	  <LI> FileLocations - List of files with location which is downloaded </LI>
+	  </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
@@ -40,10 +45,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     
 */
-namespace Mantid
-{
-	namespace ICat
-	{
 		class DLLExport CDownloadDataFile: public API::Algorithm
 		{
 		public:

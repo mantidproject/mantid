@@ -183,51 +183,9 @@ namespace Mantid
 			//save response to a table workspace
 			saveSearchRessults(response,outputws);
 		}
-	   /**This method sets the input request parameters for search 
-		* @param input Refrence to input class
-		* @request refrence to request object
-		*/
-		void CICatHelper::setReqParamforSearchByRunNumber(CSearchInput& input,boost::shared_ptr<ns1__searchByAdvanced>& request)
-		{
-			//get the sessionid which is cached in session class during login
-			*request->sessionId=Session::Instance().getSessionId();
-			//run start
-			if(input.getRunStart()>0)
-			{
-			*request->advancedSearchDetails->runStart=input.getRunStart();
-			}
-			//run end
-			if(input.getRunEnd()>0)
-			{
-			
-			*request->advancedSearchDetails->runEnd=input.getRunEnd();
-			}
-			//instrument name
-			if(!input.getInstrument().empty())
-			{
-				request->advancedSearchDetails->instruments.push_back(input.getInstrument());
-			}
-			if(!input.getKeywords().empty())
-			{
-				request->advancedSearchDetails->keywords.push_back(input.getKeywords());
-			}
-
-			if(input.getEndDate()!=0)
-			{
-			*request->advancedSearchDetails->dateRangeEnd =input.getEndDate();
-			}
-			if(input.getStartDate()!=0)
-			{
-				*request->advancedSearchDetails->dateRangeStart = input.getStartDate();
-			}
-			
-			request->advancedSearchDetails->caseSensitive=input.getCaseSensitive();
-			// investigation include
-			*request->advancedSearchDetails->investigationInclude=input.getInvestigationInclude();
-		}
-
+	   
 	  		
-	   /** This method saves the search response( investigations )data to a table workspace
+	/** This method saves the search response( investigations )data to a table workspace
 		*  @param response const reference to response object
 		*  @param outputws shared pointer to output workspace
 		*/
@@ -1027,7 +985,7 @@ namespace Mantid
 		 * @param inputs reference to class containing search inputs
 		 * @param outputws shared pointer to output workspace
 		 */
-		void CICatHelper::doAdvancedSearch(CSearchInput& inputs,API::ITableWorkspace_sptr &outputws)
+		void CICatHelper::doAdvancedSearch(CSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
 		{
 
 			//ICAt proxy object
@@ -1065,7 +1023,7 @@ namespace Mantid
 				*req_sptr->advancedSearchDetails->dateRangeStart = inputs.getStartDate();
 			}
 			//end date
-            boost::shared_ptr<time_t> enddate_sptr(new time_t);
+      boost::shared_ptr<time_t> enddate_sptr(new time_t);
 			if(inputs.getEndDate()!=0)
 			{				
 				req_sptr->advancedSearchDetails->dateRangeEnd =  enddate_sptr.get();
@@ -1075,9 +1033,9 @@ namespace Mantid
 			req_sptr->advancedSearchDetails->caseSensitive=inputs.getCaseSensitive();
 
 			// investigation include
-            boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
+      boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
 			req_sptr->advancedSearchDetails->investigationInclude = invstInculde_sptr.get();
-			*req_sptr->advancedSearchDetails->investigationInclude = inputs.getInvestigationInclude();
+			*req_sptr->advancedSearchDetails->investigationInclude = ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
 
 			//instrument name
 			if(!inputs.getInstrument().empty())

@@ -19,7 +19,7 @@ namespace Mantid
 		ICat3Catalog::~ICat3Catalog()
 		{
 		}
-		/**This method is responsible for login to ISIS catalog
+		/**This method is responsible for connecting the client application to ICat3 based catalog services
 		  *@param username - login name(eg. federal id) of the user
 		  *@param password - passowrd of the user
 		  *@param url - url of the user
@@ -29,7 +29,7 @@ namespace Mantid
 			CICatHelper helper;
 			helper.doLogin(username,password,url);
 		}
-		/// This method disconnects the client application for ICat catalog
+		/// This method disconnects the client application from ICat3 based catalog services
 		void ICat3Catalog::logout()
 		{
 

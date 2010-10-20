@@ -70,32 +70,31 @@ namespace Mantid
 				return;
 			}
 			/// now filter log files
-			for( int row=0;row<ws_sptr->rowCount();++row)
+			for( int row=0;row<ws_sptr->rowCount();)
 			{
 				if(!isDataFile(ws_sptr->cell<std::string>(row,0)))
 				{
-
 					ws_sptr->removeRow(row);
-				}
+ 				}
+        else
+        {
+          ++row;
+        }
 			}
 		}
 
-	   /**This checks the datafile boolean  selected
+	 /**This checks the datafile boolean  selected
 		 * @param fileName - name of the  file 
 		 * @return bool - returns true if it's a raw file or nexus file
 		 */
-
 		bool CGetDataFiles::isDataFile(const std::string& fileName)
-		{	
-		
+		{			
 			std::basic_string <char>::size_type dotIndex;
 			//find the position of '.' in raw/nexus file name
 			dotIndex = fileName.find_last_of (".");
 			std::string fextn=fileName.substr(dotIndex+1,fileName.size()-dotIndex);
 			std::transform(fextn.begin(),fextn.end(),fextn.begin(),tolower);
-			bool bData;
-			(!fextn.compare("raw")|| !fextn.compare("nxs")) ? bData = true : bData = false;
-			return bData;
+			return ((!fextn.compare("raw")|| !fextn.compare("nxs")) ? true : false);
 		}
 		
 		
