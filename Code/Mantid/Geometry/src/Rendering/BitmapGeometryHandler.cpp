@@ -76,19 +76,19 @@ namespace Geometry
 
     glTexCoord2f (0.0, 0.0);
     pos = mRectDet->getRelativePosAtXY(0,0);
-    glVertex3f( pos.X(), pos.Y(), pos.Z());
+    glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
     glTexCoord2f (1.0, 0.0);
     pos = mRectDet->getRelativePosAtXY(mRectDet->xpixels()-1,0);
-    glVertex3f( pos.X(), pos.Y(), pos.Z());
+    glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
     glTexCoord2f (1.0, 1.0);
     pos = mRectDet->getRelativePosAtXY(mRectDet->xpixels()-1, mRectDet->ypixels()-1);
-    glVertex3f( pos.X(), pos.Y(), pos.Z());
+    glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
     glTexCoord2f (0.0, 1.0);
     pos = mRectDet->getRelativePosAtXY(0, mRectDet->ypixels()-1);
-    glVertex3f( pos.X(), pos.Y(), pos.Z());
+    glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
     glEnd ();
     if (glGetError()>0) std::cout << "OpenGL error in BitmapGeometryHandler::Render \n";

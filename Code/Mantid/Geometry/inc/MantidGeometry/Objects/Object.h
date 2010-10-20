@@ -33,7 +33,7 @@ namespace Mantid
     class vtkGeometryCacheReader;
     class vtkGeometryCacheWriter;
     class BoundingBox;
-    
+
     /*!
     \class Object
     \brief Global object for object
@@ -41,8 +41,7 @@ namespace Mantid
     \date July 2007
     \author S. Ansell
 
-    An object is a collection of Rules and
-    surface object
+    An object is a collection of Rules and surface objects
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -66,85 +65,26 @@ namespace Mantid
     */
     class DLLExport Object
     {
-    private:
-      static Kernel::Logger& PLog;           ///< The official logger
-
-      int ObjName;       ///< Creation number
-      int MatN;          ///< Material Number
-      double Tmp;        ///< Temperature (K)
-      double density;    ///< Density
-
-      Rule* TopRule;     ///< Top rule [ Geometric scope of object]
-
-      int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
-      CompGrp* procComp(Rule*) const;
-      int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
-      boost::shared_ptr<BoundingBox> m_boundingBox;
-
-      // -- DEPRECATED --
-      mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
-        AABByMax,  ///< ymax of Axis aligned bounding box cache
-        AABBzMax,  ///< zmax of Axis aligned bounding box cache
-        AABBxMin,  ///< xmin of Axis aligned bounding box cache
-        AABByMin,  ///< xmin of Axis aligned bounding box cache
-        AABBzMin;  ///< zmin of Axis Aligned Bounding Box Cache
-      mutable bool  boolBounded; ///< flag true if a bounding box exists, either by getBoundingBox or defineBoundingBox
-      // -- --
-
-      int searchForObject(Geometry::V3D&) const;
-      double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
-      double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
-      double SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const;
-      double CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
-        const Mantid::Geometry::V3D & axis, 
-        const double radius, const double height) const;
-      double ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
-        const Mantid::Geometry::V3D & axis, 
-        const double radius, const double height) const;
-
-      /// Geometry Handle for rendering
-      boost::shared_ptr<GeometryHandler> handle;
-      friend class CacheGeometryHandler;
-      /// Is geometry caching enabled?
-      bool bGeometryCaching;
-      /// a pointer to a class for reading from the geometry cache
-      boost::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
-      /// a pointer to a class for writing to the geometry cache
-      boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
-      void updateGeometryHandler();
-      /// for solid angle from triangulation
-      int NumberOfTriangles() const;
-      int NumberOfPoints() const;
-      int* getTriangleFaces() const;
-      double* getTriangleVertices() const;
-      void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const;
-
-    protected:
-      std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)
-
     public:
+      /// Default constructor
       Object();
+      /// Copy constructor
       Object(const Object&);
+      /// Assignment operator
       Object& operator=(const Object&);
+      /// Destructor
       virtual ~Object();
 
       /// Return the top rule
       const Rule* topRule() const { return TopRule; }
 
       void setName(const int nx) { ObjName=nx; }           ///< Set Name
-      void setTemp(const double A) { Tmp=A; }              ///< Set temperature [Kelvin]
+      int getName() const  { return ObjName; }             ///< Get Name
+
       int setObject(const int ON,const std::string& Ln);
       int procString(const std::string& Line);
-      void setMaterial(const int MatIndex) { MatN=MatIndex; }  ///< Set Material index
-      void setDensity(const double D) { density=D; }           ///< Set Density [Atom/A^3]
-
       int complementaryObject(const int Cnum,std::string& Ln); ///< Process a complementary object
       int hasComplement() const;
-
-      int getName() const  { return ObjName; }             ///< Get Name
-      int getMat() const { return MatN; }                  ///< Get Material ID
-      double getTemp() const { return Tmp; }               ///< Get Temperature [K]
-      double getDensity() const { return density; }        ///< Get Density [Atom/A^3]
 
       int populate(const std::map<int,Surface*>&);
       int createSurfaceList(const int outFlag=0);               ///< create Surface list
@@ -212,6 +152,63 @@ namespace Mantid
       void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
       ///set vtkGeometryCache reader
       void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+    private:
+      static Kernel::Logger& PLog;           ///< The official logger
+
+      int ObjName;       ///< Creation number
+      //int MatN;          ///< Material Number
+      //double Tmp;        ///< Temperature (K)
+      //double density;    ///< Density
+
+      Rule* TopRule;     ///< Top rule [ Geometric scope of object]
+
+      int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
+      CompGrp* procComp(Rule*) const;
+      int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
+      boost::shared_ptr<BoundingBox> m_boundingBox;
+
+      // -- DEPRECATED --
+      mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
+        AABByMax,  ///< ymax of Axis aligned bounding box cache
+        AABBzMax,  ///< zmax of Axis aligned bounding box cache
+        AABBxMin,  ///< xmin of Axis aligned bounding box cache
+        AABByMin,  ///< xmin of Axis aligned bounding box cache
+        AABBzMin;  ///< zmin of Axis Aligned Bounding Box Cache
+      mutable bool  boolBounded; ///< flag true if a bounding box exists, either by getBoundingBox or defineBoundingBox
+      // -- --
+
+      int searchForObject(Geometry::V3D&) const;
+      double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
+      double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
+      double SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const;
+      double CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
+        const Mantid::Geometry::V3D & axis, 
+        const double radius, const double height) const;
+      double ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
+        const Mantid::Geometry::V3D & axis, 
+        const double radius, const double height) const;
+
+      /// Geometry Handle for rendering
+      boost::shared_ptr<GeometryHandler> handle;
+      friend class CacheGeometryHandler;
+      /// Is geometry caching enabled?
+      bool bGeometryCaching;
+      /// a pointer to a class for reading from the geometry cache
+      boost::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
+      /// a pointer to a class for writing to the geometry cache
+      boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
+      void updateGeometryHandler();
+      /// for solid angle from triangulation
+      int NumberOfTriangles() const;
+      int NumberOfPoints() const;
+      int* getTriangleFaces() const;
+      double* getTriangleVertices() const;
+      void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const;
+
+    protected:
+      std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)
+
+
     };
 
   }  // NAMESPACE Geometry

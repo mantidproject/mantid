@@ -108,7 +108,7 @@ void AnyShapeAbsorption::initialiseCachedDistances()
           // the element in this case.
           if ( m_sampleObject->interceptSurface(incoming) > 0 )
           {
-            m_L1s.push_back(incoming.begin()->Dist);
+            m_L1s.push_back(incoming.begin()->distFromStart);
             m_elementPositions.push_back(currentPosition);
             // Also calculate element volume here
             m_elementVolumes.push_back(XSliceThickness*YSliceThickness*ZSliceThickness);

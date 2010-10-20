@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
@@ -53,9 +55,9 @@ namespace ComponentCreationHelper
   /**
   * Create a component assembly at the origin made up of 4 cylindrical detectors
   */
-  static CompAssembly * createTestAssemblyOfFourCylinders()
+  static boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders()
   {
-    CompAssembly * bank = new CompAssembly("BankName");
+    boost::shared_ptr<CompAssembly> bank = boost::shared_ptr<CompAssembly>(new CompAssembly("BankName"));
     // One object
     Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
     // Four object components
@@ -69,7 +71,47 @@ namespace ComponentCreationHelper
     return bank;
   }
 
+  /**
+   * Create a detector group containing 5 detectors
+   */
+  static boost::shared_ptr<DetectorGroup> createDetectorGroupWith5CylindricalDetectors()
+  {
+    const int ndets = 5;
+    std::vector<boost::shared_ptr<IDetector> > groupMembers(ndets);
+    // One object
+    Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
+    for( int i = 0; i < ndets; ++i )
+    {
+      std::ostringstream os;
+      os << "d" << i;
+      boost::shared_ptr<Detector> det(new Detector(os.str(), detShape, NULL));
+      det->setID(i+1);
+      det->setPos((double)(i+1), 2.0, 2.0);
+      groupMembers[i] = det;
+    }
 
+    return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
+  }
+
+  /**
+   * Create a group of two monitors
+   */
+  static boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors()
+  {
+    const int ndets(2);
+    std::vector<boost::shared_ptr<IDetector> > groupMembers(ndets);
+    for( int i = 0; i < ndets; ++i )
+    {
+      std::ostringstream os;
+      os << "m" << i;
+      boost::shared_ptr<Detector> det(new Detector(os.str(), NULL));
+      det->setID(i+1);
+      det->setPos((double)(i+1), 2.0, 2.0);
+      det->markAsMonitor();
+      groupMembers[i] = det;
+    }
+    return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
+  }
 }
 
 #endif //COMPONENTCREATIONHELPERS_H_

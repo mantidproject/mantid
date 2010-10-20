@@ -133,12 +133,12 @@ public:
     TS_ASSERT_EQUALS( ocyl.interceptSurface(track), 1 )
       Track::LType::const_iterator it = track.begin();
     if (it == track.end()) return;
-    TS_ASSERT_EQUALS( it->Dist, 10.5 )
-      TS_ASSERT_DELTA( it->Length, 1, 0.0001 )
-      TS_ASSERT_EQUALS( it->PtA, V3D(9.5,0,0) )
-      TS_ASSERT_EQUALS( it->PtB, V3D(10.5,0,0) )
-      // Now add a parent with a rotation of its own;
-      Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    TS_ASSERT_EQUALS( it->distFromStart, 10.5 );
+    TS_ASSERT_DELTA( it->distInsideObject, 1, 0.0001 );
+    TS_ASSERT_EQUALS( it->entryPoint, V3D(9.5,0,0) );
+    TS_ASSERT_EQUALS( it->exitPoint, V3D(10.5,0,0) );
+    // Now add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
     // Check original track misses
     TS_ASSERT_EQUALS( ocyl.interceptSurface(track), 0 )
@@ -147,14 +147,14 @@ public:
     TS_ASSERT_EQUALS( ocyl.interceptSurface(track2), 1 )
       Track::LType::const_iterator it2 = track2.begin();
     if (it2 == track2.end()) return;
-    TS_ASSERT_DELTA( it2->Dist, sqrt(2*10.5*10.5), 0.0001 )
-      TS_ASSERT_DELTA( it2->Length, sqrt(2.0), 0.0001 )
-      TS_ASSERT_EQUALS( it2->PtA, V3D(0,9.5,-9.5) )
-      TS_ASSERT_EQUALS( it2->PtB, V3D(0,10.5,-10.5) )
+    TS_ASSERT_DELTA( it2->distFromStart, sqrt(2*10.5*10.5), 0.0001 );
+    TS_ASSERT_DELTA( it2->distInsideObject, sqrt(2.0), 0.0001 );
+    TS_ASSERT_EQUALS( it2->entryPoint, V3D(0,9.5,-9.5) );
+    TS_ASSERT_EQUALS( it2->exitPoint, V3D(0,10.5,-10.5) );
 
-      // Calling on an ObjComponent without an associated geometric object will throw
-      ObjComponent comp("noShape");
-    TS_ASSERT_THROWS( comp.interceptSurface(track), Exception::NullPointerException )
+    // Calling on an ObjComponent without an associated geometric object will throw
+    ObjComponent comp("noShape");
+    TS_ASSERT_THROWS( comp.interceptSurface(track), Exception::NullPointerException );
   }
 
   void testSolidAngleCappedCylinder()
@@ -313,23 +313,23 @@ public:
     Track trackScale(V3D(-6.5,0,0),V3D(1.0,0,0));
     TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScale), 1 );
     Track::LType::const_iterator itscale=trackScale.begin();
-    TS_ASSERT_EQUALS(itscale->Dist, 8.9);
-    TS_ASSERT_EQUALS(itscale->PtA, V3D(-6.4,0.0,0.0));
-    TS_ASSERT_EQUALS(itscale->PtB, V3D( 2.4,0.0,0.0));
+    TS_ASSERT_EQUALS(itscale->distFromStart, 8.9);
+    TS_ASSERT_EQUALS(itscale->entryPoint, V3D(-6.4,0.0,0.0));
+    TS_ASSERT_EQUALS(itscale->exitPoint, V3D( 2.4,0.0,0.0));
 
     Track trackScaleY(V3D(-6.0,-1,0),V3D(0,1.0,0));
     TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScaleY), 1 );
     Track::LType::const_iterator itscaleY=trackScaleY.begin();
-    TS_ASSERT_EQUALS(itscaleY->Dist, 1.5);
-    TS_ASSERT_EQUALS(itscaleY->PtA, V3D(-6.0,-0.5,0.0));
-    TS_ASSERT_EQUALS(itscaleY->PtB, V3D(-6.0, 0.5,0.0));
+    TS_ASSERT_EQUALS(itscaleY->distFromStart, 1.5);
+    TS_ASSERT_EQUALS(itscaleY->entryPoint, V3D(-6.0,-0.5,0.0));
+    TS_ASSERT_EQUALS(itscaleY->exitPoint, V3D(-6.0, 0.5,0.0));
 
     Track trackScaleW(V3D(-6.0,-1.5,0),V3D(1.0,1.0,0));
     TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScaleW), 1 );
     Track::LType::const_iterator itscaleW=trackScaleW.begin();
-    TS_ASSERT_DELTA(itscaleW->Dist, 2.828427, 1e-6);
-    TS_ASSERT_EQUALS(itscaleW->PtA, V3D(-5.0,-0.5,0.0));
-    TS_ASSERT_EQUALS(itscaleW->PtB, V3D(-4.0, 0.5,0.0));
+    TS_ASSERT_DELTA(itscaleW->distFromStart, 2.828427, 1e-6);
+    TS_ASSERT_EQUALS(itscaleW->entryPoint, V3D(-5.0,-0.5,0.0));
+    TS_ASSERT_EQUALS(itscaleW->exitPoint, V3D(-4.0, 0.5,0.0));
   }
 
   void testBoundingBoxWithScaleFactor()

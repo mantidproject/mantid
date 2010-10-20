@@ -74,11 +74,11 @@ public:
 		//Check track length
 		int index=0;
 		for(Track::LType::const_iterator it=A.begin();it!=A.end();++it){
-			TS_ASSERT_DELTA(it->Dist,7,0.0001);
-			TS_ASSERT_DELTA(it->Length,4,0.0001);
+			TS_ASSERT_DELTA(it->distFromStart,7,0.0001);
+			TS_ASSERT_DELTA(it->distInsideObject,4,0.0001);
 			TS_ASSERT_EQUALS(it->ObjID,1);
-			TS_ASSERT_EQUALS(it->PtA,V3D(-5.0,-2.0,0.0));
-			TS_ASSERT_EQUALS(it->PtB,V3D(-5.0,2.0,0.0));
+			TS_ASSERT_EQUALS(it->entryPoint,V3D(-5.0,-2.0,0.0));
+			TS_ASSERT_EQUALS(it->exitPoint,V3D(-5.0,2.0,0.0));
 			index++;
 		}
 		TS_ASSERT_EQUALS(index,1);

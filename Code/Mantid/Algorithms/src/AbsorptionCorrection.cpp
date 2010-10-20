@@ -312,7 +312,7 @@ void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sp
     }
     else // The normal situation
     {
-      L2s[i] = outgoing.begin()->Dist;
+      L2s[i] = outgoing.begin()->distFromStart;
     }
   }
 }

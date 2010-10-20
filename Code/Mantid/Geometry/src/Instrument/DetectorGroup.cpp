@@ -243,7 +243,14 @@ namespace Mantid
     */
     void DetectorGroup::getBoundingBox(BoundingBox & boundingBox) const
     {
-      throw Kernel::Exception::NotImplementedError("DetectorGroup::getBoundingBox");
+      boundingBox = BoundingBox();
+      for( DetCollection::const_iterator cit = m_detectors.begin(); cit != m_detectors.end(); ++cit )
+      {
+        BoundingBox memberBox;
+        IComponent_sptr det = cit->second;
+        det->getBoundingBox(memberBox);
+        boundingBox.grow(memberBox);
+      }
     }
 
     /**

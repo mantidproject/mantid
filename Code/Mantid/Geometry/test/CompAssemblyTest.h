@@ -358,7 +358,7 @@ public:
 
   void test_That_The_Bounding_Box_Is_The_Correct_Size_For_All_Of_The_Constituents()
   {
-    CompAssembly * bank = ComponentCreationHelper::createTestAssemblyOfFourCylinders();
+    boost::shared_ptr<CompAssembly> bank = ComponentCreationHelper::createTestAssemblyOfFourCylinders();
     TS_ASSERT(bank);
     TS_ASSERT_EQUALS(bank->nelements(), 4);
 
@@ -371,7 +371,6 @@ public:
     TS_ASSERT_DELTA(bbox.zMin(), -0.5, 1e-08);
     TS_ASSERT_DELTA(bbox.zMax(), 0.5, 1e-08);
 
-    delete bank;
   }
 
 };

@@ -320,7 +320,7 @@ double He3TubeEfficiency::distToSurface(const Geometry::V3D start,
   }
   // the first part of the track will be the part inside the shape,
   // return its length
-  return track.begin()->Length;
+  return track.begin()->distInsideObject;
 }
 
 /**

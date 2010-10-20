@@ -160,10 +160,10 @@ public:
     TS_ASSERT_EQUALS( pocyl.interceptSurface(track), 1 );
     Track::LType::const_iterator it = track.begin();
     if (it == track.end()) return;
-    TS_ASSERT_EQUALS( it->Dist, 10.5 );
-    TS_ASSERT_DELTA( it->Length, 1, 0.0001 );
-    TS_ASSERT_EQUALS( it->PtA, V3D(9.5,0,0) );
-    TS_ASSERT_EQUALS( it->PtB, V3D(10.5,0,0) );
+    TS_ASSERT_EQUALS( it->distFromStart, 10.5 );
+    TS_ASSERT_DELTA( it->distInsideObject, 1, 0.0001 );
+    TS_ASSERT_EQUALS( it->entryPoint, V3D(9.5,0,0) );
+    TS_ASSERT_EQUALS( it->exitPoint, V3D(10.5,0,0) );
     // Now add a parent with a rotation of its own;
     Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
@@ -174,10 +174,10 @@ public:
     TS_ASSERT_EQUALS( pocyl.interceptSurface(track2), 1 );
     Track::LType::const_iterator it2 = track2.begin();
     if (it2 == track2.end()) return;
-    TS_ASSERT_DELTA( it2->Dist, sqrt(2*10.5*10.5), 0.0001 );
-    TS_ASSERT_DELTA( it2->Length, sqrt(2.0), 0.0001 );
-    TS_ASSERT_EQUALS( it2->PtA, V3D(0,9.5,-9.5) );
-    TS_ASSERT_EQUALS( it2->PtB, V3D(0,10.5,-10.5) );
+    TS_ASSERT_DELTA( it2->distFromStart, sqrt(2*10.5*10.5), 0.0001 );
+    TS_ASSERT_DELTA( it2->distInsideObject, sqrt(2.0), 0.0001 );
+    TS_ASSERT_EQUALS( it2->entryPoint, V3D(0,9.5,-9.5) );
+    TS_ASSERT_EQUALS( it2->exitPoint, V3D(0,10.5,-10.5) );
 
     // Calling on an ObjComponent without an associated geometric object will throw
     ObjComponent comp("noShape");

@@ -37,8 +37,8 @@ public:
   void testCreateUnitCube()
   {
     Object_sptr geom_obj = createUnitCube();
-
-    TS_ASSERT_EQUALS(geom_obj->str(),"68 -1 0 -6 5 -4 3 -2 1");
+    
+    TS_ASSERT_EQUALS(geom_obj->str(),"68 -6 5 -4 3 -2 1");
 
     double xmin(0.0), xmax(0.0), ymin(0.0), ymax(0.0), zmin(0.0), zmax(0.0);
     geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymax,zmin);
@@ -272,6 +272,7 @@ public:
     std::vector<TUnit> expectedResults;
     Object_sptr geom_obj = createSphere();
     Track track(V3D(-10,0,0),V3D(1,0,0));
+
     //format = startPoint, endPoint, total distance so far, objectID
     expectedResults.push_back(TUnit(V3D(-4.1,0,0),V3D(4.1,0,0),14.1,geom_obj->getName()));
     checkTrackIntercept(geom_obj,track,expectedResults);
@@ -314,11 +315,11 @@ public:
     int index = 0;
     for (Track::LType::const_iterator it = track.begin(); it!=track.end();++it)
     {
-      TS_ASSERT_DELTA(it->Dist,expectedResults[index].Dist,1e-6);
-      TS_ASSERT_DELTA(it->Length,expectedResults[index].Length,1e-6);
+      TS_ASSERT_DELTA(it->distFromStart,expectedResults[index].distFromStart,1e-6);
+      TS_ASSERT_DELTA(it->distInsideObject,expectedResults[index].distInsideObject,1e-6);
       TS_ASSERT_EQUALS(it->ObjID,expectedResults[index].ObjID);
-      TS_ASSERT_EQUALS(it->PtA,expectedResults[index].PtA);
-      TS_ASSERT_EQUALS(it->PtB,expectedResults[index].PtB);
+      TS_ASSERT_EQUALS(it->entryPoint,expectedResults[index].entryPoint);
+      TS_ASSERT_EQUALS(it->exitPoint,expectedResults[index].exitPoint);
       ++index;
     }
     TS_ASSERT_EQUALS(index,static_cast<int>(expectedResults.size()));
@@ -327,8 +328,8 @@ public:
   void checkTrackIntercept(Object_sptr obj, Track& track, std::vector<TUnit>& expectedResults)
   {
     int unitCount = obj->interceptSurface(track);
-    TS_ASSERT_EQUALS(unitCount,expectedResults.size())
-      checkTrackIntercept(track,expectedResults);
+    TS_ASSERT_EQUALS(unitCount,expectedResults.size());
+    checkTrackIntercept(track,expectedResults);
   }
 
   void xtestTrackTwoIsolatedCubes()

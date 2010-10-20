@@ -112,8 +112,25 @@ public:
     //Name
     TS_ASSERT_EQUALS(det->getAtXY(1,2)->getName(), "MyRectangle(1,2)");
 
-    BoundingBox box= det->getBoundingBox();
-    //std::cout << box << "\n";
+    BoundingBox box;
+    det->getBoundingBox(box);
+    TS_ASSERT_DELTA(box.xMin(), 949.5, 1e-08);
+    TS_ASSERT_DELTA(box.yMin(), 1899.5, 1e-08);
+    TS_ASSERT_DELTA(box.zMin(), 2999.5, 1e-08);
+    TS_ASSERT_DELTA(box.xMax(), 1049.5, 1e-08);
+    TS_ASSERT_DELTA(box.yMax(), 2099.5, 1e-08);
+    TS_ASSERT_DELTA(box.zMax(), 3000.5, 1e-08);
+
+    // Pull out a component and check that
+    boost::shared_ptr<Detector> pixelDet = det->getAtXY(1,2);
+    box = BoundingBox();
+    pixelDet->getBoundingBox(box);
+    TS_ASSERT_DELTA(box.xMin(), 950.5, 1e-08);
+    TS_ASSERT_DELTA(box.yMin(), 1901.5, 1e-08);
+    TS_ASSERT_DELTA(box.zMin(), 2999.5, 1e-08);
+    TS_ASSERT_DELTA(box.xMax(), 951.5, 1e-08);
+    TS_ASSERT_DELTA(box.yMax(), 1902.5, 1e-08);
+    TS_ASSERT_DELTA(box.zMax(), 3000.5, 1e-08);
   }
 
 

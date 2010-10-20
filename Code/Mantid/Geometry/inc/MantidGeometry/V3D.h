@@ -6,7 +6,6 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
 {

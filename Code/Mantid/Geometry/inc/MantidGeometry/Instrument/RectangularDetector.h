@@ -70,10 +70,14 @@ public:
 
   /// Get a detector at given XY indices.
   boost::shared_ptr<Detector> getAtXY(int X, int Y) const;
-
-
+  /// Return the number of pixels in the X direction
   int xpixels() const;
+  /// Return the number of pixels in the Y direction
   int ypixels() const;
+  
+  // This should inherit the getBoundingBox implementation from  CompAssembly but
+  // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
+  using CompAssembly::getBoundingBox;
 
   // ------------ IObjComponent methods ----------------
 
@@ -88,9 +92,7 @@ public:
 
   /// Finds the approximate solid angle covered by the component when viewed from the point given
   double solidAngle(const V3D& observer) const;
-
-  BoundingBox getBoundingBox() const;
-
+  /// Retrieve the cached bounding box
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
 
   ///Try to find a point that lies within (or on) the object
@@ -131,8 +133,6 @@ private:
 
   /// Pointer to the shape of the pixels in this detector array.
   boost::shared_ptr<Object> mShape;
-
-
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const RectangularDetector&);

@@ -67,19 +67,19 @@ namespace Mantid
       Track::LType::const_iterator it;
       for (it = probeTrack.begin(); it < probeTrack.end(); ++it)
       {
-        V3D in = it->PtA;
+        V3D in = it->entryPoint;
         this->getRotation().rotate(in);
         //use the scale factor
         in *= scaleFactor;
         //
         in += this->getPos();
-        V3D out = it->PtB;
+        V3D out = it->exitPoint;
         this->getRotation().rotate(out);
         //use the scale factor
         out *= scaleFactor;
         //
         out += this->getPos();
-        track.addTUnit(Shape()->getName(),in,out,it->Dist);
+        track.addTUnit(Shape()->getName(),in,out,it->distFromStart);
       }
 
       return intercepts;
