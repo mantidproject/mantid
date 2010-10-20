@@ -161,6 +161,7 @@ public:
   void removeUserMenuAction(const QString & menu, const QString & action); //Mantid
   const QList<QMenu*> & getCustomMenus() const; //Mantid
   ScriptingWindow* getScriptWindowHandle() { return scriptingWindow; }
+  bool getMenuSettingsFlag(const QString & menu_item);
   //-------------------
   	//@}
 
@@ -1219,6 +1220,8 @@ public:
     QStringList d_param_surface_func; //user-defined parametric surface functions;
 	//! List of tables and matrices renamed in order to avoid conflicts when appending a project to a folder
 	QStringList renamedTables;
+  // List of removed interfaces
+  QStringList removed_interfaces;
 
 	//! \name variables used when user copy/paste markers
 	//@{

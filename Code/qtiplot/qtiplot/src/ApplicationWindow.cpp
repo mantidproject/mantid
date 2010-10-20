@@ -1417,10 +1417,49 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 
   }
 
-  menuBar()->insertItem(tr("&ICat"),icat);
+  menuBar()->insertItem(tr("I&Cat"),icat);
+
+  // Interface menu. Build the interface from the user sub windows list.
+  // Modifications will be done through the ManageCustomMenus dialog and
+  // remembered through QSettings.
+  QStringList user_windows = MantidQt::API::InterfaceManager::Instance().getUserSubWindowKeys();
+  QStringListIterator itr(user_windows);
+  QString menuName = "&Interfaces";
+  addUserMenu(menuName);
+  while( itr.hasNext() )
+  {
+      QString itemName = itr.next();
+      // Check whether the menu item was flagged in the QSettings.
+      if (getMenuSettingsFlag(itemName))
+          addUserMenuAction( menuName, itemName, itemName);
+  }
+
   menuBar()->insertItem(tr("&Help"), help );
 
   reloadCustomActions();
+}
+
+/**
+ * Returns whether a custom interface should be added to the Interfaces menu.
+ *
+ * - Is item present in CustomScripts? Yes --> return true
+ *
+ *
+ */
+bool ApplicationWindow::getMenuSettingsFlag(const QString & menu_item)
+{
+  // Look for the interface in the user menu list
+  // If we found the item in the user menu list, return true
+  QMenu *menu = NULL;
+  foreach(menu, d_user_menus)
+  {
+    if( menu->title() == menu_item ) return true;
+  }
+
+  // If we didn't find it, check whether is was manually removed
+  //std::cout << "FLAG: " << "[" << menu_item.ascii() << "]" << removed_interfaces.join(", ").ascii() << std::endl;
+  if( removed_interfaces.grep(menu_item).size() > 0 ) return false;
+  return true;
 }
 
 void ApplicationWindow::disableActions()
@@ -4869,6 +4908,13 @@ void ApplicationWindow::readSettings()
     }
     settings.endGroup();
   }
+
+  // Mantid - Remember which interfaces the user explicitely removed
+  // from the Interfaces menu
+  removed_interfaces = settings.value("RemovedInterfaces").toStringList();
+
+  settings.endGroup();
+
 }
 
 void ApplicationWindow::saveSettings()
@@ -5199,6 +5245,11 @@ void ApplicationWindow::saveSettings()
     }
     settings.endGroup();
   }
+
+  // Mantid - Remember which interfaces the user explicitely removed
+  // from the Interfaces menu
+  settings.setValue("RemovedInterfaces", removed_interfaces);
+
   settings.endGroup();
   //-----------------------------------
 }
@@ -16239,6 +16290,8 @@ void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QStr
   topMenu->addAction(scriptAction);
   d_user_actions.append(scriptAction);
 
+  // Remove name from the list of removed interfaces if applicable
+  removed_interfaces.remove(itemName);
 }
 
 void ApplicationWindow::removeUserMenu(const QString & parentMenu)
@@ -16276,6 +16329,9 @@ void ApplicationWindow::removeUserMenuAction(const QString & parentMenu, const Q
 
   d_user_actions.removeAt(menu_count);
   menu->removeAction(action);
+
+  // Add interface name to the list of removed interfaces
+  removed_interfaces.append(userAction);
 }
 
 const QList<QMenu*> & ApplicationWindow::getCustomMenus() const
