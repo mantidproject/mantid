@@ -58,18 +58,21 @@ namespace MantidQt
 
       Mantid::API::CompositeFunction* createFunction();
       QtProperty* createLorentzian();
-      QtProperty* createStretchedExp();
       QtProperty* createExponential();
-
+      QtProperty* createStretchedExp();
+      
       virtual void closeEvent(QCloseEvent* close);
 
     private slots:
       void instrumentChanged(int index);
       void analyserSelected(int index);
       void reflectionSelected(int index);
+      void refreshWSlist();
+
       void furyRun();
       void furyResType(const QString& type);
       void furyPlotInput();
+
       void runFuryFit();
       void furyfit_typeSelection(int index);
       void furyfitPlotInput();
@@ -77,14 +80,22 @@ namespace MantidQt
       void furyfitXMaxSelected(double val);
       void furyfitBackgroundSelected(double val);
       void furyfitRangePropChanged(QtProperty*, double);
+      void furyfitInputType(int index);
+      void furyfitPlotOutput();
+      void furyfitSequential();
+
       void elwinRun();
       void elwinPlotInput();
       void elwinTwoRanges(bool state);
+
       void msdRun();
       void msdPlotInput();
+
       void absorptionRun();
       void absorptionShape(int index);
+
       void demonRun();
+
       void openDirectoryDialog();
       void help();
       

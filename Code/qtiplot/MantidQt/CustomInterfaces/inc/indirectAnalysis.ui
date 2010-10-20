@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>516</width>
-    <height>342</height>
+    <width>517</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -782,27 +782,78 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_23" >
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" >
+          <widget class="QComboBox" name="furyfit_cbInputType" >
+           <item>
+            <property name="text" >
+             <string>File</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Workspace</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="furyfit_swInput" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
              <horstretch>0</horstretch>
-             <verstretch>41</verstretch>
+             <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="findRunFiles" stdset="0" >
-            <bool>false</bool>
+           <property name="currentIndex" >
+            <number>0</number>
            </property>
-           <property name="label" stdset="0" >
-            <string>Input File</string>
-           </property>
-           <property name="multipleFiles" stdset="0" >
-            <bool>false</bool>
-           </property>
-           <property name="fileExtensions" >
-            <stringlist>
-             <string>_iqt.nxs</string>
-            </stringlist>
-           </property>
+           <widget class="QWidget" name="page" >
+            <layout class="QHBoxLayout" name="horizontalLayout_19" >
+             <item>
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                 <horstretch>0</horstretch>
+                 <verstretch>41</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="findRunFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="label" stdset="0" >
+                <string/>
+               </property>
+               <property name="multipleFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="fileExtensions" >
+                <stringlist>
+                 <string>_iqt.nxs</string>
+                </stringlist>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_2" >
+            <layout class="QHBoxLayout" name="horizontalLayout_12" >
+             <item>
+              <widget class="QComboBox" name="furyfit_cbWorkspace" />
+             </item>
+             <item>
+              <widget class="QPushButton" name="furyfit_pbRefreshWSList" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text" >
+                <string>Refresh</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
          <item>
@@ -815,50 +866,50 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_24" >
-         <item>
-          <widget class="QLabel" name="furyfit_lbFitType" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text" >
-            <string>Fit Type:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="furyfit_cbFitType" >
-           <item>
-            <property name="text" >
-             <string>1 Exponential</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>2 Exponentials</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>1 Stretched Exponential</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>1 Stretched Exponential and 1 Exponential</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_25" >
          <item>
           <layout class="QVBoxLayout" name="furyfit_vlTreeProp" >
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_8" >
+             <item>
+              <widget class="QLabel" name="furyfit_lbFitType" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text" >
+                <string>Fit Type:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="furyfit_cbFitType" >
+               <item>
+                <property name="text" >
+                 <string>1 Exponential</string>
+                </property>
+               </item>
+               <item>
+                <property name="text" >
+                 <string>2 Exponentials</string>
+                </property>
+               </item>
+               <item>
+                <property name="text" >
+                 <string>1 Stretched Exponential</string>
+                </property>
+               </item>
+               <item>
+                <property name="text" >
+                 <string>1 Stretched Exponential and 1 Exponential</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item>
             <widget class="QCheckBox" name="furyfit_ckConstrainIntensities" >
              <property name="text" >
@@ -878,6 +929,16 @@
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_27" >
+             <item>
+              <widget class="QPushButton" name="furyfit_pbPlotGuess" >
+               <property name="enabled" >
+                <bool>false</bool>
+               </property>
+               <property name="text" >
+                <string>Plot Guess</string>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QLabel" name="furyfit_lbSpectra" >
                <property name="text" >
@@ -930,6 +991,20 @@
           <widget class="QPushButton" name="furyfit_pbRun" >
            <property name="text" >
             <string>Run Fury Fit</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="furyfit_pbPlotOutput" >
+           <property name="text" >
+            <string>Plot Output</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="furyfit_pbSeqFit" >
+           <property name="text" >
+            <string>Sequential Fit</string>
            </property>
           </widget>
          </item>

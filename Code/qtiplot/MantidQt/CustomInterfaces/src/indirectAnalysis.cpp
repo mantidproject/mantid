@@ -79,6 +79,10 @@ void indirectAnalysis::initLayout()
   connect(m_uiForm.furyfit_pbRun, SIGNAL(clicked()), this, SLOT(runFuryFit()));
   connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
   connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
+  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));
+  connect(m_uiForm.furyfit_pbRefreshWSList, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.furyfit_pbPlotOutput, SIGNAL(clicked()), this, SLOT(furyfitPlotOutput()));
+  connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // elwin
   connect(m_uiForm.elwin_pbRun, SIGNAL(clicked()), this, SLOT(elwinRun()));
   connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
@@ -92,7 +96,7 @@ void indirectAnalysis::initLayout()
   // demon
   connect(m_uiForm.dem_pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
 
-  m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
+  m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts)[0];
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   m_settingsGroup = "CustomInterfaces/IndirectAnalysis/";
@@ -131,6 +135,8 @@ void indirectAnalysis::initLayout()
   m_uiForm.abs_leRadius->setValidator(m_valDbl);
   m_uiForm.abs_leSlices->setValidator(m_valInt);
   m_uiForm.abs_leAnnuli->setValidator(m_valInt);
+
+  refreshWSlist();
 }
 
 void indirectAnalysis::initLocalPython()
@@ -545,7 +551,7 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
         if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
-        m_furyfitConstraints += "0 <= f%1.Intensity <= 1,0 <= f%1.Beta <= 1";
+        m_furyfitConstraints += "0 <= f%1.Beta <= 1";
         m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
       }
       else if ( name == "Exponential" )
@@ -556,8 +562,6 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
         std::string formula = "Intensity*exp(-(x*Exponent))";
         Mantid::API::IFunction::Attribute att(formula);
         func->setAttribute("Formula", att);
-        if ( m_furyfitConstraints != "" ) m_furyfitConstraints += ",";
-        m_furyfitConstraints += "0 <= f%1.Intensity <= 1";
         m_furyfitConstraints = m_furyfitConstraints.arg(funcIndex);
       }
       else
@@ -727,6 +731,25 @@ void indirectAnalysis::reflectionSelected(int index)
   m_uiForm.tabAbsorption->setEnabled(state);
   m_uiForm.tabDemon->setEnabled(!state);
 }
+
+void indirectAnalysis::refreshWSlist()
+{
+  // Get object list from ADS
+  std::set<std::string> workspaceList = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  // Clear Workspace Lists
+  m_uiForm.furyfit_cbWorkspace->clear();
+
+  if ( ! workspaceList.empty() )
+  {
+    std::set<std::string>::const_iterator it;
+    for ( it=workspaceList.begin(); it != workspaceList.end(); ++it )
+    {
+      QString ws = QString::fromStdString(*it);
+      m_uiForm.furyfit_cbWorkspace->addItem(ws);
+    }
+  }
+}
+
 void indirectAnalysis::furyRun()
 {
   if ( !validateFury() )
@@ -787,8 +810,6 @@ void indirectAnalysis::furyPlotInput()
 
 void indirectAnalysis::runFuryFit()
 {
-  if ( m_uiForm.furyfit_inputFile->isValid() )
-  {
     // First create the function
     Mantid::API::CompositeFunction* function = createFunction();
 
@@ -812,23 +833,15 @@ void indirectAnalysis::runFuryFit()
       }
     }
 
-    // Now load up the input workspace (if not already loaded)
-    QFileInfo fi(m_uiForm.furyfit_inputFile->getFirstFilename());
-    std::string wsname = fi.baseName().toStdString();
-
-    bool wsExists = Mantid::API::AnalysisDataService::Instance().doesExist(wsname);
-
-    if ( ( wsname != m_ffInputWSName ) || ! wsExists )
+    // the plotInput function handles loading the workspace, no need to duplicate that code here
+    furyfitPlotInput();
+    // however if it doesn't a workspace we don't want to continue, so...
+    if ( m_ffInputWS == NULL )
     {
-    QString pyInput = "from mantidsimple import *\n"
-      "LoadNexus(r'" + m_uiForm.furyfit_inputFile->getFirstFilename() + "', '"+QString::fromStdString(wsname)+"')\n";
-    QString pyOutput = runPythonCode(pyInput);
-    m_ffInputWSName = wsname;
+      return;
     }
-
-    /// @todo some check here to make sure the spectra number isn't out of range
     
-    std::string output = wsname + "_fit";
+    std::string output = m_ffInputWSName + "_fit_s" + m_uiForm.furyfit_leSpecNo->text().toStdString();
     // Create the Fit Algorithm
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
@@ -842,6 +855,14 @@ void indirectAnalysis::runFuryFit()
     alg->setPropertyValue("Output",output);
     alg->execute();
 
+    if ( ! alg->isExecuted() )
+    {
+      QString msg = "There was an error executing the fitting algorithm. Please see the "
+        "Results Log pane for more details.";
+      showInformationBox(msg);
+      return;
+    }
+
     // Now show the fitted curve of the mini plot
     m_ffOutputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(output+"_Workspace"));
     const QVector<double> dataX = QVector<double>::fromStdVector(m_ffOutputWS->readX(1));
@@ -851,7 +872,9 @@ void indirectAnalysis::runFuryFit()
     {
       m_ffFitCurve->attach(0);
       delete m_ffFitCurve;
+      m_ffFitCurve = 0;
     }
+
     m_ffFitCurve = new QwtPlotCurve();
     m_ffFitCurve->setData(dataX, dataY);
     m_ffFitCurve->attach(m_furyFitPlotWindow);
@@ -863,15 +886,15 @@ void indirectAnalysis::runFuryFit()
     // Get the "*_Parameters" TableWorkspace created by the Fit function
     Mantid::API::ITableWorkspace_sptr table = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(output+"_Parameters"));
     std::map<std::string,double> params;
-    Mantid::API::TableRow row = table->getFirstRow();
-    do
+    int nRow = table->rowCount();
+    for ( int i = 0; i < nRow; i++ )
     {
+      Mantid::API::TableRow row = table->getRow(i);
       std::string key;
       double value, error;
       row >> key >> value >> error;
       params[key] = value;
     }
-    while ( row.next() );
 
     // Background is in all functions
     m_ffRangeManager->setValue(m_fitProperties["BackgroundA0"], params["f0.A0"]);
@@ -943,20 +966,12 @@ void indirectAnalysis::runFuryFit()
     case 2:
       break;
     }
-  }
-  else
-  {
-    showInformationBox("You must select an input file.");
-  }
 }
 
 void indirectAnalysis::furyfit_typeSelection(int index)
 {
   m_propBrowser->clear();
 
-  // StartX and EndX
-  //m_doubleManager->setDecimals(startX, 10);
-  //m_doubleManager->setDecimals(endX, 10);
   m_propBrowser->addProperty(m_fitProperties["StartX"]);
   m_propBrowser->addProperty(m_fitProperties["EndX"]);
 
@@ -978,82 +993,98 @@ void indirectAnalysis::furyfit_typeSelection(int index)
     m_propBrowser->addProperty(m_fitProperties["Exponential1"]);
     m_propBrowser->addProperty(m_fitProperties["StretchedExp"]);
     break;
-  default:
-    showInformationBox("Something very bad has happened.");
-    return;
-    break;
   }
 }
 
 void indirectAnalysis::furyfitPlotInput()
 {
-  if ( ! m_uiForm.furyfit_inputFile->isValid() )
+  if ( m_ffDataCurve != NULL )
   {
+    m_ffDataCurve->attach(0);
+    delete m_ffDataCurve;
+    m_ffDataCurve = 0;
+  }
+
+  std::string wsname;
+
+  switch ( m_uiForm.furyfit_cbInputType->currentIndex() )
+  {
+  case 0: // "File"
+    {
+      QFileInfo fi(m_uiForm.furyfit_inputFile->getFirstFilename());
+      wsname = fi.baseName().toStdString();
+
+      if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
+      {
+        std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
+        // LoadNexus
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
+        alg->initialize();
+        alg->setPropertyValue("Filename", filename);
+        alg->setPropertyValue("OutputWorkspace",wsname);
+        alg->execute();
+        // get the output workspace
+        m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      }
+    }
+    break;
+  case 1: // Workspace
+    {
+      wsname = m_uiForm.furyfit_cbWorkspace->currentText().toStdString();
+      try
+      {
+        m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      }
+      catch ( Mantid::Kernel::Exception::NotFoundError & )
+      {
+        QString msg = "Workspace: '" + QString::fromStdString(wsname) + "' could not be "
+          "found in the Analysis Data Service.";
+        showInformationBox(msg);
+        return;
+      }
+    }
+    break;
+  }
+  m_ffInputWSName = wsname;
+
+  int nHist = m_ffInputWS->getNumberHistograms();
+  int specNo = m_uiForm.furyfit_leSpecNo->text().toInt();
+
+  if ( specNo < 0 || specNo >= nHist )
+  {
+    showInformationBox("Spectra number is out of range.");
     return;
   }
-  else
-  {
-    if ( m_ffDataCurve != NULL )
-    {
-      m_ffDataCurve->attach(0);
-      delete m_ffDataCurve;
-    }
 
-    QFileInfo fi(m_uiForm.furyfit_inputFile->getFirstFilename());
-    std::string wsname = fi.baseName().toStdString();
+  // get the data of that spectra number
+  const QVector<double> dataX = QVector<double>::fromStdVector(m_ffInputWS->readX(specNo));
+  const QVector<double> dataY = QVector<double>::fromStdVector(m_ffInputWS->readY(specNo));
 
-    if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
-    {
-      std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
-      // LoadNexus
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
-      alg->initialize();
-      alg->setPropertyValue("Filename", filename);
-      alg->setPropertyValue("OutputWorkspace",wsname);
-      alg->execute();
-      // get the output workspace
-      m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
-    }
-    m_ffInputWSName = wsname;
-
-    /// @todo some check here to make sure the spectra number isn't out of range
-    int specNo = m_uiForm.furyfit_leSpecNo->text().toInt();
-
-    // get the data of that spectra number
-    const QVector<double> dataX = QVector<double>::fromStdVector(m_ffInputWS->readX(specNo));
-    const QVector<double> dataY = QVector<double>::fromStdVector(m_ffInputWS->readY(specNo));
-
-    // get xMin and xMax range
-    const double & lower = dataX.first();
-    const double & upper = dataX.last();
-    m_ffRangeS->setRange(lower, upper);
-    m_ffRangeManager->setRange(m_fitProperties["StartX"], lower, upper);
-    m_ffRangeManager->setRange(m_fitProperties["EndX"], lower, upper);
+  // get xMin and xMax range
+  const double & lower = dataX.first();
+  const double & upper = dataX.last();
+  m_ffRangeS->setRange(lower, upper);
+  m_ffRangeManager->setRange(m_fitProperties["StartX"], lower, upper);
+  m_ffRangeManager->setRange(m_fitProperties["EndX"], lower, upper);
             
-    // create the QwtPlotCurve
-    m_ffDataCurve = new QwtPlotCurve();
-    m_ffDataCurve->setData(dataX, dataY);
-    m_ffDataCurve->attach(m_furyFitPlotWindow);
+  // create the QwtPlotCurve
+  m_ffDataCurve = new QwtPlotCurve();
+  m_ffDataCurve->setData(dataX, dataY);
+  m_ffDataCurve->attach(m_furyFitPlotWindow);
 
-    m_furyFitPlotWindow->setAxisScale(QwtPlot::xBottom, lower, upper);
-    m_furyFitPlotWindow->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
-    m_furyFitPlotWindow->replot();
-  }
+  m_furyFitPlotWindow->setAxisScale(QwtPlot::xBottom, lower, upper);
+  m_furyFitPlotWindow->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
+  m_furyFitPlotWindow->replot();
 }
 
 void indirectAnalysis::furyfitXMinSelected(double val)
 {
-  // disconnect(m_ffRangeS, SIGNAL(minValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
   m_ffRangeManager->setValue(m_fitProperties["StartX"], val);
-  // connect(m_ffRangeS, SIGNAL(minValueChanged(double)), this, SLOT(furyfitXMinSelected(double)));
 }
 void indirectAnalysis::furyfitXMaxSelected(double val)
 {
-  // disconnect(m_ffRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(furyfitXMaxSelected(double)));
   m_ffRangeManager->setValue(m_fitProperties["EndX"], val);
-  // connect(m_ffRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(furyfitXMaxSelected(double)));
 }
-
 void indirectAnalysis::furyfitBackgroundSelected(double val)
 {
   m_ffRangeManager->setValue(m_fitProperties["BackgroundA0"], val);
@@ -1073,6 +1104,68 @@ void indirectAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
   {
     m_ffBackRangeS->setMinimum(val);
   }
+}
+
+void indirectAnalysis::furyfitInputType(int index)
+{
+  m_uiForm.furyfit_swInput->setCurrentIndex(index);
+}
+
+void indirectAnalysis::furyfitPlotOutput()
+{
+  if ( m_ffOutputWS == NULL )
+  {
+    showInformationBox("No output found for FuryFit");
+    return;
+  }
+
+  std::string name = m_ffOutputWS->getName();
+
+  QString pyInput = "from mantidplot import *\n"
+    "plotSpectrum('" + QString::fromStdString(name) + "', [0,1,2])\n";
+  QString pyOutput = runPythonCode(pyInput);
+}
+void indirectAnalysis::furyfitSequential()
+{
+  furyfitPlotInput();
+  if ( m_ffInputWS == NULL )
+  {
+    return;
+  }
+
+  Mantid::API::CompositeFunction* func = createFunction();
+
+  // Function Ties
+  func->tie("f0.A1", "0");
+  if ( m_uiForm.furyfit_ckConstrainIntensities->isChecked() )
+  {
+    switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
+    {
+    case 0: // 1 Exp
+    case 2: // 1 Str
+      func->tie("f1.Intensity","1-f0.A0");
+      break;
+    case 1: // 2 Exp
+    case 3: // 1 Exp & 1 Str
+      func->tie("f1.Intensity","1-f2.Intensity-f0.A0");
+      break;
+    }
+  }
+
+  std::string function = std::string(*func);
+  
+  QString stX = QString::number(m_ffRangeManager->value(m_fitProperties["StartX"]), 'g', 10);
+  QString enX = QString::number(m_ffRangeManager->value(m_fitProperties["EndX"]), 'g', 10);
+
+  QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
+    "input = '" + QString::fromStdString(m_ffInputWSName) + "'\n"
+    "func = r'" + QString::fromStdString(function) + "'\n"
+    "startx = " + stX + "\n"
+    "endx = " + enX + "\n"
+    "furyfitSeq(input, func, startx, endx)\n";
+  
+  QString pyOutput = runPythonCode(pyInput);
+
 }
 
 void indirectAnalysis::elwinRun()

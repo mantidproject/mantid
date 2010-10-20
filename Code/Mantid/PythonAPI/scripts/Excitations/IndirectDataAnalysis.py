@@ -133,6 +133,13 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         plotFury(outWSlist, specrange)
     return outWSlist
 
+def furyfitSeq(inputWS,func,startx,endx):
+    input = inputWS+',i0'
+    nHist = mtd[inputWS].getNumberHistograms()
+    for i in range(1,nHist):
+        input += ';'+inputWS+',i'+str(i)
+    PlotPeakByLogValue(input, inputWS+'_fitParameters', func, StartX=startx, EndX=endx)
+
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
     for file in inputs:
         (direct, filename) = os.path.split(file)
