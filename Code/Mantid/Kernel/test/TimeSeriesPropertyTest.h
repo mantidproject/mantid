@@ -17,48 +17,49 @@ public:
     dProp = new TimeSeriesProperty<double>("doubleProp");
     sProp = new TimeSeriesProperty<std::string>("stringProp");
   }
-  
+
   ~TimeSeriesPropertyTest()
   {
     delete iProp;
     delete dProp;
     delete sProp;
   }
-  
-	void testConstructor()
-	{
+
+  void testConstructor()
+  {
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT( ! iProp->name().compare("intProp") );
     TS_ASSERT( ! iProp->documentation().compare("") );
     TS_ASSERT( typeid( std::multimap<boost::posix_time::ptime, int> ) == *iProp->type_info()  );
     //TS_ASSERT( iProp->isDefault() )
-    
+
     TS_ASSERT( ! dProp->name().compare("doubleProp") );
     TS_ASSERT( ! dProp->documentation().compare("") );
     TS_ASSERT( typeid( std::multimap<boost::posix_time::ptime, double> ) == *dProp->type_info()  );
     ///TS_ASSERT( dProp->isDefault() )
-    
+
     TS_ASSERT( ! sProp->name().compare("stringProp") );
     TS_ASSERT( ! sProp->documentation().compare("") );
     TS_ASSERT( typeid( std::multimap<boost::posix_time::ptime, std::string> ) == *sProp->type_info()  );
     //TS_ASSERT( sProp->isDefault() )
-	}
-  
-	void testSetValue()
-	{
+  }
+
+  void testSetValue()
+  {
     TS_ASSERT_THROWS( iProp->setValue("1"), Exception::NotImplementedError );
     TS_ASSERT_THROWS( dProp->setValue("5.5"), Exception::NotImplementedError );
     TS_ASSERT_THROWS( sProp->setValue("aValue"), Exception::NotImplementedError );
-	}
+  }
 
-	void testAddValue()
-	{
-    TS_ASSERT( iProp->addValue("2007-11-30T16:17:00",1) );
+  void testAddValue()
+  {
+    const std::string tester("2007-11-30T16:17:00");
+    TS_ASSERT( iProp->addValue(tester,1) );
     TS_ASSERT( iProp->addValue("2007-11-30T16:17:10",1) );
-    
+
     TS_ASSERT( dProp->addValue("2007-11-30T16:17:00",9.99) );
     TS_ASSERT( dProp->addValue("2007-11-30T16:17:10",5.55) );
-    
+
     TS_ASSERT( sProp->addValue("2007-11-30T16:17:00","test") );
     TS_ASSERT( sProp->addValue("2007-11-30T16:17:10","test2") );
 
@@ -66,29 +67,29 @@ public:
     TimeSeriesProperty<int> otherProp("otherProp");
     TS_ASSERT( otherProp.addValue( static_cast<std::time_t>( 123 ), 1) );
     TS_ASSERT( otherProp.addValue( boost::posix_time::second_clock::local_time(), 1) );
-	}
+  }
 
-	void testValue()
-	{
+  void testValue()
+  {
     const std::string dString = dProp->value();
     TS_ASSERT_EQUALS( dString.substr(0,27), "2007-Nov-30 16:17:00  9.99\n" );
     const std::string iString = iProp->value();
     TS_ASSERT_EQUALS( iString.substr(0,24), "2007-Nov-30 16:17:00  1\n" );
     const std::string sString = sProp->value();
     TS_ASSERT_EQUALS( sString.substr(0,27), "2007-Nov-30 16:17:00  test\n" );
-	}
+  }
 
-	void testCasting()
-	{
+  void testCasting()
+  {
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(iProp), static_cast<Property*>(0) );
-	  TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) );
+    TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) );
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(sProp), static_cast<Property*>(0) );
-	}
+  }
 
 
   //----------------------------------------------------------------------------
-	void testAdditionOperator()
-	{
+  void testAdditionOperator()
+  {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
     TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
@@ -104,7 +105,7 @@ public:
     (*log) += log2;
 
     TS_ASSERT_EQUALS( log->size(), 5);
-	}
+  }
 
   //----------------------------------------------------------------------------
   void test_filterByTime_and_getTotalValue()
@@ -188,7 +189,7 @@ public:
     TS_ASSERT_EQUALS( log->realSize(), 12);
 
     //Make the outputs
-//    std::vector< TimeSeriesProperty<int> * > outputs2;
+    //    std::vector< TimeSeriesProperty<int> * > outputs2;
     std::vector< Property * > outputs;
     for (int i=0; i<5; i++)
     {
@@ -229,7 +230,7 @@ public:
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[4])->realSize(), 1);
 
   }
-  
+
 
   //----------------------------------------------------------------------------
   void test_splitByTime_withOverlap()
@@ -250,7 +251,7 @@ public:
     TS_ASSERT_EQUALS( log->realSize(), 12);
 
     //Make the outputs
-//    std::vector< TimeSeriesProperty<int> * > outputs2;
+    //    std::vector< TimeSeriesProperty<int> * > outputs2;
     std::vector< Property * > outputs;
     for (int i=0; i<1; i++)
     {

@@ -106,12 +106,9 @@ void LoadParameterFile::exec()
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
 
-
+  pDoc->release();
 
 }
-
-
-
 
 } // namespace DataHandling
 } // namespace Mantid

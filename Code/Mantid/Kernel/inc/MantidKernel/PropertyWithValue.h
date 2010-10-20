@@ -52,7 +52,7 @@ namespace Kernel
 */
 
 // --------------------- convert values to strings
-
+namespace {
 /// Convert values to strings.
 template <typename T>
 std::string toString(const T& value)
@@ -195,7 +195,7 @@ inline void addingOperator(boost::shared_ptr<T>& lhs, const boost::shared_ptr<T>
   (void) rhs; //avoid compiler warning
   throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
 }
-
+}
 //------------------------------------------------------------------------------------------------
 // Now the PropertyWithValue class itself
 //------------------------------------------------------------------------------------------------

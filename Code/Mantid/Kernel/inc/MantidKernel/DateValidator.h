@@ -10,12 +10,12 @@ namespace Kernel
 {
 /** DateValidator is a validator that validates date, format of valid date is  "DD/MM/YYYY"
     At present, this validator is only available for properties of type std::string
-	This class has written for validating  start and end dates of  ICat interface.
-	
+    This class has written for validating  start and end dates of  ICat interface.
+
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 03/09/2010
  
-    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -35,24 +35,19 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	
-class DLLExport DateValidator :public IValidator<std::string>
+class DLLExport DateValidator : public IValidator<std::string>
 {
 public:
-	/// constrcutor
-	DateValidator();
-	/// destructor
-	virtual ~DateValidator();
-	/// create a copy of the the validator
-	IValidator<std::string> * clone();
-private:
+  DateValidator();
+  virtual ~DateValidator();
+  IValidator<std::string> * clone();
 
-	///Checks the validity of date string ,expected format is "DD/MM/YYYY"
-	struct tm getTimevalue(const std::string& sDate,std::string & error) const;
-	///Checks the given value is a valid date
-	std::string checkValidity(const std::string& value) const;
-	
+private:
+  struct tm getTimevalue(const std::string& sDate, std::string & error) const;
+  std::string checkValidity(const std::string& value) const;
 };
+
 }
 }
+
 #endif

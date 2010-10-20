@@ -148,10 +148,10 @@ namespace Mantid
       const FacilityInfo& Facility(const std::string& fName)const;
 
       /// Add an observer for a notification
-			void addObserver(const Poco::AbstractObserver& observer)const;
+      void addObserver(const Poco::AbstractObserver& observer)const;
 
-			/// Remove an observer
-			void removeObserver(const Poco::AbstractObserver& observer)const;
+      /// Remove an observer
+      void removeObserver(const Poco::AbstractObserver& observer)const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;

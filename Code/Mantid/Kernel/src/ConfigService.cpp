@@ -9,6 +9,7 @@
 #include "MantidKernel/SignalChannel.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
@@ -178,12 +179,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.debug() << "ConfigService created." << std::endl;
   g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
   g_log.information() << "This is Mantid Version " << MANTID_VERSION << std::endl;
-}
-
-/// Private copy constructor for singleton class
-ConfigServiceImpl::ConfigServiceImpl(const ConfigServiceImpl&) :
-  g_log(Logger::get("ConfigService"))
-{
 }
 
 /** Private Destructor
@@ -910,6 +905,8 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
     throw std::runtime_error("The facility definition file " + fileName + " defines no facilities");
   }
 
+  pNL_facility->release();
+  pDoc->release();
 }
 
 /** Get the default facility

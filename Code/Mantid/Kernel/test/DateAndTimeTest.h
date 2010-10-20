@@ -73,7 +73,7 @@ public:
     dateAndTime utc_time = DateAndTime::from_time_t(utc_time_t);
 
     //Timezone offset in hours (sorry, newfoundland and labrador - half time zones are crazy! )
-    int tz_offset = difftime(utc_time_t, local_time_t) / 3600;
+    int tz_offset = static_cast<int>( difftime(utc_time_t, local_time_t) / 3600 );
 
     //Get tm in UTC
     std::tm utc_tm = Mantid::Kernel::DateAndTime::to_tm(utc_time);
@@ -131,17 +131,17 @@ public:
 
     //Add one second
     dt += time_duration(0,0,1,0);
-    pt = 1e9;
+    pt = 1000000000;
     TS_ASSERT_EQUALS( dt, get_time_from_pulse_time(pt));
 
     //Half a second
     dt += boost::posix_time::milliseconds(500);
-    pt += 5e8;
+    pt += 500000000;
     TS_ASSERT_EQUALS( dt, get_time_from_pulse_time(pt));
 
     //All installs should support at least 1 microsecond resolution.
     dt += boost::posix_time::microseconds(1);
-    pt += 1e3;
+    pt += 1000;
     TS_ASSERT_EQUALS( dt, get_time_from_pulse_time(pt));
 
     //Back-conversion

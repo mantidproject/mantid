@@ -64,7 +64,9 @@ namespace Mantid
             }
           }
         }
+        pNL->release();
       }
+      pNL_technique->release();
 
       if (m_technique.empty())
       {

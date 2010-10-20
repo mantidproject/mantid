@@ -9,6 +9,7 @@
 		<project>DataHandling</project>
 		<project>DataObjects</project>
 		<project>Geometry</project>
+		<project>ICat</project>
 		<project>Kernel</project>
 		<project>Nexus</project>
 	</projects>
@@ -39,7 +40,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/Main/Release}</value>
+					<value>${workspace_loc:/Main/Debug}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>

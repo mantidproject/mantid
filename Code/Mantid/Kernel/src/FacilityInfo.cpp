@@ -70,13 +70,15 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
         m_archiveSearch.insert(plugin);
       }
     }
-
+    pNL_interfaces->release();
   }
-   Poco::XML::NodeList* pNL_catalogs = elem->getElementsByTagName("catalog");
-   if(!pNL_catalogs)
-   {
-	   throw std::runtime_error("Facilities.xml file  must have catalog information");
-   }
+  pNL_archives->release();
+
+  Poco::XML::NodeList* pNL_catalogs = elem->getElementsByTagName("catalog");
+  if(!pNL_catalogs)
+  {
+    throw std::runtime_error("Facilities.xml file  must have catalog information");
+  }
   if (pNL_catalogs->length() > 1)
   {
     g_log.error("Facility must have only one catalog tag");
@@ -84,13 +86,13 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   }
   else if (pNL_catalogs->length() == 1)
   {
-	  Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
-	  if(!elem->getAttribute("name").empty())
-	  {
-	     m_catalogName= elem->getAttribute("name");
-	  }
-    
+    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
+    if(!elem->getAttribute("name").empty())
+    {
+      m_catalogName= elem->getAttribute("name");
+    }
   }
+  pNL_catalogs->release();
 
   Poco::XML::NodeList* pNL_instrument = elem->getElementsByTagName("instrument");
   unsigned int n = pNL_instrument->length();
@@ -109,6 +111,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
       {/*skip this instrument*/}
     }
   }
+  pNL_instrument->release();
 
   if (m_instruments.empty())
   {
