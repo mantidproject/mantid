@@ -14,18 +14,18 @@ namespace Mantid
 		{
 		}
 
-		void CompositeImplicitFunction::AddFunction(boost::shared_ptr<IImplicitFunction> constituentFunction)
+		void CompositeImplicitFunction::addFunction(boost::shared_ptr<IImplicitFunction> constituentFunction)
 		{
 			this->m_Functions.push_back(constituentFunction);
 		}
 
-		bool CompositeImplicitFunction::Evaluate(MDDataObjects::point3D const * const pPoint3D) const
+		bool CompositeImplicitFunction::evaluate(MDDataObjects::point3D const * const pPoint3D) const
 		{
 			bool evalResult = false;
 			std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>>::const_iterator it;
 			for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
 			{
-				evalResult = (*it)->Evaluate(pPoint3D);
+				evalResult = (*it)->evaluate(pPoint3D);
 				if(!evalResult)
 				{
 					break;

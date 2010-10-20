@@ -6,54 +6,51 @@ namespace Mantid
 {
 	namespace MDAlgorithms
 	{
+
+
 		
-		PlaneImplicitFunction::PlaneImplicitFunction(std::vector<double> normal, std::vector<double> origin)
+		PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter normal, OriginParameter origin): m_normal(normal), m_origin(origin)
 		{
-			this->normalX = normal.at(0);
-			this->normalY = normal.at(1);
-			this->normalZ = normal.at(2);
-			this->originX = origin.at(0);
-			this->originY = origin.at(1);
-			this->originZ = origin.at(2);
+			
 		}
 		
 
-		bool PlaneImplicitFunction::Evaluate(MDDataObjects::point3D const * const pPoint) const
+		bool PlaneImplicitFunction::evaluate(MDDataObjects::point3D const * const pPoint) const
 		{
 			std::vector<double> num; 
-			DotProduct<double>(pPoint->GetX() - originX, pPoint->GetY() - originY, pPoint->GetZ() - originZ, normalX, normalY, normalZ, num);
-			//return num.at(0) + num.at(1) + num.at(2) / Absolute(normalX, normalY, normalZ) <= 0; //Calculates distance, but magnituted of normal not important in this algorithm
+			dotProduct<double>(pPoint->GetX() - m_origin.getX(), pPoint->GetY() - m_origin.getY(), pPoint->GetZ() - m_origin.getZ(), m_normal.getX(), m_normal.getY(), m_normal.getZ(), num);
+			//return num.at(0) + num.at(1) + num.at(2) / absolute(normalX, normalY, normalZ) <= 0; //Calculates distance, but magnituted of normal not important in this algorithm
 			return num.at(0) + num.at(1) + num.at(2)  <= 0;
 		}
 
-		double PlaneImplicitFunction::GetOriginX() const
+		double PlaneImplicitFunction::getOriginX() const
 		{
-			return this->originX;
+			return this->m_origin.getX();
 		}
 
-		double PlaneImplicitFunction::GetOriginY() const
+		double PlaneImplicitFunction::getOriginY() const
 		{
-			return this->originY;
+			return this->m_origin.getY();
 		}
 
-		double PlaneImplicitFunction::GetOriginZ() const
+		double PlaneImplicitFunction::getOriginZ() const
 		{
-			return this->originZ;
+			return this->m_origin.getZ();
 		}
 
-		double PlaneImplicitFunction::GetNormalX() const
+		double PlaneImplicitFunction::getNormalX() const
 		{
-			return this->normalX;
+			return this->m_normal.getX();
 		}
 
-		double PlaneImplicitFunction::GetNormalY() const
+		double PlaneImplicitFunction::getNormalY() const
 		{
-			return this->normalY;
+			return this->m_normal.getY();
 		}
 
-		double PlaneImplicitFunction::GetNormalZ() const
+		double PlaneImplicitFunction::getNormalZ() const
 		{
-			return this->normalZ;
+			return this->m_normal.getZ();
 		}
 
 		PlaneImplicitFunction::~PlaneImplicitFunction()

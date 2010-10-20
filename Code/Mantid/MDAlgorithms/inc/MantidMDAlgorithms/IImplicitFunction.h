@@ -7,7 +7,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "IImplicitFunction.h"
+
 using namespace Mantid::Kernel;
 
 namespace Mantid
@@ -52,7 +52,7 @@ namespace Mantid
 		class DLLExport IImplicitFunction
 		{
 		public:
-			virtual bool Evaluate(MDDataObjects::point3D const * const pPoint3D) const = 0;
+			virtual bool evaluate(MDDataObjects::point3D const * const pPoint3D) const = 0;
 			virtual ~IImplicitFunction(){
 			};
 		};

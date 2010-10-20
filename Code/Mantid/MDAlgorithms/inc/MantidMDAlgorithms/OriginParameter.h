@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
+#ifndef ORIGINPARAMETER_H_
+#define ORIGINPARAMETER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,24 +7,17 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "IImplicitFunction.h"
+#include "IParameter.h"
 
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid
 {
-	namespace MDDataObjects
-	{
-		class point3D;
-	}
 	namespace MDAlgorithms
 	{
 		/** A base class for absorption correction algorithms.
 
-
-		This class represents a composite implicit function used for communicating and implementing an operation against 
-		an MDWorkspace.
+		OriginParameter. Wraps a vector expressing origin location.
 
 		@author Owen Arnold, Tessella plc
 		@date 01/10/2010
@@ -50,23 +43,44 @@ namespace Mantid
 		Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		//TODO. This should be constructed via a factory
-		class DLLExport CompositeImplicitFunction : public IImplicitFunction
+		class DLLExport OriginParameter :public IParameter
 		{
-		public:
-			CompositeImplicitFunction();
-			
-			~CompositeImplicitFunction();
-			void addFunction(boost::shared_ptr<IImplicitFunction> constituentFunction);
-			bool evaluate(MDDataObjects::point3D const * const pPoint3D) const;
-		protected:
-			std::vector<boost::shared_ptr<IImplicitFunction>> m_Functions;
 		private:
-			CompositeImplicitFunction(const CompositeImplicitFunction& other);
-			CompositeImplicitFunction& operator=(const CompositeImplicitFunction& other);
+
+			std::vector<double> m_origin;
+
+		protected:
+
+			OriginParameter* cloneImp() const;
+
+		public:
+
+			OriginParameter(double o1, double o2, double o3);
+
+			OriginParameter::OriginParameter(OriginParameter& other);
+
+			bool isValid() const;
+
+			std::string getName() const;
+
+			void asVector(std::vector<double>& origin) const;
+
+			std::auto_ptr<OriginParameter> clone() const;
+
+			double getX() const;
+
+			double getY() const;
+
+			double getZ() const;
+
+			~OriginParameter();
+
+			static std::string parameterName()
+			{
+				return "OriginParameter";
+			}
 		};
 	}
 }
-
 
 #endif

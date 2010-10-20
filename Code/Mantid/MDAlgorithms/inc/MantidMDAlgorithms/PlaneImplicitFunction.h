@@ -7,10 +7,11 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "IImplicitFunction.h"
-#include "VectorMathematics.h"
+#include "MantidMDAlgorithms/IImplicitFunction.h"
+#include "MantidMDAlgorithms/OriginParameter.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
+#include "MantidMDAlgorithms/VectorMathematics.h"
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -51,28 +52,24 @@ namespace Mantid
 		*/
 
 		//TODO. This should be constructed via a factory
-		class DLLExport PlaneImplicitFunction : IImplicitFunction
+		class DLLExport PlaneImplicitFunction : public Mantid::API::IImplicitFunction
 		{
 		public:
-			PlaneImplicitFunction::PlaneImplicitFunction(std::vector<double> normal, std::vector<double> origin);
+			PlaneImplicitFunction(NormalParameter normal, OriginParameter origin);
 			~PlaneImplicitFunction();
-			bool Evaluate(MDDataObjects::point3D const * const pPoint) const;
-			double GetOriginX() const;
-			double GetOriginY() const;
-			double GetOriginZ() const;
-			double GetNormalX() const;
-			double GetNormalY() const;
-			double GetNormalZ() const;
+			bool evaluate(MDDataObjects::point3D const * const pPoint) const;
+			double getOriginX() const;
+			double getOriginY() const;
+			double getOriginZ() const;
+			double getNormalX() const;
+			double getNormalY() const;
+			double getNormalZ() const;
 
 		private:
 			PlaneImplicitFunction(const PlaneImplicitFunction& other);
 			PlaneImplicitFunction& operator=(const PlaneImplicitFunction& other);
-			double originX;
-			double originY;
-			double originZ;
-			double normalX;
-			double normalY;
-			double normalZ;
+			OriginParameter m_origin;
+			NormalParameter m_normal;
 
 		};
 	}

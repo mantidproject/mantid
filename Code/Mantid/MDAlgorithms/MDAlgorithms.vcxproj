@@ -125,14 +125,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\IFunctionBuilder.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\IImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\IParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\NormalParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\OriginParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionBuilder.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
     <ClInclude Include="test\testCPrebinning.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CompositeFunctionBuilder.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
+    <ClCompile Include="src\IFunctionBuilder.cpp" />
+    <ClCompile Include="src\InvalidParameter.cpp" />
+    <ClCompile Include="src\NormalParameter.cpp" />
+    <ClCompile Include="src\OriginParameter.cpp" />
+    <ClCompile Include="src\PlaneFunctionBuilder.cpp" />
     <ClCompile Include="src\PlaneImplicitFunction.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

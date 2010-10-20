@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
+#ifndef INVALIDPARAMETER_H
+#define INVALIDPARAMETER_H
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,24 +7,17 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "IImplicitFunction.h"
+#include "IParameter.h"
 
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid
 {
-	namespace MDDataObjects
-	{
-		class point3D;
-	}
 	namespace MDAlgorithms
 	{
 		/** A base class for absorption correction algorithms.
 
-
-		This class represents a composite implicit function used for communicating and implementing an operation against 
-		an MDWorkspace.
+		Invalid parameter type. Modelled from Null object pattern.
 
 		@author Owen Arnold, Tessella plc
 		@date 01/10/2010
@@ -50,23 +43,27 @@ namespace Mantid
 		Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		//TODO. This should be constructed via a factory
-		class DLLExport CompositeImplicitFunction : public IImplicitFunction
+		class DLLExport InvalidParameter : public IParameter
 		{
-		public:
-			CompositeImplicitFunction();
-			
-			~CompositeImplicitFunction();
-			void addFunction(boost::shared_ptr<IImplicitFunction> constituentFunction);
-			bool evaluate(MDDataObjects::point3D const * const pPoint3D) const;
 		protected:
-			std::vector<boost::shared_ptr<IImplicitFunction>> m_Functions;
-		private:
-			CompositeImplicitFunction(const CompositeImplicitFunction& other);
-			CompositeImplicitFunction& operator=(const CompositeImplicitFunction& other);
+			InvalidParameter* cloneImp() const;
+		public:
+			InvalidParameter();
+
+			std::string getName() const;
+
+			bool isValid() const;
+
+			std::auto_ptr<InvalidParameter> clone() const;
+
+		    ~InvalidParameter();
+
+			static std::string parameterName()
+			{
+				return "InvalidParameter";
+			}
 		};
 	}
 }
-
 
 #endif

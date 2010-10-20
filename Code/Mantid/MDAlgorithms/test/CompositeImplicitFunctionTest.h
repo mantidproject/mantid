@@ -25,7 +25,7 @@ private:
 		FakeIImplicitFunction(bool setOutput=false) : m_setOutput(setOutput), m_evaluateCount(0)
 		{
 		}
-		bool Evaluate(point3D const * const pPoint) const
+		bool evaluate(point3D const * const pPoint) const
 		{
 			m_evaluateCount += 1;
 			return m_setOutput;
@@ -52,8 +52,8 @@ public:
   void testFunctionAddition()
   {
 	  FakeCompositeImplicitFunction composite;
-	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(new FakeIImplicitFunction()));
-	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(new FakeIImplicitFunction()));
+	  composite.addFunction(boost::shared_ptr<IImplicitFunction>(new FakeIImplicitFunction()));
+	  composite.addFunction(boost::shared_ptr<IImplicitFunction>(new FakeIImplicitFunction()));
 	  TSM_ASSERT_EQUALS("Two functions should have been added to composite", 2, composite.getFunctionsCount());
   }
 
@@ -64,9 +64,9 @@ public:
 	  bool dummyOutCome = true;
 	  FakeIImplicitFunction* a = new FakeIImplicitFunction(dummyOutCome);
 	  FakeIImplicitFunction* b = new FakeIImplicitFunction(dummyOutCome);
-	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(a));
-	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(b));
-	  composite.Evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
+	  composite.addFunction(boost::shared_ptr<IImplicitFunction>(a));
+	  composite.addFunction(boost::shared_ptr<IImplicitFunction>(b));
+	  composite.evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
 
 	  int callResult = a->getEvaluateCount() + b->getEvaluateCount();
 	  TSM_ASSERT_EQUALS("Two Functions should have been executed",2, callResult);
@@ -77,9 +77,9 @@ public:
 	  CompositeImplicitFunction composite;
 	  FakeIImplicitFunction* a = new FakeIImplicitFunction(false);
 	  FakeIImplicitFunction* b = new FakeIImplicitFunction(false);
-	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(a));
-	  composite.AddFunction(boost::shared_ptr<IImplicitFunction>(b));
-	  composite.Evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
+	  composite.addFunction(boost::shared_ptr<IImplicitFunction>(a));
+	  composite.addFunction(boost::shared_ptr<IImplicitFunction>(b));
+	  composite.evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
 
 	  int callResult = a->getEvaluateCount() + b->getEvaluateCount();
 	  TSM_ASSERT_EQUALS("Should have aborted after first function evaluation", 1, callResult);

@@ -42,7 +42,7 @@ namespace Mantid
 		*/
 
 		template<typename T>
-		void static DotProduct(T a1, T a2, T a3, T b1, T b2, T b3, std::vector<T>& result)
+		void static dotProduct(T a1, T a2, T a3, T b1, T b2, T b3, std::vector<T>& result)
 		{
 			result.push_back(a1 * b1);
 			result.push_back(a2 * b2);
@@ -50,7 +50,7 @@ namespace Mantid
 		}
 
 		template<typename T>
-		T static Absolute(T a1, T a2, T a3)
+		T static absolute(T a1, T a2, T a3)
 		{
 			return sqrt((a1 * a1) + (a2 * a2) + (a3 * a3));
 		}
