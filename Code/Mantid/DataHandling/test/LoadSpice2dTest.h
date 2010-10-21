@@ -10,7 +10,7 @@
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/IInstrument.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "Poco/Path.h"
@@ -102,7 +102,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Mantid::API::IInstrument> i = ws2d->getInstrument();
+    boost::shared_ptr<Mantid::Geometry::IInstrument> i = ws2d->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( i->getName(), "BIOSANS");

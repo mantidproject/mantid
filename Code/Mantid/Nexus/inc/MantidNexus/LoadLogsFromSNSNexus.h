@@ -18,15 +18,12 @@
 namespace Mantid
 {
 
-namespace Geometry
-{
-	class CompAssembly;
-	class Component;
-}
-namespace API
-{
-	class Instrument;
-}
+  namespace Geometry
+  {
+    class CompAssembly;
+    class Component;
+    class Instrument;
+  }
 
   namespace NeXus
   {

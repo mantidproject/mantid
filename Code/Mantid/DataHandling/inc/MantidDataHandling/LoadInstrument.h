@@ -19,18 +19,15 @@ namespace XML {
 namespace Mantid
 {
 
-namespace Geometry
-{
-  class CompAssembly;
-  class Component;
-  class Object;
-  class ObjComponent;
-  class V3D;
-}
-namespace Geometry
-{
-  class Instrument;
-}
+  namespace Geometry
+  {
+    class CompAssembly;
+    class Component;
+    class Object;
+    class ObjComponent;
+    class V3D;
+    class Instrument;
+  }
 
   namespace DataHandling
   {

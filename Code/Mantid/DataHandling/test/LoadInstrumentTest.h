@@ -7,7 +7,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"

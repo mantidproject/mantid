@@ -12,7 +12,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "Poco/Path.h"
 
 using namespace Mantid::API;

@@ -7,7 +7,7 @@
 #include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid::NeXus;
