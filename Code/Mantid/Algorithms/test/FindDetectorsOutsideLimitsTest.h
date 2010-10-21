@@ -70,7 +70,7 @@ public:
       work_in->getAxis(1)->spectraNo(i) = i;
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",NULL);
       det->setID(i);
-      boost::shared_ptr<Mantid::API::Instrument> instr = boost::dynamic_pointer_cast<Mantid::API::Instrument>(work_in->getInstrument());
+      boost::shared_ptr<Mantid::Geometry::Instrument> instr = boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(work_in->getInstrument());
       instr->add(det);
       instr->markAsDetector(det);
     }

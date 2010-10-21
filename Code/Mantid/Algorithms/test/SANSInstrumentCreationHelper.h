@@ -93,7 +93,7 @@ public:
   {
     // Get the number of monitor channels
     int nMonitors = 0;
-    boost::shared_ptr<API::Instrument> instrument = workspace->getBaseInstrument();
+    boost::shared_ptr<Geometry::Instrument> instrument = workspace->getBaseInstrument();
     std::vector<int> monitors = instrument->getMonitors();
     nMonitors = monitors.size();
 
