@@ -199,8 +199,38 @@ namespace Mantid
       size_t oldIn2 =
         std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.back())
         - xCensOld.begin();
+      
       //check that the intepolation points fit well enough within the data for reliable intepolation to be done
-      if ( oldIn1<2 || oldIn2>=size_old-1 || oldIn1>oldIn2 )
+      bool goodRangeLow(false), goodRangeHigh(false), canInterpol(false);
+      if ( oldIn1 > 1 )
+      {//set the range of the fit, including more input data to improve accuracy
+        oldIn1 -= 2;
+        goodRangeLow = true;
+        canInterpol = true;
+      }
+      else
+      {
+        if ( oldIn1 > 0)
+        {
+          canInterpol = true;
+          oldIn1 --;
+        }
+      }
+      if ( oldIn2 < size_old-1 )
+      {
+        oldIn2 ++;
+        goodRangeHigh = true;
+      }
+      else
+      {
+        if (oldIn2 >= size_old)
+        {
+          canInterpol = false;
+        }
+      }
+  
+
+      if ( ! canInterpol )
       {
         double constantVal = -1;
         if (VectorHelper::isConstantValue(yOld, constantVal))
@@ -212,19 +242,14 @@ namespace Mantid
         }
         else
         {//some points are two close to the edge of the data
-          if ( oldIn1>0 && oldIn2<size_old-1 && oldIn1<oldIn2 )
-          {
-            g_log.information() << "One or more points in the interpolation are near the boundary of the input data, these points will have slightly less accuracy\n";
-          }
-          else
-          {
-            throw std::invalid_argument("At least one x-value to intepolate to is outside the range of the original data");
-          }
+          throw std::invalid_argument("At least one x-value to intepolate to is outside the range of the original data");
         }
       }
-      //bring one point before and one point after into the inpolation to reduce any possible errors from running out of data
-      oldIn1 -= 2;
-      oldIn2 ++;
+
+      if ( (! goodRangeLow) || (! goodRangeHigh) )
+      {
+          g_log.information() << "One or more points in the interpolation are near the boundary of the input data, these points will have slightly less accuracy\n";
+      }
 
       
       //get the GSL to allocate the memory
