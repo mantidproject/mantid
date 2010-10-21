@@ -138,7 +138,28 @@ def furyfitSeq(inputWS,func,startx,endx):
     nHist = mtd[inputWS].getNumberHistograms()
     for i in range(1,nHist):
         input += ';'+inputWS+',i'+str(i)
-    PlotPeakByLogValue(input, inputWS+'_fitParameters', func, StartX=startx, EndX=endx)
+    outNm = inputWS + '_fitParameters'
+    PlotPeakByLogValue(input, outNm, func, StartX=startx, EndX=endx)
+    procSeqParToWS(outNm)
+
+def procSeqParToWS(inputWS):
+    ws = mtd[inputWS]
+    dataX = []
+    dataY = []
+    dataE = []
+    cCount = ws.getColumnCount()
+    rCount = ws.getRowCount()
+    cName =  ws.getColumnNames()
+    nSpec = ( cCount - 1 ) / 2
+    xAxis = cName[0]
+    for spec in range(0,nSpec):
+        yAxis = cName[(spec*2)+1]
+        eAxis = cName[(spec*2)+2]
+        for row in range(0, rCount):
+            dataX.append(ws.getDouble(xAxis,row))
+            dataY.append(ws.getDouble(yAxis,row))
+            dataE.append(ws.getDouble(eAxis,row))
+    CreateWorkspace(inputWS+'_matrix', dataX, dataY, dataE, nSpec)
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
     for file in inputs:
