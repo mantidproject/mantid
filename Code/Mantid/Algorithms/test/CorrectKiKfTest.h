@@ -43,7 +43,6 @@ public:
     Workspace2D_sptr result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     double ei,ef,factor,deltaE;
     int numHists = result->getNumberHistograms();
-    std::cout<<std::endl;
     for (int i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;
@@ -67,7 +66,6 @@ public:
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     numHists = result->getNumberHistograms();
-    std::cout<<std::endl;
     for (int i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;
@@ -91,7 +89,6 @@ public:
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     numHists = result->getNumberHistograms();
-    std::cout<<std::endl;
     for (int i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;
@@ -115,7 +112,6 @@ public:
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     numHists = result->getNumberHistograms();
-    std::cout<<std::endl;
     for (int i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;
@@ -144,7 +140,8 @@ public:
     // Should blow up, but it doesn't. It seems that the error is caught by Mantid 
     // TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
-
+    AnalysisDataService::Instance().remove(outputEvWSname);
+    AnalysisDataService::Instance().remove(inputEvWSname);
   }
 
 
