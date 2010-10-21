@@ -198,20 +198,26 @@ void LoadEventPreNeXus::exec()
   // the event file is needed in case the pulseid fileanme is empty
   string event_filename = this->getPropertyValue(EVENT_PARAM);
   string pulseid_filename = this->getPropertyValue(PULSEID_PARAM);
+  bool throwError = true;
   if (pulseid_filename.empty())
   {
     pulseid_filename = generatePulseidName(event_filename);
     if (!pulseid_filename.empty())
     {
       if (Poco::File(pulseid_filename).exists())
+      {
         this->g_log.information() << "Found pulseid file " << pulseid_filename << std::endl;
+        throwError = false;
+      }
       else
+      {
         pulseid_filename = "";
+      }
 
     }
   }
 
-  this->readPulseidFile(pulseid_filename);
+  this->readPulseidFile(pulseid_filename, throwError);
 
 
 //  // add the frame information to the event workspace
@@ -381,9 +387,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     spectraLoadMap[*it] = true;
 
   //Allocate the intermediate buffer, if it will be used in parallel processing
-  IntermediateEvent * intermediate_buffer;
-  if (parallelProcessing)
-    intermediate_buffer = new IntermediateEvent[loadBlockSize];
+  //IntermediateEvent * intermediate_buffer;
+  //if (parallelProcessing)
+  //  intermediate_buffer = new IntermediateEvent[loadBlockSize];
 
 
   while (eventfile->getOffset() < this->num_events)
@@ -403,8 +409,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
   //Clean up the buffers
   delete [] event_buffer;
-  if (parallelProcessing)
-    delete [] intermediate_buffer;
+  //if (parallelProcessing)
+  //  delete [] intermediate_buffer;
 
   //--------- Pad Empty Pixels -----------
   if (this->getProperty(PAD_PIXELS_PARAM))
@@ -674,7 +680,7 @@ static PulseTimeType getTime(uint32_t seconds, uint32_t nanoseconds)
 /** Read a pulse ID file
  * @param filename file to load.
  */
-void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
+void LoadEventPreNeXus::readPulseidFile(const std::string &filename, const bool throwError)
 {
   this->proton_charge_tot = 0.;
   this->num_pulses = 0;
@@ -685,18 +691,31 @@ void LoadEventPreNeXus::readPulseidFile(const std::string &filename)
     return;
   }
 
+  std::vector<Pulse> * pulses;
+
   // set up for reading
   //Open the file; will throw if there is any problem
-  BinaryFile<Pulse> pulseFile(filename);
-  //Get the # of pulse
-  this->num_pulses = pulseFile.getNumElements();
+  try {
+    BinaryFile<Pulse> pulseFile(filename);
 
-  this->g_log.information() << "Using pulseid file \"" << filename << "\", with " << num_pulses << " pulses.\n";
+    //Get the # of pulse
+    this->num_pulses = pulseFile.getNumElements();
+    this->g_log.information() << "Using pulseid file \"" << filename << "\", with " << num_pulses
+        << " pulses.\n";
 
-
-  //Load all the data
-  std::vector<Pulse> * pulses;
-  pulses = pulseFile.loadAll();
+    //Load all the data
+    pulses = pulseFile.loadAll();
+  } catch (runtime_error &e) {
+    if (throwError)
+    {
+      throw;
+    }
+    else
+    {
+      this->g_log.information() << "Encountered error in pulseidfile (ignoring file): " << e.what() << "\n";
+      return;
+    }
+  }
 
   double temp;
   for (std::vector<Pulse>::iterator it = pulses->begin(); it != pulses->end(); it++)

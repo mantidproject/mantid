@@ -171,7 +171,7 @@ private:
 
   void openEventFile(const std::string &filename);
 
-  void readPulseidFile(const std::string &filename);
+  void readPulseidFile(const std::string &filename, const bool throwError);
 
   void runLoadInstrument(const std::string &eventfilename, API::MatrixWorkspace_sptr localWorkspace);
 
