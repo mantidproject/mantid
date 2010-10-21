@@ -211,8 +211,15 @@ namespace Mantid
           return;
         }
         else
-        {
-          throw std::invalid_argument("Problem with the requested x-values to intepolate to: There must be at\nleast two input data points below the range of intepolation points and\ntwo higher. Also the intepolation points must have monatonically increasing x-values.");
+        {//some points are two close to the edge of the data
+          if ( oldIn1>0 && oldIn2<size_old-1 && oldIn1<oldIn2 )
+          {
+            g_log.information() << "One or more points in the interpolation are near the boundary of the input data, these points will have slightly less accuracy\n";
+          }
+          else
+          {
+            throw std::invalid_argument("At least one x-value to intepolate to is outside the range of the original data");
+          }
         }
       }
       //bring one point before and one point after into the inpolation to reduce any possible errors from running out of data

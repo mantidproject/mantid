@@ -742,11 +742,11 @@ def Mask(details):
 
     global TIMEMASKSTRING, TIMEMASKSTRING_R, TIMEMASKSTRING_F,SPECMASKSTRING, SPECMASKSTRING_R, SPECMASKSTRING_F
     parts = details_compare.split('/')
-    # A spectrum mask or mask range applied to both detectors
+    # A spectrum mask or mask range applied to the rear detector
     if len(parts) == 1:
         spectra = details[4:].lstrip()
         if len(spectra.split()) == 1:
-            SPECMASKSTRING += ',' + spectra
+            SPECMASKSTRING_R += ',' + spectra
     elif len(parts) == 2:
         type = parts[1]
         detname = type.split()
@@ -1645,21 +1645,23 @@ def PlotResult(workspace):
 ##################### View mask details #####################################################
 
 def ViewCurrentMask():
+    inst_name = INSTRUMENT.name()
     top_layer = 'CurrentMask'
-    LoadEmptyInstrument(INSTR_DIR + '/' + INSTRUMENT.name() + "_Definition.xml",top_layer)
+    inst = eval('SANSInsts.'+inst_name+'("'+top_layer+'")')
+
     if RMIN > 0.0: 
         SANSUtility.MaskInsideCylinder(top_layer, RMIN, XBEAM_CENTRE, YBEAM_CENTRE)
     if RMAX > 0.0:
         SANSUtility.MaskOutsideCylinder(top_layer, RMAX, 0.0, 0.0)
 
-    dimension = SANSUtility.GetInstrumentDetails(INSTRUMENT)[0]
+    dimension = SANSUtility.GetInstrumentDetails(inst)[0]
 
     #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
     #start with the currently selected detector
-    firstSpec1 = INSTRUMENT.cur_detector().first_spec_num
+    firstSpec1 = inst.cur_detector().get_first_spec_num()
     _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
     #now the other detector
-    firstSpec2 = INSTRUMENT.other_detector().first_spec_num
+    firstSpec2 = inst.other_detector().get_first_spec_num()
     _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
     
     # Mark up "dead" detectors with error value 

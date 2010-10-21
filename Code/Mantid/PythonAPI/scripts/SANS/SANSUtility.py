@@ -16,9 +16,9 @@ def GetInstrumentDetails(instrum):
     #for backwards compatibility we have to return a width
     if instrum.name() == 'LOQ' and instrum.cur_detector().name() == 'HAB':
         if det.n_columns is None :
-            return 128, det.first_spec_num, det.last_spec_num
+            return 128, det.get_first_spec_num(), det.last_spec_num
 
-    return det.n_columns, det.first_spec_num, det.last_spec_num
+    return det.n_columns, det.get_first_spec_num(), det.last_spec_num
 
 # Parse a log file containing run information and return the detector positions
 def parseLogFile(logfile):
@@ -227,14 +227,15 @@ def MaskByBinRange(workspace, timemask):
 # Setup the transmission workspace
 def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
     tmpWS = inputWS + '_tmp'
+    CropWorkspace(inputWS,tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
+
     if loqremovebins == True:
-        RemoveBins(inputWS,tmpWS, 19900, 20500, Interpolation='Linear')
-        inputWS = tmpWS
+        RemoveBins(tmpWS,tmpWS, 19900, 20500, Interpolation='Linear')
     if backmon_start != None and backmon_end != None:
-        FlatBackground(inputWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
-        inputWS = tmpWS
+        FlatBackground(tmpWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
+
     # Convert and rebin
-    ConvertUnits(inputWS,tmpWS,"Wavelength")
+    ConvertUnits(tmpWS,tmpWS,"Wavelength")
     
     if interpolate :
         InterpolatingRebin(tmpWS, tmpWS, wavbining)

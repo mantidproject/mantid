@@ -45,7 +45,6 @@ class ISISReducer(SANSReducer):
     PHIMAX=90.0
     PHIMIRROR=True
     
-    DIMENSION = None
     SPECMIN = None
     SPECMAX = None
 
@@ -67,7 +66,7 @@ class ISISReducer(SANSReducer):
         self._reduction_steps.append(self.data_loader)
         self._reduction_steps.append(self.user_settings)
         self._reduction_steps.append(self.place_det_sam)
-        self._reduction_steps.append(self._geometry)
+        self._reduction_steps.append(self.geometry)
         self._reduction_steps.append(self._out_name)
         #---- the can special reducer uses the steps starting with the next one
         self._reduction_steps.append(self.flood_file)
@@ -97,7 +96,7 @@ class ISISReducer(SANSReducer):
         self.data_loader =     ISISReductionSteps.LoadSample()
         self.user_settings =   ISISReductionSteps.ReadUserFile()
         self.place_det_sam =   ISISReductionSteps.MoveComponents()
-        self._geometry =       SANSReductionSteps.GetSampleGeom()
+        self.geometry =       SANSReductionSteps.GetSampleGeom()
         self._out_name =       ISISReductionSteps.GetOutputName()
         self.flood_file =      ISISReductionSteps.CorrectToFileISIS(
             '', 'SpectrumNumber','Divide', self._out_name.name_holder)
@@ -112,7 +111,7 @@ class ISISReducer(SANSReducer):
         self._corr_and_scale = ISISReductionSteps.ISISCorrections()
         self.to_Q =            ISISReductionSteps.ConvertToQ()
         self.background_subtracter = None
-        self._geo_corr =       SANSReductionSteps.SampleGeomCor(self._geometry)
+        self._geo_corr =       SANSReductionSteps.SampleGeomCor(self.geometry)
         self._zero_errors =    ISISReductionSteps.ReplaceErrors()
         self._rem_zeros =      SANSReductionSteps.StripEndZeros()
         
@@ -279,5 +278,14 @@ class ISISReducer(SANSReducer):
 
     def post_process(self):
         pass
-            
+    
+    def get_instrument(self):
+        """
+            Convenience function used by the inst propery to make
+            calls shorter
+        """
+        return self.instrument
+ 
+    #quicker to write than .instrument 
+    inst = property(get_instrument, None, None, None)
  

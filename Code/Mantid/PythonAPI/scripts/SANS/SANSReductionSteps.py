@@ -684,6 +684,9 @@ class CorrectToFileStep(ReductionStep):
         self._corr_type = corr_type
         self._operation = operation
 
+    def get_filename(self):
+        return self._filename
+
     def set_filename(self, filename):
         self._filename = filename
 

@@ -425,35 +425,39 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         self._specmask=specmask
         self._specmask_r=specmask_r
         self._specmask_f=specmask_f
-        self._lim_phi_xml = ''
+
         self._both_dets = both_dets
-        
+
+        self._lim_phi_xml = ''
+        self.phi_min = -90.0
+        self.phi_max = 90.0
+        self.phi_mirror = True
+
         ########################## Masking  ################################################
         # Mask the corners and beam stop if radius parameters are given
 
-        self._min_radius = None
-        self._max_radius = None
+        self.min_radius = None
+        self.max_radius = None
 
     def set_radi(self, min, max):
-        self._min_radius = float(min)/1000.
-        self._max_radius = float(max)/1000.
+        self.min_radius = float(min)/1000.
+        self.max_radius = float(max)/1000.
 
     def parse_instruction(self, details):
         """
             Parse an instruction line from an ISIS mask file
         """
         details = details.lstrip()
-        details_compare = details.upper()
-        if not details_compare.startswith('MASK'):
+        details = details.upper()
+        if not details.startswith('MASK'):
             _issueWarning('Ignoring malformed mask line ' + details)
             return
         
-        parts = details_compare.split('/')
+        parts = details.split('/')
         # A spectrum mask or mask range applied to both detectors
         if len(parts) == 1:
-            spectra = details[4:].lstrip()
-            if len(spectra.split()) == 1:
-                self._specmask += ',' + spectra
+            #by default only the rear detector is masked
+            self.add_mask_string(details[4:].lstrip(), detect='rear')
         elif len(parts) == 2:
             type = parts[1]
             detname = type.split()
@@ -468,16 +472,7 @@ class Mask_ISIS(SANSReductionSteps.Mask):
                     bin_range = type[1:].lstrip()
                 self._timemask += ';' + bin_range
             elif len(detname) == 2:
-                det_type = detname[0]
-                #TODO: warning: this means that Detector needs to be called before Mask
-                if self.instrument.isDetectorName(det_type) :
-                    spectra = detname[1]
-                    if self.instrument.isHighAngleDetector(type) :
-                        self._specmask_f += ',' + spectra
-                    else:
-                        self._specmask_r += ',' + spectra
-                else:
-                    _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
+                self.add_mask_string(mask_string=detname[1],detect=detname[0])
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
@@ -491,17 +486,24 @@ class Mask_ISIS(SANSReductionSteps.Mask):
                 if len(parts) == 3:
                     detname = parts[0].rstrip()
                     bin_range = parts[1].rstrip() + ' ' + parts[2].lstrip() 
-                    if self.instrument.detectorExists(detname) :
-                        if self.instrument.isHighAngleDetector(detname) :
-                            self._timemask_f += ';' + bin_range
-                        else:
-                            self._timemask_r += ';' + bin_range
+                    if detname.upper() == 'FRONT':
+                        self._timemask_f += ';' + bin_range
+                    elif detname.upper() == 'REAR':
+                        self._timemask_r += ';' + bin_range
                     else:
                         _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
                 else:
                     _issueWarning('Unrecognized masking option "' + details + '"')
         else:
             pass
+
+    def add_mask_string(self, mask_string, detect):
+        if detect.upper() == 'FRONT':
+            self._specmask_f += ',' + mask_string
+        elif detect.upper() == 'REAR':
+            self._specmask_r += ',' + mask_string
+        else:
+            _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
 
     def _ConvertToSpecList(self, maskstring, detector):
         '''
@@ -616,19 +618,22 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         if phimirror :
             if phimin > phimax:
                 phimin, phimax = phimax, phimin
-            if abs(phimin) > 180.0 :
+            if abs(phimin) > 180.0:
                 phimin = -90.0
-            if abs(phimax) > 180.0 :
+            if abs(phimax) > 180.0:
                 phimax = 90.0
         
-            if phimax - phimin == 180.0 :
-                phimin = -90.0
-                phimax = 90.0
+            if phimax - phimin == 180.0:
+                self.phi_min = -90.0
+                self.phi_max = 90.0
             else:
-                phimin = self.normalizePhi(phimin)
-                phimax = self.normalizePhi(phimax)
-    
-        self._mask_phi('unique phi', [0,0,0], phimin,phimax,phimirror)
+                self.phi_min = self.normalizePhi(phimin)
+                self.phi_max = self.normalizePhi(phimax)
+
+        self.phi_mirror = phimirror
+
+        self._mask_phi(
+            'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
     def execute(self, reducer, workspace):
         #set up the spectra lists and shape xml to mask
@@ -655,17 +660,17 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         #reset the xml, as execute can be run more than once
         self._xml = []
         if DEL__FINDING_CENTRE_ == True:
-            if ( not self._min_radius is None) and (self._min_radius > 0.0):
-                self.add_cylinder(self._min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
-            if ( not self._max_radius is None) and (self._max_radius > 0.0):
-                self.add_outside_cylinder(self._max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
+            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+                self.add_cylinder(self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
+            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+                self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
         else:
             xcenter = reducer.place_det_sam.maskpt_rmax[0]
             ycentre = reducer.place_det_sam.maskpt_rmax[1]
-            if ( not self._min_radius is None) and (self._min_radius > 0.0):
-                self.add_cylinder(self._min_radius, xcenter, ycentre, 'beam_stop')
-            if ( not self._max_radius is None) and (self._max_radius > 0.0):
-                self.add_outside_cylinder(self._max_radius, xcenter, ycentre, 'beam_area')
+            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+                self.add_cylinder(self.min_radius, xcenter, ycentre, 'beam_stop')
+            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+                self.add_outside_cylinder(self.max_radius, xcenter, ycentre, 'beam_area')
         #now do the masking
         SANSReductionSteps.Mask.execute(self, reducer, workspace)
 
@@ -787,7 +792,7 @@ class CropDetBank(ReductionStep):
             reducer.wksp_name = self.out_container[0]
          # Get the detector bank that is to be used in this analysis leave the complete workspace
         CropWorkspace(workspace, reducer.wksp_name,
-            StartWorkspaceIndex = reducer.instrument.cur_detector().first_spec_num - 1,
+            StartWorkspaceIndex = reducer.instrument.cur_detector().get_first_spec_num() - 1,
             EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
 
 class UnitsConvert(ReductionStep):
@@ -853,12 +858,17 @@ class ConvertToQ(ReductionStep):
 
     output_type = property(get_output_type, set_output_type, None, None)
 
+    def get_gravity(self):
+        return self._use_gravity
+
     def set_gravity(self, flag):
         if isinstance(flag, bool) or isinstance(flag, int):
             self._use_gravity = bool(flag)
         else:
             _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
-                   
+
+    gravity = property(get_gravity, set_gravity, None, None)
+
     def execute(self, reducer, workspace):
         #Steve, I'm not sure this contains good error values 
         if self._Q_alg == 'Q1D':
@@ -961,26 +971,26 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
         self.enabled = run
         self._is_can = False
         #set these variables to None, which means they haven't been set and defaults will be set further down
-        self._lambda_min = None
-        self._lambda_max = None
-        self._fit_method = None
+        self.lambda_min = None
+        self.lambda_max = None
+        self.fit_method = None
         self._use_full_range = None
 
-    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method=None, override=True):
-        if not lambda_min is None:
-            if (self._lambda_min is None) or override:
-                self._lambda_min = lambda_min
-        if not lambda_max is None:
-            if (self._lambda_max is None) or override:
-                self._lambda_max = lambda_max
+    def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
+        if not min is None:
+            if (self.lambda_min is None) or override:
+                self.lambda_min = min
+        if not max is None:
+            if (self.lambda_max is None) or override:
+                self.lambda_max = max
 
         if not fit_method is None:
-            if (self._fit_method is None) or override:
+            if (self.fit_method is None) or override:
                 fit_method = fit_method.upper()
                 if fit_method in self.TRANS_FIT_OPTIONS.keys():
-                    self._fit_method = self.TRANS_FIT_OPTIONS[fit_method]
+                    self.fit_method = self.TRANS_FIT_OPTIONS[fit_method]
                 else:
-                    self._fit_method = self.DEFAULT_FIT
+                    self.fit_method = self.DEFAULT_FIT
                     mantid.sendLogMessage('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
 
     def set_full_wav(self, is_full):
@@ -1007,13 +1017,13 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
         instrum = reducer.instrument
 
         #set the defaults where no value had be set
-        if self._lambda_max is None:
-            self._lambda_max = instrum.WAV_RANGE_MAX
-        if self._lambda_min is None:
-            self._lambda_min = instrum.WAV_RANGE_MIN
+        if self.lambda_max is None:
+            self.lambda_max = instrum.WAV_RANGE_MAX
+        if self.lambda_min is None:
+            self.lambda_min = instrum.WAV_RANGE_MIN
         
-        if self._fit_method is None:
-            self._fit_method = self.DEFAULT_FIT
+        if self.fit_method is None:
+            self.fit_method = self.DEFAULT_FIT
             
         if self._use_full_range is None:
             use_full_range = reducer.full_trans_wav
@@ -1026,8 +1036,8 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
             translambda_min = instrum.WAV_RANGE_MIN
             translambda_max = instrum.WAV_RANGE_MAX
         else:
-            translambda_min = self._lambda_min
-            translambda_max = self._lambda_max
+            translambda_min = self.lambda_min
+            translambda_max = self.lambda_max
             wavbin = str(reducer.to_wavelen.get_rebin())
     
         fittedtransws = trans_raw.split('_')[0] + '_trans_'
@@ -1036,13 +1046,13 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
         unfittedtransws = fittedtransws + "_unfitted"
         
         if (not use_full_range) or \
-        (self._fit_method != 'Off' and mantid.workspaceExists(fittedtransws) == False) or \
-        (self._fit_method == 'Off' and mantid.workspaceExists(unfittedtransws) == False):
+        (self.fit_method != 'Off' and mantid.workspaceExists(fittedtransws) == False) or \
+        (self.fit_method == 'Off' and mantid.workspaceExists(unfittedtransws) == False):
             # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-            if self._fit_method == 'Off':
+            if self.fit_method == 'Off':
                 fit_type = 'Linear'
             else:
-                fit_type = self._fit_method
+                fit_type = self.fit_method
 
             if reducer.instrument.name() == 'LOQ':
                 # Load in the instrument setup used for LOQ transmission runs
@@ -1076,7 +1086,7 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
             mantid.deleteWorkspace(trans_tmp_out)
             mantid.deleteWorkspace(direct_tmp_out)
             
-        if self._fit_method == 'Off':
+        if self.fit_method == 'Off':
             result = unfittedtransws
             mantid.deleteWorkspace(fittedtransws)
         else:
@@ -1136,12 +1146,12 @@ class CorrectToFileISIS(SANSReductionSteps.CorrectToFileStep):
                               self._corr_type, self._operation)
 
 class ReadUserFile(ReductionStep):
-    def __init__(self):
+    def __init__(self, file=None):
         """
             Reads a SANS mask file
         """
         super(ReadUserFile, self).__init__()
-        self.filename = None
+        self.filename = file
 
     def execute(self, reducer, workspace):
         if self.filename is None:
@@ -1219,8 +1229,8 @@ class ReadUserFile(ReductionStep):
                 params = upper_line[10:].split()
                 if len(params) == 3:
                     fit_type, lambdamin, lambdamax = params
-                    reducer.transmission_calculator.set_trans_fit(lambda_min=lambdamin, 
-                        lambda_max=lambdamax, fit_method=fit_type, override=False)
+                    reducer.transmission_calculator.set_trans_fit(min=lambdamin, 
+                        max=lambdamax, fit_method=fit_type, override=False)
                 else:
                     _issueWarning('Incorrectly formatted FIT/TRANS line, $s, line ignored' % upper_line)
 
@@ -1233,8 +1243,10 @@ class ReadUserFile(ReductionStep):
         reducer.instrument.copy_correction_files()
 
         # Store the mask file within the final workspace so that it is saved to the CanSAS file
-        if not workspace == '':
+        if workspace:
             AddSampleLog(workspace, "UserFile", self.filename)
+        #say that we've successfully read the file
+        return True
 
     def _initialize_mask(self, reducer):
         self._restore_defaults(reducer)

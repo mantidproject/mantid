@@ -15,22 +15,29 @@ def instrument_factory(name):
         raise RuntimeError, "Instrument %s doesn't exist\n  %s" % (name, sys.exc_value)
 
 class Instrument(object):
-    def __init__(self):
+    def __init__(self, wrksp_name=None):
         """
             Reads the instrument definition xml file
+            @param wrksp_name: Create a workspace with this containing the empty instrument, if it not set the instrument workspace is deleted afterwards
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """ 
     
         self._definition_file = \
             mtd.getConfigProperty('instrumentDefinition.directory')+'/'+self._NAME+'_Definition.xml'
-        temp_WS_name = '_'+self._NAME+'instrument_definition'
-        #read the information about the instrument that stored in it's xml
-        LoadEmptyInstrument(
-            self._definition_file, temp_WS_name)
-        definitionWS = mtd[temp_WS_name]  
-        self.definition = definitionWS.getInstrument()
-        mtd.deleteWorkspace(temp_WS_name)
         
+        if not wrksp_name is None:
+            wrksp = wrksp_name
+        else:
+            wrksp = '_'+self._NAME+'instrument_definition'
+        #read the information about the instrument that stored in it's xml
+        LoadEmptyInstrument(self._definition_file, wrksp)
+        definitionWS = mtd[wrksp]  
+        self.definition = definitionWS.getInstrument()
+
+        if wrksp_name is None:
+            #we haven't been asked to leave the empty instrument workspace so remove it
+            mtd.deleteWorkspace(wrksp)
+
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
             'default-incident-monitor-spectrum')[0])
@@ -141,14 +148,7 @@ class DetectorBank:
         else:
             position = 'front'
         self._names['position'] = position
-            
-        spec_entry = instr.getNumberParameter('first-low-angle-spec-number')
-        if len(spec_entry) > 0 :
-            self.first_spec_num = int(spec_entry[0])
-        else :
-            #'first-low-angle-spec-number' is an optimal instrument parameter
-            self.first_spec_num = 0
-        
+
         cols_data = instr.getNumberParameter(det_type+'-detector-num-columns')
         if len(cols_data) > 0 :
             rectanglar_shape = True
@@ -171,6 +171,13 @@ class DetectorBank:
         #n_pixels is normally None and calculated by DectShape but LOQ (at least) has a detector with a hole 
         self._shape = self._DectShape(width, height, rectanglar_shape, n_pixels)
         
+        spec_entry = instr.getNumberParameter('first-low-angle-spec-number')
+        if len(spec_entry) > 0 :
+            self.set_first_spec_num(int(spec_entry[0]))
+        else :
+            #'first-low-angle-spec-number' is an optimal instrument parameter
+            self.set_first_spec_num(0)
+
         
         
         #needed for compatibility with SANSReduction and SANSUtily, remove
@@ -179,7 +186,6 @@ class DetectorBank:
         
         
         
-        self.last_spec_num = self.first_spec_num + self._shape.n_pixels() - 1
         #this can be set to the name of a file with correction factor against wavelength
         correction_file = ''
         #this corrections are set by the mask file
@@ -230,9 +236,15 @@ class DetectorBank:
     y_corr = property(get_y_corr, set_y_corr, None, None)
     rot_corr = property(get_rot_corr , set_rot_corr, None, None)
 
+    def get_first_spec_num(self):
+        return self._first_spec_num
+
+    def set_first_spec_num(self, value):
+        self._first_spec_num = value
+        self.last_spec_num = self._first_spec_num + self._shape.n_pixels() - 1
+
     def place_after(self, previousDet):
-        self.first_spec_num = previousDet.last_spec_num + 1
-        self.last_spec_num = self.first_spec_num + self._shape.n_pixels() - 1
+        self.set_first_spec_num(previousDet.last_spec_num + 1)
 
     def name(self, form = 'long') :
         if form.lower() == 'inst_view' : form = 'long'
@@ -266,7 +278,7 @@ class DetectorBank:
         if xdim == 'all':
             xdim = self._shape.width()
         det_dimension = self._shape.width()
-        base = self.first_spec_num
+        base = self._first_spec_num
 
         if not self._shape.isRectangle():
             mantid.sendLogMessage('::SANS::Warning: Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
@@ -316,8 +328,8 @@ class DetectorBank:
         self._orientation = orien
 
 class ISISInstrument(Instrument):
-    def __init__(self,) :
-        Instrument.__init__(self)
+    def __init__(self, wrksp_name=None) :
+        Instrument.__init__(self, wrksp_name)
     
         firstDetect = DetectorBank(self.definition, 'low-angle')
         firstDetect.disable_y_and_rot_corrs()
@@ -435,9 +447,9 @@ class LOQ(ISISInstrument):
     WAV_RANGE_MIN = 2.2
     WAV_RANGE_MAX = 10.0
     
-    def __init__(self):
+    def __init__(self, wrksp_name=None):
         self._NAME = 'LOQ'
-        super(LOQ, self).__init__()
+        super(LOQ, self).__init__(wrksp_name)
 
 
     def set_component_positions(self, ws, xbeam, ybeam):
@@ -461,8 +473,14 @@ class LOQ(ISISInstrument):
         """
             Needs to run whenever a sample is loaded
         """
-        self.DETECTORS['low-angle'].set_orien('Horizontal')
-        self.DETECTORS['high-angle'].set_orien('Horizontal')
+        first = self.DETECTORS['low-angle']
+        second = self.DETECTORS['high-angle']
+
+        first.set_orien('Horizontal')
+        #probably _first_spec_num was already set to this when the instrument parameter file was loaded  
+        first.set_first_spec_num(3)
+        second.set_orien('Horizontal')
+        second.place_after(first)
 
     def load_transmission_inst(self, workspace):
         """
@@ -480,9 +498,9 @@ class SANS2D(ISISInstrument):
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
-    def __init__(self):
+    def __init__(self, wrksp_name=None):
         self._NAME = 'SANS2D'
-        super(SANS2D, self).__init__()
+        super(SANS2D, self).__init__(wrksp_name)
         
         self._marked_dets = []
     
@@ -491,22 +509,28 @@ class SANS2D(ISISInstrument):
             Handles changes required when a sample is loaded, both generic
             and run specific
         """
-        low = self.DETECTORS['low-angle']
-        high = self.DETECTORS['high-angle']
+        first = self.DETECTORS['low-angle']
+        second = self.DETECTORS['high-angle']
+
+        #first deal with some specifal cases
         if base_runno < 568:
             self.set_incident_mon(73730)
-            low.set_orien('Vertical')
-            low.first_spec_num = 1
-            low.last_spec_num = self._num_pixels*self._num_pixels
-            high.set_orien('Vertical')
-            high.first_spec_num = (self._num_pixels*self._num_pixels) + 1 
-            high.last_spec_num = self._num_pixels*self._num_pixels*2
+            first.set_first_spec_num(1)
+            first.set_orien('Vertical')
+            second.set_orien('Vertical')
         elif (base_runno >= 568 and base_runno < 684):
-            low.set_orien('Rotated')
-            high.set_orien('Rotated')
+            first.set_first_spec_num(9)
+            first.set_orien('Rotated')
+            second.set_orien('Rotated')
         else:
-            low.set_orien('Horizontal')
-            high.set_orien('Horizontal')
+            #this is the default case
+            first.set_first_spec_num(9)
+            first.set_orien('Horizontal')
+            second.set_orien('Horizontal')
+
+        #as spectrum numbers of the first detector have changed we'll move those in the second too  
+        second.place_after(first)
+
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """

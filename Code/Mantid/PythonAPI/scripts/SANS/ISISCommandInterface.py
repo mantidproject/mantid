@@ -100,7 +100,7 @@ def SetSampleOffset(value):
     ReductionSingleton().instrument.set_sample_offset(value)
     
 def Gravity(flag):
-    ReductionSingleton().to_Q.set_gravity(flag)
+    ReductionSingleton().to_Q.gravity = flag
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
     ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
@@ -158,26 +158,37 @@ def Set2D():
     ReductionSingleton().to_Q.output_type = '2D'
 
 def SetSampleOffset(value):
-    INSTRUMENT.set_sample_offset(value)
+    ReductionSingleton().instrument.set_sample_offset(value)
 
 def SetRearEfficiencyFile(filename):
-    global DIRECT_BEAM_FILE_R
-    DIRECT_BEAM_FILE_R = filename
+    rear_det = ReductionSingleton().instrument.getDetector('rear')
+    rear_det.correction_file = filename
 
 def SetFrontEfficiencyFile(filename):
-    global DIRECT_BEAM_FILE_F
-    DIRECT_BEAM_FILE_F = filename
+    front_det = ReductionSingleton().instrument.getDetector('front')
+    front_det.correction_file = filename
+
+def SetDetectorFloodFile(filename):
+    ReductionSingleton().flood_file.set_filename(filename)
 
 def displayUserFile():
     print '-- Mask file defaults --'
     print ReductionSingleton().to_wavlen
     print ReductionSingleton().to_Q
-    print '    direct beam file rear:', DIRECT_BEAM_FILE_R
-    print '    direct beam file front:', DIRECT_BEAM_FILE_F
+    print correction_files()
+    print '    direct beam file rear:',
+    print ReductionSingleton().instrument.detector_file('rear')
+    print '    direct beam file front:',
+    print ReductionSingleton().instrument.detector_file('front')
     print ReductionSingleton().mask
 
 def displayMaskFile():
     displayUserFile()
+
+def displayGeometry():
+    [x, y] = ReductionSingleton()._beam_finder.get_beam_center()
+    print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
+    print ReductionSingleton().geometry
 
 def SetPhiLimit(phimin,phimax, phimirror=True):
     maskStep = ReductionSingleton().get_mask()
@@ -299,9 +310,34 @@ def PlotResult(workspace):
 ##################### View mask details #####################################################
 
 def ViewCurrentMask():
+    inst_name = INSTRUMENT.name()
+    top_layer = 'CurrentMask'
+    inst = eval('SANSInsts.'+inst_name+'("'+top_layer+'")')
+
     #get the reducer to run the mask step if it hasn't already
-    ReductionSingleton().reduce(mask)
-    ReductionSingleton().mask.view_mask()
+    ReductionSingleton().mask.execute(need to pass instrument, top_layer)
+
+#    if RMIN > 0.0: 
+#        SANSUtility.MaskInsideCylinder(top_layer, RMIN, XBEAM_CENTRE, YBEAM_CENTRE)
+#    if RMAX > 0.0:
+#        SANSUtility.MaskOutsideCylinder(top_layer, RMAX, 0.0, 0.0)
+
+ #   dimension = SANSUtility.GetInstrumentDetails(inst)[0]
+
+    #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
+    #start with the currently selected detector
+#    firstSpec1 = inst.cur_detector().get_first_spec_num()
+#    _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
+    #now the other detector
+#    firstSpec2 = inst.other_detector().get_first_spec_num()
+#    _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
+    
+    # Mark up "dead" detectors with error value 
+    FindDeadDetectors(top_layer, top_layer, DeadValue=500)
+
+    # Visualise the result
+    instrument_win = qti.app.mantidUI.getInstrumentView(top_layer)
+    instrument_win.showWindow()
 
 # Print a test script for Colette if asked
 def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvfile = '', savepath = ''):
