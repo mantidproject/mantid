@@ -108,25 +108,11 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
   }
   else 
   {
-    // check that m_value is a valid number before proceeding
-    bool validValue = true;
-    if ( m_value.empty() )
-      validValue = false;
-    const std::string allowed("0123456789-. ");
-    for (unsigned int i = 0; i < m_value.size(); i++)
+    try
     {
-      if (allowed.find_first_of(m_value[i]) == std::string::npos)
-      {
-        validValue = false;
-      }
+      extractedValue = boost::lexical_cast<double>(m_value);
     }
-
-    if ( validValue )
-    {
-      std::stringstream extractValue(m_value);
-      extractValue >> extractedValue;
-    }
-    else
+    catch (boost::bad_lexical_cast &e)
     {
       throw Kernel::Exception::InstrumentDefinitionError(std::string("<parameter> with name ")
         + m_paramName + " much be set to a number,\n" + 
