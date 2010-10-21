@@ -1822,7 +1822,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     }
     else
     {
-      QMessageBox::critical(this, "Reduction aborted", "Error running script "+pythonStdOut);
+      QMessageBox::critical(this, "Reduction aborted", "Error running script ");//+pythonStdOut);
     }
   }
 
@@ -1970,7 +1970,7 @@ void SANSRunWindow::handleDefSaveClick()
   for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
   {//the key is the check box
     if (i.key()->isChecked())
-    {// and value() is the name of the algorithm associated with that chackbox
+    {// and value() is the name of the algorithm associated with that checkbox
       QString algName = i.value();
       QString ext = SaveWorkspaces::getSaveAlgExt(algName);
       QString fname = fileBase.endsWith(ext) ? fileBase : fileBase+ext;

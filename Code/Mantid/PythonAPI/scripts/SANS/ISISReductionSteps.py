@@ -259,7 +259,7 @@ class CanSubtraction(LoadRun):
         #TODO: get rid of any reference to the instrument object as much as possible
         # Definitely get rid of the if-statements checking the instrument name.
         if not issubclass(reducer.instrument.__class__, SANSInsts.ISISInstrument):
-            raise RuntimeError, "Transmission.assign_can expects an argument of class ISISInstrument"
+            raise RuntimeError, "CanSubtraction.assign_can expects an argument of class ISISInstrument"
         
         
         # Code from AssignCan
@@ -281,7 +281,7 @@ class CanSubtraction(LoadRun):
             return '','()'
         if reset == True:
             self._CAN_SETUP  = None
-            
+
 
         try:
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
@@ -365,14 +365,15 @@ class CanSubtraction(LoadRun):
 
         # Can correction
         #replaces Correct(can_setup, wav_start, wav_end, use_def_trans, finding_centre)
+        #can't do a deepcopy on the reducer as we can't deepcopy the instrument
         reduce_can = copy.copy(reducer)
         #this will be the first command that is run in the new chain
         start = reduce_can._reduction_steps.index(reduce_can.flood_file)
         #stop before this current step
         end = reduce_can._reduction_steps.index(self)-1
-        
         #some things are going to be changed, make deep copies
         reduce_can._reduction_steps = copy.deepcopy(reducer._reduction_steps)
+
         #the workspace is again branched with a new name
         reduce_can._reduction_steps[start].out_container[0] = tmp_can
         #the line below is required if the step above is optional
@@ -390,6 +391,12 @@ class CanSubtraction(LoadRun):
         #set the workspace that we've been setting up as the one to be processed 
         reduce_can.set_process_single_workspace(self.SCATTER_CAN.getName())
 
+        p_run_ws = mantid[self.SCATTER_CAN.getName()]
+        run_num = p_run_ws.getSampleDetails().getLogData('run_number').value()
+        reduce_can.instrument = copy.copy(reducer.instrument)
+        reduce_can.instrument.set_up_for_run(run_num)
+
+        #the reducer is completely setup, run it
         reduce_can.run_steps(start_ind=start, stop_ind=end)
         
 
@@ -635,11 +642,13 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         self._mask_phi(
             'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, workspace, instrument=None, xcentre=None, ycentre=None):
+        if instrument is None:
+            instrument = reducer.instrument
         #set up the spectra lists and shape xml to mask
-        detector = reducer.instrument.cur_detector()
+        detector = instrument.cur_detector()
         if self._both_dets or detector.isAlias('rear'):
-            rear = reducer.instrument.getDetector('rear')
+            rear = instrument.getDetector('rear')
             self.spec_list = self._ConvertToSpecList(self._specmask_r, rear)
             #masking for both detectors
             self.spec_list += self._ConvertToSpecList(self._specmask, rear)
@@ -648,7 +657,7 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             SANSUtility.MaskByBinRange(workspace,self._timemask)
 
         if self._both_dets or detector.isAlias('front'):
-            front = reducer.instrument.getDetector('front')
+            front = instrument.getDetector('front')
             #front specific masking
             self.spec_list += self._ConvertToSpecList(self._specmask_f, front)
             #masking for both detectors
@@ -665,14 +674,16 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             if ( not self.max_radius is None) and (self.max_radius > 0.0):
                 self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
         else:
-            xcenter = reducer.place_det_sam.maskpt_rmax[0]
-            ycentre = reducer.place_det_sam.maskpt_rmax[1]
+            if xcentre is None:
+                xcentre = reducer.place_det_sam.maskpt_rmax[0]
+            if ycentre is None:
+                ycentre = reducer.place_det_sam.maskpt_rmax[1]
             if ( not self.min_radius is None) and (self.min_radius > 0.0):
-                self.add_cylinder(self.min_radius, xcenter, ycentre, 'beam_stop')
+                self.add_cylinder(self.min_radius, xcentre, ycentre, 'beam_stop')
             if ( not self.max_radius is None) and (self.max_radius > 0.0):
-                self.add_outside_cylinder(self.max_radius, xcenter, ycentre, 'beam_area')
+                self.add_outside_cylinder(self.max_radius, xcentre, ycentre, 'beam_area')
         #now do the masking
-        SANSReductionSteps.Mask.execute(self, reducer, workspace)
+        SANSReductionSteps.Mask.execute(self, reducer, workspace, instrument)
 
         if self._lim_phi_xml != '':
             MaskDetectorsInShape(workspace, self._lim_phi_xml)
@@ -735,7 +746,7 @@ class LoadSample(LoadRun):
         self.uncropped  = self.SCATTER_SAMPLE.getName()
         p_run_ws = mantid[self.uncropped]
         run_num = p_run_ws.getSampleDetails().getLogData('run_number').value()
-        reducer.instrument.set_up_for_sample(run_num)
+        reducer.instrument.set_up_for_run(run_num)
 
         try:
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
@@ -834,6 +845,7 @@ class UnitsConvert(ReductionStep):
 
 class ConvertToQ(ReductionStep):
     _OUTPUT_TYPES = {'1D' : 'Q1D', '2D': 'Qxy'}
+    _DEFAULT_GRAV = False
     
     def __init__(self, type = '1D'):
         #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
@@ -845,7 +857,7 @@ class ConvertToQ(ReductionStep):
         self._Q_alg = None
         self.set_output_type(type)
         #if true gravity is taken into account in the Q1D calculation
-        self._use_gravity = False
+        self._use_gravity = None
         
         self.error_est_1D = None
     
@@ -861,15 +873,20 @@ class ConvertToQ(ReductionStep):
     def get_gravity(self):
         return self._use_gravity
 
-    def set_gravity(self, flag):
+    def set_gravity(self, flag, set_default=False):
         if isinstance(flag, bool) or isinstance(flag, int):
-            self._use_gravity = bool(flag)
+            if (self._use_gravity is None) or (not set_default):
+                self._use_gravity = bool(flag)
         else:
             _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
 
     gravity = property(get_gravity, set_gravity, None, None)
 
+    def set_defaults(self):
+        self.set_gravity(self._DEFAULT_GRAV, set_default=True)
+
     def execute(self, reducer, workspace):
+        self.set_defaults()
         #Steve, I'm not sure this contains good error values 
         if self._Q_alg == 'Q1D':
             if self.error_est_1D is None:
@@ -1208,9 +1225,9 @@ class ReadUserFile(ReductionStep):
             elif upper_line.startswith('GRAVITY'):
                 flag = upper_line[8:]
                 if flag == 'ON':
-                    reducer.to_Q.set_gravity(True)
+                    reducer.to_Q.set_gravity(True, set_default=True)
                 elif flag == 'OFF':
-                    reducer.to_Q.set_gravity(False)
+                    reducer.to_Q.set_gravity(False, set_default=True)
                 else:
                     _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                     reducer.to_Q.set_gravity(False)

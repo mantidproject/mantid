@@ -100,7 +100,7 @@ def SetSampleOffset(value):
     ReductionSingleton().instrument.set_sample_offset(value)
     
 def Gravity(flag):
-    ReductionSingleton().to_Q.gravity = flag
+    ReductionSingleton().to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
     ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
@@ -222,7 +222,7 @@ def _create_quadrant(reduced_ws, rawcount_ws, quadrant, xcentre, ycentre, q_bins
     # Mask out everything outside the quadrant of interest
     MaskDetectorsInShape(output,objxml)
     # Q1D ignores masked spectra/detectors. This is on the InputWorkspace, so we don't need masking of the InputForErrors workspace
-    Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=GRAVITY)
+    Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=ReductionSingleton().to_Q.get_gravity())
 
     flag_value = -10.0
     ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
@@ -315,7 +315,7 @@ def ViewCurrentMask():
     inst = eval('SANSInsts.'+inst_name+'("'+top_layer+'")')
 
     #get the reducer to run the mask step if it hasn't already
-    ReductionSingleton().mask.execute(need to pass instrument, top_layer)
+    ReductionSingleton().mask.execute(None, top_layer, inst, 0, 0)
 
 #    if RMIN > 0.0: 
 #        SANSUtility.MaskInsideCylinder(top_layer, RMIN, XBEAM_CENTRE, YBEAM_CENTRE)

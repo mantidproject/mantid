@@ -636,18 +636,20 @@ class Mask(ReductionStep):
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
             complement=True, id=ID))
 
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, workspace, instrument=None):
         for shape in self._xml:
             MaskDetectorsInShape(workspace, shape)
         
+        if instrument is None:
+            instrument = reducer.instrument
         # Get a list of detector pixels to mask
         if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:
-            masked_pixels = reducer.instrument.get_masked_pixels(self._nx_low,
+            masked_pixels = instrument.get_masked_pixels(self._nx_low,
                                                              self._nx_high,
                                                              self._ny_low,
                                                              self._ny_high)
             # Transform the list of pixels into a list of Mantid detector IDs
-            masked_detectors = reducer.instrument.get_masked_detectors(masked_pixels)
+            masked_detectors = instrument.get_masked_detectors(masked_pixels)
             
             # Mask the pixels by passing the list of IDs
             MaskDetectors(workspace, None, masked_detectors)

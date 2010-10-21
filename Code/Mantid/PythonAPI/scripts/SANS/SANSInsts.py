@@ -469,7 +469,7 @@ class LOQ(ISISInstrument):
     def get_marked_dets(self):
         raise NotImplementedError('The marked detector list isn\'t stored for instrument '+self._NAME)
 
-    def set_up_for_sample(self, base_runno):
+    def set_up_for_run(self, base_runno):
         """
             Needs to run whenever a sample is loaded
         """
@@ -504,7 +504,7 @@ class SANS2D(ISISInstrument):
         
         self._marked_dets = []
     
-    def set_up_for_sample(self, base_runno):
+    def set_up_for_run(self, base_runno):
         """
             Handles changes required when a sample is loaded, both generic
             and run specific

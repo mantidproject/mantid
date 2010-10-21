@@ -18,7 +18,13 @@ def GetInstrumentDetails(instrum):
         if det.n_columns is None :
             return 128, det.get_first_spec_num(), det.last_spec_num
 
-    return det.n_columns, det.get_first_spec_num(), det.last_spec_num
+    first_spectrum = det.get_first_spec_num()
+    last_spectrum = det.last_spec_num
+    if instrum.name() == 'SANS2D':
+        first_spectrum += 4
+        last_spectrum += 4
+
+    return det.n_columns, first_spectrum, last_spectrum
 
 # Parse a log file containing run information and return the detector positions
 def parseLogFile(logfile):
