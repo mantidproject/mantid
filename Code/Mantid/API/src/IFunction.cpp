@@ -26,7 +26,9 @@ namespace Mantid
 {
 namespace API
 {
-Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
+  using namespace Geometry;
+  
+  Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
 
 /**
  * Destructor
@@ -87,7 +89,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
     // the detector returned by det->getID()
     if ( boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det) )
     {
-      API::IInstrument_sptr inst = m_workspace->getInstrument();
+      IInstrument_sptr inst = m_workspace->getInstrument();
       det = inst->getDetector(det->getID());
     }
 

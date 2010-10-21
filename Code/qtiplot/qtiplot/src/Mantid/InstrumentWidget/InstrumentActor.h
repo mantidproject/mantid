@@ -33,7 +33,7 @@
 class InstrumentActor : public CompAssemblyActor
 {
 public:
-	InstrumentActor(boost::shared_ptr<Mantid::API::IInstrument> ins, bool withDisplayList); ///< Constructor
+	InstrumentActor(boost::shared_ptr<Mantid::Geometry::IInstrument> ins, bool withDisplayList); ///< Constructor
 	~InstrumentActor();								   ///< Destructor
 	virtual std::string type()const {return "InstrumentActor";} ///< Type of the GL object
 	void getDetectorIDList(std::vector<int>&);

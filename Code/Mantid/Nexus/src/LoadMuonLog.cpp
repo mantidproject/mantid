@@ -6,7 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/LogParser.h"
+#include "MantidKernel/LogParser.h"
 
 #include <ctime>
 
@@ -19,6 +19,8 @@ namespace NeXus
 DECLARE_ALGORITHM(LoadMuonLog)
 
 using namespace Kernel;
+using Geometry::IInstrument;
+using Geometry::IInstrument_sptr;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;

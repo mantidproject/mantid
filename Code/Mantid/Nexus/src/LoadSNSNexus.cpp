@@ -11,7 +11,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/LogParser.h"
+#include "MantidKernel/LogParser.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/PhysicalConstants.h"
 

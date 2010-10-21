@@ -17,6 +17,7 @@ DECLARE_ALGORITHM(MaskDetectors)
 
 using namespace Kernel;
 using namespace API;
+using Geometry::Instrument;
 using namespace DataObjects;
 
 /// (Empty) Constructor

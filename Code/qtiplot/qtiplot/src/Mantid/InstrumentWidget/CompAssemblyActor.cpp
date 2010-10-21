@@ -1,4 +1,4 @@
-#include "MantidAPI/IInstrument.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -11,8 +11,15 @@
 #include "ObjComponentActor.h"
 #include "RectangularDetectorActor.h"
 #include <cfloat>
-using namespace Mantid;
-using namespace Geometry;
+
+using Mantid::Geometry::IInstrument;
+using Mantid::Geometry::IComponent;
+using Mantid::Geometry::IObjComponent;
+using Mantid::Geometry::ICompAssembly;
+using Mantid::Geometry::ComponentID;
+using Mantid::Geometry::RectangularDetector;
+using Mantid::Geometry::IDetector;
+using Mantid::Geometry::Object;
 
 /**
  * This is default constructor for CompAssembly Actor
@@ -29,7 +36,7 @@ CompAssemblyActor::CompAssemblyActor(bool withDisplayList):GLActor(withDisplayLi
  * @param ins             :: Instrument
  * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
  */
-CompAssemblyActor::CompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Object>,MantidObject*> >& objs, Mantid::Geometry::ComponentID id,boost::shared_ptr<Mantid::API::IInstrument> ins,bool withDisplayList):GLActor(withDisplayList),mNumberOfDetectors(0),minBoundBox(DBL_MAX,DBL_MAX,DBL_MAX),maxBoundBox(-DBL_MAX,-DBL_MAX,-DBL_MAX)
+CompAssemblyActor::CompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Object>,MantidObject*> >& objs, ComponentID id,boost::shared_ptr<IInstrument> ins,bool withDisplayList):GLActor(withDisplayList),mNumberOfDetectors(0),minBoundBox(DBL_MAX,DBL_MAX,DBL_MAX),maxBoundBox(-DBL_MAX,-DBL_MAX,-DBL_MAX)
 {
   // Initialises
   mId=id;
@@ -129,7 +136,7 @@ void CompAssemblyActor::drawUsingColorID()
  */
 void CompAssemblyActor::initChilds(bool withDisplayList)
 {
-  boost::shared_ptr<Mantid::Geometry::IComponent> CompPtr;
+  boost::shared_ptr<IComponent> CompPtr;
   if(mId == mInstrument->getComponentID())
     CompPtr=mInstrument;
   else
@@ -138,20 +145,20 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
   Mantid::Geometry::V3D minBound;
   Mantid::Geometry::V3D maxBound;
   //Iterate through CompAssembly children
-  boost::shared_ptr<Mantid::Geometry::ICompAssembly> CompAssemPtr=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(CompPtr);
-  if(CompAssemPtr!=boost::shared_ptr<Mantid::Geometry::ICompAssembly>())
+  boost::shared_ptr<ICompAssembly> CompAssemPtr=boost::dynamic_pointer_cast<ICompAssembly>(CompPtr);
+  if(CompAssemPtr!=boost::shared_ptr<ICompAssembly>())
   {
     int nChild=CompAssemPtr->nelements();
     for(int i=0;i<nChild;i++)
     {
-      boost::shared_ptr<Mantid::Geometry::IComponent> ChildCompPtr=(*CompAssemPtr)[i];
-      boost::shared_ptr<Mantid::Geometry::ICompAssembly> ChildCAPtr=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(ChildCompPtr);
-      boost::shared_ptr<Mantid::Geometry::RectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<Mantid::Geometry::RectangularDetector>(ChildCompPtr);
+      boost::shared_ptr<IComponent> ChildCompPtr=(*CompAssemPtr)[i];
+      boost::shared_ptr<ICompAssembly> ChildCAPtr=boost::dynamic_pointer_cast<ICompAssembly>(ChildCompPtr);
+      boost::shared_ptr<RectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<RectangularDetector>(ChildCompPtr);
 
       if (ChildRDPtr)
       {
         //If the child is a RectangularDetector, then create a RectangularDetectorActor for it.
-        boost::shared_ptr<Mantid::Geometry::IObjComponent> ChildObjPtr = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
+        boost::shared_ptr<IObjComponent> ChildObjPtr = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
         if (ChildObjPtr)
         {
           //MantidObject * mantObj = getMantidObject(ChildObjPtr->Shape(),withDisplayList);
@@ -177,7 +184,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
       }
       //If the child is a CompAssembly then create a CompAssemblyActor for the child
       else
-      if(ChildCAPtr!=boost::shared_ptr<Mantid::Geometry::ICompAssembly>())
+      if(ChildCAPtr!=boost::shared_ptr<ICompAssembly>())
       {
         CompAssemblyActor* iActor=new CompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
         iActor->getBoundingBox(minBound,maxBound);
@@ -332,8 +339,8 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
   int n_comp_actors = static_cast<int>(mChildObjCompActors.size());
   if(rgb > 0 && rgb <= n_comp_actors)
   {
-    const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
-    if(iDec!=boost::shared_ptr<Mantid::Geometry::IDetector>())
+    const boost::shared_ptr<IDetector>  iDec= boost::dynamic_pointer_cast<IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
+    if(iDec!=boost::shared_ptr<IDetector>())
     {
       return iDec->getID();
     }

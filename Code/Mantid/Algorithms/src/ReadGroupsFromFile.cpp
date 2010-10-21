@@ -1,13 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
-
 #include <fstream>
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/IInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "Poco/Path.h"
 #include "MantidAPI/SpectraDetectorMap.h"

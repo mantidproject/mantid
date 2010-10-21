@@ -11,8 +11,6 @@
 #include <MantidAPI/ITableWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
 #include <MantidAPI/IEventWorkspace.h>
-#include <MantidAPI/Instrument.h>
-#include <MantidAPI/ParInstrument.h>
 #include <MantidAPI/Sample.h>
 #include <MantidAPI/WorkspaceProperty.h>
 #include <MantidAPI/FileProperty.h>
@@ -293,31 +291,6 @@ namespace PythonAPI
      ;
   }
 
-  void export_instrument()
-  {
-    //Pointer to the interface
-    register_ptr_to_python<boost::shared_ptr<API::IInstrument> >();
-    
-    //IInstrument class
-    class_< API::IInstrument, boost::python::bases<Geometry::ICompAssembly>, 
-      boost::noncopyable>("IInstrument", no_init)
-      .def("getSample", &API::IInstrument::getSample)
-      .def("getSource", &API::IInstrument::getSource)
-      .def("getComponentByName", &API::IInstrument::getComponentByName)
-      ;
-
-    /** Concrete implementations so that Python knows about them */
-    
-    //Instrument class
-    class_< API::Instrument, boost::python::bases<API::IInstrument, Geometry::CompAssembly>, 
-	    boost::noncopyable>("Instrument", no_init)
-      ;
-    //Instrument class
-    class_< API::ParInstrument, boost::python::bases<API::IInstrument, Geometry::ParCompAssembly>, 
-	    boost::noncopyable>("ParInstrument", no_init)
-      ;
-  }
-
   void export_workspace_property()
   {
     // Tell python about this so I can check if a property is a workspace
@@ -400,7 +373,6 @@ namespace PythonAPI
     export_workspacegroup();
     export_sample();
     export_run();
-    export_instrument();
     export_workspace_property();
     export_fileproperty();
     export_workspacefactory();

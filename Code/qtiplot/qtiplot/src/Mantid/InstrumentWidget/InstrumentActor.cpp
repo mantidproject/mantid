@@ -1,4 +1,4 @@
-#include "MantidAPI/IInstrument.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -15,7 +15,7 @@ using namespace Mantid::Geometry;
  * @param ins             :: Instrument
  * @param withDisplayList :: true use display list, false use immediate rendering
  */
-InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::API::IInstrument> ins, bool withDisplayList):CompAssemblyActor(withDisplayList)
+InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::Geometry::IInstrument> ins, bool withDisplayList):CompAssemblyActor(withDisplayList)
 {
 	mInstrument=ins;
 	mId=mInstrument->getComponentID();

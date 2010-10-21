@@ -2,7 +2,6 @@
 #include "InstrumentActor.h"
 #include "MantidObject.h"
 
-#include "MantidAPI/IInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
@@ -12,6 +11,7 @@
 
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -159,7 +159,7 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
   mWorkspaceName = wsName;
   mWorkspace = output;
   // Read the instrument geometry
-  boost::shared_ptr<Mantid::API::IInstrument> ins = output->getInstrument();
+  boost::shared_ptr<Mantid::Geometry::IInstrument> ins = output->getInstrument();
   this->ParseInstrumentGeometry(ins);
   boost::shared_ptr<Mantid::Geometry::IObjComponent> sample = ins->getSample();
   if( sample.get() )
@@ -183,7 +183,7 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
 /**
  * This method parses the instrument information and creates the actors relating to the detectors.
  */
-void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument> ins)
+void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::Geometry::IInstrument> ins)
 {
   makeCurrent();
   boost::shared_ptr<GLActorCollection> scene = boost::shared_ptr<GLActorCollection>(new GLActorCollection);

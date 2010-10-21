@@ -165,7 +165,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\IInstrument.cpp" />
+    <ClCompile Include="src\Instrument\Instrument.cpp" />
+    <ClCompile Include="src\Instrument\ParInstrument.cpp" />
     <ClCompile Include="src\Instrument\RectangularDetector.cpp" />
+    <ClCompile Include="src\Instrument\XMLlogfile.cpp" />
     <ClCompile Include="src\Math\Acomp.cpp" />
     <ClCompile Include="src\Math\Algebra.cpp" />
     <ClCompile Include="src\Math\BnId.cpp" />
@@ -247,7 +251,11 @@
     <ClCompile Include="src\Rendering\vtkGeometryCacheWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidGeometry\IInstrument.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\Instrument.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParInstrument.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\RectangularDetector.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\XMLlogfile.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h" />
     <ClInclude Include="inc\MantidGeometry\Objects\BoundingBox.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\BitmapGeometryHandler.h" />
@@ -354,20 +362,6 @@
     <ClInclude Include="test\V3DTest.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\vtkGeometryCacheReader.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\vtkGeometryCacheWriter.h" />
-    <ClInclude Include="auxinc\XMLattribute.h" />
-    <ClInclude Include="auxinc\XMLcollect.h" />
-    <ClInclude Include="auxinc\XMLcomment.h" />
-    <ClInclude Include="auxinc\XMLcomp.h" />
-    <ClInclude Include="auxinc\XMLgrid.h" />
-    <ClInclude Include="auxinc\XMLgridSupport.h" />
-    <ClInclude Include="auxinc\XMLgroup.h" />
-    <ClInclude Include="auxinc\XMLindex.h" />
-    <ClInclude Include="auxinc\XMLnamespace.h" />
-    <ClInclude Include="auxinc\XMLobject.h" />
-    <ClInclude Include="auxinc\XMLpath.h" />
-    <ClInclude Include="auxinc\XMLread.h" />
-    <ClInclude Include="auxinc\XMLsupport.h" />
-    <ClInclude Include="auxinc\XMLvector.h" />
     <ClInclude Include="inc\MantidGeometry\Tolerance.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,10 @@
-#ifndef MANTID_API_XMLLOGFILE_H_
-#define MANTID_API_XMLLOGFILE_H_
+#ifndef MANTID_GEOMETRY_XMLLOGFILE_H_
+#define MANTID_GEOMETRY_XMLLOGFILE_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Interpolation.h"
 #include <string>
 
@@ -13,20 +13,19 @@ namespace Mantid
 
   namespace Kernel {
     template <typename TYPE>
-	  class TimeSeriesProperty;
+    class TimeSeriesProperty;
   }
 
-  namespace Geometry {
-    class IComponent;
-  }
-
-  namespace API
+  namespace Geometry
   {
-    /** @class XMLlogfile XMLlogfile.h API/XMLlogfile.h
+    //--------------------------------------------------------------------------
+    // Forward declarations
+    //--------------------------------------------------------------------------
+    class IComponent;
 
-    Class intended to be used by the API LoadInstrument and 
-    LoadRaw algorithms to link up parameters defined in instrument 
-    definition files with data in ISIS logfiles.
+    /*
+    This class links parameters defined in ISIS log files to components of the instrument tree
+    defined in the instrument definition.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 12/1/2009
@@ -50,7 +49,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class EXPORT_OPT_MANTID_API XMLlogfile
+    class DLLExport XMLlogfile
     {
     public:
       /// Default constructor
@@ -87,14 +86,13 @@ namespace Mantid
 
     private:
 
-
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 
     };
 
-  } // namespace API
+  } // namespace Geometry
 } // namespace Mantid
 
-#endif /*MANTID_API_XMLLOGFILE_H_*/
+#endif /*MANTID_GEOMETRY_XMLLOGFILE_H_*/
 

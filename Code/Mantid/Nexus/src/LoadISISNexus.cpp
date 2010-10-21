@@ -6,11 +6,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/LogParser.h"
-#include "MantidAPI/XMLlogfile.h"
+#include "MantidKernel/LogParser.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
 
 #include "Poco/Path.h"
 #include <Poco/DateTimeFormatter.h>
@@ -31,6 +31,7 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using Geometry::IInstrument;
 
     /// Empty default constructor
     LoadISISNexus::LoadISISNexus() : 

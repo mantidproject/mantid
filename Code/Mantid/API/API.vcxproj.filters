@@ -66,12 +66,6 @@
     <ClCompile Include="src\IFunction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\IInstrument.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Instrument.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\InstrumentDataService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -82,9 +76,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\LocatedDataValue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\LogParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MatrixWorkspace.cpp">
@@ -103,9 +94,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ParameterTie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ParInstrument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Progress.cpp">
@@ -148,9 +136,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\WorkspaceTracer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\XMLlogfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\IPeakFunction.cpp">
@@ -278,22 +263,13 @@
     <ClInclude Include="inc\MantidAPI\IFunctionWithLocation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidAPI\IInstrument.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidAPI\ILocatedData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidAPI\Instrument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\InstrumentDataService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\InstrumentDataServiceTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test\InstrumentTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\IPeakFunction.h">
@@ -309,9 +285,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\LocatedDataValue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidAPI\LogParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\MatrixWorkspace.h">
@@ -339,12 +312,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\ParameterTieTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidAPI\ParInstrument.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test\ParInstrumentTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\Progress.h">
@@ -411,9 +378,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\WorkspaceValidators.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidAPI\XMLlogfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\mantidapi\run.h">

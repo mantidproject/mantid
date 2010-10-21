@@ -18,6 +18,7 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using Geometry::IInstrument_const_sptr;
 
     /// Default constructor
     SolidAngle::SolidAngle() : Algorithm()

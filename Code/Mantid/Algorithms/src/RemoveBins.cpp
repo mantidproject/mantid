@@ -13,6 +13,7 @@ namespace Algorithms
 
 using namespace Kernel;
 using namespace API;
+using Geometry::IInstrument_const_sptr;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RemoveBins)

@@ -27,7 +27,7 @@ namespace Geometry
   class ObjComponent;
   class V3D;
 }
-namespace API
+namespace Geometry
 {
   class Instrument;
 }
@@ -88,7 +88,7 @@ namespace API
       virtual const std::string category() const { return "DataHandling\\Instrument";}
 
       /// Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
-      void setComponentLinks(boost::shared_ptr<API::Instrument>& instrument, Poco::XML::Element* pElem);
+      void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem);
 
     private:
       void init();
@@ -137,7 +137,7 @@ namespace API
 
       /// Set parameter/logfile info (if any) associated with component
       void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
-                                std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache);
+                                std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
 
       /// Holds all the xml elements that have a \<parameter\> child element.
       /// Added purely for the purpose of computing speed and is used in setLogFile()
@@ -192,7 +192,7 @@ namespace API
       std::string m_filename;
 
       /// For convenience added pointer to instrument here
-      boost::shared_ptr<API::Instrument> m_instrument;
+      boost::shared_ptr<Geometry::Instrument> m_instrument;
 
       /// Flag to indicate whether offsets given in spherical coordinates are to be added to the current
       /// position (true) or are a vector from the current position (false, default)

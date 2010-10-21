@@ -111,7 +111,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
 
       // Get the geometric information for this detector
       
-      API::IInstrument_const_sptr instrument = m_workspace->getInstrument();
+      Geometry::IInstrument_const_sptr instrument = m_workspace->getInstrument();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
       const double l1 = instrument->getSource()->getDistance(*sample);
       Geometry::IDetector_sptr det = m_workspace->getDetector(m_workspaceIndex);  // i is the workspace index

@@ -1,4 +1,4 @@
-#include "MantidAPI/IInstrument.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"

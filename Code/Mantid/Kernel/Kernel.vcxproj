@@ -201,6 +201,7 @@
     <ClCompile Include="src\ListValidator.cpp" />
     <ClCompile Include="src\LogFilter.cpp" />
     <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\LogParser.cpp" />
     <ClCompile Include="src\MandatoryValidator.cpp" />
     <ClCompile Include="src\MaskedProperty.cpp" />
     <ClCompile Include="src\Property.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="inc\MantidKernel\DateValidator.h" />
     <ClInclude Include="inc\mantidkernel\facilityinfo.h" />
     <ClInclude Include="inc\mantidkernel\instrumentinfo.h" />
+    <ClInclude Include="inc\MantidKernel\LogParser.h" />
     <ClInclude Include="inc\MantidKernel\TimeSplitter.h" />
     <ClInclude Include="test\ArrayPropertyTest.h" />
     <ClInclude Include="inc\MantidKernel\BoundedValidator.h" />

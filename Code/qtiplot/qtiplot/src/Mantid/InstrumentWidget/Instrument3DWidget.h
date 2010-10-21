@@ -39,8 +39,11 @@ namespace Mantid
 {
   namespace API
   {
-    class IInstrument;
     class MatrixWorkspace;
+  }
+  namespace Geometry
+  {
+    class IInstrument;
   }
 }
 
@@ -102,7 +105,7 @@ signals:
   void actionDetectorHighlighted(int,int,int);
 
 private:
-  void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument>);
+  void ParseInstrumentGeometry(boost::shared_ptr<Mantid::Geometry::IInstrument>);
   void calculateBinRange(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
   void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
   double integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wks_index);

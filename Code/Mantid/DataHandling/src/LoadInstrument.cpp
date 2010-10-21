@@ -4,9 +4,9 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -51,6 +51,7 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using namespace Geometry;
 
     /// Empty default constructor
     LoadInstrument::LoadInstrument() : Algorithm(), hasParameterElement_beenSet(false),
@@ -1299,7 +1300,7 @@ namespace Mantid
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
     */
     void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
-      std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache)
+      std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache)
     {
       // check first if pElem contains any <parameter> child elements, however not if this method is called through
       // setComponentLinks() for example by the LoadParameter algorithm
@@ -1581,7 +1582,7 @@ namespace Mantid
     *  @param instrument Instrument
     *  @param pRootElem  Associated Poco::XML element to component that may hold a \<parameter\> element
     */
-    void LoadInstrument::setComponentLinks(boost::shared_ptr<API::Instrument>& instrument, Poco::XML::Element* pRootElem)
+    void LoadInstrument::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
     {
       NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
       unsigned int numberLinks = pNL_link->length();

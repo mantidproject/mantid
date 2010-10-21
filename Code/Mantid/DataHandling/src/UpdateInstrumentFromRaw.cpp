@@ -2,15 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/UpdateInstrumentFromRaw.h"
-#include "MantidAPI/Instrument.h"
-
-#include "MantidKernel/ConfigService.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <fstream>
 
@@ -24,6 +23,7 @@ DECLARE_ALGORITHM(UpdateInstrumentFromRaw)
 
 using namespace Kernel;
 using namespace API;
+using Geometry::Instrument;
 
 /// Empty default constructor
 UpdateInstrumentFromRaw::UpdateInstrumentFromRaw()
@@ -67,7 +67,7 @@ void UpdateInstrumentFromRaw::exec()
   }
 
   // Get reference to Instrument
-  boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
+  boost::shared_ptr<Instrument> instrument = localWorkspace->getBaseInstrument();
   if (instrument.get() == 0)
   {
       g_log.error("Trying to use ParInstrument as an Instrument.");

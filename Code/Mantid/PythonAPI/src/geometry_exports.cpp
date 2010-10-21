@@ -15,6 +15,9 @@
 #include <MantidGeometry/Instrument/ParCompAssembly.h>
 #include <MantidGeometry/Instrument/Detector.h>
 #include <MantidGeometry/Instrument/ParDetector.h>
+#include <MantidGeometry/Instrument/Instrument.h>
+#include <MantidGeometry/Instrument/ParInstrument.h>
+
 
 namespace Mantid
 {
@@ -197,10 +200,37 @@ namespace Mantid
         ;
     }
 
+  void export_instrument()
+  {
+    //Pointer to the interface
+    register_ptr_to_python<boost::shared_ptr<Geometry::IInstrument> >();
+    
+    //IInstrument class
+    class_< Geometry::IInstrument, boost::python::bases<Geometry::ICompAssembly>, 
+      boost::noncopyable>("IInstrument", no_init)
+      .def("getSample", &Geometry::IInstrument::getSample)
+      .def("getSource", &Geometry::IInstrument::getSource)
+      .def("getComponentByName", &Geometry::IInstrument::getComponentByName)
+      ;
+
+    /** Concrete implementations so that Python knows about them */
+    
+    //Instrument class
+    class_< Geometry::Instrument, boost::python::bases<Geometry::IInstrument, Geometry::CompAssembly>, 
+	    boost::noncopyable>("Instrument", no_init)
+      ;
+    //Instrument class
+    class_< Geometry::ParInstrument, boost::python::bases<Geometry::IInstrument, Geometry::ParCompAssembly>, 
+	    boost::noncopyable>("ParInstrument", no_init)
+      ;
+  }
+
+
     void export_geometry_namespace()
     {
       export_utils();
       export_components();
+      export_instrument();
     }
 
     //@endcond

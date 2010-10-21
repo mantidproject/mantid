@@ -56,9 +56,9 @@ namespace Mantid
       /// a pointer the workspace with the detector information
       const API::MatrixWorkspace_const_sptr m_Input;
       /// following the example MaskDetectors write to this version of the instrument
-      boost::shared_ptr<API::Instrument> m_WInstru;
+      boost::shared_ptr<Geometry::Instrument> m_WInstru;
       /// when we read need to read from here
-      API::IInstrument_sptr m_RInstru;
+      Geometry::IInstrument_sptr m_RInstru;
       /// pointer to the map that links detectors to their masking with the input workspace
       Geometry::ParameterMap* m_Pmap;
     };

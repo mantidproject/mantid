@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadSNSEventNexus.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -33,6 +33,7 @@ DECLARE_ALGORITHM(LoadSNSEventNexus)
 
 using namespace Kernel;
 using namespace API;
+using Geometry::Instrument;
 
 /// Empty default constructor
 LoadSNSEventNexus::LoadSNSEventNexus()

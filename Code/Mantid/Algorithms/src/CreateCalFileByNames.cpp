@@ -5,7 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/IInstrument.h"
+#include "MantidGeometry/IInstrument.h"
 #include <queue>
 #include <fstream>
 #include <iomanip>
@@ -41,6 +41,7 @@ namespace Mantid
     using namespace Kernel;
     using API::Progress;
     using API::FileProperty;
+    using Geometry::IInstrument_sptr;
 
     CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
     {
@@ -117,7 +118,7 @@ namespace Mantid
         throw std::runtime_error("Instrument "+instshort+" is not present in data store.");
       }
       // Get the instrument.
-      API::IInstrument_sptr inst=API::InstrumentDataService::Instance().retrieve(instshort);
+      IInstrument_sptr inst = API::InstrumentDataService::Instance().retrieve(instshort);
 
       // Get the names of groups
       std::string groupsname=getProperty("GroupNames");

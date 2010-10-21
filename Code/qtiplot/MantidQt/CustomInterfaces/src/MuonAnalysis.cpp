@@ -13,12 +13,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/IInstrument.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <Poco/StringTokenizer.h>
 

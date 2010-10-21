@@ -3,12 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Instrument.h"
-#include "MantidKernel/Exception.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 class InstrumentTest : public CxxTest::TestSuite

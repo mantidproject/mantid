@@ -2678,7 +2678,7 @@ void MantidUI::memoryImage2()
 // End of Windows specfic stuff
 //=======================================================================
 
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 
 void MantidUI::test()
@@ -2688,7 +2688,7 @@ void MantidUI::test()
   Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getSelectedWorkspace());
   if (ws)
   {
-    boost::shared_ptr<Mantid::API::Instrument> instr = ws->getBaseInstrument();
+    boost::shared_ptr<Mantid::Geometry::Instrument> instr = ws->getBaseInstrument();
     boost::shared_ptr<Mantid::Geometry::CompAssembly> both = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*instr)[3]);
     if (both)
     {

@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadLog.h"
-#include "MantidAPI/LogParser.h"
+#include "MantidKernel/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -199,7 +199,7 @@ void LoadLog::exec()
     icpevent_file_name = *icpfile;
   }
 
-  API::LogParser parser(icpevent_file_name);
+  Kernel::LogParser parser(icpevent_file_name);
   // Add mantid-created logs
   
   m_periods=parser.getPeriodsProperty();
@@ -229,7 +229,7 @@ void LoadLog::exec()
     }
     // figure out if second column is a number or a string
     std::string aLine;
-    if( Mantid::API::extractToEOL(inLogFile,aLine) )
+    if( Mantid::Kernel::extractToEOL(inLogFile,aLine) )
     {
       if ( !isDateTimeString(aLine) )
       {
@@ -309,7 +309,7 @@ std::string LoadLog::getThreeColumnName() const
     //check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
     std::string aLine;
     kind l_kind(LoadLog::empty);
-    while(Mantid::API::extractToEOL(inLogFile,aLine))
+    while(Mantid::Kernel::extractToEOL(inLogFile,aLine))
     {			 
       if ( !isDateTimeString(aLine) )
       { g_log.warning("File" + logfileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
@@ -386,7 +386,7 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
   }
   if(pos!=std::string::npos)
     path=m_filename.substr(0,pos);
-  while(Mantid::API::extractToEOL(adstream,str))
+  while(Mantid::Kernel::extractToEOL(adstream,str))
   {
     std::string fileName;
     pos = str.find("*");
@@ -435,7 +435,7 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
     g_log.warning()<<"Cannot open log file "<<logfile<<"\n";
     return std::set<std::string>();
   }
-  while(Mantid::API::extractToEOL(file,str))
+  while(Mantid::Kernel::extractToEOL(file,str))
   {
     if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str[0]=='#')) 
     {    //if the line doesn't start with a time read the next line

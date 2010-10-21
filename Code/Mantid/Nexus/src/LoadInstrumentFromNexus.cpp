@@ -2,14 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadInstrumentFromNexus.h"
-#include "MantidAPI/Instrument.h"
-
-#include "MantidKernel/ConfigService.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidNexus/MuonNexusReader.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <fstream>
 
@@ -23,6 +22,7 @@ DECLARE_ALGORITHM(LoadInstrumentFromNexus)
 
 using namespace Kernel;
 using namespace API;
+using Geometry::Instrument;
 
 /// Empty default constructor
 LoadInstrumentFromNexus::LoadInstrumentFromNexus()
@@ -64,7 +64,7 @@ void LoadInstrumentFromNexus::exec()
   }
   progress(0.5);
   // Get reference to Instrument and set its name
-  boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
+  boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
   instrument->setName(nxload.getInstrumentName());
 
   // Add dummy source and samplepos to instrument

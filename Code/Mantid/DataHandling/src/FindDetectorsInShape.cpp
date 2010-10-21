@@ -23,6 +23,7 @@ namespace Mantid
 
 		using namespace Kernel;
 		using namespace API;
+    using namespace Geometry;
 
 		/// (Empty) Constructor
 		FindDetectorsInShape::FindDetectorsInShape() {}

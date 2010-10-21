@@ -1,14 +1,20 @@
-#ifndef H_IMD_WORKSPACE
-#define H_IMD_WORKSPACE
+#ifndef MANTID_API_IMDWORKSPACE_H_
+#define MANTID_API_IMDWORKSPACE_H_
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
-//----------------------------------------------------------------------
-/** Base MD Workspace Abstract Class.
-*  
-*   It defines common interface to Matrix Workspace and MD workspace. It is expected that all algorithms, which are applicable 
-*   to both 2D matrix workspace and MD workspace will use methods, with interfaces, defined here. 
+
+namespace Mantid
+{
+  namespace API
+  {
+
+    /** Base MD Workspace Abstract Class.
+    *  
+    *   It defines common interface to Matrix Workspace and MD workspace. It is expected that all algorithms, which are applicable 
+    *   to both 2D matrix workspace and MD workspace will use methods, with interfaces, defined here. 
 
     @author Alex Buts, ISIS, RAL
     @date 04/10/2010
@@ -32,24 +38,17 @@
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
+    */
+    class DLLExport IMDWorkspace :  public Workspace
+    {
+    public:
+      /// interface  to get number of dimensions in the workspace
+      virtual unsigned int getNumDims() const = 0;
+      /// Destructor
+      virtual ~IMDWorkspace(){};
+    };
 
-
-
-namespace Mantid
-{
-namespace API
-{
-class DLLExport IMDWorkspace :    public Workspace
-{
-public:
-    /// interface  to get number of dimensions in the worspace
-    virtual unsigned int getNumDims(void)const=0;
-
-    IMDWorkspace(void):Workspace(){}
-    virtual ~IMDWorkspace(void){};
-};
-}
+  }
 }
 #endif
 

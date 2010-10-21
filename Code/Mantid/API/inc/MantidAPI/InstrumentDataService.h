@@ -3,14 +3,14 @@
 
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/DataService.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
-namespace API
-{
-/** InstrumentDataService Class. Derived from DataService.
+  namespace API
+  {
+    /** InstrumentDataService Class. Derived from DataService.
     Class to store shared_pointer to Instrument Objects.
 
     @author Laurent C Chapon, ISIS, Rutherford Appleton Laboratory
@@ -35,27 +35,28 @@ namespace API
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class EXPORT_OPT_MANTID_API InstrumentDataServiceImpl : public Mantid::Kernel::DataService<Mantid::API::Instrument>
-{
-private:
-	friend struct Mantid::Kernel::CreateUsingNew<InstrumentDataServiceImpl>;
-	// Constructors
-	InstrumentDataServiceImpl();
-  /// Private, unimplemented copy constructor
-	InstrumentDataServiceImpl(const InstrumentDataServiceImpl&);
-  /// Private, unimplemented copy assignment operator
-	InstrumentDataServiceImpl& operator=(const InstrumentDataServiceImpl&);
-	~InstrumentDataServiceImpl();
-};
+    */
+    class EXPORT_OPT_MANTID_API InstrumentDataServiceImpl : public Mantid::Kernel::DataService<Mantid::Geometry::Instrument>
+    {
+    private:
+      friend struct Mantid::Kernel::CreateUsingNew<InstrumentDataServiceImpl>;
+      /// Constructor
+      InstrumentDataServiceImpl();
+      /// Private, unimplemented copy constructor
+      InstrumentDataServiceImpl(const InstrumentDataServiceImpl&);
+      /// Private, unimplemented copy assignment operator
+      InstrumentDataServiceImpl& operator=(const InstrumentDataServiceImpl&);
+      /// Destructor
+      ~InstrumentDataServiceImpl();
+    };
 
-///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.
+    ///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
+    // this breaks new namespace declaraion rules; need to find a better fix
+    template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
 #endif /* _WIN32 */
-typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl> InstrumentDataService;
+    typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl> InstrumentDataService;
 
-} // Namespace API
+  } // Namespace API
 } // Namespace Mantid
 #endif /*INSTRUMENTDATASERVICE_*/

@@ -16,13 +16,15 @@
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid
 {
 namespace NeXus
 {
+
+  using namespace Kernel;
+  using namespace API;
+  using Geometry::IInstrument_const_sptr;
 
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveNexusProcessed)

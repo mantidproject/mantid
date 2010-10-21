@@ -3,14 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/XMLlogfile.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/FileProperty.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -40,6 +40,7 @@ DECLARE_ALGORITHM(LoadParameterFile)
 
 using namespace Kernel;
 using namespace API;
+using Geometry::Instrument;
 
 /// Empty default constructor
 LoadParameterFile::LoadParameterFile() : Algorithm()
@@ -71,12 +72,7 @@ void LoadParameterFile::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-
-  // Remove the path from the filename for use with the InstrumentDataService
-  //const int stripPath = m_filename.find_last_of("\\/");
-  //std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
-
-	boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
+	boost::shared_ptr<Instrument> instrument = localWorkspace->getBaseInstrument();
 
 
   // Set up the DOM parser and parse xml file

@@ -27,7 +27,7 @@ namespace Geometry
   class ObjComponent;
   class V3D;
 }
-namespace API
+namespace Geometry
 {
   class Instrument;
 }

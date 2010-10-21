@@ -14,8 +14,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/IInstrument.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
@@ -49,6 +49,8 @@ using namespace MantidQt::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Geometry::IInstrument_sptr;
+using Mantid::Geometry::IInstrument;
 
 // Initialize the logger
 Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
@@ -1210,7 +1212,7 @@ void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspac
   
   double unitconv = 1000.;
 
-  Mantid::API::IInstrument_sptr instr = workspace->getInstrument();
+  Mantid::Geometry::IInstrument_sptr instr = workspace->getInstrument();
   boost::shared_ptr<Mantid::Geometry::IComponent> sample = instr->getSample();
   boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
   double distance = source->getDistance(*sample) * unitconv;

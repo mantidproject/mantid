@@ -270,7 +270,7 @@ namespace Mantid
       runLoadMappingTable(ws, numberXPixels, numberYPixels);
 
       // Set the sample-detector distance
-      boost::shared_ptr<Mantid::API::IInstrument> i = ws->getInstrument();
+      boost::shared_ptr<Mantid::Geometry::IInstrument> i = ws->getInstrument();
       boost::shared_ptr<Mantid::Geometry::IComponent> sample = i->getSample();
 
       Geometry::ParameterMap &pmap = ws->instrumentParameters();
@@ -356,7 +356,7 @@ namespace Mantid
     {
       // Get the number of monitor channels
       int nMonitors = 0;
-      boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
+      boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
       std::vector<int> monitors = instrument->getMonitors();
       nMonitors = monitors.size();
 

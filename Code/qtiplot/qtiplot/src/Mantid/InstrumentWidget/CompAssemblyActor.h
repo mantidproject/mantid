@@ -37,13 +37,10 @@ namespace Mantid
 
 namespace Geometry
 {
+  class IInstrument;
   class ICompAssembly;
   class Object;
   class V3D;
-}
-namespace API
-{
-  class IInstrument;
 }
 
 }
@@ -60,7 +57,7 @@ private:
   void AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound);
 protected:
   Mantid::Geometry::ComponentID mId; ///< Component ID of the CompAssembly
-  boost::shared_ptr<Mantid::API::IInstrument> mInstrument; ///< Instrument
+  boost::shared_ptr<Mantid::Geometry::IInstrument> mInstrument; ///< Instrument
   boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> > mObjects; ///< List of Objects in the Instrument, its built as the Instrument is parsed through
   std::vector<ObjComponentActor*> mChildObjCompActors;     ///< List of ObjComponent Actors
   std::vector<CompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
@@ -74,7 +71,7 @@ protected:
   int findDetectorIDUsingColor(int rgb);
 public:
   CompAssemblyActor(bool withDisplayList);                       ///< Constructor
-  CompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> >& ,  Mantid::Geometry::ComponentID id, boost::shared_ptr<Mantid::API::IInstrument> ins,bool withDisplayList); ///< Constructor
+  CompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> >& ,  Mantid::Geometry::ComponentID id, boost::shared_ptr<Mantid::Geometry::IInstrument> ins,bool withDisplayList); ///< Constructor
   virtual ~CompAssemblyActor();								   ///< Destructor
   int  setStartingReferenceColor(int rgb);
   virtual std::string type()const {return "CompAssemblyActor";} ///< Type of the GL object

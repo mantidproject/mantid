@@ -2,8 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadLogsFromSNSNexus.h"
-#include "MantidAPI/Instrument.h"
-
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/FileProperty.h"
@@ -28,6 +27,7 @@ DECLARE_ALGORITHM(LoadLogsFromSNSNexus)
 
 using namespace Kernel;
 using namespace API;
+using Geometry::Instrument;
 
 /// Empty default constructor
 LoadLogsFromSNSNexus::LoadLogsFromSNSNexus()

@@ -201,6 +201,18 @@
     <ClCompile Include="src\Rendering\BitmapGeometryHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\IInstrument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Instrument\Instrument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Instrument\XMLlogfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Instrument\ParInstrument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h">
@@ -509,48 +521,6 @@
     <ClInclude Include="inc\MantidGeometry\Rendering\vtkGeometryCacheWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="auxinc\XMLattribute.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLcollect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLcomment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLcomp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLgrid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLgridSupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLgroup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLindex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLnamespace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLobject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLpath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLsupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="auxinc\XMLvector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidGeometry\Tolerance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -567,6 +537,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidGeometry\Rendering\BitmapGeometryHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\IInstrument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Instrument\Instrument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Instrument\XMLlogfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParInstrument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

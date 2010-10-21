@@ -12,7 +12,7 @@
 #include <cfloat>
 #include <iostream>
 
-void InstrumentTreeWidget::setInstrument(boost::shared_ptr<Mantid::API::IInstrument> ins)
+void InstrumentTreeWidget::setInstrument(boost::shared_ptr<Mantid::Geometry::IInstrument> ins)
 {
 	mInstrument=ins;
 	mTreeModel=new InstrumentTreeModel(ins);

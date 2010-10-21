@@ -1,5 +1,5 @@
-#ifndef MANTID_API_IINSTRUMENT_H_
-#define MANTID_API_IINSTRUMENT_H_
+#ifndef MANTID_GEOMETRY_IINSTRUMENT_H_
+#define MANTID_GEOMETRY_IINSTRUMENT_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,9 +13,11 @@
 
 namespace Mantid
 {
-namespace API
+
+namespace Geometry
 {
-/** IInstrument Class. The abstract instrument class it is the base for 
+
+/** IInstrument class. The abstract instrument class it is the base for 
     Instrument and ParInstrument classes.
 
     @author Nick Draper, ISIS, RAL
@@ -96,7 +98,7 @@ typedef boost::shared_ptr<IInstrument> IInstrument_sptr;
 /// Shared pointer to IInstrument (const version)
 typedef boost::shared_ptr<const IInstrument> IInstrument_const_sptr;
 
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /*MANTID_API_IINSTRUMENT_H_*/
+#endif /*MANTID_GEOMETRY_IINSTRUMENT_H_*/

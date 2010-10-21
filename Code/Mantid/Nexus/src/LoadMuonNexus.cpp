@@ -29,6 +29,7 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using Geometry::IInstrument;
 
     /// Empty default constructor
     LoadMuonNexus::LoadMuonNexus() : 

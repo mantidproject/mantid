@@ -2,14 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadInstrumentFromSNSNexus.h"
-#include "MantidAPI/Instrument.h"
-
-#include "MantidKernel/ConfigService.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/FileProperty.h"
 
 #include <fstream>
 #include <sstream>
@@ -25,6 +24,7 @@ DECLARE_ALGORITHM(LoadInstrumentFromSNSNexus)
 
 using namespace Kernel;
 using namespace API;
+using Geometry::Instrument;
 
 /// Empty default constructor
 LoadInstrumentFromSNSNexus::LoadInstrumentFromSNSNexus()
@@ -43,10 +43,6 @@ void LoadInstrumentFromSNSNexus::init()
 		  "attempt to load the instrument from. The file extension must either be\n"
 		  ".nxs or .NXS" );
 }
-
-
-
-
 
 /** Loads the instrument from the SNS file
  *  @param localWS The workspace
@@ -78,7 +74,7 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
     ws->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
 
     // Get reference to Instrument and set its name
-    boost::shared_ptr<API::Instrument> instrument = ws->getBaseInstrument();
+    boost::shared_ptr<Instrument> instrument = ws->getBaseInstrument();
 
     std::string xmlSphere = "<sphere id=\"some-shape\">"
              "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" />"

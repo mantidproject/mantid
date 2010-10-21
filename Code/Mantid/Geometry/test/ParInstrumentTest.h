@@ -3,14 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Instrument.h"
-#include "MantidAPI/ParInstrument.h"
+#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/ParInstrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 class ParInstrumentTest : public CxxTest::TestSuite
@@ -34,12 +33,6 @@ public:
     det3 = boost::shared_ptr<Detector>(new Detector("det3",0));
     det3->setID(11);
     instrument->markAsDetector(det3.get());
-  }
-
-  ~ParInstrumentTest()
-  {
-    //delete det, det2, det3;
-    //delete instrument->getSample();
   }
 
   void testType()

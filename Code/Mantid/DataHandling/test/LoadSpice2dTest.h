@@ -10,7 +10,7 @@
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IInstrument.h"
+#include "MantidGeometry/Instrument/IInstrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "Poco/Path.h"

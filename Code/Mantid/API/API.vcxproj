@@ -182,21 +182,17 @@
     <ClCompile Include="src\Function.cpp" />
     <ClCompile Include="src\FunctionFactory.cpp" />
     <ClCompile Include="src\IFunction.cpp" />
-    <ClCompile Include="src\IInstrument.cpp" />
-    <ClCompile Include="src\Instrument.cpp" />
     <ClCompile Include="src\InstrumentDataService.cpp" />
     <ClCompile Include="src\IPeakFunction.cpp" />
     <ClCompile Include="src\ITableWorkspace.cpp" />
     <ClCompile Include="src\LocatedDataRef.cpp" />
     <ClCompile Include="src\LocatedDataValue.cpp" />
-    <ClCompile Include="src\LogParser.cpp" />
     <ClCompile Include="src\MatrixWorkspace.cpp" />
     <ClCompile Include="src\MemoryManager.cpp" />
     <ClCompile Include="src\NumericAxis.cpp" />
     <ClCompile Include="src\PairedGroupAlgorithm.cpp" />
     <ClCompile Include="src\ParameterReference.cpp" />
     <ClCompile Include="src\ParameterTie.cpp" />
-    <ClCompile Include="src\ParInstrument.cpp" />
     <ClCompile Include="src\Progress.cpp" />
     <ClCompile Include="src\RefAxis.cpp" />
     <ClCompile Include="src\Run.cpp" />
@@ -212,7 +208,6 @@
     <ClCompile Include="src\WorkspaceOpOverloads.cpp" />
     <ClCompile Include="src\WorkspaceProperty.cpp" />
     <ClCompile Include="src\WorkspaceTracer.cpp" />
-    <ClCompile Include="src\XMLlogfile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAPI\Algorithm.h" />
@@ -257,18 +252,14 @@
     <ClInclude Include="inc\MantidAPI\IDataItem.h" />
     <ClInclude Include="inc\MantidAPI\IFunction.h" />
     <ClInclude Include="inc\MantidAPI\IFunctionWithLocation.h" />
-    <ClInclude Include="inc\MantidAPI\IInstrument.h" />
     <ClInclude Include="inc\MantidAPI\ILocatedData.h" />
-    <ClInclude Include="inc\MantidAPI\Instrument.h" />
     <ClInclude Include="inc\MantidAPI\InstrumentDataService.h" />
     <ClInclude Include="test\InstrumentDataServiceTest.h" />
-    <ClInclude Include="test\InstrumentTest.h" />
     <ClInclude Include="inc\MantidAPI\IPeakFunction.h" />
     <ClInclude Include="inc\MantidAPI\ITableWorkspace.h" />
     <ClInclude Include="inc\MantidAPI\IWorkspaceProperty.h" />
     <ClInclude Include="inc\MantidAPI\LocatedDataRef.h" />
     <ClInclude Include="inc\MantidAPI\LocatedDataValue.h" />
-    <ClInclude Include="inc\MantidAPI\LogParser.h" />
     <ClInclude Include="inc\MantidAPI\MatrixWorkspace.h" />
     <ClInclude Include="test\MatrixWorkspaceTest.h" />
     <ClInclude Include="inc\MantidAPI\MemoryManager.h" />
@@ -278,8 +269,6 @@
     <ClInclude Include="test\ParameterReferenceTest.h" />
     <ClInclude Include="inc\MantidAPI\ParameterTie.h" />
     <ClInclude Include="test\ParameterTieTest.h" />
-    <ClInclude Include="inc\MantidAPI\ParInstrument.h" />
-    <ClInclude Include="test\ParInstrumentTest.h" />
     <ClInclude Include="inc\MantidAPI\Progress.h" />
     <ClInclude Include="inc\MantidAPI\RefAxis.h" />
     <ClInclude Include="inc\MantidAPI\Sample.h" />
@@ -302,7 +291,6 @@
     <ClInclude Include="test\WorkspacePropertyTest.h" />
     <ClInclude Include="inc\MantidAPI\WorkspaceTracer.h" />
     <ClInclude Include="inc\MantidAPI\WorkspaceValidators.h" />
-    <ClInclude Include="inc\MantidAPI\XMLlogfile.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\MemoryManager.cpp_WIN32">

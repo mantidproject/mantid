@@ -5,7 +5,7 @@
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Progress.h"

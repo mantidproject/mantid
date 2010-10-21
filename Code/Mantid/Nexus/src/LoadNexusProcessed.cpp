@@ -26,8 +26,9 @@ namespace NeXus
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadNexusProcessed)
 
-        using namespace Kernel;
+using namespace Kernel;
 using namespace API;
+using Geometry::IInstrument_sptr;
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() : Algorithm(), m_shared_bins(false), m_xbins(),
