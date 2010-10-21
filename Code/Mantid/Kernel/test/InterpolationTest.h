@@ -15,7 +15,12 @@ public:
 	{
     Interpolation interpolation;
 
+    TS_ASSERT ( interpolation.containData() == false );
+
     interpolation.addPoint(200.0, 50);
+
+    TS_ASSERT ( interpolation.containData() == true );
+
     interpolation.addPoint(201.0, 60);
     interpolation.addPoint(202.0, 100);
     interpolation.addPoint(204.0, 400);

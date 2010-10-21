@@ -63,6 +63,35 @@ public:
     TS_ASSERT_DELTA( ret3[0], 0.5005, 0.0001);
 
   }
+
+  // LoadRaw2 uses XMLlogfile to populate its parameter map. Hence the test here simply
+  // checks that this is done ok
+  void testParsing()
+  {
+    IComponent* comp;
+    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+    std::vector<std::string> constraint;
+    std::string penaltyFactor;
+    std::string fitFunc;
+    std::string extractSingleValueAs;
+    std::string eq;
+
+    XMLlogfile testParamEntry("", "1000.0", interpolation, 
+                       "", "", "", "bob", 
+                       "double", "", 
+                    constraint, penaltyFactor, 
+                       fitFunc, extractSingleValueAs, 
+                       eq, comp);
+
+    TimeSeriesProperty<double>* dummy = NULL;
+    TS_ASSERT_DELTA( testParamEntry.createParamValue(dummy), 1000.0, 0.0001);
+
+    interpolation->addPoint(201.0, 60);
+    TS_ASSERT_DELTA( testParamEntry.createParamValue(dummy), 0.0, 0.0001);
+
+  }
+
+
 };
 
 #endif /*XMLLOGFILETEST_H_*/

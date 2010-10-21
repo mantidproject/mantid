@@ -49,7 +49,7 @@ XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, c
 {
 }
 
-/** Returns parameter value as generated using possibly equation expression etc
+/** Returns parameter value
  *
  *  @param logData Data in logfile
  *  @return parameter value
@@ -58,9 +58,27 @@ XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, c
  */
 double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
 {
-  double extractedValue; 
+  // If this parameter is a <look-up-table> or <formula> return 0.0. These parameter types are 
+  // associated with 'fitting' parameters. In some sense this method should never be called
+  // for such parameters since they return values from other attributes and only during (or just
+  // before) 'fitting'. But include the statement below for safety.
 
-  // get value either as directly specified by user using the 'value' attribute or through
+  if ( !m_formula.empty() || m_interpolation->containData() )
+    return 0.0;
+
+  // also this method should not be called when parameter is of 'string' type. Display
+  // an error and return 0.0
+
+  if ( m_type == "string" )
+  {
+    g_log.error() << "XMLlogfile::createParamValue has been called with a 'string' parameters.\n"
+      << "Return meaningless zere value.";
+    return 0.0;
+  }
+
+  double extractedValue = 0.0; 
+
+  // Get value either as directly specified by user using the 'value' attribute or through
   // a logfile as specified using the 'logfile-id' attribute. Note if both specified 'logfile-id'
   // takes precedence over the 'value' attribute
 
@@ -88,53 +106,75 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
           + " element (eq=" + m_eq + ") in instrument definition file is not recognised.");
     }
   }
+  else 
   {
-    std::stringstream extractValue(m_value);
-    extractValue >> extractedValue;
+    // check that m_value is a valid number before proceeding
+    bool validValue = true;
+    if ( m_value.empty() )
+      validValue = false;
+    const std::string allowed("0123456789-. ");
+    for (unsigned int i = 0; i < m_value.size(); i++)
+    {
+      if (allowed.find_first_of(m_value[i]) == std::string::npos)
+      {
+        validValue = false;
+      }
+    }
+
+    if ( validValue )
+    {
+      std::stringstream extractValue(m_value);
+      extractValue >> extractedValue;
+    }
+    else
+    {
+      throw Kernel::Exception::InstrumentDefinitionError(std::string("<parameter> with name ")
+        + m_paramName + " much be set to a number,\n" + 
+        "unless it is meant to be a 'string' parameter, see http://www.mantidproject.org/InstrumentDefinitionFile .\n");
+    }
   }
 
   // Check if m_eq is specified if yes evaluate this equation
 
   if ( m_eq.empty() )
     return extractedValue;
-  else
+
+  size_t found;
+  std::string equationStr = m_eq;
+  found = equationStr.find("value");
+  if ( found==std::string::npos )
   {
-    size_t found;
-    std::string equationStr = m_eq;
-    found = equationStr.find("value");
-    if ( found==std::string::npos )
-    {
-      throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>")
-        + " element (eq=" + m_eq + ") in instrument definition file must contain the string: \"value\"."
-        + ". \"value\" is replaced by a value from the logfile.");
-    }
-
-    std::stringstream readDouble;
-    readDouble << extractedValue;
-    std::string extractedValueStr = readDouble.str();
-    equationStr.replace(found, 5, extractedValueStr);
-
-    // check if more than one 'value' in m_eq
-
-    while ( equationStr.find("value") != std::string::npos )
-    {
-      found = equationStr.find("value");
-      equationStr.replace(found, 5, extractedValueStr);
-    }
-
-    try
-    {
-      mu::Parser p;
-      p.SetExpr(equationStr);
-      return p.Eval();
-    }
-    catch (mu::Parser::exception_type &e)
-    {
-      throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>")
-        + " element (eq=" + m_eq + ") in instrument definition file cannot be parsed."
-        + ". Muparser error message is: " + e.GetMsg());
-    }
+    throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>")
+      + " element (eq=" + m_eq + ") in instrument definition file must contain the string: \"value\"."
+      + ". \"value\" is replaced by a value from the logfile.");
   }
+
+  std::stringstream readDouble;
+  readDouble << extractedValue;
+  std::string extractedValueStr = readDouble.str();
+  equationStr.replace(found, 5, extractedValueStr);
+
+  // check if more than one 'value' in m_eq
+
+  while ( equationStr.find("value") != std::string::npos )
+  {
+    found = equationStr.find("value");
+    equationStr.replace(found, 5, extractedValueStr);
+  }
+
+  try
+  {
+    mu::Parser p;
+    p.SetExpr(equationStr);
+    return p.Eval();
+  }
+  catch (mu::Parser::exception_type &e)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>")
+      + " element (eq=" + m_eq + ") in instrument definition file cannot be parsed."
+      + ". Muparser error message is: " + e.GetMsg());
+  }
+
 
 
 }
