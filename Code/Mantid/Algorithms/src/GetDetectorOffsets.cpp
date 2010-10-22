@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <ostream>
 #include <iomanip>
@@ -112,6 +113,8 @@ namespace Mantid
       MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
       const double peakHeight = *it; 
       const double peakLoc = inputW->readX(s)[it - yValues.begin()];
+      // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
+      if ( boost::math::isnan(peakHeight) ) return (0.);
 
       IAlgorithm_sptr fit_alg;
       try
