@@ -30,9 +30,10 @@ RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geo
 
   if (mDet)
   {
-    BoundingBox compBox = mDet->getBoundingBox();
+    BoundingBox compBox;
+    mDet->getBoundingBox(compBox);
+    std::cout << " RectangularDetectorActor : bounding box is " << compBox.minPoint() << " " << compBox.maxPoint() << "\n";
     this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());
-    //std::cout << " RectangularDetectorActor : bounding box is " << compBox << "\n";
   }
 
 //
