@@ -59,9 +59,9 @@ public:
     alg.setPropertyValue("InputWorkspace", inputEvWS);
     alg.setPropertyValue("OutputWorkspace", inputEvWS);
 
-    // Should blow up, but it doesn't
-    //TS_ASSERT_THROWS( alg.execute(), NotImplementedError );
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    alg.execute();
+    TS_ASSERT( !alg.isExecuted() );
+
   }
 
 private:
