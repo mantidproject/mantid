@@ -71,22 +71,31 @@ int ParCompAssembly::addCopy(IComponent* comp, const std::string& n)
 
 /*! Get a pointer to the ith component in the assembly. Note standard C/C++
  *  array notation used, that is, i most be an integer i = 0,1,..., N-1, where
- *  N is the number of component in the assembly.
+ *  N is the number of component in the assembly. Easier to use than the [] operator 
+ *  when you have a pointer
  *
  * @param i The index of the component you want
- * @return group[i] 
- * 
- *  Throws if i is not in range
+ * @return m_children[i] 
+ * @throws std::runtime_error if i is not in range
+ */
+boost::shared_ptr<IComponent> ParCompAssembly::getChild(const int i) const
+{
+  if( i < 0 || i > nelements() )
+  {
+    throw std::runtime_error("ParCompAssembly::getChild() range not valid");
+  }
+  boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->operator[](i);
+  return ParComponentFactory::create(child_base,m_map);
+}
+
+/*! Overloaded index access operator. \link getChild(const int)
+ * @param i Element i within the component assembly
+ * @returns A shared pointer to the ith component
+ * @throws std:runtime_error if i is out of range 
  */
 boost::shared_ptr<IComponent> ParCompAssembly::operator[](int i) const
 {
-  if (i<0 || i> nelements()-1)
-  {
-      throw std::runtime_error("ParCompAssembly::operator[] range not valid");
-  }
-  boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->operator[](i);
-
-  return ParComponentFactory::create(child_base,m_map);
+  return this->getChild(i);
 }
 
 /**

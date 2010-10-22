@@ -145,25 +145,36 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
  */
 int CompAssembly::nelements() const
 {
-  return m_children.size();
+  return static_cast<int>(m_children.size());
 }
 
 /*! Get a pointer to the ith component in the assembly. Note standard C/C++
  *  array notation used, that is, i most be an integer i = 0,1,..., N-1, where
- *  N is the number of component in the assembly.
+ *  N is the number of component in the assembly. Easier to use than the [] operator 
+ *  when you have a pointer
  *
  * @param i The index of the component you want
  * @return m_children[i] 
- * 
- *  Throws if i is not in range
+ * @throws std::runtime_error if i is not in range
  */
-boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
+boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
 {
-  if (i<0 || i> static_cast<int>(m_children.size()-1))
-  throw std::runtime_error("CompAssembly::operator[] range not valid");
+  if( i < 0 || i > static_cast<int>(m_children.size()-1) )
+  {
+    throw std::runtime_error("CompAssembly::getChild() range not valid");
+  }
   return boost::shared_ptr<IComponent>(m_children[i],NoDeleting());
 }
 
+/*! Overloaded index access operator. \link getChild(const int)
+ * @param i Element i within the component assembly
+ * @returns A shared pointer to the ith component
+ * @throws std:runtime_error if i is out of range 
+ */
+boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
+{
+  return this->getChild(i);
+}
 
 /**
  * Get the bounding box for this assembly. It is simply the sum of the bounding boxes of its children

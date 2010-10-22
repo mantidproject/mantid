@@ -179,6 +179,7 @@
     <ClCompile Include="src\ConvertSpectrumAxis.cpp" />
     <ClCompile Include="src\ConvertToDistribution.cpp" />
     <ClCompile Include="src\ConvertUnits.cpp" />
+    <ClCompile Include="src\CorrectKiKf.cpp" />
     <ClCompile Include="src\CorrectToFile.cpp" />
     <ClCompile Include="src\CreateCalFileByNames.cpp" />
     <ClCompile Include="src\CreateSingleValuedWorkspace.cpp" />
@@ -274,6 +275,7 @@
     <ClInclude Include="inc\MantidAlgorithms\AbsorptionCorrection.h" />
     <ClInclude Include="inc\MantidAlgorithms\AddSampleLog.h" />
     <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h" />
+    <ClInclude Include="inc\MantidAlgorithms\CorrectKiKf.h" />
     <ClInclude Include="inc\MantidAlgorithms\CreateWorkspace.h" />
     <ClInclude Include="inc\MantidAlgorithms\ExtractFFTSpectrum.h" />
     <ClInclude Include="inc\MantidAlgorithms\FFTSmooth2.h" />

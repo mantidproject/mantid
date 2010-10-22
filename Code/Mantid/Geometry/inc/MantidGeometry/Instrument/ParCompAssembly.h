@@ -59,6 +59,8 @@ public:
   int addCopy(IComponent*);
   //! Add a copy (clone) of a component and rename it
   int addCopy(IComponent*, const std::string&);
+  //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
+  boost::shared_ptr<IComponent> getChild(const int i) const;
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
 

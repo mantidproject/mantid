@@ -58,7 +58,9 @@ public:
   virtual int addCopy(IComponent*) = 0;
   //! Add a copy (clone) of a component and rename it
   virtual int addCopy(IComponent*, const std::string&) = 0;
-  //! Get a pointer to the ith component in the assembly
+  //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
+  virtual boost::shared_ptr<IComponent> getChild(const int i) const = 0;
+  //! Overloaded index operator. Get a pointer to the ith component in the assembly
   virtual boost::shared_ptr<IComponent> operator[](int i) const = 0;
   //! Print information about all children
   virtual void printChildren(std::ostream&) const = 0;
