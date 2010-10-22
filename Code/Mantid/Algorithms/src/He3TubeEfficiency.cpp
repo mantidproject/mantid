@@ -83,7 +83,7 @@ void He3TubeEfficiency::exec()
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(this->inputWS);
   if (eventWS != NULL)
   {
-    //g_log.error() << "EventWorkspaces are not supported!" << std::endl;
+    //this->g_log.error() << "EventWorkspaces are not supported!" << std::endl;
     throw Kernel::Exception::NotImplementedError("EventWorkspaces are not supported!");
   }
 
@@ -346,14 +346,14 @@ void He3TubeEfficiency::logErrors() const
   std::vector<int>::size_type nspecs = this->spectraSkipped.size();
   if( nspecs > 0 )
   {
-    g_log.warning() << "There were " <<  nspecs
+    this->g_log.warning() << "There were " <<  nspecs
         << " spectra that could not be corrected. ";
-    g_log.debug() << "Unaffected spectra numbers: ";
+    this->g_log.debug() << "Unaffected spectra numbers: ";
     for( size_t i = 0; i < nspecs; ++i )
     {
-      g_log.debug() << this->spectraSkipped[i] << " ";
+      this->g_log.debug() << this->spectraSkipped[i] << " ";
     }
-    g_log.debug() << std::endl;
+    this->g_log.debug() << std::endl;
   }
 }
 
