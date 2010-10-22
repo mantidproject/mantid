@@ -624,7 +624,9 @@ namespace Mantid
         int idstart=0; bool idfillbyfirst_y=true; int idstepbyrow=0;
 
         //The shape!
-        boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[typeName];
+        // Given that this leaf component is actually an assembly, its constituent component detector shapes comes from its type attribute.
+        const std::string shapeType = pType->getAttribute("type");
+        boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
 
         //These parameters are in the TYPE defining RectangularDetector
         if ( pType->hasAttribute("xpixels") ) xpixels = atoi((pType->getAttribute("xpixels")).c_str());

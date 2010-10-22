@@ -271,48 +271,6 @@ int RectangularDetector::getPointInObject(V3D& point) const
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Return the bounding box (as a BoundingBox object.
- * Saves the calculated bounding box in the cache.
- */
-BoundingBox RectangularDetector::getBoundingBox() const
-{
-  //  if( !m_cachedBoundingBox )
-//  {
-//    m_cachedBoundingBox = new BoundingBox();
-//    BoundingBox compBox;
-//    this->getAtXY(0,0)->getBoundingBox(compBox);
-//    m_cachedBoundingBox->grow(compBox);
-//    this->getAtXY(xPixels-1,0)->getBoundingBox(compBox);
-//    m_cachedBoundingBox->grow(compBox);
-//    this->getAtXY(xPixels-1,yPixels-1)->getBoundingBox(compBox);
-//    m_cachedBoundingBox->grow(compBox);
-//    this->getAtXY(0,yPixels-1)->getBoundingBox(compBox);
-//    m_cachedBoundingBox->grow(compBox);
-//  }
-
-    if( !m_cachedBoundingBox )
-    {
-      m_cachedBoundingBox = new BoundingBox();
-//      V3D totalMinBound, totalMaxBound;
-      //Get the bounding boxes of all 4 corners
-      for (int x=0; x < this->xpixels(); x += this->xpixels()-1)
-        for (int y=0; y < this->ypixels(); y += this->ypixels()-1)
-        {
-          //Get the BB of the detector at that corner
-          double xmin,ymin,zmin,xmax,ymax,zmax;
-          xmin=ymin=zmin=-1000;
-          xmax=ymax=zmax=1000;
-          this->getAtXY(x,y)->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-          BoundingBox localBox(xmax,ymax,zmax,xmin,ymin,zmin);
-          m_cachedBoundingBox->grow(localBox);
-        }
-    }
-  //Copy to the result
-  return *m_cachedBoundingBox;
-}
-
-
-//-------------------------------------------------------------------------------------------------
 /** Return the bounding box (as 6 double values)
  *
  */

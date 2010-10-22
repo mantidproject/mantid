@@ -92,7 +92,6 @@ public:
 
   /// Finds the approximate solid angle covered by the component when viewed from the point given
   double solidAngle(const V3D& observer) const;
-  BoundingBox getBoundingBox() const;
   /// Retrieve the cached bounding box
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
 
