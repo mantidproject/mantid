@@ -137,7 +137,8 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
  * contained within it. You should have set the name, position
  * and rotation and facing of this object BEFORE calling this.
  *
- * @param shape a geometry Object containing the shape of the pixel
+ * @param shape a geometry Object containing the shape of each (individual) pixel in the assembly.
+ *              All pixels must have the same shape.
  * @param xpixels number of pixels in X
  * @param xstart x-position of the 0-th pixel (in length units, normally meters)
  * @param xstep step size between pixels in the horizontal direction (in length units, normally meters)

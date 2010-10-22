@@ -92,14 +92,15 @@ unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidKernel
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
   LIBS += -L$$MANTIDLIBPATH -lMantidGeometry
-  LIBS += -L$$MANTIDLIBPATH -lQtPropertyBrowser
 
   CONFIG(debug, debug|release) {
   LIBS	+= -lPocoFoundationd
   LIBS  += -lPocoXMLd
+  LIBS += -L$$MANTIDLIBPATH -lQtPropertyBrowserd
   } else {
   LIBS	+= -lPocoFoundation
   LIBS  += -lPocoXML
+  LIBS += -L$$MANTIDLIBPATH -lQtPropertyBrowser
  }
 
   macx {

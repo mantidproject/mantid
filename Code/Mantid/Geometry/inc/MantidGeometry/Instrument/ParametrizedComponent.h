@@ -179,10 +179,10 @@ namespace Mantid
 
     protected:
 
-      /// The base component 
+      /// The base component - this is the unmodifed component (without the parameters)
       const IComponent* m_base;
 
-      /// Reference to the map
+      /// Reference to the map containing the parameters
       const ParameterMap& m_map;
 
     private:
