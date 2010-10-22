@@ -114,11 +114,11 @@ void LoadSNSEventNexus::exec()
   //Initialize progress reporting.
   Progress prog(this,0.0,0.3,  3); //3 calls for the first part
 
-
   prog.report(1, "Loading DAS logs");
 
   // --------------------- Load DAS Logs -----------------
-  // do the actual work
+  //The pulse times will be empty if not specified in the DAS logs.
+  pulseTimes.clear();
   IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
@@ -139,8 +139,6 @@ void LoadSNSEventNexus::exec()
   {
     g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
   }
-
-
 
   prog.report(1, "Loading instrument");
 
@@ -203,8 +201,6 @@ void LoadSNSEventNexus::exec()
     }
   }
 
-  //The pulse times will be empty if not specified in the DAS logs.
-  pulseTimes.clear();
 
   // -- Time filtering --
   double filter_time_start_sec, filter_time_stop_sec;

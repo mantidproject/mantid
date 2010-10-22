@@ -30,6 +30,7 @@ class LoadSNSEventNexusTest : public CxxTest::TestSuite
 {
 public:
 
+
   void testExec()
     {
         Mantid::API::FrameworkManager::Instance();
@@ -38,10 +39,10 @@ public:
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
         ld.setPropertyValue("OutputWorkspace",outws_name);
-        ld.setPropertyValue("FilterByTof_Min", "-1e10");
-        ld.setPropertyValue("FilterByTof_Max", "1e10");
-        ld.setPropertyValue("FilterByTime_Start", "-1e10");
-        ld.setPropertyValue("FilterByTime_Stop", "1e10");
+        ld.setPropertyValue("FilterByTof_Min", "-1e6");
+        ld.setPropertyValue("FilterByTof_Max", "1e6");
+        ld.setPropertyValue("FilterByTime_Start", "-1e6");
+        ld.setPropertyValue("FilterByTime_Stop", "1e6");
 
         ld.execute();
         TS_ASSERT( ld.isExecuted() );
@@ -58,7 +59,6 @@ public:
         TS_ASSERT_DELTA( (*WS->refX(0))[1],  60830.4, 0.05);
 
         //Check one event from one pixel - does it have a reasonable pulse time
-        std::cout << WS->getEventListPtr(1000)->getEvents()[0].pulseTime() << "\n";
         TS_ASSERT( WS->getEventListPtr(1000)->getEvents()[0].pulseTime() > 1e9*365*10 );
 
         //Longer, more thorough test
