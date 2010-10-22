@@ -150,7 +150,8 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
 
   //If there is more than one entry, it is a timeseries
   info = file.getInfo();
-  isTimeSeries = (info.dims[0] > 1);
+  //isTimeSeries = (info.dims[0] > 1);
+  isTimeSeries = true;
 
   try
   {
@@ -159,20 +160,20 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     {
       isInt = true;
       file.getDataCoerce(values_int);
-      if (values_int.size() == 1)
-      {
-        WS->mutableRun().addProperty(entry_name, values_int[0], units);
-      }
+//      if (values_int.size() == 1)
+//      {
+//        WS->mutableRun().addProperty(entry_name, values_int[0], units);
+//      }
 
     }
     else
     {
       //Try to get as doubles.
       file.getDataCoerce(values);
-      if (values.size() == 1)
-      {
-        WS->mutableRun().addProperty(entry_name, values[0], units);
-      }
+//      if (values.size() == 1)
+//      {
+//        WS->mutableRun().addProperty(entry_name, values[0], units);
+//      }
     }
   }
   catch (::NeXus::Exception e)

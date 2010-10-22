@@ -46,23 +46,24 @@ public:
         double val;
         Run& run = ws->mutableRun();
         Property * prop;
-        PropertyWithValue<double> * dProp;
+        TimeSeriesProperty<double> * dProp;
 
         prop = run.getLogData("Speed3");
         TS_ASSERT(prop);
-        TS_ASSERT_EQUALS( prop->value(), "60");
-        TS_ASSERT_EQUALS(prop->units(), "Phase,H");
+        //TS_ASSERT_EQUALS( prop->value(), "60");
+        TS_ASSERT_EQUALS( prop->units(), "Phase,H");
 
         prop = run.getLogData("PhaseRequest1");
-        dProp = dynamic_cast< PropertyWithValue<double> * >(prop);
+        dProp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
         TS_ASSERT(dProp);
-        val = boost::lexical_cast<double>(prop->value());
+        val = dProp->nthValue(0);
         TS_ASSERT_DELTA( val, 10914.857421875, 1e-6);
         TS_ASSERT_EQUALS(prop->units(), "Phase,uS");
 
         //NXPositioner
         prop = run.getLogData("chi");
-        val = boost::lexical_cast<double>(prop->value());
+        dProp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
+        val = dProp->nthValue(0);
         TS_ASSERT_DELTA( val, 45.0, 1e-6);
         TS_ASSERT_EQUALS(prop->units(), "degree");
 
