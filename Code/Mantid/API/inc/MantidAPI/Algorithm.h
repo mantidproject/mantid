@@ -225,7 +225,7 @@ public:
   ///returns the status of logging, True = enabled
   bool isLogging() const {return g_log.getEnabled();}
 
-  protected:
+protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
   /// Virtual method - must be overridden by concrete algorithm
@@ -284,7 +284,7 @@ public:
   bool m_parallelException; ///< Set if an exception is thrown, and not caught, within a parallel region
   Kernel::Logger& g_log;    ///< reference to the logger class
 
-  private:
+private:
 
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -305,7 +305,7 @@ public:
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
   /** executeAsync() implementation.
-			@param i Unused argument
+      @param i Unused argument
    */
   bool executeAsyncImpl(const Poco::Void & i);
 

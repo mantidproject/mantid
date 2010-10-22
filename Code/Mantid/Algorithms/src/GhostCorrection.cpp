@@ -60,7 +60,6 @@ namespace Mantid
     void GhostCorrection::init()
     {
       nGroups = 0;
-      this->g_log.setName("Algorithms::GhostCorrection");
 
       //Input workspace must be in dSpacing and be an EventWorkspace
       API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;

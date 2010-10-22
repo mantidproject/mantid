@@ -91,9 +91,6 @@ LoadEventPreNeXus::~LoadEventPreNeXus()
 /** Initialize the algorithm */
 void LoadEventPreNeXus::init()
 {
-  // reset the logger's name
-  this->g_log.setName("DataHandling::LoadEventPreNeXus");
-
   // which files to use
   this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
                         "A preNeXus neutron event file");

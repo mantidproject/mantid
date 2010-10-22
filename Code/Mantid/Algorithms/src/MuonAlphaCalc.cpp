@@ -23,9 +23,6 @@ DECLARE_ALGORITHM( MuonAlphaCalc)
  */
 void MuonAlphaCalc::init()
 {
-  // reset the logger's name
-  this->g_log.setName("Algorithms::MuonAlphaCalc");
-
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");
 

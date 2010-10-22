@@ -42,8 +42,6 @@ FilterByTime::~FilterByTime()
 //-----------------------------------------------------------------------
 void FilterByTime::init()
 {
-  this->g_log.setName("Algorithms::FilterByTime");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace
   wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);

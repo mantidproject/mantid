@@ -45,8 +45,6 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
-  this->g_log.setName("Algorithms::FilterByLogValue");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace
   wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);

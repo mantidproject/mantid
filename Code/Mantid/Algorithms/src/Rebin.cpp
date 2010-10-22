@@ -28,8 +28,6 @@ namespace Mantid
     */
     void Rebin::init()
     {
-      this->g_log.setName("Algorithms::Rebin");
-
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),
         "Workspace containing the input data");

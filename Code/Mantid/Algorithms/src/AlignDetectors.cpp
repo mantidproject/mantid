@@ -206,8 +206,6 @@ AlignDetectors::~AlignDetectors()
 //-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
-  this->g_log.setName("Algorithms::AlignDetectors");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace unit must be TOF.
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));

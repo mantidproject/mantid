@@ -42,8 +42,6 @@ He3TubeEfficiency::~He3TubeEfficiency()
  */
 void He3TubeEfficiency::init()
 {
-  this->g_log.setName("Algorithms::He3TubeEfficiency");
-
   API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
   wsValidator->add(new API::WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new API::HistogramValidator<>);

@@ -26,8 +26,6 @@ namespace Mantid
     */
     void Sort::init()
     {
-      this->g_log.setName("Algorithms::Sort");
-
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "",Direction::InOut,new EventWorkspaceValidator<>),
         "EventWorkspace to be sorted.");

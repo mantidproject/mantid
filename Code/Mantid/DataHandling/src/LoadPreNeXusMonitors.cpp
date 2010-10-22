@@ -46,10 +46,6 @@ static const std::string WORKSPACE_OUT("OutputWorkspace");
 
 void LoadPreNeXusMonitors::init()
 {
-
-  // Reset the logger's name
-  this->g_log.setName("DataHandling::LoadPreNeXusMonitors");
-
   // Filename for the runinfo file.
   declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"));
 

@@ -34,8 +34,6 @@ void CorrectToFile::init()
     "Allowed values: Divide, Multiply (default is divide)");
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output),
     "Name of the output workspace to store the results in" );
-
-  g_log.setName("CorrectToFile");
 }
 
 void CorrectToFile::exec()
