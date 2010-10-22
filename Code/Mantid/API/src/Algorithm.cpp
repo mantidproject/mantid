@@ -33,7 +33,7 @@ Algorithm::Algorithm() :
 /// Virtual destructor
 Algorithm::~Algorithm()
 {
-	g_log.release();
+  g_log.release();
 }
 
 
@@ -49,7 +49,7 @@ void Algorithm::initialize()
   // Bypass the initialization if the algorithm has already been initialized.
   if (m_isInitialized) return;
 
-	g_log.setName(this->name());
+  g_log.setName(this->name());
   try
   {
     // Invoke init() method of the derived class inside a try/catch clause
@@ -128,114 +128,114 @@ bool Algorithm::execute()
   std::vector<Property*>::const_iterator itr;
   for (itr=Prop.begin();itr!=Prop.end();itr++)
   {
-	  const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);
-	  if (wsProp)
-	  { 
-		  const Property *wsPropProp = dynamic_cast<Property*>(*itr);
-		  unsigned int direction = wsPropProp->direction();
-		  if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
-		  { 
-			  std::string wsName=wsPropProp->value();
-			 // try
-			  //{					
-				  //checking the input is a group
-				  try
-				  {	  //check if the pointer is valid, it won't be if it is a group
-					  Workspace_sptr wsSptr=wsProp->getWorkspace();
-					  if(!wsSptr)
-					  {
-						  boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-							  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
-						  if(wsGrpSptr)
-						  {	 //this must be a group - test for that
-							  g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
+    const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);
+    if (wsProp)
+    {
+      const Property *wsPropProp = dynamic_cast<Property*>(*itr);
+      unsigned int direction = wsPropProp->direction();
+      if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
+      {
+        std::string wsName=wsPropProp->value();
+        // try
+        //{
+        //checking the input is a group
+        try
+        {	  //check if the pointer is valid, it won't be if it is a group
+          Workspace_sptr wsSptr=wsProp->getWorkspace();
+          if(!wsSptr)
+          {
+            boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+                boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
+            if(wsGrpSptr)
+            {	 //this must be a group - test for that
+              g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
 
-							  //return(processGroups(wsGrpSptr,Prop));
-							  return processGroups(wsGrpSptr,Prop);
-							 
+              //return(processGroups(wsGrpSptr,Prop));
+              return processGroups(wsGrpSptr,Prop);
 
-						  }
-					  }
 
-				  }
-				  catch (std::invalid_argument&ex)
-				  {
-					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-					  g_log.error()<<ex.what()<<std::endl;
-					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-					  m_running = false;
-					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-					  {
-						  m_runningAsync = false;
-						  throw;
-					  }					
-					 
-					 
-				  }
-				  catch(Exception::NotFoundError&ex )
-				  {
-					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-					  g_log.error()<<ex.what()<<std::endl;
-					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-					  m_running = false;
-					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-					  {
-						  m_runningAsync = false;
-						  throw;
-					  }					
-					  
-					 
-				  }
-				  catch (std::runtime_error &ex)
-				  {	
-					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-					  g_log.error()<<ex.what()<<std::endl;
-					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-					  m_running = false;
-					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-					  {
-						  m_runningAsync = false;
-						  throw;
-					  }					
-					  
-				  }
-				  catch(CancelException& ex)
-				  {
-					  g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-					  g_log.error()<<ex.what()<<std::endl;
-					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-					  m_running = false;
-					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-					  {
-						  m_runningAsync = false;
-						  throw;
-					  }					
-					  
-					 
-				  }
-				  catch(std::exception&ex)
-				  {
-					 g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-					 g_log.error()<<ex.what()<<std::endl;
-					  m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-					  m_running = false;
-					  return false;
-					  if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-					  {
-						  m_runningAsync = false;
-						  throw;
-					  }					
-				
-				  }
-				  
-			  //}
-			  
-		  }//end of if loop checking the direction
-	  }//end of if loop for checking workspace properties
+            }
+          }
+
+        }
+        catch (std::invalid_argument&ex)
+        {
+          g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<<ex.what()<<std::endl;
+          m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+          m_running = false;
+          return false;
+          if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+          {
+            m_runningAsync = false;
+            throw;
+          }
+
+
+        }
+        catch(Exception::NotFoundError&ex )
+        {
+          g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<<ex.what()<<std::endl;
+          m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+          m_running = false;
+          return false;
+          if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+          {
+            m_runningAsync = false;
+            throw;
+          }
+
+
+        }
+        catch (std::runtime_error &ex)
+        {
+          g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<<ex.what()<<std::endl;
+          m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+          m_running = false;
+          return false;
+          if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+          {
+            m_runningAsync = false;
+            throw;
+          }
+
+        }
+        catch(CancelException& ex)
+        {
+          g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<<ex.what()<<std::endl;
+          m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+          m_running = false;
+          return false;
+          if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+          {
+            m_runningAsync = false;
+            throw;
+          }
+
+
+        }
+        catch(std::exception&ex)
+        {
+          g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<<ex.what()<<std::endl;
+          m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+          m_running = false;
+          return false;
+          if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+          {
+            m_runningAsync = false;
+            throw;
+          }
+
+        }
+
+        //}
+
+      }//end of if loop checking the direction
+    }//end of if loop for checking workspace properties
 
   }// end of for loop for checking the properties for workspace groups
 
@@ -258,10 +258,8 @@ bool Algorithm::execute()
       // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
       if (!isChild())
       {
-		
         fillHistory(start_time,duration,Algorithm::g_execCount);
-		this->store();
-	
+        this->store();
       }
 
       // RJT, 19/3/08: Moved this up from below the catch blocks
@@ -430,17 +428,15 @@ void Algorithm::cancel()const
 //----------------------------------------------------------------------
 
 /** Initialize using proxy algorithm.
-    proxy calls this algorithm's init() method and keeps the declared properties.
-    initialize(const AlgorithmProxy*) copies the properties from the proxy to this algorithm.
+    Call the main initialize method and then copy in the property values.
     @param proxy Initialising proxy algorithm
   */
 void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
 {
-    init();
+    initialize();
     copyPropertiesFrom(proxy);
-    setInitialized();
     m_algorithmID = proxy.getAlgorithmID();
-		setLogging(proxy.isLogging());
+    setLogging(proxy.isLogging());
 }
 
 /// Set the Algorithm initialized state
@@ -470,11 +466,11 @@ void Algorithm::progress(double p, const std::string& msg)
 
 void Algorithm::interruption_point()
 {
-		//only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
-		// that defines that all loops must complete, and no exception can leave an OpenMP section
-	  // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
-    IF_NOT_PARALLEL
-		if (m_cancel) throw CancelException();
+  // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
+  // that defines that all loops must complete, and no exception can leave an OpenMP section
+  // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
+  IF_NOT_PARALLEL
+  if (m_cancel) throw CancelException();
 }
 
 //----------------------------------------------------------------------
@@ -532,7 +528,7 @@ void Algorithm::findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorksp
       if (direction == Direction::Input || direction == Direction::InOut)
       {
         inputWorkspaces.push_back(wsProp->getWorkspace());
-	  }
+      }
       if (direction == Direction::Output || direction == Direction::InOut)
       {
         outputWorkspaces.push_back(wsProp->getWorkspace());
@@ -650,8 +646,8 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
         {
           //setInputWSProperties(alg,*itr,*wsItr);
           bool b = true;
-		  b = setInputWSProperties(alg,prevPropName,*itr,*wsItr);
-		  if(!b)
+          b = setInputWSProperties(alg,prevPropName,*itr,*wsItr);
+          if(!b)
           {
            	throw std::runtime_error("Giving two workspace groups as input is not permitted for the algorithm"+this->name());
           }
@@ -693,8 +689,9 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
     // execute the algorithm 
     bool bStatus = false;
     if ( alg->validateProperties() ) 
-		{bStatus = alg->execute();
-	}
+    {
+      bStatus = alg->execute();
+    }
     // status of each execution is checking 
     bgroupPassed=bgroupPassed&&bStatus;
     bgroupFailed=bgroupFailed||bStatus;
@@ -703,7 +700,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
     //if a workspace execution fails
     if(!bStatus)
     {  
-	   throw std::runtime_error("execution failed for the input workspace "+(*wsItr));
+      throw std::runtime_error("execution failed for the input workspace "+(*wsItr));
     }
     //increment count for outworkpsace name
     nPeriod++;
@@ -744,43 +741,44 @@ void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyN
  */
 bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropName,Mantid::Kernel::Property* prop,const std::string&inputWS )
 {
-	 std::string wsname=prop->value();
-	try
-	{ 
-		std::string currentPropName=prop->name();
-		if(!prevPropName.empty())
-		{			
-			//check the property name 
-			if(currentPropName.compare(prevPropName))
-			{
-				boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-					boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
-				if(wsGrpSptr)
-				{
-					return false;
-				}
-			}
-		}
-		boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-			boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
-		if(wsGrpSptr)
-		{
-			pAlg->setPropertyValue(prop->name(), inputWS);
-			prevPropName=currentPropName;
-		}
-		else
-		{
-			pAlg->setPropertyValue(prop->name(), wsname);
-		}
-		return true;
-	}
-	catch(Exception::NotFoundError&e )//if not a valid object in analysis data service
-	{
-		g_log.error()<<e.what()<<std::endl;
-		return false;
-	}
-	
+  std::string wsname=prop->value();
+  try
+  {
+    std::string currentPropName=prop->name();
+    if(!prevPropName.empty())
+    {
+      //check the property name
+      if(currentPropName.compare(prevPropName))
+      {
+        boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+            boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
+        if(wsGrpSptr)
+        {
+          return false;
+        }
+      }
+    }
+    boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
+    if(wsGrpSptr)
+    {
+      pAlg->setPropertyValue(prop->name(), inputWS);
+      prevPropName=currentPropName;
+    }
+    else
+    {
+      pAlg->setPropertyValue(prop->name(), wsname);
+    }
+    return true;
+  }
+  catch(Exception::NotFoundError&e )//if not a valid object in analysis data service
+  {
+    g_log.error()<<e.what()<<std::endl;
+    return false;
+  }
+
 }
+
 /** setting output workspace properties for an algorithm,for handling workspace goups.
  *  @param pAlg      pointer to algorithm
  *  @param prop      pointer to the input properties
@@ -790,25 +788,26 @@ bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropNam
  */
 void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nPeriod,WorkspaceGroup_sptr sptrWSGrp,std::string &outWSParentName)
 {
-	std::string outWSChildName("");
-	outWSParentName=prop->value();
-	//std::string outWSParentName=prop->value();
-	std::stringstream suffix;
-	suffix<<nPeriod;
-	outWSChildName=outWSParentName+"_"+suffix.str();
+  std::string outWSChildName("");
+  outWSParentName=prop->value();
+  //std::string outWSParentName=prop->value();
+  std::stringstream suffix;
+  suffix<<nPeriod;
+  outWSChildName=outWSParentName+"_"+suffix.str();
   if (prop->direction() == Kernel::Direction::Output) 
-	  {pAlg->setPropertyValue(prop->name(), outWSChildName);
+  {
+    pAlg->setPropertyValue(prop->name(), outWSChildName);
   }
-	if(nPeriod==1){
-		//if(sptrWSGrp)sptrWSGrp->add(outWSParentName);
-		AnalysisDataService::Instance().addOrReplace(outWSParentName,sptrWSGrp );
-	}
-	//adding to wsgroup vector
-	if(sptrWSGrp)
-	{
-		g_log.information()<< outWSChildName<<" adding to group"<<std::endl;
-		sptrWSGrp->add(outWSChildName);
-	}
+  if(nPeriod==1){
+    //if(sptrWSGrp)sptrWSGrp->add(outWSParentName);
+    AnalysisDataService::Instance().addOrReplace(outWSParentName,sptrWSGrp );
+  }
+  //adding to wsgroup vector
+  if(sptrWSGrp)
+  {
+    g_log.information()<< outWSChildName<<" adding to group"<<std::endl;
+    sptrWSGrp->add(outWSChildName);
+  }
 }
 
 /** To query the property is a workspace property
@@ -816,7 +815,7 @@ void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
  */
 bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 {
-	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+  const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
   return (wsProp ? true : false);	
 }
 
@@ -825,26 +824,26 @@ bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 */
 bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
 {
-	const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
-	unsigned int direction = wsPropProp->direction();
-	if (direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)
-	{
-		return true;
-	}
-	else return false;
+  const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
+  unsigned int direction = wsPropProp->direction();
+  if (direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)
+  {
+    return true;
+  }
+  else return false;
 }
 /** checks the property is a output workspace property
   * @param prop pointer to input  properties
 */
 bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) const
 {
-	const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
-	unsigned int direction = wsPropProp->direction();
-	if (direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)
-	{
-		return true;
-	}
-	else return false;
+  const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
+  unsigned int direction = wsPropProp->direction();
+  if (direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)
+  {
+    return true;
+  }
+  else return false;
 }
 
 
