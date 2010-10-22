@@ -24,7 +24,7 @@ namespace Mantid
 
     /*!
     \class Acomp
-    \brief Holds a state point in the descision tree. 
+    \brief Holds a state point in the decision tree.
     \version 1.0
     \author S. Ansell
     \date April 2005
@@ -39,6 +39,8 @@ namespace Mantid
     a set of unions.
     - intersection : (logical and) : ^ : e.g abcd
     - union : (logical or) : v : e.g a+b+c+d
+
+
     Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -71,8 +73,8 @@ namespace Mantid
       std::vector<Acomp> Comp;      ///< Components in list
 
       void deleteComp();            ///< delete all of the Comp list
-      void addComp(const Acomp&);      ///< add a Component intellegently
-      //  void addCompPtr(Acomp*);      ///< add a Component intellegently
+      void addComp(const Acomp&);      ///< add a Component intelligently
+      //  void addCompPtr(Acomp*);      ///< add a Component intelligently
       void addUnitItem(int const);      ///< add an Unit intellgently
       void processIntersection(const std::string&);
       void processUnion(const std::string&);
@@ -89,7 +91,7 @@ namespace Mantid
       void assignCNF(const std::vector<int>&,const std::vector<BnId>&);   ///< Assigns the Comp with the DNF
       //  int getCNFpart(std::vector<Acomp>&) const;                   ///< get the CNF parts (as Acomp)
 
-      /// Calculate Principle Components
+      /// Calculate Principal Components
       int makePI(std::vector<BnId>&) const;                        
       int makeEPI(std::vector<BnId>&,std::vector<BnId>&) const;    
 

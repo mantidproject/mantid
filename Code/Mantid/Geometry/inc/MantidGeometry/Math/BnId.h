@@ -23,7 +23,7 @@ namespace Geometry
   This class holds a tri-state variable 
   of -1 (false) 0 (not-important) 1 (true) against
   each of the possible input desisions. It has
-  arbiatary lenght (unlike using a long integer)
+  arbitrary lenght (unlike using a long integer)
   \todo Could be improved by using a set of 
   unsigned integers. 
 
@@ -95,8 +95,7 @@ class DLLExport BnId
   int PIstatus() const { return PI; }     ///< PI accessor
   void setPI(const int A) { PI=A; }       ///< PI accessor
   int intValue() const;                   ///< Integer from binary expression
-  std::pair<int,BnId> 
-    makeCombination(const BnId&) const;  
+  std::pair<int,BnId>  makeCombination(const BnId&) const;
 
 
   /// Total requiring expression
