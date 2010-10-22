@@ -63,6 +63,11 @@ public:
     //
     TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
     TS_ASSERT( nxLoad.isExecuted() );    
+
+    // Test additional output parameters
+    std::string field = nxLoad.getProperty("MainFieldDirection");
+    TS_ASSERT( field == "Longitudinal" );
+
     //
     // Test workspace data (copied from LoadRawTest.h)
     //
@@ -164,6 +169,37 @@ public:
 //    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws") );    
 //    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
 //  }
+
+  
+
+  void testTransvereDataset()
+  {
+    //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
+    LoadMuonNexus nxL;
+    if ( !nxL.isInitialized() ) nxL.initialize();
+
+    // Now set required filename and output workspace name
+    std::string inputFile_musr00022725 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/musr00022725.nxs").toString();
+    nxL.setPropertyValue("FileName", inputFile_musr00022725);
+
+    outputSpace="outermusr00022725";
+    nxL.setPropertyValue("OutputWorkspace", outputSpace);     
+
+    TS_ASSERT_THROWS_NOTHING(nxL.execute());    
+    TS_ASSERT( nxL.isExecuted() );    
+
+    // Test additional output parameters
+    std::string field = nxL.getProperty("MainFieldDirection");
+    TS_ASSERT( field == "Transverse" );
+    double timeZero = nxL.getProperty("TimeZero");
+    TS_ASSERT_DELTA( timeZero, 0.55,0.001);
+    double firstgood = nxL.getProperty("FirstGoodData");
+    TS_ASSERT_DELTA( firstgood, 0.656,0.001);
+
+
+#endif /*_WIN64*/  
+  }
 
   void testExec2()
   {

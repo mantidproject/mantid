@@ -19,7 +19,6 @@
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
 
-
 namespace Mantid
 {
   namespace NeXus
@@ -70,6 +69,15 @@ namespace Mantid
 
       declareProperty("EntryNumber", 0, mustBePositive->clone(),
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
+
+      std::vector<std::string> FieldOptions;
+      FieldOptions.push_back("Transverse");
+      FieldOptions.push_back("Longitudinal");
+      declareProperty("MainFieldDirection","Transverse",new ListValidator(FieldOptions),
+        "Output the main field direction if specified in Nexus file (default Transverse)", Direction::Output);
+
+      declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
+      declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)", Direction::Output);
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -556,17 +564,44 @@ namespace Mantid
 
 
       NXRoot root(m_filename);
-      NXChar start_time = root.openNXChar("run/start_time");
-      start_time.load();
+      std::string start_time = root.getString("run/start_time");
+    
       NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
       orientation.load();
+
+      // dump various Nexus numbers to outputs 
 
       if (orientation[0] == 't')
       {
         Kernel::TimeSeriesProperty<double>* p = new Kernel::TimeSeriesProperty<double>("fromNexus");
-        p->addValue(start_time(),-90.);
+        p->addValue(start_time,-90.0);
         localWorkspace->mutableRun().addLogData(p);
+        setProperty("MainFieldDirection", "Transverse");
       }
+      else
+      {
+        setProperty("MainFieldDirection", "Longitudinal");
+      }
+
+      NXEntry entry = root.openEntry("run/histogram_data_1");
+      NXInfo info = entry.getDataSetInfo("time_zero");
+      if (info.stat != NX_ERROR)
+      {
+        double dum = root.getFloat("run/histogram_data_1/time_zero");
+        setProperty("TimeZero", dum);
+      }
+
+      NXInfo infoResolution = entry.getDataSetInfo("resolution");
+      NXInt counts = root.openNXInt("run/histogram_data_1/counts");
+      std::string firstGoodBin = counts.attributes("first_good_bin");
+
+      if ( !firstGoodBin.empty() && infoResolution.stat != NX_ERROR )
+      {
+        double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
+        double bin_size = static_cast<double>(root.getInt("run/histogram_data_1/resolution"))/1000000.0;
+        setProperty("FirstGoodData", bin*bin_size);
+      }
+
 
       NXEntry nxRun = root.openEntry("run");
       localWorkspace->setTitle(nxRun.getString("title"));
