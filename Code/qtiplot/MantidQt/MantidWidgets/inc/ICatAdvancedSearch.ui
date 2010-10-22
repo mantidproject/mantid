@@ -5,14 +5,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>784</width>
+    <width>833</width>
     <height>550</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>ICat Advanced Search</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout_2" >
    <item>
     <widget class="QLabel" name="advsearchtitleLabel" >
      <property name="maximumSize" >
@@ -56,8 +56,8 @@ p, li { white-space: pre-wrap; }
      <property name="frameShadow" >
       <enum>QFrame::Sunken</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2" >
-      <item row="0" column="0" >
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <item>
        <layout class="QGridLayout" name="gridLayout" >
         <item row="0" column="0" >
          <widget class="QLabel" name="invstNameLabel" >
@@ -67,7 +67,20 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="0" column="1" >
-         <widget class="QLineEdit" name="InvestigationName" />
+         <widget class="QLineEdit" name="InvestigationName" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item row="0" column="2" >
          <widget class="QLabel" name="InvestigationName_2" >
@@ -82,12 +95,25 @@ p, li { white-space: pre-wrap; }
         <item row="0" column="3" >
          <widget class="QLabel" name="runNumberLabel" >
           <property name="text" >
-           <string>Run#:</string>
+           <string>StartRun:</string>
           </property>
          </widget>
         </item>
         <item row="0" column="4" >
-         <widget class="QLineEdit" name="StartRun" />
+         <widget class="QLineEdit" name="StartRun" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item row="0" column="5" >
          <widget class="QLabel" name="StartRun_2" >
@@ -99,10 +125,30 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="6" colspan="2" >
-         <widget class="QLineEdit" name="EndRun" />
+        <item row="0" column="7" >
+         <widget class="QLabel" name="label" >
+          <property name="text" >
+           <string>EndRun:</string>
+          </property>
+         </widget>
         </item>
-        <item row="0" column="8" colspan="3" >
+        <item row="0" column="8" colspan="2" >
+         <widget class="QLineEdit" name="EndRun" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="10" >
          <widget class="QLabel" name="EndRun_2" >
           <property name="styleSheet" >
            <string notr="true" >color: rgb(255, 0, 0);</string>
@@ -120,7 +166,20 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="1" column="1" >
-         <widget class="QLineEdit" name="InvestigationAbstract" />
+         <widget class="QLineEdit" name="InvestigationAbstract" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item row="1" column="2" >
          <widget class="QLabel" name="InvestigationAbstract_2" >
@@ -141,6 +200,18 @@ p, li { white-space: pre-wrap; }
         </item>
         <item row="1" column="4" >
          <widget class="QLineEdit" name="StartDate" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip" >
            <string>Date in DD/MM/YYY format</string>
           </property>
@@ -152,7 +223,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="5" colspan="2" >
+        <item row="1" column="5" >
          <widget class="QToolButton" name="startdatetoolButton" >
           <property name="maximumSize" >
            <size>
@@ -165,8 +236,63 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="7" >
+        <item row="1" column="6" >
          <widget class="QLabel" name="StartDate_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
+          </property>
+          <property name="text" >
+           <string>*</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="7" >
+         <widget class="QLabel" name="enddateLabel" >
+          <property name="text" >
+           <string>End Date:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8" colspan="2" >
+         <widget class="QLineEdit" name="EndDate" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip" >
+           <string>Date in DD/MM/YYY format</string>
+          </property>
+          <property name="inputMask" >
+           <string>99/99/9999;_</string>
+          </property>
+          <property name="text" >
+           <string>//</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="10" >
+         <widget class="QToolButton" name="enddatetoolButton" >
+          <property name="maximumSize" >
+           <size>
+            <width>25</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="11" >
+         <widget class="QLabel" name="EndDate_2" >
           <property name="styleSheet" >
            <string notr="true" >color: rgb(255, 0, 0);</string>
           </property>
@@ -183,7 +309,23 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="2" column="1" >
-         <widget class="QLineEdit" name="SampleName" />
+         <widget class="QLineEdit" name="SampleName" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
         </item>
         <item row="2" column="2" >
          <widget class="QLabel" name="SampleName_2" >
@@ -196,40 +338,72 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="2" column="3" >
-         <widget class="QLabel" name="enddateLabel" >
+         <widget class="QLabel" name="instrumentLabel" >
           <property name="text" >
-           <string>End Date:</string>
+           <string>Instrument:</string>
           </property>
          </widget>
         </item>
         <item row="2" column="4" >
-         <widget class="QLineEdit" name="EndDate" >
+         <widget class="QComboBox" name="Instrument" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip" >
-           <string>Date in DD/MM/YYY format</string>
+           <string>Instrument Box</string>
           </property>
-          <property name="inputMask" >
-           <string>99/99/9999;_</string>
-          </property>
-          <property name="text" >
-           <string>//</string>
+          <property name="styleSheet" >
+           <string notr="true" >QComboBox#Instrument QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#Instrument QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
           </property>
          </widget>
         </item>
-        <item row="2" column="5" colspan="2" >
-         <widget class="QToolButton" name="enddatetoolButton" >
-          <property name="maximumSize" >
-           <size>
-            <width>25</width>
-            <height>16777215</height>
-           </size>
+        <item row="2" column="5" >
+         <widget class="QLabel" name="Instrument_2" >
+          <property name="styleSheet" >
+           <string notr="true" >color: rgb(255, 0, 0);</string>
           </property>
           <property name="text" >
-           <string>...</string>
+           <string>*</string>
           </property>
          </widget>
         </item>
         <item row="2" column="7" >
-         <widget class="QLabel" name="EndDate_2" >
+         <widget class="QLabel" name="invstTypeLabel" >
+          <property name="text" >
+           <string>Investigation Type:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="8" colspan="2" >
+         <widget class="QComboBox" name="InvestigationType" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="styleSheet" >
+           <string notr="true" >QComboBox#InvestigationType QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#InvestigationType QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="10" >
+         <widget class="QLabel" name="InvestigationType_2" >
           <property name="styleSheet" >
            <string notr="true" >color: rgb(255, 0, 0);</string>
           </property>
@@ -246,7 +420,20 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="3" column="1" >
-         <widget class="QLineEdit" name="InvestigatorSurName" />
+         <widget class="QLineEdit" name="InvestigatorSurName" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item row="3" column="2" >
          <widget class="QLabel" name="InvestigatorSurName_2" >
@@ -259,63 +446,29 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="3" column="3" >
-         <widget class="QLabel" name="instrumentLabel" >
-          <property name="text" >
-           <string>Instrument:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="4" >
-         <widget class="QComboBox" name="Instrument" >
-          <property name="toolTip" >
-           <string>Instrument Box</string>
-          </property>
-          <property name="styleSheet" >
-           <string notr="true" >QComboBox#Instrument QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#Instrument QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="5" >
-         <widget class="QLabel" name="Instrument_2" >
-          <property name="styleSheet" >
-           <string notr="true" >color: rgb(255, 0, 0);</string>
-          </property>
-          <property name="text" >
-           <string>*</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="7" colspan="2" >
-         <widget class="QLabel" name="keywordsLabel" >
-          <property name="text" >
-           <string>    KeyWord(s):</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="9" colspan="2" >
-         <widget class="QLineEdit" name="Keywords" />
-        </item>
-        <item row="3" column="11" >
-         <widget class="QLabel" name="Keywords_2" >
-          <property name="styleSheet" >
-           <string notr="true" >color: rgb(255, 0, 0);</string>
-          </property>
-          <property name="text" >
-           <string>*</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0" >
          <widget class="QLabel" name="datafilenameLabel" >
           <property name="text" >
            <string>Datafile name:</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1" >
-         <widget class="QLineEdit" name="DataFileName" />
+        <item row="3" column="4" >
+         <widget class="QLineEdit" name="DataFileName" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
         </item>
-        <item row="4" column="2" >
+        <item row="3" column="5" >
          <widget class="QLabel" name="DataFileName_2" >
           <property name="styleSheet" >
            <string notr="true" >color: rgb(255, 0, 0);</string>
@@ -325,22 +478,31 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="3" >
-         <widget class="QLabel" name="invstTypeLabel" >
+        <item row="3" column="7" >
+         <widget class="QLabel" name="keywordsLabel" >
           <property name="text" >
-           <string>Investigation Type:</string>
+           <string>    KeyWord(s):</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="4" >
-         <widget class="QComboBox" name="InvestigationType" >
-          <property name="styleSheet" >
-           <string notr="true" >QComboBox#InvestigationType QListView{background-color: white;background-image: url(ICatComboBackground.png);background-attachment: scroll;}QComboBox#InvestigationType QListView QScrollBar:vertical{background-image: url(:/images/ICatComboVScrollbar.png); background-repeat: repeat-y; width: 17px; height:20px;} </string>
+        <item row="3" column="8" colspan="2" >
+         <widget class="QLineEdit" name="Keywords" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>130</width>
+            <height>0</height>
+           </size>
           </property>
          </widget>
         </item>
-        <item row="4" column="5" colspan="2" >
-         <widget class="QLabel" name="InvestigationType_2" >
+        <item row="3" column="10" >
+         <widget class="QLabel" name="Keywords_2" >
           <property name="styleSheet" >
            <string notr="true" >color: rgb(255, 0, 0);</string>
           </property>
@@ -349,27 +511,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="7" colspan="3" >
-         <spacer name="horizontalSpacer_3" >
-          <property name="orientation" >
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0" >
-           <size>
-            <width>108</width>
-            <height>17</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="4" column="10" >
+        <item row="4" column="8" >
          <widget class="QCheckBox" name="casesensitiveBox" >
           <property name="text" >
            <string>Case Sensitive</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="11" >
+        <item row="4" column="9" >
          <widget class="QLabel" name="CaseSensitive_2" >
           <property name="styleSheet" >
            <string notr="true" >color: rgb(255, 0, 0);</string>
@@ -381,16 +530,16 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </item>
-      <item row="1" column="0" >
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" >
         <item>
-         <spacer name="horizontalSpacer_4" >
+         <spacer name="horizontalSpacer_2" >
           <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0" >
            <size>
-            <width>587</width>
+            <width>738</width>
             <height>20</height>
            </size>
           </property>
@@ -456,8 +605,8 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="sizeHint" stdset="0" >
         <size>
-         <width>568</width>
-         <height>20</height>
+         <width>548</width>
+         <height>17</height>
         </size>
        </property>
       </spacer>
@@ -474,8 +623,6 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <tabstops>
-  <tabstop>helpButton</tabstop>
-  <tabstop>closeButton</tabstop>
   <tabstop>advSearchtableWidget</tabstop>
  </tabstops>
  <resources>

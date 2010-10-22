@@ -998,8 +998,8 @@ public slots:
   /// execute loadraw/nexus without popingup load dialogs.
   void executeloadAlgorithm(const QString&, const QString&, const QString&);
 
-  /// execute download data files - called  from ICat interface
-  void executeDownloadDataFiles(std::vector<std::string>&);
+  /// slot to execute download datafiles algorithm - called  from ICat interface
+  void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<long long>&);
  
 signals:
 	void modified();

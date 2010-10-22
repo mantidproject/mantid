@@ -25,7 +25,7 @@ public:
 signals:
    ///this signal prints error messge to log window
    
-void error(const QString&,int param=0);
+   void error(const QString&,int param=0);
    /// loadraw asynchronous execution.
    void loadRawAsynch(const QString&,const QString&);
   
@@ -33,7 +33,7 @@ void error(const QString&,int param=0);
    void loadNexusAsynch(const QString&,const QString&);
 
    /// signal for downloading data files
-   void executeDownload(std::vector<std::string>&);
+    void download(const std::vector<std::string>&,const std::vector<long long>&);
 
    //signal for uncontrolled loading of 
    void executeLoadAlgorithm(const QString&, const QString&, const QString&);
@@ -52,10 +52,7 @@ private:
   /// Poulates the data files tree widget 
   void populateinvestigationWidget(Mantid::API::ITableWorkspace_sptr ws_sptr,const QString& type,bool bEnable);
 
-  /// executes the downlaod file algorithm
-   bool executeDownloadDataFiles(const std::vector<std::string>& fileNames,std::vector<std::string>& fileLocs);
-   
-   /// get the selected file name
+    /// get the selected file name
 	void getSelectedFileNames(std::vector<std::string>& fileNames );
 
 	/// checks the file is of raw extn
@@ -78,6 +75,9 @@ private:
 	/// This method loads raw/nexus data
 	void loadData( const QString& filePath);
 
+	/// get fileds 
+	void getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds);
+
 
   private slots:
 	  /// investigation Clicked
@@ -97,7 +97,7 @@ private:
 	/// if data file checkbox selected
 	bool isDataFilesChecked();
 	 /// This method checks the selected data file exis in the downlaoded list
-	bool isFileExistsInDownlodedList(const std::string& selectedFile,std::string& loadPath);
+	bool isFileExistsInDownloadedList(const std::string& selectedFile,std::string& loadPath);
 
 	/// getting the file locations
 	void setfileLocations(const std::vector<std::string>&);

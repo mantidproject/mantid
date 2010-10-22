@@ -813,6 +813,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
   executeLoadAlgorithm(dlg,alg);
 
 }
+
 /** This method is to execute loadraw from ICat Interface
  *@param fileName - name of the file
  *@param wsName - name of the workspace
@@ -1160,13 +1161,13 @@ bool MantidUI::executeICatLogout(int version)
 
 }
 /// This method is to execute download data files algorithm from ICat
-void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& fileNames)
+void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds)
 {
   std::vector<std::string> fileLocs;
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
-    alg = Mantid::API::AlgorithmManager::Instance().create("GetDataFiles",-1);
+    alg = Mantid::API::AlgorithmManager::Instance().create("DownloadDataFiles",-1);
   }
   catch(...)
   {
@@ -1175,8 +1176,9 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& fileName
   }
   try
   {
-    alg->setProperty("Filenames",fileNames);
-    alg->setPropertyValue("InputWorkspace","insvestigation");
+    alg->setProperty("FileNames",filenNames);
+	alg->setProperty("FileIds",fileIds);
+    
   }
   catch(std::invalid_argument& e)
   {

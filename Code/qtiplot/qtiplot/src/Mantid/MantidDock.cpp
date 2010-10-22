@@ -492,6 +492,7 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 
 void MantidDockWidget::deleteGroupWorkspaceIfEmpty(QTreeWidgetItem* item)
 {
+	if(!item) return;
 //if there are no members in the group workspace delete the group workspace
  if(item->childCount()==1)//workspace id
  {

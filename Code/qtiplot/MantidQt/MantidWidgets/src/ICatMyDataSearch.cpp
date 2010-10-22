@@ -1,7 +1,7 @@
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtMantidWidgets/ICatUtils.h"
+
 
 #include<QStringList>
 #include<QTreeWidget>
@@ -11,7 +11,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par)
+ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par),m_utils_sptr()
 {
 	m_uiForm.setupUi(this);
 
@@ -34,8 +34,10 @@ ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par)
 			emit error("MyData search completed,No results to display.");
 			return;
 		}
-		ICatUtils utils;
-		utils.updatesearchResults(ws_sptr,m_uiForm.myDatatableWidget);
+		//boost::shared_ptr<ICatUtils> utils(new ICatUtils(parent));
+		
+		m_utils_sptr->setParent(parent);
+		m_utils_sptr->updatesearchResults(ws_sptr,m_uiForm.myDatatableWidget);
 
 		//setting the label string
 		QFont font;
@@ -53,6 +55,7 @@ ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par)
 	
 	
 }
+
 /* this method sets the parent widget as application window
 */
 void ICatMyDataSearch::setparentWidget(QWidget* par)

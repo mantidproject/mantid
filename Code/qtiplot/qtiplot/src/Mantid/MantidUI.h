@@ -162,7 +162,7 @@ public:
 	void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
 	
 	/// This method is to execute download data files algorithm from ICat
-	void executeDownloadDataFiles(const std::vector<std::string>& fileNames);
+	void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds);
 
 public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace

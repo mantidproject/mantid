@@ -12616,27 +12616,22 @@ void ApplicationWindow::createActions()
   connect(actionMagnify, SIGNAL(activated()), this, SLOT(magnify()));
 
   actionICatLogin  = new QAction("Login",this);
-  //actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
   actionICatLogin->setToolTip(tr("ICat Login"));
   connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
 
-  actionICatSearch=new QAction("ISIS Search",this);
-  //actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
-  actionICatSearch->setToolTip(tr("ICat ISIS Search"));
+  actionICatSearch=new QAction("Basic Search",this);
+  actionICatSearch->setToolTip(tr("ICat Basic Search"));
   connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
 
   actionMydataSearch=new QAction("My Data Search",this);
-  //actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
   actionMydataSearch->setToolTip(tr("ICat MyData Search"));
   connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
 
   actionICatLogout=new QAction("Logout",this);
-  //actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
   actionICatLogout->setToolTip(tr("ICat Logout"));
   connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
 
   actionAdvancedSearch = new QAction("Advanced Search",this);
-  //actionLogon->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
   actionAdvancedSearch->setToolTip(tr("ICat Advanced Search"));
   connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));
 }
@@ -16544,7 +16539,6 @@ void ApplicationWindow::ICatMyDataSearch()
 {	
   QMdiSubWindow* usr_win = new QMdiSubWindow(this);
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  //QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch1(usr_win);
   QWidget* mydatsearch = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
   if(mydatsearch)
   {
@@ -16625,7 +16619,7 @@ void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QSt
 /* This method executes Download data files algorithm
  * @param  filenames - list of the file names to download
  */
-void ApplicationWindow::executeDownloadDataFiles(std::vector<std::string>& filenames)
+void ApplicationWindow::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds)
 {
   //getting the sender of the signal(it's ICatInvestigation object)
   QObject* qsender= sender();
@@ -16635,7 +16629,7 @@ void ApplicationWindow::executeDownloadDataFiles(std::vector<std::string>& filen
   // This is to send the filelocations vector  after  algorithm execution to ICatInvestigation object(which is MnatidQt) for further processing
   connect(mantidUI,SIGNAL(fileLocations(const std::vector<std::string>&)),qsender,SLOT(setfileLocations(const std::vector<std::string>&)));
   /// execute the algorithm
-  mantidUI->executeDownloadDataFiles(filenames);
+  mantidUI->executeDownloadDataFiles(filenNames,fileIds);
 }
 
 void  ApplicationWindow::executeloadAlgorithm(const QString& algName,const QString& fileName, const QString& wsName)

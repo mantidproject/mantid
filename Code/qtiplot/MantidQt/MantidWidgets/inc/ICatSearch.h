@@ -11,9 +11,8 @@
 #include "MantidQtMantidWidgets/ICatInvestigation.h"
 #include "MantidQtMantidWidgets/ICatUtils.h"
 #include "WidgetDllOption.h"
+
 #include <algorithm>
-
-
 #include <QObject>
 #include <QCalendarWidget>
 #include <QHash>
@@ -46,7 +45,7 @@ private:
    /// get the user selected instrument
   void getSelectedInstrument(QString& instrName);
   /// execute the algorithm
-  bool executeSearchByRunNumber(Mantid::API::ITableWorkspace_sptr& ws1_sptr);
+  bool executeSearch(Mantid::API::ITableWorkspace_sptr& ws1_sptr);
 
   /// this method populates the search result widget.
   void updatesearchResults(Mantid::API::ITableWorkspace_sptr & ws_sptr );
@@ -103,6 +102,9 @@ private:
    void showInvalidMarkerLabel(const QString& name);
    /// hide invalid marker labels
    void hideInvalidMarkerLabel(const QString& name);
+
+   ///checks the given sessionId is valid
+   bool isValidSession();
  
 private slots:
 	///handler for search button

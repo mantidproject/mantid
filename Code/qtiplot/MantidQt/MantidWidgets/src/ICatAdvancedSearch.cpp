@@ -14,10 +14,8 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 ICatAdvancedSearch::ICatAdvancedSearch(QWidget* par):
-QWidget(par),m_utils_sptr( new ICatUtils)
-{
-	initLayout();
-	
+QWidget(par),m_utils_sptr(new ICatUtils),m_applicationWindow(NULL)
+{	
 
 	//	 getting the application window pointer and setting it 
 	//this is bcoz parent()->parent() is not working in some slots as I expected 
@@ -27,10 +25,10 @@ QWidget(par),m_utils_sptr( new ICatUtils)
 	{
 		setparentWidget(parent);
 	}
-
+	m_utils_sptr->setParent(parent);
+    initLayout();
 	m_alg=createAlgorithm();
 	addtoPropertyLabelsHash();
-	
 	
 }
 ICatAdvancedSearch::~ICatAdvancedSearch()
@@ -121,20 +119,18 @@ void ICatAdvancedSearch::populateInstrumentBox()
 void ICatAdvancedSearch::populateInvestigationType()
 {
 
-	ITableWorkspace_sptr ws_sptr=executeListInvestigationTypes();
-	if(!ws_sptr)
+	std::vector<std::string> invstList = executeListInvestigationTypes();
+	if(invstList.empty())
 	{
-		emit error("Error when Populating the investigation types box");
-		return;
+		emit error("Investigation Types list is empty");
+
 	}
-		
+	std::vector<std::string>::const_iterator citr;
 	// loop through values
-	for(int row=0;row<ws_sptr->rowCount();++row)
+	for(citr=invstList.begin();citr!=invstList.end();++citr)
 	{
-		//retrieving the  instrument name from table workspace
-		std::string instName(ws_sptr->String(row,0));
 		//populate the instrument box  
-		m_uiForm.InvestigationType->insertItem(row,QString::fromStdString(instName));
+		m_uiForm.InvestigationType->addItem(QString::fromStdString(*citr));
 
 	}
 	//sorting the combo by instrument name;
@@ -143,12 +139,10 @@ void ICatAdvancedSearch::populateInvestigationType()
 
 }
 
-ITableWorkspace_sptr ICatAdvancedSearch:: executeListInvestigationTypes()
-{
-	
+std::vector<std::string> ICatAdvancedSearch:: executeListInvestigationTypes()
+{	
 	QString algName("ListInvestigationTypes");
-	const int version=1;
-	ITableWorkspace_sptr  ws_sptr;
+	const int version=-1;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
 	{
@@ -156,27 +150,10 @@ ITableWorkspace_sptr ICatAdvancedSearch:: executeListInvestigationTypes()
 	}
 	catch(...)
 	{
-		//throw std::runtime_error("Error when Populating the instrument list box"); 
-		throw;
+		throw std::runtime_error("Error when Populating the Investigations types list box"); 
+		
 	}
-	try
-	{
-	alg->setPropertyValue("OutputWorkspace","investigationTypes");
-	}
-	catch(std::invalid_argument&)
-	{			
-		throw;
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError&)
-	{		
-		throw;
-	}
-	catch(std::runtime_error & e)
-	{
-		emit error(e.what());
-		throw;
-	}
-	
+		
 	Poco::ActiveResult<bool> result(alg->executeAsync());
 	while( !result.available() )
 	{
@@ -184,22 +161,43 @@ ITableWorkspace_sptr ICatAdvancedSearch:: executeListInvestigationTypes()
 	}
 	if(!alg->isExecuted())
 	{
-		ws_sptr.reset();
-		return ws_sptr;
-	}
-	
-	if(AnalysisDataService::Instance().doesExist("investigationTypes"))
-	{
-		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
-			(AnalysisDataService::Instance().retrieve("investigationTypes"));
-	}
-	return ws_sptr;
 
+		//if the algorithm failed check the session id passed is valid
+		if(! m_utils_sptr->isSessionValid(alg))
+		{			
+			//at this point session is invalid, popup loginbox to login
+			if(m_utils_sptr->login())
+			{
+			//now populate instrument box
+			 std::vector<std::string> invstTypes =executeListInvestigationTypes();
+			 return invstTypes;
+			}
+		}
+		else
+		{			
+			return std::vector<std::string>();
+		}
+	
+	}
+
+	std::vector<std::string> invstlist ;
+	try
+	{
+		
+	  invstlist= alg->getProperty("InvestigationTypes");
+	}
+	catch (Mantid::Kernel::Exception::NotFoundError&)
+	{
+		throw;
+	}
+	return invstlist;
+	
+	
 }
 
 Mantid::API::IAlgorithm_sptr ICatAdvancedSearch::createAlgorithm()
 {
-	QString algName("AdvancedSearch");
+	QString algName("Search");
 	Mantid::API::IAlgorithm_sptr alg;
 	const int version=-1;
 	try
@@ -208,7 +206,7 @@ Mantid::API::IAlgorithm_sptr ICatAdvancedSearch::createAlgorithm()
 	}
 	catch(...)
 	{
-		throw std::runtime_error("Error when Populating the instrument list box"); 
+		throw std::runtime_error("Error when creating search algorithm"); 
 	}
 	return alg;
 
@@ -216,6 +214,13 @@ Mantid::API::IAlgorithm_sptr ICatAdvancedSearch::createAlgorithm()
 
 void ICatAdvancedSearch	::onSearch()
 {
+	m_ws_sptr.reset();
+	//before starting new search investigations clear the old one.
+	m_utils_sptr->clearSearch(m_uiForm.advSearchtableWidget,"advanced_investigations");
+
+	//update the label status
+	m_utils_sptr->setLabelText(m_uiForm.advsearchLabel,"Searching investigations...");
+
 	QString invstName;
 	QString invstAbstract;
 	QString sampleName;
@@ -236,28 +241,11 @@ void ICatAdvancedSearch	::onSearch()
 	getDatafileName(dataFileName);
 	getCaseSensitive(bCase);
 	getInvestigationType(invstType);
-	//get start and end run values 
 	getRunNumbers(startRun,endRun);
 	getDates(startDate,endDate);
 	getInstrument(instrName);
 	getKeyWords(keywords);
-
-	//before starting new search for investigations object clear the old one.
-
-	if(AnalysisDataService::Instance().doesExist("advanced_investigations"))
-	{
-		AnalysisDataService::Instance().remove("advanced_investigations");
-
-	}
-
-	//try to validate the UI level.
-	if(startRun> endRun)
-	{
-		emit error("Run end number cannot be lower than run start number.");
-		return ;
-	}
-
-	
+		
 	if(!setProperty("StartRun",startRun))
 	{
 		updatesearchResults(m_ws_sptr);
@@ -330,7 +318,6 @@ void ICatAdvancedSearch	::onSearch()
 		updatesearchResults(m_ws_sptr);
 		return ;
 	}
-	
 	Poco::ActiveResult<bool> result(m_alg->executeAsync());
 	while(!result.available() )
 	{
@@ -339,18 +326,21 @@ void ICatAdvancedSearch	::onSearch()
 	}
 	if(result.available())
 	{
-		if(!m_alg->isExecuted())
-		{
+		//if(!m_alg->isExecuted())
+		if(result.failed())
+		{			
 			m_ws_sptr.reset();
+			updatesearchResults(m_ws_sptr);
 			return ;
 		}
 		if(AnalysisDataService::Instance().doesExist("advanced_investigations"))
 		{
 			m_ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
 				(AnalysisDataService::Instance().retrieve("advanced_investigations"));
+			updatesearchResults(m_ws_sptr);
 		}
 
-		updatesearchResults(m_ws_sptr);
+		
 	}
 	return ;
 
@@ -398,8 +388,8 @@ void ICatAdvancedSearch::addtoPropertyLabelsHash()
 			if(!label)
 				continue;
 			
-			//validator labels i've named as "propertyname_2",
-			//so remove "_2" from label name to get property name
+			//validator labels is named as "propertyname_2",
+			// remove "_2" from label name to get property name
 			int index=label->objectName().indexOf("_");
 			if(index!=-1)
 			{

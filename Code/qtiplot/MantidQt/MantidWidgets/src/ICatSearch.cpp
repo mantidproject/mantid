@@ -7,7 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h" 
-
+#include "MantidQtAPI/InterfaceManager.h"
 
 #include<QStringList>
 #include<QFont>
@@ -29,18 +29,18 @@ using namespace MantidQt::MantidWidgets;
 ///Constructor
 ICatSearch::ICatSearch(QWidget *par) :
 QWidget(par),m_sender(NULL),m_invstWidget(NULL),
-m_utils_sptr( new ICatUtils)
+	m_utils_sptr(new ICatUtils),m_applicationWindow(NULL)
 {
-	initLayout();
 	
-//	 getting the application window pointer and setting it 
-	//this is bcoz parent()->parent() is not working in some slots as I expected 
+	// getting the application window pointer and setting it as the parent 
 	QObject* qobj = parent();
 	QWidget* parent = qobject_cast<QWidget*>(qobj->parent());
 	if(parent)
 	{
 		setparentWidget(parent);
 	}
+	m_utils_sptr->setParent(parent);
+	initLayout();
     m_alg=createAlgorithm();
 	addtoPropertyLabelsHash();
 	
@@ -62,8 +62,8 @@ void ICatSearch::setparentWidget(QWidget* par)
 void ICatSearch::initLayout()
 {
  	m_uiForm.setupUi(this);
-	// as the instrument combo box popup down and up arrow disappeared 
-	//when light blue back ground is set in ICat search dailog 
+	// when light blue back ground is set in ICat search dailog ,
+	//the instrument combo box popup down and up arrow disappears
 	// I'm setting this style sheet to bring the combobox's popup listview's arrows back.
 	QString str="QComboBox#Instrument QListView{background-color: white;background-image:"
 		"url(ICatCombobackground.png);background-attachment: scroll;}"
@@ -72,8 +72,20 @@ void ICatSearch::initLayout()
 		"background-repeat: repeat-y; width: 17px; height:20px;} ";
 	m_uiForm.Instrument->setStyleSheet(str);
 	
+	try
+	{
 	populateInstrumentBox();
+	}
+	catch(Mantid::Kernel::Exception::NotFoundError&)
+	{
+		emit error("Error when Populating instruments box");
 
+	}
+	catch(std::runtime_error &)
+	{
+		emit error("Error when Populating instruments box");
+	}
+	
 	//validator for start and end run numbers
 	QValidator * runval= new QIntValidator(0,100000000,m_uiForm.StartRun);
 	m_uiForm.StartRun->setValidator(runval);
@@ -109,8 +121,8 @@ void ICatSearch::onSearch()
 {	 
 	//clear the workspace pointer
 	m_ws_sptr.reset();
-	// execute the search by run number algorithm
-	executeSearchByRunNumber(m_ws_sptr);
+   // execute the search by run number algorithm
+	executeSearch(m_ws_sptr);
 }
 
 /** Is case sensitive search
@@ -120,12 +132,58 @@ bool ICatSearch::isCaseSensitiveSearch()
 	return m_uiForm.CaseSensitive->isChecked();
 }
 
+bool ICatSearch::isValidSession()
+{
+	emit error("isValid called");
+	QString algName("ValidateSession");
+	const int version=-1;
+	
+	Mantid::API::IAlgorithm_sptr alg;
+	try
+	{
+		alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+	}
+	catch(...)
+	{
+		//throw std::runtime_error("Error checking the validity of sessionid");
+		emit error("invalid session");
+		return false;
+	}
+
+	Poco::ActiveResult<bool> result(alg->executeAsync());
+	while( !result.available() )
+	{
+		QCoreApplication::processEvents();
+	}
+	
+	if(!alg->isExecuted())
+	{
+		emit error("invalid session");
+		return false ;
+	}
+	else
+	{
+		bool bvalidSession= alg->getProperty("isValid");
+		if(bvalidSession)
+		{
+			emit error("valid session");
+			return true;
+		}
+		else
+		{
+			emit error("invalid session");
+			return false;
+
+		}
+	}
+	return true;
+}
+
 /* This method updates the search result to search tree
  * @param ws_sptr workspace shared pointer
 */ 
 void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 {	
-	//ICatUtils utils;
 	if(!m_utils_sptr)
 		return;
 	m_utils_sptr->resetSearchResultsWidget(m_uiForm.searchtableWidget);
@@ -139,16 +197,10 @@ void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 void ICatSearch::populateInstrumentBox(){
 
 	try{
-
-		//ICatUtils utils;
+				
 		if(!m_utils_sptr)
 			return;
 		m_utils_sptr->populateInstrumentBox(m_uiForm.Instrument);
-	}
-	catch(std::invalid_argument& e)
-	{
-		emit error(e.what());
-		return;
 	}
 	catch (Mantid::Kernel::Exception::NotFoundError& e)
 	{
@@ -175,7 +227,7 @@ void ICatSearch::populateInstrumentBox(){
 ITableWorkspace_sptr  ICatSearch::executeListInstruments()
 {
 	QString algName("ListInstruments");
-	const int version=1;
+	const int version = -1;
 	ITableWorkspace_sptr  ws_sptr;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
@@ -289,7 +341,7 @@ void ICatSearch::getSelectedInstrument(QString& instrName)
 
 Mantid::API::IAlgorithm_sptr ICatSearch::createAlgorithm()
 {
-	QString algName("SearchByRunNumber");
+	QString algName("Search");
 	Mantid::API::IAlgorithm_sptr alg;
 	const int version=-1;
 	try
@@ -298,7 +350,7 @@ Mantid::API::IAlgorithm_sptr ICatSearch::createAlgorithm()
 	}
 	catch(...)
 	{
-		throw std::runtime_error("Error when Populating the instrument list box"); 
+		throw std::runtime_error("Error when creating search algorithm"); 
 	}
 	return alg;
 
@@ -306,16 +358,15 @@ Mantid::API::IAlgorithm_sptr ICatSearch::createAlgorithm()
 /**This method executes the search by run number algorithm
  *@param ws_sptr shared pointer to outputworkspace
 */
-bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
+bool  ICatSearch::executeSearch(ITableWorkspace_sptr& ws_sptr)
 {
-	//before starting new search for investigations object clear the old one.
-
-	if(AnalysisDataService::Instance().doesExist("investigations"))
-	{
-		AnalysisDataService::Instance().remove("investigations");
-
-	}
-		
+	//before starting new search investigations clear the old one.
+	m_utils_sptr->clearSearch(m_uiForm.searchtableWidget,"investigations");
+	
+	//update the label status
+	m_utils_sptr->setLabelText(m_uiForm.searchlabel,"Searching investigations...");
+	
+	//now get the input values for search
 	QString startDate,endDate;
 	getDates(startDate,endDate);
 
@@ -323,13 +374,6 @@ bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
 	//get start and end run values 
 	getRunValues(startRun,endRun);
 	
-	//try to validate the UI level.
-	if(startRun> endRun)
-	{
-		emit error("Run end number cannot be lower than run start number.");
-		return false;
-	}
-
 	// get the selected instrument
 	QString instr ;
 	getSelectedInstrument(instr);
@@ -375,7 +419,7 @@ bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
 		return false;
 	}
 	
-		
+	// execute the algorithm asynchrnously	
 	Poco::ActiveResult<bool> result(m_alg->executeAsync());
 	while(!result.available() )
 	{
@@ -384,18 +428,21 @@ bool  ICatSearch::executeSearchByRunNumber(ITableWorkspace_sptr& ws_sptr)
 	}
 	if(result.available())
 	{
-		if(!m_alg->isExecuted())
+		if(result.failed())
 		{
 			ws_sptr.reset();
+			updatesearchResults(ws_sptr);
+			emit error(QString::fromStdString(result.exception()->message()));
 			return false;
 		}
 		if(AnalysisDataService::Instance().doesExist("investigations"))
 		{
 			ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
 				(AnalysisDataService::Instance().retrieve("investigations"));
+			updatesearchResults(ws_sptr);
 		}
 			
-		updatesearchResults(ws_sptr);
+		
 	}
 	return true;
 
@@ -440,35 +487,40 @@ void ICatSearch::addtoPropertyLabelsHash()
 			if(!widget) continue;
 			QLabel* label=qobject_cast<QLabel*>(widget);
 			if(!label)
-				continue;
-			
-			//validator labels i've named as "propertyname_2",
-			//so remove "_2" from label name to get property name
-			int index=label->objectName().indexOf("_");
-			if(index!=-1)
 			{
+				continue;
+			}
+			
+			//for each property,the validator label is named as "propertyname_2",
+			//now remove "_2" from label name to get property name
+			int index=label->objectName().indexOf("_");
+			if(index==-1)
+			{
+				continue;
+			}
 				QString name;
 				name=label->objectName().left(index);
 				std::string propName=name.toStdString();
 				
 				std::vector<Mantid::Kernel::Property*> props=m_alg->getProperties();
 				//if this name exists in algorithm properties vector it's a property validator label
-				std::vector<Mantid::Kernel::Property*>::iterator result;
-				result=std::find_if(props.begin(),props.end(),Contains(propName));
-				if(result!=props.end())
+				std::vector<Mantid::Kernel::Property*>::iterator prop;
+				prop=std::find_if(props.begin(),props.end(),Contains(propName));
+				if(prop!=props.end())
 				{				
 					//at this point the label is a validator label
-					m_propLabelHash[QString::fromStdString((*result)->name())]=label;
+					//add the lable to a hash 
+					m_propLabelHash[QString::fromStdString((*prop)->name())]=label;
 					label->hide();//initially hide the label 
 
 				}
-			}
+		
 			
 		}
 	}
 	
 }
-/// show invalid marker labels
+/// This method shows the invalid marker label for a property
 void ICatSearch::showInvalidMarkerLabel(const QString& name)
 {
 	if(m_propLabelHash.contains(name))

@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/ui_ICatMyDataSearch.h"
 #include "WidgetDllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtMantidWidgets/ICatUtils.h"
 
 namespace MantidQt
 {
@@ -35,7 +36,10 @@ private:
 	///parent widget
 	QWidget* m_applicationWindow;
 
-	/// workspace which contains investigation data like abstrct,facility user names,sample names etc.
+  ///shared pointer to icat utils object
+  boost::shared_ptr<ICatUtils> m_utils_sptr;
+
+	/// workspace which contains investigation data like abstract,facility user names,sample names etc.
 	Mantid::API::ITableWorkspace_sptr  m_ws2_sptr ;
 
 };

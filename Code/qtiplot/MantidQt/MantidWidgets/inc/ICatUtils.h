@@ -54,14 +54,26 @@ namespace MantidQt
 			/// close calendarwidget
 			void closeCalendarWidget(); 
 
+			///
+			void setParent(QWidget*);
+
 			/// returns the calendar widget
 			QCalendarWidget* calendarWidget();
+
+			//This method clears the data associated to the previous search
+			void clearSearch( QTableWidget*,const std::string & wsName);
 			
-			
+			bool login();
+			///Thsi methos return true if it's valid session
+			bool isSessionValid(const Mantid::API::IAlgorithm_sptr& alg);
+			/// set label widget's text
+			void setLabelText(QLabel* plabel,const QString& text);
 		private:
 
-			Mantid::API::ITableWorkspace_sptr  executeListInstruments();
+		std::vector<std::string> executeListInstruments();
 
+	
+		
 		private:
 			///investigation widget
 			ICatInvestigation* m_invstWidget;

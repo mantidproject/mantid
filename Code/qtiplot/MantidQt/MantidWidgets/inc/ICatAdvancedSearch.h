@@ -44,7 +44,7 @@ namespace MantidQt
 			void populateInstrumentBox();
 			void populateInvestigationType();
 			//execute the algorithm for populating investigation types.
-			Mantid::API::ITableWorkspace_sptr  executeListInvestigationTypes();
+			std::vector<std::string>  executeListInvestigationTypes();
 
 			void getInvestigationName(QString& invstName);
 			void getInvestigationAbstract(QString& invstAbstract);

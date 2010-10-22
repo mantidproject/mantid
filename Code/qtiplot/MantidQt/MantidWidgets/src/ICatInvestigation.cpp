@@ -28,26 +28,35 @@ ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,
 	initLayout();
 	m_uiForm.invsttableWidget->verticalHeader()->setVisible(false);
 	m_investws_sptr=ws2_sptr;
-		
-	populateInvestigationTreeWidget();//Tree on LHS of the display
-
+	//Tree on LHS of the investigation display	
+	populateInvestigationTreeWidget();
+	//an item selected from the LHS treewidget
 	connect(m_uiForm.invsttreeWidget,SIGNAL(itemClicked (QTreeWidgetItem*, int )),this,SLOT(investigationClicked(QTreeWidgetItem*, int)));
+	/// cancel clicked
 	connect(m_uiForm.cancelButton,SIGNAL(clicked()),this,SLOT(onCancel()));
+
 	connect(m_uiForm.invsttreeWidget,SIGNAL(itemExpanded(QTreeWidgetItem* )),this,SLOT(investigationWidgetItemExpanded(QTreeWidgetItem* )));
 	connect(m_uiForm.invsttableWidget,SIGNAL(itemClicked (QTableWidgetItem* )),this,SLOT(tableItemSelected(QTableWidgetItem* )));
 	
 	//download button clciked
 	connect(m_uiForm.downloadButton,SIGNAL(clicked()),this,SLOT(onDownload()));
-	//load button clikced
+	//load button clicked
 	connect(m_uiForm.LoadButton,SIGNAL(clicked()),this,SLOT(onLoad()));
+	/// send error mesages to logwindow
  	connect(this,SIGNAL(error(const QString&,int) ),parent()->parent(),SLOT(writetoLogWindow(const QString& ,int )));
+	//execute loadraw asynchronously
 	connect(this,SIGNAL(loadRawAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadRawAsynch(const QString&,const QString& )));
+	//execute loadnexus asynchronously
 	connect(this,SIGNAL(loadNexusAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadNexusAsynch(const QString&,const QString& )));
+	//select all file button clicked
 	connect(m_uiForm.selectallButton,SIGNAL(clicked()),this,SLOT(onSelectAllFiles()));
-	connect(this,SIGNAL(executeDownload(std::vector<std::string>&)),
-		parent()->parent(),SLOT(executeDownloadDataFiles(std::vector<std::string>&)));
+	//download button clicked
+	connect(this,SIGNAL(download(const std::vector<std::string>&,const std::vector<long long>&)),
+		parent()->parent(),SLOT(executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<long long>&)));
+	///
 	connect(this,SIGNAL(executeLoadAlgorithm(const QString&, const QString&, const QString&)),parent()->parent(),
 		SLOT(executeloadAlgorithm(const QString&, const QString&, const QString&)));
+	//helpbutton clicked
 	connect(m_uiForm.helpButton,SIGNAL(clicked()),this,SLOT(helpButtonClicked()));
 }
 
@@ -118,7 +127,7 @@ void ICatInvestigation::tableItemSelected(QTableWidgetItem*)
 /// execute getdatafIles algorithm
 ITableWorkspace_sptr ICatInvestigation::executeGetdataFiles()
 {
-	QString algName("GetInvestigation");
+	QString algName("GetDataFiles");
 	const int version=1;
 	Mantid::API::ITableWorkspace_sptr  ws_sptr;
 	Mantid::API::IAlgorithm_sptr alg;
@@ -133,8 +142,8 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataFiles()
 	try
 	{
 		alg->setProperty("InvestigationId",m_invstId);
-		alg->setProperty("DataFiles",isDataFilesChecked());
-		alg->setPropertyValue("OutputWorkspace","insvestigation");
+		alg->setProperty("FilterLogFiles",isDataFilesChecked());
+		alg->setPropertyValue("OutputWorkspace","datafiles");
 	}
 	catch(std::invalid_argument& e)
 	{		
@@ -159,10 +168,10 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataFiles()
     {     
 		return ws_sptr;
     }
-	if(AnalysisDataService::Instance().doesExist("insvestigation"))
+	if(AnalysisDataService::Instance().doesExist("datafiles"))
 	{
 	ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
-		(AnalysisDataService::Instance().retrieve("insvestigation"));
+		(AnalysisDataService::Instance().retrieve("datafiles"));
 	}
 	return ws_sptr;
 	
@@ -218,69 +227,6 @@ ITableWorkspace_sptr ICatInvestigation::executeGetdataSets()
 
 	return ws_sptr;
 }
-/**This method executes the GetdatFile algorithm used for getting the data file location or downloading the data file
-  *@param fileName -name of the file to download
-  *@param fileLocs -archive location of the file
-*/
-bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>& fileNames,std::vector<std::string>& fileLocs)
-{
-	//
-	QString algName("GetDataFiles");
-	const int version=-1;
-	Mantid::API::IAlgorithm_sptr alg;
-	try
-	{
-		alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
-	}
-	catch(...)
-	{
-		throw std::runtime_error("Error when getting/downloading data file from isis server "); 
-	}
-	try
-	{
-		
-		alg->setProperty("Filenames",fileNames);
-		alg->setPropertyValue("InputWorkspace","insvestigation");
-	}
-	catch(std::invalid_argument& e)
-	{		
-		emit error(e.what());
-		return false;
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError& e)
-	{
-		emit error(e.what());
-		return false;
-	}
-	
-
-	Poco::ActiveResult<bool> result(alg->executeAsync());
-	while( !result.available() )
-	{
-		QCoreApplication::processEvents();
-	}
-	if(result.available())
-	{
-
-		try
-		{
-			fileLocs = alg->getProperty("FileLocations");
-		}
-		catch (Mantid::Kernel::Exception::NotFoundError&e)
-		{
-			emit error(e.what());
-			return false;
-		}
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-	
-	
-	
-}
 
 /** this method gets called when an item on the investigation tree widget is  clicked
   *@param item - selected item
@@ -289,10 +235,6 @@ bool ICatInvestigation::executeDownloadDataFiles(const std::vector<std::string>&
 void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 {
 	if(!item)return;
-	//QFont font;
-	//font.setBold(true);
-	//QString labelText;
-	//std::stringstream totalCount;
 	if(!item->text(0).compare("Default"))
 	{			
 		if(isDataFilesChecked())
@@ -325,8 +267,8 @@ void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 	
 }
 /**This method populates the investigation table widget
-  *@param bdataFiles -shared pointer to data files
   *@param ws_sptr - shared pointer to workspace
+  *@param  type - string used to identify datasets or data files
   *@param bEnable - flag to enable sorting
 */
 void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace_sptr dataws_sptr,const QString& type,bool bEnable)
@@ -351,7 +293,6 @@ void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace
 	 
 	for (int i=0;i<ws_sptr->rowCount();++i)
 	{
-		//m_uiForm.invsttableWidget->insertRow(i);
 		//setting the row height of tableWidget 
 		m_uiForm.invsttableWidget->setRowHeight(i,20);
 	}
@@ -396,7 +337,6 @@ void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace
 	m_uiForm.invstlabel->setText(labelText);
 	m_uiForm.invstlabel->setAlignment(Qt::AlignHCenter);
 	m_uiForm.invstlabel->setFont(font);
-
 	
 	//if flag is set sort by first column
 	if(bEnable)
@@ -448,11 +388,54 @@ void ICatInvestigation::getSelectedFileNames(std::vector<std::string>& fileNames
 	QModelIndex index;
 	QAbstractItemModel *model = m_uiForm.invsttableWidget->model();
 	foreach(index, indexes) 
-		{			
-			QString text = model->data(index, Qt::DisplayRole).toString();
-			fileNames.push_back(text.toStdString());
+	{			
+		QString text = model->data(index, Qt::DisplayRole).toString();
+		fileNames.push_back(text.toStdString());
 
+	}
+}
+
+/** This method returns the fileids of the given files.
+@param fileNames - list of filenames
+@param fileIds - reference to a vector of fileIds
+*/
+void ICatInvestigation::getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds)
+{
+	ITableWorkspace_sptr ws_sptr;
+
+	if(AnalysisDataService::Instance().doesExist("datafiles"))
+	{
+		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
+			(AnalysisDataService::Instance().retrieve("datafiles"));
+	}
+	long long fileId=0;
+	const int col=0;
+	int row=0;
+	std::vector<std::string>::const_iterator citr;
+	for(citr=fileNames.begin();citr!=fileNames.end();++citr)
+	{
+		try
+		{
+		ws_sptr->find(*citr,row,col);
+		fileId=ws_sptr->cell<long long >(row,col+2);//3rd column is the file id.
 		}
+		catch(std::range_error&)
+		{
+			throw std::runtime_error("selected file "+*citr+" not exists in the ICat search results workspace");
+		}
+		catch(std::out_of_range&)
+		{
+			throw std::runtime_error("selected file "+*citr+" not exists in the ithe ICat search results workspace");;
+		}
+		catch(std::runtime_error&)
+		{
+			throw std::runtime_error("selected file "+*citr+" not exists in the the ICat search results workspace");;
+		}
+
+		fileIds.push_back(fileId);
+		++row;
+	}
+	
 }
 /** download button clicked
 */
@@ -470,9 +453,16 @@ void  ICatInvestigation::onDownload()
 		emit error(msg);
 		return;
 	}
-	emit executeDownload(fileNames);
+
+	std::vector<long long >fileIds;
+	//get the file ids.
+	getFileIds(fileNames,fileIds);
+	
+	emit download(fileNames,fileIds);
 	
 }
+/** This slot sets the file locations returned by download algorithm to downloaded filelist
+*/
 void ICatInvestigation::setfileLocations(const std::vector<std::string>& fileLocs)
 {	
 	m_downloadedFileList.assign(fileLocs.begin(),fileLocs.end());
@@ -517,26 +507,23 @@ void ICatInvestigation::investigationWidgetItemExpanded(QTreeWidgetItem* item )
 /// Load button clicked
 void ICatInvestigation::onLoad()
 {
-	///get selected filename (raw,nexus,log) from table widget to load to mantid
-	
-    std::vector<std::string> sfileNames;
+	///get selected filename (raw,nexus,log) from table widget 
+	std::vector<std::string> sfileNames;
 	getSelectedFileNames(sfileNames);
 	if(sfileNames.empty())
 	{
-		QString msg="Select the file by clicking on the file or use the 'Select All files' button provided to select all teh files or "
-			 "\n mouse left button and Shift/Ctrl Key and download the files using Download button provided before trying to load.";
+		QString msg="Files must be downloaded before trying to load.";
 		emit error( msg);
 	}
 
-	// for loop for checking the selected file names is there in the downloaded files list.
-	//users are suopposed to download first and then load
-		
+	// before loading check the file is downloaded
 	std::vector<std::string>::const_iterator citr;
 	for(citr=sfileNames.begin();citr!=sfileNames.end();++citr)
 	{		
 		std::string loadPath;
-		if(isFileExistsInDownlodedList(*citr,loadPath ))
+		if(isFileExistsInDownloadedList(*citr,loadPath ))
 		{
+			//if the file is downloaded ,then load to mantid and create workspace
 			loadData(QString::fromStdString(loadPath));
 		}
 		else
@@ -549,7 +536,7 @@ void ICatInvestigation::onLoad()
 		
 }
 
-bool ICatInvestigation::isFileExistsInDownlodedList(const std::string& selectedFile,std::string& loadPath )
+bool ICatInvestigation::isFileExistsInDownloadedList(const std::string& selectedFile,std::string& loadPath )
 {
 	std::basic_string <char>::size_type npos = -1;
 	std::basic_string <char>::size_type index;
@@ -558,14 +545,13 @@ bool ICatInvestigation::isFileExistsInDownlodedList(const std::string& selectedF
 	std::vector<std::string>::const_iterator cditr;
 	for(cditr=m_downloadedFileList.begin();cditr!=m_downloadedFileList.end();++cditr)
 	{
-		// the selected file name UI contains only file names,but the downloaded filelist returned
+		// the selected file name from UI contains only file names,but the downloaded filelist returned
 		// by downlaod algorithm contains filename with full path
-		// so below code extarcts the file name part and checks file exists in the downloaded list
+		// below code extarcts the file name part and checks file exists in the downloaded list
 		index=(*cditr).find_last_of("/");
 		if(index!=npos)
 		{
 			filenamePart=(*cditr).substr(index+1,(*cditr).length()-index);
-			//emit error("fileNamepart is "+QString::fromStdString(filenamePart) );
 			QString temp=QString::fromStdString(filenamePart);
 			QString temp1=QString::fromStdString(selectedFile);
 			if(!temp.compare(temp1,Qt::CaseInsensitive))
@@ -582,7 +568,6 @@ bool ICatInvestigation::isFileExistsInDownlodedList(const std::string& selectedF
 }
 /**This method loads the data file
   *@param filePath name of the file
-  *@return  boolean
 */
 void ICatInvestigation::loadData( const QString& filePath)
 {
@@ -638,7 +623,6 @@ bool ICatInvestigation::isLoadingControlled()
 */
 bool ICatInvestigation::isRawFile(const QString& fileName)
 {
-	//return fileName.endsWith(".raw",Qt::CaseInsensitive);
 	int index = fileName.lastIndexOf(".");
 	bool braw;
 	QString extn;
@@ -652,7 +636,7 @@ bool ICatInvestigation::isRawFile(const QString& fileName)
 
 /**This method checks the file name extension and returns true if it's nexus file 
   *@param fileName name of the file
-  *@return  boolean
+  *@return  true if it's nexus file
 */
 bool ICatInvestigation::isNexusFile(const QString& fileName)
 {
@@ -666,31 +650,31 @@ bool ICatInvestigation::isNexusFile(const QString& fileName)
 	(!extn.compare("nxs",Qt::CaseInsensitive) )? bnxs=true : bnxs=false;
 	
 	return bnxs;
-	//return fileName.endsWith(".nxs",Qt::CaseInsensitive);
+	
 }
 
 /** This method executes loadRaw algorithm
   * @param fileName name of the raw file
+  * @param wsName name of the workspace to store the data
 */
 void ICatInvestigation::executeLoadRaw(const QString& fileName,const QString& wsName)
 {	
-	//return execute("LoadRaw",-1,fileName,wsName);
 	emit executeLoadAlgorithm("LoadRaw",fileName,wsName);
 }
 
 /** This method executes loadNexus algorithm
   * @param fileName name of the nexus file
+  * @param wsName name of the workspace to store the data
 */
 void ICatInvestigation::executeLoadNexus(const QString& fileName,const QString& wsName)
 {
-	//return execute("LoadNexus",-1,fileName,wsName);
-	executeLoadAlgorithm("LoadNexus",fileName,wsName);
-
+	emit executeLoadAlgorithm("LoadNexus",fileName,wsName);
 }
 /**This method executes loadraw/loadnexus algorithm
   *@param algName - algoritm name
   *@param version -algorithm version
   *@param fileName - name of the file to load
+  *@param wsName name of the workspace to store the data
 */
 bool ICatInvestigation::execute(const QString& algName,const int& version,const QString& fileName,const QString& wsName)
 {

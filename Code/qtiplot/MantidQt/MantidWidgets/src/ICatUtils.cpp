@@ -1,18 +1,23 @@
 
 #include "MantidQtMantidWidgets/ICatUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/AlgorithmDialog.h"
 
 #include <QMdiSubWindow>
 #include <QStringList>
 #include <QFont>
-#include<QHeaderView>
+#include <QHeaderView>
+#include <QDialog>
+#include <QPalette>
+#include <QColor>
 
 using namespace MantidQt::MantidWidgets;
 
 using namespace Mantid::API;
 
 
-ICatUtils::ICatUtils():m_calendarWidget(NULL)
+ICatUtils::ICatUtils():m_calendarWidget(NULL),m_applicationWindow(NULL)
 {
 	
 	
@@ -28,9 +33,7 @@ void ICatUtils::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr,Q
 	{
 		return ;
 	}
-	// reset the background color to white
-	// if it's not reset to white alternating colour is not working.
-	//tablewidget->setStyleSheet("background-color: rgb(255, 255, 255)");
+
 	//now set alternating color flag
 	tablewidget->setAlternatingRowColors(true);
 	//stylesheet for alternating background color
@@ -44,8 +47,6 @@ void ICatUtils::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr,Q
 
 	for (int i=0;i<ws_sptr->rowCount();++i)
 	{
-		//tablewidget->insertRow(i);
-		
 		//setting the row height of tableWidget 
 		tablewidget->setRowHeight(i,20);
 	}
@@ -79,8 +80,6 @@ void ICatUtils::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr,Q
 	}
 	//sorting by title
 	tablewidget->sortByColumn(2,Qt::AscendingOrder);
-	// resizing the coulmn based on data size
-	//tablewidget->resizeColumnsToContents ();
 	//enable sorting
 	tablewidget->setSortingEnabled(true);
 
@@ -106,12 +105,26 @@ void ICatUtils::resetSearchResultsWidget(QTableWidget* tablewidget )
 	// if it's not reset to white alternating colour is not working.
 	tablewidget->setStyleSheet("background-color: rgb(216, 225, 255)");
 	
-	//stylesheet for alternating background color
-	//tablewidget->setStyleSheet("alternate-background-color: rgb(216, 225, 255)");
 	//disable  sorting as per QT documentation.otherwise  setitem will give undesired results
 	tablewidget->setSortingEnabled(false);
 
 	tablewidget->verticalHeader()->setVisible(false);
+}
+
+
+//This method clears the data associated to the previous search
+void ICatUtils::clearSearch(QTableWidget* tablewidget,const std::string & wsName )
+{
+	//before starting new search investigations clear the old one.
+
+	if(AnalysisDataService::Instance().doesExist(wsName))
+	{
+		AnalysisDataService::Instance().remove(wsName);
+
+	}
+
+	resetSearchResultsWidget(tablewidget);
+
 }
 /**This method is called when an investigation is selected  from investigations list
  *@param item  table widget item
@@ -162,11 +175,10 @@ void ICatUtils::investigationSelected(QTableWidget* tablewidget,QTableWidgetItem
   * and fills the instrument box with instrument lists returned by ICat API
   * @return shared pointer to workspace which contains instrument names
 */
-ITableWorkspace_sptr  ICatUtils::executeListInstruments()
+std::vector<std::string> ICatUtils::executeListInstruments()
 {
 	QString algName("ListInstruments");
-	const int version=1;
-	ITableWorkspace_sptr  ws_sptr;
+	const int version=-1;
 	Mantid::API::IAlgorithm_sptr alg;
 	try
 	{
@@ -177,38 +189,88 @@ ITableWorkspace_sptr  ICatUtils::executeListInstruments()
 		throw std::runtime_error("Error when Populating the instrument list box"); 
 			
 	}
-	try
-	{
-	alg->setPropertyValue("OutputWorkspace","instruments");
-	}
-	catch(std::invalid_argument& )
-	{			
-		//throw std::runtime_error(e.what()); 
-		throw;
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError& )
-	{		
-		//throw std::runtime_error(e.what()); 
-		throw;
-	}
-	
+		
 	Poco::ActiveResult<bool> result(alg->executeAsync());
 	while( !result.available() )
 	{
 		QCoreApplication::processEvents();
 	}
 	if(!alg->isExecuted())
-	{
-		ws_sptr.reset();
-		return ws_sptr;
+	{		
+		//if the algorithm failed check the session id passed is valid
+		if(!isSessionValid(alg))
+		{			
+			//at this point session is invalid, popup loginbox to login
+			if(login())
+			{
+			//now populate instrument box
+			 std::vector<std::string> instruments =executeListInstruments();
+			 return instruments;
+			}
+		}
+		else
+		{			
+			return std::vector<std::string>();
+		}
 	}
+	std::vector<std::string>instrlist;
+	try
+	{
+		
+	  instrlist= alg->getProperty("InstrumentList");
+	}
+	catch (Mantid::Kernel::Exception::NotFoundError& e)
+	{
+		throw e;
+	}
+	return instrlist;
 
-	if(AnalysisDataService::Instance().doesExist("instruments"))
+}
+bool ICatUtils::isSessionValid(const Mantid::API::IAlgorithm_sptr& alg)
+{
+	try
 	{
-		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
-			(AnalysisDataService::Instance().retrieve("instruments"));
+	return  alg->getProperty("isValid");
 	}
-	return ws_sptr;
+	catch (Mantid::Kernel::Exception::NotFoundError&e)
+	{
+		throw e;
+	}
+   
+}
+bool ICatUtils::login()
+{
+	QString algName("Login");
+	const int version =-1;
+	Mantid::API::IAlgorithm_sptr alg;
+	try
+	{
+		alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+	}
+	catch(...)
+	{		
+		throw std::runtime_error("Error when Populating the instrument list box"); 
+	}
+	if(!m_applicationWindow)
+	{return false;}
+
+	MantidQt::API::AlgorithmDialog *dlg =MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_applicationWindow, false, "", "", "");
+	if(!dlg) return false;
+	if(dlg->exec()==QDialog::Accepted)
+	{
+		delete dlg;
+		Poco::ActiveResult<bool> result(alg->executeAsync());
+		while( !result.available() )
+		{
+			QCoreApplication::processEvents();
+		}
+	
+		if(!alg->isExecuted())
+		{
+			return false;
+		}
+		return true;
+	}
 }
 
 /** This method populates the instrument box
@@ -216,23 +278,22 @@ ITableWorkspace_sptr  ICatUtils::executeListInstruments()
 void ICatUtils::populateInstrumentBox(QComboBox* instrumentBox)
 {
 	
-	//// execute the algorithm ListInstruments
-	ITableWorkspace_sptr ws_sptr=executeListInstruments();
+	/// execute the algorithm ListInstruments
+	std::vector<std::string> instrlist = executeListInstruments();
 
-	if(!ws_sptr)
+	if(instrlist.empty())
 	{
-		throw std::runtime_error("Instruments list is empty,can not load instrument box.");
+		throw std::runtime_error("Instrument list is empty");
 	}
-		
-	// loop through values
-	for(int row=0;row<ws_sptr->rowCount();++row)
+
+	/// loop through values
+	std::vector<std::string>::const_iterator citr;
+	for (citr=instrlist.begin();citr!=instrlist.end();++citr)
 	{
-		//retrieving the  instrument name from table workspace
-		std::string instName(ws_sptr->String(row,0));
 		//populate the instrument box  
-		instrumentBox->addItem(QString::fromStdString(instName));
-
+		instrumentBox->addItem(QString::fromStdString(*citr));
 	}
+
 	//sorting the combo by instrument name;
 	instrumentBox->model()->sort(0);
 	instrumentBox->insertItem(-1,"");
@@ -243,26 +304,25 @@ void ICatUtils::populateInstrumentBox(QComboBox* instrumentBox)
 void ICatUtils::updateSearchLabel(const Mantid::API::ITableWorkspace_sptr& ws_sptr,QLabel* label)
 {
 	std::stringstream rowcount;
-	QString results;
+	QString results("Investigations Search Results :");
 	if(!ws_sptr)
 	{
-		//rowcount<<0;
-		results=" no investigations to dispaly as an error occured during investigations search";
-
-		
+		results+=" No investigations to dispaly as an error occured during investigations search";
 	}
 	else{
 		rowcount<<ws_sptr->rowCount();
-		results=QString::fromStdString(rowcount.str()) + " Investigations Found";
+		results+=QString::fromStdString(rowcount.str()) + " Investigations Found";
 	}
-
+    setLabelText(label,results);
+}
+void ICatUtils::setLabelText(QLabel* plabel,const QString& text)
+{
 	//setting the label string
 	QFont font;
 	font.setBold(true);
-	label->setText("Investigations Search Results : "+results);
-	label->setAlignment(Qt::AlignHCenter);
-	label->setFont(font);
-
+	plabel->setText(text);
+	plabel->setAlignment(Qt::AlignHCenter);
+	plabel->setFont(font);
 }
 void  ICatUtils::popupCalendar(QWidget* parent)
 {
@@ -289,10 +349,18 @@ QCalendarWidget* ICatUtils::calendarWidget()
 	return m_calendarWidget;
 }
 
+/// This method sets the parent widget of search widgets.
+void ICatUtils::setParent(QWidget*parent)
+{
+	m_applicationWindow=parent;
+
+}
 
 SearchCalendar::SearchCalendar(QWidget* par):QCalendarWidget(par)
 {
 }
+
+
 
 
 
