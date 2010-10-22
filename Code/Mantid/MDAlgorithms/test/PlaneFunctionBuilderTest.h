@@ -19,10 +19,8 @@ public:
         using namespace Mantid::API;
 
         PlaneFunctionBuilder builder;
-        OriginParameter origin(1, 2, 3);
-        builder.addParameter(origin);
-        NormalParameter normal(4, 5, 6);
-        builder.addParameter(normal);
+        builder.addParameter(std::auto_ptr<IParameter>(new OriginParameter(1, 2, 3)));
+        builder.addParameter(std::auto_ptr<IParameter>(new NormalParameter(4, 5, 6)));
         std::auto_ptr<IImplicitFunction> impFunc = builder.create();
         PlaneImplicitFunction * planeFunc = dynamic_cast<PlaneImplicitFunction*>(impFunc.get());
 
@@ -40,7 +38,7 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         PlaneFunctionBuilder builder;
-        InvalidParameter invalid;
+        std::auto_ptr<IParameter> invalid = std::auto_ptr<IParameter>(new InvalidParameter);
 
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as invalid parameter is provided.",  builder.addParameter(invalid), std::invalid_argument );
     }
@@ -50,8 +48,7 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         PlaneFunctionBuilder builder;
-        OriginParameter origin(0, 0, 0);
-        builder.addParameter(origin);
+        builder.addParameter(std::auto_ptr<IParameter>(new OriginParameter(0, 0, 0)));
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as normal parameter is missing.",  builder.create(), std::invalid_argument );
     }
 
@@ -60,8 +57,7 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         PlaneFunctionBuilder builder;
-        NormalParameter normal(0, 1, 1);
-        builder.addParameter(normal);
+        builder.addParameter(std::auto_ptr<IParameter>(new NormalParameter(0, 0, 0)));
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as origin parameter is missing.",  builder.create(), std::invalid_argument );
     }
 
@@ -73,13 +69,10 @@ public:
 
         PlaneFunctionBuilder builder;
 
-        OriginParameter origin(1, 2, 3);
-        builder.addParameter(origin);
-
-        OriginParameter originOverwrite(4, 5, 6);
-        builder.addParameter(originOverwrite);
-
-        builder.addParameter(NormalParameter(0,0,0));
+        builder.addParameter(std::auto_ptr<IParameter>(new OriginParameter(1, 2, 3)));
+		//Overwrite origin
+        builder.addParameter(std::auto_ptr<IParameter>(new OriginParameter(4, 5, 6)));
+        builder.addParameter(std::auto_ptr<IParameter>(new NormalParameter(0, 0, 0)));
         std::auto_ptr<IImplicitFunction> impFunc = builder.create();
         PlaneImplicitFunction * planeFunc = dynamic_cast<PlaneImplicitFunction*>(impFunc.get());
 
@@ -96,13 +89,11 @@ public:
 
         PlaneFunctionBuilder builder;
 
-        NormalParameter normal(1, 2, 3);
-        builder.addParameter(normal);
+        builder.addParameter(std::auto_ptr<IParameter>(new NormalParameter(1, 2, 3)));
+		//Overwrite normal
+        builder.addParameter(std::auto_ptr<IParameter>(new NormalParameter(4, 5, 6)));
 
-        NormalParameter normalOverwrite(4, 5, 6);
-        builder.addParameter(normalOverwrite);
-
-        builder.addParameter(OriginParameter(0,0,0));
+        builder.addParameter(std::auto_ptr<IParameter>(new OriginParameter(0, 0, 0)));
         std::auto_ptr<IImplicitFunction> impFunc = builder.create();
         PlaneImplicitFunction * planeFunc = dynamic_cast<PlaneImplicitFunction*>(impFunc.get());
 

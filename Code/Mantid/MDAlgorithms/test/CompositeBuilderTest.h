@@ -53,7 +53,7 @@ private:
     {
     public:
         mutable bool isInvoked;
-        void addParameter(Mantid::MDAlgorithms::IParameter& parameter)
+        void addParameter(std::auto_ptr<Mantid::MDAlgorithms::IParameter> parameter)
         {
         }
         std::auto_ptr<Mantid::API::IImplicitFunction> create() const
@@ -90,7 +90,7 @@ public:
     {
         using namespace Mantid::MDAlgorithms;
 
-        FakeParameter param;
+        std::auto_ptr<IParameter> param = std::auto_ptr<IParameter>(new FakeParameter);
         CompositeFunctionBuilder compFuncBuilder; 
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as no parameters allowed on composite function builders.", compFuncBuilder.addParameter(param), std::invalid_argument);
     }

@@ -64,6 +64,11 @@ namespace Mantid
             double getNormalY() const;
             double getNormalZ() const;
 
+            static std::string functionName()
+            {
+                return "PlaneImplicitFunction";
+            }
+
         private:
             PlaneImplicitFunction(const PlaneImplicitFunction& other);
             PlaneImplicitFunction& operator=(const PlaneImplicitFunction& other);

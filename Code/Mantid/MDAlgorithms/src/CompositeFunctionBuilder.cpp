@@ -18,9 +18,9 @@ namespace Mantid
             this->m_functionBuilders.push_back(boost::shared_ptr<IFunctionBuilder>(funcBuilder));
         }
 
-        void CompositeFunctionBuilder::addParameter(IParameter& parameter)
+        void CompositeFunctionBuilder::addParameter(std::auto_ptr<IParameter> parameter)
         {
-            std::string message = "PlaneFunctionBuilder does not take parameters of type: " + parameter.getName();
+            std::string message = "PlaneFunctionBuilder does not take parameters of type: " + parameter->getName();
             throw std::invalid_argument(message);
         }
 

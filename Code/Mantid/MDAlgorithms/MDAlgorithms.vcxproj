@@ -139,6 +139,7 @@
     <ClInclude Include="inc\MantidMDAlgorithms\OriginParameterParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\ParameterParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionBuilder.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
     <ClInclude Include="test\testCPrebinning.h" />
@@ -155,6 +156,7 @@
     <ClCompile Include="src\OriginParameterParser.cpp" />
     <ClCompile Include="src\ParameterParser.cpp" />
     <ClCompile Include="src\PlaneFunctionBuilder.cpp" />
+    <ClCompile Include="src\PlaneFunctionParser.cpp" />
     <ClCompile Include="src\PlaneImplicitFunction.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

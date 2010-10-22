@@ -1,5 +1,5 @@
-#ifndef IFUNCTONBUILDER_H_
-#define IFUNCTONBUILDER_H_
+#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
+#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,17 +7,22 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/IImplicitFunction.h"
-#include "MantidMDAlgorithms/IParameter.h"
+#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
+#include "MantidMDAlgorithms/FunctionParser.h"
+
 
 namespace Mantid
 {
-
+    namespace MDDataObjects
+    {
+        class point3D;
+    }
     namespace MDAlgorithms
     {
         /** A base class for absorption correction algorithms.
 
-        This class is the abstract type for building IImplicitFunctions
+
+        This class to parse plane type functions and generate the associated builders.
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010
@@ -43,16 +48,22 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-
-        class DLLExport IFunctionBuilder
+        //TODO. This should be constructed via a factory
+        class DLLExport PlaneFunctionParser : public FunctionParser
         {
+
         public:
-            virtual void addParameter(std::auto_ptr<IParameter> parameter) = 0;
-            virtual std::auto_ptr<Mantid::API::IImplicitFunction> create() const = 0;
-            virtual ~IFunctionBuilder() = 0;
+            PlaneFunctionParser(std::auto_ptr<ParameterParser> parameterParser);
+
+            std::auto_ptr<IFunctionBuilder> createFunctionBuilder(Poco::XML::Element* functionElement);
+
+            void setSuccessorParser(std::auto_ptr<FunctionParser> parser);
+
+            PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
 
         };
     }
 }
+
 
 #endif

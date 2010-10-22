@@ -14,19 +14,19 @@ namespace Mantid
         {
         }
 
-        void PlaneFunctionBuilder::addParameter(IParameter& parameter)
+        void PlaneFunctionBuilder::addParameter(std::auto_ptr<IParameter> parameter)
         {
-            if(parameter.getName() == OriginParameter::parameterName())
+            if(parameter->getName() == OriginParameter::parameterName())
             {
-                this->origin = parameter.clone();
+                this->origin = parameter->clone();
             }
-            else if(parameter.getName() == NormalParameter::parameterName())
+            else if(parameter->getName() == NormalParameter::parameterName())
             {
-                this->normal = parameter.clone();
+                this->normal = parameter->clone();
             }
             else
             {
-                std::string message = "PlaneFunctionBuilder does not take parameters of type: " + parameter.getName();
+                std::string message = "PlaneFunctionBuilder does not take parameters of type: " + parameter->getName();
                 throw std::invalid_argument(message);
             }
         }

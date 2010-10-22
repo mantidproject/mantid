@@ -34,7 +34,7 @@ private:
     {
     public:
         bool isCalled;
-
+        SuccessorParameterParser() : isCalled(false) {}
         std::auto_ptr<Mantid::MDAlgorithms::IParameter> createParameter(Poco::XML::Element* parameterElement)
         {
             using namespace Mantid::MDAlgorithms;
@@ -81,7 +81,7 @@ public:
     {
         using namespace Mantid::MDAlgorithms;
         Poco::XML::DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter>";
+        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>UnknownParameter</Type><Value>1, 2, 3</Value></Parameter>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 

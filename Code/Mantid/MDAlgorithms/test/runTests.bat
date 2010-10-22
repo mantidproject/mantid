@@ -43,3 +43,5 @@ del runner.ilk
 del runner.exp
 del vc100.idb
 del runner.exe
+REM del *.pdb
+REM del runner.exe

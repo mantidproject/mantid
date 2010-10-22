@@ -62,6 +62,7 @@ namespace Mantid
             virtual void setSuccessorParser(std::auto_ptr<ParameterParser> paramParser) = 0;
         protected:
             std::auto_ptr<ParameterParser> m_successor;
+
         };
     }
 }

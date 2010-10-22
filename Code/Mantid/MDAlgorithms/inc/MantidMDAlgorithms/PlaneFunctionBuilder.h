@@ -53,7 +53,7 @@ namespace Mantid
             std::auto_ptr<IParameter> normal;
         public:
             PlaneFunctionBuilder();
-            void addParameter(IParameter& parameter);
+            void addParameter(std::auto_ptr<IParameter> parameter);
             std::auto_ptr<Mantid::API::IImplicitFunction> create() const;
             ~PlaneFunctionBuilder();
         };

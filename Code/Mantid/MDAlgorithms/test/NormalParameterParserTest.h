@@ -33,7 +33,7 @@ private:
     {
     public:
         bool isCalled;
-
+        SuccessorParameterParser() : isCalled(false) {}
         std::auto_ptr<Mantid::MDAlgorithms::IParameter> createParameter(Poco::XML::Element* parameterElement)
         {
             isCalled = true;
@@ -71,13 +71,13 @@ public:
         Document* pDoc = pParser.parseString(xmlToParse);
         Element* pRootElem = pDoc->documentElement();
 
+
         NormalParameterParser parser;
         std::auto_ptr<IParameter> iparam = parser.createParameter(pRootElem);
         NormalParameter* pNormalParam = dynamic_cast<NormalParameter*>(iparam.release());
         std::auto_ptr<NormalParameter> nparam = std::auto_ptr<NormalParameter>(pNormalParam);
         TSM_ASSERT("The paramter generated should be an NormalParamter", NULL != pNormalParam);
     }
-
     void testChainOfResponsibility()
     {
         using namespace Mantid::MDAlgorithms;
@@ -94,6 +94,8 @@ public:
         std::auto_ptr<IParameter> iparam = parser.createParameter(pRootElem);
         TSM_ASSERT("The successor parser has not been called.", successor->isCalled)
     }
+
+
 
 };
 
