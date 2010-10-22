@@ -114,7 +114,35 @@ void LoadSNSEventNexus::exec()
   //Initialize progress reporting.
   Progress prog(this,0.0,0.3,  3); //3 calls for the first part
 
-  prog.report(0, "Loading instrument");
+
+  prog.report(1, "Loading DAS logs");
+
+  // --------------------- Load DAS Logs -----------------
+  // do the actual work
+  IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
+
+  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    g_log.information() << "Loading logs from NeXus file..." << endl;
+    loadLogs->setPropertyValue("Filename", m_filename);
+    loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", WS);
+    loadLogs->execute();
+
+    //If successful, we can try to load the pulse times
+    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
+    std::vector<Kernel::dateAndTime> temp = log->timesAsVector();
+    for (size_t i =0; i < temp.size(); i++)
+      pulseTimes.push_back( Kernel::DateAndTime::get_from_absolute_time( temp[i] ) );
+  }
+  catch (...)
+  {
+    g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
+  }
+
+
+
+  prog.report(1, "Loading instrument");
 
   //Load the instrument
   runLoadInstrument(m_filename, WS);
@@ -148,6 +176,7 @@ void LoadSNSEventNexus::exec()
   file.closeGroup();
   file.close();
 
+
   prog.report(1, "Initializing all pixels");
 
   //----------------- Pad Empty Pixels -------------------------------
@@ -176,31 +205,6 @@ void LoadSNSEventNexus::exec()
 
   //The pulse times will be empty if not specified in the DAS logs.
   pulseTimes.clear();
-
-  prog.report(1, "Loading DAS logs");
-
-  // --------------------- Load DAS Logs -----------------
-  // do the actual work
-  IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
-
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-  try
-  {
-    g_log.information() << "Loading logs from NeXus file..." << endl;
-    loadLogs->setPropertyValue("Filename", m_filename);
-    loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", WS);
-    loadLogs->execute();
-
-    //If successful, we can try to load the pulse times
-    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
-    std::vector<Kernel::dateAndTime> temp = log->timesAsVector();
-    for (size_t i =0; i < temp.size(); i++)
-      pulseTimes.push_back( Kernel::DateAndTime::get_from_absolute_time( temp[i] ) );
-  }
-  catch (...)
-  {
-    g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
-  }
 
   // -- Time filtering --
   double filter_time_start_sec, filter_time_stop_sec;

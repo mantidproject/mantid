@@ -608,7 +608,7 @@ namespace Mantid
       std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
 
 
-      // iterator to browse throw the multimap: paramInfoFromIDF
+      // iterator to browse through the multimap: paramInfoFromIDF
 
       std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> > :: const_iterator it;
       std::pair<std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator,
@@ -621,7 +621,7 @@ namespace Mantid
       unsigned int N = logfileProp.size();
       for (unsigned int i = 0; i < N; i++)
       {
-        // Remove the path, the run number and extension from logfile filename
+        // Get the name of the timeseries property
 
         std::string logName = logfileProp[i]->name();
 

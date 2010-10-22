@@ -30,15 +30,18 @@ class LoadSNSEventNexusTest : public CxxTest::TestSuite
 {
 public:
 
-    void testExec()
+  void testExec()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadSNSEventNexus ld;
         std::string outws_name = "cncs";
         ld.initialize();
-        ld.setPropertyValue("OutputWorkspace",outws_name);
-        //ld.setPropertyValue("Filename","/home/janik/data/PG3_732_event.nxs");
         ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
+        ld.setPropertyValue("OutputWorkspace",outws_name);
+        ld.setPropertyValue("FilterByTof_Min", "-1e10");
+        ld.setPropertyValue("FilterByTof_Max", "1e10");
+        ld.setPropertyValue("FilterByTime_Start", "-1e10");
+        ld.setPropertyValue("FilterByTime_Stop", "1e10");
 
         ld.execute();
         TS_ASSERT( ld.isExecuted() );
@@ -55,6 +58,7 @@ public:
         TS_ASSERT_DELTA( (*WS->refX(0))[1],  60830.4, 0.05);
 
         //Check one event from one pixel - does it have a reasonable pulse time
+        std::cout << WS->getEventListPtr(1000)->getEvents()[0].pulseTime() << "\n";
         TS_ASSERT( WS->getEventListPtr(1000)->getEvents()[0].pulseTime() > 1e9*365*10 );
 
         //Longer, more thorough test
@@ -129,6 +133,8 @@ public:
         ld.setPropertyValue("Filename","../../../../Test/AutoTestData/CNCS_7850_event.nxs");
         ld.setPropertyValue("FilterByTime_Start", "300.0");
         ld.setPropertyValue("FilterByTime_Stop", "600.0");
+        ld.setPropertyValue("FilterByTof_Min", "-1e10");
+        ld.setPropertyValue("FilterByTof_Max", "1e10");
 
         ld.execute();
         TS_ASSERT( ld.isExecuted() );
@@ -144,7 +150,36 @@ public:
         //Check one event from one pixel - does it have a reasonable pulse time
         TS_ASSERT( WS->getEventListPtr(7)->getEvents()[0].pulseTime() > 1e9*365*10 );
     }
+
+
+//
+//    void xtestExec_SNAP()
+//    {
+//      Mantid::API::FrameworkManager::Instance();
+//      LoadSNSEventNexus ld;
+//      std::string outws_name = "snap";
+//      ld.initialize();
+//      ld.setPropertyValue("Filename","/home/8oz/data/SNAP_4105_event.nxs");
+//      ld.setPropertyValue("OutputWorkspace",outws_name);
+//      ld.setPropertyValue("FilterByTof_Min", "-1e10");
+//      ld.setPropertyValue("FilterByTof_Max", "1e10");
+//      ld.setPropertyValue("FilterByTime_Start", "-1e10");
+//      ld.setPropertyValue("FilterByTime_Stop", "1e10");
+//
+//      ld.execute();
+//      TS_ASSERT( ld.isExecuted() );
+//
+//      DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+//      //Valid WS and it is an EventWorkspace
+//      TS_ASSERT( WS );
+//      //Pixels have to be padded
+//      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 18);
+//
+//    }
+
+
 };
+
 
 #endif /*LOADSNSEVENTNEXUSTEST_H_*/
 

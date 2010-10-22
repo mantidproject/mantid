@@ -1388,6 +1388,7 @@ namespace Mantid
           }
           else if ( numberLogfileEle >= 1 )
           {
+            // <logfile > tag was used at least once.
             pLogfileElem = static_cast<Element*>(pNLlogfile->item(0));
             if ( !pLogfileElem->hasAttribute("id") )
               throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
