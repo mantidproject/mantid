@@ -3,36 +3,50 @@
 
 namespace Mantid
 {
-	namespace MDAlgorithms
-	{
-		InvalidParameter::InvalidParameter() 
-		{
-		}
-		
-		std::string InvalidParameter::getName() const
-		{
-			return parameterName();
-		}
+    namespace MDAlgorithms
+    {
+        InvalidParameter::InvalidParameter()
+        {
+        }
 
-		bool InvalidParameter::isValid() const
-		{
-			return false;
-		}
+        InvalidParameter::InvalidParameter(std::string value): m_value(value) 
+        {
+        }
 
-		InvalidParameter* InvalidParameter::cloneImp() const
-		{
-			return new InvalidParameter;
-		}
+        std::string InvalidParameter::getName() const
+        {
+            return parameterName();
+        }
 
-		std::auto_ptr<InvalidParameter> InvalidParameter::clone() const
-		{
-			return std::auto_ptr<InvalidParameter>(cloneImp());
-		}
+        std::string InvalidParameter::getValue() const
+        {
+            return m_value;
+        }
 
-		InvalidParameter::~InvalidParameter()
-		{
-		}
-	}
+        bool InvalidParameter::isValid() const
+        {
+            return false;
+        }
+
+        InvalidParameter* InvalidParameter::cloneImp() const
+        {
+            return new InvalidParameter(m_value);
+        }
+
+        std::auto_ptr<InvalidParameter> InvalidParameter::clone() const
+        {
+            return std::auto_ptr<InvalidParameter>(cloneImp());
+        }
+
+        InvalidParameter::~InvalidParameter()
+        {
+        }
+
+        std::string InvalidParameter::toXML() const
+        {
+            throw std::runtime_error("Invalid parameters cannot be represented in xml.");
+        }
+    }
 
 
 }

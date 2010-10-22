@@ -6,53 +6,56 @@
 #include <memory>
 #include "OriginParameter.h"
 
-using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDDataObjects;
-
 class OriginParameterTest : public CxxTest::TestSuite
 {
- public:
-	
+public:
+
     void testCreate()
-	{
-	  OriginParameter origin(0, 1, 2);
-	  TSM_ASSERT_EQUALS("OriginParameter getX() is not wired-up correctly.", 0, origin.getX() );
-	  TSM_ASSERT_EQUALS("OriginParameter getY() is not wired-up correctly.", 1, origin.getY() );
-	  TSM_ASSERT_EQUALS("OriginParameter getZ() is not wired-up correctly.", 2, origin.getZ() );
-	}
-	
-	void testIsValid()
-	{
-	  OriginParameter origin(0, 0, 0);
-	  TSM_ASSERT_EQUALS("The OriginParameter should be valid.", true, origin.isValid());
-	}
-	
-	void testClone()
-	{
-	  OriginParameter original(0, 1, 2);
-	  std::auto_ptr<OriginParameter> cloned = original.clone();
-	  
-	  TSM_ASSERT_EQUALS("Cloned OriginParameter getX() is not same as original.", 0, cloned->getX() );
-	  TSM_ASSERT_EQUALS("Cloned OriginParameter getY() is not same as original.", 1, cloned->getY() );
-	  TSM_ASSERT_EQUALS("Cloned OriginParameter getZ() is not same as original.", 2, cloned->getZ() );
-	}
-	
-	void testCopy()
-	{
-	  OriginParameter original(0, 1, 2);
-	  OriginParameter copy(original);
-	  TSM_ASSERT_EQUALS("Copied OriginParameter getX() is not same as original.", 0, copy.getX() );
-	  TSM_ASSERT_EQUALS("Copied OriginParameter getY() is not same as original.", 1, copy.getY() );
-	  TSM_ASSERT_EQUALS("Copied OriginParameter getZ() is not same as original.", 2, copy.getZ() );
-	}
-	
-	void testGetNameFunctionsEquivalent()
-	{
-	  OriginParameter origin(0, 0, 0);
-	  TSM_ASSERT_EQUALS("The static name and the dynamic name of the OriginParameter do not match.", origin.getName(),  OriginParameter::parameterName())
-	}
-	
-	
+    {
+
+        Mantid::MDAlgorithms::OriginParameter origin(0, 1, 2);
+        TSM_ASSERT_EQUALS("OriginParameter getX() is not wired-up correctly.", 0, origin.getX() );
+        TSM_ASSERT_EQUALS("OriginParameter getY() is not wired-up correctly.", 1, origin.getY() );
+        TSM_ASSERT_EQUALS("OriginParameter getZ() is not wired-up correctly.", 2, origin.getZ() );
+    }
+
+    void testIsValid()
+    {
+        Mantid::MDAlgorithms::OriginParameter origin(0, 0, 0);
+        TSM_ASSERT_EQUALS("The OriginParameter should be valid.", true, origin.isValid());
+    }
+
+    void testClone()
+    {
+        Mantid::MDAlgorithms::OriginParameter original(0, 1, 2);
+        std::auto_ptr<Mantid::MDAlgorithms::OriginParameter> cloned = original.clone();
+
+        TSM_ASSERT_EQUALS("Cloned OriginParameter getX() is not same as original.", 0, cloned->getX() );
+        TSM_ASSERT_EQUALS("Cloned OriginParameter getY() is not same as original.", 1, cloned->getY() );
+        TSM_ASSERT_EQUALS("Cloned OriginParameter getZ() is not same as original.", 2, cloned->getZ() );
+    }
+
+    void testCopy()
+    {
+        Mantid::MDAlgorithms::OriginParameter original(0, 1, 2);
+        Mantid::MDAlgorithms::OriginParameter copy(original);
+        TSM_ASSERT_EQUALS("Copied OriginParameter getX() is not same as original.", 0, copy.getX() );
+        TSM_ASSERT_EQUALS("Copied OriginParameter getY() is not same as original.", 1, copy.getY() );
+        TSM_ASSERT_EQUALS("Copied OriginParameter getZ() is not same as original.", 2, copy.getZ() );
+    }
+
+    void testGetNameFunctionsEquivalent()
+    {
+        Mantid::MDAlgorithms::OriginParameter origin(0, 0, 0);
+        TSM_ASSERT_EQUALS("The static name and the dynamic name of the OriginParameter do not match.", origin.getName(),  Mantid::MDAlgorithms::OriginParameter::parameterName())
+    }
+
+    void testToXML()
+    {
+        Mantid::MDAlgorithms::OriginParameter origin(1, 2, 3);
+        TSM_ASSERT_EQUALS("The generated xml for the OriginParameter does not match the specification.", "<Parameter><Type>OriginParameter</Type><Value>1.0000, 2.0000, 3.0000</Value></Parameter>", origin.toXML());
+    }
+
 };
 
 #endif

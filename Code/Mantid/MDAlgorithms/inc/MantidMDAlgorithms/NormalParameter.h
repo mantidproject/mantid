@@ -9,79 +9,79 @@
 #include "boost/smart_ptr/shared_ptr.hpp"
 #include "IParameter.h"
 
-using namespace Mantid::Kernel;
-
 namespace Mantid
 {
-	namespace MDAlgorithms
-	{
-		/** A base class for absorption correction algorithms.
+    namespace MDAlgorithms
+    {
+        /** A base class for absorption correction algorithms.
 
-		Implementation of a parameter expressing normal vector information.
+        Implementation of a parameter expressing normal vector information.
 
-		@author Owen Arnold, Tessella plc
-		@date 01/10/2010
+        @author Owen Arnold, Tessella plc
+        @date 01/10/2010
 
-		Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-		This file is part of Mantid.
+        This file is part of Mantid.
 
-		Mantid is free software; you can redistribute it and/or modify
-		it under the terms of the GNU General Public License as published by
-		the Free Software Foundation; either version 3 of the License, or
-		(at your option) any later version.
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
 
-		Mantid is distributed in the hope that it will be useful,
-		but WITHOUT ANY WARRANTY; without even the implied warranty of
-		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-		GNU General Public License for more details.
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
 
-		You should have received a copy of the GNU General Public License
-		along with this program.  If not, see <http://www.gnu.org/licenses/>.
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-		File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-		Code Documentation is available at: <http://doxygen.mantidproject.org>
-		*/
+        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
+        */
 
-		class DLLExport NormalParameter : public IParameter
-		{
+        class DLLExport NormalParameter : public IParameter
+        {
 
-		private:
+        private:
 
-			std::vector<double> m_normal;
+            std::vector<double> m_normal;
 
-		protected:
+        protected:
 
-			NormalParameter* cloneImp() const;
+            NormalParameter* cloneImp() const;
 
-		public:
+        public:
 
-			NormalParameter(double n1, double n2, double n3);
+            NormalParameter(double n1, double n2, double n3);
 
-			NormalParameter::NormalParameter(NormalParameter& other);
+            NormalParameter::NormalParameter(NormalParameter& other);
 
-			std::string getName() const;
+            std::string getName() const;
 
-			bool isValid() const;
+            bool isValid() const;
 
-			NormalParameter reflect();
+            NormalParameter reflect();
 
-			std::auto_ptr<NormalParameter> clone() const;
+            std::auto_ptr<NormalParameter> clone() const;
 
-		    ~NormalParameter();
-						
-			double getX() const;
+            ~NormalParameter();
 
-			double getY() const;
+            double getX() const;
 
-			double getZ() const;
+            double getY() const;
 
-			static std::string parameterName()
-			{
-				return "NormalParameter";
-			}
-		};
-	}
+            double getZ() const;
+
+            std::string toXML() const;
+
+            static std::string parameterName()
+            {
+                return "NormalParameter";
+            }
+        };
+    }
 }
 
 #endif

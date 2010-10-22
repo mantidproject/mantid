@@ -1,24 +1,34 @@
-#ifndef COMPOSITEFUNCTONBUILDER_H_
-#define COMPOSITEFUNCTONBUILDER_H_
+#ifndef FUNCTION_ABSTRACT_PARSER_H_
+#define FUNCTION_ABSTRACT_PARSER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidKernel/System.h"
+#include <memory>
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/IParameter.h"
-#include "MantidMDAlgorithms/IImplicitFunction.h"
-#include "MantidMDAlgorithms/IFunctionBuilder.h"
+
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
+
+#include "MantidKernel/System.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "IFunctionBuilder.h"
+#include "ParameterParser.h"
 
 namespace Mantid
 {
-
 	namespace MDAlgorithms
 	{
 		/** A base class for absorption correction algorithms.
 
-		This builder is for constructing composite functions.
+		XML Parser for function types. See chain of reponsibility pattern.
 
 		@author Owen Arnold, Tessella plc
 		@date 01/10/2010
@@ -43,20 +53,29 @@ namespace Mantid
 		File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 		Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
-
-
-		class DLLExport CompositeFunctionBuilder : public IFunctionBuilder
+		/*
+		                   class DLLExport FunctionParser
 		{
-		private:
-			std::vector<boost::shared_ptr<IFunctionBuilder> > m_functionBuilders;
-		public:
-			CompositeFunctionBuilder();
-			void addFunctionBuilder(IFunctionBuilder* funcBuilder);
-			void addParameter(IParameter& parameter);
-			std::auto_ptr<Mantid::API::IImplicitFunction> create() const;
-			~CompositeFunctionBuilder();
-		};
+		protected:
+			std::auto_ptr<IFunctionBuilder> m_functionBuilder;
+			std::auto_ptr<ParameterParser> m_paramParserRoot; //Chain of responsibility 
+			std::auto_ptr<FunctionParser> m_successor;
+			std::auto_ptr<Parameter> parseParameter(Poco::XML::Element* pRoot)
+			{
+				m_paramParserRoot->createParameter(pRoot);
+			}
 
+		public:
+			FunctionParser(std::auto_ptr<ParameterParser> parameterParser) : m_paramParserRoot(parameterParser)
+			{
+			}
+
+			std::auto_ptr<IFunctionBuilder> createFunctionBuilder() = 0;
+			void SetSuccessorParser(std::auto_ptr<FunctionParser> parser) = 0;
+
+			
+		};
+		*/
 	}
 }
 

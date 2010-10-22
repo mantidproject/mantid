@@ -2,10 +2,10 @@
 
 namespace Mantid
 {
-	namespace MDAlgorithms
-	{
-		IFunctionBuilder::~IFunctionBuilder()
-		{
-		}
-	}
+    namespace MDAlgorithms
+    {
+        IFunctionBuilder::~IFunctionBuilder()
+        {
+        }
+    }
 }

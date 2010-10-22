@@ -3,66 +3,77 @@
 
 namespace Mantid
 {
-	namespace MDAlgorithms
-	{
-		NormalParameter::NormalParameter(double n1, double n2, double n3)
-		{
-			m_normal.push_back(n1);
-			m_normal.push_back(n2);
-			m_normal.push_back(n3);
-		}
+    namespace MDAlgorithms
+    {
+        NormalParameter::NormalParameter(double n1, double n2, double n3)
+        {
+            m_normal.push_back(n1);
+            m_normal.push_back(n2);
+            m_normal.push_back(n3);
+        }
 
-		NormalParameter::NormalParameter(NormalParameter& other)
-		{
-			this->m_normal = std::vector<double>(3);
-			std::copy(other.m_normal.begin(), other.m_normal.end(), this->m_normal.begin());
-		}
+        NormalParameter::NormalParameter(NormalParameter& other)
+        {
+            this->m_normal = std::vector<double>(3);
+            std::copy(other.m_normal.begin(), other.m_normal.end(), this->m_normal.begin());
+        }
 
-		NormalParameter NormalParameter::reflect()
-		{
-			return NormalParameter(-m_normal.at(0), -m_normal.at(1), -m_normal.at(2));
-		}
-		
-		
-		std::string NormalParameter::getName() const
-		{
-			return parameterName();
-		}
+        NormalParameter NormalParameter::reflect()
+        {
+            return NormalParameter(-m_normal.at(0), -m_normal.at(1), -m_normal.at(2));
+        }
 
-		bool NormalParameter::isValid() const
-		{
-			return true;
-		}
 
-		NormalParameter* NormalParameter::cloneImp() const
-		{
-			return new NormalParameter(m_normal.at(0), m_normal.at(1), m_normal.at(2)); 
-		}
+        std::string NormalParameter::getName() const
+        {
+            return parameterName();
+        }
 
-		std::auto_ptr<NormalParameter> NormalParameter::clone() const
-		{
-			return std::auto_ptr<NormalParameter>(cloneImp());
-		}
+        bool NormalParameter::isValid() const
+        {
+            return true;
+        }
 
-		NormalParameter::~NormalParameter()
-		{
-		}
+        NormalParameter* NormalParameter::cloneImp() const
+        {
+            return new NormalParameter(m_normal.at(0), m_normal.at(1), m_normal.at(2)); 
+        }
 
-		double NormalParameter::getX() const
-		{
-			return m_normal.at(0);
-		}
+        std::auto_ptr<NormalParameter> NormalParameter::clone() const
+        {
+            return std::auto_ptr<NormalParameter>(cloneImp());
+        }
 
-		double NormalParameter::getY() const
-		{
-			return m_normal.at(1);
-		}
+        NormalParameter::~NormalParameter()
+        {
+        }
 
-		double NormalParameter::getZ() const
-		{
-			return m_normal.at(2);
-		}
-	}
+        double NormalParameter::getX() const
+        {
+            return m_normal.at(0);
+        }
+
+        double NormalParameter::getY() const
+        {
+            return m_normal.at(1);
+        }
+
+        double NormalParameter::getZ() const
+        {
+            return m_normal.at(2);
+        }
+
+        std::string NormalParameter::toXML() const
+        {
+            //TODO use proper DOM library for this
+            char buffer[256];
+            sprintf(buffer, "<Parameter><Type>NormalParameter</Type><Value>%.4f, %.4f, %.4f</Value></Parameter>", m_normal.at(0),  m_normal.at(1), m_normal.at(2));
+
+            std::string xmlFragment = std::string(buffer);
+
+            return xmlFragment;
+        }
+    }
 
 
 }

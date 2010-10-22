@@ -1,25 +1,35 @@
-#ifndef PLANEFUNCTONBUILDER_H_
-#define PLANEFUNCTONBUILDER_H_
+#ifndef PARAMETER_PARSER_H_
+#define PARAMETER_PARSER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include <memory>
-#include "MantidKernel/System.h"
+
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MantidMDAlgorithms/IFunctionBuilder.h"
-#include "MantidMDAlgorithms/IParameter.h"
+
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
+
+#include "MantidKernel/System.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "OriginParameter.h"
+#include "NormalParameter.h"
+#include "InvalidParameter.h"
 
 namespace Mantid
 {
-
     namespace MDAlgorithms
     {
         /** A base class for absorption correction algorithms.
 
-        This class is the abstract type for building IImplicitFunctions
+        XML Parser for parameter types
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010
@@ -45,19 +55,14 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-
-        class DLLExport PlaneFunctionBuilder : public IFunctionBuilder
+        class DLLExport ParameterParser
         {
-        protected:
-            std::auto_ptr<IParameter> origin;
-            std::auto_ptr<IParameter> normal;
         public:
-            PlaneFunctionBuilder();
-            void addParameter(IParameter& parameter);
-            std::auto_ptr<Mantid::API::IImplicitFunction> create() const;
-            ~PlaneFunctionBuilder();
+            virtual std::auto_ptr<IParameter> createParameter(Poco::XML::Element* parameterElement) = 0;
+            virtual void setSuccessorParser(std::auto_ptr<ParameterParser> paramParser) = 0;
+        protected:
+            std::auto_ptr<ParameterParser> m_successor;
         };
-
     }
 }
 

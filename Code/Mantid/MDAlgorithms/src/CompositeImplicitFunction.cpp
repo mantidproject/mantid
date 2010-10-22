@@ -3,37 +3,37 @@
 
 namespace Mantid
 {
-	namespace MDAlgorithms
-	{
+    namespace MDAlgorithms
+    {
 
-		CompositeImplicitFunction::CompositeImplicitFunction()
-		{	
-		}
+        CompositeImplicitFunction::CompositeImplicitFunction()
+        {	
+        }
 
-		CompositeImplicitFunction::~CompositeImplicitFunction()
-		{
-		}
+        CompositeImplicitFunction::~CompositeImplicitFunction()
+        {
+        }
 
-		void CompositeImplicitFunction::addFunction(boost::shared_ptr<IImplicitFunction> constituentFunction)
-		{
-			this->m_Functions.push_back(constituentFunction);
-		}
+        void CompositeImplicitFunction::addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction> constituentFunction)
+        {
+            this->m_Functions.push_back(constituentFunction);
+        }
 
-		bool CompositeImplicitFunction::evaluate(MDDataObjects::point3D const * const pPoint3D) const
-		{
-			bool evalResult = false;
-			std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>>::const_iterator it;
-			for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
-			{
-				evalResult = (*it)->evaluate(pPoint3D);
-				if(!evalResult)
-				{
-					break;
-				}
-			}
-			return evalResult;
-		}
+        bool CompositeImplicitFunction::evaluate(MDDataObjects::point3D const * const pPoint3D) const
+        {
+            bool evalResult = false;
+            std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>>::const_iterator it;
+            for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
+            {
+                evalResult = (*it)->evaluate(pPoint3D);
+                if(!evalResult)
+                {
+                    break;
+                }
+            }
+            return evalResult;
+        }
 
 
-	}
+    }
 }
