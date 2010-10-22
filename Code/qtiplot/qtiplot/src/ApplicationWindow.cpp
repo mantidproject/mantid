@@ -156,7 +156,7 @@
 #include <QVarLengthArray>
 #include <QList>
 #include <QUrl>
-#include <QAssistantClient>
+//#include <QAssistantClient>
 #include <QFontComboBox>
 #include <QSpinBox>
 #include <QMdiArea>
@@ -342,7 +342,7 @@ void ApplicationWindow::init(bool factorySettings)
   insertTranslatedStrings();
   disableToolbars();
 
-  assistant = new QAssistantClient( QString(), this );
+//  assistant = new QAssistantClient( QString(), this );
 
   actionNextWindow = new QAction(QIcon(getQPixmap("next_xpm")), tr("&Next","next window"), this);
   actionNextWindow->setShortcut( tr("F5","next window shortcut") );
@@ -9436,10 +9436,10 @@ void ApplicationWindow::showStandAloneHelp()
   }
 
   QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  QAssistantClient *assist = new QAssistantClient( QString(), 0);
-  assist->setArguments( cmdLst );
-  assist->showPage(helpPath);
-  connect(assist, SIGNAL(assistantClosed()), qApp, SLOT(quit()) );
+//  QAssistantClient *assist = new QAssistantClient( QString(), 0);
+//  assist->setArguments( cmdLst );
+//  assist->showPage(helpPath);
+//  connect(assist, SIGNAL(assistantClosed()), qApp, SLOT(quit()) );
 }
 
 void ApplicationWindow::showHelp()
@@ -9472,8 +9472,8 @@ void ApplicationWindow::showHelp()
   }
 
   QStringList cmdLst = QStringList() << "-profile" << profilePath;
-  assistant->setArguments( cmdLst );
-  assistant->showPage(helpFilePath);
+//  assistant->setArguments( cmdLst );
+//  assistant->showPage(helpFilePath);
 }
 
 void ApplicationWindow::showPlotWizard()

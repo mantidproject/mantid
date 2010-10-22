@@ -61,7 +61,7 @@ class QToolButton;
 class QShortcut;
 class QMenu;
 class QToolBar;
-class QAssistantClient;
+//class QAssistantClient;
 class QLocale;
 class QMdiArea;
 class QUndoView;
@@ -1258,7 +1258,7 @@ private:
 	Graph *lastCopiedLayer;
 	QSplitter *explorerSplitter;
 
-	QAssistantClient *assistant;
+//	QAssistantClient *assistant;
 	ScriptingWindow *scriptingWindow; //Mantid
         Script *m_iface_script;
 	QTranslator *appTranslator, *qtTranslator;
