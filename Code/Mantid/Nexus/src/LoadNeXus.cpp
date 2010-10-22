@@ -240,7 +240,6 @@ namespace Mantid
       while(noError)
       {
         std::stringstream suffix;
-        // period++;
         suffix << (period+1);
         std::string opWS = outputWorkspace + "_"+ suffix.str();
         std::string WSName = m_workspace + "_" + suffix.str();
@@ -304,7 +303,6 @@ namespace Mantid
       while(noError)
       {
         std::stringstream suffix;
-        // period++;
         suffix << (period+1);
         std::string opWS = outputWorkspace + "_"+suffix.str();
         std::string WSName = m_workspace + "_" + suffix.str();

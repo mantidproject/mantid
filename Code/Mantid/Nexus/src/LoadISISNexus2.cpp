@@ -228,7 +228,6 @@ namespace Mantid
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
         declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + "1", base_name + "1", Direction::Output));
-        wksp_group->add(getPropertyValue("OutputWorkspace"));
         wksp_group->add(base_name + "1");
         setProperty(prop_name + "1", local_workspace);
 

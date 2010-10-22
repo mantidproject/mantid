@@ -122,7 +122,6 @@ void LoadNexusProcessed::exec()
     //This forms the name of the group
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
-    wksp_group->add(base_name);
     base_name += "_";
     const std::string prop_name = "OutputWorkspace_";
     for( int p = 1; p <= nperiods; ++p )

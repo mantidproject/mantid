@@ -139,8 +139,7 @@ namespace Mantid
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
       if(m_numberOfPeriods>1)
       {	
-        if(wsGrpSptr)wsGrpSptr->add(localWSName);
-        setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+          setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
 

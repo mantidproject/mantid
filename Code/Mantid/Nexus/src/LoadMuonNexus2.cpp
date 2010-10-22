@@ -156,7 +156,6 @@ namespace Mantid
 
       if(m_numberOfPeriods>1)
       {	
-        if(wsGrpSptr)wsGrpSptr->add(localWSName);
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
