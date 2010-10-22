@@ -160,7 +160,7 @@ namespace Mantid
         else
         {
 
-          for( int period = 1; period < wsGroup->getNumberOfEntries(); ++period )
+          for( int period = 1; period <= wsGroup->getNumberOfEntries(); ++period )
           {
             std::stringstream suffix;
             suffix << period;
