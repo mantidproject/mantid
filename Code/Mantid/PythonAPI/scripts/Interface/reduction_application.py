@@ -91,6 +91,8 @@ class ReductionGUI(QtGui.QMainWindow):
         """
             Set up the File menu and update the menu with recent files
         """
+        self.file_menu.clear()
+
         openAction = QtGui.QAction("&Open...", self)
         openAction.setShortcut("Ctrl+O")
         openAction.setStatusTip("Open an XML file containing reduction parameters")
@@ -113,18 +115,19 @@ class ReductionGUI(QtGui.QMainWindow):
         quitAction = QtGui.QAction("&Quit", self)
         quitAction.setShortcut("Ctrl+Q")
         self.connect(quitAction, QtCore.SIGNAL("triggered()"), self.close)
-    
-        clearAction = QtGui.QAction("&Clear settings and quit", self)
-        clearAction.setStatusTip("Restore initial application settings and close the application")
-        self.connect(clearAction, QtCore.SIGNAL("triggered()"), self._clear_and_close)
-    
-        self.file_menu.clear()
+        
         self.file_menu.addAction(openAction)
         self.file_menu.addAction(saveAction)
         self.file_menu.addAction(saveAsAction)
         self.file_menu.addAction(exportAction)
         self.file_menu.addSeparator()
-        self.file_menu.addAction(clearAction)
+
+        if self.general_settings.debug:
+            clearAction = QtGui.QAction("&Clear settings and quit", self)
+            clearAction.setStatusTip("Restore initial application settings and close the application")
+            self.connect(clearAction, QtCore.SIGNAL("triggered()"), self._clear_and_close)
+            self.file_menu.addAction(clearAction)
+            
         self.file_menu.addAction(quitAction)
         
         # TOOLS menu
@@ -133,8 +136,16 @@ class ReductionGUI(QtGui.QMainWindow):
         instrAction.setStatusTip("Select a new instrument")
         self.connect(instrAction, QtCore.SIGNAL("triggered()"), self._change_instrument)
     
+        debug_menu_item_str = "Turn debug mode ON"
+        if self.general_settings.debug:
+            debug_menu_item_str = "Turn debug mode OFF"
+        debugAction = QtGui.QAction(debug_menu_item_str, self)
+        debugAction.setStatusTip(debug_menu_item_str)
+        self.connect(debugAction, QtCore.SIGNAL("triggered()"), self._debug_mode)
+    
         self.tools_menu.clear()
         self.tools_menu.addAction(instrAction)
+        self.tools_menu.addAction(debugAction)
         
         recent_files = []
         for fname in self._recent_files:
@@ -148,6 +159,16 @@ class ReductionGUI(QtGui.QMainWindow):
                 action.setData(QtCore.QVariant(fname))
                 self.connect(action, QtCore.SIGNAL("triggered()"), self.open_file)
                 self.file_menu.addAction(action)
+
+    def _debug_mode(self, mode=None):
+        """
+            Set debug mode
+            @param mode: debug mode (True or False). If None, the debug mode will simply be flipped
+        """
+        if mode is None:
+            mode = not self.general_settings.debug
+        self.general_settings.debug = mode
+        self._update_file_menu()
 
     def _change_instrument(self):
         """

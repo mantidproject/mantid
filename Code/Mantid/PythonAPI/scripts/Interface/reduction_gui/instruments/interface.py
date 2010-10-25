@@ -80,7 +80,10 @@ class InstrumentInterface(object):
         try:
             return self.scripter.to_script(file_name)
         except RuntimeError, e:
-            msg = "The following error was encountered:\n\n%s" % unicode(e)
+            if self._settings.debug:
+                msg = "The following error was encountered:\n\n%s" % unicode(traceback.format_exc())
+            else:
+                msg = "The following error was encountered:\n\n%s" % unicode(e)
             self._warning("Reduction Parameters Incomplete", msg)
             return None
         
@@ -95,8 +98,11 @@ class InstrumentInterface(object):
             
             # Update widgets
             self.scripter.push_state()
-        except:
-            msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
+        except RuntimeError, e:
+            if self._settings.debug:
+                msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
+            else:
+                msg = "Reduction could not be executed:\n\n%s" % unicode(e)
             self._warning("Reduction failed", msg)
         
     def get_tabs(self):

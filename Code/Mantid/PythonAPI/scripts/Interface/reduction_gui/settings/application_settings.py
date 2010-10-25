@@ -6,6 +6,7 @@ class GeneralSettings(object):
         to the control widgets.
     """
     data_path = '.'
+    debug = False
     
     def __init__(self, settings=None):
         """
@@ -22,6 +23,8 @@ class GeneralSettings(object):
         """
         last_dir = QtCore.QVariant(QtCore.QString(self.data_path))
         settings.setValue("general_data_path", last_dir)
+        debug_mode = QtCore.QVariant(self.debug)
+        settings.setValue("debug_mode", debug_mode)
         
     def from_settings(self, settings):
         """
@@ -29,3 +32,4 @@ class GeneralSettings(object):
             @param settings: QSettings object
         """
         self.data_path = unicode(settings.value("general_data_path", QtCore.QVariant('.')).toString())
+        self.debug = settings.value("debug_mode", QtCore.QVariant('false')).toBool()
