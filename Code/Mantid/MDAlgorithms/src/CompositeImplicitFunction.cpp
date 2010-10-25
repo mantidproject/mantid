@@ -19,6 +19,11 @@ namespace Mantid
             this->m_Functions.push_back(constituentFunction);
         }
 
+        int CompositeImplicitFunction::getNFunctions() const
+        {
+            return this->m_Functions.size();
+        }
+
         bool CompositeImplicitFunction::evaluate(MDDataObjects::point3D const * const pPoint3D) const
         {
             bool evalResult = false;

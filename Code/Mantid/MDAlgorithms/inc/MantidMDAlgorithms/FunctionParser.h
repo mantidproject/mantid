@@ -59,6 +59,7 @@ namespace Mantid
         protected:
             std::auto_ptr<ParameterParser> m_paramParserRoot; //Chain of responsibility 
             std::auto_ptr<FunctionParser> m_successor;
+
             
             IParameter* parseParameter(Poco::XML::Element* pRoot)
             {
@@ -67,7 +68,7 @@ namespace Mantid
 
             void checkSuccessorExists()
             {
-                if(NULL == m_successor.get())
+                if(0 == m_successor.get())
                 {
                     std::string message = "There is no successor function parser"; 
                     throw std::runtime_error(message);

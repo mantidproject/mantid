@@ -73,6 +73,9 @@
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CompositeImplicitFunction.cpp">
@@ -112,6 +115,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PlaneFunctionParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CompositeFunctionParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

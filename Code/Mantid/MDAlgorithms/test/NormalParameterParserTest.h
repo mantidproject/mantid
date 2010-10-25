@@ -97,9 +97,6 @@ public:
 
         TSM_ASSERT("Chain of responsiblity did not execute as expected for NormalParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
     }
-
-
-
 };
 
 #endif

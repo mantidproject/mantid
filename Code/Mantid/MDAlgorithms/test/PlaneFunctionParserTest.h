@@ -1,14 +1,16 @@
 #ifndef TEST_PLANE_FUNCTION_PARSERS_H_
 #define TEST_PLANE_FUNCTION_PARSERS_H_
 
-#include <cxxtest/TestSuite.h>
+
 #include <vector>
 #include <memory>
+#include "FunctionParserTest.h"
 #include "PlaneFunctionParser.h"
 #include "NormalParameterParser.h"
 #include "OriginParameterParser.h"
 #include "InvalidParameterParser.h"
 #include "PlaneFunctionBuilder.h"
+#include <cxxtest/TestSuite.h>
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -19,26 +21,9 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
-class  PlaneFunctionParserTest : public CxxTest::TestSuite
+class  PlaneFunctionParserTest : public CxxTest::TestSuite, FunctionParserTest 
 {
 private:
-
-    //Mock function parser class.
-    class MockFunctionParser : public Mantid::MDAlgorithms::FunctionParser
-    {
-    public:
-        MockFunctionParser(Mantid::MDAlgorithms::ParameterParser* paramParser) : Mantid::MDAlgorithms::FunctionParser(paramParser) { ; }
-        MOCK_METHOD1(createFunctionBuilder, Mantid::MDAlgorithms::IFunctionBuilder*(Poco::XML::Element* functionElement));
-        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::FunctionParser* parameterElement));
-    };
-
-    //Mock parameter parser class.
-    class MockParameterParser : public Mantid::MDAlgorithms::ParameterParser 
-    {
-    public:
-        MOCK_METHOD1(createParameter, Mantid::MDAlgorithms::IParameter*(Poco::XML::Element* parameterElement));
-        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::ParameterParser* parameterParser));
-    };
 
     class ExposedPlaneFunctionParser : public Mantid::MDAlgorithms::PlaneFunctionParser
     {
@@ -51,20 +36,6 @@ private:
         }
         MOCK_METHOD1(createFunctionBuilder, Mantid::MDAlgorithms::IFunctionBuilder*(Poco::XML::Element* functionElement));
     };
-
-    //helper method to construct real parameter parser chain.
-    std::auto_ptr<Mantid::MDAlgorithms::ParameterParser> constructRootParameterParser()
-    {
-        using namespace Mantid::MDAlgorithms;
-        std::auto_ptr<ParameterParser> originParser = std::auto_ptr<ParameterParser>(new OriginParameterParser);
-        std::auto_ptr<ParameterParser> normalParser = std::auto_ptr<ParameterParser>(new NormalParameterParser);
-        std::auto_ptr<ParameterParser> invalidParser = std::auto_ptr<ParameterParser>(new InvalidParameterParser);
-
-        originParser->setSuccessorParser(invalidParser.release());
-        normalParser->setSuccessorParser(originParser.release());
-
-        return normalParser;
-    }
 
 public:
 
@@ -136,7 +107,7 @@ public:
         TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameters to give the correct nz value.", -3, planeFunction->getNormalZ());
     }
 
-    void testBadXMLThrows(void)
+    void testBadXMLSchemaThrows(void)
     {
         using namespace Mantid::MDAlgorithms;
 
@@ -154,7 +125,7 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         Poco::XML::DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>UnknownImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></Function>";
+        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>OtherImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></Function>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 

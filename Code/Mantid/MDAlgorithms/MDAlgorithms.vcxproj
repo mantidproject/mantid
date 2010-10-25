@@ -126,6 +126,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\FunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\IFunctionBuilder.h" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CompositeFunctionBuilder.cpp" />
+    <ClCompile Include="src\CompositeFunctionParser.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
     <ClCompile Include="src\IFunctionBuilder.cpp" />
     <ClCompile Include="src\InvalidParameter.cpp" />

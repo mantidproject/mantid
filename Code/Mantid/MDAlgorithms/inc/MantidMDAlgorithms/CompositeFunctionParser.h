@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
+#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_PARSER_H_
+#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_PARSER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,7 +7,9 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "IImplicitFunction.h"
+#include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
+#include "MantidMDAlgorithms/FunctionParser.h"
+
 
 namespace Mantid
 {
@@ -19,9 +21,7 @@ namespace Mantid
     {
         /** A base class for absorption correction algorithms.
 
-
-        This class represents a composite implicit function used for communicating and implementing an operation against 
-        an MDWorkspace.
+        This class to parse composite type functions and generate the associated builders.
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010
@@ -47,24 +47,19 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport CompositeImplicitFunction : public Mantid::API::IImplicitFunction
+        class DLLExport CompositeFunctionParser : public FunctionParser
         {
+
         public:
-            CompositeImplicitFunction();
-          
-            ~CompositeImplicitFunction();
-            void addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction> constituentFunction);
-            bool evaluate(MDDataObjects::point3D const * const pPoint3D) const;
-            int getNFunctions() const;
-            static std::string functionName()
-            {
-                return "CompositeImplicitFunction";
-            }
-        protected:
-            std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>> m_Functions;
-        private:
-            CompositeImplicitFunction(const CompositeImplicitFunction& other);
-            CompositeImplicitFunction& operator=(const CompositeImplicitFunction& other);
+            CompositeFunctionParser();
+
+            IFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
+
+            void setSuccessorParser(FunctionParser* parser);
+
+            CompositeFunctionBuilder* parseCompositeFunction(Poco::XML::Element* functionElement);
+
+            ~CompositeFunctionParser();
         };
     }
 }
