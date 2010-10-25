@@ -11809,8 +11809,8 @@ void ApplicationWindow::createActions()
 {
   actionCustomActionDialog = new QAction(tr("Manage Custom Menus..."), this);
   connect(actionCustomActionDialog, SIGNAL(activated()), this, SLOT(showCustomActionDialog()));
-
-  actionManageDirs = new QAction(tr("Manage User Directories"), this);
+  
+  actionManageDirs = new QAction(QIcon(getQPixmap("managefolders_xpm")), tr("Manage User Directories"), this);
   connect(actionManageDirs, SIGNAL(activated()), this, SLOT(showUserDirectoryDialog()));
 
   actionNewProject = new QAction(QIcon(getQPixmap("new_xpm")), tr("New &Project"), this);
