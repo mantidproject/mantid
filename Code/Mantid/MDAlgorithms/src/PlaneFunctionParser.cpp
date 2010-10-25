@@ -4,13 +4,13 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        PlaneFunctionParser::PlaneFunctionParser(std::auto_ptr<ParameterParser> parameterParser) : FunctionParser(parameterParser)
+        PlaneFunctionParser::PlaneFunctionParser(ParameterParser* parameterParser) : FunctionParser(parameterParser)
         {
         }
 
-        std::auto_ptr<IFunctionBuilder> PlaneFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
+        IFunctionBuilder* PlaneFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
         {
-            std::auto_ptr<IFunctionBuilder> functionBuilder;
+            IFunctionBuilder* functionBuilder;
             if("Function" != functionElement->localName())
             {
                std::string message = "This is not a function element: " + functionElement->localName(); 
@@ -25,14 +25,14 @@ namespace Mantid
             }
             else
             {
-                functionBuilder = std::auto_ptr<IFunctionBuilder>(parsePlaneFunction(functionElement));
+                functionBuilder = parsePlaneFunction(functionElement);
             }
             return functionBuilder;
         }
 
-        void PlaneFunctionParser::setSuccessorParser(std::auto_ptr<FunctionParser> parser)
+        void PlaneFunctionParser::setSuccessorParser(FunctionParser* parser)
         {
-            this->m_successor = parser;
+            this->m_successor = std::auto_ptr<FunctionParser>(parser);
         }
 
         PlaneFunctionBuilder * PlaneFunctionParser::parsePlaneFunction(Poco::XML::Element* functionElement)
@@ -63,6 +63,10 @@ namespace Mantid
             }
 
             return functionBuilder.release(); //convert to raw pointer and cancel smart management.
+        }
+
+        PlaneFunctionParser::~PlaneFunctionParser()
+        {
         }
     }
 }

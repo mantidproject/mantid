@@ -53,14 +53,15 @@ namespace Mantid
         {
 
         public:
-            PlaneFunctionParser(std::auto_ptr<ParameterParser> parameterParser);
+            PlaneFunctionParser(ParameterParser* parameterParser);
 
-            std::auto_ptr<IFunctionBuilder> createFunctionBuilder(Poco::XML::Element* functionElement);
+            IFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
 
-            void setSuccessorParser(std::auto_ptr<FunctionParser> parser);
+            void setSuccessorParser(FunctionParser* parser);
 
             PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
 
+            ~PlaneFunctionParser();
         };
     }
 }

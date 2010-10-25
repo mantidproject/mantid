@@ -23,28 +23,37 @@ class  PlaneFunctionParserTest : public CxxTest::TestSuite
 {
 private:
 
+    //Mock function parser class.
+    class MockFunctionParser : public Mantid::MDAlgorithms::FunctionParser
+    {
+    public:
+        MockFunctionParser(Mantid::MDAlgorithms::ParameterParser* paramParser) : Mantid::MDAlgorithms::FunctionParser(paramParser) { ; }
+        MOCK_METHOD1(createFunctionBuilder, Mantid::MDAlgorithms::IFunctionBuilder*(Poco::XML::Element* functionElement));
+        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::FunctionParser* parameterElement));
+    };
+
+    //Mock parameter parser class.
+    class MockParameterParser : public Mantid::MDAlgorithms::ParameterParser 
+    {
+    public:
+        MOCK_METHOD1(createParameter, Mantid::MDAlgorithms::IParameter*(Poco::XML::Element* parameterElement));
+        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::ParameterParser* parameterParser));
+    };
+
     class ExposedPlaneFunctionParser : public Mantid::MDAlgorithms::PlaneFunctionParser
     {
     public:
-        bool isSuccess;
-        ExposedPlaneFunctionParser(std::auto_ptr<Mantid::MDAlgorithms::ParameterParser> paramParser) :  PlaneFunctionParser(paramParser)
+        ExposedPlaneFunctionParser(Mantid::MDAlgorithms::ParameterParser* paramParser) :  PlaneFunctionParser(paramParser)
         {}
         Mantid::MDAlgorithms::PlaneFunctionBuilder* exposedParsePlaneFunction(Poco::XML::Element* functionElement)
         {
             return this->parsePlaneFunction(functionElement);
         }
-        std::auto_ptr<Mantid::MDAlgorithms::IFunctionBuilder> createFunctionBuilder(Poco::XML::Element* functionElement)
-        { 
-            isSuccess = true;
-            return Mantid::MDAlgorithms::PlaneFunctionParser::createFunctionBuilder(functionElement);
-        }
+        MOCK_METHOD1(createFunctionBuilder, Mantid::MDAlgorithms::IFunctionBuilder*(Poco::XML::Element* functionElement));
     };
 
-    std::auto_ptr<Mantid::MDAlgorithms::ParameterParser> rootParameterParser;
-
-public:
-
-    virtual void setUp()
+    //helper method to construct real parameter parser chain.
+    std::auto_ptr<Mantid::MDAlgorithms::ParameterParser> constructRootParameterParser()
     {
         using namespace Mantid::MDAlgorithms;
         std::auto_ptr<ParameterParser> originParser = std::auto_ptr<ParameterParser>(new OriginParameterParser);
@@ -54,10 +63,52 @@ public:
         originParser->setSuccessorParser(invalidParser.release());
         normalParser->setSuccessorParser(originParser.release());
 
-        //Apply the chain of responsibility for the parameter parsers.
-        this->rootParameterParser = normalParser;
+        return normalParser;
     }
 
+public:
+
+    void testCallsParameterParserChain()
+    {
+        using namespace Mantid::MDAlgorithms;
+
+        Poco::XML::DOMParser pParser;
+        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></Function>";
+        Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+        Poco::XML::Element* pRootElem = pDoc->documentElement();
+
+        MockParameterParser* paramParser = new MockParameterParser;
+        EXPECT_CALL(*paramParser, createParameter(testing::_))
+            .WillOnce(testing::Return(new OriginParameter(0, 0, 0)))
+            .WillOnce(testing::Return(new NormalParameter(0, 0, 0)));
+
+        PlaneFunctionParser functionParser(paramParser);
+        IFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
+        delete builder;
+
+        TSM_ASSERT("Incorrect calling of nested matched parameter parsers!", testing::Mock::VerifyAndClearExpectations(paramParser))
+    }
+
+    void testCallsFunctionParserChain()
+    {
+        using namespace Mantid::MDAlgorithms;
+
+        Poco::XML::DOMParser pParser;
+        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>X</Type><ParameterList></ParameterList></Function>";
+        Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+        Poco::XML::Element* pRootElem = pDoc->documentElement();
+
+        MockFunctionParser* mockFuncParser = new MockFunctionParser(constructRootParameterParser().release());
+        EXPECT_CALL(*mockFuncParser, createFunctionBuilder(testing::_))
+            .Times(1);
+
+        PlaneFunctionParser functionParser(constructRootParameterParser().release());
+        functionParser.setSuccessorParser(mockFuncParser);
+        IFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
+        delete builder;
+
+        TSM_ASSERT("Incorrect calling of nested successor function parsers", testing::Mock::VerifyAndClearExpectations(mockFuncParser))
+    }
 
     void testParsePlaneFunction(void)
     {
@@ -68,7 +119,7 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        ExposedPlaneFunctionParser functionParser(this->rootParameterParser);
+        ExposedPlaneFunctionParser functionParser(constructRootParameterParser().release());
         PlaneFunctionBuilder* planeBuilder = functionParser.exposedParsePlaneFunction(pRootElem);
         std::auto_ptr<Mantid::API::IImplicitFunction> impFunction = planeBuilder->create();
 
@@ -94,7 +145,7 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        PlaneFunctionParser functionParser(this->rootParameterParser);
+        PlaneFunctionParser functionParser(constructRootParameterParser().release());
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as Function element was expected, but not found.", functionParser.createFunctionBuilder(pRootElem), std::invalid_argument );
     }
 
@@ -107,7 +158,7 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        PlaneFunctionParser functionParser(this->rootParameterParser);
+        PlaneFunctionParser functionParser(constructRootParameterParser().release());
         TSM_ASSERT_THROWS("There is no successor parser setup for the PlaneFunctionParser", functionParser.createFunctionBuilder(pRootElem), std::runtime_error );
     }
 

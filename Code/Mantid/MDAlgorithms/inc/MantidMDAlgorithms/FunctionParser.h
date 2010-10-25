@@ -75,12 +75,13 @@ namespace Mantid
             }
 
         public:
-            FunctionParser(std::auto_ptr<ParameterParser> parameterParser) : m_paramParserRoot(parameterParser)
+            FunctionParser(ParameterParser* parameterParser) : m_paramParserRoot(std::auto_ptr<ParameterParser>(parameterParser))
             {
             }
 
-            virtual std::auto_ptr<IFunctionBuilder> createFunctionBuilder(Poco::XML::Element* functionElement) = 0;
-            virtual void setSuccessorParser(std::auto_ptr<FunctionParser> parser) = 0;
+            virtual IFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement) = 0;
+            virtual void setSuccessorParser(FunctionParser* parser) = 0;
+            virtual ~FunctionParser() = 0 {;}
 
         };
 
