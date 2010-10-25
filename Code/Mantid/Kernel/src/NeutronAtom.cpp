@@ -5,6 +5,7 @@
  *, , Author: pf9
  */
 #include "MantidKernel/NeutronAtom.h"
+#include <math.h> // this defines NAN
 
 using std::string;
 
@@ -43,8 +44,6 @@ NeutronAtom::NeutronAtom(const uint8_t z, const uint8_t a,
                          inc_scatt_length_real(inc_b_real), inc_scatt_length_img(inc_b_img),
                          coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
                          tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
-
-static const double NAN = 1./0.;
 
 static const NeutronAtom H( 1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);
 static const NeutronAtom H1(1, 1, -3.7406, 25.274, 1.7583, 80.27, 82.03, 0.3326);
@@ -417,6 +416,44 @@ static const NeutronAtom Cm(96, 0., 0., 0., 0., 0., 0.);
 static const NeutronAtom Cm244(96, 244, 9.5, 0., 11.3, 0., 11.3, 16.2);
 static const NeutronAtom Cm246(96, 246, 9.3, 0., 10.9, 0., 10.9, 1.36);
 static const NeutronAtom Cm248(96, 248, 7.7, 0., 7.5, 0., 7.5, 3);
+
+static const NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, B10,
+				    B11, C, C12, C13, N, N14, N15, O, O16, O17, O18, F, Ne,
+				    Ne20, Ne21, Ne22, Na, Mg, Mg24, Mg25, Mg26, Al, Si, 
+				    Si28, Si29, Si30, P, S, S32, S33, S34, S36, Cl, Cl35, 
+				    Cl37, Ar, Ar36, Ar38, Ar40, K, K39, K40, K41, Ca, Ca40, 
+				    Ca42, Ca43, Ca44, Ca46, Ca48, Sc, Ti, Ti46, Ti47, Ti48, 
+				    Ti49, Ti50, V, V50, V51, Cr, Cr50, Cr52, Cr53, Cr54, Mn,
+				    Fe, Fe54, Fe56, Fe57, Fe58, Co, Ni, Ni58, Ni60, Ni61,
+				    Ni62, Ni64, Cu, Cu63, Cu65, Zn, Zn64, Zn66, Zn67, Zn68,
+				    Zn70, Ga, Ga69, Ga71, Ge, Ge70, Ge72, Ge73, Ge74, Ge76,
+				    As, Se, Se74, Se76, Se77, Se78, Se80, Se82, Br, Br79, Br81,
+				    Kr, Kr78, Kr80, Kr82, Kr83, Kr84, Kr86, Rb, Rb85, Rb87, 
+				    Sr, Sr84, Sr86, Sr87, Sr88, Y, Zr, Zr90, Zr91, Zr92, Zr94,
+				    Zr96, Nb, Mo, Mo92, Mo94, Mo95, Mo96, Mo97, Mo98, Mo100, Tc,
+				    Ru, Ru96, Ru98, Ru99, Ru100, Ru101, Ru102, Ru104, Rh, Pd,
+				    Pd102, Pd104, Pd105, Pd106, Pd108, Pd110, Ag, Ag107, Ag109,
+				    Cd, Cd106, Cd108, Cd110, Cd111, Cd112, Cd113, Cd114, Cd116,
+				    In, In113, In115, Sn, Sn112, Sn114, Sn115, Sn116, Sn117,
+				    Sn118, Sn119, Sn120, Sn122, Sn124, Sb, Sb121, Sb123, Te,
+				    Te120, Te122, Te123, Te124, Te125, Te126, Te128, Te130, I,
+				    Xe, Xe124, Xe126, Xe128, Xe129, Xe130, Xe131, Xe132, Xe134,
+				    Xe136, Cs, Ba, Ba130, Ba132, Ba134, Ba135, Ba136, Ba137,
+				    Ba138, La, La138, La139, Ce, Ce136, Ce138, Ce140, Ce142, Pr,
+				    Nd, Nd142, Nd143, Nd144, Nd145, Nd146, Nd148, Nd150, Pm, Sm,
+				    Sm144, Sm147, Sm148, Sm149, Sm150, Sm152, Sm154, Eu, Eu151,
+				    Eu153, Gd, Gd152, Gd154, Gd155, Gd156, Gd157, Gd158, Gd160,
+				    Tb, Dy, Dy156, Dy158, Dy160, Dy161, Dy162, Dy163, Dy164, Ho,
+				    Er, Er162, Er164, Er166, Er167, Er168, Er170, Tm, Yb, Yb168,
+				    Yb170, Yb171, Yb172, Yb173, Yb174, Yb176, Lu, Lu175, Lu176,
+				    Hf, Hf174, Hf176, Hf177, Hf178, Hf179, Hf180, Ta, Ta180,
+				    Ta181, W, W180, W182, W183, W184, W186, Re, Re185, Re187, Os,
+				    Os184, Os186, Os187, Os188, Os189, Os190, Os192, Ir, Ir191,
+				    Ir193, Pt, Pt190, Pt192, Pt194, Pt195, Pt196, Pt198, Au, Hg,
+				    Hg196, Hg198, Hg199, Hg200, Hg201, Hg202, Hg204, Tl, Tl203,
+				    Tl205, Pb, Pb204, Pb206, Pb207, Pb208, Bi, Po, At, Rn, Fr, Ra,
+				    Ac, Th, Pa, U, U233, U234, U235, U238, Np, Pu, Pu238, Pu239,
+				    Pu240, Pu242, Am, Cm, Cm244, Cm246, Cm248};
 
 } // namespace Kernel
 } // namespace Mantid
