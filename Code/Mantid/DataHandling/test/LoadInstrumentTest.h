@@ -35,7 +35,7 @@ public:
   void testInit()
   {
     TS_ASSERT( !loader.isInitialized() );
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    loader.initialize();
     TS_ASSERT( loader.isInitialized() );
   }
 
@@ -689,7 +689,7 @@ public:
       loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_RECTANGULAR_UNIT_TESTING.xml");
       inputFile = loaderIDF2.getPropertyValue("Filename");
       loaderIDF2.setPropertyValue("Workspace", wsName);
-      TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
+      loaderIDF2.execute();
       TS_ASSERT( loaderIDF2.isExecuted() );
 
       // Get back the saved workspace
