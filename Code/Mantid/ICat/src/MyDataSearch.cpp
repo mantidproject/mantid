@@ -3,6 +3,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
+#include "MantidICat/ErrorHandling.h"
 
 namespace Mantid
 {
@@ -17,6 +18,7 @@ namespace Mantid
 		{
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
                             "The name of the workspace to store the result of MyData search ");
+      declareProperty("isValid",true,"Boolean option used to check the validity of login session", Direction::Output);
 			
 		}
 		/// Execution method.
@@ -40,7 +42,15 @@ namespace Mantid
 			}
 			
 			API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      try
+      {
 			catalog_sptr->myData(outputws);
+      }
+      catch(SessionException& e)
+      {
+        setProperty("isValid",false);
+        throw std::runtime_error(e.what());
+      }
 			setProperty("OutputWorkspace",outputws);
 		
 		}

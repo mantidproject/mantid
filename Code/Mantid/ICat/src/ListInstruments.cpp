@@ -45,10 +45,10 @@ namespace Mantid
 			{
 			catalog_sptr->listInstruments(intruments);
 			}
-			catch(SessionException& )
+			catch(SessionException& e )
 			{			   
 				setProperty("isValid",false);
-				throw std::runtime_error("Invalid Session");
+        throw std::runtime_error(e.what());
 			}
 			setProperty("InstrumentList",intruments);
 		}

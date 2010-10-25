@@ -43,10 +43,10 @@ namespace Mantid
 			{
 			catalog_sptr->listInvestigationTypes(investTypes);
 			}
-			catch(SessionException& )
+			catch(SessionException& e)
 			{			   
 				setProperty("isValid",false);
-				throw std::runtime_error("Invalid Session");
+        throw std::runtime_error(e.what());
 			}
 			setProperty("InvestigationTypes",investTypes);
 		}

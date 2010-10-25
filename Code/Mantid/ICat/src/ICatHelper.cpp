@@ -783,7 +783,7 @@ namespace Mantid
 				 }
 				 else
 				 {					
-					 throw SessionException("Invalid Session");
+					 throw SessionException("Please login to the information catalog using the login dialog provided.");
 				 }
 
 			 }
@@ -847,7 +847,7 @@ namespace Mantid
 				 }
 				 else
 				 {					
-					 throw SessionException("Invalid Session");
+					 throw SessionException("Please login to the information catalog using the login dialog provided.");
 				 }
 			 }
 			 if(response.return_.empty())
@@ -946,7 +946,16 @@ namespace Mantid
 			int ret=icat.getMyInvestigationsIncludes(&request,&response);
 			if(ret!=0)
 			{
-				CErrorHandling::throwErrorMessages(icat);
+				//CErrorHandling::throwErrorMessages(icat);
+
+         if(isvalidSession())
+				 {					
+					 CErrorHandling::throwErrorMessages(icat);
+				 }
+				 else
+				 {					
+					 throw SessionException("Please login to the information catalog using the login dialog provided.");
+				 }
 			}
 			if(response.return_.empty())
 			{	
