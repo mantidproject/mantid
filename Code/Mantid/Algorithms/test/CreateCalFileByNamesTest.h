@@ -30,13 +30,13 @@ class CreateCalFileByNamesTest : public CxxTest::TestSuite
 {
 public:
 
-  void testSNAP()
+  void testINES()
   {
     LoadEmptyInstrument loaderCAL;
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("Filename", "../../../../Test/Instrument/SNAP_Definition.xml");
+    loaderCAL.setPropertyValue("Filename", "../../../../Test/Instrument/INES_Definition.xml");
     inputFile = loaderCAL.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestCAL";
     loaderCAL.setPropertyValue("OutputWorkspace", wsName);
@@ -47,11 +47,11 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.initialize());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());
-    testerCAL.setPropertyValue("InstrumentName", "SNAP");
+    testerCAL.setPropertyValue("InstrumentName", "INES");
     std::string outputFile;
-    outputFile = "SNAP_test.cal";
+    outputFile = "INES_test.cal";
     testerCAL.setPropertyValue("GroupingFileName", outputFile);
-    testerCAL.setPropertyValue("GroupNames", "E1,E2,E3,E4,E5,E6,E7,E8,E9,W1,W2,W3,W4,W5,W6,W7,W8,W9");
+    testerCAL.setPropertyValue("GroupNames", "bank1A,bank2B,bank3C,bank4D,bank5E,bank6F,bank7G,bank8H,bank9I");
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isExecuted());
@@ -74,22 +74,22 @@ public:
     int i1,i2,i3,i4;
     double d1;
 
-    for (int i=0; i<5; ++i)
+    for (int i=0; i<4; ++i)
     {
       std::getline (in,line);
     }
-    for (int i=0; i<1179648; ++i)
+    for (int i=0; i<145; ++i)
     {
       in >> i1 >> i2 >> d1 >> i3 >> i4;
     }
 
     in.close();
 
-    TS_ASSERT_EQUALS(i1,1179648 );
-    TS_ASSERT_EQUALS(i2,65535 );
+    TS_ASSERT_EQUALS(i1,144 );
+    TS_ASSERT_EQUALS(i2,144 );
     TS_ASSERT_EQUALS(d1,0.000000 );
     TS_ASSERT_EQUALS(i3,1 );
-    TS_ASSERT_EQUALS(i4,18 );
+    TS_ASSERT_EQUALS(i4,9 );
 
 
     // remove file created by this algorithm
