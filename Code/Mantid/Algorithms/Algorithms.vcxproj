@@ -192,6 +192,7 @@
     <ClCompile Include="src\DiffractionFocussing.cpp" />
     <ClCompile Include="src\DiffractionFocussing2.cpp" />
     <ClCompile Include="src\Divide.cpp" />
+    <ClCompile Include="src\ElasticWindow.cpp" />
     <ClCompile Include="src\Exponential.cpp" />
     <ClCompile Include="src\ExponentialCorrection.cpp" />
     <ClCompile Include="src\ExtractFFTSpectrum.cpp" />
@@ -277,6 +278,7 @@
     <ClInclude Include="inc\MantidAlgorithms\AlignDetectors.h" />
     <ClInclude Include="inc\MantidAlgorithms\CorrectKiKf.h" />
     <ClInclude Include="inc\MantidAlgorithms\CreateWorkspace.h" />
+    <ClInclude Include="inc\MantidAlgorithms\ElasticWindow.h" />
     <ClInclude Include="inc\MantidAlgorithms\ExtractFFTSpectrum.h" />
     <ClInclude Include="inc\MantidAlgorithms\FFTSmooth2.h" />
     <ClInclude Include="inc\MantidAlgorithms\FilterByLogValue.h" />
