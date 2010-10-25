@@ -70,6 +70,7 @@ void LoadPreNeXusMonitors::exec()
   std::vector < std::string > monitorFilenames;
   std::vector < std::string > monitorBinMode;
   std::vector < size_t > monitorDims;
+  std::vector <int> monitorIDs;
 
   // Get the Runinfo filename from the property
   std::string runinfo_filename = this->getPropertyValue(RUNINFO_FILENAME);
@@ -133,8 +134,9 @@ void LoadPreNeXusMonitors::exec()
         // We only care about monitors
         if (pDataListChildren->item(i)->nodeName() == "monitor")
         {
-          monitorFilenames.push_back(
-              static_cast<Poco::XML::Element*> (pDataListChildren->item(i))->getAttribute("name"));
+        	Poco::XML::Element* element = static_cast<Poco::XML::Element*> (pDataListChildren->item(i));
+            monitorIDs.push_back(boost::lexical_cast<int>(element->getAttribute("id")));
+            monitorFilenames.push_back(element->getAttribute("name"));
         }
       }
       // Release the NodeList
@@ -209,9 +211,9 @@ void LoadPreNeXusMonitors::exec()
     localWorkspace->dataY(i) = intensity;
     localWorkspace->dataE(i) = error;
     // Just have spectrum number be the same as the monitor number but -ve.
-    detector_numbers[i] = -static_cast<int>(i + 1);
-    spectra_numbers[i] = (i + 1);
-    localWorkspace->getAxis(1)->spectraNo(i) = (i + 1);
+    detector_numbers[i] = -monitorIDs[i];
+    spectra_numbers[i] = monitorIDs[i];
+    localWorkspace->getAxis(1)->spectraNo(i) = monitorIDs[i];
   }
 
   g_log.debug() << "Setting axis zero to TOF" << std::endl;
