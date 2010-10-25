@@ -91,7 +91,7 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
   if (m_executionDate != Mantid::Kernel::DateAndTime::defaultTime)
   {
     char buffer [25];
-    std::tm date_as_tm = Mantid::Kernel::DateAndTime::to_tm( m_executionDate );
+    std::tm date_as_tm = Mantid::Kernel::DateAndTime::to_localtime_tm( m_executionDate );
     strftime (buffer,25,"%Y-%b-%d %H:%M:%S", &date_as_tm);
     os << std::string(indent,' ') << "Execution Date: " << buffer<<std::endl;
     os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
