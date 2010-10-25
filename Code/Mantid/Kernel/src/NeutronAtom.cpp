@@ -417,6 +417,7 @@ static const NeutronAtom Cm244(96, 244, 9.5, 0., 11.3, 0., 11.3, 16.2);
 static const NeutronAtom Cm246(96, 246, 9.3, 0., 10.9, 0., 10.9, 1.36);
 static const NeutronAtom Cm248(96, 248, 7.7, 0., 7.5, 0., 7.5, 3);
 
+/** All of the atoms in a single array so it can be searched. */
 static const NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, B10,
 				    B11, C, C12, C13, N, N14, N15, O, O16, O17, O18, F, Ne,
 				    Ne20, Ne21, Ne22, Na, Mg, Mg24, Mg25, Mg26, Al, Si, 
@@ -454,6 +455,9 @@ static const NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, B
 				    Tl205, Pb, Pb204, Pb206, Pb207, Pb208, Bi, Po, At, Rn, Fr, Ra,
 				    Ac, Th, Pa, U, U233, U234, U235, U238, Np, Pu, Pu238, Pu239,
 				    Pu240, Pu242, Am, Cm, Cm244, Cm246, Cm248};
+
+/** The total number of atoms in the array. */
+static const size_t NUM_ATOMS = 371;
 
 } // namespace Kernel
 } // namespace Mantid
