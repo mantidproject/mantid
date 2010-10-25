@@ -26,11 +26,11 @@ using namespace Mantid::DataObjects;
   
 // choose an instrument to test, we could test all instruments very time but I think a detailed test on the smallest workspace is enough as the other workspaces take a long time to process (Steve Williams)
                                     //MARI                               MAPS                         MERLIN
-static const std::string RAWFILE =  /**/"../../../../Test/AutoTestData/MAR11015.raw" /*"../../../../Test/AutoTestData/MAP10241.raw" "../../../../Test/AutoTestData/MER02257.raw"/**/;
-static const double TIMEOFF  =      /**/3.9                                 /*9.5                         5.3/**/   ;
-static const int MONITOR =          /**/2                                   /*41473                         69634/**/  ;
+static const std::string RAWFILE =  "../../../../Test/AutoTestData/MAR11015.raw" /*"../../../../Test/AutoTestData/MAP10241.raw" "../../../../Test/AutoTestData/MER02257.raw"*/;
+static const double TIMEOFF  =      3.9                                 /*9.5                         5.3/**/   ;
+static const int MONITOR =          2                                   /*41473                         69634/**/  ;
 static const int NUMRANDOM =        7;
-static const int DETECTS[NUMRANDOM]=/**/{4101,4804,1323,1101,3805,1323,3832} /*{22301173,12607241,11305101,52102085,41501009,43306001,32404209}/*
+static const int DETECTS[NUMRANDOM]={4101,4804,1323,1101,3805,1323,3832} /*{22301173,12607241,11305101,52102085,41501009,43306001,32404209}/*
                                                                                                        {6470765, 6470769, 6470773, 6470777, 6470781, 6470785, 6470789}/**/;
 
 class LoadDetectorInfoTest : public CxxTest::TestSuite
@@ -44,11 +44,11 @@ public:
 
     LoadDetectorInfo grouper;
 
-    TS_ASSERT_EQUALS( grouper.name(), "LoadDetectorInfo" )
-    TS_ASSERT_EQUALS( grouper.version(), 1 )
-    TS_ASSERT_EQUALS( grouper.category(), "DataHandling\\Detectors" )
-    TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
-    TS_ASSERT( grouper.isInitialized() )
+    TS_ASSERT_EQUALS( grouper.name(), "LoadDetectorInfo" );
+    TS_ASSERT_EQUALS( grouper.version(), 1 );
+    TS_ASSERT_EQUALS( grouper.category(), "DataHandling\\Detectors" );
+    TS_ASSERT_THROWS_NOTHING( grouper.initialize() );
+    TS_ASSERT( grouper.isInitialized() );
 
     // Set up a small workspace for testing
     makeSmallWS();
@@ -76,27 +76,27 @@ public:
       // this is only for PSD detectors, code 3
       if ( code[j] == "3" )
       {
-        TS_ASSERT(par)
-        TS_ASSERT_EQUALS(par->asString(), castaround(pressure[j]))
+        TS_ASSERT(par);
+        TS_ASSERT_EQUALS(par->asString(), castaround(pressure[j]));
         par = pmap.get(baseComp,"wallT(m)");
-        TS_ASSERT(par)
-	TS_ASSERT_EQUALS(par->asString(), castaround(wallThick[j]).substr(0,par->asString().length()))
+        TS_ASSERT(par);
+	TS_ASSERT_EQUALS(par->asString(), castaround(wallThick[j]).substr(0,par->asString().length()));
       }
-      else TS_ASSERT ( ! par )
+      else TS_ASSERT ( ! par );
     }
 
     // ensure that the loops below are entered into
-    TS_ASSERT( WS->getNumberHistograms() > 0 )
-    TS_ASSERT( WS->readX(0).size() > 0)
+    TS_ASSERT( WS->getNumberHistograms() > 0 );
+    TS_ASSERT( WS->readX(0).size() > 0);
     // test sharing X-value arrays
     const double *previous = (&(WS->dataX(0)[0]));
     for (int k = 1; k < WS->getNumberHistograms(); ++k)
     {
       if ( k == 3 )// the third and fourth times are the same so their array should be shared
       {
-        TS_ASSERT_EQUALS( previous, &(WS->dataX(k)[0]) )
+        TS_ASSERT_EQUALS( previous, &(WS->dataX(k)[0]) );
       }
-      else TS_ASSERT_DIFFERS( previous, &(WS->dataX(k)[0]) )
+      else TS_ASSERT_DIFFERS( previous, &(WS->dataX(k)[0]) );
 
       previous = &(WS->dataX(k)[0]);
     }
@@ -106,9 +106,9 @@ public:
       for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
       {
         if ( x == DAT_MONTOR_IND )
-          TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 )
+          TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 );
         else
-          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 )
+          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 );
       }
     }
 
@@ -139,21 +139,21 @@ public:
     TS_ASSERT( info.isExecuted() );
     
     // test x offsets
-    TS_ASSERT( WS->getNumberHistograms() > 0 )
+    TS_ASSERT( WS->getNumberHistograms() > 0 );
     for (int x = 0; x < WS->getNumberHistograms(); x++ )
     {
       for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
       {
         if ( x == alteredHist && j == alteredBin)
         {
-          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x])+alteredAmount, 1e-6 )
+          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x])+alteredAmount, 1e-6 );
           continue;
         }
 
         if ( x == DAT_MONTOR_IND )
-          TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 )
+          TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 );
         else
-          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 )
+          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 );
       }
     }
 
@@ -165,8 +165,8 @@ public:
   {
     LoadDetectorInfo grouper;
 
-    TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
-    TS_ASSERT( grouper.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( grouper.initialize() );
+    TS_ASSERT( grouper.isInitialized() );
     
     loadRawFile();
     MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -200,19 +200,19 @@ public:
     const IComponent* baseComp = detector->getComponent();
       Parameter_sptr par = pmap.get(baseComp,"3He(atm)");
 
-      TS_ASSERT(par)
-      TS_ASSERT_EQUALS(par->asString(), castaround("10.0"))
+      TS_ASSERT(par);
+      TS_ASSERT_EQUALS(par->asString(), castaround("10.0"));
       par = pmap.get(baseComp,"wallT(m)");
-      TS_ASSERT(par)
+      TS_ASSERT(par);
 
-      TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0,6))
+      TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0,6));
     }
 
     // all non-monitors should share the same array
 /**/    const double *first = &WS->readX(firstIndex)[0];
     for (int i = firstIndex+1; i < lastIndex+1; ++i)
     {
-      TS_ASSERT_EQUALS( first, &(WS->readX(i)[0]) )
+      TS_ASSERT_EQUALS( first, &(WS->readX(i)[0]) );
     }/*
 // to test Different Bins Same Offsets comment out the code above and uncomment the code below
     for (int i = firstIndex; i < lastIndex+1; i++ )
@@ -227,12 +227,12 @@ public:
     }/**/
     
     // the code above proves that the X-values for each histogram are the same so just check one histogram
-    TS_ASSERT( WS->readX(1).size() > 0 )
+    TS_ASSERT( WS->readX(1).size() > 0 );
 
     // the time of flight values that matter are the differences between the detector values and the monitors
     for (int j = 0; j < static_cast<int>(WS->readX(firstIndex).size()); j++ )
     {// we're assuming here that the second spectrum (index 1) is a monitor
-      TS_ASSERT_DELTA( WS->readX(firstIndex)[j] - WS->readX(MONITOR)[j], -TIMEOFF, 1e-6 )
+      TS_ASSERT_DELTA( WS->readX(firstIndex)[j] - WS->readX(MONITOR)[j], -TIMEOFF, 1e-6 );
     }
 
     AnalysisDataService::Instance().remove(m_MariWS);
