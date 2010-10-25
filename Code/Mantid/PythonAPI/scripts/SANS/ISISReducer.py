@@ -15,31 +15,23 @@ from mantidsimple import *
 ## Version number
 __version__ = '0.0'
 
-def _issueWarning(msg):
-    """
-        Issues a Mantid message
-        @param msg: message to be issued
-    """
-    mantid.sendLogMessage('::SANS::Warning: ' + msg)
-    
 class ISISReducer(SANSReducer):
     """
         ISIS Reducer
         TODO: need documentation for all the data member
         TODO: need to see whether all those data members really belong here
     """
-    DEF_RMIN = None
-    DEF_RMAX = None
+    CENT_FIND_RMIN = None
+    CENT_FIND_RMAX = None
     
+    #the rebin parameters used by Q1D
     Q_REBIN = None
     QXY2 = None
     DQY = None
 
     BACKMON_START = None
     BACKMON_END = None
-    
-    lowAngDetSet = True
-    
+
     # Component positions
     PHIMIN=-90.0
     PHIMAX=90.0
@@ -52,18 +44,19 @@ class ISISReducer(SANSReducer):
     _user_file_path = '.'
     
     def __init__(self):
-        super(ISISReducer, self).__init__()
+        SANSReducer.__init__(self)
 
         self._init_steps()
         self.wksp_name = None
         self.full_trans_wav = True
+        self._monitor_set = False
 
 
     def _to_steps(self):
         """
             Defines the steps that are run and their order
         """
-        self._reduction_steps.append(self.data_loader)
+#        self._reduction_steps.append(self.data_loader)
         self._reduction_steps.append(self.user_settings)
         self._reduction_steps.append(self.place_det_sam)
         self._reduction_steps.append(self.geometry)
@@ -71,7 +64,7 @@ class ISISReducer(SANSReducer):
         #---- the can special reducer uses the steps starting with the next one
         self._reduction_steps.append(self.flood_file)
         self._reduction_steps.append(self.crop_detector)
-        self._reduction_steps.append(self.trans_loader)
+        self._reduction_steps.append(self.samp_trans_load)
         self._reduction_steps.append(self.mask)
         self._reduction_steps.append(self.to_wavelen)
         self._reduction_steps.append(self.norm_mon)
@@ -93,8 +86,8 @@ class ISISReducer(SANSReducer):
         """
         #_to_steps() defines the order the steps are run in, any steps not in that list wont be run  
         
-        self.data_loader =     ISISReductionSteps.LoadSample()
-        self.user_settings =   ISISReductionSteps.ReadUserFile()
+        self.data_loader =     None
+        self.user_settings =   None
         self.place_det_sam =   ISISReductionSteps.MoveComponents()
         self.geometry =       SANSReductionSteps.GetSampleGeom()
         self._out_name =       ISISReductionSteps.GetOutputName()
@@ -102,12 +95,13 @@ class ISISReducer(SANSReducer):
             '', 'SpectrumNumber','Divide', self._out_name.name_holder)
         self.crop_detector =   ISISReductionSteps.CropDetBank(
             self._out_name.name_holder)
-        self.trans_loader =    None
-        self.mask =            ISISReductionSteps.Mask_ISIS(both_dets=False)
+        self.samp_trans_load = None
+        self.can_trans_load =  None
+        self.mask =self._mask= ISISReductionSteps.Mask_ISIS()
         self.to_wavelen =      ISISReductionSteps.UnitsConvert('Wavelength')
         self.norm_mon =        ISISReductionSteps.NormalizeToMonitor()
         self.transmission_calculator =\
-                               ISISReductionSteps.TransmissionCalc(run=False)
+                               ISISReductionSteps.TransmissionCalc(loader=None)
         self._corr_and_scale = ISISReductionSteps.ISISCorrections()
         self.to_Q =            ISISReductionSteps.ConvertToQ()
         self.background_subtracter = None
@@ -163,8 +157,9 @@ class ISISReducer(SANSReducer):
             
         self._full_file_path(filename)
         
-        self._data_files[workspace] = data_file
-        
+        self._data_files.clear()
+        self._data_files[workspace] = wrkspc
+
     def set_background(self, can_run=None, reload = True, period = -1):
         """
             Sets the can data to be subtracted from sample data files
@@ -180,24 +175,31 @@ class ISISReducer(SANSReducer):
         self.transmission_calculator.enabled = True
         
     def set_trans_sample(self, sample, direct, reload=True, period=-1):
-        if not issubclass(self.trans_loader.__class__, SANSReductionSteps.BaseTransmission):
-            self.trans_loader = ISISReductionSteps.LoadTransmissions()
-        self.trans_loader.set_trans_sample(sample, direct, reload, period)
-        self.transmission_calculator.enabled = True
+        if not issubclass(self.samp_trans_load.__class__, SANSReductionSteps.BaseTransmission):
+            self.samp_trans_load = ISISReductionSteps.LoadTransmissions()
+        self.samp_trans_load.set_run(sample, direct, reload, period)
+        self.transmission_calculator.set_loader(self.samp_trans_load)
 
     def set_trans_can(self, can, direct, reload = True, period = -1):
-        if not issubclass(self.trans_loader.__class__, SANSReductionSteps.BaseTransmission):
-            self.trans_loader = ISISReductionSteps.LoadTransmissions()
-        self.trans_loader.set_trans_can(can, direct, reload, period)
+        if not issubclass(self.can_trans_load.__class__, SANSReductionSteps.BaseTransmission):
+            self.can_trans_load = ISISReductionSteps.LoadTransmissions(is_can=True)
+        self.can_trans_load.set_run(can, direct, reload, period)
         
-    def set_monitor_spectrum(self, specNum, interp=False):
-        self.instrument.set_incident_mon(specNum)
+    def set_monitor_spectrum(self, specNum, interp=False, override=True):
+        if override:
+            self._monitor_set=True
+        
+        if not self._monitor_set or override:
+            self.instrument.set_incident_mon(specNum)
         #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
-        if interp :
+        if override:
+            self.instrument.set_interpolating_norm(interp)
+        elif interp :
             self.instrument.set_interpolating_norm()
                         
     def suggest_monitor_spectrum(self, specNum, interp=False):
-        self.instrument.suggest_incident_mntr(specNum)
+        if not self._monitor_set:
+            self.instrument.suggest_incident_mntr(specNum)
         #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
         if interp :
             self.instrument.suggest_interpolating_norm()
@@ -235,6 +237,7 @@ class ISISReducer(SANSReducer):
 
         #any clean up, possibly removing workspaces 
         self.post_process()
+        return self.wksp_name
 
     def run_steps(self, start_ind = None, stop_ind = None):
         """
@@ -273,15 +276,20 @@ class ISISReducer(SANSReducer):
                     for key, value in quadrants.iteritems():
                         old_name = self.final_workspace + '_' + str(key)
                         RenameWorkspace(old_name, value)
-                        AddSampleLog(value, "UserFile", self.maskfile)
 
 
     def post_process(self):
-        pass
+        # Store the mask file within the final workspace so that it is saved to the CanSAS file
+        if user_settings is None:
+            user_file = 'None'
+        else:
+            user_file = self.user_settings.filename
+        AddSampleLog(self.wksp_name, "UserFile", user_file)
+
     
     def get_instrument(self):
         """
-            Convenience function used by the inst propery to make
+            Convenience function used by the inst property to make
             calls shorter
         """
         return self.instrument
@@ -289,3 +297,15 @@ class ISISReducer(SANSReducer):
     #quicker to write than .instrument 
     inst = property(get_instrument, None, None, None)
  
+            
+    def ViewCurrentMask(self):
+        #mask the current detector
+        SANSReducer.ViewCurrentMask(self)
+        #now the other detector
+        other = self.instrument.other_detector().name()
+        self.instrument.setDetector(other)
+        #reset the instrument to mask the currecnt detector
+        SANSReducer.ViewCurrentMask(self)
+        original = self.instrument.cur_detector().name()
+        self.instrument.setDetector(original)
+        

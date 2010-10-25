@@ -8,6 +8,7 @@ import os
 
 import SANSInsts
 from CommandInterface import *
+import ISISReductionSteps
 import ISISReducer
 
 #remove the following
@@ -50,12 +51,12 @@ def _printMessage(msg, log = True):
         return
     print msg
     
-def _issueWarning(msg):
+def issueWarning(msg):
     """
         Issues a Mantid message
         @param msg: message to be issued
     """
-    mantid.sendLogMessage('::SANS::Warning: ' + msg)
+    ISISReductionSteps._issueWarning(msg)
                 
 def UserPath(path):
     ReductionSingleton().user_file_path = path
@@ -78,7 +79,10 @@ def Mask(details):
     ReductionSingleton().mask(details)
     
 def MaskFile(file_name):
-    ReductionSingleton().user_settings.filename = file_name
+    ReductionSingleton().user_settings = ISISReductionSteps.UserFile(
+        file_name)
+    ReductionSingleton().user_settings.execute(
+        ReductionSingleton(), None)
     
 def SetMonitorSpectrum(specNum, interp=False):
     ReductionSingleton().set_monitor_spectrum(specNum, interp)
@@ -107,19 +111,32 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
     
 def AssignCan(can_run, reload = True, period = -1):
     ReductionSingleton().set_background(can_run, reload = reload, period = period)
+    return ReductionSingleton().background_subtracter.assign_can(
+                                                    ReductionSingleton())
     
 def TransmissionSample(sample, direct, reload = True, period = -1):
     ReductionSingleton().set_trans_sample(sample, direct, reload = True, period = -1)
-    
+    return ReductionSingleton().samp_trans_load.execute(
+                                            ReductionSingleton(), None)
+
 def TransmissionCan(can, direct, reload = True, period = -1):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
     ReductionSingleton().set_trans_can(can, direct, reload = True, period = -1)
+    return ReductionSingleton().can_trans_load.execute(
+                                            ReductionSingleton(), None)
     
 def AssignSample(sample_run, reload = True, period = -1):
     _printMessage('AssignSample("' + sample_run + '")')
+
     ReductionSingleton().append_data_file(sample_run)
+    ReductionSingleton().data_loader = ISISReductionSteps.LoadSample(
+                                                            sample_run)
     ReductionSingleton().load_set_options(reload, period)
-    
+
+    sample_wksp, logs = ReductionSingleton().data_loader.execute(
+                                            ReductionSingleton(), None)
+    return sample_wksp, logs
+
 def SetCentre(XVAL, YVAL):
     _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
     SetBeamCenter(XVAL/1000.0, YVAL/1000.0)
@@ -145,7 +162,8 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None):
                 GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
                 return
     #run the chain that has been created so far
-    ReductionSingleton.run()
+    return ReductionSingleton.run()
+
     
 def _SetWavelengthRange(start, end):
     ReductionSingleton().to_wavelen.set_range(start, end)
@@ -206,6 +224,35 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
     else :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
         ReductionSingleton()._readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax))
+
+def LimitsR(rmin, rmax):
+    _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')')
+    settings = ReductionSingleton().user_settings
+    settings._readLimitValues('L/R ' + str(rmin) + ' ' + str(rmax) + ' 1')
+
+def LimitsWav(lmin, lmax, step, type):
+    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + type + ')')
+    _readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type)
+
+def LimitsQ(*args):
+    # If given one argument it must be a rebin string
+    if len(args) == 1:
+        val = args[0]
+        if type(val) == str:
+            _printMessage("LimitsQ(" + val + ")")
+            _readLimitValues("L/Q " + val)
+        else:
+            _issueWarning("LimitsQ can only be called with a single string or 4 values")
+    elif len(args) == 4:
+        qmin,qmax,step,step_type = args
+        _printMessage('LimitsQ(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(step_type) + ')')
+        _readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type)
+    else:
+        _issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
+
+def LimitsQXY(qmin, qmax, step, type):
+    _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
+    _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
 
 # These variables keep track of the centre coordinates that have been used so that we can calculate a relative shift of the
 # detector
@@ -310,34 +357,7 @@ def PlotResult(workspace):
 ##################### View mask details #####################################################
 
 def ViewCurrentMask():
-    inst_name = INSTRUMENT.name()
-    top_layer = 'CurrentMask'
-    inst = eval('SANSInsts.'+inst_name+'("'+top_layer+'")')
-
-    #get the reducer to run the mask step if it hasn't already
-    ReductionSingleton().mask.execute(None, top_layer, inst, 0, 0)
-
-#    if RMIN > 0.0: 
-#        SANSUtility.MaskInsideCylinder(top_layer, RMIN, XBEAM_CENTRE, YBEAM_CENTRE)
-#    if RMAX > 0.0:
-#        SANSUtility.MaskOutsideCylinder(top_layer, RMAX, 0.0, 0.0)
-
- #   dimension = SANSUtility.GetInstrumentDetails(inst)[0]
-
-    #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
-    #start with the currently selected detector
-#    firstSpec1 = inst.cur_detector().get_first_spec_num()
-#    _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
-    #now the other detector
-#    firstSpec2 = inst.other_detector().get_first_spec_num()
-#    _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
-    
-    # Mark up "dead" detectors with error value 
-    FindDeadDetectors(top_layer, top_layer, DeadValue=500)
-
-    # Visualise the result
-    instrument_win = qti.app.mantidUI.getInstrumentView(top_layer)
-    instrument_win.showWindow()
+    ReductionSingleton().ViewCurrentMask()
 
 # Print a test script for Colette if asked
 def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvfile = '', savepath = ''):
@@ -360,12 +380,13 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     if centreit:
         script += '[COLETTE]  FIT/MIDDLE'
     # Parameters
-    script += '[COLETTE]  LIMIT/RADIUS ' + str(RMIN) + ' ' + str(RMAX) + '\n'
-    script += '[COLETTE]  LIMIT/WAVELENGTH ' + str(WAV1) + ' ' + str(WAV2) + '\n'
+    script += '[COLETTE]  LIMIT/RADIUS ' + str(ReductionSingleton().mask.min_radius)
+    script += ' ' + str(ReductionSingleton().mask.max_radius) + '\n'
+    script += '[COLETTE]  LIMIT/WAVELENGTH ' + ReductionSingleton().to_wavelen.get_range() + '\n'
     if DWAV <  0:
-        script += '[COLETTE]  STEP/WAVELENGTH/LOGARITHMIC ' + str(DWAV)[1:] + '\n'
+        script += '[COLETTE]  STEP/WAVELENGTH/LOGARITHMIC ' + str(ReductionSingleton().to_wavelen.w_step)[1:] + '\n'
     else:
-        script += '[COLETTE]  STEP/WAVELENGTH/LINEAR ' + str(DWAV) + '\n'
+        script += '[COLETTE]  STEP/WAVELENGTH/LINEAR ' + str(ReductionSingleton().to_wavelen.w_step) + '\n'
     # For the moment treat the rebin string as min/max/step
     qbins = q_REBEIN.split(",")
     nbins = len(qbins)
@@ -396,3 +417,4 @@ ReductionSingleton.clean(ISISReducer.ISISReducer)
 
 #this is like a #define I'd like to get rid of it because it means nothing here
 DefaultTrans = 'True'
+NewTrans = 'False'

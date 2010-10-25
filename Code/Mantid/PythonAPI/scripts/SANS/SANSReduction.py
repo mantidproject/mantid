@@ -539,7 +539,6 @@ def _leaveSinglePeriod(groupW, period):
     #remove the rest of the group
     mtd.deleteWorkspace(groupW.getName())
     return newName
-##REMOVED STEVE 08 Sepember 2010
 # Return the list of mismatched detector names
 def GetMismatchedDetList():
     return INSTRUMENT.get_marked_dets()
@@ -573,7 +572,7 @@ def LimitsQ(*args):
 def LimitsQXY(qmin, qmax, step, type):
     _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
-##REMOVED START
+
 def LimitsPhi(phimin, phimax, use_mirror=True):
     if use_mirror :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
@@ -581,7 +580,7 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
     else :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
         _readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax))
-##REMOVED END
+
 def Gravity(flag):
     _printMessage('Gravity(' + str(flag) + ')')
     if isinstance(flag, bool) or isinstance(flag, int):
@@ -1278,17 +1277,15 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
 ##
 # Apply the spectrum and time masks to one detector in a given workspace
 ##
-def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orientation.Horizontal,limitphi = True, useActiveDetector = True):
-    # mask areas both detectors
-    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, dimension,orientation)
+def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orientation.Horizontal,limitphi = True, inst=INSTRUMENT, useActiveDetector=True):
 
     #Time mask
     SANSUtility.MaskByBinRange(workspace,TIMEMASKSTRING)
     
     #this function only masks one detector, find out which one that should be
-    setLowAngle = INSTRUMENT.lowAngDetSet
+    setLowAngle = inst.lowAngDetSet
     if not useActiveDetector :
-        setLowAngle = not INSTRUMENT.lowAngDetSet
+        setLowAngle = not inst.lowAngDetSet
         
     if setLowAngle :
         specstring = SPECMASKSTRING_R
@@ -1297,7 +1294,7 @@ def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orien
         specstring = SPECMASKSTRING_F
         timestring = TIMEMASKSTRING_F
 
-    speclist += SANSUtility.ConvertToSpecList(specstring, firstspec, dimension,orientation) 
+    speclist = SANSUtility.ConvertToSpecList(specstring, firstspec, dimension,orientation) 
     _printMessage(str(speclist))
     SANSUtility.MaskBySpecNumber(workspace, speclist)
 
@@ -1378,7 +1375,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         if RMAX > 0.0:
             SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
-    _applyMasking(final_result, SPECMIN, DIMENSION, orientation,True)
+    _applyMasking(final_result, SPECMIN, DIMENSION, orientation)
     ####################################################################################
 
     ######################## Unit change and rebin #####################################
@@ -1659,10 +1656,10 @@ def ViewCurrentMask():
     #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
     #start with the currently selected detector
     firstSpec1 = inst.cur_detector().get_first_spec_num()
-    _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, True)
+    _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, inst, True)
     #now the other detector
     firstSpec2 = inst.other_detector().get_first_spec_num()
-    _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, False)
+    _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, inst, False)
     
     # Mark up "dead" detectors with error value 
     FindDeadDetectors(top_layer, top_layer, DeadValue=500)

@@ -146,89 +146,42 @@ class LoadRun(ReductionStep):
                 inWS = inWS.getName()
             if mantid.workspaceExists(inWS) and (not inWS in others):
                 mantid.deleteWorkspace(inWS)
-                
+
 class LoadTransmissions(SANSReductionSteps.BaseTransmission, LoadRun):
     """
-        Transmission calculation for ISIS SANS instruments
+        Loads the file used to apply the transmission correction to the
+        sample or can 
     """
-    # Transmission sample parameters
-    _direct_sample = None
-    _trans_sample = None
-    _sample_reload = True
-    _sample_period = -1
-    
-    # Transmission can parameters
-    _direct_can = None
-    _trans_can = None
-    _can_reload = True
-    _can_period = -1
-    
-    TRANS_SAMPLE = '' 
-    DIRECT_SAMPLE = ''
-    TRANS_SAMPLE_N_PERIODS = -1
-    DIRECT_SAMPLE_N_PERIODS = -1
-    TRANS_CAN = ''
-    DIRECT_CAN = ''
-    TRANS_CAN_N_PERIODS = -1
-    DIRECT_CAN_N_PERIODS = -1
-    
-    def __init__(self):
+
+    def __init__(self, is_can=False):
         """
         """
         super(LoadTransmissions, self).__init__()
         self.trans_name = None
         self.direct_name = None
-        self.trans_can_name = None
-        self.direct_can_name = None
+        self._reload = True
+        self._period = -1
+        self.can = is_can
 
-        self.TRANS_SAMPLE_N_PERIODS = None
-        self.DIRECT_SAMPLE_N_PERIODS = None
-        self.TRANS_CAN_N_PERIODS = None
-        self.DIRECT_CAN_N_PERIODS = None
+    def set_run(self, sample, direct, reload=True, period=-1):            
+        self._trans_name = sample
+        self._direct_name = direct
+        self._reload = reload
+        self._period = period
 
-    def set_trans_sample(self, sample, direct, reload=True, period=-1):            
-        self._trans_sample = sample
-        self._direct_sample = direct
-        self._sample_reload = reload
-        self._sample_period = period
-        
-    def set_trans_can(self, can, direct, reload = True, period = -1):
-        self._trans_can = can
-        self._direct_can = direct
-        self._can_reload = reload
-        self._can_period = period
-    
     def execute(self, reducer, workspace):
-        # Load transmission sample
-        self._clearPrevious(self.TRANS_SAMPLE)
-        self._clearPrevious(self.DIRECT_SAMPLE)
-        
-        if self._trans_sample not in [None, '']:
+        if self._trans_name not in [None, '']:
             trans_ws, dummy1, dummy2, dummy3, self.TRANS_SAMPLE_N_PERIODS = \
-                self._assignHelper(reducer, self._trans_sample, True, self._sample_reload, self._sample_period)
+                self._assignHelper(reducer, self._trans_name, True, self._reload, self._period)
             self.trans_name = trans_ws.getName()
         
-        if self._direct_sample not in [None, '']:
+        if self._direct_name not in [None, '']:
             direct_sample_ws, dummy1, dummy2, dummy3, self.DIRECT_SAMPLE_N_PERIODS = \
-                self._assignHelper(reducer, self._direct_sample, True, self._sample_reload, self._sample_period)
+                self._assignHelper(reducer, self._direct_name, True, self._reload, self._period)
             self.direct_name = direct_sample_ws.getName()
-        
-        # Load transmission can
-        self._clearPrevious(self.TRANS_CAN)
-        self._clearPrevious(self.DIRECT_CAN)
-    
-        if self._trans_can not in [None, '']:
-            can_ws, dummy1, dummy2, dummy3, self.TRANS_CAN_N_PERIODS = \
-                self._assignHelper(reducer, self._trans_can, True, self._can_reload, self._can_period)
-            self.trans_can_name = can_ws.getName()
 
-        if self._direct_can in [None, '']:
-            self.direct_can_name, self.DIRECT_CAN_N_PERIODS = self.DIRECT_SAMPLE, self.DIRECT_SAMPLE_N_PERIODS
-        else:
-            direct_can_ws, dummy1, dummy2, dummy3, self.DIRECT_CAN_N_PERIODS = \
-                self._assignHelper(reducer, self._direct_can, True, self._can_reload, self._can_period)
-            self.direct_can_name = direct_can_ws.getName()
- 
+        return self.trans_name, self.direct_name
+
 class CanSubtraction(LoadRun):
     """
         Subtract the can after correcting it.
@@ -237,11 +190,6 @@ class CanSubtraction(LoadRun):
         we load only before doing the subtraction.
     """
 
-    SCATTER_CAN = None
-    _CAN_SETUP = None
-    _CAN_RUN = None
-    _CAN_N_PERIODS = -1
-    #TODO: we don't need a dictionary here
     PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
 
     def __init__(self, can_run, reload = True, period = -1):
@@ -254,28 +202,22 @@ class CanSubtraction(LoadRun):
         self._can_run = can_run
         self._can_run_reload = reload
         self._can_run_period = period
+        self.SCATTER_CAN = None
 
-    def _assign_can(self, reducer, can_run, reload = True, period = -1):
+    def assign_can(self, reducer, reload = True, period = -1):
         #TODO: get rid of any reference to the instrument object as much as possible
         # Definitely get rid of the if-statements checking the instrument name.
         if not issubclass(reducer.instrument.__class__, SANSInsts.ISISInstrument):
             raise RuntimeError, "CanSubtraction.assign_can expects an argument of class ISISInstrument"
         
-        
-        # Code from AssignCan
-        self._clearPrevious(self.SCATTER_CAN)
-        
-        self._CAN_N_PERIODS = -1
-        
-        if( can_run.startswith('.') or can_run == '' or can_run == None):
-            self.SCATTER_CAN.reset()
-            self._CAN_RUN = ''
-            self._CAN_SETUP = None
+        if( self._can_run.startswith('.') or self._can_run == '' or self._can_run == None):
+            self._can_run = None
+            return '', '()'
+
             return '', '()'
     
-        self._CAN_RUN = can_run
         self.SCATTER_CAN ,reset, logname,filepath, self._CAN_N_PERIODS = \
-            self._assignHelper(reducer, can_run, False, reload, period)
+            self._assignHelper(reducer, self._can_run, False, reload, period)
         if self.SCATTER_CAN.getName() == '':
             mantid.sendLogMessage('::SANS::Warning: Unable to load sans can run, cannot continue.')
             return '','()'
@@ -329,14 +271,11 @@ class CanSubtraction(LoadRun):
 
     def execute(self, reducer, workspace):
         """
-        """ 
-        if self._can_run is not None:
-            self._assign_can(reducer, self._can_run, reload = self._can_run_reload, period = self._can_run_period)
-        
-        # Apply same corrections as for data then subtract from data
-        # Start of WaveRangeReduction code
-        # _initReduction code
-        # _init_run()
+            Apply same corrections as for data then subtract from data
+        """
+        if not self._can_run:
+            return
+
         beamcoords = reducer._beam_finder.get_beam_center()
 
         final_ws = "can_temp_workspace"
@@ -365,37 +304,27 @@ class CanSubtraction(LoadRun):
 
         # Can correction
         #replaces Correct(can_setup, wav_start, wav_end, use_def_trans, finding_centre)
-        #can't do a deepcopy on the reducer as we can't deepcopy the instrument
-        reduce_can = copy.copy(reducer)
-        #this will be the first command that is run in the new chain
-        start = reduce_can._reduction_steps.index(reduce_can.flood_file)
-        #stop before this current step
-        end = reduce_can._reduction_steps.index(self)-1
-        #some things are going to be changed, make deep copies
-        reduce_can._reduction_steps = copy.deepcopy(reducer._reduction_steps)
+        reduce_can = copy.deepcopy(reducer)
 
         #the workspace is again branched with a new name
-        reduce_can._reduction_steps[start].out_container[0] = tmp_can
+        reduce_can.flood_file.out_container[0] = tmp_can
         #the line below is required if the step above is optional
-        ch = reducer._reduction_steps.index(reducer.crop_detector)
-        reduce_can._reduction_steps[ch].out_container[0] = tmp_can
+        reduce_can.crop_detector.out_container[0] = tmp_can
         if not reducer.transmission_calculator is None:
-            ch =reducer._reduction_steps.index(reducer.transmission_calculator)
-            reduce_can._reduction_steps[ch].set_is_can()
+            reduce_can.transmission_calculator.set_loader(reduce_can.can_trans_load)
 
-        ch = reducer._reduction_steps.index(reducer.norm_mon)
-        reduce_can._reduction_steps[ch]\
-            = NormalizeToMonitor(raw_ws = self.SCATTER_CAN.getName())
-
-        reduce_can._data_files = copy.deepcopy(reducer._data_files)
+        norm_step_ind = reduce_can._reduction_steps.index(reduce_can.norm_mon)
+        reduce_can.norm_mon = NormalizeToMonitor(
+                                        raw_ws = self.SCATTER_CAN.getName())
+        reduce_can._reduction_steps[norm_step_ind] = reduce_can.norm_mon
+           
         #set the workspace that we've been setting up as the one to be processed 
         reduce_can.set_process_single_workspace(self.SCATTER_CAN.getName())
 
-        p_run_ws = mantid[self.SCATTER_CAN.getName()]
-        run_num = p_run_ws.getSampleDetails().getLogData('run_number').value()
-        reduce_can.instrument = copy.copy(reducer.instrument)
-        reduce_can.instrument.set_up_for_run(run_num)
-
+        #this will be the first command that is run in the new chain
+        start = reduce_can._reduction_steps.index(reduce_can.flood_file)
+        #stop before this current step
+        end = reducer._reduction_steps.index(self)-1
         #the reducer is completely setup, run it
         reduce_can.run_steps(start_ind=start, stop_ind=end)
         
@@ -424,21 +353,19 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         MASK commands from user files), inherits from Mask
     """
     def __init__(self, timemask='', timemask_r='', timemask_f='', 
-                 specmask='', specmask_r='', specmask_f='', both_dets=False):
+                 specmask='', specmask_r='', specmask_f=''):
         SANSReductionSteps.Mask.__init__(self)
-        self._timemask=timemask 
-        self._timemask_r=timemask_r
-        self._timemask_f=timemask_f
-        self._specmask=specmask
-        self._specmask_r=specmask_r
-        self._specmask_f=specmask_f
-
-        self._both_dets = both_dets
+        self.time_mask=timemask 
+        self.time_mask_r=timemask_r
+        self.time_mask_f=timemask_f
+        self.spec_mask_r=specmask_r
+        self.spec_mask_f=specmask_f
 
         self._lim_phi_xml = ''
         self.phi_min = -90.0
         self.phi_max = 90.0
         self.phi_mirror = True
+        self._readonly_phi = False
 
         ########################## Masking  ################################################
         # Mask the corners and beam stop if radius parameters are given
@@ -469,15 +396,14 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             type = parts[1]
             detname = type.split()
             if type == 'CLEAR':
-                self._specmask = ''
-                self._specmask_r = ''
-                self._specmask_f = ''
+                self.spec_mask_r = ''
+                self.spec_mask_f = ''
             elif type.startswith('T'):
                 if type.startswith('TIME'):
                     bin_range = type[4:].lstrip()
                 else:
                     bin_range = type[1:].lstrip()
-                self._timemask += ';' + bin_range
+                self.time_mask += ';' + bin_range
             elif len(detname) == 2:
                 self.add_mask_string(mask_string=detname[1],detect=detname[0])
             else:
@@ -485,18 +411,18 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         elif len(parts) == 3:
             type = parts[1]
             if type == 'CLEAR':
-                self._timemask = ''
-                self._timemask_r = ''
-                self._timemask_f = ''
+                self.time_mask = ''
+                self.time_mask_r = ''
+                self.time_mask_f = ''
             elif (type == 'TIME' or type == 'T'):
                 parts = parts[2].split()
                 if len(parts) == 3:
                     detname = parts[0].rstrip()
                     bin_range = parts[1].rstrip() + ' ' + parts[2].lstrip() 
                     if detname.upper() == 'FRONT':
-                        self._timemask_f += ';' + bin_range
+                        self.time_mask_f += ';' + bin_range
                     elif detname.upper() == 'REAR':
-                        self._timemask_r += ';' + bin_range
+                        self.time_mask_r += ';' + bin_range
                     else:
                         _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
                 else:
@@ -506,9 +432,9 @@ class Mask_ISIS(SANSReductionSteps.Mask):
 
     def add_mask_string(self, mask_string, detect):
         if detect.upper() == 'FRONT':
-            self._specmask_f += ',' + mask_string
+            self.spec_mask_f += ',' + mask_string
         elif detect.upper() == 'REAR':
-            self._specmask_r += ',' + mask_string
+            self.spec_mask_r += ',' + mask_string
         else:
             _issueWarning('Detector \'' + det_type + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
 
@@ -573,6 +499,8 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             elif x == '':
                 #empty entries are allowed
                 pass
+            elif len(x.split()) == 4:
+                _issueWarning('Box mask entry %s ignored. Box masking is not supported by Mantid'%'mask '+x)
             else:
                 raise SyntaxError('Problem reading a mask entry: %s' %x)
         
@@ -621,7 +549,7 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             pass
         return phi
 
-    def set_phi_limit(self, phimin, phimax, phimirror):
+    def set_phi_limit(self, phimin, phimax, phimirror, override=True):
         if phimirror :
             if phimin > phimax:
                 phimin, phimax = phimax, phimin
@@ -639,49 +567,47 @@ class Mask_ISIS(SANSReductionSteps.Mask):
 
         self.phi_mirror = phimirror
 
-        self._mask_phi(
-            'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
+        if override:
+            self._readonly_phi = True
+            
+        if self._readonly_phi and not override:
+            self._mask_phi(
+                'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
     def execute(self, reducer, workspace, instrument=None, xcentre=None, ycentre=None):
         if instrument is None:
             instrument = reducer.instrument
         #set up the spectra lists and shape xml to mask
         detector = instrument.cur_detector()
-        if self._both_dets or detector.isAlias('rear'):
-            rear = instrument.getDetector('rear')
-            self.spec_list = self._ConvertToSpecList(self._specmask_r, rear)
-            #masking for both detectors
-            self.spec_list += self._ConvertToSpecList(self._specmask, rear)
+        if detector.isAlias('rear'):
+            self.spec_list = self._ConvertToSpecList(self.spec_mask_r, detector)
             #Time mask
-            SANSUtility.MaskByBinRange(workspace,self._timemask_r)
-            SANSUtility.MaskByBinRange(workspace,self._timemask)
+            SANSUtility.MaskByBinRange(workspace,self.time_mask_r)
+            SANSUtility.MaskByBinRange(workspace,self.time_mask)
 
-        if self._both_dets or detector.isAlias('front'):
-            front = instrument.getDetector('front')
+        if detector.isAlias('front'):
             #front specific masking
-            self.spec_list += self._ConvertToSpecList(self._specmask_f, front)
-            #masking for both detectors
-            self.spec_list += self._ConvertToSpecList(self._specmask, front)
+            self.spec_list = self._ConvertToSpecList(self.spec_mask_f, detector)
             #Time mask
-            SANSUtility.MaskByBinRange(workspace,self._timemask_f)
-            SANSUtility.MaskByBinRange(workspace,self._timemask)
+            SANSUtility.MaskByBinRange(workspace,self.time_mask_f)
+            SANSUtility.MaskByBinRange(workspace,self.time_mask)
 
         #reset the xml, as execute can be run more than once
-        self._xml = []
-        if DEL__FINDING_CENTRE_ == True:
-            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-                self.add_cylinder(self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
-            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-                self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
-        else:
-            if xcentre is None:
-                xcentre = reducer.place_det_sam.maskpt_rmax[0]
-            if ycentre is None:
-                ycentre = reducer.place_det_sam.maskpt_rmax[1]
-            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-                self.add_cylinder(self.min_radius, xcentre, ycentre, 'beam_stop')
-            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-                self.add_outside_cylinder(self.max_radius, xcentre, ycentre, 'beam_area')
+#        self._xml = []
+#        if DEL__FINDING_CENTRE_ == True:
+#            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+#                self.add_cylinder(self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
+#            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+#                self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
+#        else:
+#            if xcentre is None:
+#                xcentre = reducer.place_det_sam.maskpt_rmax[0]
+#            if ycentre is None:
+#                ycentre = reducer.place_det_sam.maskpt_rmax[1]
+#            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+#                self.add_cylinder(self.min_radius, xcentre, ycentre, 'beam_stop')
+#            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+#                self.add_outside_cylinder(self.max_radius, xcentre, ycentre, 'beam_area')
         #now do the masking
         SANSReductionSteps.Mask.execute(self, reducer, workspace, instrument)
 
@@ -690,12 +616,11 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             
     def __str__(self):
         return '    radius', self.min_radius, self.max_radius+'\n'+\
-            '    global spectrum mask: ', str(self._specmask)+'\n'+\
-            '    rear spectrum mask: ', str(self._specmask_r)+'\n'+\
-            '    front spectrum mask: ', str(self._specmask_f)+'\n'+\
-            '    global time mask: ', str(self._timemask)+'\n'+\
-            '    rear time mask: ', str(self._timemask_r)+'\n'+\
-            '    front time mask: ', str(self._timemask_f)+'\n'
+            '    rear spectrum mask: ', str(self.spec_mask_r)+'\n'+\
+            '    front spectrum mask: ', str(self.spec_mask_f)+'\n'+\
+            '    global time mask: ', str(self.time_mask)+'\n'+\
+            '    rear time mask: ', str(self.time_mask_r)+'\n'+\
+            '    front time mask: ', str(self.time_mask_f)+'\n'
 
 
 class LoadSample(LoadRun):
@@ -748,6 +673,7 @@ class LoadSample(LoadRun):
         run_num = p_run_ws.getSampleDetails().getLogData('run_number').value()
         reducer.instrument.set_up_for_run(run_num)
 
+        logvalues = None
         try:
             logvalues = reducer.instrument.load_detector_logs(logname,filepath)
             if logvalues == None:
@@ -757,17 +683,10 @@ class LoadSample(LoadRun):
             if not reducer.instrument.name() == 'LOQ': raise
         
         self.PERIOD_NOS["SCATTER_SAMPLE"] = self._period
-        
-        # Create a run details object
-        TRANS_SAMPLE = ''
-        DIRECT_SAMPLE = ''
-        if reducer._transmission_calculator is not None:
-            TRANS_SAMPLE = reducer.trans_loader.TRANS_SAMPLE
-        if reducer._transmission_calculator is not None:
-            DIRECT_SAMPLE = reducer.trans_loader.DIRECT_SAMPLE
 
         reducer.wksp_name = self.uncropped
-
+        
+        return reducer.wksp_name, logvalues
 
 class MoveComponents(ReductionStep):
     def __init__(self):
@@ -807,13 +726,13 @@ class CropDetBank(ReductionStep):
             EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
 
 class UnitsConvert(ReductionStep):
-    def __init__(self, units, w_low = None, w_step = None, w_high = None):
+    def __init__(self, units):
         #TODO: data_file = None only makes sense when AppendDataFile is used... (AssignSample?)
         super(UnitsConvert, self).__init__()
         self._units = units
-        self.wav_low = w_low
-        self.wav_high = w_high
-        self.wav_step = w_step
+        self.wav_low = None
+        self.wav_high = None
+        self.wav_step = None
 
     def execute(self, reducer, workspace, rebin_alg = 'use default'):
         ConvertUnits(workspace, workspace, self._units)
@@ -826,13 +745,16 @@ class UnitsConvert(ReductionStep):
     def get_rebin(self):
         return str(self.wav_low)+', ' + str(self.wav_step) + ', ' + str(self.wav_high)
     
-    def set_rebin(self, w_low = None, w_step = None, w_high = None):
+    def set_rebin(self, w_low = None, w_step = None, w_high = None, override=True):
         if not w_low is None:
-            self.wav_low = w_low
+            if self.wav_low is None or override:
+                self.wav_low = w_low
         if not w_step is None:
-            self.wav_step = w_step
+            if self.wav_step is None or override:
+                self.wav_step = w_step
         if not w_high is None:
-            self.wav_high = w_high
+            if self.wav_high is None or override:
+                self.wav_high = w_high
 
     def get_range(self):
         return str(self.wav_low)+'_'+str(self.wav_high)
@@ -873,9 +795,9 @@ class ConvertToQ(ReductionStep):
     def get_gravity(self):
         return self._use_gravity
 
-    def set_gravity(self, flag, set_default=False):
+    def set_gravity(self, flag, override=True):
         if isinstance(flag, bool) or isinstance(flag, int):
-            if (self._use_gravity is None) or (not set_default):
+            if (self._use_gravity is None) or override:
                 self._use_gravity = bool(flag)
         else:
             _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(self._use_gravity)) 
@@ -883,7 +805,7 @@ class ConvertToQ(ReductionStep):
     gravity = property(get_gravity, set_gravity, None, None)
 
     def set_defaults(self):
-        self.set_gravity(self._DEFAULT_GRAV, set_default=True)
+        self.set_gravity(self._DEFAULT_GRAV, override=False)
 
     def execute(self, reducer, workspace):
         self.set_defaults()
@@ -983,15 +905,14 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
     
     DEFAULT_FIT = 'Log'
 
-    def __init__(self, run = True):
+    def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
-        self.enabled = run
-        self._is_can = False
         #set these variables to None, which means they haven't been set and defaults will be set further down
         self.lambda_min = None
         self.lambda_max = None
         self.fit_method = None
         self._use_full_range = None
+        self.loader = loader
 
     def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
         if not min is None:
@@ -1013,21 +934,18 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
     def set_full_wav(self, is_full):
         self._use_full_range = is_full
 
-    def set_is_can(self, is_can=True):
-        self._is_can = is_can
+    def set_loader(self, loader):
+        self.loader = loader
 
     def execute(self, reducer, workspace):
-        if not self.enabled:
+        if (self.loader is None) or (not self.loader.trans_name):
             return
 
-        if self._is_can:
-            trans_raw = reducer.trans_loader.trans_can_name
-            direct_raw = reducer.trans_loader.direct_can_name
-        else:
-            trans_raw = reducer.trans_loader.trans_name
-            direct_raw = reducer.trans_loader.direct_name
+        trans_raw = self.loader.trans_name
+        direct_raw = self.loader.direct_name
+        
         if not trans_raw:
-            raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % CAN_SAMPLE_SUFFIXES[self._is_can])
+            raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % self.CAN_SAMPLE_SUFFIXES[self.loader.can])
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
 
@@ -1048,8 +966,8 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
             use_full_range = self._use_full_range
         if use_full_range:
             wavbin = str(instrum.WAV_RANGE_MIN) 
-            wavbin = + ',' + str(ReductionSingleton().to_wavelen.wav_step)
-            wavbin = + ',' + str(instrum.WAV_RANGE_MAX)
+            wavbin +=','+str(reducer.to_wavelen.wav_step)
+            wavbin +=','+str(instrum.WAV_RANGE_MAX)
             translambda_min = instrum.WAV_RANGE_MIN
             translambda_max = instrum.WAV_RANGE_MAX
         else:
@@ -1058,7 +976,7 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
             wavbin = str(reducer.to_wavelen.get_rebin())
     
         fittedtransws = trans_raw.split('_')[0] + '_trans_'
-        fittedtransws += self.CAN_SAMPLE_SUFFIXES[self._is_can]
+        fittedtransws += self.CAN_SAMPLE_SUFFIXES[self.loader.can]
         fittedtransws += '_'+str(translambda_min)+'_'+str(translambda_max)
         unfittedtransws = fittedtransws + "_unfitted"
         
@@ -1110,7 +1028,7 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
             result = fittedtransws
     
         if use_full_range:
-            tmp_ws = 'trans_' + self.CAN_SAMPLE_SUFFIXES[self._is_can]
+            tmp_ws = 'trans_' + self.CAN_SAMPLE_SUFFIXES[self.loader.can]
             tmp_ws += '_' + reducer.to_wavelen.get_range()
             CropWorkspace(result, tmp_ws, XMin = str(reducer.to_wavelen.wav_low), XMax = str(reducer.to_wavelen.wav_high))
             trans_ws = tmp_ws
@@ -1162,12 +1080,12 @@ class CorrectToFileISIS(SANSReductionSteps.CorrectToFileStep):
                 CorrectToFile(workspace, self._filename, reducer.wksp_name,
                               self._corr_type, self._operation)
 
-class ReadUserFile(ReductionStep):
+class UserFile(ReductionStep):
     def __init__(self, file=None):
         """
             Reads a SANS mask file
         """
-        super(ReadUserFile, self).__init__()
+        super(UserFile, self).__init__()
         self.filename = file
 
     def execute(self, reducer, workspace):
@@ -1225,9 +1143,9 @@ class ReadUserFile(ReductionStep):
             elif upper_line.startswith('GRAVITY'):
                 flag = upper_line[8:]
                 if flag == 'ON':
-                    reducer.to_Q.set_gravity(True, set_default=True)
+                    reducer.to_Q.set_gravity(True, override=False)
                 elif flag == 'OFF':
-                    reducer.to_Q.set_gravity(False, set_default=True)
+                    reducer.to_Q.set_gravity(False, override=False)
                 else:
                     _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                     reducer.to_Q.set_gravity(False)
@@ -1258,18 +1176,14 @@ class ReadUserFile(ReductionStep):
         file_handle.close()
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
-
-        # Store the mask file within the final workspace so that it is saved to the CanSAS file
-        if workspace:
-            AddSampleLog(workspace, "UserFile", self.filename)
-        #say that we've successfully read the file
+        
         return True
-
+        
     def _initialize_mask(self, reducer):
         self._restore_defaults(reducer)
 
-        reducer.DEF_RMIN = None
-        reducer.DEF_RMAX = None
+        reducer.CENT_FIND_RMIN = None
+        reducer.CENT_FIND_RMAX = None
        
         reducer.Q_REBIN = None
         reducer.QXY = None
@@ -1319,7 +1233,8 @@ class ReadUserFile(ReductionStep):
             minval = maxval = step_type = step_size = None
     
         if limit_type.upper() == 'WAV':
-            reducer.to_wavelen.set_rebin(minval, step_type + step_size, maxval)
+            reducer.to_wavelen.set_rebin(
+                minval, step_type + step_size, maxval, override=False)
         elif limit_type.upper() == 'Q':
             if not rebin_str is None:
                 reducer.Q_REBIN = rebin_str
@@ -1330,12 +1245,14 @@ class ReadUserFile(ReductionStep):
             reducer.DQXY = float(step_type + step_size)
         elif limit_type.upper() == 'R':
             reducer.mask.set_radi(minval, maxval)
-            reducer.DEF_RMIN = float(minval)/1000.
-            reducer.DEF_RMAX = float(maxval)/1000.
+            reducer.CENT_FIND_RMIN = float(minval)/1000.
+            reducer.CENT_FIND_RMAX = float(maxval)/1000.
         elif limit_type.upper() == 'PHI':
-            reducer.mask.set_phi_limit(float(minval), float(maxval), True) 
+            reducer.mask.set_phi_limit(
+                float(minval), float(maxval), True, override=False) 
         elif limit_type.upper() == 'PHI/NOMIRROR':
-            reducer.mask.set_phi_limit(float(minval), float(maxval), False)
+            reducer.mask.set_phi_limit(
+                float(minval), float(maxval), False, override=False)
         else:
             pass
 
@@ -1350,10 +1267,12 @@ class ReadUserFile(ReductionStep):
             details = details[0:interPlace]
     
         if details.upper().startswith('LENGTH'):
-            reducer.suggest_monitor_spectrum(int(details.split()[1]), interpolate)
+            reducer.suggest_monitor_spectrum(
+                int(details.split()[1]), interpolate)
         
         elif details.upper().startswith('SPECTRUM'):
-            reducer.set_monitor_spectrum(int(details.split('=')[1]), interpolate)
+            reducer.set_monitor_spectrum(
+                int(details.split('=')[1]), interpolate, override=False)
         
         elif details.upper().startswith('TRANS'):
             parts = details.split('=')
@@ -1423,7 +1342,7 @@ class ReadUserFile(ReductionStep):
         reducer.mask.parse_instruction('MASK/CLEAR')
         reducer.mask.parse_instruction('MASK/CLEAR/TIME')
 
-        reducer.DEF_RMIN = reducer.DEF_RMAX
+        reducer.CENT_FIND_RMIN = reducer.CENT_FIND_RMAX
         reducer.Q_REBIN = reducer.QXY = reducer.DQY = None
 
         # Scaling values
@@ -1447,7 +1366,7 @@ class GetOutputName(ReductionStep):
             @param workspace un-used
         """
         run = reducer._data_files.values()[0]
-        name = run.split('.')[0]
+        name = run.split('_')[0]
         
         if (not reducer._period_num is None) and (reducer._period_num > 0):
             name += 'p'+str(reducer._period_num)
