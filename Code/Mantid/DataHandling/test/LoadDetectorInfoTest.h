@@ -106,9 +106,13 @@ public:
       for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
       {
         if ( x == DAT_MONTOR_IND )
+        {
           TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 );
+        }
         else
+        {
           TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 );
+        }
       }
     }
 
@@ -151,9 +155,13 @@ public:
         }
 
         if ( x == DAT_MONTOR_IND )
+        {
           TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 );
+        }
         else
+        {
           TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 );
+        }
       }
     }
 
@@ -271,7 +279,7 @@ public:
       WorkspaceFactory::Instance().create("Workspace2D", NDETECTS, NBINS+1, NBINS);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    MantidVecPtr xs, errors, data[NDETECTS];
+    Mantid::MantidVecPtr xs, errors, data[NDETECTS];
     xs.access().resize(NBINS+1, 0.0);
     errors.access().resize(NBINS, 1.0);
     int detIDs[NDETECTS];
