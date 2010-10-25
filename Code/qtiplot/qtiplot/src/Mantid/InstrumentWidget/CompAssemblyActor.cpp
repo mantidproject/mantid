@@ -23,6 +23,7 @@ using Mantid::Geometry::IRectangularDetector;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::Object;
 
+
 /**
  * This is default constructor for CompAssembly Actor
  * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
