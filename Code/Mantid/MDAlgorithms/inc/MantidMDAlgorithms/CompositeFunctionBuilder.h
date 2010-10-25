@@ -52,7 +52,6 @@ namespace Mantid
 		public:
 			CompositeFunctionBuilder();
 			void addFunctionBuilder(IFunctionBuilder* funcBuilder);
-			void addParameter(std::auto_ptr<IParameter> parameter);
 			std::auto_ptr<Mantid::API::IImplicitFunction> create() const;
 			~CompositeFunctionBuilder();
 		};

@@ -60,7 +60,7 @@ namespace Mantid
             std::auto_ptr<ParameterParser> m_paramParserRoot; //Chain of responsibility 
             std::auto_ptr<FunctionParser> m_successor;
             
-            std::auto_ptr<IParameter> parseParameter(Poco::XML::Element* pRoot)
+            IParameter* parseParameter(Poco::XML::Element* pRoot)
             {
                 return m_paramParserRoot->createParameter(pRoot);
             }

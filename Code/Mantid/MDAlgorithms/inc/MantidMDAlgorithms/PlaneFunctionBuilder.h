@@ -45,15 +45,18 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
+        class NormalParameter;
+        class OriginParameter;
 
         class DLLExport PlaneFunctionBuilder : public IFunctionBuilder
         {
-        protected:
-            std::auto_ptr<IParameter> origin;
-            std::auto_ptr<IParameter> normal;
+        private:
+            mutable OriginParameter m_origin;
+            mutable NormalParameter m_normal;
         public:
             PlaneFunctionBuilder();
-            void addParameter(std::auto_ptr<IParameter> parameter);
+            void addNormalParameter(NormalParameter& parameter);
+            void addOriginParameter(OriginParameter& parameter);
             std::auto_ptr<Mantid::API::IImplicitFunction> create() const;
             ~PlaneFunctionBuilder();
         };

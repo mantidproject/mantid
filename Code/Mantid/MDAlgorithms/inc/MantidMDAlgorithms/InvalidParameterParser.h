@@ -58,8 +58,8 @@ namespace Mantid
         {
         public:
             InvalidParameterParser();
-            std::auto_ptr<IParameter> createParameter(Poco::XML::Element* parameterElement);
-            void setSuccessorParser(std::auto_ptr<ParameterParser> paramParser);
+            IParameter* createParameter(Poco::XML::Element* parameterElement);
+            void setSuccessorParser(ParameterParser* paramParser);
         protected:
             std::auto_ptr<ParameterParser> m_successor;
             InvalidParameter* parseInvalidParameter(std::string value);

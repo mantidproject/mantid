@@ -33,8 +33,8 @@ public:
         Element* pRootElem = pDoc->documentElement();
 
         InvalidParameterParser parser;
-        std::auto_ptr<IParameter> iparam = parser.createParameter(pRootElem);
-        InvalidParameter* pInvalidParam = dynamic_cast<InvalidParameter*>(iparam.release());
+        IParameter* iparam = parser.createParameter(pRootElem);
+        InvalidParameter* pInvalidParam = dynamic_cast<InvalidParameter*>(iparam);
         std::auto_ptr<InvalidParameter> invalparam = std::auto_ptr<InvalidParameter>(pInvalidParam);
 
         TSM_ASSERT("The paramter generated should be an InvalidParamter", NULL != pInvalidParam);

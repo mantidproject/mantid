@@ -51,8 +51,8 @@ public:
         std::auto_ptr<ParameterParser> normalParser = std::auto_ptr<ParameterParser>(new NormalParameterParser);
         std::auto_ptr<ParameterParser> invalidParser = std::auto_ptr<ParameterParser>(new InvalidParameterParser);
 
-        originParser->setSuccessorParser(invalidParser);
-        normalParser->setSuccessorParser(originParser);
+        originParser->setSuccessorParser(invalidParser.release());
+        normalParser->setSuccessorParser(originParser.release());
 
         //Apply the chain of responsibility for the parameter parsers.
         this->rootParameterParser = normalParser;

@@ -10,12 +10,38 @@ namespace Mantid
             m_origin.push_back(n1);
             m_origin.push_back(n2);
             m_origin.push_back(n3);
+            m_isValid = true;
         }
 
-        OriginParameter::OriginParameter(OriginParameter& other)
+        OriginParameter::OriginParameter()
         {
+            this->m_isValid = false;
+        }
+
+        OriginParameter::OriginParameter(OriginParameter& other) 
+        {
+            this->m_isValid = other.m_isValid;
             this->m_origin = std::vector<double>(3);
             std::copy(other.m_origin.begin(), other.m_origin.end(), this->m_origin.begin());
+        }
+
+        OriginParameter::OriginParameter(OriginParameter const * const other)
+        {
+            this->m_isValid = other->m_isValid;
+            this->m_origin = std::vector<double>(3);
+            std::copy(other->m_origin.begin(), other->m_origin.end(), this->m_origin.begin());
+        }
+
+        OriginParameter& OriginParameter::operator=(const OriginParameter& other)
+        {
+            if(&other != this)
+            {
+                this->m_isValid = other.m_isValid;
+                this->m_origin.clear();
+                this->m_origin = std::vector<double>(3);
+                std::copy(other.m_origin.begin(), other.m_origin.end(), this->m_origin.begin());
+            }
+            return *this;
         }
 
         std::string OriginParameter::getName() const
@@ -25,7 +51,7 @@ namespace Mantid
 
         bool OriginParameter::isValid() const
         {
-            return true;
+            return m_isValid;
         }
 
         OriginParameter* OriginParameter::cloneImp() const

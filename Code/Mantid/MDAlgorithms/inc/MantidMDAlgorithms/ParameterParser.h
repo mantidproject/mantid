@@ -58,8 +58,9 @@ namespace Mantid
         class DLLExport ParameterParser
         {
         public:
-            virtual std::auto_ptr<IParameter> createParameter(Poco::XML::Element* parameterElement) = 0;
-            virtual void setSuccessorParser(std::auto_ptr<ParameterParser> paramParser) = 0;
+            virtual IParameter* createParameter(Poco::XML::Element* parameterElement) = 0;
+            virtual void setSuccessorParser(ParameterParser* paramParser) = 0;
+            virtual ~ParameterParser() = 0 {;}
         protected:
             std::auto_ptr<ParameterParser> m_successor;
 

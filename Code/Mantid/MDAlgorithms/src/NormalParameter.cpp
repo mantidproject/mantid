@@ -10,12 +10,39 @@ namespace Mantid
             m_normal.push_back(n1);
             m_normal.push_back(n2);
             m_normal.push_back(n3);
+            m_isValid = true;
+        }
+
+        NormalParameter::NormalParameter()
+        {
+            this->m_isValid = false;
         }
 
         NormalParameter::NormalParameter(NormalParameter& other)
         {
+            this->m_isValid = other.m_isValid;
             this->m_normal = std::vector<double>(3);
             std::copy(other.m_normal.begin(), other.m_normal.end(), this->m_normal.begin());
+        } 
+        
+        NormalParameter::NormalParameter(NormalParameter const * const other)
+        {
+            this->m_isValid = other->m_isValid;
+            this->m_normal = std::vector<double>(3);
+            std::copy(other->m_normal.begin(), other->m_normal.end(), this->m_normal.begin());
+        }
+
+
+        NormalParameter& NormalParameter::operator=(const NormalParameter& other)
+        {
+            if(&other != this)
+            {
+                this->m_isValid = other.m_isValid;
+                this->m_normal.clear();
+                this->m_normal = std::vector<double>(3);
+                std::copy(other.m_normal.begin(), other.m_normal.end(), this->m_normal.begin());
+            }
+            return *this;
         }
 
         NormalParameter NormalParameter::reflect()
@@ -31,7 +58,7 @@ namespace Mantid
 
         bool NormalParameter::isValid() const
         {
-            return true;
+            return this->m_isValid;
         }
 
         NormalParameter* NormalParameter::cloneImp() const

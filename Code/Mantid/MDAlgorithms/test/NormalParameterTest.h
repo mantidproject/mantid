@@ -24,6 +24,42 @@ public:
         Mantid::MDAlgorithms::NormalParameter normal(0, 0, 0);
         TSM_ASSERT_EQUALS("The NormalParameter should be valid.", true, normal.isValid());
     }
+	
+	void testCopyPtr()
+	{
+	    using namespace Mantid::MDAlgorithms;
+        NormalParameter* original = new NormalParameter(0, 1, 2);
+	    NormalParameter copy(original);
+		
+        TSM_ASSERT_EQUALS("Copied NormalParameter getX() is not same as original.", 0, copy.getX() );
+        TSM_ASSERT_EQUALS("Copied NormalParameter getY() is not same as original.", 1, copy.getY() );
+        TSM_ASSERT_EQUALS("Copied NormalParameter getZ() is not same as original.", 2, copy.getZ() );
+		TSM_ASSERT_EQUALS("Copied NormalParameter isValid() is not same as original.", original->isValid(), copy.isValid() );
+	}
+	
+	void testAssigment()
+	{
+	    using namespace Mantid::MDAlgorithms;
+        NormalParameter A(0, 1, 2);
+	    NormalParameter B;
+		A = B;
+        TSM_ASSERT_EQUALS("Assigned NormalParameter getX() is not correct.", 0, A.getX() );
+        TSM_ASSERT_EQUALS("Assigned NormalParameter getY() is not correct.", 0, A.getY() );
+        TSM_ASSERT_EQUALS("Assigned NormalParameter getZ() is not correct.", 0, A.getZ() );	
+		TSM_ASSERT_EQUALS("Assigned NormalParameter isValid() is not correct.", false, A.isValid() );	
+	}
+	
+	void testDefaultInvalid()
+	{
+	  Mantid::MDAlgorithms::NormalParameter normal;
+	  TSM_ASSERT_EQUALS("Should be invalid!", false, normal.isValid() );
+	}
+	
+	void testIsNotValid()
+	{
+        Mantid::MDAlgorithms::NormalParameter normal(0, 0, 0);
+        TSM_ASSERT_EQUALS("NormalParameter constructed via parameterless constructor should be invalid.", true, normal.isValid());	 
+	}
 
     void testClone()
     {
@@ -33,6 +69,7 @@ public:
         TSM_ASSERT_EQUALS("Cloned NormalParameter getX() is not same as original.", 0, cloned->getX() );
         TSM_ASSERT_EQUALS("Cloned NormalParameter getY() is not same as original.", 1, cloned->getY() );
         TSM_ASSERT_EQUALS("Cloned NormalParameter getZ() is not same as original.", 2, cloned->getZ() );
+		TSM_ASSERT_EQUALS("Cloned NormalParameter isValid() is not same as original.", original.isValid(), cloned->isValid());
     }
 
     void testCopy()
@@ -42,6 +79,7 @@ public:
         TSM_ASSERT_EQUALS("Copied NormalParameter getX() is not same as original.", 0, copy.getX() );
         TSM_ASSERT_EQUALS("Copied NormalParameter getY() is not same as original.", 1, copy.getY() );
         TSM_ASSERT_EQUALS("Copied NormalParameter getZ() is not same as original.", 2, copy.getZ() );
+		TSM_ASSERT_EQUALS("Copied NormalParameter isValid() is not same as original.", original.isValid(), copy.isValid());
     }
 
     void testGetNameFunctionsEquivalent()

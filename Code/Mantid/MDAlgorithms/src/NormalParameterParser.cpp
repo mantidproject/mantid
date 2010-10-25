@@ -11,7 +11,11 @@ namespace Mantid
 
         }
 
-        std::auto_ptr<IParameter> NormalParameterParser::createParameter(Poco::XML::Element* parameterElement)
+        NormalParameterParser::~NormalParameterParser()
+        {
+        }
+
+        IParameter* NormalParameterParser::createParameter(Poco::XML::Element* parameterElement)
         {
             if(NormalParameter::parameterName() != parameterElement->getChildElement("Type")->innerText())
             {
@@ -21,9 +25,7 @@ namespace Mantid
             {
                 std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
 
-                IParameter* result = parseNormalParameter(sParameterValue);
-
-                return std::auto_ptr<IParameter>(result);
+                return parseNormalParameter(sParameterValue);
             }
         }
 
@@ -46,9 +48,9 @@ namespace Mantid
             return new NormalParameter(nx, ny, nz);
         }
 
-        void NormalParameterParser::setSuccessorParser(std::auto_ptr<ParameterParser> parameterParser)
+        void NormalParameterParser::setSuccessorParser(ParameterParser* parameterParser)
         {
-            m_successor = parameterParser;
+            m_successor = std::auto_ptr<ParameterParser>(parameterParser);
         }
     }
 

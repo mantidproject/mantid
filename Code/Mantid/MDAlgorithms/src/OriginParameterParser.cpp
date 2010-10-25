@@ -11,7 +11,7 @@ namespace Mantid
 
         }
 
-        std::auto_ptr<IParameter> OriginParameterParser::createParameter(Poco::XML::Element* parameterElement)
+        IParameter* OriginParameterParser::createParameter(Poco::XML::Element* parameterElement)
         {
             std::string sParameterType = parameterElement->getChildElement("Type")->innerText();
             if(OriginParameter::parameterName() != sParameterType)
@@ -22,7 +22,7 @@ namespace Mantid
             {
 
                 std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
-                return std::auto_ptr<IParameter>(parseOriginParameter(sParameterValue));
+                return parseOriginParameter(sParameterValue);
             }
         }
 
@@ -47,9 +47,9 @@ namespace Mantid
             return new OriginParameter(ox, oy, oz);
         }
 
-        void OriginParameterParser::setSuccessorParser(std::auto_ptr<ParameterParser> parameterParser)
+        void OriginParameterParser::setSuccessorParser(ParameterParser* parameterParser)
         {
-            m_successor = parameterParser;
+            m_successor = std::auto_ptr<ParameterParser>(parameterParser);
         }
     }
 

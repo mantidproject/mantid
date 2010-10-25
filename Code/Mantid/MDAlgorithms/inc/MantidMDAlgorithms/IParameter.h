@@ -58,10 +58,12 @@ namespace Mantid
             virtual ~IParameter() = 0
             {
             };
+            
         protected:
             virtual IParameter* cloneImp() const = 0;
+            bool m_isValid;
         private:
-            IParameter& operator=(const IParameter&);
+            
 
         };
     }

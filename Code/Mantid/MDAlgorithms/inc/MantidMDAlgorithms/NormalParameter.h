@@ -55,9 +55,10 @@ namespace Mantid
         public:
 
             NormalParameter(double n1, double n2, double n3);
-
-            NormalParameter::NormalParameter(NormalParameter& other);
-
+            NormalParameter();
+            NormalParameter(NormalParameter& other);
+            NormalParameter(NormalParameter const * const other);
+            NormalParameter& operator=(const NormalParameter& other);
             std::string getName() const;
 
             bool isValid() const;

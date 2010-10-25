@@ -11,10 +11,10 @@ namespace Mantid
 
         }
 
-        std::auto_ptr<IParameter> InvalidParameterParser::createParameter(Poco::XML::Element* parameterElement)
+        IParameter* InvalidParameterParser::createParameter(Poco::XML::Element* parameterElement)
         {
             std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
-            return std::auto_ptr<IParameter>(parseInvalidParameter(sParameterValue));
+            return parseInvalidParameter(sParameterValue);
         }
 
 
@@ -23,9 +23,9 @@ namespace Mantid
             return new InvalidParameter(value);
         }
 
-        void InvalidParameterParser::setSuccessorParser(std::auto_ptr<ParameterParser> parser)
+        void InvalidParameterParser::setSuccessorParser(ParameterParser* parser)
         {
-            //Do nothing.
+            //Do nothing. No sucessor allowed.
         }
     }
 

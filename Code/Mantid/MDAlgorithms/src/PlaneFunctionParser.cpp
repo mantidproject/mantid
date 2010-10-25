@@ -44,7 +44,22 @@ namespace Mantid
             for(int i = 0; i < parameterList->length(); i++)
             {
                 Element* parameterElement = dynamic_cast<Element*>(parameterList->item(i));
-                functionBuilder->addParameter(this->parseParameter(parameterElement));
+                std::auto_ptr<IParameter> parameter = std::auto_ptr<IParameter>(this->parseParameter(parameterElement));
+                if(NormalParameter::parameterName() == parameter->getName())
+                { 
+                    NormalParameter normal = NormalParameter(dynamic_cast<NormalParameter*>(parameter.get()));
+                    functionBuilder->addNormalParameter(normal);
+                }
+                else if(OriginParameter::parameterName() == parameter->getName())
+                {
+                    OriginParameter origin = OriginParameter(dynamic_cast<OriginParameter*>(parameter.get()));
+                    functionBuilder->addOriginParameter(origin);
+                }
+                else
+                {
+                    //Do nothing!
+                }
+                
             }
 
             return functionBuilder.release(); //convert to raw pointer and cancel smart management.

@@ -47,7 +47,6 @@ namespace Mantid
         class DLLExport IFunctionBuilder
         {
         public:
-            virtual void addParameter(std::auto_ptr<IParameter> parameter) = 0;
             virtual std::auto_ptr<Mantid::API::IImplicitFunction> create() const = 0;
             virtual ~IFunctionBuilder() = 0;
 

@@ -45,7 +45,7 @@ namespace Mantid
         {
         private:
 
-            std::vector<double> m_origin;
+           std::vector<double> m_origin;
 
         protected:
 
@@ -54,9 +54,10 @@ namespace Mantid
         public:
 
             OriginParameter(double o1, double o2, double o3);
-
-            OriginParameter::OriginParameter(OriginParameter& other);
-
+            OriginParameter();
+            OriginParameter(OriginParameter & other);
+            OriginParameter(OriginParameter const * const other);
+            OriginParameter& operator=(const OriginParameter& other);
             bool isValid() const;
 
             std::string getName() const;

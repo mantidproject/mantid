@@ -86,15 +86,6 @@ public:
 
     }
 
-    void testAddParameter()
-    {
-        using namespace Mantid::MDAlgorithms;
-
-        std::auto_ptr<IParameter> param = std::auto_ptr<IParameter>(new FakeParameter);
-        CompositeFunctionBuilder compFuncBuilder; 
-        TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as no parameters allowed on composite function builders.", compFuncBuilder.addParameter(param), std::invalid_argument);
-    }
-
 };
 
 

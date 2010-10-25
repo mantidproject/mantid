@@ -24,6 +24,43 @@ public:
         Mantid::MDAlgorithms::OriginParameter origin(0, 0, 0);
         TSM_ASSERT_EQUALS("The OriginParameter should be valid.", true, origin.isValid());
     }
+	
+    void testIsNotValid()
+	{
+        Mantid::MDAlgorithms::OriginParameter origin(0, 0, 0);
+        TSM_ASSERT_EQUALS("OriginParameter constructed via parameterless constructor should be invalid.", true, origin.isValid());	 
+	}
+	
+	
+	void testCopyPtr()
+	{
+	    using namespace Mantid::MDAlgorithms;
+        OriginParameter* original = new OriginParameter(0, 1, 2);
+	    OriginParameter copy(original);
+		
+        TSM_ASSERT_EQUALS("Copied OriginParameter getX() is not same as original.", 0, copy.getX() );
+        TSM_ASSERT_EQUALS("Copied OriginParameter getY() is not same as original.", 1, copy.getY() );
+        TSM_ASSERT_EQUALS("Copied OriginParameter getZ() is not same as original.", 2, copy.getZ() );
+		TSM_ASSERT_EQUALS("Copied OriginParameter isValid() is not same as original.", original->isValid(), copy.isValid() );
+	}
+	
+	void testDefaultInvalid()
+	{
+	  Mantid::MDAlgorithms::OriginParameter origin;
+	  TSM_ASSERT_EQUALS("Should be invalid!", false, origin.isValid() );
+	}
+	
+	void testAssigment()
+	{
+	    using namespace Mantid::MDAlgorithms;
+        OriginParameter A(0, 1, 2);
+	    OriginParameter B;
+		A = B;
+        TSM_ASSERT_EQUALS("Assigned OriginParameter getX() is not correct.", 0, A.getX() );
+        TSM_ASSERT_EQUALS("Assigned OriginParameter getY() is not correct.", 0, A.getY() );
+        TSM_ASSERT_EQUALS("Assigned OriginParameter getZ() is not correct.", 0, A.getZ() );	
+		TSM_ASSERT_EQUALS("Assigned OriginParameter isValid() is not same as original.", B.isValid(), A.isValid() );
+	}
 
     void testClone()
     {
@@ -33,6 +70,7 @@ public:
         TSM_ASSERT_EQUALS("Cloned OriginParameter getX() is not same as original.", 0, cloned->getX() );
         TSM_ASSERT_EQUALS("Cloned OriginParameter getY() is not same as original.", 1, cloned->getY() );
         TSM_ASSERT_EQUALS("Cloned OriginParameter getZ() is not same as original.", 2, cloned->getZ() );
+		TSM_ASSERT_EQUALS("Cloned OriginParameter isValid() is not same as original.", original.isValid(), cloned->isValid() );
     }
 
     void testCopy()
@@ -42,6 +80,7 @@ public:
         TSM_ASSERT_EQUALS("Copied OriginParameter getX() is not same as original.", 0, copy.getX() );
         TSM_ASSERT_EQUALS("Copied OriginParameter getY() is not same as original.", 1, copy.getY() );
         TSM_ASSERT_EQUALS("Copied OriginParameter getZ() is not same as original.", 2, copy.getZ() );
+		TSM_ASSERT_EQUALS("Copied OriginParameter isValid() is not same as original.", original.isValid(), copy.isValid() );
     }
 
     void testGetNameFunctionsEquivalent()

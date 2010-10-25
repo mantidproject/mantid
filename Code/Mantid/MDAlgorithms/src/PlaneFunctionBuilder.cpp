@@ -10,44 +10,38 @@ namespace Mantid
     {
         using namespace Mantid::API;
 
-        PlaneFunctionBuilder::PlaneFunctionBuilder(): origin(std::auto_ptr<IParameter>(new InvalidParameter())) , normal(std::auto_ptr<IParameter>(new InvalidParameter()))
+        PlaneFunctionBuilder::PlaneFunctionBuilder()//: m_origin(std::auto_ptr<IParameter>(new InvalidParameter())) , m_normal(std::auto_ptr<IParameter>(new InvalidParameter()))
         {
         }
 
-        void PlaneFunctionBuilder::addParameter(std::auto_ptr<IParameter> parameter)
+        void  PlaneFunctionBuilder::addNormalParameter(NormalParameter& parameter)
         {
-            if(parameter->getName() == OriginParameter::parameterName())
-            {
-                this->origin = parameter->clone();
-            }
-            else if(parameter->getName() == NormalParameter::parameterName())
-            {
-                this->normal = parameter->clone();
-            }
-            else
-            {
-                std::string message = "PlaneFunctionBuilder does not take parameters of type: " + parameter->getName();
-                throw std::invalid_argument(message);
-            }
+            
+            this->m_normal = NormalParameter(parameter);
+        }
+
+        void  PlaneFunctionBuilder::addOriginParameter(OriginParameter& parameter)
+        { 
+           
+            this->m_origin = OriginParameter(parameter);
         }
 
         std::auto_ptr<IImplicitFunction> PlaneFunctionBuilder::create() const
         {
-            if(!origin->isValid())
+            //check that builder parameters are valid.
+            if(!m_origin.isValid())
             {
-                std::string message = "Invalid parameter passed to PlaneFunctionBuilder: " + origin->getName();
+                std::string message = "Invalid origin parameter on PlaneFunctionBuilder";
+                throw std::invalid_argument(message);
+            } 
+            if(!m_normal.isValid())
+            {
+                std::string message = "Invalid normal parameter passed to PlaneFunctionBuilder";
                 throw std::invalid_argument(message);
             }
-            if(!normal->isValid())
-            {
-                std::string message = "Invalid parameter passed to PlaneFunctionBuilder: " + normal->getName();
-                throw std::invalid_argument(message);
-            }
-
-            OriginParameter originParam = *dynamic_cast<OriginParameter*>(origin.get());
-            NormalParameter normalParam = *dynamic_cast<NormalParameter*>(normal.get());
-
-            return std::auto_ptr<IImplicitFunction>(new PlaneImplicitFunction(normalParam, originParam));
+            //implement construction.
+            PlaneImplicitFunction* func = new PlaneImplicitFunction(m_normal, m_origin);
+            return std::auto_ptr<IImplicitFunction>(func);
         }
 
         PlaneFunctionBuilder::~PlaneFunctionBuilder()

@@ -20,27 +20,22 @@ class  OriginParameterParserTest : public CxxTest::TestSuite
 {
 private:
 
-
+    //Testable sub-class
     class ExposedOriginParameterParser : public Mantid::MDAlgorithms::OriginParameterParser
     {
-    public:
+    public: //Make protected method on base public.
         Mantid::MDAlgorithms::OriginParameter* exposedParseOriginParameterValue(std::string value)
         {
             return this->parseOriginParameter(value);
         }
     };
 
-    class SuccessorParameterParser : public Mantid::MDAlgorithms::InvalidParameterParser
+    //Mock class
+    class SuccessorParameterParser : public Mantid::MDAlgorithms::ParameterParser 
     {
     public:
-        bool isCalled;
-        SuccessorParameterParser() : isCalled(false) {}
-        std::auto_ptr<Mantid::MDAlgorithms::IParameter> createParameter(Poco::XML::Element* parameterElement)
-        {
-            using namespace Mantid::MDAlgorithms;
-            isCalled = true;
-            return std::auto_ptr<IParameter>(new OriginParameter(0,0,0));
-        }
+        MOCK_METHOD1(createParameter, Mantid::MDAlgorithms::IParameter*(Poco::XML::Element* parameterElement));
+        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::ParameterParser* parameterParser));
     };
 
 public:
@@ -71,8 +66,8 @@ public:
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         OriginParameterParser parser;
-        std::auto_ptr<IParameter> iparam = parser.createParameter(pRootElem);
-        OriginParameter* pOriginParam = dynamic_cast<OriginParameter*>(iparam.release());
+        IParameter* iparam = parser.createParameter(pRootElem);
+        OriginParameter* pOriginParam = dynamic_cast<OriginParameter*>(iparam);
         std::auto_ptr<OriginParameter> oparam = std::auto_ptr<OriginParameter>(pOriginParam);
         TSM_ASSERT("The paramter generated should be an OriginParamter", NULL != pOriginParam);
     }
@@ -85,11 +80,15 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        OriginParameterParser parser;
         SuccessorParameterParser* successor = new SuccessorParameterParser;
-        parser.setSuccessorParser(std::auto_ptr<ParameterParser>(successor));
-        std::auto_ptr<IParameter> iparam = parser.createParameter(pRootElem);
-        TSM_ASSERT("The successor parser has not been called.", successor->isCalled)
+        EXPECT_CALL(*successor, createParameter(testing::_)).Times(1);
+        
+		OriginParameterParser parser;
+		
+        parser.setSuccessorParser(successor);
+        IParameter* iparam = parser.createParameter(pRootElem);
+
+        TSM_ASSERT("Chain of responsiblity did not execute as expected for OriginParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
     }
 
 };
