@@ -11,7 +11,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par),m_utils_sptr()
+ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par),m_utils_sptr(new ICatUtils)
 {
 	m_uiForm.setupUi(this);
 
@@ -25,32 +25,17 @@ ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par),m_utils_sptr()
 	{
 		setparentWidget(parent);
 	}
-	
+	if(!m_utils_sptr)
+  {
+      return ;
+  }
+		m_utils_sptr->setParent(parent);
 	Mantid::API::ITableWorkspace_sptr  ws_sptr ;
 	if(executeMyDataSearch(ws_sptr))
-	{
-		if(!ws_sptr)
-		{
-			emit error("MyData search completed,No results to display.");
-			return;
-		}
-		//boost::shared_ptr<ICatUtils> utils(new ICatUtils(parent));
-		
-		m_utils_sptr->setParent(parent);
+	{		
 		m_utils_sptr->updatesearchResults(ws_sptr,m_uiForm.myDatatableWidget);
-
-		//setting the label string
-		QFont font;
-		font.setBold(true);
-
-		QString labelText;
-		std::stringstream totalCount;
-		totalCount<<ws_sptr->rowCount();
-		labelText="Data: "+QString::fromStdString(totalCount.str())+" Investigations "+" found";
-
-		m_uiForm.mydatalabel->setText(labelText);
-		m_uiForm.mydatalabel->setAlignment(Qt::AlignHCenter);
-		m_uiForm.mydatalabel->setFont(font);
+    m_utils_sptr->updateSearchLabel(ws_sptr,m_uiForm.mydatalabel);
+	
 	}
 	
 	
@@ -65,7 +50,6 @@ void ICatMyDataSearch::setparentWidget(QWidget* par)
 bool ICatMyDataSearch::executeMyDataSearch(ITableWorkspace_sptr& ws_sptr)
 {
 	Mantid::API::IAlgorithm_sptr alg;
-	//Mantid::API::ITableWorkspace_sptr ws_sptr;
 	try
 	{
 		alg = Mantid::API::AlgorithmManager::Instance().create("MyDataSearch",1);
@@ -96,10 +80,24 @@ bool ICatMyDataSearch::executeMyDataSearch(ITableWorkspace_sptr& ws_sptr)
 	{
 		QCoreApplication::processEvents();
 	}
-		//return (!result.failed());
-    if(!alg->isExecuted())
-	{		
-		return false;
+  if(result.failed())
+	{	
+    if(!m_utils_sptr)
+    {
+      return false;
+    }
+    //if the algorithm failed check the session id passed is valid
+		if(!m_utils_sptr->isSessionValid(alg))
+		{			
+			//at this point session is invalid, popup loginbox to login
+			if(m_utils_sptr->login())
+			{
+     	//now populate instrument box
+			 return(executeMyDataSearch(ws_sptr)?true:false );
+      
+			}
+		}
+		//return false;
 	}
 	
 	if(AnalysisDataService::Instance().doesExist("MyInvestigations"))

@@ -77,6 +77,9 @@ private:
 
 	/// get fileds 
 	void getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds);
+  
+  ///update the investigation widget label
+  void updateLabel(const QString& labelText);
 
 
   private slots:

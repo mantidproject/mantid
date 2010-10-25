@@ -69,6 +69,8 @@ void ICatInvestigation::initLayout()
 /// Poulate the tree widget on LHS
 void ICatInvestigation::populateInvestigationTreeWidget(){
 	
+
+  m_uiForm.invsttreeWidget->setHeaderLabel("");
 	QStringList qlist;
 	qlist.push_back(m_Title);
 	QTreeWidgetItem *item1 = new QTreeWidgetItem(qlist);
@@ -101,7 +103,7 @@ void ICatInvestigation::populateInvestigationTreeWidget(){
 	qlist.push_back("Default");
 	QTreeWidgetItem *item5 = new QTreeWidgetItem(qlist);
 	item4->addChild(item5);
-	item5->setToolTip(0,"View default's datafiles");
+	item5->setToolTip(0,"View default's files");
 
 	qlist.clear();
 	qlist.push_back("Status:");
@@ -241,14 +243,17 @@ void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 		{
 			if(!m_filteredws_sptr)
 			{
+        updateLabel("Loading data files...");
 				m_filteredws_sptr=executeGetdataFiles();
 			}
+      
 			populateinvestigationWidget(m_filteredws_sptr,"DataFiles",true);
 		}
 		else
 		{
 			if(!m_datafilesws_sptr)
 			{
+        updateLabel("Loading files...");
 				m_datafilesws_sptr = executeGetdataFiles();
 			}
 			if(!m_datafilesws_sptr) return;
@@ -258,6 +263,7 @@ void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
 	else if(!item->text(0).compare("DataSets"))
 	{
 		if(!m_datasetsws_sptr){
+      updateLabel("Loading datasets...");
 			m_datasetsws_sptr= executeGetdataSets();
 
 		}
@@ -276,6 +282,7 @@ void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace
 	if(!dataws_sptr){return;}
 
 	Mantid::API::ITableWorkspace_sptr ws_sptr(dataws_sptr);
+  if(!ws_sptr){return;}
 
 	//turn off sorting as per QT documentation
 	m_uiForm.invsttableWidget->setSortingEnabled(false);
@@ -332,12 +339,8 @@ void ICatInvestigation::populateinvestigationWidget(Mantid::API::ITableWorkspace
 	std::stringstream totalCount;
 	totalCount<<ws_sptr->rowCount();
 	labelText="Data: "+QString::fromStdString(totalCount.str())+" "+type+" found";
-	
-	m_uiForm.invstlabel->clear();
-	m_uiForm.invstlabel->setText(labelText);
-	m_uiForm.invstlabel->setAlignment(Qt::AlignHCenter);
-	m_uiForm.invstlabel->setFont(font);
-	
+  updateLabel(labelText);
+			
 	//if flag is set sort by first column
 	if(bEnable)
 	{   
@@ -356,6 +359,17 @@ void  ICatInvestigation::onCancel()
 	{
 		parent->close();
 	}
+}
+/**update label on labled widget with the given text
+*/
+void ICatInvestigation::updateLabel(const QString& labelText)
+{
+  QFont font;
+	font.setBold(true);
+ 	m_uiForm.invstlabel->clear();
+	m_uiForm.invstlabel->setText(labelText);
+	m_uiForm.invstlabel->setAlignment(Qt::AlignHCenter);
+	m_uiForm.invstlabel->setFont(font);
 }
 void ICatInvestigation::onSelectAllFiles()
 {
@@ -455,7 +469,7 @@ void  ICatInvestigation::onDownload()
 	}
 
 	std::vector<long long >fileIds;
-	//get the file ids.
+	//get the file ids for the given file names.
 	getFileIds(fileNames,fileIds);
 	
 	emit download(fileNames,fileIds);

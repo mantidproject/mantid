@@ -40,61 +40,6 @@
      <property name="selectionBehavior" >
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
-     <column>
-      <property name="text" >
-       <string>InvestigationId</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>RbNumber</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Title</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Type</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Instrument</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Investigator</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>RunRange</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Year</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Abstract</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Investigators Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Samples Name</string>
-      </property>
-     </column>
     </widget>
    </item>
   </layout>
