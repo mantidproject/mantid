@@ -4,7 +4,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/ui_indirectAnalysis.h"
+#include "MantidQtCustomInterfaces/ui_IndirectDataAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -26,7 +26,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    class indirectAnalysis : public MantidQt::API::UserSubWindow
+    class IndirectDataAnalysis : public MantidQt::API::UserSubWindow
     {
       Q_OBJECT
 
@@ -36,7 +36,7 @@ namespace MantidQt
 
     public:
       /// Default Constructor
-      indirectAnalysis(QWidget *parent = 0);
+      IndirectDataAnalysis(QWidget *parent = 0);
 
     private:
       /// Initialize the layout
@@ -48,7 +48,9 @@ namespace MantidQt
       void saveSettings();
 
       void setupTreePropertyBrowser();
-      void setupFFPlotArea();
+
+      void setupFuryFit();
+      void setupConFit();
 
       bool validateFury();
       bool validateElwin();
@@ -56,25 +58,39 @@ namespace MantidQt
       bool validateAbsorption();
       bool validateDemon();
 
-      Mantid::API::CompositeFunction* createFunction();
+      Mantid::API::CompositeFunction* createFunction(QtTreePropertyBrowser* propertyBrowser);
       QtProperty* createLorentzian();
       QtProperty* createExponential();
       QtProperty* createStretchedExp();
       
       virtual void closeEvent(QCloseEvent* close);
 
+      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
+
     private slots:
+      // Generic
       void instrumentChanged(int index);
       void analyserSelected(int index);
       void reflectionSelected(int index);
       void refreshWSlist();
 
+      // ElasticWindow
+      void elwinRun();
+      void elwinPlotInput();
+      void elwinTwoRanges(bool state);
+
+      // MSD Fit
+      void msdRun();
+      void msdPlotInput();
+
+      // Fourier Transform
       void furyRun();
       void furyResType(const QString& type);
       void furyPlotInput();
 
-      void runFuryFit();
-      void furyfit_typeSelection(int index);
+      // Fourier Transform Fit
+      void furyfitRun();
+      void furyfitTypeSelection(int index);
       void furyfitPlotInput();
       void furyfitXMinSelected(double val);
       void furyfitXMaxSelected(double val);
@@ -84,34 +100,33 @@ namespace MantidQt
       void furyfitPlotOutput();
       void furyfitSequential();
 
-      void elwinRun();
-      void elwinPlotInput();
-      void elwinTwoRanges(bool state);
-
-      void msdRun();
-      void msdPlotInput();
-
+      // Absorption (Basic)
       void absorptionRun();
       void absorptionShape(int index);
 
+      // Diffraction Reduction
       void demonRun();
 
+      // Common Elements
       void openDirectoryDialog();
       void help();
       
     private:
-      Ui::indirectAnalysis m_uiForm;
+      Ui::IndirectDataAnalysis m_uiForm;
       QString m_settingsGroup;
       QString m_dataDir;
       QString m_saveDir;
       QIntValidator *m_valInt;
       QDoubleValidator *m_valDbl;
-      QtTreePropertyBrowser* m_propBrowser; ///< FuryFit Property Browser
+
+      bool m_furyResFileType;
+
+      // Fury Fit Member Variables (prefix 'm_ff')
+      QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
       QtGroupPropertyManager* m_groupManager;
       QtDoublePropertyManager* m_doubleManager;
       QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
-      bool m_furyResFileType;
-      QMap<QString, QtProperty*> m_fitProperties;
+      QMap<QString, QtProperty*> m_ffProp;
       QwtPlot* m_furyFitPlotWindow;
       QwtPlotCurve* m_ffDataCurve;
       QwtPlotCurve* m_ffFitCurve;
@@ -123,6 +138,10 @@ namespace MantidQt
       std::string m_ffInputWSName;
       QString m_furyfitTies;
       QString m_furyfitConstraints;
+
+      /// Change Observer for ConfigService (monitors user directories)
+      Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+
     };
   }
 }

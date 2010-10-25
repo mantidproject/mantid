@@ -1,12 +1,12 @@
 <ui version="4.0" >
- <class>indirectAnalysis</class>
- <widget class="QWidget" name="indirectAnalysis" >
+ <class>IndirectDataAnalysis</class>
+ <widget class="QWidget" name="IndirectDataAnalysis" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
-    <height>424</height>
+    <width>511</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -708,6 +708,19 @@
         </layout>
        </item>
        <item>
+        <spacer name="verticalSpacer_4" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_9" >
          <item>
           <widget class="QCheckBox" name="fury_ckVerbose" >
@@ -915,10 +928,13 @@
              <property name="text" >
               <string>Constrain Intensities</string>
              </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="furyfit_hlTreePlace" />
+            <layout class="QHBoxLayout" name="furyfit_properties" />
            </item>
           </layout>
          </item>

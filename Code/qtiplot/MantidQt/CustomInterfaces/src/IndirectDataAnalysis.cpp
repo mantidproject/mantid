@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/indirectAnalysis.h"
+#include "MantidQtCustomInterfaces/IndirectDataAnalysis.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
@@ -24,6 +24,8 @@
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
 
+#include <Poco/NObserver.h>
+
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
@@ -32,7 +34,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(indirectAnalysis);
+    DECLARE_SUBWINDOW(IndirectDataAnalysis);
   }
 }
 
@@ -41,27 +43,41 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 // Public member functions
 //----------------------
-///Constructor
-indirectAnalysis::indirectAnalysis(QWidget *parent) :
-UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true), m_ffDataCurve(0), m_ffFitCurve(0)
+
+IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
+UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true), m_ffDataCurve(0), m_ffFitCurve(0),
+  m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
 {
 }
-void indirectAnalysis::closeEvent(QCloseEvent* close)
+
+void IndirectDataAnalysis::closeEvent(QCloseEvent* close)
 {
   (void) close;
   saveSettings();
+
+  Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
-/// Set up the dialog layout
-void indirectAnalysis::initLayout()
+void IndirectDataAnalysis::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+{
+  std::string key = pNf->key();
+  std::string preValue = pNf->preValue();
+  std::string curValue = pNf->curValue();
+
+  if ( key == "datasearch.directories" || key == "defaultsave.directory" )
+  {
+    loadSettings();
+  }
+}
+
+void IndirectDataAnalysis::initLayout()
 {
   m_uiForm.setupUi(this);
 
-  m_propBrowser = new QtTreePropertyBrowser();
-  m_uiForm.furyfit_hlTreePlace->addWidget(m_propBrowser);
-  setupTreePropertyBrowser();
+  // Connect Poco Notification Observer
+  Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
-  setupFFPlotArea();
+  setupFuryFit();
 
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -70,19 +86,6 @@ void indirectAnalysis::initLayout()
   connect(m_uiForm.set_cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentChanged(int)));
   connect(m_uiForm.set_cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
   connect(m_uiForm.set_cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
-  // fury
-  connect(m_uiForm.fury_pbRun, SIGNAL(clicked()), this, SLOT(furyRun()));
-  connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
-  connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
-  // fury fit
-  connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfit_typeSelection(int)));
-  connect(m_uiForm.furyfit_pbRun, SIGNAL(clicked()), this, SLOT(runFuryFit()));
-  connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));
-  connect(m_uiForm.furyfit_pbRefreshWSList, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
-  connect(m_uiForm.furyfit_pbPlotOutput, SIGNAL(clicked()), this, SLOT(furyfitPlotOutput()));
-  connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // elwin
   connect(m_uiForm.elwin_pbRun, SIGNAL(clicked()), this, SLOT(elwinRun()));
   connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
@@ -90,14 +93,24 @@ void indirectAnalysis::initLayout()
   // msd
   connect(m_uiForm.msd_pbRun, SIGNAL(clicked()), this, SLOT(msdRun()));
   connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
+  // fury
+  connect(m_uiForm.fury_pbRun, SIGNAL(clicked()), this, SLOT(furyRun()));
+  connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
+  connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
+  // fury fit
+  connect(m_uiForm.furyfit_pbRun, SIGNAL(clicked()), this, SLOT(furyfitRun()));
+  connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitTypeSelection(int)));
+  connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
+  connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
+  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));
+  connect(m_uiForm.furyfit_pbRefreshWSList, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.furyfit_pbPlotOutput, SIGNAL(clicked()), this, SLOT(furyfitPlotOutput()));
+  connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // absorption
   connect(m_uiForm.abs_pbRun, SIGNAL(clicked()), this, SLOT(absorptionRun()));
   connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
   // demon
   connect(m_uiForm.dem_pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
-
-  m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts)[0];
-  m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   m_settingsGroup = "CustomInterfaces/IndirectAnalysis/";
 
@@ -109,12 +122,6 @@ void indirectAnalysis::initLayout()
   m_uiForm.set_leSpecMin->setValidator(m_valInt);
   m_uiForm.set_leSpecMax->setValidator(m_valInt);
   m_uiForm.set_leEFixed->setValidator(m_valDbl);
-  // apply validators - fury
-  m_uiForm.fury_leELow->setValidator(m_valDbl);
-  m_uiForm.fury_leEWidth->setValidator(m_valDbl);
-  m_uiForm.fury_leEHigh->setValidator(m_valDbl);
-  // apply validators - furyfit
-  m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
   // apply validators - elwin
   m_uiForm.elwin_leEStart->setValidator(m_valDbl);
   m_uiForm.elwin_leEEnd->setValidator(m_valDbl);
@@ -123,6 +130,12 @@ void indirectAnalysis::initLayout()
   // apply validators - msd
   m_uiForm.msd_leStartX->setValidator(m_valDbl);
   m_uiForm.msd_leEndX->setValidator(m_valDbl);
+  // apply validators - fury
+  m_uiForm.fury_leELow->setValidator(m_valDbl);
+  m_uiForm.fury_leEWidth->setValidator(m_valDbl);
+  m_uiForm.fury_leEHigh->setValidator(m_valDbl);
+  // apply validators - furyfit
+  m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
   // apply validators - absorption
   m_uiForm.abs_leAttenuation->setValidator(m_valDbl);
   m_uiForm.abs_leScatter->setValidator(m_valDbl);
@@ -139,15 +152,17 @@ void indirectAnalysis::initLayout()
   refreshWSlist();
 }
 
-void indirectAnalysis::initLocalPython()
+void IndirectDataAnalysis::initLocalPython()
 {
   instrumentChanged(m_uiForm.set_cbInst->currentIndex());
   loadSettings();
 }
 
-void indirectAnalysis::loadSettings()
+void IndirectDataAnalysis::loadSettings()
 {
   QSettings settings;
+  m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts)[0];
+  m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   settings.beginGroup(m_settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", m_saveDir);
@@ -193,7 +208,8 @@ void indirectAnalysis::loadSettings()
   settings.endGroup();
 
 }
-void indirectAnalysis::saveSettings()
+
+void IndirectDataAnalysis::saveSettings()
 { // The only settings we want to preserve are the instrument selection.
   QSettings settings;
   settings.beginGroup(m_settingsGroup + "InstrumentOptions");
@@ -206,44 +222,49 @@ void indirectAnalysis::saveSettings()
   settings.setValue("reflection", reflection);
 }
 
-void indirectAnalysis::setupTreePropertyBrowser()
+void IndirectDataAnalysis::setupTreePropertyBrowser()
 {
   m_groupManager = new QtGroupPropertyManager();
   m_doubleManager = new QtDoublePropertyManager();
   m_ffRangeManager = new QtDoublePropertyManager();
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
-  m_propBrowser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_propBrowser->setFactoryForManager(m_ffRangeManager, doubleEditorFactory);
+  m_ffTree->setFactoryForManager(m_doubleManager, doubleEditorFactory);
+  m_ffTree->setFactoryForManager(m_ffRangeManager, doubleEditorFactory);
 
-  m_fitProperties["StartX"] = m_ffRangeManager->addProperty("StartX");
-  m_ffRangeManager->setDecimals(m_fitProperties["StartX"], 10);
-  m_fitProperties["EndX"] = m_ffRangeManager->addProperty("EndX");
-  m_ffRangeManager->setDecimals(m_fitProperties["EndX"], 10);
+  m_ffProp["StartX"] = m_ffRangeManager->addProperty("StartX");
+  m_ffRangeManager->setDecimals(m_ffProp["StartX"], 10);
+  m_ffProp["EndX"] = m_ffRangeManager->addProperty("EndX");
+  m_ffRangeManager->setDecimals(m_ffProp["EndX"], 10);
 
   connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyfitRangePropChanged(QtProperty*, double)));
 
-  m_fitProperties["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
+  m_ffProp["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
   QtProperty* bgA0 = m_ffRangeManager->addProperty("A0");
   QtProperty* bgA1 = m_doubleManager->addProperty("A1");
   m_ffRangeManager->setDecimals(bgA0, 10);
   m_doubleManager->setDecimals(bgA1, 1);
   m_doubleManager->setRange(bgA1, 0.0, 0.0);
-  m_fitProperties["LinearBackground"]->addSubProperty(bgA0);
-  m_fitProperties["LinearBackground"]->addSubProperty(bgA1);
-  m_fitProperties["BackgroundA0"] = bgA0;
-  m_fitProperties["Lorentzian1"] = createLorentzian();
-  m_fitProperties["Lorentzian2"] = createLorentzian();
+  m_ffProp["LinearBackground"]->addSubProperty(bgA0);
+  m_ffProp["LinearBackground"]->addSubProperty(bgA1);
+  m_ffProp["BackgroundA0"] = bgA0;
+  m_ffProp["Lorentzian1"] = createLorentzian();
+  m_ffProp["Lorentzian2"] = createLorentzian();
 
-  m_fitProperties["Exponential1"] = createExponential();
-  m_fitProperties["Exponential2"] = createExponential();
+  m_ffProp["Exponential1"] = createExponential();
+  m_ffProp["Exponential2"] = createExponential();
   
-  m_fitProperties["StretchedExp"] = createStretchedExp();
+  m_ffProp["StretchedExp"] = createStretchedExp();
 
-  furyfit_typeSelection(m_uiForm.furyfit_cbFitType->currentIndex());
+  furyfitTypeSelection(m_uiForm.furyfit_cbFitType->currentIndex());
 }
 
-void indirectAnalysis::setupFFPlotArea()
+void IndirectDataAnalysis::setupFuryFit()
 {
+  m_ffTree = new QtTreePropertyBrowser();
+  m_uiForm.furyfit_properties->addWidget(m_ffTree);
+  setupTreePropertyBrowser();
+
+  // Setup FuryFit Plot Window
   m_furyFitPlotWindow = new QwtPlot(this);
   m_furyFitPlotWindow->setAxisFont(QwtPlot::xBottom, this->font());
   m_furyFitPlotWindow->setAxisFont(QwtPlot::yLeft, this->font());
@@ -262,7 +283,7 @@ void indirectAnalysis::setupFFPlotArea()
 
 }
 
-bool indirectAnalysis::validateFury()
+bool IndirectDataAnalysis::validateFury()
 {
   bool valid = true;
 
@@ -306,7 +327,8 @@ bool indirectAnalysis::validateFury()
 
   return valid;
 }
-bool indirectAnalysis::validateElwin()
+
+bool IndirectDataAnalysis::validateElwin()
 {
   bool valid = true;
 
@@ -359,7 +381,8 @@ bool indirectAnalysis::validateElwin()
 
   return valid;
 }
-bool indirectAnalysis::validateMsd()
+
+bool IndirectDataAnalysis::validateMsd()
 {
   bool valid = true;
 
@@ -391,7 +414,8 @@ bool indirectAnalysis::validateMsd()
 
   return valid;
 }
-bool indirectAnalysis::validateAbsorption()
+
+bool IndirectDataAnalysis::validateAbsorption()
 {
   bool valid = true;
 
@@ -519,17 +543,17 @@ bool indirectAnalysis::validateAbsorption()
 
   return valid;
 }
-bool indirectAnalysis::validateDemon()
+
+bool IndirectDataAnalysis::validateDemon()
 {
   return m_uiForm.dem_rawFiles->isValid();
 }
 
-Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
+Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePropertyBrowser* propertyBrowser)
 {
   Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
 
-  // QString message;
-  QList<QtBrowserItem*> items = m_propBrowser->topLevelItems();
+  QList<QtBrowserItem*> items = propertyBrowser->topLevelItems();
   m_furyfitConstraints = "";
   int funcIndex = 0;
 
@@ -580,7 +604,7 @@ Mantid::API::CompositeFunction* indirectAnalysis::createFunction()
   return result;
 }
 
-QtProperty* indirectAnalysis::createLorentzian()
+QtProperty* IndirectDataAnalysis::createLorentzian()
 {
   QtProperty* lorentzGroup = m_groupManager->addProperty("Lorentzian");
   QtProperty* lzA0 = m_doubleManager->addProperty("Height");
@@ -596,7 +620,7 @@ QtProperty* indirectAnalysis::createLorentzian()
   return lorentzGroup;
 }
 
-QtProperty* indirectAnalysis::createExponential()
+QtProperty* IndirectDataAnalysis::createExponential()
 {
   QtProperty* expGroup = m_groupManager->addProperty("Exponential");
   QtProperty* expA0 = m_doubleManager->addProperty("Intensity");
@@ -609,7 +633,7 @@ QtProperty* indirectAnalysis::createExponential()
   return expGroup;
 }
 
-QtProperty* indirectAnalysis::createStretchedExp()
+QtProperty* IndirectDataAnalysis::createStretchedExp()
 {
   QtProperty* prop = m_groupManager->addProperty("Stretched Exponential");
   QtProperty* stA0 = m_doubleManager->addProperty("Intensity");
@@ -626,7 +650,7 @@ QtProperty* indirectAnalysis::createStretchedExp()
   return prop;
 }
 
-void indirectAnalysis::instrumentChanged(int index)
+void IndirectDataAnalysis::instrumentChanged(int index)
 {
   m_uiForm.set_cbAnalyser->blockSignals(true);
   m_uiForm.set_cbAnalyser->clear();
@@ -668,7 +692,8 @@ void indirectAnalysis::instrumentChanged(int index)
     }
   }
 }
-void indirectAnalysis::analyserSelected(int index)
+
+void IndirectDataAnalysis::analyserSelected(int index)
 {
   // populate Reflection combobox with correct values for Analyser selected.
   m_uiForm.set_cbReflection->blockSignals(true);
@@ -692,7 +717,8 @@ void indirectAnalysis::analyserSelected(int index)
     }
   }
 }
-void indirectAnalysis::reflectionSelected(int index)
+
+void IndirectDataAnalysis::reflectionSelected(int index)
 {
   QString pyInput =
     "from IndirectEnergyConversion import getReflectionDetails\n"
@@ -732,25 +758,132 @@ void indirectAnalysis::reflectionSelected(int index)
   m_uiForm.tabDemon->setEnabled(!state);
 }
 
-void indirectAnalysis::refreshWSlist()
+void IndirectDataAnalysis::refreshWSlist()
 {
   // Get object list from ADS
   std::set<std::string> workspaceList = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   // Clear Workspace Lists
   m_uiForm.furyfit_cbWorkspace->clear();
-
+  
   if ( ! workspaceList.empty() )
   {
     std::set<std::string>::const_iterator it;
     for ( it=workspaceList.begin(); it != workspaceList.end(); ++it )
     {
+      Mantid::API::Workspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::Workspace>(Mantid::API::AnalysisDataService::Instance().retrieve(*it));
+      
+      if ( workspace->id() != "TableWorkspace" )
+      {
       QString ws = QString::fromStdString(*it);
       m_uiForm.furyfit_cbWorkspace->addItem(ws);
+      }
     }
   }
 }
 
-void indirectAnalysis::furyRun()
+void IndirectDataAnalysis::elwinRun()
+{
+  if ( ! validateElwin() )
+  {
+    showInformationBox("Please check your input.");
+    return;
+  }
+
+  QString pyInput =
+    "from IndirectDataAnalysis import elwin\n"
+    "input = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
+    "eRange = [ " + m_uiForm.elwin_leEStart->text() +","+ m_uiForm.elwin_leEEnd->text();
+  if ( m_uiForm.elwin_ckUseTwoRanges->isChecked() )
+  {
+    pyInput += ", " + m_uiForm.elwin_leRangeTwoStart->text() + ", " + m_uiForm.elwin_leRangeTwoEnd->text();
+  }
+
+  pyInput+= "]\n"
+    "eFixed = "+ m_uiForm.set_leEFixed->text() +"\n";
+
+  if ( m_uiForm.elwin_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
+  if ( m_uiForm.elwin_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.elwin_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
+
+  pyInput +=
+    "elwin_ws = elwin(input, eRange, eFixed, Save=save, Verbose=verbose, Plot=plot)\n";
+
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+
+void IndirectDataAnalysis::elwinPlotInput()
+{
+  if ( m_uiForm.elwin_inputFile->isValid() )
+  {
+    QString pyInput = "from IndirectDataAnalysis import plotInput\n"
+      "inputfiles = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
+      "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n"
+      "plotInput(inputfiles, spectra=spec)\n";
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+}
+
+void IndirectDataAnalysis::elwinTwoRanges(bool state)
+{
+  QString val;
+  if ( state ) val = "*";
+  else val = " ";
+  m_uiForm.elwin_lbR2Start->setEnabled(state);
+  m_uiForm.elwin_lbR2End->setEnabled(state);
+  m_uiForm.elwin_leRangeTwoStart->setEnabled(state);
+  m_uiForm.elwin_leRangeTwoEnd->setEnabled(state);
+  m_uiForm.elwin_valRangeTwoStart->setEnabled(state);
+  m_uiForm.elwin_valRangeTwoEnd->setEnabled(state);
+  m_uiForm.elwin_valRangeTwoStart->setText(val);
+  m_uiForm.elwin_valRangeTwoEnd->setText(val);
+}
+
+void IndirectDataAnalysis::msdRun()
+{
+  if ( ! validateMsd() )
+  {
+    showInformationBox("Please check your input.");
+    return;
+  }
+
+  QString pyInput =
+    "from IndirectDataAnalysis import msdfit\n"
+    "startX = " + m_uiForm.msd_leStartX->text() +"\n"
+    "endX = " + m_uiForm.msd_leEndX->text() +"\n"
+    "inputs = [r'" + m_uiForm.msd_inputFile->getFilenames().join("', r'") + "']\n";
+
+  if ( m_uiForm.msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
+  if ( m_uiForm.msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
+  else pyInput += "plot = False\n";
+
+  if ( m_uiForm.msd_ckSave->isChecked() ) pyInput += "save = True\n";
+  else pyInput += "save = False\n";
+
+  pyInput +=
+    "msdfit(inputs, startX, endX, Save=save, Verbose=verbose, Plot=plot)\n";
+
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+
+
+}
+
+void IndirectDataAnalysis::msdPlotInput()
+{
+  QString pyInput = "from mantidsimple import *\n"
+    "from mantidplot import *\n"
+    "LoadNexusProcessed(r'" + m_uiForm.msd_inputFile->getFirstFilename() + "', 'msd_input_plot')\n"
+    "plotSpectrum('msd_input_plot', 0)\n";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+
+void IndirectDataAnalysis::furyRun()
 {
   if ( !validateFury() )
   {
@@ -779,7 +912,8 @@ void indirectAnalysis::furyRun()
     "fury_ws = fury(samples, resolution, rebin, Save=save, Verbose=verbose, Plot=plot)\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
-void indirectAnalysis::furyResType(const QString& type)
+
+void IndirectDataAnalysis::furyResType(const QString& type)
 {
   QStringList exts;
   if ( type == "RES File" )
@@ -794,7 +928,8 @@ void indirectAnalysis::furyResType(const QString& type)
   }
   m_uiForm.fury_resFile->setFileExtensions(exts);
 }
-void indirectAnalysis::furyPlotInput()
+
+void IndirectDataAnalysis::furyPlotInput()
 {
   if ( m_uiForm.fury_iconFile->isValid() )
   {
@@ -806,12 +941,11 @@ void indirectAnalysis::furyPlotInput()
   }
 }
 
-// FURYFIT
-
-void indirectAnalysis::runFuryFit()
+/* FURY FIT TAB */
+void IndirectDataAnalysis::furyfitRun()
 {
     // First create the function
-    Mantid::API::CompositeFunction* function = createFunction();
+    Mantid::API::CompositeFunction* function = createFunction(m_ffTree);
 
     // Background level
     m_furyfitTies = "f0.A1 = 0";
@@ -847,8 +981,8 @@ void indirectAnalysis::runFuryFit()
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", m_ffInputWSName);
     alg->setProperty("WorkspaceIndex", m_uiForm.furyfit_leSpecNo->text().toInt());
-    alg->setProperty("StartX", m_ffRangeManager->value(m_fitProperties["StartX"]));
-    alg->setProperty("EndX", m_ffRangeManager->value(m_fitProperties["EndX"]));
+    alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
+    alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
     alg->setProperty("Ties", m_furyfitTies.toStdString());
     alg->setProperty("Constraints", m_furyfitConstraints.toStdString());
     alg->setPropertyValue("Function", *function);
@@ -890,14 +1024,14 @@ void indirectAnalysis::runFuryFit()
     for ( int i = 0; i < nRow; i++ )
     {
       Mantid::API::TableRow row = table->getRow(i);
-      std::string key;
-      double value, error;
-      row >> key >> value >> error;
+      std::string key = "";
+      double value = 0.0;
+      row >> key >> value;
       params[key] = value;
     }
 
     // Background is in all functions
-    m_ffRangeManager->setValue(m_fitProperties["BackgroundA0"], params["f0.A0"]);
+    m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], params["f0.A0"]);
 
     QMap<QString,QtProperty*> subprops;
     QtProperty* exp;
@@ -909,7 +1043,7 @@ void indirectAnalysis::runFuryFit()
     case 1:
     case 3:
       {
-      exp = m_fitProperties["Exponential1"];
+      exp = m_ffProp["Exponential1"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
       {
@@ -921,7 +1055,7 @@ void indirectAnalysis::runFuryFit()
       }
     case 2:
       {
-      exp = m_fitProperties["StretchedExp"];
+      exp = m_ffProp["StretchedExp"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
       {
@@ -938,7 +1072,7 @@ void indirectAnalysis::runFuryFit()
     {
     case 1: // 2 Exp
       {
-      exp = m_fitProperties["Exponential2"];
+      exp = m_ffProp["Exponential2"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
       {
@@ -950,7 +1084,7 @@ void indirectAnalysis::runFuryFit()
       }
     case 3: // 1 Exp & 1 Stretched Exp
       {
-      exp = m_fitProperties["StretchedExp"];
+      exp = m_ffProp["StretchedExp"];
       subs = exp->subProperties();
       for ( int i = 0; i < subs.size(); i++ )
       {
@@ -968,35 +1102,35 @@ void indirectAnalysis::runFuryFit()
     }
 }
 
-void indirectAnalysis::furyfit_typeSelection(int index)
+void IndirectDataAnalysis::furyfitTypeSelection(int index)
 {
-  m_propBrowser->clear();
+  m_ffTree->clear();
 
-  m_propBrowser->addProperty(m_fitProperties["StartX"]);
-  m_propBrowser->addProperty(m_fitProperties["EndX"]);
+  m_ffTree->addProperty(m_ffProp["StartX"]);
+  m_ffTree->addProperty(m_ffProp["EndX"]);
 
-  m_propBrowser->addProperty(m_fitProperties["LinearBackground"]);
+  m_ffTree->addProperty(m_ffProp["LinearBackground"]);
 
   switch ( index )
   {
   case 0:
-    m_propBrowser->addProperty(m_fitProperties["Exponential1"]);
+    m_ffTree->addProperty(m_ffProp["Exponential1"]);
     break;
   case 1:
-    m_propBrowser->addProperty(m_fitProperties["Exponential1"]);
-    m_propBrowser->addProperty(m_fitProperties["Exponential2"]);
+    m_ffTree->addProperty(m_ffProp["Exponential1"]);
+    m_ffTree->addProperty(m_ffProp["Exponential2"]);
     break;
   case 2:
-    m_propBrowser->addProperty(m_fitProperties["StretchedExp"]);
+    m_ffTree->addProperty(m_ffProp["StretchedExp"]);
     break;
   case 3:
-    m_propBrowser->addProperty(m_fitProperties["Exponential1"]);
-    m_propBrowser->addProperty(m_fitProperties["StretchedExp"]);
+    m_ffTree->addProperty(m_ffProp["Exponential1"]);
+    m_ffTree->addProperty(m_ffProp["StretchedExp"]);
     break;
   }
 }
 
-void indirectAnalysis::furyfitPlotInput()
+void IndirectDataAnalysis::furyfitPlotInput()
 {
   if ( m_ffDataCurve != NULL )
   {
@@ -1013,7 +1147,6 @@ void indirectAnalysis::furyfitPlotInput()
     {
       QFileInfo fi(m_uiForm.furyfit_inputFile->getFirstFilename());
       wsname = fi.baseName().toStdString();
-
       if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
       {
         std::string filename = m_uiForm.furyfit_inputFile->getFirstFilename().toStdString();
@@ -1064,8 +1197,8 @@ void indirectAnalysis::furyfitPlotInput()
   const double & lower = dataX.first();
   const double & upper = dataX.last();
   m_ffRangeS->setRange(lower, upper);
-  m_ffRangeManager->setRange(m_fitProperties["StartX"], lower, upper);
-  m_ffRangeManager->setRange(m_fitProperties["EndX"], lower, upper);
+  m_ffRangeManager->setRange(m_ffProp["StartX"], lower, upper);
+  m_ffRangeManager->setRange(m_ffProp["EndX"], lower, upper);
             
   // create the QwtPlotCurve
   m_ffDataCurve = new QwtPlotCurve();
@@ -1077,41 +1210,43 @@ void indirectAnalysis::furyfitPlotInput()
   m_furyFitPlotWindow->replot();
 }
 
-void indirectAnalysis::furyfitXMinSelected(double val)
+void IndirectDataAnalysis::furyfitXMinSelected(double val)
 {
-  m_ffRangeManager->setValue(m_fitProperties["StartX"], val);
-}
-void indirectAnalysis::furyfitXMaxSelected(double val)
-{
-  m_ffRangeManager->setValue(m_fitProperties["EndX"], val);
-}
-void indirectAnalysis::furyfitBackgroundSelected(double val)
-{
-  m_ffRangeManager->setValue(m_fitProperties["BackgroundA0"], val);
+  m_ffRangeManager->setValue(m_ffProp["StartX"], val);
 }
 
-void indirectAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
+void IndirectDataAnalysis::furyfitXMaxSelected(double val)
 {
-  if ( prop == m_fitProperties["StartX"] )
+  m_ffRangeManager->setValue(m_ffProp["EndX"], val);
+}
+
+void IndirectDataAnalysis::furyfitBackgroundSelected(double val)
+{
+  m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], val);
+}
+
+void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
+{
+  if ( prop == m_ffProp["StartX"] )
   {
     m_ffRangeS->setMinimum(val);
   }
-  else if ( prop == m_fitProperties["EndX"] )
+  else if ( prop == m_ffProp["EndX"] )
   {
     m_ffRangeS->setMaximum(val);
   }
-  else if ( prop == m_fitProperties["BackgroundA0"] )
+  else if ( prop == m_ffProp["BackgroundA0"] )
   {
     m_ffBackRangeS->setMinimum(val);
   }
 }
 
-void indirectAnalysis::furyfitInputType(int index)
+void IndirectDataAnalysis::furyfitInputType(int index)
 {
   m_uiForm.furyfit_swInput->setCurrentIndex(index);
 }
 
-void indirectAnalysis::furyfitPlotOutput()
+void IndirectDataAnalysis::furyfitPlotOutput()
 {
   if ( m_ffOutputWS == NULL )
   {
@@ -1125,7 +1260,8 @@ void indirectAnalysis::furyfitPlotOutput()
     "plotSpectrum('" + QString::fromStdString(name) + "', [0,1,2])\n";
   QString pyOutput = runPythonCode(pyInput);
 }
-void indirectAnalysis::furyfitSequential()
+
+void IndirectDataAnalysis::furyfitSequential()
 {
   furyfitPlotInput();
   if ( m_ffInputWS == NULL )
@@ -1133,7 +1269,7 @@ void indirectAnalysis::furyfitSequential()
     return;
   }
 
-  Mantid::API::CompositeFunction* func = createFunction();
+  Mantid::API::CompositeFunction* func = createFunction(m_ffTree);
 
   // Function Ties
   func->tie("f0.A1", "0");
@@ -1154,8 +1290,8 @@ void indirectAnalysis::furyfitSequential()
 
   std::string function = std::string(*func);
   
-  QString stX = QString::number(m_ffRangeManager->value(m_fitProperties["StartX"]), 'g', 10);
-  QString enX = QString::number(m_ffRangeManager->value(m_fitProperties["EndX"]), 'g', 10);
+  QString stX = QString::number(m_ffRangeManager->value(m_ffProp["StartX"]), 'g', 10);
+  QString enX = QString::number(m_ffRangeManager->value(m_ffProp["EndX"]), 'g', 10);
 
   QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
     "input = '" + QString::fromStdString(m_ffInputWSName) + "'\n"
@@ -1168,104 +1304,7 @@ void indirectAnalysis::furyfitSequential()
 
 }
 
-void indirectAnalysis::elwinRun()
-{
-  if ( ! validateElwin() )
-  {
-    showInformationBox("Please check your input.");
-    return;
-  }
-
-  QString pyInput =
-    "from IndirectDataAnalysis import elwin\n"
-    "input = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
-    "eRange = [ " + m_uiForm.elwin_leEStart->text() +","+ m_uiForm.elwin_leEEnd->text();
-  if ( m_uiForm.elwin_ckUseTwoRanges->isChecked() )
-  {
-    pyInput += ", " + m_uiForm.elwin_leRangeTwoStart->text() + ", " + m_uiForm.elwin_leRangeTwoEnd->text();
-  }
-
-  pyInput+= "]\n"
-    "eFixed = "+ m_uiForm.set_leEFixed->text() +"\n";
-
-  if ( m_uiForm.elwin_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-  else pyInput += "verbose = False\n";
-
-  if ( m_uiForm.elwin_ckPlot->isChecked() ) pyInput += "plot = True\n";
-  else pyInput += "plot = False\n";
-
-  if ( m_uiForm.elwin_ckSave->isChecked() ) pyInput += "save = True\n";
-  else pyInput += "save = False\n";
-
-  pyInput +=
-    "elwin_ws = elwin(input, eRange, eFixed, Save=save, Verbose=verbose, Plot=plot)\n";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-}
-void indirectAnalysis::elwinPlotInput()
-{
-  if ( m_uiForm.elwin_inputFile->isValid() )
-  {
-    QString pyInput = "from IndirectDataAnalysis import plotInput\n"
-      "inputfiles = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
-      "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n"
-      "plotInput(inputfiles, spectra=spec)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-  }
-}
-void indirectAnalysis::elwinTwoRanges(bool state)
-{
-  QString val;
-  if ( state ) val = "*";
-  else val = " ";
-  m_uiForm.elwin_lbR2Start->setEnabled(state);
-  m_uiForm.elwin_lbR2End->setEnabled(state);
-  m_uiForm.elwin_leRangeTwoStart->setEnabled(state);
-  m_uiForm.elwin_leRangeTwoEnd->setEnabled(state);
-  m_uiForm.elwin_valRangeTwoStart->setEnabled(state);
-  m_uiForm.elwin_valRangeTwoEnd->setEnabled(state);
-  m_uiForm.elwin_valRangeTwoStart->setText(val);
-  m_uiForm.elwin_valRangeTwoEnd->setText(val);
-}
-void indirectAnalysis::msdRun()
-{
-  if ( ! validateMsd() )
-  {
-    showInformationBox("Please check your input.");
-    return;
-  }
-
-  QString pyInput =
-    "from IndirectDataAnalysis import msdfit\n"
-    "startX = " + m_uiForm.msd_leStartX->text() +"\n"
-    "endX = " + m_uiForm.msd_leEndX->text() +"\n"
-    "inputs = [r'" + m_uiForm.msd_inputFile->getFilenames().join("', r'") + "']\n";
-
-  if ( m_uiForm.msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-  else pyInput += "verbose = False\n";
-
-  if ( m_uiForm.msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
-  else pyInput += "plot = False\n";
-
-  if ( m_uiForm.msd_ckSave->isChecked() ) pyInput += "save = True\n";
-  else pyInput += "save = False\n";
-
-  pyInput +=
-    "msdfit(inputs, startX, endX, Save=save, Verbose=verbose, Plot=plot)\n";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-
-
-}
-void indirectAnalysis::msdPlotInput()
-{
-  QString pyInput = "from mantidsimple import *\n"
-    "from mantidplot import *\n"
-    "LoadNexusProcessed(r'" + m_uiForm.msd_inputFile->getFirstFilename() + "', 'msd_input_plot')\n"
-    "plotSpectrum('msd_input_plot', 0)\n";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-}
-void indirectAnalysis::absorptionRun()
+void IndirectDataAnalysis::absorptionRun()
 {
   if ( ! validateAbsorption() )
   {
@@ -1313,11 +1352,13 @@ void indirectAnalysis::absorptionRun()
     "absorption(file, mode, sample, can, efixed, Save=save, Verbose=verbose, Plot=plot)\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
-void indirectAnalysis::absorptionShape(int index)
+
+void IndirectDataAnalysis::absorptionShape(int index)
 {
   m_uiForm.abs_swDetails->setCurrentIndex(index);
 }
-void indirectAnalysis::demonRun()
+
+void IndirectDataAnalysis::demonRun()
 {
   if ( validateDemon() )
   {
@@ -1344,14 +1385,16 @@ void indirectAnalysis::demonRun()
     showInformationBox("Input invalid.");
   }
 }
-void indirectAnalysis::openDirectoryDialog()
+
+void IndirectDataAnalysis::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
 }
-void indirectAnalysis::help()
+
+void IndirectDataAnalysis::help()
 {
   QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
   QString url = "http://www.mantidproject.org/IDA#";
