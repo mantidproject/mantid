@@ -182,6 +182,8 @@
 #include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 
 
 using namespace Qwt3D;
@@ -334,6 +336,10 @@ void ApplicationWindow::init(bool factorySettings)
 
   scriptingWindow = NULL;
   d_text_editor = NULL;
+
+  // List of registered PyQt interfaces
+  QString pyqt_interfaces_as_str = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces"));
+  pyqt_interfaces = QStringList::split(" ", pyqt_interfaces_as_str);
 
   renamedTables = QStringList();
   if (!factorySettings)
@@ -1434,6 +1440,26 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
           addUserMenuAction( menuName, itemName, itemName);
   }
 
+  // Go through PyQt interfaces
+  QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directories"));
+  QStringListIterator pyqt_itr(pyqt_interfaces);
+  while( pyqt_itr.hasNext() )
+  {
+    QString itemName = pyqt_itr.next();
+    QString scriptPath = scriptsDir + itemName;
+
+    if( QFileInfo(scriptPath).exists() ) {
+      QString baseName = QFileInfo(scriptPath).baseName();
+      if (getMenuSettingsFlag(itemName))
+        addUserMenuAction(menuName, baseName, scriptPath);
+    }
+    else
+    {
+      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
+      g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
+    }
+  }
+
   menuBar()->insertItem(tr("&Help"), help );
 
   reloadCustomActions();
@@ -1441,10 +1467,7 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 
 /**
  * Returns whether a custom interface should be added to the Interfaces menu.
- *
- * - Is item present in CustomScripts? Yes --> return true
- *
- *
+ * @param menu_item: name of the custom interface
  */
 bool ApplicationWindow::getMenuSettingsFlag(const QString & menu_item)
 {
@@ -1457,7 +1480,6 @@ bool ApplicationWindow::getMenuSettingsFlag(const QString & menu_item)
   }
 
   // If we didn't find it, check whether is was manually removed
-  //std::cout << "FLAG: " << "[" << menu_item.ascii() << "]" << removed_interfaces.join(", ").ascii() << std::endl;
   if( removed_interfaces.grep(menu_item).size() > 0 ) return false;
   return true;
 }
@@ -4894,9 +4916,17 @@ void ApplicationWindow::readSettings()
 
   //---------------------------------
   // Mantid
+
+  bool warning_shown = settings.value("/DuplicationDialogShown", false).toBool();
+
   //Check for user defined scripts in settings and create menus for them
   //Top level scripts group
   settings.beginGroup("CustomScripts");
+
+  // Reference list of custom Interfaces that will be added to the Interfaces menu
+  QStringList user_windows = MantidQt::API::InterfaceManager::Instance().getUserSubWindowKeys();
+  // List it user items that will be moved to the Interfaces menu
+  QStringList duplicated_custom_menu = QStringList();
 
   foreach(QString menu, settings.childGroups())
   {
@@ -4904,6 +4934,11 @@ void ApplicationWindow::readSettings()
     settings.beginGroup(menu);
     foreach(QString keyName, settings.childKeys())
     {
+      if ( menu.contains("Interfaces")==0 &&
+          (user_windows.grep(keyName).size() > 0 || pyqt_interfaces.grep(keyName).size() > 0) )
+      {
+        duplicated_custom_menu.append(menu+"/"+keyName);
+      }
       addUserMenuAction(menu, keyName, settings.value(keyName).toString());
     }
     settings.endGroup();
@@ -4914,6 +4949,19 @@ void ApplicationWindow::readSettings()
   removed_interfaces = settings.value("RemovedInterfaces").toStringList();
 
   settings.endGroup();
+
+  if (duplicated_custom_menu.size() > 0 && !warning_shown)
+  {
+    QString mess = "The following menus are now part of the Interfaces menu:\n\n";
+    mess += duplicated_custom_menu.join("\n");
+    mess += "\n\nYou may consider removing them from your custom menus.";
+    //FIXME: A nice alternative to showing a message in the log window would
+    // be to pop up a message box. This should be done AFTER MantidPlot has started.
+    //QMessageBox::warning(this, tr("MantidPlot - Menu Warning"), tr(mess.ascii()));
+    Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
+    g_log.warning() << mess.ascii() << "\n";
+    settings.setValue("/DuplicationDialogShown", true);
+  }
 
 }
 

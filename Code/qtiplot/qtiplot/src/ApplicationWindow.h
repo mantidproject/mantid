@@ -1222,6 +1222,8 @@ public:
 	QStringList renamedTables;
   // List of removed interfaces
   QStringList removed_interfaces;
+  // List of PyQt interfaces to be added to the Interfaces menu
+	QStringList pyqt_interfaces;
 
 	//! \name variables used when user copy/paste markers
 	//@{
