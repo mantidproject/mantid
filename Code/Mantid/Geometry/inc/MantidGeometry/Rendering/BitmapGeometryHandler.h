@@ -6,7 +6,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/IRectangularDetector.h"
 #include "boost/weak_ptr.hpp"
 #include "MantidGeometry/Objects/Object.h"
 namespace Mantid
@@ -53,20 +53,21 @@ namespace Mantid
 			static Kernel::Logger& PLog;           ///< The official logger
 
 			/// The RectangularDetector object being plotted.
-			RectangularDetector * mRectDet;
+			IRectangularDetector * mRectDet;
 
 		protected:
 			IObjComponent	*ObjComp;              ///< ObjComponent that uses this geometry handler
 			Object          *Obj;                  ///< Object that uses this geometry handler
 			bool			boolTriangulated;      ///< state of the geometry triangulation
 			bool			boolIsInitialized;     ///< state of the geometry initialization for rendering
+
 		public:
-	    BitmapGeometryHandler(RectangularDetector *comp);
-	    BitmapGeometryHandler();
-	    //
-//			BitmapGeometryHandler(IObjComponent *comp);   ///< Constructor
-//			BitmapGeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
-//			BitmapGeometryHandler(Object *obj); ///<Constructor
+			BitmapGeometryHandler(IRectangularDetector *comp);
+			BitmapGeometryHandler();
+			//
+			//			BitmapGeometryHandler(IObjComponent *comp);   ///< Constructor
+			//			BitmapGeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
+			//			BitmapGeometryHandler(Object *obj); ///<Constructor
 			virtual ~BitmapGeometryHandler();
 			virtual BitmapGeometryHandler* createInstance(IObjComponent *); ///< Create an instance of concrete geometry handler for ObjComponent
 			virtual BitmapGeometryHandler* createInstance(boost::shared_ptr<Object> ); ///< Create an instance of concrete geometry handler for Object
@@ -86,12 +87,12 @@ namespace Mantid
 			/// Sets the geometry cache using the triangulation information provided
 			virtual void setGeometryCache(int noPts,int noFaces,double* pts,int* faces)
 			{
-        (void) noPts; (void) noFaces; (void) pts; (void) faces; //Avoid compiler warning
+				(void) noPts; (void) noFaces; (void) pts; (void) faces; //Avoid compiler warning
 			};
 			/// return the actual type and points of one of the "standard" objects, cuboid/cone/cyl/sphere
 			virtual void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight)
 			{
-        (void) mytype; (void) vectors; (void) myradius; (void) myheight; //Avoid compiler warning
+				(void) mytype; (void) vectors; (void) myradius; (void) myheight; //Avoid compiler warning
 			};
 		};
 

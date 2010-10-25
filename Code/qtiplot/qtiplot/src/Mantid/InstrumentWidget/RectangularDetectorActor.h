@@ -3,7 +3,7 @@
 #include "GLActor.h"
 #include "ObjComponentActor.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/IRectangularDetector.h"
 #include "MantidGeometry/V3D.h"
 /*!
   \class  RectangularDetectorActor
@@ -54,6 +54,12 @@ class ObjComponentActor;
 
 class RectangularDetectorActor : public ObjComponentActor
 {
+public:
+  /// Constructor
+  RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::IRectangularDetector> rectDet);
+  /// Destructor
+  virtual ~RectangularDetectorActor();
+
 private:
   int mNumberOfDetectors;          ///< The number of detectors in the Component assembly 
   Mantid::Geometry::V3D minBoundBox;
@@ -68,17 +74,13 @@ protected:
 
   int mColorStartID;                                       ///< Starting picking colorid for the subcomponents to CompAssembly
 
-  boost::shared_ptr<Mantid::Geometry::RectangularDetector> mDet;
+  boost::shared_ptr<Mantid::Geometry::IRectangularDetector> mDet;
 
   void init();
   void redraw();
   int findDetectorIDUsingColor(int rgb);
 
 public:
-  /// Constructor
-  RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::RectangularDetector> rectDet);
-  virtual ~RectangularDetectorActor();								   ///< Destructor
-
   virtual std::string type()const {return "RectangularDetectorActor";} ///< Type of the GL object
   void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
   void appendObjCompID(std::vector<int>& idList);

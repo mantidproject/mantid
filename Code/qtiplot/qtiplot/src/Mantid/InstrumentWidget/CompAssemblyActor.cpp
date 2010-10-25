@@ -5,6 +5,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/IRectangularDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidObject.h"
 #include "CompAssemblyActor.h"
@@ -18,6 +19,7 @@ using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
+using Mantid::Geometry::IRectangularDetector;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::Object;
 
@@ -153,7 +155,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
     {
       boost::shared_ptr<IComponent> ChildCompPtr=(*CompAssemPtr)[i];
       boost::shared_ptr<ICompAssembly> ChildCAPtr=boost::dynamic_pointer_cast<ICompAssembly>(ChildCompPtr);
-      boost::shared_ptr<RectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<RectangularDetector>(ChildCompPtr);
+      boost::shared_ptr<IRectangularDetector> ChildRDPtr=boost::dynamic_pointer_cast<IRectangularDetector>(ChildCompPtr);
 
       if (ChildRDPtr)
       {
@@ -161,23 +163,10 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
         boost::shared_ptr<IObjComponent> ChildObjPtr = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
         if (ChildObjPtr)
         {
-          //MantidObject * mantObj = getMantidObject(ChildObjPtr->Shape(),withDisplayList);
-          //MantidObject * mantObj;
-
-          //std::cout << "Creating the actor for " << ChildRDPtr->getName() << "\n";
           RectangularDetectorActor* iActor = new RectangularDetectorActor(ChildRDPtr);
-
-          //std::cout << "Getting bounding boxes for " << ChildRDPtr->getName() << "\n";
           iActor->getBoundingBox(minBound,maxBound);
-//          minBound = V3D(-60,-60,-60);
-//          maxBound = V3D(60,60,60);
           AppendBoundingBox(minBound,maxBound);
-
-          //mNumberOfDetectors+=iActor->getNumberOfDetectors();
-
-          //TODO: Track the rectangular objects
           mChildObjCompActors.push_back(iActor);
-
         }
         else
           std::cout << " ChildObjPtr is null for " << ChildRDPtr->getName() << "\n";

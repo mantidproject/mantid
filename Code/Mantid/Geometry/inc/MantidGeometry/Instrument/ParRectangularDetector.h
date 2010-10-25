@@ -1,29 +1,29 @@
-#ifndef RECTANGULAR_DETECTOR_H
-#define RECTANGULAR_DETECTOR_H
+#ifndef PARRECTANGULARDETECTOR_H
+#define PARRECTANGULARDETECTOR_H
 #include <string> 
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IRectangularDetector.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ParCompAssembly.h"
 
 namespace Mantid
 {
 namespace Geometry
 {
-/**
- *  RectangularDetector is a type of CompAssembly, an assembly of components.
- *  It is designed to be an easy way to specify a rectangular (XY) array of
- *  Detector pixels.
- *
- * @class RectangularDetector
- * @brief Assembly of Detector objects in a rectangular shape
- * @author Janik Zikovsky, SNS
- * @date 2010-Oct-06
 
+class CompAssembly;
+
+/** @class ParRectangularDetector
+    @brief Parametrized RectangularDetector
+    @author Janik Zikovsky, SNS
+
+    Note: This class hierarchy will get cleaned up. I know it is ugly as it
+    is, but for now, just trying to make things work. 2010-10-25.
+
+    
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -44,41 +44,21 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-class DLLExport RectangularDetector : public CompAssembly, public IObjComponent, public IRectangularDetector
+class DLLExport ParRectangularDetector : public ParCompAssembly, public IRectangularDetector, public IObjComponent
 {
 public:
+  /// Constructors
+  ParRectangularDetector(const RectangularDetector* base, const ParameterMap& map);
+  ParRectangularDetector(const ParRectangularDetector & other);
+
+  //! Destructor
+  ~ParRectangularDetector(){}
+
   ///String description of the type of component
-  virtual std::string type() const { return "RectangularDetector";}
-  //! Empty constructor
-  RectangularDetector();
+  virtual std::string type() const { return "ParRectangularDetector";}
 
-  //! Constructor with a name and parent reference
-  RectangularDetector(const std::string&, Component* reference=0);
+  IComponent* clone() const;
 
-  /// Create all the detector pixels of this rectangular detector.
-  void initialize(boost::shared_ptr<Object> shape,
-      int xpixels, double xstart, double xstep,
-      int ypixels, double ystart, double ystep,
-      int idstart, bool idfillbyfirst_y, int idstepbyrow
-      );
-
-  //! Copy constructor
-  RectangularDetector(const RectangularDetector&);
-  virtual ~RectangularDetector();
-  //! Make a clone of the present component
-  virtual IComponent* clone() const;
-
-  /// Get a detector at given XY indices.
-  boost::shared_ptr<Detector> getAtXY(int X, int Y) const;
-  /// Return the number of pixels in the X direction
-  int xpixels() const;
-  /// Return the number of pixels in the Y direction
-  int ypixels() const;
-  
-  // This should inherit the getBoundingBox implementation from  CompAssembly but
-  // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
-  using CompAssembly::getBoundingBox;
 
   // ------------ IObjComponent methods ----------------
 
@@ -115,31 +95,29 @@ public:
   // ------------ End of IObjComponent methods ----------------
 
 
+
+  /// Get a detector at given XY indices.
+  boost::shared_ptr<Detector> getAtXY(int X, int Y) const;
+  /// Return the number of pixels in the X direction
+  int xpixels() const;
+  /// Return the number of pixels in the Y direction
+  int ypixels() const;
+
   ///Size in X of the detector
-  double xsize() const { return m_xsize; }
+  double xsize() const;
   ///Size in Y of the detector
-  double ysize() const { return m_xsize; }
+  double ysize() const;
 
   V3D getRelativePosAtXY(int x, int y) const;
 
 private:
   /// Private copy assignment operator
-  RectangularDetector& operator=(const ICompAssembly&);
+  //ParRectangularDetector& operator=(const ICompAssembly&);
+  const RectangularDetector * mBase;
 
-  /// The number of pixels in the X (horizontal) direction;
-  int xPixels;
-  /// The number of pixels in the Y (vertical) direction;
-  int yPixels;
-
-  double m_xsize, m_ysize;
-  double m_xstart, m_ystart;
-  double m_xstep, m_ystep;
-
-  /// Pointer to the shape of the pixels in this detector array.
-  boost::shared_ptr<Object> mShape;
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const RectangularDetector&);
+//DLLExport std::ostream& operator<<(std::ostream&, const ParCompAssembly&);
 
 } //Namespace Geometry
 } //Namespace Mantid

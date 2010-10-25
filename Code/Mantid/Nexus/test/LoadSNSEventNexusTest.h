@@ -153,7 +153,7 @@ public:
 
 
 //
-//    void xtestExec_SNAP()
+//    void testExec_SNAP()
 //    {
 //      Mantid::API::FrameworkManager::Instance();
 //      LoadSNSEventNexus ld;
@@ -174,6 +174,10 @@ public:
 //      TS_ASSERT( WS );
 //      //Pixels have to be padded
 //      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 18);
+//
+//      V3D pos = WS->getInstrument()->getDetector(720896)->getPos();
+//      TS_ASSERT_DELTA( pos.X(), -0.0000216, 0.0000001);
+//      std::cout << "A pixel in E1 is at " << pos << "\n";
 //
 //    }
 
