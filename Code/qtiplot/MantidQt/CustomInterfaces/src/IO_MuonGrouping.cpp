@@ -56,27 +56,24 @@ void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 
   // loop over groups in table
 
-  int numRows = m_uiForm.groupTable->rowCount();
-  for (int i = 0; i < numRows; i++)
-  {
-    QTableWidgetItem *item = m_uiForm.groupTable->item(i,1);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
+  std::vector<int> groupToRow;
+  whichGroupToWhichRow(m_uiForm, groupToRow);
 
+  int num = groupToRow.size();
+  for (int i = 0; i < groupToRow.size(); i++)
+  {
     Element* gElem = mDoc->createElement("group");
-    gElem->setAttribute("name", m_uiForm.groupTable->item(i,0)->text().toStdString());
+    gElem->setAttribute("name", m_uiForm.groupTable->item(groupToRow[i],0)->text().toStdString());
     rootElem->appendChild(gElem);
     Element* idsElem = mDoc->createElement("ids");
-    idsElem->setAttribute("val", m_uiForm.groupTable->item(i,1)->text().toStdString());
+    idsElem->setAttribute("val", m_uiForm.groupTable->item(groupToRow[i],1)->text().toStdString());
     gElem->appendChild(idsElem);
   }
 
   // loop over pairs in pair table
 
-  numRows = m_uiForm.pairTable->rowCount();
-  for (int i = 0; i < numRows; i++)
+  num = m_uiForm.pairTable->rowCount();
+  for (int i = 0; i < num; i++)
   {
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(i,0);
     if (!itemName)
@@ -246,12 +243,14 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
         {
           m_uiForm.pairTable->setItem(iPair,3, new QTableWidgetItem(element->getAttribute("val").c_str()));
         }
+        else
+          throw Mantid::Kernel::Exception::FileError("XML pair group contains an <alpha> element with no 'val' attribute:" , filename);
       }
-      else
+      // if alpha element not there for now just default it to 1.0
+      else 
       {
-        // for now accept that alpha is not specified
-        //throw Mantid::Kernel::Exception::FileError("XML pair group contains no <backward-group> elements:" , filename);
-      } 
+        m_uiForm.pairTable->setItem(iPair,3, new QTableWidgetItem(1.0));
+      }
 
     }
   }
@@ -262,6 +261,9 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 
   m_uiForm.frontGroupGroupPairComboBox->addItems(allGroupNames);
   m_uiForm.frontGroupGroupPairComboBox->addItems(allPairNames);
+
+
+  // at some point put in some code which reads default choice 
 
   /*
   Element* element = pGroupElem->getChildElement("default");
@@ -274,6 +276,70 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
       }
 */
 
+}
+
+/**
+ * create 'map' relating group number to row number in group table
+ *
+ * @param groupToRow The 'map' returned
+ */
+void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow)
+{
+  groupToRow.clear();
+
+  int numRows = m_uiForm.groupTable->rowCount();
+  for (int i = 0; i < numRows; i++)
+  {
+    // test if group name valid
+    QTableWidgetItem *item0 = m_uiForm.groupTable->item(i,0);
+    if (!item0)
+      continue;
+    if ( item0->text().isEmpty() )
+      continue;
+
+    // test if group IDs valid
+    QTableWidgetItem *item1 = m_uiForm.groupTable->item(i,1);
+    QTableWidgetItem *item2 = m_uiForm.groupTable->item(i,2);
+    if (!item1 || !item2)
+      continue;
+    if ( item1->text().isEmpty() || item2->text().isEmpty() )
+      continue;
+    if ( item2->text() == "Invalid IDs string" )
+      continue;
+
+    groupToRow.push_back(i);
+  }
+}
+
+
+/**
+ * create 'map' relating pair number to row number in pair table
+ *
+ * @param pairToRow The 'map' returned
+ */
+void whichPairToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow)
+{
+  pairToRow.clear();
+
+  int numRows = m_uiForm.pairTable->rowCount();
+  for (int i = 0; i < numRows; i++)
+  {
+    // test if pair name valid
+    QTableWidgetItem *item0 = m_uiForm.pairTable->item(i,0);
+    if (!item0)
+      continue;
+    if ( item0->text().isEmpty() )
+      continue;
+
+    // test if alpha is specified
+    QTableWidgetItem *item3 = m_uiForm.pairTable->item(i,3);
+    if (!item3)
+      continue;
+    if ( item3->text().isEmpty() )
+      continue;
+
+    pairToRow.push_back(i);
+  }
 }
 
 

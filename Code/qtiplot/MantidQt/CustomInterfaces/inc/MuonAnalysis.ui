@@ -19,7 +19,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget" >
      <property name="currentIndex" >
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="Home" >
       <attribute name="title" >
@@ -82,7 +82,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>Time Zero (mu-s):</string>
+         <string>Time Zero (ns):</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="timeZeroFront" >
@@ -98,7 +98,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>0.2</string>
+         <string>200</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_4" >
@@ -111,7 +111,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>First Good Data (mu-s):</string>
+         <string>First Good Data (ns):</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="firstGoodBinFront" >
@@ -124,7 +124,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>0.3</string>
+         <string>300</string>
         </property>
        </widget>
        <widget class="QLabel" name="instrumentDescription" >
@@ -283,7 +283,7 @@
        </widget>
        <widget class="QComboBox" name="homePeriodBoxMath" >
         <property name="enabled" >
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry" >
          <rect>
@@ -295,18 +295,18 @@
         </property>
         <item>
          <property name="text" >
-          <string>+</string>
+          <string>-</string>
          </property>
         </item>
         <item>
          <property name="text" >
-          <string>-</string>
+          <string>+</string>
          </property>
         </item>
        </widget>
        <widget class="QComboBox" name="homePeriodBox2" >
         <property name="enabled" >
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry" >
          <rect>

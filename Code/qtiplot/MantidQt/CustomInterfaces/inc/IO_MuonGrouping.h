@@ -30,6 +30,11 @@ namespace Muon
   /// load XML grouping file
   void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filename);
 
+  /// create 'map' relating group number to row number in group table
+  void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow);
+
+  /// create 'map' relating pair number to row number in pair table
+  void whichPairToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow);
 }
 }
 }

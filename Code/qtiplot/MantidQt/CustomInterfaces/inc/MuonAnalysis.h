@@ -46,6 +46,9 @@ private slots:
   // group table clicked
   void groupTableClicked(int row, int column);
 
+  /// group table changed
+  void pairTableChanged(int row, int column);
+
   // pair table clicked
   void pairTableClicked(int row, int column);
 
@@ -92,17 +95,27 @@ private:
   /// Set start up interface look
   void startUpLook();
 
+  /// Return the group which is in focus and -1 if none
+  int groupInFocus();
+
+  /// Return the pair which is in focus and -1 if none
+  int pairInFocus();
+
   /// is grouping set
   bool isGroupingSet();
 
   /// Apply grouping specified in xml file to workspace
-  void applyGroupingToWS( const std::string& wsName, std::string filename);
+  void applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
+    const std::string& filename);
 
   /// Apply whatever grouping is specified in GUI tables to workspace
-  void applyGroupingToWS( const std::string& wsName);
+  void applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
 
-  /// Update front "group / group-pair" combo-box based on what the currentIndex now is
+  /// Update front 
   void updateFront();
+
+  /// Update front anc pair combo box
+  void updateFrontAndCombo();
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(std::string str) const;
@@ -183,18 +196,21 @@ private:
   /// Currently selected instrument
   QString m_curInterfaceSetup;
 
-  ///
-  ///std::map<int, QString> m_groupNameMap;
+  /// tell which group is in which row
+  std::vector<int> m_pairToRow;
 
   /// tell which group is in which row
   std::vector<int> m_groupToRow;
+
+  /// Return the group-number for the group in a row. 
+  /// Return -1 if invalid group in row
+  int getGroupNumberFromRow(int row);
 
   ///
   void createCropWS();
 
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
-
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

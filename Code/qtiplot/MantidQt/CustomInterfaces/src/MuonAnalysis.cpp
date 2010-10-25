@@ -99,9 +99,11 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(const QString)), this, 
     SLOT(runGroupTablePlotChoice(const QString))); 
 
-  // pair table
+  // If pair table change
+  connect(m_uiForm.pairTable, SIGNAL(cellChanged(int, int)), this, SLOT(pairTableChanged(int, int))); 
+  connect(m_uiForm.pairTable, SIGNAL(cellClicked(int, int)), this, SLOT(pairTableClicked(int, int)));
+  // Pair table plot button
   connect(m_uiForm.pairTablePlotButton, SIGNAL(clicked()), this, SLOT(runPairTablePlotButton())); 
-  connect(m_uiForm.pairTable, SIGNAL(cellClicked(int, int)), this, SLOT(pairTableClicked(int, int))); 
 
   // save grouping
   connect(m_uiForm.saveGroupButton, SIGNAL(clicked()), this, SLOT(runSaveGroupButton())); 
@@ -482,6 +484,35 @@ void MuonAnalysis::groupTableChanged(int row, int column)
   }   
 }
 
+
+/**
+ * Pair table changed, e.g. if:         (slot)
+ *
+ *    1) user changed alpha value
+ *
+ * @param row 
+ * @param column
+ */
+void MuonAnalysis::pairTableChanged(int row, int column)
+{
+  if ( column == 3 )
+  {
+    QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
+
+    try
+    {
+      double alpha = boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
+    }  catch (boost::bad_lexical_cast&)
+    {
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Alpha must be a number.");
+      itemAlpha->setText("");
+      return;
+    }
+  }
+
+}
+
+
 /**
  * Input file changed. Update information accordingly (slot)
  */
@@ -516,8 +547,8 @@ void MuonAnalysis::inputFileChanged()
   {
     numPeriods = wsPeriods->getNumberOfEntries() - 1;  // note getNumberOfEntries returns one more # of periods 
 
-    for ( int i = 1; i <= numPeriods; i++)
-      applyGroupingToWS( m_workspace_name + "_" + iToString(i));
+//    for ( int i = 1; i <= numPeriods; i++)
+//      applyGroupingToWS( m_workspace_name + "_" + iToString(i));
 
     Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
@@ -525,11 +556,12 @@ void MuonAnalysis::inputFileChanged()
   }
   else
   {
-    applyGroupingToWS(m_workspace_name);
 
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
   }
 
+
+  applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouping");
 
   // Populate instrument description field
 
@@ -729,6 +761,66 @@ void MuonAnalysis::updateFront()
     }
   }
 }
+
+
+/**
+ * Update front including first re-populate pair list combo box
+ */
+void MuonAnalysis::updateFrontAndCombo()
+{
+  m_uiForm.frontGroupGroupPairComboBox->clear();
+
+
+  
+  m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+
+  updateFront();
+}
+
+
+/**
+ * Return the group which is in focus and -1 if none
+ */
+int MuonAnalysis::groupInFocus()
+{
+  if ( getGroupNumberFromRow(m_groupTableRowInFocus) >= 0 )
+    return m_groupTableRowInFocus;
+  else 
+    return -1;
+}
+
+/**
+ * Return the group-number for the group in a row. Return -1 if 
+ * invalid group in row
+ *
+ * @param row A row in the group table
+ * @return Group number
+ */
+int MuonAnalysis::getGroupNumberFromRow(int row)
+{
+  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  for (unsigned int i = 0; i < m_groupToRow.size(); i++)
+  {
+    if ( m_groupToRow[i] == row )
+      return i;
+  }
+  return -1;
+}
+
+
+
+/**
+ * Return the pair which is in focus and -1 if none
+ */
+int MuonAnalysis::pairInFocus()
+{
+  // plus some code here which double checks that pair
+  // table in focus actually sensible
+
+    return m_pairTableRowInFocus;
+
+}
+
 
 /**
  * Clear tables and front combo box
@@ -931,12 +1023,13 @@ bool MuonAnalysis::isGroupingSet()
  *
  * @param filename Name of grouping file
  */
-void MuonAnalysis::applyGroupingToWS( const std::string& wsName, std::string filename)
+void MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
+   const std::string& filename)
 {
   QString pyString = "GroupDetectors('";
-  pyString.append(wsName.c_str());
+  pyString.append(inputWS.c_str());
   pyString.append("','");
-  pyString.append(wsName.c_str());
+  pyString.append(outputWS.c_str());
   pyString.append("','");
   pyString.append(filename.c_str());
   pyString.append("');");
@@ -948,12 +1041,12 @@ void MuonAnalysis::applyGroupingToWS( const std::string& wsName, std::string fil
 /**
  * Apply whatever grouping is specified in GUI tables to workspace. 
  */
-void MuonAnalysis::applyGroupingToWS( const std::string& wsName)
+void MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
 {
   if ( isGroupingSet() )
   {
     saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-    applyGroupingToWS(wsName, m_groupingTempFilename);
+    applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
   }
 }
 
@@ -1079,24 +1172,38 @@ void MuonAnalysis::nowDataAvailable()
  */
  void MuonAnalysis::startUpLook()
  {
-  // populate group plot functions. Get these from relevant combobox 
+  // populate group plot functions
   for (int i = 0; i < m_uiForm.groupTablePlotChoice->count(); i++)
     m_groupPlotFunc.append(m_uiForm.groupTablePlotChoice->itemText(i));
 
-  // pair plot functions. Get these from relevant combobox
+  // pair plot functions
   for (int i = 0; i < m_uiForm.pairTablePlotChoice->count(); i++)
     m_pairPlotFunc.append(m_uiForm.pairTablePlotChoice->itemText(i));
-
-  //
+  
+  // Set initial front assuming to alpha specified etc...
   m_uiForm.frontAlphaLabel->setVisible(false);
   m_uiForm.frontAlphaNumber->setVisible(false);
   m_uiForm.frontAlphaNumber->setEnabled(false);
-
   m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
+  // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(1, 2*m_uiForm.groupTable->columnWidth(1));
   m_uiForm.groupTable->setColumnWidth(3, 0.5*m_uiForm.groupTable->columnWidth(3));
+  for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
+  {
+    QTableWidgetItem* item = m_uiForm.groupTable->item(i,2);
+    if (!item)
+    {
+      QTableWidgetItem* it = new QTableWidgetItem("");
+      it->setFlags(it->flags() & (~Qt::ItemIsEditable));
+      m_uiForm.groupTable->setItem(i,2, it);
+    }
+    else
+    {
+      item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+    }
+  }
 
  }
 
@@ -1160,12 +1267,16 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   {
     std::stringstream idstr;
     idstr << "1-" << matrix_workspace->getNumberHistograms();
-    m_uiForm.frontGroupGroupPairComboBox->addItems(QStringList("NoGroupingDetected"));
+
+
+    //m_uiForm.frontGroupGroupPairComboBox->addItems(QStringList("NoGroupingDetected"));
+
+
     m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
     m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
 
     m_groupTableRowInFocus = 0;
-    updateFront();
+    updateFrontAndCombo();
     nowDataAvailable();
 
     QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "No grouping detected in Nexus.");
