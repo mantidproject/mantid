@@ -5,7 +5,7 @@
  *, , Author: pf9
  */
 #include "MantidKernel/NeutronAtom.h"
-#include <math.h> // this defines NAN
+#include <limits>
 
 using std::string;
 
@@ -44,6 +44,8 @@ NeutronAtom::NeutronAtom(const uint8_t z, const uint8_t a,
                          inc_scatt_length_real(inc_b_real), inc_scatt_length_img(inc_b_img),
                          coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
                          tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+
+static const double NAN = std::numeric_limits<double>::quiet_NaN();
 
 static const NeutronAtom H( 1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);
 static const NeutronAtom H1(1, 1, -3.7406, 25.274, 1.7583, 80.27, 82.03, 0.3326);
