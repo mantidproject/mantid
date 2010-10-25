@@ -1396,7 +1396,7 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item row="1" column="0" >
-           <layout class="QHBoxLayout" name="horizontalLayout_9" >
+           <layout class="QHBoxLayout" name="hozl_save" >
             <item>
              <widget class="QLabel" name="save_lbFile" >
               <property name="text" >
@@ -2572,6 +2572,9 @@ p, li { white-space: pre-wrap; }
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="slice_plot" />
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_39" >

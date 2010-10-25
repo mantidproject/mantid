@@ -4,6 +4,11 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/ui_ConvertToEnergy.h"
 
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+
+#include "MantidQtMantidWidgets/RangeSelector.h"
+
 //-----------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------
@@ -60,11 +65,10 @@ namespace MantidQt
       void runConvertToEnergy(bool tryToSave=true);
       /// gather necessary information from Instument Definition Files
       virtual void setIDFValues(const QString & prefix);
-    protected:
-      virtual void closeEvent(QCloseEvent* close);
-      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
 
     private:
+      virtual void closeEvent(QCloseEvent* close);
+      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
       void getSpectraRanges(); ///< populate the spectra ranges for the "Calibration" tab.
       void clearReflectionInfo(); ///< clear various line edit boxes
       QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
@@ -80,6 +84,8 @@ namespace MantidQt
       void isDirtyRebin(bool state); ///< set value for above
       void loadSettings();
       void saveSettings();
+
+      void setupSlice(); ///< setup the slice miniplot section
 
     private slots:
       void refreshWSlist();
@@ -112,16 +118,14 @@ namespace MantidQt
       void slicePlotRaw();
       void sliceTwoRanges(bool state);
       void sliceCalib(bool state);
-
-    protected:
-      // member variables
-      Poco::NObserver<Indirect, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+      void sliceMinChanged(double val);
+      void sliceMaxChanged(double val);
+      void sliceUpdateRS();
 
     private:
-      // member variables
       Ui::ConvertToEnergy m_uiForm; ///< user interface form object
       Background *m_backgroundDialog; ///< background removal dialog
-
+      Poco::NObserver<Indirect, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver; ///< Poco observer for changes in user directory settings
       QString m_dataDir; ///< default data search directory
       QString m_saveDir; ///< default data save directory
       QString m_settingsGroup;
@@ -132,6 +136,12 @@ namespace MantidQt
       /* Validators */
       QIntValidator *m_valInt; ///< validator for int inputs
       QDoubleValidator *m_valDbl; ///< validator for double inputs
+
+      // SLICE MINIPLOT (prefix: 'm_slt')
+      QwtPlot* m_sltPlot;
+      MantidWidgets::RangeSelector* m_sltR1;
+      MantidWidgets::RangeSelector* m_sltR2;
+      QwtPlotCurve* m_sltDataCurve;
     };
   }
 }

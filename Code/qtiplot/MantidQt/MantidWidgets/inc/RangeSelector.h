@@ -29,21 +29,26 @@ namespace MantidWidgets
 
     bool eventFilter(QObject*, QEvent*);
     
-    void setRange(double, double);
     bool changingMin(double, double);
     bool changingMax(double, double);
+
+    std::pair<double,double> getRange();
+    void setRange(std::pair<double,double> range); /// Overloaded function provided for convenience
 
   signals:
     void minValueChanged(double);
     void maxValueChanged(double);
+    void rangeChanged(double, double);
     
   public slots:
+    void setRange(double, double);
     void minChanged(double);
     void maxChanged(double);
     void setMinimum(double); ///< outside setting of value
     void setMaximum(double); ///< outside setting of value
     void reapply(); ///< re-apply the range selector lines
     void setColour(QColor colour);
+    void setVisible(bool state);
 
   private:
     void setMin(double val);

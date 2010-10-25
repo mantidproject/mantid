@@ -4,6 +4,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/NObserver.h>
 
@@ -22,7 +23,12 @@ using namespace MantidQt::CustomInterfaces;
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
 UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true),
-  m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), m_changeObserver(*this, &Indirect::handleDirectoryChange)
+  m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), 
+  m_changeObserver(*this, &Indirect::handleDirectoryChange),
+
+  // Slice init
+  m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL)
+
 {
   // Constructor
 }
@@ -35,6 +41,8 @@ void Indirect::initLayout()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   m_settingsGroup = "CustomInterfaces/ConvertToEnergy/Indirect/";
+
+  setupSlice(); // setup the slice miniplot
 
   // "Energy Transfer" tab
   connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
@@ -125,6 +133,8 @@ void Indirect::initLayout()
   loadSettings();
 
   refreshWSlist();
+
+  sliceTwoRanges(m_uiForm.slice_ckUseTwoRanges->isChecked());
 }
 /**
 * This function will hold any Python-dependent setup actions for the interface.
@@ -392,12 +402,14 @@ void Indirect::setIDFValues(const QString & prefix)
     analyserSelected(m_uiForm.cbAnalyser->currentIndex());
   }
 }
+
 void Indirect::closeEvent(QCloseEvent* close)
 {
   (void) close;
   //saveSettings();
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
+
 void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
 {
   std::string key = pNf->key();
@@ -923,6 +935,7 @@ bool Indirect::validateCalib()
 
   return valid;
 }
+
 bool Indirect::validateSofQw()
 {
   bool valid = true;
@@ -1128,6 +1141,7 @@ void Indirect::isDirtyRebin(bool state)
 {
   m_isDirtyRebin = state;
 }
+
 void Indirect::loadSettings()
 {
   
@@ -1156,11 +1170,50 @@ void Indirect::loadSettings()
 
   // And for instrument/analyser/reflection
 }
+
 void Indirect::saveSettings()
 {
   // The only settings that we want to keep are the instrument / analyser / reflection ones
   // Instrument is handled in ConvertToEnergy class
 }
+
+void Indirect::setupSlice()
+{
+  // Create Slice Plot Widget for Range Selection
+  m_sltPlot = new QwtPlot(this);
+  m_sltPlot->setAxisFont(QwtPlot::xBottom, this->font());
+  m_sltPlot->setAxisFont(QwtPlot::yLeft, this->font());
+  m_uiForm.slice_plot->addWidget(m_sltPlot);
+  // We always want one range selector... the second one can be controlled from
+  // within the sliceTwoRanges(bool state) function
+  m_sltR1 = new MantidWidgets::RangeSelector(m_sltPlot);
+  m_sltR1->setMinimum(m_uiForm.slice_leRange0->text().toDouble());
+  m_sltR1->setMaximum(m_uiForm.slice_leRange1->text().toDouble());
+  connect(m_sltR1, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+  connect(m_sltR1, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+
+  // second range
+  // create the second range
+  m_sltR2 = new MantidWidgets::RangeSelector(m_sltPlot);
+  m_sltR2->setColour(Qt::darkGreen); // dark green for background
+  m_sltR2->setMinimum(m_uiForm.slice_leRange2->text().toDouble()); // m_uiForm.slice_leRange2->text().toDouble()
+  m_sltR2->setMaximum(m_uiForm.slice_leRange3->text().toDouble());
+  connect(m_sltR1, SIGNAL(rangeChanged(double, double)), m_sltR2, SLOT(setRange(double, double)));
+  connect(m_sltR2, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+  connect(m_sltR2, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+  m_sltR2->setRange(m_sltR1->getRange());
+
+  // Refresh the plot window
+  m_sltPlot->replot();
+
+  connect(m_uiForm.slice_leRange0, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
+  connect(m_uiForm.slice_leRange1, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
+  connect(m_uiForm.slice_leRange2, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
+  connect(m_uiForm.slice_leRange3, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
+}
+
+/* QT SLOT FUNCTIONS */
+
 void Indirect::refreshWSlist()
 {
   m_uiForm.sqw_cbWorkspace->clear();
@@ -1253,6 +1306,10 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.slice_leRange1->setText(values[5]);
       m_uiForm.slice_leRange2->setText(values[6]);
       m_uiForm.slice_leRange3->setText(values[7]);
+      m_sltR1->setMinimum(values[4].toDouble());
+      m_sltR1->setMaximum(values[5].toDouble());
+      m_sltR2->setMinimum(values[6].toDouble());
+      m_sltR2->setMaximum(values[7].toDouble());
     }
     else
     {
@@ -1302,6 +1359,7 @@ void Indirect::mappingOptionSelected(const QString& groupType)
 
   isDirtyRebin(true);
 }
+
 void Indirect::tabChanged(int index)
 {
   QString tabName = m_uiForm.tabWidget->tabText(index);
@@ -1441,6 +1499,7 @@ void Indirect::detailedBalanceCheck(bool state)
 
   isDirtyRebin(true);
 }
+
 void Indirect::resPlotInput()
 {
   if ( m_uiForm.cal_leRunNo->isValid() )
@@ -1484,6 +1543,7 @@ void Indirect::rebinData()
 {
   runConvertToEnergy(false);
 }
+
 void Indirect::useCalib(bool state)
 {
   m_uiForm.ind_calibFile->isOptional(!state);
@@ -1603,6 +1663,7 @@ void Indirect::calibFileChanged(const QString & calib)
     m_uiForm.ckUseCalib->setChecked(true);
   }
 }
+
 void Indirect::sOfQwClicked()
 {
   if ( validateSofQw() )
@@ -1643,6 +1704,7 @@ void Indirect::sOfQwClicked()
     showInformationBox("Some of your input is invalid. Please check the input highlighted.");
   }
 }
+
 void Indirect::sOfQwRebinE(bool state)
 {
   QString val;
@@ -1661,6 +1723,7 @@ void Indirect::sOfQwRebinE(bool state)
   m_uiForm.sqw_lbEWidth->setEnabled(state);
   m_uiForm.sqw_lbEHigh->setEnabled(state);
 }
+
 void Indirect::sOfQwInputType(const QString& input)
 {
   if ( input == "File" )
@@ -1759,39 +1822,115 @@ void Indirect::sliceRun()
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
+
 void Indirect::slicePlotRaw()
 {
   if ( m_uiForm.slice_inputFile->isValid() )
   {
-    QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
-    QString pyInput =
-      "from IndirectDataAnalysis import plotRaw\n"
-      "spec = ["+m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text() +"]\n"
-      "files = [r'" + filenames + "']\n"
-      "plotRaw(files, spectra=spec)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QString filename = m_uiForm.slice_inputFile->getFirstFilename();
+    QFileInfo fi(filename);
+    QString wsname = fi.baseName();
+
+    QString pyInput = "LoadRaw(r'" + filename + "', '" + wsname + "', SpectrumMin=" 
+      + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
+      + m_uiForm.leSpectraMax->text() + ")\n";
+    QString pyOutput = runPythonCode(pyInput);
+
+    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+
+    QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
+    QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+
+    if ( m_sltDataCurve != NULL )
+    {
+      m_sltDataCurve->attach(0);
+      delete m_sltDataCurve;
+      m_sltDataCurve = 0;
+    }
+
+    m_sltDataCurve = new QwtPlotCurve();
+    m_sltDataCurve->setData(dataX, dataY);
+    m_sltDataCurve->attach(m_sltPlot);
+
+    m_sltPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
+
+    m_sltR1->setRange(dataX.first(), dataX.last());
+
+    // Replot
+    m_sltPlot->replot();
   }
   else
   {
     showInformationBox("Selected input files are invalid.");
   }
+
 }
+
 void Indirect::sliceTwoRanges(bool state)
 {
-  QString val;
-  if ( state ) val = "*";
-  else val = " ";
   m_uiForm.slice_lbRange2->setEnabled(state);
   m_uiForm.slice_lbTo2->setEnabled(state);
   m_uiForm.slice_leRange2->setEnabled(state);
   m_uiForm.slice_leRange3->setEnabled(state);
   m_uiForm.slice_valRange2->setEnabled(state);
-  m_uiForm.slice_valRange2->setText(val);
   m_uiForm.slice_valRange3->setEnabled(state);
-  m_uiForm.slice_valRange3->setText(val);
+
+  m_sltR2->setVisible(state);
+
+  validateSlice();
 }
+
 void Indirect::sliceCalib(bool state)
 {
   m_uiForm.slice_calibFile->setEnabled(state);
   m_uiForm.slice_calibFile->isOptional(!state);
+}
+
+void Indirect::sliceMinChanged(double val)
+{
+  MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
+  if ( from == m_sltR1 )
+  {
+    m_uiForm.slice_leRange0->setText(QString::number(val));
+  }
+  else if ( from == m_sltR2 )
+  {
+    m_uiForm.slice_leRange2->setText(QString::number(val));
+  }
+}
+
+void Indirect::sliceMaxChanged(double val)
+{
+  MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
+  if ( from == m_sltR1 )
+  {
+    m_uiForm.slice_leRange1->setText(QString::number(val));
+  }
+  else if ( from == m_sltR2 )
+  {
+    m_uiForm.slice_leRange3->setText(QString::number(val));
+  }
+}
+
+void Indirect::sliceUpdateRS()
+{
+  QLineEdit* from = qobject_cast<QLineEdit*>(sender());
+  double val = from->text().toDouble();
+
+  if ( from == m_uiForm.slice_leRange0 )
+  {
+    m_sltR1->setMinimum(val);
+  }
+  else if ( from == m_uiForm.slice_leRange1 )
+  {
+    m_sltR1->setMaximum(val);
+  }
+  else if ( from == m_uiForm.slice_leRange2 )
+  {
+    m_sltR2->setMinimum(val);
+  }
+  else if ( from == m_uiForm.slice_leRange3 )
+  {
+    m_sltR2->setMaximum(val);
+  }
 }

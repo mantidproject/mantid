@@ -208,11 +208,25 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
   }
 }
 
+std::pair<double, double> RangeSelector::getRange()
+{
+  std::pair<double,double> range(m_lower,m_higher);
+  return range;
+}
+
 void RangeSelector::setRange(double min, double max)
 {
   m_lower = min;
   m_higher = max;
   verify();
+  emit rangeChanged(min, max);
+}
+
+void RangeSelector::setRange(std::pair<double,double> range)
+{
+  double min = range.first;
+  double max = range.second;
+  this->setRange(min, max);
 }
 
 void RangeSelector::minChanged(double val)
@@ -275,6 +289,21 @@ void RangeSelector::setColour(QColor colour)
     m_mrkMin->setLinePen(*m_pen);
     break;
   }
+}
+
+void RangeSelector::setVisible(bool state)
+{
+  if ( state )
+  {
+    m_mrkMin->show();
+    m_mrkMax->show();
+  }
+  else
+  {
+    m_mrkMin->hide();
+    m_mrkMax->hide();
+  }
+  m_plot->replot();
 }
 
 void RangeSelector::setMin(double val)
