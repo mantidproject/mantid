@@ -30,6 +30,10 @@ class Transmission(BaseScriptElement):
                 Generate reduction script
                 @param execute: if true, the script will be executed
             """
+            if len(str(self.sample_file).strip())==0 \
+                or len(str(self.direct_beam).strip())==0:
+                raise RuntimeError, "Transmission with direct beam was selected but data files were not entered."
+
             return "DirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
             
@@ -74,6 +78,12 @@ class Transmission(BaseScriptElement):
                 Generate reduction script
                 @param execute: if true, the script will be executed
             """
+            if len(str(self.sample_scatt).strip())==0 \
+                or len(str(self.sample_spreader).strip())==0 \
+                or len(str(self.direct_scatt).strip())==0 \
+                or len(str(self.direct_spreader).strip())==0:
+                raise RuntimeError, "Transmission with beam spreader was selected but data files were not entered."
+                        
             return "BeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
             (self.sample_spreader, self.direct_spreader, 
              self.sample_scatt, self.direct_scatt, 
@@ -537,6 +547,9 @@ class BeamFinder(BaseScriptElement):
         if not self.use_finder:
             script += "SetBeamCenter(%g, %g)\n" % (self.x_position, self.y_position) 
         else:
+            if len(str(self.beam_file).strip())==0:
+                raise RuntimeError, "Beam finder was selected but no data file was entered."
+
             if self.use_direct_beam:
                 script += "DirectBeamCenter(\"%s\")\n" % self.beam_file
             else:
