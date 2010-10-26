@@ -98,11 +98,27 @@ public:
         TSM_ASSERT_EQUALS("Reflected normal z value is not negative of original.", -3, reflected.getZ() );
     }
 
-    void testToXML()
-    {
-        Mantid::MDAlgorithms::NormalParameter normal(1, 2, 3);
-        TSM_ASSERT_EQUALS("The generated xml for the NormalParameter does not match the specification.", "<Parameter><Type>NormalParameter</Type><Value>1.0000, 2.0000, 3.0000</Value></Parameter>", normal.toXML());
-    }
+ 	void testEqual()
+	{
+	    using namespace Mantid::MDAlgorithms;
+	    NormalParameter A(1, 2, 3);
+		NormalParameter B(1, 2, 3);
+		
+		TSM_ASSERT_EQUALS("The two Normal instances are not considered equal, but should be.", A, B);
+	}
+	
+	void testNotEqual()
+	{
+	    //Test unequal combinations
+	    using namespace Mantid::MDAlgorithms;
+	    NormalParameter A(1, 2, 3);
+		NormalParameter B(0, 2, 3);
+		NormalParameter C(1, 0, 3);
+		NormalParameter D(1, 2, 0);		
+		TSM_ASSERT_DIFFERS("The two Normal instances are considered equal, but should not be.", A, B);
+		TSM_ASSERT_DIFFERS("The two Normal instances are considered equal, but should not be.", A, C);
+		TSM_ASSERT_DIFFERS("The two Normal instances are considered equal, but should not be.", A, D);
+	}
 
 
 };

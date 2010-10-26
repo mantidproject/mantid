@@ -92,8 +92,30 @@ public:
     void testToXML()
     {
         Mantid::MDAlgorithms::OriginParameter origin(1, 2, 3);
-        TSM_ASSERT_EQUALS("The generated xml for the OriginParameter does not match the specification.", "<Parameter><Type>OriginParameter</Type><Value>1.0000, 2.0000, 3.0000</Value></Parameter>", origin.toXML());
+        TSM_ASSERT_EQUALS("The generated xml for the OriginParameter does not match the specification.", "<Parameter><Type>OriginParameter</Type><Value>1.0000, 2.0000, 3.0000</Value></Parameter>", origin.toXMLString());
     }
+	
+	void testEqual()
+	{
+	    using namespace Mantid::MDAlgorithms;
+	    OriginParameter A(1, 2, 3);
+		OriginParameter B(1, 2, 3);
+		
+		TSM_ASSERT_EQUALS("The two origin instances are not considered equal, but should be.", A, B);
+	}
+	
+	void testNotEqual()
+	{
+	    //Test unequal combinations
+	    using namespace Mantid::MDAlgorithms;
+	    OriginParameter A(1, 2, 3);
+		OriginParameter B(0, 2, 3);
+		OriginParameter C(1, 0, 3);
+		OriginParameter D(1, 2, 0);		
+		TSM_ASSERT_DIFFERS("The two origin instances are considered equal, but should not be.", A, B);
+		TSM_ASSERT_DIFFERS("The two origin instances are considered equal, but should not be.", A, C);
+		TSM_ASSERT_DIFFERS("The two origin instances are considered equal, but should not be.", A, D);
+	}
 
 };
 

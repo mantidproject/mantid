@@ -90,16 +90,27 @@ namespace Mantid
             return m_normal.at(2);
         }
 
-        std::string NormalParameter::toXML() const
+        bool NormalParameter::operator==(const NormalParameter &other) const
         {
-            //TODO use proper DOM library for this
-            char buffer[256];
-            sprintf(buffer, "<Parameter><Type>NormalParameter</Type><Value>%.4f, %.4f, %.4f</Value></Parameter>", m_normal.at(0),  m_normal.at(1), m_normal.at(2));
-
-            std::string xmlFragment = std::string(buffer);
-
-            return xmlFragment;
+            return this->m_normal.at(0) == other.m_normal.at(0) && this->m_normal.at(1) == other.m_normal.at(1) && this->m_normal.at(2) == other.m_normal.at(2);
         }
+
+        bool NormalParameter::operator!=(const NormalParameter &other) const
+        {
+            return !(*this == other);
+        }
+
+
+        std::string NormalParameter::toXMLString() const
+        {
+            char buffer[256];
+            sprintf(buffer, "%.4f, %.4f, %.4f", m_normal.at(0),  m_normal.at(1), m_normal.at(2));
+            std::string valueXMLtext = std::string(buffer);
+
+            return this->parameterXMLTemplate(valueXMLtext);
+        }
+
+
     }
 
 

@@ -4,6 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/Text.h"
+#include "Poco/DOM/AutoPtr.h" 
+#include "Poco/DOM/DOMWriter.h"
+#include "Poco/XML/XMLWriter.h"
+#include <sstream>
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
@@ -48,7 +55,8 @@ namespace Mantid
 
             virtual bool isValid() const = 0;
 
-            virtual std::string toXML() const = 0;
+            virtual std::string toXMLString() const = 0;
+
 
             std::auto_ptr<IParameter> clone() const
             { 
@@ -58,12 +66,39 @@ namespace Mantid
             virtual ~IParameter() = 0
             {
             };
-            
+
         protected:
+
             virtual IParameter* cloneImp() const = 0;
+
             bool m_isValid;
-        private:
-            
+
+            std::string parameterXMLTemplate(std::string valueXMLtext) const
+            {
+                using namespace Poco::XML;
+
+                using namespace Poco::XML;
+                AutoPtr<Document> pDoc = new Document;
+                Element* paramElement = pDoc->createElement("Parameter");
+                
+                pDoc->appendChild(paramElement);
+                Element* typeElement = pDoc->createElement("Type");
+                Text* typeText = pDoc->createTextNode(this->getName());
+                typeElement->appendChild(typeText);
+                paramElement->appendChild(typeElement);
+
+                Element* valueElement = pDoc->createElement("Value");
+                Text* valueText = pDoc->createTextNode(valueXMLtext);
+                valueElement->appendChild(valueText);
+                paramElement->appendChild(valueElement);
+                
+                std::stringstream xmlstream;
+
+                DOMWriter writer;
+                writer.writeNode(xmlstream, pDoc);
+                return xmlstream.str();
+            }
+
 
         };
     }

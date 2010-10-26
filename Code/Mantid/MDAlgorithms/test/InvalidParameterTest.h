@@ -44,7 +44,7 @@ public:
     {
         using namespace Mantid::MDAlgorithms;
         InvalidParameter invalidParam;
-        TSM_ASSERT_THROWS("Should have thrown runtime_error exception as it is not possible to represent and invalid parameter in xml.",  invalidParam.toXML(), std::runtime_error );
+        TSM_ASSERT_THROWS("Should have thrown runtime_error exception as it is not possible to represent and invalid parameter in xml.",  invalidParam.toXMLString(), std::runtime_error );
     }
 
 };

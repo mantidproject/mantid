@@ -60,7 +60,7 @@ namespace Mantid
 
             std::auto_ptr<InvalidParameter> clone() const;
 
-            std::string toXML() const;
+            std::string toXMLString() const;
 
             ~InvalidParameter();
 

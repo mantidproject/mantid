@@ -54,10 +54,19 @@ namespace Mantid
         public:
 
             OriginParameter(double o1, double o2, double o3);
+            
             OriginParameter();
+            
             OriginParameter(OriginParameter & other);
+            
             OriginParameter(OriginParameter const * const other);
+            
             OriginParameter& operator=(const OriginParameter& other);
+
+            bool operator==(const OriginParameter &other) const;
+
+            bool operator!=(const OriginParameter &other) const;
+
             bool isValid() const;
 
             std::string getName() const;
@@ -72,7 +81,7 @@ namespace Mantid
 
             double getZ() const;
 
-            std::string toXML() const;
+            std::string toXMLString() const;
 
             ~OriginParameter();
 

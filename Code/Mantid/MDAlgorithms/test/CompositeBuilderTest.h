@@ -1,6 +1,8 @@
 #ifndef COMPOSITE_FUNCTION_BUILDER_TEST_H_
 #define COMPOSITE_FUNCTION_BUILDER_TEST_H_
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <memory>
@@ -11,7 +13,7 @@
 #include "IParameter.h"
 #include "MDDataObjects/point3D.h"
 
-class CompositeFunctionBuilderTest : public CxxTest::TestSuite
+class CompositeBuilderTest : public CxxTest::TestSuite
 {
 
 private:
@@ -19,18 +21,12 @@ private:
     class FakeParameter : public Mantid::MDAlgorithms::IParameter
     {
     public:
-        std::string getName() const
-        {
-            return "FakeParameter";
-        }
         bool isValid() const
         {
             return false;
         }
-        std::string toXML() const
-        {
-            return "";
-        }
+		 MOCK_CONST_METHOD0(getName, std::string());
+         MOCK_CONST_METHOD0(toXMLString, std::string());
         ~FakeParameter(){;} 
 
     protected:
@@ -40,13 +36,17 @@ private:
         }
     };	
 
+
+
     class FakeImplicitFunction : Mantid::API::IImplicitFunction
     {
     public:
-        bool evaluate(Mantid::MDDataObjects::point3D const * const pPoint3D) const
+        bool evaluate(const Mantid::MDDataObjects::point3D* pPoint3D) const
         {    
             return false;
         }
+		MOCK_CONST_METHOD0(getName, std::string());
+		MOCK_CONST_METHOD0(toXMLString, std::string());
     };
 
     class FakeFunctionBuilder : public Mantid::MDAlgorithms::IFunctionBuilder

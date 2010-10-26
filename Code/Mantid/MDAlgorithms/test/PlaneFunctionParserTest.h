@@ -132,6 +132,7 @@ public:
         PlaneFunctionParser functionParser(constructRootParameterParser().release());
         TSM_ASSERT_THROWS("There is no successor parser setup for the PlaneFunctionParser", functionParser.createFunctionBuilder(pRootElem), std::runtime_error );
     }
+	
 
 };
 

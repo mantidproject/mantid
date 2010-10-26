@@ -1,6 +1,8 @@
 #ifndef COMPOSITE_IMPLICIT_FUNCTION_TEST_H_
 #define COMPOSITE_IMPLICIT_FUNCTION_TEST_H_
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
@@ -12,82 +14,93 @@ class CompositeImplicitFunctionTest : public CxxTest::TestSuite
 private:
 
     //Fake ImplicitFunction to verify abstract treatement of nested functions by composite.
-    class FakeIImplicitFunction : public Mantid::API::IImplicitFunction
-    {
-    private:
-        mutable int  m_evaluateCount;
-        bool m_setOutput;
-    public:
-        FakeIImplicitFunction(bool setOutput=false) : m_setOutput(setOutput), m_evaluateCount(0)
-        {
-        }
-        bool evaluate(Mantid::MDDataObjects::point3D const * const pPoint) const
-        {
-            m_evaluateCount += 1;
-            return m_setOutput;
-        }
-        int getEvaluateCount()
-        {
-            return m_evaluateCount;
-        }
-        ~FakeIImplicitFunction(){}
-    };
-
-    //Fake CompositeImplicitFunction. Minimal decoration to expose the number of contained functions for testability purposes.
-    class FakeCompositeImplicitFunction : public Mantid::MDAlgorithms::CompositeImplicitFunction
+    class MockImplicitFunction : public Mantid::API::IImplicitFunction
     {
     public:
-        int getFunctionsCount()
-        {
-            return this->m_Functions.size();
-        }
+        MOCK_CONST_METHOD1(evaluate, bool(const Mantid::MDDataObjects::point3D* pPoint));
+		MOCK_CONST_METHOD0(getName, std::string());
+        MOCK_CONST_METHOD0(toXMLString, std::string());
+        ~MockImplicitFunction(){}
     };
+	
 
 public:
 
     void testFunctionAddition()
     {
-
         using namespace Mantid::MDAlgorithms;
-
-        FakeCompositeImplicitFunction composite;
-        composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(new FakeIImplicitFunction()));
-        composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(new FakeIImplicitFunction()));
-        TSM_ASSERT_EQUALS("Two functions should have been added to composite", 2, composite.getFunctionsCount());
+        CompositeImplicitFunction composite;
+        composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(new MockImplicitFunction()));
+        composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(new MockImplicitFunction()));
+        TSM_ASSERT_EQUALS("Two functions should have been added to composite", 2, composite.getNFunctions());
     }
 
 
     void testEvaluateCount()
     {
-
         using namespace Mantid::MDAlgorithms;
 
         CompositeImplicitFunction composite;
         bool dummyOutCome = true;
-        FakeIImplicitFunction* a = new FakeIImplicitFunction(dummyOutCome);
-        FakeIImplicitFunction* b = new FakeIImplicitFunction(dummyOutCome);
+        MockImplicitFunction* a = new MockImplicitFunction;
+        MockImplicitFunction* b = new MockImplicitFunction;
+		EXPECT_CALL(*a, evaluate(testing::_)).Times(1).WillOnce(testing::Return(true));
+		EXPECT_CALL(*b, evaluate(testing::_)).Times(1);
+        
         composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(a));
         composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(b));
         composite.evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
-
-        int callResult = a->getEvaluateCount() + b->getEvaluateCount();
-        TSM_ASSERT_EQUALS("Two Functions should have been executed",2, callResult);
+		TSM_ASSERT("This nested function should have been executed", testing::Mock::VerifyAndClearExpectations(a));
+		TSM_ASSERT("This nested function should have been executed", testing::Mock::VerifyAndClearExpectations(b));
     }
-
-    void testAbortEvaluation()
+	
+	void testEvaluateAbort()
     {
         using namespace Mantid::MDAlgorithms;
 
         CompositeImplicitFunction composite;
-        FakeIImplicitFunction* a = new FakeIImplicitFunction(false);
-        FakeIImplicitFunction* b = new FakeIImplicitFunction(false);
+        bool dummyOutCome = true;
+        MockImplicitFunction* a = new MockImplicitFunction;
+        MockImplicitFunction* b = new MockImplicitFunction;
+		EXPECT_CALL(*a, evaluate(testing::_)).Times(1).WillOnce(testing::Return(false)); //Ensure that composite function 'gives-up'
+		EXPECT_CALL(*b, evaluate(testing::_)).Times(0); //This should not now be evaluated.
+        
         composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(a));
         composite.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(b));
         composite.evaluate(new Mantid::MDDataObjects::point3D(0,0,0));
-
-        int callResult = a->getEvaluateCount() + b->getEvaluateCount();
-        TSM_ASSERT_EQUALS("Should have aborted after first function evaluation", 1, callResult);
+		TSM_ASSERT("This nested function should have been executed", testing::Mock::VerifyAndClearExpectations(a));
+		TSM_ASSERT("This nested function should have been executed", testing::Mock::VerifyAndClearExpectations(b));
     }
+
+	
+    void testRecursiveToXML()
+	{
+	    using namespace Mantid::MDAlgorithms;
+
+		MockImplicitFunction* mockFunctionA = new MockImplicitFunction;
+		MockImplicitFunction* mockFunctionB = new MockImplicitFunction;
+		
+		EXPECT_CALL(*mockFunctionA, toXMLString()).Times(1).WillOnce(testing::Return("<Function></Function>"));
+		EXPECT_CALL(*mockFunctionB, toXMLString()).Times(1).WillOnce(testing::Return("<Function></Function>"));
+		
+		CompositeImplicitFunction function;
+        function.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(mockFunctionA));	
+        function.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(mockFunctionB));	
+		
+	    TSM_ASSERT_EQUALS("The xml generated by this function did not match the expected schema.", "<Function><Type>CompositeImplicitFunction</Type><Function></Function><Function></Function></Function>", function.toXMLString());
+	}
+	
+	void testNotEqual()
+	{
+	    using namespace Mantid::MDAlgorithms;
+	
+	    CompositeImplicitFunction A;
+		CompositeImplicitFunction B;
+		CompositeImplicitFunction C;
+		C.addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction>(new MockImplicitFunction));
+		TSM_ASSERT_DIFFERS("These two objects should not be considered equal as they both have zero nested functions.", A, B);
+		TSM_ASSERT_DIFFERS("These two objects should not be considered equal as they have and unequal number of nested functions.", A, C);		
+	}
 
 
 };

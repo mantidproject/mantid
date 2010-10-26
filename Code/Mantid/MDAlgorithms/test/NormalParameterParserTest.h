@@ -97,6 +97,25 @@ public:
 
         TSM_ASSERT("Chain of responsiblity did not execute as expected for NormalParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
     }
+	
+	void testCanParseXMLOutput()
+	{ 
+	  //Circular check that xml given by an normal parameter can be used to create a new one using the parser.
+	  using namespace Mantid::MDAlgorithms;
+	  NormalParameter originalNormal(1, 2, 3);
+	  
+	  Poco::XML::DOMParser pParser;
+      Poco::XML::Document* pDoc = pParser.parseString(originalNormal.toXMLString());
+	
+	  NormalParameterParser normalParser;
+	  NormalParameter* synthNormal = dynamic_cast<NormalParameter*>(normalParser.createParameter(pDoc->documentElement()));
+	  
+	  TSM_ASSERT_EQUALS("Formats used for xml parsing and xml output are not synchronised. x-values do not match", originalNormal.getX() ,  synthNormal->getX());
+	  TSM_ASSERT_EQUALS("Formats used for xml parsing and xml output are not synchronised. y-values do not match", originalNormal.getY() ,  synthNormal->getY());
+	  TSM_ASSERT_EQUALS("Formats used for xml parsing and xml output are not synchronised. z-values do not match", originalNormal.getZ() ,  synthNormal->getZ());
+	  
+	  delete synthNormal;
+	}
 };
 
 #endif

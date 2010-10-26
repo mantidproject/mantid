@@ -42,7 +42,7 @@ namespace Mantid
         {
         }
 
-        std::string InvalidParameter::toXML() const
+        std::string InvalidParameter::toXMLString() const
         {
             throw std::runtime_error("Invalid parameters cannot be represented in xml.");
         }

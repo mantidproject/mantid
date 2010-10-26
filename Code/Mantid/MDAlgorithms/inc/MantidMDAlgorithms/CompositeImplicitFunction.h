@@ -54,17 +54,20 @@ namespace Mantid
           
             ~CompositeImplicitFunction();
             void addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction> constituentFunction);
-            bool evaluate(MDDataObjects::point3D const * const pPoint3D) const;
+            bool evaluate(const MDDataObjects::point3D* pPoint3D) const;
+            std::string getName() const;
+            std::string toXMLString() const;
             int getNFunctions() const;
+            bool operator==(const CompositeImplicitFunction &other) const;
+            bool operator!=(const CompositeImplicitFunction &other) const;
             static std::string functionName()
             {
                 return "CompositeImplicitFunction";
             }
         protected:
             std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>> m_Functions;
-        private:
-            CompositeImplicitFunction(const CompositeImplicitFunction& other);
-            CompositeImplicitFunction& operator=(const CompositeImplicitFunction& other);
+            typedef std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>>::const_iterator FunctionIterator;
+
         };
     }
 }

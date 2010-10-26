@@ -4,10 +4,17 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/Text.h"
+#include "Poco/DOM/AutoPtr.h" 
+#include "Poco/DOM/DOMWriter.h"
+#include "Poco/XML/XMLWriter.h"
+#include <sstream>
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-
 namespace Mantid
 {
 
@@ -50,9 +57,12 @@ namespace Mantid
         class DLLExport IImplicitFunction
         {
         public:
-            virtual bool evaluate(MDDataObjects::point3D const * const pPoint3D) const = 0;
-            virtual ~IImplicitFunction(){
-            };
+            virtual bool evaluate(const MDDataObjects::point3D* pPoint3D) const = 0;
+            virtual std::string getName() const = 0; 
+            virtual std::string toXMLString() const = 0;
+            virtual ~IImplicitFunction() = 0 {;}
+        protected:
+
         };
     }
 }

@@ -56,13 +56,17 @@ namespace Mantid
         public:
             PlaneImplicitFunction(NormalParameter normal, OriginParameter origin);
             ~PlaneImplicitFunction();
-            bool evaluate(MDDataObjects::point3D const * const pPoint) const;
+            std::string getName() const;
+            std::string toXMLString() const;
+            bool evaluate(const MDDataObjects::point3D* pPoint) const;
             double getOriginX() const;
             double getOriginY() const;
             double getOriginZ() const;
             double getNormalX() const;
             double getNormalY() const;
             double getNormalZ() const;
+            bool operator==(const PlaneImplicitFunction &other) const;
+            bool operator!=(const PlaneImplicitFunction &other) const;
 
             static std::string functionName()
             {
@@ -70,8 +74,7 @@ namespace Mantid
             }
 
         private:
-            PlaneImplicitFunction(const PlaneImplicitFunction& other);
-            PlaneImplicitFunction& operator=(const PlaneImplicitFunction& other);
+
             OriginParameter m_origin;
             NormalParameter m_normal;
 

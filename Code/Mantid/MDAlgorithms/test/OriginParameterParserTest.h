@@ -90,6 +90,25 @@ public:
 
         TSM_ASSERT("Chain of responsiblity did not execute as expected for OriginParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
     }
+	
+	void testCanParseXMLOutput()
+	{ 
+	  //Circular check that xml given by an origin parameter can be used to create a new one using the parser.
+	  using namespace Mantid::MDAlgorithms;
+	  OriginParameter originalOrigin(1, 2, 3);
+	  
+	  Poco::XML::DOMParser pParser;
+      Poco::XML::Document* pDoc = pParser.parseString(originalOrigin.toXMLString());
+	
+	  OriginParameterParser originParser;
+	  OriginParameter* synthOrigin = dynamic_cast<OriginParameter*>(originParser.createParameter(pDoc->documentElement()));
+	  
+	  TSM_ASSERT_EQUALS("Formats used for xml parsing and xml output are not synchronised. x-values do not match", originalOrigin.getX() ,  synthOrigin->getX());
+	  TSM_ASSERT_EQUALS("Formats used for xml parsing and xml output are not synchronised. y-values do not match", originalOrigin.getY() ,  synthOrigin->getY());
+	  TSM_ASSERT_EQUALS("Formats used for xml parsing and xml output are not synchronised. z-values do not match", originalOrigin.getZ() ,  synthOrigin->getZ());
+	  
+	  delete synthOrigin;
+	}
 
 };
 

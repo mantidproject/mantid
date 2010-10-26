@@ -55,10 +55,19 @@ namespace Mantid
         public:
 
             NormalParameter(double n1, double n2, double n3);
+            
             NormalParameter();
+            
             NormalParameter(NormalParameter& other);
+            
             NormalParameter(NormalParameter const * const other);
+            
             NormalParameter& operator=(const NormalParameter& other);
+
+            bool operator==(const NormalParameter &other) const;
+
+            bool operator!=(const NormalParameter &other) const;
+            
             std::string getName() const;
 
             bool isValid() const;
@@ -75,7 +84,7 @@ namespace Mantid
 
             double getZ() const;
 
-            std::string toXML() const;
+            std::string toXMLString() const;
 
             static std::string parameterName()
             {

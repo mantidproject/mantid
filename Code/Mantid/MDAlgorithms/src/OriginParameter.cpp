@@ -1,4 +1,5 @@
-﻿#include "MantidMDAlgorithms/OriginParameter.h"
+﻿
+#include "MantidMDAlgorithms/OriginParameter.h"
 
 namespace Mantid
 {
@@ -83,15 +84,23 @@ namespace Mantid
             return m_origin.at(2);
         }
 
-        std::string OriginParameter::toXML() const
+        bool OriginParameter::operator==(const OriginParameter &other) const
         {
-            //TODO use proper DOM library for this
+            return this->m_origin.at(0) == other.m_origin.at(0) && this->m_origin.at(1) == other.m_origin.at(1) && this->m_origin.at(2) == other.m_origin.at(2);
+        }
+
+        bool OriginParameter::operator!=(const OriginParameter &other) const
+        {
+            return !(*this == other);
+        }
+
+       std::string OriginParameter::toXMLString() const
+        {
             char buffer[256];
-            sprintf(buffer, "<Parameter><Type>OriginParameter</Type><Value>%.4f, %.4f, %.4f</Value></Parameter>", m_origin.at(0),  m_origin.at(1), m_origin.at(2));
+            sprintf(buffer, "%.4f, %.4f, %.4f", m_origin.at(0),  m_origin.at(1), m_origin.at(2));
+            std::string valueXMLtext = std::string(buffer);
 
-            std::string xmlFragment = std::string(buffer);
-
-            return xmlFragment;
+            return this->parameterXMLTemplate(valueXMLtext);
         }
     }
 
