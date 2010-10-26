@@ -324,6 +324,9 @@
         </spacer>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="elwin_plot" />
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5" >
          <item>
           <widget class="QCheckBox" name="elwin_ckVerbose" >

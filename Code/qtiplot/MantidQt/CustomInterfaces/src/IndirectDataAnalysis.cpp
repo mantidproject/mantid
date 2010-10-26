@@ -45,8 +45,9 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
-UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true), m_ffDataCurve(0), m_ffFitCurve(0),
-  m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
+UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true), m_ffDataCurve(NULL), m_ffFitCurve(NULL),
+  m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange),
+  m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL)
 {
 }
 
@@ -78,6 +79,7 @@ void IndirectDataAnalysis::initLayout()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   setupFuryFit();
+  setupElwin();
 
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -150,6 +152,8 @@ void IndirectDataAnalysis::initLayout()
   m_uiForm.abs_leAnnuli->setValidator(m_valInt);
 
   refreshWSlist();
+
+  elwinTwoRanges(m_uiForm.elwin_ckUseTwoRanges->isChecked());
 }
 
 void IndirectDataAnalysis::initLocalPython()
@@ -256,6 +260,39 @@ void IndirectDataAnalysis::setupTreePropertyBrowser()
   m_ffProp["StretchedExp"] = createStretchedExp();
 
   furyfitTypeSelection(m_uiForm.furyfit_cbFitType->currentIndex());
+}
+
+void IndirectDataAnalysis::setupElwin()
+{
+  // Create Slice Plot Widget for Range Selection
+  m_elwPlot = new QwtPlot(this);
+  m_elwPlot->setAxisFont(QwtPlot::xBottom, this->font());
+  m_elwPlot->setAxisFont(QwtPlot::yLeft, this->font());
+  m_uiForm.elwin_plot->addWidget(m_elwPlot);
+  m_elwPlot->setCanvasBackground(Qt::white);
+  // We always want one range selector... the second one can be controlled from
+  // within the elwinTwoRanges(bool state) function
+  m_elwR1 = new MantidWidgets::RangeSelector(m_elwPlot);
+  m_elwR1->setMinimum(m_uiForm.elwin_leEStart->text().toDouble());
+  m_elwR1->setMaximum(m_uiForm.elwin_leEEnd->text().toDouble());
+  connect(m_elwR1, SIGNAL(minValueChanged(double)), this, SLOT(elwinMinChanged(double)));
+  connect(m_elwR1, SIGNAL(maxValueChanged(double)), this, SLOT(elwinMaxChanged(double)));
+  // create the second range
+  m_elwR2 = new MantidWidgets::RangeSelector(m_elwPlot);
+  m_elwR2->setColour(Qt::darkGreen); // dark green for background
+  m_elwR2->setMinimum(m_uiForm.elwin_leRangeTwoStart->text().toDouble());
+  m_elwR2->setMaximum(m_uiForm.elwin_leRangeTwoEnd->text().toDouble());
+  connect(m_elwR1, SIGNAL(rangeChanged(double, double)), m_elwR2, SLOT(setRange(double, double)));
+  connect(m_elwR2, SIGNAL(minValueChanged(double)), this, SLOT(elwinMinChanged(double)));
+  connect(m_elwR2, SIGNAL(maxValueChanged(double)), this, SLOT(elwinMaxChanged(double)));
+  m_elwR2->setRange(m_elwR1->getRange());
+  // Refresh the plot window
+  m_elwPlot->replot();
+
+  connect(m_uiForm.elwin_leEStart, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
+  connect(m_uiForm.elwin_leEEnd, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
+  connect(m_uiForm.elwin_leRangeTwoStart, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
+  connect(m_uiForm.elwin_leRangeTwoEnd, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
 }
 
 void IndirectDataAnalysis::setupFuryFit()
@@ -820,11 +857,38 @@ void IndirectDataAnalysis::elwinPlotInput()
 {
   if ( m_uiForm.elwin_inputFile->isValid() )
   {
-    QString pyInput = "from IndirectDataAnalysis import plotInput\n"
-      "inputfiles = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
-      "spec = ["+m_uiForm.set_leSpecMin->text() + "," + m_uiForm.set_leSpecMax->text() +"]\n"
-      "plotInput(inputfiles, spectra=spec)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QString filename = m_uiForm.elwin_inputFile->getFirstFilename();
+    QFileInfo fi(filename);
+    QString wsname = fi.baseName();
+
+    QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
+    QString pyOutput = runPythonCode(pyInput);
+
+    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+
+    QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
+    QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+
+    if ( m_elwDataCurve != NULL )
+    {
+      m_elwDataCurve->attach(0);
+      delete m_elwDataCurve;
+      m_elwDataCurve = 0;
+    }
+
+    m_elwDataCurve = new QwtPlotCurve();
+    m_elwDataCurve->setData(dataX, dataY);
+    m_elwDataCurve->attach(m_elwPlot);
+
+    m_elwPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
+    m_elwR1->setRange(dataX.first(), dataX.last());
+
+    // Replot
+    m_elwPlot->replot();
+  }
+  else
+  {
+    showInformationBox("Selected input files are invalid.");
   }
 }
 
@@ -841,6 +905,56 @@ void IndirectDataAnalysis::elwinTwoRanges(bool state)
   m_uiForm.elwin_valRangeTwoEnd->setEnabled(state);
   m_uiForm.elwin_valRangeTwoStart->setText(val);
   m_uiForm.elwin_valRangeTwoEnd->setText(val);
+  m_elwR2->setVisible(state);
+}
+
+void IndirectDataAnalysis::elwinMinChanged(double val)
+{
+  MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
+  if ( from == m_elwR1 )
+  {
+    m_uiForm.elwin_leEStart->setText(QString::number(val));
+  }
+  else if ( from == m_elwR2 )
+  {
+    m_uiForm.elwin_leRangeTwoStart->setText(QString::number(val));
+  }
+}
+
+void IndirectDataAnalysis::elwinMaxChanged(double val)
+{
+  MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
+  if ( from == m_elwR1 )
+  {
+    m_uiForm.elwin_leEEnd->setText(QString::number(val));
+  }
+  else if ( from == m_elwR2 )
+  {
+    m_uiForm.elwin_leRangeTwoEnd->setText(QString::number(val));
+  }
+}
+
+void IndirectDataAnalysis::elwinUpdateRS()
+{
+  QLineEdit* from = qobject_cast<QLineEdit*>(sender());
+  double val = from->text().toDouble();
+
+  if ( from == m_uiForm.elwin_leEStart )
+  {
+    m_elwR1->setMinimum(val);
+  }
+  else if ( from == m_uiForm.elwin_leEEnd )
+  {
+    m_elwR1->setMaximum(val);
+  }
+  else if ( from == m_uiForm.elwin_leRangeTwoStart )
+  {
+    m_elwR2->setMinimum(val);
+  }
+  else if ( from == m_uiForm.elwin_leRangeTwoEnd )
+  {
+    m_elwR2->setMaximum(val);
+  }
 }
 
 void IndirectDataAnalysis::msdRun()

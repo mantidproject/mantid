@@ -50,7 +50,7 @@ namespace MantidQt
       void setupTreePropertyBrowser();
 
       void setupFuryFit();
-      void setupConFit();
+      void setupElwin();
 
       bool validateFury();
       bool validateElwin();
@@ -78,6 +78,9 @@ namespace MantidQt
       void elwinRun();
       void elwinPlotInput();
       void elwinTwoRanges(bool state);
+      void elwinMinChanged(double val);
+      void elwinMaxChanged(double val);
+      void elwinUpdateRS();
 
       // MSD Fit
       void msdRun();
@@ -138,6 +141,12 @@ namespace MantidQt
       std::string m_ffInputWSName;
       QString m_furyfitTies;
       QString m_furyfitConstraints;
+
+      // ELASTICWINDOW MINIPLOT (prefix: 'm_elw')
+      QwtPlot* m_elwPlot;
+      MantidWidgets::RangeSelector* m_elwR1;
+      MantidWidgets::RangeSelector* m_elwR2;
+      QwtPlotCurve* m_elwDataCurve;
 
       /// Change Observer for ConfigService (monitors user directories)
       Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
