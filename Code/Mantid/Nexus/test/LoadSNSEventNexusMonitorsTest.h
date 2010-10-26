@@ -3,8 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidNexus/LoadSNSEventNexusMonitors.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
 
@@ -22,6 +24,12 @@ public:
 
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
+
+    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+    //Valid WS and it is an EventWorkspace
+    TS_ASSERT( WS );
+    //Correct number of monitors found
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 3);
   }
 };
 
