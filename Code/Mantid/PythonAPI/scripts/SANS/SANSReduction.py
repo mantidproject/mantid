@@ -591,6 +591,14 @@ def Gravity(flag):
 
 def TransFit(mode,lambdamin=None,lambdamax=None):
     global TRANS_WAV1, TRANS_WAV2, TRANS_FIT
+    mode = mode.upper()
+
+    if mode in TRANS_FIT_OPTIONS.keys():
+        TRANS_FIT = TRANS_FIT_OPTIONS[mode]
+    else:
+        _issueWarning("Invalid fit mode passed to TransFit, using default LOG method")
+        TRANS_FIT = mode = TRANS_FIT_DEF = 'Log'
+
     if lambdamin is None or lambdamax is None:
         _printMessage("TransFit(\"" + str(mode) + "\")")
         TRANS_WAV1 = TRANS_WAV1_FULL
@@ -600,12 +608,6 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
         TRANS_WAV1 = lambdamin
         TRANS_WAV2 = lambdamax
 
-    mode = mode.upper()
-    if mode in TRANS_FIT_OPTIONS.keys():
-        TRANS_FIT = TRANS_FIT_OPTIONS[mode]
-    else:
-        _issueWarning("Invalid fit mode passed to TransFit, using default LOG method")
-        TRANS_FIT = 'Log'
 
 ###################################
 # Scaling value
@@ -866,6 +868,8 @@ def MaskFile(filename):
             if len(params) == 3:
                 fit_type, lambdamin, lambdamax = params
                 TransFit(fit_type, lambdamin, lambdamax)
+            elif len(params) == 1:
+                TransFit(params[0])
             else:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, setting defaults to LOG and full range')
                 TransFit(TRANS_FIT_DEF)

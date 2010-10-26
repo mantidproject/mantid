@@ -1162,8 +1162,13 @@ class UserFile(ReductionStep):
             
             elif upper_line.startswith("FIT/TRANS/"):
                 params = upper_line[10:].split()
-                if len(params) == 3:
-                    fit_type, lambdamin, lambdamax = params
+                nparams = len(params)
+                if nparams == 3 or nparams == 1:
+                    if nparams == 1:
+                        fit_type = params[0]
+                        lambdamin = lambdamax = None
+                    else:
+                        fit_type, lambdamin, lambdamax = params
                     reducer.transmission_calculator.set_trans_fit(min=lambdamin, 
                         max=lambdamax, fit_method=fit_type, override=False)
                 else:
