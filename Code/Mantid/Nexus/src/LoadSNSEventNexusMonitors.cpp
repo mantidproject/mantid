@@ -80,10 +80,13 @@ void LoadSNSEventNexusMonitors::exec()
       this->nMonitors, 1, 1);
 
   // a temporary place to put the spectra/detector numbers
-  boost::shared_array<int> spectra_numbers(new int[nMonitors]);
-  boost::shared_array<int> detector_numbers(new int[nMonitors]);
+  boost::shared_array<int> spectra_numbers(new int[this->nMonitors]);
+  boost::shared_array<int> detector_numbers(new int[this->nMonitors]);
 
-  for (std::size_t i = 0; i < nMonitors; ++i)
+  //Initialize progress reporting.
+  API::Progress prog(this, 0.0, 1.0, this->nMonitors);
+
+  for (std::size_t i = 0; i < this->nMonitors; ++i)
   {
     // Do not rely on the order in path list
     Poco::Path monPath(monitorNames[i]);
@@ -119,6 +122,7 @@ void LoadSNSEventNexusMonitors::exec()
     this->WS->dataX(spectraIndex) = tof;
     this->WS->dataY(spectraIndex) = data;
     this->WS->dataE(spectraIndex) = error;
+    prog.report(i);
   }
 
   // Need to get the instrument name from the file
