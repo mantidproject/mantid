@@ -25,7 +25,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.1037618271." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.1820293044" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.404038132" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
-							<builder buildPath="${workspace_loc:/Algorithms/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.1455773509" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="4" stopOnErr="true" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
+							<builder buildPath="${workspace_loc:/Algorithms/Debug}" id="cdt.managedbuild.target.gnu.builder.so.debug.1455773509" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="-4" stopOnErr="true" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
 							<tool command="g++" id="cdt.managedbuild.tool.gnu.archiver.base.1458945323" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1236616293" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.555170748" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
@@ -533,7 +533,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/DataObjects/inc}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1738137935" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC -fopenmp" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1270104264" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1270104264" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1010757092" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
