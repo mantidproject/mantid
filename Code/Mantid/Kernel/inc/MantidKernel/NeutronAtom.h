@@ -11,11 +11,12 @@
 #include <string>
 #include "MantidKernel/System.h"
 
+
 namespace Mantid
 {
 namespace Kernel
 {
-namespace NeutronAtom
+namespace PhysicalConstants
 {
 
 /**
@@ -73,9 +74,9 @@ struct NeutronAtom {
   double abs_scatt_xs;
 };
 
-NeutronAtom getAtom(const int z_number, const int a_number = 0);
+extern NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
 
-} //Namespace NeutronAtom
+} //Namespace PhysicalConstants
 } //Namespace Kernel
 } //Namespace Mantid
 

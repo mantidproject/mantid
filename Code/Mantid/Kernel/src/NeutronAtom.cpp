@@ -14,7 +14,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-namespace NeutronAtom
+namespace PhysicalConstants
 {
 
 NeutronAtom::NeutronAtom(const uint8_t z,
@@ -474,7 +474,7 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
   }
 }
 
-NeutronAtom getAtom(const int z_number, const int a_number)
+extern NeutronAtom getNeutronAtom(const int z_number, const int a_number)
 {
   NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN, NAN);
 
@@ -489,6 +489,6 @@ NeutronAtom getAtom(const int z_number, const int a_number)
   return *result;
 }
 
-} // namespace NeutronAtom
+} // namespace PhysicalConstants
 } // namespace Kernel
 } // namespace Mantid
