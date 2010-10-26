@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -34,9 +35,9 @@ namespace Mantid
      */
     void GetDetectorOffsets::init()
     {
-      declareProperty(
-          new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
-          "A 2D workspace with X values of d-spacing" );
+
+      declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
+          new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"Workspace containing the offsets");
       declareProperty("Step",0.001);
       declareProperty("DReference",2.0);
@@ -143,7 +144,7 @@ namespace Mantid
       }
       catch (std::runtime_error)
       {
-        g_log.error("Unable to successfully run Gausssian1D sub-algorithm");
+        g_log.error("Unable to successfully run Gaussian1D sub-algorithm");
         throw;
       }
 
