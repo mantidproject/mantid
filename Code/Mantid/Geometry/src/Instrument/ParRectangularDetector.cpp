@@ -15,13 +15,17 @@ namespace Geometry
 {
 
 ParRectangularDetector::ParRectangularDetector(const RectangularDetector* base, const ParameterMap& map)
-      :ParCompAssembly(base,map), IObjComponent(new BitmapGeometryHandler(this)),  mBase(base)
-{}
+      :ParCompAssembly(base,map), IObjComponent(NULL),  mBase(base)
+{
+  setGeometryHandler(new BitmapGeometryHandler(this));
+}
 
 /** Copy constructor */
 ParRectangularDetector::ParRectangularDetector(const ParRectangularDetector & other)
-      :ParCompAssembly(other.mBase, other.m_map), IObjComponent(new BitmapGeometryHandler(this)), mBase(other.mBase)
-{}
+      :ParCompAssembly(other.mBase, other.m_map), IObjComponent(NULL), mBase(other.mBase)
+{
+  setGeometryHandler(new BitmapGeometryHandler(this));
+}
 
 /*! Clone method
  *  Make a copy of the component assembly

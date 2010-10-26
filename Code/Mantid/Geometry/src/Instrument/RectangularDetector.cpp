@@ -36,8 +36,9 @@ std::ostream& operator<<(std::ostream& os, const RectangularDetector& ass)
 
 /*! Empty constructor
  */
-RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(new BitmapGeometryHandler(this))
+RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL)
 {
+  setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
 /*! Valued constructor
@@ -50,9 +51,10 @@ RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(new B
  *  this is registered as a children of reference.
  */
 RectangularDetector::RectangularDetector(const std::string& n, Component* reference) :
-    CompAssembly(n, reference), IObjComponent(new BitmapGeometryHandler(this))
+  CompAssembly(n, reference), IObjComponent(NULL)
 {
   this->setName(n);
+  setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
 /*! Copy constructor
