@@ -152,7 +152,7 @@ public:
     }
 
 
-//
+
 //    void testExec_SNAP()
 //    {
 //      Mantid::API::FrameworkManager::Instance();
@@ -176,7 +176,7 @@ public:
 //      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 18);
 //
 //      V3D pos = WS->getInstrument()->getDetector(720896)->getPos();
-//      TS_ASSERT_DELTA( pos.X(), -0.0000216, 0.0000001);
+//      TS_ASSERT_DELTA( pos.X(), -21.6, 0.0000001);
 //      std::cout << "A pixel in E1 is at " << pos << "\n";
 //
 //    }

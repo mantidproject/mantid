@@ -295,9 +295,10 @@ namespace Mantid
 
 
     /** Returns the mean value if the property is TimeSeriesProperty<double>.
-    * TODO: Make this more efficient!
-    @param p Property with the data
-    @return The mean value over time.
+     *
+      @param p Property with the data. Will throw if not TimeSeriesProperty<double>.
+      @return The mean value over time.
+      @throw runtime_error if the property is not TimeSeriesProperty<double>
     */
     double timeMean(const Kernel::Property* p)
     {
@@ -307,21 +308,9 @@ namespace Mantid
         throw std::runtime_error("Property of a wrong type.");
       }
 
-      double res = 0.;
-      Kernel::time_duration total(0,0,0,0);
+      TimeSeriesPropertyStatistics stats = getTimeSeriesPropertyStatistics(dp);
 
-      for(int i=0;i<dp->size();i++)
-      {
-        Kernel::TimeInterval t = dp->nthInterval(i);
-        Kernel::time_duration dt = t.length();
-        total += dt;
-        res += dp->nthValue(i) * Kernel::DateAndTime::durationInSeconds(dt);
-      }
-
-      double total_seconds = Kernel::DateAndTime::durationInSeconds(total);
-      if (total_seconds > 0) res /= total_seconds;
-
-      return res;
+      return stats.mean;
     }
 
     /**

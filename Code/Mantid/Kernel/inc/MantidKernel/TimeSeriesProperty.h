@@ -903,7 +903,7 @@ public:
 
 
 //================================================================================================
-DLLExport TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<double> * tsp);
+DLLExport TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(const TimeSeriesProperty<double> * tsp);
 
 
 } // namespace Kernel

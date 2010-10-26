@@ -27,7 +27,7 @@ template DLLExport class TimeSeriesProperty<std::string>;
  * @param tsp TimeSeriesProperty<double> pointer to calculate.
  */
 //template<typename TYPE>
-TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(TimeSeriesProperty<double> * tsp)
+TimeSeriesPropertyStatistics getTimeSeriesPropertyStatistics(const TimeSeriesProperty<double> * tsp)
 {
   if(!tsp)
     throw std::invalid_argument("NULL pointer given to getTimeSeriesPropertyStatistics.");
