@@ -474,7 +474,7 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
   }
 }
 
-extern NeutronAtom getNeutronAtom(const int z_number, const int a_number)
+NeutronAtom getNeutronAtom(const int z_number, const int a_number)
 {
   NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN, NAN);
 

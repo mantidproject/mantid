@@ -74,7 +74,7 @@ struct NeutronAtom {
   double abs_scatt_xs;
 };
 
-extern NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
+DLLExport NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
 
 } //Namespace PhysicalConstants
 } //Namespace Kernel
