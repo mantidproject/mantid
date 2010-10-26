@@ -185,11 +185,14 @@ class MaskWidget(QWidget):
         # Image
         if HAS_MPL:
             if self._background_data is not None:
-                matplotlib.pyplot.imsave(fname="data_image.png", arr=self._background_data, cmap="jet")
-                target = QRect(0,0,100, 100)
-                image = QImage("data_image.png")
-                image.scaled(side, side, Qt.KeepAspectRatio)
-                painter.drawImage(target, image)
+                try:
+                    matplotlib.pyplot.imsave(fname="data_image.png", arr=self._background_data, cmap="jet")
+                    target = QRect(0,0,100, 100)
+                    image = QImage("data_image.png")
+                    image.scaled(side, side, Qt.KeepAspectRatio)
+                    painter.drawImage(target, image)
+                except:
+                    raise RuntimeError, "Could not process 2D image\n  %s" % sys.exc_value
         elif self._background_file is not None:
             try:
                 target = QRect(0,0,100, 100)
