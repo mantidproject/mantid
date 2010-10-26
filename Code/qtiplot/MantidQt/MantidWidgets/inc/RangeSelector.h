@@ -74,6 +74,8 @@ namespace MantidWidgets
     bool m_minChanging;
     bool m_maxChanging;
 
+    bool m_visible;
+
     /** Strictly UI options and settings below this point **/
 
     QPen* m_pen; ///< pen object used to define line style, colour, etc

@@ -7,7 +7,7 @@
 
 using namespace MantidQt::MantidWidgets;
 
-RangeSelector::RangeSelector(QwtPlot* plot, SelectType type) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot), m_type(type)
+RangeSelector::RangeSelector(QwtPlot* plot, SelectType type) : QwtPlotPicker(plot->canvas()), m_canvas(plot->canvas()), m_plot(plot), m_type(type), m_visible(true)
 {
   m_canvas->installEventFilter(this);
 
@@ -72,6 +72,12 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type) : QwtPlotPicker(plo
 
 bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
 {
+  // Do not handle the event if the widget is set to be invisible
+  if ( !m_visible )
+  {
+    return false;
+  }
+
   switch ( evn->type() )
   {
   case QEvent::MouseButtonPress: // User has started moving something (perhaps)
@@ -304,6 +310,7 @@ void RangeSelector::setVisible(bool state)
     m_mrkMax->hide();
   }
   m_plot->replot();
+  m_visible = state;
 }
 
 void RangeSelector::setMin(double val)
