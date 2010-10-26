@@ -8,6 +8,8 @@
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
+#include <algorithm>
+#include <cmath>
 #include <map>
 #include <vector>
 
@@ -88,21 +90,38 @@ void LoadSNSEventNexusMonitors::exec()
     std::string monitorName = monPath.getBaseName();
     std::string::size_type loc = monitorName.rfind('r');
     int monIndex = boost::lexical_cast<int>(monitorName.substr(loc+1));
+    int spectraIndex = monIndex - 1;
 
     spectra_numbers[monIndex] = monIndex;
     detector_numbers[monIndex] = -monIndex;
+    this->WS->getAxis(1)->spectraNo(spectraIndex) = spectraIndex;
 
     // Now, actually retrieve the necessary data
     file.openGroup(monitorNames[i], "NXmonitor");
     file.openData("data");
-
+    MantidVec data;
+    MantidVec error;
+    file.getDataCoerce(data);
+    file.getDataCoerce(error);
     file.closeData();
-    file.openData("time_of_flight");
 
+    // Transform errors via square root
+    std::transform(error.begin(), error.end(), error.begin(),
+        (double(*)(double)) sqrt);
+
+    // Get the TOF axis
+    file.openData("time_of_flight");
+    MantidVec tof;
+    file.getDataCoerce(tof);
     file.closeData();
     file.closeGroup();
+
+    this->WS->dataX(spectraIndex) = tof;
+    this->WS->dataY(spectraIndex) = data;
+    this->WS->dataE(spectraIndex) = error;
   }
 
+  file.closeGroup();
   file.close();
 
   this->WS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");

@@ -30,6 +30,16 @@ public:
     TS_ASSERT( WS );
     //Correct number of monitors found
     TS_ASSERT_EQUALS( WS->getNumberHistograms(), 3);
+    // Check some histogram data
+    // TOF
+    TS_ASSERT_EQUALS( (*WS->refX(0)).size(), 200002);
+    TS_ASSERT_DELTA( (*WS->refX(0))[1], 1.0, 1e-6);
+    // Data
+    TS_ASSERT_EQUALS( WS->dataY(0).size(), 200001);
+    TS_ASSERT_DELTA( WS->dataY(0)[12], 0.0, 1e-6);
+    // Error
+    TS_ASSERT_EQUALS( WS->dataE(0).size(), 200001);
+    TS_ASSERT_DELTA( WS->dataE(0)[12], 0.0, 1e-6);
   }
 };
 
