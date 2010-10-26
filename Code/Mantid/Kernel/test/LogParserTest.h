@@ -238,6 +238,39 @@ public:
 
         delete p1;
     }
+
+
+
+    //----------------------------------------------------------------------------
+    void test_timeMean()
+    {
+      TimeSeriesProperty<double> * log  = new TimeSeriesProperty<double>("MydoubleLog");
+      TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+      TS_ASSERT( log->addValue("2007-11-30T16:17:10",2) );
+      TS_ASSERT( log->addValue("2007-11-30T16:17:20",3) );
+      TS_ASSERT( log->addValue("2007-11-30T16:17:30",4) );
+      TS_ASSERT( log->addValue("2007-11-30T16:17:40",5) );
+      TS_ASSERT( log->addValue("2007-11-30T16:17:50",6) );
+      TS_ASSERT( log->addValue("2007-11-30T16:18:00",7) );
+      TS_ASSERT( log->addValue("2007-11-30T16:18:10",8) );
+      TS_ASSERT( log->addValue("2007-11-30T16:18:20",9) );
+      TS_ASSERT( log->addValue("2007-11-30T16:18:30",10) );
+      TS_ASSERT( log->addValue("2007-11-30T16:18:40",11) );
+      TS_ASSERT_EQUALS( log->realSize(), 11);
+
+      TS_ASSERT_DELTA(timeMean(log), 6.0, 1e-3);
+    }
+
+    void test_timeMean_one_Value()
+    {
+      TimeSeriesProperty<double> * log  = new TimeSeriesProperty<double>("MydoubleLog");
+      TS_ASSERT( log->addValue("2007-11-30T16:17:00",56) );
+      TS_ASSERT_EQUALS( log->realSize(), 1);
+
+      TS_ASSERT_DELTA(timeMean(log), 56.0, 1e-3);
+    }
+
+
 //*/
 private:
 

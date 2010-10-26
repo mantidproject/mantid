@@ -294,7 +294,9 @@ namespace Mantid
     }
 
 
-    /** Returns the mean value if the property is TimeSeriesProperty<double>.
+    /** Returns the time-weigthed mean value if the property is TimeSeriesProperty<double>.
+     *
+     * TODO: Make this more efficient.
      *
       @param p Property with the data. Will throw if not TimeSeriesProperty<double>.
       @return The mean value over time.
@@ -308,10 +310,31 @@ namespace Mantid
         throw std::runtime_error("Property of a wrong type.");
       }
 
-      TimeSeriesPropertyStatistics stats = getTimeSeriesPropertyStatistics(dp);
+      //Special case for only one value - the algorithm
+      if (dp->size() == 1)
+      {
+        return dp->nthValue(1);
+      }
 
-      return stats.mean;
+      double res = 0.;
+      Kernel::time_duration total(0,0,0,0);
+
+      for(int i=0;i<dp->size();i++)
+      {
+        Kernel::TimeInterval t = dp->nthInterval(i);
+        Kernel::time_duration dt = t.length();
+        total += dt;
+        res += dp->nthValue(i) * Kernel::DateAndTime::durationInSeconds(dt);
+      }
+
+      double total_seconds = Kernel::DateAndTime::durationInSeconds(total);
+      if (total_seconds > 0) res /= total_seconds;
+
+      return res;
     }
+
+
+
 
     /**
     * Extract a string until an EOL character is reached. There are 3 scenarios that we need to deal with
