@@ -55,7 +55,7 @@ class Transmission(BaseScriptElement):
         def from_xml(self, dom):
             """
                 Read in data from XML
-                @param xml_str: text to read the data from
+                @param dom: text to read the data from
             """
             element_list = dom.getElementsByTagName("DirectBeam")
             if len(element_list)>0:
@@ -111,7 +111,7 @@ class Transmission(BaseScriptElement):
         def from_xml(self, dom):
             """
                 Read in data from XML
-                @param xml_str: text to read the data from
+                @param dom: text to read the data from
             """       
             element_list = dom.getElementsByTagName("BeamSpreader")
             if len(element_list)>0:

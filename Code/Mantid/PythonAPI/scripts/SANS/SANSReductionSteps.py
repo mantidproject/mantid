@@ -570,7 +570,7 @@ class SensitivityCorrection(ReductionStep):
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
         MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
     
-        return "Sensitivity correction applied [%s]" % (flood_ws)
+        return "Sensitivity correction applied [%s]" % (self._efficiency_ws)
 
 class Mask(ReductionStep):
     """
@@ -750,7 +750,7 @@ class SubtractBackground(ReductionStep):
             for item in reducer._2D_steps():
                 output = item.execute(reducer, self._background_ws)
                 if output is not None:
-                    log_text = log_text + '  ' + str(output) 
+                    log_text = log_text + '  ' + str(output) +'\n'
         
             # The transmission correction is set separately
             if self._transmission is not None:
