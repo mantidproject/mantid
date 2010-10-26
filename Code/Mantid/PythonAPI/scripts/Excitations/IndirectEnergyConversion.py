@@ -119,7 +119,10 @@ def normToMon(inWS_n = 'Time', outWS_n = 'Energy', monWS_n = 'MonWS'):
     return outWS_n
 
 def conToEnergy(efixed, inWS_n = 'Energy', outWS_n = 'ConvertedToEnergy'):
-    ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
+    if adjustTOF(inWS_n):
+        ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect')
+    else:
+        ConvertUnits(inWS_n, outWS_n, 'DeltaE', 'Indirect', efixed)
     return outWS_n
 
 def rebinData(rebinParam, inWS_n = 'ConvertedToEnergy', outWS_n = 'Energy'):
@@ -163,6 +166,8 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
         sys.exit('Monitor area and thickness (unt and zz) are not defined \
                 in the Instrument Parameter File.')
     for ws in ws_name:
+        if adjustTOF(ws):
+            TofCorrection(ws, ws)
         runNo = mtd[ws].getRun().getLogData("run_number").value()
         runNos.append(runNo)
         name = ws[:3].lower() + runNo + '_' + analyser + reflection
@@ -431,3 +436,20 @@ def getSpectraRanges(instrument):
         result += message + '\n'
     mtd.deleteWorkspace('ins')
     return result
+
+def adjustTOF(ws='', inst=''):
+    if ( ws != '' ):
+        ins = mtd[ws].getInstrument()
+    elif ( inst != ''):
+        idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+        idf = idf_dir + inst + '_Definition.xml'
+        LoadEmptyInstrument(idf, 'ins')
+        ins = mtd['ins'].getInstrument()
+    try:
+        val = ins.getNumberParameter('adjustTOF')[0]
+    except IndexError:
+        val = 0
+    if ( val == 1 ):
+        return True
+    else:
+        return False
