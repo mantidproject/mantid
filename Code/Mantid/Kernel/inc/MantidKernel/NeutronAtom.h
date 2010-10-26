@@ -15,6 +15,8 @@ namespace Mantid
 {
 namespace Kernel
 {
+namespace NeutronAtom
+{
 
 /**
  * Structure to store neutronic scatting information for the various elements.
@@ -71,6 +73,9 @@ struct NeutronAtom {
   double abs_scatt_xs;
 };
 
+NeutronAtom getAtom(const int z_number, const int a_number = 0);
+
+} //Namespace NeutronAtom
 } //Namespace Kernel
 } //Namespace Mantid
 

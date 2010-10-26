@@ -5,13 +5,16 @@
  *, , Author: pf9
  */
 #include "MantidKernel/NeutronAtom.h"
+#include <algorithm>
 #include <limits>
-
-using std::string;
+#include <sstream>
+#include <stdexcept>
 
 namespace Mantid
 {
 namespace Kernel
+{
+namespace NeutronAtom
 {
 
 NeutronAtom::NeutronAtom(const uint8_t z,
@@ -420,7 +423,7 @@ static const NeutronAtom Cm246(96, 246, 9.3, 0., 10.9, 0., 10.9, 1.36);
 static const NeutronAtom Cm248(96, 248, 7.7, 0., 7.5, 0., 7.5, 3);
 
 /** All of the atoms in a single array so it can be searched. */
-static const NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, B10,
+static NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, B10,
 				    B11, C, C12, C13, N, N14, N15, O, O16, O17, O18, F, Ne,
 				    Ne20, Ne21, Ne22, Na, Mg, Mg24, Mg25, Mg26, Al, Si, 
 				    Si28, Si29, Si30, P, S, S32, S33, S34, S36, Cl, Cl35, 
@@ -461,5 +464,31 @@ static const NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, B
 /** The total number of atoms in the array. */
 static const size_t NUM_ATOMS = 371;
 
+bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
+{
+  if (left.z_number == right.z_number) {
+    return (left.a_number < right.a_number);
+  }
+  else {
+    return (left.z_number < right.z_number);
+  }
+}
+
+NeutronAtom getAtom(const int z_number, const int a_number)
+{
+  NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN, NAN);
+
+  NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
+  if (result == &(ATOMS[NUM_ATOMS]))
+  {
+    std::stringstream msg;
+    msg << "Failed to find an atom with z=" << z_number << " and a=" << a_number;
+    throw std::runtime_error(msg.str());
+  }
+
+  return *result;
+}
+
+} // namespace NeutronAtom
 } // namespace Kernel
 } // namespace Mantid
