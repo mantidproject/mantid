@@ -92,9 +92,9 @@ void LoadSNSEventNexusMonitors::exec()
     int monIndex = boost::lexical_cast<int>(monitorName.substr(loc+1));
     int spectraIndex = monIndex - 1;
 
-    spectra_numbers[monIndex] = monIndex;
-    detector_numbers[monIndex] = -monIndex;
-    this->WS->getAxis(1)->spectraNo(spectraIndex) = spectraIndex;
+    spectra_numbers[spectraIndex] = monIndex;
+    detector_numbers[spectraIndex] = -monIndex;
+    this->WS->getAxis(1)->spectraNo(spectraIndex) = monIndex;
 
     // Now, actually retrieve the necessary data
     file.openGroup(monitorNames[i], "NXmonitor");
@@ -121,14 +121,32 @@ void LoadSNSEventNexusMonitors::exec()
     this->WS->dataE(spectraIndex) = error;
   }
 
-  file.closeGroup();
+  // Need to get the instrument name from the file
+  // FIXME: System uses short name for now
+  std::string instrumentName;
+  file.openGroup("instrument", "NXinstrument");
+  file.openPath("name");
+  std::vector< ::NeXus::AttrInfo > attrs = file.getAttrInfos();
+  std::vector< ::NeXus::AttrInfo >::const_iterator ait = attrs.begin();
+
+  while(ait != attrs.end()) {
+    if(ait->name == std::string("short_name")) {
+      instrumentName = file.getStrAttr(*ait);
+      break;
+    }
+    ait++;
+  }
+
+  file.closeGroup(); // Close the NXinstrument
+
+  file.closeGroup(); // Close the NXentry
   file.close();
 
   this->WS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   this->WS->setYUnit("Counts");
 
   // Load the instrument
-  this->runLoadInstrument(this->filename, this->WS);
+  this->runLoadInstrument(instrumentName, this->WS);
 
   // Populate the Spectra Map
   this->WS->mutableSpectraMap().populate(spectra_numbers.get(),
