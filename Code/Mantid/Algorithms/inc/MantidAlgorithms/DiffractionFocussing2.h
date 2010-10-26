@@ -97,10 +97,10 @@ private:
 
   // For events
   void execEvent();
-  void initializeGroups();
-  
+
   /// Read the calibration file and construct the udet2group map
   void readGroupingFile(const std::string& groupingFileName);
+
   /// Loop over the workspace and determine the rebin parameters (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
   void determineRebinParameters();
@@ -108,8 +108,11 @@ private:
   
   /// Shared pointer to the input workspace
   API::MatrixWorkspace_const_sptr inputW;
+  API::MatrixWorkspace_sptr matrixInputW;
+
   /// Shared pointer to the event workspace
   DataObjects::EventWorkspace_const_sptr eventW;
+
 
   // This map does not need to be ordered, just a lookup for udet
 #ifndef HAS_UNORDERED_MAP_H

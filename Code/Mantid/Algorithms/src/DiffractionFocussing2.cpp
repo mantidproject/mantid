@@ -75,11 +75,15 @@ void DiffractionFocussing2::exec()
   readGroupingFile(groupingFileName);
 
   // Get the input workspace
-  MatrixWorkspace_sptr matrixW = getProperty("InputWorkspace");
-  nPoints = matrixW->blocksize();
-  nHist = matrixW->getNumberHistograms();
+  matrixInputW = getProperty("InputWorkspace");
+  nPoints = matrixInputW->blocksize();
+  nHist = matrixInputW->getNumberHistograms();
 
-  eventW = boost::dynamic_pointer_cast<const EventWorkspace>( matrixW );
+  //This finds the rebin parameters (used in both versions)
+  // It also initializes the groupAtWorkspaceIndex[] array.
+  determineRebinParameters();
+
+  eventW = boost::dynamic_pointer_cast<const EventWorkspace>( matrixInputW );
   if (eventW != NULL)
   {
     //Input workspace is an event workspace. Use the other exec method
@@ -88,14 +92,13 @@ void DiffractionFocussing2::exec()
   }
 
   // Get the input workspace
-  inputW = boost::dynamic_pointer_cast<const Workspace2D>( matrixW );
+  inputW = boost::dynamic_pointer_cast<const Workspace2D>( matrixInputW );
   if (inputW == NULL)
   {
     throw std::runtime_error("Input workspace is not of type EventWorkspace nor Workspace2D.");
   }
-  //No problem? Then it is a normal Workspace2D
-  determineRebinParameters();
 
+  //No problem? Then it is a normal Workspace2D
   API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(inputW,nGroups,nPoints+1,nPoints);
 
   // The spectaDetectorMap will have been copied from the input, but we don't want it
@@ -264,9 +267,6 @@ void DiffractionFocussing2::execEvent()
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(inputW, out, true);
 
-  // Make sure the group list is initialized
-  this->initializeGroups();
-
   //BUT! We want to use all groups, even if no pixels ever refer to them.
   nGroups = maxgroup_in_file+1;
   g_log.information() << nGroups << " groups found in .cal file (counting group 0).\n";
@@ -275,7 +275,7 @@ void DiffractionFocussing2::execEvent()
   std::vector<bool> flags(nGroups,true);
 
   //Vector where the index is the group #; and the value is the workspace index to take in the INPUT workspace to copy the X bins to the new group.
-  std::vector< MantidVec > original_X_to_use(nGroups+1);
+  //std::vector< MantidVec > original_X_to_use(nGroups+1);
 
   API::Progress progress(this,0.0,1.0,nHist+nGroups);
   for (int i=0;i<nHist;i++)
@@ -284,7 +284,7 @@ void DiffractionFocussing2::execEvent()
     //i is the workspace index (of the input)
 
     //Check whether this spectra is in a valid group
-    const int group=groupAtWorkspaceIndex[i];
+    const int group = groupAtWorkspaceIndex[i];
     if (group < 1) // Not in a group
       continue;
 
@@ -292,7 +292,7 @@ void DiffractionFocussing2::execEvent()
     if (flags[group])
     {
       //Copy the X axis for later
-      original_X_to_use[group].assign( eventW->refX(i)->begin(), eventW->refX(i)->end())  ;
+      //original_X_to_use[group].assign( eventW->refX(i)->begin(), eventW->refX(i)->end())  ;
       //Flag not to copy it again.
       flags[group]=false;
     }
@@ -312,7 +312,7 @@ void DiffractionFocussing2::execEvent()
       EventList& emptyEventList = out->getOrAddEventList(group-1);
       emptyEventList.clear();
       //If the X axis hasn't been set, just use the one from workspace index 0.
-      original_X_to_use[group].assign( eventW->refX(0)->begin(), eventW->refX(0)->end())  ;
+      //original_X_to_use[group].assign( eventW->refX(0)->begin(), eventW->refX(0)->end())  ;
     }
   }
 
@@ -333,40 +333,23 @@ void DiffractionFocussing2::execEvent()
     }
 
     //Now you set the X axis to the X you saved before.
-    if (original_X_to_use[g].size() > 0)
+    if (group2xvector.size() > 0)
     {
-      out->setX(workspaceIndex, original_X_to_use[g] );
-      g_log.information() << "X axis for workspace index " << workspaceIndex << " set, with " << original_X_to_use[g].size() << " bins.\n";
+      group2vectormap::iterator git = group2xvector.find(g);
+      if (git != group2xvector.end())
+        out->setX(workspaceIndex, *(git->second) );
+      else
+        //Just use the 1st X vector it found, instead of nothin.
+        out->setX(workspaceIndex, *(group2xvector.begin()->second) );
     }
     else
-      g_log.warning() << "Warning! No X histogram bins were found for group # " << g << ". Histogram will be empty.\n";
+      g_log.warning() << "Warning! No X histogram bins were found for any groups. Histogram will be empty.\n";
   }
   out->clearMRU();
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out));
   return;
 }
 
-
-//=============================================================================
-/** Initialize the groups for an event workspace
- *
- */
-void DiffractionFocussing2::initializeGroups()
-{
-  groupAtWorkspaceIndex.resize(nHist);
-  const API::Axis* const spectra_Axis = inputW->getAxis(1);
-  int maxGroup = 0;
-
-  for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
-  {
-    const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
-    groupAtWorkspaceIndex[i] = group;
-    if (group > maxGroup)
-      maxGroup = group;
-  }
-  //Save the # of groups; note: if any group is never referred to, it will not show up in the output.
-  nGroups = maxGroup+1;
-}
 
 //=============================================================================
 /** Verify that all the contributing detectors to a spectrum belongs to the same group
@@ -376,7 +359,7 @@ void DiffractionFocussing2::initializeGroups()
 int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
 {
   // Get the spectra to detector map
-  const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
+  const API::SpectraDetectorMap& spectramap = matrixInputW->spectraMap();
   const std::vector<int> dets = spectramap.getDetectors(spectrum_number);
   if (dets.empty()) // Not in group
   {
@@ -441,7 +424,17 @@ void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName
 }
 
 //=============================================================================
-/// Determine the rebinning parameters, i.e Xmin, Xmax and logarithmic step for each group
+/** Determine the rebinning parameters, i.e Xmin, Xmax and logarithmic step for each group
+ * Looks for the widest range of X bins (lowest min and highest max) of
+ *  all the spectra in a group and sets the output group X bin boundaries to use
+ *  those limits.
+ *  The X histogram is set to log binning with the same # of points between max and min
+ *  as the input spectra.
+ *
+ * The X vectors are saved in group2xvector.
+ * It also initializes the groupAtWorkspaceIndex[] array.
+ *
+ */
 void DiffractionFocussing2::determineRebinParameters()
 {
   std::ostringstream mess;
@@ -453,7 +446,7 @@ void DiffractionFocussing2::determineRebinParameters()
   group2minmaxmap::iterator gpit;
 
   groupAtWorkspaceIndex.resize(nHist);
-  const API::Axis* const spectra_Axis = inputW->getAxis(1);
+  const API::Axis* const spectra_Axis = matrixInputW->getAxis(1);
 
   for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
@@ -469,7 +462,7 @@ void DiffractionFocussing2::determineRebinParameters()
     }
     const double min = ((*gpit).second).first;
     const double max = ((*gpit).second).second;
-    const MantidVec& X = inputW->readX(i);
+    const MantidVec& X = matrixInputW->readX(i);
     if (X.front() < (min)) //New Xmin found
       ((*gpit).second).first = X.front();
     if (X.back() > (max)) //New Xmax found
@@ -486,17 +479,25 @@ void DiffractionFocussing2::determineRebinParameters()
   {
     Xmin = ((*gpit).second).first;
     Xmax = ((*gpit).second).second;
+
+    //Make sure that Xmin is not 0 - since it is not possible to do log binning from 0.0.
+    if (Xmin <= 0) Xmin = Xmax / nPoints;
+    if (Xmin <= 0) Xmin = 1.0;
+
     if (Xmax < Xmin) // Should never happen
     {
       mess << "Fail to determine X boundaries for group:" << (*gpit).first << "\n";
       mess << "The boundaries are (Xmin,Xmax):" << Xmin << " " << Xmax;
       throw std::runtime_error(mess.str());
     }
+    //This log step size will give the right # of points
     step = (log(Xmax) - log(Xmin)) / nPoints;
     mess << "Found Group:" << ((*gpit).first) << "(Xmin,Xmax,log step):" << ((*gpit).second).first
         << "," << ((*gpit).second).second << "," << step;
     g_log.information(mess.str());
     mess.str("");
+
+    //Build up the X vector.
     boost::shared_ptr<MantidVec> xnew = boost::shared_ptr<MantidVec>(new MantidVec(xPoints)); //New X vector
     (*xnew)[0] = Xmin;
     for (int j = 1; j < xPoints; j++)

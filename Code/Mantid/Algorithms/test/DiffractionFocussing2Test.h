@@ -108,9 +108,10 @@ public:
     {
       Kernel::cow_ptr<MantidVec> axis;
       MantidVec& xRef = axis.access();
-      xRef.resize(50);
-      for (int i = 0; i < 50; ++i)
-        xRef[i] = pix + i*1.0;
+      xRef.resize(5);
+      for (int i = 0; i < 5; ++i)
+        xRef[i] = 1 + pix + i*1.0;
+      xRef[4] = 1e6;
 
       //Set an X-axis
       inputW->setX(pix, axis);
@@ -174,9 +175,11 @@ public:
       //Look up how many events in the output, summed up spectrum (workspace index = group-1)
       TS_ASSERT_EQUALS(numevents, output->getEventList(workspaceindex_in_output).getNumberEvents());
 
-      //The first X bin of each group corresponds to the workspace index in the INPUT workspace of the first pixel in the group.
-      TS_ASSERT( (*output->refX(workspaceindex_in_output)).size() > 0);
-      TS_ASSERT_EQUALS((*output->refX(workspaceindex_in_output))[0], (*mymap)[ mylist[0] ]);
+      //The first X bin of each group corresponds to the lowest workspace index - since the limits in X are used.
+      const MantidVec & X = (*output->refX(workspaceindex_in_output));
+      TS_ASSERT_EQUALS( X.size(), 5);
+      TS_ASSERT_EQUALS( X[0], (*mymap)[ mylist[0] ] + 1);
+
       //Save the # of events for later
       expected_total_events[workspaceindex_in_output] = numevents;
 
