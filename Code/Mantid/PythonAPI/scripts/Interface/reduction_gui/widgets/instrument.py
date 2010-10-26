@@ -285,5 +285,9 @@ class SANSInstrumentWidget(BaseWidget):
                         self._summary.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
                     if len(dataproxy.errors)>0:
                         print dataproxy.errors
+                if dataproxy.data is not None:
+                    self._mask_widget.set_background_data(dataproxy.data)
+                    self._summary.repaint()  
+
             
         

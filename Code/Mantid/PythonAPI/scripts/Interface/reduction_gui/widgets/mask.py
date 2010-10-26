@@ -15,6 +15,12 @@ from __future__ import division
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import sys
+try:
+    import numpy
+    import matplotlib.pyplot
+    HAS_MPL = True
+except:
+    HAS_MPL = False
 
 
 class MaskWidget(QWidget):
@@ -31,6 +37,7 @@ class MaskWidget(QWidget):
 
         self.n_pixels = maxFlow
         self._background_file = None
+        self._background_data = None
 
         # Top mask
         self.topSpinBox = QSpinBox(self)
@@ -144,6 +151,13 @@ class MaskWidget(QWidget):
             @param filename: file path for background image
         """
         self._background_file = filename
+        
+    def set_background_data(self, array):
+        """
+            Sets the background data as an array
+            @param array: background data array
+        """
+        self._background_data = array
 
     def paintEvent(self, event=None):
         LogicalSize = 100.0
@@ -169,7 +183,14 @@ class MaskWidget(QWidget):
                     QPolygon([ax, ay, bx, by, cx, cy, dx, dy]))
 
         # Image
-        if self._background_file is not None:
+        if HAS_MPL:
+            if self._background_data is not None:
+                matplotlib.pyplot.imsave(fname="data_image.png", arr=self._background_data, cmap="jet")
+                target = QRect(0,0,100, 100)
+                image = QImage("data_image.png")
+                image.scaled(side, side, Qt.KeepAspectRatio)
+                painter.drawImage(target, image)
+        elif self._background_file is not None:
             try:
                 target = QRect(0,0,100, 100)
                 # left, top, right, bottom
@@ -178,7 +199,7 @@ class MaskWidget(QWidget):
                 image = QImage(self._background_file)
                 image.scaled(side, side, Qt.KeepAspectRatio)
                 painter.drawImage(target, image, source)
-            except:
+            except:            
                 raise RuntimeError, "Could not process image file %s\n  %s" % (str(self._background_file), sys.exc_value)
     
         # Mask
