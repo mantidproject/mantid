@@ -75,7 +75,7 @@ void LoadSNSEventNexusMonitors::exec()
 
   // Create the output workspace
   this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
-      nMonitors, 1, 1);
+      this->nMonitors, 1, 1);
 
   // a temporary place to put the spectra/detector numbers
   boost::shared_array<int> spectra_numbers(new int[nMonitors]);
@@ -83,6 +83,24 @@ void LoadSNSEventNexusMonitors::exec()
 
   for (std::size_t i = 0; i < nMonitors; ++i)
   {
+    // Do not rely on the order in path list
+    Poco::Path monPath(monitorNames[i]);
+    std::string monitorName = monPath.getBaseName();
+    std::string::size_type loc = monitorName.rfind('r');
+    int monIndex = boost::lexical_cast<int>(monitorName.substr(loc+1));
+
+    spectra_numbers[monIndex] = monIndex;
+    detector_numbers[monIndex] = -monIndex;
+
+    // Now, actually retrieve the necessary data
+    file.openGroup(monitorNames[i], "NXmonitor");
+    file.openData("data");
+
+    file.closeData();
+    file.openData("time_of_flight");
+
+    file.closeData();
+    file.closeGroup();
   }
 
   file.close();
