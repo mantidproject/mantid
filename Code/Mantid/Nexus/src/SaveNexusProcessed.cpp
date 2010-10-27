@@ -216,7 +216,11 @@ namespace NeXus
     }
     nexusFile->writeNexusProcessedData(m_inputWorkspace,uniformSpectra,spec);
     nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
-    nexusFile->writeNexusProcessedSpectraMap(m_inputWorkspace, spec);
+    // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
+    if ( m_inputWorkspace->getAxis(1)->isSpectra() )
+    {
+      nexusFile->writeNexusProcessedSpectraMap(m_inputWorkspace, spec);
+    }
     nexusFile->closeNexusFile();
     progress(1.0);
 
