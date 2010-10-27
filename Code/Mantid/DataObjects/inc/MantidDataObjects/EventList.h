@@ -20,13 +20,150 @@ namespace DataObjects
 {
 
 
+
+
+//==========================================================================================
+/** Info about a single neutron detection event:
+ *
+ *  - the time of flight of the neutron (can be converted to other units)
+ *  - the absolute time of the pulse at which it was produced
+ */
+class DLLExport TofEvent {
+
+  /// EventList has the right to mess with TofEvent.
+  friend class EventList;
+  friend class WeightedEvent;
+  friend class tofGreaterOrEqual;
+  friend class tofGreater;
+
+protected:
+  /** The units of the time of flight index in nanoseconds. This is relative to the
+   * start of the pulse (stored in pulse_time.
+   * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1 */
+  double m_tof;
+
+  /**
+   * The absolute time of the start of the pulse that generated this event.
+   * This is saved as the number of ticks (1 nanosecond if boost is compiled
+   * for nanoseconds) since a specified epoch: we use the GPS epoch of Jan 1, 1990.
+   *
+   * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be enough.
+   */
+  Mantid::Kernel::PulseTimeType m_pulsetime;
+
+public:
+  /// Constructor, specifying the time of flight and the frame id
+  TofEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime);
+
+  /// Constructor, copy from another TofEvent object
+  TofEvent(const TofEvent&);
+
+  /// Empty constructor
+  TofEvent();
+
+  /// Destructor
+  ~TofEvent();
+
+  /// Copy from another TofEvent object
+  TofEvent& operator=(const TofEvent&rhs);
+
+  bool operator==(const TofEvent & rhs);
+
+
+  /// Return the time of flight, as a double, in nanoseconds.
+  double tof() const;
+
+  /// Return the frame id
+  Mantid::Kernel::PulseTimeType pulseTime() const;
+
+  /// Output a string representation of the event to a stream
+  friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
+};
+
+
+
+
+//==========================================================================================
+/** Info about a single neutron detection event, including a weight and error value:
+ *
+ *  - the time of flight of the neutron (can be converted to other units)
+ *  - the absolute time of the pulse at which it was produced
+ *  - weight of the neutron (float, can be
+ */
+class DLLExport WeightedEvent : public TofEvent {
+
+  /// EventList has the right to mess with WeightedEvent.
+  friend class EventList;
+  friend class tofGreaterOrEqual;
+  friend class tofGreater;
+
+private:
+
+  /** The weight of this neutron. */
+  float m_weight;
+
+  /** The SQUARE of the error that this neutron contributes. */
+  float m_errorSquared;
+
+public:
+
+  /// Constructor, full
+  WeightedEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float error);
+
+  WeightedEvent(const TofEvent&, float weight, float error);
+
+  WeightedEvent(const WeightedEvent&);
+
+  WeightedEvent(const TofEvent&);
+
+  WeightedEvent();
+
+  ~WeightedEvent();
+
+  /// Copy from another WeightedEvent object
+  WeightedEvent& operator=(const WeightedEvent & rhs);
+
+  bool operator==(const WeightedEvent & other);
+
+  /// Return the weight of the neutron, as a double (it is saved as a float).
+  double weight() const;
+
+  /// Return the error of the neutron, as a double (it is saved as a float).
+  double error() const;
+
+  /// Return the squared error of the neutron, as a double
+  double errorSquared() const;
+
+  /// Output a string representation of the event to a stream
+  friend std::ostream& operator<<(std::ostream &os, const WeightedEvent &event);
+
+
+};
+
+
+
+
+
+
+
+
+/// How the event list is sorted.
+enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
+
+//==========================================================================================
 /** @class Mantid::DataObjects::EventList
 
-    A class for holding an event list for a single detector
-    
-    @author Janik, SNS ORNL
+    A class for holding :
+      - a list of neutron detection events (TofEvent or WeightedEvent).
+      - a list of associated detector ID's.
+
+    This class can switch from holding regular TofEvent's (implied weight of 1.0)
+    or WeightedEvent (where each neutron can have a non-1 weight).
+    This is done transparently.
+
+    @author Janik Zikovsky, SNS ORNL
     @date 4/02/2010
-    
+
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -44,71 +181,9 @@ namespace DataObjects
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-//==========================================================================================
-/** Info about a single event: the time of flight of the neutron, and the frame id
- * in which it was detected.
- */
-class DLLExport TofEvent {
-
-  /// EventList has the right to mess with TofEvent.
-  friend class EventList;
-  friend class tofGreaterOrEqual;
-  friend class tofGreater;
-
-private:
-  /** The units of the time of flight index in nanoseconds. This is relative to the
-   * start of the pulse (stored in pulse_time.
-   * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1 */
-  double time_of_flight;
-
-  /**
-   * The absolute time of the start of the pulse that generated this event.
-   * This is saved as the number of ticks (1 nanosecond if boost is compiled
-   * for nanoseconds) since a specified epoch: we use the GPS epoch of Jan 1, 1990.
-   *
-   * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be enough.
-   */
-  Mantid::Kernel::PulseTimeType pulse_time;
-
- public:
-  /// Constructor, specifying the time of flight and the frame id
-  TofEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime);
-
-  /// Constructor, copy from another TofEvent object
-  TofEvent(const TofEvent&);
-
-  /// Empty constructor
-  TofEvent();
-
-  /// Destructor
-  ~TofEvent();
-
-  /// Copy from another TofEvent object
-  TofEvent& operator=(const TofEvent&rhs);
-
-  /// Return the time of flight, as a double, in nanoseconds.
-  double tof() const;
-
-  /// Return the frame id
-  Mantid::Kernel::PulseTimeType pulseTime() const;
-
-  /// Output a string representation of the event to a stream
-  friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
-
-
-};
-
-
-/// How the event list is sorted.
-enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
-
-//==========================================================================================
-/** A list of TofEvent objects, corresponding to all the events that were measured on a pixel.
- *
- */
 class DLLExport EventList
 {
 public:
@@ -127,12 +202,26 @@ public:
 
   EventList& operator+=(const std::vector<TofEvent>& more_events);
 
+  EventList& operator+=(const WeightedEvent& event);
+
+  EventList& operator+=(const std::vector<WeightedEvent>& more_events);
+
   EventList& operator+=(const EventList& more_events);
 
   void addEventQuickly(const TofEvent &event);
 
+  void addEventQuickly(const WeightedEvent &event);
+
+
+  bool hasWeights() const;
+
+  void switchToWeightedEvents();
+
   std::vector<TofEvent>& getEvents();
   const std::vector<TofEvent>& getEvents() const;
+
+  std::vector<WeightedEvent>& getWeightedEvents();
+  const std::vector<WeightedEvent>& getWeightedEvents() const;
 
   void addDetectorID(const int detID);
 
@@ -168,13 +257,13 @@ public:
 
   virtual std::size_t getNumberEvents() const;
 
-  void allocateMoreEvents(int numEvents);
-
   virtual size_t histogram_size() const;
 
   void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;
 
   void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
+
+  void generateHistogramsForWeights(const MantidVec& X, MantidVec& Y, MantidVec& E) const;
 
   void convertTof(const double factor, const double offset=0.);
 
@@ -194,9 +283,21 @@ public:
 
   void splitByTime(Kernel::TimeSplitterType splitter, std::vector< EventList * > outputs) const;
 
+  void multiply(const double value);
+  void multiply(const double value, const double error);
+  EventList& operator*=(const double value);
+
+  void multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
+
 private:
-  ///List of events.
+  ///List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;
+
+  ///List of WeightedEvent's
+  mutable std::vector<WeightedEvent> weightedEvents;
+
+  ///Flag indicating whether the events have the weights (use weightedEvents) or not (use events)
+  bool has_weights;
 
   /// Last sorting order
   mutable EventSortType order;
@@ -206,6 +307,13 @@ private:
 
   /// Set of the detector IDs associated with this EventList
   std::set<int> detectorIDs;
+
+  void convertTof_onList(const double factor, const double offset);
+
+  std::vector<WeightedEvent>::iterator findFirstWeightedEvent(const double seek_tof) const;
+
+  std::vector<TofEvent>::iterator findFirstEvent(const double seek_tof) const;
+
 };
 
 } // DataObjects

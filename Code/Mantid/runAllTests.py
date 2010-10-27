@@ -12,12 +12,12 @@ def runtest(folder):
     if folder == "Algorithms1":
         real_folder = "Algorithms"
         #Run tests for the tests starting with these letters
-        files = ['%s*.h' % chr(x) for x in range(65, 65+11)]
+        files = ['%s*.h' % chr(x) for x in range(65, 65+10)]
         files = '1 ' + ' '.join(files)
     elif folder == "Algorithms2":
         real_folder = "Algorithms"
         #Run tests for the tests starting with these letters
-        files = ['%s*.h' % chr(x) for x in range(65+11, 65+27)]
+        files = ['%s*.h' % chr(x) for x in range(65+10, 65+27)]
         files = '2 ' + ' '.join(files)
                          
     os.system('rm %s.out' % folder)

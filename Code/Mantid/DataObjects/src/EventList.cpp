@@ -15,15 +15,15 @@ namespace DataObjects
 using Kernel::Exception::NotImplementedError;
 using Kernel::PulseTimeType;
 
-  //==========================================================================
-  /// --------------------- TofEvent stuff ----------------------------------
-  //==========================================================================
+//==========================================================================
+/// --------------------- TofEvent stuff ----------------------------------
+//==========================================================================
   /** Constructor, specifying the time of flight and the frame id
-   * @param time_of_flight time of flight, in nanoseconds
+   * @param m_tof time of flight, in nanoseconds
    * @param frameid frame id, integer
    */
-  TofEvent::TofEvent(const double time_of_flight, const PulseTimeType pulse_time) :
-              time_of_flight(time_of_flight), pulse_time(pulse_time)
+  TofEvent::TofEvent(const double m_tof, const PulseTimeType m_pulsetime) :
+              m_tof(m_tof), m_pulsetime(m_pulsetime)
   {
   }
 
@@ -31,13 +31,13 @@ using Kernel::PulseTimeType;
    * @param rhs Other TofEvent to copy.
    */
   TofEvent::TofEvent(const TofEvent& rhs) :
-      time_of_flight(rhs.time_of_flight), pulse_time(rhs.pulse_time)
+      m_tof(rhs.m_tof), m_pulsetime(rhs.m_pulsetime)
   {
   }
 
   /// Empty constructor
   TofEvent::TofEvent() :
-            time_of_flight(0), pulse_time(0)
+            m_tof(0), m_pulsetime(0)
   {
   }
 
@@ -51,32 +51,149 @@ using Kernel::PulseTimeType;
    */
   TofEvent& TofEvent::operator=(const TofEvent& rhs)
   {
-	  this->time_of_flight = rhs.time_of_flight;
-	  this->pulse_time = rhs.pulse_time;
-	  return *this;
+    this->m_tof = rhs.m_tof;
+    this->m_pulsetime = rhs.m_pulsetime;
+    return *this;
   }
+
+  /** Comparison operator. */
+  bool TofEvent::operator==(const TofEvent & rhs)
+  {
+    return  (this->m_tof == rhs.m_tof) &&
+            (this->m_pulsetime == rhs.m_pulsetime);
+  }
+
 
   /// Return the time of flight, as a double, in nanoseconds.
   double TofEvent::tof() const
   {
-	  return this->time_of_flight;
+	  return this->m_tof;
   }
 
   /// Return the frame id
   PulseTimeType TofEvent::pulseTime() const
   {
-	  return this->pulse_time;
+	  return this->m_pulsetime;
   }
 
   /** Output a string representation of the event to a stream
    * @param os Stream
-   * @param event Event to output to the stream
+   * @param event TofEvent to output to the stream
    */
   ostream& operator<<(ostream &os, const TofEvent &event)
   {
-    os << event.time_of_flight << "," << event.pulse_time;
+    os << event.m_tof << "," << event.m_pulsetime;
     return os;
   }
+
+
+
+
+
+  //==========================================================================
+  /// --------------------- WeightedEvent stuff ----------------------------------
+  //==========================================================================
+
+  /** Constructor, full:
+   * @param m_tof: tof in microseconds.
+   * @param pulsetime: absolute pulse time
+   * @param weight: weight of this neutron event.
+   * @param error: the actual error on the event (not squared!)
+   */
+  WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float error)
+  : TofEvent(tof, pulsetime), m_weight(weight), m_errorSquared(error*error)
+  {
+  }
+
+  /** Constructor, copy from a TofEvent object but add weights
+   * @param rhs: TofEvent to copy into this.
+   * @param weight: weight of this neutron event.
+   * @param error: the actual error on the event (not squared!)
+  */
+  WeightedEvent::WeightedEvent(const TofEvent& rhs, float weight, float error)
+  : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(weight), m_errorSquared(error*error)
+  {
+  }
+
+  /// Constructor, copy from another WeightedEvent object
+  WeightedEvent::WeightedEvent(const WeightedEvent& rhs)
+  : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(rhs.m_weight), m_errorSquared(rhs.m_errorSquared)
+  {
+  }
+
+  /// Constructor, copy from a TofEvent object and add default weight and errors of 1.0
+  WeightedEvent::WeightedEvent(const TofEvent& rhs)
+  : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(1.0), m_errorSquared(1.0)
+  {
+  }
+
+  /// Empty constructor
+  WeightedEvent::WeightedEvent()
+  : TofEvent(), m_weight(1.0), m_errorSquared(1.0)
+  {
+  }
+
+  /// Destructor
+  WeightedEvent::~WeightedEvent()
+  {
+  }
+
+
+  /// Copy from another WeightedEvent object
+  WeightedEvent& WeightedEvent::operator=(const WeightedEvent & rhs)
+  {
+    this->m_tof = rhs.m_tof;
+    this->m_pulsetime = rhs.m_pulsetime;
+    this->m_weight = rhs.m_weight;
+    this->m_errorSquared = rhs.m_errorSquared;
+    return *this;
+  }
+
+  /** Comparison operator. */
+  bool WeightedEvent::operator==(const WeightedEvent & rhs)
+  {
+    return  (this->m_tof == rhs.m_tof) &&
+            (this->m_pulsetime == rhs.m_pulsetime) &&
+            (this->m_weight == rhs.m_weight) &&
+            (this->m_errorSquared == rhs.m_errorSquared);
+  }
+
+
+  /// Return the weight of the neutron, as a double (it is saved as a float).
+  double WeightedEvent::weight() const
+  {
+    return m_weight;
+  }
+
+  /** Return the error of the neutron, as a double (it is saved as a float).
+   * Note: this returns the actual error; the value is saved
+   * internally as the SQUARED error, so this function calculates sqrt().
+   * For more speed, use errorSquared().
+   */
+  double WeightedEvent::error() const
+  {
+    return std::sqrt( double(m_errorSquared) );
+  }
+
+  /** Returns the square of the error for this event.
+   * This is how the error is saved internally, so this is faster than error()
+   */
+  double WeightedEvent::errorSquared() const
+  {
+    return m_errorSquared;
+  }
+
+
+  /** Output a string representation of the event to a stream
+   * @param os Stream
+   * @param event WeightedEvent to output to the stream
+   */
+  ostream& operator<<(ostream &os, const WeightedEvent &event)
+  {
+    os << event.m_tof << "," << event.m_pulsetime << " (W" << event.m_weight << " +- " << event.error() << ")";
+    return os;
+  }
+
 
 
   //==========================================================================
@@ -116,7 +233,7 @@ using Kernel::PulseTimeType;
     /// () operator: return true if event.tof >= value
     bool operator()(TofEvent event)
     {
-        return event.time_of_flight >= m_value;
+        return event.m_tof >= m_value;
     }
   };
 
@@ -136,9 +253,15 @@ using Kernel::PulseTimeType;
     /// () operator: return true if event.tof > value
     bool operator()(TofEvent event)
     {
-        return event.time_of_flight > m_value;
+        return event.m_tof > m_value;
     }
   };
+
+
+
+
+
+
 
 
 
@@ -151,8 +274,7 @@ using Kernel::PulseTimeType;
 
   /// Constructor (empty)
   EventList::EventList() :
-      order(UNSORTED),
-      detectorIDs()
+    has_weights(false), order(UNSORTED), detectorIDs()
   {
   }
 
@@ -169,6 +291,7 @@ using Kernel::PulseTimeType;
   EventList::EventList(const std::vector<TofEvent> &events)
   {
     this->events.assign(events.begin(), events.end());
+    this->has_weights = false;
     this->order = UNSORTED;
   }
 
@@ -186,6 +309,8 @@ using Kernel::PulseTimeType;
   {
     //Copy all data from the rhs.
     this->events.assign(rhs.events.begin(), rhs.events.end());
+    this->weightedEvents.assign(rhs.weightedEvents.begin(), rhs.weightedEvents.end());
+    this->has_weights = rhs.has_weights;
     this->refX = rhs.refX;
     this->order = rhs.order;
     //Copy the detector ID set
@@ -198,7 +323,11 @@ using Kernel::PulseTimeType;
    * @param event TofEvent to add at the end of the list.*/
   EventList& EventList::operator+=(const TofEvent &event)
   {
-    this->events.push_back(event);
+    if (has_weights)
+      this->weightedEvents.push_back(WeightedEvent(event));
+    else
+      this->events.push_back(event);
+
     this->order = UNSORTED;    
     return *this;
   }
@@ -208,10 +337,56 @@ using Kernel::PulseTimeType;
    * @param more_events A vector of events to append.*/
   EventList& EventList::operator+=(const std::vector<TofEvent> & more_events)
   {
-    this->events.insert(this->events.end(), more_events.begin(), more_events.end());
+    if (has_weights)
+    {
+      //Add default weights to all the un-weighted incoming events from the list.
+      // and append to the list
+      std::vector<TofEvent>::const_iterator it;
+      for(it = more_events.begin(); it != more_events.end(); it++)
+        this->weightedEvents.push_back( WeightedEvent(*it) );
+    }
+    else
+    {
+      //Simply push the events
+      this->events.insert(this->events.end(), more_events.begin(), more_events.end());
+    }
     this->order = UNSORTED;    
     return *this;
   }
+
+
+  // --------------------------------------------------------------------------
+  /** Append a WeightedEvent to the histogram.
+   * Note: The whole list will switch to weights (a possibly lengthy operation)
+   *  if it did not have weights before.
+   *
+   * @param event WeightedEvent to add at the end of the list.*/
+  EventList& EventList::operator+=(const WeightedEvent &event)
+  {
+    if (!has_weights)
+      this->switchToWeightedEvents();
+    this->weightedEvents.push_back(event);
+    this->order = UNSORTED;
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  /** Append a list of events to the histogram.
+   * Note: The whole list will switch to weights (a possibly lengthy operation)
+   *  if it did not have weights before.
+   *
+   * @param more_events A vector of events to append.*/
+  EventList& EventList::operator+=(const std::vector<WeightedEvent> & more_events)
+  {
+    if (!has_weights)
+      this->switchToWeightedEvents();
+    //Simply push the events
+    this->weightedEvents.insert(weightedEvents.end(), more_events.begin(), more_events.end());
+    this->order = UNSORTED;
+    return *this;
+  }
+
+
 
   // --------------------------------------------------------------------------
   /** Append another EventList to this event list.
@@ -220,8 +395,34 @@ using Kernel::PulseTimeType;
    * */
   EventList& EventList::operator+=(const EventList& more_events)
   {
-    vector<TofEvent> rel = more_events.getEvents();
-    this->events.insert(this->events.end(), rel.begin(), rel.end());
+    if (more_events.hasWeights())
+    {
+      //We're adding something with weights
+
+      //Make sure that THIS has weights too.
+      if (!has_weights)
+        this->switchToWeightedEvents();
+
+      //At this point, both have weights. Great!
+      const vector<WeightedEvent> & rel = more_events.getWeightedEvents();
+      this->weightedEvents.insert(this->weightedEvents.end(), rel.begin(), rel.end());
+    }
+
+    if (has_weights && !more_events.hasWeights())
+    {
+      //THIS has weights, but we're adding something that doesn't.
+      const vector<TofEvent> & rel = more_events.getEvents();
+      this->operator+=(rel);
+    }
+
+    else if (!has_weights && !more_events.hasWeights())
+    {
+      //Neither has weights. Keep the unweighted event lists.
+      const vector<TofEvent> & rel = more_events.getEvents();
+      this->events.insert(this->events.end(), rel.begin(), rel.end());
+    }
+
+    //No guaranteed order
     this->order = UNSORTED;
     //Do a union between the detector IDs of both lists
     std::set<int>::const_iterator it;
@@ -238,8 +439,23 @@ using Kernel::PulseTimeType;
    * */
   void EventList::addEventQuickly(const TofEvent &event)
   {
-    this->events.push_back(event);
+    if (has_weights)
+      this->weightedEvents.push_back(WeightedEvent(event));
+    else
+      this->events.push_back(event);
   }
+
+  // --------------------------------------------------------------------------
+  /** Append an event to the histogram, without clearing the cache, to make it faster.
+   * @param event TofEvent to add at the end of the list.
+   * */
+  void EventList::addEventQuickly(const WeightedEvent &event)
+  {
+    this->weightedEvents.push_back(event);
+  }
+
+
+
 
 
   // --------------------------------------------------------------------------
@@ -274,18 +490,70 @@ using Kernel::PulseTimeType;
     return this->detectorIDs;
   }
 
-  // --------------------------------------------------------------------------
-  // --- Handling the event list -------------------------------------------------------------------
-  /** Return the const list of TofEvents contained. */
-  const std::vector<TofEvent>& EventList::getEvents() const
+  /** Return true if the event list has weights */
+  bool EventList::hasWeights() const
   {
+    return has_weights;
+  }
+
+  // -----------------------------------------------------------------------------------------------
+  /** Switch the EventList to use WeightedEvents instead
+   * of TofEvent.
+   */
+  void EventList::switchToWeightedEvents()
+  {
+    //Do nothing if already there
+    if (has_weights)
+      return;
+    has_weights = true;
+    weightedEvents.clear();
+
+    //Convert and copy all TofEvents to the weightedEvents list.
+    std::vector<TofEvent>::const_iterator it;
+    for(it = events.begin(); it != events.end(); it++)
+      this->weightedEvents.push_back( WeightedEvent(*it) );
+
+    //Get rid of the old events
+    events.clear();
+  }
+
+
+
+
+  // ==============================================================================================
+  // --- Handling the event list -------------------------------------------------------------------
+  // ==============================================================================================
+
+  /** Return the const list of TofEvents contained. */
+  const std::vector<TofEvent> & EventList::getEvents() const
+  {
+    if (has_weights)
+      throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents().");
     return this->events;
   }
 
   /** Return the list of TofEvents contained. */
   std::vector<TofEvent>& EventList::getEvents()
   {
+    if (has_weights)
+      throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents().");
     return this->events;
+  }
+
+  /** Return the list of WeightedEvent contained. */
+  std::vector<WeightedEvent>& EventList::getWeightedEvents()
+  {
+    if (!has_weights)
+      throw std::runtime_error("EventList::getWeightedEvents() called for an EventList that does not have weights. Use getEvents().");
+    return this->weightedEvents;
+  }
+
+  /** Return the list of WeightedEvent contained. */
+  const std::vector<WeightedEvent>& EventList::getWeightedEvents() const
+  {
+    if (!has_weights)
+      throw std::runtime_error("EventList::getWeightedEvents() called for an EventList that does not have weights. Use getEvents().");
+    return this->weightedEvents;
   }
 
   /** Clear the list of events and any
@@ -294,11 +562,17 @@ using Kernel::PulseTimeType;
   void EventList::clear()
   {
     this->events.clear();
+    this->weightedEvents.clear();
     this->detectorIDs.clear();
   }
 
+
+
+  // ==============================================================================================
+  // --- Sorting functions -----------------------------------------------------
+  // ==============================================================================================
+
   // --------------------------------------------------------------------------
-  // --- Sorting functions -------------------------------------------------------------------
   /** Sort events by TOF or Frame
    * @param order Order by which to sort.
    * */
@@ -322,6 +596,7 @@ using Kernel::PulseTimeType;
     }
   }
 
+  // --------------------------------------------------------------------------
   /** Sort events by TOF */
   void EventList::sortTof() const
   {
@@ -330,11 +605,16 @@ using Kernel::PulseTimeType;
       return; // nothing to do
     }
     //Perform sort.
-    std::sort(events.begin(), events.end(), compareEventTof);
+    if (has_weights)
+      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventTof);
+    else
+      std::sort(events.begin(), events.end(), compareEventTof);
+
     //Save the order to avoid unnecessary re-sorting.
     this->order = TOF_SORT;
   }
 
+  // --------------------------------------------------------------------------
   /** Sort events by Frame */
   void EventList::sortPulseTime() const
   {
@@ -343,17 +623,22 @@ using Kernel::PulseTimeType;
       return; // nothing to do
     }
     //Perform sort.
-    std::sort(events.begin(), events.end(), compareEventPulseTime);
+    if (has_weights)
+      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTime);
+    else
+      std::sort(events.begin(), events.end(), compareEventPulseTime);
     //Save the order to avoid unnecessary re-sorting.
     this->order = PULSETIME_SORT;
   }
 
+  // --------------------------------------------------------------------------
   /** Return true if the event list is sorted by TOF */
   bool EventList::isSortedByTof() const
   {
     return (this->order == TOF_SORT);
   }
 
+  // --------------------------------------------------------------------------
   /** Reverse the histogram boundaries and the associated events if they are sorted */
   void EventList::reverse()
   {
@@ -364,23 +649,32 @@ using Kernel::PulseTimeType;
 
     // flip the events if they are tof sorted
     if (this->isSortedByTof())
-      std::reverse(this->events.begin(), this->events.end());
+    {
+      if (has_weights)
+        std::reverse(this->weightedEvents.begin(), this->weightedEvents.end());
+      else
+        std::reverse(this->events.begin(), this->events.end());
+      //And we are still sorted! :)
+    }
     else
       this->order = UNSORTED;
   }
 
   // --------------------------------------------------------------------------
-  /** Return the number of events in the list. */
+  /** Return the number of events in the list.
+   * NOTE: If the events have weights, this returns the NUMBER of WeightedEvent's in the
+   * list, and NOT the sum of their weights (which may be two different numbers).
+   *  */
   size_t EventList::getNumberEvents() const
   {
-    return this->events.size();
+    if (has_weights)
+      return this->weightedEvents.size();
+    else
+      return this->events.size();
   }
 
-  void EventList::allocateMoreEvents(int numEvents)
-  {
-    this->events.reserve( events.size() + numEvents );
-  }
 
+  // --------------------------------------------------------------------------
   /** Return the size of the histogram representation of the data (size of Y) **/
   size_t EventList::histogram_size() const
   {
@@ -391,8 +685,12 @@ using Kernel::PulseTimeType;
       return 0;
   }
 
-  // --------------------------------------------------------------------------
-  // --- Setting the Histrogram X axis, without recalculating the histogram -------------------------
+
+
+  // ==============================================================================================
+  // --- Setting the Histrogram X axis, without recalculating the histogram -----------------------
+  // ==============================================================================================
+
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
    */
@@ -418,8 +716,10 @@ using Kernel::PulseTimeType;
   }
 
 
-  // --------------------------------------------------------------------------
+  // ==============================================================================================
   // --- Return Data Vectors --------------------------------------------------
+  // ==============================================================================================
+
   // Note: these will only be called from a const class; e.g
   // const EventList el;
   // el.dataX(); <<<<< this works
@@ -449,27 +749,83 @@ using Kernel::PulseTimeType;
     return Y;
   }
 
+
   /** Calculates and returns a pointer to the E histogrammed data.
    * Remember to delete your pointer after use!
    */
   MantidVec * EventList::dataE() const
   {
-    MantidVec Y;
-    generateCountsHistogram(*this->refX, Y);
-    MantidVec * E = new MantidVec();
-    generateErrorsHistogram(Y, *E);
-    return E;
+    if (has_weights)
+    {
+      MantidVec Y;
+      MantidVec * E = new MantidVec();
+      generateHistogramsForWeights(*this->refX, Y, *E);
+      //Y is unused.
+      return E;
+    }
+    else
+    {
+      MantidVec Y;
+      generateCountsHistogram(*this->refX, Y);
+      MantidVec * E = new MantidVec();
+      generateErrorsHistogram(Y, *E);
+      return E;
+    }
   }
 
 
+
+
+
   // --------------------------------------------------------------------------
-  /** Fill a histogram given specified histogram bounds. Does not modify
-   * the eventlist (const method).
-   * @param X The x bins
-   * @param Y The generated counts histogram
+  /** Utility function:
+   * Returns the iterator into events of the first TofEvent with
+   * tof() > seek_tof
+   *
+   * Will return this->events.end() if nothing is found!
    */
-  void EventList::generateCountsHistogram(const MantidVec& X, MantidVec& Y) const
+  std::vector<TofEvent>::iterator EventList::findFirstEvent(const double seek_tof) const
   {
+    std::vector<TofEvent>::iterator itev;
+    itev = this->events.begin();
+
+    //if tof < X[0], that means that you need to skip some events
+    while ((itev != this->events.end()) && (itev->tof() < seek_tof))
+      itev++;
+    // Better fix would be to use a binary search instead of the linear one used here.
+
+    return itev;
+  }
+
+  // --------------------------------------------------------------------------
+  /** Utility function:
+   * Returns the iterator into events of the first TofEvent with
+   * tof() > seek_tof
+   *
+   * Will return this->events.end() if nothing is found!
+   */
+  std::vector<WeightedEvent>::iterator EventList::findFirstWeightedEvent(const double seek_tof) const
+  {
+    std::vector<WeightedEvent>::iterator itev;
+    itev = this->weightedEvents.begin();
+
+    //if tof < X[0], that means that you need to skip some events
+    while ((itev != this->weightedEvents.end()) && (itev->tof() < seek_tof))
+      itev++;
+    // Better fix would be to use a binary search instead of the linear one used here.
+    return itev;
+  }
+
+  // --------------------------------------------------------------------------
+  /** Generates both the Y and E (error) histograms
+   * for an EventList with WeightedEvents.
+   * @throw runtime_error if the EventList does not have weighted events
+   */
+  void EventList::generateHistogramsForWeights(const MantidVec& X, MantidVec& Y, MantidVec& E) const
+  {
+    if (!has_weights)
+      throw std::runtime_error("EventList::generateHistogramsForWeights() called for a non-weighted EventList. Try generateCountsHistogram() instead.");
+
     //For slight speed=up.
     size_t x_size = X.size();
 
@@ -480,24 +836,112 @@ using Kernel::PulseTimeType;
       return;
     }
 
-    //Do the histogram.
+    //Sort the events by tof
+    this->sortTof();
+    //Clear the Y data, assign all to 0.
+    Y.resize(x_size-1, 0.0);
+    //Clear the Error data, assign all to 0.
+    // Note: Errors will be squared until the last step.
+    E.resize(x_size-1, 0.0);
+
+    //---------------------- Histogram without weights ---------------------------------
+
+    //Do we even have any events to do?
+    if (this->weightedEvents.size() > 0)
+    {
+      //Iterate through all events (sorted by tof)
+      std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
+      // The above can still take you to end() if no events above X[0], so check again.
+      if (itev == this->weightedEvents.end()) return;
+
+      //Find the first bin
+      size_t bin=0;
+
+      //The tof is greater the first bin boundary, so we need to find the first bin
+      double tof = itev->tof();
+      while (bin < x_size-1)
+      {
+        //Within range?
+        if ((tof >= X[bin]) && (tof < X[bin+1]))
+        {
+          //Add up the weight (convert to double before adding, to preserve precision)
+          Y[bin] += double(itev->m_weight);
+          E[bin] += double(itev->m_errorSquared); //square of error
+          break;
+        }
+        ++bin;
+      }
+      //Go to the next event, we've already binned this first one.
+      ++itev;
+
+      //Keep going through all the events
+      while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
+      {
+        tof = itev->tof();
+        while (bin < x_size-1)
+        {
+          //Within range?
+          if ((tof >= X[bin]) && (tof < X[bin+1]))
+          {
+            //Add up the weight (convert to double before adding, to preserve precision)
+            Y[bin] += double(itev->m_weight);
+            E[bin] += double(itev->m_errorSquared); //square of error
+            break;
+          }
+          ++bin;
+        }
+        ++itev;
+      }
+    } // end if (there are any events to histogram)
+
+    // Now do the sqrt of all errors
+    typedef double (*uf)(double);
+    uf dblSqrt = std::sqrt;
+    std::transform(E.begin(), E.end(), E.begin(), dblSqrt);
+
+
+  }
+
+
+
+  // --------------------------------------------------------------------------
+  /** Fill a histogram given specified histogram bounds. Does not modify
+   * the eventlist (const method).
+   * @param X The x bins
+   * @param Y The generated counts histogram
+   */
+  void EventList::generateCountsHistogram(const MantidVec& X, MantidVec& Y) const
+  {
+    //Call the weights function, if needed
+    if (has_weights)
+    {
+      MantidVec E;
+      this->generateHistogramsForWeights(X, Y, E);
+    }
+
+    //For slight speed=up.
+    size_t x_size = X.size();
+
+    if (x_size <= 1)
+    {
+      //X was not set. Return an empty array.
+      Y.resize(0, 0);
+      return;
+    }
 
     //Sort the events by tof
     this->sortTof();
     //Clear the Y data, assign all to 0.
     Y.resize(x_size-1, 0);
 
+    //---------------------- Histogram without weights ---------------------------------
+
     //Do we even have any events to do?
     if (this->events.size() > 0)
     {
       //Iterate through all events (sorted by tof)
-      std::vector<TofEvent>::iterator itev = this->events.begin();
-
-      //if tof < X[0], that means that you need to skip some events
-      while ((itev != this->events.end()) && (itev->tof() < X[0]))
-        itev++;
+      std::vector<TofEvent>::iterator itev = this->findFirstEvent(X[0]);
       // The above can still take you to end() if no events above X[0], so check again.
-      // Better fix would be to use a binary search instead of the linear one used here.
       if (itev == this->events.end()) return;
 
       //Find the first bin
@@ -536,26 +980,39 @@ using Kernel::PulseTimeType;
       }
     } // end if (there are any events to histogram)
 
+
   }
 
   // --------------------------------------------------------------------------
   /**
-   * Generate the Error histogram for the provided counts histogram
+   * Generate the Error histogram for the provided counts histogram.
+   * It simply returns the sqrt of the number of counts for each bin.
+   *
    * @param Y The counts histogram
    * @param E The generated error histogram
    */
   void EventList::generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const
   {
-      // Fill the vector for the errors, containing sqrt(count)
-      E.resize(Y.size(), 0);    
+    if (has_weights)
+      throw std::runtime_error("EventList::generateErrorsHistogram() called for a weighted EventList. Try generateHistogramsForWeights() instead.");
 
-      // windows can get confused about std::sqrt
-      typedef double (*uf)(double);
-      uf dblSqrt = std::sqrt;
-      std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt); 
+    // Fill the vector for the errors, containing sqrt(count)
+    E.resize(Y.size(), 0);
+
+    // windows can get confused about std::sqrt
+    typedef double (*uf)(double);
+    uf dblSqrt = std::sqrt;
+    std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
 
   }
 
+
+
+
+
+  // ==============================================================================================
+  // ----------- Conversion Functions (changing tof values) ---------------------------------------
+  // ==============================================================================================
 
   // --------------------------------------------------------------------------
   /**
@@ -565,8 +1022,8 @@ using Kernel::PulseTimeType;
    */
   void EventList::convertTof(const double factor, const double offset)
   {
-    if (this->events.empty())
-      return;
+    if (this->getNumberEvents() <= 0)  return;
+
     if (factor == 1.)
     {
       this->addTof(offset);
@@ -578,10 +1035,8 @@ using Kernel::PulseTimeType;
       return;
     }
 
-    // iterate through all events
-    for (std::vector<TofEvent>::iterator iter = this->events.begin();
-         iter != this->events.end(); iter++)
-      iter->time_of_flight = iter->time_of_flight * factor + offset;
+    //Convert the list
+    this->convertTof_onList(factor, offset);
 
     // fix the histogram parameter
     MantidVec x = this->refX.access();
@@ -593,45 +1048,66 @@ using Kernel::PulseTimeType;
       this->reverse();
   }
 
+
+  // --------------------------------------------------------------------------
+  /** Private function to do the conversion factor work
+   * on either the TofEvent list or the WeightedEvent list.
+   * Does NOT reverse the event list if the factor < 0
+   */
+  void EventList::convertTof_onList(const double factor, const double offset)
+  {
+    if (has_weights)
+    {
+      // iterate through all events
+      for (std::vector<WeightedEvent>::iterator iter = this->weightedEvents.begin();
+           iter != this->weightedEvents.end(); iter++)
+        iter->m_tof = iter->m_tof * factor + offset;
+    }
+    else
+    {
+      // iterate through all events
+      for (std::vector<TofEvent>::iterator iter = this->events.begin();
+           iter != this->events.end(); iter++)
+        iter->m_tof = iter->m_tof * factor + offset;
+    }
+
+  }
+
+  // --------------------------------------------------------------------------
   /**
-   * Convert the units in the TofEvent's time_of_flight field to
+   * Convert the units in the TofEvent's m_tof field to
    *  some other value, by scaling by a multiplier.
    * @param factor conversion factor (e.g. multiply TOF by this to get d-spacing)
    */
   void EventList::scaleTof(const double factor)
   {
-
     //Do we even have any events to do?
-    if (this->events.empty())
-      return;
+    if (this->getNumberEvents() <= 0)  return;
 
+    //Do the event list
+    convertTof_onList(factor, 0.0);
+
+    //Scale the X vector too
     MantidVec x = this->refX.access();
     std::transform(x.begin(), x.end(), x.begin(),
                    std::bind2nd(std::multiplies<double>(), factor));
-
-    //Iterate through all events
-    for (std::vector<TofEvent>::iterator iter = this->events.begin();
-         iter != this->events.end(); iter++)
-      iter->time_of_flight *= factor;
-    this->refX.access() = x;
 
     if (factor < 0.)
       this->reverse();
 
   }
 
+  // --------------------------------------------------------------------------
   /** Add an offset to the TOF of each event in the list.
+   *
    * @param offset The value to shift the time-of-flight by
    */
   void EventList::addTof(const double offset)
   {
-    if (this->events.empty())
-      return;
+    if (this->getNumberEvents() <= 0)  return;
 
-    // iterate through all events
-    std::vector<TofEvent>::iterator iter;
-    for (iter = this->events.begin(); iter != this->events.end(); iter++)
-      iter->time_of_flight += offset;
+    //Do the event list
+    convertTof_onList(1.0, offset);
 
     // fix the histogram vector
     MantidVec x = this->refX.access();
@@ -642,6 +1118,7 @@ using Kernel::PulseTimeType;
 
 
 
+  // --------------------------------------------------------------------------
   /**
    * Mask out events that have a tof between tofMin and tofMax (inclusively).
    * Events are removed from the list.
@@ -656,21 +1133,41 @@ using Kernel::PulseTimeType;
     //Start by sorting by tof
     this->sortTof();
 
-    //Find the index of the first tofMin
-    std::vector<TofEvent>::iterator it_first = std::find_if(this->events.begin(), this->events.end(), tofGreaterOrEqual(tofMin));
-    if (it_first != events.end())
+    if (has_weights)
     {
-      //Something was found
-      //Look for the first one > tofMax
-      std::vector<TofEvent>::iterator it_last = std::find_if(it_first, this->events.end(), tofGreater(tofMax));
-      //it_last will either be at the end (if not found) or before it.
-      //Erase this range from the vector
-      events.erase(it_first, it_last);
-      //Done! Sorting is still valid, no need to redo.
+      //Find the index of the first tofMin
+      std::vector<WeightedEvent>::iterator it_first = std::find_if(this->weightedEvents.begin(), this->weightedEvents.end(), tofGreaterOrEqual(tofMin));
+      if (it_first != weightedEvents.end())
+      {
+        //Something was found
+        //Look for the first one > tofMax
+        std::vector<WeightedEvent>::iterator it_last = std::find_if(it_first, this->weightedEvents.end(), tofGreater(tofMax));
+        //it_last will either be at the end (if not found) or before it.
+        //Erase this range from the vector
+        weightedEvents.erase(it_first, it_last);
+        //Done! Sorting is still valid, no need to redo.
+      }
+    }
+    else
+    {
+      //Find the index of the first tofMin
+      std::vector<TofEvent>::iterator it_first = std::find_if(this->events.begin(), this->events.end(), tofGreaterOrEqual(tofMin));
+      if (it_first != events.end())
+      {
+        //Something was found
+        //Look for the first one > tofMax
+        std::vector<TofEvent>::iterator it_last = std::find_if(it_first, this->events.end(), tofGreater(tofMax));
+        //it_last will either be at the end (if not found) or before it.
+        //Erase this range from the vector
+        events.erase(it_first, it_last);
+        //Done! Sorting is still valid, no need to redo.
+      }
     }
 
   }
 
+
+  // --------------------------------------------------------------------------
   /**
    * Get a list of the TOFs
    *
@@ -680,14 +1177,23 @@ using Kernel::PulseTimeType;
   {
     MantidVec * tofs = new MantidVec();
     // iterate through all events
-    std::vector<TofEvent>::iterator iter;
-    for (iter = this->events.begin(); iter != this->events.end(); iter++)
+    if (has_weights)
     {
-      tofs->push_back(iter->time_of_flight);
+      std::vector<WeightedEvent>::iterator iter;
+      for (iter = this->weightedEvents.begin(); iter != this->weightedEvents.end(); iter++)
+        tofs->push_back(iter->m_tof);
+    }
+    else
+    {
+      std::vector<TofEvent>::iterator iter;
+      for (iter = this->events.begin(); iter != this->events.end(); iter++)
+        tofs->push_back(iter->m_tof);
     }
     return tofs;
   }
 
+
+  // --------------------------------------------------------------------------
   /**
    * Set a list of TOFs to the current event list. Modify the units if necessary.
    * NOTE: This function does not check if the list sizes are the same.
@@ -701,12 +1207,171 @@ using Kernel::PulseTimeType;
       return;
     }
     size_t x_size = T.size();
-    for (size_t i = 0; i < x_size; ++i)
+    if (has_weights)
     {
-      events[i].time_of_flight = T[i];
+      for (size_t i = 0; i < x_size; ++i)
+        weightedEvents[i].m_tof = T[i];
+    }
+    else
+    {
+      for (size_t i = 0; i < x_size; ++i)
+        events[i].m_tof = T[i];
     }
   }
 
+
+
+  // ==============================================================================================
+  // ----------- MULTIPLY AND DIVIDE ---------------------------------------
+  // ==============================================================================================
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Multiply the weights in this event list by an error-less scalar
+   * The event list switches to WeightedEvent's if needed.
+   *
+   * @param value: multiply all weights by this amount.
+   */
+  void EventList::multiply(const double value)
+  {
+    //Switch to weights if needed.
+    this->switchToWeightedEvents();
+
+    //Square of the value's error
+    double valSquared = value * value;
+
+    std::vector<WeightedEvent>::iterator iter;
+    for (iter = this->weightedEvents.begin(); iter != this->weightedEvents.end(); iter++)
+    {
+      iter->m_errorSquared = (iter->m_errorSquared * valSquared);
+      iter->m_weight *= value;
+    }
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Operator to multiply the weights in this EventList by an error-less scalar.
+   * Use multiply(value,error) if your scalar has an error!
+   */
+  EventList& EventList::operator*=(const double value)
+  {
+    this->multiply(value);
+    return *this;
+  }
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Multiply the weights in this event list by a scalar.
+   * The event list switches to WeightedEvent's if needed.
+   *
+   * @param value: multiply all weights by this amount.
+   * @param error: error on 'value'. Can be 0.
+   */
+  void EventList::multiply(const double value, const double error)
+  {
+    if (error==0.0)
+    {
+      this->multiply(value);
+      return;
+    }
+
+    //Switch to weights if needed.
+    this->switchToWeightedEvents();
+
+    //Square of the value's error
+    double valSquared = value * value;
+    double valErrorSquared = error * error;
+
+    std::vector<WeightedEvent>::iterator itev;
+    for (itev = this->weightedEvents.begin(); itev != this->weightedEvents.end(); itev++)
+    {
+      itev->m_errorSquared = (itev->m_errorSquared * valSquared) + (itev->m_weight*itev->m_weight * valErrorSquared);
+      itev->m_weight *= value;
+    }
+  }
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Multiply the weights in this event list by a histogram.
+   * The event list switches to WeightedEvent's if needed.
+   * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
+   *
+   * @param: X: bins of the multiplying histogram.
+   * @param: Y: value to multiply the weights.
+   * @param: E: error on the value to multiply.
+   * @throw: invalid_argument if the sizes of X, Y, E are not consistent.
+   */
+  void EventList::multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
+  {
+    //Validate inputs
+    if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1+Y.size()) )
+      throw std::invalid_argument("EventList::multiply() was given invalid size or inconsistent histogram arrays.");
+
+    //Switch to weights if needed.
+    this->switchToWeightedEvents();
+
+    //Sorting by tof is necessary for the algorithm
+    this->sortTof();
+    size_t x_size = X.size();
+
+    //Iterate through all events (sorted by tof)
+    std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
+    // The above can still take you to end() if no events above X[0], so check again.
+    if (itev == this->weightedEvents.end()) return;
+
+    //Find the first bin
+    size_t bin=0;
+
+    //Multiplier values
+    double value;
+    double error;
+    double valSquared;
+    double valErrorSquared;
+
+    //If the tof is greater the first bin boundary, so we need to find the first bin
+    double tof = itev->tof();
+    while (bin < x_size-1)
+    {
+      //Within range?
+      if ((tof >= X[bin]) && (tof < X[bin+1]))
+        break; //Stop increasing bin
+      ++bin;
+    }
+    //New bin! Find what you are multiplying!
+    value = Y[bin];
+    error = E[bin];
+    valSquared = value * value;
+    valErrorSquared = error * error;
+
+    //Keep going through all the events
+    while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
+    {
+      tof = itev->tof();
+      while (bin < x_size-1)
+      {
+        //Event is Within range?
+        if ((tof >= X[bin]) && (tof < X[bin+1]))
+        {
+          //Process this event. Multilpy and calculate error.
+          itev->m_errorSquared = (itev->m_errorSquared * valSquared) + (itev->m_weight*itev->m_weight * valErrorSquared);
+          itev->m_weight *= value;
+          break; //out of the bin-searching-while-loop
+        }
+        ++bin;
+        //New bin! Find what you are multiplying!
+        value = Y[bin];
+        error = E[bin];
+        valSquared = value * value;
+        valErrorSquared = error * error;
+      }
+      ++itev;
+    }
+  }
+
+
+
+  // ==============================================================================================
+  // ----------- SPLITTING AND FILTERING ---------------------------------------
+  // ==============================================================================================
 
   //------------------------------------------------------------------------------------------------
   /** Filter this EventList into an output EventList, using
@@ -727,21 +1392,41 @@ using Kernel::PulseTimeType;
     output.detectorIDs = this->detectorIDs;
     output.refX = this->refX;
 
-    //Iterate through all events (sorted by tof)
-    std::vector<TofEvent>::iterator itev = this->events.begin();
+    //Iterate through all events (sorted by pulse time)
 
-    //Find the first event with pulse_time >= start
-    while ((itev != this->events.end()) && (itev->pulse_time < start))
-      itev++;
-
-    while ((itev != this->events.end()) && (itev->pulse_time < stop))
+    if (has_weights)
     {
-      //Copy the event into another
-      const TofEvent eventCopy(*itev);
-      //Add the copy to the output
-      output.addEventQuickly(eventCopy);
-      ++itev;
+      //Make sure the output is also with weights
+      output.switchToWeightedEvents();
+      std::vector<WeightedEvent>::iterator itev = this->weightedEvents.begin();
+
+      //Find the first event with m_pulsetime >= start
+      while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < start))
+        itev++;
+
+      while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < stop))
+      {
+        //Add the copy to the output
+        output.addEventQuickly(*itev);
+        ++itev;
+      }
     }
+    else
+    {
+      std::vector<TofEvent>::iterator itev = this->events.begin();
+
+      //Find the first event with m_pulsetime >= start
+      while ((itev != this->events.end()) && (itev->m_pulsetime < start))
+        itev++;
+
+      while ((itev != this->events.end()) && (itev->m_pulsetime < stop))
+      {
+        //Add the copy to the output
+        output.addEventQuickly(*itev);
+        ++itev;
+      }
+    }
+
   }
 
 
@@ -764,59 +1449,108 @@ using Kernel::PulseTimeType;
       outputs[i]->clear();
       outputs[i]->detectorIDs = this->detectorIDs;
       outputs[i]->refX = this->refX;
+      if (has_weights)
+        outputs[i]->switchToWeightedEvents();
     }
 
     //Do nothing if there are no entries
     if (splitter.size() <= 0)
       return;
 
-    //Iterate through all events (sorted by tof)
-    std::vector<TofEvent>::iterator itev = this->events.begin();
-
-    //And at the same time, iterate through the splitter
+    //Iterate through the splitter at the same time
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
-
     PulseTimeType start, stop;
     int index;
 
-    //This is the time of the first section. Anything before is thrown out.
 
-    while (itspl != splitter.end())
+    if (has_weights)
     {
-      //Get the splitting interval times and destination
-      start = itspl->start();
-      stop = itspl->stop();
-      index = itspl->index();
+      //Iterate through all events (sorted by tof)
+      std::vector<WeightedEvent>::iterator itev = this->weightedEvents.begin();
 
-      //Skip the events before the start of the time
-      while ((itev != this->events.end()) && (itev->pulse_time < start))
-        itev++;
-
-      //Go through all the events that are in the interval (if any)
-      while ((itev != this->events.end()) && (itev->pulse_time < stop))
+      //This is the time of the first section. Anything before is thrown out.
+      while (itspl != splitter.end())
       {
-        //Copy the event into another
-        const TofEvent eventCopy(*itev);
-        if ((index >= 0) && (index < numOutputs))
+        //Get the splitting interval times and destination
+        start = itspl->start();
+        stop = itspl->stop();
+        index = itspl->index();
+
+        //Skip the events before the start of the time
+        while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < start))
+          itev++;
+
+        //Go through all the events that are in the interval (if any)
+        while ((itev != this->weightedEvents.end()) && (itev->m_pulsetime < stop))
         {
-          EventList * myOutput = outputs[index];
-          //Add the copy to the output
-          myOutput->addEventQuickly(eventCopy);
+          //Copy the event into another
+          const TofEvent eventCopy(*itev);
+          if ((index >= 0) && (index < numOutputs))
+          {
+            EventList * myOutput = outputs[index];
+            //Add the copy to the output
+            myOutput->addEventQuickly(eventCopy);
+          }
+          ++itev;
         }
-        ++itev;
-      }
 
-      //Go to the next interval
-      itspl++;
-      //But if we reached the end, then we are done.
-      if (itspl==splitter.end())
-        break;
+        //Go to the next interval
+        itspl++;
+        //But if we reached the end, then we are done.
+        if (itspl==splitter.end())
+          break;
 
-      //No need to keep looping through the filter if we are out of events
-      if (itev == this->events.end())
-        break;
+        //No need to keep looping through the filter if we are out of events
+        if (itev == this->weightedEvents.end())
+          break;
 
-    } //Looping through entries in the splitter vector
+      } //Looping through entries in the splitter vector
+    }
+    else
+    {
+      //--------------- NO WEIGHTS ---------------------------------------
+      //Iterate through all events (sorted by tof)
+      std::vector<TofEvent>::iterator itev = this->events.begin();
+
+      //This is the time of the first section. Anything before is thrown out.
+      while (itspl != splitter.end())
+      {
+        //Get the splitting interval times and destination
+        start = itspl->start();
+        stop = itspl->stop();
+        index = itspl->index();
+
+        //Skip the events before the start of the time
+        while ((itev != this->events.end()) && (itev->m_pulsetime < start))
+          itev++;
+
+        //Go through all the events that are in the interval (if any)
+        while ((itev != this->events.end()) && (itev->m_pulsetime < stop))
+        {
+          //Copy the event into another
+          const TofEvent eventCopy(*itev);
+          if ((index >= 0) && (index < numOutputs))
+          {
+            EventList * myOutput = outputs[index];
+            //Add the copy to the output
+            myOutput->addEventQuickly(eventCopy);
+          }
+          ++itev;
+        }
+
+        //Go to the next interval
+        itspl++;
+        //But if we reached the end, then we are done.
+        if (itspl==splitter.end())
+          break;
+
+        //No need to keep looping through the filter if we are out of events
+        if (itev == this->events.end())
+          break;
+
+      } //Looping through entries in the splitter vector
+
+    }
 
     //Done!
   }

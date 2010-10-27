@@ -50,26 +50,71 @@ public:
     TS_ASSERT_EQUALS(e3.pulseTime(), 321);
   }
 
-  void test_timestamp()
-  {
-    //Make an event workspace
-    //EventWorkspace ews =
+};
 
+
+//==========================================================================================
+class WeightedEventTest : public CxxTest::TestSuite
+{
+private:
+
+public:
+  WeightedEventTest()
+  {
+  }
+
+  void testConstructors()
+  {
+    TofEvent e(123, 456);
+    WeightedEvent we, we2;
+
+    //Empty
+    we = WeightedEvent();
+    TS_ASSERT_EQUALS(we.tof(), 0);
+    TS_ASSERT_EQUALS(we.pulseTime(), 0);
+    TS_ASSERT_EQUALS(we.weight(), 1.0);
+    TS_ASSERT_EQUALS(we.error(), 1.0);
+
+    //Default one weight
+    we = WeightedEvent(e);
+    TS_ASSERT_EQUALS(we.tof(), 123);
+    TS_ASSERT_EQUALS(we.pulseTime(), 456);
+    TS_ASSERT_EQUALS(we.weight(), 1.0);
+    TS_ASSERT_EQUALS(we.error(), 1.0);
+
+    //TofEvent + weights
+    we = WeightedEvent(e, 3.5, 0.5);
+    TS_ASSERT_EQUALS(we.tof(), 123);
+    TS_ASSERT_EQUALS(we.pulseTime(), 456);
+    TS_ASSERT_EQUALS(we.weight(), 3.5);
+    TS_ASSERT_EQUALS(we.error(), 0.5);
+
+    //Full constructor
+    we = WeightedEvent(456, 789, 2.5, 1.5);
+    TS_ASSERT_EQUALS(we.tof(), 456);
+    TS_ASSERT_EQUALS(we.pulseTime(), 789);
+    TS_ASSERT_EQUALS(we.weight(), 2.5);
+    TS_ASSERT_EQUALS(we.error(), 1.5);
+  }
+
+  void testAssignAndCopy()
+  {
+    WeightedEvent we, we2;
+
+    //Copy constructor
+    we = WeightedEvent();
+    we2 = WeightedEvent(456, 789, 2.5, 1.5);
+    we = we2;
+    TS_ASSERT_EQUALS(we.tof(), 456);
+    TS_ASSERT_EQUALS(we.pulseTime(), 789);
+    TS_ASSERT_EQUALS(we.weight(), 2.5);
+    TS_ASSERT_EQUALS(we.error(), 1.5);
   }
 
 
-
-//  void testBadInputs()
-//  {
-//    e = TofEvent(-100,1);
-//    // SHOULD THIS BE THE BEHAVIOR FOR BAD INPUTS????
-//    TS_ASSERT_EQUALS(e.tof(), 0);
-//
-//    e = TofEvent(1,-500);
-//    // SHOULD THIS BE THE BEHAVIOR FOR BAD INPUTS????
-//    TS_ASSERT_EQUALS(e.pulseTime(), 0);
-//  }
 };
+
+
 
 
 //==========================================================================================
@@ -77,8 +122,9 @@ class EventListTest : public CxxTest::TestSuite
 {
 private:
   EventList el;
-  static const int NUMEVENTS = 200;
-  static const int NUMBINS = 1600;
+  static const int NUMEVENTS = 100;
+  static const int MAX_TOF = 10e6;
+  static const int NUMBINS = 160;
   int BIN_DELTA;
 
 
@@ -90,6 +136,7 @@ public:
 
   void setUp()
   {
+    //Make a little event list with 3 events
     vector<TofEvent> mylist;
     mylist.push_back(TofEvent(100,200));
     mylist.push_back(TofEvent(3.5, 400));
@@ -97,6 +144,9 @@ public:
     el = EventList(mylist);
   }
 
+  //==================================================================================
+  //--- Basics  ----
+  //==================================================================================
 
   void testInit()
   {
@@ -106,6 +156,10 @@ public:
     TS_ASSERT_EQUALS(rel[0].pulseTime(), 200);
     TS_ASSERT_EQUALS(rel[2].tof(), 50);
   }
+
+  //==================================================================================
+  //--- Plus Operators  ----
+  //==================================================================================
 
   void testPlusOperator()
   {
@@ -172,28 +226,192 @@ public:
     for (int i=7; i< 35; i+=7)
       TS_ASSERT( el2.hasDetectorID(i) );
     TS_ASSERT( !el2.hasDetectorID(0) );
+  }
+
+
+  //==================================================================================
+  //--- Switching to Weighted Events ----
+  //==================================================================================
+
+  //----------------------------------
+  void test_switchToWeightedEvents()
+  {
+    //Start with a bit of fake data
+    fake_data();
+    TS_ASSERT_EQUALS( el.getEvents().size(), NUMEVENTS );
+    TS_ASSERT_EQUALS( el.getNumberEvents(), NUMEVENTS);
+    TS_ASSERT_THROWS( el.getWeightedEvents().size(), std::runtime_error);
+
+    el.switchToWeightedEvents();
+    TS_ASSERT_THROWS( el.getEvents().size(), std::runtime_error);
+    TS_ASSERT_EQUALS( el.getWeightedEvents().size(), NUMEVENTS );
+    TS_ASSERT_EQUALS( el.getNumberEvents(), NUMEVENTS);
+    TS_ASSERT_EQUALS( el.getWeightedEvents()[0].weight(), 1.0 );
+    TS_ASSERT_EQUALS( el.getWeightedEvents()[0].error(), 1.0 );
+  }
+
+
+  //----------------------------------
+  void test_switch_on_the_fly()
+  {
+    fake_data();
+    TS_ASSERT( !el.hasWeights() );
+
+    // Add a weighted event = everything switches
+    WeightedEvent we(123, 456, 2.0, 3.0);
+    el += we;
+    TS_ASSERT( el.hasWeights() );
+    TS_ASSERT_EQUALS( el.getWeightedEvents()[0].weight(), 1.0 );
+    TS_ASSERT_EQUALS( el.getWeightedEvents()[0].error(), 1.0 );
+    //New one is at the end
+    TS_ASSERT_EQUALS( el.getWeightedEvents()[NUMEVENTS], we );
+
+    //But you can still add a plain one
+    TofEvent e(789, 654);
+    el += e;
+    TS_ASSERT_EQUALS( el.getWeightedEvents()[NUMEVENTS+1], e );
+    TS_ASSERT_EQUALS( el.getWeightedEvents()[NUMEVENTS+1].weight(), 1.0 );
 
   }
 
-  //==================================================================================
-  //--- Sorting Tests ---
 
-  void fake_data()
+  //----------------------------------
+  void test_switch_on_the_fly_when_appending_lists_1_none_plus_weights()
   {
-    //Clear the list
-    el = EventList();
-    //Create some mostly-reasonable fake data.
-    srand(1234); //Fixed random seed
-    for (int i=0; i < NUMEVENTS; i++)
+    TS_ASSERT( !el.hasWeights() );
+    vector<WeightedEvent> mylist;
+    mylist.push_back(WeightedEvent(45,67, 4.5, 6.5));
+    mylist.push_back(WeightedEvent(89,12, 1.0, 1.0));
+    mylist.push_back(WeightedEvent(34,56, 3.0, 2.0));
+
+    el += mylist;
+    TS_ASSERT( el.hasWeights() );
+    vector<WeightedEvent> rel = el.getWeightedEvents();
+    TS_ASSERT_EQUALS(rel.size(), 6);
+    TS_ASSERT_EQUALS(rel[3].tof(), 45);
+    TS_ASSERT_EQUALS(rel[3].weight(), 4.5);
+    TS_ASSERT_EQUALS(rel[5].tof(), 34);
+    TS_ASSERT_EQUALS(rel[5].error(), 2.0);
+  }
+
+  //----------------------------------
+  void test_switch_on_the_fly_when_appending_lists2_none_plus_weights()
+  {
+    TS_ASSERT( !el.hasWeights() );
+    EventList el2 = el;
+    el2.switchToWeightedEvents();
+    el += el2;
+
+    TS_ASSERT( el.hasWeights() );
+    vector<WeightedEvent> rel = el.getWeightedEvents();
+    TS_ASSERT_EQUALS(rel.size(), 6);
+    TS_ASSERT_EQUALS(rel[3].weight(), 1.0);
+    TS_ASSERT_EQUALS(rel[5].error(), 1.0);
+  }
+
+
+  //----------------------------------
+  void test_switch_on_the_fly_when_appending_lists3_weights_plus_none()
+  {
+    TS_ASSERT( !el.hasWeights() );
+    EventList el2 = el;
+    el2.switchToWeightedEvents();
+    el2 += el;
+    TS_ASSERT( el2.hasWeights() );
+    vector<WeightedEvent> rel = el2.getWeightedEvents();
+    TS_ASSERT_EQUALS(rel.size(), 6);
+    TS_ASSERT_EQUALS(rel[3].weight(), 1.0);
+    TS_ASSERT_EQUALS(rel[5].error(), 1.0);
+  }
+
+  //----------------------------------
+  void test_switch_on_the_fly_when_appending_lists4_weights_plus_weights()
+  {
+    EventList el2 = el;
+    el2.switchToWeightedEvents();
+    el2 += el2;
+    TS_ASSERT( el2.hasWeights() );
+    vector<WeightedEvent> rel = el2.getWeightedEvents();
+    TS_ASSERT_EQUALS(rel.size(), 6);
+    TS_ASSERT_EQUALS(rel[3].weight(), 1.0);
+    TS_ASSERT_EQUALS(rel[5].error(), 1.0);
+  }
+
+
+
+  //==================================================================================
+  //--- Multiplying  ----
+  //==================================================================================
+  void test_multiply_scalar()
+  {
+    //Weight 2, error sqrt(2.5)
+    this->fake_uniform_data_weights();
+    //Perform the multiply
+    el.multiply(2.0, 0.5);
+
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 4.0, 1e-5);
+    //Error^2 = 2*2 * 2.5 + (2*0.5)^2 = 11
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 11.0, 1e-5);
+
+    //Try it with no scalar error
+    this->fake_uniform_data_weights();
+    el.multiply(2.0);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 4.0, 1e-5);
+    //Error^2 = 2*2 * 2.5 + 0 = 10
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 10.0, 1e-5);
+
+    // *= operator
+    this->fake_uniform_data_weights();
+    el *= 2.0;
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 4.0, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 10.0, 1e-5);
+  }
+
+  void test_multiply_histogram()
+  {
+
+    //Make the histogram we are multiplying.
+    MantidVec X, Y, E;
+    // one tenth of the # of bins
+    double step = BIN_DELTA*10;
+    for (double tof=step; tof<BIN_DELTA*(NUMBINS+1); tof += step)
     {
-      //Random tof up to 10 ms
-      //Random pulse time up to 1000
-      el += TofEvent( 1e7*(rand()*1.0/RAND_MAX), rand()%1000);
+      X.push_back(tof);
+      //std::cout << tof << "\n";
+    }
+    for (int i=0; i < X.size()-1; i++)
+    {
+      Y.push_back( 1.0 * (i+1));
+      E.push_back( sqrt(double(1.0 * (i+1))) );
+    }
+
+
+    //Make the data and multiply
+    this->fake_uniform_data_weights();
+    el.multiply(X, Y, E);
+
+    vector<WeightedEvent> & rwel = el.getWeightedEvents();
+    for (int i=0; i < rwel.size(); i++)
+    {
+      double tof = rwel[i].tof();
+      if (tof>=step && tof<BIN_DELTA*NUMBINS)
+      {
+        int bini = tof / step;
+        //std::cout << i << ":" <<bini << "   ; " << rwel[i].weight() << "\n";
+        TS_ASSERT_DELTA( rwel[i].weight(), 2.0*bini, 1e-6);
+      }
     }
   }
 
+
+  //==================================================================================
+  //--- Sorting Tests ---
+  //==================================================================================
+
   void testSortTOF()
   {
+    int i;
+
     el.sortTof();
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 3);
@@ -204,10 +422,21 @@ public:
     this->fake_data();
     el.sort(TOF_SORT);
     rel = el.getEvents();
-    int i;
     for (i=1; i<100; i++)
     {
       TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].tof(), rel[i].tof());
+    }
+  }
+
+  void testSortTOF_weights()
+  {
+    this->fake_data();
+    el.switchToWeightedEvents();
+    el.sort(TOF_SORT);
+    vector<WeightedEvent> rwel = el.getWeightedEvents();
+    for (int i=1; i<100; i++)
+    {
+      TS_ASSERT_LESS_THAN_EQUALS(rwel[i-1].tof(), rwel[i].tof());
     }
   }
 
@@ -223,16 +452,28 @@ public:
     this->fake_data();
     el.sort(PULSETIME_SORT);
     rel = el.getEvents();
-    int i;
-    for (i=1; i<100; i++)
+    for (int i=1; i<100; i++)
     {
       TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].pulseTime(), rel[i].pulseTime());
+    }
+  }
+
+  void testSortPulseTime_weights()
+  {
+    this->fake_data();
+    el.switchToWeightedEvents();
+    el.sort(PULSETIME_SORT);
+    vector<WeightedEvent> rwel = el.getWeightedEvents();
+    for (int i=1; i<100; i++)
+    {
+      TS_ASSERT_LESS_THAN_EQUALS(rwel[i-1].pulseTime(), rwel[i].pulseTime());
     }
   }
 
 
   //==================================================================================
   //--- Histogramming Tests ---
+  //==================================================================================
 
   void test_setX()
   {
@@ -300,57 +541,51 @@ public:
     TS_ASSERT_EQUALS(el4.dataY()->size(), 0);
   }
 
-  void fake_uniform_data()
-  {
-    //Clear the list
-    el = EventList();
-    //Create some mostly-reasonable fake data.
-    srand(1234); //Fixed random seed
-    for (double tof=100; tof < 20e6; tof += 5000)
-    {
-      //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
-      el += TofEvent( tof, rand()%1000);
-    }
-  }
 
-  void fake_uniform_time_data()
-  {
-    //Clear the list
-    el = EventList();
-    //Create some mostly-reasonable fake data.
-    srand(1234); //Fixed random seed
-    for (double time=0; time < 1000; time++)
-    {
-      //All pulse times from 0 to 999
-      el += TofEvent( rand()%1000, time);
-    }
-  }
 
-  void fake_data_only_two_times(PulseTimeType time1, PulseTimeType time2)
-  {
-    //Clear the list
-    el = EventList();
-    el += TofEvent(  rand()%1000, time1);
-    el += TofEvent(  rand()%1000, time2);
-  }
+
 
   void test_histogram()
   {
     this->fake_uniform_data();
     this->test_setX(); //Set it up
-    MantidVec X, Y;
+    MantidVec X, Y, E;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
     X = el3.dataX();
     Y = *el3.dataY();
+    E = *el3.dataE();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     //The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
     for (int i=0; i<Y.size(); i++)
     {
       TS_ASSERT_EQUALS(Y[i], 2.0);
+      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
     }
-
   }
+
+  void test_histogram_weights()
+  {
+    //This one has a weight of
+    this->fake_uniform_data_weights();
+
+    this->test_setX(); //Set it up
+    MantidVec X, Y, E;
+    const EventList el3(el); //need to copy to a const method in order to access the data directly.
+    X = el3.dataX();
+    Y = *el3.dataY();
+    E = *el3.dataE();
+    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+    //The data was created so that there should be exactly 2 events per bin
+    // The last bin entry will be 0 since we use it as the top boundary of i-1.
+    for (int i=0; i<Y.size(); i++)
+    {
+      TS_ASSERT_EQUALS(Y[i], 4.0);
+      //Two errors of sqrt(2.5) adds up to sqrt(5.0)
+      TS_ASSERT_DELTA(E[i], sqrt(5.0), 1e-5);
+    }
+  }
+
 
   void test_histogram_with_first_bin_higher_than_first_event()
   {
@@ -359,7 +594,7 @@ public:
 
     //Generate the histrogram bins starting at 1000
     MantidVec shared_x;
-    for (double tof=1000; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
+    for (double tof=BIN_DELTA*10; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
       shared_x.push_back(tof);
     el.setX(shared_x);
 
@@ -370,13 +605,31 @@ public:
     Y = *el3.dataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
 
-    //The data was created so that there should be exactly 2 events per bin
-    // The last bin entry will be 0 since we use it as the top boundary of i-1.
+    //The data was created so that there should be exactly 2 events per bin. The first 10 bins (20 events) are empty.
     for (int i=0; i<Y.size(); i++)
     {
       TS_ASSERT_EQUALS(Y[i], 2.0);
     }
+  }
 
+
+  void test_histogram_with_first_bin_higher_than_first_event_Weights()
+  {
+    //Make sure the algorithm handles it if the first bin > then the first event tof
+    this->fake_uniform_data_weights();
+    MantidVec shared_x;
+    for (double tof=BIN_DELTA*10; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
+      shared_x.push_back(tof);
+    el.setX(shared_x);
+    MantidVec X, Y;
+    const EventList el3(el); //need to copy to a const method in order to access the data directly.
+    X = el3.dataX();
+    Y = *el3.dataY();
+    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+    for (int i=0; i<Y.size(); i++)
+    {
+      TS_ASSERT_EQUALS(Y[i], 4.0);
+    }
   }
 
   void test_random_histogram()
@@ -422,10 +675,12 @@ public:
 
     //With all this jazz, the original element is unchanged
     TS_ASSERT_EQUALS(this->el.getRefX()->size(), NUMBINS+1);
-
   }
 
 
+
+
+  //-----------------------------------------------------------------------------------------------
   void test_convertTof()
   {
     this->fake_uniform_data();
@@ -442,27 +697,60 @@ public:
 
   }
 
+  void test_convertTof_weights()
+  {
+    this->fake_uniform_data();
+    el.switchToWeightedEvents();
+    size_t old_num = this->el.getWeightedEvents().size();
+    this->el.convertTof( 2.5 );
+    TS_ASSERT_EQUALS(old_num, this->el.getWeightedEvents().size());
+    TS_ASSERT_EQUALS(this->el.getWeightedEvents()[0].tof(), 250.0);
+    TS_ASSERT_EQUALS(this->el.getWeightedEvents()[1].tof(), 12750.0);
 
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
   void testMaskTOF()
   {
     //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
     this->fake_uniform_data();
-    //Start with 4000 events
-    TS_ASSERT_EQUALS( el.getNumberEvents(), 4000);
+    //How many events did we make?
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 2*MAX_TOF/BIN_DELTA);
     //Mask out 5-10 milliseconds
-    el.maskTof( 5e6, 10e6);
+    double min = MAX_TOF * 0.25;
+    double max = MAX_TOF * 0.5;
+    el.maskTof( min, max);
     vector<TofEvent> rel = el.getEvents();
-    int i;
-    for (i=0; i<rel.size(); i++)
+    for (int i=0; i<rel.size(); i++)
     {
       //No tofs in that range
-      TS_ASSERT((rel[i].tof() < 5e6) || (rel[i].tof() > 10e6));
+      TS_ASSERT((rel[i].tof() < min) || (rel[i].tof() > max));
     }
-    TS_ASSERT_EQUALS( el.getNumberEvents(), 3000);
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 0.75 * 2*MAX_TOF/BIN_DELTA);
   }
 
+  void testMaskTOF_weights()
+  {
+    // ---- Same, with weights ------
+    this->fake_uniform_data();
+    el.switchToWeightedEvents();
+    TS_ASSERT_EQUALS( el.getNumberEvents(), 2*MAX_TOF/BIN_DELTA);
+    double min = MAX_TOF * 0.25;
+    double max = MAX_TOF * 0.5;
+    el.maskTof( min, max);
+    vector<WeightedEvent> rwel = el.getWeightedEvents();
+    for (int i=0; i<rwel.size(); i++)
+    {
+      TS_ASSERT((rwel[i].tof() < min) || (rwel[i].tof() > max));
+    }
+    TS_ASSERT_EQUALS( el.getNumberEvents(),  0.75 * 2*MAX_TOF/BIN_DELTA);
+  }
+
+
   //-----------------------------------------------------------------------------------------------
-  void testSetTofs()
+  void test_getTofs_and_setTofs()
   {
     this->fake_data();
 
@@ -479,6 +767,29 @@ public:
     this->el.setTofs(T);
     double new_value = this->el.getEvents()[0].tof();
     size_t new_size = this->el.getEvents().size();
+
+    TS_ASSERT_EQUALS(old_size, new_size);
+    TS_ASSERT_DIFFERS(old_value, new_value);
+  }
+
+  void test_getTofs_and_setTofs_weights()
+  {
+    this->fake_data();
+    el.switchToWeightedEvents();
+
+    // Grab original data as it will become "new" data
+    MantidVec T;
+    T = *el.getTofs();
+
+    // Convert to make values something different
+    this->el.convertTof(4.0, 2.0);
+    double old_value = this->el.getWeightedEvents()[0].tof();
+    size_t old_size = this->el.getWeightedEvents().size();
+
+    // Set "new" data
+    this->el.setTofs(T);
+    double new_value = this->el.getWeightedEvents()[0].tof();
+    size_t new_size = this->el.getWeightedEvents().size();
 
     TS_ASSERT_EQUALS(old_size, new_size);
     TS_ASSERT_DIFFERS(old_value, new_value);
@@ -504,6 +815,33 @@ public:
     TS_ASSERT_EQUALS( numGood, out.getNumberEvents());
 
     std::vector<TofEvent> events = out.getEvents();
+    for (int i=0; i < events.size(); i++)
+    {
+      //Check that the times are within the given limits.
+      TS_ASSERT_LESS_THAN_EQUALS( 100, events[i].pulseTime());
+      TS_ASSERT_LESS_THAN( events[i].pulseTime(), 200);
+    }
+  }
+
+  void testFilterByPulseTime_weights()
+  {
+    this->fake_data();
+    el.switchToWeightedEvents();
+
+    //Filter into this
+    EventList out = EventList();
+    el.filterByPulseTime(100, 200, out);
+
+    std::vector<WeightedEvent> eventsIn = el.getWeightedEvents();
+    int numGood = 0;
+    for (int i=0; i < eventsIn.size(); i++)
+      if ((eventsIn[i].pulseTime() >= 100) && (eventsIn[i].pulseTime() < 200))
+        numGood++;
+
+    //Good # of events.
+    TS_ASSERT_EQUALS( numGood, out.getNumberEvents());
+
+    std::vector<WeightedEvent> events = out.getWeightedEvents();
     for (int i=0; i < events.size(); i++)
     {
       //Check that the times are within the given limits.
@@ -585,7 +923,35 @@ public:
     TS_ASSERT_EQUALS( outputs[7]->getNumberEvents(), 0);
     TS_ASSERT_EQUALS( outputs[8]->getNumberEvents(), 1);
     TS_ASSERT_EQUALS( outputs[9]->getNumberEvents(), 0);
+  }
 
+  void testSplit2_weights()
+  {
+    this->fake_data_only_two_times(150, 850);
+    el.switchToWeightedEvents();
+
+    std::vector< EventList * > outputs;
+    for (int i=0; i<10; i++)
+      outputs.push_back( new EventList() );
+
+    TimeSplitterType split;
+    //Slices of 100
+    for (int i=0; i<10; i++)
+      split.push_back( SplittingInterval(i*100, (i+1)*100, i) );
+
+    //Do the splitting
+    el.splitByTime(split, outputs);
+
+    TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( outputs[1]->getNumberEvents(), 1);
+    TS_ASSERT_EQUALS( outputs[2]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( outputs[3]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( outputs[4]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( outputs[5]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( outputs[6]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( outputs[7]->getNumberEvents(), 0);
+    TS_ASSERT_EQUALS( outputs[8]->getNumberEvents(), 1);
+    TS_ASSERT_EQUALS( outputs[9]->getNumberEvents(), 0);
   }
 
 
@@ -608,6 +974,77 @@ public:
     //No events in the first ouput 0-99
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 150);
 
+  }
+
+
+
+
+
+
+
+  //==================================================================================
+  // Mocking functions
+  //==================================================================================
+
+  void fake_data()
+  {
+    //Clear the list
+    el = EventList();
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (int i=0; i < NUMEVENTS; i++)
+    {
+      //Random tof up to 10 ms
+      //Random pulse time up to 1000
+      el += TofEvent( 1e7*(rand()*1.0/RAND_MAX), rand()%1000);
+    }
+  }
+
+  void fake_uniform_data()
+  {
+    //Clear the list
+    el = EventList();
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (double tof=100; tof < MAX_TOF; tof += BIN_DELTA/2)
+    {
+      //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+      el += TofEvent( tof, rand()%1000);
+    }
+  }
+  void fake_uniform_data_weights()
+  {
+    //Clear the list
+    el = EventList();
+    el.switchToWeightedEvents();
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (double tof=100; tof < MAX_TOF; tof += BIN_DELTA/2)
+    {
+      //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+      el += WeightedEvent( tof, rand()%1000, 2.0, sqrt(2.5));
+    }
+  }
+
+  void fake_uniform_time_data()
+  {
+    //Clear the list
+    el = EventList();
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (double time=0; time < 1000; time++)
+    {
+      //All pulse times from 0 to 999
+      el += TofEvent( rand()%1000, time);
+    }
+  }
+
+  void fake_data_only_two_times(PulseTimeType time1, PulseTimeType time2)
+  {
+    //Clear the list
+    el = EventList();
+    el += TofEvent(  rand()%1000, time1);
+    el += TofEvent(  rand()%1000, time2);
   }
 
 
