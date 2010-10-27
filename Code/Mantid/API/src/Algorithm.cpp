@@ -9,7 +9,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/DateAndTime.h"
 #include <iomanip>
-#include <functional>
 
 using namespace Mantid::Kernel;
 
@@ -841,64 +840,67 @@ bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
   *  @param outwsgrp_sptr shared pointer for workspacegroup
   *  @param bSimilarNames -true if the input member workspaces are of similar names
   *  @param bequal -true if both the input and output group workspaces are same
+  *  @returns true if property is set 
  */
 bool Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,const std::string& inmemberwsName,
 	                                  WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal)
 {
-	if(!prop) return false;
-	if(!outwsgrp_sptr) return false;
-	//output group workspace name
-	std::string outgrpwsName=prop->value();
-	// period number
-	std::stringstream suffix;
-	suffix<<nPeriod;
-	//member workspace name
-	std::string outmemberwsName;
+  if(!prop) return false;
+  if(!outwsgrp_sptr) return false;
+  //output group workspace name
+  std::string outgrpwsName=prop->value();
+  // period number
+  std::stringstream suffix;
+  suffix<<nPeriod;
+  //member workspace name
+  std::string outmemberwsName;
   //if input and ouput group workspace name same
-	if(bequal)
-	{
-		outmemberwsName=inmemberwsName;               //InputPut GroupWs ="NewGroup",//OutPut GroupWs ="NewGroup"
-													                        // input member ws1= "Bob", // output member ws1="Bob_NewGroup" 
-		                                              //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
-	}
-	else
-	{	
+  if(bequal)
+  {
+    outmemberwsName=inmemberwsName;               //InputPut GroupWs ="NewGroup",//OutPut GroupWs ="NewGroup"
+                                                  // input member ws1= "Bob", // output member ws1="Bob_NewGroup" 
+                                                  //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
+  }
+  else
+  {	
     if(bSimilarNames) //if group are of similar names
-	  {
-		  outmemberwsName=outgrpwsName+"_"+suffix.str(); // input group ws ="Group"  ,//OutPut GroupWs ="NewGroup"
-													                           //input member ws1="Group_1",//output member ws1="NewGroup_1"
-	                                                   //input member ws2="Group_2",//output member ws2="NewGroup_2" 
+    {
+      outmemberwsName=outgrpwsName+"_"+suffix.str(); // input group ws ="Group"  ,//OutPut GroupWs ="NewGroup"
+                                                    //input member ws1="Group_1",//output member ws1="NewGroup_1"
+                                                    //input member ws2="Group_2",//output member ws2="NewGroup_2" 
     }	
     else
     {
-		outmemberwsName= inmemberwsName+"_"+outgrpwsName;//InputPut GroupWs ="Group",//OutPut GroupWs ="NewGroup"
-														                         // input member ws1 = "Bob", // output member ws1="Bob_NewGroup" 
-		                                                 //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
+      outmemberwsName= inmemberwsName+"_"+outgrpwsName;//InputPut GroupWs ="Group",//OutPut GroupWs ="NewGroup"
+                                                      // input member ws1 = "Bob", // output member ws1="Bob_NewGroup" 
+                                                      //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
     }
-	}
-	if(nPeriod==1)
-	{//group workspace is saving to ADS
-		AnalysisDataService::Instance().addOrReplace(outgrpwsName,outwsgrp_sptr );
-	} 
-	if (prop->direction() == (Kernel::Direction::Output|| Kernel::Direction::InOut)) 
-	{
+  }
+  if(nPeriod==1)
+  {//group workspace is saving to ADS
+    AnalysisDataService::Instance().addOrReplace(outgrpwsName,outwsgrp_sptr );
+  } 
+  unsigned int direction = prop->direction();
+  if ((direction == Kernel::Direction::Output||direction== Kernel::Direction::InOut)) 
+  {
     try
     {
-		 pAlg->setPropertyValue(prop->name(), outmemberwsName);
+      pAlg->setPropertyValue(prop->name(), outmemberwsName);
     }
-    catch(std::invalid_argument&e)
+    catch(std::invalid_argument&)
     {
       return false;
     }
   }
-    //adding  member workspace to group vector
-	g_log.information()<< outmemberwsName<<" adding to group workspace"<<std::endl;
-	outwsgrp_sptr->add(outmemberwsName);
+  //adding  member workspace to group vector
+  g_log.information()<< outmemberwsName<<" adding to group workspace"<<std::endl;
+  outwsgrp_sptr->add(outmemberwsName);
   return true;
 }
 
 /** To query the property is a workspace property
  *  @param prop pointer to input properties
+ *  @returns true if this is a workspace property
  */
 bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 {
@@ -912,6 +914,7 @@ bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 
 /** checks the property is a input workspace property
   * @param prop pointer to the input properties
+  *  @returns true if this is a input workspace property
 */
 bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
 {	
@@ -927,6 +930,7 @@ bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) con
 }
 /** checks the property is a output workspace property
   * @param prop pointer to input  properties
+  * @returns true if this is a output workspace property
 */
 bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) const
 {
