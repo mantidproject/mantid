@@ -395,7 +395,23 @@ std::string to_simple_string(const dateAndTime &time)
 std::string to_string(const dateAndTime &time, const char *format)
 {
   char buffer [100]; //max 100 characters in the format
-  std::tm time_tm = boost::posix_time::to_tm(time); //turn into that struct
+  std::tm time_tm;
+  try
+  {
+    time_tm = boost::posix_time::to_tm(time); //turn into that struct
+  } catch ( std::out_of_range & )
+  {
+    time_tm.tm_year = 0;
+    time_tm.tm_mon = 0;
+    time_tm.tm_mday = 1;
+    time_tm.tm_hour = 0;
+    time_tm.tm_min = 0;
+    time_tm.tm_sec = 0;
+    time_tm.tm_wday = 0;
+    time_tm.tm_yday = 0;
+    time_tm.tm_isdst = 0;
+  }
+
   strftime (buffer, 100, format, &time_tm); //Make into a string
   return std::string(buffer);
 }
