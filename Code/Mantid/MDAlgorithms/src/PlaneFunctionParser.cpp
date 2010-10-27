@@ -4,13 +4,13 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        PlaneFunctionParser::PlaneFunctionParser(ParameterParser* parameterParser) : FunctionParser(parameterParser)
+        PlaneFunctionParser::PlaneFunctionParser(API::ImplicitFunctionParameterParser* parameterParser) : ImplicitFunctionParser(parameterParser)
         {
         }
 
-        IFunctionBuilder* PlaneFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
+        API::ImplicitFunctionBuilder* PlaneFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
         {
-            IFunctionBuilder* functionBuilder;
+            API::ImplicitFunctionBuilder* functionBuilder;
             if("Function" != functionElement->localName())
             {
                std::string message = "This is not a function element: " + functionElement->localName(); 
@@ -20,7 +20,7 @@ namespace Mantid
             std::string type = functionElement->getChildElement("Type")->innerText();
             if(PlaneImplicitFunction::functionName() != type)
             {
-                FunctionParser::checkSuccessorExists();
+                ImplicitFunctionParser::checkSuccessorExists();
                 functionBuilder = m_successor->createFunctionBuilder(functionElement);
             }
             else
@@ -30,9 +30,9 @@ namespace Mantid
             return functionBuilder;
         }
 
-        void PlaneFunctionParser::setSuccessorParser(FunctionParser* parser)
+        void PlaneFunctionParser::setSuccessorParser(ImplicitFunctionParser* parser)
         {
-            this->m_successor = std::auto_ptr<FunctionParser>(parser);
+            this->m_successor = std::auto_ptr<ImplicitFunctionParser>(parser);
         }
 
         PlaneFunctionBuilder * PlaneFunctionParser::parsePlaneFunction(Poco::XML::Element* functionElement)
@@ -44,7 +44,7 @@ namespace Mantid
             for(int i = 0; i < parameterList->length(); i++)
             {
                 Element* parameterElement = dynamic_cast<Element*>(parameterList->item(i));
-                std::auto_ptr<IParameter> parameter = std::auto_ptr<IParameter>(this->parseParameter(parameterElement));
+                std::auto_ptr<API::ImplicitFunctionParameter> parameter = std::auto_ptr<API::ImplicitFunctionParameter>(this->parseParameter(parameterElement));
                 if(NormalParameter::parameterName() == parameter->getName())
                 { 
                     NormalParameter normal = NormalParameter(dynamic_cast<NormalParameter*>(parameter.get()));

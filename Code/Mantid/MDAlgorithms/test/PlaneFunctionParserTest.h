@@ -28,13 +28,13 @@ private:
     class ExposedPlaneFunctionParser : public Mantid::MDAlgorithms::PlaneFunctionParser
     {
     public:
-        ExposedPlaneFunctionParser(Mantid::MDAlgorithms::ParameterParser* paramParser) :  PlaneFunctionParser(paramParser)
+        ExposedPlaneFunctionParser(Mantid::API::ImplicitFunctionParameterParser* paramParser) :  PlaneFunctionParser(paramParser)
         {}
         Mantid::MDAlgorithms::PlaneFunctionBuilder* exposedParsePlaneFunction(Poco::XML::Element* functionElement)
         {
             return this->parsePlaneFunction(functionElement);
         }
-        MOCK_METHOD1(createFunctionBuilder, Mantid::MDAlgorithms::IFunctionBuilder*(Poco::XML::Element* functionElement));
+        MOCK_METHOD1(createFunctionBuilder, Mantid::API::ImplicitFunctionBuilder*(Poco::XML::Element* functionElement));
     };
 
 public:
@@ -54,7 +54,7 @@ public:
             .WillOnce(testing::Return(new NormalParameter(0, 0, 0)));
 
         PlaneFunctionParser functionParser(paramParser);
-        IFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
+        Mantid::API::ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
 
         TSM_ASSERT("Incorrect calling of nested matched parameter parsers!", testing::Mock::VerifyAndClearExpectations(paramParser))
@@ -63,6 +63,7 @@ public:
     void testCallsFunctionParserChain()
     {
         using namespace Mantid::MDAlgorithms;
+		using namespace Mantid::API;
 
         Poco::XML::DOMParser pParser;
         std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>X</Type><ParameterList></ParameterList></Function>";
@@ -75,7 +76,7 @@ public:
 
         PlaneFunctionParser functionParser(constructRootParameterParser().release());
         functionParser.setSuccessorParser(mockFuncParser);
-        IFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
+        ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
 
         TSM_ASSERT("Incorrect calling of nested successor function parsers", testing::Mock::VerifyAndClearExpectations(mockFuncParser))
@@ -92,7 +93,7 @@ public:
 
         ExposedPlaneFunctionParser functionParser(constructRootParameterParser().release());
         PlaneFunctionBuilder* planeBuilder = functionParser.exposedParsePlaneFunction(pRootElem);
-        std::auto_ptr<Mantid::API::IImplicitFunction> impFunction = planeBuilder->create();
+        std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = planeBuilder->create();
 
         PlaneImplicitFunction* planeFunction = dynamic_cast<PlaneImplicitFunction*>(impFunction.get());
 

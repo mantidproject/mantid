@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <memory>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include "OriginParameterParser.h"
 #include "OriginParameter.h"
 
@@ -31,11 +33,11 @@ private:
     };
 
     //Mock class
-    class SuccessorParameterParser : public Mantid::MDAlgorithms::ParameterParser 
+    class SuccessorParameterParser : public Mantid::API::ImplicitFunctionParameterParser 
     {
     public:
-        MOCK_METHOD1(createParameter, Mantid::MDAlgorithms::IParameter*(Poco::XML::Element* parameterElement));
-        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::ParameterParser* parameterParser));
+        MOCK_METHOD1(createParameter, Mantid::API::ImplicitFunctionParameter*(Poco::XML::Element* parameterElement));
+        MOCK_METHOD1(setSuccessorParser, void(Mantid::API::ImplicitFunctionParameterParser* parameterParser));
     };
 
 public:
@@ -66,7 +68,7 @@ public:
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         OriginParameterParser parser;
-        IParameter* iparam = parser.createParameter(pRootElem);
+        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
         OriginParameter* pOriginParam = dynamic_cast<OriginParameter*>(iparam);
         std::auto_ptr<OriginParameter> oparam = std::auto_ptr<OriginParameter>(pOriginParam);
         TSM_ASSERT("The paramter generated should be an OriginParamter", NULL != pOriginParam);
@@ -86,7 +88,7 @@ public:
 		OriginParameterParser parser;
 		
         parser.setSuccessorParser(successor);
-        IParameter* iparam = parser.createParameter(pRootElem);
+        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
 
         TSM_ASSERT("Chain of responsiblity did not execute as expected for OriginParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
     }

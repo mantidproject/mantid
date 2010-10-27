@@ -25,25 +25,16 @@
     <ClInclude Include="test\testCPrebinning.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\IImplicitFunction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\IFunctionBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\IParameter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\NormalParameter.h">
@@ -53,12 +44,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\ParameterParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\FunctionParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\NormalParameterParser.h">
@@ -76,6 +61,12 @@
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\Topology.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\ImplicitTopology.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CompositeImplicitFunction.cpp">
@@ -85,9 +76,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PlaneFunctionBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IFunctionBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\NormalParameter.cpp">
@@ -118,6 +106,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CompositeFunctionParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImplicitTopology.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

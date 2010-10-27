@@ -13,23 +13,23 @@ namespace Mantid
         {
         }
 
-        void CompositeFunctionBuilder::addFunctionBuilder(IFunctionBuilder* funcBuilder)
+        void CompositeFunctionBuilder::addFunctionBuilder(ImplicitFunctionBuilder* funcBuilder)
         {
-            this->m_functionBuilders.push_back(boost::shared_ptr<IFunctionBuilder>(funcBuilder));
+            this->m_functionBuilders.push_back(boost::shared_ptr<ImplicitFunctionBuilder>(funcBuilder));
         }
 
-        std::auto_ptr<Mantid::API::IImplicitFunction> CompositeFunctionBuilder::create() const
+        std::auto_ptr<Mantid::API::ImplicitFunction> CompositeFunctionBuilder::create() const
         {
             CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
 
-            std::vector<boost::shared_ptr<IFunctionBuilder>>::const_iterator it;
+            std::vector<boost::shared_ptr<ImplicitFunctionBuilder>>::const_iterator it;
             for(it = this->m_functionBuilders.begin(); it != this->m_functionBuilders.end(); ++it)
             {
-                IImplicitFunction* rawFunc = (*it)->create().release();
-                compFunction->addFunction(boost::shared_ptr<IImplicitFunction>(rawFunc));
+                ImplicitFunction* rawFunc = (*it)->create().release();
+                compFunction->addFunction(boost::shared_ptr<ImplicitFunction>(rawFunc));
             }
 
-            return std::auto_ptr<IImplicitFunction>(compFunction);
+            return std::auto_ptr<ImplicitFunction>(compFunction);
         }
 
         CompositeFunctionBuilder::~CompositeFunctionBuilder()

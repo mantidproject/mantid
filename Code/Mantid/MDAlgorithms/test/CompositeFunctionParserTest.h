@@ -30,7 +30,7 @@ private:
         {
             return this->parseCompositeFunction(functionElement);
         }
-        MOCK_METHOD1(createFunctionBuilder, Mantid::MDAlgorithms::IFunctionBuilder*(Poco::XML::Element* functionElement));
+        MOCK_METHOD1(createFunctionBuilder, Mantid::API::ImplicitFunctionBuilder*(Poco::XML::Element* functionElement));
     };
 
 public:
@@ -66,7 +66,8 @@ public:
     void testCallsFunctionParserChain()
     {
         using namespace Mantid::MDAlgorithms;
-
+        using namespace Mantid::API;
+		
         Poco::XML::DOMParser pParser;
         std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>OtherFunctionType</Type><ParameterList></ParameterList></Function>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
@@ -78,7 +79,7 @@ public:
 
         CompositeFunctionParser functionParser;
         functionParser.setSuccessorParser(mockFuncParser);
-        IFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
+        ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
 
         TSM_ASSERT("Incorrect calling of nested successor function parsers", testing::Mock::VerifyAndClearExpectations(mockFuncParser))
@@ -96,7 +97,7 @@ public:
         ExposedCompositeFunctionParser functionParser;
 		functionParser.setSuccessorParser(new PlaneFunctionParser(constructRootParameterParser().release()));
         CompositeFunctionBuilder* compositeFunctionBuilder = functionParser.exposedParseCompositeFunction(pRootElem);
-        std::auto_ptr<Mantid::API::IImplicitFunction> impFunction = compositeFunctionBuilder->create();
+        std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = compositeFunctionBuilder->create();
 
         CompositeImplicitFunction* compositeFunction = dynamic_cast<CompositeImplicitFunction*>(impFunction.get());
 

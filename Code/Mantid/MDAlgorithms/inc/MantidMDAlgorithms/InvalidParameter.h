@@ -7,7 +7,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "IParameter.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 
 namespace Mantid
 {
@@ -41,7 +41,7 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport InvalidParameter : public IParameter
+        class DLLExport InvalidParameter : public Mantid::API::ImplicitFunctionParameter
         {
         private:
             std::string m_value;

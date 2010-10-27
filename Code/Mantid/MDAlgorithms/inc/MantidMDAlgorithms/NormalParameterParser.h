@@ -19,8 +19,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "NormalParameter.h"
-#include "ParameterParser.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
 
 
 namespace Mantid
@@ -55,15 +55,15 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport NormalParameterParser : public ParameterParser
+        class DLLExport NormalParameterParser : public Mantid::API::ImplicitFunctionParameterParser
         {
         public:
             NormalParameterParser();
-            IParameter* createParameter(Poco::XML::Element* parameterElement);
-            void setSuccessorParser(ParameterParser* paramParser);
+            Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
+            void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
             ~NormalParameterParser();
         protected:
-            std::auto_ptr<ParameterParser> m_successor;
+            std::auto_ptr<ImplicitFunctionParameterParser> m_successor;
             NormalParameter* parseNormalParameter(std::string value);
         };
     }

@@ -7,9 +7,9 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/IParameter.h"
-#include "MantidMDAlgorithms/IImplicitFunction.h"
-#include "MantidMDAlgorithms/IFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidAPI/ImplicitFunction.h"
+#include "MantidAPI/ImplicitFunctionBuilder.h"
 
 namespace Mantid
 {
@@ -45,14 +45,14 @@ namespace Mantid
         */
 
 
-        class DLLExport CompositeFunctionBuilder : public IFunctionBuilder
+        class DLLExport CompositeFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
         {
         private:
-            std::vector<boost::shared_ptr<IFunctionBuilder> > m_functionBuilders;
+            std::vector<boost::shared_ptr<ImplicitFunctionBuilder> > m_functionBuilders;
         public:
             CompositeFunctionBuilder();
-            void addFunctionBuilder(IFunctionBuilder* funcBuilder);
-            std::auto_ptr<Mantid::API::IImplicitFunction> create() const;
+            void addFunctionBuilder(ImplicitFunctionBuilder* funcBuilder);
+            std::auto_ptr<Mantid::API::ImplicitFunction> create() const;
             ~CompositeFunctionBuilder();
         };
 

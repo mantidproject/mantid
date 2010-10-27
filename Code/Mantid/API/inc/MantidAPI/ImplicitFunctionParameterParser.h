@@ -19,13 +19,11 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "OriginParameter.h"
-#include "NormalParameter.h"
-#include "InvalidParameter.h"
+#include "ImplicitFunctionParameter.h"
 
 namespace Mantid
 {
-    namespace MDAlgorithms
+    namespace API
     {
         /** A base class for absorption correction algorithms.
 
@@ -55,14 +53,14 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport ParameterParser
+        class DLLExport ImplicitFunctionParameterParser
         {
         public:
-            virtual IParameter* createParameter(Poco::XML::Element* parameterElement) = 0;
-            virtual void setSuccessorParser(ParameterParser* paramParser) = 0;
-            virtual ~ParameterParser() = 0 {;}
+            virtual ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement) = 0;
+            virtual void setSuccessorParser(ImplicitFunctionParameterParser* paramParser) = 0;
+            virtual ~ImplicitFunctionParameterParser() = 0 {;}
         protected:
-            std::auto_ptr<ParameterParser> m_successor;
+            std::auto_ptr<ImplicitFunctionParameterParser> m_successor;
 
         };
     }

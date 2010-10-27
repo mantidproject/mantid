@@ -1,9 +1,22 @@
-#ifndef IPARAMETER_H_
-#define IPARAMETER_H_
+#ifndef IIMPLICITFUNCTION_H_
+#define IIMPLICITFUNCTION_H_
+
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
+#define DECLARE_IMPLICIT_FUNCTION(classname) \
+    namespace { \
+    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+    ((Mantid::API::ImplicitFunctionFactory::Instance().subscribe<classname>()) \
+    , 0)); \
+    }
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/Text.h"
@@ -14,14 +27,19 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
+#include "Point3D.h"
 
 namespace Mantid
 {
-    namespace MDAlgorithms
+
+    namespace API
     {
+  
+
         /** A base class for absorption correction algorithms.
 
-        IProperty abstract property type for use with IImplicitFunctions.
+        This class represents the abstract implicit function type used for communicating and implementing an operation against 
+        an MDWorkspace.
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010
@@ -47,58 +65,14 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport IParameter
+        class DLLExport ImplicitFunction
         {
-
         public:
-            virtual std::string getName() const = 0;
-
-            virtual bool isValid() const = 0;
-
+            virtual bool evaluate(const Point3D* pPoint3D) const = 0;
+            virtual std::string getName() const = 0; 
             virtual std::string toXMLString() const = 0;
-
-
-            std::auto_ptr<IParameter> clone() const
-            { 
-                return std::auto_ptr<IParameter>( this->cloneImp() ); 
-            }
-
-            virtual ~IParameter() = 0
-            {
-            };
-
+            virtual ~ImplicitFunction() = 0 {;}
         protected:
-
-            virtual IParameter* cloneImp() const = 0;
-
-            bool m_isValid;
-
-            std::string parameterXMLTemplate(std::string valueXMLtext) const
-            {
-                using namespace Poco::XML;
-
-                using namespace Poco::XML;
-                AutoPtr<Document> pDoc = new Document;
-                Element* paramElement = pDoc->createElement("Parameter");
-                
-                pDoc->appendChild(paramElement);
-                Element* typeElement = pDoc->createElement("Type");
-                Text* typeText = pDoc->createTextNode(this->getName());
-                typeElement->appendChild(typeText);
-                paramElement->appendChild(typeElement);
-
-                Element* valueElement = pDoc->createElement("Value");
-                Text* valueText = pDoc->createTextNode(valueXMLtext);
-                valueElement->appendChild(valueText);
-                paramElement->appendChild(valueElement);
-                
-                std::stringstream xmlstream;
-
-                DOMWriter writer;
-                writer.writeNode(xmlstream, pDoc);
-                return xmlstream.str();
-            }
-
 
         };
     }

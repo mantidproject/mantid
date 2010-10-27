@@ -1,4 +1,5 @@
-﻿
+﻿#include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
 #include "MantidMDAlgorithms/NormalParameter.h"
 
 namespace Mantid
@@ -103,13 +104,10 @@ namespace Mantid
 
         std::string NormalParameter::toXMLString() const
         {
-            char buffer[256];
-            sprintf(buffer, "%.4f, %.4f, %.4f", m_normal.at(0),  m_normal.at(1), m_normal.at(2));
-            std::string valueXMLtext = std::string(buffer);
+            std::string valueXMLtext = boost::str(boost::format("%.4f, %.4f, %.4f") % m_normal.at(0) %  m_normal.at(1) % m_normal.at(2));
 
             return this->parameterXMLTemplate(valueXMLtext);
         }
-
 
     }
 

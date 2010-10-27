@@ -1,17 +1,19 @@
 ﻿#include "MantidMDAlgorithms/CompositeFunctionParser.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include "MantidAPI/ImplicitFunctionBuilder.h"
+
 namespace Mantid
 {
     namespace MDAlgorithms
     {
-        CompositeFunctionParser::CompositeFunctionParser() : FunctionParser(new InvalidParameterParser)
+        CompositeFunctionParser::CompositeFunctionParser() : ImplicitFunctionParser(new InvalidParameterParser)
         {
         }
 
-        IFunctionBuilder* CompositeFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
+        API::ImplicitFunctionBuilder* CompositeFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
         {
-            IFunctionBuilder* functionBuilder;
+            Mantid::API::ImplicitFunctionBuilder* functionBuilder;
             if("Function" != functionElement->localName())
             {
                std::string message = "This is not a function element: " + functionElement->localName(); 
@@ -21,7 +23,7 @@ namespace Mantid
             std::string type = functionElement->getChildElement("Type")->innerText();
             if(CompositeImplicitFunction::functionName() != type)
             {
-                FunctionParser::checkSuccessorExists(); 
+                ImplicitFunctionParser::checkSuccessorExists(); 
                 functionBuilder = m_successor->createFunctionBuilder(functionElement);
             }
             else
@@ -31,15 +33,15 @@ namespace Mantid
             return functionBuilder;
         }
 
-        void CompositeFunctionParser::setSuccessorParser(FunctionParser* parser)
+        void CompositeFunctionParser::setSuccessorParser(ImplicitFunctionParser* parser)
         {
-            this->m_successor = std::auto_ptr<FunctionParser>(parser);
+            this->m_successor = std::auto_ptr<ImplicitFunctionParser>(parser);
         }
 
         CompositeFunctionBuilder * CompositeFunctionParser::parseCompositeFunction(Poco::XML::Element* functionElement)
         {
             using namespace Poco::XML;
-            FunctionParser::checkSuccessorExists(); 
+            ImplicitFunctionParser::checkSuccessorExists(); 
             std::auto_ptr<CompositeFunctionBuilder> functionBuilder = std::auto_ptr<CompositeFunctionBuilder>(new CompositeFunctionBuilder);
             NodeList* childFunctionElementList = functionElement->childNodes();
            
@@ -49,7 +51,7 @@ namespace Mantid
                 std::string typeName = childFunctionElement->localName();
                 if("Function" == typeName)
                 {
-                    IFunctionBuilder* childFunctionBuilder = m_successor->createFunctionBuilder(childFunctionElement);
+                    Mantid::API::ImplicitFunctionBuilder* childFunctionBuilder = m_successor->createFunctionBuilder(childFunctionElement);
                     functionBuilder->addFunctionBuilder(childFunctionBuilder);
                 }
             }

@@ -4,7 +4,6 @@
 //Abstract testing base class for function parsers.
 
 #include <memory>
-#include "FunctionParserTest.h"
 #include "PlaneFunctionParser.h"
 #include "NormalParameterParser.h"
 #include "OriginParameterParser.h"
@@ -19,29 +18,30 @@ class  FunctionParserTest
 protected:
 
     //Mock function parser class.
-    class MockFunctionParser : public Mantid::MDAlgorithms::FunctionParser
+    class MockFunctionParser : public Mantid::API::ImplicitFunctionParser
     {
     public:
-        MockFunctionParser(Mantid::MDAlgorithms::ParameterParser* paramParser) : Mantid::MDAlgorithms::FunctionParser(paramParser) { ; }
-        MOCK_METHOD1(createFunctionBuilder, Mantid::MDAlgorithms::IFunctionBuilder*(Poco::XML::Element* functionElement));
-        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::FunctionParser* parameterElement));
+        MockFunctionParser(Mantid::API::ImplicitFunctionParameterParser* paramParser) : Mantid::API::ImplicitFunctionParser(paramParser) { ; }
+        MOCK_METHOD1(createFunctionBuilder, Mantid::API::ImplicitFunctionBuilder*(Poco::XML::Element* functionElement));
+        MOCK_METHOD1(setSuccessorParser, void(Mantid::API::ImplicitFunctionParser* parameterElement));
     };
 
     //Mock parameter parser class.
-    class MockParameterParser : public Mantid::MDAlgorithms::ParameterParser 
+    class MockParameterParser : public Mantid::API::ImplicitFunctionParameterParser
     {
     public:
-        MOCK_METHOD1(createParameter, Mantid::MDAlgorithms::IParameter*(Poco::XML::Element* parameterElement));
-        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::ParameterParser* parameterParser));
+        MOCK_METHOD1(createParameter, Mantid::API::ImplicitFunctionParameter*(Poco::XML::Element* parameterElement));
+        MOCK_METHOD1(setSuccessorParser, void(Mantid::API::ImplicitFunctionParameterParser* parameterParser));
     };
 	
     //helper method to construct real parameter parser chain.
-    std::auto_ptr<Mantid::MDAlgorithms::ParameterParser> constructRootParameterParser()
+    std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser> constructRootParameterParser()
     {
         using namespace Mantid::MDAlgorithms;
-        std::auto_ptr<ParameterParser> originParser = std::auto_ptr<ParameterParser>(new OriginParameterParser);
-        std::auto_ptr<ParameterParser> normalParser = std::auto_ptr<ParameterParser>(new NormalParameterParser);
-        std::auto_ptr<ParameterParser> invalidParser = std::auto_ptr<ParameterParser>(new InvalidParameterParser);
+		using namespace Mantid::API;
+        std::auto_ptr<ImplicitFunctionParameterParser> originParser = std::auto_ptr<ImplicitFunctionParameterParser>(new OriginParameterParser);
+        std::auto_ptr<ImplicitFunctionParameterParser> normalParser = std::auto_ptr<ImplicitFunctionParameterParser>(new NormalParameterParser);
+        std::auto_ptr<ImplicitFunctionParameterParser> invalidParser = std::auto_ptr<ImplicitFunctionParameterParser>(new InvalidParameterParser);
 
         originParser->setSuccessorParser(invalidParser.release());
         normalParser->setSuccessorParser(originParser.release());

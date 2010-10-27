@@ -26,7 +26,7 @@ namespace Mantid
             this->m_origin = OriginParameter(parameter);
         }
 
-        std::auto_ptr<IImplicitFunction> PlaneFunctionBuilder::create() const
+        std::auto_ptr<ImplicitFunction> PlaneFunctionBuilder::create() const
         {
             //check that builder parameters are valid.
             if(!m_origin.isValid())
@@ -41,7 +41,7 @@ namespace Mantid
             }
             //implement construction.
             PlaneImplicitFunction* func = new PlaneImplicitFunction(m_normal, m_origin);
-            return std::auto_ptr<IImplicitFunction>(func);
+            return std::auto_ptr<ImplicitFunction>(func);
         }
 
         PlaneFunctionBuilder::~PlaneFunctionBuilder()

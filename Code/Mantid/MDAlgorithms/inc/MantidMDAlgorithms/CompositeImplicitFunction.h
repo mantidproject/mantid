@@ -7,13 +7,13 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "IImplicitFunction.h"
+#include "MantidAPI/ImplicitFunction.h"
 
 namespace Mantid
 {
-    namespace MDDataObjects
+    namespace API
     {
-        class point3D;
+        class Point3D;
     }
     namespace MDAlgorithms
     {
@@ -47,14 +47,14 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport CompositeImplicitFunction : public Mantid::API::IImplicitFunction
+        class DLLExport CompositeImplicitFunction : public Mantid::API::ImplicitFunction
         {
         public:
             CompositeImplicitFunction();
           
             ~CompositeImplicitFunction();
-            void addFunction(boost::shared_ptr<Mantid::API::IImplicitFunction> constituentFunction);
-            bool evaluate(const MDDataObjects::point3D* pPoint3D) const;
+            void addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction> constituentFunction);
+            bool evaluate(const Mantid::API::Point3D* pPoint3D) const;
             std::string getName() const;
             std::string toXMLString() const;
             int getNFunctions() const;
@@ -65,8 +65,8 @@ namespace Mantid
                 return "CompositeImplicitFunction";
             }
         protected:
-            std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>> m_Functions;
-            typedef std::vector<boost::shared_ptr<Mantid::API::IImplicitFunction>>::const_iterator FunctionIterator;
+            std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction>> m_Functions;
+            typedef std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction>>::const_iterator FunctionIterator;
 
         };
     }

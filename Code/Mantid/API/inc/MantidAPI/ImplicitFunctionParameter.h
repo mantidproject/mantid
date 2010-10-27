@@ -1,10 +1,9 @@
-#ifndef IIMPLICITFUNCTION_H_
-#define IIMPLICITFUNCTION_H_
+#ifndef IPARAMETER_H_
+#define IPARAMETER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/Text.h"
@@ -15,20 +14,14 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
+
 namespace Mantid
 {
-
-    namespace MDDataObjects
-    {
-        class point3D;
-    }
-
     namespace API
     {
         /** A base class for absorption correction algorithms.
 
-        This class represents the abstract implicit function type used for communicating and implementing an operation against 
-        an MDWorkspace.
+        IProperty abstract property type for use with IImplicitFunctions.
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010
@@ -54,14 +47,58 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport IImplicitFunction
+        class DLLExport ImplicitFunctionParameter
         {
+
         public:
-            virtual bool evaluate(const MDDataObjects::point3D* pPoint3D) const = 0;
-            virtual std::string getName() const = 0; 
+            virtual std::string getName() const = 0;
+
+            virtual bool isValid() const = 0;
+
             virtual std::string toXMLString() const = 0;
-            virtual ~IImplicitFunction() = 0 {;}
+
+
+            std::auto_ptr<ImplicitFunctionParameter> clone() const
+            { 
+                return std::auto_ptr<ImplicitFunctionParameter>( this->cloneImp() ); 
+            }
+
+            virtual ~ImplicitFunctionParameter() = 0
+            {
+            };
+
         protected:
+
+            virtual ImplicitFunctionParameter* cloneImp() const = 0;
+
+            bool m_isValid;
+
+            std::string parameterXMLTemplate(std::string valueXMLtext) const
+            {
+                using namespace Poco::XML;
+
+                using namespace Poco::XML;
+                AutoPtr<Document> pDoc = new Document;
+                Element* paramElement = pDoc->createElement("Parameter");
+                
+                pDoc->appendChild(paramElement);
+                Element* typeElement = pDoc->createElement("Type");
+                Text* typeText = pDoc->createTextNode(this->getName());
+                typeElement->appendChild(typeText);
+                paramElement->appendChild(typeElement);
+
+                Element* valueElement = pDoc->createElement("Value");
+                Text* valueText = pDoc->createTextNode(valueXMLtext);
+                valueElement->appendChild(valueText);
+                paramElement->appendChild(valueElement);
+                
+                std::stringstream xmlstream;
+
+                DOMWriter writer;
+                writer.writeNode(xmlstream, pDoc);
+                return xmlstream.str();
+            }
+
 
         };
     }

@@ -8,9 +8,9 @@
 #include <memory>
 #include "CompositeFunctionBuilder.h"
 #include "CompositeImplicitFunction.h"
-#include "IImplicitFunction.h"
-#include "IFunctionBuilder.h"
-#include "IParameter.h"
+#include "MantidAPI/ImplicitFunction.h"
+#include "MantidAPI/ImplicitFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MDDataObjects/point3D.h"
 
 class CompositeBuilderTest : public CxxTest::TestSuite
@@ -18,7 +18,7 @@ class CompositeBuilderTest : public CxxTest::TestSuite
 
 private:
 
-    class FakeParameter : public Mantid::MDAlgorithms::IParameter
+    class FakeParameter : public Mantid::API::ImplicitFunctionParameter
     {
     public:
         bool isValid() const
@@ -30,7 +30,7 @@ private:
         ~FakeParameter(){;} 
 
     protected:
-        virtual Mantid::MDAlgorithms::IParameter* cloneImp() const
+        virtual Mantid::API::ImplicitFunctionParameter* cloneImp() const
         {
             return new FakeParameter;
         }
@@ -38,10 +38,10 @@ private:
 
 
 
-    class FakeImplicitFunction : Mantid::API::IImplicitFunction
+    class FakeImplicitFunction : Mantid::API::ImplicitFunction
     {
     public:
-        bool evaluate(const Mantid::MDDataObjects::point3D* pPoint3D) const
+        bool evaluate(const Mantid::API::Point3D* pPoint3D) const
         {    
             return false;
         }
@@ -49,17 +49,17 @@ private:
 		MOCK_CONST_METHOD0(toXMLString, std::string());
     };
 
-    class FakeFunctionBuilder : public Mantid::MDAlgorithms::IFunctionBuilder
+    class FakeFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
     {
     public:
         mutable bool isInvoked;
-        void addParameter(std::auto_ptr<Mantid::MDAlgorithms::IParameter> parameter)
+        void addParameter(std::auto_ptr<Mantid::API::ImplicitFunctionParameter> parameter)
         {
         }
-        std::auto_ptr<Mantid::API::IImplicitFunction> create() const
+        std::auto_ptr<Mantid::API::ImplicitFunction> create() const
         {
             isInvoked = true;
-            return std::auto_ptr<Mantid::API::IImplicitFunction>(new FakeImplicitFunction);
+            return std::auto_ptr<Mantid::API::ImplicitFunction>(new FakeImplicitFunction);
         }
     };
 
@@ -77,7 +77,7 @@ public:
         innerCompBuilder->addFunctionBuilder(builderB);
         std::auto_ptr<CompositeFunctionBuilder> outterCompBuilder = std::auto_ptr<CompositeFunctionBuilder>(new CompositeFunctionBuilder);
         outterCompBuilder->addFunctionBuilder(innerCompBuilder);
-        std::auto_ptr<Mantid::API::IImplicitFunction> topFunc = outterCompBuilder->create();
+        std::auto_ptr<Mantid::API::ImplicitFunction> topFunc = outterCompBuilder->create();
         //CompositeImplicitFunction* topCompFunc = dynamic_cast<CompositeImplicitFunction*>(topFunc.get());
 
         TSM_ASSERT("Nested builder not called by composite", builderA->isInvoked);

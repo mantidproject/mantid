@@ -19,12 +19,12 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "IFunctionBuilder.h"
-#include "ParameterParser.h"
+#include "ImplicitFunctionBuilder.h"
+#include "ImplicitFunctionParameterParser.h"
 
 namespace Mantid
 {
-    namespace MDAlgorithms
+    namespace API
     {
         /** A base class for absorption correction algorithms.
 
@@ -54,14 +54,14 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport FunctionParser
+        class DLLExport ImplicitFunctionParser
         {
         protected:
-            std::auto_ptr<ParameterParser> m_paramParserRoot; //Chain of responsibility 
-            std::auto_ptr<FunctionParser> m_successor;
+            std::auto_ptr<ImplicitFunctionParameterParser> m_paramParserRoot; //Chain of responsibility 
+            std::auto_ptr<ImplicitFunctionParser> m_successor;
 
             
-            IParameter* parseParameter(Poco::XML::Element* pRoot)
+            ImplicitFunctionParameter* parseParameter(Poco::XML::Element* pRoot)
             {
                 return m_paramParserRoot->createParameter(pRoot);
             }
@@ -76,13 +76,13 @@ namespace Mantid
             }
 
         public:
-            FunctionParser(ParameterParser* parameterParser) : m_paramParserRoot(std::auto_ptr<ParameterParser>(parameterParser))
+            ImplicitFunctionParser(ImplicitFunctionParameterParser* parameterParser) : m_paramParserRoot(std::auto_ptr<ImplicitFunctionParameterParser>(parameterParser))
             {
             }
 
-            virtual IFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement) = 0;
-            virtual void setSuccessorParser(FunctionParser* parser) = 0;
-            virtual ~FunctionParser() = 0 {;}
+            virtual ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement) = 0;
+            virtual void setSuccessorParser(ImplicitFunctionParser* parser) = 0;
+            virtual ~ImplicitFunctionParser() = 0 {;}
 
         };
 

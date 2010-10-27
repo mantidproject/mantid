@@ -34,11 +34,11 @@ private:
     };
 
 	//Mock class
-    class SuccessorParameterParser : public Mantid::MDAlgorithms::ParameterParser 
+    class SuccessorParameterParser : public Mantid::API::ImplicitFunctionParameterParser 
     {
     public:
-        MOCK_METHOD1(createParameter, Mantid::MDAlgorithms::IParameter*(Poco::XML::Element* parameterElement));
-        MOCK_METHOD1(setSuccessorParser, void(Mantid::MDAlgorithms::ParameterParser* parameterParser));
+        MOCK_METHOD1(createParameter, Mantid::API::ImplicitFunctionParameter*(Poco::XML::Element* parameterElement));
+        MOCK_METHOD1(setSuccessorParser, void(Mantid::API::ImplicitFunctionParameterParser* parameterParser));
     };
 
 public:
@@ -72,7 +72,7 @@ public:
         Element* pRootElem = pDoc->documentElement();
 
         NormalParameterParser parser;
-        IParameter* iparam = parser.createParameter(pRootElem);
+        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
         NormalParameter* pNormalParam = dynamic_cast<NormalParameter*>(iparam);
         std::auto_ptr<NormalParameter> nparam = std::auto_ptr<NormalParameter>(pNormalParam);
         TSM_ASSERT("The paramter generated should be an NormalParamter", NULL != pNormalParam);
@@ -93,7 +93,7 @@ public:
 		NormalParameterParser parser;
 		
         parser.setSuccessorParser(successor);
-        IParameter* iparam = parser.createParameter(pRootElem);
+        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
 
         TSM_ASSERT("Chain of responsiblity did not execute as expected for NormalParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
     }

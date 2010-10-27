@@ -19,8 +19,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "InvalidParameter.h"
-#include "ParameterParser.h"
+#include "MantidMDAlgorithms/InvalidParameter.h"
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
 
 namespace Mantid
 {
@@ -54,14 +54,14 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport InvalidParameterParser : public ParameterParser
+        class DLLExport InvalidParameterParser : public Mantid::API::ImplicitFunctionParameterParser
         {
         public:
             InvalidParameterParser();
-            IParameter* createParameter(Poco::XML::Element* parameterElement);
-            void setSuccessorParser(ParameterParser* paramParser);
+            Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
+            void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
         protected:
-            std::auto_ptr<ParameterParser> m_successor;
+            std::auto_ptr<ImplicitFunctionParameterParser> m_successor;
             InvalidParameter* parseInvalidParameter(std::string value);
         };
     }

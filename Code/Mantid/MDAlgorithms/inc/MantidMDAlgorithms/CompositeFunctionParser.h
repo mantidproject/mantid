@@ -8,7 +8,7 @@
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
 #include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
-#include "MantidMDAlgorithms/FunctionParser.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
 
 
 namespace Mantid
@@ -47,15 +47,15 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport CompositeFunctionParser : public FunctionParser
+        class DLLExport CompositeFunctionParser : public Mantid::API::ImplicitFunctionParser
         {
 
         public:
             CompositeFunctionParser();
 
-            IFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
+            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
 
-            void setSuccessorParser(FunctionParser* parser);
+            void setSuccessorParser(ImplicitFunctionParser* parser);
 
             CompositeFunctionBuilder* parseCompositeFunction(Poco::XML::Element* functionElement);
 

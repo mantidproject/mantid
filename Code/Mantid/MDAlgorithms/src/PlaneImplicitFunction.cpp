@@ -1,7 +1,7 @@
 ﻿#include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MDDataObjects/point3D.h"
+#include "MantidAPI/Point3D.h"
 #include <cmath>
 #include <vector>
 
@@ -15,10 +15,10 @@ namespace Mantid
 
         }
 
-        bool PlaneImplicitFunction::evaluate(const MDDataObjects::point3D* pPoint) const
+        bool PlaneImplicitFunction::evaluate(const Mantid::API::Point3D* pPoint) const
         {
             std::vector<double> num; 
-            dotProduct<double>(pPoint->GetX() - m_origin.getX(), pPoint->GetY() - m_origin.getY(), pPoint->GetZ() - m_origin.getZ(), m_normal.getX(), m_normal.getY(), m_normal.getZ(), num);
+            dotProduct<double>(pPoint->getX() - m_origin.getX(), pPoint->getY() - m_origin.getY(), pPoint->getZ() - m_origin.getZ(), m_normal.getX(), m_normal.getY(), m_normal.getZ(), num);
             //return num.at(0) + num.at(1) + num.at(2) / absolute(normalX, normalY, normalZ) <= 0; //Calculates distance, but magnituted of normal not important in this algorithm
             return num.at(0) + num.at(1) + num.at(2)  <= 0;
         }

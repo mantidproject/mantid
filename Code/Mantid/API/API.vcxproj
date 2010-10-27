@@ -219,6 +219,14 @@
     <ClInclude Include="inc\MantidAPI\FileProperty.h" />
     <ClInclude Include="inc\mantidapi\iarchivesearch.h" />
     <ClInclude Include="inc\MantidAPI\IMDWorkspace.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunction.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunctionBuilder.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunctionFactory.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameter.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameterParser.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunctionParser.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunctionParserFactory.h" />
+    <ClInclude Include="inc\MantidAPI\Point3D.h" />
     <ClInclude Include="inc\mantidapi\run.h" />
     <ClInclude Include="test\AlgorithmHistoryTest.h" />
     <ClInclude Include="inc\MantidAPI\AlgorithmManager.h" />

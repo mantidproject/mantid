@@ -15,7 +15,7 @@ namespace Mantid
         {
         }
 
-        IParameter* NormalParameterParser::createParameter(Poco::XML::Element* parameterElement)
+        Mantid::API::ImplicitFunctionParameter* NormalParameterParser::createParameter(Poco::XML::Element* parameterElement)
         {
             if(NormalParameter::parameterName() != parameterElement->getChildElement("Type")->innerText())
             {
@@ -48,9 +48,9 @@ namespace Mantid
             return new NormalParameter(nx, ny, nz);
         }
 
-        void NormalParameterParser::setSuccessorParser(ParameterParser* parameterParser)
+        void NormalParameterParser::setSuccessorParser(ImplicitFunctionParameterParser* parameterParser)
         {
-            m_successor = std::auto_ptr<ParameterParser>(parameterParser);
+            m_successor = std::auto_ptr<ImplicitFunctionParameterParser>(parameterParser);
         }
     }
 

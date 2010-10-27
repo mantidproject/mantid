@@ -9,8 +9,8 @@
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MantidMDAlgorithms/IFunctionBuilder.h"
-#include "MantidMDAlgorithms/IParameter.h"
+#include "MantidAPI/ImplicitFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 
 namespace Mantid
 {
@@ -48,7 +48,7 @@ namespace Mantid
         class NormalParameter;
         class OriginParameter;
 
-        class DLLExport PlaneFunctionBuilder : public IFunctionBuilder
+        class DLLExport PlaneFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
         {
         private:
             mutable OriginParameter m_origin;
@@ -57,7 +57,7 @@ namespace Mantid
             PlaneFunctionBuilder();
             void addNormalParameter(NormalParameter& parameter);
             void addOriginParameter(OriginParameter& parameter);
-            std::auto_ptr<Mantid::API::IImplicitFunction> create() const;
+            std::auto_ptr<Mantid::API::ImplicitFunction> create() const;
             ~PlaneFunctionBuilder();
         };
 

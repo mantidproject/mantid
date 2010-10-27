@@ -19,7 +19,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "ParameterParser.h"
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "OriginParameter.h"
 
 namespace Mantid
@@ -54,14 +54,14 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport OriginParameterParser : public ParameterParser
+        class DLLExport OriginParameterParser : public Mantid::API::ImplicitFunctionParameterParser
         {
         public:
             OriginParameterParser();
-            IParameter* createParameter(Poco::XML::Element* parameterElement);
-            void setSuccessorParser(ParameterParser* paramParser);
+            Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
+            void setSuccessorParser(ImplicitFunctionParameterParser* paramParser);
         protected:
-            std::auto_ptr<ParameterParser> m_successor;
+            std::auto_ptr<ImplicitFunctionParameterParser> m_successor;
             OriginParameter* parseOriginParameter(std::string value);
         };
     }

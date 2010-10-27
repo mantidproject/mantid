@@ -8,7 +8,7 @@
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
-#include "MantidMDAlgorithms/FunctionParser.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
 
 
 namespace Mantid
@@ -49,15 +49,15 @@ namespace Mantid
         */
 
         //TODO. This should be constructed via a factory
-        class DLLExport PlaneFunctionParser : public FunctionParser
+        class DLLExport PlaneFunctionParser : public Mantid::API::ImplicitFunctionParser
         {
 
         public:
-            PlaneFunctionParser(ParameterParser* parameterParser);
+            PlaneFunctionParser(Mantid::API::ImplicitFunctionParameterParser* parameterParser);
 
-            IFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
+            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
 
-            void setSuccessorParser(FunctionParser* parser);
+            void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
 
             PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
 

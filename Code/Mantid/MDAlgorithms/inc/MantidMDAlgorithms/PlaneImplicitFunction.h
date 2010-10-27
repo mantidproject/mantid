@@ -7,7 +7,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/IImplicitFunction.h"
+#include "MantidAPI/ImplicitFunction.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
 #include "MantidMDAlgorithms/VectorMathematics.h"
@@ -51,14 +51,14 @@ namespace Mantid
         */
 
         //TODO. This should be constructed via a factory
-        class DLLExport PlaneImplicitFunction : public Mantid::API::IImplicitFunction
+        class DLLExport PlaneImplicitFunction : public Mantid::API::ImplicitFunction
         {
         public:
             PlaneImplicitFunction(NormalParameter normal, OriginParameter origin);
             ~PlaneImplicitFunction();
             std::string getName() const;
             std::string toXMLString() const;
-            bool evaluate(const MDDataObjects::point3D* pPoint) const;
+            bool evaluate(const API::Point3D* pPoint) const;
             double getOriginX() const;
             double getOriginY() const;
             double getOriginZ() const;

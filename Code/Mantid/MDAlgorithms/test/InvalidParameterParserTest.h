@@ -16,8 +16,6 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
-using namespace Mantid::MDDataObjects;
-
 class  InvalidParameterParserTest : public CxxTest::TestSuite
 {
 public:
@@ -33,7 +31,7 @@ public:
         Element* pRootElem = pDoc->documentElement();
 
         InvalidParameterParser parser;
-        IParameter* iparam = parser.createParameter(pRootElem);
+        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
         InvalidParameter* pInvalidParam = dynamic_cast<InvalidParameter*>(iparam);
         std::auto_ptr<InvalidParameter> invalparam = std::auto_ptr<InvalidParameter>(pInvalidParam);
 

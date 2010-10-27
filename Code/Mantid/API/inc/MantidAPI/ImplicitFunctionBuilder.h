@@ -7,13 +7,13 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/IImplicitFunction.h"
-#include "MantidMDAlgorithms/IParameter.h"
+#include "ImplicitFunction.h"
+#include "ImplicitFunctionParameter.h"
 
 namespace Mantid
 {
 
-    namespace MDAlgorithms
+    namespace API
     {
         /** A base class for absorption correction algorithms.
 
@@ -44,11 +44,11 @@ namespace Mantid
         */
 
 
-        class DLLExport IFunctionBuilder
+        class DLLExport ImplicitFunctionBuilder
         {
         public:
-            virtual std::auto_ptr<Mantid::API::IImplicitFunction> create() const = 0;
-            virtual ~IFunctionBuilder() = 0;
+            virtual std::auto_ptr<Mantid::API::ImplicitFunction> create() const = 0;
+            virtual ~ImplicitFunctionBuilder() = 0 {;}
 
         };
     }

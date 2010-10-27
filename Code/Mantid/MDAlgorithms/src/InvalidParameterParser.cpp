@@ -11,7 +11,7 @@ namespace Mantid
 
         }
 
-        IParameter* InvalidParameterParser::createParameter(Poco::XML::Element* parameterElement)
+        Mantid::API::ImplicitFunctionParameter* InvalidParameterParser::createParameter(Poco::XML::Element* parameterElement)
         {
             std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
             return parseInvalidParameter(sParameterValue);
@@ -23,7 +23,7 @@ namespace Mantid
             return new InvalidParameter(value);
         }
 
-        void InvalidParameterParser::setSuccessorParser(ParameterParser* parser)
+        void InvalidParameterParser::setSuccessorParser(ImplicitFunctionParameterParser* parser)
         {
             //Do nothing. No sucessor allowed.
         }

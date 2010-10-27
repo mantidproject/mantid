@@ -3,15 +3,26 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <vector>
 #include "PlaneImplicitFunction.h"
 #include "NormalParameter.h"
 #include "OriginParameter.h"
-#include "MDDataObjects/point3D.h"
+#include "MantidAPI/Point3D.h"
 
 class PlaneImplicitFunctionTest : public CxxTest::TestSuite
 {
 private:
+    
+	class MockPoint3D: public Mantid::API::Point3D
+    {
+    public:
+	    MOCK_CONST_METHOD0(getX, double());
+        MOCK_CONST_METHOD0(getY, double());
+        MOCK_CONST_METHOD0(getZ, double());
+    };
+
     Mantid::MDAlgorithms::NormalParameter normal;
     Mantid::MDAlgorithms::OriginParameter origin;
 
@@ -39,7 +50,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(1, 1, 1);
+		
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(1));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(1));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(1));
+   
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", isInside);
@@ -49,7 +65,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(1, 1, 1);
+		
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(1));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(1));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(1));
+		
         NormalParameter reflectNormal = normal.reflect();
 
         PlaneImplicitFunction plane(reflectNormal, origin);
@@ -61,8 +82,13 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(4, 4, 4);
-        PlaneImplicitFunction plane(normal, origin);
+		
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(4));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(4));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(4));
+        
+		PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !isInside);
     }
@@ -71,7 +97,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(4, 4, 4);
+		
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(4));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(4));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(4));
+		
         NormalParameter reflectNormal = normal.reflect();;
         PlaneImplicitFunction plane(reflectNormal, origin);
         bool isInside = plane.evaluate(&point);
@@ -82,7 +113,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX(), origin.getY(), origin.getZ());
+
+		MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+		
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point should have been found to be on the region bounded by the plane.", isInside);
@@ -92,7 +128,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX(), origin.getY(), origin.getZ());
+		
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+		
         NormalParameter reflectNormal = normal.reflect();
         PlaneImplicitFunction plane(reflectNormal, origin);
         bool isInside = plane.evaluate(&point);
@@ -103,7 +144,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX() - 0.0001, origin.getY(), origin.getZ());
+		
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX() - 0.0001));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+		
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point x-value.", isInside);
@@ -113,7 +159,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX() + 0.0001, origin.getY(), origin.getZ());
+		
+		MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()+ 0.0001));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+		
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point x-value.", !isInside);
@@ -123,7 +174,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX(), origin.getY() - 0.0001, origin.getZ());
+		
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY() - 0.0001));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+		
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point y-value.", isInside);
@@ -133,7 +189,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX(), origin.getY() + 0.0001, origin.getZ());
+        
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY() + 0.0001));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ()));
+		
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", !isInside);
@@ -143,7 +204,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX(), origin.getY(), origin.getZ() - 0.0001);
+        
+        MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ() - 0.0001));
+		
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point z-value.", isInside);
@@ -153,7 +219,12 @@ public:
     {
         using namespace Mantid::MDDataObjects;
         using namespace Mantid::MDAlgorithms;
-        point3D point(origin.getX(), origin.getY(), origin.getZ() + 0.0001);
+		
+		MockPoint3D point;
+		EXPECT_CALL(point, getX()).Times(1).WillOnce(testing::Return(origin.getX()));
+		EXPECT_CALL(point, getY()).Times(1).WillOnce(testing::Return(origin.getY()));
+		EXPECT_CALL(point, getZ()).Times(1).WillOnce(testing::Return(origin.getZ() + 0.0001));
+		
         PlaneImplicitFunction plane(normal, origin);
         bool isInside = plane.evaluate(&point);
         TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point z-value.", !isInside);
