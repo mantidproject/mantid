@@ -69,7 +69,6 @@ namespace MantidQt
     private:
       virtual void closeEvent(QCloseEvent* close);
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
-      void getSpectraRanges(); ///< populate the spectra ranges for the "Calibration" tab.
       void clearReflectionInfo(); ///< clear various line edit boxes
       QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
       QString savePyCode(); ///< create python code as string to save files
@@ -85,6 +84,7 @@ namespace MantidQt
       void loadSettings();
       void saveSettings();
 
+      void setupCalibration(); ///< set up the miniplots on calibration tab
       void setupSlice(); ///< setup the slice miniplot section
 
     private slots:
@@ -99,15 +99,19 @@ namespace MantidQt
       void plotRaw(); ///< plot raw data from instrument
       void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
       void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
-      void resPlotInput();
       void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
       void rebinData(); ///< rebin transformed data
       void useCalib(bool state); ///< whether to use calib file
-      void calibPlot(); ///< plot raw data for calibration run
       void calibCreate(); ///< create calibration file
       void setasDirty(); ///< sets m_isDirty(true)
       void setasDirtyRebin(); ///< sets m_isDirtyRebin(true)
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
+
+      void calPlotRaw();
+      void calPlotEnergy();
+      void calMinChanged(double);
+      void calMaxChanged(double);
+      void calUpdateRS();
 
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
       void sOfQwRebinE(bool state);
@@ -136,6 +140,15 @@ namespace MantidQt
       /* Validators */
       QIntValidator *m_valInt; ///< validator for int inputs
       QDoubleValidator *m_valDbl; ///< validator for double inputs
+
+      // CALIBRATION MINIPLOTS (prefix: 'm_calCal' (calibration) and 'm_calRes' (resolution))
+      QwtPlot* m_calCalPlot;
+      QwtPlot* m_calResPlot;
+      MantidWidgets::RangeSelector* m_calCalR1;
+      MantidWidgets::RangeSelector* m_calCalR2;
+      MantidWidgets::RangeSelector* m_calResR1;
+      QwtPlotCurve* m_calCalCurve;
+      QwtPlotCurve* m_calResCurve;
 
       // SLICE MINIPLOT (prefix: 'm_slt')
       QwtPlot* m_sltPlot;

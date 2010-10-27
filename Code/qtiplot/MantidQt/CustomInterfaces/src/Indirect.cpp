@@ -25,8 +25,11 @@ Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
 UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true),
   m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), 
   m_changeObserver(*this, &Indirect::handleDirectoryChange),
-
-  // Slice init
+  // Null pointers - Calibration Tab
+  m_calCalPlot(NULL), m_calResPlot(NULL),
+  m_calCalR1(NULL), m_calCalR2(NULL), m_calResR1(NULL),
+  m_calCalCurve(NULL), m_calResCurve(NULL),
+  // Null pointers - Diagnostics Tab
   m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL)
 
 {
@@ -42,6 +45,7 @@ void Indirect::initLayout()
 
   m_settingsGroup = "CustomInterfaces/ConvertToEnergy/Indirect/";
 
+  setupCalibration(); // setup the calibration miniplots
   setupSlice(); // setup the slice miniplot
 
   // "Energy Transfer" tab
@@ -73,8 +77,8 @@ void Indirect::initLayout()
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
 
   // "Calibration" tab
-  connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calibPlot()));
-  connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(resPlotInput()));
+  connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
+  connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
   // "SofQW" tab
@@ -397,7 +401,6 @@ void Indirect::setIDFValues(const QString & prefix)
         }
       }
     }
-    getSpectraRanges();
 
     analyserSelected(m_uiForm.cbAnalyser->currentIndex());
   }
@@ -419,63 +422,6 @@ void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification
   if ( key == "datasearch.directories" || key == "defaultsave.directory" )
   {
     loadSettings();
-  }
-}
-/**
-* This function loads the min and max values for the analysers spectra and
-* displays this in the "Calibration" tab.
-*/
-void Indirect::getSpectraRanges()
-{
-  QString pyInput =
-    "from IndirectEnergyConversion import getSpectraRanges\n"
-    "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-    "print getSpectraRanges(instrument)\n";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-
-  if ( pyOutput == "" )
-  {
-    showInformationBox("Could not retrieve Spectral Ranges from IDF.");
-  }
-  else
-  {
-    QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
-
-    QLabel* lbPGMin = m_uiForm.cal_lbGraphiteMin;
-    QLabel* lbPGMax = m_uiForm.cal_lbGraphiteMax;
-    QLabel* lbMiMin = m_uiForm.cal_lbMicaMin;
-    QLabel* lbMiMax = m_uiForm.cal_lbMicaMax;
-    QLabel* lbDifMin = m_uiForm.cal_lbDiffractionMin;
-    QLabel* lbDifMax = m_uiForm.cal_lbDiffractionMax;
-
-    lbPGMin->clear();
-    lbPGMax->clear();
-    lbMiMin->clear();
-    lbMiMax->clear();
-    lbDifMin->clear();
-    lbDifMax->clear();
-
-    for ( int i = 0 ; i < analysers.count() ; i++ )
-    {
-      QStringList analyser_spectra = analysers[i].split("-", QString::SkipEmptyParts);
-      QStringList first_last = analyser_spectra[1].split(",", QString::SkipEmptyParts);
-      if(  analyser_spectra[0] == "graphite" )
-      {
-        lbPGMin->setText(first_last[0]);
-        lbPGMax->setText(first_last[1]);
-      }
-      else if ( analyser_spectra[0] == "mica" )
-      {
-        lbMiMin->setText(first_last[0]);
-        lbMiMax->setText(first_last[1]);
-      }
-      else if ( analyser_spectra[0] == "diffraction" )
-      {
-        lbDifMin->setText(first_last[0]);
-        lbDifMax->setText(first_last[1]);
-      }
-    }
   }
 }
 /**
@@ -1177,6 +1123,48 @@ void Indirect::saveSettings()
   // Instrument is handled in ConvertToEnergy class
 }
 
+void Indirect::setupCalibration()
+{
+  // Calib
+  m_calCalPlot = new QwtPlot(this);
+  m_calCalPlot->setAxisFont(QwtPlot::xBottom, this->font());
+  m_calCalPlot->setAxisFont(QwtPlot::yLeft, this->font());
+  m_uiForm.cal_plotCal->addWidget(m_calCalPlot);
+  m_calCalPlot->setCanvasBackground(Qt::white);
+  // R1 = Peak, R2 = Background
+  m_calCalR1 = new MantidWidgets::RangeSelector(m_calCalPlot);
+  m_calCalR1->setMinimum(m_uiForm.cal_lePeakMin->text().toDouble());
+  m_calCalR1->setMaximum(m_uiForm.cal_lePeakMax->text().toDouble());
+  connect(m_calCalR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+  connect(m_calCalR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+  m_calCalR2 = new MantidWidgets::RangeSelector(m_calCalPlot);
+  m_calCalR2->setColour(Qt::darkGreen); // dark green to signify background range
+  m_calCalR2->setMinimum(m_uiForm.cal_leBackMin->text().toDouble());
+  m_calCalR2->setMaximum(m_uiForm.cal_leBackMax->text().toDouble());
+  connect(m_calCalR2, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+  connect(m_calCalR2, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+
+  // Res
+  m_calResPlot = new QwtPlot(this);
+  m_calResPlot->setAxisFont(QwtPlot::xBottom, this->font());
+  m_calResPlot->setAxisFont(QwtPlot::yLeft, this->font());
+  m_uiForm.cal_plotRes->addWidget(m_calResPlot);
+  m_calResPlot->setCanvasBackground(Qt::white);
+  // Only one range selector for Res (background)
+  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
+  m_calResR1->setMinimum(m_uiForm.cal_lePeakMin->text().toDouble());
+  m_calResR1->setMaximum(m_uiForm.cal_lePeakMax->text().toDouble());
+  connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+  connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+
+  connect(m_uiForm.cal_lePeakMin, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
+  connect(m_uiForm.cal_lePeakMax, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
+  connect(m_uiForm.cal_leBackMin, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
+  connect(m_uiForm.cal_leBackMax, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
+  connect(m_uiForm.cal_leStartX, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
+  connect(m_uiForm.cal_leEndX, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
+}
+
 void Indirect::setupSlice()
 {
   // Create Slice Plot Widget for Range Selection
@@ -1184,6 +1172,7 @@ void Indirect::setupSlice()
   m_sltPlot->setAxisFont(QwtPlot::xBottom, this->font());
   m_sltPlot->setAxisFont(QwtPlot::yLeft, this->font());
   m_uiForm.slice_plot->addWidget(m_sltPlot);
+  m_sltPlot->setCanvasBackground(Qt::white);
   // We always want one range selector... the second one can be controlled from
   // within the sliceTwoRanges(bool state) function
   m_sltR1 = new MantidWidgets::RangeSelector(m_sltPlot);
@@ -1499,26 +1488,6 @@ void Indirect::detailedBalanceCheck(bool state)
 
   isDirtyRebin(true);
 }
-
-void Indirect::resPlotInput()
-{
-  if ( m_uiForm.cal_leRunNo->isValid() )
-  {
-    QString file = m_uiForm.cal_leRunNo->getFirstFilename();
-    QString pyInput =
-      "from IndirectEnergyConversion import res\n"
-      "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
-      ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
-      ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
-      "file = r'" + file + "'\n"
-      "outWS = res(file, iconOpt, '', '', plotOpt=True, Res=False)\n";
-    QString pyOuput = runPythonCode(pyInput).trimmed();
-  }
-  else
-  {
-    showInformationBox("Run number not valid.");
-  }
-}
 /**
 * This function enables/disables the display of the options involved in creating the RES file.
 * @param state whether checkbox is checked or unchecked
@@ -1527,14 +1496,7 @@ void Indirect::resCheck(bool state)
 {
   m_uiForm.cal_pbPlotEnergy->setEnabled(state);
   m_uiForm.cal_gbRES->setEnabled(state);
-  if ( state )
-  {
-    // m_uiForm.pbRun->setText("Create Calibration && Res files");
-  }
-  else
-  {
-    // m_uiForm.pbRun->setText("Create Calibration File");
-  }
+  m_calResR1->setVisible(state);
 }
 /**
 * This function just calls the runClicked slot, but with tryToSave being 'false'
@@ -1548,40 +1510,6 @@ void Indirect::useCalib(bool state)
 {
   m_uiForm.ind_calibFile->isOptional(!state);
   m_uiForm.ind_calibFile->setEnabled(state);
-}
-/**
-* This function plots the raw data entered onto the "Calibration" tab, without performing any of the data
-* modification steps.
-*/
-void Indirect::calibPlot()
-{
-  QString file = m_uiForm.cal_leRunNo->getFirstFilename();
-  if ( file == "" )
-  {
-    showInformationBox("Please enter a run number.");
-  }
-  else
-  {
-    QString pyInput =
-      "from mantidsimple import *\n"
-      "from mantidplot import *\n"
-      "try:\n"
-      "   LoadRaw(r'"+file+"', 'Raw', SpectrumMin=%1, SpectrumMax=%2)\n"
-      "except:\n"
-      "   print 'Could not load .raw file. Please check run number.'\n"
-      "   sys.exit('Could not load .raw file.')\n"
-      "graph = plotSpectrum('Raw', 0)\n";
-
-    pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
-    pyInput = pyInput.arg(m_uiForm.leSpectraMax->text());
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-
-    if ( pyOutput != "" )
-    {
-      showInformationBox(pyOutput);
-    }
-  }
 }
 /**
 * This function is called when the user clicks on the "Create Calibration File" button.
@@ -1661,6 +1589,164 @@ void Indirect::calibFileChanged(const QString & calib)
   else
   {
     m_uiForm.ckUseCalib->setChecked(true);
+  }
+}
+
+void Indirect::calPlotRaw()
+{
+  QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
+  
+  if ( filename == "" )
+  {
+    showInformationBox("Please enter a run number.");
+    return;
+  }
+    
+  QFileInfo fi(filename);
+  QString wsname = fi.baseName();
+
+  QString pyInput = "LoadRaw(r'" + filename + "', '" + wsname + "', SpectrumMin=" 
+    + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
+    + m_uiForm.leSpectraMax->text() + ")\n";
+  QString pyOutput = runPythonCode(pyInput);
+    
+  Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+
+  QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
+  QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+
+  if ( m_calCalCurve != NULL )
+  {
+    m_calCalCurve->attach(0);
+    delete m_calCalCurve;
+    m_calCalCurve = 0;
+  }
+
+  m_calCalCurve = new QwtPlotCurve();
+  m_calCalCurve->setData(dataX, dataY);
+  m_calCalCurve->attach(m_calCalPlot);
+  
+  m_calCalPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
+
+  m_calCalR1->setMinimum(m_uiForm.cal_lePeakMin->text().toDouble());
+  m_calCalR1->setMaximum(m_uiForm.cal_lePeakMax->text().toDouble());
+  m_calCalR1->setRange(dataX.first(), dataX.last());
+
+  m_calCalR2->setMinimum(m_uiForm.cal_leBackMin->text().toDouble());
+  m_calCalR2->setMaximum(m_uiForm.cal_leBackMax->text().toDouble());
+  m_calCalR2->setRange(dataX.first(), dataX.last());
+
+  // Replot
+  m_calCalPlot->replot();
+
+}
+
+void Indirect::calPlotEnergy()
+{
+  if ( ! m_uiForm.cal_leRunNo->isValid() )
+  {
+    showInformationBox("Run number not valid.");
+    return;
+  }
+  QString file = m_uiForm.cal_leRunNo->getFirstFilename();
+  QString pyInput =
+    "from IndirectEnergyConversion import res\n"
+    "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
+    ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
+    ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
+    "file = r'" + file + "'\n"
+    "outWS = res(file, iconOpt, '', '', Res=False)\n"
+    "print outWS\n";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+  
+  Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
+
+  QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
+  QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+
+  if ( m_calResCurve != NULL )
+  {
+    m_calResCurve->attach(0);
+    delete m_calResCurve;
+    m_calResCurve = 0;
+  }
+
+  m_calResCurve = new QwtPlotCurve();
+  m_calResCurve->setData(dataX, dataY);
+  m_calResCurve->attach(m_calResPlot);
+  
+  m_calResPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
+
+  m_calResR1->setMinimum(m_uiForm.cal_leStartX->text().toDouble());
+  m_calResR1->setMaximum(m_uiForm.cal_leEndX->text().toDouble());
+  m_calResR1->setRange(dataX.first(), dataX.last());
+
+  // Replot
+  m_calResPlot->replot();
+}
+
+void Indirect::calMinChanged(double val)
+{
+  MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
+  if ( from == m_calCalR1 )
+  {
+    m_uiForm.cal_lePeakMin->setText(QString::number(val));
+  }
+  else if ( from == m_calCalR2 )
+  {
+    m_uiForm.cal_leBackMin->setText(QString::number(val));
+  }
+  else if ( from == m_calResR1 )
+  {
+    m_uiForm.cal_leStartX->setText(QString::number(val));
+  }
+}
+
+void Indirect::calMaxChanged(double val)
+{
+  MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
+  if ( from == m_calCalR1 )
+  {
+    m_uiForm.cal_lePeakMax->setText(QString::number(val));
+  }
+  else if ( from == m_calCalR2 )
+  {
+    m_uiForm.cal_leBackMax->setText(QString::number(val));
+  }
+  else if ( from == m_calResR1 )
+  {
+    m_uiForm.cal_leEndX->setText(QString::number(val));
+  }
+}
+
+void Indirect::calUpdateRS()
+{
+  QLineEdit* from = qobject_cast<QLineEdit*>(sender());
+  double val = from->text().toDouble();
+
+  if ( from == m_uiForm.cal_lePeakMin )
+  {
+    m_calCalR1->setMinimum(val);
+  }
+  else if ( from == m_uiForm.cal_lePeakMax )
+  {
+    m_calCalR1->setMaximum(val);
+  }
+  else if ( from == m_uiForm.cal_leBackMin )
+  {
+    m_calCalR2->setMinimum(val);
+  }
+  else if ( from == m_uiForm.cal_leBackMax )
+  {
+    m_calCalR2->setMaximum(val);
+  }
+  else if ( from == m_uiForm.cal_leStartX )
+  {
+    m_calResR1->setMinimum(val);
+  }
+  else if ( from == m_uiForm.cal_leEndX )
+  {
+    m_calResR1->setMaximum(val);
   }
 }
 
