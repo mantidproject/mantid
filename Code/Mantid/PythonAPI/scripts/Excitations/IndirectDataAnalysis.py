@@ -80,11 +80,18 @@ def elwin(inputFiles, eRange, efixed, Save=False, Verbose=False, Plot=False):
         (root, ext) = os.path.splitext(filename)
         LoadNexus(file, root)
         run = mtd[root].getRun().getLogData("run_number").value()
-        savefile = root[:3] + run + '_elw'
-        Elwin(root, savefile, eRange, efixed)
+        savefile = root[:3] + run + root[8:-3]
+        if ( len(eRange) == 4 ):
+            ElasticWindow(root, eRange[0], eRange[1], eRange[2], eRange[3],
+                savefile + 'elw', savefile + 'eqs')
+        elif ( len(eRange) == 2 ):
+            ElasticWindow(root, eRange[0], eRange[1],
+                OutputInQ=savefile+'elw', OutputInQSquared=savefile+'eqs')
         if Save:
-            SaveNexusProcessed(savefile, savefile+'.nxs')
-        outWS_list.append(savefile)
+            SaveNexusProcessed(savefile+'elw', savefile+'elw.nxs')
+            SaveNexusProcessed(savefile+'eqs', savefile+'eqs.nxs')
+        outWS_list.append(savefile+'elw')
+        outWS_list.append(savefile+'eqs')
         mantid.deleteWorkspace(root)
     if Plot:
         graph = plotSpectrum(outWS_list, 0)
