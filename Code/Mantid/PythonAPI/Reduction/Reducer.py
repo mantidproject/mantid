@@ -143,14 +143,60 @@ class ReductionStep(object):
     """
         Base class for reduction steps
     """ 
-    def execute(self, reducer, workspace): 
+    def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
         """
             Implemented the reduction step.
             @param reducer: Reducer object for which the step is executed
-            @param workspace: Name of the workspace to apply this step to
+            @param inputworkspace: Name of the workspace to apply this step to
+            @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
         """
         raise NotImplemented
-    
+
+class AlgoReductionStep(ReductionStep):
+    """
+       Class that wraps an algorithm as a reducer
+    """
+    def __init__(self, algo):
+        super(AlgoReductionStep, self).__init__()
+        self._algo = algo
+        self.__init_args()
+
+    def __init_args(self):
+        # determine what variables exist in the underlying algorithm
+        import inspect
+        self._argspec = inspect.getargspec(self._algo)
+
+        # set all of the values to none and make them accessible
+        args = self._argspec.args
+        for arg in args:
+            self.__dict__[arg] = None
+
+        # set the default values that the underlying algorithm uses
+        defaults = self._argspec.defaults
+        indices = [-1*(i+1) for i in range(len(defaults))]
+        for i in indices:
+            self.__dict__[args[i]] = defaults[i]
+
+    def execute(self, reducer=None, inputworkspace=None, outputworkspace=None):
+        """
+           Execute the wrapped algorithm
+        """
+        if outputworkspace is None:
+            outputworkspace = inputworkspace 
+
+        # construct the argument list
+        args = []
+        for arg in self._argspec.args:
+            if arg == "InputWorkspace" and inputworkspace is not None:
+                args.append(inputworkspace)
+            elif arg == "OutputWorkspace" and outputworkspace is not None:
+                args.append(outputworkspace)
+            else:
+                args.append(self.__dict__[arg])
+
+        # call the algorithm
+        self._algo(*args)
+
 
 def extract_workspace_name(filepath, suffix=''):
     """
