@@ -7,30 +7,47 @@ import os
 
 def runtest(folder):
     print "Launching ", folder
-    os.system('cd %s/test ; rm stdout.txt' % folder)
-    f = open('%s/test/stdout.txt' % folder, 'w')
+    real_folder = folder
+    files = ""
+    if folder == "Algorithms1":
+        real_folder = "Algorithms"
+        #Run tests for the tests starting with these letters
+        files = ['%s*.h' % chr(x) for x in range(65, 65+11)]
+        files = '1 ' + ' '.join(files)
+    elif folder == "Algorithms2":
+        real_folder = "Algorithms"
+        #Run tests for the tests starting with these letters
+        files = ['%s*.h' % chr(x) for x in range(65+11, 65+27)]
+        files = '2 ' + ' '.join(files)
+                         
+    os.system('rm %s.out' % folder)
+    f = open('./%s.out' % folder, 'w')
     f.write("----------------------------------------------\n") 
     f.write("----------------------------------------------\n") 
     f.write("---------- %s -------------------\n" % folder) 
     f.write("----------------------------------------------\n") 
     f.write("----------------------------------------------\n")
     f.close()
-    os.system("cd %s/test ; ./runTests.sh >> stdout.txt 2> stderr.txt " % folder )
+    os.system("cd %s/test ; ./runTests.sh %s >> ../../%s.out 2> ../../%s.err " % ( real_folder, files, folder, folder) )
     print "... completed: ", folder, "..."
     
 
 if __name__ == '__main__':
     p = Pool(6)
     #Best to put the slowest tests at the front...
-    folders = ['Algorithms', 'Nexus',  'CurveFitting', 'DataHandling', 
+    simple_folders = ['Nexus',  'CurveFitting', 'DataHandling', 
                  'DataObjects', 'API', 'Kernel', 'PythonAPI']
-    p.map(runtest, folders)
+    # Algorithms will get split in half
+    arguments = ['Algorithms1', 'Algorithms2' ] + simple_folders
+    p.map(runtest, arguments)
     
     #Compile the outputs
-    folders.sort()
+    arguments.sort()
     os.system("rm test_results.txt");
-    for folder in folders:
-        os.system('cat %s/test/stdout.txt >> test_results.txt ' % folder)
+    for folder in arguments:
+        os.system('cat %s.out >> test_results.txt ' % folder)
+        os.system('echo "--- stderr output ---" >> test_results.txt ')
+        os.system('cat %s.err >> test_results.txt ' % folder)
                        
     #show it!
         

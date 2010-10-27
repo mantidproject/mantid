@@ -184,7 +184,7 @@ void testExecOnMuon()
     outputFile = algToBeTested.getPropertyValue("Filename");
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
-	algToBeTested.setPropertyValue("Append", "0");
+    algToBeTested.setPropertyValue("Append", "0");
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
@@ -195,8 +195,8 @@ void testExecOnMuon()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
-	// try writing data again
-   TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    // try writing data again
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
     if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
@@ -285,7 +285,7 @@ void testExecOnMuonXml()
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
-    outputFile = "testOfSaveNexusProcessed2.xml";
+    outputFile = "./testOfSaveNexusProcessed2.xml";
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
