@@ -262,8 +262,6 @@ protected:
   void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
   ///Child algorithm progress observer
   Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
-
-
   ///checks that the value was not set by users, uses the value in EMPTY_DBL()
   static bool isEmpty(double toCheck) { return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
   ///checks that the value was not set by users, uses the value in EMPTY_INT()
@@ -276,7 +274,7 @@ protected:
   bool isOutputWorkspaceProperty(const Kernel::Property* const prop) const;
 
   /// process workspace groups
-  virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+  virtual bool processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>&props);
   /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed
   virtual void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
@@ -291,17 +289,25 @@ private:
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
   Algorithm& operator=(const Algorithm&);
 
-  void store();
-  void fillHistory(Mantid::Kernel::dateAndTime, double,unsigned int);
-  void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
-      std::vector<Workspace_sptr>& outputWorkspaces) const;
-  void algorithm_info() const;
+			void store();
+			void fillHistory(Mantid::Kernel::dateAndTime, double,unsigned int);
+			void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
+				std::vector<Workspace_sptr>& outputWorkspaces) const;
+			void algorithm_info() const;
+			
+			/// setting the input properties for an algorithm - to handle workspace groups 
+			bool setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName );
+			/// setting the output properties for an algorithm -to handle workspace groups 
+			bool setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,
+        const std::string& inmemberwsName,WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal);
+		
+ 		
+			/// This method returns true if the input and output workspaces are same
+			bool isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>&props);
 
-  /// setting the input properties for an algorithm - to handle workspace groups
-  bool setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropName,Mantid::Kernel::Property* prop,const std::string&inputWS );
-  /// setting the output properties for an algorithm -to handle workspace groups
-  void setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nperiod,WorkspaceGroup_sptr sptrWSGrp,std::string &outParentname);
-
+			/// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
+			bool isGroupWorkspacesofSimilarNames(const std::vector<Mantid::Kernel::Property*>& props,const std::vector<std::string>& grpmembersNames); 
+		
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
   /** executeAsync() implementation.

@@ -9,6 +9,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/DateAndTime.h"
 #include <iomanip>
+#include <functional>
 
 using namespace Mantid::Kernel;
 
@@ -150,9 +151,8 @@ bool Algorithm::execute()
             {	 //this must be a group - test for that
               g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
 
-              //return(processGroups(wsGrpSptr,Prop));
-              return processGroups(wsGrpSptr,Prop);
-
+							  return processGroups(wsGrpSptr,Prop);
+					
 
             }
           }
@@ -599,25 +599,25 @@ Poco::ActiveResult<bool> Algorithm::executeAsync()
 }
 
 /** To Process workspace groups.
- *  @param inputwsPtr input workspacegroup pointer to iterate through all members
- *  @param  prop a vector holding the input properties
+ *  @param ingrpws_sptr input workspacegroup pointer to iterate through all members
+ *  @param  props a vector holding the input properties
  *  @returns true - if all the workspace members are executed.
  */
-bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<Mantid::Kernel::Property*>&prop)
+bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>& props)
 {
   int nPeriod=1;
   int execPercentage=0;
   bool bgroupPassed=true;
   bool bgroupFailed=false;
-  std::string outWSParentName("");
-  WorkspaceGroup_sptr sptrWSGrp1; 
-  WorkspaceGroup_sptr sptrWSGrp2;
+
+  WorkspaceGroup_sptr wsgrp1_sptr; 
+  WorkspaceGroup_sptr wsgrp2_sptr;
   bool bnewGoup1=true;
   bool bnewGoup2=true;
   std::string prevPropName("");
 
   //getting the input workspace group names
-  const std::vector<std::string> inputWSNames=inputwsPtr->getNames();
+  const std::vector<std::string> inputWSNames=ingrpws_sptr->getNames();
   int nSize=inputWSNames.size();
   //size is one if only group header.
   //return if atleast one meber is not there in group to process
@@ -634,53 +634,67 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
   if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
   //for each member in the input workspace group
   std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
+
+  //now check the input and output workspaces are of same name.
+  bool bequal=isInputequaltoOutPut(props);
+ 
+  //check the workspace are of similar names (similar if they are of names  group_1,group_2)
+  bool bSimilarNames=isGroupWorkspacesofSimilarNames(props,inputWSNames);
+  g_log.error()<<"bsimialr is"<<bSimilarNames<<std::endl;
+   
   for(;wsItr!=inputWSNames.end();++wsItr)
   {	//set  properties
     std::vector<Mantid::Kernel::Property*>::const_iterator itr;
-    for (itr=prop.begin();itr!=prop.end();itr++)
+    for (itr=props.begin();itr!=props.end();itr++)
     {
       int outWSCount=0;
+	  
       if(isWorkspaceProperty(*itr) )
-      {
+      {		
         if(isInputWorkspaceProperty(*itr))
         {
-          //setInputWSProperties(alg,*itr,*wsItr);
-          bool b = true;
-          b = setInputWSProperties(alg,prevPropName,*itr,*wsItr);
-          if(!b)
+         	      
+		      if(!setInputWSProperties(alg,*itr,*wsItr))
           {
-           	throw std::runtime_error("Giving two workspace groups as input is not permitted for the algorithm"+this->name());
+			       throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
           }
+		 
         }
         if(isOutputWorkspaceProperty(*itr))
         {
           ++outWSCount;
-          //create a group and pass that to setOutputWSProperties properties
+          //create a group and pass that to setOutputWSProperties 
           if(outWSCount==1)
           { 
             if( bnewGoup1)
             {
-              sptrWSGrp1= WorkspaceGroup_sptr(new WorkspaceGroup);
+              wsgrp1_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
               bnewGoup1=false;
             }
-            setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp1,outWSParentName);
+			      if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp1_sptr,bSimilarNames,bequal))
+            {
+               throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
+            }
+						
           }
           if(outWSCount==2)
           {
             if( bnewGoup2)
             {
-              sptrWSGrp2= WorkspaceGroup_sptr(new WorkspaceGroup);
+              wsgrp2_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
               bnewGoup2=false;
             }
-            setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp2,outWSParentName);
+            if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp2_sptr,bSimilarNames,bequal))
+            {
+               throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
+            }
           }
 
-        }
+        }//end of isOutputWorkspaceProperty
 
-      }
+      }// end of isWorkspaceProperty
       else
       {
-        //alg->setPropertyValue((*itr)->name(),(*itr)->value());
         this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
       }
     }//end of for loop for setting properties
@@ -689,9 +703,8 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
     // execute the algorithm 
     bool bStatus = false;
     if ( alg->validateProperties() ) 
-    {
-      bStatus = alg->execute();
-    }
+		{bStatus = alg->execute();
+	  }
     // status of each execution is checking 
     bgroupPassed=bgroupPassed&&bStatus;
     bgroupFailed=bgroupFailed||bStatus;
@@ -710,17 +723,82 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
   if(bgroupPassed)
   {setExecuted(true);
   }
-  //if all failed
-  //if(!bgroupFailed)
- // {	// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
- //   AnalysisDataService::Instance().remove(outWSParentName);
-  //}
- 
+  
   m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   return bgroupPassed;
 }
 
- /** virtual method to set the non workspace properties for this algorithm.
+/**This method checks input and output groupworkspace for an algorithm is of same name.
+ *  @param props a list of properties for the algorithm
+ *  @returns true if the input and output groupworkspaces are of same names
+ */ 
+bool Algorithm::isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>& props)
+{
+	std::vector<Mantid::Kernel::Property*>::const_iterator citr;
+	std::string inputwsName;std::string outputwsName;
+	for(citr=props.begin();citr!=props.end();++citr)
+	{
+		
+		if(isInputWorkspaceProperty(*citr))
+		{
+          inputwsName=(*citr)->value();
+		}
+		if(isOutputWorkspaceProperty(*citr))
+		{
+			outputwsName=(*citr)->value();
+		}
+		
+	}
+	return (!inputwsName.compare(outputwsName)? true:false);
+}
+
+
+/**This method checks the member workspace are of similar names in a group workspace .
+  *  @param props a list of properties for the algorithm
+  *  @param grpmembersNames a list of group member names
+  *  @returns true if workspaces are of similar names
+ */ 
+bool Algorithm::isGroupWorkspacesofSimilarNames(const std::vector<Mantid::Kernel::Property*>& props,const std::vector<std::string>& grpmembersNames)
+{
+  if(props.empty())return false;
+   if(grpmembersNames.empty()) return false;
+   std::string inputGroupWSName;
+   std::vector<Mantid::Kernel::Property*>::const_iterator itr;
+   for (itr=props.begin();itr!=props.end();++itr)
+   {  	       
+        if(isInputWorkspaceProperty(*itr))
+        {  	
+          inputGroupWSName=(*itr)->value();
+          break;
+        }
+   }
+   bool bsimilar(true);
+   //check all the members are of similar names
+   std::vector<std::string>::const_iterator citr;
+   for(citr=grpmembersNames.begin();citr!=grpmembersNames.end();++citr)
+   {
+       bool b;
+       std::size_t pos=(*citr).find_last_of("_");
+       if(pos==std::string::npos)
+       {
+         b=false;
+       }
+       std::string commonpart((*citr).substr(0,pos));
+       if(!inputGroupWSName.compare(commonpart))
+       {
+         b=true;
+        
+       }
+       else
+       {
+         b=false;
+       }
+       bsimilar= bsimilar&&b;
+   }
+   return(bsimilar?true:false);
+   
+}
+ /**virtual method to set the non workspace properties for this algorithm.
  *  @param alg pointer to the algorithm
  *  @param propertyName name of the property
  *  @param propertyValue value  of the property
@@ -734,80 +812,89 @@ void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyN
 
 /** Setting input workspace properties for an algorithm,for handling workspace groups.
  *  @param pAlg  pointer to algorithm
- *  @param prevPropName An in/out string argument denoting the previous property's name to keep track of this in a group
  *  @param  prop  pointer to a vector holding the input properties
- *  @param  inputWS input workspace name
+ *  @param  inMemberWSName input workspace name
  *  @returns true - if property is set .
  */
-bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropName,Mantid::Kernel::Property* prop,const std::string&inputWS )
+bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName )
 {
-  std::string wsname=prop->value();
-  try
-  {
-    std::string currentPropName=prop->name();
-    if(!prevPropName.empty())
-    {
-      //check the property name
-      if(currentPropName.compare(prevPropName))
-      {
-        boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-            boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
-        if(wsGrpSptr)
-        {
-          return false;
-        }
-      }
-    }
-    boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
-    if(wsGrpSptr)
-    {
-      pAlg->setPropertyValue(prop->name(), inputWS);
-      prevPropName=currentPropName;
-    }
+	if(!pAlg) return false;
+	if(!prop)return false;
+	try
+	{
+	pAlg->setPropertyValue(prop->name(), inMemberWSName);
+	}
+	catch(std::invalid_argument&)
+	{
+		return false;
+	}
+	return true;
+  		
+}
+/** setting output workspace properties for an algorithm,
+  *  This used for processing workspace groups and this  method is called when
+  *  the input and out workspaces are not same
+  *  @param pAlg      pointer to algorithm
+  *  @param prop      pointer to the input properties
+  *  @param nPeriod   period number 
+  *  @param inmemberwsName outputworksapce name
+  *  @param outwsgrp_sptr shared pointer for workspacegroup
+  *  @param bSimilarNames -true if the input member workspaces are of similar names
+  *  @param bequal -true if both the input and output group workspaces are same
+ */
+bool Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,const std::string& inmemberwsName,
+	                                  WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal)
+{
+	if(!prop) return false;
+	if(!outwsgrp_sptr) return false;
+	//output group workspace name
+	std::string outgrpwsName=prop->value();
+	// period number
+	std::stringstream suffix;
+	suffix<<nPeriod;
+	//member workspace name
+	std::string outmemberwsName;
+  //if input and ouput group workspace name same
+	if(bequal)
+	{
+		outmemberwsName=inmemberwsName;               //InputPut GroupWs ="NewGroup",//OutPut GroupWs ="NewGroup"
+													                        // input member ws1= "Bob", // output member ws1="Bob_NewGroup" 
+		                                              //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
+	}
+	else
+	{	
+    if(bSimilarNames) //if group are of similar names
+	  {
+		  outmemberwsName=outgrpwsName+"_"+suffix.str(); // input group ws ="Group"  ,//OutPut GroupWs ="NewGroup"
+													                           //input member ws1="Group_1",//output member ws1="NewGroup_1"
+	                                                   //input member ws2="Group_2",//output member ws2="NewGroup_2" 
+    }	
     else
     {
-      pAlg->setPropertyValue(prop->name(), wsname);
+		outmemberwsName= inmemberwsName+"_"+outgrpwsName;//InputPut GroupWs ="Group",//OutPut GroupWs ="NewGroup"
+														                         // input member ws1 = "Bob", // output member ws1="Bob_NewGroup" 
+		                                                 //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
     }
-    return true;
+	}
+	if(nPeriod==1)
+	{//group workspace is saving to ADS
+		AnalysisDataService::Instance().addOrReplace(outgrpwsName,outwsgrp_sptr );
+	} 
+	if (prop->direction() == (Kernel::Direction::Output|| Kernel::Direction::InOut)) 
+	{
+    try
+    {
+		 pAlg->setPropertyValue(prop->name(), outmemberwsName);
+    }
+    catch(std::invalid_argument&e)
+    {
+      return false;
+    }
   }
-  catch(Exception::NotFoundError&e )//if not a valid object in analysis data service
-  {
-    g_log.error()<<e.what()<<std::endl;
-    return false;
-  }
-
-}
-
-/** setting output workspace properties for an algorithm,for handling workspace goups.
- *  @param pAlg      pointer to algorithm
- *  @param prop      pointer to the input properties
- *  @param nPeriod   period number
- *  @param sptrWSGrp shared pointer for workspacegroup
- *  @param outWSParentName outputworksapce name
- */
-void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nPeriod,WorkspaceGroup_sptr sptrWSGrp,std::string &outWSParentName)
-{
-  std::string outWSChildName("");
-  outWSParentName=prop->value();
-  //std::string outWSParentName=prop->value();
-  std::stringstream suffix;
-  suffix<<nPeriod;
-  outWSChildName=outWSParentName+"_"+suffix.str();
-  if (prop->direction() == Kernel::Direction::Output) 
-  {
-    pAlg->setPropertyValue(prop->name(), outWSChildName);
-  }
-  if(nPeriod==1){
-    //if(sptrWSGrp)sptrWSGrp->add(outWSParentName);
-    AnalysisDataService::Instance().addOrReplace(outWSParentName,sptrWSGrp );
-  }
-  //adding to wsgroup vector
-  if(sptrWSGrp)
-  {
-    g_log.information()<< outWSChildName<<" adding to group"<<std::endl;
-    sptrWSGrp->add(outWSChildName);
-  }
+    //adding  member workspace to group vector
+	g_log.information()<< outmemberwsName<<" adding to group workspace"<<std::endl;
+	outwsgrp_sptr->add(outmemberwsName);
+  return true;
 }
 
 /** To query the property is a workspace property
@@ -815,7 +902,11 @@ void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
  */
 bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 {
-  const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+  if(!prop)
+	{
+	 return false;
+	}
+	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
   return (wsProp ? true : false);	
 }
 
@@ -823,27 +914,30 @@ bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
   * @param prop pointer to the input properties
 */
 bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
-{
-  const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
-  unsigned int direction = wsPropProp->direction();
-  if (direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)
-  {
-    return true;
-  }
-  else return false;
+{	
+	if(!prop)
+	{
+	 return false;
+	}
+	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+	if(!wsProp) return false;
+	unsigned int direction = prop->direction();
+	return ((direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)?true :false);
+
 }
 /** checks the property is a output workspace property
   * @param prop pointer to input  properties
 */
 bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) const
 {
-  const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
-  unsigned int direction = wsPropProp->direction();
-  if (direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)
-  {
-    return true;
-  }
-  else return false;
+	if(!prop)
+	{
+	 return false;
+	}
+	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+	if(!wsProp) return false;
+	unsigned int direction = prop->direction();
+	return((direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)? true :false);
 }
 
 
