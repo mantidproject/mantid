@@ -210,21 +210,18 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
 	}
 }
 
-/**
-* This function: 1. loads the instrument and gets the value of deltaE-mode parameter
-*				 2. Based on this value, makes the necessary changes to the form setup (direct or indirect).
-* @param name name of the instrument from the QComboBox
-*/
-//void MuonAnalysis::instrumentSelectChanged(const QString& name)
-//{
-//}
-
 
 /**
  * Save grouping button (slot)
  */
 void MuonAnalysis::runSaveGroupButton()
 {
+  if ( numGroups() <= 0 )
+  {
+    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "No grouping to save.");
+    return;
+  }
+
   QSettings prevValues;
   prevValues.beginGroup("CustomInterfaces/MuonAnalysis/SaveOutput");
 
@@ -455,14 +452,10 @@ void MuonAnalysis::groupTableChanged(int row, int column)
         QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
         if (item)
         {
-          QString kk = item->text();
-          QString kdk = itemName->text();
-
           if ( item->text() == itemName->text() )
           {
             QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Group names must be unique. Please re-enter Group name.");
             itemName->setText("");
-            return;
           }
         }
       }
@@ -485,6 +478,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
  */
 void MuonAnalysis::pairTableChanged(int row, int column)
 {
+  // alpha been modified
   if ( column == 3 )
   {
     QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
@@ -502,6 +496,38 @@ void MuonAnalysis::pairTableChanged(int row, int column)
       return;
     }
   }
+
+  // pair name been modified
+  if ( column == 0 )
+  {
+    QTableWidgetItem *itemName = m_uiForm.pairTable->item(row,0);
+
+    if ( itemName == NULL )  // this should never happen
+      m_uiForm.pairTable->setItem(row,0, new QTableWidgetItem(""));
+      
+    if ( itemName->text() != "" )
+    {
+      // check that the group name entered does not already exist
+      for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
+      {
+        if (i==row)
+          continue;
+
+        QTableWidgetItem *item = m_uiForm.pairTable->item(i,0);
+        if (item)
+        {
+          if ( item->text() == itemName->text() )
+          {
+            QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Pair names must be unique. Please re-enter Pair name.");
+            itemName->setText("");
+          }
+        }
+      }
+    }
+
+    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    updateFrontAndCombo();
+  }  
 
 }
 
@@ -523,6 +549,11 @@ void MuonAnalysis::updatePairTable()
     updateFrontAndCombo();
     return;
   }
+  else if ( numGroups() < 2 && numPairs() <= 0 )
+  {
+    return;
+  }
+
 
   // get previous number of groups
   QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(0,1));
@@ -562,6 +593,9 @@ void MuonAnalysis::updatePairTable()
       }
     }
 
+    if ( qwF->currentIndex() == 0 && qwB->currentIndex() == 0 )
+      qwB->setCurrentIndex(1);
+
     // re-populate names in combo boxes with group names
     for (int ii = 0; ii < newNumGroups; ii++)
     {
@@ -585,12 +619,13 @@ void MuonAnalysis::inputFileChanged()
   m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
 
   // Load nexus file with no grouping
-  QString pyString = "LoadMuonNexus('";
+  QString pyString = "alg = LoadMuonNexus('";
   pyString.append(m_previousFilename);
   pyString.append("','");
   pyString.append(m_workspace_name.c_str());
-  pyString.append("', AutoGroup=\"0\");");
-  runPythonCode( pyString ).trimmed();
+  pyString.append("', AutoGroup=\"0\")\n");
+  pyString.append("print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')");
+  QString outputParams = runPythonCode( pyString ).trimmed();
 
   if ( !isGroupingSet() )
     setGroupingFromNexus(m_previousFilename);
@@ -618,10 +653,21 @@ void MuonAnalysis::inputFileChanged()
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
   }
 
-
   applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouping");
 
-  // Populate instrument description field
+
+  // get hold of output parameters
+  std::stringstream strParam(outputParams.toStdString());
+  std::string mainFieldDirection;
+  double timeZero;
+  double firstGoodData;
+  strParam >> mainFieldDirection >> timeZero >> firstGoodData;
+  
+  timeZero *= 1000.0;      // convert to ns
+  firstGoodData *= 1000.0;
+
+
+  // Populate instrument fields
 
   IInstrument_sptr instrument = matrix_workspace->getInstrument();
   std::stringstream str;
@@ -629,9 +675,12 @@ void MuonAnalysis::inputFileChanged()
   unsigned int nDet = instrument->getDetectors().size();
   str << nDet;
   str << " detector spectrometer, main field ";
-  str << "longitudinal";
+  str << QString(mainFieldDirection.c_str()).toLower().toStdString(); 
   str << " to muon polarisation";
   m_uiForm.instrumentDescription->setText(str.str().c_str());
+
+  //m_uiForm.timeZeroFront->setText((boost::lexical_cast<std::string>(timeZero)).c_str());
+  //m_uiForm.firstGoodBinFront->setText((boost::lexical_cast<std::string>(firstGoodData)).c_str());
 
 
   // Populate run information text field
@@ -678,7 +727,7 @@ void MuonAnalysis::inputFileChanged()
     }
   }*/
 
-  // Populate grouping table and front combobox
+  nowDataAvailable();
 }
 
 /**
@@ -701,19 +750,19 @@ void MuonAnalysis::exitClicked()
  */
 void MuonAnalysis::guessAlphaClicked()
 {
-  if ( m_pairTableRowInFocus >= 0 )
+  if ( getPairNumberFromRow(m_pairTableRowInFocus) >= 0 )
   {
-
     QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
     QComboBox* qwB = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
 
-    if (qwF || qwB)
+    if (!qwF || !qwB)
       return;
 
-    QTableWidgetItem *idsF = m_uiForm.groupTable->item(qwF->currentIndex(),1);
-    QTableWidgetItem *idsB = m_uiForm.groupTable->item(qwB->currentIndex(),1);
+    // group IDs
+    QTableWidgetItem *idsF = m_uiForm.groupTable->item(m_groupToRow[qwF->currentIndex()],1);
+    QTableWidgetItem *idsB = m_uiForm.groupTable->item(m_groupToRow[qwB->currentIndex()],1);
 
-    if (idsF || idsB)
+    if (!idsF || !idsB)
       return;
 
     QString periodStr = "";
@@ -724,15 +773,22 @@ void MuonAnalysis::guessAlphaClicked()
 
     QString pyString;
 
-    pyString += "AlphaCalc(\"" + inputWS + "\",\"" 
+    pyString += "alg=AlphaCalc(\"" + inputWS + "\",\"" 
         + idsF->text() + "\",\""
         + idsB->text() + "\",\"" 
-        + firstGoodBin() + "\");";
+        + firstGoodBin() + "\")\n"
+        + "print alg.getPropertyValue('Alpha')";
 
     std::cout << pyString.toStdString() << std::endl;
 
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
+
+    QComboBox* qwAlpha = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,3));
+    if (qwAlpha)
+      m_uiForm.pairTable->item(m_pairTableRowInFocus,3)->setText(pyOutput);
+    else
+      m_uiForm.pairTable->setItem(m_pairTableRowInFocus,3, new QTableWidgetItem(pyOutput));
   }
 }
 
@@ -1214,6 +1270,9 @@ void MuonAnalysis::nowDataAvailable()
   m_dataLoaded = true;
 
   m_uiForm.guessAlphaButton->setEnabled(true);
+  m_uiForm.frontPlotButton->setEnabled(true);
+  m_uiForm.groupTablePlotButton->setEnabled(true);
+  m_uiForm.pairTablePlotButton->setEnabled(true);
 }
 
 /**
@@ -1268,6 +1327,7 @@ void MuonAnalysis::nowDataAvailable()
       m_uiForm.groupTable->setItem(i,0, it);
     }
   }
+
 
  }
 
@@ -1342,7 +1402,6 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 
     m_groupTableRowInFocus = 0;
     updateFrontAndCombo();
-    nowDataAvailable();
 
     QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "No grouping detected in Nexus.");
 
@@ -1412,7 +1471,6 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   m_groupTableRowInFocus = 0;
   updatePairTable();
   updateFrontAndCombo();
-  nowDataAvailable();
 }
 
 

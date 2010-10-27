@@ -19,7 +19,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget" >
      <property name="currentIndex" >
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="Home" >
       <attribute name="title" >
@@ -341,6 +341,9 @@
         <string>Plot Data</string>
        </property>
        <widget class="QPushButton" name="frontPlotButton" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="geometry" >
          <rect>
           <x>240</x>
@@ -536,6 +539,9 @@
        </property>
       </widget>
       <widget class="QPushButton" name="groupTablePlotButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
        <property name="geometry" >
         <rect>
          <x>480</x>
@@ -549,6 +555,9 @@
        </property>
       </widget>
       <widget class="QPushButton" name="pairTablePlotButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
        <property name="geometry" >
         <rect>
          <x>480</x>
