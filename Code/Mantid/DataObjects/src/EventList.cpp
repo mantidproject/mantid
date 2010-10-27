@@ -20,8 +20,8 @@ using Kernel::PulseTimeType;
 /// --------------------- TofEvent stuff ----------------------------------
 //==========================================================================
   /** Constructor, specifying the time of flight and the frame id
-   * @param m_tof time of flight, in nanoseconds
-   * @param frameid frame id, integer
+   * @param m_tof time of flight, in microseconds
+   * @param m_pulsetime absolute pulse time of the neutron.
    */
   TofEvent::TofEvent(const double m_tof, const PulseTimeType m_pulsetime) :
               m_tof(m_tof), m_pulsetime(m_pulsetime)
@@ -59,6 +59,7 @@ using Kernel::PulseTimeType;
   }
 
   /** Comparison operator.
+   * @param rhs: the other TofEvent to compare.
    * @return true if the TofEvent's are identical.*/
   bool TofEvent::operator==(const TofEvent & rhs)
   {

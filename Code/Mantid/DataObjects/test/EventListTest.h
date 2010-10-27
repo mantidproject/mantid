@@ -5,6 +5,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <math.h>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -479,8 +480,8 @@ public:
         if (bini == 7)
         {
           //That was zeros
-          TS_ASSERT( isnan(rwel[i].weight()) );
-          TS_ASSERT( isnan(rwel[i].errorSquared()) );
+          TS_ASSERT( boost::math::isnan(rwel[i].weight()) );
+          TS_ASSERT( boost::math::isnan(rwel[i].errorSquared()) );
         }
         else
         {
