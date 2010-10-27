@@ -20,10 +20,10 @@ using Kernel::PulseTimeType;
 /// --------------------- TofEvent stuff ----------------------------------
 //==========================================================================
   /** Constructor, specifying the time of flight and the frame id
-   * @param m_tof time of flight, in microseconds
-   * @param m_pulsetime absolute pulse time of the neutron.
+   * @param tof time of flight, in microseconds
+   * @param pulsetime absolute pulse time of the neutron.
    */
-  TofEvent::TofEvent(const double m_tof, const PulseTimeType m_pulsetime) :
+  TofEvent::TofEvent(const double tof, const PulseTimeType pulsetime) :
               m_tof(m_tof), m_pulsetime(m_pulsetime)
   {
   }
@@ -129,8 +129,6 @@ using Kernel::PulseTimeType;
 
   /** Constructor, copy from another WeightedEvent object
    * @param rhs: source TofEvent
-   * @param weight: weight of this neutron event.
-   * @param error: the actual error on the event (not squared!)
    */
   WeightedEvent::WeightedEvent(const TofEvent& rhs)
   : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(1.0), m_errorSquared(1.0)
@@ -160,6 +158,7 @@ using Kernel::PulseTimeType;
   }
 
   /** Comparison operator.
+   * @param rhs event to which we are comparing.
    * @return true if all elements of this event are identical
    *  */
   bool WeightedEvent::operator==(const WeightedEvent & rhs)
@@ -671,7 +670,7 @@ using Kernel::PulseTimeType;
   }
 
   // --------------------------------------------------------------------------
-  /** Reverse the histogram boundaries and the associated events if they are sorted */
+  /** Reverse the histogram boundaries and the associated events if they are sorted. */
   void EventList::reverse()
   {
     // reverse the histogram bin parameters
@@ -696,6 +695,8 @@ using Kernel::PulseTimeType;
   /** Return the number of events in the list.
    * NOTE: If the events have weights, this returns the NUMBER of WeightedEvent's in the
    * list, and NOT the sum of their weights (which may be two different numbers).
+   *
+   * @return the number of events in the list.
    *  */
   size_t EventList::getNumberEvents() const
   {
@@ -707,7 +708,8 @@ using Kernel::PulseTimeType;
 
 
   // --------------------------------------------------------------------------
-  /** Return the size of the histogram representation of the data (size of Y) **/
+  /** Return the size of the histogram data.
+   * @return the size of the histogram representation of the data (size of Y) **/
   size_t EventList::histogram_size() const
   {
     size_t x_size = refX->size();
@@ -758,13 +760,17 @@ using Kernel::PulseTimeType;
   // EventList el2;
   // el2.dataX(); <<<<< this throws an error.
 
-  /** Returns the x data. */
+  /** Returns the x data.
+   * @return a const reference to the X (bin) vector.
+   *  */
   const MantidVec& EventList::dataX() const
   {
     return *(this->refX);
   }
 
-  /** Returns a reference to the X data */
+  /** Returns a reference to the X data
+   * @return a cow_ptr to the X (bin) vector.
+   * */
   Kernel::cow_ptr<MantidVec> EventList::getRefX() const
   {
     return refX;
@@ -773,6 +779,8 @@ using Kernel::PulseTimeType;
 
   /** Calculates and returns a pointer to the Y histogrammed data.
    * Remember to delete your pointer after use!
+   *
+   * @return a pointer to a MantidVec
    */
   MantidVec * EventList::dataY() const
   {
@@ -784,6 +792,8 @@ using Kernel::PulseTimeType;
 
   /** Calculates and returns a pointer to the E histogrammed data.
    * Remember to delete your pointer after use!
+   *
+   * @return a pointer to a MantidVec
    */
   MantidVec * EventList::dataE() const
   {
@@ -813,8 +823,10 @@ using Kernel::PulseTimeType;
   /** Utility function:
    * Returns the iterator into events of the first TofEvent with
    * tof() > seek_tof
-   *
    * Will return this->events.end() if nothing is found!
+   *
+   * @param seek_tof tof to find (typically the first bin X[0])
+   * @return iterator where the first event matching it is.
    */
   std::vector<TofEvent>::iterator EventList::findFirstEvent(const double seek_tof) const
   {
@@ -833,8 +845,10 @@ using Kernel::PulseTimeType;
   /** Utility function:
    * Returns the iterator into events of the first TofEvent with
    * tof() > seek_tof
-   *
    * Will return this->events.end() if nothing is found!
+   *
+   * @param seek_tof tof to find (typically the first bin X[0])
+   * @return iterator where the first event matching it is.
    */
   std::vector<WeightedEvent>::iterator EventList::findFirstWeightedEvent(const double seek_tof) const
   {
@@ -851,6 +865,10 @@ using Kernel::PulseTimeType;
   // --------------------------------------------------------------------------
   /** Generates both the Y and E (error) histograms
    * for an EventList with WeightedEvents.
+   *
+   * @param X: x-bins supplied
+   * @param Y: counts returned
+   * @param E: errors returned
    * @throw runtime_error if the EventList does not have weighted events
    */
   void EventList::generateHistogramsForWeights(const MantidVec& X, MantidVec& Y, MantidVec& E) const
@@ -888,7 +906,6 @@ using Kernel::PulseTimeType;
 
       //Find the first bin
       size_t bin=0;
-
       //The tof is greater the first bin boundary, so we need to find the first bin
       double tof = itev->tof();
       while (bin < x_size-1)
@@ -1085,6 +1102,9 @@ using Kernel::PulseTimeType;
   /** Private function to do the conversion factor work
    * on either the TofEvent list or the WeightedEvent list.
    * Does NOT reverse the event list if the factor < 0
+   *
+   * @param factor multiply by this
+   * @param offset add this
    */
   void EventList::convertTof_onList(const double factor, const double offset)
   {
@@ -1284,6 +1304,9 @@ using Kernel::PulseTimeType;
   //------------------------------------------------------------------------------------------------
   /** Operator to multiply the weights in this EventList by an error-less scalar.
    * Use multiply(value,error) if your scalar has an error!
+   *
+   * @param value multiply by this
+   * @return reference to this
    */
   EventList& EventList::operator*=(const double value)
   {
@@ -1328,10 +1351,10 @@ using Kernel::PulseTimeType;
    * The event list switches to WeightedEvent's if needed.
    * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
    *
-   * @param: X: bins of the multiplying histogram.
-   * @param: Y: value to multiply the weights.
-   * @param: E: error on the value to multiply.
-   * @throw: invalid_argument if the sizes of X, Y, E are not consistent.
+   * @param X: bins of the multiplying histogram.
+   * @param Y: value to multiply the weights.
+   * @param E: error on the value to multiply.
+   * @throw invalid_argument if the sizes of X, Y, E are not consistent.
    */
   void EventList::multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
   {
@@ -1406,10 +1429,10 @@ using Kernel::PulseTimeType;
    * The event list switches to WeightedEvent's if needed.
    * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
    *
-   * @param: X: bins of the multiplying histogram.
-   * @param: Y: value to multiply the weights.
-   * @param: E: error on the value to multiply.
-   * @throw: invalid_argument if the sizes of X, Y, E are not consistent.
+   * @param X: bins of the multiplying histogram.
+   * @param Y: value to multiply the weights.
+   * @param E: error on the value to multiply.
+   * @throw invalid_argument if the sizes of X, Y, E are not consistent.
    */
   void EventList::divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
   {
@@ -1503,6 +1526,9 @@ using Kernel::PulseTimeType;
   //------------------------------------------------------------------------------------------------
   /** Operator to divide the weights in this EventList by an error-less scalar.
    * Use divide(value,error) if your scalar has an error!
+   *
+   * @param value divide by this
+   * @return reference to this
    */
   EventList& EventList::operator/=(const double value)
   {

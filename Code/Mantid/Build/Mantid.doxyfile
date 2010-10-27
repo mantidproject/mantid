@@ -101,7 +101,15 @@ INPUT                  = ../Kernel/inc/MantidKernel \
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
 RECURSIVE              = YES
-EXCLUDE                = 
+
+#Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
+EXCLUDE                = ../Nexus/src/NeXusException.cpp \
+			../Nexus/src/NeXusFile.cpp \
+			../Nexus/src/NeXusStream.cpp \
+			../Nexus/inc/MantidNexus/NeXusStream.hpp \
+			../Nexus/inc/MantidNexus/NeXusFile.hpp \
+			../Nexus/inc/MantidNexus/NeXusException.hpp 
+
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXCLUDE_SYMBOLS        = 

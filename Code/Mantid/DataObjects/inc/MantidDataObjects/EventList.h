@@ -39,7 +39,9 @@ class DLLExport TofEvent {
 protected:
   /** The units of the time of flight index in nanoseconds. This is relative to the
    * start of the pulse (stored in pulse_time.
-   * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1 */
+   * EXCEPT: After AlignDetectors is run, this is converted to dSpacing, in Angstroms^-1
+   * @return a double
+   * */
   double m_tof;
 
   /**
@@ -48,12 +50,13 @@ protected:
    * for nanoseconds) since a specified epoch: we use the GPS epoch of Jan 1, 1990.
    *
    * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be enough.
+   * @return a PulseTimeType
    */
   Mantid::Kernel::PulseTimeType m_pulsetime;
 
 public:
   /// Constructor, specifying the time of flight and the frame id
-  TofEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime);
+  TofEvent(double tof, const Mantid::Kernel::PulseTimeType pulsetime);
 
   /// Constructor, copy from another TofEvent object
   TofEvent(const TofEvent&);
@@ -99,10 +102,10 @@ class DLLExport WeightedEvent : public TofEvent {
 
 private:
 
-  /** The weight of this neutron. */
+  /// The weight of this neutron.
   float m_weight;
 
-  /** The SQUARE of the error that this neutron contributes. */
+  /// The SQUARE of the error that this neutron contributes.
   float m_errorSquared;
 
 public:
@@ -308,7 +311,7 @@ private:
   /// Last sorting order
   mutable EventSortType order;
 
-  /** Cached version of the x axis. */
+  /// Cached version of the x axis.
   mutable MantidVecPtr refX;
 
   /// Set of the detector IDs associated with this EventList
