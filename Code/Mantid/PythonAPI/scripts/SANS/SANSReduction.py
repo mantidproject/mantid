@@ -597,7 +597,7 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
         TRANS_FIT = TRANS_FIT_OPTIONS[mode]
     else:
         _issueWarning("Invalid fit mode passed to TransFit, using default LOG method")
-        TRANS_FIT = mode = TRANS_FIT_DEF = 'Log'
+        TRANS_FIT = mode = TRANS_FIT_DEF
 
     if lambdamin is None or lambdamax is None:
         _printMessage("TransFit(\"" + str(mode) + "\")")
@@ -1281,7 +1281,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
 ##
 # Apply the spectrum and time masks to one detector in a given workspace
 ##
-def _applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orientation.Horizontal,limitphi = True, inst=INSTRUMENT, useActiveDetector=True):
+def _applyMasking(workspace, firstspec, dimension, inst, orientation=SANSUtility.Orientation.Horizontal,limitphi = True, useActiveDetector=True):
 
     #Time mask
     SANSUtility.MaskByBinRange(workspace,TIMEMASKSTRING)
@@ -1379,7 +1379,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         if RMAX > 0.0:
             SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
-    _applyMasking(final_result, SPECMIN, DIMENSION, orientation)
+    _applyMasking(final_result, SPECMIN, DIMENSION, INSTRUMENT, orientation)
     ####################################################################################
 
     ######################## Unit change and rebin #####################################
@@ -1660,10 +1660,10 @@ def ViewCurrentMask():
     #_applyMasking() must be called on both detectors, the detector is specified by passing the index of it's first spectrum
     #start with the currently selected detector
     firstSpec1 = inst.cur_detector().get_first_spec_num()
-    _applyMasking(top_layer, firstSpec1, dimension, SANSUtility.Orientation.Horizontal, False, inst, True)
+    _applyMasking(top_layer, firstSpec1, dimension,  inst, SANSUtility.Orientation.Horizontal, False, True)
     #now the other detector
     firstSpec2 = inst.other_detector().get_first_spec_num()
-    _applyMasking(top_layer, firstSpec2, dimension, SANSUtility.Orientation.Horizontal, False, inst, False)
+    _applyMasking(top_layer, firstSpec2, dimension, inst, SANSUtility.Orientation.Horizontal, False, False)
     
     # Mark up "dead" detectors with error value 
     FindDeadDetectors(top_layer, top_layer, DeadValue=500)
