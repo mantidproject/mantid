@@ -59,7 +59,7 @@ namespace ComponentCreationHelper
   /**
    * Create a sphere object
    */
-  static Object_sptr createSphere(double radius, V3D & centre, const std::string & id)
+  static Object_sptr createSphere(double radius, const V3D & centre, const std::string & id)
   {
     std::ostringstream xml;
     xml << "<sphere id=\"" << id <<  "\">"
