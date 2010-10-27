@@ -74,6 +74,8 @@ namespace Mantid
 
       /// return reference to detector cache 
       std::map<int, Geometry::IDetector_sptr> getDetectors() const;
+      /// Get the bounding box for this component and store it in the given argument
+      void getBoundingBox(BoundingBox& boundingBox) const;
 
       /// Get pointers to plottable components
       virtual plottables_const_sptr getPlottable() const;

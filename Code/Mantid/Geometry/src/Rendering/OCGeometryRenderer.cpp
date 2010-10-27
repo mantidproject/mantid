@@ -1,5 +1,7 @@
 #include "MantidGeometry/Rendering/OCGeometryRenderer.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Quat.h"
 #include <climits>
 #ifdef _WIN32
   #include "windows.h"

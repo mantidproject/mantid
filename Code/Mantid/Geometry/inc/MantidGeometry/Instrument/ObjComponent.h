@@ -78,7 +78,7 @@ public:
   void drawObject() const;
   void initDraw() const;
   ///returns a shared pointer to the object class
-  const boost::shared_ptr<const Object> Shape()const{return shape;}; 
+  const boost::shared_ptr<const Object> shape()const{return m_shape;}; 
 
 
 protected:
@@ -95,7 +95,7 @@ private:
   /// The phyical geometry representation
   // Made a const pointer to a const object. Since this is a shared object we shouldn't be
   // exposing non-const methods of Object through this class.
-  const boost::shared_ptr<const Object> shape;
+  const boost::shared_ptr<const Object> m_shape;
 
 };
 

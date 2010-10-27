@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/ParObjComponent.h"
 #include "MantidGeometry/Instrument/ParDetector.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 
 #include <algorithm>
@@ -87,7 +88,37 @@ namespace Mantid
       boost::shared_ptr<Detector> det = boost::dynamic_pointer_cast<Detector>(dynamic_cast<const Instrument*>(m_base)->getDetector(detector_id));
       return IDetector_sptr(new Geometry::ParDetector(det.get(),m_map));
     }
-
+ 
+    /**
+    * Get the bounding box for this assembly and store it in the given argument. Note that the bounding box
+    * is cached in the ParameterMap after the first call
+    * @param assemblyBox [Out] The resulting bounding box is stored here.
+    */
+    void ParInstrument::getBoundingBox(BoundingBox& assemblyBox) const
+    {
+      // Check cache for assembly
+      if( m_map.getCachedBoundingBox(this, assemblyBox ) )
+      {
+        return;
+      }
+      // Loop over the children and define a box large enough for all of them
+      ComponentID sourceID = getSource()->getComponentID();
+      assemblyBox = BoundingBox();
+      int nchildren = nelements();
+      for(int i = 0; i < nchildren; ++i)
+      {
+        IComponent_sptr comp = this->getChild(i);
+        if( comp && comp->getComponentID() != sourceID )
+        {
+          BoundingBox compBox;
+          comp->getBoundingBox(compBox);
+          assemblyBox.grow(compBox);
+        }
+      }
+      //Set the cache
+      m_map.setCachedBoundingBox(this, assemblyBox);
+    }
+    
     IInstrument::plottables_const_sptr ParInstrument::getPlottable() const
     {
       // Get the 'base' plottable components

@@ -82,7 +82,7 @@ public:
 protected:
   ParObjComponent(const ParObjComponent&);
 
-  const boost::shared_ptr<const Object> Shape()const{return dynamic_cast<const ObjComponent*>(m_base)->Shape();}
+  const boost::shared_ptr<const Object> shape()const{return dynamic_cast<const ObjComponent*>(m_base)->shape();}
   //GeometryHandler* Handle()const{return dynamic_cast<const ObjComponent*>(m_base)->Handle();}
   const V3D factorOutComponentPosition(const V3D& point) const;
   const V3D takeOutRotation(V3D point) const;

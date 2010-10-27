@@ -5,14 +5,15 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
-using namespace Mantid::Geometry;
-typedef boost::shared_ptr<Object> Object_sptr;
-
 namespace ComponentCreationHelper
 {
+
+  using namespace Mantid::Geometry;
+  typedef boost::shared_ptr<Object> Object_sptr;
 
   /** 
   A set of helper functions for creating various component structures for the unit tests.
@@ -38,6 +39,9 @@ namespace ComponentCreationHelper
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
+  /**
+   * Create a capped cylinder object
+   */
   static Object_sptr createCappedCylinder(double radius, double height, const V3D & baseCentre, const V3D & axis, const std::string & id)
   {
     std::ostringstream xml;
@@ -47,6 +51,21 @@ namespace ComponentCreationHelper
       << "<radius val=\"" << radius << "\" />"
       << "<height val=\"" << height << "\" />"
       << "</cylinder>";
+
+    ShapeFactory shapeMaker;
+    return shapeMaker.createShape(xml.str());
+  }
+  
+  /**
+   * Create a sphere object
+   */
+  static Object_sptr createSphere(double radius, V3D & centre, const std::string & id)
+  {
+    std::ostringstream xml;
+    xml << "<sphere id=\"" << id <<  "\">"
+    << "<centre x=\"" << centre.X() << "\"  y=\"" << centre.Y() << "\" z=\"" << centre.Z() << "\" />"
+    << "<radius val=\"" << radius << "\" />"
+    << "</sphere>";
 
     ShapeFactory shapeMaker;
     return shapeMaker.createShape(xml.str());
@@ -111,6 +130,70 @@ namespace ComponentCreationHelper
       groupMembers[i] = det;
     }
     return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
+  }
+
+  /**
+   * Create an test instrument with a panel of 9 cylindrical detectors, a source and spherical sample shape.
+   */
+  static IInstrument_sptr createTestInstrument(bool verbose = false)
+  {
+    CompAssembly *bank = new CompAssembly("Bank1");
+    const double cylRadius(0.004);
+    const double cylHeight(0.0002);
+    // One object
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape"); 
+    // Four object components
+    for( int i = -1; i < 2; ++i )
+    {
+      for( int j = -1; j < 2; ++j )
+      {
+        std::ostringstream lexer;
+        lexer << "pixel-(" << j << "," << i << ")";
+        ObjComponent * physicalPixel = new ObjComponent(lexer.str(), pixelShape);
+        const double xpos = j*cylRadius*2.0;
+        const double ypos = i*cylHeight;
+        physicalPixel->setPos(xpos, ypos,0.0);
+        bank->add(physicalPixel);
+      }
+    }
+
+    boost::shared_ptr<Instrument> testInst(new Instrument("basic"));
+    testInst->add(bank);
+    bank->setPos(V3D(0.0, 0.0, 5.0));
+    //Define a source component
+    ObjComponent *source = new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
+    source->setPos(V3D(0.0, 0.0, -10.));
+    testInst->add(source);
+    testInst->markAsSource(source);
+
+    // Define a sample as a simple sphere
+    Object_sptr sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+    ObjComponent *sample = new ObjComponent("sample", sampleSphere, testInst.get());
+    testInst->setPos(0.0, 0.0, 0.0);
+    testInst->add(sample);
+    testInst->markAsSamplePos(sample);
+
+    if( verbose )
+    {
+      std::cout << "\n\n=== Testing bank positions ==\n";
+      const int nchilds = testInst->nelements();
+      for(int i = 0; i < nchilds; ++i )
+      {
+        boost::shared_ptr<IComponent> child = testInst->getChild(i);
+        std::cout << "Component " << i << " at pos " << child->getPos() << "\n";
+        if( boost::shared_ptr<ICompAssembly> assem = boost::dynamic_pointer_cast<ICompAssembly>(child) )
+        {
+          for(int j = 0; j < assem->nelements(); ++j )
+          {
+            boost::shared_ptr<IComponent> comp = assem->getChild(j);
+            std::cout << "Child " << j << " at pos " << comp->getPos() << "\n";
+          }
+        }
+      }
+      std::cout << "==================================\n";
+    }
+    
+    return testInst;
   }
 }
 

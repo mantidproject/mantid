@@ -1,4 +1,5 @@
-#include "MantidGeometry/Instrument/CompAssembly.h" 
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>

@@ -2,7 +2,7 @@
 // Includes
 //---------------------------------------------------------
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include <iostream>
+#include "MantidGeometry/Objects/Track.h"
 
 namespace Mantid
 {
@@ -28,6 +28,16 @@ namespace Mantid
       {
         return false;
       }
+    }
+
+    /** 
+    * Does a defined track intersect the bounding box
+    * @param track A test track It is assumed that this is outside the bounding box.
+    * @returns True if the track intersects this bounding box, false otherwise.
+    */
+    bool BoundingBox::doesLineIntersect(const Track & track) const
+    {
+      return this->doesLineIntersect(track.startPoint(), track.direction());
     }
 
     /** 

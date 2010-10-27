@@ -12,6 +12,11 @@ namespace Mantid
   namespace Geometry
   {
 
+    //-------------------------------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------------------------------
+    class Track;
+
     /** 
     A simple structure that defines an axis-aligned cuboid shaped bounding box for a geometrical object. 
     It is a thin structure containing the 6 points that define the corners of the cuboid.
@@ -95,6 +100,8 @@ namespace Mantid
       //@{
       /// Is the given point within the bounding box?
       bool isPointInside(const V3D & point) const;
+      /// Does a specified track intersect the bounding box
+      bool doesLineIntersect(const Track & track) const;
       /// Does a line intersect the bounding box
       bool doesLineIntersect(const V3D & startPoint, const V3D & lineDir) const;
       /// Calculate the angular half width from the given point

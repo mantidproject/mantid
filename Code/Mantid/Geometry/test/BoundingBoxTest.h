@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Track.h"
 #include <iostream>
 using namespace Mantid::Geometry;
 
@@ -75,6 +76,26 @@ public:
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(-5.0,-1.0,0.0),V3D(1.0,1.0,0.0)), true);
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(-5.0,-1.0,-0.5),V3D(1.0,1.0,1.0)), true);
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(10.0,10.0,0.0),V3D(-1.0,-0.4,0.0)), false);
+
+  }
+
+  void test_That_A_Track_Originating_Outside_The_Box_And_Fired_Towards_It_Intersects_The_Box()
+  {
+    BoundingBox bbox(4.1, 4.1, 4.1, -4.1, -4.1, -4.1);
+    //X initial
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-6.0,0.0,0.0), V3D(1.0,0.0,0.0))), true);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(6.0,0.0,0.0), V3D(-1.0,0.0,0.0))), true);
+    // Y initial
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(0.0,-6.0,0.0), V3D(0.0,1.0,0.0))), true);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(0.0,6.0,0.0), V3D(0.0,-1.0,0.0))), true);
+    //Z initial
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(0.0,0.0,-6.0), V3D(0.0,0.0,1.0))), true);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(0.0,0.0,6.0), V3D(0.0,0.0,-1.0))), true);
+
+    // Mix
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-5.0,-1.0,0.0),V3D(1.0,1.0,0.0))), true);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-5.0,-1.0,-0.5),V3D(1.0,1.0,1.0))), true);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(10.0,10.0,0.0),V3D(-1.0,-0.4,0.0))), false);
 
   }
 

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <cfloat>
@@ -16,7 +17,7 @@ namespace Mantid
     *  @param name   The name of the component
     *  @param parent The Parent geometry object of this component
     */
-    ObjComponent::ObjComponent(const std::string& name, Component* parent) : IObjComponent(),Component(name,parent), shape()
+    ObjComponent::ObjComponent(const std::string& name, Component* parent) : IObjComponent(),Component(name,parent), m_shape()
     {
     }
 
@@ -26,13 +27,13 @@ namespace Mantid
     *  @param parent The Parent geometry object of this component
     */
     ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
-    IObjComponent(),Component(name,parent), shape(shape)
+    IObjComponent(),Component(name,parent), m_shape(shape)
     {
     }
 
     /// Copy constructor
     ObjComponent::ObjComponent(const ObjComponent& rhs) :
-    IObjComponent(),Component(rhs), shape(rhs.shape)//,handle(0)
+    IObjComponent(),Component(rhs), m_shape(rhs.m_shape)
     {
     }
 
@@ -45,18 +46,18 @@ namespace Mantid
     bool ObjComponent::isValid(const V3D& point) const
     {
       // If the form of this component is not defined, just treat as a point
-      if (!shape) return (this->getPos() == point);
+      if (!m_shape) return (this->getPos() == point);
       // Otherwise pass through the shifted point to the Object::isValid method
-      return shape->isValid( factorOutComponentPosition(point) );
+      return m_shape->isValid( factorOutComponentPosition(point) );
     }
 
     /// Does the point given lie on the surface of this object component?
     bool ObjComponent::isOnSide(const V3D& point) const
     {
       // If the form of this component is not defined, just treat as a point
-      if (!shape) return (this->getPos() == point);
+      if (!m_shape) return (this->getPos() == point);
       // Otherwise pass through the shifted point to the Object::isOnSide method
-      return shape->isOnSide( factorOutComponentPosition(point) );
+      return m_shape->isOnSide( factorOutComponentPosition(point) );
     }
 
     /** Checks whether the track given will pass through this Component.
@@ -67,13 +68,13 @@ namespace Mantid
     int ObjComponent::interceptSurface(Track& track) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::interceptSurface","shape");
+      if (!m_shape) throw Kernel::Exception::NullPointerException("ObjComponent::interceptSurface","shape");
 
-      V3D trkStart = factorOutComponentPosition(track.getInit());
-      V3D trkDirection = takeOutRotation(track.getUVec());
+      V3D trkStart = factorOutComponentPosition(track.startPoint());
+      V3D trkDirection = takeOutRotation(track.direction());
 
       Track probeTrack(trkStart, trkDirection);
-      int intercepts = shape->interceptSurface(probeTrack);
+      int intercepts = m_shape->interceptSurface(probeTrack);
 
       Track::LType::const_iterator it;
       for (it = probeTrack.begin(); it < probeTrack.end(); ++it)
@@ -88,7 +89,7 @@ namespace Mantid
         //use the scale factor
         out *= m_ScaleFactor;
         out += this->getPos();
-        track.addTUnit(shape->getName(),in,out,out.distance(track.getInit()));
+        track.addLink(in,out,out.distance(track.startPoint()),this->getComponentID());
       }
 
       return intercepts;
@@ -102,13 +103,13 @@ namespace Mantid
     double ObjComponent::solidAngle(const V3D& observer) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
+      if (!m_shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
       // Otherwise pass through the shifted point to the Object::solidAngle method, if non-unity
       // scaling also pass the scaling vector
       if((m_ScaleFactor-V3D(1.0,1.0,1.0)).norm()<1e-12)
-        return shape->solidAngle( factorOutComponentPosition(observer) );
+        return m_shape->solidAngle( factorOutComponentPosition(observer) );
       else
-        return shape->solidAngle( factorOutComponentPosition(observer)*m_ScaleFactor, m_ScaleFactor);
+        return m_shape->solidAngle( factorOutComponentPosition(observer)*m_ScaleFactor, m_ScaleFactor);
     }
 
     /**
@@ -143,7 +144,7 @@ namespace Mantid
       inverse.rotateBB(min[0],min[1],min[2],max[0],max[1],max[2]);
 
       // pass bounds to getBoundingBox
-      shape->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
+      m_shape->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
 
       //Apply scale factor
       min*=m_ScaleFactor;
@@ -158,37 +159,37 @@ namespace Mantid
       return;
     }
 
-/**
- * Get the bounding box for this object-component. The underlying shape has a bounding box defined in its own coorindate
- * system. This needs to be adjusted for the actual position and rotation of this ObjComponent.
- * @param absoluteBB [Out] The bounding box for this object component will be stored here.
- */
-void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
-{
-  // Start with the box in the shape's coordinates
-  boost::shared_ptr<BoundingBox> BB = shape->getBoundingBox();
-  if (!BB) return;
-  // modify in place for speed
-  absoluteBB = BoundingBox(*BB);
-  // Scale
-  absoluteBB.xMin() *= m_ScaleFactor.X();
-  absoluteBB.xMax() *= m_ScaleFactor.X();
-  absoluteBB.yMin() *= m_ScaleFactor.Y(); 
-  absoluteBB.yMax() *= m_ScaleFactor.Y();
-  absoluteBB.zMin() *= m_ScaleFactor.Z(); 
-  absoluteBB.zMax() *= m_ScaleFactor.Z();
-  // Rotate
-  (this->getRotation()).rotateBB(absoluteBB.xMin(),absoluteBB.yMin(),absoluteBB.zMin(),
-                                 absoluteBB.xMax(),absoluteBB.yMax(),absoluteBB.zMax());
-  // Shift
-  const V3D localPos = this->getPos();
-  absoluteBB.xMin() += localPos.X(); 
-  absoluteBB.xMax() += localPos.X();
-  absoluteBB.yMin() += localPos.Y(); 
-  absoluteBB.yMax() += localPos.Y();
-  absoluteBB.zMin() += localPos.Z(); 
-  absoluteBB.zMax() += localPos.Z();
-}
+    /**
+    * Get the bounding box for this object-component. The underlying shape has a bounding box defined in its own coorindate
+    * system. This needs to be adjusted for the actual position and rotation of this ObjComponent.
+    * @param absoluteBB [Out] The bounding box for this object component will be stored here.
+    */
+    void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
+    {
+      // Start with the box in the shape's coordinates
+      boost::shared_ptr<BoundingBox> BB = m_shape->getBoundingBox();
+      if (!BB) return;
+      // modify in place for speed
+      absoluteBB = BoundingBox(*BB);
+      // Scale
+      absoluteBB.xMin() *= m_ScaleFactor.X();
+      absoluteBB.xMax() *= m_ScaleFactor.X();
+      absoluteBB.yMin() *= m_ScaleFactor.Y(); 
+      absoluteBB.yMax() *= m_ScaleFactor.Y();
+      absoluteBB.zMin() *= m_ScaleFactor.Z(); 
+      absoluteBB.zMax() *= m_ScaleFactor.Z();
+      // Rotate
+      (this->getRotation()).rotateBB(absoluteBB.xMin(),absoluteBB.yMin(),absoluteBB.zMin(),
+        absoluteBB.xMax(),absoluteBB.yMax(),absoluteBB.zMax());
+      // Shift
+      const V3D localPos = this->getPos();
+      absoluteBB.xMin() += localPos.X(); 
+      absoluteBB.xMax() += localPos.X();
+      absoluteBB.yMin() += localPos.Y(); 
+      absoluteBB.yMax() += localPos.Y();
+      absoluteBB.zMin() += localPos.Z(); 
+      absoluteBB.zMax() += localPos.Z();
+    }
 
     /**
     * Try to find a point that lies within (or on) the object
@@ -198,9 +199,9 @@ void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     int ObjComponent::getPointInObject(V3D& point) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
+      if (!m_shape) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
       // Call the Object::getPointInObject method, which may give a point in Object coordinates
-      int result= shape->getPointInObject( point );
+      int result= m_shape->getPointInObject( point );
       // transform point back to component space
       if(result)
       {
@@ -254,8 +255,8 @@ void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     */
     void ObjComponent::drawObject() const
     {
-      if(shape!=NULL)
-        shape->draw();
+      if(m_shape!=NULL)
+        m_shape->draw();
     }
 
     /**
@@ -265,8 +266,8 @@ void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     {
       if(Handle()==NULL)return;
       //Render the ObjComponent and then render the object
-      if(shape!=NULL)
-        shape->initDraw();
+      if(m_shape!=NULL)
+        m_shape->initDraw();
       Handle()->Initialize();
     }
 

@@ -1,16 +1,13 @@
-#ifndef MANTID_GEOMETRY_IComponent_H_
-#define MANTID_GEOMETRY_IComponent_H_
+#ifndef MANTID_GEOMETRY_ICOMPONENT_H_
+#define MANTID_GEOMETRY_ICOMPONENT_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <string>
-#include <set>
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/System.h"
-
+#include <string>
+#include <vector>
+#include <set>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -20,7 +17,10 @@ namespace Mantid
     //---------------------------------------------------------
     // Forward declarations
     //---------------------------------------------------------
+    class V3D;
+    class Quat;
     class IComponent;
+    class BoundingBox;
 
     /// Define a type for a unique component identifier.
     typedef IComponent* ComponentID;
@@ -160,4 +160,4 @@ namespace Mantid
 
 } //Namespace Mantid
 
-#endif /*MANTID_GEOMETRY_IComponent_H_*/
+#endif // MANTID_GEOMETRY_ICOMPONENT_H_

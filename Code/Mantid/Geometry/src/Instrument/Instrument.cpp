@@ -2,6 +2,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
 #include <iostream>
 
@@ -216,6 +217,33 @@ namespace Mantid
     {
       return m_monitorCache;
     }
+
+   /**
+    * Get the bounding box for this instrument. It is simply the sum of the bounding boxes of its children excluding the source
+    * @param assemblyBox [Out] The resulting bounding box is stored here.
+    */
+    void Instrument::getBoundingBox(BoundingBox & assemblyBox) const
+    {
+      if( !m_cachedBoundingBox )
+      {
+        m_cachedBoundingBox = new BoundingBox();
+        ComponentID sourceID = getSource()->getComponentID();
+        // Loop over the children and define a box large enough for all of them
+        for (const_comp_it it = m_children.begin(); it != m_children.end(); ++it)
+        {
+          BoundingBox compBox;
+          IComponent *component = *it;
+          if(component && component->getComponentID() != sourceID)
+          {
+            component->getBoundingBox(compBox);
+            m_cachedBoundingBox->grow(compBox);
+          }
+        }
+      }
+      // Use cached box
+      assemblyBox = *m_cachedBoundingBox;
+    }
+
 
     IInstrument::plottables_const_sptr Instrument::getPlottable() const
     {

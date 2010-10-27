@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "Poco/Path.h"
 
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;

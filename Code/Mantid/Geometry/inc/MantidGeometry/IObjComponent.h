@@ -109,7 +109,7 @@ public:
   virtual void initDraw() const = 0;
 
   /// Returns the shape of the Object
-  virtual const boost::shared_ptr<const Object> Shape()const = 0;
+  virtual const boost::shared_ptr<const Object> shape()const = 0;
 
   void setScaleFactor(double xFactor,double yFactor, double zFactor);
 

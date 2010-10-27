@@ -204,7 +204,7 @@ void ParRectangularDetector::initDraw() const
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> ParRectangularDetector::Shape() const
+const boost::shared_ptr<const Object> ParRectangularDetector::shape() const
 {
   throw Kernel::Exception::NotImplementedError("ParRectangularDetector::Shape() is not implemented.");
 }

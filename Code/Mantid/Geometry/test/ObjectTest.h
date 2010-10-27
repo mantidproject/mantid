@@ -37,7 +37,7 @@ public:
   void testCreateUnitCube()
   {
     Object_sptr geom_obj = createUnitCube();
-    
+
     TS_ASSERT_EQUALS(geom_obj->str(),"68 -6 5 -4 3 -2 1");
 
     double xmin(0.0), xmax(0.0), ymin(0.0), ymax(0.0), zmin(0.0), zmax(0.0);
@@ -47,7 +47,7 @@ public:
 
   void testIsOnSideCappedCylinder()
   {
-	Object_sptr geom_obj = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     //inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,0)),0); //origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,2.9,0)),0);
@@ -227,7 +227,7 @@ public:
 
   void testInterceptSurfaceSphereZ()
   {
-    std::vector<TUnit> expectedResults;
+    std::vector<Link> expectedResults;
     std::string S41="s 1 1 1 4";         // Sphere at (1,1,1) radius 4
 
     // First create some surfaces
@@ -246,44 +246,43 @@ public:
 
     Track track(V3D(-1,1.5,1),V3D(1,0,0));
 
-    // format = startPoint, endPoint, total distance so far, objectID
+    // format = startPoint, endPoint, total distance so far
     // forward only intercepts means that start point should be track origin
-    //expectedResults.push_back(TUnit(V3D(-sqrt(16-0.25)+1,1.5,1),
-    expectedResults.push_back(TUnit(V3D(-1,1.5,1),
-      V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,geom_obj->getName()));
+    expectedResults.push_back(Link(V3D(-1,1.5,1),
+      V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2));
 
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceSphereY()
   {
-    std::vector<TUnit> expectedResults;
+    std::vector<Link> expectedResults;
     Object_sptr geom_obj = createSphere();
     Track track(V3D(0,-10,0),V3D(0,1,0));
 
-    //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(0,-4.1,0),V3D(0,4.1,0),14.1,geom_obj->getName()));
+    //format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(Link(V3D(0,-4.1,0),V3D(0,4.1,0),14.1));
 
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceSphereX()
   {
-    std::vector<TUnit> expectedResults;
+    std::vector<Link> expectedResults;
     Object_sptr geom_obj = createSphere();
     Track track(V3D(-10,0,0),V3D(1,0,0));
 
-    //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(-4.1,0,0),V3D(4.1,0,0),14.1,geom_obj->getName()));
+    //format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(Link(V3D(-4.1,0,0),V3D(4.1,0,0),14.1));
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceCappedCylinderY()
   {
-    std::vector<TUnit> expectedResults;
+    std::vector<Link> expectedResults;
     Object_sptr geom_obj = createCappedCylinder();
-    //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(0,-3,0),V3D(0,3,0),13,geom_obj->getName()));
+    //format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(Link(V3D(0,-3,0),V3D(0,3,0),13));
 
     Track track(V3D(0,-10,0),V3D(0,1,0));
     checkTrackIntercept(geom_obj,track,expectedResults);
@@ -291,33 +290,32 @@ public:
 
   void testInterceptSurfaceCappedCylinderX()
   {
-    std::vector<TUnit> expectedResults;
+    std::vector<Link> expectedResults;
     Object_sptr geom_obj = createCappedCylinder();
     Track track(V3D(-10,0,0),V3D(1,0,0));
 
-    //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(-3.2,0,0),V3D(1.2,0,0),11.2,geom_obj->getName()));
-
+    //format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(Link(V3D(-3.2,0,0),V3D(1.2,0,0),11.2));
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceCappedCylinderMiss()
   {
-    std::vector<TUnit> expectedResults; //left empty as there are no expected results
+    std::vector<Link> expectedResults; //left empty as there are no expected results
     Object_sptr geom_obj = createCappedCylinder();
     Track track(V3D(-10,0,0),V3D(1,1,0));
 
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
-  void checkTrackIntercept(Track& track, std::vector<TUnit>& expectedResults)
+  void checkTrackIntercept(Track& track, const std::vector<Link>& expectedResults)
   {
     int index = 0;
     for (Track::LType::const_iterator it = track.begin(); it!=track.end();++it)
     {
       TS_ASSERT_DELTA(it->distFromStart,expectedResults[index].distFromStart,1e-6);
       TS_ASSERT_DELTA(it->distInsideObject,expectedResults[index].distInsideObject,1e-6);
-      TS_ASSERT_EQUALS(it->ObjID,expectedResults[index].ObjID);
+      TS_ASSERT_EQUALS(it->componentID,expectedResults[index].componentID);
       TS_ASSERT_EQUALS(it->entryPoint,expectedResults[index].entryPoint);
       TS_ASSERT_EQUALS(it->exitPoint,expectedResults[index].exitPoint);
       ++index;
@@ -325,7 +323,7 @@ public:
     TS_ASSERT_EQUALS(index,static_cast<int>(expectedResults.size()));
   }
 
-  void checkTrackIntercept(Object_sptr obj, Track& track, std::vector<TUnit>& expectedResults)
+  void checkTrackIntercept(Object_sptr obj, Track& track, const std::vector<Link>& expectedResults)
   {
     int unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount,expectedResults.size());
@@ -339,7 +337,7 @@ public:
   {
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
     std::string ObjB="80001 -80002 60003 -60004 60005 -60006";
-    
+
     createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
@@ -354,12 +352,12 @@ public:
       Geometry::V3D(1,0,0));
 
     // CARE: This CANNOT be called twice
-    TS_ASSERT(object1.interceptSurface(TL)!=0)
-      TS_ASSERT(object2.interceptSurface(TL)!=0)
+    TS_ASSERT(object1.interceptSurface(TL)!=0);
+    TS_ASSERT(object2.interceptSurface(TL)!=0);
 
-      std::vector<TUnit> expectedResults;
-    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
-    expectedResults.push_back(TUnit(V3D(4.5,0,0),V3D(6.5,0,0),11.5,4));
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(1,0,0),6));
+    expectedResults.push_back(Link(V3D(4.5,0,0),V3D(6.5,0,0),11.5));
     checkTrackIntercept(TL,expectedResults);
 
   }
@@ -382,16 +380,15 @@ public:
     object2.setObject(4,ObjB);
     object2.populate(SMap);
 
-    Track TL(Geometry::V3D(-5,0,0),
-      Geometry::V3D(1,0,0));
+    Track TL(Geometry::V3D(-5,0,0), Geometry::V3D(1,0,0));
 
     // CARE: This CANNOT be called twice
-    TS_ASSERT(object1.interceptSurface(TL)!=0)
-      TS_ASSERT(object2.interceptSurface(TL)!=0)
+    TS_ASSERT(object1.interceptSurface(TL)!=0);
+    TS_ASSERT(object2.interceptSurface(TL)!=0);
 
-      std::vector<TUnit> expectedResults;
-    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
-    expectedResults.push_back(TUnit(V3D(1,0,0),V3D(6.5,0,0),11.5,4));
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(1,0,0),6));
+    expectedResults.push_back(Link(V3D(1,0,0),V3D(6.5,0,0),11.5));
 
     checkTrackIntercept(TL,expectedResults);
 
@@ -422,10 +419,10 @@ public:
     TS_ASSERT(object1.interceptSurface(TL)!=0);
     TS_ASSERT(object2.interceptSurface(TL)!=0);
 
-    std::vector<TUnit> expectedResults;
-    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.8,0,0),4.2,3));
-    expectedResults.push_back(TUnit(V3D(-0.8,0,0),V3D(0.8,0,0),5.8,4));
-    expectedResults.push_back(TUnit(V3D(0.8,0,0),V3D(1,0,0),6,3));
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(-0.8,0,0),4.2));
+    expectedResults.push_back(Link(V3D(-0.8,0,0),V3D(0.8,0,0),5.8));
+    expectedResults.push_back(Link(V3D(0.8,0,0),V3D(1,0,0),6));
     checkTrackIntercept(TL,expectedResults);
   }
 
@@ -436,7 +433,7 @@ public:
   {
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
     std::string ObjB="(-72 : -73)";
-   
+
     createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
@@ -447,18 +444,17 @@ public:
     object2.setObject(4,ObjB);
     object2.populate(SMap);
 
-    Track TL(Geometry::V3D(-5,0,0),
-      Geometry::V3D(1,0,0));
+    Track TL(Geometry::V3D(-5,0,0), Geometry::V3D(1,0,0));
 
 
     // CARE: This CANNOT be called twice
     TS_ASSERT(object1.interceptSurface(TL)!=0);
     TS_ASSERT(object2.interceptSurface(TL)!=0);
 
-    std::vector<TUnit> expectedResults;
-    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.4,0,0),4.6,4));
-    expectedResults.push_back(TUnit(V3D(-0.4,0,0),V3D(0.2,0,0),5.2,3));
-    expectedResults.push_back(TUnit(V3D(0.2,0,0),V3D(1,0,0),6,4));
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(-0.4,0,0),4.6));
+    expectedResults.push_back(Link(V3D(-0.4,0,0),V3D(0.2,0,0),5.2));
+    expectedResults.push_back(Link(V3D(0.2,0,0),V3D(1,0,0),6));
     checkTrackIntercept(TL,expectedResults);
   }
 
@@ -469,7 +465,7 @@ public:
   {
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
     std::string ObjB="(-72 : -73)";
-    
+
     createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
@@ -488,7 +484,7 @@ public:
     TS_ASSERT_EQUALS(object1.interceptSurface(TL),0);
     TS_ASSERT_EQUALS(object2.interceptSurface(TL),0);
 
-    std::vector<TUnit> expectedResults; //left empty as this should miss
+    std::vector<Link> expectedResults; //left empty as this should miss
     checkTrackIntercept(TL,expectedResults);
   }
 
@@ -701,7 +697,7 @@ public:
     xmin=-3.2;ymin=-3.0;zmin=-3.0;
 
     TS_ASSERT_THROWS_NOTHING(geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin));
-    
+
     boost::shared_ptr<BoundingBox> boundBox = geom_obj->getBoundingBox();
 
     TS_ASSERT_EQUALS(boundBox->xMax(),1.2);
@@ -728,7 +724,7 @@ public:
     geom_obj->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
     double saTri,saRay;
     V3D observer(4.2,0,0);
-    
+
     double satol=1e-3; // typical result tolerance
 
     if(timeTest)
@@ -753,11 +749,11 @@ public:
     saRay=geom_obj->rayTraceSolidAngle(observer);
     TS_ASSERT_DELTA(saTri,1.840302,0.001);
     TS_ASSERT_DELTA(saRay,1.840302,0.01);
-    
+
     observer=V3D(-7.2,0,0);
     saTri=geom_obj->triangleSolidAngle(observer);
     saRay=geom_obj->rayTraceSolidAngle(observer);
-    
+
     TS_ASSERT_DELTA(saTri,1.25663708,0.001);
     TS_ASSERT_DELTA(saRay,1.25663708,0.001);
 
@@ -771,7 +767,7 @@ public:
     TS_ASSERT_DELTA(saTri,0.000715295,satol*0.000715);
     saTri=geom_obj->triangleSolidAngle(V3D(2000,0,0));
     TS_ASSERT_DELTA(saTri,7.08131e-6,satol*7.08e-6);
-    
+
   }
   void testSolidAngleSphereTri()
     /*!
@@ -827,7 +823,7 @@ private:
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest=false;
-  
+
   STYPE SMap;   ///< Surface Map
 
   Object_sptr createCappedCylinder()
@@ -853,15 +849,15 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder="-31 -32 33";
 
-	Object_sptr retVal = Object_sptr(new Object); 
+    Object_sptr retVal = Object_sptr(new Object); 
     retVal->setObject(21,ObjCapCylinder);
     retVal->populate(CylSurMap);
 
-	TS_ASSERT(retVal.get())
+    TS_ASSERT(retVal.get());
 
     return retVal;
   }
-  
+
   // This creates a cylinder to test the solid angle that is more realistic in size
   // for a detector cylinder
   Object_sptr createSmallCappedCylinder()

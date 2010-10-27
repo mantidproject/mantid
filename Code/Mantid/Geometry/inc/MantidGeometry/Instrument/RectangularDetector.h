@@ -110,7 +110,7 @@ public:
   void initDraw() const;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> Shape() const;
+  const boost::shared_ptr<const Object> shape() const;
 
   // ------------ End of IObjComponent methods ----------------
 

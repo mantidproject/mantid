@@ -228,7 +228,7 @@ void He3TubeEfficiency::getDetectorGeometry(\
     boost::shared_ptr<Geometry::IDetector> det,
     double & detRadius, Geometry::V3D & detAxis)
 {
-  boost::shared_ptr<const Geometry::Object> shape_sptr = det->Shape();
+  boost::shared_ptr<const Geometry::Object> shape_sptr = det->shape();
   std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> >::const_iterator it =
     this->shapeCache.find(shape_sptr.get());
   if( it == this->shapeCache.end() )

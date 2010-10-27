@@ -175,7 +175,7 @@
     <ClCompile Include="src\Math\Algebra.cpp" />
     <ClCompile Include="src\Math\BnId.cpp" />
     <ClCompile Include="src\Objects\BoundingBox.cpp" />
-    <ClCompile Include="src\RayTracer.cpp" />
+    <ClCompile Include="src\InstrumentRayTracer.cpp" />
     <ClCompile Include="src\Rendering\BitmapGeometryHandler.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryGenerator.cpp" />
     <ClCompile Include="src\Rendering\CacheGeometryHandler.cpp" />
@@ -262,7 +262,7 @@
     <ClInclude Include="inc\MantidGeometry\IRectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h" />
     <ClInclude Include="inc\MantidGeometry\Objects\BoundingBox.h" />
-    <ClInclude Include="inc\MantidGeometry\Objects\RayTracer.h" />
+    <ClInclude Include="inc\MantidGeometry\Objects\InstrumentRayTracer.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\BitmapGeometryHandler.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\OpenCascadeConfig.h" />
     <ClInclude Include="test\AcompTest.h" />
@@ -343,7 +343,7 @@
     <ClInclude Include="inc\MantidGeometry\Quat.h" />
     <ClInclude Include="test\QuatTest.h" />
     <ClInclude Include="inc\MantidGeometry\Math\RegexSupport.h" />
-    <ClInclude Include="test\RayTracerTest.h" />
+    <ClInclude Include="test\InstrumentRayTracerTest.h" />
     <ClInclude Include="test\RegexSupportTest.h" />
     <ClInclude Include="inc\MantidGeometry\Math\RotCounter.h" />
     <ClInclude Include="auxinc\RotCounter.h" />

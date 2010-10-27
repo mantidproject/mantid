@@ -2,6 +2,7 @@
 #include <windows.h>
 #endif
 #include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Quat.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IDetector.h"

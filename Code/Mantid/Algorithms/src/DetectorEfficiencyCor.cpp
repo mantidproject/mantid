@@ -276,7 +276,7 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBin
 */
 void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, V3D & detAxis)
 {
-  boost::shared_ptr<const Object> shape_sptr = det->Shape();
+  boost::shared_ptr<const Object> shape_sptr = det->shape();
   std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> >::const_iterator it = 
     m_shapeCache.find(shape_sptr.get());
   if( it == m_shapeCache.end() )

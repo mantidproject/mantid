@@ -8,9 +8,9 @@
 
 namespace Mantid
 {
-namespace Geometry
-{
-/** @class ICompAssembly 
+  namespace Geometry
+  {
+    /** @class ICompAssembly 
     @brief Class for Assembly of geometric components. 
     @version A
     @author Laurent C Chapon, ISIS RAL
@@ -39,47 +39,49 @@ namespace Geometry
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport ICompAssembly : public virtual IComponent
-{
-public:
-  ///String description of the type of component
-  virtual std::string type() const { return "ICompAssembly";}
-  //ICompAssembly();
+    */
+    class DLLExport ICompAssembly : public virtual IComponent
+    {
+    public:
+      ///String description of the type of component
+      virtual std::string type() const { return "ICompAssembly";}
+      //ICompAssembly();
 
-  virtual ~ICompAssembly(){}
-  //! Make a clone of the present component
-  virtual IComponent* clone() const = 0;
-  //! Return the number of elements in the assembly
-  virtual int nelements() const = 0;
-  //! Add a component to the assembly
-  virtual int add(IComponent*) = 0;
-  //! Add a copy (clone) of a component 
-  virtual int addCopy(IComponent*) = 0;
-  //! Add a copy (clone) of a component and rename it
-  virtual int addCopy(IComponent*, const std::string&) = 0;
-  //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
-  virtual boost::shared_ptr<IComponent> getChild(const int i) const = 0;
-  //! Overloaded index operator. Get a pointer to the ith component in the assembly
-  virtual boost::shared_ptr<IComponent> operator[](int i) const = 0;
-  //! Print information about all children
-  virtual void printChildren(std::ostream&) const = 0;
-  /*! Print information about all the elements in the tree to a stream
-   *  Loops through all components in the tree 
-   *  and call printSelf(os). 
-   */
-  virtual void printTree(std::ostream&) const = 0;
+      virtual ~ICompAssembly(){}
+      //! Make a clone of the present component
+      virtual IComponent* clone() const = 0;
+      //! Return the number of elements in the assembly
+      virtual int nelements() const = 0;
+      //! Add a component to the assembly
+      virtual int add(IComponent*) = 0;
+      //! Add a copy (clone) of a component 
+      virtual int addCopy(IComponent*) = 0;
+      //! Add a copy (clone) of a component and rename it
+      virtual int addCopy(IComponent*, const std::string&) = 0;
+      //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
+      virtual boost::shared_ptr<IComponent> getChild(const int i) const = 0;
+      //! Overloaded index operator. Get a pointer to the ith component in the assembly
+      virtual boost::shared_ptr<IComponent> operator[](int i) const = 0;
+      //! Print information about all children
+      virtual void printChildren(std::ostream&) const = 0;
+      /*! Print information about all the elements in the tree to a stream
+      *  Loops through all components in the tree 
+      *  and call printSelf(os). 
+      */
+      virtual void printTree(std::ostream&) const = 0;
 
-private:
-  /// Private copy assignment operator
-  ICompAssembly& operator=(const ICompAssembly&);
+    private:
+      /// Private copy assignment operator
+      ICompAssembly& operator=(const ICompAssembly&);
 
+    };
 
-};
+    /// Shared pointer to a ICompAssembly
+    typedef boost::shared_ptr<ICompAssembly> ICompAssembly_sptr;
+    /// Shared pointer to a const ICompAssembly
+    typedef boost::shared_ptr<const ICompAssembly> ICompAssembly_const_sptr;
 
-//DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);
-
-} //Namespace Geometry
+  } //Namespace Geometry
 } //Namespace Mantid
 
 #endif

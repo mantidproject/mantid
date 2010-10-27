@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/MultiThreaded.h"
 

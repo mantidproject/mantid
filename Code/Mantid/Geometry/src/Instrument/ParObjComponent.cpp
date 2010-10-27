@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/ParObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <cfloat>
@@ -31,20 +32,20 @@ namespace Mantid
     bool ParObjComponent::isValid(const V3D& point) const
     {
       // If the form of this component is not defined, just treat as a point
-      if (!Shape()) return (this->getPos() == point);
+      if (!shape()) return (this->getPos() == point);
       // Otherwise pass through the shifted point to the Object::isValid method
       V3D scaleFactor=this->getScaleFactorP();
-      return Shape()->isValid( factorOutComponentPosition(point) / scaleFactor )!=0;
+      return shape()->isValid( factorOutComponentPosition(point) / scaleFactor )!=0;
     }
 
     /// Does the point given lie on the surface of this object component?
     bool ParObjComponent::isOnSide(const V3D& point) const
     {
       // If the form of this component is not defined, just treat as a point
-      if (!Shape()) return (this->getPos() == point);
+      if (!shape()) return (this->getPos() == point);
       // Otherwise pass through the shifted point to the Object::isOnSide method
       V3D scaleFactor=this->getScaleFactorP();
-      return Shape()->isOnSide( factorOutComponentPosition(point) / scaleFactor )!=0;
+      return shape()->isOnSide( factorOutComponentPosition(point) / scaleFactor )!=0;
     }
 
     /** Checks whether the track given will pass through this Component.
@@ -55,14 +56,14 @@ namespace Mantid
     int ParObjComponent::interceptSurface(Track& track) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!Shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::interceptSurface","shape");
+      if (!shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::interceptSurface","shape");
 
       V3D scaleFactor=this->getScaleFactorP();
-      V3D trkStart = factorOutComponentPosition(track.getInit()) / scaleFactor;
-      V3D trkDirection = takeOutRotation(track.getUVec()) / scaleFactor;
+      V3D trkStart = factorOutComponentPosition(track.startPoint()) / scaleFactor;
+      V3D trkDirection = takeOutRotation(track.direction()) / scaleFactor;
 
       Track probeTrack(trkStart, trkDirection);
-      int intercepts = Shape()->interceptSurface(probeTrack);
+      int intercepts = shape()->interceptSurface(probeTrack);
 
       Track::LType::const_iterator it;
       for (it = probeTrack.begin(); it < probeTrack.end(); ++it)
@@ -79,7 +80,7 @@ namespace Mantid
         out *= scaleFactor;
         //
         out += this->getPos();
-        track.addTUnit(Shape()->getName(),in,out,it->distFromStart);
+        track.addLink(in,out,it->distFromStart, this->getComponentID());
       }
 
       return intercepts;
@@ -93,13 +94,13 @@ namespace Mantid
     double ParObjComponent::solidAngle(const V3D& observer) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!Shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::solidAngle","shape");
+      if (!shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::solidAngle","shape");
       // Otherwise pass through the shifted point to the Object::solidAngle method
       V3D scaleFactor=this->getScaleFactorP();
       if((scaleFactor-V3D(1.0,1.0,1.0)).norm()<1e-12)
-        return Shape()->solidAngle( factorOutComponentPosition(observer) );
+        return shape()->solidAngle( factorOutComponentPosition(observer) );
       else
-        return Shape()->solidAngle( factorOutComponentPosition(observer), scaleFactor );
+        return shape()->solidAngle( factorOutComponentPosition(observer), scaleFactor );
     }
 
     /**
@@ -118,7 +119,7 @@ namespace Mantid
     */
     void ParObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
     {
-      if (!Shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::getBoundingBox","shape");
+      if (!shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::getBoundingBox","shape");
       
       Geometry::V3D min(xmin,ymin,zmin),  max(xmax,ymax,zmax);
 
@@ -135,7 +136,7 @@ namespace Mantid
       inverse.rotateBB(min[0],min[1],min[2],max[0],max[1],max[2]);
 
       // pass bounds to getBoundingBox
-      Shape()->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
+      shape()->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
 
       //Apply scale factor
       min*=m_ScaleFactor;
@@ -156,9 +157,17 @@ namespace Mantid
     */
     void ParObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     {
+      // Check this object component has a defined shape and bounding box
+      boost::shared_ptr<BoundingBox> shapeBox = shape()->getBoundingBox();
+      if( !shapeBox ) 
+      {
+        absoluteBB = BoundingBox();
+        return;
+      }
+      
       // Start with the box in the shape's coordinates and
       // modify in place for speed
-      absoluteBB = BoundingBox(*(Shape()->getBoundingBox()));
+      absoluteBB = BoundingBox(*shapeBox);
       // Scale
       absoluteBB.xMin() *= m_ScaleFactor.X();
       absoluteBB.xMax() *= m_ScaleFactor.X();
@@ -187,9 +196,9 @@ namespace Mantid
     int ParObjComponent::getPointInObject(V3D& point) const
     {
       // If the form of this component is not defined, throw NullPointerException
-      if (!Shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::getPointInObject","shape");
+      if (!shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::getPointInObject","shape");
       // Call the Object::getPointInObject method, which may give a point in Object coordinates
-      int result= Shape()->getPointInObject( point );
+      int result= shape()->getPointInObject( point );
       // transform point back to component space
       if(result)
       {
@@ -244,7 +253,7 @@ namespace Mantid
     */
     void ParObjComponent::drawObject() const
     {
-      Shape()->draw();
+      shape()->draw();
     }
 
     /**
@@ -254,7 +263,7 @@ namespace Mantid
     {
       if(Handle()==NULL)return;
       //Render the ParObjComponent and then render the object
-      Shape()->initDraw();
+      shape()->initDraw();
       Handle()->Initialize();
     }
 

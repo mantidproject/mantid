@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -22,7 +23,10 @@ namespace Mantid
 namespace Geometry
 {
 
-//class IComponent;
+  //---------------------------------------------------------------------------
+  // Forward declarations
+  //---------------------------------------------------------------------------
+  class BoundingBox;
 
 /** @class ParameterMap ParameterMap.h
 

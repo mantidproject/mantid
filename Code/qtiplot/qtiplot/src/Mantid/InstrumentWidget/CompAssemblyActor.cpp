@@ -185,7 +185,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
       else //it has to be a ObjComponent child, create a ObjComponentActor for the child use the same display list attribute
       {
         boost::shared_ptr<Mantid::Geometry::IObjComponent> ChildObjPtr = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
-        ObjComponentActor* iActor = new ObjComponentActor(getMantidObject(ChildObjPtr->Shape(),withDisplayList), ChildObjPtr,false);
+        ObjComponentActor* iActor = new ObjComponentActor(getMantidObject(ChildObjPtr->shape(),withDisplayList), ChildObjPtr,false);
         iActor->getBoundingBox(minBound,maxBound);
         AppendBoundingBox(minBound,maxBound);
         mChildObjCompActors.push_back(iActor);

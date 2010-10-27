@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Tolerance.h"
+#include "MantidGeometry/IComponent.h"
 
 namespace Mantid
 {
@@ -20,10 +21,11 @@ namespace Mantid
 
   namespace Geometry
   {
+
     /*!
-    \struct TUnit
-    \version 1.0
+    \struct Link
     \author S. Ansell
+    \author M. Gigg, Tessella plc
     \brief For a leg of a track
 
     Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -46,74 +48,85 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    struct DLLExport TUnit
+    struct DLLExport Link
     {
+      /**
+       * Default constructor
+       */
+      inline Link() : entryPoint(),exitPoint(),distFromStart(), 
+        distInsideObject(), componentID(NULL)
+      {}
+
       /**
       * Constuctor
       * @param entry V3D point to start
       * @param exit V3D point to end track
       * @param totalDistance Total distance from start of track
-      * @param ID ID number
+      * @param compID An optional component identifier for the physical object hit. (Default=NULL)
       */
-      inline TUnit(const Geometry::V3D& entry,const Geometry::V3D& exit, const double totalDistance,const int ID) :
-      entryPoint(entry),exitPoint(exit),distFromStart(totalDistance), distInsideObject(entryPoint.distance(exitPoint)),ObjID(ID)
+      inline Link(const V3D& entry,const V3D& exit, const double totalDistance, const ComponentID compID = NULL) :
+        entryPoint(entry),exitPoint(exit),distFromStart(totalDistance), distInsideObject(entryPoint.distance(exitPoint)), 
+        componentID(compID)
       {}
       /// Less than operator
-      inline bool operator<(const TUnit& other) const { return distFromStart < other.distFromStart; }
+      inline bool operator<(const Link& other) const { return distFromStart < other.distFromStart; }
       /// Less than operator
       inline bool operator<(const double& other) const { return distFromStart < other; }
 
       /** @name Attributes. */
       //@{
-      V3D entryPoint;           ///< Entry point
-      V3D exitPoint;           ///< Exit point
-      double distFromStart;         ///< Total distance from track beginning
-      double distInsideObject;       ///< Total distance covered inside object
-      int ObjID;           ///< ObjectID
+      V3D entryPoint;             ///< Entry point
+      V3D exitPoint;              ///< Exit point
+      double distFromStart;       ///< Total distance from track beginning
+      double distInsideObject;    ///< Total distance covered inside object
+      ComponentID componentID;    ///< ComponentID of the intersected component
       //@}
+    
     };
 
     /**
-    * Stores a point of intersection along a track. The object intersected is linked using its
-    * ID.
+    * Stores a point of intersection along a track. The component intersected
+    * is linked using its ComponentID.
     *
-    * Ordering for TPartial is special since we need
-    * that when dist is close that the +/- flag is taken into
+    * Ordering for IntersectionPoint is special since we need that when dist is close 
+    * that the +/- flag is taken into
     * account.
     */
-    struct TPartial
+    struct IntersectionPoint
     {
       /**
       * Constuctor
-      * @param ID Object ID number
-      * @param flag Indicates the direction of travel of the track with respect to the object: +1 is entering, -1 is leaving.
+      * @param flag Indicates the direction of travel of the track with respect 
+      * to the object: +1 is entering, -1 is leaving.
       * @param end The end point for this partial segment
       * @param distFromStartOfTrack Total distance from start of track
+      * @param compID An optional unique ID marking the component intersected. (Default=NULL)
       */
-      inline TPartial(const int ID,const int directionFlag, const Geometry::V3D& end,const double distFromStartOfTrack) :
-      ObjID(ID),direction(directionFlag),endPoint(end),distFromStart(distFromStartOfTrack)
+      inline IntersectionPoint(const int flag, const Geometry::V3D& end,
+                               const double distFromStartOfTrack, const ComponentID compID = NULL) :
+        directionFlag(flag),endPoint(end),distFromStart(distFromStartOfTrack), componentID(compID)
       {}
 
       /**
-      * A TPartial is less-than another if either
+      * A IntersectionPoint is less-than another if either
       * (a) the difference in distances is greater than the tolerance and this distance is less than the other or
       * (b) the distance is less than the other and this point is defined as an exit point
       * 
-      * @param other TPartial object to compare
+      * @param other IntersectionPoint object to compare
       * @return True if the object is considered less than, otherwise false.
       */
-      inline bool operator<(const TPartial& other) const
+      inline bool operator<(const IntersectionPoint& other) const
       {
         const double diff = fabs(distFromStart - other.distFromStart);
-        return (diff > Tolerance) ? distFromStart < other.distFromStart : direction < other.direction;
+        return (diff > Tolerance) ? distFromStart < other.distFromStart : directionFlag < other.directionFlag;
       }
 
       /** @name Attributes. */
       //@{
-      int ObjID;           ///< ObjectID
-      int direction;            ///< Directional flag
-      V3D endPoint;             ///< Point
-      double distFromStart;         ///< Total distance from track begin
+      int directionFlag;         ///< Directional flag
+      V3D endPoint;              ///< Point
+      double distFromStart;      ///< Total distance from track begin
+      ComponentID componentID;   ///< Unique component ID
       //@}
     };
 
@@ -126,12 +139,12 @@ namespace Mantid
     class DLLExport Track
     {
     public:
-      typedef std::vector<TUnit> LType;       ///< Type for the Link storage
-      typedef std::vector<TPartial> PType;    ///< Type for the partial
+      typedef std::vector<Link> LType;       ///< Type for the Link storage
+      typedef std::vector<IntersectionPoint> PType;   ///< Type for the partial
 
     public:
       /// Constructor
-      Track(const Geometry::V3D& StartPt,const Geometry::V3D& UV,const int initObj=0);
+      Track(const V3D& startPt, const V3D& unitVector);
       /// Copy constructor
       Track(const Track&);
       /// Assignment operator
@@ -139,37 +152,35 @@ namespace Mantid
       /// Destructor
       ~Track();
       /// Adds a point of intersection to the track
-      void addPoint(const int ID,const int Direct,const Geometry::V3D& Pt);
+      void addPoint(const int directionFlag, const V3D& endPoint, const ComponentID compID = NULL);
       /// Adds a link to the track
-      int addTUnit(const int ID,const Geometry::V3D& Apt,const Geometry::V3D& Bpt,
-        const double D);
-      /// Remove touching TUnits that have identical components
-      void removeCoJoins();
+      int addLink(const V3D& firstPoint,const V3D& secondPoint, 
+        const double distanceAlongTrack, const ComponentID compID = NULL);
+      /// Remove touching Links that have identical components
+      void removeCojoins();
       /// Construct links between added points
       void buildLink();
 
       /// Reset the track
-      void setFirst(const Geometry::V3D& startPoint,const Geometry::V3D& direction);
+      void reset(const Geometry::V3D& startPoint,const Geometry::V3D& direction);
       /// Returns the starting point
-      const Geometry::V3D& getInit() const { return iPt; }
-      /// Returns the direction
-      const Geometry::V3D& getUVec() const { return uVec; }
+      const V3D& startPoint() const { return m_startPoint; }
+      /// Returns the direction as a unit vector
+      const V3D& direction() const { return m_unitVector; }
       /// Returns an interator to the start of the set of links
-      LType::const_iterator begin() const { return Link.begin(); }
+      LType::const_iterator begin() const { return m_links.begin(); }
       /// Returns an interator to one-past-the-end of the set of links
-      LType::const_iterator end() const { return Link.end(); }       
+      LType::const_iterator end() const { return m_links.end(); }       
       /// Returns the number of links
-      int count() const { return static_cast<int>(Link.size()); }     
+      int count() const { return static_cast<int>(m_links.size()); }     
       /// Is the link complete? 
       int nonComplete() const;
 
     private:
-      Geometry::V3D iPt;   ///< Start Point
-      Geometry::V3D uVec;  ///< unit vector to direction
-      int iObj;            ///< Initial object
-      LType Link;          ///< Track units
-      PType surfPoints;    ///< Intersection points
-
+      V3D m_startPoint;   ///< Start Point
+      V3D m_unitVector;  ///< unit vector to direction
+      LType m_links;          ///< Track units
+      PType m_surfPoints;    ///< Intersection points
     };
 
   }  // NAMESPACE Geometry

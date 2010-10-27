@@ -14,6 +14,7 @@ namespace Mantid
 {
 namespace Geometry
 {
+
 /** @class CompAssembly 
     @brief Class for Assembly of geometric components. 
     @version A

@@ -774,7 +774,7 @@ namespace Mantid
     {
       int cnt = UT.count(); // Number of intersections original track
       // Loop over all the surfaces.
-      LineIntersectVisit LI(UT.getInit(), UT.getUVec());
+      LineIntersectVisit LI(UT.startPoint(), UT.direction());
       std::vector<const Surface*>::const_iterator vc;
       for (vc = SurList.begin(); vc != SurList.end(); vc++)
       {
@@ -788,14 +788,13 @@ namespace Mantid
         if (dPts[i] > 0.0) // only interested in forward going points
         {
           // Is the point and enterance/exit Point
-          const int flag = calcValidType(IPts[i], UT.getUVec());
-          UT.addPoint(ObjName, flag, IPts[i]);
+          const int flag = calcValidType(IPts[i], UT.direction());
+          UT.addPoint(flag, IPts[i]);
         }
       }
       UT.buildLink();
-      // Get number of track segments added
-      cnt = UT.count() - cnt;
-      return cnt;
+      // Return number of track segments added
+      return (UT.count() - cnt);
     }
 
     /**

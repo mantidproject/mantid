@@ -93,6 +93,8 @@ namespace Mantid
 
       /// returns a list containing  detector ids of monitors
       const std::vector<int> getMonitors()const ;
+      /// Get the bounding box for this component and store it in the given argument
+      void getBoundingBox(BoundingBox& boundingBox) const;
 
       /// Get pointers to plottable components
       plottables_const_sptr getPlottable() const;
@@ -109,6 +111,9 @@ namespace Mantid
       std::string getDefaultAxis() const {return m_defaultViewAxis;}
       /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
       void setDefaultViewAxis(const std::string &axis) {m_defaultViewAxis = axis;}
+      // Allow access by index
+      using CompAssembly::getChild;
+
     private:
       friend class ParInstrument;
 
@@ -120,6 +125,7 @@ namespace Mantid
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
 
+      /// Get a child by name
       Geometry::IComponent* getChild(const std::string& name) const;
 
       /// Add a plottable component
@@ -146,6 +152,11 @@ namespace Mantid
       /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possiblities are "Z+, Z-, X+, ..."
       std::string m_defaultViewAxis;
     };
+
+    /// Shared pointer to an instrument object
+    typedef boost::shared_ptr<Instrument> Instrument_sptr;
+    /// Shared pointer to an const instrument object
+    typedef boost::shared_ptr<const Instrument> Instrument_const_sptr;
 
   } // namespace Geometry
 } //Namespace Mantid

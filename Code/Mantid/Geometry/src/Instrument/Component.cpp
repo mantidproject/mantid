@@ -1,4 +1,7 @@
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Quat.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid

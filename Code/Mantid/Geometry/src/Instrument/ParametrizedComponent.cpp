@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 namespace Mantid
 {

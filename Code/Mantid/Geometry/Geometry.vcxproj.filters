@@ -213,10 +213,10 @@
     <ClCompile Include="src\Instrument\ParInstrument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\RayTracer.cpp">
+    <ClCompile Include="src\Instrument\ParRectangularDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Instrument\ParRectangularDetector.cpp">
+    <ClCompile Include="src\InstrumentRayTracer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -557,16 +557,16 @@
     <ClInclude Include="inc\MantidGeometry\Instrument\ParInstrument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidGeometry\Objects\RayTracer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test\RayTracerTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidGeometry\IRectangularDetector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidGeometry\Instrument\ParRectangularDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Objects\InstrumentRayTracer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\InstrumentRayTracerTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,16 +1,12 @@
-#include <fstream>
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <string>
-#include <algorithm>
-
-#include "MantidKernel/Exception.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+
+#include <cmath>
+#include <algorithm>
+
 
 namespace Mantid
 {
@@ -21,18 +17,17 @@ namespace Mantid
     * Constructor
     * @param startPoint Initial point
     * @param direction Directional vector. It must be unit vector.
-    * @param initObj iniital object identifier
     */ 
-    Track::Track(const Geometry::V3D& startPoint, const Geometry::V3D& direction,const int initObj) : 
-    iPt(startPoint),uVec(direction),iObj(initObj)
+    Track::Track(const V3D& startPoint, const V3D& direction) : 
+    m_startPoint(startPoint),m_unitVector(direction)
     {}
 
     /**
      * Copy Constructor
      * @param other Track to initialise this copy with.
      */ 
-    Track::Track(const Track& other) : iPt(other.iPt),uVec(other.uVec),iObj(other.iObj),
-      Link(other.Link),surfPoints(other.surfPoints)
+    Track::Track(const Track& other) : m_startPoint(other.m_startPoint),m_unitVector(other.m_unitVector),
+      m_links(other.m_links),m_surfPoints(other.m_surfPoints)
     {}
 
     /**
@@ -44,11 +39,10 @@ namespace Mantid
     {
       if (this != &other)
       {
-        iPt = other.iPt;
-        uVec = other.uVec;
-        iObj = other.iObj;
-        Link = other.Link;
-        surfPoints = other.surfPoints;
+        m_startPoint = other.m_startPoint;
+        m_unitVector = other.m_unitVector;
+        m_links = other.m_links;
+        m_surfPoints = other.m_surfPoints;
       }
       return *this;
     }
@@ -60,15 +54,18 @@ namespace Mantid
     {}
 
     /**
-     * Resets the track starting point and direction
+     * Resets the track starting point and direction. Clears any 
+     * stored links and intersections
      * @param startPoint The new starting point
      * @param direction The new direction
      */
-    void Track::setFirst(const Geometry::V3D& startPoint,
-      const Geometry::V3D& direction)
+    void Track::reset(const V3D& startPoint,
+      const V3D& direction)
     {
-      iPt = startPoint;
-      uVec = direction;
+      m_startPoint = startPoint;
+      m_unitVector = direction;
+      m_links.clear();
+      m_surfPoints.clear();
     }
 
     /**
@@ -78,20 +75,24 @@ namespace Mantid
      */
     int Track::nonComplete() const
     {
-      const double TrackTolerance(1e-6);
-      if (Link.size()<2)
+      if (m_links.size() < 2)
+      {
         return 0;
-
-      LType::const_iterator ac=Link.begin();
-      if (iPt.distance(ac->entryPoint)>TrackTolerance)
+      }
+      LType::const_iterator ac = m_links.begin();
+      if (m_startPoint.distance(ac->entryPoint) > Tolerance)
+      {
         return 1;
-      LType::const_iterator bc=ac;
+      }
+      LType::const_iterator bc = ac;
       bc++;
 
-      while(bc!=Link.end())
+      while(bc != m_links.end())
       {
-        if ((ac->exitPoint).distance(bc->entryPoint)>TrackTolerance)
-          return distance(Link.begin(),bc)+1;
+        if( (ac->exitPoint).distance(bc->entryPoint) > Tolerance)
+        {
+          return (distance(m_links.begin(),bc) + 1);
+        }
         ac++;
         bc++;
       }
@@ -100,81 +101,80 @@ namespace Mantid
     }
 
     /**
-    * Remove touching TUnits that have identical
-    * components
-    */
-    void Track::removeCoJoins()
+     * Remove touching links that have identical
+     * components
+     */
+    void Track::removeCojoins()
     {
-      // No work to do:
-      if (Link.empty())
-        return; 
-      // ac == previous : bc = next node.
-      LType::iterator ac = Link.begin();
-      LType::iterator bc = Link.begin();
-      bc++;
-      while(bc != Link.end())
+      if( m_links.empty() )
       {
-        if (ac->ObjID == bc->ObjID)
+        return;
+      }
+      LType::iterator prevNode = m_links.begin();
+      LType::iterator nextNode = m_links.begin();
+      nextNode++;
+      while(nextNode != m_links.end())
+      {
+        if(prevNode->componentID == nextNode->componentID)
         {
-          ac->exitPoint = bc->exitPoint;
-          ac->distFromStart = ac->entryPoint.distance(ac->exitPoint);
-          ac->distInsideObject = bc->distInsideObject;
-          Link.erase(bc);
-          bc = ac;
-          bc++;
+          prevNode->exitPoint = nextNode->exitPoint;
+          prevNode->distFromStart = prevNode->entryPoint.distance(prevNode->exitPoint);
+          prevNode->distInsideObject = nextNode->distInsideObject;
+          m_links.erase(nextNode);
+          nextNode = prevNode;
+          nextNode++;
         }
         else
         {
-          ac++;
-          bc++;
+          prevNode++;
+          nextNode++;
         }
       }
       return;
     }
 
     /**
-    * Objective is to merge in partial information
-    * about the beginning and end of the tracks.
-    * We do not need to keep surfPoints in order
-    * because that will be done when they are converted into
-    * TUnits.  
-    * @param ID Id number of the object
-    * @param Direct direction of travel
-    * @param Pt Point to go
-    */
-    void Track::addPoint(const int ID,const int Direct,
-      const Geometry::V3D& Pt) 
+     * Objective is to merge in partial information
+     * about the beginning and end of the tracks.
+     * We do not need to keep surfPoints in order
+     * because that will be done when they are converted into
+     * Links  
+     * @param directionFlag A flag indicating if the direction of travel is entering/leaving
+     * an object. +1 is entering, -1 is leaving.
+     * @param point Point of intersection
+     * @param compID :: ID of the component that this link is about (Default=NULL)
+     */
+    void Track::addPoint(const int directionFlag, const V3D& point, const ComponentID compID) 
     {
-      surfPoints.push_back(TPartial(ID,Direct,Pt,Pt.distance(iPt)));
-      return;
+      m_surfPoints.push_back(IntersectionPoint(directionFlag, point, point.distance(m_startPoint), compID));
     }
 
     /**
     * This adds a whole segment to the track : This currently assumes that links are added in order
-    * @param ID :: Id number of the object
     * @param startPoint :: first Point
     * @param endPoint :: second Point
     * @param distAlongTrack :: Distance along track
-    * @retval Index point 
+    * @param compID :: ID of the component that this link is about (Default=NULL)
+    * @retval Index of link within the track
     */
-    int Track::addTUnit(const int ID,const Geometry::V3D& startPoint,
-      const Geometry::V3D& endPoint,const double distAlongTrack)
-
+    int Track::addLink(const V3D& startPoint, const V3D& endPoint,
+      const double distAlongTrack, const ComponentID compID)
     {
       // Process First Point
-      TUnit newTUnit(startPoint,endPoint,distAlongTrack,ID);
-      if (Link.empty())
+      Link newLink(startPoint,endPoint,distAlongTrack,compID);
+      int index(0);
+      if( m_links.empty() )
       {
-        Link.push_back(newTUnit);
-        return 0;
+        m_links.push_back(newLink);
+        index = 0;
       }
-      std::vector<TUnit>::iterator xV = lower_bound(Link.begin(),Link.end(),newTUnit);
-
-      //must extract the distance before you insert otherwise the iterators are incompatible
-      int index = distance(Link.begin(),xV);
-
-      Link.insert(xV,newTUnit);
-
+      else
+      {
+        std::vector<Link>::iterator linkPtr = std::lower_bound(m_links.begin(),m_links.end(),newLink);
+        //must extract the distance before you insert otherwise the iterators are incompatible
+        index = std::distance(m_links.begin(), linkPtr);
+        m_links.insert(linkPtr,newLink);
+      }
       return index;
     }
 
@@ -184,62 +184,67 @@ namespace Mantid
       */
     void Track::buildLink()
     {
-      if (surfPoints.empty())
+      if (m_surfPoints.empty())
+      {
         return;
+      }
 
-      // First sort surfPoints
-      sort(surfPoints.begin(),surfPoints.end());
-      PType::const_iterator ac=surfPoints.begin();
-      PType::const_iterator bc=ac;
+      // First sort m_surfPoints
+      std::sort(m_surfPoints.begin(),m_surfPoints.end());
+      PType::const_iterator ac = m_surfPoints.begin();
+      PType::const_iterator bc = ac;
       bc++;
-      Geometry::V3D workPt=iPt;            // last good point
+      V3D workPt = m_startPoint;            // last good point
       // First point is not necessarily in an object
       // Process first point:
-      while(ac!=surfPoints.end() && ac->direction != 1)    // stepping from an object.
+      while(ac!=m_surfPoints.end() && ac->directionFlag != 1)    // stepping from an object.
       {
-        if (ac->direction==-1)
+        if (ac->directionFlag==-1)
         {
-          addTUnit(ac->ObjID,iPt,ac->endPoint,ac->distFromStart);  // from the void
+          addLink(m_startPoint,ac->endPoint,ac->distFromStart,ac->componentID);  // from the void
           workPt = ac->endPoint;
         }
         ac++;
-        if (bc!=surfPoints.end())
+        if (bc!=m_surfPoints.end())
+        {
           bc++;
+        }
       } 
 
       //have we now passed over all of the potential intersections without actually hitting the object
-      if (ac==surfPoints.end())
+      if (ac == m_surfPoints.end())
       {
         //yes
-        surfPoints.clear();
+        m_surfPoints.clear();
         return;
       }
 
       workPt = ac->endPoint;      
-
-      while(bc!=surfPoints.end())      // Since bc > ac
+      while(bc != m_surfPoints.end())      // Since bc > ac
       {
-        if (ac->direction==1 && bc->direction==-1)
+        if (ac->directionFlag==1 && bc->directionFlag==-1)
         {
           // Touching surface / identical surface
           if (fabs(ac->distFromStart - bc->distFromStart)>Tolerance)
           {
             // track leave ac into bc.
-            addTUnit(ac->ObjID,ac->endPoint,bc->endPoint,bc->distFromStart);
+            addLink(ac->endPoint,bc->endPoint,bc->distFromStart,ac->componentID);
           }
           // Points with intermediate void
           else
           {
-            addTUnit(ac->ObjID,workPt,ac->endPoint,ac->distFromStart);
+            addLink(workPt,ac->endPoint,ac->distFromStart,ac->componentID);
           }
-          workPt=bc->endPoint;
+          workPt = bc->endPoint;
 
           // ADDING to ac twice: since processing pairs
           ac++;
           ac++;
           bc++;    // can I do this past the end ? 
-          if (bc!=surfPoints.end())
+          if (bc!=m_surfPoints.end())
+          {
             bc++;
+          }
         }
         else         // Test for glacing point / or void edges
         {          // These all can be skipped
@@ -248,7 +253,7 @@ namespace Mantid
         }
       }	
 
-      surfPoints.clear();        // While vector 
+      m_surfPoints.clear();        // While vector 
       return;
     }
 

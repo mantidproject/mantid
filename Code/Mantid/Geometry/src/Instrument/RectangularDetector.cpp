@@ -2,6 +2,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
 #include "MantidKernel/Exception.h"
 
@@ -51,7 +52,7 @@ RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL)
  *  this is registered as a children of reference.
  */
 RectangularDetector::RectangularDetector(const std::string& n, Component* reference) :
-  CompAssembly(n, reference), IObjComponent(NULL)
+    CompAssembly(n, reference), IObjComponent(NULL)
 {
   this->setName(n);
   setGeometryHandler(new BitmapGeometryHandler(this));
@@ -327,7 +328,7 @@ void RectangularDetector::initDraw() const
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> RectangularDetector::Shape() const
+const boost::shared_ptr<const Object> RectangularDetector::shape() const
 {
   //std::cout << "RectangularDetector::Shape() called.\n";
   //throw Kernel::Exception::NotImplementedError("RectangularDetector::Shape() is not implemented.");
