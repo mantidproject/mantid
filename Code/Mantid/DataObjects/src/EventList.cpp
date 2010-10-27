@@ -49,6 +49,7 @@ using Kernel::PulseTimeType;
 
   /** Copy from another TofEvent object
    * @param rhs Other TofEvent to copy.
+   * @return reference to this.
    */
   TofEvent& TofEvent::operator=(const TofEvent& rhs)
   {
@@ -57,7 +58,8 @@ using Kernel::PulseTimeType;
     return *this;
   }
 
-  /** Comparison operator. */
+  /** Comparison operator.
+   * @return true if the TofEvent's are identical.*/
   bool TofEvent::operator==(const TofEvent & rhs)
   {
     return  (this->m_tof == rhs.m_tof) &&
@@ -96,7 +98,7 @@ using Kernel::PulseTimeType;
   //==========================================================================
 
   /** Constructor, full:
-   * @param m_tof: tof in microseconds.
+   * @param tof: tof in microseconds.
    * @param pulsetime: absolute pulse time
    * @param weight: weight of this neutron event.
    * @param error: the actual error on the event (not squared!)
@@ -116,13 +118,19 @@ using Kernel::PulseTimeType;
   {
   }
 
-  /// Constructor, copy from another WeightedEvent object
+  /** Constructor, copy from another WeightedEvent object
+   * @param rhs: source WeightedEvent
+   */
   WeightedEvent::WeightedEvent(const WeightedEvent& rhs)
   : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(rhs.m_weight), m_errorSquared(rhs.m_errorSquared)
   {
   }
 
-  /// Constructor, copy from a TofEvent object and add default weight and errors of 1.0
+  /** Constructor, copy from another WeightedEvent object
+   * @param rhs: source TofEvent
+   * @param weight: weight of this neutron event.
+   * @param error: the actual error on the event (not squared!)
+   */
   WeightedEvent::WeightedEvent(const TofEvent& rhs)
   : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(1.0), m_errorSquared(1.0)
   {
@@ -150,7 +158,9 @@ using Kernel::PulseTimeType;
     return *this;
   }
 
-  /** Comparison operator. */
+  /** Comparison operator.
+   * @return true if all elements of this event are identical
+   *  */
   bool WeightedEvent::operator==(const WeightedEvent & rhs)
   {
     return  (this->m_tof == rhs.m_tof) &&
@@ -166,17 +176,18 @@ using Kernel::PulseTimeType;
     return m_weight;
   }
 
-  /** Return the error of the neutron, as a double (it is saved as a float).
+  /** @return the error of the neutron, as a double (it is saved as a float).
    * Note: this returns the actual error; the value is saved
    * internally as the SQUARED error, so this function calculates sqrt().
    * For more speed, use errorSquared().
+   *
    */
   double WeightedEvent::error() const
   {
     return std::sqrt( double(m_errorSquared) );
   }
 
-  /** Returns the square of the error for this event.
+  /** @return the square of the error for this event.
    * This is how the error is saved internally, so this is faster than error()
    */
   double WeightedEvent::errorSquared() const
@@ -305,7 +316,9 @@ using Kernel::PulseTimeType;
   // --- Operators -------------------------------------------------------------------
 
   /** Copy into this event list from another
-   * @param rhs We will copy all the events from that into this object.*/
+   * @param rhs We will copy all the events from that into this object.
+   * @return reference to this
+   * */
   EventList& EventList::operator=(const EventList& rhs)
   {
     //Copy all data from the rhs.
@@ -321,7 +334,9 @@ using Kernel::PulseTimeType;
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram.
-   * @param event TofEvent to add at the end of the list.*/
+   * @param event TofEvent to add at the end of the list.
+   * @return reference to this
+   * */
   EventList& EventList::operator+=(const TofEvent &event)
   {
     if (has_weights)
@@ -335,7 +350,9 @@ using Kernel::PulseTimeType;
 
   // --------------------------------------------------------------------------
   /** Append a list of events to the histogram.
-   * @param more_events A vector of events to append.*/
+   * @param more_events A vector of events to append.
+   * @return reference to this
+   * */
   EventList& EventList::operator+=(const std::vector<TofEvent> & more_events)
   {
     if (has_weights)
@@ -361,7 +378,9 @@ using Kernel::PulseTimeType;
    * Note: The whole list will switch to weights (a possibly lengthy operation)
    *  if it did not have weights before.
    *
-   * @param event WeightedEvent to add at the end of the list.*/
+   * @param event WeightedEvent to add at the end of the list.
+   * @return reference to this
+   * */
   EventList& EventList::operator+=(const WeightedEvent &event)
   {
     if (!has_weights)
@@ -376,7 +395,9 @@ using Kernel::PulseTimeType;
    * Note: The whole list will switch to weights (a possibly lengthy operation)
    *  if it did not have weights before.
    *
-   * @param more_events A vector of events to append.*/
+   * @param more_events A vector of events to append.
+   * @return reference to this
+   * */
   EventList& EventList::operator+=(const std::vector<WeightedEvent> & more_events)
   {
     if (!has_weights)
@@ -393,6 +414,7 @@ using Kernel::PulseTimeType;
   /** Append another EventList to this event list.
    * The event lists are concatenated, and a union of the sets of detector ID's is done.
    * @param more_events Another EventList.
+   * @return reference to this
    * */
   EventList& EventList::operator+=(const EventList& more_events)
   {
@@ -525,7 +547,9 @@ using Kernel::PulseTimeType;
   // --- Handling the event list -------------------------------------------------------------------
   // ==============================================================================================
 
-  /** Return the const list of TofEvents contained. */
+  /** Return the const list of TofEvents contained.
+   * @return a const reference to the list of non-weighted events
+   * */
   const std::vector<TofEvent> & EventList::getEvents() const
   {
     if (has_weights)
@@ -533,7 +557,9 @@ using Kernel::PulseTimeType;
     return this->events;
   }
 
-  /** Return the list of TofEvents contained. */
+  /** Return the list of TofEvents contained.
+   * @return a reference to the list of non-weighted events
+   * */
   std::vector<TofEvent>& EventList::getEvents()
   {
     if (has_weights)
@@ -541,7 +567,9 @@ using Kernel::PulseTimeType;
     return this->events;
   }
 
-  /** Return the list of WeightedEvent contained. */
+  /** Return the list of WeightedEvent contained.
+   * @return a reference to the list of weighted events
+   * */
   std::vector<WeightedEvent>& EventList::getWeightedEvents()
   {
     if (!has_weights)
@@ -549,7 +577,9 @@ using Kernel::PulseTimeType;
     return this->weightedEvents;
   }
 
-  /** Return the list of WeightedEvent contained. */
+  /** Return the list of WeightedEvent contained.
+   * @return a const reference to the list of weighted events
+   * */
   const std::vector<WeightedEvent>& EventList::getWeightedEvents() const
   {
     if (!has_weights)
@@ -1419,7 +1449,7 @@ using Kernel::PulseTimeType;
     }
     //New bin! Find what you are multiplying!
     value = Y[bin];
-    if (value == 0) value = NAN; //Avoid divide by zero
+    if (value == 0) value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
     error = E[bin];
     valSquared = value * value;
     valFourth = valSquared * valSquared;
@@ -1442,7 +1472,7 @@ using Kernel::PulseTimeType;
         ++bin;
         //New bin! Find what you are multiplying!
         value = Y[bin];
-        if (value == 0) value = NAN; //Avoid divide by zero
+        if (value == 0) value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
         error = E[bin];
         valSquared = value * value;
         valFourth = valSquared * valSquared;
