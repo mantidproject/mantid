@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <math.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -385,7 +386,6 @@ public:
       E.push_back( sqrt(double(1.0 * (i+1))) );
     }
 
-
     //Make the data and multiply
     this->fake_uniform_data_weights();
     el.multiply(X, Y, E);
@@ -397,12 +397,101 @@ public:
       if (tof>=step && tof<BIN_DELTA*NUMBINS)
       {
         int bini = tof / step;
-        //std::cout << i << ":" <<bini << "   ; " << rwel[i].weight() << "\n";
-        TS_ASSERT_DELTA( rwel[i].weight(), 2.0*bini, 1e-6);
+        double value = bini;
+        double errorsquared = value;
+        //Check the formulae for value and error
+        TS_ASSERT_DELTA( rwel[i].weight(), 2.0*value, 1e-6);
+        TS_ASSERT_DELTA( rwel[i].errorSquared(), 2.5*value*value + 2.0*2.0*errorsquared, 1e-6);
       }
     }
   }
 
+
+  void test_divide_scalar()
+  {
+    //Weight 2, error sqrt(2.5)
+    this->fake_uniform_data_weights();
+    //Perform the multiply
+    el.divide(2.0, 0.5);
+
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 1.0, 1e-5);
+    //Error^2 = 2.5/(2*2) + (2*0.5)^2/(2^4) = 0.6875
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 0.6875, 1e-5);
+
+    //Try it with no scalar error
+    this->fake_uniform_data_weights();
+    el.divide(2.0);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 1.0, 1e-5);
+    //Error^2 = 2.5/(2*2) = 0.625
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 0.625, 1e-5);
+
+    // *= operator
+    this->fake_uniform_data_weights();
+    el /= 2.0;
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].weight(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( el.getWeightedEvents()[0].errorSquared(), 0.625, 1e-5);
+  }
+
+  void test_divide_by_zero()
+  {
+    //Perform the multiply
+    TS_ASSERT_THROWS( el.divide(0.0, 0.5), std::invalid_argument);
+    TS_ASSERT_THROWS( el.divide(0.0), std::invalid_argument);
+    TS_ASSERT_THROWS( el /= 0, std::invalid_argument);
+  }
+
+
+  void test_divide_histogram()
+  {
+
+    //Make the histogram we are multiplying.
+    MantidVec X, Y, E;
+    // one tenth of the # of bins
+    double step = BIN_DELTA*10;
+    for (double tof=step; tof<BIN_DELTA*(NUMBINS+1); tof += step)
+    {
+      X.push_back(tof);
+      //std::cout << tof << "\n";
+    }
+    for (int i=0; i < X.size()-1; i++)
+    {
+      //Have one zero bin in there
+      if (i == 6)
+        Y.push_back( 0.0 );
+      else
+        Y.push_back( 1.0 * (i+1));
+      E.push_back( sqrt(double(1.0 * (i+1))) );
+    }
+
+    //Make the data and multiply
+    this->fake_uniform_data_weights();
+    el.divide(X, Y, E);
+
+    vector<WeightedEvent> & rwel = el.getWeightedEvents();
+    for (int i=0; i < rwel.size(); i++)
+    {
+      double tof = rwel[i].tof();
+      if (tof>=step && tof<BIN_DELTA*NUMBINS)
+      {
+        int bini = tof / step;
+        double value = bini;
+        double errorsquared = value;
+        if (bini == 7)
+        {
+          //That was zeros
+          TS_ASSERT( isnan(rwel[i].weight()) );
+          TS_ASSERT( isnan(rwel[i].errorSquared()) );
+        }
+        else
+        {
+          //Check the formulae for value and error
+          TS_ASSERT_DELTA( rwel[i].weight(), 2.0/value, 1e-6);
+          TS_ASSERT_DELTA( rwel[i].errorSquared(), 2.5/(value*value) + 2.0*2.0*errorsquared/(value*value*value*value), 1e-6);
+        }
+
+      }
+    }
+  }
 
   //==================================================================================
   //--- Sorting Tests ---

@@ -5,6 +5,7 @@
 #include "Poco/Path.h"
 #include "boost/shared_ptr.hpp"
 #include <climits>
+#include <limits>
 #include <cfloat>
 #include <typeinfo>
 #include <map>
@@ -50,7 +51,7 @@ int Mantid::EMPTY_INT()
  */
 double Mantid::EMPTY_DBL()
 {
-  return /*  -  */  DBL_MAX/2;
+  return DBL_MAX/2;
 }
 
 /// Constructor

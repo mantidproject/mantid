@@ -2,6 +2,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Exception.h"
 #include <functional>
+#include <math.h>
 
 using std::ostream;
 using std::runtime_error;
@@ -1248,6 +1249,7 @@ using Kernel::PulseTimeType;
     }
   }
 
+
   //------------------------------------------------------------------------------------------------
   /** Operator to multiply the weights in this EventList by an error-less scalar.
    * Use multiply(value,error) if your scalar has an error!
@@ -1366,6 +1368,133 @@ using Kernel::PulseTimeType;
       ++itev;
     }
   }
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Divide the weights in this event list by a histogram.
+   * The event list switches to WeightedEvent's if needed.
+   * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
+   *
+   * @param: X: bins of the multiplying histogram.
+   * @param: Y: value to multiply the weights.
+   * @param: E: error on the value to multiply.
+   * @throw: invalid_argument if the sizes of X, Y, E are not consistent.
+   */
+  void EventList::divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E)
+  {
+    //Validate inputs
+    if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1+Y.size()) )
+      throw std::invalid_argument("EventList::multiply() was given invalid size or inconsistent histogram arrays.");
+
+    //Switch to weights if needed.
+    this->switchToWeightedEvents();
+
+    //Sorting by tof is necessary for the algorithm
+    this->sortTof();
+    size_t x_size = X.size();
+
+    //Iterate through all events (sorted by tof)
+    std::vector<WeightedEvent>::iterator itev = this->findFirstWeightedEvent(X[0]);
+    // The above can still take you to end() if no events above X[0], so check again.
+    if (itev == this->weightedEvents.end()) return;
+
+    //Find the first bin
+    size_t bin=0;
+
+    //Multiplier values
+    double value;
+    double error;
+    double valSquared;
+    double valFourth;
+    double valErrorSquared;
+
+    //If the tof is greater the first bin boundary, so we need to find the first bin
+    double tof = itev->tof();
+    while (bin < x_size-1)
+    {
+      //Within range?
+      if ((tof >= X[bin]) && (tof < X[bin+1]))
+        break; //Stop increasing bin
+      ++bin;
+    }
+    //New bin! Find what you are multiplying!
+    value = Y[bin];
+    if (value == 0) value = NAN; //Avoid divide by zero
+    error = E[bin];
+    valSquared = value * value;
+    valFourth = valSquared * valSquared;
+    valErrorSquared = error * error;
+
+    //Keep going through all the events
+    while ((itev != this->weightedEvents.end()) && (bin < x_size-1))
+    {
+      tof = itev->tof();
+      while (bin < x_size-1)
+      {
+        //Event is Within range?
+        if ((tof >= X[bin]) && (tof < X[bin+1]))
+        {
+          //Process this event. Multilpy and calculate error.
+          itev->m_errorSquared = (itev->m_errorSquared / valSquared) + (itev->m_weight*itev->m_weight * valErrorSquared / valFourth);
+          itev->m_weight /= value;
+          break; //out of the bin-searching-while-loop
+        }
+        ++bin;
+        //New bin! Find what you are multiplying!
+        value = Y[bin];
+        if (value == 0) value = NAN; //Avoid divide by zero
+        error = E[bin];
+        valSquared = value * value;
+        valFourth = valSquared * valSquared;
+        valErrorSquared = error * error;
+      }
+      ++itev;
+    }
+  }
+
+
+
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Divide the weights in this event list by an error-less scalar
+   * The event list switches to WeightedEvent's if needed.
+   *
+   * @param value: divide all weights by this amount.
+   */
+  void EventList::divide(const double value)
+  {
+    if (value == 0.0)
+      throw std::invalid_argument("EventList::divide() called with value of 0.0. Cannot divide by zero.");
+    this->multiply(1.0/value);
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Operator to divide the weights in this EventList by an error-less scalar.
+   * Use divide(value,error) if your scalar has an error!
+   */
+  EventList& EventList::operator/=(const double value)
+  {
+    if (value == 0.0)
+      throw std::invalid_argument("EventList::divide() called with value of 0.0. Cannot divide by zero.");
+    this->multiply(1.0/value);
+    return *this;
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Divide the weights in this event list by a scalar with an error.
+   * The event list switches to WeightedEvent's if needed.
+   *
+   * @param value: divide all weights by this amount.
+   * @param error: error on 'value'. Can be 0.
+   */
+  void EventList::divide(const double value, const double error)
+  {
+    if (value == 0.0)
+      throw std::invalid_argument("EventList::divide() called with value of 0.0. Cannot divide by zero.");
+    this->multiply(1.0/value, error/(value*value));
+  }
+
 
 
 

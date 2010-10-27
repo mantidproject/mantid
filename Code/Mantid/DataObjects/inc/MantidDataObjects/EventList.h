@@ -289,6 +289,12 @@ public:
 
   void multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
 
+  void divide(const double value);
+  void divide(const double value, const double error);
+  EventList& operator/=(const double value);
+
+  void divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
+
 private:
   ///List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;
