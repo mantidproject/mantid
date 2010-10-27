@@ -52,16 +52,21 @@ void LoadSNSEventNexusMonitors::exec()
   // Retrieve the filename from the properties
   this->filename = this->getPropertyValue("Filename");
 
+  API::Progress prog1(this, 0.0, 0.2, 2);
 
   // top level file information
   ::NeXus::File file(this->filename);
 
   //Start with the base entry
   file.openGroup("entry", "NXentry");
+  prog1.report();
 
   //Now we want to go through and find the monitors
   std::map<std::string, std::string> entries = file.getEntries();
   std::vector<std::string> monitorNames;
+  prog1.report();
+
+  API::Progress prog2(this, 0.2, 0.6, entries.size());
 
   std::map<std::string,std::string>::const_iterator it = entries.begin();
   for (; it != entries.end(); it++)
@@ -72,6 +77,7 @@ void LoadSNSEventNexusMonitors::exec()
     {
       monitorNames.push_back( entry_name );
     }
+    prog2.report();
   }
   this->nMonitors = monitorNames.size();
 
@@ -83,8 +89,7 @@ void LoadSNSEventNexusMonitors::exec()
   boost::shared_array<int> spectra_numbers(new int[this->nMonitors]);
   boost::shared_array<int> detector_numbers(new int[this->nMonitors]);
 
-  //Initialize progress reporting.
-  API::Progress prog(this, 0.0, 1.0, this->nMonitors);
+  API::Progress prog3(this, 0.6, 1.0, this->nMonitors);
 
   for (std::size_t i = 0; i < this->nMonitors; ++i)
   {
@@ -122,7 +127,7 @@ void LoadSNSEventNexusMonitors::exec()
     this->WS->dataX(spectraIndex) = tof;
     this->WS->dataY(spectraIndex) = data;
     this->WS->dataE(spectraIndex) = error;
-    prog.report(i);
+    prog3.report();
   }
 
   // Need to get the instrument name from the file
