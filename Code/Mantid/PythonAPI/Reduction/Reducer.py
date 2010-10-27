@@ -84,6 +84,9 @@ class Reducer(object):
             Append a reduction step
             @param reduction_step: ReductionStep object
         """
+        if reduction_step is None:
+            return None
+
         if issubclass(reduction_step.__class__, ReductionStep):
             self._reduction_steps.append(reduction_step)
         else:
@@ -160,6 +163,9 @@ class AlgoReductionStep(ReductionStep):
         super(AlgoReductionStep, self).__init__()
         self._algo = algo
         self.__init_args()
+
+    def __repr__(self):
+        return "AlgoReductionStep(%s)" % self._algo.__name__
 
     def __init_args(self):
         # determine what variables exist in the underlying algorithm
