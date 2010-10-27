@@ -94,6 +94,15 @@ public:
 
   }
 
+  /* Ensure that exceptions thrown by boost date_time conversions are caught where they
+     may cause problems. */
+  void testNotADateTime()
+  {
+    boost::posix_time::ptime time(boost::posix_time::not_a_date_time);
+    TS_ASSERT_THROWS(std::tm tm = boost::posix_time::to_tm(time), std::out_of_range);
+    TS_ASSERT_THROWS_NOTHING(std::tm tm2 = Mantid::Kernel::DateAndTime::to_tm(time));
+  }
+
   void test_ISO8601_string_with_timezones()
   {
     //Time without timezone : UTC assumed

@@ -246,7 +246,7 @@ std::tm to_tm(const dateAndTime &time)
     as_tm = boost::posix_time::to_tm(time);
   } catch ( std::out_of_range & )
   { // MW 26/10 - above code throws on some setups, create "dummy" date object
-    as_tm.tm_year = 1901;
+    as_tm.tm_year = 0;
     as_tm.tm_mon = 0;
     as_tm.tm_mday = 1;
     as_tm.tm_hour = 0;
