@@ -252,6 +252,9 @@ std::tm to_tm(const dateAndTime &time)
     as_tm.tm_hour = 0;
     as_tm.tm_min = 0;
     as_tm.tm_sec = 0;
+    as_tm.tm_wday = 0;
+    as_tm.tm_yday = 0;
+    as_tm.tm_isdst = 0;
   }
   return as_tm;
 }
