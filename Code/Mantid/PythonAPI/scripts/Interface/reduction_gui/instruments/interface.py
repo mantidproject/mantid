@@ -114,3 +114,11 @@ class InstrumentInterface(object):
         for item in self.widgets:
             tab_list.append([item.name, item])
         return tab_list
+
+    def reset(self):
+        """
+            Reset the interface
+        """
+        self.scripter.reset()
+        self.scripter.push_state()
+        

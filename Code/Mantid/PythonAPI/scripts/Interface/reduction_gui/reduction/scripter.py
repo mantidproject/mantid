@@ -55,6 +55,12 @@ class BaseScriptElement(object):
         """
         return NotImplemented
     
+    def reset(self):
+        """
+            Reset the state to default
+        """
+        return NotImplemented
+    
     @classmethod
     def getText(cls, nodelist):
         """
@@ -159,6 +165,15 @@ class BaseReductionScripter(object):
             elif self._state is None:
                 raise RuntimeError, "Error with %s widget: state not initialized" % self._subject.__class__
             return self._state
+        
+        def reset(self):
+            """
+                Reset state
+            """
+            if self._state is not None:
+                self._state.reset()
+            else:
+                raise RuntimeError, "State reset called without a valid initialized state"
             
     
     def __init__(self, name=""):
@@ -269,3 +284,11 @@ class BaseReductionScripter(object):
             return ReductionSingleton().log_text
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
+
+    def reset(self):
+        """
+            Reset reduction state to default
+        """
+        for item in self._observers:
+            item.reset()
+            

@@ -93,6 +93,11 @@ class ReductionGUI(QtGui.QMainWindow):
         """
         self.file_menu.clear()
 
+        newAction = QtGui.QAction("&New...", self)
+        newAction.setShortcut("Ctrl+N")
+        newAction.setStatusTip("Start a new reduction")
+        self.connect(newAction, QtCore.SIGNAL("triggered()"), self._new)
+    
         openAction = QtGui.QAction("&Open...", self)
         openAction.setShortcut("Ctrl+O")
         openAction.setStatusTip("Open an XML file containing reduction parameters")
@@ -116,6 +121,7 @@ class ReductionGUI(QtGui.QMainWindow):
         quitAction.setShortcut("Ctrl+Q")
         self.connect(quitAction, QtCore.SIGNAL("triggered()"), self.close)
         
+        self.file_menu.addAction(newAction)
         self.file_menu.addAction(openAction)
         self.file_menu.addAction(saveAction)
         self.file_menu.addAction(saveAsAction)
@@ -254,6 +260,15 @@ class ReductionGUI(QtGui.QMainWindow):
         self._interface.load_file(file_path)
         self._recent_files.append(file_path)
         self._filename = file_path
+        self._update_file_menu()
+        self._set_window_title()
+        
+    def _new(self, *argv):
+        """
+            Start new reduction
+        """
+        self._interface.reset()
+        self._filename = None
         self._update_file_menu()
         self._set_window_title()
         

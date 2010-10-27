@@ -65,6 +65,14 @@ class Transmission(BaseScriptElement):
                 self.beam_radius = BaseScriptElement.getFloatElement(instrument_dom, "beam_radius",
                                                                      default=Transmission.DirectBeam.beam_radius)           
         
+        def reset(self):
+            """
+                Reset state
+            """
+            self.sample_file = ''
+            self.direct_beam = ''
+            self.beam_radius = Transmission.DirectBeam.beam_radius   
+            
     class BeamSpreader(BaseScriptElement):
         sample_scatt = ''
         sample_spreader = ''
@@ -124,6 +132,17 @@ class Transmission(BaseScriptElement):
                                                                      default=Transmission.BeamSpreader.spreader_trans)           
                 self.spreader_trans_spread = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans_spread",
                                                                      default=Transmission.BeamSpreader.spreader_trans_spread)           
+
+        def reset(self):
+            """
+                Reset state
+            """
+            self.sample_scatt = ''
+            self.sample_spreader = ''
+            self.direct_scatt = ''
+            self.direct_spreader = ''
+            self.spreader_trans = Transmission.BeamSpreader.spreader_trans           
+            self.spreader_trans_spread = Transmission.BeamSpreader.spreader_trans_spread     
 
     transmission = 1.0
     transmission_spread = 0.0
@@ -189,6 +208,15 @@ class Transmission(BaseScriptElement):
                         method.from_xml(dom)
                         self.calculation_method = method
                         break
+    
+    def reset(self):
+        """
+            Reset state
+        """
+        self.transmission = Transmission.transmission      
+        self.transmission_spread = Transmission.transmission_spread  
+        self.calculate_transmission = Transmission.calculate_transmission
+        self.calculation_method = Transmission.calculation_method
     
 class Background(BaseScriptElement):
     
@@ -339,6 +367,18 @@ class Background(BaseScriptElement):
                         self.trans_calculation_method = method
                         break
 
+    def reset(self):
+        """
+            Reset state
+        """
+        self.dark_current_corr = Background.dark_current_corr
+        self.dark_current_file = ''
+        self.background_corr = Background.background_corr
+        self.background_file = ''
+        self.bck_transmission = Background.bck_transmission      
+        self.bck_transmission_spread = Background.bck_transmission_spread  
+        self.calculate_transmission = Background.calculate_transmission
+        self.trans_calculation_method = Background.trans_calculation_method
     
 class DataSets(BaseScriptElement):
     def __str__(self):
@@ -526,6 +566,37 @@ class InstrumentDescription(BaseScriptElement):
         self.normalization = BaseScriptElement.getIntElement(instrument_dom, "normalization",
                                                              default=InstrumentDescription.normalization)
 
+    def reset(self):
+        """
+            Reset state
+        """
+        self.nx_pixels = InstrumentDescription.nx_pixels
+        self.ny_pixels = InstrumentDescription.ny_pixels
+        self.name = ''
+        self.pixel_size = InstrumentDescription.pixel_size
+        
+        self.data_file = ''
+        self.mask_top = InstrumentDescription.mask_top
+        self.mask_bottom = InstrumentDescription.mask_bottom
+        self.mask_right = InstrumentDescription.mask_right
+        self.mask_left = InstrumentDescription.mask_left
+        
+        self.sample_detector_distance = InstrumentDescription.sample_detector_distance
+        self.detector_offset = InstrumentDescription.detector_offset
+        self.wavelength = InstrumentDescription.wavelength
+        self.wavelength_spread = InstrumentDescription.wavelength_spread
+        
+        self.solid_angle_corr = InstrumentDescription.solid_angle_corr
+        self.sensitivity_corr = InstrumentDescription.sensitivity_corr
+        self.sensitivity_data = ''
+        self.min_sensitivity = InstrumentDescription.min_sensitivity
+        self.max_sensitivity = InstrumentDescription.max_sensitivity
+        
+        self.n_q_bins = InstrumentDescription.n_q_bins
+        self.n_sub_pix = InstrumentDescription.n_sub_pix
+        
+        self.normalization = InstrumentDescription.normalization
+
 class BeamFinder(BaseScriptElement):
     """
         Small class to hold the state of the interface
@@ -600,6 +671,15 @@ class BeamFinder(BaseScriptElement):
             self.use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
                                                                default = BeamFinder.use_direct_beam) 
             
+    def reset(self):
+        """
+            Reset state
+        """
+        self.x_position = BeamFinder.x_position
+        self.y_position = BeamFinder.y_position
+        self.use_finder = BeamFinder.use_finder
+        self.beam_file = ''
+        self.use_direct_beam = BeamFinder.use_direct_beam
         
 class Output(BaseScriptElement):
     log_text = ''
