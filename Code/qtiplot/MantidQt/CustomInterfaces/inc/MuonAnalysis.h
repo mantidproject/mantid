@@ -193,6 +193,9 @@ private:
   /// name for file to temperary store grouping
   std::string m_groupingTempFilename;
 
+  ///
+  void updatePairTable();
+
   /// Currently selected instrument
   QString m_curInterfaceSetup;
 
@@ -205,6 +208,13 @@ private:
   /// Return the group-number for the group in a row. 
   /// Return -1 if invalid group in row
   int getGroupNumberFromRow(int row);
+
+  /// Return the pair-number for the pair in a row. 
+  /// Return -1 if invalid pair in row
+  int getPairNumberFromRow(int row);
+
+  /// first good bin returend in ms
+  QString firstGoodBin();
 
   ///
   void createCropWS();

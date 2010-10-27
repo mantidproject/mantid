@@ -364,12 +364,11 @@ void MuonAnalysis::pairTableClicked(int row, int column)
 
   m_pairTableRowInFocus = row;
 
-
   // if something sensible in row then update front
-
-  if ( m_uiForm.pairTable->item(row,0) != NULL )
+  int pNum = getPairNumberFromRow(row);
+  if ( pNum >= 0 )
   {
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(row+numGroups());
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(pNum+numGroups());
     updateFront();
   }
 }
@@ -383,12 +382,11 @@ void MuonAnalysis::groupTableClicked(int row, int column)
 
   m_groupTableRowInFocus = row;
 
-
   // if something sensible in row then update front
-
-  if ( m_uiForm.groupTable->item(row,2) != NULL && m_uiForm.groupTable->item(row,0) != NULL)
+  int gNum = getGroupNumberFromRow(row);
+  if ( gNum >= 0 )
   {
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(row);
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(gNum);
     updateFront();
   }
 }
@@ -404,84 +402,76 @@ void MuonAnalysis::groupTableClicked(int row, int column)
  */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
+  // changes to the IDs
   if ( column == 1 )
   {
     QTableWidgetItem* itemNdet = m_uiForm.groupTable->item(row,2);
     QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
 
+    // if IDs list has been changed to empty string
     if (item->text() == "")
     {
       if (itemNdet)
         itemNdet->setText("");
-      return;
-    }
-
-    int numDet = numOfDetectors(item->text().toStdString());
-    std::stringstream detNumRead;
-    if (numDet >= 0 )
-    {
-      detNumRead << numDet;
-      if (itemNdet == NULL)
-        m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem(detNumRead.str().c_str()));
-      else
-        m_uiForm.groupTable->item(row, 2)->setText(detNumRead.str().c_str());
     }
     else
     {
-      if (itemNdet == NULL)
-        m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem("Invalid IDs string"));
+      int numDet = numOfDetectors(item->text().toStdString());
+      std::stringstream detNumRead;
+      if (numDet >= 0 )
+      {
+        detNumRead << numDet;
+        if (itemNdet == NULL)
+          m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem(detNumRead.str().c_str()));
+        else
+          m_uiForm.groupTable->item(row, 2)->setText(detNumRead.str().c_str());
+      }
       else
-        m_uiForm.groupTable->item(row, 2)->setText("Invalid IDs string");
-    }
-  }   
-
+      {
+        if (itemNdet == NULL)
+          m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem("Invalid IDs string"));
+        else
+          m_uiForm.groupTable->item(row, 2)->setText("Invalid IDs string");
+      }
+    }   
+  }
 
   // Change to group name
-
   if ( column == 0 )
   {
-    //if ( m_uiForm.groupTable->item(row,2) == NULL )
-    //  return;
-
-
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(row,0);
 
-    if ( itemName == NULL || itemName->text() == "" )
-      return; // I can't see this ever happening but for safety...
-
-
-    // check that the group name entered does not already exist
-
-    for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
+    if ( itemName == NULL )  // this should never happen
+      m_uiForm.groupTable->setItem(row,0, new QTableWidgetItem(""));
+      
+    if ( itemName->text() != "" )
     {
-      if (i==row)
-        continue;
-
-      QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
-      if (item)
+      // check that the group name entered does not already exist
+      for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
       {
-        QString kk = item->text();
-        QString kdk = itemName->text();
+        if (i==row)
+          continue;
 
-        if ( item->text() == itemName->text() )
+        QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
+        if (item)
         {
-          QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Group names must be unique. Please re-enter Group name.");
-          itemName->setText("");
-          return;
+          QString kk = item->text();
+          QString kdk = itemName->text();
+
+          if ( item->text() == itemName->text() )
+          {
+            QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Group names must be unique. Please re-enter Group name.");
+            itemName->setText("");
+            return;
+          }
         }
       }
     }
+  }  
 
-    /*
-    for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
-    {
-      QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
-      QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
-
-      qw1->setItemText(row, item->text());
-      qw2->setItemText(row, item->text());
-    } */ 
-  }   
+  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  updatePairTable();
+  updateFrontAndCombo();
 }
 
 
@@ -499,9 +489,12 @@ void MuonAnalysis::pairTableChanged(int row, int column)
   {
     QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
 
+    if ( itemAlpha->text().toStdString().empty() )
+      return;
+
     try
     {
-      double alpha = boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
+       double alpha = boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
     }  catch (boost::bad_lexical_cast&)
     {
       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Alpha must be a number.");
@@ -512,6 +505,71 @@ void MuonAnalysis::pairTableChanged(int row, int column)
 
 }
 
+/**
+ * Update pair table
+ */
+void MuonAnalysis::updatePairTable()
+{
+  // number of groups has dropped below 2 and pair names specified then
+  // clear pair table
+  if ( numGroups() < 2 && numPairs() > 0 )
+  { 
+    m_uiForm.pairTable->clearContents();
+    for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
+    {
+      m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
+      m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
+    }
+    updateFrontAndCombo();
+    return;
+  }
+
+  // get previous number of groups
+  QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(0,1));
+  int previousNumGroups = qwF->count();
+  int newNumGroups = numGroups();
+
+  // reset context of combo boxes
+  for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
+  {
+    QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
+    QComboBox* qwB = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+
+    if (previousNumGroups < newNumGroups)
+    {
+      // then need to increase the number of entrees in combo box
+      for (int ii = 1; ii <= newNumGroups-previousNumGroups; ii++)
+      {
+        qwF->addItem(""); // effectively here just allocate space for extra items
+        qwB->addItem("");
+      }
+    }
+    else if (previousNumGroups > newNumGroups)
+    {
+      // then need to decrease the number of entrees in combo box
+      for (int ii = 1; ii <= previousNumGroups-newNumGroups; ii++)
+      {
+        qwF->removeItem(qwF->count()-1); // remove top items 
+        qwB->removeItem(qwB->count()-1);
+      }
+
+      // further for this case check that none of the current combo box
+      // indexes are larger than the number of groups
+      if ( qwF->currentIndex()+1 > newNumGroups || qwB->currentIndex()+1 > newNumGroups )
+      {
+        qwF->setCurrentIndex(0);
+        qwB->setCurrentIndex(1);
+      }
+    }
+
+    // re-populate names in combo boxes with group names
+    for (int ii = 0; ii < newNumGroups; ii++)
+    {
+      qwF->setItemText(ii, m_uiForm.groupTable->item(m_groupToRow[ii],0)->text());
+      qwB->setItemText(ii, m_uiForm.groupTable->item(m_groupToRow[ii],0)->text());
+    }
+  }
+}
 
 /**
  * Input file changed. Update information accordingly (slot)
@@ -669,7 +727,7 @@ void MuonAnalysis::guessAlphaClicked()
     pyString += "AlphaCalc(\"" + inputWS + "\",\"" 
         + idsF->text() + "\",\""
         + idsB->text() + "\",\"" 
-        + m_uiForm.firstGoodBinFront->text() + "\");";
+        + firstGoodBin() + "\");";
 
     std::cout << pyString.toStdString() << std::endl;
 
@@ -685,19 +743,8 @@ void MuonAnalysis::guessAlphaClicked()
  */
 int MuonAnalysis::numGroups()
 {
-  int numRows = m_uiForm.groupTable->rowCount();
-  int retVal = 0;
-  for (int i = 0; i < numRows; i++)
-  {
-    QTableWidgetItem *item = m_uiForm.groupTable->item(i,0);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
-
-    retVal++;
-  }
-  return retVal;
+  whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  return static_cast<int>(m_groupToRow.size());
 }
 
 /**
@@ -707,24 +754,8 @@ int MuonAnalysis::numGroups()
  */
 int MuonAnalysis::numPairs()
 {
-  int numRows = m_uiForm.pairTable->rowCount();
-  int retVal = 0;
-  for (int i = 0; i < numRows; i++)
-  {
-    QTableWidgetItem *item = m_uiForm.pairTable->item(i,0);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
-    item = m_uiForm.pairTable->item(i,3);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
-
-    retVal++;
-  }
-  return retVal;
+  whichPairToWhichRow(m_uiForm, m_pairToRow);
+  return static_cast<int>(m_pairToRow.size());
 }
 
 /**
@@ -768,9 +799,19 @@ void MuonAnalysis::updateFront()
  */
 void MuonAnalysis::updateFrontAndCombo()
 {
+  // for now brute force clearing and adding new context
+  // could go for softer approach and check if is necessary
+  // to complete reset this combo box
   m_uiForm.frontGroupGroupPairComboBox->clear();
 
-
+  int numG = numGroups();
+  int numP = numPairs();
+  for (int i = 0; i < numG; i++)
+    m_uiForm.frontGroupGroupPairComboBox->addItem(
+      m_uiForm.groupTable->item(m_groupToRow[i],0)->text());
+  for (int i = 0; i < numP; i++)
+    m_uiForm.frontGroupGroupPairComboBox->addItem(
+      m_uiForm.pairTable->item(m_pairToRow[i],0)->text());
   
   m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
 
@@ -807,6 +848,23 @@ int MuonAnalysis::getGroupNumberFromRow(int row)
   return -1;
 }
 
+/**
+ * Return the pair-number for the pair in a row. Return -1 if 
+ * invalid pair in row
+ *
+ * @param row A row in the pair table
+ * @return Pair number
+ */
+int MuonAnalysis::getPairNumberFromRow(int row)
+{
+  whichPairToWhichRow(m_uiForm, m_pairToRow);
+  for (unsigned int i = 0; i < m_pairToRow.size(); i++)
+  {
+    if ( m_pairToRow[i] == row )
+      return i;
+  }
+  return -1;
+}
 
 
 /**
@@ -828,10 +886,10 @@ int MuonAnalysis::pairInFocus()
 void MuonAnalysis::clearTablesAndCombo()
 {
   m_uiForm.groupTable->clearContents();
-  m_uiForm.pairTable->clearContents();
   m_uiForm.frontGroupGroupPairComboBox->clear();
   m_uiForm.frontPlotFuncs->clear();
 
+  m_uiForm.pairTable->clearContents();
   for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
   {
     m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
@@ -870,7 +928,7 @@ void MuonAnalysis::createCropWS()
   cropStr += m_workspace_name.c_str() + periodStr;
   cropStr += "\",\"";
   cropStr += outputWS;
-  cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
+  cropStr += "\"," + firstGoodBin() + ");";
   runPythonCode( cropStr ).trimmed();
 }
 
@@ -903,7 +961,7 @@ void MuonAnalysis::plotGroup(std::string& plotType)
     cropStr += m_workspace_name.c_str() + periodStr;
     cropStr += "\",\"";
     cropStr += cropWS;
-    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
+    cropStr += "\"," + firstGoodBin() + ");";
     runPythonCode( cropStr ).trimmed();
 
 
@@ -967,7 +1025,7 @@ void MuonAnalysis::plotPair(std::string& plotType)
     cropStr += m_workspace_name.c_str() + periodStr;
     cropStr += "\",\"";
     cropStr += cropWS;
-    cropStr += "\"," + m_uiForm.firstGoodBinFront->text() + ");";
+    cropStr += "\"," + firstGoodBin() + ");";
     runPythonCode( cropStr ).trimmed();
 
 
@@ -1203,6 +1261,12 @@ void MuonAnalysis::nowDataAvailable()
     {
       item->setFlags(item->flags() & (~Qt::ItemIsEditable));
     }
+    item = m_uiForm.groupTable->item(i,0);
+    if (!item)
+    {
+      QTableWidgetItem* it = new QTableWidgetItem("");
+      m_uiForm.groupTable->setItem(i,0, it);
+    }
   }
 
  }
@@ -1213,7 +1277,8 @@ void MuonAnalysis::nowDataAvailable()
  */
 void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 {
-  if (isGroupingSet())
+  // for now do try to set grouping from nexus file if it is already set
+  if ( isGroupingSet() )
     return;
 
   std::string groupedWS = m_workspace_name+"Grouping";
@@ -1327,48 +1392,39 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
       gName << wsIndex;
 
       // create table row
-
-      m_uiForm.frontGroupGroupPairComboBox->addItems(QStringList(gName.str().c_str()));
-      m_uiForm.groupTable->setItem(wsIndex, 0, new QTableWidgetItem(gName.str().c_str()));
-      m_uiForm.groupTable->setItem(wsIndex, 1, new QTableWidgetItem(idstr.str().c_str()));
-
-     /* std::stringstream detNumRead;
-      try
+      QTableWidgetItem* it = m_uiForm.groupTable->item(wsIndex, 0);
+      if (it)
+        it->setText(gName.str().c_str());
+      else
       {
-        detNumRead << numOfDetectors(idstr.str());
-        m_uiForm.groupTable->setItem(wsIndex, 2, new QTableWidgetItem(detNumRead.str().c_str()));
-      }
-      catch (...)
-      {
-        m_uiForm.groupTable->setItem(wsIndex, 2, new QTableWidgetItem("Invalid"));
+        m_uiForm.groupTable->setItem(wsIndex, 0, new QTableWidgetItem(gName.str().c_str()));
       }
 
-
-      m_uiForm.groupTable->item(wsIndex,2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);*/
-
-      // populate pair table combo boxes
-      int rowNum = m_uiForm.pairTable->rowCount();
-      for (int i = 0; i < rowNum; i++)
-      {
-        QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
-        QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
-
-        qw1->addItem( gName.str().c_str() );
-        qw2->addItem( gName.str().c_str() );
-       
-   
-      if ( qw2->count() > 1 )
-        qw2->setCurrentIndex(1);
-      }
+      it = m_uiForm.groupTable->item(wsIndex, 1);
+      if (it)
+        it->setText(idstr.str().c_str());
+      else
+        m_uiForm.groupTable->setItem(wsIndex, 1, new QTableWidgetItem(idstr.str().c_str()));
     }
   }  // end loop over wsIndex
   
 
-
   m_groupTableRowInFocus = 0;
-  updateFront();
+  updatePairTable();
+  updateFrontAndCombo();
   nowDataAvailable();
+}
 
 
+ /**
+ * first good bin returend in ms
+ */
+QString MuonAnalysis::firstGoodBin()
+{
+  std::stringstream str(m_uiForm.firstGoodBinFront->text().toStdString()); 
+  double fgb;
+  str >> fgb;
+  fgb /= 1000.0;  // convert from ns to ms
 
+  return QString((boost::lexical_cast<std::string>(fgb)).c_str());
 }
