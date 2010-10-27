@@ -24,7 +24,7 @@ using Kernel::PulseTimeType;
    * @param pulsetime absolute pulse time of the neutron.
    */
   TofEvent::TofEvent(const double tof, const PulseTimeType pulsetime) :
-              m_tof(m_tof), m_pulsetime(m_pulsetime)
+              m_tof(tof), m_pulsetime(pulsetime)
   {
   }
 
