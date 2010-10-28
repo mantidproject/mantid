@@ -71,7 +71,9 @@ namespace Mantid
         public:
             virtual ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement) = 0;
             virtual void setSuccessorParser(ImplicitFunctionParameterParser* paramParser) = 0;
-            virtual ~ImplicitFunctionParameterParser() = 0 {;}
+            virtual ~ImplicitFunctionParameterParser()
+            {
+            }
         protected:
             std::auto_ptr<ImplicitFunctionParameterParser> m_successor;
 

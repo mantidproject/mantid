@@ -48,7 +48,9 @@ namespace Mantid
         {
         public:
             virtual std::auto_ptr<Mantid::API::ImplicitFunction> create() const = 0;
-            virtual ~ImplicitFunctionBuilder() = 0 {;}
+            virtual ~ImplicitFunctionBuilder()
+            {
+            }
 
         };
     }

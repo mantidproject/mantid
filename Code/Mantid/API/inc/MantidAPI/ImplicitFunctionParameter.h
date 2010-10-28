@@ -63,9 +63,9 @@ namespace Mantid
                 return std::auto_ptr<ImplicitFunctionParameter>( this->cloneImp() ); 
             }
 
-            virtual ~ImplicitFunctionParameter() = 0
+            virtual ~ImplicitFunctionParameter()
             {
-            };
+            }
 
         protected:
 

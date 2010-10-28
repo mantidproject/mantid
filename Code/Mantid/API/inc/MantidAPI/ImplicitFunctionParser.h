@@ -98,7 +98,9 @@ namespace Mantid
             virtual ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement) = 0;
             virtual void setSuccessorParser(ImplicitFunctionParser* parser) = 0;
             virtual void setParameterParser(ImplicitFunctionParameterParser* parser) = 0;
-            virtual ~ImplicitFunctionParser() = 0 {;}
+            virtual ~ImplicitFunctionParser()
+            {
+            }
 
         };
 

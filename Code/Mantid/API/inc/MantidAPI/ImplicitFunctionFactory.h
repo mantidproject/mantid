@@ -53,6 +53,7 @@ namespace Mantid
 
       ImplicitFunctionParser * createImplicitFunctionParser() const
       {
+        
         boost::shared_ptr<Mantid::API::ImplicitFunctionParser> parser = Mantid::API::ImplicitFunctionParserFactory::Instance().create("CompositeImplicitFunctionParser");
         return parser.get();
       }
