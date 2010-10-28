@@ -157,6 +157,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._mask_widget.rightSpinBox.setValue(state.mask_right)
         self._mask_widget.leftSpinBox.setValue(state.mask_left)
         self._mask_widget.set_background_data(None)
+        self._mask_widget.set_background(None)
         
         # Detector offset input
         self._prepare_field(state.detector_offset != 0, 
