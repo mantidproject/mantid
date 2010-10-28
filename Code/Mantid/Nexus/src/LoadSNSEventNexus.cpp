@@ -299,8 +299,9 @@ void LoadSNSEventNexus::exec()
 
 
 //------------------------------------------------------------------------------------------------
-/** Load one of the banks' event data from the nexus file
- *
+/**
+ * Load one of the banks' event data from the nexus file
+ * @param entry_name The pathname of the bank to load
  */
 void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
 {

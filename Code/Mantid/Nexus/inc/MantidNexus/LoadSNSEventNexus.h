@@ -83,18 +83,25 @@ namespace Mantid
       /// The workspace being filled out
       DataObjects::EventWorkspace_sptr WS;
 
-      double filter_tof_min, filter_tof_max;
+      /// Filter by a minimum time-of-flight
+      double filter_tof_min;
+      /// Filter by a maximum time-of-flight
+      double filter_tof_max;
 
-      //Filter by start/stop times
-      Kernel::PulseTimeType filter_time_start, filter_time_stop;
+      /// Filter by start time
+      Kernel::PulseTimeType filter_time_start;
+      /// Filter by stop time
+      Kernel::PulseTimeType filter_time_stop;
 
       /// Was the instrument loaded?
       bool instrument_loaded_correctly;
 
-      //Limits found to tof
-      double longest_tof, shortest_tof;
+      /// Limits found to tof
+      double longest_tof;
+      /// Limits found to tof
+      double shortest_tof;
 
-      ///List of the absolute time of each pulse
+      /// List of the absolute time of each pulse
       std::vector<Kernel::PulseTimeType> pulseTimes;
 
       void loadBankEventData(std::string entry_name);
