@@ -93,7 +93,6 @@ namespace MantidQt
       void reflectionSelected(int index); ///< set up parameter file values based on reflection
       void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
       void tabChanged(int index); ///< handles enabling/disabling the "Run" button
-      void browseSave(); ///< show saveFileDialog for save file
       void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
       void backgroundRemoval(); ///< handles data from BG
       void plotRaw(); ///< plot raw data from instrument

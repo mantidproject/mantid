@@ -315,7 +315,6 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabTimeSlice));
     m_uiForm.tabWidget->addTab(m_uiForm.tabDiagnoseDetectors, "Diagnose Detectors");
     m_uiForm.tabWidget->addTab(m_uiForm.tabAbsoluteUnits, "Absolute Units");
-
     if ( m_directInstruments == NULL )
     {
       m_directInstruments = new Homer(qobject_cast<QWidget*>(this->parent()), m_uiForm);
@@ -324,13 +323,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
 	      this, SIGNAL(runAsPythonScript(const QString&)));
       m_directInstruments->initializeLocalPython();
     }
-    connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_directInstruments, SLOT(browseSaveFile()));
-    if ( m_indirectInstruments != NULL )
-    {
-      disconnect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_indirectInstruments, SLOT(browseSave()));
-    }
     m_directInstruments->setIDFValues(curInstPrefix);
-    m_uiForm.save_lbFile->setText("Filename:");
     break;
   case InDirect:
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabDiagnoseDetectors));
@@ -338,7 +331,6 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->addTab(m_uiForm.tabCalibration, "Calibration");
     m_uiForm.tabWidget->addTab(m_uiForm.tabTimeSlice, "Diagnostics");
     m_uiForm.tabWidget->addTab(m_uiForm.tabSofQW, "S(Q, w)");
-
     if ( m_indirectInstruments == NULL )
     {
       m_indirectInstruments = new Indirect(qobject_cast<QWidget*>(this->parent()), m_uiForm);
@@ -347,26 +339,19 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
 	      this, SIGNAL(runAsPythonScript(const QString&)));
       m_indirectInstruments->initializeLocalPython();
     }
-    connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_indirectInstruments, SLOT(browseSave()));
-    if ( m_directInstruments != NULL )
-    {
-      disconnect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), m_directInstruments, SLOT(browseSaveFile()));
-    }
     m_indirectInstruments->setIDFValues(curInstPrefix);
-    m_uiForm.save_lbFile->setText("Save Directory:");
     break;
   default:
     QMessageBox::information(this, "MantidPlot", "Undefined interface type detected.");
     return;
   }
-
   m_uiForm.swInstrument->setCurrentIndex(desired);
   m_uiForm.swInputFiles->setCurrentIndex(desired);
   m_uiForm.swAnalysis->setCurrentIndex(desired);
   m_uiForm.swConvertToEnergy->setCurrentIndex(desired);
   m_uiForm.swRebin->setCurrentIndex(desired);
+  m_uiForm.swSave->setCurrentIndex(desired);
 }
-
 
 /**
  * If the instrument selection has changed, calls instrumentSelectChanged
@@ -387,7 +372,6 @@ void ConvertToEnergy::userSelectInstrument(const QString& prefix)
     m_uiForm.pbRun->setEnabled(true);
   }
 }
-
 
 void ConvertToEnergy::openDirectoryDialog()
 {

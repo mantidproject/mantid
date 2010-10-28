@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>604</height>
+    <width>507</width>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -1348,7 +1348,7 @@ p, li { white-space: pre-wrap; }
           <property name="bottomMargin" >
            <number>0</number>
           </property>
-          <item row="2" column="0" >
+          <item row="1" column="0" >
            <layout class="QHBoxLayout" name="horizontalLayout_8" >
             <item>
              <widget class="QLabel" name="save_lbFormats" >
@@ -1395,49 +1395,61 @@ p, li { white-space: pre-wrap; }
             </item>
            </layout>
           </item>
-          <item row="1" column="0" >
-           <layout class="QHBoxLayout" name="hozl_save" >
-            <item>
-             <widget class="QLabel" name="save_lbFile" >
-              <property name="text" >
-               <string>Filename</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="leNameSPE" >
-              <property name="minimumSize" >
-               <size>
-                <width>250</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pbBrowseSPE" >
-              <property name="text" >
-               <string>Browse</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2" >
-              <property name="orientation" >
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType" >
-               <enum>QSizePolicy::MinimumExpanding</enum>
-              </property>
-              <property name="sizeHint" stdset="0" >
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+          <item row="0" column="0" >
+           <widget class="QStackedWidget" name="swSave" >
+            <property name="currentIndex" >
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="page_15" >
+             <layout class="QVBoxLayout" name="verticalLayout_13" >
+              <item>
+               <layout class="QHBoxLayout" name="et_save" >
+                <item>
+                 <widget class="QLabel" name="save_lbFile" >
+                  <property name="text" >
+                   <string>Filename</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leNameSPE" >
+                  <property name="minimumSize" >
+                   <size>
+                    <width>250</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pbBrowseSPE" >
+                  <property name="text" >
+                   <string>Browse</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_2" >
+                  <property name="orientation" >
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType" >
+                   <enum>QSizePolicy::MinimumExpanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0" >
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="page_16" />
+           </widget>
           </item>
          </layout>
         </widget>

@@ -301,7 +301,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput += "ind.convert_to_energy(rawfiles, mapfile, "
       "first, last, efixed, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, "
       "rebinParam = rebinParam, instrument = ins, savesuffix = suffix, saveFormats = fileFormats,"
-      "savedir = directory, analyser = ana, reflection = ref, CleanUp=clean)\n";
+      "analyser = ana, reflection = ref, CleanUp=clean)\n";
   }
   else if ( isDirtyRebin() )
   {
@@ -320,7 +320,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
       "   if save_ws.search(workspace):\n"
       "      ws_list.append(workspace)\n"
       "      runNos.append(mantid.getMatrixWorkspace(workspace).getRun().getLogData('run_number').value())\n"
-      "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix, directory)\n";
+      "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix)\n";
   }
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -512,7 +512,6 @@ QString Indirect::savePyCode()
 
   QString ins = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
   QString suffix = analyser + m_uiForm.cbReflection->currentText() + "_red";
-  QString directory = m_uiForm.leNameSPE->text();
 
   QStringList fileFormats;
   QString fileFormatList;
@@ -531,8 +530,7 @@ QString Indirect::savePyCode()
     "# Save File Parameters\n"
     "ins = '" + ins + "'\n"
     "suffix = '" + suffix + "'\n"
-    "fileFormats = " + fileFormatList + "\n"
-    "directory = r'" + directory + "'\n";
+    "fileFormats = " + fileFormatList + "\n";
 
   return pyInput;
 }
@@ -1353,20 +1351,6 @@ void Indirect::tabChanged(int index)
 {
   QString tabName = m_uiForm.tabWidget->tabText(index);
   m_uiForm.pbRun->setText("Run " + tabName);
-}
-/**
-* Select location to save file.
-*/
-void Indirect::browseSave()
-{
-  QString savDir = QFileDialog::getExistingDirectory(this, "Save Directory",
-    m_saveDir, QFileDialog::ShowDirsOnly);
-
-  if ( savDir != "" )
-  {
-    m_uiForm.leNameSPE->setText(savDir);
-    isDirty(true); 
-  }
 }
 /**
 * This function is called when the user clicks on the Background Removal button. It

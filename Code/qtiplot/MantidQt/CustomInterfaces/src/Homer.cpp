@@ -119,6 +119,7 @@ void Homer::setUpPage1()
   // SIGNALS and SLOTS that deal with copying the text from one edit box to another 
   connect(m_uiForm.ckSumSpecs, SIGNAL(stateChanged(int)), this, SLOT(updateSaveName()));
   connect(m_uiForm.leNameSPE, SIGNAL(editingFinished()), this, SLOT(saveNameUpd()));
+  connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), this, SLOT(browseSaveFile()));
 }
 
 /// put default values into the controls in the first tab
