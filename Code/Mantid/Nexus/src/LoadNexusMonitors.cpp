@@ -57,6 +57,8 @@ void LoadNexusMonitors::exec()
   // top level file information
   ::NeXus::File file(this->filename);
 
+  // FIXME: This is a SNS specific NXentry. In order to make this reader
+  // more generic, this must be changed.
   //Start with the base entry
   file.openGroup("entry", "NXentry");
   prog1.report();
@@ -93,6 +95,7 @@ void LoadNexusMonitors::exec()
 
   for (std::size_t i = 0; i < this->nMonitors; ++i)
   {
+    g_log.information() << "Loading " << monitorNames[i] << std::endl;
     // Do not rely on the order in path list
     Poco::Path monPath(monitorNames[i]);
     std::string monitorName = monPath.getBaseName();
