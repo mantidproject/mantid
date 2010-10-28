@@ -19,7 +19,6 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <memory>
-#include <boost/shared_ptr.hpp>
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

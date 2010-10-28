@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
 #include "ImplicitFunction.h"
 #include "ImplicitFunctionParameter.h"
 
