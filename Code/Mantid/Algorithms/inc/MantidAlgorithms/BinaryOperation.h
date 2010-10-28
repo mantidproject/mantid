@@ -9,11 +9,27 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
+
+    enum OperandType
+    {
+      eEventList = 0,
+      eHistogram = 1,
+      eNumber = 2
+    };
+
+//    struct OpRequirements
+//    {
+//      bool matchXSize;
+//      bool keepEventWorkspace;
+//    };
+
+
     /** 
     BinaryOperation supports the implementation of a binary operation on two input workspaces.
     It inherits from the Algorithm class, and overrides the init() & exec() methods.
@@ -89,7 +105,8 @@ namespace Mantid
       virtual bool propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs, 
 					const int index, API::MatrixWorkspace_sptr out);
 
-      /** Carries out the binary operation on a single spectrum.
+      /** Carries out the binary operation on a single spectrum, with another spectrum as the right-hand operand.
+       *
        *  @param lhsX The X values, made available if required.
        *  @param lhsY The vector of lhs data values
        *  @param lhsE The vector of lhs error values
@@ -102,6 +119,7 @@ namespace Mantid
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
 
       /** Carries out the binary operation when the right hand operand is a single number.
+       *
        *  @param lhsX The X values, made available if required.
        *  @param lhsY The vector of lhs data values
        *  @param lhsE The vector of lhs error values
@@ -112,6 +130,46 @@ namespace Mantid
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
+
+
+      // ===================================== EVENT LIST BINARY OPERATIONS ==========================================
+
+      /** Carries out the binary operation IN-PLACE on a single EventList,
+       * with another EventList as the right-hand operand.
+       * The event lists simply get appended.
+       *
+       *  @param lhs Reference to the EventList that will be modified in place.
+       *  @param rhs Const reference to the EventList on the right hand side.
+       *  @param rhsY The vector of rhs data values
+       *  @param rhsE The vector of rhs error values
+       */
+      virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
+          const DataObjects::EventList & rhs);
+
+
+      /** Carries out the binary operation IN-PLACE on a single EventList,
+       * with another (histogrammed) spectrum as the right-hand operand.
+       *
+       *  @param lhs Reference to the EventList that will be modified in place.
+       *  @param rhsX The vector of rhs X bin boundaries
+       *  @param rhsY The vector of rhs data values
+       *  @param rhsE The vector of rhs error values
+       */
+      virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
+          const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE);
+
+      /** Carries out the binary operation IN-PLACE on a single EventList,
+       * with a single (double) value as the right-hand operand
+       *
+       *  @param lhs Reference to the EventList that will be modified in place.
+       *  @param rhsY The rhs data value
+       *  @param rhsE The rhs error value
+       */
+      virtual void performEventBinaryOperation(DataObjects::EventList & lhs,
+          const double& rhsY, const double& rhsE);
+
+
+
 
       /** Should be overridden by operations that need to manipulate the units of the output workspace.
        *  Does nothing by default.
@@ -132,6 +190,7 @@ namespace Mantid
        *  @param rhs the other workspace
        *  @param ans the output workspace
        */
+
       virtual void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run& ans) const
       {
         (void) lhs; //Avoid compiler warning
@@ -139,14 +198,52 @@ namespace Mantid
         (void) ans;
       };
 
+
+      OperandType getOperandType(const API::MatrixWorkspace_const_sptr ws);
+
+      virtual void checkRequirements();
+
+      // ------- Workspaces being worked on --------
+      //Left-hand side workspace
+      API::MatrixWorkspace_const_sptr m_lhs;
+      //Left-hand side EventWorkspace
+      DataObjects::EventWorkspace_const_sptr m_elhs;
+
+      //Right-hand side workspace
+      API::MatrixWorkspace_const_sptr m_rhs;
+      //Right-hand side EventWorkspace
+      DataObjects::EventWorkspace_const_sptr m_erhs;
+
+      //Output workspace
+      API::MatrixWorkspace_sptr m_out;
+      //Output EventWorkspace
+      DataObjects::EventWorkspace_sptr m_eout;
+
+
+      //------ Requirements -----------
+
+      /// matchXSize set to true if the X sizes of histograms must match.
+      bool m_matchXSize;
+
+      /// flipSides set to true if the rhs and lhs operands should be flipped - for commutative binary operations, normally.
+      bool m_flipSides;
+
+      /// keepEventWorkspace set to true if the operation allows the output to stay as an EventWorkspace.
+      ///        if this returns false, any EventWorkspace will be converted to Workspace2D.
+      ///        This is ignored if the lhs operand is not an EventWorkspace.
+      bool m_keepEventWorkspace;
+
     private:
-      void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
-      void doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
-      void doSingleColumn(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
-      void do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
+
+      void doSingleValue();
+      void doSingleSpectrum();
+      void doSingleColumn();
+      void do2D();
+
       void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out);
       /// Apply masking requested by propagateSpectraMasks.
       void applyMaskingToOutput(API::MatrixWorkspace_sptr out);
+
 
       /// A store for accumulated spectra that should be masked in the output workspace
       std::vector<int> m_indicesToMask;

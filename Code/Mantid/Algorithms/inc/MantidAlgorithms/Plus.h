@@ -64,14 +64,17 @@ namespace Mantid
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
+      void performEventBinaryOperation(DataObjects::EventList & lhs, const DataObjects::EventList & rhs);
+      void performEventBinaryOperation(DataObjects::EventList & lhs, const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE);
+      void performEventBinaryOperation(DataObjects::EventList & lhs, const double& rhsY, const double& rhsE);
+
+
+      void checkRequirements();
       bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run & ans) const;
 
       //Overridden event-specific operation
-      void execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs );
       bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-      /// Checks the compatibility of event-based processing of the two workspaces
-      bool checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs);
 
       //Variables used in processing
       std::string lhs_name, rhs_name, out_name;

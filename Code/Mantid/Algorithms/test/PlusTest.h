@@ -561,6 +561,58 @@ public:
     EventTeardown();
   }
 
+
+
+  //------------------------------------------------------------------------------------------------
+  void testEventWorkspaces_differentOutputWorkspace_with_a_singlebin()
+  {
+    EventSetup();
+
+    std::string in1_name("ev1");
+    std::string in2_name("ev2");
+    std::string out_name("evOUT");
+
+    EventWorkspace_sptr in1, in2, out;
+    TS_ASSERT_THROWS_NOTHING(in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in1_name)));
+    TS_ASSERT_THROWS_NOTHING(in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in2_name)));
+    int numEvents1 = in1->getNumberEvents();
+    int numEvents2 = in2->getNumberEvents();
+
+    //------- set to a single bin ------------
+    MantidVecPtr x1;
+    MantidVec& xRef = x1.access();
+    xRef.push_back(0);
+    xRef.push_back(1e5); //One large bin
+    in1->setAllX(x1);
+    in2->setAllX(x1);
+
+    Plus alg;
+    alg.initialize();
+    alg.setPropertyValue("LHSWorkspace",in1_name);
+    alg.setPropertyValue("RHSWorkspace",in2_name);
+    alg.setPropertyValue("OutputWorkspace",out_name);
+    alg.execute();
+
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_name));
+    //Ya, its an event workspace
+    TS_ASSERT(out);
+    int numEventsOut = out->getNumberEvents();
+
+    //Correct in output
+    TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
+    //1 bin copied
+    TS_ASSERT_EQUALS( out->blocksize(), 1);
+
+    for (int wi=0; wi < 3; wi++)
+      TS_ASSERT_EQUALS( out->readY(wi)[0], (numEvents1+numEvents2)/3);
+
+    //But they were added in #1
+    TS_ASSERT_DIFFERS( in1, out);
+    TS_ASSERT_DIFFERS( in2, out);
+
+    EventTeardown();
+  }
+
   //------------------------------------------------------------------------------------------------
   void testEventWorkspaces_differentOutputAndDifferentPixelIDs()
   {
