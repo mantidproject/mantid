@@ -20,7 +20,7 @@ namespace PhysicalConstants
 {
 
 /**
- * Structure to store neutronic scatting information for the various elements.
+ * Structure to store neutronic scattering information for the various elements.
  * This is taken from http://www.ncnr.nist.gov/resources/n-lengths/list.html.
  */
 struct NeutronAtom {
@@ -40,37 +40,34 @@ struct NeutronAtom {
               const double coh_xs, const double inc_xs,
               const double tot_xs, const double abs_xs);
 
-  /** The atomic number, or number of protons, for the atom. */
+  /// The atomic number, or number of protons, for the atom.
   uint8_t z_number;
 
-  /**
-   * The total number of protons and neutrons, or mass number, for the atom.
-   * For isotopic averages this is set to zero.
-   */
+  /// The total number of protons and neutrons, or mass number, for the atom for isotopic averages this is set to zero.
   uint8_t a_number;
 
-  /** The real part of the coherent scattering length in fm. */
+  /// The real part of the coherent scattering length in fm.
   double coh_scatt_length_real;
 
-  /** The imaginary part of the coherent scattering length in fm. */
+  /// The imaginary part of the coherent scattering length in fm.
   double coh_scatt_length_img;
 
-  /** The real part of the incoherent scattering length in fm. */
+  /// The real part of the incoherent scattering length in fm.
   double inc_scatt_length_real;
 
-  /** The imaginary part of the incoherent scattering length in fm. */
+  /// The imaginary part of the incoherent scattering length in fm.
   double inc_scatt_length_img;
 
-  /** The coherent scattering cross section in barns. */
+  /// The coherent scattering cross section in barns.
   double coh_scatt_xs;
 
-  /** The incoherent scattering cross section in barns. */
+  /// The incoherent scattering cross section in barns.
   double inc_scatt_xs;
 
-  /** The total scattering cross section in barns. */
+  /// The total scattering cross section in barns.
   double tot_scatt_xs;
 
-  /** The absorption cross section for 2200m/s neutrons in barns. */
+  /// The absorption cross section for 2200m/s neutrons in barns.
   double abs_scatt_xs;
 };
 
