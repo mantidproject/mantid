@@ -90,7 +90,9 @@ class Reducer(object):
         if issubclass(reduction_step.__class__, ReductionStep):
             self._reduction_steps.append(reduction_step)
         else:
-            raise RuntimeError, "Reducer.append_step expects an object of class ReductionStep"
+            reduction_step = AlgoReductionStep(reduction_step)
+            self._reduction_steps.append(reduction_step)
+
         return reduction_step
         
     def append_data_file(self, data_file, workspace=None):
