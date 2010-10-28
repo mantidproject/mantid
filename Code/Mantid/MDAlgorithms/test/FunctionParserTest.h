@@ -4,11 +4,11 @@
 //Abstract testing base class for function parsers.
 
 #include <memory>
-#include "PlaneFunctionParser.h"
 #include "NormalParameterParser.h"
 #include "OriginParameterParser.h"
 #include "InvalidParameterParser.h"
 #include "PlaneFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

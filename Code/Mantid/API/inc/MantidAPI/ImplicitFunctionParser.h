@@ -1,6 +1,18 @@
 #ifndef FUNCTION_ABSTRACT_PARSER_H_
 #define FUNCTION_ABSTRACT_PARSER_H_
 
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
+#define DECLARE_IMPLICIT_FUNCTION_PARSER(classname) \
+    namespace { \
+    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+    ((Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<classname>(#classname##Parser)) \
+    , 0)); \
+    }
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -22,12 +34,13 @@
 #include "ImplicitFunctionBuilder.h"
 #include "ImplicitFunctionParameterParser.h"
 
+
+
 namespace Mantid
 {
     namespace API
     {
-        /** A base class for absorption correction algorithms.
-
+        /** 
         XML Parser for function types. See chain of reponsibility pattern.
 
         @author Owen Arnold, Tessella plc

@@ -6,8 +6,8 @@
 #include <memory>
 
 #include "InvalidParameterParser.h"
-#include "CompositeFunctionParser.h"
-#include "PlaneFunctionParser.h"
+#include "CompositeImplicitFunctionParser.h"
+#include "PlaneImplicitFunctionParser.h"
 #include "CompositeImplicitFunction.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -18,12 +18,12 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
-class  CompositeFunctionParserTest : public CxxTest::TestSuite, FunctionParserTest 
+class  CompositeImplicitFunctionParserTest : public CxxTest::TestSuite, FunctionParserTest 
 {
 
 private:
 
-    class ExposedCompositeFunctionParser : public Mantid::MDAlgorithms::CompositeFunctionParser
+    class ExposedCompositeImplicitFunctionParser : public Mantid::MDAlgorithms::CompositeImplicitFunctionParser
     {
     public:
         Mantid::MDAlgorithms::CompositeFunctionBuilder* exposedParseCompositeFunction(Poco::XML::Element* functionElement)
@@ -45,7 +45,7 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        CompositeFunctionParser functionParser;
+        CompositeImplicitFunctionParser functionParser;
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as Function element was expected, but not found.", functionParser.createFunctionBuilder(pRootElem), std::invalid_argument );
     }
 
@@ -58,7 +58,7 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        CompositeFunctionParser functionParser;
+        CompositeImplicitFunctionParser functionParser;
         TSM_ASSERT_THROWS("There is no successor parser setup for the PlaneFunctionParser", functionParser.createFunctionBuilder(pRootElem), std::runtime_error );
     }
 
@@ -77,7 +77,7 @@ public:
         EXPECT_CALL(*mockFuncParser, createFunctionBuilder(testing::_))
             .Times(1);
 
-        CompositeFunctionParser functionParser;
+        CompositeImplicitFunctionParser functionParser;
         functionParser.setSuccessorParser(mockFuncParser);
         ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
@@ -94,8 +94,8 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        ExposedCompositeFunctionParser functionParser;
-		functionParser.setSuccessorParser(new PlaneFunctionParser(constructRootParameterParser().release()));
+        ExposedCompositeImplicitFunctionParser functionParser;
+		functionParser.setSuccessorParser(new PlaneImplicitFunctionParser(constructRootParameterParser().release()));
         CompositeFunctionBuilder* compositeFunctionBuilder = functionParser.exposedParseCompositeFunction(pRootElem);
         std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = compositeFunctionBuilder->create();
 

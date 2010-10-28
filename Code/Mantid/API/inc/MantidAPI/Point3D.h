@@ -1,30 +1,31 @@
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_PARSER_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_PARSER_H_
+#ifndef _POINT_3D_ABSTRACT_H
+#define  _POINT_3D_ABSTRACT_H
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/DOM/Text.h"
+#include "Poco/DOM/AutoPtr.h" 
+#include "Poco/DOM/DOMWriter.h"
+#include "Poco/XML/XMLWriter.h"
+#include <sstream>
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
-#include "MantidAPI/ImplicitFunctionParser.h"
-
+#include "MantidGeometry/V3D.h"
 
 namespace Mantid
 {
-    namespace MDDataObjects
-    {
-        class point3D;
-    }
-    namespace MDAlgorithms
-    {
-        /** A base class for absorption correction algorithms.
 
-        This class to parse composite type functions and generate the associated builders.
+    namespace API
+    {
+  
+
+        /** 
+        Abstract type for point data.
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 27/10/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -47,22 +48,16 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport CompositeFunctionParser : public Mantid::API::ImplicitFunctionParser
+        class DLLExport Point3D
         {
-
         public:
-            CompositeFunctionParser();
-
-            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
-
-            void setSuccessorParser(ImplicitFunctionParser* parser);
-
-            CompositeFunctionBuilder* parseCompositeFunction(Poco::XML::Element* functionElement);
-
-            ~CompositeFunctionParser();
+          virtual double getX() const = 0;
+          virtual double getY() const = 0;
+          virtual double getZ() const = 0;
+          virtual ~Point3D(){};
         };
+
     }
 }
-
 
 #endif

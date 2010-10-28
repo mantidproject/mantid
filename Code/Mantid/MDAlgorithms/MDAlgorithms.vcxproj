@@ -126,8 +126,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h" />
-    <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\ImplicitTopology.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameterParser.h" />
@@ -136,16 +136,16 @@
     <ClInclude Include="inc\MantidMDAlgorithms\OriginParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\OriginParameterParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionBuilder.h" />
-    <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunctionParser.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\Topology.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h" />
     <ClInclude Include="test\testCPrebinning.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CompositeFunctionBuilder.cpp" />
-    <ClCompile Include="src\CompositeFunctionParser.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
+    <ClCompile Include="src\CompositeImplicitFunctionParser.cpp" />
     <ClCompile Include="src\ImplicitTopology.cpp" />
     <ClCompile Include="src\InvalidParameter.cpp" />
     <ClCompile Include="src\InvalidParameterParser.cpp" />
@@ -155,8 +155,8 @@
     <ClCompile Include="src\OriginParameterParser.cpp" />
     <ClCompile Include="src\ParameterParser.cpp" />
     <ClCompile Include="src\PlaneFunctionBuilder.cpp" />
-    <ClCompile Include="src\PlaneFunctionParser.cpp" />
     <ClCompile Include="src\PlaneImplicitFunction.cpp" />
+    <ClCompile Include="src\PlaneImplicitFunctionParser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

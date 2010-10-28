@@ -1,5 +1,6 @@
-#ifndef IMPLICIT_FUNCTION_FACTORY
-#define IMPLICIT_FUNCTION_FACTORY
+#ifndef IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_H
+#define IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_H
+
 
 /** @class ImplicitFunctionFactory ImplicitFunctionFactory.h Kernel/ImplicitFunctionFactory.h
 
@@ -32,55 +33,40 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "DllExport.h"
-#include "ImplicitFunction.h"
-#include "ImplicitFunctionParserFactory.h"
-#include "ImplicitFunctionParameterParserFactory.h"
+#include "ImplicitFunctionParameterParser.h"
 
 namespace Mantid
 {
   namespace API
   {
-    class EXPORT_OPT_MANTID_API ImplicitFunctionFactoryImpl : public Kernel::DynamicFactory<ImplicitFunction>
+    class EXPORT_OPT_MANTID_API ImplicitFunctionParameterParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParameterParser>
     {
     public:
-      virtual boost::shared_ptr<ImplicitFunction> create(const std::string& xmlString) const
+      virtual boost::shared_ptr<ImplicitFunctionParameterParser> create(const std::string& xmlString) const
       {
-
-        return Kernel::DynamicFactory<ImplicitFunction>::create(xmlString);
+        return Kernel::DynamicFactory<ImplicitFunctionParameterParser>::create(xmlString);
       }
 
     private:
-
-      //ImplicitFunctionParser * createImplicitFunctionParser()
-      //{
-      //  
-
-      //  //boost::shared_ptr<Mantid::API::ImplicitFunctionParser> parser = Mantid::API::ImplicitFunctionParserFactory::Instance().create("CompositeFunctionParserA");
-      //}
-
-      //ImplicitFunctionParameterParser * createImplicitFunctionParameterParser()
-      //{
-      //}
-
-      friend Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
+      friend Mantid::Kernel::CreateUsingNew<ImplicitFunctionParameterParserFactoryImpl>;
 
       /// Private Constructor for singleton class
-      ImplicitFunctionFactoryImpl();	
+      ImplicitFunctionParameterParserFactoryImpl();	
       /// Private copy constructor - NO COPY ALLOWED
-      ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl&);
+      ImplicitFunctionParameterParserFactoryImpl(const ImplicitFunctionParameterParserFactoryImpl&);
       /// Private assignment operator - NO ASSIGNMENT ALLOWED
-      ImplicitFunctionFactoryImpl& operator = (const ImplicitFunctionFactoryImpl&);
+      ImplicitFunctionParameterParserFactoryImpl& operator = (const ImplicitFunctionParameterParserFactoryImpl&);
       ///Private Destructor
-      virtual ~ImplicitFunctionFactoryImpl();
+      virtual ~ImplicitFunctionParameterParserFactoryImpl();
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for ImplicitFunctionFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
     #ifdef _WIN32
       // this breaks new namespace declaraion rules; need to find a better fix
-      template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl>;
+      template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl>;
     #endif /* _WIN32 */
 
-    typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl> ImplicitFunctionFactory;
+    typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl> ImplicitFunctionParameterParserFactory;
 
   }
 }

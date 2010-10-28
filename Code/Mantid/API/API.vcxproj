@@ -183,6 +183,9 @@
     <ClCompile Include="src\Function.cpp" />
     <ClCompile Include="src\FunctionFactory.cpp" />
     <ClCompile Include="src\IFunction.cpp" />
+    <ClCompile Include="src\ImplicitFunctionParserFactory.cpp" />
+    <ClCompile Include="src\ImplicitFunctionParameterParserFactory.cpp" />
+    <ClCompile Include="src\ImplictFunctionFactory.cpp" />
     <ClCompile Include="src\InstrumentDataService.cpp" />
     <ClCompile Include="src\IPeakFunction.cpp" />
     <ClCompile Include="src\ITableWorkspace.cpp" />
@@ -227,6 +230,7 @@
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameterParser.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParser.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParserFactory.h" />
+    <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameterParserFactory.h" />
     <ClInclude Include="inc\MantidAPI\Point3D.h" />
     <ClInclude Include="inc\mantidapi\run.h" />
     <ClInclude Include="test\AlgorithmHistoryTest.h" />

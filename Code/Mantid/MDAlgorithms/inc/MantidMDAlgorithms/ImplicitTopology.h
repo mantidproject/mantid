@@ -1,31 +1,31 @@
-#ifndef MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
-#define MANTID_ALGORITHMS_PLANEIMPLICITFUNCTION_PARSER_H_
+#ifndef VIS_IMPLICIT_TOPOLOGY_H_
+#define VIS_IMPLICIT_TOPOLOGY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
-#include "MantidAPI/ImplicitFunctionParser.h"
-
+#include "MantidMDAlgorithms/Topology.h"
 
 namespace Mantid
 {
-    namespace MDDataObjects
+    
+    namespace API
     {
-        class point3D;
+        class Point3D;
     }
+
     namespace MDAlgorithms
     {
         /** A base class for absorption correction algorithms.
 
-
-        This class to parse plane type functions and generate the associated builders.
+        Abstract type representing a topology request;
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 27/10/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -48,23 +48,18 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        //TODO. This should be constructed via a factory
-        class DLLExport PlaneFunctionParser : public Mantid::API::ImplicitFunctionParser
+        class DLLExport ImplicitTopology : public Mantid::API::Topology
         {
 
         public:
-            PlaneFunctionParser(Mantid::API::ImplicitFunctionParameterParser* parameterParser);
 
-            Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
+            void applyOrdering(Mantid::API::Point3D** unOrderedPoints) const;
 
-            void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
+            std::string getName() const;
 
-            PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
-
-            ~PlaneFunctionParser();
+            std::string toXMLString() const;
         };
     }
 }
-
 
 #endif

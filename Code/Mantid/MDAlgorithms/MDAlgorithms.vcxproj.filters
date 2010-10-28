@@ -55,16 +55,16 @@
     <ClInclude Include="inc\MantidMDAlgorithms\OriginParameterParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\Topology.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\ImplicitTopology.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunctionParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunctionParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -102,13 +102,13 @@
     <ClCompile Include="src\OriginParameterParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PlaneFunctionParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CompositeFunctionParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ImplicitTopology.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CompositeImplicitFunctionParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PlaneImplicitFunctionParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

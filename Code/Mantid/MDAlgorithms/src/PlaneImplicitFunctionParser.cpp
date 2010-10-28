@@ -1,14 +1,14 @@
-﻿#include "MantidMDAlgorithms/PlaneFunctionParser.h"
+﻿#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 namespace Mantid
 {
     namespace MDAlgorithms
     {
-        PlaneFunctionParser::PlaneFunctionParser(API::ImplicitFunctionParameterParser* parameterParser) : ImplicitFunctionParser(parameterParser)
+        PlaneImplicitFunctionParser::PlaneImplicitFunctionParser(API::ImplicitFunctionParameterParser* parameterParser) : ImplicitFunctionParser(parameterParser)
         {
         }
 
-        API::ImplicitFunctionBuilder* PlaneFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
+        API::ImplicitFunctionBuilder* PlaneImplicitFunctionParser::createFunctionBuilder(Poco::XML::Element* functionElement)
         {
             API::ImplicitFunctionBuilder* functionBuilder;
             if("Function" != functionElement->localName())
@@ -30,12 +30,12 @@ namespace Mantid
             return functionBuilder;
         }
 
-        void PlaneFunctionParser::setSuccessorParser(ImplicitFunctionParser* parser)
+        void PlaneImplicitFunctionParser::setSuccessorParser(ImplicitFunctionParser* parser)
         {
             this->m_successor = std::auto_ptr<ImplicitFunctionParser>(parser);
         }
 
-        PlaneFunctionBuilder * PlaneFunctionParser::parsePlaneFunction(Poco::XML::Element* functionElement)
+        PlaneFunctionBuilder * PlaneImplicitFunctionParser::parsePlaneFunction(Poco::XML::Element* functionElement)
         {
             using namespace Poco::XML;
             std::auto_ptr<PlaneFunctionBuilder> functionBuilder = std::auto_ptr<PlaneFunctionBuilder>(new PlaneFunctionBuilder);
@@ -65,7 +65,7 @@ namespace Mantid
             return functionBuilder.release(); //convert to raw pointer and cancel smart management.
         }
 
-        PlaneFunctionParser::~PlaneFunctionParser()
+        PlaneImplicitFunctionParser::~PlaneImplicitFunctionParser()
         {
         }
     }

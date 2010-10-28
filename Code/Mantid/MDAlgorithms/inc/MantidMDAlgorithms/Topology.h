@@ -1,48 +1,30 @@
-#ifndef IIMPLICITFUNCTION_H_
-#define IIMPLICITFUNCTION_H_
-
-/* Used to register classes into the factory. creates a global object in an
- * anonymous namespace. The object itself does nothing, but the comma operator
- * is used in the call to its constructor to effect a call to the factory's
- * subscribe method.
- */
-#define DECLARE_IMPLICIT_FUNCTION(classname) \
-    namespace { \
-    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-    ((Mantid::API::ImplicitFunctionFactory::Instance().subscribe<classname>(#classname)) \
-    , 0)); \
-    }
+#ifndef VIS_TOPOLOGY_H_
+#define VIS_TOPOLOGY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Text.h"
-#include "Poco/DOM/AutoPtr.h" 
-#include "Poco/DOM/DOMWriter.h"
-#include "Poco/XML/XMLWriter.h"
-#include <sstream>
+
 #include <vector>
 #include "MantidKernel/System.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
-#include "Point3D.h"
 
 namespace Mantid
 {
+    
+    namespace API
+    {
+        class Point3D;
+    }
 
     namespace API
     {
-  
-
         /** A base class for absorption correction algorithms.
 
-        This class represents the abstract implicit function type used for communicating and implementing an operation against 
-        an MDWorkspace.
+        Abstract type represents topology for visualisation.
 
         @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+        @date 27/10/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -65,14 +47,16 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport ImplicitFunction
+        class DLLExport Topology
         {
-        public:
-            virtual bool evaluate(const Point3D* pPoint3D) const = 0;
-            virtual std::string getName() const = 0; 
-            virtual std::string toXMLString() const = 0;
-            virtual ~ImplicitFunction() = 0 {;}
 
+        public:
+
+            virtual void applyOrdering(Mantid::API::Point3D** unOrderedPoints) const = 0;
+
+            virtual std::string getName() const = 0;
+
+            virtual std::string toXMLString() const = 0;
         };
     }
 }

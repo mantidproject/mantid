@@ -1,11 +1,11 @@
-#ifndef TEST_PLANE_FUNCTION_PARSERS_H_
-#define TEST_PLANE_FUNCTION_PARSERS_H_
+#ifndef TEST_PLANE_IMPLICIT_FUNCTION_PARSERS_H_
+#define TEST_PLANE_IMPLICIT_FUNCTION_PARSERS_H_
 
 
 #include <vector>
 #include <memory>
 #include "FunctionParserTest.h"
-#include "PlaneFunctionParser.h"
+#include "PlaneImplicitFunctionParser.h"
 #include "NormalParameterParser.h"
 #include "OriginParameterParser.h"
 #include "InvalidParameterParser.h"
@@ -21,14 +21,14 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
-class  PlaneFunctionParserTest : public CxxTest::TestSuite, FunctionParserTest 
+class  PlaneImplicitFunctionParserTest : public CxxTest::TestSuite, FunctionParserTest 
 {
 private:
 
-    class ExposedPlaneFunctionParser : public Mantid::MDAlgorithms::PlaneFunctionParser
+    class ExposedPlaneFunctionParser : public Mantid::MDAlgorithms::PlaneImplicitFunctionParser
     {
     public:
-        ExposedPlaneFunctionParser(Mantid::API::ImplicitFunctionParameterParser* paramParser) :  PlaneFunctionParser(paramParser)
+        ExposedPlaneFunctionParser(Mantid::API::ImplicitFunctionParameterParser* paramParser) :  PlaneImplicitFunctionParser(paramParser)
         {}
         Mantid::MDAlgorithms::PlaneFunctionBuilder* exposedParsePlaneFunction(Poco::XML::Element* functionElement)
         {
@@ -53,7 +53,7 @@ public:
             .WillOnce(testing::Return(new OriginParameter(0, 0, 0)))
             .WillOnce(testing::Return(new NormalParameter(0, 0, 0)));
 
-        PlaneFunctionParser functionParser(paramParser);
+        PlaneImplicitFunctionParser functionParser(paramParser);
         Mantid::API::ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
 
@@ -74,7 +74,7 @@ public:
         EXPECT_CALL(*mockFuncParser, createFunctionBuilder(testing::_))
             .Times(1);
 
-        PlaneFunctionParser functionParser(constructRootParameterParser().release());
+        PlaneImplicitFunctionParser functionParser(constructRootParameterParser().release());
         functionParser.setSuccessorParser(mockFuncParser);
         ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
@@ -117,7 +117,7 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        PlaneFunctionParser functionParser(constructRootParameterParser().release());
+        PlaneImplicitFunctionParser functionParser(constructRootParameterParser().release());
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as Function element was expected, but not found.", functionParser.createFunctionBuilder(pRootElem), std::invalid_argument );
     }
 
@@ -130,8 +130,8 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        PlaneFunctionParser functionParser(constructRootParameterParser().release());
-        TSM_ASSERT_THROWS("There is no successor parser setup for the PlaneFunctionParser", functionParser.createFunctionBuilder(pRootElem), std::runtime_error );
+        PlaneImplicitFunctionParser functionParser(constructRootParameterParser().release());
+        TSM_ASSERT_THROWS("There is no successor parser setup for the PlaneImplicitFunctionParser", functionParser.createFunctionBuilder(pRootElem), std::runtime_error );
     }
 	
 
