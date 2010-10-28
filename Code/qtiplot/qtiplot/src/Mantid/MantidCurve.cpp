@@ -256,6 +256,16 @@ void MantidCurve::dataReset(const QString& wsName)
   try {
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);
+    if (mws->isHistogramData())
+    {
+      setStyle(QwtPlotCurve::Steps);
+      setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
+    }
+    else
+    {
+      setStyle(QwtPlotCurve::Lines);
+    }
+    plot()->replot();
   } catch(std::range_error) {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
     Mantid::Kernel::Logger::get("MantidCurve").information() << "Workspace " << wsNameStd
@@ -263,16 +273,6 @@ void MantidCurve::dataReset(const QString& wsName)
     deleteHandle(wsNameStd,mws);
   }
   delete new_mantidData;
-  if (mws->isHistogramData())
-  {
-    setStyle(QwtPlotCurve::Steps);
-    setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
-  }
-  else
-  {
-    setStyle(QwtPlotCurve::Lines);
-  }
-  plot()->replot();
 }
 
 void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
