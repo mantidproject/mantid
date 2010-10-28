@@ -18,12 +18,12 @@ using namespace API;
 void ElasticWindow::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new WorkspaceUnitValidator<>("DeltaE")));
+  declareProperty(new WorkspaceProperty<>("OutputInQ","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("OutputInQSquared","",Direction::Output));
   declareProperty("Range1Start", EMPTY_DBL(), new MandatoryValidator<double>());
   declareProperty("Range1End", EMPTY_DBL(), new MandatoryValidator<double>());
   declareProperty("Range2Start", EMPTY_DBL(), Direction::Input);
   declareProperty("Range2End", EMPTY_DBL(), Direction::Input);
-  declareProperty(new WorkspaceProperty<>("OutputInQ","",Direction::Output));
-  declareProperty(new WorkspaceProperty<>("OutputInQSquared","",Direction::Output));
 }
 
 void ElasticWindow::exec()
