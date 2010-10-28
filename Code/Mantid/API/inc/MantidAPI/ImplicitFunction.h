@@ -70,7 +70,9 @@ namespace Mantid
             virtual bool evaluate(const Point3D* pPoint3D) const = 0;
             virtual std::string getName() const = 0; 
             virtual std::string toXMLString() const = 0;
-            virtual ~ImplicitFunction() = 0 {;}
+            virtual ~ImplicitFunction()
+            {
+            }
 
         };
     }
