@@ -30,7 +30,7 @@ Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get(
 Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
-  QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
+QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -82,6 +82,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadMenu->addAction(loadEventAction);
   m_loadButton->setMenu(m_loadMenu);
 
+  createWorkspaceMenuActions();
+
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
   connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(workspaceSelected()));
@@ -93,13 +95,13 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(m_mantidUI, SIGNAL(workspace_added(const QString &, Mantid::API::Workspace_sptr)),
     this, SLOT(addTreeEntry(const QString &, Mantid::API::Workspace_sptr)), Qt::QueuedConnection);
   connect(m_mantidUI, SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr)),
-          this, SLOT(replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr)),Qt::QueuedConnection);
+    this, SLOT(replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr)),Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspace_ungrouped(const QString &, Mantid::API::Workspace_sptr)),
-          this, SLOT(unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr)),Qt::QueuedConnection);
+    this, SLOT(unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr)),Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspace_removed(const QString &)),
-          this, SLOT(removeWorkspaceEntry(const QString &)),Qt::QueuedConnection);
+    this, SLOT(removeWorkspaceEntry(const QString &)),Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),Qt::QueuedConnection);
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
@@ -108,8 +110,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
 }
 
 /** Returns the name of the selected workspace
- *  (the first one if more than one is selected)
- */
+*  (the first one if more than one is selected)
+*/
 QString MantidDockWidget::getSelectedWorkspaceName() const
 {
   QList<QTreeWidgetItem*> items = m_tree->selectedItems();
@@ -137,10 +139,10 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
 }
 
 /**
- * Add an item to the tree list
- * @ws_name The name of the workspace
- * @param workspace A pointer to the workspace
- */
+* Add an item to the tree list
+* @ws_name The name of the workspace
+* @param workspace A pointer to the workspace
+*/
 void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   QString group_name = findParentName(ws_name, workspace);
@@ -161,10 +163,10 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
 }
 
 /**
- * Replace an item in the tree list
- * @ws_name The name of the workspace
- * @param workspace A pointer to the workspace
- */
+* Replace an item in the tree list
+* @ws_name The name of the workspace
+* @param workspace A pointer to the workspace
+*/
 void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   QString group_name = findParentName(ws_name, workspace);
@@ -188,8 +190,41 @@ void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Wo
 }
 
 /**
- * Check if the given workspace is part of a known group
- */
+* Create the action items associated with the dock
+*/
+void MantidDockWidget::createWorkspaceMenuActions()
+{
+  m_showData = new QAction(tr("Show data"),this);
+  connect(m_showData,SIGNAL(triggered()),m_mantidUI,SLOT(importWorkspace()));
+
+  m_showInst = new QAction(tr("Show instrument"),this);
+  connect(m_showInst,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
+
+  m_plotSpec = new QAction(tr("Plot spectrum..."),this);
+  connect(m_plotSpec,SIGNAL(triggered()),this,SLOT(plotSpectra()));
+
+  m_colorFill = new QAction(tr("Color fill plot"), this);
+  connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
+
+  m_showLogs = new QAction(tr("Sample Logs..."), this);
+  connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
+
+  m_showHist = new QAction(tr("Show History"), this);
+  connect(m_showHist,SIGNAL(triggered()),m_mantidUI,SLOT(showAlgorithmHistory()));
+
+  m_saveNexus = new QAction(tr("Save Nexus"),this);
+  connect(m_saveNexus,SIGNAL(activated()),m_mantidUI,SLOT(saveNexusWorkspace()));
+
+  m_rename = new QAction(tr("Rename"),this);
+  connect(m_rename,SIGNAL(activated()),this,SLOT(renameWorkspace()));
+
+  m_delete = new QAction(tr("Delete"),this);
+  connect(m_delete,SIGNAL(triggered()),this,SLOT(deleteWorkspaces()));
+}
+
+/**
+* Check if the given workspace is part of a known group
+*/
 QString MantidDockWidget::findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   QString name("");
@@ -205,19 +240,19 @@ QString MantidDockWidget::findParentName(const QString & ws_name, Mantid::API::W
       Mantid::API::Workspace *worksp = NULL;
       try
       {
-	worksp = Mantid::API::AnalysisDataService::Instance().retrieve((*itr).toStdString()).get();
+        worksp = Mantid::API::AnalysisDataService::Instance().retrieve((*itr).toStdString()).get();
       }
       catch(Mantid::Kernel::Exception::NotFoundError&)
       {
-	continue;
+        continue;
       }
       if( Mantid::API::WorkspaceGroup *grouped = dynamic_cast<Mantid::API::WorkspaceGroup *>(worksp) )
       {
-	if( grouped->contains(ws_name.toStdString()) )
-	{
-	  name = *itr;
-	  break;
-	}
+        if( grouped->contains(ws_name.toStdString()) )
+        {
+          name = *itr;
+          break;
+        }
       }
     }
   }
@@ -225,9 +260,9 @@ QString MantidDockWidget::findParentName(const QString & ws_name, Mantid::API::W
 }
 
 /**
- * When an item is expanded, populate the child data for this item
- * @param item The item being expanded
- */
+* When an item is expanded, populate the child data for this item
+* @param item The item being expanded
+*/
 void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
 {
   // Clear it first
@@ -286,10 +321,10 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
 }
 
 /**
- * Create a tree item for the given workspace
- * @param ws_name The worksapce name
- * @param workspace A pointer to the workspace
- */
+* Create a tree item for the given workspace
+* @param ws_name The worksapce name
+* @param workspace A pointer to the workspace
+*/
 QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   QTreeWidgetItem *ws_item = new QTreeWidgetItem(QStringList(ws_name));
@@ -301,10 +336,10 @@ QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid:
 }
 
 /*
- * This slot handles the notification sent by the UnGroupWorkspace algorithm.
- * @param group_name The name of the group
- * @param ws_group The pointer to the workspace group
- */
+* This slot handles the notification sent by the UnGroupWorkspace algorithm.
+* @param group_name The name of the group
+* @param ws_group The pointer to the workspace group
+*/
 void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::API::Workspace_sptr ws_group)
 {
   QList<QTreeWidgetItem*> matches = m_tree->findItems(group_name, Qt::MatchFixedString);
@@ -322,11 +357,11 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
       Workspace_sptr member_ws;
       try
       {
-	member_ws = AnalysisDataService::Instance().retrieve(name);
+        member_ws = AnalysisDataService::Instance().retrieve(name);
       }
       catch(Exception::NotFoundError&)
       {
-	continue;
+        continue;
       }
       QTreeWidgetItem *item = createEntry(QString::fromStdString(name), member_ws);
       setItemIcon(item, member_ws);
@@ -337,10 +372,10 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
 }
 
 /**
- * Populate the children of this item with data relevant to the MatrixWorkspace object
- * @param workspace A pointer to the MatrixWorkspace object to inspect
- * @param ws_item The tree item that has been expanded
- */
+* Populate the children of this item with data relevant to the MatrixWorkspace object
+* @param workspace A pointer to the MatrixWorkspace object to inspect
+* @param ws_item The tree item that has been expanded
+*/
 void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
   QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
@@ -350,15 +385,15 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   data_item = new QTreeWidgetItem(QStringList("Histograms: "+QString::number(workspace->getNumberHistograms())));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
- 
+
   data_item = new QTreeWidgetItem(QStringList("Bins: "+QString::number(workspace->blocksize())));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
-  
+
   data_item = new QTreeWidgetItem(QStringList(workspace->isHistogramData() ? "Histogram" : "Data points"));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
-  
+
   std::string s = "X axis: ";
   if (workspace->axes() > 0 )
   {
@@ -374,11 +409,11 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
   s = "Y axis: " + workspace->YUnitLabel();
-  
+
   data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
-  
+
   data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize())+" KB"));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
@@ -394,10 +429,10 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
 }
 
 /**
- * Populate the children of this item with data relevant to the WorkspaceGroup object
- * @param workspace A pointer to the WorkspaceGroup object to inspect
- * @param ws_item The tree item that has been expanded
- */
+* Populate the children of this item with data relevant to the WorkspaceGroup object
+* @param workspace A pointer to the WorkspaceGroup object to inspect
+* @param ws_item The tree item that has been expanded
+*/
 void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item)
 {
   const std::vector<std::string> group_names = workspace->getNames();
@@ -407,7 +442,7 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
   for( ; sitr != send; ++sitr )
   {
     std::string name = *sitr;
-	Workspace_sptr member_ws;
+    Workspace_sptr member_ws;
     try
     {
       member_ws = AnalysisDataService::Instance().retrieve(name);
@@ -423,10 +458,10 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
 }
 
 /**
- * Populate the children of this item with data relevant to the TableWorkspace object
- * @param workspace A pointer to the TableWorkspace object to inspect
- * @param ws_item The tree item that has been expanded
- */
+* Populate the children of this item with data relevant to the TableWorkspace object
+* @param workspace A pointer to the TableWorkspace object to inspect
+* @param ws_item The tree item that has been expanded
+*/
 void MantidDockWidget::populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
   QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Columns: "+QString::number(workspace->columnCount())));
@@ -457,7 +492,7 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
         return;
       }
       int childCounts=topItem->childCount();
-	  for(int chIndex=0;chIndex<childCounts;++chIndex)
+      for(int chIndex=0;chIndex<childCounts;++chIndex)
       {
         QTreeWidgetItem* childItem= topItem->child(chIndex);
         if(!childItem)
@@ -468,9 +503,9 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
         if(!ws_name.compare(childItem->text(0)))
         {
           topItem->takeChild(chIndex);
-		  parent_item = topItem;
-		  deleteGroupWorkspaceIfEmpty(topItem);
-		 
+          parent_item = topItem;
+          deleteGroupWorkspaceIfEmpty(topItem);
+
         }
       }
     }
@@ -487,52 +522,107 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
     }
     m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
   }
- 
+
 }
 
 void MantidDockWidget::deleteGroupWorkspaceIfEmpty(QTreeWidgetItem* item)
 {
-	if(!item) return;
-//if there are no members in the group workspace delete the group workspace
- if(item->childCount()==1)//workspace id
- {
-	 
-	 Workspace_sptr ws_sptr;
-	 try
-	 {
-		 ws_sptr= Mantid::API::AnalysisDataService::Instance().retrieve(item->text(0).toStdString());
-	 }
-	 catch(Mantid::Kernel::Exception::NotFoundError &)
-	 {
-		 return;
-	 }
-	 WorkspaceGroup_sptr wsgrp_sptr;
-	 try
-	 {
-	   wsgrp_sptr = boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
-	 }
-	 catch(std::runtime_error&)
-	 {
-		 return;
-	 }
-	if(!wsgrp_sptr) 
-	{ 
-		return;
-	}
-	if(wsgrp_sptr->isEmpty())
-	{
-		//if the  group workspace is empty
-		m_mantidUI->deleteWorkspace(item->text(0));
-	}
-	
- }
+  if(!item) return;
+  //if there are no members in the group workspace delete the group workspace
+  if(item->childCount()==1)//workspace id
+  {
+
+    Workspace_sptr ws_sptr;
+    try
+    {
+      ws_sptr= Mantid::API::AnalysisDataService::Instance().retrieve(item->text(0).toStdString());
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError &)
+    {
+      return;
+    }
+    WorkspaceGroup_sptr wsgrp_sptr;
+    try
+    {
+      wsgrp_sptr = boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
+    }
+    catch(std::runtime_error&)
+    {
+      return;
+    }
+    if(!wsgrp_sptr) 
+    { 
+      return;
+    }
+    if(wsgrp_sptr->isEmpty())
+    {
+      //if the  group workspace is empty
+      m_mantidUI->deleteWorkspace(item->text(0));
+    }
+
+  }
 
 }
+
+/**
+ * Add the actions that are appropriate for a MatrixWorspace
+ * @param menu The menu to store the items
+ * @param matrixWS The workspace related to the menu
+ */
+void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const
+{
+  // Add all options except plot of we only have 1 value
+  menu->addAction(m_showData);
+  menu->addAction(m_showInst);
+  menu->addAction(m_plotSpec);
+  if( matrixWS->blocksize() > 1 )
+  {
+    m_plotSpec->setEnabled(true);
+  }
+  else
+  {
+    m_plotSpec->setEnabled(false);
+  }
+  menu->addAction(m_colorFill);
+  if( matrixWS->axes() > 1 )
+  {
+    m_colorFill->setEnabled(true);
+  }
+  else
+  {
+    m_colorFill->setEnabled(false);
+  }
+  menu->addAction(m_showLogs);
+  menu->addAction(m_showHist);
+  menu->addAction(m_saveNexus);
+}
+
+/**
+ * Add the actions that are appropriate for a MatrixWorspace
+ * @param menu The menu to store the items
+ */
+void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
+{
+  m_plotSpec->setEnabled(true);
+  menu->addAction(m_plotSpec);
+  menu->addAction(m_colorFill);
+  m_colorFill->setEnabled(true);
+  menu->addAction(m_saveNexus);
+}
+
+/**
+ * Add the actions that are appropriate for a MatrixWorspace
+ * @param menu The menu to store the items
+ */
+void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
+{
+  menu->addAction(m_showData);
+  menu->addAction(m_showHist);
+}
+
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
   (void) item; //Avoid unused warning
-
-
 }
 
 void MantidDockWidget::workspaceSelected()
@@ -547,7 +637,7 @@ void MantidDockWidget::workspaceSelected()
 }
 
 /**
-     deleteWorkspaces
+deleteWorkspaces
 */
 void MantidDockWidget::deleteWorkspaces()
 {
@@ -557,7 +647,7 @@ void MantidDockWidget::deleteWorkspaces()
     MantidMatrix* m = (MantidMatrix*) m_mantidUI->appWindow()->activeWindow();
     if (!m || !m->isA("MantidMatrix")) return;
     if(m->workspaceName().isEmpty()) return;
-    
+
     if(Mantid::API::AnalysisDataService::Instance().doesExist(m->workspaceName().toStdString()))
     {	
       m_mantidUI->deleteWorkspace(m->workspaceName());
@@ -569,7 +659,7 @@ void MantidDockWidget::deleteWorkspaces()
   for (itr = items.begin(); itr != items.end(); ++itr)
   {
     m_mantidUI->deleteWorkspace((*itr)->text(0));
-   }//end of for loop for selected items
+  }//end of for loop for selected items
 }
 
 void MantidDockWidget::renameWorkspace()
@@ -602,92 +692,40 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
   {
     // Fresh menu
     menu = new QMenu(this);
-    Mantid::API::Workspace_const_sptr grpWSPstr;
-    bool singleValueWS = false;
-    bool bDisable = false;
-	bool disableTableWS =false;
+    Mantid::API::Workspace_const_sptr ws;
     try
     {
-      Mantid::API::Workspace_const_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(selectedWsName.toStdString());
-      grpWSPstr = boost::dynamic_pointer_cast<const WorkspaceGroup>(ws);
-      // Check for single-valued workspaces because they don't like to be plotted!
-      if ( ws->id() == "WorkspaceSingleValue" ) singleValueWS = true;
-	  Mantid::API::ITableWorkspace_const_sptr tablews = boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(ws);
-	  if(tablews)
-	  {
-		  disableTableWS=true;
-	  }
+      ws = Mantid::API::AnalysisDataService::Instance().retrieve(selectedWsName.toStdString());
     }
-    catch(Mantid::Kernel::Exception::NotFoundError &)//if not a valid object in analysis data service
+    catch(Mantid::Kernel::Exception::NotFoundError &)
     {
-      bDisable=true;
-
-    }
-    QAction *action = new QAction("Show data",this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(importWorkspace()));
-    menu->addAction(action);
-    if(grpWSPstr|| bDisable)
-    {action->setEnabled(false);
+      // Nothing to do
+      return;
     }
 
-    action = new QAction("Show instrument",this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
-    menu->addAction(action);
-    if(grpWSPstr||bDisable||disableTableWS)
-    {action->setEnabled(false);
-    }
-
-    action = new QAction("Plot spectrum...",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(plotSpectra()));
-    menu->addAction(action);
-    if( bDisable || singleValueWS || disableTableWS)
+    // Add the items that are appropriate for the type
+    if( MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws) ) 
     {
-      action->setEnabled(false);
+      addMatrixWorspaceMenuItems(menu, matrixWS);
     }
-
-    action = new QAction("Sample Logs...", this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
-    menu->addAction(action);
-    if(grpWSPstr||bDisable || disableTableWS)
-    {action->setEnabled(false);
-    }
-
-    action = new QAction("Show History", this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showAlgorithmHistory()));
-    menu->addAction(action);
-    if(grpWSPstr||bDisable)
-    {action->setEnabled(false);
-    }
-
-    action = new QAction("Save Nexus",this);
-    connect(action,SIGNAL(activated()),m_mantidUI,SLOT(saveNexusWorkspace()));
-    menu->addAction(action);
-    if(bDisable||disableTableWS)
-    {action->setEnabled(false);
-    }
-
-    action = new QAction("Rename",this);
-    connect(action,SIGNAL(activated()),this,SLOT(renameWorkspace()));
-    menu->addAction(action);
-    if(bDisable)
+    else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) ) 
     {
-      action->setEnabled(false);
+      addWorkspaceGroupMenuItems(menu);
     }
-
-
+    else if( boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(ws) )
+    {
+      addTableWorkspaceMenuItems(menu);
+    }
+    else {}
+    
+    //Rename is valid for all workspace types
+    menu->addAction(m_rename);
     //separate delete
     menu->addSeparator();
-
-    action = new QAction("Delete",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(deleteWorkspaces()));
-    menu->addAction(action);
-    if(bDisable)
-    {
-      action->setEnabled(false);
-    }
-
+    menu->addAction(m_delete);
   }
 
+  //Show the menu at the cursor's current position
   menu->popup(QCursor::pos());
 }
 
@@ -714,6 +752,20 @@ void MantidDockWidget::plotSpectra()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   m_mantidUI->plotSpectraList( toPlot, false );
+}
+
+/**
+ * Draw a color fill plot of the workspaces that are currently selected.
+ * NOTE: The drawing of 2D plots is currently intimately linked with MantidMatrix meaning
+ * that one of these must be generated first!
+ */
+void MantidDockWidget::drawColorFillPlot()
+{
+  // Get the selected workspaces
+  QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  if( wsNames.empty() ) return;
+  m_mantidUI->drawColorFillPlots(wsNames);
+
 }
 
 void MantidDockWidget::treeSelectionChanged()
@@ -756,6 +808,7 @@ void MantidDockWidget::treeSelectionChanged()
   }
 
 }
+
 
 
 //------------ MantidTreeWidget -----------------------//
@@ -802,7 +855,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
     QString wsName = m_mantidUI->getSelectedWorkspaceName();
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
     grpWSPstr=boost::dynamic_pointer_cast< WorkspaceGroup>
-              (Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+      (Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     if(!grpWSPstr)
     {
       if ( ! wsName.isEmpty() )
@@ -820,11 +873,11 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
 }
 
 /** Returns a list of all selected workspaces
- *  (including members of groups if appropriate)
- */
-QList<QString> MantidTreeWidget::getSelectedWorkspaceNames() const
+*  (including members of groups if appropriate)
+*/
+QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 {
-  QList<QString> names;
+  QStringList names;
   const QList<QTreeWidgetItem*> items = this->selectedItems();
   QList<QTreeWidgetItem*>::const_iterator it;
   // Need to look for workspace groups and add all children if found
@@ -852,9 +905,9 @@ QList<QString> MantidTreeWidget::getSelectedWorkspaceNames() const
 }
 
 /** Allows the user to select a spectrum from the selected workspaces.
- *  Automatically chooses spectrum 0 if all are single-spectrum workspaces.
- *  @return A map of workspace name - spectrum index pairs
- */
+*  Automatically chooses spectrum 0 if all are single-spectrum workspaces.
+*  @return A map of workspace name - spectrum index pairs
+*/
 QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
@@ -881,7 +934,7 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
     spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,maxHists-1,1,&goAhead);
     if (!goAhead) return toPlot;
   }
- 
+
   // Now need to go around inserting workspace-spectrum pairs into a map
   // and checking whether the requested spectrum is too large for any workspaces
   for ( int i = 0; i < wsNames.size(); ++i )
@@ -889,7 +942,7 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
     if (spec >= wsSizes[i])
     {
       logObject.warning() << wsNames[i].toStdString() << " has only "
-          << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";
+        << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";
       continue;
     }
     toPlot.insert(wsNames[i],spec);
@@ -911,7 +964,7 @@ void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
 }
 
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
-    QDockWidget(w),m_progressBar(NULL),m_algID(NULL),m_mantidUI(mui)
+QDockWidget(w),m_progressBar(NULL),m_algID(NULL),m_mantidUI(mui)
 {
   setWindowTitle(tr("Algorithms"));
   setObjectName("exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
@@ -940,7 +993,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
 
   m_runningLayout = new QHBoxLayout();
   m_runningLayout->setName("testA");
-  
+
   m_runningButton = new QPushButton("Details");
   m_runningLayout->addStretch();
   m_runningLayout->addWidget(m_runningButton);

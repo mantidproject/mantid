@@ -1,7 +1,6 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
-#include <algorithm>
 #include "ImportWorkspaceDlg.h"
 #include "AlgMonitor.h"
 #include "MantidSampleLogDialog.h"
@@ -40,7 +39,7 @@
 #include <QInputDialog>
 
 #include <qwt_plot_curve.h>
-
+#include <algorithm>
 #include <time.h>
 
 #ifdef _WIN32
@@ -54,6 +53,7 @@ using namespace std;
 
 using namespace Mantid::API;
 using Mantid::Kernel::dateAndTime;
+namespace MantidException = Mantid::Kernel::Exception;
 
 MantidUI::MantidUI(ApplicationWindow *aw):
     m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -353,7 +353,6 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
   MantidMatrix *m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (m) return m->plotGraph2D(type);
   return 0;
-
 }
 
 /**  Import a MatrixWorkspace into a MantidMatrix.
@@ -2307,7 +2306,9 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   {
     try {
       new MantidCurve(it.key(),g,"spectra",it.value(),errs);
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } 
+    catch (Mantid::Kernel::Exception::NotFoundError&) 
+    {
       // Get here if workspace name is invalid
       const std::string message("Workspace "+it.key().toStdString()+" not found");
       logMessage(Poco::Message("MantidPlot",message,Poco::Message::PRIO_WARNING));
@@ -2329,8 +2330,35 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
 }
 
+/**
+ * Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
+ * initimately linked to MantidMatrix so that one of these needs to be created first
+ * @param wsNames For each workspace listed create a 2D colorfill plot 
+ * @param curveType The curve type for each of the plots
+ */
+void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType)
+{
+  for( QStringList::const_iterator cit = wsNames.begin(); cit != wsNames.end(); ++cit )
+  {
+    this->drawSingleColorFillPlot(*cit, curveType);
+  }
+}
 
-
+/**
+ * Draw a single ColorFill plot for the named workspace
+ * @param wsName The name of the workspace which provides data for the plot
+ * @param curveType The type of curve
+ * @returns A pointer to the created plot
+ */
+MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType)
+{
+  MantidMatrix *matrix =  importMatrixWorkspace(wsName, -1, -1, false,false);
+  if(matrix)
+  {
+    return matrix->plotGraph2D(curveType);
+  }
+  return NULL;
+}
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
     @param wsName Workspace name
@@ -2639,7 +2667,7 @@ void MantidUI::memoryImage()
       }
     }
   }
-  MultiLayer* g = appWindow()->plotSpectrogram(m, Graph::ColorMap);
+  appWindow()->plotSpectrogram(m, Graph::ColorMap);
 }
 
 void MantidUI::memoryImage2()

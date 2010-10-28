@@ -48,8 +48,10 @@ private slots:
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
+  void drawColorFillPlot();
 
 private:
+  void createWorkspaceMenuActions();
   QString findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace_sptr workspace);
   QTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
@@ -59,6 +61,9 @@ private:
   void populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item);
   void populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
   void deleteGroupWorkspaceIfEmpty(QTreeWidgetItem* item);
+  void addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const;
+  void addWorkspaceGroupMenuItems(QMenu *menu) const;
+  void addTableWorkspaceMenuItems(QMenu * menu) const;
   
 protected:
   MantidTreeWidget * m_tree;
@@ -66,14 +71,19 @@ protected:
 
 private:
   MantidUI * const m_mantidUI;
+  QSet<QString> m_known_groups;
+
   QPushButton *m_loadButton;
   QMenu *m_loadMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QSignalMapper *m_loadMapper;
 
+  //Context-menu actions
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_colorFill, *m_showLogs, *m_showHist, 
+    *m_saveNexus, *m_rename, *m_delete;
+
   static Mantid::Kernel::Logger& logObject;
-  QSet<QString> m_known_groups;
 };
 
 
@@ -87,7 +97,7 @@ public:
   void mouseMoveEvent(QMouseEvent *e);
   void mouseDoubleClickEvent(QMouseEvent *e);
 
-  QList<QString> getSelectedWorkspaceNames() const;
+  QStringList getSelectedWorkspaceNames() const;
   QMultiMap<QString,int> chooseSpectrumFromSelected() const;
   
 private:

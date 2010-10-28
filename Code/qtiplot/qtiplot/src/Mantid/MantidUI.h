@@ -170,6 +170,10 @@ public slots:
 
 public:
     MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false);
+    /// Draw a color fill plot for each of the listed workspaces
+    void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
+    /// Draw a color fill plot for the named workspace
+    MultiLayer* drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType = Graph::ColorMap);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true);
@@ -179,8 +183,6 @@ public:
 
     // Set properties of a 1d graph which plots data from a workspace
     static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace);
-
-
 
     // Copy to a Table Y-values (and Err-values if errs==true) of bins with indeces from i0 to i1 (inclusive) from a workspace
     Table* createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, const QList<int>& bins, bool errs=true,int fromRow = -1, int toRow = -1);
@@ -462,5 +464,6 @@ private:
     std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
 
 };
+
 
 #endif

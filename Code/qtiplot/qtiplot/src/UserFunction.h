@@ -8,6 +8,7 @@ using namespace Qwt3D;
 class UserHelperFunction
 {
 public:
+    virtual ~UserHelperFunction() {};
     virtual double operator()(double x, double y)=0;
     virtual double getMinPositiveValue()const = 0;
 };
