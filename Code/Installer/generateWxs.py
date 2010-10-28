@@ -147,12 +147,12 @@ def addComponent(Id,guid,parent):
 # adds all dlls from location to parent.
 # rules are applied to exclude debug libraries
 # name is a short name to which a number will be added
-def addDlls(location,name,parent, exclud = []):
+def addDlls(location,name,parent, exclude_files = []):
     #print 'Include dlls from',os.path.abspath(location);
     sdlls = os.listdir(location);
     i = 0
     for fil in sdlls:
-        if fil in exclud:
+        if fil in exclude_files:
             continue
         lst = fil.split('.')
         l = len(lst)
@@ -161,7 +161,7 @@ def addDlls(location,name,parent, exclud = []):
         del lst[l-1]
         fn0 = string.join(lst,'_')
         fn = fn0.replace('-','_')
-        if not ((fil.find('-gd-') >= 0) or
+        if not ((fil.find('-gd-') >= 0) or (fil.find('-gyd-') >= 0) or
                 (fil.find('d.dll')>=0 and fil.replace('d.dll','.dll') in sdlls) or
                 (fil.find('d4.dll')>=0 and fil.replace('d4.dll','4.dll') in sdlls) or
                 (fil.find('_d.dll')>=0 and fil.replace('_d.dll','.dll') in sdlls)):
@@ -324,6 +324,7 @@ def createPropertiesFile(filename):
     "pythonscripts.directory":"pythonscripts.directory = ../scripts",
     "pythonscripts.directories":"pythonscripts.directories = ../scripts",
     "pythonalgorithms.directories":"pythonalgorithms.directories=../plugins/PythonAlgs"
+    "icatDownload.directory = ../data"
     }
 
     template = open(filename,'r')
@@ -537,7 +538,7 @@ if ARCH == '32':
 addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
 
 # Python algorithms
-pyalgsList = addCompList("PyAlgsDir","../Mantid/PythonAPI/PythonAlgorithms","PythonAlgs",pluginsDir)[0]
+pyalgsList = addCompList("PyAlgsDir","../Mantid/PythonAPI/PythonAlgorithms","PythonAlgs",pluginsDir,exclude_suffix=['.pyc'])[0]
 
 
 ##
