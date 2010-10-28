@@ -48,7 +48,7 @@ namespace Mantid
       }
 
     private:
-      friend Mantid::Kernel::CreateUsingNew<ImplicitFunctionParameterParserFactoryImpl>;
+      friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParameterParserFactoryImpl>;
 
       /// Private Constructor for singleton class
       ImplicitFunctionParameterParserFactoryImpl();	

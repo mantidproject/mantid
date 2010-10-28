@@ -49,7 +49,7 @@ namespace Mantid
 
     private:
 
-      friend Mantid::Kernel::CreateUsingNew<ImplicitFunctionParserFactoryImpl>;
+      friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParserFactoryImpl>;
 
       /// Private Constructor for singleton class
       ImplicitFunctionParserFactoryImpl();	
