@@ -99,6 +99,7 @@ namespace Mantid
 
       void loadBankEventData(std::string entry_name);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
+      void runLoadMonitors();
 
     };
 

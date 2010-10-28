@@ -68,7 +68,9 @@ void LoadSNSEventNexus::init()
       new PropertyWithValue<double>("FilterByTime_Stop", EMPTY_DBL(), Direction::Input),
     "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run");
 
-
+  declareProperty(
+      new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
+      "Load the monitors from the file.");
 }
 
 
@@ -99,6 +101,8 @@ void LoadSNSEventNexus::exec()
   else
     throw std::invalid_argument("You must specify both the min and max of time of flight to filter, or neither!");
 
+  // Check to see if the monitors need to be loaded later
+  bool load_monitors = this->getProperty("LoadMonitors");
 
   // Create the output workspace
   WS = EventWorkspace_sptr(new EventWorkspace());
@@ -112,7 +116,13 @@ void LoadSNSEventNexus::exec()
   WS->setYUnit("Counts");
 
   //Initialize progress reporting.
-  Progress prog(this,0.0,0.3,  3); //3 calls for the first part
+  //3 calls for the first part, 4 if monitors are loaded
+  int reports = 3;
+  if (load_monitors)
+  {
+    reports++;
+  }
+  Progress prog(this,0.0,0.3,  reports);
 
   prog.report(1, "Loading DAS logs");
 
@@ -144,6 +154,12 @@ void LoadSNSEventNexus::exec()
 
   //Load the instrument
   runLoadInstrument(m_filename, WS);
+
+  if (load_monitors)
+  {
+    prog.report(1, "Loading monitors");
+    this->runLoadMonitors();
+  }
 
   // top level file information
   ::NeXus::File file(m_filename);
@@ -501,7 +517,36 @@ void LoadSNSEventNexus::runLoadInstrument(const std::string &nexusfilename, Matr
   }
 }
 
+/**
+ * Load the Monitors from the NeXus file into a workspace. The original
+ * workspace name is used and appended with _monitors.
+ */
+void LoadSNSEventNexus::runLoadMonitors()
+{
+  IAlgorithm_sptr loadMonitors = this->createSubAlgorithm("LoadNexusMonitors");
+  std::string mon_wsname = this->getProperty("OutputWorkspace");
+  mon_wsname.append("_monitors");
 
+  try
+  {
+    this->g_log.information() << "Loading monitors from NeXus file..."
+        << std::endl;
+    loadMonitors->setPropertyValue("Filename", m_filename);
+    this->g_log.information() << "New workspace name for monitors: "
+        << mon_wsname << std::endl;
+    loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
+    loadMonitors->execute();
+    MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
+    this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
+        mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
+    this->setProperty("MonitorWorkspace", mons);
+  }
+  catch (...)
+  {
+    this->g_log.error() << "Error while loading the monitors from the file. "
+        << "File may contain no monitors." << std::endl;
+  }
+}
 
 } // namespace NeXus
 } // namespace Mantid
