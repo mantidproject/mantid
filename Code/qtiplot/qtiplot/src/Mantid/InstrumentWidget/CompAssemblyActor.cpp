@@ -2,6 +2,8 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -10,6 +12,7 @@
 #include "MantidObject.h"
 #include "CompAssemblyActor.h"
 #include "ObjComponentActor.h"
+#include "ObjCompAssemblyActor.h"
 #include "RectangularDetectorActor.h"
 #include <cfloat>
 
@@ -17,6 +20,8 @@ using Mantid::Geometry::IInstrument;
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::ICompAssembly;
+using Mantid::Geometry::ObjCompAssembly;
+using Mantid::Geometry::ParObjCompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
 using Mantid::Geometry::IRectangularDetector;
@@ -28,7 +33,8 @@ using Mantid::Geometry::Object;
  * This is default constructor for CompAssembly Actor
  * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
  */
-CompAssemblyActor::CompAssemblyActor(bool withDisplayList):GLActor(withDisplayList), mNumberOfDetectors(0), minBoundBox(DBL_MAX,DBL_MAX,DBL_MAX),maxBoundBox(-DBL_MAX,-DBL_MAX,-DBL_MAX)
+CompAssemblyActor::CompAssemblyActor(bool withDisplayList):
+    ICompAssemblyActor(withDisplayList)
 {
 }
 
@@ -39,7 +45,11 @@ CompAssemblyActor::CompAssemblyActor(bool withDisplayList):GLActor(withDisplayLi
  * @param ins             :: Instrument
  * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
  */
-CompAssemblyActor::CompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Object>,MantidObject*> >& objs, ComponentID id,boost::shared_ptr<IInstrument> ins,bool withDisplayList):GLActor(withDisplayList),mNumberOfDetectors(0),minBoundBox(DBL_MAX,DBL_MAX,DBL_MAX),maxBoundBox(-DBL_MAX,-DBL_MAX,-DBL_MAX)
+CompAssemblyActor::CompAssemblyActor(
+    boost::shared_ptr<std::map<const boost::shared_ptr<const Object>,MantidObject*> >& objs,
+    ComponentID id,boost::shared_ptr<IInstrument> ins,
+    bool withDisplayList):
+    ICompAssemblyActor(withDisplayList)
 {
   // Initialises
   mId=id;
@@ -56,7 +66,7 @@ CompAssemblyActor::CompAssemblyActor(boost::shared_ptr<std::map<const boost::sha
 CompAssemblyActor::~CompAssemblyActor()
 {
   //Remove all the child CompAssembly Actors
-  for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+  for(std::vector<ICompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
     delete (*iAssem);
   mChildCompAssemActors.clear();
   //Remove all the child ObjComponent Actors
@@ -92,8 +102,9 @@ void CompAssemblyActor::define()
       }
     }
     //Iterate through the CompAssemblyActor children and draw them
-    for(std::vector<CompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+    for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
     {
+      //std::cout << (*itrObjAssem)->getName() << " is gonna draw. From define()\n";
       (*itrObjAssem)->draw();
     }
   }
@@ -125,7 +136,7 @@ void CompAssemblyActor::drawUsingColorID()
         (*itrObjComp)->draw();
       rgb++;
     }
-    for(std::vector<CompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+    for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
     {
       (*itrObjAssem)->drawUsingColorID();
     }
@@ -176,11 +187,25 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
       else
       if(ChildCAPtr!=boost::shared_ptr<ICompAssembly>())
       {
-        CompAssemblyActor* iActor=new CompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
-        iActor->getBoundingBox(minBound,maxBound);
-        AppendBoundingBox(minBound,maxBound);
-        mNumberOfDetectors+=iActor->getNumberOfDetectors();
-        mChildCompAssemActors.push_back(iActor);
+        boost::shared_ptr<ObjCompAssembly> ChildOCAPtr=boost::dynamic_pointer_cast<ObjCompAssembly>(ChildCompPtr);
+        boost::shared_ptr<ParObjCompAssembly> ChildPOCAPtr=boost::dynamic_pointer_cast<ParObjCompAssembly>(ChildCompPtr);
+        if (ChildOCAPtr || ChildPOCAPtr)
+        {
+          ObjCompAssemblyActor* iActor =
+              new ObjCompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
+          iActor->getBoundingBox(minBound,maxBound);
+          AppendBoundingBox(minBound,maxBound);
+          mNumberOfDetectors+=iActor->getNumberOfDetectors();
+          mChildCompAssemActors.push_back(iActor);
+        }
+        else
+        {
+          CompAssemblyActor* iActor=new CompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
+          iActor->getBoundingBox(minBound,maxBound);
+          AppendBoundingBox(minBound,maxBound);
+          mNumberOfDetectors+=iActor->getNumberOfDetectors();
+          mChildCompAssemActors.push_back(iActor);
+        }
       }
       else //it has to be a ObjComponent child, create a ObjComponentActor for the child use the same display list attribute
       {
@@ -237,7 +262,7 @@ int CompAssemblyActor::setStartingReferenceColor(int rgb)
       (*itrObjComp)->setStartingReferenceColor(val);
       val++;
     }
-  for(std::vector<CompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+  for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
     {
       val+=(*itrObjAssem)->setStartingReferenceColor(val);
     }
@@ -251,7 +276,7 @@ int CompAssemblyActor::setStartingReferenceColor(int rgb)
  */
 void CompAssemblyActor::init()
 {
-  //for_each(mChildObjCompActors.begin(),mChildObjCompActors.end(),std::mem_fun(&GLActor::draw));
+  for_each(mChildObjCompActors.begin(),mChildObjCompActors.end(),std::mem_fun(&GLActor::draw));
   for_each(mChildCompAssemActors.begin(),mChildCompAssemActors.end(),std::mem_fun(&GLActor::draw));
 }
 
@@ -268,7 +293,7 @@ void CompAssemblyActor::appendObjCompID(std::vector<int>& idList)
     (*iObjComp)->appendObjCompID(idList);
   }
 
-  for(std::vector<CompAssemblyActor*>::const_iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end(); ++iAssem)
+  for(std::vector<ICompAssemblyActor*>::const_iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end(); ++iAssem)
   {
     (*iAssem)->appendObjCompID(idList);
   }
@@ -292,7 +317,7 @@ int CompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<G
     count+=num;
   }
 
-  for(std::vector<CompAssemblyActor*>::iterator iAssem = mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+  for(std::vector<ICompAssemblyActor*>::iterator iAssem = mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
   {
     //Each assembly does the same
     int num=(*iAssem)->setInternalDetectorColors(list);
@@ -311,7 +336,7 @@ int CompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<G
 void CompAssemblyActor::redraw()
 {
   mChanged=true;
-  for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+  for(std::vector<ICompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
     (*iAssem)->redraw();
   construct();
 }
@@ -337,7 +362,7 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
   }
   rgb -= n_comp_actors;
 
-  for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+  for(std::vector<ICompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
   {
     if(rgb > 0 && rgb <= (*iAssem)->getNumberOfDetectors() )
     {
@@ -348,18 +373,6 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
   return -1;
 }
 
-
-//------------------------------------------------------------------------------------------------
-/**
- * Return the bounding box
- * @param minBound :: min point of the bounding box
- * @param maxBound :: max point of the bounding box
- */
-void CompAssemblyActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)
-{
-  minBound=minBoundBox;
-  maxBound=maxBoundBox;
-}
 
 
 //------------------------------------------------------------------------------------------------

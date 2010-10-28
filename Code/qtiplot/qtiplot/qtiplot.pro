@@ -495,12 +495,15 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/InstrumentWidget/GLActor.h \
 	    src/Mantid/InstrumentWidget/GLActorCollection.h \
 	    src/Mantid/InstrumentWidget/MantidObject.h \
+            src/Mantid/InstrumentWidget/TexObject.h \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.h \
 		src/Mantid/InstrumentWidget/BinDialog.h	\
 		src/Mantid/InstrumentWidget/GLGroupPickBox.h \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.h \
 		src/Mantid/InstrumentWidget/InstrumentTreeModel.h \
+		src/Mantid/InstrumentWidget/ICompAssemblyActor.h \
 		src/Mantid/InstrumentWidget/CompAssemblyActor.h \
+                src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h \
 		src/Mantid/InstrumentWidget/ObjComponentActor.h \
 		src/Mantid/InstrumentWidget/InstrumentActor.h \
 		src/Mantid/InstrumentWidget/RectangularDetectorActor.h \
@@ -676,12 +679,15 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/InstrumentWidget/GLActor.cpp \
 	    src/Mantid/InstrumentWidget/GLActorCollection.cpp \
 	    src/Mantid/InstrumentWidget/MantidObject.cpp \
+            src/Mantid/InstrumentWidget/TexObject.cpp \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.cpp \
 		src/Mantid/InstrumentWidget/BinDialog.cpp  \
 		src/Mantid/InstrumentWidget/GLGroupPickBox.cpp \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp \
 		src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp \
-		src/Mantid/InstrumentWidget/CompAssemblyActor.cpp	\
+                src/Mantid/InstrumentWidget/ICompAssemblyActor.cpp	\
+                src/Mantid/InstrumentWidget/CompAssemblyActor.cpp	\
+                src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp	\
 		src/Mantid/InstrumentWidget/ObjComponentActor.cpp	\	
 		src/Mantid/InstrumentWidget/InstrumentActor.cpp \
 		src/Mantid/InstrumentWidget/RectangularDetectorActor.cpp \

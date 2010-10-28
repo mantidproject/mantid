@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Histogram1D.h" 
 
 using Mantid::DataObjects::Histogram1D;
+using Mantid::MantidVec;
 
 class Histogram1DTest : public CxxTest::TestSuite
 {

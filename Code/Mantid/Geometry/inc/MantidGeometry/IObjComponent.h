@@ -114,7 +114,7 @@ public:
   void setScaleFactor(double xFactor,double yFactor, double zFactor);
 
   ///Gets the scaling factor of the object for the Object Component.
-  V3D  getScaleFactor(){return m_ScaleFactor;}
+  V3D  getScaleFactor()const{return m_ScaleFactor;}
 
   /// Gets the GeometryHandler
   GeometryHandler* Handle()const{return handle;}

@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -178,7 +179,13 @@ namespace Mantid
             mapTypeNameToShape[typeName]->setName(iType);
           }
           else
+          {
             isTypeAssembly[typeName] = true;
+            if (pTypeElem->hasAttribute("outline"))
+            {
+              pTypeElem->setAttribute("object_created","no");
+            }
+          }
           pNL_local->release();
         }
         pNL_type->release();
@@ -423,7 +430,7 @@ namespace Mantid
     *  @param idList The current IDList
     *  @param excludeList The exclude List
     */
-    void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList, 
+    void LoadInstrument::appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList, 
       const std::vector<std::string> excludeList)
     {
       if (VERBOSE) std::cout << "appendAssembly() starting for parent " << parent->getName() << "\n";
@@ -454,7 +461,21 @@ namespace Mantid
       }
 
       //Create the assembly that will be appended into the parent.
-      Geometry::CompAssembly *ass = new Geometry::CompAssembly;
+      Geometry::ICompAssembly *ass;
+      // The newly added component is required to have a type. Find out what this
+      // type is and find all the location elements of this type. Finally loop over these
+      // location elements
+
+      Element* pType = getTypeElement[pCompElem->getAttribute("type")];
+      if (pType->hasAttribute("outline") && pType->getAttribute("outline") != "no")
+      {
+        ass = new Geometry::ObjCompAssembly(getNameOfLocationElement(pLocElem));
+      }
+      else
+      {
+        ass = new Geometry::CompAssembly;
+        ass->setName( getNameOfLocationElement(pLocElem) );
+      }
       ass->setParent(parent);
       parent->add(ass);
 
@@ -471,11 +492,6 @@ namespace Mantid
       setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
 
-      // The newly added component is required to have a type. Find out what this
-      // type is and find all the location elements of this type. Finally loop over these
-      // location elements
-
-      Element* pType = getTypeElement[pCompElem->getAttribute("type")];
       NodeIterator it(pType, NodeFilter::SHOW_ELEMENT);
 
       Node* pNode = it.nextNode();
@@ -518,6 +534,30 @@ namespace Mantid
         pNode = it.nextNode();
       }
 
+      // create outline object for the assembly
+      if (pType->hasAttribute("outline") && pType->getAttribute("outline") != "no")
+      {
+        Geometry::ObjCompAssembly* objAss = dynamic_cast<Geometry::ObjCompAssembly*>(ass);
+        if (pType->getAttribute("object_created") == "no")
+        {
+          std::cerr<<pType->getAttribute("name")<<' '<<pType->getAttribute("object_created")<<"\n";
+          pType->setAttribute("object_created","yes");
+          boost::shared_ptr<Geometry::Object> obj = objAss->createOutline();
+          if (obj)
+          {
+            mapTypeNameToShape[pType->getAttribute("name")] = obj;
+          }
+          else
+          {// object failed to be created
+            pType->setAttribute("outline","no");
+            g_log.warning()<<"Failed to create outline object for assembly "<<pType->getAttribute("name")<<'\n';
+          }
+        }
+        else
+        {
+          objAss->setOutline(mapTypeNameToShape[pType->getAttribute("name")]);
+        }
+      }
 
     }
 
@@ -533,7 +573,7 @@ namespace Mantid
     *  @param idList The current IDList
     *  @param excludeList The exclude List
     */
-    void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList,
+    void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList,
       const std::vector<std::string> excludeList)
     {
       appendAssembly(parent.get(), pLocElem, idList, excludeList);
@@ -551,7 +591,7 @@ namespace Mantid
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
     */
-    void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
+    void LoadInstrument::appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
     {
       // The location element is required to be a child of a component element. Get this component element
       Element* pCompElem = getParentComponent(pLocElem);
@@ -657,7 +697,7 @@ namespace Mantid
             if (detector)
             {
               //Make default facing for the pixel
-              Geometry::Component* comp = (Geometry::Component*) detector.get();
+              Geometry::IComponent* comp = (Geometry::IComponent*) detector.get();
               makeXYplaneFaceComponent(comp, m_defaultFacing);
               //Mark it as a detector (add to the instrument cache)
               m_instrument->markAsDetector(detector.get());
@@ -763,7 +803,7 @@ namespace Mantid
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
     */
-    void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
+    void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
     {
       appendLeaf(parent.get(), pLocElem, idList);
     }
@@ -777,7 +817,7 @@ namespace Mantid
     *
     *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
     */
-    void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* pElem)
+    void LoadInstrument::setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem)
     {
       // Require that pElem points to an element with tag name 'location'
 
@@ -1146,7 +1186,7 @@ namespace Mantid
     *  @param in  Component to be rotated
     *  @param facing Object to face
     */
-    void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::ObjComponent* facing)
+    void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing)
     {
       const Geometry::V3D facingPoint = facing->getPos();
 
@@ -1163,7 +1203,7 @@ namespace Mantid
     *  @param in  Component to be rotated
     *  @param facingPoint position to face
     */
-    void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::V3D& facingPoint)
+    void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::V3D& facingPoint)
     {
       Geometry::V3D pos = in->getPos();
 
@@ -1248,7 +1288,7 @@ namespace Mantid
     *
     *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
     */
-    void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pElem)
+    void LoadInstrument::setFacing(Geometry::IComponent* comp, Poco::XML::Element* pElem)
     {
       // Require that pElem points to an element with tag name 'location'
 

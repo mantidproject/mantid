@@ -7,6 +7,7 @@
 # Compile mode
 #------------------------
 CONFIG += qt warn_on exceptions debug_and_release
+QT -= script
 
 win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 BOOST_ALL_DYN_LINK POCO_DLL
 DEFINES += BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
@@ -52,7 +53,12 @@ win32:LIBPATH += $$MANTIDLIBPATH
 
 THIRDPARTY = "$$TOPBUILDDIR/../../Third_Party"
 
-MANTIDQTINCLUDES = $$TOPBUILDDIR/includes
+unix {
+    MANTIDQTINCLUDES = $$TOPBUILDDIR/includes
+}
+win32 {
+    MANTIDQTINCLUDES = $$TOPBUILDDIR\includes
+}
 
 !exists(\"$$MANTIDQTINCLUDES\") {
   system(mkdir \"$$MANTIDQTINCLUDES\")
@@ -121,7 +127,7 @@ unix {
 }
 
 win32 {
-  INCLUDEPATH += "$$THIRDPARTY/include"
+  INCLUDEPATH += "$$THIRDPARTY\\include"
 
 CONFIG(build64)  {
     THIRDPARTYLIB = "$$THIRDPARTY/lib/win64"
@@ -146,7 +152,7 @@ CONFIG(build64)  {
     LIBS += "PocoFoundationd.lib"
     LIBS += "PocoXMLd.lib"
     LIBS += "QtPropertyBrowserd.lib"
-	LIBS += "qwtd.lib"
+        LIBS += "qwtd.lib"
   }
 }
 

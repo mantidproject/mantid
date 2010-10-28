@@ -213,6 +213,12 @@
     <ClCompile Include="src\Instrument\ParInstrument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Instrument\ParObjCompAssembly.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Instrument\ObjCompAssembly.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\Instrument\ParRectangularDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -555,6 +561,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidGeometry\Instrument\ParInstrument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParObjCompAssembly.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidGeometry\Instrument\ObjCompAssembly.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidGeometry\IRectangularDetector.h">

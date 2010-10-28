@@ -62,8 +62,18 @@ UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"
 
 TARGET = MantidQtCustomInterfaces
 
-unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"'
-win32:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtCustomInterfaces"'
+unix{
+  HEADERDIR = $$TOPBUILDDIR/CustomInterfaces/inc
+  SRCDIR = $$TOPBUILDDIR/CustomInterfaces/src
+  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"'
+}
+
+win32{
+  HEADERDIR = $$TOPBUILDDIR\CustomInterfaces\inc
+  SRCDIR = $$TOPBUILDDIR\CustomInterfaces\src
+  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtCustomInterfaces"'
+}
+
 PRE_TARGETDEPS = headercopy
 
 QMAKE_EXTRA_TARGETS += headercopy

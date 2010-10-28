@@ -152,6 +152,7 @@ namespace Mantid
       void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
       ///set vtkGeometryCache reader
       void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+      void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const;
     private:
       static Kernel::Logger& PLog;           ///< The official logger
 
@@ -203,7 +204,6 @@ namespace Mantid
       int NumberOfPoints() const;
       int* getTriangleFaces() const;
       double* getTriangleVertices() const;
-      void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const;
 
     protected:
       std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)

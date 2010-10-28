@@ -17,7 +17,7 @@ namespace Mantid
     *  @param name   The name of the component
     *  @param parent The Parent geometry object of this component
     */
-    ObjComponent::ObjComponent(const std::string& name, Component* parent) : IObjComponent(),Component(name,parent), m_shape()
+    ObjComponent::ObjComponent(const std::string& name, IComponent* parent) : IObjComponent(),Component(name,parent), m_shape()
     {
     }
 
@@ -26,7 +26,7 @@ namespace Mantid
     *  @param shape  A pointer to the object describing the shape of this component
     *  @param parent The Parent geometry object of this component
     */
-    ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
+    ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent) :
     IObjComponent(),Component(name,parent), m_shape(shape)
     {
     }

@@ -37,7 +37,7 @@ namespace Mantid{
 
 class MantidObject : public GLObject
 {
-private:
+protected:
   boost::shared_ptr<const Mantid::Geometry::Object> Obj; ///< Holder for Object
   bool mHighResolution;
 public:

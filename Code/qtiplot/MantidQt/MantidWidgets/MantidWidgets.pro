@@ -79,8 +79,18 @@ UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"
 # Target and dependancies
 #-----------------------------
 
-unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtMantidWidgets"'
-win32:headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtMantidWidgets"'
+unix{
+  HEADERDIR = $$TOPBUILDDIR/MantidWidgets/inc
+  SRCDIR = $$TOPBUILDDIR/MantidWidgets/src
+  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtMantidWidgets"'
+}
+
+win32{
+  HEADERDIR = $$TOPBUILDDIR\MantidWidgets\inc
+  SRCDIR = $$TOPBUILDDIR\MantidWidgets\src
+  headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtMantidWidgets"'
+}
+
 PRE_TARGETDEPS = headercopy
 
 QMAKE_EXTRA_TARGETS += headercopy

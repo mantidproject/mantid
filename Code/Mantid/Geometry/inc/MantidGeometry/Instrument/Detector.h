@@ -47,8 +47,8 @@ class DLLExport Detector : public virtual IDetector, public ObjComponent
 public:
   ///A string representation of the component type
 	virtual std::string type() const {return "DetectorComponent";}
-	Detector(const std::string& name, Component* parent);
-  Detector(const std::string& name, boost::shared_ptr<Object> shape, Component* parent);
+	Detector(const std::string& name, IComponent* parent);
+  Detector(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent);
 	virtual ~Detector();
 	//empty functions inherited from IObjectComponent
 	virtual Component* clone() const {return new Detector(*this);}

@@ -2,6 +2,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParObjComponent.h"
 #include "MantidGeometry/Instrument/ParDetector.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
@@ -56,23 +57,7 @@ namespace Mantid
     boost::shared_ptr<Geometry::IComponent> ParInstrument::getComponentByID(Geometry::ComponentID id)
     {
       IComponent* base = (IComponent*)(id);
-      Detector* dc = dynamic_cast<Detector*>(base);
-      CompAssembly* ac = dynamic_cast<CompAssembly*>(base);
-      ObjComponent* oc = dynamic_cast<ObjComponent*>(base);
-      Component* cc = dynamic_cast<Component*>(base);
-      if (dc)
-        return boost::shared_ptr<IComponent>(new ParDetector(dc,m_map));
-      else if (ac)
-        return boost::shared_ptr<IComponent>(new ParCompAssembly(ac,m_map));
-      else if (oc)
-        return boost::shared_ptr<IComponent>(new ParObjComponent(oc,m_map));
-      else if (cc)
-        return boost::shared_ptr<IComponent>(new ParametrizedComponent(cc,m_map));
-      else
-      {
-        throw std::runtime_error("ParInstrument::getComponentByID: Error creating parametruzed component.");
-      }
-      return boost::shared_ptr<IComponent>() ;
+      return ParComponentFactory::create(boost::shared_ptr<IComponent>(base,NoDeleting()),m_map);
     }
 
     /**	Gets a pointer to the detector from its ID

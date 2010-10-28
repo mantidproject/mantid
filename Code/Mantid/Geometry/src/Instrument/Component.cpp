@@ -20,7 +20,7 @@ Component::Component() : name(), pos(), rot(), parent(NULL)
  *  @param name :: Component name
  * 	@param parent :: parent Component (optional)
  */
-Component::Component(const std::string& name, Component* parent) :
+Component::Component(const std::string& name, IComponent* parent) :
   name(name), pos(), rot(), parent(parent)
 {
 }
@@ -31,7 +31,7 @@ Component::Component(const std::string& name, Component* parent) :
  * 	absolute or relative if the parent is defined
  * 	@param parent :: parent Component
  */
-Component::Component(const std::string& name, const V3D& position, Component* parent) :
+Component::Component(const std::string& name, const V3D& position, IComponent* parent) :
   name(name), pos(position), rot(), parent(parent)
 {
 }

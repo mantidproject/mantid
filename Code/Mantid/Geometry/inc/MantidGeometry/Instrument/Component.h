@@ -61,9 +61,9 @@ namespace Mantid
       //! Create Empty Component at Origin, with no orientation and null parent
       Component();
       //! Create a named component with a parent component (optional)
-      explicit Component(const std::string& name, Component* parent=0);
+      explicit Component(const std::string& name, IComponent* parent=0);
       //! Create a named component with positioning vector, and parent component (optional)
-      Component(const std::string& name, const V3D& position, Component* parent=0);
+      Component(const std::string& name, const V3D& position, IComponent* parent=0);
       //! Create a named component with positioning vector, orientation and parent component
       Component(const std::string& name, const V3D& position, const Quat& rotation, Component* parent=0);
       //Copy constructors

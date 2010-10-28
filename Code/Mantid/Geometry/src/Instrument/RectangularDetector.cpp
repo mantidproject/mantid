@@ -51,7 +51,7 @@ RectangularDetector::RectangularDetector() : CompAssembly(), IObjComponent(NULL)
  *  an assembly itself, then in addition to parenting
  *  this is registered as a children of reference.
  */
-RectangularDetector::RectangularDetector(const std::string& n, Component* reference) :
+RectangularDetector::RectangularDetector(const std::string& n, IComponent* reference) :
     CompAssembly(n, reference), IObjComponent(NULL)
 {
   this->setName(n);

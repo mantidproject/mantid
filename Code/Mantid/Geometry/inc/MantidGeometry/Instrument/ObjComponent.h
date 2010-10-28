@@ -57,8 +57,8 @@ public:
   virtual std::string type() {return "PhysicalComponent";}
 
   // Looking to get rid of the first of these constructors in due course (and probably add others)
-  explicit ObjComponent(const std::string& name, Component* parent=0);
-  explicit ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent=0);
+  explicit ObjComponent(const std::string& name, IComponent* parent=0);
+  explicit ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, IComponent* parent=0);
   virtual ~ObjComponent();
 
   /** Virtual Copy Constructor
@@ -84,6 +84,10 @@ public:
 protected:
   ObjComponent(const ObjComponent&);
 
+  /// The phyical geometry representation
+  // Made a const pointer to a const object. Since this is a shared object we shouldn't be
+  // exposing non-const methods of Object through this class.
+  /*const*/ boost::shared_ptr<const Object> m_shape;
 
 private:
   /// Private, unimplemented copy assignment operator
@@ -91,11 +95,6 @@ private:
 
   const V3D factorOutComponentPosition(const V3D& point) const;
   const V3D takeOutRotation(V3D point) const;
-
-  /// The phyical geometry representation
-  // Made a const pointer to a const object. Since this is a shared object we shouldn't be
-  // exposing non-const methods of Object through this class.
-  const boost::shared_ptr<const Object> m_shape;
 
 };
 

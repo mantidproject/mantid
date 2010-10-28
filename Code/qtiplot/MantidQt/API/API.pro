@@ -54,8 +54,19 @@ UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtAPI"
 TARGET = MantidQtAPI
 
 
-unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '$$MANTIDQTINCLUDES/MantidQtAPI'
-win32:headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtAPI"'
+unix{
+  HEADERDIR = $$TOPBUILDDIR/API/inc
+  SRCDIR = $$TOPBUILDDIR/API/src
+  headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '$$MANTIDQTINCLUDES/MantidQtAPI'
+}
+
+win32{
+  HEADERDIR = $$TOPBUILDDIR\API\inc
+  SRCDIR = $$TOPBUILDDIR\API\src
+  headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\\MantidQtAPI"'
+}
+
 PRE_TARGETDEPS = headercopy
 
 QMAKE_EXTRA_TARGETS += headercopy
+

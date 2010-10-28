@@ -118,19 +118,19 @@ namespace Mantid
       void populateIdList(Poco::XML::Element* pElem, IdList& idList);
 
       /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList,
+      void appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList,
                           const std::vector<std::string> excludeList);
       /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList,
+      void appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pElem, IdList& idList,
                           const std::vector<std::string> excludeList);
 
       /// Add XML element to parent assuming the element contains no other component elements
-      void appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+      void appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
       /// Add XML element to parent assuming the element contains no other component elements
-      void appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
+      void appendLeaf(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
 
       /// Set location (position) of comp as specified in XML location element
-      void setLocation(Geometry::Component* comp, Poco::XML::Element* pElem);
+      void setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem);
 
       /// Set parameter/logfile info (if any) associated with component
       void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
@@ -165,7 +165,7 @@ namespace Mantid
       Geometry::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
 
       /// Set facing of comp as specified in XML facing element
-      void setFacing(Geometry::Component* comp, Poco::XML::Element* pElem);
+      void setFacing(Geometry::IComponent* comp, Poco::XML::Element* pElem);
 
       /// True if defaults->components-are-facing is set in instrument def. file
       bool m_haveDefaultFacing;
@@ -174,10 +174,10 @@ namespace Mantid
       Geometry::V3D m_defaultFacing;
 
       /// Make the shape defined in 1st argument face the component in the second argument
-      void makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::ObjComponent* facing);
+      void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing);
 
       /// Make the shape defined in 1st argument face the position in the second argument
-      void makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::V3D& facingPoint);
+      void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::V3D& facingPoint);
 
       /// Return true if assembly, false if not assembly and throws exception if string not in assembly
       bool isAssembly(std::string);

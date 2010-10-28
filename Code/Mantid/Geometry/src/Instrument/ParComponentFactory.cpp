@@ -2,6 +2,8 @@
 #include "MantidGeometry/Instrument/ParametrizedComponent.h"
 #include "MantidGeometry/Instrument/ParCompAssembly.h"
 #include "MantidGeometry/Instrument/CompAssembly.h" 
+#include "MantidGeometry/Instrument/ObjCompAssembly.h" 
+#include "MantidGeometry/Instrument/ParObjCompAssembly.h" 
 #include "MantidGeometry/Instrument/Detector.h" 
 #include "MantidGeometry/Instrument/ParDetector.h" 
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -28,6 +30,10 @@ boost::shared_ptr<IComponent> ParComponentFactory::create(boost::shared_ptr<cons
       const CompAssembly* ac = dynamic_cast<const CompAssembly*>(base.get());
       if (ac)
         return boost::shared_ptr<IComponent>(new ParCompAssembly(ac,map));
+
+      const ObjCompAssembly* oac = dynamic_cast<const ObjCompAssembly*>(base.get());
+      if (oac)
+        return boost::shared_ptr<IComponent>(new ParObjCompAssembly(oac,map));
 
       const ObjComponent* oc = dynamic_cast<const ObjComponent*>(base.get());
       if (oc)

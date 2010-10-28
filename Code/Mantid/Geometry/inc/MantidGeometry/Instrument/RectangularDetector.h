@@ -54,7 +54,7 @@ public:
   RectangularDetector();
 
   //! Constructor with a name and parent reference
-  RectangularDetector(const std::string&, Component* reference=0);
+  RectangularDetector(const std::string&, IComponent* reference=0);
 
   /// Create all the detector pixels of this rectangular detector.
   void initialize(boost::shared_ptr<Object> shape,

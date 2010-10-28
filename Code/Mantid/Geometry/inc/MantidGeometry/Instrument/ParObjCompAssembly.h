@@ -1,30 +1,25 @@
-#ifndef COMPONENT_ASSEMBLY_
-#define COMPONENT_ASSEMBLY_
+#ifndef PAR_OBJ_COMPONENT_ASSEMBLY_
+#define PAR_OBJ_COMPONENT_ASSEMBLY_
 #include <string> 
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ParObjComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
-
-#ifdef _WIN32
-  #pragma warning( disable: 4250 )
-#endif
 
 namespace Mantid
 {
 namespace Geometry
 {
 
-/** @class CompAssembly 
-    @brief Class for Assembly of geometric components. 
+class ObjCompAssembly;
+
+/** @class ParCompAssembly 
+    @brief A wrapper for CompAssembly with possiblty modified parameters.
     @version A
     @author Laurent C Chapon, ISIS RAL
     @date 01/11/2007
 
-    CompAssembly allows Components to be positioned
-    in a hierarchical structure in the form of a tree.
-    CompAssembly inherits from component.
-
+    
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -45,22 +40,15 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompAssembly : public virtual ICompAssembly, public Component
+class DLLExport ParObjCompAssembly : public virtual ICompAssembly, public virtual ParObjComponent
 {
-protected:
-  typedef std::vector< IComponent* >::iterator comp_it;///< Iterator type
-  typedef std::vector< IComponent* >::const_iterator const_comp_it;///< Const iterator type
-
 public:
   ///String description of the type of component
-  virtual std::string type() const { return "CompAssembly";}
-  //! Empty constructor
-  CompAssembly();
-  //! Constructor with a name and parent reference
-  CompAssembly(const std::string&, IComponent* reference=0);
-  //! Copy constructor
-  CompAssembly(const CompAssembly&);
-  virtual ~CompAssembly();
+  virtual std::string type() const { return "ParObjCompAssembly";}
+  /// Constructor
+  ParObjCompAssembly(const ObjCompAssembly* base, const ParameterMap& map); 
+  //! Destructor
+  ~ParObjCompAssembly(){}
   //! Make a clone of the present component
   virtual IComponent* clone() const;
   //! Return the number of elements in the assembly
@@ -72,31 +60,27 @@ public:
   //! Add a copy (clone) of a component and rename it
   int addCopy(IComponent*, const std::string&);
   //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
-  boost::shared_ptr<IComponent> getChild(const int i) const;
+  boost::shared_ptr<IComponent> getChild(const int i) const{return (*this)[i];}
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
-
-  /// Get the bounding box for this component and store it in the given argument
-  virtual void getBoundingBox(BoundingBox& boundingBox) const;
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
 
+  //! Get the position of the IComponent. Tree structure is traversed through the parent chain
+  virtual V3D getPos() const;
+  //! Get the Rotation of the IComponent.
+  virtual const Quat getRotation() const;
+
 private:
+  ParObjCompAssembly(const ParObjCompAssembly&); 
   /// Private copy assignment operator
-  CompAssembly& operator=(const ICompAssembly&);
-
-protected:
-  ///the group of child components
-  std::vector< IComponent* > m_children;
-
-  /// A cached bounding box 
-  mutable BoundingBox *m_cachedBoundingBox;
+  ParObjCompAssembly& operator=(const ICompAssembly&);
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);
+DLLExport std::ostream& operator<<(std::ostream&, const ParObjCompAssembly&);
 
 } //Namespace Geometry
 } //Namespace Mantid
 
-#endif
+#endif /*PAR_OBJ_COMPONENT_ASSEMBLY_*/

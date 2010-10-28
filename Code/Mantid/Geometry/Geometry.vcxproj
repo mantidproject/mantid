@@ -167,7 +167,9 @@
   <ItemGroup>
     <ClCompile Include="src\IInstrument.cpp" />
     <ClCompile Include="src\Instrument\Instrument.cpp" />
+    <ClCompile Include="src\Instrument\ObjCompAssembly.cpp" />
     <ClCompile Include="src\Instrument\ParInstrument.cpp" />
+    <ClCompile Include="src\Instrument\ParObjCompAssembly.cpp" />
     <ClCompile Include="src\Instrument\ParRectangularDetector.cpp" />
     <ClCompile Include="src\Instrument\RectangularDetector.cpp" />
     <ClCompile Include="src\Instrument\XMLlogfile.cpp" />
@@ -255,7 +257,9 @@
   <ItemGroup>
     <ClInclude Include="inc\MantidGeometry\IInstrument.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\Instrument.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ObjCompAssembly.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ParInstrument.h" />
+    <ClInclude Include="inc\MantidGeometry\Instrument\ParObjCompAssembly.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\ParRectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\RectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Instrument\XMLlogfile.h" />

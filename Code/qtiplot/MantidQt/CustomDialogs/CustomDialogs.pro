@@ -24,6 +24,7 @@ win32:LIBS += "$$DESTDIR\MantidQtAPI.lib"
 # ------------------------
 HEADERDIR = inc
 SRCDIR = src
+
 SOURCES = $$SRCDIR/LoadRawDialog.cpp \
     $$SRCDIR/LOQScriptInputDialog.cpp \
     $$SRCDIR/CreateSampleShapeDialog.cpp \
@@ -55,17 +56,27 @@ FORMS = $$HEADERDIR/LOQScriptInputDialog.ui \
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomDialogs"
 
 TARGET = MantidQtCustomDialogs
-unix:headercopy.commands = cd \
+unix{
+  HEADERDIR = $$TOPBUILDDIR/CustomDialogs/inc
+  SRCDIR = $$TOPBUILDDIR/CustomDialogs/src
+  headercopy.commands = cd \
     $$HEADERDIR \
     && \
     $(COPY) \
     *.h \
     '"$$MANTIDQTINCLUDES/MantidQtCustomDialogs"'
-win32:headercopy.commands = cd \
+}
+
+win32{
+  HEADERDIR = $$TOPBUILDDIR\CustomDialogs\inc
+  SRCDIR = $$TOPBUILDDIR\CustomDialogs\src
+  headercopy.commands = cd \
     $$HEADERDIR \
     && \
     $(COPY) \
     *.h \
     '"$$MANTIDQTINCLUDES\MantidQtCustomDialogs"'
+}
+
 PRE_TARGETDEPS = headercopy
 QMAKE_EXTRA_TARGETS += headercopy

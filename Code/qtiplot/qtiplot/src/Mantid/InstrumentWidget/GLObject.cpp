@@ -2,6 +2,7 @@
 #include <windows.h>
 #endif
 #include "GLObject.h"
+#include "ObjCompAssemblyActor.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include <iostream>
@@ -33,10 +34,13 @@ void GLObject::draw()
   if (mChanged) construct();
   if (mDisplayListId!=0)
   {
+    //std::cerr << mDisplayListId << '\n';
     glCallList(mDisplayListId);
   }
   else
+  {
     define();
+  }
 }
 
 /**
@@ -51,9 +55,10 @@ void GLObject::construct()
 	}
 	init();
 	glNewList(mDisplayListId,GL_COMPILE); //Construct display list for object representation
-	define();
+        this->define();
 	glEndList();
-
+        //if (dynamic_cast<ObjCompAssemblyActor*>(this))
+        //std::cerr<<"construct " << getName() << ' ' << mDisplayListId << '\n';
 	if(glGetError()==GL_OUT_OF_MEMORY) //Throw an exception
 	  throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
 	mChanged=false;  //Object Marked as changed.

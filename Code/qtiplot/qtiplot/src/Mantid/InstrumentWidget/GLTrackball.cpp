@@ -92,18 +92,21 @@ void GLTrackball::generateZoomTo(int a, int b)
 
 void GLTrackball::IssueRotation() const
 {
-	if (_viewport)
-	{
-		// Translate if offset is defined
-		if (hasOffset)
-			glTranslated(_modelCenter[0],_modelCenter[1],_modelCenter[2]);
-		// Rotate with respect to the centre
-		glMultMatrixd(_rotationmatrix);
-		// Translate back
-		if (hasOffset)
-			glTranslated(-_modelCenter[0],-_modelCenter[1],-_modelCenter[2]);
-	}
-	return;
+  if (_viewport)
+  {
+    // Translate if offset is defined
+    if (hasOffset)
+    {
+      std::cerr<<"centre "<<_modelCenter<<'\n';
+      glTranslated(_modelCenter[0],_modelCenter[1],_modelCenter[2]);
+    }
+    // Rotate with respect to the centre
+    glMultMatrixd(_rotationmatrix);
+    // Translate back
+    if (hasOffset)
+      glTranslated(-_modelCenter[0],-_modelCenter[1],-_modelCenter[2]);
+  }
+  return;
 }
 
 void GLTrackball::setModelCenter(const Mantid::Geometry::V3D& center)

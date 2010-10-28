@@ -34,7 +34,7 @@ CompAssembly::CompAssembly() : Component(), m_children(), m_cachedBoundingBox(NU
  *  an assembly itself, then in addition to parenting
  *  this is registered as a children of reference.
  */
-CompAssembly::CompAssembly(const std::string& n, Component* reference) :
+CompAssembly::CompAssembly(const std::string& n, IComponent* reference) :
   Component(n, reference), m_children(), m_cachedBoundingBox(NULL)
 {
   if (reference)

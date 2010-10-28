@@ -184,6 +184,7 @@ void GL3DWidget::drawAxes()
  */
 void GL3DWidget::drawDisplayScene()
 {
+  static int i = 0;
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -572,7 +573,9 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
   setCursor(Qt::PointingHandCursor);
   isKeyPressed=false;
   if(!event->isAutoRepeat())
+  {
     update();
+  }
 }
 /**
  * This method sets the collection of actors that widget needs to display

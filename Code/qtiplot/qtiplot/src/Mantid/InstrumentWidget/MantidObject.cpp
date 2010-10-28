@@ -5,7 +5,8 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Exception.h"
 #include "MantidObject.h"
-#include <GL/gl.h> 
+#include "TexObject.h"
+#include <GL/gl.h>
 
 /**
  * Constructor
@@ -29,10 +30,14 @@ MantidObject::~MantidObject()
  */
 void MantidObject::define()
 {
-	if(mHighResolution)
-		Obj->draw();
-	else
-		defineBoundingBox();
+  if(mHighResolution)
+  {
+    Obj->draw();
+  }
+  else
+  {
+    defineBoundingBox();
+  }
 }
 
 /**
