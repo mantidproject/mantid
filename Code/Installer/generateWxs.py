@@ -734,13 +734,19 @@ addCRef('QtImagePlugins', MantidExec)
 addCRef('MantidQtPlugins', MantidExec)
 
 # C/C++ runtime. The msm files are essentially themseleves installers  and merging them in this manner causes their contents to be installed during the Mantid install
-# procedure
+# procedure. Some dependencies still require the VC80 runtime so include these as well
 Redist = addHiddenFeature('Redist',Complete)
 if ARCH == '32':
-    msm_files = ['Microsoft_VC100_CRT_x86.msm','Microsoft_VC100_OpenMP_x86.msm']
+    msm_files = ['Microsoft_VC80_CRT_x86.msm', 'Microsoft_VC80_OpenMP_x86.msm',\
+                 'policy_8_0_Microsoft_VC80_CRT_x86.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86.msm',\
+                 'Microsoft_VC100_CRT_x86.msm','Microsoft_VC100_OpenMP_x86.msm'\
+                ]
     msm_dir = r'C:\Program Files\Common Files\Merge Modules'
 else:
-    msm_files = ['Microsoft_VC100_CRT_x64.msm','Microsoft_VC100_OpenMP_x64.msm']
+    msm_files = ['Microsoft_VC80_CRT_x86_x64.msm', 'Microsoft_VC80_OpenMP_x86_x64.msm',\
+                 'policy_8_0_Microsoft_VC80_CRT_x86_x64.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86_x64.msm',\
+                 'Microsoft_VC100_CRT_x64.msm','Microsoft_VC100_OpenMP_x64.msm'\
+                ]
     msm_dir = r'C:\Program Files (x86)\Common Files\Merge Modules'
 for index, mod in enumerate(msm_files):
     id = 'VCRed_' + str(index)
