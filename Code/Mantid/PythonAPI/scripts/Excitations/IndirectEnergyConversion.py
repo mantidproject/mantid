@@ -149,7 +149,7 @@ def backgroundRemoval(tofStart, tofEnd, inWS_n = 'Time', outWS_n = 'Time'):
 def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '', 
         reflection = '', SumFiles=False, bgremove = [0, 0], tempK=-1, 
         calib='', rebinParam='', CleanUp = True, instrument='', savesuffix='',
-        saveFormats = [], savedir='', Verbose = False):
+        saveFormats = [], Verbose = False):
     output_workspace_names = []
     runNos = []
     if Verbose:
@@ -216,7 +216,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
         output_workspace_names.append(group)
     if ( saveFormats != [] ):
         saveItems(output_workspace_names, runNos, saveFormats, instrument, 
-                savesuffix, directory = savedir)
+                savesuffix)
         if Verbose:
             mtd.sendLogMessage(">> Saved workspaces: " + 
                     ", ".join(output_workspace_names) +" in formats: " + 
@@ -340,11 +340,9 @@ def res(file, iconOpt, rebinParam, bground, plotOpt = False, Res = True):
             graph = plotSpectrum(iconWS, 0)
         return iconWS
 
-def saveItems(workspaces, runNos, fileFormats, ins, suffix, directory = ''):
+def saveItems(workspaces, runNos, fileFormats, ins, suffix):
     for i in range(0, len(workspaces)):
         filename = ins + runNos[i] + '_' + suffix
-        if directory != '':
-            filename = os.path.join(directory, filename)
         for j in fileFormats:
             if j == 'spe':
                 SaveSPE(workspaces[i], filename + '.spe')
