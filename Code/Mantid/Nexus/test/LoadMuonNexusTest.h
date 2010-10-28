@@ -180,7 +180,7 @@ public:
     if ( !nxL.isInitialized() ) nxL.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile_musr00022725 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/musr00022725.nxs").toString();
+    std::string inputFile_musr00022725 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/AutoTestData/MUSR00022725.nxs").toString();
     nxL.setPropertyValue("FileName", inputFile_musr00022725);
 
     outputSpace="outermusr00022725";
