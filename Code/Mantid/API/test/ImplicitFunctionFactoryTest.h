@@ -8,7 +8,7 @@
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/ImplicitFunction.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 
 class ImplicitFunctionFactoryTest : public CxxTest::TestSuite
@@ -65,12 +65,16 @@ public:
   
   void testGetFirstConcreteInstance()
   {
+  //std::string s;
+  // std::getline(std::cin,s);
+
       boost::shared_ptr<Mantid::API::ImplicitFunction> function = Mantid::API::ImplicitFunctionFactory::Instance().create("MockImplicitFunctionA");
 	  TSM_ASSERT_EQUALS("The correct implicit function type has not been generated", "MockImplicitFunctionA", function->getName());
   }
   
   void testGetSecondConcreteInstance()
   {
+  
       boost::shared_ptr<Mantid::API::ImplicitFunction> function = Mantid::API::ImplicitFunctionFactory::Instance().create("MockImplicitFunctionB");
 	  TSM_ASSERT_EQUALS("The correct implicit function type has not been generated", "MockImplicitFunctionB", function->getName());
   }

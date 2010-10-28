@@ -8,7 +8,7 @@
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 
 class ImplicitFunctionParameterParserFactoryTest : public CxxTest::TestSuite

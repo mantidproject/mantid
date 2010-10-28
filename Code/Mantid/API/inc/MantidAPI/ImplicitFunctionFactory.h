@@ -45,18 +45,17 @@ namespace Mantid
     public:
       virtual boost::shared_ptr<ImplicitFunction> create(const std::string& xmlString) const
       {
-
+        //ImplicitFunctionParser * funcParser = createImplicitFunctionParser();
         return Kernel::DynamicFactory<ImplicitFunction>::create(xmlString);
       }
 
     private:
 
-      //ImplicitFunctionParser * createImplicitFunctionParser()
-      //{
-      //  
-
-      //  //boost::shared_ptr<Mantid::API::ImplicitFunctionParser> parser = Mantid::API::ImplicitFunctionParserFactory::Instance().create("CompositeFunctionParserA");
-      //}
+      ImplicitFunctionParser * createImplicitFunctionParser() const
+      {
+        boost::shared_ptr<Mantid::API::ImplicitFunctionParser> parser = Mantid::API::ImplicitFunctionParserFactory::Instance().create("CompositeImplicitFunctionParser");
+        return parser.get();
+      }
 
       //ImplicitFunctionParameterParser * createImplicitFunctionParameterParser()
       //{

@@ -1,10 +1,16 @@
 ﻿#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidAPI/ImplicitFunctionParserFactory.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
+
 namespace Mantid
 {
     namespace MDAlgorithms
     {
-        PlaneImplicitFunctionParser::PlaneImplicitFunctionParser(API::ImplicitFunctionParameterParser* parameterParser) : ImplicitFunctionParser(parameterParser)
+
+        DECLARE_IMPLICIT_FUNCTION_PARSER(PlaneImplicitFunctionParser);
+
+        PlaneImplicitFunctionParser::PlaneImplicitFunctionParser() : ImplicitFunctionParser(new InvalidParameterParser)
         {
         }
 
@@ -67,6 +73,11 @@ namespace Mantid
 
         PlaneImplicitFunctionParser::~PlaneImplicitFunctionParser()
         {
+        }
+
+        void PlaneImplicitFunctionParser::setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
+        {
+          this->m_paramParserRoot = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(parser);
         }
     }
 }

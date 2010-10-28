@@ -6,10 +6,10 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
-
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
 
 namespace Mantid
 {
@@ -53,11 +53,13 @@ namespace Mantid
         {
 
         public:
-            PlaneImplicitFunctionParser(Mantid::API::ImplicitFunctionParameterParser* parameterParser);
+            PlaneImplicitFunctionParser();
 
             Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
 
             void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
+
+            void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser);
 
             PlaneFunctionBuilder* parsePlaneFunction(Poco::XML::Element* functionElement);
 

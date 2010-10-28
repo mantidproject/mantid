@@ -88,14 +88,16 @@ public:
     void testParseCompositeFunction(void)
     {
         using namespace Mantid::MDAlgorithms;
-
+        using namespace Mantid::API;
         Poco::XML::DOMParser pParser;
         std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>CompositeImplicitFunction</Type><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></Function><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter></ParameterList></Function></Function>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
         ExposedCompositeImplicitFunctionParser functionParser;
-		functionParser.setSuccessorParser(new PlaneImplicitFunctionParser(constructRootParameterParser().release()));
+		ImplicitFunctionParser* planeParser = new PlaneImplicitFunctionParser;
+		planeParser->setParameterParser(constructRootParameterParser().release());
+		functionParser.setSuccessorParser(planeParser);
         CompositeFunctionBuilder* compositeFunctionBuilder = functionParser.exposedParseCompositeFunction(pRootElem);
         std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = compositeFunctionBuilder->create();
 

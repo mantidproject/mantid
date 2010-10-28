@@ -26,7 +26,7 @@
 #include <sstream>
 #include <vector>
 #include "MantidKernel/System.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "Point3D.h"
 
 namespace Mantid

@@ -1,10 +1,13 @@
 ﻿#include "MantidMDAlgorithms/OriginParameterParser.h"
 #include <boost/algorithm/string.hpp>
+#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 
 namespace Mantid
 {
     namespace MDAlgorithms
     {
+
+        DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(OriginParameterParser)
 
         OriginParameterParser::OriginParameterParser()
         {

@@ -10,13 +10,12 @@
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 
 class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite
 {
   private:
-  
   
   //TODO, use mocking framework instead!
   class MockImplicitFunctionParameterParser : public Mantid::API::ImplicitFunctionParameterParser
@@ -40,9 +39,8 @@ class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite
 	{
         return NULL;	
 	}
-    virtual void setSuccessorParser(ImplicitFunctionParser* parser)
-	{
-	}
+    virtual void setSuccessorParser(ImplicitFunctionParser* parser){}
+	virtual void setParameterParser(ImplicitFunctionParameterParser* parser){}
   };
   
   class MockImplicitFunctionParserB : public Mantid::API::ImplicitFunctionParser
@@ -54,9 +52,8 @@ class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite
 	{
         return NULL;	
 	}
-    virtual void setSuccessorParser(ImplicitFunctionParser* parser)
-	{
-	}
+    virtual void setSuccessorParser(ImplicitFunctionParser* parser){}
+	virtual void setParameterParser(ImplicitFunctionParameterParser* parser){}
   };
   
 

@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
 
@@ -54,6 +54,8 @@ namespace Mantid
             CompositeImplicitFunctionParser();
 
             Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
+
+            void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser);
 
             void setSuccessorParser(ImplicitFunctionParser* parser);
 

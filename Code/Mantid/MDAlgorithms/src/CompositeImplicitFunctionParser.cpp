@@ -2,11 +2,15 @@
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionParserFactory.h"
+#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 
 namespace Mantid
 {
     namespace MDAlgorithms
     {
+        DECLARE_IMPLICIT_FUNCTION_PARSER(CompositeImplicitFunctionParser);
+
         CompositeImplicitFunctionParser::CompositeImplicitFunctionParser() : ImplicitFunctionParser(new InvalidParameterParser)
         {
         }
@@ -61,6 +65,11 @@ namespace Mantid
 
         CompositeImplicitFunctionParser::~CompositeImplicitFunctionParser()
         {
+        }
+
+        void CompositeImplicitFunctionParser::setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
+        {
+          this->m_paramParserRoot = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(parser);
         }
     }
 }

@@ -1,12 +1,25 @@
 #ifndef PARAMETER_PARSER_H_
 #define PARAMETER_PARSER_H_
 
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
+//#define Parser Parser
+#define DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(classname) \
+    namespace { \
+    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+    ((Mantid::API::ImplicitFunctionParameterParserFactory::Instance().subscribe<classname>(#classname)) \
+    , 0)); \
+    }
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
 
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

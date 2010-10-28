@@ -6,10 +6,11 @@
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
+//#define Parser Parser
 #define DECLARE_IMPLICIT_FUNCTION_PARSER(classname) \
     namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-    ((Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<classname>(#classname##Parser)) \
+    ((Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<classname>(#classname)) \
     , 0)); \
     }
 
@@ -18,7 +19,7 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <memory>
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -93,8 +94,10 @@ namespace Mantid
             {
             }
 
+            
             virtual ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement) = 0;
             virtual void setSuccessorParser(ImplicitFunctionParser* parser) = 0;
+            virtual void setParameterParser(ImplicitFunctionParameterParser* parser) = 0;
             virtual ~ImplicitFunctionParser() = 0 {;}
 
         };

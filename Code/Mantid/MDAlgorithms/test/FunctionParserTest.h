@@ -9,6 +9,7 @@
 #include "InvalidParameterParser.h"
 #include "PlaneFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -24,6 +25,7 @@ protected:
         MockFunctionParser(Mantid::API::ImplicitFunctionParameterParser* paramParser) : Mantid::API::ImplicitFunctionParser(paramParser) { ; }
         MOCK_METHOD1(createFunctionBuilder, Mantid::API::ImplicitFunctionBuilder*(Poco::XML::Element* functionElement));
         MOCK_METHOD1(setSuccessorParser, void(Mantid::API::ImplicitFunctionParser* parameterElement));
+		MOCK_METHOD1(setParameterParser, void(Mantid::API::ImplicitFunctionParameterParser* parameterElement));
     };
 
     //Mock parameter parser class.

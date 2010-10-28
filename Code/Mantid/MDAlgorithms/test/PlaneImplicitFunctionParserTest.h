@@ -28,8 +28,6 @@ private:
     class ExposedPlaneFunctionParser : public Mantid::MDAlgorithms::PlaneImplicitFunctionParser
     {
     public:
-        ExposedPlaneFunctionParser(Mantid::API::ImplicitFunctionParameterParser* paramParser) :  PlaneImplicitFunctionParser(paramParser)
-        {}
         Mantid::MDAlgorithms::PlaneFunctionBuilder* exposedParsePlaneFunction(Poco::XML::Element* functionElement)
         {
             return this->parsePlaneFunction(functionElement);
@@ -53,7 +51,8 @@ public:
             .WillOnce(testing::Return(new OriginParameter(0, 0, 0)))
             .WillOnce(testing::Return(new NormalParameter(0, 0, 0)));
 
-        PlaneImplicitFunctionParser functionParser(paramParser);
+        PlaneImplicitFunctionParser functionParser;
+		functionParser.setParameterParser(paramParser);
         Mantid::API::ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
 
@@ -74,7 +73,8 @@ public:
         EXPECT_CALL(*mockFuncParser, createFunctionBuilder(testing::_))
             .Times(1);
 
-        PlaneImplicitFunctionParser functionParser(constructRootParameterParser().release());
+        PlaneImplicitFunctionParser functionParser;
+		functionParser.setParameterParser(constructRootParameterParser().release());
         functionParser.setSuccessorParser(mockFuncParser);
         ImplicitFunctionBuilder* builder = functionParser.createFunctionBuilder(pRootElem);
         delete builder;
@@ -91,7 +91,8 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        ExposedPlaneFunctionParser functionParser(constructRootParameterParser().release());
+        ExposedPlaneFunctionParser functionParser;
+		functionParser.setParameterParser(constructRootParameterParser().release());
         PlaneFunctionBuilder* planeBuilder = functionParser.exposedParsePlaneFunction(pRootElem);
         std::auto_ptr<Mantid::API::ImplicitFunction> impFunction = planeBuilder->create();
 
@@ -117,7 +118,8 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        PlaneImplicitFunctionParser functionParser(constructRootParameterParser().release());
+        PlaneImplicitFunctionParser functionParser;
+		functionParser.setParameterParser(constructRootParameterParser().release());
         TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as Function element was expected, but not found.", functionParser.createFunctionBuilder(pRootElem), std::invalid_argument );
     }
 
@@ -130,7 +132,8 @@ public:
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-        PlaneImplicitFunctionParser functionParser(constructRootParameterParser().release());
+        PlaneImplicitFunctionParser functionParser;
+		functionParser.setParameterParser(constructRootParameterParser().release());
         TSM_ASSERT_THROWS("There is no successor parser setup for the PlaneImplicitFunctionParser", functionParser.createFunctionBuilder(pRootElem), std::runtime_error );
     }
 	
