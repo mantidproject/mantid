@@ -1,6 +1,5 @@
-from MantidFramework import *
-mtd.initialise()
-from mantidsimple import *
+import MantidFramework
+import mantidsimple
 
 def instrument_factory(name):
     """
@@ -21,7 +20,7 @@ class Instrument(object):
         """ 
     
         self._definition_file = \
-            mtd.getConfigProperty('instrumentDefinition.directory')+'/'+self._NAME+'_Definition.xml'
+            MantidFramework.mtd.getConfigProperty('instrumentDefinition.directory')+'/'+self._NAME+'_Definition.xml'
         
         if not wrksp_name is None:
             wrksp = wrksp_name
@@ -29,13 +28,13 @@ class Instrument(object):
             wrksp = '_'+self._NAME+'instrument_definition'
         
         # Read instrument description
-        LoadEmptyInstrument(self._definition_file, wrksp)
-        definitionWS = mtd[wrksp]  
+        mantidsimple.LoadEmptyInstrument(self._definition_file, wrksp)
+        definitionWS = MantidFramework.mtd[wrksp]  
         self.definition = definitionWS.getInstrument()
 
         if wrksp_name is None:
             #we haven't been asked to leave the empty instrument workspace so remove it
-            mtd.deleteWorkspace(wrksp)
+            MantidFramework.mtd.deleteWorkspace(wrksp)
         
         
     def name(self):
