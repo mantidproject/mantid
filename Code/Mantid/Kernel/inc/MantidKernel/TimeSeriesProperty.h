@@ -333,7 +333,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /**  Return the time series's values as a vector<TYPE>
-   *
+   *  @return the time series's values as a vector<TYPE>
    */
   std::vector<TYPE> valuesAsVector() const
   {
@@ -612,8 +612,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Returns total value, added up for all times
-   *  @param t time
-   *  @return Value at time \a t
+   *  @return Total value from all times
    */
   TYPE getTotalValue() const
   {

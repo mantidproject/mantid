@@ -137,7 +137,7 @@ namespace Mantid
                                 std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
 
       /// Holds all the xml elements that have a \<parameter\> child element.
-      /// Added purely for the purpose of computing speed and is used in setLogFile()
+      /// added purely for the purpose of computing speed and is used in setLogFile()
       /// for the purpose of quickly accessing if a component have a parameter/logfile
       /// associated with it or not - instead of using the comparatively slow poco
       /// call getElementsByTagName() (or getChildElement)

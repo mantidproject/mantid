@@ -284,6 +284,7 @@ namespace DataObjects
    *  to finalize the stuff that needs to.
    **
    * @param workspace_index The workspace index number.
+   * @return An event list (new or existing) at the index provided
    */
   EventList& EventWorkspace::getOrAddEventList(const int workspace_index)
     {
@@ -592,7 +593,7 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
-  /*** Sort all event lists. Uses a parallelized algortih
+  /*** Sort all event lists. Uses a parallelized algorithm
    * @param sortType How to sort the event lists.
    * @param prog a progress report object. If the pointer is not NULL, each event list will call prog.report() once.
    */
@@ -616,6 +617,7 @@ namespace DataObjects
   /** Return the time of the first pulse received, by accessing the run's
    * sample logs to find the ProtonCharge
    *
+   * @return the time of the first pulse
    * @throw runtime_error if the log is not found; or if it is empty.
    */
   Kernel::PulseTimeType EventWorkspace::getFirstPulseTime() const

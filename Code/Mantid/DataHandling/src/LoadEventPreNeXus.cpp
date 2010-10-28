@@ -461,6 +461,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 //-----------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
  * @param workspace EventWorkspace to write to.
+ * @param event_buffer The buffer containing the DAS events
+ * @param current_event_buffer_size The length of the given DAS buffer
+ * @param fileOffset Value for an offset into the binary file
  */
 void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer,
     size_t current_event_buffer_size, size_t fileOffset)
@@ -676,6 +679,7 @@ static PulseTimeType getTime(uint32_t seconds, uint32_t nanoseconds)
 //-----------------------------------------------------------------------------
 /** Read a pulse ID file
  * @param filename file to load.
+ * @param throwError Flag to trigger error throwing instead of just logging
  */
 void LoadEventPreNeXus::readPulseidFile(const std::string &filename, const bool throwError)
 {

@@ -83,8 +83,7 @@ struct IntermediateEvent
 #pragma pack(push, 4) //Make sure the structure is 16 bytes.
 struct Pulse
 {
-  /// The number of nanoseconds since the seconds field. This is not
-  /// necessarily less than one second.
+  /// The number of nanoseconds since the seconds field. This is not necessarily less than one second.
   uint32_t nanoseconds;
 
   /// The number of seconds since January 1, 1990.
@@ -136,7 +135,7 @@ private:
   /// The total proton charge for the run.
   double proton_charge_tot;
 
-  ///Handles loading from the event file
+  /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> * eventfile;
   std::size_t num_events; ///<the number of events
   std::size_t num_pulses; ///<the number of pulses
@@ -149,19 +148,23 @@ private:
   /// max events to load
   std::size_t max_events;
 
-  ///Set to true if a valid Mapping file was provided.
+  /// Set to true if a valid Mapping file was provided.
   bool using_mapping_file;
 
   /// Set to true when instrument geometry was loaded.
   bool instrument_loaded_correctly;
 
-  //For loading only some spectra
+  /// For loading only some spectra
   bool loadOnlySomeSpectra;
+  /// Handle to the loaded spectra map
   std::map<int, bool> spectraLoadMap;
 
-  //Limits found to tof
-  double longest_tof, shortest_tof;
+  /// Longest TOF limit
+  double longest_tof;
+  /// Shortest TOF limit
+  double shortest_tof;
 
+  /// Flag to allow for parallel loading
   bool parallelProcessing;
 
   /// How many events to load at a time

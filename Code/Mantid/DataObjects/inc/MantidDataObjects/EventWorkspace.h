@@ -211,6 +211,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   void clearMRU() const;
 
+  /// Sort all event lists. Uses a parallelized algorithm
   void sortAll(EventSortType sortType, Mantid::API::Progress * prog);
 
   Kernel::PulseTimeType getFirstPulseTime() const;
@@ -221,9 +222,9 @@ private:
   /// NO ASSIGNMENT ALLOWED
   EventWorkspace& operator=(const EventWorkspace&);
 
-  /** A map that holds the event list for each pixel; the key is the pixelid.
-   * This is used when loading data.
-   * This is NOT guaranteed to be ok after DoneLoadingData. Don't use it!
+  /** A map that holds the event list for each pixel; the key is the pixelid;
+   * this is used when loading data;
+   * this is NOT guaranteed to be ok after DoneLoadingData; Don't use it!
    */
   EventListMap data_map;
 

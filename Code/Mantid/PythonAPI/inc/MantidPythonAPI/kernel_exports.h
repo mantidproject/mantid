@@ -41,6 +41,7 @@ namespace Mantid
       /**
        * Access the facilities information
        * @param name The name of a facility. If empty the default facility is returned. (default = "")
+       * @return the facility information object
        */
       Kernel::FacilityInfo facility(const std::string & name = "")
       {

@@ -233,6 +233,5 @@ namespace Mantid
       export_instrument();
     }
 
-    //@endcond
   }
 }

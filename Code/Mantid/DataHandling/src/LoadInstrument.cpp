@@ -1161,6 +1161,7 @@ namespace Mantid
     /** Returns True if the (string) type given is an assembly.
      *
      *  @param type  name of the type of a component in XML instrument definition
+     *  @return True if the type is an assembly
      *  @throw InstrumentDefinitionError Thrown if type not defined in XML definition
     */
     bool LoadInstrument::isAssembly(std::string type)
