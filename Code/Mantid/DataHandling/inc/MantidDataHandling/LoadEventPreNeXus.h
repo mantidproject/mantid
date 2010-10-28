@@ -181,14 +181,7 @@ private:
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer, size_t current_event_buffer_size, size_t fileOffset);
 
-  void makeIntermediateEventBuffer(DasEvent * event_buffer, size_t& current_event_buffer_size, IntermediateEvent * intermediate_buffer, size_t fileOffset);
-
-  void procEventsParallel(DataObjects::EventWorkspace_sptr & workspace, IntermediateEvent * intermediate_buffer, size_t current_event_buffer_size);
-
   void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
-
-  std::size_t getFrameIndex(const std::size_t event_index,
-                              const std::size_t last_frame_index);
 };
 
   }

@@ -201,16 +201,6 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
 
   //------------------------------------------------------------
-  /// Set the size of the MRU (most recently used) histogram cache
-  //void setMRUSize(const int size) const;
-
-  //------------------------------------------------------------
-  /// Get the absolute time corresponding to the give frame ID
-  boost::posix_time::ptime getTime(const size_t frameId);
-
-  /// Add the absolute time corresponding to the give frame ID
-  void addTime(const size_t frameId, boost::posix_time::ptime absoluteTime);
-
   /// The total number of events across all of the spectra.
   std::size_t getNumberEvents() const;
 
