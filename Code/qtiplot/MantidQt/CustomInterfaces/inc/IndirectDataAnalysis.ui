@@ -873,14 +873,25 @@
             </layout>
            </item>
            <item>
-            <widget class="QCheckBox" name="furyfit_ckConstrainIntensities" >
-             <property name="text" >
-              <string>Constrain Intensities</string>
-             </property>
-             <property name="checked" >
-              <bool>true</bool>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout" >
+             <item>
+              <widget class="QCheckBox" name="furyfit_ckConstrainIntensities" >
+               <property name="text" >
+                <string>Constrain Intensities</string>
+               </property>
+               <property name="checked" >
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="furyfit_ckPlotGuess" >
+               <property name="text" >
+                <string>Plot Guess</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <layout class="QHBoxLayout" name="furyfit_properties" />
@@ -982,11 +993,6 @@
         </layout>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="tabConvFit" >
-      <attribute name="title" >
-       <string>ConvFit</string>
-      </attribute>
      </widget>
      <widget class="QWidget" name="tabAbsorption" >
       <attribute name="title" >

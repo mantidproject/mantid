@@ -319,7 +319,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
       "for workspace in wslist:\n"
       "   if save_ws.search(workspace):\n"
       "      ws_list.append(workspace)\n"
-      "      runNos.append(mantid.getMatrixWorkspace(workspace).getRun().getLogData('run_number').value())\n"
+      "      runNos.append(mtd[workspace].getRun().getLogData('run_number').value())\n"
       "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix)\n";
   }
 

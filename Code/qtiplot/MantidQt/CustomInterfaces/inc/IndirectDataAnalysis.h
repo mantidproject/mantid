@@ -61,7 +61,6 @@ namespace MantidQt
       void msdRun();
       void furyRun();
       void furyfitRun();
-      void confitRun();
       void absorptionRun();
       void demonRun();
 
@@ -108,6 +107,7 @@ namespace MantidQt
       void furyfitInputType(int index);
       void furyfitPlotOutput();
       void furyfitSequential();
+      void furyfitPlotGuess(QtProperty* prop);
 
       // Convolution Fit
 

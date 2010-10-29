@@ -304,8 +304,6 @@ void IndirectDataAnalysis::setupFuryFit()
   m_ffProp["LinearBackground"]->addSubProperty(bgA0);
   m_ffProp["LinearBackground"]->addSubProperty(bgA1);
   m_ffProp["BackgroundA0"] = bgA0;
-  m_ffProp["Lorentzian1"] = createLorentzian();
-  m_ffProp["Lorentzian2"] = createLorentzian();
 
   m_ffProp["Exponential1"] = createExponential();
   m_ffProp["Exponential2"] = createExponential();
@@ -313,6 +311,9 @@ void IndirectDataAnalysis::setupFuryFit()
   m_ffProp["StretchedExp"] = createStretchedExp();
 
   furyfitTypeSelection(m_uiForm.furyfit_cbFitType->currentIndex());
+
+  // Connect to PlotGuess checkbox
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(furyfitPlotGuess(QtProperty*)));
 }
 
 bool IndirectDataAnalysis::validateFury()
@@ -850,10 +851,6 @@ void IndirectDataAnalysis::run()
   {
     furyfitRun();
   }
-  else if ( tabName == "ConvFit" )
-  {
-    confitRun();
-  }
   else if ( tabName == "Absorption" )
   {
     absorptionRun();
@@ -864,7 +861,7 @@ void IndirectDataAnalysis::run()
   }
   else
   {
-    showInformationBox("Not yet implemented...");
+    showInformationBox("This tab does not have a 'Run' action.");
   }
 }
 
@@ -1287,7 +1284,7 @@ void IndirectDataAnalysis::furyfitRun()
       break;
     }
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitTypeSelection(int index)
 {
   m_ffTree->clear();
@@ -1315,7 +1312,7 @@ void IndirectDataAnalysis::furyfitTypeSelection(int index)
     break;
   }
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitPlotInput()
 {
   if ( m_ffDataCurve != NULL )
@@ -1395,22 +1392,22 @@ void IndirectDataAnalysis::furyfitPlotInput()
   m_furyFitPlotWindow->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
   m_furyFitPlotWindow->replot();
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitXMinSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["StartX"], val);
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitXMaxSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["EndX"], val);
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitBackgroundSelected(double val)
 {
   m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], val);
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
 {
   if ( prop == m_ffProp["StartX"] )
@@ -1426,12 +1423,12 @@ void IndirectDataAnalysis::furyfitRangePropChanged(QtProperty* prop, double val)
     m_ffBackRangeS->setMinimum(val);
   }
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitInputType(int index)
 {
   m_uiForm.furyfit_swInput->setCurrentIndex(index);
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitPlotOutput()
 {
   if ( m_ffOutputWS == NULL )
@@ -1446,7 +1443,7 @@ void IndirectDataAnalysis::furyfitPlotOutput()
     "plotSpectrum('" + QString::fromStdString(name) + "', [0,1,2])\n";
   QString pyOutput = runPythonCode(pyInput);
 }
-
+/** ...  */
 void IndirectDataAnalysis::furyfitSequential()
 {
   furyfitPlotInput();
@@ -1489,10 +1486,135 @@ void IndirectDataAnalysis::furyfitSequential()
   QString pyOutput = runPythonCode(pyInput);
 
 }
-
-void IndirectDataAnalysis::confitRun()
+/** ...  */
+void IndirectDataAnalysis::furyfitPlotGuess(QtProperty* prop)
 {
-  showInformationBox("Not yet implemented.");
+  if ( ! m_uiForm.furyfit_ckPlotGuess->isChecked() )
+  {
+    return;
+  }
+
+  Mantid::API::CompositeFunction* function = new Mantid::API::CompositeFunction();
+  QList<QtProperty*> fitItems;
+  int funcIndex = 1;
+  bool singleF = true;
+
+  switch ( m_uiForm.furyfit_cbFitType->currentIndex() )
+  {
+  case 0: // 1 Exponential
+    fitItems.append(m_ffProp["Exponential1"]);
+    break;
+  case 1: // 2 Exponentials
+    fitItems.append(m_ffProp["Exponential1"]);
+    fitItems.append(m_ffProp["Exponential2"]);
+    singleF = false;
+    break;
+  case 2: // 1 Stretched Exponential
+    fitItems.append(m_ffProp["StretchedExp"]);
+    break;
+  case 3: // 1 Exponential with 1 Stretched Exponential
+    fitItems.append(m_ffProp["Exponential1"]);
+    fitItems.append(m_ffProp["StretchedExp"]);
+    singleF = false;
+    break;
+  default:
+    return;
+    break;
+  }
+
+  // Add in background
+  Mantid::API::IFunction* background = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
+  function->addFunction(background);
+  function->tie("f0.A1", "0");
+  function->tie("f0.A0", m_ffProp["BackgroundA0"]->valueText().toStdString());
+
+  for ( int i = 0; i < fitItems.size(); i++ )
+  {
+    QList<QtProperty*> fitProps = fitItems[i]->subProperties();
+    if ( fitProps.size() > 0 )
+    {
+      Mantid::API::IFunction* func;
+      // Both Exp and StrExp are Userfunctions
+      func = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+      std::string funcName = fitItems[i]->propertyName().toStdString();
+      std::string formula;
+      if ( funcName == "Exponential" )
+      {
+        formula = "Intensity*exp(-(x*Exponent))";
+      }
+      else if ( funcName == "Stretched Exponential" )
+      {
+        formula = "Intensity*exp(-Exponent*(x^Beta))";
+      }
+      // Create subfunction object with specified formula
+      Mantid::API::IFunction::Attribute att(formula);
+      func->setAttribute("Formula", att);
+      function->addFunction(func);
+      // Create ties
+      for ( int j = 0; j < fitProps.size(); j++ )
+      {
+        std::string parName;
+        parName += QString("f%1.").arg(funcIndex).toStdString() + fitProps[j]->propertyName().toStdString();
+        function->tie(parName, fitProps[j]->valueText().toStdString());
+      }
+      funcIndex++;
+    }
+  }
+  // Run the fit routine
+  if ( m_ffInputWS == NULL )
+  {
+    furyfitPlotInput();
+  }
+
+  std::string inputName = m_ffInputWS->getName();
+  
+  // Create the double* array from the input workspace
+  int binIndxLow = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["StartX"]));
+  int binIndxHigh = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["EndX"]));
+  const int nData = binIndxHigh - binIndxLow;
+
+  double* inputXData = new double[nData];
+  double* outputData = new double[nData];
+
+  const Mantid::MantidVec& XValues = m_ffInputWS->readX(0);
+
+  const bool isHistogram = m_ffInputWS->isHistogramData();
+
+  for ( int i = 0; i < nData ; i++ )
+  {
+    if ( isHistogram )
+      inputXData[i] = 0.5*(XValues[binIndxLow+i]+XValues[binIndxLow+i+1]);
+    else
+      inputXData[i] = XValues[binIndxLow+i];
+  }
+
+  function->applyTies();
+  function->function(outputData, inputXData, nData);
+
+  // get output data into a q vector for qwt
+  QVector<double> dataX;
+  QVector<double> dataY;
+
+  for ( int i = 0; i < nData; i++ )
+  {
+    dataX.append(inputXData[i]);
+    dataY.append(outputData[i]);
+  }
+
+  // Create the curve
+  if ( m_ffFitCurve != NULL )
+  {
+    m_ffFitCurve->attach(0);
+    delete m_ffFitCurve;
+    m_ffFitCurve = 0;
+  }
+
+  m_ffFitCurve = new QwtPlotCurve();
+  m_ffFitCurve->setData(dataX, dataY);
+  m_ffFitCurve->attach(m_furyFitPlotWindow);
+  QPen fitPen(Qt::red, Qt::SolidLine);
+  m_ffFitCurve->setPen(fitPen);
+  m_furyFitPlotWindow->replot();
 }
 
 /* ABSORPTION TAB */
