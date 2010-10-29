@@ -170,7 +170,6 @@ MantidObject*	ObjCompAssemblyActor::getMantidObject(const boost::shared_ptr<cons
 int ObjCompAssemblyActor::setStartingReferenceColor(int rgb)
 {
   mColorStartID=rgb;
-  std::cerr<<"mColorStartID "<<mColorStartID<<'\n';
   return getNumberOfDetectors();
 }
 
