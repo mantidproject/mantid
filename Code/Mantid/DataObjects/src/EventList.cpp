@@ -102,20 +102,20 @@ using Kernel::PulseTimeType;
    * @param tof: tof in microseconds.
    * @param pulsetime: absolute pulse time
    * @param weight: weight of this neutron event.
-   * @param error: the actual error on the event (not squared!)
+   * @param error: the square of the error on the event
    */
-  WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float error)
-  : TofEvent(tof, pulsetime), m_weight(weight), m_errorSquared(error*error)
+  WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float errorSquared)
+  : TofEvent(tof, pulsetime), m_weight(weight), m_errorSquared(errorSquared)
   {
   }
 
   /** Constructor, copy from a TofEvent object but add weights
    * @param rhs: TofEvent to copy into this.
    * @param weight: weight of this neutron event.
-   * @param error: the actual error on the event (not squared!)
+   * @param error: the square of the error on the event
   */
-  WeightedEvent::WeightedEvent(const TofEvent& rhs, float weight, float error)
-  : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(weight), m_errorSquared(error*error)
+  WeightedEvent::WeightedEvent(const TofEvent& rhs, float weight, float errorSquared)
+  : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(weight), m_errorSquared(errorSquared)
   {
   }
 
@@ -454,6 +454,56 @@ using Kernel::PulseTimeType;
 
     return *this;
   }
+
+
+
+  // --------------------------------------------------------------------------
+  /** SUBTRACT another EventList from this event list.
+   * The event lists are concatenated, but the weights of the incoming
+   *    list are multiplied by -1.0.
+   *
+   * @param more_events Another EventList.
+   * @return reference to this
+   * */
+  EventList& EventList::operator-=(const EventList& more_events)
+  {
+    if (more_events.hasWeights())
+    {
+      //We're adding something with weights
+      //Make sure that THIS has weights too.
+      this->switchToWeightedEvents();
+
+      //At this point, both have weights. Great!
+      const vector<WeightedEvent> & rel = more_events.getWeightedEvents();
+      std::vector<WeightedEvent>::const_iterator it;
+      for(it = rel.begin(); it != rel.end(); it++)
+        this->weightedEvents.push_back( WeightedEvent(it->m_tof, it->m_pulsetime, -it->m_weight, it->m_errorSquared) );
+    }
+
+    if (!more_events.hasWeights())
+    {
+      //We're adding a list without weights.
+
+      //Make sure that THIS has weights too.
+      this->switchToWeightedEvents();
+
+      //Loop through the unweighted input, convert them to -1.0 weight, and concatenate.
+      const vector<TofEvent> & rel = more_events.getEvents();
+      std::vector<TofEvent>::const_iterator it;
+      for(it = rel.begin(); it != rel.end(); it++)
+        this->weightedEvents.push_back( WeightedEvent(*it, -1.0, 1.0) );
+    }
+
+    //No guaranteed order
+    this->order = UNSORTED;
+
+    //NOTE: What to do about detector ID's
+
+    return *this;
+  }
+
+
+
 
 
   // --------------------------------------------------------------------------

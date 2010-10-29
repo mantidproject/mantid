@@ -85,14 +85,14 @@ public:
     TS_ASSERT_EQUALS(we.error(), 1.0);
 
     //TofEvent + weights
-    we = WeightedEvent(e, 3.5, 0.5);
+    we = WeightedEvent(e, 3.5, 0.5*0.5);
     TS_ASSERT_EQUALS(we.tof(), 123);
     TS_ASSERT_EQUALS(we.pulseTime(), 456);
     TS_ASSERT_EQUALS(we.weight(), 3.5);
     TS_ASSERT_EQUALS(we.error(), 0.5);
 
     //Full constructor
-    we = WeightedEvent(456, 789, 2.5, 1.5);
+    we = WeightedEvent(456, 789, 2.5, 1.5*1.5);
     TS_ASSERT_EQUALS(we.tof(), 456);
     TS_ASSERT_EQUALS(we.pulseTime(), 789);
     TS_ASSERT_EQUALS(we.weight(), 2.5);
@@ -105,7 +105,7 @@ public:
 
     //Copy constructor
     we = WeightedEvent();
-    we2 = WeightedEvent(456, 789, 2.5, 1.5);
+    we2 = WeightedEvent(456, 789, 2.5, 1.5*1.5);
     we = we2;
     TS_ASSERT_EQUALS(we.tof(), 456);
     TS_ASSERT_EQUALS(we.pulseTime(), 789);
@@ -239,7 +239,7 @@ public:
   void test_switchToWeightedEvents()
   {
     //Start with a bit of fake data
-    fake_data();
+    this->fake_data();
     TS_ASSERT_EQUALS( el.getEvents().size(), NUMEVENTS );
     TS_ASSERT_EQUALS( el.getNumberEvents(), NUMEVENTS);
     TS_ASSERT_THROWS( el.getWeightedEvents().size(), std::runtime_error);
@@ -260,7 +260,7 @@ public:
     TS_ASSERT( !el.hasWeights() );
 
     // Add a weighted event = everything switches
-    WeightedEvent we(123, 456, 2.0, 3.0);
+    WeightedEvent we(123, 456, 2.0, 3.0*3.0);
     el += we;
     TS_ASSERT( el.hasWeights() );
     TS_ASSERT_EQUALS( el.getWeightedEvents()[0].weight(), 1.0 );
@@ -282,9 +282,9 @@ public:
   {
     TS_ASSERT( !el.hasWeights() );
     vector<WeightedEvent> mylist;
-    mylist.push_back(WeightedEvent(45,67, 4.5, 6.5));
-    mylist.push_back(WeightedEvent(89,12, 1.0, 1.0));
-    mylist.push_back(WeightedEvent(34,56, 3.0, 2.0));
+    mylist.push_back(WeightedEvent(45,67, 4.5, 6.5*6.5));
+    mylist.push_back(WeightedEvent(89,12, 1.0, 1.0*1.0));
+    mylist.push_back(WeightedEvent(34,56, 3.0, 2.0*2.0));
 
     el += mylist;
     TS_ASSERT( el.hasWeights() );
@@ -493,6 +493,45 @@ public:
       }
     }
   }
+
+
+  //==================================================================================
+  //--- Minus Operation ----
+  //==================================================================================
+
+  /// Make a big bin holding all events
+  MantidVecPtr one_big_bin()
+  {
+    //Generate the histrogram bins
+    MantidVecPtr x;
+    MantidVec & shared_x = x.access();
+    shared_x.push_back(0);
+    shared_x.push_back(1e10);
+    return x;
+  }
+
+  void testMinusOperator()
+  {
+    this->fake_uniform_data();
+    EventList el2(el); //An EventList with 1.0 weights implied
+    int num2 = el2.getNumberEvents();
+
+    this->fake_uniform_data();
+    int num1 = el2.getNumberEvents();
+
+    //Subtract the non-weighted from the weighted
+    el -= el2;
+
+    TS_ASSERT_EQUALS( el.getNumberEvents(), num1+num2 );
+
+    //Put a single big bin with all events
+    el.setX(one_big_bin() );
+    //But the total neutrons is 0.0! They've been cancelled out :)
+    TS_ASSERT_DELTA( (*el.dataY())[0], 0.0, 1e-6);
+    TS_ASSERT_DELTA( (*el.dataE())[0], sqrt(el.getNumberEvents()), 1e-6);
+
+  }
+
 
   //==================================================================================
   //--- Sorting Tests ---
@@ -1112,7 +1151,7 @@ public:
     for (double tof=100; tof < MAX_TOF; tof += BIN_DELTA/2)
     {
       //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
-      el += WeightedEvent( tof, rand()%1000, 2.0, sqrt(2.5));
+      el += WeightedEvent( tof, rand()%1000, 2.0, 2.5);
     }
   }
 

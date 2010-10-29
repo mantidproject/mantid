@@ -111,9 +111,9 @@ private:
 public:
 
   /// Constructor, full
-  WeightedEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float error);
+  WeightedEvent(double time_of_flight, const Mantid::Kernel::PulseTimeType pulsetime, float weight, float errorSquared);
 
-  WeightedEvent(const TofEvent&, float weight, float error);
+  WeightedEvent(const TofEvent&, float weight, float errorSquared);
 
   WeightedEvent(const WeightedEvent&);
 
@@ -210,6 +210,8 @@ public:
   EventList& operator+=(const std::vector<WeightedEvent>& more_events);
 
   EventList& operator+=(const EventList& more_events);
+
+  EventList& operator-=(const EventList& more_events);
 
   void addEventQuickly(const TofEvent &event);
 
