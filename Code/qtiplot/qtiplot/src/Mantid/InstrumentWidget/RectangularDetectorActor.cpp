@@ -41,6 +41,7 @@ RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geo
 }
 
 
+
 //-------------------------------------------------------------------------------------------------
 /**
  * Destructor which removes the actors created by this object
