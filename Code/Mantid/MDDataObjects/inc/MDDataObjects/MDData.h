@@ -3,11 +3,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/SlicingProperty.h"
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/IMD_FileFormat.h"
 #include "MDDataObjects/MDGeometry.h"
 #include "MDDataObjects/point3D.h"
-#include "MantidAPI/IMDWorkspace.h"
+
 //#include "c:/Mantid/Code/Mantid/API/inc/MantidAPI/IMDWorkspace.h"
 
 
@@ -36,7 +38,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
-	Code Documentation is available at: <http://doxygen.mantidproject.org>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace Mantid{
     namespace MDDataObjects{
@@ -66,6 +68,8 @@ public:
     virtual const std::string id() const { return "MD-Workspace"; }
     /// overload to return the memory size of main visualisation datata ;  may need further clarification
     virtual long int getMemorySize()const{return this->data_size*sizeof(data_point);}
+    /// builds empty workspace from the slicing data;
+    virtual boost::shared_ptr<IMDWorkspace> build_from_IMD(const SlicingProperty &newGeomerty);
  //****************************************************************************************************** 
     /// 
    bool read_mdd(void){if(this->theFile){
@@ -133,8 +137,7 @@ protected:
      data_point thePoint(int i,int j,int k)       const{   return data[nCell(i,j,k)];}
      data_point thePoint(int i,int j,int k, int n)const{   return data[nCell(i,j,k,n)];}
 
-  /// logger -> to provide logging, mainly for file operations
-  static Logger& g_log;
+  
 private:
     /** function reshapes the geomerty of the array according to the pAxis array request; returns the total array size */
     size_t reshape_geometry(const SlicingProperty &transf);

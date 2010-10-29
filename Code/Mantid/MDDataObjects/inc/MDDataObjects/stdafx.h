@@ -14,7 +14,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <hdf5.h>
 #include <cfloat>
 #include <algorithm>
 #include <limits>

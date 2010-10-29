@@ -8,8 +8,8 @@ namespace Mantid{
 //
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
-//
- Logger& MDData::g_log=Logger::get("FrameworkManager");
+    
+
 void
 MDData::getPointData(std::vector<point3D> &image_points)const{
     std::vector<unsigned int> selection;
@@ -20,6 +20,13 @@ MDData::getPointData(std::vector<point3D> &image_points)const{
     }
     this->getPointData(selection,image_points);
      
+}
+boost::shared_ptr<IMDWorkspace> 
+MDData::build_from_IMD(const SlicingProperty &newGeomerty)
+{
+    boost::shared_ptr<IMDWorkspace> ws;
+
+    return ws;
 }
 //
 void
