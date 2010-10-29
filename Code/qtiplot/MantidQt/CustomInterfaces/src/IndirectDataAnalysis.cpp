@@ -1130,6 +1130,9 @@ void IndirectDataAnalysis::furyfitRun()
     // First create the function
     Mantid::API::CompositeFunction* function = createFunction(m_ffTree);
 
+    // uncheck "plot guess"
+    m_uiForm.furyfit_ckPlotGuess->setChecked(false);
+
     // Background level
     m_furyfitTies = "f0.A1 = 0";
     
