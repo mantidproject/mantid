@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>511</width>
-    <height>436</height>
+    <width>514</width>
+    <height>388</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -327,6 +327,13 @@
         <layout class="QHBoxLayout" name="elwin_plot" />
        </item>
        <item>
+        <widget class="QCheckBox" name="elwin_ckConcat" >
+         <property name="text" >
+          <string>Concatanate Multiple Results</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5" >
          <item>
           <widget class="QCheckBox" name="elwin_ckVerbose" >
@@ -351,43 +358,6 @@
             <string>Save Result</string>
            </property>
           </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" >
-         <item>
-          <spacer name="horizontalSpacer_4" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="elwin_pbRun" >
-           <property name="text" >
-            <string>Run Elwin</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_3" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>
@@ -419,7 +389,8 @@
            </property>
            <property name="fileExtensions" >
             <stringlist>
-             <string>_elw.nxs</string>
+             <string>_eq1.nxs</string>
+             <string>_eq2.nxs</string>
             </stringlist>
            </property>
           </widget>
@@ -518,43 +489,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7" >
-         <item>
-          <spacer name="horizontalSpacer_6" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="msd_pbRun" >
-           <property name="text" >
-            <string>Run MSD Fit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_7" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabFury" >
@@ -564,31 +498,7 @@
       <layout class="QVBoxLayout" name="verticalLayout_2" >
        <item>
         <layout class="QGridLayout" name="fury_layoutFiles" >
-         <item row="0" column="0" >
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-             <horstretch>0</horstretch>
-             <verstretch>41</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="findRunFiles" stdset="0" >
-            <bool>false</bool>
-           </property>
-           <property name="label" stdset="0" >
-            <string>Sample:     </string>
-           </property>
-           <property name="multipleFiles" stdset="0" >
-            <bool>true</bool>
-           </property>
-           <property name="fileExtensions" >
-            <stringlist>
-             <string>_red.nxs</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0" >
+         <item row="2" column="1" >
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
@@ -612,14 +522,14 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1" >
+         <item row="0" column="2" >
           <widget class="QPushButton" name="fury_pbPlotInput" >
            <property name="text" >
             <string>Plot Input</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" >
+         <item row="1" column="1" >
           <layout class="QHBoxLayout" name="horizontalLayout_17" >
            <item>
             <widget class="QLabel" name="fury_lbResType" >
@@ -640,6 +550,79 @@
                <string>Data File</string>
               </property>
              </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="1" >
+          <layout class="QHBoxLayout" name="horizontalLayout_24" >
+           <item>
+            <widget class="QComboBox" name="fury_cbInputType" >
+             <item>
+              <property name="text" >
+               <string>File</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>Workspace</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QStackedWidget" name="fury_swInput" >
+             <property name="currentIndex" >
+              <number>0</number>
+             </property>
+             <widget class="QWidget" name="page_3" >
+              <layout class="QVBoxLayout" name="verticalLayout_9" >
+               <item>
+                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" >
+                 <property name="sizePolicy" >
+                  <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="findRunFiles" stdset="0" >
+                  <bool>false</bool>
+                 </property>
+                 <property name="label" stdset="0" >
+                  <string>Sample:     </string>
+                 </property>
+                 <property name="multipleFiles" stdset="0" >
+                  <bool>true</bool>
+                 </property>
+                 <property name="fileExtensions" >
+                  <stringlist>
+                   <string>_red.nxs</string>
+                  </stringlist>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="page_4" >
+              <layout class="QHBoxLayout" name="horizontalLayout_28" >
+               <item>
+                <widget class="QComboBox" name="fury_cbWorkspace" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="fury_pbRefresh" >
+                 <property name="sizePolicy" >
+                  <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text" >
+                  <string>Refresh</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
             </widget>
            </item>
           </layout>
@@ -748,43 +731,6 @@
             <string>Save Result</string>
            </property>
           </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="fury_layoutSpacer" >
-         <item>
-          <spacer name="horizontalSpacer" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="fury_pbRun" >
-           <property name="text" >
-            <string>Run Fury</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>
@@ -1005,13 +951,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="furyfit_pbRun" >
-           <property name="text" >
-            <string>Run Fury Fit</string>
-           </property>
-          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="furyfit_pbPlotOutput" >
@@ -1379,43 +1318,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_14" >
-         <item>
-          <spacer name="horizontalSpacer_5" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="abs_pbRun" >
-           <property name="text" >
-            <string>Run Absorption</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_12" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabDemon" >
@@ -1480,43 +1382,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_20" >
-         <item>
-          <spacer name="horizontalSpacer_15" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="dem_pbRun" >
-           <property name="text" >
-            <string>Run DEMON</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_16" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -1542,6 +1407,26 @@
        </property>
        <property name="text" >
         <string>?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_14" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbRun" >
+       <property name="text" >
+        <string>Run</string>
        </property>
       </widget>
      </item>

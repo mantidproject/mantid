@@ -33,6 +33,17 @@ def absorption(input, mode, sample, can, efixed, Save=False, Verbose=False,
     if Plot:
         graph = plotSpectrum(outWS_n,0)
 
+def concatWSs(workspaces, unit, name):
+    dataX = []
+    dataY = []
+    dataE = []
+    for ws in workspaces:
+        dataX += mtd[ws].readX(0)
+        dataY += mtd[ws].readY(0)
+        dataE += mtd[ws].readE(0)
+    CreateWorkspace(name, dataX, dataY, dataE, NSpec = len(workspaces),
+        UnitX=unit)
+
 def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
         Verbose=False, Plot=False, Save=True):
     ws_list, ws_names = loadData(rawFiles, Sum=SumFiles)
@@ -73,8 +84,9 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
             plotSpectrum(demon, range(0, nspec))
     return workspaces, runNos
 
-def elwin(inputFiles, eRange, efixed, Save=False, Verbose=False, Plot=False):
-    outWS_list = []
+def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
+    eq1 = [] # output workspaces with units in Q
+    eq2 = [] # output workspaces with units in Q^2
     for file in inputFiles:
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
@@ -82,20 +94,20 @@ def elwin(inputFiles, eRange, efixed, Save=False, Verbose=False, Plot=False):
         run = mtd[root].getRun().getLogData("run_number").value()
         savefile = root[:3] + run + root[8:-3]
         if ( len(eRange) == 4 ):
-            ElasticWindow(root, eRange[0], eRange[1], eRange[2], eRange[3],
-                savefile + 'elw', savefile + 'eqs')
+            ElasticWindow(root, savefile+'eq1', savefile+'eq2',eRange[0],
+                eRange[1], eRange[2], eRange[3])
         elif ( len(eRange) == 2 ):
-            ElasticWindow(root, eRange[0], eRange[1],
-                OutputInQ=savefile+'elw', OutputInQSquared=savefile+'eqs')
+            ElasticWindow(root, savefile+'eq1', savefile+'eq2', 
+            eRange[0], eRange[1])
         if Save:
-            SaveNexusProcessed(savefile+'elw', savefile+'elw.nxs')
-            SaveNexusProcessed(savefile+'eqs', savefile+'eqs.nxs')
-        outWS_list.append(savefile+'elw')
-        outWS_list.append(savefile+'eqs')
+            SaveNexusProcessed(savefile+'eq1', savefile+'eq1.nxs')
+            SaveNexusProcessed(savefile+'eq2', savefile+'eq2.nxs')
+        eq1.append(savefile+'eq1')
+        eq2.append(savefile+'eq2')
         mantid.deleteWorkspace(root)
     if Plot:
-        graph = plotSpectrum(outWS_list, 0)
-    return outWS_list
+        graph = plotSpectrum(eq1+eq2, 0)
+    return eq1, eq2
 
 def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Plot=False):
@@ -109,14 +121,17 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
     for sam_file in sam_files:
         (direct, filename) = os.path.split(sam_file)
         (root, ext) = os.path.splitext(filename)
-        LoadNexus(sam_file, 'sam_data') # SAMPLE
-        Rebin('sam_data', 'sam_data', rebinParam)
+        if (ext == '.nxs'):
+            LoadNexus(sam_file, 'sam_data') # SAMPLE
+            Rebin('sam_data', 'sam_data', rebinParam)
+        else: #input is workspace
+            Rebin(sam_file, 'sam_data', rebinParam)
         ExtractFFTSpectrum('sam_data', 'sam_fft', 2)
         Integration('sam_data', 'sam_int')
         Divide('sam_fft', 'sam_int', 'sam')
         # Create save file name.
         runNo = mtd['sam_data'].getRun().getLogData("run_number").value()
-        savefile = root[:3] + runNo + '_iqt'
+        savefile = root[:3] + runNo + root[8:-3] + 'iqt'
         outWSlist.append(savefile)
         Divide('sam', 'res', savefile)
         #Cleanup Sample Files
@@ -169,6 +184,7 @@ def procSeqParToWS(inputWS):
     CreateWorkspace(inputWS+'_matrix', dataX, dataY, dataE, nSpec)
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
+    output = []
     for file in inputs:
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
@@ -176,6 +192,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
         outWS_n = root[:-3] + 'msd'
         fit_alg = Linear(root, outWS_n, WorkspaceIndex=0, StartX=startX, 
             EndX=endX)
+        output.append(outWS_n)
         A0 = fit_alg.getPropertyValue("FitIntercept")
         A1 = fit_alg.getPropertyValue("FitSlope")
         title = 'Intercept: '+A0+' ; Slope: '+A1
@@ -184,6 +201,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
             graph.activeLayer().setTitle(title)
         if Save:
             SaveNexusProcessed(outWS_n, outWS_n+'.nxs', Title=title)
+    return output
 
 def mut(inWS_n, deltaW, filename, efixed):
     file_handle = open(filename, 'w') # Open File
@@ -222,38 +240,6 @@ def plotFury(inWS_n, spec):
     layer = graph.activeLayer()
     layer.setScale(0, 0, 1.0)
     layer.setScale(2, 0, xBoundary)
-
-def slice(inputfiles, calib, xrange, spec, Save=False, Verbose=False,
-        Plot=False):
-    outWSlist = []
-    if  not ( ( len(xrange) == 2 ) or ( len(xrange) == 4 ) ):
-        mantid.sendLogMessage('>> TOF Range must contain either 2 or 4 \
-                numbers.')
-        sys.exit(1)
-    for file in inputfiles:
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        if spec == [0, 0]:
-            LoadRaw(file, root)
-        else:
-            LoadRaw(file, root, SpectrumMin=spec[0], SpectrumMax=spec[1])
-        nhist = mtd[root].getNumberHistograms()
-        if calib != '':
-            useCalib(calib, inWS_n=root, outWS_n=root)
-        run = mtd[root].getRun().getLogData("run_number").value()
-        sfile = root[:3] + run + '_slt'
-        if (len(xrange) == 2):
-            Integration(root, sfile, xrange[0], xrange[1], 0, nhist-1)
-        else:
-            FlatBackground(root, sfile, StartX=xrange[2], EndX=xrange[3], 
-                    Mode='Mean')
-            Integration(sfile, sfile, xrange[0], xrange[1], 0, nhist-1)
-        if Save:
-            SaveNexusProcessed(sfile, sfile+'.nxs')
-        outWSlist.append(sfile)
-        mantid.deleteWorkspace(root)
-    if Plot:
-        graph = plotBin(outWSlist, 0)
 
 def plotRaw(inputfiles,spectra=[]):
     if len(spectra) != 2:

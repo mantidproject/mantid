@@ -33,8 +33,6 @@ namespace MantidQt
     public:
       /// The name of the interface as registered into the factory
       static std::string name() { return "Indirect Data Analysis"; }
-
-    public:
       /// Default Constructor
       IndirectDataAnalysis(QWidget *parent = 0);
 
@@ -47,16 +45,25 @@ namespace MantidQt
       void loadSettings();
       void saveSettings();
 
-      void setupTreePropertyBrowser();
-
+      // Tab-specific setup stages (mainly miniplots)
       void setupFuryFit();
       void setupElwin();
 
-      bool validateFury();
+      // Validation of user inputs
       bool validateElwin();
       bool validateMsd();
+      bool validateFury();
       bool validateAbsorption();
       bool validateDemon();
+
+      // Run processes
+      void elwinRun();
+      void msdRun();
+      void furyRun();
+      void furyfitRun();
+      void confitRun();
+      void absorptionRun();
+      void demonRun();
 
       Mantid::API::CompositeFunction* createFunction(QtTreePropertyBrowser* propertyBrowser);
       QtProperty* createLorentzian();
@@ -74,8 +81,9 @@ namespace MantidQt
       void reflectionSelected(int index);
       void refreshWSlist();
 
+      void run();
+
       // ElasticWindow
-      void elwinRun();
       void elwinPlotInput();
       void elwinTwoRanges(bool state);
       void elwinMinChanged(double val);
@@ -83,16 +91,14 @@ namespace MantidQt
       void elwinUpdateRS();
 
       // MSD Fit
-      void msdRun();
       void msdPlotInput();
 
       // Fourier Transform
-      void furyRun();
+      void furyInputType(int index);
       void furyResType(const QString& type);
       void furyPlotInput();
 
       // Fourier Transform Fit
-      void furyfitRun();
       void furyfitTypeSelection(int index);
       void furyfitPlotInput();
       void furyfitXMinSelected(double val);
@@ -103,16 +109,16 @@ namespace MantidQt
       void furyfitPlotOutput();
       void furyfitSequential();
 
+      // Convolution Fit
+
       // Absorption (Basic)
-      void absorptionRun();
       void absorptionShape(int index);
 
       // Diffraction Reduction
-      void demonRun();
 
       // Common Elements
-      void openDirectoryDialog();
       void help();
+      void openDirectoryDialog();
       
     private:
       Ui::IndirectDataAnalysis m_uiForm;

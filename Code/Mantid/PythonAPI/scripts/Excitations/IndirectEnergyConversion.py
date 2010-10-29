@@ -189,6 +189,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
             mtd.sendLogMessage('>> Converting workspace '+normalised+' to \
                     units of deltaE.')
         cte = conToEnergy(efixed, outWS_n=name+'_intermediate')
+        CorrectKiKf(cte, cte, 'Indirect', efixed)
         if ( rebinParam != ''):
             if Verbose:
                 mtd.sendLogMessage('>> Rebinning workspace ' + cte + ' with \
@@ -313,7 +314,7 @@ def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax,
         mantid.deleteWorkspace(outWS_n)
     return savefile
 
-def res(file, iconOpt, rebinParam, bground, plotOpt = False, Res = True):
+def res(file, iconOpt, rebinParam, bground, suffix, plotOpt=False, Res=True):
     (direct, filename) = os.path.split(file)
     (root, ext) = os.path.splitext(filename)
     nspec = iconOpt['last'] - iconOpt['first'] + 1
@@ -324,7 +325,7 @@ def res(file, iconOpt, rebinParam, bground, plotOpt = False, Res = True):
     iconWS = workspace_list[0]
     if Res:
         run = mtd[workspace_list[0]].getRun().getLogData("run_number").value()
-        name = root[:3].lower() + run + '_res'
+        name = root[:3].lower() + run + '_' + suffix + '_res'
         Rebin(iconWS, iconWS, rebinParam)
         FFTSmooth(iconWS,iconWS,0)
         FlatBackground(iconWS, name, bground[0], bground[1], Mode='Mean')
@@ -351,6 +352,38 @@ def saveItems(workspaces, runNos, fileFormats, ins, suffix):
             else:
                 print 'Save: unknown file type.'
                 system.exit('Save: unknown file type.')
+
+def slice(inputfiles, calib, xrange, spec,  suffix, Save=False, Verbose=False,
+        Plot=False):
+    outWSlist = []
+    if  not ( ( len(xrange) == 2 ) or ( len(xrange) == 4 ) ):
+        mantid.sendLogMessage('>> TOF Range must contain either 2 or 4 \
+                numbers.')
+        sys.exit(1)
+    for file in inputfiles:
+        (direct, filename) = os.path.split(file)
+        (root, ext) = os.path.splitext(filename)
+        if spec == [0, 0]:
+            LoadRaw(file, root)
+        else:
+            LoadRaw(file, root, SpectrumMin=spec[0], SpectrumMax=spec[1])
+        nhist = mtd[root].getNumberHistograms()
+        if calib != '':
+            useCalib(calib, inWS_n=root, outWS_n=root)
+        run = mtd[root].getRun().getLogData("run_number").value()
+        sfile = root[:3].lower() + run + '_' + suffix + '_slt'
+        if (len(xrange) == 2):
+            Integration(root, sfile, xrange[0], xrange[1], 0, nhist-1)
+        else:
+            FlatBackground(root, sfile, StartX=xrange[2], EndX=xrange[3], 
+                    Mode='Mean')
+            Integration(sfile, sfile, xrange[0], xrange[1], 0, nhist-1)
+        if Save:
+            SaveNexusProcessed(sfile, sfile+'.nxs')
+        outWSlist.append(sfile)
+        mantid.deleteWorkspace(root)
+    if Plot:
+        graph = plotBin(outWSlist, 0)
 
 def getInstrumentDetails(instrument):
     idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
@@ -404,35 +437,6 @@ def getReflectionDetails(inst, analyser, refl):
     except IndexError:
         pass
     mantid.deleteWorkspace('ins')
-    return result
-
-def getSpectraRanges(instrument):
-    idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
-    idf = idf_dir + instrument + '_Definition.xml'
-    LoadEmptyInstrument(idf, 'ins')
-    workspace = mtd['ins']
-    instrument = workspace.getInstrument()
-    analyser = []
-    analyser_f = []
-    result = ''
-    for i in range(0, instrument.nElements() ):
-        if instrument[i].type() == 'ParCompAssembly':
-            analyser.append(instrument[i])
-    for i in range(0, len(analyser) ):
-        analyser_f.append(analyser[i])
-        for j in range(0, analyser[i].nElements() ):
-            if analyser[i][j].type() == 'ParCompAssembly':
-                try:
-                    analyser_f.remove(analyser[i])
-                except ValueError:
-                    pass
-                analyser_f.append(analyser[i][j])
-    for i in range(0, len(analyser_f)):
-        message = analyser_f[i].getName() + '-'
-        message += str(analyser_f[i][0].getID()) + ','
-        message += str(analyser_f[i][analyser_f[i].nElements()-1].getID())
-        result += message + '\n'
-    mtd.deleteWorkspace('ins')
     return result
 
 def adjustTOF(ws='', inst=''):

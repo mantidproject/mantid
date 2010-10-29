@@ -545,6 +545,7 @@ void Indirect::createRESfile(const QString& file)
     "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
     ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
     ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
+    "suffix = '" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "'\n"
     "plot = ";
 
   if ( m_uiForm.cal_ckPlotResult->isChecked() )
@@ -564,7 +565,7 @@ void Indirect::createRESfile(const QString& file)
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = r'" + file + "'\n"
-    "outWS = ind.res(file, iconOpt, rebinParam, background, plotOpt = plot)\n";
+    "outWS = ind.res(file, iconOpt, rebinParam, background, suffix, plotOpt = plot)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1638,8 +1639,9 @@ void Indirect::calPlotEnergy()
     "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
     ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
     ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
+    "suffix = '" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "'\n"
     "file = r'" + file + "'\n"
-    "outWS = res(file, iconOpt, '', '', Res=False)\n"
+    "outWS = res(file, iconOpt, '', '', suffix, Res=False)\n"
     "print outWS\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
   
@@ -1850,7 +1852,7 @@ void Indirect::sliceRun()
   }
 
   QString pyInput =
-    "from IndirectDataAnalysis import slice\n"
+    "from IndirectEnergyConversion import slice\n"
     "tofRange = [" + m_uiForm.slice_leRange0->text() + ","
     + m_uiForm.slice_leRange1->text();
   if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
@@ -1874,9 +1876,11 @@ void Indirect::sliceRun()
       "calib = ''\n";
   }
   QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
+  QString suffix = m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText();
   pyInput +=
     "rawfile = [r'" + filenames + "']\n"
-    "spectra = ["+m_uiForm.slice_leSpecMin->text() + "," + m_uiForm.slice_leSpecMax->text() +"]\n";
+    "spectra = ["+m_uiForm.slice_leSpecMin->text() + "," + m_uiForm.slice_leSpecMax->text() +"]\n"
+    "suffix = '" + suffix + "'\n";
 
   if ( m_uiForm.slice_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
   else pyInput += "verbose = False\n";
@@ -1888,7 +1892,7 @@ void Indirect::sliceRun()
   else pyInput += "save = False\n";
 
   pyInput +=
-    "slice(rawfile, calib, tofRange, spectra, Save=save, Verbose=verbose, Plot=plot)";
+    "slice(rawfile, calib, tofRange, spectra, suffix, Save=save, Verbose=verbose, Plot=plot)";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
