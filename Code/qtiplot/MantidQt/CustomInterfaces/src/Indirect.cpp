@@ -298,17 +298,17 @@ void Indirect::runConvertToEnergy(bool tryToSave)
 
   if ( isDirty() )
   {
-    pyInput += "ind.convert_to_energy(rawfiles, mapfile, "
+    pyInput += "ws_list, rns = ind.convert_to_energy(rawfiles, mapfile, "
       "first, last, efixed, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, "
       "rebinParam = rebinParam, instrument = ins, savesuffix = suffix, saveFormats = fileFormats,"
       "analyser = ana, reflection = ref, CleanUp=clean)\n";
   }
   else if ( isDirtyRebin() )
   {
-    pyInput += "ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
+    pyInput += "ws_list, rns = ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
       "fileFormats, directory, CleanUp = clean)\n";
   }
-  else if ( tryToSave )
+  else if ( tryToSave ) // where all we want to do is save and/or plot output
   {
     pyInput +=
       "import re\n"
@@ -321,6 +321,33 @@ void Indirect::runConvertToEnergy(bool tryToSave)
       "      ws_list.append(workspace)\n"
       "      runNos.append(mantid.getMatrixWorkspace(workspace).getRun().getLogData('run_number').value())\n"
       "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix)\n";
+  }
+
+  // Plot Output Handling
+  switch ( m_uiForm.ind_cbPlotOutput->currentIndex() )
+  {
+  case 0: // "None"
+    break;
+  case 1: // "Spectra"
+    {
+      // Plot a spectra of the first result workspace
+      pyInput += 
+        "if ( len(ws_list) > 0 ):\n"
+        "  nSpec = mtd[ws_list[0]].getNumberHistograms()\n"
+        "  plotSpectrum(ws_list[0], range(0, nSpec))\n";
+    }
+    break;
+  case 2: // "Contour"
+    {
+      // Plot a 2D Contour Lines of the first result workspace
+      pyInput += 
+        "if ( len(ws_list) > 0 ):\n"
+        "  ws = importMatrixWorkspace(ws_list[0])\n"
+        "  ws.plotGraph2D()\n";
+    }
+    break;
+  default: // Do nothing
+    break;
   }
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -1745,13 +1772,15 @@ void Indirect::sOfQwClicked()
 
     if ( m_uiForm.sqw_cbInput->currentText() == "File" )
     {
-      pyInput += "cleanup = True\n"
-        "sqwInput = 'sqwInput'\n"
-        "LoadNexusProcessed(r'"+m_uiForm.sqw_inputFile->getFirstFilename()+ "','sqwInput')\n";
+      pyInput +=
+        "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
+        "(dir, file) = os.path.split(filename)\n"
+        "(sqwInput, ext) = os.path.splitext(file)\n"
+        "LoadNexus(filename, sqwInput)\n";
     }
     else
     {
-      pyInput += "cleanup = False\n"
+      pyInput +=
         "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
     }
 
@@ -1764,11 +1793,11 @@ void Indirect::sOfQwClicked()
         "sqwInput = 'sqwInput_r'\n";
     }
     pyInput +=
-      "efixed = " +m_uiForm.leEfixed->text()+"\n"
+      "efixed = " + m_uiForm.leEfixed->text() + "\n"
       "rebin = '" + rebinString + "'\n"
-      "SofQW(sqwInput,'sqwOutput',rebin,'Indirect',EFixed=efixed)\n"
-      "if cleanup:\n"
-      "    mantid.deleteWorkspace(sqwInput)\n";
+      "sqwOutput = sqwInput[:-3] + 'sqw'\n"
+      "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n"
+      "SaveNexus(sqwOutput, sqwOutput+'.nxs')\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
@@ -1820,8 +1849,10 @@ void Indirect::sOfQwPlotInput()
     // get filename
     if ( m_uiForm.sqw_inputFile->isValid() )
     {
-      pyInput += "input = 'SofQWInput'\n"
+      pyInput +=
         "filename = r'" + m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
+        "(dir, file) = os.path.split(filename)\n"
+        "(input, ext) = os.path.splitext(file)\n"
         "LoadNexus(filename, input)\n";
     }
     else
@@ -1835,8 +1866,8 @@ void Indirect::sOfQwPlotInput()
     pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
   }
 
-  pyInput += "nHist = mtd[input].getNumberHistograms()\n"
-    "plotSpectrum(input, range(0,nHist))\n";
+  pyInput += "ws = importMatrixWorkspace(input)\n"
+    "ws.plotGraph2D()\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 

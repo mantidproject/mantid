@@ -1339,7 +1339,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <widget class="QGroupBox" name="gbSave" >
          <property name="title" >
-          <string>Save</string>
+          <string>Output Options</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8" >
           <property name="topMargin" >
@@ -1353,7 +1353,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <widget class="QLabel" name="save_lbFormats" >
               <property name="text" >
-               <string>Select Desired Formats:</string>
+               <string>Select Save Formats:</string>
               </property>
              </widget>
             </item>
@@ -1448,7 +1448,36 @@ p, li { white-space: pre-wrap; }
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="page_16" />
+            <widget class="QWidget" name="page_16" >
+             <layout class="QHBoxLayout" name="horizontalLayout_9" >
+              <item>
+               <widget class="QLabel" name="ind_lbPlotOutput" >
+                <property name="text" >
+                 <string>Plot Output:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="ind_cbPlotOutput" >
+                <item>
+                 <property name="text" >
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text" >
+                  <string>Spectra</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text" >
+                  <string>Contour</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
          </layout>
