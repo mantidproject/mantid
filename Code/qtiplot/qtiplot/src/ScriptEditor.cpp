@@ -169,7 +169,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
     remapWindowEditingKeys();
     QShortcut *shortcut = new QShortcut(m_paste->shortcut(), this);
     connect(shortcut, SIGNAL(activated()), this, SLOT(paste()));
-
+   
     // Use a fixed width font
     QFont f("Courier");
     f.setFixedPitch(true);
@@ -194,6 +194,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
     //Update the editor
     update();
   }
+  
 }
 
 /**
@@ -291,14 +292,15 @@ bool ScriptEditor::saveScript(const QString & filename)
  * that like QScintilla line numbers start from 0
  * @param lineno A zero-based index representing the linenumber, 
  * @param text The text to insert at the given line
+ * @param index The position of text in a line number,default value is zero
  */
-void ScriptEditor::setText(int lineno, const QString& txt)
+void ScriptEditor::setText(int lineno, const QString& txt,int index)
 {
   int line_length = txt.length();
   // Index is max of the length of current/new text
-  setSelection(lineno, 0, lineno, qMax(line_length, this->text(lineno).length()));
+  setSelection(lineno, index, lineno, qMax(line_length, this->text(lineno).length()));
   removeSelectedText();
-  insertAt(txt, lineno, 0);
+  insertAt(txt, lineno, index);
   setCursorPosition(lineno, line_length);
 }
 
@@ -314,8 +316,23 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
     forwardKeyPressToBase(event);
     return;
   }
+    
    // Check if we have flagged to mark the line as read only
-  if( m_read_only ) return;
+  if( m_read_only ) 
+  {
+    if(m_interpreter_mode)
+    {
+     ///set the cursor at the current input line
+      setCursorPosition(lines() - 1, length()-1);
+      /// now set the editing state of the current line 
+      setEditingState(lines() - 1);
+    }
+    else
+    {
+      return;
+    }
+  }
+  
   int key = event->key();
 
   bool handled(false);
@@ -379,6 +396,7 @@ void ScriptEditor::mousePressEvent(QMouseEvent *event)
     int line(-1), dummy(-1);
     getCursorPosition(&line, &dummy);
     setEditingState(line);
+    
   }
 }
 
@@ -519,6 +537,14 @@ void ScriptEditor::paste()
 {
   if( m_interpreter_mode )
   {
+    // Check if we have flagged to mark the line as read only
+    if( m_read_only ) 
+    {
+      ///set the cursor at the current input line
+      setCursorPosition(lines() - 1,length()-1);
+      /// now set the editing state of the current line 
+      setEditingState(lines() - 1);
+    }
     QString txt = QApplication::clipboard()->text();
     if( txt.isEmpty() )
     {
@@ -531,8 +557,12 @@ void ScriptEditor::paste()
     {
       int line_index = this->lines() - 1;
       QString txt = itr.next();
-      this->setText(line_index, txt.remove('\r').remove('\n'));
-      executeCodeAtLine(line_index);
+      this->setText(line_index, txt.remove('\r').remove('\n'),length()-1);
+      //if there are lines ahead of this line ( multilines) then execute the line
+      if(itr.hasNext())
+      {
+        executeCodeAtLine(line_index);
+      }
     }
   }
   else

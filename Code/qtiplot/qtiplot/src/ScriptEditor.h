@@ -86,7 +86,7 @@ public:
   // Size hint
   QSize sizeHint() const;
   /// Set the text on a given line number
-  void setText(int lineno, const QString& text);
+  void setText(int lineno, const QString& text,int index=0);
   /// Save a the text to the given filename
   bool saveScript(const QString & filename);
   ///Capture key presses
