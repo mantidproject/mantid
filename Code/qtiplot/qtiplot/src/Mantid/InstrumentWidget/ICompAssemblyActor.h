@@ -83,7 +83,7 @@ public:
   virtual void redraw() = 0;
   virtual void appendObjCompID(std::vector<int>&) = 0;
   virtual MantidObject*	getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object>,bool withDisplayList) = 0;
-  virtual int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator list){return 0;}// = 0;
+  virtual int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list) = 0;
   virtual int findDetectorIDUsingColor(int rgb) = 0;
 
 };

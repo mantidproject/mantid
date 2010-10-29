@@ -68,6 +68,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mSaveImage = new QPushButton(tr("Save image"));
 	m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
+        QPushButton* setLight = new QPushButton(tr("Set lighting"));
+        setLight->setCheckable(true);
+
 	mMinValueBox = new QLineEdit();
 	mMaxValueBox = new QLineEdit();
 	mMinValueBox->setMinimumWidth(40);
@@ -122,8 +125,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	renderControlsLayout->addWidget(mSelectButton);
 	renderControlsLayout->addWidget(mSelectBin);
 	renderControlsLayout->addWidget(mSelectColormap);
-	renderControlsLayout->addWidget(mSaveImage);
-	renderControlsLayout->addWidget(axisViewFrame);
+        renderControlsLayout->addWidget(mSaveImage);
+        renderControlsLayout->addWidget(setLight);
+        renderControlsLayout->addWidget(axisViewFrame);
 	renderControlsLayout->addWidget(btnBackgroundColor);
 	renderControlsLayout->addWidget(lColormapFrame);
   renderControlsLayout->addWidget(m3DAxesToggle);
@@ -139,6 +143,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
 	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
 	connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
+        connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
 	connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
 	connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 

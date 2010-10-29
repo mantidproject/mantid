@@ -44,28 +44,27 @@ class ObjCompAssemblyActor : public ICompAssemblyActor
 {
   std::vector<Mantid::Geometry::ComponentID> mObjCompIDs;     ///< List of Component IDs
   boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> m_ObjAss;    ///< Pointer to the ObjCompAssembly
-  boost::shared_ptr<TexObject> m_tex;
+  boost::shared_ptr<TexObject> m_tex;                        ///< MantidObject with a texture
   void initChilds(bool);
   void init();
   void redraw();
   void appendObjCompID(std::vector<int>&);
   MantidObject*	getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object>,bool withDisplayList);
-  int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator list);
   int findDetectorIDUsingColor(int rgb);
 public:
   ///< Constructor
   ObjCompAssemblyActor(bool withDisplayList):ICompAssemblyActor(withDisplayList){};
   /// Constructor
   ObjCompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> >& objs,
-    Mantid::Geometry::ComponentID id, 
-    boost::shared_ptr<Mantid::Geometry::IInstrument> ins,
-    bool withDisplayList);
+                       Mantid::Geometry::ComponentID id,
+                       boost::shared_ptr<Mantid::Geometry::IInstrument> ins,
+                       bool withDisplayList);
   virtual ~ObjCompAssemblyActor();								   ///< Destructor
   int  setStartingReferenceColor(int rgb);
   virtual std::string type()const {return "ObjCompAssemblyActor";} ///< Type of the GL object
   void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  //const int  getNumberOfDetectors() const{return mNumberOfDetectors;}
   void drawUsingColorID();
+  int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list);
 };
 
 #endif /*OBJCOMPASSEMBLY_ACTOR__H_*/

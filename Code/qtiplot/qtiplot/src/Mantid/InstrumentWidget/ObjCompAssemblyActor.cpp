@@ -21,7 +21,6 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(boost::shared_ptr<std::map<const boos
     bool withDisplayList):
   ICompAssemblyActor(objs,id,ins,withDisplayList)
 {
-  setName("ObjCompAssemblyActor");
   boost::shared_ptr<IComponent> ic = ins->getComponentByID(id);
   boost::shared_ptr<ObjCompAssembly> oca = boost::dynamic_pointer_cast<ObjCompAssembly>(ic);
   if (oca)
@@ -41,6 +40,7 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(boost::shared_ptr<std::map<const boos
   {
     throw Mantid::Kernel::Exception::InstrumentDefinitionError("Expected ObjCompAssembly, found "+ic->type());
   }
+  setName(m_ObjAss->getName());
   m_tex.reset(new TexObject(m_ObjAss,withDisplayList));
   initChilds(withDisplayList);
 }
@@ -61,8 +61,6 @@ void ObjCompAssemblyActor::define()
   if(mVisible)
   {
     glPushMatrix();
-    mColor->paint(GLColor::MATERIAL);
-    mColor->paint(GLColor::PLAIN);
     // Translation first
     V3D pos = m_ObjAss->getPos();
     if (!(pos.nullVector()))
@@ -100,23 +98,23 @@ void ObjCompAssemblyActor::drawUsingColorID()
   //Check whether this assembly and its child components can be drawn
   if(mVisible)
   {
-    ////Iterate throught the children with the starting reference color mColorStartID and incrementing
-    //int rgb=mColorStartID;
-    //int r,g,b;
-    //for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
-    //{
-    //  r=(rgb/65536);
-    //  g=((rgb%65536)/256);
-    //  b=((rgb%65536)%256);
-    //  glColor3f(r/255.0,g/255.0,b/255.0);
-    //  if((*itrObjComp)->getVisibility())
-    //    (*itrObjComp)->draw();
-    //  rgb++;
-    //}
-    //for(std::vector<ObjCompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
-    //{
-    //  (*itrObjAssem)->drawUsingColorID();
-    //}
+    m_tex->swap(); // swap to pick texture
+    //Iterate throught the children with the starting reference color mColorStartID and incrementing
+    int rgb=mColorStartID;
+    int r,g,b;
+    for(int i = 0;i < getNumberOfDetectors();++i)
+    {
+      r=(rgb/65536);
+      g=((rgb%65536)/256);
+      b=((rgb%65536)%256);
+      GLColor c(r/255.0,g/255.0,b/255.0);
+      m_tex->setDetectorColor(i,c);
+      rgb++;
+    }
+    m_tex->generateTexture();
+    define();
+    m_tex->swap(); // swap to show the data
+    m_tex->generateTexture();
   }
 }
 
@@ -126,6 +124,7 @@ void ObjCompAssemblyActor::drawUsingColorID()
 */
 void ObjCompAssemblyActor::initChilds(bool withDisplayList)
 {
+  mNumberOfDetectors = m_ObjAss->nelements();
   for(int i=0;i<getNumberOfDetectors();++i)
   {
     mObjCompIDs.push_back(m_ObjAss->getChild(i)->getComponentID());
@@ -171,6 +170,7 @@ MantidObject*	ObjCompAssemblyActor::getMantidObject(const boost::shared_ptr<cons
 int ObjCompAssemblyActor::setStartingReferenceColor(int rgb)
 {
   mColorStartID=rgb;
+  std::cerr<<"mColorStartID "<<mColorStartID<<'\n';
   return getNumberOfDetectors();
 }
 
@@ -199,13 +199,14 @@ void ObjCompAssemblyActor::appendObjCompID(std::vector<int>& idList)
 * @param list :: Color list iterator
 * @return the number of detectors
 */
-int ObjCompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator list)
+int ObjCompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list)
 {
   for(int i=0;i<getNumberOfDetectors();++i)
   {
     m_tex->setDetectorColor(i,**list);
     list++;
   }
+  m_tex->generateTexture();
   return getNumberOfDetectors();
 }
 
@@ -215,38 +216,22 @@ int ObjCompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_pt
 void ObjCompAssemblyActor::redraw()
 {
   mChanged=true;
-  //for(std::vector<ObjCompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
-  //  (*iAssem)->redraw();
   construct();
 }
 
 /**
 * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
 * detector is not found then returns -1.
-* @param  rgb :: input color id
+* @param  rgb :: input color id  ? I am not sure what it is ? It looks like an index of a child component + 1
 * @return the detector id of the input rgb color.if detector id not found then returns -1
 */
 int ObjCompAssemblyActor::findDetectorIDUsingColor(int rgb)
 {
-  //size_t n_comp_actors = mChildObjCompActors.size();
-  //if(rgb > 0 && rgb <= n_comp_actors)
-  //{
-  //  const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
-  //  if(iDec!=boost::shared_ptr<Mantid::Geometry::IDetector>())
-  //  {
-  //    return iDec->getID();
-  //  }
-  //}
-  //rgb -= n_comp_actors;
-
-  //for(std::vector<ObjCompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
-  //{
-  //  if(rgb > 0 && rgb <= (*iAssem)->getNumberOfDetectors() )
-  //  {
-  //    return (*iAssem)->findDetectorIDUsingColor(rgb);
-  //  }
-  //  rgb -= (*iAssem)->getNumberOfDetectors();
-  //}
+  int i = rgb - 1;
+  if (i >= 0 && i < getNumberOfDetectors())
+  {
+    return boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(m_ObjAss->getChild(i))->getID();
+  }
   return -1;
 }
 

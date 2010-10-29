@@ -7,7 +7,7 @@
 #include "boost/shared_ptr.hpp"
 #include "MantidObject.h"
 #include "GLColor.h"
-#include <map>
+#include <vector>
 #include <string>
 
 
@@ -57,11 +57,16 @@ public:
   ~TexObject();								   ///< Destructor
   virtual std::string type()const {return "TexObject";} ///< Type of the GL object
   void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  void setDetectorColor(int id,GLColor c); ///< set colour to a detector
+  void setDetectorColor(int i,GLColor c); ///< set colour to a detector
+  void generateTexture();
+  /// Swap between drawing counts and drawing detector code colours
+  void swap();
 protected:
   unsigned int m_id;     ///< OpenGL texture id
   int m_n;               ///< texture size in one dimension, the other dimension is 1
   unsigned char* m_data; ///< texture colour data
+  unsigned char* m_pick_data; ///< texture with detector code colours
+  //std::vector<int> m_index_to_detID_map;
 };
 
 #endif /*TEXOBJECT_H_*/

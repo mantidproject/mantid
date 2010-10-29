@@ -237,6 +237,7 @@ namespace Mantid
 			GLUquadricObj *qobj=gluNewQuadric();
 			gluQuadricDrawStyle(qobj,GLU_FILL);
 			gluQuadricNormals(qobj,GL_SMOOTH);
+      gluQuadricTexture(qobj,true); 
 			glPushMatrix();
 			glTranslated(center[0],center[1],center[2]);
 			GLdouble mat[16];

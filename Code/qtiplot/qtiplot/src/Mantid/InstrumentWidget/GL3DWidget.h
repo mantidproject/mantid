@@ -42,65 +42,73 @@
 
 class GL3DWidget : public QGLWidget
 {
-	Q_OBJECT
+  Q_OBJECT
 public:
   enum InteractionMode {MoveMode = 0, PickMode = 1};
-	enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
-	GL3DWidget(QWidget* parent=0); ///< Constructor
-	virtual ~GL3DWidget();         ///< Destructor
-	void setActorCollection(boost::shared_ptr<GLActorCollection>);
-	void setInteractionModePick();
-	void setInteractionModeNormal();
-	GLActor* getPickedActor();
-	void setViewDirection(AxisDirection);
-	void setBackgroundColor(QColor);
+  enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
+  enum PolygonMode{ SOLID, WIREFRAME };
+  GL3DWidget(QWidget* parent=0); ///< Constructor
+  virtual ~GL3DWidget();         ///< Destructor
+  void setActorCollection(boost::shared_ptr<GLActorCollection>);
+  void setInteractionModePick();
+  void setInteractionModeNormal();
+  GLActor* getPickedActor();
+  void setViewDirection(AxisDirection);
+  void setBackgroundColor(QColor);
   QColor currentBackgroundColor() const;
   void saveToFile(const QString & filename);
 
 signals:
-	void actorsPicked(const std::set<QRgb>& );
-	void actorHighlighted( QRgb );
+  void actorsPicked(const std::set<QRgb>& );
+  void actorHighlighted( QRgb );
+
+public slots:
+  void enableLighting(bool);
+
 protected:
-	void initializeGL();
-	void resetWidget();
+  void initializeGL();
+  void resetWidget();
   void MakeObject();
-	void paintEvent(QPaintEvent *event);
-	void resizeGL(int,int);
-	void mousePressEvent(QMouseEvent*);
+  void paintEvent(QPaintEvent *event);
+  void resizeGL(int,int);
+  void mousePressEvent(QMouseEvent*);
   void contextMenuEvent(QContextMenuEvent*);
-	void mouseMoveEvent(QMouseEvent*);
+  void mouseMoveEvent(QMouseEvent*);
   void mouseReleaseEvent(QMouseEvent*);
-	void wheelEvent(QWheelEvent *);
-	void keyPressEvent(QKeyEvent *);
-	void keyReleaseEvent(QKeyEvent *);
-	void defaultProjection();
+  void wheelEvent(QWheelEvent *);
+  void keyPressEvent(QKeyEvent *);
+  void keyReleaseEvent(QKeyEvent *);
+  void defaultProjection();
   
   virtual void drawSceneUsingColorID()=0;
-	virtual void setSceneLowResolution()=0;
-	virtual void setSceneHighResolution()=0;
-	virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)=0;
+  virtual void setSceneLowResolution()=0;
+  virtual void setSceneHighResolution()=0;
+  virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)=0;
 
   boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
   GLTrackball* _trackball;       ///< Trackball for user interaction
   GLViewport* _viewport;         ///< Opengl View port [World -> Window]
-	
+
 protected slots:
   void set3DAxesState(int state);
-	
+
 private:
   void setRenderingOptions();
   void setLightingModel(int);
   void drawAxes();
-	void drawDisplayScene();
-	void drawPickingScene();
-	void switchToPickingMode();
-	QColor bgColor; ///< Background color
-	InteractionMode iInteractionMode;
-	bool mPickingDraw;
-	GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
-	GLActor* mPickedActor;
-	bool isKeyPressed;
-  int m3DAxesShown; //true when the 3D axes are to be shown
+  void drawDisplayScene();
+  void drawPickingScene();
+  void switchToPickingMode();
+
+  QColor bgColor; ///< Background color
+  InteractionMode iInteractionMode;
+  bool mPickingDraw;
+  GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
+  GLActor* mPickedActor;
+  bool isKeyPressed;
+  int m3DAxesShown;              ///< true when the 3D axes are to be shown
+  int m_lightingState;           ///< 0 = light off; 2 = light on
+  PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
 };
 
 #endif /*GL3DWIDGET_H_*/

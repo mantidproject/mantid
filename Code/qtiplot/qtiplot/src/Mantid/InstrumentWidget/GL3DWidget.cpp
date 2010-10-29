@@ -36,7 +36,8 @@ GL3DWidget::GL3DWidget(QWidget* parent):
   setAutoFillBackground(false);
   bgColor=QColor(0,0,0,1);
   m3DAxesShown = 1;
-  
+  m_polygonMode = SOLID;
+
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
 }
@@ -51,8 +52,6 @@ void GL3DWidget::setInteractionModePick()
 {
   iInteractionMode = GL3DWidget::PickMode;// Pick mode
   setMouseTracking(true);
-  //Set basic lighting model
-  setLightingModel(0);
   switchToPickingMode();
 }
 
@@ -62,6 +61,10 @@ void GL3DWidget::setInteractionModeNormal()
   setMouseTracking(false);
   setCursor(Qt::PointingHandCursor);
   glEnable(GL_NORMALIZE);
+  if (m_lightingState > 0)
+  {
+    glEnable(GL_LIGHTING);
+  }
   update();
 }
 
@@ -96,10 +99,11 @@ void GL3DWidget::setRenderingOptions()
   glDisable(GL_BLEND);
 
   //Set a simple flat lighting model
-  glShadeModel(GL_FLAT);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_LIGHT0);
-  glDisable(GL_LINE_SMOOTH);
+//  glShadeModel(GL_FLAT);
+//  glDisable(GL_LIGHTING);
+//  glDisable(GL_LIGHT0);
+//  glDisable(GL_LINE_SMOOTH);
+
 }
 
 /**
@@ -192,17 +196,35 @@ void GL3DWidget::drawDisplayScene()
   // Issue the rotation, translation and zooming of the trackball to the object
   _trackball->IssueRotation();
   
+  if (m_polygonMode == SOLID)
+  {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+  else
+  {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  }
+
   glPushMatrix();
   if(isKeyPressed)
   {
-    glDisable(GL_LIGHTING);
+    if (m_lightingState > 0)
+    {
+      glEnable(GL_LIGHTING);
+    }
     scene->draw();
+    glDisable(GL_LIGHTING);
     this->drawAxes();
   }
   else
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
+    if (m_lightingState > 0)
+    {
+      glEnable(GL_LIGHTING);
+    }
     scene->draw();
+    glDisable(GL_LIGHTING);
     //This draws a point at the origin, I guess
     glPointSize(3.0);
     glBegin(GL_POINTS);
@@ -224,6 +246,7 @@ void GL3DWidget::drawDisplayScene()
  */
 void GL3DWidget::drawPickingScene()
 {
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glClearColor(0.0,0.0,0.0,1.0);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -249,6 +272,7 @@ void GL3DWidget::switchToPickingMode()
   mPickBox->setPickImage(grabFrameBuffer(false));
   glEnable(GL_MULTISAMPLE);   //enable antialiasing
   mPickingDraw=false;
+  //mPickBox->mPickImage.save("C:\\Documents and Settings\\hqs74821\\Desktop\\tmp\\pick.png");
 }
 
 /**
@@ -737,4 +761,14 @@ void GL3DWidget::saveToFile(const QString & filename)
 void GL3DWidget::resetWidget()
 {
   setActorCollection(boost::shared_ptr<GLActorCollection>(new GLActorCollection()));
+}
+
+/**
+  * Enables / disables lighting
+  * @param on Set true to turn lighting on or false to turn it off.
+  */
+void GL3DWidget::enableLighting(bool on)
+{
+  m_lightingState = on? 2 : 0;
+  setLightingModel(m_lightingState);
 }
