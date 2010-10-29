@@ -2,7 +2,6 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
-#include <gl/glu.h>
 
 #include <algorithm>
 
@@ -62,12 +61,6 @@ void TexObject::generateTexture()
   err=glGetError(); if (err) std::cerr<<err<<" GL 1d error2\n";
 
   GLint texParam = GL_NEAREST;
-  if (false)
-  {
-    gluBuild2DMipmaps( GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, m_data );
-    texParam = GL_NEAREST_MIPMAP_NEAREST;
-  }
-
   glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
   err=glGetError(); if (err) std::cerr<<err<<" GL 1d error3\n";
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,texParam);
