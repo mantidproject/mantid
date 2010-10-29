@@ -76,8 +76,8 @@ private:
 	std::string filename;
 
 	/// Some constants to be written for masked values.
-	static const double MASK_FLAG = -1e30;
-	static const double MASK_ERROR = 0.0;
+	static const double MASK_FLAG;
+	static const double MASK_ERROR;
 };
 
 } // namespace NeXus
