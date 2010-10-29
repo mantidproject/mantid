@@ -470,7 +470,13 @@ addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + 
 addDlls('../Mantid/Build/Plugins','PnDll',MantidDlls)
 addDlls('../Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
 
+#------------- Environment settings ---------------------- 
 addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','Part':'last','Value':'[PYTHON25DIR]'})
+# MantidPATH to point to the bin directory
+mantidbin = '[INSTALLDIR]\\bin'
+addTo(MantidDlls,'Environment',{'Id':'SetMtdPath','Name':'MANTIDBIN','Action':'set','Part':'all','Value':mantidbin})
+# Also add binary directory to the path
+addTo(MantidDlls,'Environment',{'Id':'AddMtdPath','Name':'PATH','Action':'set','Part':'last','Value':'%MANTIDBIN%'})
 
 # ---------------------- Matlab bindings -------------------------
 # Only on 32bit windows for the moment
