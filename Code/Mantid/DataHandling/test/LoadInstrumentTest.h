@@ -724,6 +724,8 @@ public:
   }
 
 
+
+
 //
 //    /** Compare the old and new SNAP instrument definitions **/
 //    void xtestExecSNAPComparison_SLOW() // This test is slow!
@@ -806,25 +808,7 @@ public:
 //      loaderIDF2 = new LoadInstrument();
 //      loaderIDF2->initialize();
 //      wsName = "PG3_NEW";
-//      ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-//      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-//      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/PG3NEW_Definition.xml");
-//      inputFile = loaderIDF2->getPropertyValue("Filename");
-//      loaderIDF2->setPropertyValue("Workspace", wsName);
-//      loaderIDF2->execute();
-//      TS_ASSERT( loaderIDF2->isExecuted() );
-//      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-//      boost::shared_ptr<IInstrument> i_new = output->getInstrument();
-//      TS_ASSERT_EQUALS( i_new->getName(), "PG3NEW");
-//
-//      TS_ASSERT_EQUALS( i_new->nelements(), 21);
-//
-//      std::cout << "Loading the OLD geometry\n";
-//      loaderIDF2 = new LoadInstrument();
-//      loaderIDF2->initialize();
-//      wsName = "PG3_OLD";
-//      ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+//      ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
 //      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 //      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 //      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/PG3_Definition.xml");
@@ -833,17 +817,38 @@ public:
 //      loaderIDF2->execute();
 //      TS_ASSERT( loaderIDF2->isExecuted() );
 //      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-//      boost::shared_ptr<IInstrument> i_old = output->getInstrument();
-//      TS_ASSERT_EQUALS( i_old->getName(), "PG3");
+//      boost::shared_ptr<IInstrument> i_new = output->getInstrument();
+//      TS_ASSERT_EQUALS( i_new->getName(), "PG3");
 //
-//      std::cout << "Comparing\n";
+//      std::cout << "Loading the OLD geometry\n";
+//      loaderIDF2 = new LoadInstrument();
+//      loaderIDF2->initialize();
+//      wsName = "PG3_OLD";
+//      ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
+//      ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+//      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+//      loaderIDF2->setPropertyValue("Filename", "../../../../Test/Instrument/PG3OLD_Definition.xml");
+//      inputFile = loaderIDF2->getPropertyValue("Filename");
+//      loaderIDF2->setPropertyValue("Workspace", wsName);
+//      loaderIDF2->execute();
+//      TS_ASSERT( loaderIDF2->isExecuted() );
+//      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+//      boost::shared_ptr<IInstrument> i_old = output->getInstrument();
+//      TS_ASSERT_EQUALS( i_old->getName(), "PG3OLD");
+//
+//      std::cout << "Comparing #\n";
 //
 //      TS_ASSERT_EQUALS( i_new->nelements(), i_old->nelements());
+//
+//
+//      std::cout << "Comparing banks\n";
 //
 //      //Compare the list of detectors
 //      std::map<int, Geometry::IDetector_sptr> bank_new = i_new->getDetectors();
 //      std::map<int, Geometry::IDetector_sptr> bank_old = i_old->getDetectors();
 //      TS_ASSERT_EQUALS( bank_new.size(), bank_old.size());
+//
+//      std::cout << "Comparing detectors\n";
 //
 //      std::map<int, Geometry::IDetector_sptr>::iterator it;
 //      int count = 0;
@@ -852,8 +857,15 @@ public:
 //        count++;
 //        Geometry::IDetector_sptr det_new = it->second;
 //        Geometry::IDetector_sptr det_old = bank_old[it->first];
-//        //Compare their positions
-//        TS_ASSERT_EQUALS( det_new->getPos(), det_old->getPos() );
+//        if (det_new && det_old)
+//        {
+//          //Compare their positions
+//          TS_ASSERT_EQUALS( det_new->getPos(), det_old->getPos() );
+//        }
+//        else
+//        {
+//          std::cout << "Detector at "<< count << " was not initialized.\n";
+//        }
 //      }
 //    }
 

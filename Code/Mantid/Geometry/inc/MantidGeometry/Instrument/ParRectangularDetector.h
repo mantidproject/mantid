@@ -75,6 +75,7 @@ public:
   double solidAngle(const V3D& observer) const;
   /// Retrieve the cached bounding box
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
+  void getBoundingBox(BoundingBox & assemblyBox) const;
 
   ///Try to find a point that lies within (or on) the object
   int getPointInObject(V3D& point) const;
@@ -103,10 +104,14 @@ public:
   /// Return the number of pixels in the Y direction
   int ypixels() const;
 
+  double xstep() const;
+  double ystep() const;
+
   ///Size in X of the detector
   double xsize() const;
   ///Size in Y of the detector
   double ysize() const;
+  void getTextureSize(int & xsize, int & ysize) const;
 
   V3D getRelativePosAtXY(int x, int y) const;
 
@@ -114,6 +119,10 @@ private:
   /// Private copy assignment operator
   //ParRectangularDetector& operator=(const ICompAssembly&);
   const RectangularDetector * mBase;
+
+  /// A cached bounding box
+  mutable BoundingBox *m_cachedBoundingBox;
+
 
 };
 

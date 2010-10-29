@@ -76,6 +76,12 @@ public:
   /// Return the number of pixels in the Y direction
   int ypixels() const;
   
+  double xstep() const;
+  double ystep() const;
+
+  void getTextureSize(int & xsize, int & ysize) const;
+
+
   // This should inherit the getBoundingBox implementation from  CompAssembly but
   // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
   using CompAssembly::getBoundingBox;
@@ -95,6 +101,7 @@ public:
   double solidAngle(const V3D& observer) const;
   /// Retrieve the cached bounding box
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
+  void getBoundingBox(BoundingBox & assemblyBox) const;
 
   ///Try to find a point that lies within (or on) the object
   int getPointInObject(V3D& point) const;

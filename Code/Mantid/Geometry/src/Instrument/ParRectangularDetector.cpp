@@ -15,14 +15,14 @@ namespace Geometry
 {
 
 ParRectangularDetector::ParRectangularDetector(const RectangularDetector* base, const ParameterMap& map)
-      :ParCompAssembly(base,map), IObjComponent(NULL),  mBase(base)
+      :ParCompAssembly(base,map), IObjComponent(NULL),  mBase(base), m_cachedBoundingBox(NULL)
 {
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
 /** Copy constructor */
 ParRectangularDetector::ParRectangularDetector(const ParRectangularDetector & other)
-      :ParCompAssembly(other.mBase, other.m_map), IObjComponent(NULL), mBase(other.mBase)
+      :ParCompAssembly(other.mBase, other.m_map), IObjComponent(NULL), mBase(other.mBase), m_cachedBoundingBox(NULL)
 {
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
@@ -40,19 +40,32 @@ IComponent* ParRectangularDetector::clone() const
 boost::shared_ptr<Detector> ParRectangularDetector::getAtXY(int X, int Y) const
 {
   return mBase->getAtXY(X,Y);
-//  if ((xpixels() <= 0) || (ypixels() <= 0))
-//  {
-//    //std::cout << "xPixels " << xPixels << " yPixels " << yPixels << "\n";
-//    throw std::runtime_error("RectangularDetector::getAtXY: invalid X or Y width set in the object.");
-//  }
-//  if ((X < 0) || (X >= xpixels()))
-//    throw std::runtime_error("RectangularDetector::getAtXY: X specified is out of range.");
-//  if ((Y < 0) || (Y >= ypixels()))
-//    throw std::runtime_error("RectangularDetector::getAtXY: Y specified is out of range.");
-//  //Find the index and return that.
-//  int i = X*ypixels() + Y;
-//  return boost::dynamic_pointer_cast<Detector>( this->operator[](i) );
 }
+
+
+/// Set the bounding box
+void ParRectangularDetector::getBoundingBox(BoundingBox & assemblyBox) const
+{
+  //TODO: Male this more efficient
+  ParCompAssembly::getBoundingBox(assemblyBox);
+//  if( !m_cachedBoundingBox )
+//  {
+//    m_cachedBoundingBox = new BoundingBox();
+//    //Get all the corner
+//    BoundingBox compBox;
+//    mBase->getAtXY(0, 0)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//    mBase->getAtXY(this->xpixels()-1, 0)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//    mBase->getAtXY(this->xpixels()-1, this->ypixels()-1)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//    mBase->getAtXY(0, this->ypixels()-1)->getBoundingBox(compBox);
+//    m_cachedBoundingBox->grow(compBox);
+//  }
+//  // Use cached box
+//  assemblyBox = *m_cachedBoundingBox;
+}
+
 
 /// Return the number of pixels in the X direction
 int ParRectangularDetector::xpixels() const
@@ -66,6 +79,17 @@ int ParRectangularDetector::ypixels() const
   return mBase->ypixels();
 }
 
+/// Returns the step size in the X direction
+double ParRectangularDetector::xstep() const
+{
+  return mBase->xstep();
+}
+
+/// Returns the step size in the Y direction
+double ParRectangularDetector::ystep() const
+{
+  return mBase->ystep();
+}
 ///Size in X of the detector
 double ParRectangularDetector::xsize() const
 {
@@ -84,6 +108,15 @@ V3D ParRectangularDetector::getRelativePosAtXY(int x, int y) const
   return mBase->getRelativePosAtXY(x,y);
 }
 
+
+/**
+ * Return the number of pixels to make a texture in, given the
+ * desired pixel size. A texture has to have 2^n pixels per side.
+ */
+void ParRectangularDetector::getTextureSize(int & xsize, int & ysize) const
+{
+  mBase->getTextureSize(xsize, ysize);
+}
 
 
 

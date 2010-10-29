@@ -126,7 +126,22 @@ int RectangularDetector::ypixels() const
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Returns the position of the pixel at x,y, relative to the center
+/// Returns the step size in the X direction
+double RectangularDetector::xstep() const
+{
+  return this->m_xstep;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the step size in the Y direction
+double RectangularDetector::ystep() const
+{
+  return this->m_ystep;
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Returns the position of the center of the pixel at x,y, relative to the center
  * of the RectangularDetector.
  */
 V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
@@ -290,6 +305,53 @@ void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zma
   zmax = box.zMax();
   zmin = box.zMin();
 }
+
+
+void RectangularDetector::getBoundingBox(BoundingBox & assemblyBox) const
+{
+  if( !m_cachedBoundingBox )
+  {
+    m_cachedBoundingBox = new BoundingBox();
+    //Get all the corner
+    BoundingBox compBox;
+    getAtXY(0, 0)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    getAtXY(this->xpixels()-1, 0)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    getAtXY(this->xpixels()-1, this->ypixels()-1)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    getAtXY(0, this->ypixels()-1)->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+  }
+  // Use cached box
+  assemblyBox = *m_cachedBoundingBox;
+}
+
+
+/**
+ * Return the number of pixels to make a texture in, given the
+ * desired pixel size. A texture has to have 2^n pixels per side.
+ */
+int getOneTextureSize(int desired)
+{
+  int size = 2;
+  while (desired > size)
+  {
+    size = size * 2;
+  }
+  return size;
+}
+
+/**
+ * Return the number of pixels to make a texture in, given the
+ * desired pixel size. A texture has to have 2^n pixels per side.
+ */
+void RectangularDetector::getTextureSize(int & xsize, int & ysize) const
+{
+  xsize = getOneTextureSize(this->xpixels());
+  ysize = getOneTextureSize(this->ypixels());
+}
+
 
 
 /**

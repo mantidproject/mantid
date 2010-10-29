@@ -66,10 +66,24 @@ namespace Geometry
     //Wait for no error
     while(glGetError() != GL_NO_ERROR);
 
+    // Because texture colours are combined with the geometry colour
+    // make sure the current colour is white
+    glColor3f(1.0f,1.0f,1.0f);
+
+    //Nearest-neighbor scaling
+    GLint texParam = GL_NEAREST;
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,texParam);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,texParam);
+
     glEnable (GL_TEXTURE_2D); // enable texture mapping
 
     //Point to the ID of the texture that was created before - in RectangularDetectorActor.
     int texture_id = mRectDet->getAtXY(0,0)->getID();
+    int texx, texy;
+    mRectDet->getTextureSize(texx, texy);
+    double tex_frac_x = (1.0 * mRectDet->xpixels()) / (texx);
+    double tex_frac_y = (1.0 * mRectDet->ypixels()) / (texy);
+
     glBindTexture (GL_TEXTURE_2D, texture_id);
     if (glGetError()>0) std::cout << "OpenGL error in glBindTexture \n";
 
@@ -77,18 +91,22 @@ namespace Geometry
 
     glTexCoord2f (0.0, 0.0);
     pos = mRectDet->getRelativePosAtXY(0,0);
+    pos += V3D( mRectDet->xstep()*(-0.5), mRectDet->ystep()*(-0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
-    glTexCoord2f (1.0, 0.0);
+    glTexCoord2f (tex_frac_x, 0.0);
     pos = mRectDet->getRelativePosAtXY(mRectDet->xpixels()-1,0);
+    pos += V3D( mRectDet->xstep()*(+0.5), mRectDet->ystep()*(-0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
-    glTexCoord2f (1.0, 1.0);
+    glTexCoord2f (tex_frac_x, tex_frac_y);
     pos = mRectDet->getRelativePosAtXY(mRectDet->xpixels()-1, mRectDet->ypixels()-1);
+    pos += V3D( mRectDet->xstep()*(+0.5), mRectDet->ystep()*(+0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
-    glTexCoord2f (0.0, 1.0);
+    glTexCoord2f (0.0, tex_frac_y);
     pos = mRectDet->getRelativePosAtXY(0, mRectDet->ypixels()-1);
+    pos += V3D( mRectDet->xstep()*(-0.5), mRectDet->ystep()*(+0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
     glEnd ();

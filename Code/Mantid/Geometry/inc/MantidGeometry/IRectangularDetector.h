@@ -52,6 +52,9 @@ public:
   /// Return the number of pixels in the Y direction
   virtual int ypixels() const = 0;
 
+  virtual double xstep() const = 0;
+  virtual double ystep() const = 0;
+  virtual void getTextureSize(int & xsize, int & ysize) const = 0;
 
   ///Size in X of the detector
   virtual double xsize() const = 0;

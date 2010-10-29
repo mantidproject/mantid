@@ -17,6 +17,7 @@ using namespace Geometry;
 
 static const bool VERBOSE = false;
 
+
 /**
  * Constructor.
  *
@@ -33,26 +34,10 @@ RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geo
   {
     BoundingBox compBox;
     mDet->getBoundingBox(compBox);
-    std::cout << " RectangularDetectorActor : bounding box is " << compBox.minPoint() << " " << compBox.maxPoint() << "\n";
+    //std::cout << " RectangularDetectorActor : bounding box is " << compBox.minPoint() << " " << compBox.maxPoint() << "\n";
     this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());
   }
 
-//
-//    V3D minBound, maxBound;
-//    //Get the bounding boxes of all 4 corners
-//    for (int x=0; x < mDet->xpixels(); x += mDet->xpixels()-1)
-//      for (int y=0; y < mDet->ypixels(); y += mDet->ypixels()-1)
-//      {
-//        //Get the BB of the detector at that corner
-//        double xmin,ymin,zmin,xmax,ymax,zmax;
-//        xmin=ymin=zmin=-1000;
-//        xmax=ymax=zmax=1000;
-//        mDet->getAtXY(x,y)->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-//        minBound[0]=xmin;minBound[1]=ymin;minBound[2]=zmin;
-//        maxBound[0]=xmax;maxBound[1]=ymax;maxBound[2]=zmax;
-//        //Append to the total bounding box.
-//        this->AppendBoundingBox(minBound, maxBound);
-//      }
 }
 
 
@@ -114,20 +99,6 @@ void RectangularDetectorActor::appendObjCompID(std::vector<int>& idList)
 }
 
 
-/**
- * Return the number of pixels to make a texture in, given the
- * desired pixel size. A texture has to have 2^n pixels per side.
- */
-int getTextureSize(int desired)
-{
-  int size = 2;
-  while (desired > size)
-  {
-    size = size * 2;
-  }
-  return size;
-}
-
 //------------------------------------------------------------------------------------------------
 /**
  * The colors are set using the iterator of the color list. The order of the detectors
@@ -141,8 +112,8 @@ int RectangularDetectorActor::setInternalDetectorColors(std::vector<boost::share
   int num = mDet->xpixels() * mDet->ypixels();
 
   //The texture size must be 2^n power.
-  int text_x_size = getTextureSize(mDet->xpixels());
-  int text_y_size = getTextureSize(mDet->ypixels());
+  int text_x_size, text_y_size;
+  mDet->getTextureSize(text_x_size, text_y_size);
 
   //------ Create the image data buffer -------
   char * image_data;
