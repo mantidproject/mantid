@@ -631,16 +631,16 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector
 
   IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",this->version());
   if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
-  //for each member in the input workspace group
-  std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
-
+    
   //now check the input and output workspaces are of same name.
   bool bequal=isInputequaltoOutPut(props);
  
-  //check the workspace are of similar names (similar if they are of names  group_1,group_2)
-  bool bSimilarNames=isGroupWorkspacesofSimilarNames(props,inputWSNames);
-  g_log.error()<<"bsimialr is"<<bSimilarNames<<std::endl;
-   
+  std::string ingrpwsName;
+  getInputGroupWorkspaceName(props,ingrpwsName);
+  //check the workspace are of similar names (similar if they are of names like group_1,group_2)
+  bool bSimilarNames=isGroupWorkspacesofSimilarNames(ingrpwsName,inputWSNames);
+
+  std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
   for(;wsItr!=inputWSNames.end();++wsItr)
   {	//set  properties
     std::vector<Mantid::Kernel::Property*>::const_iterator itr;
@@ -728,6 +728,34 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector
 }
 
 /**This method checks input and output groupworkspace for an algorithm is of same name.
+  *  @param props a list of properties for the algorithm
+  *  @param ingroupwsName  input groupworkspace
+ */ 
+void Algorithm::getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName)
+{
+   std::vector<Mantid::Kernel::Property*>::const_iterator itr;
+   for (itr=props.begin();itr!=props.end();++itr)
+   {  	       
+     if(isInputWorkspaceProperty(*itr))
+     { 
+       try
+       {
+         if(WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve((*itr)->value())))
+         {
+           ingroupwsName=(*itr)->value();
+           break;
+         }
+        
+       }
+       catch(Kernel::Exception::NotFoundError&)
+       {
+         throw std::runtime_error("Workspace "+ (*itr)->value()+ "not loaded");
+       }
+
+     }
+   }
+}
+/**This method checks input and output groupworkspace for an algorithm is of same name.
  *  @param props a list of properties for the algorithm
  *  @returns true if the input and output groupworkspaces are of same names
  */ 
@@ -753,24 +781,14 @@ bool Algorithm::isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*
 
 
 /**This method checks the member workspace are of similar names in a group workspace .
-  *  @param props a list of properties for the algorithm
+  *  @param ingroupwsName input group workspace name
   *  @param grpmembersNames a list of group member names
   *  @returns true if workspaces are of similar names
  */ 
-bool Algorithm::isGroupWorkspacesofSimilarNames(const std::vector<Mantid::Kernel::Property*>& props,const std::vector<std::string>& grpmembersNames)
+bool Algorithm::isGroupWorkspacesofSimilarNames(const std::string& ingroupwsName,const std::vector<std::string>& grpmembersNames)
 {
-  if(props.empty())return false;
    if(grpmembersNames.empty()) return false;
-   std::string inputGroupWSName;
-   std::vector<Mantid::Kernel::Property*>::const_iterator itr;
-   for (itr=props.begin();itr!=props.end();++itr)
-   {  	       
-        if(isInputWorkspaceProperty(*itr))
-        {  	
-          inputGroupWSName=(*itr)->value();
-          break;
-        }
-   }
+   
    bool bsimilar(true);
    //check all the members are of similar names
    std::vector<std::string>::const_iterator citr;
@@ -783,7 +801,7 @@ bool Algorithm::isGroupWorkspacesofSimilarNames(const std::vector<Mantid::Kernel
          b=false;
        }
        std::string commonpart((*citr).substr(0,pos));
-       if(!inputGroupWSName.compare(commonpart))
+       if(!ingroupwsName.compare(commonpart))
        {
          b=true;
         

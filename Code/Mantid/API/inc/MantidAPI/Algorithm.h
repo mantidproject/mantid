@@ -272,7 +272,9 @@ protected:
   bool isInputWorkspaceProperty(const Kernel::Property* const prop) const;
   /// checks the property is output workspace property
   bool isOutputWorkspaceProperty(const Kernel::Property* const prop) const;
-
+  /// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
+	bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames); 
+		
   /// process workspace groups
   virtual bool processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>&props);
   /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed
@@ -301,13 +303,12 @@ private:
 			bool setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,
         const std::string& inmemberwsName,WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal);
 		
- 		
+ 		 /// This method gets the input workspace name
+      void getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName);
 			/// This method returns true if the input and output workspaces are same
 			bool isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>&props);
 
-			/// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
-			bool isGroupWorkspacesofSimilarNames(const std::vector<Mantid::Kernel::Property*>& props,const std::vector<std::string>& grpmembersNames); 
-		
+			
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
   /** executeAsync() implementation.
