@@ -42,10 +42,10 @@ namespace Mantid
     class EXPORT_OPT_MANTID_API ImplicitFunctionParameterParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParameterParser>
     {
     public:
-      virtual boost::shared_ptr<ImplicitFunctionParameterParser> create(const std::string& xmlString) const
-      {
-        return Kernel::DynamicFactory<ImplicitFunctionParameterParser>::create(xmlString);
-      }
+      
+      virtual boost::shared_ptr<ImplicitFunctionParameterParser> create(const std::string& xmlString) const;
+
+      std::auto_ptr<ImplicitFunctionParameterParser> createImplicitFunctionParameterParserFromXML(const std::string& configXML) const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParameterParserFactoryImpl>;

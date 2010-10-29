@@ -71,16 +71,23 @@ public:
   
   void testGetFirstConcreteInstance()
   {
-      boost::shared_ptr<Mantid::API::ImplicitFunctionParameterParser> parser = Mantid::API::ImplicitFunctionParameterParserFactory::Instance().create("MockImplicitFunctionParameterParserA");
-	  MockImplicitFunctionParameterParserA* a = dynamic_cast<MockImplicitFunctionParameterParserA*>(parser.get());
+      Mantid::API::ImplicitFunctionParameterParser* parser = Mantid::API::ImplicitFunctionParameterParserFactory::Instance().createUnwrapped("MockImplicitFunctionParameterParserA");
+	  MockImplicitFunctionParameterParserA* a = dynamic_cast<MockImplicitFunctionParameterParserA*>(parser);
 	  TSM_ASSERT("The correct implicit implicit function parameter parser type has not been generated",  NULL != a);
+	  delete parser;
   }
   
   void testGetSecondConcreteInstance()
   {
-      boost::shared_ptr<Mantid::API::ImplicitFunctionParameterParser> parser = Mantid::API::ImplicitFunctionParameterParserFactory::Instance().create("MockImplicitFunctionParameterParserB");
-	  MockImplicitFunctionParameterParserB* b = dynamic_cast<MockImplicitFunctionParameterParserB*>(parser.get());
+      Mantid::API::ImplicitFunctionParameterParser* parser = Mantid::API::ImplicitFunctionParameterParserFactory::Instance().createUnwrapped("MockImplicitFunctionParameterParserB");
+	  MockImplicitFunctionParameterParserB* b = dynamic_cast<MockImplicitFunctionParameterParserB*>(parser);
 	  TSM_ASSERT("The correct implicit function parameter parser type has not been generated",  NULL != b);
+	  delete parser;
+  }
+  
+  void testCreateThrows()
+  {
+    TSM_ASSERT_THROWS("Should have thrown exception on use of create rather than createunwrapped.", Mantid::API::ImplicitFunctionParameterParserFactory::Instance().create(""), std::runtime_error );
   }
 
 };

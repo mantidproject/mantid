@@ -34,7 +34,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "DllExport.h"
 #include "ImplicitFunction.h"
 #include "ImplicitFunctionParserFactory.h"
-#include "ImplicitFunctionParameterParserFactory.h"
+
 
 namespace Mantid
 {
@@ -43,20 +43,10 @@ namespace Mantid
     class EXPORT_OPT_MANTID_API ImplicitFunctionFactoryImpl : public Kernel::DynamicFactory<ImplicitFunction>
     {
     public:
-      virtual boost::shared_ptr<ImplicitFunction> create(const std::string& configXML) const
-      {
-        //ImplicitFunctionParser * funcParser = createImplicitFunctionParser();
-        return Kernel::DynamicFactory<ImplicitFunction>::create(configXML);
-      }
 
-    private:
+      virtual boost::shared_ptr<ImplicitFunction> create(const std::string& className) const;
 
-      ImplicitFunctionParser * createImplicitFunctionParser() const
-      {
-        
-        boost::shared_ptr<Mantid::API::ImplicitFunctionParser> parser = Mantid::API::ImplicitFunctionParserFactory::Instance().create("CompositeImplicitFunctionParser");
-        return parser.get();
-      }
+      virtual ImplicitFunction* createUnwrapped(const std::string& configXML, const std::string& processXML) const;
 
       friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
 

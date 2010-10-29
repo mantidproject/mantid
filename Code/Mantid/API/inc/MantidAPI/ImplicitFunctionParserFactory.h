@@ -34,6 +34,7 @@
 #include "DllExport.h"
 #include "ImplicitFunctionParser.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "ImplicitFunctionParameterParserFactory.h"
 
 namespace Mantid
 {
@@ -42,10 +43,10 @@ namespace Mantid
     class EXPORT_OPT_MANTID_API ImplicitFunctionParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParser>
     {
     public:
-      virtual boost::shared_ptr<ImplicitFunctionParser> create(const std::string& xmlString) const
-      {
-        return Kernel::DynamicFactory<ImplicitFunctionParser>::create(xmlString);
-      }
+
+      virtual boost::shared_ptr<ImplicitFunctionParser> create(const std::string& xmlString) const;
+
+      std::auto_ptr<ImplicitFunctionParser> createImplicitFunctionParserFromXML(const std::string& configXML) const;
 
     private:
 
