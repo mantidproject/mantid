@@ -183,7 +183,7 @@ if __name__ == "__main__":
               print
               print "-------------- mantid.log output (ERRORS only) ------------------------------"
               print
-              MantidBuild.color_output(cmdline="grep Error ~/.mantid/mantid.log", workingdir=subproj)
+              MantidBuild.color_output(cmdline="grep --max-count=100 Error ~/.mantid/mantid.log", workingdir=subproj)
 
             last_modified = current_times;
             print "\n\n--- continuing to monitor changes to file; or press return to test now ---"
