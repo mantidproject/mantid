@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/MaskBins.h"
 #include <limits>
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
 {
@@ -34,6 +35,11 @@ void MaskBins::init()
   required->setUpper(std::numeric_limits<double>::max()*0.99);
   declareProperty("XMin",std::numeric_limits<double>::max(),required);
   declareProperty("XMax",std::numeric_limits<double>::max(),required->clone());
+
+  // which pixels to load
+  this->declareProperty(new ArrayProperty<int>("SpectraList"),
+                        "Optional: A list of individual which spectra to mask (specified using the workspace index). If not set, all spectra are masked.");
+
 }
 
 /** Execution code.
@@ -54,6 +60,25 @@ void MaskBins::exec()
     throw std::invalid_argument(failure);
   }
   
+  //---------------------------------------------------------------------------------
+  // what spectra (workspace indices) to load. Optional.
+  this->spectra_list = this->getProperty("SpectraList");
+  if (this->spectra_list.size() > 0)
+  {
+    int numHist = inputWS->getNumberHistograms();
+    //--- Validate spectra list ---
+    for (size_t i = 0; i < this->spectra_list.size(); ++i)
+    {
+      int wi = this->spectra_list[i];
+      if ((wi < 0) || (wi >= numHist))
+      {
+        std::ostringstream oss;
+        oss << "One of the workspace indices specified, " << wi << " is above the number of spectra in the workspace (" << numHist <<").";
+        throw std::invalid_argument(oss.str());
+      }
+    }
+  }
+
   //---------------------------------------------------------------------------------
   //Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
@@ -84,17 +109,31 @@ void MaskBins::exec()
       setProperty("OutputWorkspace",outputWS);
     }
     
+
     const int numHists = inputWS->getNumberHistograms();
     Progress progress(this,0.0,1.0,numHists);
     //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
 
-    for (int i = 0; i < numHists; ++i)
+    bool useSpectraList = (this->spectra_list.size() > 0);
+
+    //Alter the for loop ending based on what we are looping on
+    int for_end = numHists;
+    if (useSpectraList) for_end = this->spectra_list.size();
+
+    for (int i = 0; i < for_end; ++i)
     {
+      // Find the workspace index, either based on the spectra list or all spectra
+      int wi;
+      if (useSpectraList)
+        wi = this->spectra_list[i];
+      else
+        wi = i;
+
       // Copy over the data
-      outputWS->dataX(i) = inputWS->readX(i);
-      const MantidVec& X = outputWS->dataX(i);
-      outputWS->dataY(i) = inputWS->readY(i);
-      outputWS->dataE(i) = inputWS->readE(i);
+      outputWS->dataX(wi) = inputWS->readX(wi);
+      const MantidVec& X = outputWS->dataX(wi);
+      outputWS->dataY(wi) = inputWS->readY(wi);
+      outputWS->dataE(wi) = inputWS->readE(wi);
 
       MantidVec::difference_type startBinLoop(startBin),endBinLoop(endBin);
       if (!commonBins) this->findIndices(X,startBinLoop,endBinLoop);
@@ -102,7 +141,7 @@ void MaskBins::exec()
       // Loop over masking each bin in the range
       for (int j = startBinLoop; j < endBinLoop; ++j)
       {
-        outputWS->maskBin(i,j);
+        outputWS->maskBin(wi,j);
       }
       progress.report();
     }
@@ -146,15 +185,33 @@ void MaskBins::execEvent()
   const int numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
-  PARALLEL_FOR1(outputWS)
-  for (int i = 0; i < numHists; ++i)
+  if (this->spectra_list.size() > 0)
   {
-    PARALLEL_START_INTERUPT_REGION
-    outputWS->getEventList(i).maskTof(m_startX, m_endX);
-    progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    //Specific spectra were specified
+    PARALLEL_FOR1(outputWS)
+    for (int i = 0; i < static_cast<int>(this->spectra_list.size()); ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
+      outputWS->getEventList( this->spectra_list[i] ).maskTof(m_startX, m_endX);
+      progress.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  else
+  {
+    //Do all spectra!
+    PARALLEL_FOR1(outputWS)
+    for (int i = 0; i < numHists; ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
+      outputWS->getEventList(i).maskTof(m_startX, m_endX);
+      progress.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
+
 
   //Clear the MRU
   outputWS->clearMRU();

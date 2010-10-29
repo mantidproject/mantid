@@ -141,77 +141,163 @@ public:
   
   
 
-  void testEventWorkspace()
+  void testSpectraList_out_of_range()
   {
-    std::string workspaceName("refl");
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10,0.0);
+    AnalysisDataService::Instance().add(workspaceName,WS);
 
-    //Load an event data set
-    LoadEventPreNeXus * eventLoader;
-    eventLoader = new LoadEventPreNeXus();
-    eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat");
-    eventLoader->setProperty("PulseidFilename", "../../../../Test/AutoTestData/REF_L_32035_pulseid.dat");
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", workspaceName);
-    TS_ASSERT( eventLoader->execute() );
-
-    //Get the workspace
-    EventWorkspace_sptr WS = boost::dynamic_pointer_cast<EventWorkspace> (AnalysisDataService::Instance().retrieve(workspaceName));
-
-    std::size_t events_before = WS->getNumberEvents();
-
-    //Mask the bins
     Mantid::Algorithms::MaskBins masker2;
     masker2.initialize();
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("InputWorkspace",workspaceName) );
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("OutputWorkspace",workspaceName) );
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("XMin","10e3") );
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("XMax","12e3") );
+    masker2.setPropertyValue("InputWorkspace",workspaceName);
+    masker2.setPropertyValue("OutputWorkspace",workspaceName);
+    masker2.setPropertyValue("XMin","-11.0");
+    masker2.setPropertyValue("XMax","-8.5");
+    masker2.setPropertyValue("SpectraList","1,8-12");
+
+    TS_ASSERT_THROWS_NOTHING( masker2.execute() );
+    TS_ASSERT( !masker2.isExecuted() );
+    AnalysisDataService::Instance().remove(workspaceName);
+  }
+
+  void testSpectraList_WS2D()
+  {
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    int nBins = 10;
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(5,nBins,0.0);
+    AnalysisDataService::Instance().add(workspaceName,WS);
+
+    Mantid::Algorithms::MaskBins masker2;
+    masker2.initialize();
+    masker2.setPropertyValue("InputWorkspace",workspaceName);
+    masker2.setPropertyValue("OutputWorkspace",workspaceName);
+    masker2.setPropertyValue("XMin","3.0");
+    masker2.setPropertyValue("XMax","6.0");
+    masker2.setPropertyValue("SpectraList","1-3");
+
     TS_ASSERT_THROWS_NOTHING( masker2.execute() );
     TS_ASSERT( masker2.isExecuted() );
 
-    std::size_t events_after = WS->getNumberEvents();
+    for (int wi=1; wi<=3; wi++)
+      for (int bin=3; bin<6;bin++)
+      {
+        //std::cout << wi << ":" << bin << "\n";
+        TS_ASSERT_EQUALS( WS->dataY(wi)[bin], 0.0 );
+      }
 
-    //Fewer events now; I won't go through all of them
-    TS_ASSERT_LESS_THAN(events_after, events_before);
+    AnalysisDataService::Instance().remove(workspaceName);
   }
 
-
-  void testEventWorkspace_CopiedOutput()
+  void testEventWorkspace_SpectraList()
   {
-    std::string workspaceName("refl");
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    int nBins = 10;
+    int numHist = 5;
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins) ;
+    AnalysisDataService::Instance().add(workspaceName,WS);
 
-    //Load an event data set
-    LoadEventPreNeXus * eventLoader;
-    eventLoader = new LoadEventPreNeXus();
-    eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/REF_L_32035_neutron_event.dat");
-    eventLoader->setProperty("PulseidFilename", "../../../../Test/AutoTestData/REF_L_32035_pulseid.dat");
-    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/AutoTestData/REF_L_TS_2010_02_19.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", workspaceName);
-    TS_ASSERT( eventLoader->execute() );
-
-    //Get the workspace
-    EventWorkspace_sptr WS = boost::dynamic_pointer_cast<EventWorkspace> (AnalysisDataService::Instance().retrieve(workspaceName));
-
-    std::size_t events_before = WS->getNumberEvents();
-
-    //Mask the bins
     Mantid::Algorithms::MaskBins masker2;
     masker2.initialize();
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("InputWorkspace",workspaceName) );
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("OutputWorkspace", "changed_refl") );
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("XMin","10e3") );
-    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("XMax","12e3") );
+    masker2.setPropertyValue("InputWorkspace",workspaceName);
+    masker2.setPropertyValue("OutputWorkspace",workspaceName);
+    masker2.setPropertyValue("XMin","3.0");
+    masker2.setPropertyValue("XMax","6.0");
+    masker2.setPropertyValue("SpectraList","1-3");
+
     TS_ASSERT_THROWS_NOTHING( masker2.execute() );
     TS_ASSERT( masker2.isExecuted() );
 
-    WS = boost::dynamic_pointer_cast<EventWorkspace> (AnalysisDataService::Instance().retrieve("changed_refl"));
-    std::size_t events_after = WS->getNumberEvents();
+    EventWorkspace_const_sptr constWS = boost::dynamic_pointer_cast<const EventWorkspace>(WS);
+    for (int wi=1; wi<=3; wi++)
+      for (int bin=3; bin<6;bin++)
+      {
+        //std::cout << wi << ":" << bin << "\n";
+        const MantidVec & Y = constWS->dataY(wi);
+        TS_ASSERT_EQUALS( Y[bin], 0.0 );
+      }
 
+    AnalysisDataService::Instance().remove(workspaceName);
+  }
+
+  void testEventWorkspace_No_SpectraList()
+  {
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    int nBins = 10;
+    int numHist = 5;
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins) ;
+    AnalysisDataService::Instance().add(workspaceName,WS);
+    std::size_t events_before = WS->getNumberEvents();
+
+    Mantid::Algorithms::MaskBins masker2;
+    masker2.initialize();
+    masker2.setPropertyValue("InputWorkspace",workspaceName);
+    masker2.setPropertyValue("OutputWorkspace",workspaceName);
+    masker2.setPropertyValue("XMin","3.0");
+    masker2.setPropertyValue("XMax","6.0");
+    masker2.setPropertyValue("SpectraList",""); //Do all
+
+    TS_ASSERT_THROWS_NOTHING( masker2.execute() );
+    TS_ASSERT( masker2.isExecuted() );
+
+    EventWorkspace_const_sptr constWS = boost::dynamic_pointer_cast<const EventWorkspace>(WS);
+    std::size_t events_after = constWS->getNumberEvents();
+
+    for (int wi=0; wi<numHist; wi++)
+      for (int bin=3; bin<6;bin++)
+      {
+        //std::cout << wi << ":" << bin << "\n";
+        const MantidVec & Y = constWS->dataY(wi);
+        TS_ASSERT_EQUALS( Y[bin], 0.0 );
+      }
     //Fewer events now; I won't go through all of them
     TS_ASSERT_LESS_THAN(events_after, events_before);
+
+    AnalysisDataService::Instance().remove(workspaceName);
   }
+
+  void testEventWorkspace_copiedOutput_No_SpectraList()
+  {
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    int nBins = 10;
+    int numHist = 5;
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins) ;
+    AnalysisDataService::Instance().add(workspaceName,WS);
+    std::size_t events_before = WS->getNumberEvents();
+
+    Mantid::Algorithms::MaskBins masker2;
+    masker2.initialize();
+    masker2.setPropertyValue("InputWorkspace",workspaceName);
+    masker2.setPropertyValue("OutputWorkspace",workspaceName+"2");
+    masker2.setPropertyValue("XMin","3.0");
+    masker2.setPropertyValue("XMax","6.0");
+    masker2.setPropertyValue("SpectraList",""); //Do all
+
+    TS_ASSERT_THROWS_NOTHING( masker2.execute() );
+    TS_ASSERT( masker2.isExecuted() );
+
+    EventWorkspace_const_sptr constWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName+"2"));
+    std::size_t events_after = constWS->getNumberEvents();
+
+    for (int wi=0; wi<numHist; wi++)
+      for (int bin=3; bin<6;bin++)
+      {
+        //std::cout << wi << ":" << bin << "\n";
+        const MantidVec & Y = constWS->dataY(wi);
+        TS_ASSERT_EQUALS( Y[bin], 0.0 );
+      }
+    //Fewer events now; I won't go through all of them
+    TS_ASSERT_LESS_THAN(events_after, events_before);
+
+    AnalysisDataService::Instance().remove(workspaceName);
+    AnalysisDataService::Instance().remove(workspaceName+"2");
+  }
+
+
 
 
 private:
