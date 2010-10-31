@@ -11,6 +11,8 @@
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
+#include "MantidMDAlgorithms/OriginParameter.h"
 
 namespace Mantid
 {
@@ -44,9 +46,6 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
-
-        class NormalParameter;
-        class OriginParameter;
 
         class DLLExport PlaneFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
         {

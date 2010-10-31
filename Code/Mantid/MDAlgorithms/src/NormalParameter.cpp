@@ -46,9 +46,13 @@ namespace Mantid
             return *this;
         }
 
-        NormalParameter NormalParameter::reflect()
+        NormalParameter* NormalParameter::reflect()
         {
-            return NormalParameter(-m_normal.at(0), -m_normal.at(1), -m_normal.at(2));
+            //return NormalParameter(-m_normal.at(0), -m_normal.at(1), -m_normal.at(2));
+        	double a = 1;
+        	double b= 2;
+        	double c = 3;
+            return new Mantid::MDAlgorithms::NormalParameter::NormalParameter(a, b, c);
         }
 
 

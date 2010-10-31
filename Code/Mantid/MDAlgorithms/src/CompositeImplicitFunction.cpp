@@ -1,5 +1,4 @@
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MDDataObjects/point3D.h"
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 
@@ -62,7 +61,7 @@ namespace Mantid
         bool CompositeImplicitFunction::evaluate(const API::Point3D*  pPoint3D) const
         {
             bool evalResult = false;
-            std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction>>::const_iterator it;
+            std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator it;
             for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
             {
                 evalResult = (*it)->evaluate(pPoint3D);

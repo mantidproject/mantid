@@ -65,8 +65,8 @@ namespace Mantid
                 return "CompositeImplicitFunction";
             }
         protected:
-            std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction>> m_Functions;
-            typedef std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction>>::const_iterator FunctionIterator;
+            std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > m_Functions;
+            typedef std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator FunctionIterator;
 
         };
     }

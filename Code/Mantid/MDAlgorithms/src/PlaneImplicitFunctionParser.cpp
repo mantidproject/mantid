@@ -53,12 +53,14 @@ namespace Mantid
                 std::auto_ptr<API::ImplicitFunctionParameter> parameter = std::auto_ptr<API::ImplicitFunctionParameter>(this->parseParameter(parameterElement));
                 if(NormalParameter::parameterName() == parameter->getName())
                 { 
-                    NormalParameter normal = NormalParameter(dynamic_cast<NormalParameter*>(parameter.get()));
+                	NormalParameter* pCurr = dynamic_cast<NormalParameter*>(parameter.get());
+                    NormalParameter normal(pCurr->getX(), pCurr->getY(), pCurr->getZ());
                     functionBuilder->addNormalParameter(normal);
                 }
                 else if(OriginParameter::parameterName() == parameter->getName())
                 {
-                    OriginParameter origin = OriginParameter(dynamic_cast<OriginParameter*>(parameter.get()));
+                	OriginParameter*  pCurr = dynamic_cast<OriginParameter*>(parameter.get());
+                    OriginParameter origin(pCurr->getX(), pCurr->getY(), pCurr->getZ());
                     functionBuilder->addOriginParameter(origin);
                 }
                 else

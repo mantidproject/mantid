@@ -11,7 +11,6 @@
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MDDataObjects/point3D.h"
 
 class CompositeBuilderTest : public CxxTest::TestSuite
 {
@@ -38,7 +37,7 @@ private:
 
 
 
-    class FakeImplicitFunction : Mantid::API::ImplicitFunction
+    class FakeImplicitFunction : public Mantid::API::ImplicitFunction
     {
     public:
         bool evaluate(const Mantid::API::Point3D* pPoint3D) const

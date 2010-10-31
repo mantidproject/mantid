@@ -22,7 +22,7 @@ namespace Mantid
         {
             CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
 
-            std::vector<boost::shared_ptr<ImplicitFunctionBuilder>>::const_iterator it;
+            std::vector<boost::shared_ptr<ImplicitFunctionBuilder> >::const_iterator it;
             for(it = this->m_functionBuilders.begin(); it != this->m_functionBuilders.end(); ++it)
             {
                 ImplicitFunction* rawFunc = (*it)->create().release();

@@ -13,7 +13,7 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
+        /**
 
         Implementation of a parameter expressing normal vector information.
 
@@ -54,13 +54,13 @@ namespace Mantid
 
         public:
 
-            NormalParameter(double n1, double n2, double n3);
+            explicit NormalParameter(double n1, double n2, double n3);
             
-            NormalParameter();
+            explicit NormalParameter();
             
-            NormalParameter(NormalParameter& other);
+            explicit NormalParameter(NormalParameter& other);
             
-            NormalParameter(NormalParameter const * const other);
+            explicit NormalParameter(NormalParameter const * const other);
             
             NormalParameter& operator=(const NormalParameter& other);
 
@@ -72,7 +72,7 @@ namespace Mantid
 
             bool isValid() const;
 
-            NormalParameter reflect();
+            NormalParameter* reflect();
 
             std::auto_ptr<NormalParameter> clone() const;
 

@@ -53,13 +53,13 @@ namespace Mantid
 
         public:
 
-            OriginParameter(double o1, double o2, double o3);
+            explicit OriginParameter(double o1, double o2, double o3);
             
-            OriginParameter();
+            explicit OriginParameter();
             
-            OriginParameter(OriginParameter & other);
+            explicit OriginParameter(OriginParameter & other);
             
-            OriginParameter(OriginParameter const * const other);
+            explicit OriginParameter(OriginParameter const * const other);
             
             OriginParameter& operator=(const OriginParameter& other);
 

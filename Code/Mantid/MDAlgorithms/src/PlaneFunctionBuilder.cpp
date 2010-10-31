@@ -40,7 +40,9 @@ namespace Mantid
                 throw std::invalid_argument(message);
             }
             //implement construction.
-            PlaneImplicitFunction* func = new PlaneImplicitFunction(m_normal, m_origin);
+            NormalParameter& refNormal = m_normal;
+            OriginParameter& refOrigin = m_origin;
+            PlaneImplicitFunction* func = new Mantid::MDAlgorithms::PlaneImplicitFunction(refNormal, refOrigin);
             return std::auto_ptr<ImplicitFunction>(func);
         }
 
