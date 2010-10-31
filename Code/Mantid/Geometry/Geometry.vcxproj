@@ -77,10 +77,10 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)$(ProjectName)</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionName)$(ProjectName)</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)$(ProjectName)</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionName)$(ProjectName)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Mantid$(ProjectName)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Mantid$(ProjectName)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Mantid$(ProjectName)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Mantid$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,10 +95,12 @@
       <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionName)kernel.lib;gsl_d.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gsl_d.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Mantid$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>$(OutDir);../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AddModuleNamesToAssembly>
+      </AddModuleNamesToAssembly>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,8 +116,8 @@
       <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionName)kernel.lib;gsl_d.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
+      <AdditionalDependencies>MantidKernel.lib;gsl_d.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Mantid$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -137,8 +139,8 @@
       <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionName)kernel.lib;gsl.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
+      <AdditionalDependencies>MantidKernel.lib;gsl.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Mantid$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -156,8 +158,8 @@
       <DisableSpecificWarnings>4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionName)kernel.lib;gsl.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(SolutionName)$(ProjectName).dll</OutputFile>
+      <AdditionalDependencies>MantidKernel.lib;gsl.lib;opengl32.lib;glu32.lib;TKBO.lib;TKPrim.lib;TKBRep.lib;TKernel.lib;TKTopAlgo.lib;TKMath.lib;TKMesh.lib;TKG2d.lib;muparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Mantid$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -176,6 +178,11 @@
     <ClCompile Include="src\Math\Acomp.cpp" />
     <ClCompile Include="src\Math\Algebra.cpp" />
     <ClCompile Include="src\Math\BnId.cpp" />
+    <ClCompile Include="src\MDGeometry\MDDimension.cpp" />
+    <ClCompile Include="src\MDGeometry\MDDimensionRes.cpp" />
+    <ClCompile Include="src\MDGeometry\MDGeometry.cpp" />
+    <ClCompile Include="src\MDGeometry\MDGeometryBasis.cpp" />
+    <ClCompile Include="src\MDGeometry\MDGeometryDescription.cpp" />
     <ClCompile Include="src\Objects\BoundingBox.cpp" />
     <ClCompile Include="src\InstrumentRayTracer.cpp" />
     <ClCompile Include="src\Rendering\BitmapGeometryHandler.cpp" />
@@ -265,6 +272,12 @@
     <ClInclude Include="inc\MantidGeometry\Instrument\XMLlogfile.h" />
     <ClInclude Include="inc\MantidGeometry\IRectangularDetector.h" />
     <ClInclude Include="inc\MantidGeometry\Math\Acomp.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimension.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDDimensionRes.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometry.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometryBasis.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDGeometryDescription.h" />
+    <ClInclude Include="inc\MantidGeometry\MDGeometry\MDWorkspaceConstants.h" />
     <ClInclude Include="inc\MantidGeometry\Objects\BoundingBox.h" />
     <ClInclude Include="inc\MantidGeometry\Objects\InstrumentRayTracer.h" />
     <ClInclude Include="inc\MantidGeometry\Rendering\BitmapGeometryHandler.h" />
