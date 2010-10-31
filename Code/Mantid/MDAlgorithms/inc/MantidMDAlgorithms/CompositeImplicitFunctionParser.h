@@ -19,7 +19,7 @@ namespace Mantid
     }
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
+        /**
 
         This class to parse composite type functions and generate the associated builders.
 

@@ -19,7 +19,7 @@ namespace Mantid
 
     namespace API
     {
-        /** A base class for absorption correction algorithms.
+        /**
 
         Abstract type represents topology for visualisation.
 

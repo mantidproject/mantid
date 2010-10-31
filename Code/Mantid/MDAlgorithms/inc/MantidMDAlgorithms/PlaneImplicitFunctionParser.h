@@ -19,9 +19,7 @@ namespace Mantid
     }
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
-
-
+        /**
         This class to parse plane type functions and generate the associated builders.
 
         @author Owen Arnold, Tessella plc

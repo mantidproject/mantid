@@ -20,8 +20,7 @@ namespace Mantid
     }
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
-
+        /**
 
         This class represents a plane implicit function used for communicating and implementing an operation against 
         an MDWorkspace.

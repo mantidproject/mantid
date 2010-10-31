@@ -20,7 +20,7 @@ namespace Mantid
 
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
+        /**
 
         Abstract type representing a topology request;
 

@@ -11,8 +11,7 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
-
+        /**
 
         Grouping of static methods used to perform vector mathematics required for MDAlgorithm support. If this collection proves 
         useful elsewhere, it should be moved down the package structure.

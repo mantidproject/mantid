@@ -26,7 +26,7 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
+        /**
 
         XML Parser for origin parameter types
 

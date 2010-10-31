@@ -16,7 +16,7 @@ namespace Mantid
 
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
+        /**
 
         This builder is for constructing composite functions.
 

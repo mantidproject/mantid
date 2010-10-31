@@ -13,7 +13,7 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
+        /**
 
         OriginParameter. Wraps a vector expressing origin location.
 
