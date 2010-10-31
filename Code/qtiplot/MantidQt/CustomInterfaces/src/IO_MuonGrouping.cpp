@@ -304,8 +304,13 @@ void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToR
       continue;
     if ( item1->text().isEmpty() || item2->text().isEmpty() )
       continue;
-    if ( item2->text() == "Invalid IDs string" )
+    try
+    {
+       int ndet = boost::lexical_cast<int>(item2->text().toStdString().c_str());
+    }  catch (boost::bad_lexical_cast&)
+    {
       continue;
+    }
 
     groupToRow.push_back(i);
   }

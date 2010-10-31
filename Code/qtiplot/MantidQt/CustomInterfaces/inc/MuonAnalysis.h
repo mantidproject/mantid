@@ -58,12 +58,6 @@ private slots:
   /// group table plot button
   void runPairTablePlotButton();
 
-  /// change group table plotting choice
-  void runGroupTablePlotChoice(const QString);
-
-  // change pair table plotting choice
-  void runPairTablePlotChoice(const QString str);
-
   /// Save grouping button
   void runSaveGroupButton();
 
@@ -96,7 +90,7 @@ private:
   void startUpLook();
 
   /// Return the group which is in focus and -1 if none
-  int groupInFocus();
+  //int groupInFocus();
 
   /// Return the pair which is in focus and -1 if none
   int pairInFocus();
@@ -105,11 +99,14 @@ private:
   bool isGroupingSet();
 
   /// Apply grouping specified in xml file to workspace
-  void applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
+  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
     const std::string& filename);
 
+  /// create WS contained the data for a plot
+  void createPlotWS(const std::string& wsname);
+
   /// Apply whatever grouping is specified in GUI tables to workspace
-  void applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
+  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
 
   /// Update front 
   void updateFront();
@@ -118,7 +115,10 @@ private:
   void updateFrontAndCombo();
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
-  int numOfDetectors(std::string str) const;
+  int numOfDetectors(const std::string& str) const;
+
+  /// Return a vector of IDs for row number from string of type 1-3, 5, 10-15
+  std::vector<int> spectrumIDs(const std::string& str) const;
 
   /// is string a number?
   bool isNumber(const std::string& s) const;
@@ -132,8 +132,8 @@ private:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
-  /// Is data loaded?
-  bool m_dataLoaded;
+  /// Check if grouping in table is consistent with data file
+  std::string isGroupingAndDataConsistent();
 
   /// Return a none empty string if the data and group detector info are inconsistent
   QString dataAndTablesConsistent();
@@ -181,12 +181,6 @@ private:
   /// convert int to string
   std::string iToString(int i);
 
-  /// group table plot choice
-  std::string m_groupTablePlotChoice;
-
-  /// pair table plot choice
-  std::string m_pairTablePlotChoice;
-
   /// List of current group names 
   std::vector<std::string> m_groupNames;
 
@@ -205,6 +199,9 @@ private:
   /// tell which group is in which row
   std::vector<int> m_groupToRow;
 
+  ///
+  void checkIf_ID_dublicatesInTable(const int row);
+
   /// Return the group-number for the group in a row. 
   /// Return -1 if invalid group in row
   int getGroupNumberFromRow(int row);
@@ -215,9 +212,6 @@ private:
 
   /// first good bin returend in ms
   QString firstGoodBin();
-
-  ///
-  void createCropWS();
 
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 

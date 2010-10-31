@@ -22,6 +22,9 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <Poco/StringTokenizer.h>
 
+#include "Poco/File.h"
+#include "Poco/Path.h"
+
 #include <QLineEdit>
 #include <QFileDialog>
 #include <QHash>
@@ -67,8 +70,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_period(0), m_groupTableRowInFocus(-1), m_pairTableRowInFocus(-1),
-  m_groupTablePlotChoice("Counts"), m_pairTablePlotChoice("Asymmetry"), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"),
-  m_dataLoaded(false)
+  m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml")
 {
 }
 
@@ -91,13 +93,11 @@ void MuonAnalysis::initLayout()
 	connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
 
   // If group table change
+  // currentCellChanged ( int currentRow, int currentColumn, int previousRow, int previousColumn )
   connect(m_uiForm.groupTable, SIGNAL(cellChanged(int, int)), this, SLOT(groupTableChanged(int, int))); 
   connect(m_uiForm.groupTable, SIGNAL(cellClicked(int, int)), this, SLOT(groupTableClicked(int, int))); 
   // group table plot button
   connect(m_uiForm.groupTablePlotButton, SIGNAL(clicked()), this, SLOT(runGroupTablePlotButton())); 
-  // Store selected group-plot-choice in local variable
-  connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(const QString)), this, 
-    SLOT(runGroupTablePlotChoice(const QString))); 
 
   // If pair table change
   connect(m_uiForm.pairTable, SIGNAL(cellChanged(int, int)), this, SLOT(pairTableChanged(int, int))); 
@@ -185,12 +185,13 @@ void MuonAnalysis::runFrontPlotButton()
   if (index >= numGroups())
   {
     // i.e. index points to a pair
-
+    m_pairTableRowInFocus = m_pairToRow[index-numGroups()];  // this can be improved
     std::string str = m_uiForm.frontPlotFuncs->currentText().toStdString();
     plotPair(str);
   }
   else
   {
+    m_groupTableRowInFocus = m_groupToRow[index];
     std::string str = m_uiForm.frontPlotFuncs->currentText().toStdString();
     plotGroup(str);
   }
@@ -321,27 +322,11 @@ void MuonAnalysis::runClearGroupingButton()
 }
 
 /**
- * change group table plotting choice (slot)
- */
-void MuonAnalysis::runGroupTablePlotChoice(const QString str)
-{
-  m_groupTablePlotChoice = str.toStdString();
-}
-
-/**
- * change pair table plotting choice (slot)
- */
-void MuonAnalysis::runPairTablePlotChoice(const QString str)
-{
-  m_pairTablePlotChoice = str.toStdString();
-}
-
-/**
  * Group table plot button (slot)
  */
 void MuonAnalysis::runGroupTablePlotButton()
 {
-  plotGroup(m_groupTablePlotChoice);
+  plotGroup(m_uiForm.groupTablePlotChoice->currentText().toStdString());
 }
 
 /**
@@ -349,7 +334,7 @@ void MuonAnalysis::runGroupTablePlotButton()
  */
 void MuonAnalysis::runPairTablePlotButton()
 {
-  plotPair(m_pairTablePlotChoice);
+  plotPair(m_uiForm.pairTablePlotChoice->currentText().toStdString());
 }
 
 /**
@@ -399,6 +384,9 @@ void MuonAnalysis::groupTableClicked(int row, int column)
  */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
+  if ( column == 2 )
+    return;
+
   // changes to the IDs
   if ( column == 1 )
   {
@@ -415,13 +403,16 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     {
       int numDet = numOfDetectors(item->text().toStdString());
       std::stringstream detNumRead;
-      if (numDet >= 0 )
+      if (numDet > 0 )
       {
         detNumRead << numDet;
         if (itemNdet == NULL)
           m_uiForm.groupTable->setItem(row,2, new QTableWidgetItem(detNumRead.str().c_str()));
         else
-          m_uiForm.groupTable->item(row, 2)->setText(detNumRead.str().c_str());
+        { 
+          itemNdet->setText(detNumRead.str().c_str());
+        }
+        checkIf_ID_dublicatesInTable(row);
       }
       else
       {
@@ -463,6 +454,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
   }  
 
   whichGroupToWhichRow(m_uiForm, m_groupToRow);
+  applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped");
   updatePairTable();
   updateFrontAndCombo();
 }
@@ -611,14 +603,51 @@ void MuonAnalysis::updatePairTable()
 void MuonAnalysis::inputFileChanged()
 {
   if ( !m_uiForm.mwRunFiles->isValid() )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file not recognised");
     return;
+  }
 
   if ( m_previousFilename.compare(m_uiForm.mwRunFiles->getFirstFilename()) == 0 )
     return;
 
   m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
 
+  // in case file is selected from browser button check that it actually exist
+  Poco::File l_path( m_previousFilename.toStdString() );
+  if ( !l_path.exists() )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
+    return;
+  }
+  // and check if file is from a recognised instrument and update instrument combo box
+  QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
+  filenamePart = filenamePart.toLower();
+  bool foundInst = false;
+  for (int i = 0; i < m_uiForm.instrSelector->count(); i++)
+  {
+    QString instName = m_uiForm.instrSelector->itemText(i).toLower();
+    
+    std::string sfilename = filenamePart.toStdString();
+    std::string sinstName = instName.toStdString();
+    size_t found;
+    found = sfilename.find(sinstName);
+    if ( found != std::string::npos )
+    {
+      m_uiForm.instrSelector->setCurrentIndex(i);
+      foundInst = true;
+      break;
+    }
+  }
+  if ( !foundInst )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file not recognised.");
+    return;
+  }
+
+
   // Load nexus file with no grouping
+  AnalysisDataService::Instance().remove(m_workspace_name);
   QString pyString = "alg = LoadMuonNexus('";
   pyString.append(m_previousFilename);
   pyString.append("','");
@@ -626,6 +655,8 @@ void MuonAnalysis::inputFileChanged()
   pyString.append("', AutoGroup=\"0\")\n");
   pyString.append("print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')");
   QString outputParams = runPythonCode( pyString ).trimmed();
+
+  nowDataAvailable();
 
   if ( !isGroupingSet() )
     setGroupingFromNexus(m_previousFilename);
@@ -638,10 +669,7 @@ void MuonAnalysis::inputFileChanged()
   int numPeriods = 1;   // 1 may mean either a group with one period or simply just 1 normal matrix workspace
   if (wsPeriods)
   {
-    numPeriods = wsPeriods->getNumberOfEntries() - 1;  // note getNumberOfEntries returns one more # of periods 
-
-//    for ( int i = 1; i <= numPeriods; i++)
-//      applyGroupingToWS( m_workspace_name + "_" + iToString(i));
+    numPeriods = wsPeriods->getNumberOfEntries();
 
     Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
@@ -649,12 +677,11 @@ void MuonAnalysis::inputFileChanged()
   }
   else
   {
-
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
   }
 
-  applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouping");
-
+  if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
+    return;
 
   // get hold of output parameters
   std::stringstream strParam(outputParams.toStdString());
@@ -669,23 +696,24 @@ void MuonAnalysis::inputFileChanged()
 
   // Populate instrument fields
 
-  IInstrument_sptr instrument = matrix_workspace->getInstrument();
   std::stringstream str;
   str << "Description: ";
-  unsigned int nDet = instrument->getDetectors().size();
+  int nDet = matrix_workspace->getInstrument()->getDetectors().size();
   str << nDet;
   str << " detector spectrometer, main field ";
   str << QString(mainFieldDirection.c_str()).toLower().toStdString(); 
   str << " to muon polarisation";
   m_uiForm.instrumentDescription->setText(str.str().c_str());
 
-  //m_uiForm.timeZeroFront->setText((boost::lexical_cast<std::string>(timeZero)).c_str());
-  //m_uiForm.firstGoodBinFront->setText((boost::lexical_cast<std::string>(firstGoodData)).c_str());
+  m_uiForm.timeZeroFront->setText((boost::lexical_cast<std::string>(static_cast<int>(timeZero))).c_str());
+  m_uiForm.firstGoodBinFront->setText((boost::lexical_cast<std::string>(static_cast<int>(firstGoodData))).c_str());
 
 
   // Populate run information text field
 
-  std::string infoStr = "Title: "; 
+  std::string infoStr = "Number of spectra in data = ";
+  infoStr += boost::lexical_cast<std::string>(matrix_workspace->getNumberHistograms()) + "\n"; 
+  infoStr += "Title: "; 
   infoStr += matrix_workspace->getTitle() + "\n" + "Comment: "
     + matrix_workspace->getComment();
   m_uiForm.infoBrowser->setText(infoStr.c_str());
@@ -700,34 +728,28 @@ void MuonAnalysis::inputFileChanged()
 
   while ( m_uiForm.homePeriodBox1->count() != 0 )
     m_uiForm.homePeriodBox1->removeItem(0);
-  //while ( m_uiForm.homePeriodBox2->count() != 0 )
-  //  m_uiForm.homePeriodBox2->removeItem(0);
+  while ( m_uiForm.homePeriodBox2->count() != 0 )
+    m_uiForm.homePeriodBox2->removeItem(0);
 
+  m_uiForm.homePeriodBox2->addItem("None");
   for ( int i = 1; i <= numPeriods; i++ )
   {
     std::stringstream strInt;
     strInt << i;
     m_uiForm.homePeriodBox1->addItem(strInt.str().c_str());
+    m_uiForm.homePeriodBox2->addItem(strInt.str().c_str());
   }
 
-  /* if ( numPeriods == 1 )
+  if (wsPeriods)
   {
-    m_uiForm.homePeriodBox2->setEnabled(false);
+    m_uiForm.homePeriodBox2->setEnabled(true);
+    m_uiForm.homePeriodBoxMath->setEnabled(true);
   }
   else
   {
-    m_uiForm.homePeriodBox2->setEnabled(true);
-
-    m_uiForm.homePeriodBox2->addItem("");
-    for ( int i = 1; i <= numPeriods; i++ )
-    {
-      std::stringstream strInt;
-      strInt << i;
-      m_uiForm.homePeriodBox2->addItem(strInt.str().c_str());
-    }
-  }*/
-
-  nowDataAvailable();
+    m_uiForm.homePeriodBox2->setEnabled(false);
+    m_uiForm.homePeriodBoxMath->setEnabled(false);
+  }
 }
 
 /**
@@ -835,7 +857,6 @@ void MuonAnalysis::updateFront()
       m_uiForm.frontAlphaNumber->setVisible(true);
 
       m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(index-numG,3)->text());
-      m_pairTableRowInFocus = index-numG;
     }
     else
     {
@@ -844,7 +865,6 @@ void MuonAnalysis::updateFront()
 
       m_uiForm.frontAlphaLabel->setVisible(false);
       m_uiForm.frontAlphaNumber->setVisible(false);
-      m_groupTableRowInFocus = index;
     }
   }
 }
@@ -874,17 +894,6 @@ void MuonAnalysis::updateFrontAndCombo()
   updateFront();
 }
 
-
-/**
- * Return the group which is in focus and -1 if none
- */
-int MuonAnalysis::groupInFocus()
-{
-  if ( getGroupNumberFromRow(m_groupTableRowInFocus) >= 0 )
-    return m_groupTableRowInFocus;
-  else 
-    return -1;
-}
 
 /**
  * Return the group-number for the group in a row. Return -1 if 
@@ -967,25 +976,47 @@ std::string MuonAnalysis::iToString(int i)
 
 
 /**
+ * Create WS contained the data for a plot
  * Take the MuonAnalysisGrouped WS and reduce(crop) histograms according to e.g. first-good-bin.
- * If period data then the resulting cropped WS is on for the period selected by the user
- * on the front panel. The outputted WS is named MuonAnalysisCropped.
+ * If period data then the resulting cropped WS is on for the period, or sum/difference of, selected 
+ * by the user on the front panel
  */
-void MuonAnalysis::createCropWS()
+void MuonAnalysis::createPlotWS(const std::string& wsname)
 {
-  QString periodStr = "";  // used to pick out the WS representing the period selected by user
-  if (m_period > 0)
-  {    
-    periodStr += QString("_") + iToString(m_period).c_str();
+  QString inputWS = m_workspace_name.c_str() + QString("Grouped");
+
+  if ( m_uiForm.homePeriodBox2->isEnabled() && m_uiForm.homePeriodBox2->currentText()!="None" )
+  {
+    QString pyS;
+    if ( m_uiForm.homePeriodBoxMath->currentText()=="+" )
+    {
+      pyS += "Plus(\"" + inputWS + "_" + m_uiForm.homePeriodBox1->currentText()
+        + "\",\"" + inputWS + "_" + m_uiForm.homePeriodBox2->currentText() + "\",\""
+        + wsname.c_str() + "\")";
+    }
+    else 
+    {
+      pyS += "Minus(\"" + inputWS + "_" + m_uiForm.homePeriodBox1->currentText()
+        + "\",\"" + inputWS + "_" + m_uiForm.homePeriodBox2->currentText() + "\",\""
+        + wsname.c_str() + "\")";
+    }
+    runPythonCode( pyS ).trimmed();
+    inputWS = wsname.c_str();
+  }
+  else
+  {
+    if ( m_uiForm.homePeriodBox2->isEnabled() ) 
+      inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
   }
 
-  QString outputWS = "MuonAnalysisCropped";
   QString cropStr = "CropWorkspace(\"";
-  cropStr += m_workspace_name.c_str() + periodStr;
+  cropStr += inputWS;
   cropStr += "\",\"";
-  cropStr += outputWS;
+  cropStr += wsname.c_str();
   cropStr += "\"," + firstGoodBin() + ");";
   runPythonCode( cropStr ).trimmed();
+
+
 }
 
 
@@ -994,57 +1025,45 @@ void MuonAnalysis::createCropWS()
  */
 void MuonAnalysis::plotGroup(std::string& plotType)
 {
-  if ( m_groupTableRowInFocus >= 0 )
+  int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
+  if ( groupNum >= 0 )
   {
-    // only plot if group name available
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
-    QString groupName;
-    if (!itemName)
-      return;
-    else
-      groupName = itemName->text();
+    QString groupName = itemName->text();
 
+    // create output workspace title
+    Poco::File l_path( m_previousFilename.toStdString() );
+    std::string filenamePart = Poco::Path(l_path.path()).getFileName();
+
+    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Group='"
+      + groupName + "'";
 
     // create workspace which starts at first-good-bin 
+    QString cropWS = "MuonAnalysis_" + title;
+    createPlotWS(cropWS.toStdString());
 
-    QString periodStr = "";
-    if (m_period > 0)
-    {    
-      periodStr += QString("_") + iToString(m_period).c_str();
-    }
-    QString cropWS = m_workspace_name.c_str() + QString("_") + groupName + periodStr;
-    QString cropStr = "CropWorkspace(\"";
-    cropStr += m_workspace_name.c_str() + periodStr;
-    cropStr += "\",\"";
-    cropStr += cropWS;
-    cropStr += "\"," + firstGoodBin() + ");";
-    runPythonCode( cropStr ).trimmed();
+    // create plotting Python string
+    QString gNum = QString(iToString(groupNum).c_str());
 
+    QString pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n"
+      "l = gs.activeLayer()\n"
+      "l.setCurveTitle(0, \"" + title + "\")\n";
 
-    // create plotting Python string 
-
-    QString rowNum = QString(iToString(m_groupTableRowInFocus).c_str());
     QString pyString;
     if (plotType.compare("Counts") == 0)
     {
-      pyString += "plotSpectrum(\"" + cropWS + "\"," 
-        + rowNum + ");";
+      pyString = pyS;
     }
     else if (plotType.compare("Asymmetry") == 0)
     {
-      QString outputName = cropWS + "_asym";
-      pyString += "RemoveExpDecay(\"" + cropWS + "\",\"" 
-        + outputName + "\","
-        + rowNum + "); plotSpectrum(\"" + outputName
-        + "\"," + rowNum + ");";
+      pyString = "RemoveExpDecay(\"" + cropWS + "\",\"" 
+        + cropWS + "\"," + gNum + ")\n" + pyS;
     }
     else if (plotType.compare("Logorithm") == 0)
     {
-      QString outputName = cropWS + "_log";
       pyString += "Logarithm(\"" + cropWS + "\",\"" 
-        + outputName + "\","
-        + rowNum + "); plotSpectrum(\"" + outputName
-        + "\"," + rowNum + ");";
+        + cropWS + "\","
+        + gNum + ")\n" + pyS;
     }
     else
     {
@@ -1062,30 +1081,30 @@ void MuonAnalysis::plotGroup(std::string& plotType)
  */
 void MuonAnalysis::plotPair(std::string& plotType)
 {
-  if ( m_pairTableRowInFocus >= 0 )
+  if ( getPairNumberFromRow(m_pairTableRowInFocus) >= 0 )
   {
-    // only plot if alpha defined in table
     QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
-    if (!item)
-      return;
+    QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
+    QString pairName = itemName->text();
 
-    // create cropped workspace of relevant workspace
+    // create output workspace title
+    Poco::File l_path( m_previousFilename.toStdString() );
+    std::string filenamePart = Poco::Path(l_path.path()).getFileName();
 
-    QString periodStr = "";
-    if (m_period > 0)
-    {    
-      periodStr += QString("_") + iToString(m_period).c_str();
-    }
-    QString cropWS = m_workspace_name.c_str() + QString("_crop");
-    QString cropStr = "CropWorkspace(\"";
-    cropStr += m_workspace_name.c_str() + periodStr;
-    cropStr += "\",\"";
-    cropStr += cropWS;
-    cropStr += "\"," + firstGoodBin() + ");";
-    runPythonCode( cropStr ).trimmed();
+    QString title = QString(filenamePart.c_str()) + " " + plotType.c_str() +"; Pair='"
+      + pairName + "'";
+
+
+    // create workspace which starts at first-good-bin 
+    QString cropWS = "MuonAnalysis_" + title;
+    createPlotWS(cropWS.toStdString());
 
 
     // create plotting Python string 
+
+    QString pyS = "gs = plotSpectrum(\"" + cropWS + "\",0)\n"
+      "l = gs.activeLayer()\n"
+      "l.setCurveTitle(0, \"" + title + "\")\n";
 
     QString pyString;
     if (plotType.compare("Asymmetry") == 0)
@@ -1098,13 +1117,13 @@ void MuonAnalysis::plotPair(std::string& plotType)
       if (itemName)
         pairName = itemName->text();
 
-      QString outputWS_Name = m_workspace_name.c_str() + QString("_") + pairName + periodStr;
+      //QString outputWS_Name = m_workspace_name.c_str() + QString("_") + pairName + periodStr;
 
-      pyString += "AsymmetryCalc(\"" + cropWS + "\",\"" 
-        + outputWS_Name + "\","
-        + iToString(qw1->currentIndex()).c_str() + "," + iToString(qw2->currentIndex()).c_str()
-        + "," + item->text() + "); plotSpectrum(\"" + outputWS_Name
-        + "\",0);";
+      pyString = "AsymmetryCalc(\"" + cropWS + "\",\"" 
+        + cropWS + "\","
+        + iToString(qw1->currentIndex()).c_str() + "," 
+        + iToString(qw2->currentIndex()).c_str() + "," 
+        + item->text() + ")\n" + pyS;
     }
     else
     {
@@ -1137,30 +1156,61 @@ bool MuonAnalysis::isGroupingSet()
  *
  * @param filename Name of grouping file
  */
-void MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
+bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
    const std::string& filename)
 {
-  QString pyString = "GroupDetectors('";
-  pyString.append(inputWS.c_str());
-  pyString.append("','");
-  pyString.append(outputWS.c_str());
-  pyString.append("','");
-  pyString.append(filename.c_str());
-  pyString.append("');");
-  
-  // run python script
-  QString pyOutput = runPythonCode( pyString ).trimmed();
+  if ( isGroupingSet() && m_uiForm.frontPlotButton->isEnabled() )
+  {
+
+    std::string complaint = isGroupingAndDataConsistent();
+    if ( complaint.empty() )
+    {
+      nowDataAvailable();
+      m_uiForm.frontWarningMessage->setText("");
+    }
+    else
+    {
+      noDataAvailable();
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
+      //m_uiForm.frontWarningMessage->setText(complaint.c_str());
+      return false;
+    }
+
+    AnalysisDataService::Instance().remove(outputWS);
+
+    QString pyString = 
+      "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "  GroupDetectors('" + QString(inputWS.c_str()) + "','" + outputWS.c_str() + "','" + filename.c_str() + "')\n"
+      "except SystemExit, message:\n"
+      "  print str(message)";
+
+    // run python script
+    QString pyOutput = runPythonCode( pyString ).trimmed();
+
+    // if output is none empty something has gone wrong
+    if ( !pyOutput.toStdString().empty() )
+    {
+      noDataAvailable();
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
+      return false;
+      //m_uiForm.frontWarningMessage->setText("Can't group data file according to group-table. Plotting disabled.");
+    }
+    else
+      return true;
+  }
 }
 
 /**
  * Apply whatever grouping is specified in GUI tables to workspace. 
  */
-void MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
+bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
 {
-  if ( isGroupingSet() )
+  if ( isGroupingSet() && m_uiForm.frontPlotButton->isEnabled() )
   {
     saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-    applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
+    return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
   }
 }
 
@@ -1168,14 +1218,28 @@ void MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
  * Calculate number of detectors from string of type 1-3, 5, 10-15
  *
  * @param str String of type "1-3, 5, 10-15"
- * @return Number of detectors. Return -1 if not recognised
+ * @return Number of detectors. Return 0 if not recognised
  */
-int MuonAnalysis::numOfDetectors(std::string str) const
+int MuonAnalysis::numOfDetectors(const std::string& str) const
 {
-  int retVal = 0;
+  return static_cast<int>(spectrumIDs(str).size());
+}
+
+
+/**
+ * Return a vector of IDs for row number from string of type 1-3, 5, 10-15
+ *
+ * @param str String of type "1-3, 5, 10-15"
+ * @return Vector of IDs
+ */
+std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
+{
+  //int retVal = 0;
+  std::vector<int> retVal;
+
 
   if (str.empty())
-    return 0;
+    return retVal;
 
   typedef Poco::StringTokenizer tokenizer;
   tokenizer values(str, ",", tokenizer::TOK_TRIM);
@@ -1188,11 +1252,17 @@ int MuonAnalysis::numOfDetectors(std::string str) const
       tokenizer aPart(values[i], "-", tokenizer::TOK_TRIM);
 
       if ( aPart.count() != 2 )
-        return -1;
+      {
+        retVal.clear();
+        return retVal;
+      }
       else
       {
         if ( !(isNumber(aPart[0]) && isNumber(aPart[1])) )
-          return -1;
+        {
+          retVal.clear();
+          return retVal;
+        }
       }
 
       int leftInt;
@@ -1204,21 +1274,28 @@ int MuonAnalysis::numOfDetectors(std::string str) const
 
       if (leftInt > rightInt)
       {
-        throw;
+        retVal.clear();
+        return retVal;
       }
-      retVal += rightInt-leftInt+1;
+      for (int step = leftInt; step <= rightInt; step++)
+        retVal.push_back(step);
     }
     else
     {
 
       if (isNumber(values[i]))
-        retVal++;
+        retVal.push_back(boost::lexical_cast<int>(values[i].c_str()));
       else
-        return -1;
+      {
+        retVal.clear();
+        return retVal;
+      }
     }
   }
   return retVal;
 }
+
+
 
 
 /** Is input string a number?
@@ -1254,7 +1331,6 @@ void MuonAnalysis::noDataAvailable()
   m_uiForm.frontPlotButton->setEnabled(false);
   m_uiForm.groupTablePlotButton->setEnabled(false);
   m_uiForm.pairTablePlotButton->setEnabled(false);
-  m_dataLoaded = false;
 
   m_uiForm.guessAlphaButton->setEnabled(false);
 }
@@ -1267,13 +1343,10 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.frontPlotButton->setEnabled(true);
   m_uiForm.groupTablePlotButton->setEnabled(true);
   m_uiForm.pairTablePlotButton->setEnabled(true);
-  m_dataLoaded = true;
 
   m_uiForm.guessAlphaButton->setEnabled(true);
-  m_uiForm.frontPlotButton->setEnabled(true);
-  m_uiForm.groupTablePlotButton->setEnabled(true);
-  m_uiForm.pairTablePlotButton->setEnabled(true);
 }
+
 
 /**
  * Return a none empty string if the data and group detector info are inconsistent
@@ -1309,6 +1382,7 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.groupTable->setColumnWidth(3, 0.5*m_uiForm.groupTable->columnWidth(3));
   for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
   {
+    
     QTableWidgetItem* item = m_uiForm.groupTable->item(i,2);
     if (!item)
     {
@@ -1341,7 +1415,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   if ( isGroupingSet() )
     return;
 
-  std::string groupedWS = m_workspace_name+"Grouping";
+  std::string groupedWS = m_workspace_name+"Grouped";
 
   // Load nexus file with grouping
   QString pyString = "LoadMuonNexus('";
@@ -1400,7 +1474,6 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
     m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
     m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
 
-    m_groupTableRowInFocus = 0;
     updateFrontAndCombo();
 
     QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "No grouping detected in Nexus.");
@@ -1467,8 +1540,6 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
     }
   }  // end loop over wsIndex
   
-
-  m_groupTableRowInFocus = 0;
   updatePairTable();
   updateFrontAndCombo();
 }
@@ -1485,4 +1556,107 @@ QString MuonAnalysis::firstGoodBin()
   fgb /= 1000.0;  // convert from ns to ms
 
   return QString((boost::lexical_cast<std::string>(fgb)).c_str());
+}
+
+
+/**
+* Check if grouping in table is consistent with data file
+*
+* @return empty string if OK otherwise a complaint
+*/
+std::string MuonAnalysis::isGroupingAndDataConsistent()
+{
+  std::string complaint = "Grouping inconsistent with data file. Plotting disabled.\n";
+
+  // should probably farm the getting of matrix workspace out into separate method or store
+  // as attribute assigned in inputFileChanged
+  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
+  WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
+  MatrixWorkspace_sptr matrix_workspace;
+  if (wsPeriods)
+  {
+    Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
+  }
+  else
+  {
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+  }
+
+  int nDet = matrix_workspace->getNumberHistograms();
+
+  complaint += "Number of spectra in data = " + boost::lexical_cast<std::string>(nDet) + ". ";
+
+  int numG = numGroups();
+  for (int iG = 0; iG < numG; iG++)
+  {
+    typedef Poco::StringTokenizer tokenizer;
+    tokenizer values(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString(), ",", tokenizer::TOK_TRIM);
+
+
+    for (int i = 0; i < static_cast<int>(values.count()); i++)
+    {
+      std::size_t found= values[i].find("-");
+      if (found!=std::string::npos)
+      {
+        tokenizer aPart(values[i], "-", tokenizer::TOK_TRIM);
+
+        int rightInt;
+        std::stringstream rightRead(aPart[1]);
+        rightRead >> rightInt;
+
+        if ( rightInt > nDet )
+        {
+          complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
+            + boost::lexical_cast<std::string>(rightInt) + ".";
+          return complaint;
+        }
+      }
+      else
+      {
+        if ( boost::lexical_cast<int>(values[i].c_str()) > nDet )
+        {
+          complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
+            + values[i] + ".";
+          return complaint;
+        }
+      }
+    }
+  }
+
+  return std::string("");
+}
+
+
+/**
+* Boevs
+*/
+void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
+{
+  QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
+
+  // row of IDs to compare against
+  std::vector<int> idsNew = spectrumIDs(item->text().toStdString());
+
+  int numG = numGroups();
+  int rowInFocus = getGroupNumberFromRow(row);
+  for (int iG = 0; iG < numG; iG++)
+  {
+    if (iG != rowInFocus)
+    {
+      std::vector<int> ids = spectrumIDs(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString());
+
+      for (unsigned int i = 0; i < ids.size(); i++)
+        for (unsigned int j = 0; j < idsNew.size(); j++)
+        {
+          if ( ids[i] == idsNew[j] )
+          {
+            item->setText(QString("Dublicate ID: " + item->text()));
+            return;
+          }
+        }
+
+    }
+  }
+
 }
