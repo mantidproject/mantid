@@ -65,13 +65,13 @@ private:
     {
       return new MockImplicitFunctionBuilder(new MockImplicitFunctionA);	
     }
-    virtual void setSuccessorParser(ImplicitFunctionParser* successor)
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser* successor)
     {
-      m_successor = std::auto_ptr<ImplicitFunctionParser>(successor);
+      m_successor = std::auto_ptr<Mantid::API::ImplicitFunctionParser>(successor);
     }
-    virtual void setParameterParser(ImplicitFunctionParameterParser* parser)
+    virtual void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
     {
-      m_paramParserRoot = std::auto_ptr<ImplicitFunctionParameterParser>(parser);
+      m_paramParserRoot = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(parser);
     }
   };
 
@@ -84,13 +84,13 @@ private:
     {
       return new MockImplicitFunctionBuilder(new MockImplicitFunctionB);	
     }
-    virtual void setSuccessorParser(ImplicitFunctionParser* successor)
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser* successor)
     {
-      m_successor = std::auto_ptr<ImplicitFunctionParser>(successor);
+      m_successor = std::auto_ptr<Mantid::API::ImplicitFunctionParser>(successor);
     }
-    virtual void setParameterParser(ImplicitFunctionParameterParser* parser)
+    virtual void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
     {
-      m_paramParserRoot = std::auto_ptr<ImplicitFunctionParameterParser>(parser);
+      m_paramParserRoot = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(parser);
     }
   };
 
@@ -101,9 +101,9 @@ private:
     {
       throw std::logic_error("Mock, so doesn't actually perform creation");
     }
-    virtual void setSuccessorParser(ImplicitFunctionParameterParser* successor)
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* successor)
     {
-      m_successor = std::auto_ptr<ImplicitFunctionParameterParser>(successor);
+      m_successor = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(successor);
     }
   }; 
 
@@ -114,9 +114,9 @@ private:
     {
       throw std::logic_error("Mock, so doesn't actually perform creation");	
     }
-    virtual void setSuccessorParser(ImplicitFunctionParameterParser* successor)
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* successor)
     {
-      m_successor = std::auto_ptr<ImplicitFunctionParameterParser>(successor);
+      m_successor = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(successor);
     }
   };
 

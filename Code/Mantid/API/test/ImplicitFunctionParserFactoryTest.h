@@ -39,8 +39,8 @@ class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite
 	{
         return NULL;	
 	}
-    virtual void setSuccessorParser(ImplicitFunctionParser* parser){}
-	virtual void setParameterParser(ImplicitFunctionParameterParser* parser){}
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser){}
+	virtual void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser){}
   };
   
   class MockImplicitFunctionParserB : public Mantid::API::ImplicitFunctionParser
@@ -52,8 +52,8 @@ class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite
 	{
         return NULL;	
 	}
-    virtual void setSuccessorParser(ImplicitFunctionParser* parser){}
-	virtual void setParameterParser(ImplicitFunctionParameterParser* parser){}
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser){}
+	virtual void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser){}
   };
   
 
