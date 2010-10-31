@@ -13,8 +13,7 @@ using namespace MDDataObjects;
 class tDND : public MDData
 {
 public:
-    tDND(unsigned int nDims):MDData(nDims){};
-
+    tDND(unsigned int nDims):MDData(nDims){};  
     void read_mdd(const char *file_name){MDData::read_mdd(file_name);}
 };
 

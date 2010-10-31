@@ -21,30 +21,12 @@
     <ClCompile Include="testMDData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="testMDDimension.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="testMDGeometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="testWorkspaceGeometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="testMDPixels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="test_sqw.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="testWorkspaceGeometry.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="testMDGeometry.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="testMDDimension.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="testMDData.h">

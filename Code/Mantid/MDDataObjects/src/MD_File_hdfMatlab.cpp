@@ -337,7 +337,7 @@ MD_File_hdfMatlab::read_mdd(MDData & dnd)
         throw(Exception::FileError(err.str(),this->File_name));
     }
     nDims= arr_dims_vector[0];
-    SlicingProperty dnd_shape(nDims);
+    MDGeometryDescription dnd_shape(nDims);
 
     for(i=0;i<nDims;i++){
         unsigned int dim_size=(unsigned int)*((double*)(data)+i);
@@ -382,7 +382,7 @@ MD_File_hdfMatlab::read_mdd(MDData & dnd)
     int nData=arr_dims_vector[0]*arr_dims_vector[1];
     double filler = *((double *)(data)+nData);
     std::vector<double> **rez    =(std::vector<double> **)transform_array2cells(data,arr_dims_vector,rank,kind,&filler);
-    if(MAX_NDIMS_POSSIBLE<=arr_dims_vector[0]){
+    if(MAX_MD_DIMS_POSSIBLE<=arr_dims_vector[0]){
         throw(Exception::FileError("file_hdf_Matlab::read_mdd=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE",this->File_name));
     }
     /* This is absolutely unnesessary for linear axis as n-bins has been already defined;
@@ -408,7 +408,7 @@ MD_File_hdfMatlab::read_mdd(MDData & dnd)
 // read the dataset itself
 // 1) create mem datatype to read data into. 
 
-    hsize_t arr_dims_buf_[MAX_NDIMS_POSSIBLE];
+    hsize_t arr_dims_buf_[MAX_MD_DIMS_POSSIBLE];
     arr_dims_buf_[0] = 3;
     hid_t   memtype = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, arr_dims_buf_);
 

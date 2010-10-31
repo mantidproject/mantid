@@ -3,7 +3,7 @@
 
 
 #include <cxxtest/TestSuite.h>
-#include "MDDataObjects/MDPixels.h"
+#include "MDDataObjects/MDWorkspace.h"
 #include "find_mantid.h"
 
 using namespace Mantid;
@@ -11,12 +11,12 @@ using namespace MDDataObjects;
 
 class testMDPixels :    public CxxTest::TestSuite
 {
-    MDPixels  *pSQW;
-    sqw_pixel *pix_buf;
-    size_t     buf_size;
+    MDWorkspace  *pSQW;
+    sqw_pixel    *pix_buf;
+    size_t        buf_size;
 public:
     void testSQWConstructor(void){
-        TS_ASSERT_THROWS_NOTHING(pSQW=new MDPixels(5));
+        TS_ASSERT_THROWS_NOTHING(pSQW=new MDWorkspace(5));
     }
     void testSQWDNDread(void){
        

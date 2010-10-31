@@ -9,7 +9,7 @@ namespace Mantid{
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
     
-
+    Kernel::Logger& MDData::g_log =Kernel::Logger::get("MDWorkspaces");
 void
 MDData::getPointData(std::vector<point3D> &image_points)const{
     std::vector<unsigned int> selection;
@@ -20,13 +20,6 @@ MDData::getPointData(std::vector<point3D> &image_points)const{
     }
     this->getPointData(selection,image_points);
      
-}
-boost::shared_ptr<IMDWorkspace> 
-MDData::build_from_IMD(const SlicingProperty &newGeomerty)
-{
-    boost::shared_ptr<IMDWorkspace> ws;
-
-    return ws;
 }
 //
 void
@@ -105,10 +98,10 @@ MDData::getPointData(const std::vector<unsigned int> &selection,std::vector<poin
             indexY =indexZ+nd2*j;
             for(i=iMin;i<iMax;i++){
                 index=indexY+i;
-                image_points[ic].position.x=xx[i];                
-                image_points[ic].position.y=yy[j];                
-                image_points[ic].position.z=zz[k];                
-                image_points[ic].data= this->data[index];
+                image_points[ic].X()=xx[i];                
+                image_points[ic].Y()=yy[j];                
+                image_points[ic].Z()=zz[k];                
+                image_points[ic]  = this->data[index];
                     
                 ic++;
             }
@@ -338,20 +331,20 @@ DND::write_mdd(const char *file_name){
 */
 //*******************************************************************************************************
 size_t
-MDData::reshape_geometry(const SlicingProperty &transf)
+MDData::reshape_geometry(const MDGeometryDescription &transf)
 {
    unsigned int i;
 
    // all paxis in the transformation matrix have to be defined properly and in accordance with the transformation data. 
-   this->reinit_Geometry(transf.getPAxis());
+   this->reinit_Geometry(transf);
 
    // set the this object limits as the limits from transf class
    this->setRanges(transf);
 
    this->dimSizes.assign(this->n_total_dim,0);
-   this->dimStride.assign(MAX_NDIMS_POSSIBLE+1,0);
+   this->dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
-    Dimension *pDim;
+    MDDimension *pDim;
     this->dimStride[0] = 1;
     this->data_size    = 1;
     for(i=0;i<this->n_total_dim;i++){
@@ -361,21 +354,21 @@ MDData::reshape_geometry(const SlicingProperty &transf)
         this->dimStride[i+1] = this->data_size;
     }
 
-    this->nd2 =dimStride[ek];
-    this->nd3 =dimStride[el];
-    this->nd4 =dimStride[en];
-    this->nd5 =dimStride[u1];
-    this->nd6 =dimStride[u2];
-    this->nd7 =dimStride[u3];
-    this->nd8 =dimStride[u4];
-    this->nd9 =dimStride[u5];
-    this->nd10=dimStride[u6];
-    this->nd11=dimStride[u7];
+    this->nd2 =dimStride[0];
+    this->nd3 =dimStride[1];
+    this->nd4 =dimStride[2];
+    this->nd5 =dimStride[3];
+    this->nd6 =dimStride[4];
+    this->nd7 =dimStride[5];
+    this->nd8 =dimStride[6];
+    this->nd9 =dimStride[7];
+    this->nd10=dimStride[8];
+    this->nd11=dimStride[9];
 
     return data_size;
 }
 void 
-MDData::alloc_mdd_arrays(const SlicingProperty &transf)
+MDData::alloc_mdd_arrays(const MDGeometryDescription &transf)
 {
 
 // initiate initial dimensions
@@ -401,13 +394,12 @@ MDData::alloc_mdd_arrays(const SlicingProperty &transf)
 }
 MDData::MDData(unsigned int nDims):
 MDGeometry(nDims),
-IMDWorkspace(),
 data_size(0),
 data(NULL),
 theFile(NULL),
 nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
 {
-    if(nDims>MAX_NDIMS_POSSIBLE){
+    if(nDims>MAX_MD_DIMS_POSSIBLE){
         throw(std::invalid_argument("MDData::MDData number of dimensions exceeds the possible value"));
     }
     this->dimSizes.assign(nDims,0);

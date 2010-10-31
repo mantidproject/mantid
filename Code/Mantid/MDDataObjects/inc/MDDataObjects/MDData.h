@@ -3,11 +3,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/SlicingProperty.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+#include "MantidGeometry/MDGeometry/MDGeometry.h"
+#include "MantidAPI/MDWorkspaceHolder.h"
+
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/IMD_FileFormat.h"
-#include "MDDataObjects/MDGeometry.h"
 #include "MDDataObjects/point3D.h"
 
 //#include "c:/Mantid/Code/Mantid/API/inc/MantidAPI/IMDWorkspace.h"
@@ -45,8 +46,10 @@ namespace Mantid{
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
+
 //
-class DLLExport MDData:public MDGeometry,public IMDWorkspace
+class DLLExport MDData:public MDGeometry,public MDWorkspaceHolder
 {
 public:
     // default constructor
@@ -62,16 +65,10 @@ public:
     void getPointData(const std::vector<unsigned int> &selection,std::vector<point3D> & image_data)const;
     /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3 
     void getPointData(std::vector<point3D> & image_data)const;
-    /// return number of dimensions in MD workspace
-    virtual unsigned int getNumDims(void)const{return WorkspaceGeometry::getNumDims();}
-    /// return ID specifying the workspace kind
-    virtual const std::string id() const { return "MD-Workspace"; }
-    /// overload to return the memory size of main visualisation datata ;  may need further clarification
-    virtual long int getMemorySize()const{return this->data_size*sizeof(data_point);}
-    /// builds empty workspace from the slicing data;
-    virtual boost::shared_ptr<IMDWorkspace> build_from_IMD(const SlicingProperty &newGeomerty);
  //****************************************************************************************************** 
     /// 
+  virtual unsigned int getNumDims(void) const{return Geometry::MDGeometry::getNumDims();}
+
    bool read_mdd(void){if(this->theFile){
                            this->theFile->read_mdd(*this); return true;
                         }else{return false;}
@@ -83,10 +80,14 @@ public:
                           this->theFile->write_mdd(*this);return true;
                           }else{return false;}
     }
-
+    virtual void initialize(const Geometry::MDGeometryDescription &Description){
+        alloc_mdd_arrays(Description);
+    }
 protected:
     size_t data_size;               ///< size of the data points array
     data_point *data;             ///< multidimensional array of data points, represented as a single dimensional array;
+
+    virtual long getMemorySize()const{return data_size*sizeof(data_point);}
  
     // dimensions strides in linear order; formulated in this way for fast access 
     size_t nd2,nd3,nd4,nd5,nd6,nd7,nd8,nd9,nd10,nd11;       
@@ -95,7 +96,7 @@ protected:
 
 
    // interface to alloc_mdd_arrays below in case of full not collapsed mdd dataset
-    void alloc_mdd_arrays(const SlicingProperty &transf);
+    void alloc_mdd_arrays(const MDGeometryDescription &transf);
 
 /// clear all allocated memory as in the destructor; neded for reshaping the object for e.g. changing from defaults to something else. generally this is bad desighn. 
     void clear_class();
@@ -137,10 +138,10 @@ protected:
      data_point thePoint(int i,int j,int k)       const{   return data[nCell(i,j,k)];}
      data_point thePoint(int i,int j,int k, int n)const{   return data[nCell(i,j,k,n)];}
 
-  
+      static Kernel::Logger& g_log;
 private:
     /** function reshapes the geomerty of the array according to the pAxis array request; returns the total array size */
-    size_t reshape_geometry(const SlicingProperty &transf);
+    size_t reshape_geometry(const MDGeometryDescription &transf);
    /// the pointer for vector returning the image points for visualisation
 
  //*************************************************

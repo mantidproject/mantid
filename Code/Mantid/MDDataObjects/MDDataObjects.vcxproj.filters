@@ -15,25 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Dimension.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DimensionIDS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DimensionRes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\point3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\MDData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MDGeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MD_File_hdfMatlab.cpp">
@@ -50,15 +35,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MDDataObjects\Dimension.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\DimensionIDS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\DimensionRes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MDDataObjects\Hexahedron.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -74,13 +50,7 @@
     <ClInclude Include="inc\MDDataObjects\MDData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\MDGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MDPixels.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MDDataObjects\MDWorkspaceConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MDDataObjects\point3D.h">
@@ -113,6 +83,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MDDataObjects.vcxproj" />
-    <None Include="temp.cd" />
   </ItemGroup>
 </Project>
