@@ -39,10 +39,15 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
           new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"Workspace containing the offsets");
-      declareProperty("Step",0.001);
-      declareProperty("DReference",2.0);
-      declareProperty("XMin",0.0);
-      declareProperty("XMax",0.0);
+      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+      mustBePositive->setLower(0);
+
+      declareProperty("Step",0.001, mustBePositive,
+        "Step size used to bin d-spacing data");
+      declareProperty("DReference",2.0, mustBePositive->clone(),
+         "Center of reference peak in d-space");
+      declareProperty("XMin",0.0, "Minimum of CrossCorrelation data to search for peak, usually negative");
+      declareProperty("XMax",0.0, "Maximum of CrossCorrelation data to search for peak, usually positive");
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::Save, ".cal"),
 		      "The name of the output CalFile" );
     }
@@ -97,6 +102,8 @@ namespace Mantid
       inputW=getProperty("InputWorkspace");
       Xmin=getProperty("XMin");
       Xmax=getProperty("XMax");
+      if (Xmin>=Xmax)
+        throw std::runtime_error("Must specify Xmin<Xmax");
       dreference=getProperty("DReference");
       step=getProperty("Step");
       nspec=inputW->getNumberHistograms();
