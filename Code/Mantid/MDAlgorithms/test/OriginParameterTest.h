@@ -32,18 +32,6 @@ public:
 	}
 	
 	
-	void testCopyPtr()
-	{
-	    using namespace Mantid::MDAlgorithms;
-        OriginParameter* original = new OriginParameter(0, 1, 2);
-	    OriginParameter copy(original);
-		
-        TSM_ASSERT_EQUALS("Copied OriginParameter getX() is not same as original.", 0, copy.getX() );
-        TSM_ASSERT_EQUALS("Copied OriginParameter getY() is not same as original.", 1, copy.getY() );
-        TSM_ASSERT_EQUALS("Copied OriginParameter getZ() is not same as original.", 2, copy.getZ() );
-		TSM_ASSERT_EQUALS("Copied OriginParameter isValid() is not same as original.", original->isValid(), copy.isValid() );
-	}
-	
 	void testDefaultInvalid()
 	{
 	  Mantid::MDAlgorithms::OriginParameter origin;
@@ -86,7 +74,7 @@ public:
     void testGetNameFunctionsEquivalent()
     {
         Mantid::MDAlgorithms::OriginParameter origin(0, 0, 0);
-        TSM_ASSERT_EQUALS("The static name and the dynamic name of the OriginParameter do not match.", origin.getName(),  Mantid::MDAlgorithms::OriginParameter::parameterName())
+        TSM_ASSERT_EQUALS("The static name and the dynamic name of the OriginParameter do not match.", origin.getName(),  Mantid::MDAlgorithms::OriginParameter::parameterName());
     }
 
     void testToXML()

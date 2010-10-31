@@ -69,8 +69,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.so.debug.1807695009.284633942" name="ParameterParser.cpp" rcbsApplicability="disable" resourcePath="src/ParameterParser.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544.1280638142">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544.1280638142" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1654817544"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="src/CenterpieceRebinning.cpp|test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/ParameterParser.cpp|src/CenterpieceRebinning.cpp|test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -823,6 +826,7 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.config.gnu.so.release.1004416903">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.release.1004416903" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -1625,6 +1629,7 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">

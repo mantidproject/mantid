@@ -53,7 +53,7 @@ namespace Mantid
         class DLLExport PlaneImplicitFunction : public Mantid::API::ImplicitFunction
         {
         public:
-            explicit PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin);
+            PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin);
             ~PlaneImplicitFunction();
             std::string getName() const;
             std::string toXMLString() const;
