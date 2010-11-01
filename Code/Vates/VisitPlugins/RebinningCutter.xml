@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+  <Plugin name="RebinningCutter" type="operator" label="Rebinning Cutter" version="1.0" enabled="true" mdspecificcode="false" engspecificcode="false" onlyengine="false" noengine="false" iconFile="RebinningCutter.xpm">
+    <Attribute name="RebinningCutterAttributes" purpose="Attributes for the Rebinning Cutter" persistent="false" keyframe="true" exportAPI="" exportInclude="">
+      <Field name="origin" label="origin" type="doubleVector">
+      </Field>
+      <Field name="normal" label="normal" type="doubleVector">
+      </Field>
+    </Attribute>
+  </Plugin>
