@@ -7436,20 +7436,31 @@ void ApplicationWindow::showIntegrationDialog()
   id->exec();
 }
 
+/**
+ * Sets the visibilty of the log window. If it is shown then
+ * the results are scrolled to the bottom
+ */
+void ApplicationWindow::showLogWindow(bool show)
+{
+  logWindow->setVisible(show);
+  if( show )
+  {
+    QTextCursor cur = results->textCursor();
+    cur.movePosition(QTextCursor::End);
+    results->setTextCursor(cur);
+  }
+}
+
 void ApplicationWindow::showResults(bool ok)
 {
-  if (ok){
+  if (ok)
+  {
     if (!current_folder->logInfo().isEmpty())
       results->setText(current_folder->logInfo());
     else
       results->setText(tr("Sorry, there are no results to display!"));
-
-    logWindow->show();
-    QTextCursor cur = results->textCursor();
-    cur.movePosition(QTextCursor::End);
-    results->setTextCursor(cur);
-  } else
-    logWindow->hide();
+  }
+  showLogWindow(ok);
 }
 
 void ApplicationWindow::showResults(const QString& s, bool ok)
@@ -16630,22 +16641,38 @@ void ApplicationWindow::ICatLogout()
   mantidUI->executeICatLogout(-1);
 }
 
-///slot for writing to log window
-void ApplicationWindow::writetoLogWindow(const QString& error,int param)
+/**
+ * Write a message to the log window
+ * @param message A string containing the message
+ * @param error A boolean indicating if this is an error
+ */
+void ApplicationWindow::writeToLogWindow(const QString& message,bool error)
 {		
-  if(param==0)
+  if(error)
   {
     results->setTextColor(Qt::red);
   }
-  else if (param==1)
+  else
   {
     results->setTextColor(Qt::black);
   }
-  results->insertPlainText(error+"\n");
-  QTextCursor cur = results->textCursor();
-  cur.movePosition(QTextCursor::End);
-  results->setTextCursor(cur);
+  QTextCursor cursor = results->textCursor();
+  cursor.movePosition(QTextCursor::End);
+  results->setTextCursor(cursor);
+  results->insertPlainText(message + "\n");
+  cursor = results->textCursor();
+  cursor.movePosition(QTextCursor::End);
 }
+
+  /**
+  * Write an error message to the log window (convenience slot)
+  * @param message The string to send the log window
+  */
+  void ApplicationWindow::writeErrorToLogWindow(const QString& message)
+  {
+    writeToLogWindow(message, true);
+  }
+
 /* This method executes loadraw asynchrnously
  * @param  fileName - name of the file to load
  * @param wsName -name of the workspace to store data

@@ -15,7 +15,7 @@ ICatMyDataSearch::ICatMyDataSearch(QWidget*par):QWidget(par),m_utils_sptr(new IC
 {
 	m_uiForm.setupUi(this);
 
-	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
+	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writeErrorToLogWindow(const QString&)));
 	connect(m_uiForm.myDatatableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
 		this,SLOT(investigationSelected(QTableWidgetItem* )));
 

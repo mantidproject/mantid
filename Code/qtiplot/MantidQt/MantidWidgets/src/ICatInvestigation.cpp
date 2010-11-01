@@ -43,7 +43,7 @@ ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,
 	//load button clicked
 	connect(m_uiForm.LoadButton,SIGNAL(clicked()),this,SLOT(onLoad()));
 	/// send error mesages to logwindow
- 	connect(this,SIGNAL(error(const QString&,int) ),parent()->parent(),SLOT(writetoLogWindow(const QString& ,int )));
+ 	connect(this,SIGNAL(error(const QString&,int) ),parent()->parent(),SLOT(writeErrorLogWindow(const QString&)));
 	//execute loadraw asynchronously
 	connect(this,SIGNAL(loadRawAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadRawAsynch(const QString&,const QString& )));
 	//execute loadnexus asynchronously

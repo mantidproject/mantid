@@ -69,7 +69,7 @@ void ICatAdvancedSearch::initLayout()
 	connect(m_uiForm.closeButton,SIGNAL(clicked()),this,SLOT(onClose()));
 	connect(m_uiForm.advSearchtableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
 		this,SLOT(investigationSelected(QTableWidgetItem* )));
-	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writetoLogWindow(const QString& )));
+	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writeErrorToLogWindow(const QString& )));
 	connect(m_uiForm.startdatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.enddatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.helpButton,SIGNAL(clicked()),this,SLOT(helpButtonClicked()));

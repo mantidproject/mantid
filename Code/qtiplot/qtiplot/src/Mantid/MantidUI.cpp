@@ -138,6 +138,8 @@ MantidUI::MantidUI(ApplicationWindow *aw):
 void MantidUI::init()
 {
   Mantid::Kernel::ConfigService::Instance();
+  // Echo Mantid's welcome message to the logger
+  m_appWindow->writeToLogWindow(QString::fromStdString(Mantid::welcomeMessage()));
   MantidLog::connect(this);
   FrameworkManager::Instance();
 
@@ -871,13 +873,13 @@ void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& file
   catch(std::invalid_argument& e)
   {
     //emit error(e.what());
-    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
     return ;
   }
   catch (Mantid::Kernel::Exception::NotFoundError& e)
   {
     //emit error(e.what());
-    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
     return ;
   }
 
@@ -1170,7 +1172,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(...)
   {
-    m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server ");
+    m_appWindow->writeToLogWindow("Error when getting/downloading data file from isis server ", true);
     return;
   }
   try
@@ -1181,13 +1183,13 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(std::invalid_argument& e)
   {
-    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
     return;
 
   }
   catch (Mantid::Kernel::Exception::NotFoundError& e)
   {
-    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
     return;
   }
   m_algMonitor->add(alg);
@@ -1202,7 +1204,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(...)
   {
-    m_appWindow->writetoLogWindow("Error when getting/downloading data file from isis server");
+    m_appWindow->writeToLogWindow("Error when getting/downloading data file from isis server", true);
     return;
   }
   try
@@ -1211,7 +1213,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch (Mantid::Kernel::Exception::NotFoundError&e)
   {
-    m_appWindow->writetoLogWindow(QString::fromStdString(e.what()));
+    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
     return;
   }
 

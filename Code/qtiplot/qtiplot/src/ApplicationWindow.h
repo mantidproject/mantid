@@ -661,6 +661,7 @@ public slots:
 	void showAxisDialog();
 	void showGridDialog();
 	void showGeneralPlotDialog();
+  void showLogWindow(bool show);
 	void showResults(bool ok);
 	void showResults(const QString& s, bool ok=true);
 	void showTextDialog();
@@ -986,9 +987,10 @@ public slots:
 	void showToolBarsMenu();
   void savetoNexusFile();
 
-  //slot for writing to log window
-  void writetoLogWindow(const QString& ,int param =0);
-
+  //Slot for writing to log window
+  void writeToLogWindow(const QString& message,bool error = false);
+  /// Write an error message to the log window (convenience slot)
+  void writeErrorToLogWindow(const QString& message);
   /// execute loadraw asynchronously
   void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
   
