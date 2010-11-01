@@ -103,8 +103,8 @@ MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag)
         throw(std::invalid_argument(" The requested tag does not exist"));
     }
     if(new_place!=old_place){
-        DimTags.insert(new_place,*old_place);
-        DimTags.erase(old_place);
+//        DimTags.insert(new_place,*old_place);
+//        DimTags.erase(old_place);
         this->sortAxisTags();
     }
 
