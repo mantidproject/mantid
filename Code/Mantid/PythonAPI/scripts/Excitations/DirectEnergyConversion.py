@@ -386,6 +386,8 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
                 SaveSPE(workspace, filename)
             elif ext == '.nxs':
                 SaveNexus(workspace, filename)
+            elif ext == '.nxspe':
+                SaveNXSPE(workspace, filename)
             else:
                 self.log('Unknown file format "%s" encountered while saving results.')
 #-----------------------------------------------------------------
