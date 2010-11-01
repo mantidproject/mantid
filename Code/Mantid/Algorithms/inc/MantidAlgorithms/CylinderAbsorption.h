@@ -40,8 +40,7 @@ namespace Algorithms
     Path lengths through the sample are then calculated for the centre-point of each element and a numerical
     integration is carried out using these path lengths over the volume elements.
 
-    This algorithm assumes that the beam comes along the Z axis, that Y (the sample cylinder axis) is up
-    and that the sample is at the origin.
+    This algorithm assumes that Y (the sample cylinder axis) is up.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 02/12/2008

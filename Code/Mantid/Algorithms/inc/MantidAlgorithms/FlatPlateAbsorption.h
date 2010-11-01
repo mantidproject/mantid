@@ -37,9 +37,6 @@ namespace Algorithms
     calculated for the centre-point of each element and a numerical
     integration is carried out using these path lengths over the volume elements.
 
-    This algorithm assumes that the beam comes along the Z axis
-    and that the sample is at the origin.
-
     @author Russell Taylor, Tessella plc
     @date 15/01/2010
 
