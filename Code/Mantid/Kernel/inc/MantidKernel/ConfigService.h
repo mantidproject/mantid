@@ -30,11 +30,9 @@ namespace Poco
 
 namespace Mantid
 {
-  /**
-   * Returns the welcome message for Mantid. This is echoed to stdout by the
-   * ConfigService
-   */
-  static std::string welcomeMessage();
+
+  /// Returns the welcome message for Mantid.
+  DLLExport std::string welcomeMessage();
 
   namespace Kernel
   {
