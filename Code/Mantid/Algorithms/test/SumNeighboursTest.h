@@ -20,8 +20,8 @@ class SumNeighboursTest : public CxxTest::TestSuite
 {
 public:
 
-//  SumNeighboursTest()
-//  {
+  SumNeighboursTest()
+  {
 //    outputSpace1 = "SNAP_sum";
 //    inputSpace = "SNAP";
 //
@@ -31,23 +31,31 @@ public:
 //    loader.setPropertyValue("Filename","/home/janik/data/SNAP_4105_event.nxs");
 //    loader.setPropertyValue("OutputWorkspace",inputSpace);
 //    loader.execute();
-//
-//  }
-//
-//  ~SumNeighboursTest()
-//  {}
-//
-//  void xtestBadInputs()
-//  {
-//    alg.initialize();
-//    TS_ASSERT( alg.isInitialized() );
-//    alg.setPropertyValue("InputWorkspace",inputSpace) ;
-//    alg.setPropertyValue("OutputWorkspace",outputSpace1) ;
-//    alg.setPropertyValue("SumX","12"); //! This is not valid :)
-//    alg.setPropertyValue("SumY","16");
-//    alg.execute();
-//    TS_ASSERT( !alg.isExecuted());
-//  }
+
+  }
+
+  ~SumNeighboursTest()
+  {}
+
+
+
+  void testTheBasics()
+  {
+    TS_ASSERT_EQUALS( alg.name(), "SumNeighbours" );
+    TS_ASSERT_EQUALS( alg.version(), 1 );
+    TS_ASSERT_EQUALS( alg.category(), "General" );
+  }
+
+  void testInit()
+  {
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    std::vector<Property*> props = alg.getProperties();
+    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 );
+  }
+
+
 //
 //
 //  void testExec_SNAP()

@@ -5,6 +5,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -46,7 +47,7 @@ void SumNeighbours::init()
   declareProperty("SumY", 4, mustBePositive->clone(),
     "The number of Y (vertical) pixels to sum together. This must evenly divide the number of Y pixels in a detector" );
 
-  declareProperty("DetectorNames", "", "Comma-separated list of the names of the detectors in the Mantid geometry file." );
+  //declareProperty("DetectorNames", "", "Comma-separated list of the names of the detectors in the Mantid geometry file." );
 
 
 }
@@ -87,10 +88,10 @@ void SumNeighbours::exec()
   matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
   this->setProperty("OutputWorkspace", matrixOutputWS);
 
-  //Split the detector names string.
-  std::vector<std::string> det_names;
-  std::string det_name_list = getPropertyValue("DetectorNames");
-  boost::split(det_names, det_name_list, boost::is_any_of(", "));
+//  //Split the detector names string.
+//  std::vector<std::string> det_names;
+//  std::string det_name_list = getPropertyValue("DetectorNames");
+//  boost::split(det_names, det_name_list, boost::is_any_of(", "));
 
   //To get the workspace index from the detector ID
   IndexToIndexMap * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
@@ -99,16 +100,45 @@ void SumNeighbours::exec()
   //std::cout << " inst->nelements() " << inst->nelements() << "\n";
   Progress prog(this,0.0,1.0,inst->nelements());
 
-  //Loop through all the elements in the instrument, looking for RectangularDetector's
+  //Build a list of Rectangular Detectors
+  std::vector<boost::shared_ptr<IRectangularDetector> > detList;
   for (int i=0; i < inst->nelements(); i++)
   {
-    std::string det_name("");
-    boost::shared_ptr<RectangularDetector> det;
-    int x, y;
+    boost::shared_ptr<IRectangularDetector> det;
+    boost::shared_ptr<ICompAssembly> assem;
 
-    det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
+    det = boost::dynamic_pointer_cast<IRectangularDetector>( (*inst)[i] );
+    if (det)
+      detList.push_back(det);
+    else
+    {
+      //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
+      // We are not doing a full recursive search since that will be very long for lots of pixels.
+      assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
+      if (assem)
+      {
+        for (int j=0; j < assem->nelements(); j++)
+        {
+          det = boost::dynamic_pointer_cast<IRectangularDetector>( (*assem)[j] );
+          if (det) detList.push_back(det);
+        }
+      }
+
+    }
+  }
+
+  if (detList.size() == 0)
+    throw std::runtime_error("This instrument does not have any RectangularDetector's. SumNeighbors cannot operate on this instrument at this time.");
+
+  //Loop through the RectangularDetector's we listed before.
+  for (int i=0; i < static_cast<int>(detList.size()); i++)
+  {
+    std::string det_name("");
+    boost::shared_ptr<IRectangularDetector> det;
+    det = detList[i];
     if (det)
     {
+      int x, y;
       det_name = det->getName();
       //TODO: Check validity of the parameters
 
