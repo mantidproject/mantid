@@ -3270,7 +3270,7 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
 
   addLegendItem();
   connect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
-  connect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()), Qt::BlockingQueuedConnection);
+  connect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()), Qt::QueuedConnection);
   return c;
 }
 
