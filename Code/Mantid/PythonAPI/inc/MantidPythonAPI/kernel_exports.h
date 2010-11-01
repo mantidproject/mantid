@@ -18,6 +18,14 @@ namespace Mantid
     */
     struct ConfigServiceWrapper
     {
+      /** Get the welcome message
+       * @returns The welcome message
+       */
+      std::string welcomeMessage() const
+      {
+        return Mantid::welcomeMessage();
+      }
+
       /**
       * Retrieve a setting from the ConfigService
       * @param name The name of the property

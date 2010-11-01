@@ -418,7 +418,10 @@ class MantidPyFramework(FrameworkManager):
         """
         if self.__is_initialized == True:
             return
-
+            
+        # Welcome everyone to the world of MANTID
+        print '\n' + self.settings.welcomeMessage()
+        # Run through init steps
         self.createPythonSimpleAPI(GUI)
         self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI)

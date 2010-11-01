@@ -132,6 +132,7 @@ namespace PythonAPI
       .def("__setitem__", &ConfigServiceWrapper::setProperty)
       // Standard methods
       .def("facility", &ConfigServiceWrapper::facility, ConfigService_facilityOverloads())
+      .def("welcomeMessage", &ConfigServiceWrapper::welcomeMessage)
       ;
   }
 
