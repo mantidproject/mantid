@@ -7,7 +7,6 @@
 #include <vector>
 #include <memory>
 #include "MantidKernel/System.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
@@ -54,8 +53,8 @@ namespace Mantid
             mutable NormalParameter m_normal;
         public:
             PlaneFunctionBuilder();
-            void addNormalParameter(NormalParameter& parameter);
-            void addOriginParameter(OriginParameter& parameter);
+            void addNormalParameter(const NormalParameter& parameter);
+            void addOriginParameter(const OriginParameter& parameter);
             std::auto_ptr<Mantid::API::ImplicitFunction> create() const;
             ~PlaneFunctionBuilder();
         };

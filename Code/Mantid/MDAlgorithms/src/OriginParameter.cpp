@@ -20,7 +20,7 @@ namespace Mantid
             this->m_isValid = false;
         }
 
-        OriginParameter::OriginParameter(OriginParameter& other) 
+        OriginParameter::OriginParameter(const OriginParameter& other)
         {
             this->m_isValid = other.m_isValid;
             this->m_origin = std::vector<double>(3);

@@ -33,7 +33,7 @@ namespace Mantid
             return new InvalidParameter(m_value);
         }
 
-        std::auto_ptr<InvalidParameter> InvalidParameter::clone() const
+        std::auto_ptr<Mantid::MDAlgorithms::InvalidParameter> InvalidParameter::clone() const
         {
             return std::auto_ptr<InvalidParameter>(cloneImp());
         }

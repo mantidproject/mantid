@@ -20,7 +20,7 @@ NormalParameter::NormalParameter()
   this->m_isValid = false;
 }
 
-NormalParameter::NormalParameter(NormalParameter& other)
+NormalParameter::NormalParameter(const NormalParameter& other)
 {
   this->m_isValid = other.m_isValid;
   this->m_normal = std::vector<double>(3);

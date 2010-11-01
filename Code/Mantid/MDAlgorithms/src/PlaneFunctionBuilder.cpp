@@ -14,13 +14,13 @@ namespace Mantid
         {
         }
 
-        void  PlaneFunctionBuilder::addNormalParameter(NormalParameter& parameter)
+        void  PlaneFunctionBuilder::addNormalParameter(const NormalParameter& parameter)
         {
             
             this->m_normal = NormalParameter(parameter);
         }
 
-        void  PlaneFunctionBuilder::addOriginParameter(OriginParameter& parameter)
+        void  PlaneFunctionBuilder::addOriginParameter(const OriginParameter& parameter)
         { 
            
             this->m_origin = OriginParameter(parameter);

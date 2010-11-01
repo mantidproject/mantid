@@ -56,7 +56,7 @@ namespace Mantid
             
             OriginParameter();
             
-            OriginParameter(OriginParameter & other);
+            OriginParameter(const OriginParameter & other);
             
             OriginParameter& operator=(const OriginParameter& other);
 

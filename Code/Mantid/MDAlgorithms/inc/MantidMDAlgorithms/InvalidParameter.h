@@ -57,7 +57,7 @@ namespace Mantid
 
             bool isValid() const;
 
-            std::auto_ptr<InvalidParameter> clone() const;
+            std::auto_ptr<Mantid::MDAlgorithms::InvalidParameter> clone() const;
 
             std::string toXMLString() const;
 
