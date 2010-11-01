@@ -20,7 +20,23 @@ class GetDetectorOffsetsTest : public CxxTest::TestSuite
 {
 public:
 
-  void testPG3()
+  void testBasics()
+  {
+    GetDetectorOffsets alg;
+    TS_ASSERT_EQUALS( alg.name(), "GetDetectorOffsets" )
+    TS_ASSERT_EQUALS( alg.version(), 1 )
+    TS_ASSERT_EQUALS( alg.category(), "Diffraction" )
+  }
+
+
+  void testInit()
+  {
+    GetDetectorOffsets alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+  }
+
+  void xtestPG3()
   {
 
     //Load large diffraction dataset
