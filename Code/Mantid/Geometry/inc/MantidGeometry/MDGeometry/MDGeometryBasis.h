@@ -67,7 +67,7 @@ namespace Mantid
         /// copy constructor and operator()= are public
        /// to initate array, which has to be reset as meaningless and not checked against this later
         DimensionID(int iDimID0=-1,const char *name0="",unsigned int nReciprocalDims=3):
-        iDimID(iDimID0),DimensionTag(name0),n_reciprocal_dimensions(nReciprocalDims),tagHash(0){}; 
+        iDimID(iDimID0),tagHash(0),n_reciprocal_dimensions(nReciprocalDims),DimensionTag(name0){}; 
         /// function compares the tag of this DimensionID with the input tag and returns the numeric value of the ID if the names coinside or -1 if not. 
         int getDimensionID(const std::string &aTag)const{return (this->DimensionTag.compare(aTag)==0)?this->iDimID:-1;}
         /// this should be prviate or protected?;
