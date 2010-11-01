@@ -110,8 +110,8 @@ namespace Mantid
     /// gettind dimension tag (name)
     std::string getTag(unsigned int nDim)const;
     /// ort of the dimension. Initial are reciprocal (up to 3), returning {x,y,z}, x^2+y^2+z^2=1; and other are orthogonal {1}. (or may be should be scaled?)
-    const std::vector<double> & MDGeometryBasis::getOrt(unsigned int nDim)const;
-    const std::vector<double> & MDGeometryBasis::getOrt(const std::string &tag)const;
+    const std::vector<double> & getOrt(unsigned int nDim)const;
+    const std::vector<double> & getOrt(const std::string &tag)const;
     /// 
     double getScale(unsigned int nDim);
 
