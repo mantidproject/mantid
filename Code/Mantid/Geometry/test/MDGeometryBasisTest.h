@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
+#include <cfloat>
 
 using namespace Mantid;
 using namespace Geometry;
