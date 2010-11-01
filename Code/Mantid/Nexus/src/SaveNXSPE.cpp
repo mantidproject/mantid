@@ -179,7 +179,9 @@ namespace Mantid
       // NXsample
       nxFile.makeGroup("sample", "NXsample", true);
       // TODO: Write sample info
-      nxFile.writeData("rotation_angle", 0.0);
+//      nxFile.writeData("rotation_angle", 0.0);
+//      nxFile.writeData("seblock", "NONE");
+//      nxFile.writeData("temperature", 300.0);
 
       nxFile.closeGroup(); // NXsample
 
