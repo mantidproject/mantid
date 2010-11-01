@@ -60,7 +60,7 @@ public:
   void testExec()
   {
     // Create a small test workspace
-    std::string WSName = "saveSPETest_input";
+    std::string WSName = "saveNXSPETest_input";
     MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
 
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
@@ -81,11 +81,11 @@ public:
   void xtestThatOutputIsValidFromWorkspaceWithNumericAxis()
   {
     // Create a small test workspace
-    std::string WSName = "saveSPETestB_input";
+    std::string WSName = "saveNXSPETestB_input";
     MatrixWorkspace_sptr input = makeWorkspaceWithNumericAxis(WSName);
 
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
-    const std::string outputFile("testSPE_Axis.nxspe");
+    const std::string outputFile("testNXSPE_Axis.nxspe");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
     saver->setRethrows(true);
     saver->execute();
