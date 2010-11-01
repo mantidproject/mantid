@@ -6,6 +6,8 @@
 #include "GL/glu.h"
 #include "math.h"
 #include "MantidGeometry/V3D.h"
+#include <iostream>
+
 GLViewport::GLViewport(int w, int h):mWidth(w),mHeight(h)
 {
 	mProjection=GLViewport::ORTHO;
@@ -29,6 +31,7 @@ void GLViewport::getViewport(int* w, int* h) const
 }
 /**
  * This will set the projection to Ortho
+ *
  * @param l left side of the Ortho projection (xmin)
  * @param r right side of the Ortho projection (xmax)
  * @param b bottom side of the Ortho projection (ymin)
@@ -52,7 +55,9 @@ void GLViewport::setOrtho(double l,double r,double b,double t,double nearz,doubl
 }
 
 /**
- * This will set the projection to perspective
+ * This will set the projection to perspective.
+ * UNUSED! as of 2010-11-01.
+ *
  * @param l left side of the perspective projection (xmin)
  * @param r right side of the perspective projection (xmax)
  * @param b bottom side of the perspective projection (ymin)
@@ -109,9 +114,11 @@ void GLViewport::getTranslation(double& xval,double& yval)
 	yval=mYTrans;
 }
 
+/** Issue the OpenGL commands that define the viewport and projection. */
 void GLViewport::issueGL() const
 {
 	Mantid::Geometry::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
+
 	Mantid::Geometry::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
 	//Window Aspect ratio
 	GLdouble windowAspect=(GLdouble)mWidth/(GLdouble)mHeight;
@@ -153,13 +160,28 @@ void GLViewport::issueGL() const
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glViewport(0, 0, mWidth, mHeight);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	if(mProjection==GLViewport::PERSPECTIVE){
-		glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans, center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans, center[2]+distance[2], mFar);
-	}else{
-//		glOrtho(mLeft*mZoomFactor-mXTrans, mRight*mZoomFactor-mXTrans, mBottom*mZoomFactor-mYTrans, mTop*mZoomFactor-mYTrans, mNear*mZoomFactor, mFar);
-		glOrtho(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans, center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans, center[2]+distance[2], mFar);
+	if(mProjection==GLViewport::PERSPECTIVE)
+	{
+		glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
+		        center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
+		        center[2]+distance[2], mFar);
+	}
+	else
+	{
+	  //    glOrtho(mLeft*mZoomFactor-mXTrans, mRight*mZoomFactor-mXTrans, mBottom*mZoomFactor-mYTrans, mTop*mZoomFactor-mYTrans, mNear*mZoomFactor, mFar);
+
+	  double nearVal = center[2]+distance[2];
+	  double farVal = mFar;
+
+		glOrtho(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
+		    center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
+		    nearVal, farVal);
+//    std::cout << "center is" << center << "\n";
+//    std::cout << "distance is" << distance << "\n";
+//		std::cout << "glOrtho called with nearVal = " << nearVal  << " and farVal = " << farVal << "\n";
 	}
 	glMatrixMode(GL_MODELVIEW);
 }

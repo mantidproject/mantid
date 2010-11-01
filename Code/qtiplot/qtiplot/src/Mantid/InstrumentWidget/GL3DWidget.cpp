@@ -24,6 +24,11 @@
 GL3DWidget::GL3DWidget(QWidget* parent):
   QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent)
 {
+
+  if (!this->format().depth())
+    std::cout << "Warning! OpenGL Depth buffer could not be initialized.\n";
+  //std::cout << "Depth buffer size is " << this->format().depthBufferSize() << "\n";
+
   _viewport=new GLViewport;
   _trackball=new GLTrackball(_viewport);
   isKeyPressed=false;
@@ -93,16 +98,18 @@ void GL3DWidget::setRenderingOptions()
 {
   // Enable depth testing. This only draws points that are not hidden by other objects
   glEnable(GL_DEPTH_TEST);
+
   // Depth function for testing is Less than or equal                        
   glDepthFunc(GL_LEQUAL);
+
   // Disable colour blending
   glDisable(GL_BLEND);
 
-  //Set a simple flat lighting model
-//  glShadeModel(GL_FLAT);
-//  glDisable(GL_LIGHTING);
-//  glDisable(GL_LIGHT0);
-//  glDisable(GL_LINE_SMOOTH);
+  //Disable face culling because some polygons are visible from the back.
+  glDisable(GL_CULL_FACE);
+
+  //enablewriting into the depth buffer
+  glDepthMask(GL_TRUE);
 
 }
 
@@ -219,17 +226,21 @@ void GL3DWidget::drawDisplayScene()
   else
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    //Set the lighting
     if (m_lightingState > 0)
-    {
       glEnable(GL_LIGHTING);
-    }
+    else
+      glDisable(GL_LIGHTING);
+
     scene->draw();
-    glDisable(GL_LIGHTING);
+
     //This draws a point at the origin, I guess
     glPointSize(3.0);
     glBegin(GL_POINTS);
     glVertex3d(0.0,0.0,0.0);
     glEnd();
+
     //Also some axes
     this->drawAxes();
 
