@@ -54,7 +54,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver->initialize() );
     TS_ASSERT( saver->isInitialized() );
 
-    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 2 );
+    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 5 );
   }
 
   void testExec()
@@ -66,6 +66,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
     const std::string outputFile("testNXSPE.nxspe");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
+
+    TS_ASSERT_THROWS_NOTHING( saver->setProperty("Efixed", 0.0));
+    TS_ASSERT_THROWS_NOTHING( saver->setProperty("psi", 0.0));
+    TS_ASSERT_THROWS_NOTHING( saver->setProperty("ki_over_kf_scaling", true));
+
 
     TS_ASSERT_THROWS_NOTHING( saver->execute() );
     TS_ASSERT( saver->isExecuted() );
