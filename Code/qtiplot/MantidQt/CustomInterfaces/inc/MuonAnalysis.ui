@@ -749,6 +749,19 @@
         </rect>
        </property>
       </widget>
+      <widget class="QPushButton" name="muonAnalysisHelpGrouping" >
+       <property name="geometry" >
+        <rect>
+         <x>530</x>
+         <y>20</y>
+         <width>20</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>?</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

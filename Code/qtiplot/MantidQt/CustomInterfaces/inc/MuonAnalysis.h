@@ -91,6 +91,9 @@ private slots:
   ///
   void muonAnalysisHelpClicked();
 
+  ///
+  void muonAnalysisHelpGroupingClicked();
+
 private:
   /// Initialize the layout
   virtual void initLayout();
