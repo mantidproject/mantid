@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include <vector>
 
-#include "boost/smart_ptr/shared_ptr.hpp"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"

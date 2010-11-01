@@ -1,5 +1,4 @@
 ﻿#include <exception>
-#include "boost/smart_ptr/shared_ptr.hpp"
 #include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 

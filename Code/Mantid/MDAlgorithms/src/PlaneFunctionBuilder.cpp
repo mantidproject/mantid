@@ -10,7 +10,7 @@ namespace Mantid
     {
         using namespace Mantid::API;
 
-        PlaneFunctionBuilder::PlaneFunctionBuilder()//: m_origin(std::auto_ptr<IParameter>(new InvalidParameter())) , m_normal(std::auto_ptr<IParameter>(new InvalidParameter()))
+        PlaneFunctionBuilder::PlaneFunctionBuilder()
         {
         }
 

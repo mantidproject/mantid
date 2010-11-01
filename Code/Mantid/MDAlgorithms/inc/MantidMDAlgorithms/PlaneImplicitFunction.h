@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"

@@ -7,7 +7,6 @@
 
 #include <vector>
 #include "MantidKernel/System.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
 #include "MantidMDAlgorithms/Topology.h"
 
 namespace Mantid
