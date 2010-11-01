@@ -49,6 +49,19 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
           "", Direction::Input, wsValidator),
           "Name of the workspace to be saved.");
+
+      BoundedValidator<double> *mustBePositive =
+          new BoundedValidator<double> ();
+      mustBePositive->setLower(0.0);
+      declareProperty("Efixed", EMPTY_DBL(),
+          "Value of the fixed energy to write into NXSPE file.");
+
+      NullValidator<double> *numberValidator = new NullValidator<double> ();
+      declareProperty("psi", EMPTY_DBL(), numberValidator,
+          "Value of PSI to write into NXSPE file.");
+
+      declareProperty("ki_over_kf_scaling", true,
+          "Flags in the file whether Ki/Kf scaling has been done or not.");
     }
 
     /**
@@ -61,6 +74,7 @@ namespace Mantid
 
       // Constant for converting Radians to Degrees
       const double rad2deg = 180.0 / M_PI;
+      double efixed = 0.0;
 
       // Retrieve the input workspace
       const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -79,7 +93,8 @@ namespace Mantid
       this->nBins = inputWS->blocksize();
 
       // Get a pointer to the sample
-      Geometry::IObjComponent_const_sptr sample = inputWS->getInstrument()->getSample();
+      Geometry::IObjComponent_const_sptr sample =
+          inputWS->getInstrument()->getSample();
 
       // Retrieve the filename from the properties
       this->filename = getPropertyValue("Filename");
@@ -107,9 +122,39 @@ namespace Mantid
       // Create NXSPE_info
       nxFile.makeGroup("NXSPE_info", "NXcollection", true);
 
-      //TODO: Get and write Ei as "fixed_energy"
-      //TODO: Get and write psi as "psi"
-      //TODO: Get and write ki/kf as "ki_over_kf_scaling" = 1/0
+      // Get the value out of the property first
+      efixed = getProperty("Efixed");
+      // Now lets check to see if the workspace nows better.
+      // TODO: Check that this is the way round we want to do it.
+      const API::Run & run = inputWS->run();
+      if (run.hasProperty("Ei"))
+        {
+          Kernel::Property* propEi = run.getProperty("Ei");
+          efixed = boost::lexical_cast<double, std::string>(propEi->value());
+        }
+      nxFile.writeData("fixed_energy", efixed);
+      nxFile.openData("fixed_energy");
+      nxFile.putAttr("units", "meV");
+      nxFile.closeData();
+
+      double psi = getProperty("psi");
+      if (psi != EMPTY_DBL())
+        {
+          nxFile.writeData("psi", psi);
+          nxFile.openData("psi");
+          nxFile.putAttr("units", "degrees");
+          nxFile.closeData();
+        }
+
+      bool kikfScaling = getProperty("ki_over_kf_scaling");
+      if (kikfScaling)
+        {
+      nxFile.writeData("ki_over_kf_scaling", 1);
+        }
+      else
+        {
+          nxFile.writeData("ki_over_kf_scaling", 0);
+        }
 
       nxFile.closeGroup(); // NXSPE_info
 
@@ -125,7 +170,8 @@ namespace Mantid
 
       // NXfermi_chopper
       nxFile.makeGroup("fermi", "NXfermi_chopper", true);
-      //TODO: Get and write Ei as "fixed_energy"
+
+      nxFile.writeData("energy", efixed);
       nxFile.closeGroup(); // NXfermi_chopper
 
       nxFile.closeGroup(); // NXinstrument
@@ -133,6 +179,8 @@ namespace Mantid
       // NXsample
       nxFile.makeGroup("sample", "NXsample", true);
       // TODO: Write sample info
+      nxFile.writeData("rotation_angle", 0.0);
+
       nxFile.closeGroup(); // NXsample
 
       // Make the NXdata group
