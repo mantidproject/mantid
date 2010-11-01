@@ -1,3 +1,3 @@
 #!/bin/csh
-setenv MANTIDBIN "MANTIDBINDIR"
-setenv PATH "${PATH}:${MANTIDBIN}"
+setenv MANTIDPATH "MANTIDBINDIR"
+setenv PATH "${PATH}:${MANTIDPATH}"

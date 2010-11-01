@@ -9,7 +9,7 @@ echo "=== Starting postflight installer hook ==="
 echo
 
 # ------------- Environmental variable update -----------------------
-# Ensure the MANTIDBIN environmental variable is set correctly by either:
+# Ensure the MANTIDPATH environmental variable is set correctly by either:
 #   (a) Creating a new ~/.MacOS/environment.plist file or
 #   (b) Updating an existing file with the current value.
 echo "Checking current environmental variable status"
@@ -20,7 +20,7 @@ if [ ! -d ${env_dir} ]; then
     mkdir -p ${env_dir}
 fi
 
-var_name=MANTIDBIN
+var_name=MANTIDPATH
 var_value=/Applications/MantidPlot.app/Contents/MacOS
 
 key_value="<key>${var_name}</key>\n<string>${var_value}</string>"
