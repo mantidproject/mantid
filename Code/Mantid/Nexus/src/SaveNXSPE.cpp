@@ -1,111 +1,253 @@
 #include "MantidNexus/SaveNXSPE.h"
-
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/WorkspaceValidators.h"
-
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
-namespace Mantid {
-namespace NeXus {
+namespace Mantid
+{
+  namespace NeXus
+  {
 
-// Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM( SaveNXSPE)
+    // Register the algorithm into the algorithm factory
+    DECLARE_ALGORITHM( SaveNXSPE)
 
-using namespace Kernel;
-using namespace API;
+    using namespace Kernel;
+    using namespace API;
 
-SaveNXSPE::SaveNXSPE() :
-	API::Algorithm() {
-}
+    const double SaveNXSPE::MASK_FLAG = -1e30;
+    const double SaveNXSPE::MASK_ERROR = 0.0;
 
-/**
- * Initialise the algorithm
- */
-void SaveNXSPE::init() {
+    SaveNXSPE::SaveNXSPE() :
+      API::Algorithm()
+    {
+    }
 
-	std::vector<std::string> exts;
-	exts.push_back(".nxspe");
+    /**
+     * Initialise the algorithm
+     */
+    void
+    SaveNXSPE::init()
+    {
 
-	declareProperty(new API::FileProperty("Filename", "", FileProperty::Save, exts),
-			"The name of the NXSPE file to write, as a full or relative path");
+      std::vector < std::string > exts;
+      exts.push_back(".nxspe");
 
-	CompositeValidator<> * wsValidator = new CompositeValidator<> ;
-	wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
-	wsValidator->add(new API::CommonBinsValidator<>);
-	wsValidator->add(new API::HistogramValidator<>);
+      declareProperty(new API::FileProperty("Filename", "", FileProperty::Save,
+          exts),
+          "The name of the NXSPE file to write, as a full or relative path");
 
-	declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
-			"", Direction::Input, wsValidator),
-			"Name of the workspace to be saved.");
-}
+      CompositeValidator<> * wsValidator = new CompositeValidator<> ;
+      wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
+      wsValidator->add(new API::CommonBinsValidator<>);
+      wsValidator->add(new API::HistogramValidator<>);
 
-/**
- * Execute the algorithm
- */
-void SaveNXSPE::exec() {
-	using namespace Mantid::API;
-	// Retrieve the input workspace
-	const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
+          "", Direction::Input, wsValidator),
+          "Name of the workspace to be saved.");
+    }
 
-	// Do the full check for common binning
-	if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
-		g_log.error("The input workspace must have common bins");
-		throw std::invalid_argument("The input workspace must have common bins");
-	}
+    /**
+     * Execute the algorithm
+     */
+    void
+    SaveNXSPE::exec()
+    {
+      using namespace Mantid::API;
 
-	const int nHist = inputWS->getNumberHistograms();
-	this->nBins = inputWS->blocksize();
+      // Constant for converting Radians to Degrees
+      const double rad2deg = 180.0 / M_PI;
 
-	// Retrieve the filename from the properties
-	this->filename = getPropertyValue("Filename");
+      // Retrieve the input workspace
+      const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
-	// Create the file.
-	::NeXus::File nxFile(this->filename, NXACC_CREATE5);
+      // Do the full check for common binning
+      if (!WorkspaceHelpers::commonBoundaries(inputWS))
+        {
+          g_log.error("The input workspace must have common bins");
+          throw std::invalid_argument(
+              "The input workspace must have common bins");
+        }
 
-	// Make the top level entry (and open it)
-	nxFile.makeGroup(inputWS->getName(), "NXentry", true);
+      // Number of spectra
+      const int nHist = inputWS->getNumberHistograms();
+      // Number of energy bins
+      this->nBins = inputWS->blocksize();
 
-	// Create NXSPE_info
-	nxFile.makeGroup("NXSPE_info", "NXcollection", true);
+      // Get a pointer to the sample
+      Geometry::IObjComponent_const_sptr sample = inputWS->getInstrument()->getSample();
 
-	//TODO: Get and write Ei as "fixed_energy"
-	//TODO: Get and write psi as "psi"
-	//TODO: Get and write ki/kf as "ki_over_kf_scaling" = 1/0
+      // Retrieve the filename from the properties
+      this->filename = getPropertyValue("Filename");
 
-	nxFile.closeGroup(); // NXSPE_info
+      // Create the file.
+      ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
 
-	// NXinstrument
-	nxFile.makeGroup("instrument", "NXinstrument", true);
+      // Make the top level entry (and open it)
+      nxFile.makeGroup(inputWS->getName(), "NXentry", true);
 
-	// NXfermi_chopper
-	nxFile.makeGroup("fermi", "NXfermi_chopper", true);
-	//TODO: Get and write Ei as "fixed_energy"
-	nxFile.closeGroup(); // NXfermi_chopper
+      // Definition name and version
+      nxFile.writeData("definition", "NXSPE");
+      nxFile.openData("definition");
+      // Make Version 1.0 as we don't have all the metadata yet!
+      nxFile.putAttr("version", "1.0");
+      nxFile.closeData();
 
-	nxFile.closeGroup(); // NXinstrument
+      // Program name and version
+      nxFile.writeData("program_name", "mantid");
+      nxFile.openData("program_name");
+      // TODO: Get the correct version number
+      nxFile.putAttr("version", "1.1");
+      nxFile.closeData();
 
-	// NXsample
-	nxFile.makeGroup("sample", "NXsample", true);
-	// TODO: Write sample info
-	nxFile.closeGroup(); // NXsample
+      // Create NXSPE_info
+      nxFile.makeGroup("NXSPE_info", "NXcollection", true);
 
-	// Energy bins
-    // Get the Energy Axis (X) of the first spectra (they are all the same - checked above)
-    const MantidVec& X = inputWS->readX(0);
-	nxFile.writeData("energy", X);
+      //TODO: Get and write Ei as "fixed_energy"
+      //TODO: Get and write psi as "psi"
+      //TODO: Get and write ki/kf as "ki_over_kf_scaling" = 1/0
 
-	// TODO: Data Array
-	// TODO: Error Array
-	// Polar Angles
-	// Polar Angle Width
-	// Azimuthal Angle
-	// Azimuthal Angle Width
+      nxFile.closeGroup(); // NXSPE_info
 
-	nxFile.closeGroup(); // Top level NXentry
-}
+      // NXinstrument
+      nxFile.makeGroup("instrument", "NXinstrument", true);
+      // Write the instrument name
+      nxFile.writeData("name", inputWS->getInstrument()->getName());
+      // and the short name
+      nxFile.openData("name");
+      // TODO: Get the instrument short name
+      nxFile.putAttr("short_name", inputWS->getInstrument()->getName());
+      nxFile.closeData();
 
-} // namespace NeXus
+      // NXfermi_chopper
+      nxFile.makeGroup("fermi", "NXfermi_chopper", true);
+      //TODO: Get and write Ei as "fixed_energy"
+      nxFile.closeGroup(); // NXfermi_chopper
+
+      nxFile.closeGroup(); // NXinstrument
+
+      // NXsample
+      nxFile.makeGroup("sample", "NXsample", true);
+      // TODO: Write sample info
+      nxFile.closeGroup(); // NXsample
+
+      // Make the NXdata group
+      nxFile.makeGroup("data", "NXdata", true);
+
+      // Energy bins
+      // Get the Energy Axis (X) of the first spectra (they are all the same - checked above)
+      const MantidVec& X = inputWS->readX(0);
+      nxFile.writeData("energy", X);
+      nxFile.openData("energy");
+      nxFile.putAttr("units", "meV");
+      nxFile.closeData();
+
+      // let's create some blank arrays in the nexus file
+
+      std::vector<double> azimuthal;
+      std::vector<double> polar;
+      std::vector<double> azimuthal_width;
+      std::vector<double> polar_width;
+      double delta_polar = 0.0;
+      double delta_azimuthal = 0.0;
+      double distance = 0.0;
+
+      std::vector<int> array_dims;
+      array_dims.push_back(nHist);
+      array_dims.push_back(nBins);
+
+      nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
+      nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
+
+      std::vector<int> slab_start;
+      std::vector<int> slab_size;
+
+      // What size slabs are we going to write...
+      slab_size.push_back(1);
+      slab_size.push_back(nBins);
+
+      // And let's start at the beginning
+      slab_start.push_back(0);
+      slab_start.push_back(0);
+
+      // Loop over spectra
+      for (size_t i = 0; i < static_cast<size_t> (nHist); i++)
+        {
+          // Check that we aren't writing a monitor...
+          if (!inputWS->getDetector(i)->isMonitor())
+            {
+              Geometry::IDetector_sptr det = inputWS->getDetector(i);
+              polar.push_back(inputWS->detectorTwoTheta(det) * rad2deg);
+              azimuthal.push_back(inputWS->getDetector(i)->getPhi() * rad2deg);
+
+              // Get Sample->Detector distance
+              distance = det->getDistance(*sample);
+
+              // Now let's work out the detector widths
+              // TODO: This is the historically wrong method...update it!
+
+              // Initialise to large values
+              double xmin = -1000.0;
+              double xmax = 1000.0;
+              double ymin = -1000.0;
+              double ymax = 1000.0;
+              double zmin = -1000.0;
+              double zmax = 1000.0;
+              // Get the bounding box
+              det->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
+              double xsize = xmax - xmin;
+              double ysize = ymax - ymin;
+              delta_polar = atan2((ysize / 2.0), distance) * rad2deg;
+              delta_azimuthal = atan2((xsize / 2.0), distance) * rad2deg;
+
+              // Now write the widths...
+              polar_width.push_back(delta_polar);
+              azimuthal_width.push_back(delta_azimuthal);
+
+              if (!inputWS->getDetector(i)->isMasked())
+                {
+                  // no masking...
+                  // Open the data
+                  nxFile.openData("data");
+                  slab_start[0] = i;
+                  nxFile.putSlab(const_cast<MantidVec&> (inputWS->readY(i)),
+                      slab_start, slab_size);
+                  // Close the data
+                  nxFile.closeData();
+
+                  // Open the error
+                  nxFile.openData("error");
+                  nxFile.putSlab(const_cast<MantidVec&> (inputWS->readE(i)),
+                      slab_start, slab_size);
+                  // Close the error
+                  nxFile.closeData();
+                }
+              else
+                {
+                  // Write a masked value...
+                }
+            }
+
+        }
+
+      // Write the Polar (2Theta) angles
+      nxFile.writeData("polar", polar);
+
+      // Write the Azimuthal (phi) angles
+      nxFile.writeData("azimuthal", azimuthal);
+
+      // Now the widths...
+      nxFile.writeData("polar_width", polar_width);
+      nxFile.writeData("azimuthal_width", azimuthal_width);
+
+      nxFile.closeGroup(); // NXdata
+
+      nxFile.closeGroup(); // Top level NXentry
+    }
+
+  } // namespace NeXus
 } // namespace Mantid
