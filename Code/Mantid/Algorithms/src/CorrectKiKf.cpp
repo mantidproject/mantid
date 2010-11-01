@@ -87,123 +87,43 @@ void CorrectKiKf::exec()
   // probably faster to make 4 big cases at the beginning instead of checking inside the loop 
 
   double deltaE = 0.;
+  double Ei=0.;
+  double Ef=0.;
   double kioverkf = 0.;  
 
-  //check if EnergyTransfer[i][j]=0.5*(dataX[i][j]+dataX[i][j+1]) or  EnergyTransfer[i][j]=dataX[i][j]
-  if (histogram)
+  PARALLEL_FOR2(inputWS,outputWS)
+  for (int i = 0; i < numberOfSpectra; ++i) 
   {
-    if (emodeStr == "Direct") //Ei=Efixed
-    { 
-      PARALLEL_FOR2(inputWS,outputWS)
-      for (int i = 0; i < numberOfSpectra; ++i) 
-      {
-        PARALLEL_START_INTERUPT_REGION 
-        //Copy the energy transfer axis
-        outputWS->setX( i, inputWS->refX(i) );
-        for (unsigned int j = 0; j < size; ++j)
-        {
-          deltaE = 0.5*(inputWS->dataX(i)[j] + inputWS->dataX(i)[j+1]);
-          // if Ef=Efixed-deltaE is negative, it should be a warning
-          // however, if the intensity is 0 (histogram goes to energy transfer higher than Ei) it is still ok, so no warning.
-          if (efixedProp < deltaE)
-          {
-           kioverkf=0.;
-           if (inputWS->dataY(i)[j]!=0) negativeEnergyWarning=true;//g_log.information() <<"Ef < 0!!!! Spectrum:"<<i<<std::endl;
-          }
-          else kioverkf = std::sqrt( efixedProp / (efixedProp - deltaE) );
-          outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*kioverkf;
-          outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*kioverkf;
-        }
-        prog.report();
-        PARALLEL_END_INTERUPT_REGION
-      }//end for i 
-      PARALLEL_CHECK_INTERUPT_REGION
-    } // end case direct histogram
-    else //Ef=Efixed
+    PARALLEL_START_INTERUPT_REGION 
+    //Copy the energy transfer axis
+    outputWS->setX( i, inputWS->refX(i) );
+    for (unsigned int j = 0; j < size; ++j)
     {
-      PARALLEL_FOR2(inputWS,outputWS)
-      for (int i = 0; i < numberOfSpectra; ++i) 
+      if (histogram) deltaE = 0.5*(inputWS->dataX(i)[j] + inputWS->dataX(i)[j+1]); else deltaE = inputWS->dataX(i)[j];
+      if (emodeStr == "Direct")  //Ei=Efixed
       {
-        PARALLEL_START_INTERUPT_REGION 
-        //Copy the energy transfer axis
-        outputWS->setX( i, inputWS->refX(i) );
-        for (unsigned int j = 0; j < size; ++j)
-        {
-          deltaE = 0.5*(inputWS->dataX(i)[j] + inputWS->dataX(i)[j+1]);
-          // if Ef=Efixed-deltaE is negative, it should be a warning
-          // however, if the intensity is 0 (histogram goes to energy transfer higher than Ei) it is still ok, so no warning.
-          if (efixedProp < -deltaE)
-          {
-           kioverkf=0.;
-           if (inputWS->dataY(i)[j]!=0) negativeEnergyWarning=true;
-          }
-          else kioverkf = std::sqrt( (efixedProp + deltaE) / efixedProp );
-          outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*kioverkf;
-          outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*kioverkf;
-        }
-        prog.report();
-        PARALLEL_END_INTERUPT_REGION
-      }//end for i 
-      PARALLEL_CHECK_INTERUPT_REGION
-    }//end case indirect histogram
-  }//end case of histogram
-  else
-  { 
-    if (emodeStr == "Direct") //Ei=Efixed
-    { 
-      PARALLEL_FOR2(inputWS,outputWS)
-      for (int i = 0; i < numberOfSpectra; ++i) 
+        Ei=efixedProp;
+        Ef=efixedProp - deltaE;
+      } else                     //Ef=Efixed
       {
-        PARALLEL_START_INTERUPT_REGION 
-        //Copy the energy transfer axis
-        outputWS->setX( i, inputWS->refX(i) );
-        for (unsigned int j = 0; j < size; ++j)
-        {
-          deltaE = inputWS->dataX(i)[j];
-          // if Ef=Efixed-deltaE is negative, it should be a warning
-          // however, if the intensity is 0  it is still ok, so no warning.
-          if (efixedProp < deltaE)
-          {
-           kioverkf=0.;
-           if (inputWS->dataY(i)[j]!=0) negativeEnergyWarning=true;
-          }
-          else kioverkf = std::sqrt( efixedProp / (efixedProp - deltaE) );
-          outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*kioverkf;
-          outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*kioverkf;
-        }
-        prog.report();
-        PARALLEL_END_INTERUPT_REGION
-      }//end for i 
-      PARALLEL_CHECK_INTERUPT_REGION
-    } // end case direct not histogram
-    else //Ef=Efixed
-    {
-      PARALLEL_FOR2(inputWS,outputWS)
-      for (int i = 0; i < numberOfSpectra; ++i) 
+        Ef=efixedProp;
+        Ei=efixedProp + deltaE;
+      }
+      // if Ei or Ef is negative, it should be a warning
+      // however, if the intensity is 0 (histogram goes to energy transfer higher than Ei) it is still ok, so no warning.
+      if ((Ei < 0)||(Ef < 0))
       {
-        PARALLEL_START_INTERUPT_REGION 
-        //Copy the energy transfer axis
-        outputWS->setX( i, inputWS->refX(i) );
-        for (unsigned int j = 0; j < size; ++j)
-        {
-          deltaE = inputWS->dataX(i)[j];
-          // if Ef=Efixed-deltaE is negative, it should be a warning
-          // however, if the intensity is 0 (histogram goes to energy transfer higher than Ei) it is still ok, so no warning.
-          if (efixedProp < -deltaE)
-          {
-           kioverkf=0.;
-           if (inputWS->dataY(i)[j]!=0) negativeEnergyWarning=true;
-          }
-          else kioverkf = std::sqrt( (efixedProp + deltaE) / efixedProp );
-          outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*kioverkf;
-          outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*kioverkf;
-        }
-        prog.report();
-        PARALLEL_END_INTERUPT_REGION
-      }//end for i 
-      PARALLEL_CHECK_INTERUPT_REGION
-    }//end case indirect not histogram
-  }// end case not histogram  
+        kioverkf=0.;
+        if (inputWS->dataY(i)[j]!=0) negativeEnergyWarning=true;//g_log.information() <<"Ef < 0!!!! Spectrum:"<<i<<std::endl;
+      } 
+      else kioverkf = std::sqrt( Ei / Ef );
+      outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*kioverkf;
+      outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*kioverkf;
+    }
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }//end for i 
+  PARALLEL_CHECK_INTERUPT_REGION
 
   if (negativeEnergyWarning) g_log.information() <<"Ef < 0 or Ei <0 in at least one spectrum!!!!"<<std::endl;
   this->setProperty("OutputWorkspace",this->outputWS);
