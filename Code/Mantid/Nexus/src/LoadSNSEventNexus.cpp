@@ -294,6 +294,9 @@ void LoadSNSEventNexus::exec()
   //Save output
   this->setProperty<EventWorkspace_sptr>("OutputWorkspace", WS);
 
+  // Clear any large vectors to free up memory.
+  this->pulseTimes.clear();
+
   return;
 }
 

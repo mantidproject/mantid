@@ -94,6 +94,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  void cleanup();
 
   // For events
   void execEvent();

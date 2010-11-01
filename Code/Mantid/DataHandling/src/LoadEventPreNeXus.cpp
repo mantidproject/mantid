@@ -252,6 +252,12 @@ void LoadEventPreNeXus::exec()
 
   //Save output
   this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);
+
+  // Clear any large vectors to free up memory.
+  this->pulsetimes.clear();
+  this->event_indices.clear();
+  this->proton_charge.clear();
+  this->spectraLoadMap.clear();
 }
 
 

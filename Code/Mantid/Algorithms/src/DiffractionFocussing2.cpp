@@ -61,6 +61,21 @@ void DiffractionFocussing2::init()
 		  "The name of the CalFile with grouping data" );
 }
 
+
+//=============================================================================
+/** Perform clean-up of memory after execution but before destructor.
+ * Private method
+ */
+void DiffractionFocussing2::cleanup()
+{
+  //Clear maps and vectors to free up memory.
+  udet2group.clear();
+  groupAtWorkspaceIndex.clear();
+  group2xvector.clear();
+  group2wgtvector.clear();
+}
+
+
 //=============================================================================
 /** Executes the algorithm
  *
@@ -88,6 +103,7 @@ void DiffractionFocussing2::exec()
   {
     //Input workspace is an event workspace. Use the other exec method
     this->execEvent();
+    this->cleanup();
     return;
   }
 
@@ -140,7 +156,6 @@ void DiffractionFocussing2::exec()
     }
     // Add the detectors for this spectrum to the output workspace's spectra-detector map
     out->mutableSpectraMap().addSpectrumEntries(group,inSpecMap.getDetectors(inSpecAxis->spectraNo(i)));
-
     // Get the references to Y and E output and rebin
     MantidVec& Yout=out->dataY(static_cast<int>(dif));
     MantidVec& Eout=out->dataE(static_cast<int>(dif));
@@ -241,12 +256,9 @@ void DiffractionFocussing2::exec()
     progress.report();
   }
   
-  //Do some cleanup
-  groupAtWorkspaceIndex.clear();
-  group2xvector.clear();
-
   setProperty("OutputWorkspace",out);
-  return;
+
+  this->cleanup();
 }
 
 
