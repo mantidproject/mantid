@@ -186,6 +186,8 @@ public:
 
     //Close the file, since we are done.
     this->close();
+    // Free memory
+    delete[] buffer;
 
     //Here's your vector!
     return data;
@@ -221,6 +223,8 @@ public:
 
     //Close the file, since we are done.
     this->close();
+    // Free memory
+    delete[] buffer;
   }
 
 

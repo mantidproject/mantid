@@ -26,7 +26,7 @@ namespace Kernel
       Boost.MultiIndex documentation (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
 
       @author Russell Taylor, Tessella Support Services plc
-      @date 27/02/2008
+      @date 22/01/2008
 
       Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
