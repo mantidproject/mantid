@@ -1,0 +1,68 @@
+#! /bin/sh
+# -------------------------------------------------------------------------
+#
+# Perform additional operations after all files have been installed.
+#
+# -------------------------------------------------------------------------
+
+echo "=== Starting postflight installer hook ==="
+echo
+
+# ------------- Environmental variable update -----------------------
+# Ensure the MANTIDBIN environmental variable is set correctly by either:
+#   (a) Creating a new ~/.MacOS/environment.plist file or
+#   (b) Updating an existing file with the current value.
+echo "Checking current environmental variable status"
+env_dir=${HOME}/.MacOS
+env_filename=environment.plist
+if [ ! -d ${env_dir} ]; then
+    echo "${HOME}/.MacOS does not exist, creating..."
+    mkdir -p ${env_dir}
+fi
+
+var_name=MANTIDBIN
+var_value=/Applications/MantidPlot.app/Contents/MacOS
+
+key_value="<key>${var_name}</key>\n<string>${var_value}</string>"
+file_contents=\
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0-dtd\">\n\
+<plist version=\"1.0\">\n\
+<dict>\n\
+${key_value}\n\
+</dict>\n\
+</plist>"
+
+env_filepath=${env_dir}/${env_filename}
+if [ -f ${env_filepath} ]; then
+    if [ -n "`cat ${env_filepath} | grep -B 0 -A 1 ${var_name} | grep ${var_value}`" ]; then
+	echo "File ${env_filename} exists and contains the correct values"
+	exit 0
+    fi
+    echo "${env_filename} already exists, updating with current values"
+    backup=${env_filepath}.backup
+    echo "A backup has been created at ${backup}"
+    cp -f ${env_filepath} ${backup}
+    done_replace="0"
+    echo -n "" > ${env_filepath}
+    while read line; do
+	if [ -n "`echo ${line} | grep ${var_name}`" ]; then
+	    read line
+	    echo -e ${key_value} >> ${env_filepath}
+	    done_replace="1"
+	    continue
+	fi
+	if [ -n "`echo ${line} | grep "</dict>"`" ]; then
+	    # If we haven't replaced anything yet then append
+	    # the new key
+	    if [ ${done_replace} = "0" ]; then
+		echo "Appending ${var_name} environment variable"
+		echo -e ${key_value} >> ${env_filepath}
+	    fi
+	fi
+	echo -e ${line} >> ${env_filepath}
+    done < ${backup}
+else
+    echo "${env_filepath} does not exist, creating..."
+    echo -e ${file_contents} > ${env_filepath}
+fi
