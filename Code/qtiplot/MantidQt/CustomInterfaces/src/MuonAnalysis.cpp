@@ -1023,7 +1023,7 @@ void MuonAnalysis::createPlotWS(const std::string& wsname)
 /**
  * Plot group
  */
-void MuonAnalysis::plotGroup(std::string& plotType)
+void MuonAnalysis::plotGroup(const std::string& plotType)
 {
   int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
   if ( groupNum >= 0 )
@@ -1079,7 +1079,7 @@ void MuonAnalysis::plotGroup(std::string& plotType)
 /**
  * Plot pair
  */
-void MuonAnalysis::plotPair(std::string& plotType)
+void MuonAnalysis::plotPair(const std::string& plotType)
 {
   if ( getPairNumberFromRow(m_pairTableRowInFocus) >= 0 )
   {
