@@ -132,6 +132,7 @@ void Homer::page1FileWidgs()
   m_saveChecksGroup = new QButtonGroup();
   m_saveChecksGroup->addButton(m_uiForm.save_ckSPE);
   m_saveChecksGroup->addButton(m_uiForm.save_ckNexus);
+  m_saveChecksGroup->addButton(m_uiForm.save_ckNxSPE);
   m_saveChecksGroup->setExclusive(false);
 
   connect(m_saveChecksGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(saveFormatOptionClicked(QAbstractButton*)));

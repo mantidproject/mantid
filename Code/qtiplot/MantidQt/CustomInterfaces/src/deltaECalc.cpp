@@ -48,6 +48,10 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   {
     fileExts.append("'.nxs'");
   }
+  if( m_sets.save_ckNxSPE->isChecked() )
+  {
+    fileExts.append("'.nxspe'");
+  }
   pyCode += "mono_sample.save_formats = [" + fileExts.join(",") + "]\n\n";
 
   // Create the python variables. The strings are wrapped with r'' for slash safety
