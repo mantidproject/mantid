@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Form</string>
+   <string>Muon Analysis</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_8" >
    <property name="margin" >
