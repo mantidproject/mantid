@@ -5,27 +5,16 @@
 
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
 #include "Poco/File.h"
-#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
-using namespace Mantid::DataObjects;
 
 class GetDetectorOffsetsTest : public CxxTest::TestSuite
 {
@@ -132,6 +121,8 @@ public:
 
     // remove file created by this algorithm
     Poco::File(outputFile).remove();
+    // Remove workspace
+    AnalysisDataService::Instance().remove(wsName);
 
   }
 

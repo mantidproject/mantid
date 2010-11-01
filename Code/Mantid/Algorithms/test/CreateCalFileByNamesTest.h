@@ -94,6 +94,8 @@ public:
 
     // remove file created by this algorithm
     Poco::File(outputFile).remove();
+    // Remove workspace
+    AnalysisDataService::Instance().remove(wsName);
 
   }
 
