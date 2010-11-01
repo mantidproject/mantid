@@ -1463,6 +1463,7 @@ using Kernel::PulseTimeType;
           break; //out of the bin-searching-while-loop
         }
         ++bin;
+        if( bin >= x_size - 1 ) break;
         //New bin! Find what you are multiplying!
         value = Y[bin];
         error = E[bin];
@@ -1543,8 +1544,9 @@ using Kernel::PulseTimeType;
           itev->m_weight /= value;
           break; //out of the bin-searching-while-loop
         }
-        ++bin;
         //New bin! Find what you are multiplying!
+        ++bin;
+        if( bin >= x_size - 1 ) break;
         value = Y[bin];
         if (value == 0) value = std::numeric_limits<float>::quiet_NaN(); //Avoid divide by zero
         error = E[bin];

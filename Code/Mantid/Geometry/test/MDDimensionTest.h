@@ -68,7 +68,7 @@ public:
           // wrong limits
           TS_ASSERT_THROWS_ANYTHING(pOrtDim->setRange(20,-200,200))
           // wrong bins (too many)
-          TS_ASSERT_THROWS_ANYTHING(pOrtDim->setRange(-20,200,200000000))
+          TS_ASSERT_THROWS_ANYTHING(pOrtDim->setRange(-20,200, 2 * MAX_REASONABLE_BIN_NUMBER))
 
           // should be ok -- sets axis and ranges
           TS_ASSERT_THROWS_NOTHING(pOrtDim->setRange(-200,200,200));
@@ -99,7 +99,7 @@ public:
           TS_ASSERT_THROWS_NOTHING(pOrtDim->setIntegrated());
           TS_ASSERT_EQUALS(pOrtDim->getIntegrated(),true);
           // the n-bins is too high
-          TS_ASSERT_THROWS_ANYTHING(pOrtDim->setExpanded(10000000000));
+          TS_ASSERT_THROWS_ANYTHING(pOrtDim->setExpanded(MAX_REASONABLE_BIN_NUMBER+10));
           // this one should be fine. 
           TS_ASSERT_THROWS_NOTHING(pOrtDim->setExpanded(100));
           TS_ASSERT_EQUALS(pOrtDim->getIntegrated(),false);
