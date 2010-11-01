@@ -76,30 +76,32 @@ void CorrectKiKf::exec()
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / size;
   Progress prog(this,0.0,0.5,numberOfSpectra);
-  bool histogram = inputWS->isHistogramData();
+  const bool histogram = inputWS->isHistogramData();
   bool negativeEnergyWarning = false;
     
   const std::string emodeStr = getProperty("EMode");
-  double efixedProp = getProperty("Efixed");
+  const double efixedProp = getProperty("Efixed");
   
 
   // There are 4 cases: (direct, indirect) * (histogram,no_histogram)
-  // probably faster to make 4 big cases at the beginning instead of checking inside the loop 
-
-  double deltaE = 0.;
-  double Ei=0.;
-  double Ef=0.;
-  double kioverkf = 0.;  
 
   PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numberOfSpectra; ++i) 
   {
     PARALLEL_START_INTERUPT_REGION 
+    MantidVec& yOut = outputWS->dataY(i);
+    MantidVec& eOut = outputWS->dataE(i);
+    const MantidVec& xIn = inputWS->readX(i);
+    const MantidVec& yIn = inputWS->readY(i);
+    const MantidVec& eIn = inputWS->readE(i);
     //Copy the energy transfer axis
     outputWS->setX( i, inputWS->refX(i) );
     for (unsigned int j = 0; j < size; ++j)
     {
-      if (histogram) deltaE = 0.5*(inputWS->dataX(i)[j] + inputWS->dataX(i)[j+1]); else deltaE = inputWS->dataX(i)[j];
+      const double deltaE = histogram ? 0.5*(xIn[j]+xIn[j+1]) : xIn[j];
+      double Ei=0.;
+      double Ef=0.;
+      double kioverkf = 0.;
       if (emodeStr == "Direct")  //Ei=Efixed
       {
         Ei=efixedProp;
@@ -114,11 +116,11 @@ void CorrectKiKf::exec()
       if ((Ei < 0)||(Ef < 0))
       {
         kioverkf=0.;
-        if (inputWS->dataY(i)[j]!=0) negativeEnergyWarning=true;//g_log.information() <<"Ef < 0!!!! Spectrum:"<<i<<std::endl;
+        if (yIn[j]!=0) negativeEnergyWarning=true;//g_log.information() <<"Ef < 0!!!! Spectrum:"<<i<<std::endl;
       } 
       else kioverkf = std::sqrt( Ei / Ef );
-      outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*kioverkf;
-      outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*kioverkf;
+      yOut[j] = yIn[j]*kioverkf;
+      eOut[j] = eIn[j]*kioverkf;
     }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
