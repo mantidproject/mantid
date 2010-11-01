@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <math.h>
+#include <cmath>
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
@@ -528,7 +528,7 @@ public:
     el.setX(one_big_bin() );
     //But the total neutrons is 0.0! They've been cancelled out :)
     TS_ASSERT_DELTA( (*el.dataY())[0], 0.0, 1e-6);
-    TS_ASSERT_DELTA( (*el.dataE())[0], sqrt(el.getNumberEvents()), 1e-6);
+    TS_ASSERT_DELTA( (*el.dataE())[0], sqrt((double)el.getNumberEvents()), 1e-6);
 
   }
 
