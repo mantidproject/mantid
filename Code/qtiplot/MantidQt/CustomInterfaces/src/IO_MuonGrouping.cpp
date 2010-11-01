@@ -52,6 +52,7 @@ void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 
   Poco::XML::Document* mDoc = new Document();
   Element* rootElem = mDoc->createElement("detector-grouping");
+  rootElem->setAttribute("description", m_uiForm.groupDescription->text().toStdString());
   mDoc->appendChild(rootElem);
 
   // loop over groups in table
@@ -259,9 +260,18 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 
   // populate front combobox
 
-  m_uiForm.frontGroupGroupPairComboBox->addItems(allGroupNames);
-  m_uiForm.frontGroupGroupPairComboBox->addItems(allPairNames);
+  //m_uiForm.frontGroupGroupPairComboBox->addItems(allGroupNames);
+  //m_uiForm.frontGroupGroupPairComboBox->addItems(allPairNames);
 
+
+  if ( pRootElem->hasAttribute("description") )
+  {
+    m_uiForm.groupDescription->setText(pRootElem->getAttribute("description").c_str());
+  }
+  else
+  {
+    m_uiForm.groupDescription->setText("");
+  }
 
   // at some point put in some code which reads default choice 
 
@@ -276,6 +286,7 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
       }
 */
 
+  pDoc->release();
 }
 
 /**
@@ -341,6 +352,14 @@ void whichPairToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow
     if (!item3)
       continue;
     if ( item3->text().isEmpty() )
+      continue;
+
+    // test if content in combo boxes
+    QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
+    QComboBox* qwB = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
+    if (!qwF || !qwB)
+      continue;
+    if ( qwF->count() < 2 || qwB->count() < 2 )
       continue;
 
     pairToRow.push_back(i);

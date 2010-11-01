@@ -40,17 +40,26 @@ private slots:
   /// Input file changed
   void inputFileChanged();
 
+  // Load current button
+  void runLoadCurrent();
+
   /// group table changed
   void groupTableChanged(int row, int column);
 
   // group table clicked
   void groupTableClicked(int row, int column);
 
+  // group table vertical label clicked
+  void groupTableClicked(int row);
+
   /// group table changed
   void pairTableChanged(int row, int column);
 
   // pair table clicked
   void pairTableClicked(int row, int column);
+
+  // pair table vertical lable clicked
+  void pairTableClicked(int row);
 
   /// group table plot button
   void runGroupTablePlotButton();

@@ -168,9 +168,9 @@
        <property name="title" >
         <string>Data Files</string>
        </property>
-       <widget class="QPushButton" name="pushButton" >
+       <widget class="QPushButton" name="loadCurrent" >
         <property name="enabled" >
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry" >
          <rect>
@@ -342,7 +342,7 @@
          <rect>
           <x>390</x>
           <y>30</y>
-          <width>71</width>
+          <width>51</width>
           <height>20</height>
          </rect>
         </property>

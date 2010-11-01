@@ -69,7 +69,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_period(0), m_groupTableRowInFocus(-1), m_pairTableRowInFocus(-1),
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_period(0), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
   m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml")
 {
 }
@@ -92,16 +92,23 @@ void MuonAnalysis::initLayout()
 	// signal/slot connections to respond to changes in instrument selection combo boxes
 	connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
 
+  // Load current
+  connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this, SLOT(runLoadCurrent())); 
+
   // If group table change
   // currentCellChanged ( int currentRow, int currentColumn, int previousRow, int previousColumn )
   connect(m_uiForm.groupTable, SIGNAL(cellChanged(int, int)), this, SLOT(groupTableChanged(int, int))); 
   connect(m_uiForm.groupTable, SIGNAL(cellClicked(int, int)), this, SLOT(groupTableClicked(int, int))); 
+  connect(m_uiForm.groupTable->verticalHeader(), SIGNAL(sectionClicked(int)), SLOT(groupTableClicked(int)));
+
+
   // group table plot button
   connect(m_uiForm.groupTablePlotButton, SIGNAL(clicked()), this, SLOT(runGroupTablePlotButton())); 
 
   // If pair table change
   connect(m_uiForm.pairTable, SIGNAL(cellChanged(int, int)), this, SLOT(pairTableChanged(int, int))); 
   connect(m_uiForm.pairTable, SIGNAL(cellClicked(int, int)), this, SLOT(pairTableClicked(int, int)));
+  connect(m_uiForm.pairTable->verticalHeader(), SIGNAL(sectionClicked(int)), SLOT(pairTableClicked(int)));
   // Pair table plot button
   connect(m_uiForm.pairTablePlotButton, SIGNAL(clicked()), this, SLOT(runPairTablePlotButton())); 
 
@@ -330,6 +337,121 @@ void MuonAnalysis::runGroupTablePlotButton()
 }
 
 /**
+ * Load current (slot)
+ */
+void MuonAnalysis::runLoadCurrent()
+{
+  QString instname = m_uiForm.instrSelector->currentText().toUpper();
+  QString daename = "NDX" + instname;
+
+  // Load dae file
+  AnalysisDataService::Instance().remove(m_workspace_name);
+
+  QString pyString = 
+      "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "  LoadDAE('" + daename + "','" + m_workspace_name.c_str() + "')\n"
+      "except SystemExit, message:\n"
+      "  print str(message)";
+  QString pyOutput = runPythonCode( pyString ).trimmed();
+
+  // if output is none empty something has gone wrong
+  if ( !pyOutput.toStdString().empty() )
+  {
+    noDataAvailable();
+    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from " + daename + ". Plotting disabled");
+    return;
+  }
+
+  nowDataAvailable();
+
+  // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
+  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
+  WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
+  MatrixWorkspace_sptr matrix_workspace;
+  int numPeriods = 1;   // 1 may mean either a group with one period or simply just 1 normal matrix workspace
+  if (wsPeriods)
+  {
+    numPeriods = wsPeriods->getNumberOfEntries();
+
+    Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
+    m_period = 1;
+  }
+  else
+  {
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+  }
+
+  if ( !isGroupingSet() )
+  {
+    std::stringstream idstr;
+    idstr << "1-" << matrix_workspace->getNumberHistograms();
+    m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
+    m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
+    updateFrontAndCombo();
+  }
+
+  if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
+    return;
+
+  // Populate instrument fields
+
+  std::stringstream str;
+  str << "Description: ";
+  int nDet = matrix_workspace->getInstrument()->getDetectors().size();
+  str << nDet;
+  str << " detector spectrometer, main field ";
+  str << "unknown"; 
+  str << " to muon polarisation";
+  m_uiForm.instrumentDescription->setText(str.str().c_str());
+
+
+  // Populate run information text field
+
+  std::string infoStr = "Number of spectra in data = ";
+  infoStr += boost::lexical_cast<std::string>(matrix_workspace->getNumberHistograms()) + "\n"; 
+  infoStr += "Title: "; 
+  infoStr += matrix_workspace->getTitle() + "\n" + "Comment: "
+    + matrix_workspace->getComment();
+  m_uiForm.infoBrowser->setText(infoStr.c_str());
+
+
+  // Populate period information
+
+  std::stringstream periodLabel;
+  periodLabel << "Data collected in " << numPeriods << " Periods. " 
+    << "Plot/analyse Period:";
+  m_uiForm.homePeriodsLabel->setText(periodLabel.str().c_str());
+
+  while ( m_uiForm.homePeriodBox1->count() != 0 )
+    m_uiForm.homePeriodBox1->removeItem(0);
+  while ( m_uiForm.homePeriodBox2->count() != 0 )
+    m_uiForm.homePeriodBox2->removeItem(0);
+
+  m_uiForm.homePeriodBox2->addItem("None");
+  for ( int i = 1; i <= numPeriods; i++ )
+  {
+    std::stringstream strInt;
+    strInt << i;
+    m_uiForm.homePeriodBox1->addItem(strInt.str().c_str());
+    m_uiForm.homePeriodBox2->addItem(strInt.str().c_str());
+  }
+
+  if (wsPeriods)
+  {
+    m_uiForm.homePeriodBox2->setEnabled(true);
+    m_uiForm.homePeriodBoxMath->setEnabled(true);
+  }
+  else
+  {
+    m_uiForm.homePeriodBox2->setEnabled(false);
+    m_uiForm.homePeriodBoxMath->setEnabled(false);
+  }  
+}
+
+/**
  * Pair table plot button (slot)
  */
 void MuonAnalysis::runPairTablePlotButton()
@@ -338,12 +460,10 @@ void MuonAnalysis::runPairTablePlotButton()
 }
 
 /**
- * Group table clicked (slot)
+ * Pair table vertical lable clicked (slot)
  */
-void MuonAnalysis::pairTableClicked(int row, int column)
+void MuonAnalysis::pairTableClicked(int row)
 {
-  (void) column;
-
   m_pairTableRowInFocus = row;
 
   // if something sensible in row then update front
@@ -356,12 +476,30 @@ void MuonAnalysis::pairTableClicked(int row, int column)
 }
 
 /**
+ * Pair table clicked (slot)
+ */
+void MuonAnalysis::pairTableClicked(int row, int column)
+{
+  (void) column;
+
+  pairTableClicked(row);
+}
+
+/**
  * Group table clicked (slot)
  */
 void MuonAnalysis::groupTableClicked(int row, int column)
 {
   (void) column;
 
+  groupTableClicked(row);
+}
+
+/**
+ * Group table clicked (slot)
+ */
+void MuonAnalysis::groupTableClicked(int row)
+{
   m_groupTableRowInFocus = row;
 
   // if something sensible in row then update front
@@ -372,6 +510,7 @@ void MuonAnalysis::groupTableClicked(int row, int column)
     updateFront();
   }
 }
+
 
 /**
  * Group table changed, e.g. if:         (slot)
@@ -476,17 +615,22 @@ void MuonAnalysis::pairTableChanged(int row, int column)
     QTableWidgetItem* itemAlpha = m_uiForm.pairTable->item(row,3);
 
     if ( itemAlpha->text().toStdString().empty() )
-      return;
-
-    try
     {
-       double alpha = boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
-    }  catch (boost::bad_lexical_cast&)
-    {
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Alpha must be a number.");
-      itemAlpha->setText("");
-      return;
     }
+    else
+    {
+      try
+      {
+         double alpha = boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
+      }  catch (boost::bad_lexical_cast&)
+      {
+        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Alpha must be a number.");
+        itemAlpha->setText("");
+        return;
+      }
+    }
+    whichPairToWhichRow(m_uiForm, m_pairToRow);
+    updateFrontAndCombo();
   }
 
   // pair name been modified
@@ -805,6 +949,7 @@ void MuonAnalysis::guessAlphaClicked()
 
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
+    pyOutput.truncate(5);
 
     QComboBox* qwAlpha = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,3));
     if (qwAlpha)
@@ -1440,7 +1585,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
   }
 
-  // check if there is any grouping in nexus file
+  // check if there is any grouping in file
   bool thereIsGrouping = false;
   int numOfHist = matrix_workspace->getNumberHistograms();
   for (int wsIndex = 0; wsIndex < numOfHist; wsIndex++)
@@ -1466,11 +1611,6 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   {
     std::stringstream idstr;
     idstr << "1-" << matrix_workspace->getNumberHistograms();
-
-
-    //m_uiForm.frontGroupGroupPairComboBox->addItems(QStringList("NoGroupingDetected"));
-
-
     m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
     m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
 
