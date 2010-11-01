@@ -82,41 +82,6 @@
      <property name="cornerButtonEnabled" >
       <bool>true</bool>
      </property>
-     <column>
-      <property name="text" >
-       <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>File Size (B)</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>File Id</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Format</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Format Version</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Format Type</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Create Time</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item row="2" column="0" colspan="2" >

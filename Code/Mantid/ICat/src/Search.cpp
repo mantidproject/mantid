@@ -27,7 +27,7 @@ namespace Mantid
 			
 			declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
 			declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");
-			declareProperty("Instrument","","The list of instruments used in ISIS nuetron scattering experiments.");
+			declareProperty("Instrument","","The name of the insurument used for investigation search.");
 			declareProperty("StartDate","",new DateValidator(),"The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("EndDate","",new DateValidator(),"The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("Keywords","","An option to search investigations data");
@@ -37,7 +37,7 @@ namespace Mantid
 			declareProperty("Investigation Type", "", "The type  of the investigation to search.");
 			declareProperty("Investigation Abstract", "", "The abstract of the investigation to search.");
 			declareProperty("Sample Name", "", "The name of the sample used in the investigation to search.");
-			declareProperty("Investigator SurName", "", "The sur name of the investigation to search.");
+			declareProperty("Investigator SurName", "", "The sur name of the investigator associated to the investigation.");
 			declareProperty("DataFile Name","", "The name of the data file to search.");
 
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
