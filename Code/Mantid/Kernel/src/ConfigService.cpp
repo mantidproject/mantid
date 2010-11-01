@@ -31,6 +31,14 @@
 
 namespace Mantid
 {
+  /**
+   * Returns the welcome message for Mantid. This is echoed to stdout by the ConfigService.
+   */
+  std::string welcomeMessage() 
+  {
+    return "Welcome to Mantid - Manipulation and Analysis Toolkit for Instrument Data";
+  }
+
 namespace Kernel
 {
 
@@ -178,6 +186,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
 
   g_log.debug() << "ConfigService created." << std::endl;
   g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
+  std::cout << "\n" << Mantid::welcomeMessage() << "\n" << std::endl;
   g_log.information() << "This is Mantid Version " << MANTID_VERSION << std::endl;
 }
 

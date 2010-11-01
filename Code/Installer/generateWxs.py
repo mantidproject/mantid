@@ -454,7 +454,6 @@ addFileV('MantidProperties','Mantid.pro','Mantid.properties','Mantid.properties'
 MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat','../Mantid/PythonAPI/MantidScript.bat',MantidDlls)
 addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
 addFileV('MantidStartup','MStart.py','MantidStartup.py','../Mantid/PythonAPI/MantidStartup.py',MantidDlls)
-addFileV('MantidHeader','MHeader.py','MantidHeader.py','../Mantid/PythonAPI/MantidHeader.py',MantidDlls)
 addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd',MANTIDRELEASE + 'MantidPythonAPI.pyd',MantidDlls)
 addFileV('MantidAPI','MAPI.dll','MantidAPI.dll',MANTIDRELEASE + 'MantidAPI.dll',MantidDlls)
 addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll',MANTIDRELEASE + 'MantidGeometry.dll',MantidDlls)

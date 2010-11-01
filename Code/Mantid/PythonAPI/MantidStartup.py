@@ -1,4 +1,5 @@
-from MantidHeader import *
+from MantidFramework import *
+mtd.initialise()
 print "\n==== Mantid Scripting Interface ==== \n"
 print "Mantid Framework Manager 'mantid' ready.\n"
-mantidHelp()
+print "Type mtdHelp() for a list of available algorithms"

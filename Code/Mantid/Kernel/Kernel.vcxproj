@@ -204,6 +204,7 @@
     <ClCompile Include="src\LogParser.cpp" />
     <ClCompile Include="src\MandatoryValidator.cpp" />
     <ClCompile Include="src\MaskedProperty.cpp" />
+    <ClCompile Include="src\NeutronAtom.cpp" />
     <ClCompile Include="src\Property.cpp" />
     <ClCompile Include="src\PropertyHistory.cpp" />
     <ClCompile Include="src\PropertyManager.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="inc\mantidkernel\facilityinfo.h" />
     <ClInclude Include="inc\mantidkernel\instrumentinfo.h" />
     <ClInclude Include="inc\MantidKernel\LogParser.h" />
+    <ClInclude Include="inc\MantidKernel\NeutronAtom.h" />
     <ClInclude Include="inc\MantidKernel\TimeSplitter.h" />
     <ClInclude Include="test\ArrayPropertyTest.h" />
     <ClInclude Include="inc\MantidKernel\BoundedValidator.h" />

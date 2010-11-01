@@ -138,6 +138,9 @@
     <ClCompile Include="src\LogParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\NeutronAtom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidKernel\ArrayProperty.h">
@@ -366,6 +369,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidKernel\LogParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidKernel\NeutronAtom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

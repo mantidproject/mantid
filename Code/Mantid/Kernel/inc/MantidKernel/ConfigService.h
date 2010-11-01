@@ -30,6 +30,12 @@ namespace Poco
 
 namespace Mantid
 {
+  /**
+   * Returns the welcome message for Mantid. This is echoed to stdout by the
+   * ConfigService
+   */
+  static std::string welcomeMessage();
+
   namespace Kernel
   {
     //----------------------------------------------------------------------
@@ -105,9 +111,7 @@ namespace Mantid
         std::string m_value; ///< The new value for the property
         std::string m_prev; ///< The previous value for the property
       };
-
-
-
+      
       /// Wipe out the current configuration and load a new one
       void updateConfig(const std::string& filename, const bool append=false, const bool update_caches=true);
       /// Save the configuration to the user file
@@ -122,19 +126,28 @@ namespace Mantid
       /// Return the user properties filename
       std::string getUserFilename() const;
 
-      // Searches for the given environment variable and returns it as a string
+      /** @name Host information */
+      //@{
+      /// Searches for the given environment variable and returns it as a string
       std::string getEnvironment(const std::string& keyName);
-
-      // Getters for properties of the host system
+      /// Returns the OS name
       std::string getOSName();
+      /// Returns the computer name
       std::string getComputerName();
+      /// Returns the architecture
       std::string getOSArchitecture();
+      /// Returns the OS version
       std::string getOSVersion();
+      /// Returns the current directory
       std::string getCurrentDir();
+      /// Returns the system's temp directory
       std::string getTempDir();
-      std::string getBaseDir() const;
-      std::string getOutputDir() const;
+      //@}
 
+      /// Returns the directory where the framework libraries lie
+      std::string getBaseDir() const;
+      /// Returns a directory to use as a default output directory
+      std::string getOutputDir() const;
       /// Get the list of search paths
       const std::vector<std::string>& getDataSearchDirs() const;
       /// Gets the instrument geometry filename
