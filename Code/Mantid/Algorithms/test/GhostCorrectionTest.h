@@ -194,7 +194,7 @@ public:
     eventLoader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat");
 //    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", wsName);
-    eventLoader->setMaxEventsToLoad(1000000);
+    eventLoader->setMaxEventsToLoad(100000);
     TS_ASSERT( eventLoader->execute() );
 
     std::string groupingFile("../../../../Test/Data/sns_event_prenexus/pg3_mantid_det.cal");
@@ -227,6 +227,7 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(outwsName);
+    delete eventLoader;
   }
 
 
