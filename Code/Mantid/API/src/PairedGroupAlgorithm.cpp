@@ -57,8 +57,7 @@ namespace Mantid
       bool blhsSimilar=isGroupWorkspacesofSimilarNames(lhswsName,lhsWSGrp);
       bool brhsSimilar=isGroupWorkspacesofSimilarNames(rhswsName,rhsWSGrp);
       bool bSimilarNames(false);
-     
-     
+          
       //get member from  each group and call binary execute on each member
       IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
       if(!alg)
@@ -172,15 +171,29 @@ namespace Mantid
           {
             currentPropName=(*propItr)->name();
             if(prevPropName.empty())
-            {	//LHS workspace 
-              alg->setPropertyValue(currentPropName,lhswsName);
+            {	
+              try
+              {//LHS workspace 
+                alg->setPropertyValue(currentPropName,lhswsName);
+              }
+              catch(std::invalid_argument& )
+              {
+                throw std::runtime_error("Workspace named \"" + lhswsName+ "\"can not be found");
+              }
             }
             else
             {	// RHS workspace 
               if(currentPropName.compare(prevPropName))
-              {                 
+              {  
+                try
+                {
                   alg->setPropertyValue(currentPropName,rhswsName);
-               }
+                }
+                catch(std::invalid_argument& )
+                {
+                  throw std::runtime_error("Workspace named \"" + rhswsName+ "\"can not be found");
+                }
+              }
             }
             prevPropName=currentPropName;
           }//end of if loop for input workspace property
@@ -210,7 +223,14 @@ namespace Mantid
               }
              
             }
+            try
+            {
             alg->setPropertyValue((*propItr)->name(),outmemberwsName);
+            }
+            catch(std::invalid_argument& )
+            {
+              throw std::runtime_error("Workspace named \"" + outmemberwsName+ "\"can not be found");
+            }
             if(nPeriod==1){
               AnalysisDataService::Instance().addOrReplace(outgroupwsName,outWSGrp );
             }
@@ -222,7 +242,14 @@ namespace Mantid
         }//end of if loop for workspace property
         else
         {
+          try
+          {
           alg->setPropertyValue((*propItr)->name(),(*propItr)->name());
+          }
+          catch(std::invalid_argument& )
+          {
+            throw std::runtime_error("Workspace named \"" + (*propItr)->name()+ "\"can not be found");
+          }
         }
       }//end of for loop for property vector
 
