@@ -2,150 +2,83 @@
 #define GETDETECTOROFFSETSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "WorkspaceCreationHelper.hh"
 
 #include "MantidAlgorithms/GetDetectorOffsets.h"
-#include "MantidAlgorithms/CrossCorrelate.h"
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "Poco/File.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidCurveFitting/GaussianLinearBG1D.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
-using namespace Mantid::Kernel;
-using namespace Mantid::DataHandling;
+using Mantid::Algorithms::GetDetectorOffsets;
 
 class GetDetectorOffsetsTest : public CxxTest::TestSuite
 {
 public:
-
-  void testBasics()
+  GetDetectorOffsetsTest()
   {
-    GetDetectorOffsets alg;
-    TS_ASSERT_EQUALS( alg.name(), "GetDetectorOffsets" )
-    TS_ASSERT_EQUALS( alg.version(), 1 )
-    TS_ASSERT_EQUALS( alg.category(), "Diffraction" )
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,200,-100.5,1);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
+    const Mantid::MantidVec &X = WS->readX(0);
+    Mantid::MantidVec &Y = WS->dataY(0);
+    Mantid::MantidVec &E = WS->dataE(0);
+    for (int i = 0; i < Y.size(); ++i)
+    {
+      const double x = (X[i]+X[i+1])/2;
+      Y[i] = exp(-0.5*pow((x-1),2));
+      E[i] = sqrt(Y[i]);
+    }
+
+    AnalysisDataService::Instance().add("toOffsets",WS);
   }
 
+  void testTheBasics()
+  {
+    TS_ASSERT_EQUALS( offsets.name(), "GetDetectorOffsets" );
+    TS_ASSERT_EQUALS( offsets.version(), 1 );
+    TS_ASSERT_EQUALS( offsets.category(), "Diffraction" );
+  }
 
   void testInit()
   {
-    GetDetectorOffsets alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING( offsets.initialize() );
+    TS_ASSERT( offsets.isInitialized() );
   }
 
-  void xtestPG3()
+  void testExec()
   {
+    if ( !offsets.isInitialized() ) offsets.initialize();
 
-    //Load large diffraction dataset
-    LoadEventPreNeXus loaderCAL;
-    loaderCAL.initialize();
-    loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat");
-    wsName = "LoadEventPreNeXusTestCAL";
-    loaderCAL.setPropertyValue("OutputWorkspace", wsName);
-    loaderCAL.execute();
-    loaderCAL.isExecuted();
-
-    //Convert to d-Spacing
-    ConvertUnits convertCAL;
-    convertCAL.initialize();
-    convertCAL.isInitialized();
-    convertCAL.setPropertyValue("InputWorkspace",wsName);
-    convertCAL.setPropertyValue("OutputWorkspace", wsName);
-    convertCAL.setPropertyValue("Target","dSpacing");
-    convertCAL.execute();
-    convertCAL.isExecuted();
-
-    //Rebin data          
-    Rebin rebinCAL;
-    rebinCAL.initialize();
-    rebinCAL.isInitialized();
-    rebinCAL.setPropertyValue("InputWorkspace",wsName);
-    rebinCAL.setPropertyValue("OutputWorkspace", wsName);
-    rebinCAL.setPropertyValue("Params",".2,-.0004,5.");
-    rebinCAL.execute();
-    rebinCAL.isExecuted();
-
-    //Cross correlate     
-    CrossCorrelate ccCAL;
-    ccCAL.initialize();
-    ccCAL.isInitialized();
-    ccCAL.setPropertyValue("InputWorkspace",wsName);
-    ccCAL.setPropertyValue("OutputWorkspace", wsName);
-    ccCAL.setPropertyValue("ReferenceSpectra","1185");
-    ccCAL.setPropertyValue("WorkspaceIndexMin","0");
-    ccCAL.setPropertyValue("WorkspaceIndexMax","11857");
-    ccCAL.setPropertyValue("XMin","1.08");
-    ccCAL.setPropertyValue("XMax","1.15");
-    ccCAL.execute();
-    ccCAL.isExecuted();
-
-    //Get detector offsets
-    GetDetectorOffsets testerCAL;
-    TS_ASSERT_THROWS_NOTHING(testerCAL.initialize());
-    TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());
-    testerCAL.setPropertyValue("InputWorkspace",wsName);
-    testerCAL.setPropertyValue("OutputWorkspace",wsName);
-    testerCAL.setPropertyValue("Step","0.0004");
-    testerCAL.setPropertyValue("DReference","1.1109");
-    testerCAL.setPropertyValue("XMin","-50");
-    testerCAL.setPropertyValue("XMax","50");
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("InputWorkspace","toOffsets") );
+    std::string outputWS("offsetsped");
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step","0.02"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","1.00"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin","-20"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax","20"));
     std::string outputFile;
-    outputFile = "PG3_732_test.cal";
-    testerCAL.setPropertyValue("GroupingFileName", outputFile);
-    TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
-    TS_ASSERT_THROWS_NOTHING(testerCAL.isExecuted());
+    outputFile = "GetDetOffsets.cal";
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("GroupingFileName", outputFile));
+
+    TS_ASSERT_THROWS_NOTHING( offsets.execute() );
+    TS_ASSERT( offsets.isExecuted() );
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
+
+    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0099, 0.0001);
 
 
-    MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-    
-    // has the algorithm written a file to disk?
-
-    TS_ASSERT( Poco::File(outputFile).exists() );
-
-
-    // Do a few tests to see if the content of outputFile is what you
-    // expect.
-
-    std::ifstream in(outputFile.c_str());
-
-    std::string line;
-    int i1,i2,i3,i4;
-    double d1;
-
-    for (int i=0; i<1; ++i)
-    {
-      std::getline (in,line);
-    }
-    for (int i=0; i<11858; ++i)
-    {
-      in >> i1 >> i2 >> d1 >> i3 >> i4;
-    }
-
-    in.close();
-
-    TS_ASSERT_EQUALS(i1,11857 );
-    TS_ASSERT_EQUALS(i2,180937 );
-    TS_ASSERT_EQUALS(d1,-0.1230111 );
-    TS_ASSERT_EQUALS(i3,1 );
-    TS_ASSERT_EQUALS(i4,1 );
-
-
-    // remove file created by this algorithm
+    AnalysisDataService::Instance().remove(outputWS);
+    AnalysisDataService::Instance().remove("toOffsets");
+    //Remove file; empty since detectors not set
     Poco::File(outputFile).remove();
-    // Remove workspace
-    AnalysisDataService::Instance().remove(wsName);
 
   }
-
 
 private:
-  std::string wsName;
-
+  GetDetectorOffsets offsets;
 };
 
 #endif /*GETDETECTOROFFSETSTEST_H_*/
