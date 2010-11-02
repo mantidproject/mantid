@@ -431,7 +431,7 @@ void ICatInvestigation::getFileIds(const std::vector<std::string> &fileNames, st
 		try
 		{
 		ws_sptr->find(*citr,row,col);
-		fileId=ws_sptr->cell<long long >(row,col+2);//3rd column is the file id.
+		fileId=ws_sptr->cell<int64_t>(row,col+2);//3rd column is the file id.
 		}
 		catch(std::range_error&)
 		{
