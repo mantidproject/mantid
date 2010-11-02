@@ -334,7 +334,6 @@ namespace Mantid
     {
       if ( ! m_spectramap->nElements() )
       {
-        g_log.error("SpectraDetectorMap has not been populated.");
         throw std::runtime_error("SpectraDetectorMap has not been populated.");
       }
 
@@ -342,7 +341,6 @@ namespace Mantid
       const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
       if ( dets.empty() )
       {
-        g_log.debug() << "Spectrum number " << spectrum_number << " not found" << std::endl;
         throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
       }
       IInstrument_sptr localInstrument = getInstrument();
