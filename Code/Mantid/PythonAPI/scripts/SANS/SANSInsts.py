@@ -25,12 +25,7 @@ class Instrument(object):
         self._definition_file = \
             mtd.getConfigProperty('instrumentDefinition.directory')+'/'+self._NAME+'_Definition.xml'
         
-        if not wrksp_name is None:
-            wrksp = wrksp_name
-        else:
-            wrksp = '_'+self._NAME+'instrument_definition'
-        #read the information about the instrument that stored in it's xml
-        LoadEmptyInstrument(self._definition_file, wrksp)
+        wrksp = self.load_empty(wrksp_name)
         definitionWS = mtd[wrksp]  
         self.definition = definitionWS.getInstrument()
 
@@ -44,6 +39,21 @@ class Instrument(object):
         #this is used by suggest_incident_mntr() below 
         self._incid_monitor_lckd = False
         
+    def load_empty(self, wrksp_name=None):
+        """
+            Runs LoadEmptyInstrument to create an empty instrument in the named
+            workspace (a default name is created if none is given)
+            @param workspace_name: The empty instrument data will be contained in the named workspace
+        """
+        if not wrksp_name is None:
+            wrksp = wrksp_name
+        else:
+            wrksp = '_'+self._NAME+'instrument_definition'
+        #read the information about the instrument that stored in it's xml
+        LoadEmptyInstrument(self._definition_file, wrksp)
+
+        return wrksp
+
     def suggest_incident_mntr(self, spectrum_number):
         """
             Only sets the monitor spectrum number if it isn't locked, used
@@ -84,12 +94,19 @@ class Instrument(object):
     
     def view(self, workspace_name = None):
         """
-            Opens Mantidplot's InstrumentView displaying the current instrument
+            Opens Mantidplot's InstrumentView displaying the current instrument. This
+            empty instrument created contained in the named workspace (a default name
+            is generated if this the argument is left blank) unless the workspace already
+            exists and then it's contents are displayed
+            @param workspace_name: the name of the workspace to create and/or display
         """
         if workspace_name is None:
             workspace_name = self._NAME+'_instrument_view'
-            
-        LoadEmptyInstrument(self._definition_file, workspace_name)
+            LoadEmptyInstrument(self._definition_file, workspace_name)
+        elif not mantid.workspaceExists(workspace_name):
+            LoadEmptyInstrument(self._definition_file, workspace_name)
+        
+
         instrument_win = qti.app.mantidUI.getInstrumentView(workspace_name)
         instrument_win.showWindow()
 
@@ -117,7 +134,7 @@ class DetectorBank:
                 if self._isRect:
                     self._n_pixels = self._width*self._height
                 else:
-                    raise LogicError('Number of pixels in the detector unknown, you must state the number of pixels for non-rectangular detectors')
+                    raise AttributeError('Number of pixels in the detector unknown, you must state the number of pixels for non-rectangular detectors')
 
                 
         def width(self):
@@ -136,7 +153,6 @@ class DetectorBank:
             return self._n_pixels
 
     def __init__(self, instr, det_type) :
-        self.parent = instr
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
         self._names = {
           'uni' : det_type,
@@ -264,11 +280,6 @@ class DetectorBank:
                 return True
         return False
 
-    def clear_corrs(self):
-        self.z_corr = self.x_corr = 0.0
-        self.y_corr = 0.0
-        self.rot_corr = 0.0
-
     def spectrum_block(self, ylow, xlow, ydim, xdim):
         """
             Compile a list of spectrum IDs for rectangular block of size xdim by ydim
@@ -304,12 +315,11 @@ class DetectorBank:
                     std_i = start_spec + x + (y*det_dimension)
                     output += str(max_spec - (std_i - base)) + ','
         elif self._orientation == 'HorizontalFlipped':
-            start_spec = base + ylow*det_dimension + xlow
-            for y in range(0,ydim):
+            for y in range(ylow,ylow+ydim):
                 max_row = base + (y+1)*det_dimension - 1
                 min_row = base + (y)*det_dimension
-                for x in range(0,xdim):
-                    std_i = start_spec + x + (y*det_dimension)
+                for x in range(xlow,xlow+xdim):
+                    std_i = base + x + (y*det_dimension)
                     diff_s = std_i - min_row
                     output += str(max_row - diff_s) + ','
 
@@ -364,6 +374,8 @@ class ISISInstrument(Instrument):
         self.trans_monitor = int(self.definition.getNumberParameter(
             'default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
+        #this variable isn't used again and stops the instrument from being deep copied!
+        self.definition = None
 
     def name(self):
         return self._NAME
@@ -371,12 +383,12 @@ class ISISInstrument(Instrument):
     def is_interpolating_norm(self):
         return self._use_interpol_norm
      
-    def set_interpolating_norm(self):
+    def set_interpolating_norm(self, on=True):
         """
             This method sets that the monitor spectrum should be interpolated,
             there is currently no unset method but its off by default    
         """
-        self._use_interpol_norm = True
+        self._use_interpol_norm = on
      
     def suggest_interpolating_norm(self):
         if not self._incid_monitor_lckd:
@@ -436,7 +448,7 @@ class ISISInstrument(Instrument):
             b.correction_file = a.correction_file != ''
 
     def detector_file(self, det_name):
-        det = ReductionSingleton().instrument.getDetector(det_name)
+        det = self.getDetector(det_name)
         return det.correction_file
 
         

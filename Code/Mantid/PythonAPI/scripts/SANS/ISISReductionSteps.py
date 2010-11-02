@@ -86,7 +86,7 @@ class LoadRun(ReductionStep):
             return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
 
         if reload == False and mantid.workspaceExists(wkspname):
-            return WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
+            return SANSUtility.WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
 
         filename = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
@@ -593,27 +593,54 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             SANSUtility.MaskByBinRange(workspace,self.time_mask)
 
         #reset the xml, as execute can be run more than once
-#        self._xml = []
-#        if DEL__FINDING_CENTRE_ == True:
-#            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-#                self.add_cylinder(self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
-#            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-#                self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
-#        else:
-#            if xcentre is None:
-#                xcentre = reducer.place_det_sam.maskpt_rmax[0]
-#            if ycentre is None:
-#                ycentre = reducer.place_det_sam.maskpt_rmax[1]
-#            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-#                self.add_cylinder(self.min_radius, xcentre, ycentre, 'beam_stop')
-#            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-#                self.add_outside_cylinder(self.max_radius, xcentre, ycentre, 'beam_area')
+        self._xml = []
+        if DEL__FINDING_CENTRE_ == True:
+            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+                self.add_cylinder(self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
+            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+                self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
+        else:
+            if xcentre is None:
+                xcentre = reducer.place_det_sam.maskpt_rmax[0]
+            if ycentre is None:
+                ycentre = reducer.place_det_sam.maskpt_rmax[1]
+            if ( not self.min_radius is None) and (self.min_radius > 0.0):
+                self.add_cylinder(self.min_radius, xcentre, ycentre, 'beam_stop')
+#                self.add_cylinder(self.min_radius, 0, 0, 'beam_stop')
+            if ( not self.max_radius is None) and (self.max_radius > 0.0):
+                self.add_outside_cylinder(self.max_radius, xcentre, ycentre, 'beam_area')
         #now do the masking
         SANSReductionSteps.Mask.execute(self, reducer, workspace, instrument)
 
         if self._lim_phi_xml != '':
             MaskDetectorsInShape(workspace, self._lim_phi_xml)
-            
+
+    def view(self, instrum):
+        """
+            Display the masked detectors in the bank in a different color
+            in instrument view
+            @param instrum: a reference an instrument object to view
+        """
+        wksp_name = 'CurrentMask'
+        instrum.load_empty(wksp_name)
+
+        #apply masking to the current detector
+        self.execute(None, wksp_name, instrum, 0, 0)
+        
+        #now the other detector
+        other = instrum.other_detector().name()
+        original = instrum.cur_detector().name()
+        instrum.setDetector(other)
+        self.execute(None, wksp_name, instrum, 0, 0)
+        #reset the instrument to mask the currecnt detector
+        instrum.setDetector(original)
+
+        # Mark up "dead" detectors with error value 
+        FindDeadDetectors(wksp_name, wksp_name, DeadValue=500)
+
+        #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
+        instrum.view(wksp_name)
+
     def __str__(self):
         return '    radius', self.min_radius, self.max_radius+'\n'+\
             '    rear spectrum mask: ', str(self.spec_mask_r)+'\n'+\
@@ -1090,13 +1117,13 @@ class UserFile(ReductionStep):
 
     def execute(self, reducer, workspace):
         if self.filename is None:
-            raise LogicError('The user file must be set, use the function MaskFile')
+            raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
         #Check that the file exists.
         if not os.path.isfile(user_file):
             user_file = os.path.join(reducer.user_file_path, self.filename)
             if not os.path.isfile(user_file):
-                user_file = self._full_file_path(self.filename)
+                user_file = reducer._full_file_path(self.filename)
                 if not os.path.isfile(user_file):
                     raise RuntimeError, "Cannot read mask. File path '%s' does not exist or is not in the user path." % filename
             
@@ -1111,7 +1138,7 @@ class UserFile(ReductionStep):
             line = line.lstrip().rstrip()
             upper_line = line.upper()
             if upper_line.startswith('L/'):
-                self._readLimitValues(line, reducer)
+                self.readLimitValues(line, reducer)
             
             elif upper_line.startswith('MON/'):
                 self._readMONValues(line, reducer)
@@ -1200,7 +1227,7 @@ class UserFile(ReductionStep):
         reducer._corr_and_scale.rescale = 100.0
 
     # Read a limit line of a mask file
-    def _readLimitValues(self, limit_line, reducer):
+    def readLimitValues(self, limit_line, reducer):
         limits = limit_line.split('L/')
         if len(limits) != 2:
             _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")

@@ -57,7 +57,7 @@ class ISISReducer(SANSReducer):
             Defines the steps that are run and their order
         """
 #        self._reduction_steps.append(self.data_loader)
-        self._reduction_steps.append(self.user_settings)
+#        self._reduction_steps.append(self.user_settings)
         self._reduction_steps.append(self.place_det_sam)
         self._reduction_steps.append(self.geometry)
         self._reduction_steps.append(self._out_name)
@@ -82,7 +82,7 @@ class ISISReducer(SANSReducer):
 
     def _init_steps(self):
         """
-            Initialises all steps that can be run in an ISIS SANS reduction.
+            Initialises the steps that are not initialised by (ISIS)CommandInterface.
         """
         #_to_steps() defines the order the steps are run in, any steps not in that list wont be run  
         
@@ -149,16 +149,15 @@ class ISISReducer(SANSReducer):
             @param workspace: optional name of the workspace for this data,
                 default will be the name of the file 
         """
-        wrkspc, _, _, filename = ISISReductionSteps.extract_workspace_name(data_file, False, 
-                                                                           self.instrument.name(), 
-                                                                           self.instrument.run_number_width)
+        wrkspc, _, _, filename = ISISReductionSteps.extract_workspace_name(
+                            data_file, False, self.instrument.name(), self.instrument.run_number_width)
         if workspace is None:
             workspace = wrkspc
             
         self._full_file_path(filename)
         
         self._data_files.clear()
-        self._data_files[workspace] = wrkspc
+        self._data_files[workspace] = workspace
 
     def set_background(self, can_run=None, reload = True, period = -1):
         """
@@ -280,7 +279,7 @@ class ISISReducer(SANSReducer):
 
     def post_process(self):
         # Store the mask file within the final workspace so that it is saved to the CanSAS file
-        if user_settings is None:
+        if self.user_settings is None:
             user_file = 'None'
         else:
             user_file = self.user_settings.filename
@@ -299,13 +298,7 @@ class ISISReducer(SANSReducer):
  
             
     def ViewCurrentMask(self):
-        #mask the current detector
-        SANSReducer.ViewCurrentMask(self)
-        #now the other detector
-        other = self.instrument.other_detector().name()
-        self.instrument.setDetector(other)
-        #reset the instrument to mask the currecnt detector
-        SANSReducer.ViewCurrentMask(self)
-        original = self.instrument.cur_detector().name()
-        self.instrument.setDetector(original)
-        
+        self._mask.view(self.instrument)
+
+    def reference(self):
+        return self

@@ -33,10 +33,16 @@ class ReductionSingleton:
             ReductionSingleton.__instance = reducer_cls()
         
     @classmethod
+    def replace(cls, new_reducer):
+        ReductionSingleton.__instance = new_reducer
+
+    @classmethod
     def run(cls):
+        output_wrksp = None
         if ReductionSingleton.__instance is not None:
-            ReductionSingleton.__instance._reduce()
+            output_wrksp = ReductionSingleton.__instance._reduce()
         ReductionSingleton.clean(ReductionSingleton.__instance.__class__)
+        return output_wrksp
         
     def __getattr__(self, attr):
         """ Delegate access to implementation """
