@@ -12,10 +12,10 @@
 
 
 namespace Mantid{
-	namespace Geometry{
-		class Object;
-    class ObjCompAssembly;
-	}
+  namespace Geometry{
+    class Object;
+    class IComponent;
+  }
 }
 
 /*!
@@ -53,7 +53,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class TexObject: public MantidObject
 {
 public:
-  TexObject(const boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> obj,bool withDisplayList=true); ///< Default Constructor
+  TexObject(const boost::shared_ptr<const Mantid::Geometry::IComponent> obj,bool withDisplayList=true); ///< Default Constructor
   ~TexObject();								   ///< Destructor
   virtual std::string type()const {return "TexObject";} ///< Type of the GL object
   void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method

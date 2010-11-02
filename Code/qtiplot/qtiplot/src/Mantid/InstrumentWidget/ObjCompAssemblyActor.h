@@ -43,7 +43,7 @@ namespace Mantid{
 class ObjCompAssemblyActor : public ICompAssemblyActor
 {
   std::vector<Mantid::Geometry::ComponentID> mObjCompIDs;     ///< List of Component IDs
-  boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> m_ObjAss;    ///< Pointer to the ObjCompAssembly
+  boost::shared_ptr<const Mantid::Geometry::IComponent> m_ObjAss;    ///< Pointer to the ObjCompAssembly
   boost::shared_ptr<TexObject> m_tex;                        ///< MantidObject with a texture
   void initChilds(bool);
   void init();

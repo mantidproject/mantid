@@ -34,7 +34,8 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(boost::shared_ptr<std::map<const boos
     {
       throw Mantid::Kernel::Exception::InstrumentDefinitionError("Expected ParObjCompAssembly, found "+ic->type());
     }
-    m_ObjAss.reset(dynamic_cast<const ObjCompAssembly*>(poca->base()),NoDeleting());
+    //m_ObjAss.reset(dynamic_cast<const ObjCompAssembly*>(poca->base()),NoDeleting());
+    m_ObjAss = ic;
   }
   if (!m_ObjAss)
   {
@@ -76,7 +77,7 @@ void ObjCompAssemblyActor::define()
             glRotated(deg,ax0,ax1,ax2);
     }
     //Scale
-    V3D scaleFactor = m_ObjAss->getScaleFactor();
+    V3D scaleFactor = boost::dynamic_pointer_cast<const Mantid::Geometry::IObjComponent>(m_ObjAss)->getScaleFactor();
     if (!(scaleFactor==V3D(1,1,1)))
     {
             glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
@@ -124,16 +125,18 @@ void ObjCompAssemblyActor::drawUsingColorID()
 */
 void ObjCompAssemblyActor::initChilds(bool withDisplayList)
 {
-  mNumberOfDetectors = m_ObjAss->nelements();
+  Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
+  mNumberOfDetectors = objAss->nelements();
   for(int i=0;i<getNumberOfDetectors();++i)
   {
-    mObjCompIDs.push_back(m_ObjAss->getChild(i)->getComponentID());
+    mObjCompIDs.push_back(objAss->getChild(i)->getComponentID());
   }
 
   double xmin,ymin,zmin,xmax,ymax,zmax;
   xmin=ymin=zmin=-1000;
   xmax=ymax=zmax=1000;
-  m_ObjAss->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+  Mantid::Geometry::IObjComponent_const_sptr objComp = boost::dynamic_pointer_cast<const Mantid::Geometry::IObjComponent>(m_ObjAss);
+  objComp->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
   minBoundBox[0]=xmin;minBoundBox[1]=ymin;minBoundBox[2]=zmin;
   maxBoundBox[0]=xmax;maxBoundBox[1]=ymax;maxBoundBox[2]=zmax;
 }
@@ -186,10 +189,10 @@ void ObjCompAssemblyActor::init()
 */
 void ObjCompAssemblyActor::appendObjCompID(std::vector<int>& idList)
 {
-
+  Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
   for(int i=0;i<getNumberOfDetectors();++i)
   {
-    idList.push_back(boost::dynamic_pointer_cast<IDetector>(m_ObjAss->getChild(i))->getID());
+    idList.push_back(boost::dynamic_pointer_cast<IDetector>(objAss->getChild(i))->getID());
   }
 }
 
@@ -229,7 +232,8 @@ int ObjCompAssemblyActor::findDetectorIDUsingColor(int rgb)
   int i = rgb - 1;
   if (i >= 0 && i < getNumberOfDetectors())
   {
-    return boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(m_ObjAss->getChild(i))->getID();
+    Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
+    return boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(objAss->getChild(i))->getID();
   }
   return -1;
 }

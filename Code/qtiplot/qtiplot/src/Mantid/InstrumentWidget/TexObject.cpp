@@ -1,14 +1,15 @@
 #include "TexObject.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 
 #include <algorithm>
 
-TexObject::TexObject(const boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> obj,bool withDisplayList):
-MantidObject(obj->shape(),withDisplayList),
+TexObject::TexObject(const boost::shared_ptr<const Mantid::Geometry::IComponent> obj,bool withDisplayList):
+MantidObject(boost::dynamic_pointer_cast<const Mantid::Geometry::IObjComponent>(obj)->shape(),withDisplayList),
 m_id(0),
-m_n(obj->nelements()),
+m_n(boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(obj)->nelements()),
 m_pick_data()
 {
   m_data = new unsigned char[m_n*3];
