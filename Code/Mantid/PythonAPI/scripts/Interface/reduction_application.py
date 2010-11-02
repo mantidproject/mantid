@@ -219,16 +219,22 @@ class ReductionGUI(QtGui.QMainWindow):
         else:    
             settings = QtCore.QSettings()
             
-            instrument = QtCore.QVariant(QtCore.QString(self._instrument)) \
-                if self._instrument is not None else QtCore.QVariant()    
+            if self._instrument is not None:
+                instrument = QtCore.QVariant(QtCore.QString(self._instrument))
+            else: 
+                instrument = QtCore.QVariant()    
             settings.setValue("instrument_name", instrument)
             
-            filename = QtCore.QVariant(QtCore.QString(self._filename)) \
-                if self._filename is not None else QtCore.QVariant()    
+            if self._filename is not None:
+                filename = QtCore.QVariant(QtCore.QString(self._filename))
+            else:
+                filename = QtCore.QVariant()    
             settings.setValue("last_file", filename)
             
-            recent_files = QtCore.QVariant(self._recent_files) \
-                if self._recent_files is not [] else QtCore.QVariant()
+            if self._recent_files is not []:
+                recent_files = QtCore.QVariant(self._recent_files)
+            else:
+                recent_files = QtCore.QVariant()
             settings.setValue("recent_files", recent_files)
             
             last_dir = QtCore.QVariant(QtCore.QString(self._last_directory))
