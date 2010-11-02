@@ -1169,13 +1169,22 @@ namespace Mantid
     template<>
     std::string NexusFileIO::logValueType<bool>()const{return "bool";}
 
+
+    /** Get all the Nexus entry types for a file
+     *
+     * Try to open named Nexus file and return all entries plus the definition found for each.
+     * If definition not found, try and return "analysis" field (Muon V1 files)
+     * Closes file on exit.
+     *
+     * @param fileName file to open
+     * @param entryName vector that gets filled with strings with entry names
+     * @param definition vector that gets filled with the "definition" or "analysis" string.
+     * @return count of entries if OK, -1 failed to open file.
+     */
     int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
                            std::vector<std::string>& definition )
     {
      //
-     // Try to open named Nexus file and return all entries plus the definition found for each.
-     // If definition not found, try and return "analysis" field (Muon V1 files)
-     // Return count of entries if OK, -1 failed to open file. Close file on exit.
      //
      NXhandle fileH;
      NXaccess mode= NXACC_READ;
