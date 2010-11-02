@@ -245,7 +245,7 @@ void AbsorptionCorrection::retrieveBaseProperties()
   retrieveProperties();
 }
 
-/// Create the cylinder object using the Geometry classes
+/// Create the sample object using the Geometry classes, or use the existing one
 void AbsorptionCorrection::constructSample(API::Sample& sample)
 {
   const std::string xmlstring = sampleXML();
@@ -254,7 +254,7 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
     // This means that we should use the shape already defined on the sample.
     m_sampleObject = &sample.getShapeObject();
     // Check there is one, and fail if not
-    if ( ! m_sampleObject )
+    if ( ! m_sampleObject->topRule() )
     {
       const std::string mess("No shape has been defined for the sample in the input workspace");
       g_log.error(mess);
