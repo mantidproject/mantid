@@ -65,8 +65,8 @@ void TofCorrection::exec()
       outputWS->dataX(i) = inputWS->readX(i);
       continue;
     }
-    double adjustment = ( l2 / sqrt(efixed) ) * 2286.2873574; // 2286.2873574 - what is this value?
-    // require clarification from T Ramirez-Cuesta
+    // 2286.2873574 = sqrt(0.5 * m_neutron) with units of microsec meV^0.5 m^-1
+    double adjustment = ( l2 / sqrt(efixed) ) * 2286.2873574;
 
     std::transform(inputWS->readX(i).begin(), inputWS->readX(i).end(), outputWS->dataX(i).begin(), std::bind2nd(std::minus<double>(), adjustment));
 
