@@ -172,6 +172,12 @@ private:
   void checkLogFlags();
   //@}
 
+  QString createOldAnalysisDetailsScript(const QString & type);
+  bool oldLoadUserFile();
+  bool oldLoadButtonClick();
+  void oldUserMaskStrings(QString & exec_script);
+  bool oldAssign(int key, QString & logs);
+
 private slots:
   /// Select the data directory
   void selectDataDir();

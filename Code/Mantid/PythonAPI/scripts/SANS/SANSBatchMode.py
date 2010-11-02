@@ -28,8 +28,9 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 #Make the reduction module available
-from SANSReduction import _printMessage,_issueWarning,AssignSample, AssignCan,TransmissionSample,TransmissionCan,FindBeamCentre,plotSpectrum,WavRangeReduction,NewTrans,DefaultTrans,createColetteScript, PlotResult
+from ISISCommandInterface import *
 from mantidsimple import *
+import copy
 
 # Add a CSV line to the input data store
 def addRunToStore(parts, run_store):
@@ -58,7 +59,7 @@ def addRunToStore(parts, run_store):
         if type in inputdata.keys():
             inputdata[parts[i]] = parts[i+1]
         if 'background' in type:
-            _issueWarning('Background runs are not yet implemented in SANSReduction.py! Will process Sample & Can only')
+            issueWarning('Background runs are not yet implemented in SANSReduction.py! Will process Sample & Can only')
         
     run_store.append(inputdata)
     return 0
@@ -73,21 +74,22 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         # See how many pieces of information have been provided; brackets delineate the field seperator (nothing for space-delimited, ',' for comma-seperated)
         parts = line.rstrip().split(',')
         if addRunToStore(parts, runinfo) > 0:
-            _issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
+            issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
     # End of file reading
     file_handle.close()
 
-    # Now loop over run information and process
+    # Now loop over run information and process, first save the user settings, these were copied into the reducer
+    settings = copy.deepcopy(ReductionSingleton())
     for run in runinfo:
         # Sample run
         run_file = run['sample_sans']
         if len(run_file) == 0:
-            _issueWarning('No sample run given, skipping entry.')
+            issueWarning('No sample run given, skipping entry.')
             continue
         run_file += format
         sample_ws = AssignSample(run_file)[0]
         if len(sample_ws) == 0:
-            _issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
+            issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
             continue
         
         #Sample trans
@@ -95,17 +97,17 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         run_file2 = run['sample_direct_beam']
         ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
         if len(run_file) > 0 and len(ws1) == 0:
-            _issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
+            issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
             continue
         if len(run_file2) > 0 and len(ws2) == 0: 
-            _issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
+            issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
             continue
         
         # Sans Can 
         run_file = run['can_sans']
         can_ws = AssignCan(run_file + format)[0]
         if run_file != '' and len(can_ws) == 0:
-            _issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
+            issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
             continue
 
         #Can trans
@@ -113,10 +115,10 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         run_file2 = run['can_direct_beam']
         ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
         if len(run_file) > 0 and len(ws1) == 0:
-            _issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
+            issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
             continue
         if len(run_file2) > 0 and len(ws2) == 0: 
-            _issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
+            issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
             continue
 
 
@@ -126,7 +128,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         # WavRangeReduction runs the reduction for the specfied wavelength range where the final argument can either be DefaultTrans or CalcTrans:
         # Parameter DefaultTrans specifies the transmission should be calculated for the whole range specified by L/WAV and then cropped it to the current wavelength range
         # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
-        reduced = WavRangeReduction(use_def_trans=deftrans)
+        reduced = WavRangeReduction(full_trans_wav=deftrans)
         file_1 = run['output_as'] + '.txt'
         if file_1 != '.txt':
             SaveRKH(reduced,file_1,'0')
@@ -139,3 +141,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         RenameWorkspace(reduced,final_name)
         if plotresults == 1:
             PlotResult(final_name)
+
+        #the call to WaveRang... killed the reducer so copy back over the settings
+        ReductionSingleton.replace(settings)
+        use_singleton()

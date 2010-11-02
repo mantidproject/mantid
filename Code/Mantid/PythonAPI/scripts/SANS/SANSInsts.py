@@ -466,9 +466,12 @@ class LOQ(ISISInstrument):
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
+            Move the locations of the sample and detector bank based on the passed beam center
+            and information from the sample workspace logs
             @param ws: workspace containing the instrument information
             @param xbeam: x-position of the beam
             @param ybeam: y-position of the beam
+            @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
         MoveInstrumentComponent(ws, 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition="1")
         
@@ -524,6 +527,7 @@ class SANS2D(ISISInstrument):
         first = self.DETECTORS['low-angle']
         second = self.DETECTORS['high-angle']
 
+        base_runno = int(base_runno)
         #first deal with some specifal cases
         if base_runno < 568:
             self.set_incident_mon(73730)
@@ -546,11 +550,12 @@ class SANS2D(ISISInstrument):
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
+            Move the locations of the sample and detector bank based on the passed beam center
+            and information from the sample workspace logs
             @param ws: workspace containing the instrument information
             @param xbeam: x-position of the beam
             @param ybeam: y-position of the beam
-            
-            #TODO: move the instrument parameters into this class
+            @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
         MoveInstrumentComponent(ws, 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition="1")
         
@@ -565,6 +570,7 @@ class SANS2D(ISISInstrument):
             zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000.
             zshift -= self.FRONT_DET_DEFAULT_SD_M
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+            #does this reflect the detector being movable?
             return [0.0, 0.0], [0.0, 0.0]
         else:
             xshift = -xbeam
@@ -573,6 +579,7 @@ class SANS2D(ISISInstrument):
             zshift -= self.REAR_DET_DEFAULT_SD_M
             mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+            #does this reflect the detector being immovable?
             return [0.0,0.0], [xshift, yshift]
         
     # Load the detector logs
