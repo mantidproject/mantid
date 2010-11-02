@@ -42,6 +42,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):
   bgColor=QColor(0,0,0,1);
   m3DAxesShown = 1;
   m_polygonMode = SOLID;
+  m_lightingState = 0;
 
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
@@ -148,9 +149,6 @@ void GL3DWidget::setLightingModel(int state)
     glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
   }
   else return;
-
-  // Update the display
-  update();
 }
 
 /** Draw 3D axes centered at the origin (if the option is selected)
@@ -217,10 +215,10 @@ void GL3DWidget::drawDisplayScene()
   {
     if (m_lightingState > 0)
     {
-      glEnable(GL_LIGHTING);
+      setLightingModel(m_lightingState);
     }
     scene->draw();
-    glDisable(GL_LIGHTING);
+    setLightingModel(0);
     this->drawAxes();
   }
   else
@@ -229,9 +227,9 @@ void GL3DWidget::drawDisplayScene()
 
     //Set the lighting
     if (m_lightingState > 0)
-      glEnable(GL_LIGHTING);
+      setLightingModel(m_lightingState);
     else
-      glDisable(GL_LIGHTING);
+      setLightingModel(0);
 
     scene->draw();
 
@@ -242,6 +240,7 @@ void GL3DWidget::drawDisplayScene()
     glEnd();
 
     //Also some axes
+    setLightingModel(0);
     this->drawAxes();
 
 
@@ -782,4 +781,5 @@ void GL3DWidget::enableLighting(bool on)
 {
   m_lightingState = on? 2 : 0;
   setLightingModel(m_lightingState);
+  update();
 }

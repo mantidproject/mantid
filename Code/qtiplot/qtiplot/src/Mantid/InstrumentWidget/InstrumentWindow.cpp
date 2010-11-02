@@ -36,84 +36,85 @@ using namespace Mantid::Geometry;
 InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
   MdiSubWindow(label, app, name, f), WorkspaceObserver(), mViewChanged(false)
 {
-	setFocusPolicy(Qt::StrongFocus);
-	setFocus();
-	QFrame *frame = new QFrame();
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-	QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
+  setFocusPolicy(Qt::StrongFocus);
+  setFocus();
+  QFrame *frame = new QFrame();
+  QVBoxLayout* mainLayout = new QVBoxLayout;
+  QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
 
-	//Add Tab control panel and Render window
-	mControlsTab = new QTabWidget(0,0);
-	controlPanelLayout->addWidget(mControlsTab);
-	controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-	QFrame* renderControls=new QFrame(mControlsTab);
-	QFrame* instrumentTree=new QFrame(mControlsTab);
-	mControlsTab->addTab( renderControls, QString("Render Controls"));
-	mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
-	mInstrumentDisplay = new Instrument3DWidget();
-	controlPanelLayout->addWidget(mInstrumentDisplay);
-	mainLayout->addWidget(controlPanelLayout);
-	QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
-	QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
-	//Tree Controls
-	mInstrumentTree = new InstrumentTreeWidget(0);
-	instrumentTreeLayout->addWidget(mInstrumentTree);
-	//Render Controls
-	mSelectButton = new QPushButton(tr("Pick"));
-	mSelectColormap = new QPushButton(tr("Select ColorMap"));
-	QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
-	mBinMapDialog = new BinDialog(this);
-	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
-	//Save control
-	mSaveImage = new QPushButton(tr("Save image"));
-	m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+  //Add Tab control panel and Render window
+  mControlsTab = new QTabWidget(0,0);
+  controlPanelLayout->addWidget(mControlsTab);
+  controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+  QFrame* renderControls=new QFrame(mControlsTab);
+  QFrame* instrumentTree=new QFrame(mControlsTab);
+  mControlsTab->addTab( renderControls, QString("Render Controls"));
+  mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
+  mInstrumentDisplay = new Instrument3DWidget();
+  controlPanelLayout->addWidget(mInstrumentDisplay);
+  mainLayout->addWidget(controlPanelLayout);
+  QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
+  QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
+  //Tree Controls
+  mInstrumentTree = new InstrumentTreeWidget(0);
+  instrumentTreeLayout->addWidget(mInstrumentTree);
+  //Render Controls
+  mSelectButton = new QPushButton(tr("Pick"));
+  mSelectColormap = new QPushButton(tr("Select ColorMap"));
+  QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
+  mBinMapDialog = new BinDialog(this);
+  mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
+  //Save control
+  mSaveImage = new QPushButton(tr("Save image"));
+  m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
-        QPushButton* setLight = new QPushButton(tr("Set lighting"));
-        setLight->setCheckable(true);
+  // Lighting is needed for testing
+  //QPushButton* setLight = new QPushButton(tr("Set lighting"));
+  //setLight->setCheckable(true);
 
-	mMinValueBox = new QLineEdit();
-	mMaxValueBox = new QLineEdit();
-	mMinValueBox->setMinimumWidth(40);
-	mMaxValueBox->setMinimumWidth(40);
-	mMinValueBox->setMaximumWidth(60);
-	mMaxValueBox->setMaximumWidth(60);
-	mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
-	mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
-	//Ensure the boxes start empty, this is important for checking if values have been set from the scripting side
-	mMinValueBox->setText("");
-	mMaxValueBox->setText("");
+  mMinValueBox = new QLineEdit();
+  mMaxValueBox = new QLineEdit();
+  mMinValueBox->setMinimumWidth(40);
+  mMaxValueBox->setMinimumWidth(40);
+  mMinValueBox->setMaximumWidth(60);
+  mMaxValueBox->setMaximumWidth(60);
+  mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
+  mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
+  //Ensure the boxes start empty, this is important for checking if values have been set from the scripting side
+  mMinValueBox->setText("");
+  mMaxValueBox->setText("");
 
-	QFrame * axisViewFrame = setupAxisFrame();
+  QFrame * axisViewFrame = setupAxisFrame();
 
-	//Colormap Frame widget
-	QFrame* lColormapFrame = new QFrame();
+  //Colormap Frame widget
+  QFrame* lColormapFrame = new QFrame();
 
-	QVBoxLayout* lColormapLayout = new QVBoxLayout;
-	lColormapLayout->addWidget(mMaxValueBox);
-	lColormapLayout->addWidget(mColorMapWidget);
-	lColormapLayout->addWidget(mMinValueBox);
-	mColorMapWidget->setColorBarEnabled(true);
-	mColorMapWidget->setColorBarWidth(20);
-	mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
-	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
+  QVBoxLayout* lColormapLayout = new QVBoxLayout;
+  lColormapLayout->addWidget(mMaxValueBox);
+  lColormapLayout->addWidget(mColorMapWidget);
+  lColormapLayout->addWidget(mMinValueBox);
+  mColorMapWidget->setColorBarEnabled(true);
+  mColorMapWidget->setColorBarWidth(20);
+  mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
+  mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
 
-	mScaleOptions = new QComboBox;
-	mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
-	mScaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
-	connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
+  mScaleOptions = new QComboBox;
+  mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
+  mScaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
+  connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
 
-	QVBoxLayout* options_layout = new QVBoxLayout;
-	options_layout->addStretch();
-	options_layout->addWidget(mScaleOptions);
+  QVBoxLayout* options_layout = new QVBoxLayout;
+  options_layout->addStretch();
+  options_layout->addWidget(mScaleOptions);
 
-	QHBoxLayout *colourmap_layout = new QHBoxLayout;
-	colourmap_layout->addLayout(lColormapLayout);
-	colourmap_layout->addLayout(options_layout);
-	lColormapFrame->setLayout(colourmap_layout);
+  QHBoxLayout *colourmap_layout = new QHBoxLayout;
+  colourmap_layout->addLayout(lColormapLayout);
+  colourmap_layout->addLayout(options_layout);
+  lColormapFrame->setLayout(colourmap_layout);
 
 
-	//Pick background color
-	QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
+  //Pick background color
+  QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
 
   //Check box to toggle orientation axes
   m3DAxesToggle = new QCheckBox("Show 3D &Axes", this);
@@ -122,67 +123,67 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   connect(m3DAxesToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(set3DAxesState(int)));
   connect(m3DAxesToggle, SIGNAL(stateChanged(int)), this, SLOT(updateInteractionInfoText()));
 
-	renderControlsLayout->addWidget(mSelectButton);
-	renderControlsLayout->addWidget(mSelectBin);
-	renderControlsLayout->addWidget(mSelectColormap);
-        renderControlsLayout->addWidget(mSaveImage);
-        renderControlsLayout->addWidget(setLight);
-        renderControlsLayout->addWidget(axisViewFrame);
-	renderControlsLayout->addWidget(btnBackgroundColor);
-	renderControlsLayout->addWidget(lColormapFrame);
+  renderControlsLayout->addWidget(mSelectButton);
+  renderControlsLayout->addWidget(mSelectBin);
+  renderControlsLayout->addWidget(mSelectColormap);
+  renderControlsLayout->addWidget(mSaveImage);
+  //renderControlsLayout->addWidget(setLight);
+  renderControlsLayout->addWidget(axisViewFrame);
+  renderControlsLayout->addWidget(btnBackgroundColor);
+  renderControlsLayout->addWidget(lColormapFrame);
   renderControlsLayout->addWidget(m3DAxesToggle);
 
-	//Set the main frame to the window
-	frame->setLayout(mainLayout);
-	setWidget(frame);
+  //Set the main frame to the window
+  frame->setLayout(mainLayout);
+  setWidget(frame);
 
-	//Set the mouse/keyboard operation info
-	mInteractionInfo = new QLabel();
-	mainLayout->addWidget(mInteractionInfo);
+  //Set the mouse/keyboard operation info
+  mInteractionInfo = new QLabel();
+  mainLayout->addWidget(mInteractionInfo);
   updateInteractionInfoText();  
-	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
-	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
-	connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
-        connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
-	connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
-	connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
+  connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
+  connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
+  connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
+  //connect(setLight,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
+  connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
+  connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 
-	connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(int,int,int)),this,SLOT(detectorHighlighted(int,int,int)));
-	connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
+  connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(int,int,int)),this,SLOT(detectorHighlighted(int,int,int)));
+  connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
 
 
-	connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
-	connect(mBinMapDialog,SIGNAL(IntegralMinMax(double,double)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double)));
-	connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
-	connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
+  connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
+  connect(mBinMapDialog,SIGNAL(IntegralMinMax(double,double)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double)));
+  connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
+  connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
 
-	// Init actions
-	mInfoAction = new QAction(tr("&Details"), this);
-	connect(mInfoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
-	
-	mPlotAction = new QAction(tr("&Plot Spectra"), this);
-	connect(mPlotAction,SIGNAL(triggered()),this,SLOT(plotSelectedSpectra()));
+  // Init actions
+  mInfoAction = new QAction(tr("&Details"), this);
+  connect(mInfoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
 
-	mDetTableAction = new QAction(tr("&Extract Data"), this);
-	connect(mDetTableAction, SIGNAL(triggered()), this, SLOT(showDetectorTable()));
+  mPlotAction = new QAction(tr("&Plot Spectra"), this);
+  connect(mPlotAction,SIGNAL(triggered()),this,SLOT(plotSelectedSpectra()));
 
-	mGroupDetsAction = new QAction(tr("&Group"), this);
-	connect(mGroupDetsAction, SIGNAL(triggered()), this, SLOT(groupDetectors()));
+  mDetTableAction = new QAction(tr("&Extract Data"), this);
+  connect(mDetTableAction, SIGNAL(triggered()), this, SLOT(showDetectorTable()));
 
-	mMaskDetsAction = new QAction(tr("&Mask"), this);
-	connect(mMaskDetsAction, SIGNAL(triggered()), this, SLOT(maskDetectors()));
- 
-	// Load settings
-	loadSettings();
-    
-	askOnCloseEvent(app->confirmCloseInstrWindow);
+  mGroupDetsAction = new QAction(tr("&Group"), this);
+  connect(mGroupDetsAction, SIGNAL(triggered()), this, SLOT(groupDetectors()));
 
-	setAttribute(Qt::WA_DeleteOnClose);
-	
-	// Watch for the deletion of the associated workspace
-	observeDelete();
-	observeAfterReplace();
-	observeADSClear();
+  mMaskDetsAction = new QAction(tr("&Mask"), this);
+  connect(mMaskDetsAction, SIGNAL(triggered()), this, SLOT(maskDetectors()));
+
+  // Load settings
+  loadSettings();
+
+  askOnCloseEvent(app->confirmCloseInstrWindow);
+
+  setAttribute(Qt::WA_DeleteOnClose);
+
+  // Watch for the deletion of the associated workspace
+  observeDelete();
+  observeAfterReplace();
+  observeADSClear();
 
 }
 
