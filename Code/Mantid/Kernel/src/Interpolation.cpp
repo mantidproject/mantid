@@ -66,7 +66,7 @@ namespace Kernel
     return 0.0;
   }
 
-  /** Add point
+  /** Add point in the interpolation.
   *
   * @param xx x-value
   * @param yy y-value

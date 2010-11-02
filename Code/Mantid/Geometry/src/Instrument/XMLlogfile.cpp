@@ -48,7 +48,11 @@ namespace Mantid
     {
     }
 
-    /** Returns parameter value
+    /** Returns the parameter value.
+     * This interprets the XML parameter specification in order to do one of these things:
+     *  - Calculate an equation result, if specified
+     *  - Interpolate the value, if desired.
+     *  - Just extract the value (perhaps the man or just the n-th position) and return that.
     *
     *  @param logData Data in logfile
     *  @return parameter value
