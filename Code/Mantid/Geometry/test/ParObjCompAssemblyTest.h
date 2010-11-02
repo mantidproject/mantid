@@ -144,7 +144,7 @@ public:
 
     TS_ASSERT_EQUALS(otype,3);
     TS_ASSERT_EQUALS(radius,0.1);
-    TS_ASSERT_EQUALS(height,0.4); // must be 0.6 !!! pixel hight is not counted
+    TS_ASSERT_EQUALS(height,0.6);
 
     ParameterMap pmap;
     boost::shared_ptr<ParObjCompAssembly> pcomp(new ParObjCompAssembly(&bank,pmap));

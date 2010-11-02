@@ -226,12 +226,19 @@ void ObjCompAssembly::printTree(std::ostream& os) const
   }
 }
 
-/*! Set the outline of the assembly. Creates an Object and sets shape point to it
+/*! Set the outline of the assembly. Creates an Object and sets m_shape point to it.
+ *  All child components must be detectors and positioned along a straight line and have the same shape.
+ *  The shape can be either a box or a cylinder.
  *  @param type The shsape of the outline: "cylinder", "box", ...
  */
 boost::shared_ptr<Object> ObjCompAssembly::createOutline()
 {
-  if (group.empty()) return boost::shared_ptr<Object>();
+  if (group.empty())
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("Empty ObjCompAssembly");
+  }
+
+  // Get information about the shape and size of a detector
   std::string type;
   int otype;
   std::vector<Geometry::V3D> vectors;
@@ -250,21 +257,21 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
   {
     type = "cylinder";
   }
-  // find the basis vectors of the plane
+
+  // Calculate the dimensions of the outline object
+
   // find the 'moments of inertia' of the assembly
   double Ixx=0,Iyy=0,Izz=0,Ixy=0,Ixz=0,Iyz=0;
-  V3D Cmass;
+  V3D Cmass; // 'center of mass' of the assembly
   for (const_comp_it it=group.begin();it!=group.end();it++)
   {
     V3D p = (**it).getRelativePos();
-    //V3D p = (**it).getPos();
     Cmass += p;
   }
   Cmass /= nelements();
   for (const_comp_it it=group.begin();it!=group.end();it++)
   {
     V3D p = (**it).getRelativePos();
-    //V3D p = (**it).getPos();
     double x = p.X()-Cmass.X(),x2 = x*x;
     double y = p.Y()-Cmass.Y(),y2 = y*y;
     double z = p.Z()-Cmass.Z(),z2 = z*z;
@@ -275,7 +282,10 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
     Ixz -= x*z;
     Iyz -= y*z;
   }
-  V3D vx,vy,vz; // principal axes of the outline shape
+  // principal axes of the outline shape
+  // vz defines the line through all pixel centres
+  V3D vx,vy,vz; 
+
   if (Ixx == 0) // pixels along x axis
   {
     vx = V3D(0,1,0);
@@ -296,6 +306,9 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
   }
   else
   {
+    // Either the detectors are not perfectrly aligned or 
+    // vz is parallel to neither of the 3 axis x,y,z
+    // This code is unfinished
     Matrix<double> II(3,3),Vec(3,3),D(3,3);
     II[0][0] = Ixx;
     II[0][1] = Ixy;
@@ -316,61 +329,99 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
   }
 
   // find assembly sizes along the principal axes
-  double hx, hy, hz;
+  double hx, hy, hz; // sizes along x,y, and z axis
+
+  // maximum displacements from the mass centre along axis vx,vy, and vz
+  // in positive (p) and negative (n) directions. 
+  // positive displacements are positive numbers and negative ones are negative
   double hxn = 0,hyn = 0, hzn = 0;
   double hxp = 0,hyp = 0, hzp = 0;
   for (const_comp_it it=group.begin();it!=group.end();it++)
   {
+    // displacement vector of a detector
     V3D p = (**it).getRelativePos() - Cmass;
+    // its projection on the vx axis
     double h = p.scalar_prod(vx);
     if (h > hxp) hxp = h;
     if (h < hxn) hxn = h;
+    // its projection on the vy axis
     h = p.scalar_prod(vy);
     if (h > hyp) hyp = h;
     if (h < hyn) hyn = h;
+    // its projection on the vz axis
     h = p.scalar_prod(vz);
     if (h > hzp) hzp = h;
     if (h < hzn) hzn = h;
   }
 
+  // calc the assembly sizes
   hx = hxp - hxn;
   hy = hyp - hyn;
   hz = hzp - hzn;
+  // hx and hy must be practically zero
+  if (hx > 1e-3 || hy > 1e-3) // arbitrary numbers
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("Detectors of a ObjCompAssembly do not lie on a staraight line");
+  }
 
+  // determine the order of the detectors to make sure that the texture coordinates are correct
+  bool firstAtBottom; // first detector is at the bottom of the outline shape
+  // the bottom end is the one with the negative displacement from the centre
+  firstAtBottom = ((**group.begin()).getRelativePos() - Cmass).scalar_prod(vz) < 0;
+
+  // form the input string for the ShapeFactory
   std::ostringstream obj_str;
   if (type == "box")
   {
-    if (hx == 0) hx = 0.01;
-    if (hy == 0) hy = 0.01;
-    if (hz == 0) hz = 0.01;
 
-    vx *= hx;
-    vy *= hy;
-    vz *= hz;
+    if (hz == 0) hz = 0.1;
+
+    hx = hy = 0;
+    height = 0;
+    V3D p0 = vectors[0];
+    for(int i=1;i<vectors.size();++i)
+    {
+      V3D p = vectors[i] - p0;
+      double h = fabs(p.scalar_prod(vx));
+      if (h > hx) hx = h;
+      h = fabs(p.scalar_prod(vy));
+      if (h > hy) hy = h;
+      height = fabs(p.scalar_prod(vz));
+      if (h > height) height = h;
+    }
+
+    vx *= hx/2;
+    vy *= hy/2;
+    vz *= hzp + height/2;
+
+    if (!firstAtBottom)
+    {
+      vz = vz * (-1);
+    }
 
     // define the outline shape as cuboid
-    V3D p_lfb = Cmass - vx - vy + vz;
-    V3D p_lft = Cmass - vx + vy + vz;
-    V3D p_lbb = Cmass - vx - vy - vz;
-    V3D p_rfb = Cmass + vx - vy + vz;
+    V3D p_lfb = Cmass - vx - vy - vz;
+    V3D p_lft = Cmass - vx - vy + vz;
+    V3D p_lbb = Cmass - vx + vy - vz;
+    V3D p_rfb = Cmass + vx - vy - vz;
     obj_str << "<cuboid id=\"shape\">";
     obj_str << "<left-front-bottom-point ";
-    obj_str << "x=\""<<p_lfb.X();
+    obj_str << "x=\""   <<p_lfb.X();
     obj_str << "\" y=\""<<p_lfb.Y();
     obj_str << "\" z=\""<<p_lfb.Z();
     obj_str << "\"  />";
     obj_str << "<left-front-top-point ";
-    obj_str << "x=\""<<p_lft.X();
+    obj_str << "x=\""   <<p_lft.X();
     obj_str << "\" y=\""<<p_lft.Y();
     obj_str << "\" z=\""<<p_lft.Z();
     obj_str << "\"  />";
     obj_str << "<left-back-bottom-point ";
-    obj_str << "x=\""<<p_lbb.X();
+    obj_str << "x=\""   <<p_lbb.X();
     obj_str << "\" y=\""<<p_lbb.Y();
     obj_str << "\" z=\""<<p_lbb.Z();
     obj_str << "\"  />";
     obj_str << "<right-front-bottom-point ";
-    obj_str << "x=\""<<p_rfb.X();
+    obj_str << "x=\""   <<p_rfb.X();
     obj_str << "\" y=\""<<p_rfb.Y();
     obj_str << "\" z=\""<<p_rfb.Z();
     obj_str << "\"  />";
@@ -379,7 +430,20 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
   }
   else if (type == "cylinder")
   {
-    Cmass += vz*hzn; // shift Cmass to the bottom of the cylinder
+    // the outline is one detector height short
+    hz += height;
+    // shift Cmass to the end of the cylinder where the first detector is
+    if (firstAtBottom)
+    {
+      Cmass += vz*hzn; 
+    }
+    else
+    {
+      hzp += height;
+      Cmass += vz*hzp;
+      // inverse the vz axis
+      vz = vz * (-1);
+    }
     obj_str << "<cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
     obj_str << "x=\""<<Cmass.X();
@@ -396,8 +460,6 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
   {
     boost::shared_ptr<Object> s = ShapeFactory().createShape(obj_str.str());
     setOutline(s);
-    std::cerr<<"create shape "<<obj_str.str()<<'\n';
-    std::cerr<<"Cmass "<<Cmass<<' '<<getRotation()<<'\n';
     return s;
   }
   return boost::shared_ptr<Object>();

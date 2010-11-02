@@ -540,7 +540,6 @@ namespace Mantid
         Geometry::ObjCompAssembly* objAss = dynamic_cast<Geometry::ObjCompAssembly*>(ass);
         if (pType->getAttribute("object_created") == "no")
         {
-          std::cerr<<pType->getAttribute("name")<<' '<<pType->getAttribute("object_created")<<"\n";
           pType->setAttribute("object_created","yes");
           boost::shared_ptr<Geometry::Object> obj = objAss->createOutline();
           if (obj)

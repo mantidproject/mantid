@@ -89,9 +89,9 @@ void TexObject::setDetectorColor(int i,GLColor c)
     int pos = 3*i;
     float r,g,b,a;
     c.get(r,g,b,a);
-    m_data[pos]   = (unsigned char)(r*256);
-    m_data[pos+1] = (unsigned char)(g*256);
-    m_data[pos+2] = (unsigned char)(b*256);
+    m_data[pos]   = (unsigned char)(r*255);
+    m_data[pos+1] = (unsigned char)(g*255);
+    m_data[pos+2] = (unsigned char)(b*255);
 }
 
 void TexObject::swap()

@@ -195,7 +195,18 @@ namespace Mantid
 				normal.normalize();
 				glNormal3d(normal[0],normal[1],normal[2]);
 				for(int j=0;j<4;j++)
-					glVertex3d(vertex[faceindex[i][j]][0],vertex[faceindex[i][j]][1],vertex[faceindex[i][j]][2]);
+        {
+          int ij = faceindex[i][j];
+          if (ij == 0) glTexCoord2i(0, 0);
+          if (ij == 1) glTexCoord2i(1, 0);
+          if (ij == 2) glTexCoord2i(1, 1);
+          if (ij == 3) glTexCoord2i(0, 1);
+          if (ij == 4) glTexCoord2i(0, 0);
+          if (ij == 5) glTexCoord2i(1, 0);
+          if (ij == 6) glTexCoord2i(1, 1);
+          if (ij == 7) glTexCoord2i(0, 1);
+					glVertex3d(vertex[ij][0],vertex[ij][1],vertex[ij][2]);
+        }
 			}
 			glEnd();
 		}
@@ -246,6 +257,7 @@ namespace Mantid
 			rot.GLMatrix(&mat[0]);
 			glMultMatrixd(mat);
 			gluCylinder(qobj,radius,radius,height, Cylinder::g_nslices, Cylinder::g_nstacks);
+      gluQuadricTexture(qobj,false); 
 			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);
 			glTranslated(0.0,0.0,height);
 			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);
