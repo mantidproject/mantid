@@ -57,8 +57,8 @@ void ElasticWindow::exec()
 
     IAlgorithm_sptr integ = createSubAlgorithm("Integration");
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", flatBGws);
-    integ->setProperty<double>("RangeLower", enR2S);
-    integ->setProperty<double>("RangeUpper", enR2E);
+    integ->setProperty<double>("RangeLower", enR1S);
+    integ->setProperty<double>("RangeUpper", enR1E);
     integ->setPropertyValue("OutputWorkspace", "integ");
     integ->execute();
 
