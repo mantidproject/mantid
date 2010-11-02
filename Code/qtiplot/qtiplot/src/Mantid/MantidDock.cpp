@@ -584,7 +584,7 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
     m_plotSpec->setEnabled(false);
   }
   menu->addAction(m_colorFill);
-  if( matrixWS->axes() > 1 )
+  if( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1)
   {
     m_colorFill->setEnabled(true);
   }
