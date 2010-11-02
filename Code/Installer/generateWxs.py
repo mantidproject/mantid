@@ -324,7 +324,7 @@ def createPropertiesFile(filename):
     "pythonscripts.directory":"pythonscripts.directory = ../scripts",
     "pythonscripts.directories":"pythonscripts.directories = ../scripts",
     "pythonalgorithms.directories":"pythonalgorithms.directories=../plugins/PythonAlgs",
-    "icatDownload.directory = ../data"
+    "icatDownload.directory":"icatDownload.directory = ../data"
     }
 
     template = open(filename,'r')
