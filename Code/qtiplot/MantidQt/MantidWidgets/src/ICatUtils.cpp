@@ -304,10 +304,10 @@ void ICatUtils::populateInstrumentBox(QComboBox* instrumentBox)
 void ICatUtils::updateSearchLabel(const Mantid::API::ITableWorkspace_sptr& ws_sptr,QLabel* label)
 {
 	std::stringstream rowcount;
-	QString results("Investigations Search Results :");
+	QString results("Search Results : ");
 	if(!ws_sptr)
 	{
-		results+=" No investigations to dispaly as an error occured during investigations search";
+		results+="No investigations to display as an error occured";
 	}
 	else{
 		rowcount<<ws_sptr->rowCount();
