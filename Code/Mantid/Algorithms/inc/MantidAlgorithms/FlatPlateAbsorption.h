@@ -72,11 +72,13 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
 
+protected:
+  void initialiseCachedDistances();
+
 private:
   void defineProperties();
   void retrieveProperties();
   std::string sampleXML();
-  void initialiseCachedDistances();
 
   double m_slabHeight;      ///< The height of the sample in m
   double m_slabWidth;       ///< The width of the sample in m

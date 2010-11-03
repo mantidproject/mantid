@@ -26,5 +26,19 @@ std::string CuboidGaugeVolumeAbsorption::sampleXML()
   return std::string();
 }
 
+void CuboidGaugeVolumeAbsorption::initialiseCachedDistances()
+{
+  // Just call the superclass method within a try-catch to fail the algorithm gracefully
+  // if the sample object does not fully enclose the gauge volume requested
+  try
+  {
+    FlatPlateAbsorption::initialiseCachedDistances();
+  } catch (Exception::InstrumentDefinitionError) {
+    // Create and throw a new exception with a more specific message
+    throw Exception::InstrumentDefinitionError(
+        "This algorithm requires that the sample fully encloses the requested gauge volume.");
+  }
+}
+
 } // namespace Algorithms
 } // namespace Mantid

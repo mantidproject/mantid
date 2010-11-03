@@ -50,6 +50,7 @@ public:
 
 private:
   std::string sampleXML();
+  void initialiseCachedDistances();
 };
 
 } // namespace Algorithms

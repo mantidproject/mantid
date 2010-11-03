@@ -108,7 +108,13 @@ void FlatPlateAbsorption::initialiseCachedDistances()
         const double x = (k + 0.5) * m_XSliceThickness - 0.5 * m_slabWidth;
         // Set the current position in the sample in Cartesian coordinates.
         m_elementPositions[counter](x,y,z);
-        assert(m_sampleObject->isValid(m_elementPositions[counter]));
+        // This should never happen for the FlatPlateAbsorption algorithm, but can for the
+        // inherited CuboidGaugeVolumeAbsorption algorithm if the sample has not been defined
+        // to fully enclose the requested cuboid
+        if ( ! m_sampleObject->isValid(m_elementPositions[counter]) )
+        {
+          throw Exception::InstrumentDefinitionError("Integration element not located within sample");
+        }
         // Create track for distance in sample before scattering point
         Track incoming(m_elementPositions[counter], m_beamDirection*-1.0);
         m_sampleObject->interceptSurface(incoming);
