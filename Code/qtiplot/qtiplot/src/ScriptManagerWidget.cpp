@@ -489,8 +489,7 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
   ScriptEditor *editor = currentEditor();
   if( editor ) 
   {
-    connect(runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	    SLOT(updateMarker(int, bool)));
+    connect(runner, SIGNAL(currentLineChanged(int, bool)), editor, SLOT(updateMarker(int, bool)));
   }
   runner->setCode(code);
   QString filename = "<input>";

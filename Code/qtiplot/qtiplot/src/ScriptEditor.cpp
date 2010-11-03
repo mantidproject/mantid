@@ -320,17 +320,10 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
    // Check if we have flagged to mark the line as read only
   if( m_read_only ) 
   {
-    if(m_interpreter_mode)
-    {
-     ///set the cursor at the current input line
-      setCursorPosition(lines() - 1, length()-1);
-      /// now set the editing state of the current line 
-      setEditingState(lines() - 1);
-    }
-    else
-    {
-      return;
-    }
+    ///set the cursor at the current input line
+    setCursorPosition(lines() - 1, length()-1);
+    /// now set the editing state of the current line 
+    setEditingState(lines() - 1);
   }
   
   int key = event->key();
@@ -472,9 +465,12 @@ void ScriptEditor::updateMarker(int lineno, bool success)
     setMarkerBackgroundColor(g_error_colour, m_marker_handle);
   }
 
+  // Clear the previous markers
+  if( !m_interpreter_mode )
+  {
+    markerDeleteAll();
+  }
   if( lineno < 0 ) return;
-  markerDeleteAll();
-
   ensureLineVisible(lineno);
   markerAdd(lineno - 1, m_marker_handle);
 }
