@@ -540,7 +540,7 @@ class Mask_ISIS(SANSReductionSteps.Mask):
               # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
                 self._lim_phi_xml += '<algebra val="#('+id+'_plane1 '+id+'_plane2)" />'
 
-    def _normalizePhi(self, phi):
+    def normalizePhi(self, phi):
         if phi > 90.0:
             phi -= 180.0
         elif phi < -90.0:
