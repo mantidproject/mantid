@@ -524,21 +524,21 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         
         id = str(id)
         self._lim_phi_xml = (
-            self._infinite_cylinder(id+'_plane1',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0])
-            + self._infinite_cylinder(id+'_plane2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0])
-            + self._infinite_cylinder(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0])
-            + self._infinite_cylinder(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]))
+            self._infinite_plane(id+'_plane1',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0])
+            + self._infinite_plane(id+'_plane2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0])
+            + self._infinite_plane(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0])
+            + self._infinite_plane(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]))
         
         if use_mirror : 
-            self._lim_phi_xml += '<algebra val="#((pla pla2):(pla3 pla4))" />'
+            self._lim_phi_xml += '<algebra val="#(('+id+'_plane1 '+id+'_plane2):('+id+'_plane3 '+id+'_plane4))" />'
         else:
             #the formula is different for acute verses obstruse angles
             if phimax-phimin > math.pi :
               # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
-                self._lim_phi_xml += '<algebra val="#(pla:pla2)" />'
+                self._lim_phi_xml += '<algebra val="#('+id+'_plane1:'+id+'_plane2)" />'
             else :
               # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
-                self._lim_phi_xml += '<algebra val="#(pla pla2)" />'
+                self._lim_phi_xml += '<algebra val="#('+id+'_plane1 '+id+'_plane2)" />'
 
     def _normalizePhi(self, phi):
         if phi > 90.0:
@@ -570,7 +570,7 @@ class Mask_ISIS(SANSReductionSteps.Mask):
         if override:
             self._readonly_phi = True
             
-        if self._readonly_phi and not override:
+        if (not self._readonly_phi) or override:
             self._mask_phi(
                 'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
@@ -858,9 +858,6 @@ class ConvertToQ(ReductionStep):
             ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
         else:
             raise NotImplementedError('The type of Q reduction hasn\'t been set, e.g. 1D or 2D')
-
-    def __str__(self):
-        return '    Q range: ' + reducer.Q_REBIN +'\n    QXY range: ' + reducer.QXY2+'-'+reducer.DQXY
 
 class NormalizeToMonitor(SANSReductionSteps.Normalize):
     """

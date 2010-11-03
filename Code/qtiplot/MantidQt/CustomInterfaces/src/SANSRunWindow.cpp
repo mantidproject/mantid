@@ -2067,7 +2067,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   else
   {
     exec_reduce += "__GUI_only_reduce.user_settings.readLimitValues('L/Q "+
-      m_uiForm.q_min->text()+","+m_uiForm.q_max->text()+","+m_uiForm.q_dq->text()+","+
+      m_uiForm.q_min->text()+" "+m_uiForm.q_max->text()+" "+m_uiForm.q_dq->text()+"/"+
       m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "', __GUI_only_reduce)\n";
   }
   exec_reduce += "ISISCommands.LimitsQXY(0.0," + m_uiForm.qy_max->text().trimmed() + "," +

@@ -231,7 +231,7 @@ def SetDetectorFloodFile(filename, reducer=None):
 def displayUserFile():
     print '-- Mask file defaults --'
     print ReductionSingleton().to_wavlen
-    print ReductionSingleton().to_Q
+    print ReductionSingleton().Q_string()
     print correction_files()
     print '    direct beam file rear:',
     print ReductionSingleton().instrument.detector_file('rear')
