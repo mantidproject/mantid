@@ -197,6 +197,10 @@ namespace Mantid
               throw std::invalid_argument("Red or green period is out of range");
             TimeSeriesProperty<double>* logp = 
                 dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
+            if (!logp)
+            {
+              throw std::invalid_argument("Log "+logName+" does not exist or not a double type");
+            }
             double Y,E; 
             calcIntAsymmetry(ws_red,ws_green,Y,E);
             outWS->dataY(0)[i-is] = Y;
