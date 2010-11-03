@@ -96,10 +96,14 @@ void WorkspaceGroup::print() const
  * @param notice A pointer to a workspace delete notificiation object
  */
 void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice)
-{
+{  
   if( notice->object_name() != this->getName() )
   {
     remove(notice->object_name());
+    if(isEmpty())
+    {
+      Mantid::API::AnalysisDataService::Instance().remove(this->getName());
+    }
   }
 }
 
