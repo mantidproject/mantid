@@ -185,8 +185,8 @@ namespace Mantid
       class_<Geometry::Detector, bases<Geometry::IDetector>,
         boost::noncopyable>("MantidDetector", no_init)
         ;
-      //Detector
-      class_<Geometry::ParDetector, bases<Geometry::IDetector>,
+      //ParDetector
+      class_<Geometry::ParDetector, bases<Geometry::ParametrizedComponent, Geometry::IDetector>,
         boost::noncopyable>("MantidParDetector", no_init)
         ;
 
