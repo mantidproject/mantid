@@ -19,7 +19,7 @@ void WorkspaceAlgorithm::init()
 {
 
     // Declare a 1D workspace property.
-    declareProperty(new WorkspaceProperty<Workspace>("Workspace","",Direction::Input));
+    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::Input));
 
 }
 
