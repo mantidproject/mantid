@@ -1383,7 +1383,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <widget class="QCheckBox" name="save_ckNxSPE" >
               <property name="text" >
-               <string>NeXusSPE</string>
+               <string>NXSPE</string>
               </property>
              </widget>
             </item>
