@@ -109,6 +109,8 @@ private:
   int m3DAxesShown;              ///< true when the 3D axes are to be shown
   int m_lightingState;           ///< 0 = light off; 2 = light on
   PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
+  bool m_firstFrame;
+
 };
 
 #endif /*GL3DWIDGET_H_*/

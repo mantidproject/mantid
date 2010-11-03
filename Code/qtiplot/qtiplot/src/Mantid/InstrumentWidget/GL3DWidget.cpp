@@ -43,6 +43,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):
   m3DAxesShown = 1;
   m_polygonMode = SOLID;
   m_lightingState = 0;
+  m_firstFrame = true;
 
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
@@ -322,11 +323,10 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
   }
 
   //
-  static bool ok = true;
-  if (ok)
+  if (m_firstFrame)
   {
     update();
-    ok = false;
+    m_firstFrame = false;
   }
 }
 
