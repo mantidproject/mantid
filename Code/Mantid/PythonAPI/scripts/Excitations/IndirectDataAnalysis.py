@@ -80,7 +80,7 @@ def demon(rawFiles, first, last, Smooth=False, SumFiles=False, CleanUp=True,
             SaveNexusProcessed(savefile, savefile+'.nxs')
     if Plot:
         for demon in workspaces:
-            nspec = mantid.getMatrixWorkspace(demon).getNumberHistograms()
+            nspec = mtd[demon].getNumberHistograms()
             plotSpectrum(demon, range(0, nspec))
     return workspaces, runNos
 
@@ -106,7 +106,8 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         eq2.append(savefile+'eq2')
         mantid.deleteWorkspace(root)
     if Plot:
-        graph = plotSpectrum(eq1+eq2, 0)
+        graph1 = plotSpectrum(eq1, 0)
+        graph2 = plotSpectrum(eq2, 0)
     return eq1, eq2
 
 def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
@@ -224,7 +225,7 @@ def mut(inWS_n, deltaW, filename, efixed):
     mantid.deleteWorkspace(tempWS)
 
 def plotFury(inWS_n, spec):
-    inWS = mantid.getMatrixWorkspace(inWS_n[0])
+    inWS = mtd[inWS_n[0]]
     nbins = inWS.getNumberBins()
     lastValueZero = False
     for i in range(0, nbins):
