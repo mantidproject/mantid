@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidCurveFitting/GaussianLinearBG1D.h"
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;
