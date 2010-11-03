@@ -58,15 +58,12 @@ namespace MantidQt
     public:
       /// Default Constructor
       InstrumentSelector(QWidget *parent = NULL, bool init = true);
+      /// Destructor
+      ~InstrumentSelector();
       /// Return the list of techniques
       QStringList getTechniques() const;
       /// Set the list of techniques
       void setTechniques(const QStringList & techniques);
-
-    protected:
-
-      void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
-      Poco::NObserver<InstrumentSelector, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
     public slots:
       /// Update list for a new facility
@@ -75,15 +72,20 @@ namespace MantidQt
     signals:
       /// Indicate that the instrument selection has changed. The parameter will contain the new name
       void instrumentSelectionChanged(const QString &);
+      void configValueChanged(const QString&, const QString&, const QString&);
 
     private slots:
       /// Update Mantid's default instrument
       void updateDefaultInstrument(const QString & name) const;
+      void handleConfigChangeSlot(const QString&, const QString&, const QString&);
 
     private:
+      void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
       /// Filter the list to only show those supporting the given technique
       void filterByTechniquesAtFacility(const QStringList & techniques, const Mantid::Kernel::FacilityInfo & facility);
-
+      
+    private: // members
+      Poco::NObserver<InstrumentSelector, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
       /// A list of technqiues. Only those instruments supporting these techniques are shown.
       QStringList m_techniques;
       /// The current facility

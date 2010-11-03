@@ -41,7 +41,15 @@ namespace MantidQt
 
         Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
         config.addObserver(m_changeObserver);
+
+        connect(this, SIGNAL(configValueChanged(const QString&, const QString&, const QString&)), this, SLOT(handleConfigChangeSlot(const QString&, const QString&, const QString&)));
       }
+    }
+
+    InstrumentSelector::~InstrumentSelector()
+    {
+      //...
+      Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
     }
 
     /**
@@ -71,19 +79,8 @@ namespace MantidQt
       QString prop = QString::fromStdString(pNf->key());
       QString newV = QString::fromStdString(pNf->curValue());
       QString oldV = QString::fromStdString(pNf->preValue());
-      if ( newV != oldV )
-      {
-        if ( prop == "default.facility" )
-        {
-          // QMessageBox::information(this, "MantidPlot", "Default facility has changed to: " + newV + " from " + oldV);
-          fillWithInstrumentsFromFacility(newV);
-        }
-        else if ( ( prop == "default.instrument" ) && ( newV != this->currentText() ) )
-        {
-          // QMessageBox::information(this, "MantidPlot", "Default instrument has changed to: " + newV + " from " + oldV);
-          this->setCurrentIndex(this->findText(newV));
-        }
-      }
+      emit configValueChanged(prop, newV, oldV);
+
     }
 
     //------------------------------------------------------
@@ -99,7 +96,10 @@ namespace MantidQt
     {
       ConfigServiceImpl & mantidSettings = ConfigService::Instance(); 
       
+      blockSignals(true);
       clear();
+      blockSignals(false);
+
       if( name.isEmpty() )
       {
         m_currentFacility = &(mantidSettings.Facility());
@@ -158,6 +158,22 @@ namespace MantidQt
       if( !name.isEmpty() )
       {
         ConfigService::Instance().setString("default.instrument", name.toStdString());
+      }
+    }
+
+    void InstrumentSelector::handleConfigChangeSlot(const QString& prop, const QString& newV, const QString& oldV)
+    {
+      //...
+      if ( newV != oldV )
+      {
+        if ( ( prop == "default.facility" ) && ( oldV != QString::fromStdString(m_currentFacility->name()) ) )
+        {
+          fillWithInstrumentsFromFacility(newV);
+        }
+        else if ( ( prop == "default.instrument" ) && ( newV != this->currentText() ) )
+        {
+          this->setCurrentIndex(this->findText(newV));
+        }
       }
     }
 
