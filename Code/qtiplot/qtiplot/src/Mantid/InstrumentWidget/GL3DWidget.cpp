@@ -320,6 +320,14 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.end();
   }
+
+  //
+  static bool ok = true;
+  if (ok)
+  {
+    update();
+    ok = false;
+  }
 }
 
 /**
