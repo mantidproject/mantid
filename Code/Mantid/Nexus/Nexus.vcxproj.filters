@@ -81,6 +81,9 @@
     <ClCompile Include="src\SaveNXSPE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\LoadNexusMonitors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidNexus\LoadInstrumentFromNexus.h">
@@ -177,6 +180,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test\SaveNXSPETest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidNexus\LoadNexusMonitors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

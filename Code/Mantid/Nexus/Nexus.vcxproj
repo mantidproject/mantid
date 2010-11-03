@@ -163,6 +163,7 @@
     <ClCompile Include="src\LoadMuonNexus.cpp" />
     <ClCompile Include="src\LoadMuonNexus2.cpp" />
     <ClCompile Include="src\LoadNeXus.cpp" />
+    <ClCompile Include="src\LoadNexusMonitors.cpp" />
     <ClCompile Include="src\LoadNexusProcessed.cpp" />
     <ClCompile Include="src\LoadSNSEventNexus.cpp" />
     <ClCompile Include="src\LoadSNSNexus.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="inc\MantidNexus\LoadISISNexus.h" />
     <ClInclude Include="inc\MantidNexus\LoadISISNexus2.h" />
     <ClInclude Include="inc\mantidnexus\loadlogsfromsnsnexus.h" />
+    <ClInclude Include="inc\MantidNexus\LoadNexusMonitors.h" />
     <ClInclude Include="inc\MantidNexus\LoadSNSEventNexus.h" />
     <ClInclude Include="inc\mantidnexus\loadtofrawnexus.h" />
     <ClInclude Include="inc\mantidnexus\nexusexception.hpp" />
