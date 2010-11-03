@@ -58,11 +58,24 @@ void SavePHX::exec() {
 				filename);
 	}
 
+        int nDetectors = 0;
+
+        // Quick loop through the detectors to see how many we have that aren't monitors
+        for (int i = 0; i < nHist; ++i) {
+	        IDetector_sptr det = inputWorkspace->getDetector(i);
+                if (!det->isMonitor()) {
+                ++nDetectors;
+                }
+        }	
+		
+	// Write the number of detectors to the file.
+	outPHX_file << nDetectors << std::endl;
+
 	double twoTheta = 0.0;
 	double phi = 0.0;
 	double delta_twoTheta = 0.0;
 	double delta_phi = 0.0;
-	int nDetectors = 0;
+
 
 	for (int i = 0; i < nHist; ++i) {
 		// Now get the detector object for this histogram
@@ -75,8 +88,6 @@ void SavePHX::exec() {
 
 
 		if (!det->isMonitor()) {
-
-			++nDetectors;
 
 			// Get a pointer to the object.
 			//      const boost::shared_ptr<const Object> shape = det->Shape();
@@ -152,8 +163,6 @@ void SavePHX::exec() {
 			delta_phi = atan2((ysize / 2.0), distance) * rad2deg;
 			delta_twoTheta = atan2((xsize / 2.0), distance) * rad2deg;
 
-			// Write the number of detectors to the file.
-			outPHX_file << nDetectors << std::endl;
 			// Now write all the detector info.
 			outPHX_file << std::fixed << std::setprecision(3);
 			outPHX_file << "1\t0\t" << twoTheta << "\t" << phi << "\t"
