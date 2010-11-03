@@ -610,31 +610,31 @@ class Mask(ReductionStep):
         return '<infinite-plane id="' + str(id) + '">' + \
             '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
             '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-            '</infinite-plane><algebra val="'+addition+str(id)+'"/>\n'
+            '</infinite-plane>\n'
 
-    def _infinite_cylinder(self, centre, radius, axis, complement=False, id='shape'):
-        if complement:
-            addition = '#'
-        else:
-            addition = ''
+    def _infinite_cylinder(self, centre, radius, axis, id='shape'):
         return '<infinite-cylinder id="' + str(id) + '">' + \
             '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
             '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
             '<radius val="' + str(radius) + '" />' + \
-            '</infinite-cylinder><algebra val="'+addition+str(id)+'"/>\n'
+            '</infinite-cylinder>'
 
     def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
-        '''Mask the inside of a cylinder on the input workspace.'''
+        """
+            Mask the inside of a cylinder on the input workspace
+        """
         self.add_xml_shape(
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
-            complement=False, id=ID))
+            id=ID)+'<algebra val="'+' '+str(ID)+'"/>\n')
             
 
     def add_outside_cylinder(self, radius, xcentre = 0.0, ycentre = 0.0, ID='shape'):
-        '''Mask out the outside of a cylinder or specified radius'''
+        """
+            Mask out the outside of a cylinder or specified radius
+        """
         self.add_xml_shape(
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
-            complement=True, id=ID))
+            id=ID)+'<algebra val="'+'#'+str(ID)+'"/>\n')
 
     def execute(self, reducer, workspace, instrument=None):
         for shape in self._xml:

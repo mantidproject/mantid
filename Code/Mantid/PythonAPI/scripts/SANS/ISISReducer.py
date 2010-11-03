@@ -66,16 +66,16 @@ class ISISReducer(SANSReducer):
         self._reduction_steps.append(self.crop_detector)
         self._reduction_steps.append(self.samp_trans_load)
         self._reduction_steps.append(self.mask)
-#        self._reduction_steps.append(self.to_wavelen)
-#        self._reduction_steps.append(self.norm_mon)
-#        self._reduction_steps.append(self.transmission_calculator)
-#        self._reduction_steps.append(self._corr_and_scale)
-#        self._reduction_steps.append(self._geo_corr)
-#        self._reduction_steps.append(self.to_Q)
+        self._reduction_steps.append(self.to_wavelen)
+        self._reduction_steps.append(self.norm_mon)
+        self._reduction_steps.append(self.transmission_calculator)
+        self._reduction_steps.append(self._corr_and_scale)
+        self._reduction_steps.append(self._geo_corr)
+        self._reduction_steps.append(self.to_Q)
         #---- the can special reducer ends on the previous step
-#        self._reduction_steps.append(self.background_subtracter)
-#        self._reduction_steps.append(self._zero_errors)
-#        self._reduction_steps.append(self._rem_zeros)
+        self._reduction_steps.append(self.background_subtracter)
+        self._reduction_steps.append(self._zero_errors)
+        self._reduction_steps.append(self._rem_zeros)
         
         #if set to an integer only that period will be extracted from the run file and processed 
         self._period_num = None

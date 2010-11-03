@@ -564,6 +564,9 @@ class Mask_ISIS(SANSReductionSteps.Mask):
             else:
                 self.phi_min = self.normalizePhi(phimin)
                 self.phi_max = self.normalizePhi(phimax)
+        else:
+            self.phi_min = phimin
+            self.phi_max = phimax
 
         self.phi_mirror = phimirror
 
