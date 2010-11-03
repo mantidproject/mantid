@@ -173,7 +173,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
       return *it;
     }
   }
-  g_log.error("Instrument "+iname+" not found in facility "+name());
+  g_log.debug("Instrument "+iname+" not found in facility "+name());
   throw Exception::NotFoundError("FacilityInfo",iname);
 }
 
