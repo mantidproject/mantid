@@ -171,6 +171,10 @@ namespace Mantid
               ws_red = loadNexus->getProperty(wsProp);
               TimeSeriesProperty<double>* logp = 
                 dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
+              if (!logp)
+              {
+                throw std::invalid_argument("Log "+logName+" does not exist or not a double type");
+              }
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
               outWS->dataY(0)[i-is] = Y;
