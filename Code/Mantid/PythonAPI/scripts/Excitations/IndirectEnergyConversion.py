@@ -21,7 +21,7 @@ def loadData(rawfiles, outWS='RawFile', Sum=False):
                 print 'Rawfiles do not match, not suitable for summing.'
                 sys.exit('Rawfiles not suitable for summing.')
             mantid.deleteWorkspace(tmp_ws)
-        workspace = mtd.getMatrixWorkspace(name)
+        workspace = mtd[name]
         return [workspace], [name]
     else:
         workspace_list = []
@@ -32,8 +32,8 @@ def loadData(rawfiles, outWS='RawFile', Sum=False):
                 ( name, ext ) = os.path.splitext(file)
                 LoadRaw(rawfiles[i], name)
                 ws_name_list.append(name)
-        for i in ws_name_list:
-            workspace_list.append(mtd.getMatrixWorkspace(i))
+        for ws in ws_name_list:
+            workspace_list.append(mtd[ws])
         return workspace_list, ws_name_list
 
 def getFirstMonFirstDet(inWS):
@@ -94,9 +94,9 @@ def useCalib(path, inWS_n='Time', outWS_n='Time'):
     except ValueError, message:
        print message
        sys.exit(message)
-    tmp = mantid.getMatrixWorkspace(inWS_n)
+    tmp = mtd[inWS_n]
     shist = tmp.getNumberHistograms()
-    tmp = mantid.getMatrixWorkspace('calib')
+    tmp = mtd['calib']
     chist = tmp.getNumberHistograms()
     if chist != shist:
         msg = 'Number of spectra in calibration file does not match number \
@@ -291,12 +291,12 @@ def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax,
         LoadRaw(rawfile, 'Raw', SpectrumMin = specMin, SpectrumMax = specMax)
     except:
         sys.exit('Calib: Could not load raw file.')
-    tmp = mantid.getMatrixWorkspace('Raw')
+    tmp = mtd['Raw']
     nhist = tmp.getNumberHistograms()
     FlatBackground('Raw', 'Raw', StartX=backMin, EndX=backMax, Mode='Mean')
     Integration('Raw', outWS_n, peakMin, peakMax)
     mantid.deleteWorkspace('Raw')
-    cal_ws = mantid.getMatrixWorkspace(outWS_n)
+    cal_ws = mtd[outWS_n]
     sum = 0
     for i in range(0, nhist):
         sum += cal_ws.readY(i)[0]
@@ -349,6 +349,8 @@ def saveItems(workspaces, runNos, fileFormats, ins, suffix):
                 SaveSPE(workspaces[i], filename + '.spe')
             elif j == 'nxs':
                 SaveNexusProcessed(workspaces[i], filename + '.nxs')
+            elif j == 'nxspe':
+                SaveNXSPE(workspaces[i], filename+'.nxspe')
             else:
                 print 'Save: unknown file type.'
                 system.exit('Save: unknown file type.')

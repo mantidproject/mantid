@@ -547,6 +547,8 @@ QString Indirect::savePyCode()
     fileFormats << "nxs";
   if ( m_uiForm.save_ckSPE->isChecked() )
     fileFormats << "spe";
+  if ( m_uiForm.save_ckNxSPE->isChecked() )
+    fileFormats << "nxspe";
 
   if ( fileFormats.size() != 0 )
     fileFormatList = "[ '" + fileFormats.join("', '") + "']";

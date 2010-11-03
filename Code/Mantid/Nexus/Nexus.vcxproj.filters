@@ -78,6 +78,9 @@
     <ClCompile Include="src\LoadSNSEventNexus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SaveNXSPE.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidNexus\LoadInstrumentFromNexus.h">
@@ -168,6 +171,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidNexus\LoadSNSEventNexus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidNexus\SaveNXSPE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\SaveNXSPETest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

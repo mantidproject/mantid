@@ -175,6 +175,7 @@
     <ClCompile Include="src\NeXusStream.cpp" />
     <ClCompile Include="src\SaveNeXus.cpp" />
     <ClCompile Include="src\SaveNexusProcessed.cpp" />
+    <ClCompile Include="src\SaveNXSPE.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidNexus\LoadInstrumentFromNexus.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="inc\mantidnexus\nexusexception.hpp" />
     <ClInclude Include="inc\mantidnexus\nexusfile.hpp" />
     <ClInclude Include="inc\mantidnexus\nexusstream.hpp" />
+    <ClInclude Include="inc\MantidNexus\SaveNXSPE.h" />
     <ClInclude Include="test\LoadISISNexusTest.h" />
     <ClInclude Include="inc\MantidNexus\LoadMuonLog.h" />
     <ClInclude Include="test\LoadMuonLogTest.h" />
@@ -207,6 +209,7 @@
     <ClInclude Include="inc\MantidNexus\SaveNexusProcessed.h" />
     <ClInclude Include="test\SaveNexusProcessedTest.h" />
     <ClInclude Include="test\SaveNeXusTest.h" />
+    <ClInclude Include="test\SaveNXSPETest.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\API\API.vcxproj">
