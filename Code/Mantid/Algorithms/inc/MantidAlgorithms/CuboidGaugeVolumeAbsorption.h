@@ -13,6 +13,9 @@ namespace Algorithms
 /** Calculates attenuation due to absorption and scattering in a generic sample, considering only the
     scattering within a cuboid shaped 'gauge volume'.
 
+    This gauge volume will be an axis-aligned cuboid with its centre at the samplePos point. The
+    sample object must have been previously defined and must fully enclose the gauge volume.
+
     @author Russell Taylor, Tessella
     @date 1/11/2010
 

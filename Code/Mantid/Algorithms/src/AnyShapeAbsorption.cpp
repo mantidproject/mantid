@@ -106,6 +106,7 @@ void AnyShapeAbsorption::initialiseCachedDistances()
           // the object a track segment to the surface isn't correctly created.
           // In the context of this algorithm I think it's safe to just chuck away
           // the element in this case.
+          // This will also throw away points that are inside a gauge volume but outside the sample
           if ( m_sampleObject->interceptSurface(incoming) > 0 )
           {
             m_L1s.push_back(incoming.begin()->distFromStart);

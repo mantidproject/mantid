@@ -38,8 +38,8 @@ namespace Algorithms
     calculated for the centre-point of each element, and a numerical
     integration is carried out using these path lengths over the volume elements.
 
-    This algorithm assumes that the beam comes along the Z axis
-    and that the sample is at the origin.
+    If the "GaugeVolume" property on the run object is defined, the calculation will only use
+    points within the defined gauge volume (and also within the sample).
 
     @author Russell Taylor, Tessella plc
     @date 11/03/2010
