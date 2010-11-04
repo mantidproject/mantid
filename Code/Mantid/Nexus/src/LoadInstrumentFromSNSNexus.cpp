@@ -20,7 +20,7 @@ namespace Mantid
 namespace NeXus
 {
 
-DECLARE_ALGORITHM(LoadInstrumentFromSNSNexus)
+// DECLARE_ALGORITHM(LoadInstrumentFromSNSNexus)
 
 using namespace Kernel;
 using namespace API;
