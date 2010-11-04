@@ -63,7 +63,8 @@ void ReadGroupsFromFile::exec()
 {
 	// Construct the full filename from the symbol of the instrument (
 	const std::string instname=getProperty("InstrumentName");
-	std::string instshort=instname.substr(0,3);
+  //std::string instshort=instname.substr(0,3);
+  std::string instshort=instname;
 	std::transform(instshort.begin(),instshort.end(),instshort.begin(),toupper);
 	instshort=instshort+"_Definition.xml";
 
