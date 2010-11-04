@@ -118,8 +118,15 @@ void ICatAdvancedSearch::populateInstrumentBox()
 
 void ICatAdvancedSearch::populateInvestigationType()
 {
-
-	std::vector<std::string> invstList = executeListInvestigationTypes();
+  std::vector<std::string> invstList;
+  try
+  {
+	invstList = executeListInvestigationTypes();
+  }
+  catch(std::runtime_error & e)
+  {
+    emit error(e.what());
+  }
 	if(invstList.empty())
 	{
 		emit error("Investigation Types list is empty");
@@ -172,6 +179,10 @@ std::vector<std::string> ICatAdvancedSearch:: executeListInvestigationTypes()
 			 std::vector<std::string> invstTypes =executeListInvestigationTypes();
 			 return invstTypes;
 			}
+      else
+      {
+        throw std::runtime_error("Please Login to the information catalog using the login menu provided to do the investigation search.");
+      }
 		}
 		else
 		{			
@@ -188,7 +199,7 @@ std::vector<std::string> ICatAdvancedSearch:: executeListInvestigationTypes()
 	}
 	catch (Mantid::Kernel::Exception::NotFoundError&)
 	{
-		throw;
+		throw  std::runtime_error(" Error when retrieving the Investigation Types from the selected  catalog");
 	}
 	return invstlist;
 	

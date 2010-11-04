@@ -36,8 +36,6 @@ private:
   virtual void initLayout();
   ///populating the instrumentbox 
   void populateInstrumentBox();
-  /// execute list instruments algorithm
-  Mantid::API::ITableWorkspace_sptr  executeListInstruments();
   ///get start and end run numbers
   void getRunValues(double& startRun,double& endRun);
   ///get the user set start and end dates
@@ -102,9 +100,6 @@ private:
    void showInvalidMarkerLabel(const QString& name);
    /// hide invalid marker labels
    void hideInvalidMarkerLabel(const QString& name);
-
-   ///checks the given sessionId is valid
-   bool isValidSession();
  
 private slots:
 	///handler for search button

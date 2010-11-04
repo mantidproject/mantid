@@ -92,12 +92,16 @@ bool ICatMyDataSearch::executeMyDataSearch(ITableWorkspace_sptr& ws_sptr)
 			//at this point session is invalid, popup loginbox to login
 			if(m_utils_sptr->login())
 			{
-     	//now populate instrument box
+     
 			 return(executeMyDataSearch(ws_sptr)?true:false );
       
 			}
+      else
+      {
+        return false;
+      }
+    
 		}
-		//return false;
 	}
 	
 	if(AnalysisDataService::Instance().doesExist("MyInvestigations"))

@@ -72,6 +72,7 @@ void ICatSearch::initLayout()
 		"background-repeat: repeat-y; width: 17px; height:20px;} ";
 	m_uiForm.Instrument->setStyleSheet(str);
 	
+  connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writeErrorToLogWindow(const QString&)));
 	try
 	{
 	populateInstrumentBox();
@@ -81,9 +82,9 @@ void ICatSearch::initLayout()
 		emit error("Error when Populating instruments box");
 
 	}
-	catch(std::runtime_error &)
+	catch(std::runtime_error & e)
 	{
-		emit error("Error when Populating instruments box");
+		emit error(e.what());
 	}
 	
 	//validator for start and end run numbers
@@ -98,7 +99,7 @@ void ICatSearch::initLayout()
 	connect(m_uiForm.closeButton,SIGNAL(clicked()),this,SLOT(onClose()));
 	connect(m_uiForm.searchtableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
 		this,SLOT(investigationSelected(QTableWidgetItem* )));
-	connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writeErrorToLogWindow(const QString&)));
+	
 	connect(m_uiForm.startdatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.enddatetoolButton,SIGNAL(clicked()),this,SLOT(popupCalendar()));
 	connect(m_uiForm.helpButton,SIGNAL(clicked()),this,SLOT(helpButtonClicked()));
@@ -132,52 +133,7 @@ bool ICatSearch::isCaseSensitiveSearch()
 	return m_uiForm.CaseSensitive->isChecked();
 }
 
-bool ICatSearch::isValidSession()
-{
-	emit error("isValid called");
-	QString algName("ValidateSession");
-	const int version=-1;
-	
-	Mantid::API::IAlgorithm_sptr alg;
-	try
-	{
-		alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
-	}
-	catch(...)
-	{
-		//throw std::runtime_error("Error checking the validity of sessionid");
-		emit error("invalid session");
-		return false;
-	}
 
-	Poco::ActiveResult<bool> result(alg->executeAsync());
-	while( !result.available() )
-	{
-		QCoreApplication::processEvents();
-	}
-	
-	if(!alg->isExecuted())
-	{
-		emit error("invalid session");
-		return false ;
-	}
-	else
-	{
-		bool bvalidSession= alg->getProperty("isValid");
-		if(bvalidSession)
-		{
-			emit error("valid session");
-			return true;
-		}
-		else
-		{
-			emit error("invalid session");
-			return false;
-
-		}
-	}
-	return true;
-}
 
 /* This method updates the search result to search tree
  * @param ws_sptr workspace shared pointer
@@ -185,7 +141,9 @@ bool ICatSearch::isValidSession()
 void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 {	
 	if(!m_utils_sptr)
+  {
 		return;
+  }
 	m_utils_sptr->resetSearchResultsWidget(m_uiForm.searchtableWidget);
 	m_utils_sptr->updatesearchResults(ws_sptr,m_uiForm.searchtableWidget);
 	m_utils_sptr->updateSearchLabel(ws_sptr,m_uiForm.searchlabel);
@@ -195,80 +153,13 @@ void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
 /** This method populates the instrument box
 */
 void ICatSearch::populateInstrumentBox(){
-
-	try{
-				
+  				
 		if(!m_utils_sptr)
+    {
 			return;
+    }
 		m_utils_sptr->populateInstrumentBox(m_uiForm.Instrument);
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError& e)
-	{
-		emit error(e.what());
-		return;
-
-	}
-	catch(std::runtime_error & e)
-	{
-		emit error(e.what());
-		return;
-	}
-	catch(...)
-	{
-		emit error("Error when Populating the instruments box");
-	}
-	return;
-}
-
-/** This method executes the ListInstruments algorithm
-  * and fills the instrument box with instrument lists returned by ICat API
-  * @return shared pointer to workspace which contains instrument names
-*/
-ITableWorkspace_sptr  ICatSearch::executeListInstruments()
-{
-	QString algName("ListInstruments");
-	const int version = -1;
-	ITableWorkspace_sptr  ws_sptr;
-	Mantid::API::IAlgorithm_sptr alg;
-	try
-	{
-		alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
-	}
-	catch(...)
-	{
-		throw std::runtime_error("Error when Populating the instrument list box"); 
-	}
-	try
-	{
-	alg->setPropertyValue("OutputWorkspace","instruments");
-	}
-	catch(std::invalid_argument& e)
-	{		
-		emit error(e.what());
-		return ws_sptr;
-	}
-	catch (Mantid::Kernel::Exception::NotFoundError& e)
-	{
-		emit error(e.what());
-		return ws_sptr;
-	}
-
-	Poco::ActiveResult<bool> result(alg->executeAsync());
-	while( !result.available() )
-	{
-		QCoreApplication::processEvents();
-	}
 	
-	if(!alg->isExecuted())
-	{
-		return ws_sptr;
-	}
-	if(AnalysisDataService::Instance().doesExist("instruments"))
-	{
-		ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
-			(AnalysisDataService::Instance().retrieve("instruments"));
-	}
-	return ws_sptr;
 }
 
 /**This method gets run numbers from the start and end run boxes.

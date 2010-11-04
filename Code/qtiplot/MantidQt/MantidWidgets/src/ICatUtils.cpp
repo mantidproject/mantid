@@ -207,6 +207,10 @@ std::vector<std::string> ICatUtils::executeListInstruments()
 			 std::vector<std::string> instruments =executeListInstruments();
 			 return instruments;
 			}
+      else
+      {
+        throw std::runtime_error("Please Login to the information catalog using the login menu provided to do the investigation search.");
+      }
 		}
 		else
 		{			
@@ -271,6 +275,11 @@ bool ICatUtils::login()
 		}
 		return true;
 	}
+  else
+  {    
+    dlg->close();
+    return false;
+  }
 }
 
 /** This method populates the instrument box
