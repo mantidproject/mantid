@@ -595,6 +595,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
           {
             QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Group names must be unique. Please re-enter Group name.");
             itemName->setText("");
+            break;
           }
         }
       }
