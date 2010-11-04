@@ -117,7 +117,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  */
 ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *codelexer) : 
   QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
-  m_history(), m_read_only(false), m_need_newline(false),  m_completer(NULL)
+  m_history(), m_read_only(false), m_need_newline(false),  m_completer(NULL),m_previousKey(0)
 {
   // Undo action
   m_undo = new QAction(tr("&Undo"), this);
@@ -311,22 +311,31 @@ void ScriptEditor::setText(int lineno, const QString& txt,int index)
  */
 void ScriptEditor::keyPressEvent(QKeyEvent* event)
 {
+
   if( isListActive() || !m_interpreter_mode )
   {
     forwardKeyPressToBase(event);
     return;
   }
+  int key = event->key();
     
-   // Check if we have flagged to mark the line as read only
+  // Check if we have flagged to mark the line as read only
   if( m_read_only ) 
   {
-    ///set the cursor at the current input line
+  // if control or Ctrl+C or Ctrl+X  pressed
+    if(key==Qt::Key_Control || isCtrlCPressed(m_previousKey,key )|| isCtrlXPressed(m_previousKey,key ) )
+    { 
+      forwardKeyPressToBase(event);
+       m_previousKey=key;
+      return;
+    }
+   ///set the cursor at the current input line
     setCursorPosition(lines() - 1, length()-1);
     /// now set the editing state of the current line 
     setEditingState(lines() - 1);
   }
-  
-  int key = event->key();
+  m_previousKey=key;
+   
 
   bool handled(false);
   int last_line = lines() - 1;
@@ -365,9 +374,30 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
   }
   
   if( handled ) return;
-  
   forwardKeyPressToBase(event);
   return;
+}
+
+/**
+ * checks the shortcut key for copy pressed
+ * @param prevKey -code corresponding to the previous key 
+ * @param curKey -code corresponding to the current key 
+ * @returns bool returns true if the keys pressed are Ctrl+C
+ */
+bool ScriptEditor::isCtrlCPressed(const int prevKey,const int curKey)
+{
+   return ((curKey==Qt::Key_C  && prevKey==Qt::Key_Control )?true:false);
+}
+
+/**
+ * checks the shortcut key for cut pressed
+ * @param prevKey -code corresponding to the previous key 
+ * @param curKey -code corresponding to the current key 
+ * @returns bool returns true if the keys pressed are Ctrl+X
+ */
+bool ScriptEditor::isCtrlXPressed(const int prevKey,const int curKey)
+{
+   return ((curKey==Qt::Key_X  && prevKey==Qt::Key_Control )?true:false);
 }
 
 /**
@@ -537,7 +567,7 @@ void ScriptEditor::paste()
     if( m_read_only ) 
     {
       ///set the cursor at the current input line
-      setCursorPosition(lines() - 1,length()-1);
+      setCursorPosition(lines() - 1,length()+1);
       /// now set the editing state of the current line 
       setEditingState(lines() - 1);
     }
@@ -554,6 +584,7 @@ void ScriptEditor::paste()
       int line_index = this->lines() - 1;
       QString txt = itr.next();
       this->setText(line_index, txt.remove('\r').remove('\n'),length()-1);
+       setCursorPosition(line_index,length()+1);
       //if there are lines ahead of this line ( multilines) then execute the line
       if(itr.hasNext())
       {
@@ -621,7 +652,7 @@ void ScriptEditor::remapWindowEditingKeys()
  */
 void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
 {
-  // Handle event
+   // Handle event
   QsciScintilla::keyPressEvent(event);
   
   // Only need to do this for Unix and for QScintilla version < 2.4.2. Moreover, only Gnome but I don't think we can detect that

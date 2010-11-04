@@ -589,17 +589,17 @@ void ScriptManagerWidget::editorContextMenu(const QPoint &)
       context.addAction(m_eval);
     }
   }
-
-  context.insertSeparator();
-
-  context.addAction(m_toggle_completion);
-  context.addAction(m_toggle_calltips);
+   
   // Edit actions
    context.insertSeparator();
    context.addAction(copyAction());
    context.addAction(cutAction());
    context.addAction(pasteAction());
+ 
+   context.insertSeparator();
 
+  context.addAction(m_toggle_completion);
+  context.addAction(m_toggle_calltips);
   context.exec(QCursor::pos());
 }
 

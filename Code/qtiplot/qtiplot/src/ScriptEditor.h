@@ -164,7 +164,11 @@ public slots:
   void displayOutput(const QString& msg, bool error);
   /// Overrride the paste command when in interpreter mode
   void paste();
-
+  ///this method checks the shortcut key for the copy command (Ctrl+C) pressed
+  bool isCtrlCPressed(const int prevKey,const int curKey);
+  /// this method checks the short cut key for the command cut(Ctrl+X) is pressed
+  bool isCtrlXPressed(const int prevKey,const int curKey);
+  
 signals:
   /// Inform observers that undo information is available
   void undoAvailable(bool);
@@ -202,6 +206,9 @@ private:
   static QColor g_success_colour;
   /// The colour of the marker for an error state
   static QColor g_error_colour;
+  /// previous key
+  int m_previousKey;
+ 
 };
 
 
