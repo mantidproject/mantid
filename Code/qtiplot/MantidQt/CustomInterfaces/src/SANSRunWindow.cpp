@@ -565,16 +565,16 @@ bool SANSRunWindow::oldLoadUserFile()
 
   double unit_conv(1000.);
   // Radius
-  double dbl_param = runReduceScriptFunction("printParameter('SANSReduction.RMIN'),").toDouble();
+  double dbl_param = runReduceScriptFunction("SANSReduction.printParameter('RMIN'),").toDouble();
   m_uiForm.rad_min->setText(QString::number(dbl_param*unit_conv));
-  dbl_param = runReduceScriptFunction("printParameter('SANSReduction.RMAX'),").toDouble();
+  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('RMAX'),").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
   //Wavelength
-  m_uiForm.wav_min->setText(runReduceScriptFunction("printParameter('SANSReduction.WAV1'),"));
-  m_uiForm.wav_max->setText(runReduceScriptFunction("printParameter('SANSReduction.WAV2'),"));
-  setLimitStepParameter("wavelength", runReduceScriptFunction("printParameter('SANSReduction.DWAV'),"), m_uiForm.wav_dw, m_uiForm.wav_dw_opt);
+  m_uiForm.wav_min->setText(runReduceScriptFunction("SANSReduction.printParameter('WAV1'),"));
+  m_uiForm.wav_max->setText(runReduceScriptFunction("SANSReduction.printParameter('WAV2'),"));
+  setLimitStepParameter("wavelength", runReduceScriptFunction("SANSReduction.printParameter('DWAV'),"), m_uiForm.wav_dw, m_uiForm.wav_dw_opt);
   //Q
-  QString text = runReduceScriptFunction("printParameter('SANSReduction.Q_REBIN'),");
+  QString text = runReduceScriptFunction("SANSReduction.printParameter('Q_REBIN'),");
   QStringList values = text.split(",");
   if( values.count() == 3 )
   {
@@ -588,13 +588,13 @@ bool SANSRunWindow::oldLoadUserFile()
     m_uiForm.q_dq_opt->setCurrentIndex(2);
   }
   //Qxy
-  m_uiForm.qy_max->setText(runReduceScriptFunction("printParameter('SANSReduction.QXY2'),"));
-  setLimitStepParameter("Qxy", runReduceScriptFunction("printParameter('SANSReduction.DQXY'),"), m_uiForm.qy_dqy, m_uiForm.qy_dqy_opt);
+  m_uiForm.qy_max->setText(runReduceScriptFunction("SANSReduction.printParameter('QXY2'),"));
+  setLimitStepParameter("Qxy", runReduceScriptFunction("SANSReduction.printParameter('DQXY'),"), m_uiForm.qy_dqy, m_uiForm.qy_dqy_opt);
 
   // Tranmission options
-  m_uiForm.trans_min->setText(runReduceScriptFunction("printParameter('SANSReduction.TRANS_WAV1'),"));
-  m_uiForm.trans_max->setText(runReduceScriptFunction("printParameter('SANSReduction.TRANS_WAV2'),"));
-  text = runReduceScriptFunction("printParameter('SANSReduction.TRANS_FIT')");
+  m_uiForm.trans_min->setText(runReduceScriptFunction("SANSReduction.printParameter('TRANS_WAV1'),"));
+  m_uiForm.trans_max->setText(runReduceScriptFunction("SANSReduction.printParameter('TRANS_WAV2'),"));
+  text = runReduceScriptFunction("SANSReduction.printParameter('TRANS_FIT')");
   int index = m_uiForm.trans_opt->findData(text, Qt::UserRole, Qt::MatchFixedString);
   if( index >= 0 )
   {
@@ -603,39 +603,39 @@ bool SANSRunWindow::oldLoadUserFile()
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction(
-    "printParameter('INSTRUMENT.get_incident_mon()'),"));
+    "SANSReduction.printParameter('INSTRUMENT.get_incident_mon()'),"));
   m_uiForm.trans_monitor->setText(runReduceScriptFunction(
-    "printParameter('INSTRUMENT.incid_mon_4_trans_calc'),"));
+    "SANSReduction.printParameter('INSTRUMENT.incid_mon_4_trans_calc'),"));
   m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
-    "printParameter('INSTRUMENT.is_interpolating_norm')").trimmed() == "True");
+    "SANSReduction.printParameter('INSTRUMENT.is_interpolating_norm')").trimmed() == "True");
   m_uiForm.trans_interp->setChecked(
-    runReduceScriptFunction("printParameter('INSTRUMENT.use_interpol_trans_calc'),").trimmed() == "True");
+    runReduceScriptFunction("SANSReduction.printParameter('INSTRUMENT.use_interpol_trans_calc'),").trimmed() == "True");
 
   //Direct efficiency correction
-  m_uiForm.direct_file->setText(runReduceScriptFunction("printParameter('SANSReduction.DIRECT_BEAM_FILE_R'),"));
-  m_uiForm.front_direct_file->setText(runReduceScriptFunction("printParameter('SANSReduction.DIRECT_BEAM_FILE_F'),"));
+  m_uiForm.direct_file->setText(runReduceScriptFunction("SANSReduction.printParameter('SANSReduction.DIRECT_BEAM_FILE_R'),"));
+  m_uiForm.front_direct_file->setText(runReduceScriptFunction("SANSReduction.printParameter('SANSReduction.DIRECT_BEAM_FILE_F'),"));
 
-  QString file = runReduceScriptFunction("printParameter('SANSReduction.NORMALISATION_FILE'),");
+  QString file = runReduceScriptFunction("SANSReduction.printParameter('NORMALISATION_FILE'),");
   //Check if the file name is set to Python's None object
   file = file == "None " ? "" : file;
   m_uiForm.floodFile->setFileText(file);
 
   //Scale factor
-  dbl_param = runReduceScriptFunction("printParameter('SANSReduction.RESCALE'),").toDouble();
+  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('RESCALE'),").toDouble();
   m_uiForm.scale_factor->setText(QString::number(dbl_param/100.));
 
   //Sample offset if one has been specified
-  dbl_param = runReduceScriptFunction("printParameter('INSTRUMENT.SAMPLE_Z_CORR'),").toDouble();
+  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('SAMPLE_Z_CORR'),").toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
 
   //Centre coordinates
-  dbl_param = runReduceScriptFunction("printParameter('SANSReduction.XBEAM_CENTRE'),").toDouble();
+  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('XBEAM_CENTRE'),").toDouble();
   m_uiForm.beam_x->setText(QString::number(dbl_param*1000.0));
-  dbl_param = runReduceScriptFunction("printParameter('SANSReduction.YBEAM_CENTRE'),").toDouble();
+  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('YBEAM_CENTRE'),").toDouble();
   m_uiForm.beam_y->setText(QString::number(dbl_param*1000.0));
 
   //Gravity switch
-  QString param = runReduceScriptFunction("printParameter('SANSReduction.GRAVITY')");
+  QString param = runReduceScriptFunction("SANSReduction.printParameter('GRAVITY')");
   if( param.trimmed() == "True" )
   {
     m_uiForm.gravity_check->setChecked(true);
@@ -647,7 +647,7 @@ bool SANSRunWindow::oldLoadUserFile()
 
   ////Detector bank
   QString detName = runReduceScriptFunction(
-    "printParameter('INSTRUMENT.cur_detector().name()')");
+    "SANSReduction.printParameter('INSTRUMENT.cur_detector().name()')");
   detName = detName.trimmed();
   index = m_uiForm.detbank_sel->findText(detName);
   if( index >= 0 && index < 2 )
@@ -658,11 +658,7 @@ bool SANSRunWindow::oldLoadUserFile()
   //Masking table
   updateMaskTable();
 
-  // Phi values
-  m_uiForm.phi_min->setText(runReduceScriptFunction("printParameter('SANSReduction.PHIMIN')"));
-  m_uiForm.phi_max->setText(runReduceScriptFunction("printParameter('SANSReduction.PHIMAX')"));
-
-  if ( runReduceScriptFunction("printParameter('SANSReduction.PHIMIRROR')").trimmed() == "True" )
+  if ( runReduceScriptFunction("SANSReduction.printParameter('PHIMIRROR')").trimmed() == "True" )
   {
     m_uiForm.mirror_phi->setChecked(true);
   }
@@ -2293,13 +2289,13 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
       + full_trans_range;
     if( m_uiForm.plot_check->isChecked() )
     {
-      py_code += ", plotresults = True";
+      py_code += ", plotresults=True";
     }
     if( m_uiForm.log_colette->isChecked() )
     {
-      py_code += ", verbose = True";
+      py_code += ", verbose=True";
     }
-    py_code += ")";
+    py_code += ", reducer=__GUI_only_reduce)";
   }
 
   int idtype(0);
@@ -2584,8 +2580,8 @@ void SANSRunWindow::handleInstrumentChange(const int index)
 
     //File extensions
     m_uiForm.file_opt->clear();
-    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
     m_uiForm.file_opt->addItem("nexus", QVariant(".nxs"));
+    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   }
 
   m_cfg_loaded = false;
@@ -2759,11 +2755,11 @@ void SANSRunWindow::verboseMode(int state)
 {
   if( state == Qt::Checked )
   {
-    runReduceScriptFunction("SetVerboseMode(True)");
+    runReduceScriptFunction("ISISCommandInterface.SetVerboseMode(True)");
   }
   else if( state == Qt::Unchecked )
   {
-    runReduceScriptFunction("SetVerboseMode(False)");
+    runReduceScriptFunction("ISISCommandInterface.SetVerboseMode(False)");
   }
   else {}
 }
@@ -3012,7 +3008,7 @@ bool SANSRunWindow::oldAssign(int key, QString & logs)
       //and display to the user how many periods are in the run
       QString pythonVar = is_can ? "TRANS_CAN_N_PERIODS" : "_TRANS_SAMPLE_N_PERIODS";
       int nPeriods =
-        runReduceScriptFunction("printParameter('"+pythonVar+"'),").toInt();
+        runReduceScriptFunction("SANSReduction.printParameter('"+pythonVar+"'),").toInt();
       setNumberPeriods(key, nPeriods);
 
       pythonVar = is_can ? "DIRECT_CAN_N_PERIODS" : "DIRECT_SAMPLE_N_PERIODS";

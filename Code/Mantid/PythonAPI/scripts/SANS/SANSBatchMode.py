@@ -64,7 +64,7 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, verbose = False, centreit = False):
+def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, verbose = False, centreit = False, reducer=None):
     if not format.startswith('.'):
         format = '.' + format
         
@@ -78,16 +78,22 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
     # End of file reading
     file_handle.close()
 
-    # Now loop over run information and process, first save the user settings, these were copied into the reducer
-    settings = copy.deepcopy(ReductionSingleton())
+    red_chain = reducer
+    if red_chain is None:
+        red_chain = ReductionSingleton().reference()
+
+    # Now loop over run information and process
     for run in runinfo:
+        #first copy the user settings these will be changed below but for the next iteration they should be reset to this 
+        settings = copy.deepcopy(red_chain)
+
         # Sample run
         run_file = run['sample_sans']
         if len(run_file) == 0:
             issueWarning('No sample run given, skipping entry.')
             continue
         run_file += format
-        sample_ws = AssignSample(run_file)[0]
+        sample_ws = AssignSample(run_file, reducer=settings)[0]
         if len(sample_ws) == 0:
             issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
             continue
@@ -95,7 +101,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         #Sample trans
         run_file = run['sample_trans']
         run_file2 = run['sample_direct_beam']
-        ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
+        ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format, reducer=settings)
         if len(run_file) > 0 and len(ws1) == 0:
             issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
             continue
@@ -105,7 +111,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         
         # Sans Can 
         run_file = run['can_sans']
-        can_ws = AssignCan(run_file + format)[0]
+        can_ws = AssignCan(run_file + format, reducer=settings)[0]
         if run_file != '' and len(can_ws) == 0:
             issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
             continue
@@ -113,7 +119,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         #Can trans
         run_file = run['can_trans']
         run_file2 = run['can_direct_beam']
-        ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
+        ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format, reducer=settings)
         if len(run_file) > 0 and len(ws1) == 0:
             issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
             continue
@@ -128,7 +134,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         # WavRangeReduction runs the reduction for the specfied wavelength range where the final argument can either be DefaultTrans or CalcTrans:
         # Parameter DefaultTrans specifies the transmission should be calculated for the whole range specified by L/WAV and then cropped it to the current wavelength range
         # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
-        reduced = WavRangeReduction(full_trans_wav=deftrans)
+        reduced = WavRangeReduction(full_trans_wav=deftrans, reducer=settings)
         file_1 = run['output_as'] + '.txt'
         if file_1 != '.txt':
             SaveRKH(reduced,file_1,'0')
@@ -142,6 +148,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         if plotresults == 1:
             PlotResult(final_name)
 
-        #the call to WaveRang... killed the reducer so copy back over the settings
-        ReductionSingleton.replace(settings)
-        use_singleton()
+#        #the call to WaveRang... killed the reducer so copy back over the settings
+#        if not reducer:
+#            ReductionSingleton.replace(red_chain)
+#            use_singleton()

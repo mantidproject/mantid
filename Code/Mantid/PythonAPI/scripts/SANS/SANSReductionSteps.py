@@ -610,7 +610,7 @@ class Mask(ReductionStep):
         return '<infinite-plane id="' + str(id) + '">' + \
             '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
             '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-            '</infinite-plane>\n'
+            '</infinite-plane>'
 
     def _infinite_cylinder(self, centre, radius, axis, id='shape'):
         return '<infinite-cylinder id="' + str(id) + '">' + \
@@ -625,7 +625,7 @@ class Mask(ReductionStep):
         """
         self.add_xml_shape(
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
-            id=ID)+'<algebra val="'+' '+str(ID)+'"/>\n')
+            id=ID)+'<algebra val="'+' '+str(ID)+'"/>')
             
 
     def add_outside_cylinder(self, radius, xcentre = 0.0, ycentre = 0.0, ID='shape'):
@@ -634,7 +634,7 @@ class Mask(ReductionStep):
         """
         self.add_xml_shape(
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
-            id=ID)+'<algebra val="'+'#'+str(ID)+'"/>\n')
+            id=ID)+'<algebra val="'+'#'+str(ID)+'"/>')
 
     def execute(self, reducer, workspace, instrument=None):
         for shape in self._xml:

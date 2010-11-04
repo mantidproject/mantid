@@ -9,6 +9,7 @@ import os
 import SANSInsts
 from CommandInterface import *
 import ISISReductionSteps
+import SANSReductionSteps
 import ISISReducer
 
 #remove the following
@@ -56,24 +57,19 @@ except ImportError:
     def appwidgets():
         return []
 
-_NOPRINT_ = False
 _VERBOSE_ = False
 
-
-
-def SetNoPrintMode(quiet = True):
-    _NOPRINT_ = quiet
 
 def SetVerboseMode(state):
     _VERBOSE_ = state
 
 # Print a message and log it if the 
-def _printMessage(msg, log = True):
+def _printMessage(msg, log = True, no_console=False):
     if log == True and _VERBOSE_ == True:
         mantid.sendLogMessage('::SANS::' + msg)
-    if _NOPRINT_ == True: 
-        return
-    print msg
+    if not no_console:
+        if singleton:
+            print msg
     
 def issueWarning(msg):
     """
@@ -83,31 +79,37 @@ def issueWarning(msg):
     ISISReductionSteps._issueWarning(msg)
                 
 def UserPath(path):
+    _printMessage('UserPath("' + path + '") #Will look for mask file here')
     ReductionSingleton().user_file_path = path
         
 def SANS2D(reducer=None):
+    _printMessage('SANS2D()', no_console=reducer)
     instrument = SANSInsts.SANS2D()
         
     _active_red(reducer).set_instrument(instrument)
 
 def LOQ(reducer=None):
+    _printMessage('LOQ()', no_console=reducer)
     instrument = SANSInsts.LOQ()
 
     _active_red(reducer).set_instrument(instrument)
     
 def Detector(det_name):
+    _printMessage('Detector("' + det_name + '")')
     ReductionSingleton().instrument.setDetector(det_name)
     
 def Mask(details, reducer=None):
-    if not reducer:
-        _printMessage('Mask("' + details + '")')
+    _printMessage('Mask("' + details + '")', no_console=reducer)
     _active_red(reducer).mask.parse_instruction(details)
     
 def MaskFile(file_name):
+    _printMessage('#Opening "'+file_name+'"')
     ReductionSingleton().user_settings = ISISReductionSteps.UserFile(
         file_name)
-    ReductionSingleton().user_settings.execute(
+    status = ReductionSingleton().user_settings.execute(
         ReductionSingleton(), None)
+    _printMessage('#Success reading "'+file_name+'"'+' is '+str(status))
+    return status
     
 def SetMonitorSpectrum(specNum, interp=False, reducer=None):
     _active_red(reducer).set_monitor_spectrum(specNum, interp)
@@ -125,32 +127,38 @@ def SetSampleOffset(value, reducer=None):
     _active_red(reducer).instrument.set_sample_offset(value)
     
 def Gravity(flag, reducer=None):
+    _printMessage('Gravity(' + str(flag) + ')', no_console=reducer)
     _active_red(reducer).to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None, reducer=None):
+    if not reducer:
+        message = mode
+        if lambdamin: message += lambdamin
+        if lambdamax: message += lambdamax
+        _printMessage("TransFit(\"" + str(message) + "\")", no_console=reducer)
     _active_red(reducer).set_trans_fit(lambdamin, lambdamax, mode)
     
 def AssignCan(can_run, reload = True, period = -1, reducer=None):
+    _printMessage('AssignCan("' + can_run + '")', no_console=reducer)
     _active_red(reducer).set_background(can_run, reload = reload, period = period)
     return _active_red(reducer).background_subtracter.assign_can(
                                                     _active_red(reducer))
     
 def TransmissionSample(sample, direct, reload = True, period = -1, reducer=None):
+    _printMessage('TransmissionSample("' + sample + '","' + direct + '")', no_console=reducer)
     _active_red(reducer).set_trans_sample(sample, direct, reload = True, period = -1)
     return _active_red(reducer).samp_trans_load.execute(
                                             ReductionSingleton(), None)
 
 def TransmissionCan(can, direct, reload = True, period = -1, reducer=None):
-    if not reducer:
-        _printMessage('TransmissionCan("' + can + '","' + direct + '")')
+    _printMessage('TransmissionCan("' + can + '","' + direct + '")', no_console=reducer)
     _active_red(reducer).set_trans_can(can, direct, reload = True, period = -1)
     return _active_red(reducer).can_trans_load.execute(
                                             _active_red(reducer), None)
     
 def AssignSample(sample_run, reload = True, period = -1, reducer=None):
-    if not reducer:
-        _printMessage('AssignSample("' + sample_run + '")')
-        reducer = _active_red(reducer)
+    _printMessage('AssignSample("' + sample_run + '")', no_console=reducer)
+    reducer = _active_red(reducer)
 
     reducer.data_loader = ISISReductionSteps.LoadSample(
                                             sample_run)
@@ -162,10 +170,9 @@ def AssignSample(sample_run, reload = True, period = -1, reducer=None):
     return sample_wksp, logs
 
 def SetCentre(XVAL, YVAL, reducer=None):
-    if reducer is None:
-        _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
+    _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')', no_console=reducer)
 
-        _active_red(reducer).set_beam_finder(BaseBeamFinder(XVAL/1000.0, YVAL/1000.0))
+    _active_red(reducer).set_beam_finder(SANSReductionSteps.BaseBeamFinder(float(XVAL)/1000.0, float(YVAL)/1000.0))
 
 
 def SetSampleOffset(value, reducer=None):
@@ -178,10 +185,9 @@ def GetMismatchedDetList():
     return ReductionSingleton().instrument.get_marked_dets()
 
 def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None, reducer=None):
-    reduction_chain = reducer
-    if not reduction_chain:
-        reduction_chain = _active_red(reduction_chain)
-        _printMessage('Running reduction for ' + str(reduction_chain.to_wavelen))
+    reduction_chain = _active_red(reducer)
+    _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ','+str(full_trans_wav)+')', no_console=reducer)
+    _printMessage('Running reduction for ' + str(reduction_chain.to_wavelen))
 
     if not full_trans_wav is None:
         reduction_chain.full_trans_wav = full_trans_wav
@@ -212,9 +218,11 @@ def _SetWavelengthRange(start, end):
 
 
 def Set1D():
+    _printMessage('Set1D()')
     ReductionSingleton().to_Q.output_type = '1D'
 
 def Set2D():
+    _printMessage('Set2D()')
     ReductionSingleton().to_Q.output_type = '2D'
 
 def SetRearEfficiencyFile(filename):
@@ -260,10 +268,10 @@ def LimitsPhi(phimin, phimax, use_mirror=True, reducer=None):
     reducer = _active_red(reducer)
     settings = reducer.user_settings
     if use_mirror :
-        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
+        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)', no_console=reducer)
         settings.readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax), reducer)
     else :
-        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
+        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)', no_console=reducer)
         settings.readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax), reducer)
 
 def LimitsR(rmin, rmax):
@@ -272,8 +280,7 @@ def LimitsR(rmin, rmax):
     settings.readLimitValues('L/R ' + str(rmin) + ' ' + str(rmax) + ' 1', reducer)
 
 def LimitsWav(lmin, lmax, step, type, reducer=None):
-    if not reducer:
-        _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + type + ')')
+    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + type + ')', no_console=reducer)
     reducer = _active_red(reducer)
     settings = reducer.user_settings
     settings.readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type, reducer)
@@ -296,8 +303,7 @@ def LimitsQ(*args):
         _issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
 
 def LimitsQXY(qmin, qmax, step, type, reducer=None):
-    if not reducer:
-        _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
+    _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')', no_console=reducer)
     reducer = _active_red(reducer)
     settings = reducer.user_settings
 
