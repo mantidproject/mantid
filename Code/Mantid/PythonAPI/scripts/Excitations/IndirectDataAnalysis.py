@@ -38,9 +38,15 @@ def concatWSs(workspaces, unit, name):
     dataY = []
     dataE = []
     for ws in workspaces:
-        dataX += mtd[ws].readX(0)
-        dataY += mtd[ws].readY(0)
-        dataE += mtd[ws].readE(0)
+        readX = mtd[ws].readX(0)
+        readY = mtd[ws].readY(0)
+        readE = mtd[ws].readE(0)
+        for i in range(0, len(readX)):
+            dataX.append(readX[i])
+        for i in range(0, len(readY)):
+            dataY.append(readY[i])
+        for i in range(0, len(readE)):
+            dataE.append(readE[i])
     CreateWorkspace(name, dataX, dataY, dataE, NSpec = len(workspaces),
         UnitX=unit)
 
@@ -228,19 +234,9 @@ def plotFury(inWS_n, spec):
     inWS = mtd[inWS_n[0]]
     nbins = inWS.getNumberBins()
     lastValueZero = False
-    for i in range(0, nbins):
-        if (inWS.readY(spec[0])[i] != inWS.readY(spec[0])[i]):
-            if lastValueZero:
-                xBoundary = inWS.readX(spec[0])[i]
-                break
-            else:
-                lastValueZero = True
-        else:
-            lastValueZero = False
     graph = plotSpectrum(inWS_n, spec)
     layer = graph.activeLayer()
     layer.setScale(0, 0, 1.0)
-    layer.setScale(2, 0, xBoundary)
 
 def plotRaw(inputfiles,spectra=[]):
     if len(spectra) != 2:
