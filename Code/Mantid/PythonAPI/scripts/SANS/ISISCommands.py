@@ -275,9 +275,10 @@ def LimitsPhi(phimin, phimax, use_mirror=True, reducer=None):
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)', no_console=reducer)
         settings.readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax), reducer)
 
-def LimitsR(rmin, rmax):
-    _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')')
-    settings = ReductionSingleton().user_settings
+def LimitsR(rmin, rmax, reducer=None):
+    _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')', reducer)
+    reducer = _active_red(reducer)
+    settings = reducer.user_settings
     settings.readLimitValues('L/R ' + str(rmin) + ' ' + str(rmax) + ' 1', reducer)
 
 def LimitsWav(lmin, lmax, step, type, reducer=None):
