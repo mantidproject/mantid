@@ -208,7 +208,21 @@ class ISISReducer(SANSReducer):
         #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
         if interp :
             self.instrument.use_interpol_trans_calc = True                    
-                      
+
+    def get_trans_lambdamin(self):
+        """
+            Gets the value of the lowest wavelength that is to
+            be used in the transmission calculation
+        """
+        return self.transmission_calculator.get_lambdamin(self.instrument)
+
+    def get_trans_lambdamax(self):
+        """
+            Gets the value of the highest wavelength that is to
+            be used in the transmission calculation
+        """
+        return self.transmission_calculator.get_lambdamax(self.instrument)
+
     def set_process_single_workspace(self, wk_name):
         """
             Clears the list of data files and inserts one entry

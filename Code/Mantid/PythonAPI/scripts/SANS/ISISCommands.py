@@ -61,6 +61,7 @@ _VERBOSE_ = False
 
 
 def SetVerboseMode(state):
+#TODO: this needs to be on the reducer
     _VERBOSE_ = state
 
 # Print a message and log it if the 
@@ -148,7 +149,7 @@ def TransmissionSample(sample, direct, reload = True, period = -1, reducer=None)
     _printMessage('TransmissionSample("' + sample + '","' + direct + '")', no_console=reducer)
     _active_red(reducer).set_trans_sample(sample, direct, reload = True, period = -1)
     return _active_red(reducer).samp_trans_load.execute(
-                                            ReductionSingleton(), None)
+                                            reducer, None)
 
 def TransmissionCan(can, direct, reload = True, period = -1, reducer=None):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")', no_console=reducer)
@@ -178,11 +179,11 @@ def SetCentre(XVAL, YVAL, reducer=None):
 def SetSampleOffset(value, reducer=None):
     _active_red(reducer).instrument.set_sample_offset(value)
     
-def GetMismatchedDetList():
+def GetMismatchedDetList(reducer=None):
     """
         Return the list of mismatched detector names
     """
-    return ReductionSingleton().instrument.get_marked_dets()
+    return _active_red(reducer).instrument.get_marked_dets()
 
 def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None, reducer=None):
     reduction_chain = _active_red(reducer)

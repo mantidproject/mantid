@@ -944,19 +944,37 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
-        self.lambda_min = None
-        self.lambda_max = None
+        self._lambda_min = None
+        self._lambda_max = None
         self.fit_method = None
         self._use_full_range = None
         self.loader = loader
 
+    def get_lambdamin(self, instrum):
+        """
+            Gets lambdamin or the default if no value has been set
+        """
+        if self._lambda_min is None:
+            return instrum.WAV_RANGE_MIN
+        else:
+            return self._lambda_min
+
+    def get_lambdamax(self, instrum):
+        """
+            Gets lambdamax or the default if no value has been set
+        """
+        if self._lambda_max is None:
+            return instrum.WAV_RANGE_MAX
+        else:
+            return self._lambda_max
+
     def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
         if not min is None:
-            if (self.lambda_min is None) or override:
-                self.lambda_min = min
+            if (self._lambda_min is None) or override:
+                self._lambda_min = min
         if not max is None:
-            if (self.lambda_max is None) or override:
-                self.lambda_max = max
+            if (self._lambda_max is None) or override:
+                self._lambda_max = max
 
         if not fit_method is None:
             if (self.fit_method is None) or override:
@@ -987,12 +1005,6 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
 
         instrum = reducer.instrument
 
-        #set the defaults where no value had be set
-        if self.lambda_max is None:
-            self.lambda_max = instrum.WAV_RANGE_MAX
-        if self.lambda_min is None:
-            self.lambda_min = instrum.WAV_RANGE_MIN
-        
         if self.fit_method is None:
             self.fit_method = self.DEFAULT_FIT
             
@@ -1007,8 +1019,8 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
             translambda_min = instrum.WAV_RANGE_MIN
             translambda_max = instrum.WAV_RANGE_MAX
         else:
-            translambda_min = self.lambda_min
-            translambda_max = self.lambda_max
+            translambda_min = reducer.get_trans_lambdamin()
+            translambda_max = reducer.get_trans_lambdamax()
             wavbin = str(reducer.to_wavelen.get_rebin())
     
         fittedtransws = trans_raw.split('_')[0] + '_trans_'
@@ -1038,7 +1050,7 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
                     '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
                     reducer.instrument.use_interpol_trans_calc, True)
                 
-                CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength = translambda_min, MaxWavelength =  translambda_max, \
+                CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength=translambda_min, MaxWavelength =  translambda_max, \
                                       FitMethod = fit_type, OutputUnfittedData=True)
             else:
                 trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
