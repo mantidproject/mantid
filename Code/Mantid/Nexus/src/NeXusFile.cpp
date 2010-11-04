@@ -1346,6 +1346,27 @@ template
 NXDLL_EXPORT void File::getData(vector<char>& data);
 
 template
+NXDLL_EXPORT void File::putSlab(std::vector<float>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<double>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<int8_t>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<uint8_t>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<int16_t>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<uint16_t>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<int32_t>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<uint32_t>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<int64_t>& data, std::vector<int>& start, std::vector<int>& size);
+template
+NXDLL_EXPORT void File::putSlab(std::vector<uint64_t>& data, std::vector<int>& start, std::vector<int>& size);
+
+template
 NXDLL_EXPORT void File::putSlab(std::vector<float>& data, int start, int size);
 template
 NXDLL_EXPORT void File::putSlab(std::vector<double>& data, int start, int size);
