@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>ICat Advanced Search</string>
+   <string>Catalog Advanced Search</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" >
    <item>

@@ -1168,7 +1168,7 @@ void ApplicationWindow::initMainMenu()
   help->addAction(actionAbout);
 
   icat = new QMenu(this);
-  icat->setObjectName("ICatMenu");
+  icat->setObjectName("CatalogMenu");
   icat->addAction(actionICatLogin);//Login menu item
   icat->addAction(actionMydataSearch);// my data search menu item
   icat->addAction(actionICatSearch);//search menu item
@@ -1423,7 +1423,7 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 
   }
 
-  menuBar()->insertItem(tr("I&Cat"),icat);
+  menuBar()->insertItem(tr("&Catalog"),icat);
 
   // Interface menu. Build the interface from the user sub windows list.
   // Modifications will be done through the ManageCustomMenus dialog and
@@ -12675,23 +12675,23 @@ void ApplicationWindow::createActions()
   connect(actionMagnify, SIGNAL(activated()), this, SLOT(magnify()));
 
   actionICatLogin  = new QAction("Login",this);
-  actionICatLogin->setToolTip(tr("ICat Login"));
+  actionICatLogin->setToolTip(tr("Catalog Login"));
   connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
 
   actionICatSearch=new QAction("Basic Search",this);
-  actionICatSearch->setToolTip(tr("ICat Basic Search"));
+  actionICatSearch->setToolTip(tr("Catalog Basic Search"));
   connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
 
   actionMydataSearch=new QAction("My Data Search",this);
-  actionMydataSearch->setToolTip(tr("ICat MyData Search"));
+  actionMydataSearch->setToolTip(tr("Catalog MyData Search"));
   connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
 
   actionICatLogout=new QAction("Logout",this);
-  actionICatLogout->setToolTip(tr("ICat Logout"));
+  actionICatLogout->setToolTip(tr("Catalog Logout"));
   connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
 
   actionAdvancedSearch = new QAction("Advanced Search",this);
-  actionAdvancedSearch->setToolTip(tr("ICat Advanced Search"));
+  actionAdvancedSearch->setToolTip(tr("Catalog Advanced Search"));
   connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));
 }
 
