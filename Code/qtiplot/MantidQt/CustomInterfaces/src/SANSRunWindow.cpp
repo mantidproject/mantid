@@ -188,7 +188,7 @@ void SANSRunWindow::initLocalPython()
     m_have_reducemodule = false;
     setProcessingState(true, -1);    
   }
-  runPythonCode("import ISISCommands\n");
+  runPythonCode("import ISISCommands\nimport copy");
   QString initInstrCom = m_uiForm.inst_opt->itemData(
                               m_uiForm.inst_opt->currentIndex()).toString();
   runPythonCode("import SANSInsts\nimport ISISReductionSteps");
@@ -2264,8 +2264,14 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     py_code += "print '"+PYTHON_SEP+"'+reduced";
     if( m_uiForm.plot_check->isChecked() )
     {
-      py_code += "\nISISCommands.PlotResult(reduced, reducer=__GUI_only_reduce)\n";
+      py_code += "\nISISCommands.PlotResult(reduced, reducer=__GUI_only_reduce)";
     }
+    py_code += "\n__user_settings_copy = copy.deepcopy(__GUI_only_reduce.user_settings)";
+    py_code += "\n__GUI_only_reduce = ISISReducer.ISISReducer()";
+    int index = m_uiForm.inst_opt->currentIndex();
+    py_code += "\n__GUI_only_reduce.set_instrument(SANSInsts."+m_uiForm.inst_opt->itemData(index).toString()+")";
+    py_code += "\n__GUI_only_reduce.user_settings = __user_settings_copy";
+    py_code += "\n__GUI_only_reduce.user_settings.execute(__GUI_only_reduce)";
   }
   else
   {

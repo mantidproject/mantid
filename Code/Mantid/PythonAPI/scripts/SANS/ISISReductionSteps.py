@@ -1136,7 +1136,7 @@ class UserFile(ReductionStep):
         super(UserFile, self).__init__()
         self.filename = file
 
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, workspace=None):
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
