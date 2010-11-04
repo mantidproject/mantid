@@ -7,7 +7,6 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.mantid_util import DataFileProxy
 from base_widget import BaseWidget
 from mask import MaskWidget
-import functools
 
 class SANSInstrumentWidget(BaseWidget):    
     """

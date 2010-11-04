@@ -1,7 +1,6 @@
 from PyQt4 import QtGui, uic, QtCore
 import util
 import os
-import functools
 from reduction_gui.reduction.hfir_reduction_steps import Transmission
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget

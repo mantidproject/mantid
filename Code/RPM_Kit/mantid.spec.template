@@ -29,9 +29,9 @@ BuildRequires:	qt4-devel >= 4.2
 BuildRequires:	qwt-devel
 BuildRequires:	qwtplot3d-qt4-devel
 BuildRequires:	muParser-devel
-BuildRequires:	PyQt4-devel
+BuildRequires:	PyQt4-devel >= 4.5
 BuildRequires: 	nexus
-BuildRequires: 	sip-devel
+BuildRequires: 	sip-devel >= 4.8
 BuildRequires: 	qscintilla-devel
 BuildRequires: 	OpenCASCADE-devel
 
@@ -131,10 +131,8 @@ done
 %if %{is_debian}
 %else
 install -m755 %{pythonsitepackages}/sip.so $RPM_BUILD_ROOT/%{mantidbindir}
-for i in %{pythonsitepackages}/PyQt4/*.so; do
-    install -m755 $i $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4/`basename $i`
-done
-install -m755 %{pythonsitepackages}/PyQt4/__init__.py $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4/__init__.py
+cp -R %{pythonsitepackages}/PyQt4 $RPM_BUILD_ROOT/%{mantidbindir}
+chmod -R 755 $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4
 %endif
 
 cp -r instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}

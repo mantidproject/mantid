@@ -322,7 +322,10 @@ class ReductionGUI(QtGui.QMainWindow):
             Present a file dialog to the user and saves the content of
             the UI in XML format.
         """
-        fname = self._filename if self._filename is not None else '.'
+        if self._filename is not None:
+            fname = self._filename
+        else:
+            fname = '.'
         
         fname = unicode(QtGui.QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
                                                           self._last_directory, 
