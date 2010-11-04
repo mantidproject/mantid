@@ -77,7 +77,7 @@ class Reducer(object):
             return filename
         else:
             # If not, raise an exception
-            raise RuntimeError, "Reducer expects a file name in %s" % self._data_path
+            raise RuntimeError, 'Could not load file "%s"' % filename
         
     def append_step(self, reduction_step):
         """

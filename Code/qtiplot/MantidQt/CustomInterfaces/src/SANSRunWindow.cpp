@@ -555,8 +555,6 @@ bool SANSRunWindow::oldLoadUserFile()
     m_uiForm.mask_table->removeRow(i);
   }
 
-  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
-
   // Use python function to read the file and then extract the fields
   if ( runReduceScriptFunction("print SANSReduction.MaskFile(r'"+filetext+"')") != "True\n" )
   {
@@ -2081,7 +2079,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   }
   exec_reduce += ", reducer=__GUI_only_reduce)\n";
   QString floodFile =
-    m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename() : "";
+    m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename().trimmed() : "";
   exec_reduce += "ISISCommands.SetDetectorFloodFile('"+floodFile+"', reducer=__GUI_only_reduce)\n";
 
   //Transmission behaviour
