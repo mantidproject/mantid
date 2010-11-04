@@ -224,6 +224,11 @@ namespace Mantid
       slab_start.push_back(0);
       slab_start.push_back(0);
 
+      // define the data and error vectors for masked detectors
+      std::vector<double> masked_data (nBins, MASK_FLAG);
+      std::vector<double> masked_error (nBins, MASK_ERROR);
+       
+
       // Loop over spectra
       for (size_t i = 0; i < static_cast<size_t> (nHist); i++)
         {
@@ -254,7 +259,7 @@ namespace Mantid
               delta_polar = atan2((ysize / 2.0), distance) * rad2deg;
               delta_azimuthal = atan2((xsize / 2.0), distance) * rad2deg;
 
-              // Now write the widths...
+              // Now store the widths...
               polar_width.push_back(delta_polar);
               azimuthal_width.push_back(delta_azimuthal);
 
@@ -271,6 +276,8 @@ namespace Mantid
 
                   // Open the error
                   nxFile.openData("error");
+                  //MantidVec& tmparr = const_cast<MantidVec&>(inputWS->dataE(i));
+                  //nxFile.putSlab((void*)(&(tmparr[0])), slab_start, slab_size);
                   nxFile.putSlab(const_cast<MantidVec&> (inputWS->readE(i)),
                       slab_start, slab_size);
                   // Close the error
@@ -279,6 +286,18 @@ namespace Mantid
               else
                 {
                   // Write a masked value...
+                  // Open the data
+                  nxFile.openData("data");
+                  slab_start[0] = i;
+                  nxFile.putSlab(masked_data, slab_start, slab_size);
+                  // Close the data
+                  nxFile.closeData();
+
+                  // Open the error
+                  nxFile.openData("error");
+                  nxFile.putSlab(masked_error, slab_start, slab_size);
+                  // Close the error
+                  nxFile.closeData();
                 }
             }
 
