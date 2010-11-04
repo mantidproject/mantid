@@ -36,7 +36,6 @@ namespace Mantid
 			"",Direction::Output), "The name of the workspace that will be created.");
 
 	  std::vector<std::string> units = UnitFactory::Instance().getKeys();
-	  units.insert(units.begin(),"MomemtumTransfer");
 	  declareProperty("Unit","Energy",new Kernel::ListValidator(units),
 			"The unit to assign to the X axis (default: Energy)");
     }
