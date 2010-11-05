@@ -2172,7 +2172,7 @@ QString SANSRunWindow::createOldAnalysisDetailsScript(const QString & type)
     exec_reduce += ", False)\n";
   }
   QString floodFile =
-    m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename() : "";
+    m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename().trimmed() : "";
   exec_reduce += "SANSReduction.SetDetectorFloodFile('"+floodFile+"')\n";
 
   //Transmission behaviour
@@ -2262,16 +2262,16 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     py_code += "\nreduced = ISISCommands.WavRangeReduction(full_trans_wav=" + full_trans_range + ", reducer=__GUI_only_reduce)\n";
     //output the name of the output workspace, this is returned up by the runPythonCode() call below
     py_code += "print '"+PYTHON_SEP+"'+reduced";
-    if( m_uiForm.plot_check->isChecked() )
-    {
-      py_code += "\nISISCommands.PlotResult(reduced, reducer=__GUI_only_reduce)";
-    }
     py_code += "\n__user_settings_copy = copy.deepcopy(__GUI_only_reduce.user_settings)";
     py_code += "\n__GUI_only_reduce = ISISReducer.ISISReducer()";
     int index = m_uiForm.inst_opt->currentIndex();
     py_code += "\n__GUI_only_reduce.set_instrument(SANSInsts."+m_uiForm.inst_opt->itemData(index).toString()+")";
     py_code += "\n__GUI_only_reduce.user_settings = __user_settings_copy";
     py_code += "\n__GUI_only_reduce.user_settings.execute(__GUI_only_reduce)";
+    if( m_uiForm.plot_check->isChecked() )
+    {
+      py_code += "\nISISCommands.PlotResult(reduced, reducer=__GUI_only_reduce)";
+    }
   }
   else
   {
