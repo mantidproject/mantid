@@ -10,24 +10,15 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Takes a workspace as input and sums all of the spectra within it maintaining the existing bin structure and units.
-    The result is stored as a new workspace containing a single spectra.
-
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    </UL>
-
-    Optional Properties (assume that you count from zero):
-    <UL>
-    <LI> StartSpectrum - Workspace index number to integrate from (default 0)</LI>
-    <LI> EndSpectrum - Workspace index number to integrate to (default max)</LI>
-    <LI> IncludeMonitors - Whether to include monitor spectra in the sum (default yes)
-    </UL>
-
-    @author Nick Draper, Tessella Support Services plc
-    @date 22/01/2009
+/** Sums neighboring pixels on rectangular detectors.
+ * Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels.
+ * Only works on EventWorkspaces and for instruments with RectangularDetector's.
+ *
+ * This only works for instruments that have RectangularDetector's defined;
+ * at the time of writing: TOPAZ, SNAP, PG3.
+ *
+    @author Janik Zikovsky, SNS
+    @date Oct 2010
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

@@ -42,6 +42,12 @@ LoadSNSEventNexus::LoadSNSEventNexus()
 /// Initialisation method.
 void LoadSNSEventNexus::init()
 {
+  this->setOptionalMessage(
+      "Loads a SNS EventNeXus format file.\n"
+      "Optionally, you can filter out events falling outside a\n"
+      "range of times-of-flight and/or a time interval.");
+
+
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the Nexus file to\n"
       "attempt to load. The file extension must either be .nxs or .NXS" );

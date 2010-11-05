@@ -206,6 +206,10 @@ AlignDetectors::~AlignDetectors()
 //-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
+  this->setOptionalMessage(
+      "Converts time-of-flight to d-Spacing, using a calibration file to correct by an offset.\n"
+      );
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace unit must be TOF.
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));

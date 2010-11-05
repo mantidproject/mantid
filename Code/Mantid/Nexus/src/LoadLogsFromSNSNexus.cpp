@@ -36,6 +36,10 @@ LoadLogsFromSNSNexus::LoadLogsFromSNSNexus()
 /// Initialisation method.
 void LoadLogsFromSNSNexus::init()
 {
+  this->setOptionalMessage(
+      "Loads the logs from a SNS NeXus file,\n"
+      "and adds them to an existing workspace.");
+
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

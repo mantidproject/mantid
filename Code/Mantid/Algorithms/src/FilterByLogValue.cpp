@@ -45,6 +45,10 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
+  this->setOptionalMessage(
+      "Filter out (delete) events based on if they occured at times\n"
+      "where a given log value is within a given range (min <= value < max).");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace
   wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);

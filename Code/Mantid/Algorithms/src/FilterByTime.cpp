@@ -42,6 +42,12 @@ FilterByTime::~FilterByTime()
 //-----------------------------------------------------------------------
 void FilterByTime::init()
 {
+  std::string commonHelp("\nYou can only specify the relative or absolute start/stop times, not both.");
+
+  this->setOptionalMessage(
+      "Filter out (delete) events based on their pulse times." +
+      commonHelp);
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace
   wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);
@@ -54,7 +60,6 @@ void FilterByTime::init()
     new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
 
-  std::string commonHelp("\nYou can only specify the relative or absolute start/stop times, not both.");
 
   BoundedValidator<double> *min = new BoundedValidator<double>();
   min->setLower(0.0);

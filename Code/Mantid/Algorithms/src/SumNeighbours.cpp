@@ -29,6 +29,11 @@ using namespace DataObjects;
  */
 void SumNeighbours::init()
 {
+  this->setOptionalMessage(
+      "Sums neighboring pixels on rectangular detectors. \n"
+      "Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels.\n"
+      "Only works on EventWorkspaces and for instruments with RectangularDetector's.");
+
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new EventWorkspaceValidator<>),
                             "The workspace containing the spectra to be summed." );

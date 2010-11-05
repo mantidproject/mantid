@@ -28,6 +28,12 @@ namespace Mantid
     */
     void Rebin::init()
     {
+      this->setOptionalMessage(
+          "Rebins a workspace with new X-bins.\n"
+          "For EventWorkspaces, you can rebin in-place by keeping the same output name,\n"
+          "or specify a different output to convert to a histogram (Workspace2D)."
+          );
+
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),
         "Workspace containing the input data");
