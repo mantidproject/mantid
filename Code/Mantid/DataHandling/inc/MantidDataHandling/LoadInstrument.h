@@ -76,7 +76,7 @@ namespace Mantid
       LoadInstrument();
 
       /// Destructor
-      ~LoadInstrument() {}
+      virtual ~LoadInstrument() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadInstrument";};
       /// Algorithm's version for identification overriding a virtual method
