@@ -133,10 +133,10 @@ def Gravity(flag, reducer=None):
     
 def TransFit(mode,lambdamin=None,lambdamax=None, reducer=None):
     if not reducer:
-        message = mode
-        if lambdamin: message += lambdamin
-        if lambdamax: message += lambdamax
-        _printMessage("TransFit(\"" + str(message) + "\")", no_console=reducer)
+        message = str(mode)
+        if lambdamin: message += str(lambdamin)
+        if lambdamax: message += str(lambdamax)
+        _printMessage("TransFit(\"" + message + "\")", no_console=reducer)
     _active_red(reducer).set_trans_fit(lambdamin, lambdamax, mode)
     
 def AssignCan(can_run, reload = True, period = -1, reducer=None):
@@ -149,7 +149,7 @@ def TransmissionSample(sample, direct, reload = True, period = -1, reducer=None)
     _printMessage('TransmissionSample("' + sample + '","' + direct + '")', no_console=reducer)
     _active_red(reducer).set_trans_sample(sample, direct, reload = True, period = -1)
     return _active_red(reducer).samp_trans_load.execute(
-                                            reducer, None)
+                                        _active_red(reducer), None)
 
 def TransmissionCan(can, direct, reload = True, period = -1, reducer=None):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")', no_console=reducer)

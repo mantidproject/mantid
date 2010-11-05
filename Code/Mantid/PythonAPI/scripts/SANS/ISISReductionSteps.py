@@ -969,6 +969,8 @@ class TransmissionCalc(SANSReductionSteps.BaseTransmission):
             return self._lambda_max
 
     def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
+        min = float(min)
+        max = float(max)
         if not min is None:
             if (self._lambda_min is None) or override:
                 self._lambda_min = min
