@@ -5,10 +5,13 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <ostream>
 #include <iomanip>
+#include <sstream>
 
 namespace Mantid
 {
@@ -128,7 +131,7 @@ namespace Mantid
       try
       {
         //set the subalgorithm no to log as this will be run once per spectra
-        fit_alg = createSubAlgorithm("Gaussian1D",-1,-1,false);
+        fit_alg = createSubAlgorithm("Fit",-1,-1,false);
       } catch (Exception::NotFoundError&)
       {
         g_log.error("Can't locate Gaussian1D");
@@ -138,12 +141,13 @@ namespace Mantid
       fit_alg->setProperty("WorkspaceIndex",s);
       fit_alg->setProperty("StartX",Xmin);
       fit_alg->setProperty("EndX",Xmax);
-      fit_alg->setProperty("bg0",0.0);
-      fit_alg->setProperty("bg1",0.0);
-      fit_alg->setProperty("height", peakHeight);
-      fit_alg->setProperty("peakCentre", peakLoc);
-      fit_alg->setProperty("sigma",10.0);
       fit_alg->setProperty("MaxIterations",100);
+
+      std::ostringstream fun_str;
+      fun_str << "name=LinearBackground;name=Gaussian,Height="<<peakHeight<<",";
+      fun_str << "PeakCentre="<<peakLoc<<",Sigma=10.0";
+
+      fit_alg->setProperty("Function",fun_str.str());
 
       try
       {
@@ -161,7 +165,13 @@ namespace Mantid
         throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
       }
 
-      const double offset = fit_alg->getProperty("peakCentre");
+      IFunction* fun = FunctionFactory::Instance().createInitialized(fit_alg->getPropertyValue("Function"));
+      if (!fun)
+      {
+        throw std::runtime_error("FunctionFactory cannot create function returned from Fit algorithm");
+      }
+      const double offset = fun->getParameter("f1.PeakCentre");
+      delete fun;
       return (-offset*step/(dreference+offset*step));
     }
 
