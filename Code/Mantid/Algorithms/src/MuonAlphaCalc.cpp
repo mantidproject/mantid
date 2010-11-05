@@ -131,7 +131,7 @@ void MuonAlphaCalc::exec()
 
   double sumBackward = out->readY(0)[0];
 
-  if ( sumBackward < 0 )
+  if ( sumBackward <= 0 )
   {
     g_log.error() << "Sum of backward detector counts is negative or zero."
       << "Therefore can't calculate alpha. Return alpha = 1.0.";
