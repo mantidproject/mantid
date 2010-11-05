@@ -112,6 +112,8 @@ def NoSolidAngle():
     
 def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1):
     ReductionSingleton().set_azimuthal_averager(SANSReductionSteps.WeightedAzimuthalAverage(binning=binning,
+                                                                                            n_bins=n_bins,
+                                                                                            n_subpix=n_subpix,
                                                                                             suffix=suffix,
                                                                                             error_weighting=error_weighting))
 
