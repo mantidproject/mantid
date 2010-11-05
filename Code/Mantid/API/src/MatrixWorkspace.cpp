@@ -132,7 +132,7 @@ namespace Mantid
       {
         ax->getIndexSpectraMap(*map);
       }
-      catch (std::runtime_error err)
+      catch (std::runtime_error &err)
       {
         delete map;
         throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToSpectrumMap: no elements!");
@@ -155,7 +155,7 @@ namespace Mantid
       {
         ax->getSpectraIndexMap(*map);
       }
-      catch (std::runtime_error err)
+      catch (std::runtime_error &err)
       {
         delete map;
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!");
