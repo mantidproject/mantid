@@ -95,7 +95,7 @@ void LoadLogsFromSNSNexus::exec()
     //Use the DAS logs to integrate the proton charge (if any).
     WS->mutableRun().integrateProtonCharge();
   }
-  catch (Exception::NotFoundError e)
+  catch (Exception::NotFoundError &e)
   {
     //Ignore not found property error.
   }
@@ -142,7 +142,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
   {
     file.getAttr("units", units);
   }
-  catch (::NeXus::Exception ex)
+  catch (::NeXus::Exception &ex)
   {
     //Ignore missing units field.
     units = "";
@@ -176,7 +176,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
 //      }
     }
   }
-  catch (::NeXus::Exception e)
+  catch (::NeXus::Exception &e)
   {
     g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading 'value' data:'" << e.what() << "'.\n";
     file.closeData();
@@ -198,7 +198,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     try {
       file.openData("time");
     }
-    catch (::NeXus::Exception e)
+    catch (::NeXus::Exception &e)
     {
       g_log.warning() << "NXlog entry " << entry_name << " gave an error when opening the time field '" << e.what() << "'.\n";
       file.closeGroup();
@@ -210,13 +210,13 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     try {
       file.getAttr("start", start);
     }
-    catch (::NeXus::Exception e)
+    catch (::NeXus::Exception &e)
     {
       //Some logs have "offset" instead of start
       try {
         file.getAttr("offset", start);
       }
-      catch (::NeXus::Exception e)
+      catch (::NeXus::Exception &e)
       {
         g_log.warning() << "NXlog entry " << entry_name << " has no start time indicated.\n";
         file.closeData();
@@ -242,7 +242,7 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
     try {
       file.getDataCoerce(time_double);
     }
-    catch (::NeXus::Exception e)
+    catch (::NeXus::Exception &e)
     {
       g_log.warning() << "NXlog entry " << entry_name << "'s time field could not be loaded: '" << e.what() << "'.\n";
       file.closeData();

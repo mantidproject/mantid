@@ -469,7 +469,7 @@ namespace Mantid
       {
         m_wTitle = entry.getString("title");
       }
-      catch (std::runtime_error)
+      catch (std::runtime_error &)
       {
         g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
       }
