@@ -322,7 +322,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
 
   //The vectors we will be filling
   std::vector<uint64_t> event_index;
-  std::vector<uint32_t> event_pixel_id;
+  std::vector<uint32_t> event_id;
   std::vector<float> event_time_of_flight;
 
   bool loadError = false ;
@@ -343,21 +343,33 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
       file.getData(event_index);
     else
     {
-     g_log.warning() << "Entry " << entry_name << "'s event_index field is not uint64! It will be skipped.\n";
+     g_log.warning() << "Entry " << entry_name << "'s event_index field is not UINT64! It will be skipped.\n";
      loadError = true;
     }
     file.closeData();
 
     if (!loadError)
     {
+      bool old_nexus_file_names = false;
+
       // Get the list of pixel ID's
-      file.openData("event_pixel_id");
+      try
+      {
+        file.openData("event_id");
+      }
+      catch (::NeXus::Exception e)
+      {
+        //Older files (before Nov 5, 2010) used this field.
+        file.openData("event_pixel_id");
+        old_nexus_file_names = true;
+      }
+
       //Must be uint32
       if (file.getInfo().type == ::NeXus::UINT32)
-        file.getData(event_pixel_id);
+        file.getData(event_id);
       else
       {
-        g_log.warning() << "Entry " << entry_name << "'s event_pixel_id field is not uint32! It will be skipped.\n";
+        g_log.warning() << "Entry " << entry_name << "'s event_id field is not UINT32! It will be skipped.\n";
         loadError = true;
       }
       file.closeData();
@@ -365,13 +377,17 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
       if (!loadError)
       {
         // Get the list of event_time_of_flight's
-        file.openData("event_time_of_flight");
+        if (!old_nexus_file_names)
+          file.openData("event_time_offset");
+        else
+          file.openData("event_time_of_flight");
+
         //Check that the type is what it is supposed to be
         if (file.getInfo().type == ::NeXus::FLOAT32)
           file.getData(event_time_of_flight);
         else
         {
-          g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight field is not FLOAT32! It will be skipped.\n";
+          g_log.warning() << "Entry " << entry_name << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
           loadError = true;
         }
 
@@ -381,7 +397,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
           file.getAttr("units", units);
           if (units != "microsecond")
           {
-            g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight field's units are not microsecond. It will be skipped.\n";
+            g_log.warning() << "Entry " << entry_name << "'s event_time_offset field's units are not microsecond. It will be skipped.\n";
             loadError = true;
           }
           file.closeData();
@@ -401,13 +417,13 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
     return;
 
   // Two arrays must be the same size
-  if (event_pixel_id.size() != event_time_of_flight.size())
+  if (event_id.size() != event_time_of_flight.size())
   {
-    g_log.warning() << "Entry " << entry_name << "'s event_time_of_flight and event_pixel_id vectors are not the same size! It will be skipped.\n";
+    g_log.warning() << "Entry " << entry_name << "'s event_time_offset and event_id vectors are not the same size! It will be skipped.\n";
     return;
   }
 
-  //Default pulse time if none are found
+  //Default pulse time (if none are found)
   Mantid::Kernel::PulseTimeType pulsetime = 0;
 
   // Index into the pulse array
@@ -423,7 +439,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
   }
 
   //Go through all events in the list
-  std::size_t numEvents = event_pixel_id.size();
+  std::size_t numEvents = event_id.size();
   for (std::size_t i = 0; i < numEvents; i++)
   {
     //Find the pulse time for this event index
@@ -451,7 +467,7 @@ void LoadSNSEventNexus::loadBankEventData(std::string entry_name)
         TofEvent event(tof, pulsetime);
 
         //Add it to the list at that pixel ID
-        WS->getEventListAtPixelID( event_pixel_id[i] ).addEventQuickly( event );
+        WS->getEventListAtPixelID( event_id[i] ).addEventQuickly( event );
 
         //Local tof limits
         if (tof < my_shortest_tof) { my_shortest_tof = tof;}
