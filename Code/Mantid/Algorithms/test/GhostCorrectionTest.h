@@ -191,7 +191,7 @@ public:
     Mantid::DataHandling::LoadEventPreNeXus * eventLoader;
     eventLoader = new LoadEventPreNeXus();
     eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "../../../../Test/Data/sns_event_prenexus/PG3_732_neutron_event.dat");
+    eventLoader->setPropertyValue("EventFilename", "../../../../Test/AutoTestData/PG3_732_neutron_event.dat");
 //    eventLoader->setPropertyValue("MappingFilename", "../../../../Test/Data/sns_event_prenexus/CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", wsName);
     eventLoader->setMaxEventsToLoad(100000);
