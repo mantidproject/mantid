@@ -27,6 +27,7 @@ class FindSNSNeXus(PythonAlgorithm):
         self.declareProperty("Extension", "",
                              Validator=ListValidator(extensions))
         self.declareProperty("Use WebService", True)
+        self.declareProperty("ResultPath", "", Direction=Direction.Output)
 
     def findNeXus(self, runnumber):
         # find the nexus file
@@ -80,6 +81,6 @@ class FindSNSNeXus(PythonAlgorithm):
         else:
             result = self.findPreNeXus(runnumber)
         self.log().information(result)
-        return result
+        self.setProperty("ResultPath", result)
 
 mtd.registerPyAlgorithm(FindSNSNeXus())
