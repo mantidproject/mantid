@@ -143,6 +143,8 @@ void Q1DWeighted::exec()
       // equal to the number of detector channels + 1.
       for ( int j = 0; j < xLength-1; j++)
       {
+        double err = 1.0;
+        if (EIn[j] > 0) err = EIn[j];
         double q = factor*2.0/(XIn[j]+XIn[j+1]);
         int iq = 0;
 
@@ -166,11 +168,11 @@ void Q1DWeighted::exec()
             //       where all pixels i contribute to the q_i bin, and I_i is the intensity in the ith pixel.
             //
             //    delta I(q_i) = 1/sqrt( (sum over i of w_i) )  using simple error propagation.
-            w = 1.0/(nSubPixels*nSubPixels*EIn[0]*EIn[0]);
+            w = 1.0/(nSubPixels*nSubPixels*err*err);
           }
 
-          YOut[iq] += YIn[0]*w;
-          EOut[iq] += w*w*EIn[0]*EIn[0];
+          YOut[iq] += YIn[j]*w;
+          EOut[iq] += w*w*err*err;
           XNorm[iq] += w;
         }
       }
