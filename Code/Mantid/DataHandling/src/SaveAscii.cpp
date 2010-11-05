@@ -84,6 +84,12 @@ namespace Mantid
         std::string filename = getProperty("Filename");
         std::ofstream file(filename.c_str());
 
+        if (!file)
+        {
+          g_log.error("Unable to create file: " + filename);
+          throw Exception::FileError("Unable to create file: " , filename);
+        }
+
         // Write the column captions
         file << "X";
         if (idx.empty())

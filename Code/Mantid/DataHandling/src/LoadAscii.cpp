@@ -66,6 +66,12 @@ namespace Mantid
       std::string separator =getProperty("Separator");
       std::ifstream file(filename.c_str());
 
+      if (!file)
+      {
+        g_log.error("Unable to open file: " + filename);
+        throw Exception::FileError("Unable to open file: " , filename);
+      }
+
       file.seekg (0, std::ios::end);
       Progress progress(this,0,1,file.tellg());
       file.seekg (0, std::ios::beg);
