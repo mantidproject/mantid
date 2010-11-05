@@ -2478,7 +2478,7 @@ void SANSRunWindow::handleDefSaveClick()
   }
 
   saveCommand += "print 'success'\n";
-  QString result = runPythonCode(saveCommand);
+  QString result = runPythonCode(saveCommand).trimmed();
   if ( result != "success" )
   {
     QMessageBox::critical(this, "Error saving workspace", "Problem encountered saving workspace, does it still exist. There may be more information in the results console?");
