@@ -61,7 +61,7 @@ public:
   LoadTOFRawNeXus();
 
   // Destructor
-  ~LoadTOFRawNeXus()
+  virtual ~LoadTOFRawNeXus()
   {}
 
   /// Algorithm's name for identification overriding a virtual method

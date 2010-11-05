@@ -67,7 +67,7 @@ namespace Mantid
       LoadLogsFromSNSNexus();
 
       /// Destructor
-      ~LoadLogsFromSNSNexus() {}
+      virtual ~LoadLogsFromSNSNexus() {}
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadLogsFromSNSNexus";};

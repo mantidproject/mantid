@@ -72,7 +72,7 @@ namespace Mantid
       LoadInstrumentFromSNSNexus();
 
       /// Destructor
-      ~LoadInstrumentFromSNSNexus() {}
+      virtual ~LoadInstrumentFromSNSNexus() {}
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadInstrumentFromSNSNexus";};

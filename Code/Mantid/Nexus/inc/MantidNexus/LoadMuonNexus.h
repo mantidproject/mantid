@@ -65,7 +65,7 @@ namespace Mantid
       /// Default constructor
       LoadMuonNexus();
       /// Destructor
-      ~LoadMuonNexus() {}
+      virtual ~LoadMuonNexus() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadMuonNexus"; }
       /// Algorithm's version for identification overriding a virtual method

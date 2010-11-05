@@ -65,7 +65,7 @@ namespace Mantid
       /// Default constructor
       LoadISISNexus2();
       /// Destructor
-      ~LoadISISNexus2() {}
+      virtual ~LoadISISNexus2() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadISISNexus"; }
       /// Algorithm's version for identification overriding a virtual method
