@@ -114,6 +114,9 @@
     <ClCompile Include="src\DeltaFunction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ExpDecay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidCurveFitting\BackgroundFunction.h">
@@ -282,6 +285,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidCurveFitting\DeltaFunction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidCurveFitting\ExpDecay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ExpDecayTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

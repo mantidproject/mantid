@@ -203,6 +203,7 @@
     <ClCompile Include="src\CostFuncLeastSquares.cpp" />
     <ClCompile Include="src\CostFunctionFactory.cpp" />
     <ClCompile Include="src\DeltaFunction.cpp" />
+    <ClCompile Include="src\ExpDecay.cpp" />
     <ClCompile Include="src\Fit.cpp" />
     <ClCompile Include="src\Fit1D.cpp" />
     <ClCompile Include="src\FRConjugateGradientMinimizer.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="inc\MantidCurveFitting\BackgroundFunction.h" />
     <ClInclude Include="inc\MantidCurveFitting\BackToBackExponential.h" />
     <ClInclude Include="inc\MantidCurveFitting\DeltaFunction.h" />
+    <ClInclude Include="inc\MantidCurveFitting\ExpDecay.h" />
     <ClInclude Include="test\BackToBackExponentialTest.h" />
     <ClInclude Include="inc\MantidCurveFitting\BFGS_Minimizer.h" />
     <ClInclude Include="inc\MantidCurveFitting\BoundaryConstraint.h" />
@@ -246,6 +248,7 @@
     <ClInclude Include="test\CostFunctionFactoryTest.h" />
     <ClInclude Include="inc\MantidCurveFitting\Fit.h" />
     <ClInclude Include="inc\MantidCurveFitting\Fit1D.h" />
+    <ClInclude Include="test\ExpDecayTest.h" />
     <ClInclude Include="test\FitMultispectralTest.h" />
     <ClInclude Include="test\FitTest.h" />
     <ClInclude Include="inc\MantidCurveFitting\FRConjugateGradientMinimizer.h" />
