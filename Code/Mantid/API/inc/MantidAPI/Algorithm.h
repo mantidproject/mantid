@@ -225,6 +225,12 @@ public:
   ///returns the status of logging, True = enabled
   bool isLogging() const {return g_log.getEnabled();}
 
+  /// function returns an optional message that will be displayed in the default GUI, at the top.
+  const std::string getOptionalMessage() const { return m_OptionalMessage;}
+
+  /// Set  an optional message that will be displayed in the default GUI, at the top.
+  void setOptionalMessage(const std::string optionalMessage) { m_OptionalMessage = optionalMessage;}
+
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -291,24 +297,24 @@ private:
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
   Algorithm& operator=(const Algorithm&);
 
-			void store();
-			void fillHistory(Mantid::Kernel::dateAndTime, double,unsigned int);
-			void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
-				std::vector<Workspace_sptr>& outputWorkspaces) const;
-			void algorithm_info() const;
-			
-			/// setting the input properties for an algorithm - to handle workspace groups 
-			bool setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName );
-			/// setting the output properties for an algorithm -to handle workspace groups 
-			bool setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,
-        const std::string& inmemberwsName,WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal);
-		
- 		 /// This method gets the input workspace name
-      void getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName);
-			/// This method returns true if the input and output workspaces are same
-			bool isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>&props);
+  void store();
+  void fillHistory(Mantid::Kernel::dateAndTime, double,unsigned int);
+  void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
+      std::vector<Workspace_sptr>& outputWorkspaces) const;
+  void algorithm_info() const;
 
-			
+  /// setting the input properties for an algorithm - to handle workspace groups
+  bool setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName );
+  /// setting the output properties for an algorithm -to handle workspace groups
+  bool setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,
+      const std::string& inmemberwsName,WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal);
+
+  /// This method gets the input workspace name
+  void getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName);
+  /// This method returns true if the input and output workspaces are same
+  bool isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>&props);
+
+
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
   /** executeAsync() implementation.
@@ -332,6 +338,8 @@ private:
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
 
   static unsigned int g_execCount; ///< Counter to keep track of algorithm execution order
+
+  std::string m_OptionalMessage; ///< An optional message string to be displayed in the GUI.
 };
 
 ///Typedef for a shared pointer to an Algorithm

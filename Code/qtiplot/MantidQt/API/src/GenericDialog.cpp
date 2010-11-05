@@ -13,6 +13,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QPalette>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLineEdit>
@@ -190,6 +191,8 @@ void GenericDialog::initLayout()
     {
       QLabel *inputMessage = new QLabel(this);
       inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+      inputMessage->setBackgroundRole( QPalette::ToolTipBase ); //Make a tooltip color
+      inputMessage->setAutoFillBackground(true);
       inputMessage->setText(getOptionalMessage());
       QHBoxLayout *msgArea = new QHBoxLayout;
       msgArea->addWidget(inputMessage);

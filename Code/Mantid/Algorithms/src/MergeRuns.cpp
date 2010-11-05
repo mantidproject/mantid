@@ -26,6 +26,8 @@ MergeRuns::~MergeRuns() {if(m_progress) delete m_progress;m_progress=NULL;}
 /// Initialisation method
 void MergeRuns::init()
 {
+  this->setOptionalMessage("Type in a comma-separated list of the names of workspaces\nto merge (sum) together.");
+
   // declare arbitrary number of input workspaces as a list of strings at the moment
   declareProperty(
     new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >),

@@ -74,6 +74,8 @@ namespace Mantid
       /// The algorithmID
       AlgorithmID getAlgorithmID() const {return AlgorithmID(this);}
 
+      virtual const std::string getOptionalMessage() const { return m_OptionalMessage; }
+
       void initialize();
       bool execute();
       Poco::ActiveResult<bool> executeAsync();
@@ -115,6 +117,7 @@ namespace Mantid
 
       const std::string m_name;     ///< name of the real algorithm
       const std::string m_category; ///< category of the real algorithm
+      std::string m_OptionalMessage; ///<Message to display in GUI
       const int m_version;          ///< version of the real algorithm
 
       Algorithm_sptr m_alg;  ///< Pointer to the real algorithm, only defined when the algorithm is running

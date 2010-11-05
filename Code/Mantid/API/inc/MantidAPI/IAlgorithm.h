@@ -71,6 +71,9 @@ public:
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   virtual AlgorithmID getAlgorithmID()const = 0;
 
+  /// function returns an optional message that will be displayed in the default GUI, at the top.
+  virtual const std::string getOptionalMessage() const = 0;
+
   /** Initialization method invoked by the framework. This method is responsible
    *  for any bookkeeping of initialization required by the framework itself.
    *  It will in turn invoke the init() method of the derived algorithm,

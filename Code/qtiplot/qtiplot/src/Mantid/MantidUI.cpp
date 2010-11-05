@@ -55,6 +55,7 @@ using namespace Mantid::API;
 using Mantid::Kernel::dateAndTime;
 namespace MantidException = Mantid::Kernel::Exception;
 
+
 MantidUI::MantidUI(ApplicationWindow *aw):
     m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
     m_addObserver(*this,&MantidUI::handleAddWorkspace),
@@ -886,6 +887,9 @@ void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& file
   executeAlgorithmAsync(alg);
 }
 
+/** This creates an algorithm dialog (the default property entry thingie).
+ * It is NOT exclusively for "Load" algorithms!
+ */
 MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
 {
   QString presets(""), enabled("");
@@ -898,10 +902,16 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API
     enabled = property_name + ",";
   }
   //Check if a workspace is selected in the dock and set this as a preference for the input workspace
+
+  //This is an optional message displayed at the top of the GUI.
+  QString optional_msg(alg->getOptionalMessage().c_str());
+
   MantidQt::API::AlgorithmDialog *dlg =
-      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
+      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, optional_msg , enabled);
   return dlg;
 }
+
+
 void MantidUI::executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
 {
   if( !dlg ) return;
@@ -1690,6 +1700,7 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
   return (dlg->exec() == QDialog::Accepted);
 }
 
+
 Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algName)
 {
   const deque<Mantid::API::IAlgorithm_sptr> & algorithms = Mantid::API::AlgorithmManager::Instance().algorithms();
@@ -1706,6 +1717,8 @@ Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algN
   }
   return alg;
 }
+
+
 /** Displays a string in a Qtiplot table
  *  @param logName the title of the table is based on this
  *  @param data the string to display
