@@ -243,7 +243,7 @@ public:
   PyAlgorithmCallback(PyObject *self);
 
   ///Destructor
-  ~PyAlgorithmCallback();
+  virtual ~PyAlgorithmCallback();
 
   /// Called when a delete is performed inside a shared pointer
   virtual void kill()
