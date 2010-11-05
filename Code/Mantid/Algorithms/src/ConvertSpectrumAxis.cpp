@@ -112,7 +112,7 @@ namespace Algorithms
                efixed = efixedVec.at(0);
                g_log.debug() << "Detector: " << detector->getID() << " EFixed: " << efixed << "\n";
               }
-            } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
+            } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single provided value */ }
           }
         }
         else
@@ -137,7 +137,7 @@ namespace Algorithms
           IDetector_const_sptr det = inputWS->getDetector(i);
           indexMap.insert( std::make_pair( inputWS->detectorTwoTheta(det)*180.0/M_PI , i ) );
         }
-        catch(Exception::NotFoundError) 
+        catch(Exception::NotFoundError &)
         {
           if (!warningGiven) g_log.warning("The instrument definition is incomplete - spectra dropped from output");
           warningGiven = true;

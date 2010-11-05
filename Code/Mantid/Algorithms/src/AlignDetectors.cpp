@@ -126,7 +126,7 @@ std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_co
   {
     l1 = instrument->getSource()->getDistance(*sample);
   }
-  catch (Exception::NotFoundError e)
+  catch (Exception::NotFoundError &e)
   {
     delete myMap;
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
@@ -287,7 +287,7 @@ void AlignDetectors::exec()
       outputWS->dataY(i) = inputWS->dataY(i);
       outputWS->dataE(i) = inputWS->dataE(i);
 
-    } catch (Exception::NotFoundError e) {
+    } catch (Exception::NotFoundError &e) {
       // Zero the data in this case
       outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
       outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);

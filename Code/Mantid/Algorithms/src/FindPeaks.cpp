@@ -368,7 +368,7 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
   smooth->setProperty("NPoints",w);
   try {
     smooth->execute();
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error &) {
     g_log.error("Unable to successfully run SmoothData sub-algorithm");
     throw;
   }
@@ -481,7 +481,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
     // Fitting the candidate peaks to a Gaussian
     fit = createSubAlgorithm("Gaussian1D");
   }
-  catch (Exception::NotFoundError)
+  catch (Exception::NotFoundError &)
   {
     g_log.error("The StripPeaks algorithm requires the CurveFitting library");
     throw;
@@ -524,7 +524,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   
     try {
       fit->execute();
-    } catch (std::runtime_error) {
+    } catch (std::runtime_error &) {
       g_log.error("Unable to successfully run Gaussian Fit sub-algorithm");
       throw;
     }

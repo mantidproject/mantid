@@ -683,7 +683,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
           if ( xback > XMax )  XMax = xback;
         }
       }
-    } catch (Exception::NotFoundError) {} //Do nothing
+    } catch (Exception::NotFoundError &) {} //Do nothing
   }
   const double step = ( XMax - XMin ) / workspace->blocksize();
 
@@ -764,7 +764,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
       try {
         Geometry::IDetector_const_sptr det = workspace->getDetector(i);
         if ( !det->isMonitor() ) break;
-      } catch (Exception::NotFoundError) { /* Do nothing */ }
+      } catch (Exception::NotFoundError &) { /* Do nothing */ }
     }
     // Get an X spectrum to search (they're all the same, monitors excepted)
     const MantidVec& X0 = workspace->readX(i);
