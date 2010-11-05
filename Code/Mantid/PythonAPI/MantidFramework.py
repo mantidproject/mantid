@@ -299,29 +299,56 @@ class IAlgorithmProxy(ProxyObject):
         self.__framework = framework
         self.__havelist = False
         self.__wkspnames = []
+        self.__propertynames = {} # the names of properties and their directions
+                                  # 0 - input
+                                  # 1 - output
+        for prop in ialg.getProperties():
+            self.__propertynames[prop.name()] = prop.direction()
         
     def workspace(self):
         return self._retrieveWorkspaceByIndex(0)
-        
+
+    def keys(self):
+        return self.__propertynames.keys()
+
     def __getattr__(self, attr):
         """
         Reroute a method call to the the stored object
         """
         return getattr(self._getHeldObject(), attr)
 
-    def __getitem__(self, index):
-        return self._retrieveWorkspaceByIndex(index)
+    def __contains__(self, key):
+        if key in self.__propertynames.keys():
+            return True
+        # TODO should there be more checks?
+        return False
+
+    def __getitem__(self, key):
+        if key in self.__propertynames.keys():
+            # get the value of the properties
+            value = self._getHeldObject().getPropertyValue(key)
+
+            # convert to a workspace if appropriate
+            self._createWorkspaceList()
+            if value in self.__wkspnames:
+                return self.__framework[value]
+            else:
+                return value
+        else:
+            return self._retrieveWorkspaceByIndex(key)
 
     def _retrieveWorkspaceByIndex(self, index):
-        if self.__havelist == False:
-            self._createWorkspaceList()
+        self._createWorkspaceList()
 
         if len(self.__wkspnames) > 0:
-            return self.__framework[self.__wkspnames[index]]
+            return self.__framework[self.__wkspnames[int(index)]]
         else:
             raise RuntimeError("'%s' has no output workspaces." % self._getHeldObject().name())
 
     def _createWorkspaceList(self):
+        if self.__havelist == True:
+            return
+
         # Create a list for the output workspaces
         props = self._getHeldObject().getProperties()
         for p in props:
