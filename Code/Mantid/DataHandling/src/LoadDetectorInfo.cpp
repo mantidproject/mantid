@@ -219,7 +219,7 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
       setDetectorParams(readin, log);
       sometimesLogSuccess(log, noneSet);
     }
-    catch (Exception::NotFoundError)
+    catch (Exception::NotFoundError &)
     {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
       missingDetectors.push_back(readin.detID);
       continue;
@@ -347,7 +347,7 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
       setDetectorParams(readin, log);
       sometimesLogSuccess(log, noneSet);
     }
-    catch (Exception::NotFoundError)
+    catch (Exception::NotFoundError &)
     {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
       missingDetectors.push_back(iraw.udet[i]);
       continue;

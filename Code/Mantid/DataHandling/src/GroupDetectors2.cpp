@@ -169,7 +169,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
         processFile(filename, workspace, unUsedSpec);
       }
     }
-    catch ( std::exception )
+    catch ( std::exception & )
     {
       g_log.error() << name() << ": Error reading input file " << filename << std::endl;
       throw;

@@ -98,7 +98,7 @@ void MaskDetectors::exec()
           pmap.addBool(det,"masked",true);
         }
       }
-      catch(Kernel::Exception::NotFoundError e)
+      catch(Kernel::Exception::NotFoundError &e)
       {
         g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
       }
@@ -131,7 +131,7 @@ void MaskDetectors::exec()
             pmap.addBool(det,"masked",true);
           }
         }
-        catch(Kernel::Exception::NotFoundError e)
+        catch(Kernel::Exception::NotFoundError &e)
         {
           g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
         }
