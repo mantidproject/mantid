@@ -331,6 +331,7 @@ class WorkspaceDetails(object):
 
     def __init__(self, name, run_number):
         self._name = name
+        run_number = str(run_number).split('-add')[0]
         self._run_number = int(run_number)
         
     def getName(self):

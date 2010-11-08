@@ -511,7 +511,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 
   if ( allOutput.count() < 2 )
   {
-    QMessageBox::critical(this, "Fatal error found during reduction", "Error reported by Python script " + pythonOut);
+    QMessageBox::critical(this, "Fatal error found during reduction", "Error reported by Python script\n" + pythonOut);
     return "Error";
   }
 
@@ -554,6 +554,10 @@ bool SANSRunWindow::oldLoadUserFile()
   {
     m_uiForm.mask_table->removeRow(i);
   }
+
+  QString instFunc =
+    m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString().trimmed();
+  runReduceScriptFunction("SANSReduction."+instFunc);
 
   // Use python function to read the file and then extract the fields
   if ( runReduceScriptFunction("print SANSReduction.MaskFile(r'"+filetext+"')") != "True\n" )
