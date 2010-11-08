@@ -52,14 +52,8 @@ namespace Mantid
     public:
       /// interface  to get number of dimensions in the worspace
       virtual unsigned int getNumDims()const=0;
-      /**
-       * Initialize the concrete implementation
-       * @param description An object describing the properties of the workspace
-       */
-      virtual void initialize(const Geometry::MDGeometryDescription &description) 
-      {
-	(void)description;
-      };
+      /// Initialize the concrete implementation
+      virtual void initialize(const Geometry::MDGeometryDescription &) {} 
     };
     
     /// Shared pointer to the matrix workspace base class
