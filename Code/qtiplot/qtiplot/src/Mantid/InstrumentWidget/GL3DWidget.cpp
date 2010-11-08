@@ -791,3 +791,13 @@ void GL3DWidget::enableLighting(bool on)
   setLightingModel(m_lightingState);
   update();
 }
+
+/**
+  * Set wireframe view on or off
+  * @param on If true set wireframe, otherwise it's SOLID
+  */
+void GL3DWidget::setWireframe(bool on)
+{
+  m_polygonMode = on ? WIREFRAME : SOLID;
+  update();
+}

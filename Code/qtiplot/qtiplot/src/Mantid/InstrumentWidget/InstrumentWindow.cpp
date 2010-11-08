@@ -123,6 +123,12 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   connect(m3DAxesToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(set3DAxesState(int)));
   connect(m3DAxesToggle, SIGNAL(stateChanged(int)), this, SLOT(updateInteractionInfoText()));
 
+  //Check box to toggle polygon mode
+  QCheckBox* poligonMOdeToggle = new QCheckBox("Show wireframe", this);
+  poligonMOdeToggle->setToolTip("Toggle the wireframe polygon mode.");
+  poligonMOdeToggle->setCheckState(Qt::Unchecked);
+  connect(poligonMOdeToggle, SIGNAL(clicked(bool)), mInstrumentDisplay, SLOT(setWireframe(bool)));
+
   renderControlsLayout->addWidget(mSelectButton);
   renderControlsLayout->addWidget(mSelectBin);
   renderControlsLayout->addWidget(mSelectColormap);
@@ -132,6 +138,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   renderControlsLayout->addWidget(btnBackgroundColor);
   renderControlsLayout->addWidget(lColormapFrame);
   renderControlsLayout->addWidget(m3DAxesToggle);
+  renderControlsLayout->addWidget(poligonMOdeToggle);
 
   //Set the main frame to the window
   frame->setLayout(mainLayout);

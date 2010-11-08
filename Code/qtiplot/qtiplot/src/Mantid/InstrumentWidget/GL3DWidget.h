@@ -64,6 +64,7 @@ signals:
 
 public slots:
   void enableLighting(bool);
+  void setWireframe(bool);
 
 protected:
   void initializeGL();
