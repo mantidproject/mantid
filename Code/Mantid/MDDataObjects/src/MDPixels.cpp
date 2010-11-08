@@ -91,9 +91,9 @@ MDPixels::read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start
     return this->theFile->read_pix_subset(*this,cells_nums,start_cell,pix_buf,pix_buf_size,n_pix_in_buffer);
 }
 //***************************************************************************************
-/*
+
 void
-MDPixels::complete_rebinning()
+MDPixels::finalise_rebinning()
 {
 size_t i;
 // normalize signal and error of the dnd object;
@@ -103,8 +103,9 @@ if(this->data[0].npix>0){
 }
 // and calculate cells location for pixels;
 this->pix_array[0].chunk_file_location0=0;
+
 // counter for the number of retatined pixels;
-long nPix = this->data[0].npix;
+size_t nPix = this->data[0].npix;
 for(i=1;i<this->data_size;i++){   
     this->pix_array[i].chunk_file_location0=this->pix_array[i-1].chunk_file_location0+this->data[i-1].npix; // the next cell starts from the the boundary of the previous one
                                               // plus the number of pixels in the previous cell
@@ -115,9 +116,7 @@ for(i=1;i<this->data_size;i++){
     }
 };
 this->nPixels=nPix;
-}
-*/
-//***************************************************************************************
+}//***************************************************************************************
 size_t  
 MDPixels::rebin_dataset4D(const transf_matrix &rescaled_transf, const sqw_pixel *pix_array, size_t nPix)
 {
@@ -139,7 +138,7 @@ if(ignore_inf){
 }
 
 
-for(int ii=0;ii<nDims;ii++){
+for(unsigned int ii=0;ii<nDims;ii++){
     axis_step_inv[ii]=1/rescaled_transf.axis_step[ii];
 }
 for(int ii=0;ii<rescaled_transf.nDimensions;ii++){
@@ -154,7 +153,7 @@ int num_OMP_Threads(1);
 bool keep_pixels(false);
 
 //int nRealThreads;
-long i,indl;
+size_t i,indl;
 int    indX,indY,indZ,indE;
 size_t  nDimX(this->dimStride[0]),nDimY(this->dimStride[1]),nDimZ(this->dimStride[2]),nDimE(this->dimStride[3]); // reduction dimensions; if 0, the dimension is reduced;
 

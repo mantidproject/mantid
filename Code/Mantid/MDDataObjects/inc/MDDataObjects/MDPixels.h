@@ -106,6 +106,8 @@ public:
     // requests of the transformation
    // rebin pixels in the pix_aray and add them to the current dataset ;
     size_t rebin_dataset4D(const transf_matrix &transf, const sqw_pixel *pix_array, size_t nPix_cell);
+protected:
+     void finalise_rebinning(void);
     //void rebin_dataset4D(const SlicingProperty &transf,MDPixels &newsqw);
 private:
     // the parameter identify if the class data are file or memory based
@@ -114,7 +116,7 @@ private:
 
     std::vector<double> box_min,box_max;
 /// number of real pixels contributed in the dataset (rather sqw parameter) (should be moved there?)
-    long nPixels;      
+    size_t nPixels;      
 /// the array of structures, describing the detector pixels
     pix_location *pix_array;
    // boolean values identifying the way to treat NaN-s and Inf-s in the pixel data
@@ -128,7 +130,7 @@ private:
    MDPixels & operator = (const MDPixels & other);
 // rebin pixels in the pix_aray and add them to the current dataset ;
 //    long rebin_dataset4D(const SlicingProperty &transf, const sqw_pixel *pix_array, long nPix_cell);
-//    void complete_rebinning(void);
+
 //    void extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted);
 };
     }

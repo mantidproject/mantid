@@ -133,6 +133,7 @@ CenterpieceRebinning::exec()
       
       n_pixels_selected+=outputWS->rebin_dataset4D(trf,pix_buf,n_pix_in_buffer);
   }
+  outputWS->finalise_rebinning();
   if(pix_buf){
       delete [] pix_buf;
   }

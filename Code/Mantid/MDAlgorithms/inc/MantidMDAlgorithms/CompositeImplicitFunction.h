@@ -56,7 +56,7 @@ public:
   bool evaluate(const Mantid::API::Point3D* pPoint3D) const;
   std::string getName() const;
   std::string toXMLString() const;
-  //TO DO modified to allow compilation!
+  //TO DO : modified to allow CPR algorithm building !
   int getNFunctions() const{return 0;}
   bool operator==(const CompositeImplicitFunction &other) const;
   bool operator!=(const CompositeImplicitFunction &other) const;

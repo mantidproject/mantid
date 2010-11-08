@@ -2,7 +2,7 @@
 #define MANTID_MDDATAOBJECTS_HEXAHEDRON
 
 #include "MantidKernel/System.h"
-	
+    
 /*  A hexahedron representaion of cell. Provied the flexibility to define a bin in non-orthognal coordinate systems.
     Each hexahedron has a singular value associated with its eight verticies.
 
@@ -27,20 +27,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
-	  Code Documentation is available at: <http://doxygen.mantidproject.org>
+      Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 namespace Mantid
 {
-	namespace MDDataObjects
-	{
-		class Hexahedron
-		{
+    namespace MDDataObjects
+    {
+        class Hexahedron
+        {
 
-		public:
-			//Implementation TODO
-			~Hexahedron();
-		};
-	}
+        public:
+            //Implementation TODO
+            ~Hexahedron();
+        };
+    }
 }
 #endif
