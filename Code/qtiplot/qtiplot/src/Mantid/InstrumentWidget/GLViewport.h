@@ -51,7 +51,7 @@ public:
 	ProjectionType getProjectionType()const;
 	void getProjection(double&,double&,double&,double&,double&,double&);
 	void issueGL() const;
-	void setOrtho(double,double,double,double,double,double);
+        void setOrtho(double,double,double,double,double,double,bool useZ = true);
 	void setPrespective(double,double,double,double,double,double);
 	void setZoomFactor(double);
 	double getZoomFactor();

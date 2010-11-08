@@ -744,30 +744,6 @@ void Instrument3DWidget::resetWidget()
 
 void Instrument3DWidget::setView(const V3D& pos,double xmax,double ymax,double zmax,double xmin,double ymin,double zmin)
 {
-	////get the centre of the bounding box
-	//V3D boundCentre;
-	//double xhalf=(xmax-xmin)/2.0;
-	//double yhalf=(ymax-ymin)/2.0;
-	//double zhalf=(zmax-zmin)/2.0;
-	//boundCentre[0]=-1*(xmin+xhalf);
-	//boundCentre[1]=-1*(ymin+yhalf);
-	//boundCentre[2]=-1*(zmin+zhalf);
-	////vector from center to bounding box center
-	//V3D vcb=pos-boundCentre;
-	//vcb.normalize();
-	//V3D zaxis(0,0,1);
-	////get the rotation about zaxis
-	//Quat rotation(zaxis,vcb);
-	//rotation.inverse();
-	//_trackball->reset();
-	//_trackball->setModelCenter(pos);
-	//if(rotation!=Quat(0,0,0,0))
-	//	_trackball->setRotation(rotation);
-	//_trackball->rotateBoundingBox(xmin,xmax,ymin,ymax,zmin,zmax);//rotate the bounding box
-	//_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmin,-zmax);
-	//_viewport->issueGL();
-	//update();
-
 	//Change the View to the axis orientation
 	V3D s=mAxisDirection.cross_prod(mAxisUpVector);
 	V3D u=s.cross_prod(mAxisDirection);
@@ -796,7 +772,7 @@ void Instrument3DWidget::setView(const V3D& pos,double xmax,double ymax,double z
 	if(defaultView!=Quat(0,0,0,0))
 		_trackball->setRotation(defaultView);
 	_trackball->rotateBoundingBox(xmin,xmax,ymin,ymax,zmin,zmax);//rotate the bounding box
-	_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmax,-zmin);
+        _viewport->setOrtho(xmin,xmax,ymin,ymax,-zmax,-zmin,false);
 	_viewport->issueGL();
 	update();
 }
