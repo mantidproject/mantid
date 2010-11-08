@@ -1,8 +1,7 @@
 """
-    Command interface for ISIS SANS instruments.
-    
-    As commands in the common CommandInterface module are found to be ISIS-specific, 
-    they should be moved here.
+    Commands that are specific to ISIS SANS, in addition to those in CommandInterface.py
+    Documentation for running a conversion from neutron count files in time-of-flight
+    into Q-space can be found at http://www.mantidproject.org/SANS
 """
 import os
 
@@ -412,7 +411,7 @@ def PlotResult(workspace, reducer=None):
     if reducer.to_Q.output_type == '1D':
         plotSpectrum(workspace,0)
     else:
-        qti.app.mantidUI.importMatrixWorkspace(workspace).plotGraph2D()
+        qApp.mantidUI.importMatrixWorkspace(workspace).plotGraph2D()
 
 ##################### View mask details #####################################################
 
