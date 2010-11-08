@@ -1,20 +1,20 @@
-#ifndef NORMALPARAMETER_H
-#define NORMALPARAMETER_H
+#ifndef DIMENSION_PARAMETER_SET_H
+#define DIMENSION_PARAMETER_SET_H
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
-
+#include <boost/shared_ptr.hpp>
+#include "MantidMDAlgorithms/DimensionParameter.h"
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 /**
 
- Implementation of a parameter expressing normal vector information.
+ Represents a collection of dimension parameter information
 
  @author Owen Arnold, Tessella plc
  @date 01/10/2010
@@ -40,53 +40,29 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport NormalParameter: public Mantid::API::ImplicitFunctionParameter
+class DLLExport DimensionParameterSet
 {
-
 private:
-
-  std::vector<double> m_normal;
-
-protected:
-
-  NormalParameter* cloneImp() const;
+  std::vector<boost::shared_ptr<DimensionParameter>> m_dimensionParameters;
+  boost::shared_ptr<DimensionParameter> m_dimX;
+  boost::shared_ptr<DimensionParameter> m_dimY;
+  boost::shared_ptr<DimensionParameter> m_dimZ;
+  boost::shared_ptr<DimensionParameter> m_dimt;
+  boost::shared_ptr<DimensionParameter> findDimension(unsigned int id);
+  boost::shared_ptr<DimensionParameter> findDimensionThrow(unsigned int id);
 
 public:
+  void addDimensionParameter(DimensionParameter* dParameter);
+  std::vector<boost::shared_ptr<DimensionParameter>> getDimensions();
+  void setXDimension(unsigned int id);
+  void setYDimension(unsigned int id);
+  void setZDimension(unsigned int id);
+  void settDimension(unsigned int id);
 
-  NormalParameter(double n1, double n2, double n3);
-
-  NormalParameter();
-
-  NormalParameter(const NormalParameter& other);
-
-  NormalParameter& operator=(const NormalParameter& other);
-
-  bool operator==(const NormalParameter &other) const;
-
-  bool operator!=(const NormalParameter &other) const;
-
-  std::string getName() const;
-
-  bool isValid() const;
-
-  NormalParameter* reflect();
-
-  std::auto_ptr<NormalParameter> clone() const;
-
-  ~NormalParameter();
-
-  double getX() const;
-
-  double getY() const;
-
-  double getZ() const;
-
-  std::string toXMLString() const;
-
-  static std::string parameterName()
-  {
-    return "NormalParameter";
-  }
+  boost::shared_ptr<DimensionParameter> getXDimension();
+  boost::shared_ptr<DimensionParameter> getYDimension();
+  boost::shared_ptr<DimensionParameter> getZDimension();
+  boost::shared_ptr<DimensionParameter> gettDimension();
 };
 }
 }

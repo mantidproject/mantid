@@ -1,23 +1,21 @@
-#ifndef NORMALPARAMETER_H
-#define NORMALPARAMETER_H
+#ifndef DIMENSION_PARAMETER_INTEGRATION_H
+#define DIMENSION_PARAMETER_INTEGRATION_H
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 /**
-
- Implementation of a parameter expressing normal vector information.
+ Implementation of the integrational subsection of a dimension.
 
  @author Owen Arnold, Tessella plc
- @date 01/10/2010
+ @date 05/10/2010
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -40,53 +38,17 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport NormalParameter: public Mantid::API::ImplicitFunctionParameter
+class DimensionParameter;
+class DLLExport DimensionParameterIntegration 
 {
-
 private:
-
-  std::vector<double> m_normal;
-
-protected:
-
-  NormalParameter* cloneImp() const;
-
+  double m_upperLimit;
+  double m_lowerLimit;
 public:
-
-  NormalParameter(double n1, double n2, double n3);
-
-  NormalParameter();
-
-  NormalParameter(const NormalParameter& other);
-
-  NormalParameter& operator=(const NormalParameter& other);
-
-  bool operator==(const NormalParameter &other) const;
-
-  bool operator!=(const NormalParameter &other) const;
-
-  std::string getName() const;
-
-  bool isValid() const;
-
-  NormalParameter* reflect();
-
-  std::auto_ptr<NormalParameter> clone() const;
-
-  ~NormalParameter();
-
-  double getX() const;
-
-  double getY() const;
-
-  double getZ() const;
-
-  std::string toXMLString() const;
-
-  static std::string parameterName()
-  {
-    return "NormalParameter";
-  }
+  DimensionParameterIntegration(double upperLimit, double lowerLimit);
+  virtual double getUpperLimit() const;
+  virtual double getLowerLimit() const;
+  virtual bool isIntegrated() const;
 };
 }
 }

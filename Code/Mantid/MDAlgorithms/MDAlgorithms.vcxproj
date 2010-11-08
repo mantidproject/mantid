@@ -128,6 +128,10 @@
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunctionParser.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameter.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterIntegration.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterNoIntegration.h" />
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterSet.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\ImplicitTopology.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameterParser.h" />
@@ -146,6 +150,10 @@
     <ClCompile Include="src\CompositeFunctionBuilder.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
     <ClCompile Include="src\CompositeImplicitFunctionParser.cpp" />
+    <ClCompile Include="src\DimensionParameter.cpp" />
+    <ClCompile Include="src\DimensionParameterIntegration.cpp" />
+    <ClCompile Include="src\DimensionParameterNoIntegration.cpp" />
+    <ClCompile Include="src\DimensionParameterSet.cpp" />
     <ClCompile Include="src\ImplicitTopology.cpp" />
     <ClCompile Include="src\InvalidParameter.cpp" />
     <ClCompile Include="src\InvalidParameterParser.cpp" />

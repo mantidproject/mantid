@@ -1,12 +1,12 @@
-#ifndef NORMALPARAMETER_H
-#define NORMALPARAMETER_H
+#ifndef DIMENSION_PARAMETER_H
+#define DIMENSION_PARAMETER_H
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -14,10 +14,10 @@ namespace MDAlgorithms
 {
 /**
 
- Implementation of a parameter expressing normal vector information.
+ Memento of a Dimension.
 
  @author Owen Arnold, Tessella plc
- @date 01/10/2010
+ @date 05/10/2010
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -40,54 +40,24 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport NormalParameter: public Mantid::API::ImplicitFunctionParameter
-{
-
-private:
-
-  std::vector<double> m_normal;
-
-protected:
-
-  NormalParameter* cloneImp() const;
-
-public:
-
-  NormalParameter(double n1, double n2, double n3);
-
-  NormalParameter();
-
-  NormalParameter(const NormalParameter& other);
-
-  NormalParameter& operator=(const NormalParameter& other);
-
-  bool operator==(const NormalParameter &other) const;
-
-  bool operator!=(const NormalParameter &other) const;
-
-  std::string getName() const;
-
-  bool isValid() const;
-
-  NormalParameter* reflect();
-
-  std::auto_ptr<NormalParameter> clone() const;
-
-  ~NormalParameter();
-
-  double getX() const;
-
-  double getY() const;
-
-  double getZ() const;
-
-  std::string toXMLString() const;
-
-  static std::string parameterName()
+  class DimensionParameterIntegration;
+  class DLLExport DimensionParameter
   {
-    return "NormalParameter";
-  }
-};
+  private:
+    unsigned int m_id;
+    std::string m_name;
+    double m_upperBounds;
+    double m_lowerBounds;
+    boost::shared_ptr<DimensionParameterIntegration> m_integration;
+
+  public:
+    DimensionParameter(unsigned int id, std::string name, double upperBounds, double lowerBounds, boost::shared_ptr<DimensionParameterIntegration> integration);
+    inline boost::shared_ptr<DimensionParameterIntegration> getIntegration() const;
+    inline double getUpperBound();
+    inline double getLowerBound();
+    inline std::string getName();
+    inline unsigned int getId();
+  };
 }
 }
 

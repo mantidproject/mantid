@@ -67,6 +67,18 @@
     <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunctionParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterIntegration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameterNoIntegration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CompositeImplicitFunction.cpp">
@@ -106,6 +118,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CompositeFunctionBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DimensionParameter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DimensionParameterSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DimensionParameterIntegration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DimensionParameterNoIntegration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
