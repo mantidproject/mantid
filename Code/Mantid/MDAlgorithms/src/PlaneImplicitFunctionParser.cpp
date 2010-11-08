@@ -26,7 +26,11 @@ namespace Mantid
             std::string type = functionElement->getChildElement("Type")->innerText();
             if(PlaneImplicitFunction::functionName() != type)
             {
-                ImplicitFunctionParser::checkSuccessorExists();
+              if(0 == m_successor.get())
+                                           {
+                                               std::string message = "There is no successor function parser here for type: " + type;
+                                               throw std::runtime_error(message);
+                                           }
                 functionBuilder = m_successor->createFunctionBuilder(functionElement);
             }
             else
@@ -65,7 +69,9 @@ namespace Mantid
                 }
                 else
                 {
-                    //Do nothing!
+                   std::string message = "The parameter cannot be processed or is unrecognised: " + parameter->getName();
+                   message += ". The parameter cannot be processed or is unrecognised: " + (dynamic_cast<InvalidParameter*>(parameter.get()))->getValue();
+                   throw std::invalid_argument(message);
                 }
                 
             }

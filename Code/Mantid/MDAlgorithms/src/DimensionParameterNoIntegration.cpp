@@ -1,6 +1,6 @@
 ﻿#include "MantidMDAlgorithms/DimensionParameterNoIntegration.h"
 #include "MantidMDAlgorithms/DimensionParameter.h"
-
+#include <stdexcept>
 namespace Mantid
 {
 namespace MDAlgorithms

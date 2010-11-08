@@ -52,11 +52,11 @@ namespace MDAlgorithms
 
   public:
     DimensionParameter(unsigned int id, std::string name, double upperBounds, double lowerBounds, boost::shared_ptr<DimensionParameterIntegration> integration);
-    inline boost::shared_ptr<DimensionParameterIntegration> getIntegration() const;
-    inline double getUpperBound();
-    inline double getLowerBound();
-    inline std::string getName();
-    inline unsigned int getId();
+    boost::shared_ptr<DimensionParameterIntegration> getIntegration() const;
+    double getUpperBound() const;
+    double getLowerBound() const;
+    std::string getName() const;
+    unsigned int getId() const;
   };
 }
 }

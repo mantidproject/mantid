@@ -1,6 +1,6 @@
 ﻿#include "MantidMDAlgorithms/DimensionParameterSet.h"
 #include "MantidMDAlgorithms/DimensionParameter.h"
-
+#include <stdexcept>
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -20,7 +20,7 @@ namespace MDAlgorithms
   boost::shared_ptr<DimensionParameter> DimensionParameterSet::findDimension(unsigned int id)
   {
     boost::shared_ptr<DimensionParameter> item;
-    std::vector<boost::shared_ptr<DimensionParameter>>::iterator it = m_dimensionParameters.begin();
+    std::vector<boost::shared_ptr<DimensionParameter> >::iterator it = m_dimensionParameters.begin();
     for(it; it != m_dimensionParameters.end(); ++it)
     {
       boost::shared_ptr<DimensionParameter> dimParam = (*it);
@@ -46,7 +46,7 @@ namespace MDAlgorithms
     }
   }
 
-  std::vector<boost::shared_ptr<DimensionParameter>> DimensionParameterSet::getDimensions()
+  std::vector<boost::shared_ptr<DimensionParameter> > DimensionParameterSet::getDimensions()
   {
     return m_dimensionParameters;
   }

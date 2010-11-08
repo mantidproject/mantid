@@ -43,7 +43,7 @@ namespace MDAlgorithms
 class DLLExport DimensionParameterSet
 {
 private:
-  std::vector<boost::shared_ptr<DimensionParameter>> m_dimensionParameters;
+  std::vector<boost::shared_ptr<DimensionParameter> > m_dimensionParameters;
   boost::shared_ptr<DimensionParameter> m_dimX;
   boost::shared_ptr<DimensionParameter> m_dimY;
   boost::shared_ptr<DimensionParameter> m_dimZ;
@@ -53,7 +53,7 @@ private:
 
 public:
   void addDimensionParameter(DimensionParameter* dParameter);
-  std::vector<boost::shared_ptr<DimensionParameter>> getDimensions();
+  std::vector<boost::shared_ptr<DimensionParameter> > getDimensions();
   void setXDimension(unsigned int id);
   void setYDimension(unsigned int id);
   void setZDimension(unsigned int id);

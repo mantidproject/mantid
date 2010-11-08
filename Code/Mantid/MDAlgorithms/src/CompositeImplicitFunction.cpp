@@ -98,6 +98,12 @@ namespace Mantid
             }
             return evalResult;
         }
+
+        //TODO. retire this function, call evaluate instead!
+        std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > CompositeImplicitFunction::getFunctions() const
+        {
+          return this->m_Functions;
+        }
             
         bool CompositeImplicitFunction::operator!=(const CompositeImplicitFunction &other) const
         {

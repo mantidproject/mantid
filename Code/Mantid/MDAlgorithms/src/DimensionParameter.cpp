@@ -1,6 +1,6 @@
 ﻿#include "MantidMDAlgorithms/DimensionParameter.h"
 #include "MantidMDAlgorithms/DimensionParameterIntegration.h"
-
+#include <stdexcept>
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -27,27 +27,27 @@ namespace MDAlgorithms
     m_integration = integration;
   }
 
-  inline boost::shared_ptr<DimensionParameterIntegration> DimensionParameter::getIntegration() const
+  boost::shared_ptr<DimensionParameterIntegration> DimensionParameter::getIntegration() const
   {
     return this->m_integration;
   }
 
-  double DimensionParameter::getUpperBound()
+  double DimensionParameter::getUpperBound() const
   {
     return this->m_upperBounds;
   }
 
-  double DimensionParameter::getLowerBound()
+  double DimensionParameter::getLowerBound() const
   {
     return this->m_lowerBounds;
   }
 
-  std::string DimensionParameter::getName()
+  std::string DimensionParameter::getName() const
   {
     return this->m_name;
   }
 
-  unsigned int DimensionParameter::getId()
+  unsigned int DimensionParameter::getId() const
   {
     return this->m_id;
   }
