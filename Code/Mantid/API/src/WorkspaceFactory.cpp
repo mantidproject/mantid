@@ -214,7 +214,7 @@ ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& classN
 }
 
  /// this create method is currently used to build MD workspaces from MD workspaces, but may be used to build MD workspaces from matrix workspaces in a future;
-
+/*
 IMDWorkspace_sptr 
 WorkspaceFactoryImpl::create(const IMDWorkspace_sptr origin) const
 {
@@ -232,7 +232,7 @@ WorkspaceFactoryImpl::create(const IMDWorkspace_sptr origin) const
     return ws;
    
 }
-
+*/
 
 IMDWorkspace_sptr 
 WorkspaceFactoryImpl::create(const std::string & className,const Geometry::MDGeometryDescription & geometryDescription) const

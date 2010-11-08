@@ -67,7 +67,7 @@ public:
   
   IMDWorkspace_sptr create(const std::string & className, const Geometry::MDGeometryDescription &) const;
  /// this create method is currently used to build MD workspaces, but may be used to build MD workspaces from matrix workspaces in a future;
-   IMDWorkspace_sptr create(const IMDWorkspace_sptr origin) const;
+  // IMDWorkspace_sptr create(const IMDWorkspace_sptr origin) const;
 
  
   ///MDWorkspaceHolder_sptr create(const IMDWorkspace_sptr origin,const MDPropertyGeometry<> &MDgeometry) const;
