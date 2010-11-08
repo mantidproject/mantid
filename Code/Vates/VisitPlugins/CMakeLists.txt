@@ -5,7 +5,7 @@ SET(VISIT_LIBRARY_DIR /usr/local/2.1.0/linux-intel/lib)
 SET(VISIT_BINARY_DIR /usr/local/2.1.0/linux-intel/bin)
 SET(VISIT_ARCHIVE_DIR /usr/local/2.1.0/linux-intel/archives)
 SET(VISIT_PLUGIN_DIR /home/spu92482/.visit/linux-intel/plugins)
-#SET(MANTID_LIBRARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/) 
+SET(MANTID_LIBRARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/) 
 INCLUDE(/usr/local/2.1.0/linux-intel/include/PluginVsInstall.cmake)
 INCLUDE(/usr/local/2.1.0/linux-intel/include/VisItLibraryDependencies.cmake)
 
@@ -41,8 +41,7 @@ ${COMMON_SOURCES}
 SET(LIBE_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterEnginePluginInfo.C
 ${CMAKE_CURRENT_SOURCE_DIR}/src/avtRebinningCutterFilter.C
-${CMAKE_CURRENT_SOURCE_DIR}/src/vtkVatesDataSet.C
-${CMAKE_CURRENT_SOURCE_DIR}/src/WStoVisConverter.C
+${CMAKE_CURRENT_SOURCE_DIR}/src/InterfaceVatesMantid.C
 ${COMMON_SOURCES}
 )
 
@@ -93,14 +92,15 @@ ${QT_QTGUI_INCLUDE_DIR}
 ${VTK_INCLUDE_DIRS} 
 ${PYTHON_INCLUDE_PATH} 
 ${VISIT_INCLUDE_DIR}/visit/visitpy/visitpy 
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Mantid/API/inc/API 
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Mantid/API/inc/Kernel
-${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Mantid/API/inc/MDAlgorithms 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Kernel/inc/  
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/Geometry/inc/ 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/API/inc/ 
+${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/MDAlgorithms/inc/ 
 ${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins
 )
 
 
-LINK_DIRECTORIES(${VISIT_LIBRARY_DIR} ${QT_LIBRARY_DIR} ${MESA_LIBRARY_DIR} ${GLEW_LIBRARY_DIR} ${VTK_LIBRARY_DIRS})
+LINK_DIRECTORIES(${VISIT_LIBRARY_DIR} ${QT_LIBRARY_DIR} ${MESA_LIBRARY_DIR} ${GLEW_LIBRARY_DIR} ${VTK_LIBRARY_DIRS} ${MANTID_LIBRARY_DIR})
 
 ADD_LIBRARY(IRebinningCutterOperator ${LIBI_SOURCES})
 TARGET_LINK_LIBRARIES(IRebinningCutterOperator visitcommon)
@@ -133,12 +133,26 @@ ENDIF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_D
 
 find_library(MantidKernel_LIBRARY
   NAMES MantidKernel
-  PATHS CMAKE_CURRENT_SOURCE_DIR/../../Mantid/debug/
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
 )
 
+find_library(MantidGeometry_LIBRARY
+  NAMES MantidGeometry
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+)
+
+find_library(MantidAPI_LIBRARY
+  NAMES MantidAPI
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+)
+
+find_library(MDAlgorithms_LIBRARY
+  NAMES MDAlgorithms
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../Mantid/debug/
+)
 
 ADD_LIBRARY(ERebinningCutterOperator_ser ${LIBE_SOURCES})
-TARGET_LINK_LIBRARIES(ERebinningCutterOperator_ser visitcommon avtexpressions_ser avtfilters_ser avtpipeline_ser ${MantidKernel_LIBRARY})
+TARGET_LINK_LIBRARIES(ERebinningCutterOperator_ser visitcommon avtexpressions_ser avtfilters_ser avtpipeline_ser ${MantidKernel_LIBRARY} ${MantidGeometry_LIBRARY} ${MantidAPI_LIBRARY} ${MDAlgorithms_LIBRARY})
 SET(INSTALLTARGETS ${INSTALLTARGETS} ERebinningCutterOperator_ser)
 
 IF(VISIT_PARALLEL)

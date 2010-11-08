@@ -1,40 +1,40 @@
 /*****************************************************************************
-*
-* Copyright (c) 2000 - 2010, Lawrence Livermore National Security, LLC
-* Produced at the Lawrence Livermore National Laboratory
-* LLNL-CODE-442911
-* All rights reserved.
-*
-* This file is  part of VisIt. For  details, see https://visit.llnl.gov/.  The
-* full copyright notice is contained in the file COPYRIGHT located at the root
-* of the VisIt distribution or at http://www.llnl.gov/visit/copyright.html.
-*
-* Redistribution  and  use  in  source  and  binary  forms,  with  or  without
-* modification, are permitted provided that the following conditions are met:
-*
-*  - Redistributions of  source code must  retain the above  copyright notice,
-*    this list of conditions and the disclaimer below.
-*  - Redistributions in binary form must reproduce the above copyright notice,
-*    this  list of  conditions  and  the  disclaimer (as noted below)  in  the
-*    documentation and/or other materials provided with the distribution.
-*  - Neither the name of  the LLNS/LLNL nor the names of  its contributors may
-*    be used to endorse or promote products derived from this software without
-*    specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT  HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR  IMPLIED WARRANTIES, INCLUDING,  BUT NOT  LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND  FITNESS FOR A PARTICULAR  PURPOSE
-* ARE  DISCLAIMED. IN  NO EVENT  SHALL LAWRENCE  LIVERMORE NATIONAL  SECURITY,
-* LLC, THE  U.S.  DEPARTMENT OF  ENERGY  OR  CONTRIBUTORS BE  LIABLE  FOR  ANY
-* DIRECT,  INDIRECT,   INCIDENTAL,   SPECIAL,   EXEMPLARY,  OR   CONSEQUENTIAL
-* DAMAGES (INCLUDING, BUT NOT  LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF  USE, DATA, OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER
-* CAUSED  AND  ON  ANY  THEORY  OF  LIABILITY,  WHETHER  IN  CONTRACT,  STRICT
-* LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE)  ARISING IN ANY  WAY
-* OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-* DAMAGE.
-*
-*****************************************************************************/
+ *
+ * Copyright (c) 2000 - 2010, Lawrence Livermore National Security, LLC
+ * Produced at the Lawrence Livermore National Laboratory
+ * LLNL-CODE-442911
+ * All rights reserved.
+ *
+ * This file is  part of VisIt. For  details, see https://visit.llnl.gov/.  The
+ * full copyright notice is contained in the file COPYRIGHT located at the root
+ * of the VisIt distribution or at http://www.llnl.gov/visit/copyright.html.
+ *
+ * Redistribution  and  use  in  source  and  binary  forms,  with  or  without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  - Redistributions of  source code must  retain the above  copyright notice,
+ *    this list of conditions and the disclaimer below.
+ *  - Redistributions in binary form must reproduce the above copyright notice,
+ *    this  list of  conditions  and  the  disclaimer (as noted below)  in  the
+ *    documentation and/or other materials provided with the distribution.
+ *  - Neither the name of  the LLNS/LLNL nor the names of  its contributors may
+ *    be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT  HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR  IMPLIED WARRANTIES, INCLUDING,  BUT NOT  LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND  FITNESS FOR A PARTICULAR  PURPOSE
+ * ARE  DISCLAIMED. IN  NO EVENT  SHALL LAWRENCE  LIVERMORE NATIONAL  SECURITY,
+ * LLC, THE  U.S.  DEPARTMENT OF  ENERGY  OR  CONTRIBUTORS BE  LIABLE  FOR  ANY
+ * DIRECT,  INDIRECT,   INCIDENTAL,   SPECIAL,   EXEMPLARY,  OR   CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT  LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF  USE, DATA, OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED  AND  ON  ANY  THEORY  OF  LIABILITY,  WHETHER  IN  CONTRACT,  STRICT
+ * LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE)  ARISING IN ANY  WAY
+ * OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+ * DAMAGE.
+ *
+ *****************************************************************************/
 
 // ************************************************************************* //
 //  File: avtRebinningCutterFilter.C
@@ -43,11 +43,12 @@
 #include <avtRebinningCutterFilter.h>
 #include <DebugStream.h>
 #include <vtkVisItClipper.h>
-#include <vtkUnstructuredGrid.h>
-#include "vtkPlane.h"
-#include <DebugStream.h>
-#include "WStoVisConverter.h"
-#include "vtkVatesDataSet.h"
+#include <vtkCharArray.h>
+#include <vtkFieldData.h>
+
+
+
+using namespace Mantid::VATES;
 
 // ****************************************************************************
 //  Method: avtRebinningCutterFilter constructor
@@ -59,15 +60,9 @@
 
 avtRebinningCutterFilter::avtRebinningCutterFilter()
 {
-    this->normal.push_back(1);
-    this->normal.push_back(0);
-    this->normal.push_back(0);
 
-    this->origin.push_back(0);
-    this->origin.push_back(0);
-    this->origin.push_back(0);
+
 }
-
 
 // ****************************************************************************
 //  Method: avtRebinningCutterFilter destructor
@@ -83,7 +78,6 @@ avtRebinningCutterFilter::~avtRebinningCutterFilter()
 {
 }
 
-
 // ****************************************************************************
 //  Method:  avtRebinningCutterFilter::Create
 //
@@ -95,9 +89,8 @@ avtRebinningCutterFilter::~avtRebinningCutterFilter()
 avtFilter *
 avtRebinningCutterFilter::Create()
 {
-    return new avtRebinningCutterFilter();
+  return new avtRebinningCutterFilter();
 }
-
 
 // ****************************************************************************
 //  Method:      avtRebinningCutterFilter::SetAtts
@@ -113,12 +106,10 @@ avtRebinningCutterFilter::Create()
 //
 // ****************************************************************************
 
-void
-avtRebinningCutterFilter::SetAtts(const AttributeGroup *a)
+void avtRebinningCutterFilter::SetAtts(const AttributeGroup *a)
 {
-    atts = *(const RebinningCutterAttributes*)a;
+  atts = *(const RebinningCutterAttributes*) a;
 }
-
 
 // ****************************************************************************
 //  Method: avtRebinningCutterFilter::Equivalent
@@ -132,83 +123,29 @@ avtRebinningCutterFilter::SetAtts(const AttributeGroup *a)
 //
 // ****************************************************************************
 
-bool
-avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
+bool avtRebinningCutterFilter::Equivalent(const AttributeGroup *a)
 {
-    return (atts == *(RebinningCutterAttributes*)a);
+  return (atts == *(RebinningCutterAttributes*) a);
 }
 
-
-// ****************************************************************************
-//  Method: avtRebinningCutterFilter::ExecuteData
-//
-//  Purpose:
-//      Sends the specified input and output through the RebinningCutter filter.
-//
-//  Arguments:
-//      in_ds      The input dataset.
-//      <unused>   The domain number.
-//      <unused>   The label.
-//
-//  Returns:       The output dataset.
-//
-//  Programmer: spu92482 -- generated by xml2avt
-//  Creation:   Fri Sep 24 18:04:29 PST 2010
-//
-// ****************************************************************************
 
 vtkDataSet *
 avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
 {
-    if (this->atts.GetNormal().size() == 3 && this->atts.GetOrigin().size()== 3)
-	{
-	this->normal = this->atts.GetNormal();
-	this->origin = this->atts.GetOrigin();
-	}
 
+  RebinningCutterPresenter presenter;
 
-    vtkPlane* plane = vtkPlane::New();
-    plane->SetOrigin(origin[0], origin[1], origin[2]);
-    plane->SetNormal(normal[0], normal[1], normal[2]);
+  doubleVector& normal = this->atts.GetNormal();
+  doubleVector& origin = this->atts.GetOrigin();
 
-        debug5 <<  "priortogeneration"<< endl;
+  Mantid::API::ImplicitFunction* function = presenter.constructReductionKnowledge(in_ds, normal, origin, presenter.getMetadataID());
 
-    //vtkUnstructuredGrid *ug = vtkUnstructuredGrid::New();
-        vtkVatesDataSet *ug;
-        try
-        {
-        	ug = vtkVatesDataSet::New();
-        }
-        catch(...)
-        {
-    debug5 <<  "somethingbad" << endl;
+  vtkVisItClipper* adaptee = vtkVisItClipper::New();
+  vtkUnstructuredGrid *ug = presenter.applyReductionKnowledge(new ClipperAdapter(adaptee), in_ds, function);
 
-        }
+  presenter.persistReductionKnowledge(ug, function, presenter.getMetadataID());
+  debug5 << function->toXMLString() << endl;
 
-    //ug->SetMDFilePath("C:\\");
-    //debug5 << "MDFILEPATH " << ug->GetMDFilePath() << endl;
-
-    vtkVisItClipper*  clipper = vtkVisItClipper::New();
-    clipper->SetInput(in_ds);
-    clipper->SetClipFunction(plane);
-    clipper->SetInsideOut(true);
-    clipper->SetRemoveWholeCells(true);
-
-    clipper->SetOutput(ug);
-    clipper->Update();
-
-    plane->Delete();
-    clipper->Delete();
-
-
-
-    MDWorkspace ws;
-    WStoVisConverter converter(&ws);
-    converter.convert();
-
-    //Get dimension information
-    //Get rebinning information
-
-
-    return ug;
+  delete function;
+  return ug;
 }
