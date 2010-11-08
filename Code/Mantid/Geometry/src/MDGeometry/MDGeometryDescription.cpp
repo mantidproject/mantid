@@ -33,18 +33,18 @@ void
 MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 {
 
-    MDDimension *pDim;
+
 
     std::vector<std::string> tag  = origin.getBasisTags();
     this->nDimensions             = origin.getNumDims();
     this->nReciprocalDimensions   = origin.getNumReciprocalDims();
 
     for(unsigned int i=0;i<nReciprocalDimensions;i++){
-            this->coordinates[i].assign(3,0);
-            pDim = origin.getDimension(tag[i]);
-           if(pDim){
-                this->coordinates[i] = pDim->getCoord();
-            }
+      this->coordinates[i].assign(3,0);
+      MDDimension * pDim = origin.getDimension(tag[i]);
+      if(pDim){
+	this->coordinates[i] = pDim->getCoord();
+      }
     }
     
     SlicingData any;
@@ -55,7 +55,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 
     this->DimTags.clear();
     for(i=0;i<nDimensions;i++){
-        pDim=origin.getDimension(i);
+        MDDimension *pDim = origin.getDimension(i);
         this->data[i].trans_bott_left=0;
         this->data[i].cut_min  = pDim->getMinimum();
         this->data[i].cut_max  = pDim->getMaximum();

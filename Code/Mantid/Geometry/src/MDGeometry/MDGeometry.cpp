@@ -16,7 +16,6 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
 {
     unsigned int i;
     unsigned int n_new_dims=trf.getNumDims();
-    MDDimension *pDim;
     if(n_new_dims>this->n_total_dim){
         throw(std::invalid_argument("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
     }
@@ -26,17 +25,17 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
    // let's analyse the dimensions, which were mentioned in transformation matrix and set the ranges of these dimensions 
     // as requested
     for(i=0;i<n_new_dims;i++){
-        pDim=this->getDimension(tag[i]);
-        pDim->setRange(trf.cutMin(i),trf.cutMax(i),trf.numBins(i));
-        // set new axis name ;
-        if(trf.isAxisNamePresent(i)){
-            pDim->setName(trf.getAxisName(i));
-        }
+      MDDimension *pDim = this->getDimension(tag[i]);
+      pDim->setRange(trf.cutMin(i),trf.cutMax(i),trf.numBins(i));
+      // set new axis name ;
+      if(trf.isAxisNamePresent(i)){
+	pDim->setName(trf.getAxisName(i));
+      }
 
     }
     this->n_expanded_dim=0;
     for(i=0;i<this->n_total_dim;i++){
-          pDim=this->getDimension(i);
+          MDDimension * pDim=this->getDimension(i);
           if(!pDim->getIntegrated()){
               this->n_expanded_dim++;
           }
@@ -242,7 +241,7 @@ MDGeometry::getIntegratedDimensions(void)
     return tmp;
 }
 
-MDDimension * const 
+MDDimension *
 MDGeometry::getDimension(unsigned int i)const
 {
     if(i>=this->getNumDims()){
@@ -251,10 +250,9 @@ MDGeometry::getDimension(unsigned int i)const
     }
     return theDimension[i];
 }
-MDDimension * const 
+MDDimension *
 MDGeometry::getDimension(const std::string &tag)const
 {
-    MDDimension *pDim(NULL);
     int dim_num=this->getDimNum(tag,true);
   
     return theDimension[dim_num];

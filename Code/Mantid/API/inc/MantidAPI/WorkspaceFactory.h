@@ -20,9 +20,10 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MDWorkspaceHolder.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+
 namespace Mantid
 {
 namespace API
@@ -65,11 +66,7 @@ public:
   MatrixWorkspace_sptr create(const std::string& className, const int& NVectors,
                                    const int& XLength, const int& YLength) const;
   
-  MDWorkspaceHolder_sptr create(const std::string & className, const Geometry::MDGeometryDescription &) const;
-
-  /// this create method is currently used to build MD workspaces, but may be used to build MD workspaces from matrix workspaces in a future;
-  ///MDWorkspaceHolder_sptr create(const IMDWorkspace_sptr origin,const MDPropertyGeometry<> &MDgeometry) const;
-  //MDWorkspace_sptr create(const std::string &className="MDWorkspace",const const MDPropertyGeometry<>const *MDgeometry=NULL) const;
+  IMDWorkspace_sptr create(const std::string & className, const Geometry::MDGeometryDescription &) const;
 
   void initializeFromParent(const MatrixWorkspace_const_sptr parent,
                             const MatrixWorkspace_sptr child, const bool differentSize) const;

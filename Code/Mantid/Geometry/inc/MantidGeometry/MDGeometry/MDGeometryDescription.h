@@ -76,7 +76,7 @@ public:
    void build_from_geometry(const MDGeometry &origin);
 
    std::string toXMLstring(void)const{return std::string("TEST PROPERTY");}
-   bool fromXMLstring(const std::string &data){
+   bool fromXMLstring(const std::string &){
        return true;
    }
 
