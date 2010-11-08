@@ -133,7 +133,7 @@ namespace Mantid
       {
         ax->getIndexSpectraMap(*map);
       }
-      catch (std::runtime_error &err)
+      catch (std::runtime_error &)
       {
         delete map;
         throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToSpectrumMap: no elements!");
@@ -156,7 +156,7 @@ namespace Mantid
       {
         ax->getSpectraIndexMap(*map);
       }
-      catch (std::runtime_error &err)
+      catch (std::runtime_error &)
       {
         delete map;
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!");
@@ -171,6 +171,7 @@ namespace Mantid
     *  @param throwIfMultipleDets set to true to make the algorithm throw an error
     *         if there is more than one detector for a specific workspace index.
     *  @throws runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
+    *  @return Index to Index Map object
     */
     IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {
@@ -217,6 +218,7 @@ namespace Mantid
     *    KEY is the Workspace Index
     *    VALUE is the DetectorID (pixel ID)
     *  @throws runtime_error if there is more than one detector per spectrum, or other incompatibilities.
+    *  @return Map of workspace index to detector/pixel id.
     */
     IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap() const
     {
@@ -252,7 +254,6 @@ namespace Mantid
     //---------------------------------------------------------------------------------------
     /** Converts a list of spectrum numbers to the corresponding workspace indices.
     *  Not a very efficient operation, but unfortunately it's sometimes required.
-    *  @param WS          The workspace on which to carry out the operation
     *  @param spectraList The list of spectrum numbers required
     *  @param indexList   Returns a reference to the vector of indices (empty if not a Workspace2D)
     */
@@ -289,6 +290,7 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Get a constant reference to the Sample associated with this workspace.
+    * @return const reference to Sample object
     */
     const  Sample& MatrixWorkspace::sample() const
     {
@@ -299,6 +301,7 @@ namespace Mantid
     *  This non-const method will copy the sample if it is shared between 
     *  more than one workspace, and the reference returned will be to the copy.
     *  Can ONLY be taken by reference!
+    * @return reference to sample object
     */
     Sample& MatrixWorkspace::mutableSample()
     {
@@ -306,6 +309,7 @@ namespace Mantid
     }
 
     /** Get a constant reference to the Run object associated with this workspace.
+    * @return const reference to run object
     */
     const Run& MatrixWorkspace::run() const
     {
@@ -316,6 +320,7 @@ namespace Mantid
     *  This non-const method will copy the Run object if it is shared between 
     *  more than one workspace, and the reference returned will be to the copy.
     *  Can ONLY be taken by reference!
+    * @return reference to Run object
     */
     Run& MatrixWorkspace::mutableRun()
     {
@@ -401,6 +406,7 @@ namespace Mantid
     }
 
     /**  Returns a new copy of the instrument parameters
+    *    @return a (new) copy of the instruments parameter map
     */
     Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const
     {
@@ -421,6 +427,7 @@ namespace Mantid
     /** Get a pointer to a workspace axis
     *  @param axisIndex The index of the axis required
     *  @throw IndexError If the argument given is outside the range of axes held by this workspace
+    *  @return Pointer to Axis object
     */
     Axis* MatrixWorkspace::getAxis(const int& axisIndex) const
     {
@@ -463,7 +470,10 @@ namespace Mantid
       m_axes[axisIndex] = newAxis;
     }
 
-    /// Returns true if the workspace contains data in histogram form, false if it's point-like
+    /**
+    *  Whether the workspace contains histogram data
+    *  @return whether the worksapace contains histogram data
+    */
     bool MatrixWorkspace::isHistogramData() const
     {
       return ( readX(0).size()==readY(0).size() ? false : true );
@@ -508,13 +518,16 @@ namespace Mantid
 
     /** Are the Y-values in this workspace dimensioned?
     * TODO: For example: ????
+    * @return whether workspace is a distribution or not
     */
     const bool& MatrixWorkspace::isDistribution() const
     {
       return m_isDistribution;
     }
 
-    /// Set the flag for whether the Y-values are dimensioned
+    /** Set the flag for whether the Y-values are dimensioned
+    *  @return whether workspace is now a distribution
+    */
     bool& MatrixWorkspace::isDistribution(bool newValue)
     {
       m_isDistribution = newValue;
