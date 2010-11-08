@@ -16210,25 +16210,28 @@ if( QFileInfo(action_data).exists() )
     QMessageBox::information(this, "MantidPlot", "Error: There was a problem reading\n" + action_data);
     return;
   }
+  
   QTextStream stream(&script_file);
-  QString code("");
+  QString scriptPath = QString("r'%1'").arg(QFileInfo(action_data).absolutePath());
+  QString code = QString("sys.path.append(%1)\n").arg(scriptPath);
   while( !stream.atEnd() )
   {
     code.append(stream.readLine() + "\n");
   }
+  code.append(QString("\nsys.path.remove(%1)").arg(scriptPath));
   runPythonScript(code);
 }
 else
 {
   //First search for an existing window
   foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
-		    {
+  {
     if( sub_win->widget()->objectName() == action_data )
     {
       sub_win->widget()->show();
       return;
     }
-		    }
+  }
 
   QMdiSubWindow* usr_win = new QMdiSubWindow;
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
@@ -16269,6 +16272,9 @@ void ApplicationWindow::runPythonScript(const QString & code)
   m_iface_script->setCode(code);
   m_iface_script->exec();
 
+  // Start with a fresh script each time
+  delete m_iface_script;
+  m_iface_script = NULL;
 }
 
 void ApplicationWindow::loadCustomActions()

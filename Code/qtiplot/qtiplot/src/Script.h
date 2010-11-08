@@ -72,6 +72,8 @@ class Script : public QObject
   virtual void setCode(const QString &code);
   /// Set the context in which the code is to be executed.
   virtual void setContext(QObject *context) { Context = context; compiled = notCompiled; }
+  /// Set the filename associated with the script
+  virtual void updatePath(const QString &, bool append = true) {}
   /// Like QObject::setName, but with unicode support.
   void setName(const QString &name) { Name = name; compiled = notCompiled; }
   /// Set whether errors / exceptions are to be emitted or silently ignored

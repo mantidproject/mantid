@@ -847,12 +847,8 @@ void ScriptManagerWidget::customEvent(QEvent *event)
  */
 void ScriptManagerWidget::open(bool newtab, const QString & filename)
 {
-  // If we want to keep in current tab check if we need to save
   if( !newtab ) askSave(currentIndex());
-
-  // Qstrings are implicitly shared so this just copies a pointer
   QString file_to_open = filename;
-
   if( filename.isEmpty() )
   {
     QString filter = scriptingEnv()->fileFilter();
@@ -888,9 +884,14 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
   setTabText(currentIndex(), QFileInfo(file_to_open).fileName());
   editor->setFileName(file_to_open);
   editor->setCursorPosition(0,0);
+  
 
   // Set last directory
   m_last_dir = QFileInfo(file_to_open).absolutePath();
+
+  // Ensure the script runner knows about the file path
+  Script *runner = m_script_runners.value(currentIndex());
+  if( runner ) runner->updatePath(file_to_open);
 }
 
 /**
@@ -911,6 +912,9 @@ Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
     /// Initialize the auto complete by evaluating some completely trivial code
     script->setCode("1");
     script->exec();
+
+    
+
   }
   return script;
 }
@@ -921,10 +925,13 @@ Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
  */ 
 void ScriptManagerWidget::closeTabAtIndex(int index)
 {
-  QWidget *editor = widget(index);
+  ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
   if( !editor ) return;
   //Check if we need to save
   askSave(index);
+  // Remove the path from the script runner
+  Script *runner = m_script_runners.value(currentIndex());
+  if( runner ) runner->updatePath(editor->fileName(), false);
   //Get the widget attached to the tab first as this is not deleted
   //when remove is called
   editor->deleteLater();

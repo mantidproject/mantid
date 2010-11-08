@@ -61,6 +61,8 @@ class PythonScript : public Script
     emit currentLineChanged(getLineOffset() + lineno, true);
   }
 
+  void updatePath(const QString & filename, bool append = true);
+ 
 public slots:
   /// Compile to bytecode
   bool compile(bool for_eval=true);
@@ -92,6 +94,7 @@ private:
 
   PyObject *PyCode, *localDict, *stdoutSave, *stderrSave;
   bool isFunction;
+  QString fileName;
 };
 
 #endif

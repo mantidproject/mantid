@@ -90,6 +90,28 @@ PythonScript::~PythonScript()
 }
 
 /**
+ * Update the current environment with the script's path
+ */
+void PythonScript::updatePath(const QString & filename, bool append)
+{
+  std::cerr << "Testing \"" << filename.toStdString() << "\"\n";
+  if( filename.isEmpty() ) return;
+  QString scriptPath = QFileInfo(filename).absolutePath();
+  QString pyCode;
+  if( append )
+  {
+    pyCode = "sys.path.append(r'%1')";
+  }
+  else
+  {
+    pyCode = "sys.path.remove(r'%1')";
+  }
+  std::cerr << "Testing \"" << pyCode.arg(scriptPath).toStdString() << "\"\n";
+  setCode(pyCode.arg(scriptPath));
+  exec();
+}
+
+/**
  * Compile the code
  */
 bool PythonScript::compile(bool for_eval)
