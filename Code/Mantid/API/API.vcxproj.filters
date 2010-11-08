@@ -437,9 +437,6 @@
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameterParserFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidAPI\MDWorkspaceHolder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="test\FilePropertyTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>

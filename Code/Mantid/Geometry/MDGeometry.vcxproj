@@ -108,6 +108,7 @@
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(OutDir);../debug</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

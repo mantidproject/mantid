@@ -1,4 +1,4 @@
-@echo off
+echo off
 setlocal
 
 if "%1" == "" SET ARCH=x86
@@ -14,16 +14,19 @@ if /i not %ARCH% == x86 (
 
 python release_date.py
 
-CALL "%VCINSTALLDIR%"\vcvarsall.bat %ARCH%
+rem CALL "%VCINSTALLDIR%"\vcvarsall.bat %ARCH%
 
 :: The top-level directory
 SET ROOTDIR=%CD%
-
+pause
 :: Now build QtPropertyBrowser
 cd "%ROOTDIR%\QtPropertyBrowser"
 qmake %QMAKE_ARGS%
+pause
 nmake clean
 nmake
+pause
+
 IF %ERRORLEVEL% NEQ 0 goto qtpropertyerr
 
 
@@ -32,6 +35,7 @@ cd "%ROOTDIR%\MantidQt"
 qmake %QMAKE_ARGS%
 nmake clean
 nmake
+pause
 IF %ERRORLEVEL% NEQ 0 goto mantidqterr
 
 :: Now build qtiplot
@@ -39,6 +43,7 @@ cd "%ROOTDIR%\qtiplot"
 nmake clean
 qmake %QMAKE_ARGS%
 nmake
+pause
 IF %ERRORLEVEL% NEQ 0 goto qtiploterr
 echo "MantidQt and MantidPlot build succeeded."
 EXIT 0

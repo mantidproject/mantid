@@ -84,6 +84,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -93,6 +94,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -109,6 +111,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);../release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -122,6 +125,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -147,6 +151,7 @@
     <ClInclude Include="test\testCPrebinning.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CenterpieceRebinning.cpp" />
     <ClCompile Include="src\CompositeFunctionBuilder.cpp" />
     <ClCompile Include="src\CompositeImplicitFunction.cpp" />
     <ClCompile Include="src\CompositeImplicitFunctionParser.cpp" />

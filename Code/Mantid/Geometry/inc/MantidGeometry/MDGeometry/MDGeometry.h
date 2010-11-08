@@ -57,9 +57,9 @@ public:
 
     /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
     /// asking for DimX, Y and Z;
-    MDDimension * getDimension(unsigned int i)const;
+    MDDimension *  getDimension(unsigned int i)const;
     /// functions return the pointer to the dimension requested by the dimension tag. throws if no such dimension is present in the Geometry ;
-    MDDimension * getDimension(const std::string &tag)const;
+    MDDimension *  getDimension(const std::string &tag)const;
 
     /// function returns an axis vector of the dimension, specified by ID; it is 1 for orthogonal dimensions and triplet for the reciprocal 
     /// (but in a form of <1,0,0> if reciprocals are orthogonal to each other;

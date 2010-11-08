@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "MantidAPI/MDWorkspaceHolder.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/IMD_FileFormat.h"
@@ -49,7 +49,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 //
-class DLLExport MDData:public MDGeometry,public MDWorkspaceHolder
+class DLLExport MDData:public MDGeometry,public IMDWorkspace
 {
 public:
     // default constructor
@@ -66,9 +66,13 @@ public:
     /// the same as getPointData(std::vector<unsigned int> &selection) but select inial (0) coordinates for all dimensions > 3 
     void getPointData(std::vector<point3D> & image_data)const;
  //****************************************************************************************************** 
+// IMD workspace interface functions
+  /// return ID specifying the workspace kind
+    virtual const std::string id() const { return "MD-Workspace"; }
+  
     /// 
   virtual unsigned int getNumDims(void) const{return Geometry::MDGeometry::getNumDims();}
-
+//****************************************************************************************************** 
    bool read_mdd(void){if(this->theFile){
                            this->theFile->read_mdd(*this); return true;
                         }else{return false;}

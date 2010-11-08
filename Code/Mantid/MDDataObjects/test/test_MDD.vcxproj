@@ -159,6 +159,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MDDataTest.cpp" />
+    <ClCompile Include="MDPixelsTest.cpp" />
     <ClCompile Include="test_sqw.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -179,8 +181,34 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="find_mantid.h" />
-    <ClInclude Include="MDDataTest.h" />
-    <ClInclude Include="MDPixelsTest.h" />
+    <CustomBuild Include="MDDataTest.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">building test for: %(FileName)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FileName).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">building test for: %(FileName)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FileName).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">building test for: %(FileName)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FileName).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">building test for: %(FileName)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FileName).cpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="MDPixelsTest.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\Mantid\Code\Third_Party\src\cxxtest\cxxtestgen.py --part -o "%(Filename).cpp" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">building test for: %(FileName)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">building test for: %(FileName)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">building test for: %(FileName)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">building test for: %(FileName)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FileName).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FileName).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FileName).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FileName).cpp</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

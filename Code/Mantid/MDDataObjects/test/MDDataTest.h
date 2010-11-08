@@ -3,6 +3,8 @@
 
 
 #include <cxxtest/TestSuite.h>
+
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MDDataObjects/MDData.h"
 #include "find_mantid.h"
 
@@ -35,6 +37,12 @@ public:
 
        // 5-dim object;
         TS_ASSERT_EQUALS(pDND->getNumDims(),5);
+    }
+    void testIMDRegistration(){
+         IMDWorkspace_sptr ws;
+         MDGeometryDescription data;
+         TS_ASSERT_THROWS_NOTHING( ws = API::WorkspaceFactory::Instance().create("MDWorkspacet",data));
+ 
     }
     void testDNDPrivateRead(void){
  

@@ -2,7 +2,8 @@
 #define H_CENTERPIECE_REBINNING
 
 
-#include "MantidAPI/MDPropertyGeometry.h"
+//#include "MantidAPI/MDPropertyGeometry.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
