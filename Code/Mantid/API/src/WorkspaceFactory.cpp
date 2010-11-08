@@ -7,7 +7,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/MDPropertyGeometry.h"
+//#include "MantidAPI/MDPropertyGeometry.h"
 
 
 namespace Mantid
@@ -214,6 +214,7 @@ ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& classN
 }
 
  /// this create method is currently used to build MD workspaces from MD workspaces, but may be used to build MD workspaces from matrix workspaces in a future;
+/*
 MDWorkspaceHolder_sptr 
 WorkspaceFactoryImpl::create(const IMDWorkspace_sptr origin,const MDPropertyGeometry<> &MDgeometryDescription) const
 {
@@ -231,6 +232,24 @@ WorkspaceFactoryImpl::create(const IMDWorkspace_sptr origin,const MDPropertyGeom
     return ws;
    
 }
+*/
 
+MDWorkspaceHolder_sptr 
+WorkspaceFactoryImpl::create(const std::string & className,const Geometry::MDGeometryDescription & geometryDescription) const
+{
+    MDWorkspaceHolder_sptr ws;
+ 
+    ws = boost::dynamic_pointer_cast<MDWorkspaceHolder>(this->create("MDWorkspace"));
+    if (!ws)
+    {
+          g_log.error("MD Workspace was not created");
+          throw std::runtime_error("MD Workspace was not created");
+    }
+
+    ws->initialize(geometryDescription);
+
+    return ws;
+   
+}
 } // namespace API
 } // Namespace Mantid

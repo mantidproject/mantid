@@ -165,9 +165,6 @@
     <ClCompile Include="src\ImplicitFunctionParameterParserFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MDPropertyGeometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\MantidAPI\Algorithm.h">
@@ -438,12 +435,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameterParserFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidAPI\MDPropertyGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test\MDPropertyGeometryTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidAPI\MDWorkspaceHolder.h">

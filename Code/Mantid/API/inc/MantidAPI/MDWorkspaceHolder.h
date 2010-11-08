@@ -1,7 +1,7 @@
 #ifndef H_MD_WORKSPACE_HOLDER
 #define H_MD_WORKSPACE_HOLDER
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/MDPropertyGeometry.h"
+//#include "MantidAPI/MDPropertyGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 
 
@@ -39,7 +39,7 @@ namespace Mantid
 {
   
 
-class DLLExport MDWorkspaceHolder :  public IMDWorkspace
+class DLLExport MDWorkspaceHolder
 {
     public:
      /// return ID specifying the workspace kind
