@@ -10,6 +10,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
+#include <limits>
 
 
 namespace Mantid
@@ -36,6 +37,13 @@ void IkedaCarpenterPV::setHeight(const double h)
   setParameter("I",1);
   double h0 = height();
 
+  // to avoid devide by zero and to insane value for I to be set
+  double minCutOff = 100.0*std::numeric_limits<double>::min();
+  if ( h0 > 0 && h0 < minCutOff )
+    h0 = minCutOff;
+  if ( h0 < 0 && h0 > -minCutOff )
+    h0 = -minCutOff;
+
   // The intensity is then estimated to be h/h0
   setParameter("I", h/h0);
 };
@@ -52,15 +60,26 @@ double IkedaCarpenterPV::height()const
 
 double IkedaCarpenterPV::width()const 
 {
-  // for now assume that with is totally determined by Gaussian part
-  return sqrt(getParameter("SigmaSquared"))*2;
+  double eta = getParameter("Eta");
+
+  // if eta bigger than or equal to one then for sure the Gaussian part does not contribute 
+  if ( eta >= 1 )
+    return sqrt(getParameter("SigmaSquared"));
+  // if eta smaller than or equal to zero then for sure the Lorentzian part does not contribute
+  if ( eta <= 0 )
+    return getParameter("Gamma");
+
+  return sqrt(getParameter("SigmaSquared"))+getParameter("Gamma");
 };
 
 void IkedaCarpenterPV::setWidth(const double w) 
 {
-  // for now set the Lorentzian part to zero and adjust only gaussian part
-  setParameter("Eta", 0);
-  setParameter("SigmaSquared", w*w/4);
+  double eta = getParameter("Eta");
+
+  if ( eta < 1 && eta >= 0 )
+    setParameter("SigmaSquared", (1-eta)*w*(1-eta)*w);
+  if ( eta > 0 && eta <= 1 )
+    setParameter("Gamma", eta*w);
 };
 
 void IkedaCarpenterPV::setCentre(const double c) 
@@ -204,8 +223,8 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
 
         N = 0.25*alpha*(1-k*k)/(k*k);
 
-        out[i] = I*N*( (1-eta)*(Nu*exp(u)*gsl_sf_erfc(yu)+Nv*exp(v)*gsl_sf_erfc(yv) + 
-                        Ns*exp(s)*gsl_sf_erfc(ys)+Nr*exp(r)*gsl_sf_erfc(yr)) -
+        out[i] = I*N*( (1-eta)*(Nu*exp(u+gsl_sf_log_erfc(yu))+Nv*exp(v+gsl_sf_log_erfc(yv)) + 
+                        Ns*exp(s+gsl_sf_log_erfc(ys))+Nr*exp(r+gsl_sf_log_erfc(yr))) -
                  eta*2.0/M_PI*(Nu*exponentialIntegral(zu).imag()+Nv*exponentialIntegral(zv).imag()
                               +Ns*exponentialIntegral(zs).imag()+Nr*exponentialIntegral(zr).imag()) );
     }
