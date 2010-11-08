@@ -75,7 +75,7 @@ namespace Mantid
       */
       MDPropertyGeometry( const std::string &name, const std::string &wsName, const unsigned int direction,
         Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
-        WorkspaceProperty(name, wsName, direction,validator),
+        WorkspaceProperty<TYPE>(name, wsName, direction,validator),
         MDGeometryDescription()
       {
       }
