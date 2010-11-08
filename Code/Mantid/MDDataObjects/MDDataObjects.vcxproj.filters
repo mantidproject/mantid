@@ -62,21 +62,6 @@
     <ClInclude Include="test\test_sqw.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="test\testMDData.h">
-      <Filter>tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\testMDDimension.h">
-      <Filter>tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\testMDGeometry.h">
-      <Filter>tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\testMDPixels.h">
-      <Filter>tests</Filter>
-    </ClInclude>
-    <ClInclude Include="test\testWorkspaceGeometry.h">
-      <Filter>tests</Filter>
-    </ClInclude>
     <ClInclude Include="inc\MDDataObjects\MDWorkspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>

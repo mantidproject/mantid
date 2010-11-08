@@ -83,6 +83,8 @@ public:
     virtual void initialize(const Geometry::MDGeometryDescription &Description){
         alloc_mdd_arrays(Description);
     }
+    /// get acces to the internal image dataset
+    data_point * getPData(void){return data;}
 protected:
     size_t data_size;               ///< size of the data points array
     data_point *data;             ///< multidimensional array of data points, represented as a single dimensional array;
@@ -139,11 +141,12 @@ protected:
      data_point thePoint(int i,int j,int k, int n)const{   return data[nCell(i,j,k,n)];}
 
       static Kernel::Logger& g_log;
-private:
+
     /** function reshapes the geomerty of the array according to the pAxis array request; returns the total array size */
     size_t reshape_geometry(const MDGeometryDescription &transf);
    /// the pointer for vector returning the image points for visualisation
-
+  
+private:
  //*************************************************
    // probably temporary
      MDData & operator = (const MDData & other);

@@ -35,11 +35,11 @@ runner.exe
 REM Remove the generated files to ensure that they're not inadvertently run
 REM   when something in the chain has failed.
 echo "Cleaning up..."
-REM del runner.cpp
-REM del *.obj
-REM del *.pdb
-REM del runner.lib
-REM del runner.ilk
-REM del runner.exp
-REM del vc100.idb
-REM del runner.exe
+del runner.cpp
+del *.obj
+del *.pdb
+del runner.lib
+del runner.ilk
+del runner.exp
+del vc100.idb
+del runner.exe

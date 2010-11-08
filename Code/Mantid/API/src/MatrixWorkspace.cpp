@@ -1,4 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"

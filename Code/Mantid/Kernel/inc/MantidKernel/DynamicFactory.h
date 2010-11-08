@@ -26,7 +26,7 @@ namespace Mantid
 namespace Kernel
 {
 class Logger;	
-	
+    
 /** @class DynamicFactory DynamicFactory.h Kernel/DynamicFactory.h
 
     The dynamic factory is a base dynamic factory for serving up objects in response to requests from other classes.

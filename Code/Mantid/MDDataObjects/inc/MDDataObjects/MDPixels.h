@@ -26,7 +26,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
-	Code Documentation is available at: <http://doxygen.mantidproject.org>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 namespace Mantid{
@@ -60,6 +60,19 @@ struct pix_location
 
 
 //**********************************************************************************************************************
+/** Rebinning matrix Internal class which describes rebinning transformation in the terms of current workspace
+ */
+class transf_matrix
+{
+public:
+        int nDimensions;                   // real number of dimensions in a dataset???
+        double rotations[9];                 // rotation matrix for qx,qy,qz coordinates; 
+        std::vector<double> trans_bott_left; // shift in all directions (tans_elo is 4th element of transf_bott_left
+        std::vector<double> cut_min;        // min limits to extract data;
+        std::vector<double> cut_max;       // max limits to extract data;
+        std::vector<double> axis_step;     // (cut_max-cut_min)/(nBins);
+};
+//
 
 class DLLExport MDPixels :  public MDData
 {
@@ -91,12 +104,15 @@ public:
  
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
+   // rebin pixels in the pix_aray and add them to the current dataset ;
+    size_t rebin_dataset4D(const transf_matrix &transf, const sqw_pixel *pix_array, size_t nPix_cell);
     //void rebin_dataset4D(const SlicingProperty &transf,MDPixels &newsqw);
 private:
     // the parameter identify if the class data are file or memory based
    // usually it is file based and memory used for small datasets, debugging or in a future when PC are big
     bool      memBased;
-   
+
+    std::vector<double> box_min,box_max;
 /// number of real pixels contributed in the dataset (rather sqw parameter) (should be moved there?)
     long nPixels;      
 /// the array of structures, describing the detector pixels

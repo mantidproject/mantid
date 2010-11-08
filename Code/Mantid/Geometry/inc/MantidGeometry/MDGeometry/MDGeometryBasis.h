@@ -57,7 +57,7 @@ namespace Mantid
         /// returns  the symbol tag of this dimension ID;
         std::string getDimensionTag(void)const{return DimensionTag;}
         /// returns true if this dimension is reciprocal
-        bool isReciprocal(void)const{return (iDimID<(int)n_reciprocal_dimensions)?true:false;}
+        bool isReciprocal(void)const{return is_reciprocal;}
         /// all dimensions has to be arranged in the order of incrreased id;
         bool operator <(const DimensionID &other)const{return this->iDimID< other.iDimID;}
         bool operator<=(const DimensionID &other)const{return this->iDimID<=other.iDimID;}
@@ -66,28 +66,26 @@ namespace Mantid
         bool operator==(const DimensionID &other)const{return this->iDimID==other.iDimID;}
         /// copy constructor and operator()= are public
        /// to initate array, which has to be reset as meaningless and not checked against this later
-        DimensionID(int iDimID0=-1,const char *name0="",unsigned int nReciprocalDims=3):
-        iDimID(iDimID0),tagHash(0),n_reciprocal_dimensions(nReciprocalDims),DimensionTag(name0){}; 
+        DimensionID(int iDimID0=-1,const char *name0="",bool if_reciprocal=true):
+        iDimID(iDimID0),tagHash(0),is_reciprocal(if_reciprocal),DimensionTag(name0){}; 
         /// function compares the tag of this DimensionID with the input tag and returns the numeric value of the ID if the names coinside or -1 if not. 
-        int getDimensionID(const std::string &aTag)const{return (this->DimensionTag.compare(aTag)==0)?this->iDimID:-1;}
+        int getDimID(const std::string &aTag)const{return (this->DimensionTag.compare(aTag)==0)?this->iDimID:-1;}
         /// this should be prviate or protected?;
-        int getDimensionID(void)const{return iDimID;}
+        int getDimID(void)const{return iDimID;}
         /// 
         size_t getDimHash(void)const{return tagHash;}
        /// this should be reserved to friends?
-       void setDimensionIDValues(int newID,const std::string &newTag,unsigned int nReciprocalDimensions);
+       void setDimensionIDValues(int newNum,const std::string &newTag,bool is_recipocal);
     private:
         /// actual Dimension ID numbe used to identify the dimension; Strictly internal or shared with MDGeometryBasis
        int iDimID; 
        /// hash for the dimension tag used for sorting
        size_t tagHash;
        /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)
-       unsigned int n_reciprocal_dimensions;
+       bool is_reciprocal;
         /// default dimension name used to identify a dimension among others;
         std::string DimensionTag;
-        //
-
- 
+        //         
     };
     
 //****************************************************************************************************************************************
@@ -97,24 +95,25 @@ namespace Mantid
     virtual ~MDGeometryBasis(void);
     /// return the numbers of dimensions in current geometry; 
     unsigned int getNumDims(void)const{return n_total_dim;}
+    /// returns the number of reciprocal dimensions
     unsigned int getNumReciprocalDims(void)const{return this->n_reciprocal_dimensions;};
 
     /// function returns the vector of the names of the dimensions, which are defined in the workspace
     std::vector<std::string> getBasisTags(void)const;
 
     /// function returns the workspace ID, which defines the workspace with particular kind of dimensions
-    unsigned int getWorkspaceID()const{return MD_workspace_ID;}
+    std::string getWorkspaceIDname()const{return workspace_name;}
     /// function checks if the tags supplied  coinside with the tags for current basis ?
     bool calculateTagsCompartibility(const std::vector<std::string> &newTags)const;
 
     /// gettind dimension tag (name)
     std::string getTag(unsigned int nDim)const;
     /// ort of the dimension. Initial are reciprocal (up to 3), returning {x,y,z}, x^2+y^2+z^2=1; and other are orthogonal {1}. (or may be should be scaled?)
-    const std::vector<double> & getOrt(unsigned int nDim)const;
-    const std::vector<double> & getOrt(const std::string &tag)const;
+    //const std::vector<double> & getOrt(unsigned int nDim)const;
+    //const std::vector<double> & getOrt(const std::string &tag)const;
     /// 
     double getScale(unsigned int nDim);
-
+    size_t getDimHash(const std::string &tag)const;
 protected: 
    /*! class constructor:; Protected as GeometryBasis should not exist alone 
     *  @param nDimensions -- maximal number of the dimensions all datasets will have
@@ -124,7 +123,7 @@ protected:
      MDGeometryBasis(unsigned int nDimensions=4,unsigned int nReciprocalDimensions=3);  
 
     // init class with new number of dimensions and new dimensions types regardless of previous initialisation (which will be lost)
-    void reinit_WorkspaceGeometry(const std::vector<std::string> &tags,unsigned int nReciprocal_dims=3);
+    void reinit_GeometryBasis(const std::vector<std::string> &tags,unsigned int nReciprocal_dims=3);
     
  
   /** return the number of the  dimension which corresponds to the tag provided
@@ -144,13 +143,12 @@ protected:
    /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)
    unsigned int n_reciprocal_dimensions;
 private:
-    /// the identifier, which distinguish MD dataset with given set of dimensions from any other MD datset
-    unsigned int MD_workspace_ID;
-   /// vector of dimensions id-s, specific for current architecture, the size of dimensions is n_total_dimensions,
+    /// vector of dimensions id-s, specific for current architecture, the size of dimensions is n_total_dimensions,
     std::vector<DimensionID> DimensionIDs;
-
+    //
+    int findTag(const std::string &tag, bool do_throw)const;
       /// function returns the id of the dimension No requseted
-    DimensionID getDimensionID(unsigned int nDim)const;
+    //DimensionID getDimensionID(unsigned int nDim)const;
 
     std::map<size_t ,int>  dim_list;
    
@@ -172,8 +170,9 @@ private:
    
 
     /// gettind dimension name 
-    std::string getTag(const DimensionID &id)const;
-  
+    //std::string getTag(const DimensionID &id)const;
+    // unique name of workspace as an assembly of a sorted dimension tags 
+    std::string workspace_name;
     };
     } // namespace Geometry
 }  // namespace MANTID

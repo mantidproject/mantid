@@ -134,7 +134,7 @@ int IDCAgetdat(idc_handle_t fh, int ifsn, int nos, int** value, int dims_array[]
 static int IDCgetpar(idc_handle_t fh, const char* name, void** value, ISISDSDataType type,
 					 int dims_array[], int* ndims, int do_alloc)
 {
-	int n, stat, comm_buff_size;
+	long n, stat, comm_buff_size;
 	ISISDSDataType ret_type;
 	char* command = NULL;
 	char comm_buffer[256];

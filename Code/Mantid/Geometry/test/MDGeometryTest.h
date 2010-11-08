@@ -42,7 +42,7 @@ public:
         MDDimension *pDim;
         // get pointer to the dimension 0
         TS_ASSERT_THROWS_NOTHING(pDim=tDND_geometry->getDimension(0));
-        TS_ASSERT_SAME_DATA(pDim->getDimensionTag().c_str(),"hc",2);
+        TS_ASSERT_SAME_DATA(pDim->getDimensionTag().c_str(),"q1",2);
         MDDimension *pDim0;
         // no such dimension
         TS_ASSERT_THROWS_ANYTHING(pDim0=tDND_geometry->getDimension(8));
@@ -51,7 +51,7 @@ public:
 //        TS_ASSERT_EQUALS(pDim0,NULL);
 
         // the same dimension as above
-        TS_ASSERT_THROWS_NOTHING(pDim0=tDND_geometry->getDimension("hc"));
+        TS_ASSERT_THROWS_NOTHING(pDim0=tDND_geometry->getDimension("q1"));
         TS_ASSERT_EQUALS(pDim0,pDim);
     }
     void testSlicingProperty(void){
@@ -61,16 +61,17 @@ public:
          TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins("en",100));
          // wrong tag
          TS_ASSERT_THROWS_ANYTHING(pSlice->setNumBins("eh",200));
-         TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins("hc",200));
+         // right tag
+         TS_ASSERT_THROWS_NOTHING(pSlice->setNumBins("q1",200));
 
 // we want first (0) axis to be energy 
          TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"en"));
          TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"en"));
 // and the third (2) ->el (z-axis) 
-         TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"lc"));
-         TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(2,"lc"));
+         TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"q3"));
+         TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(2,"q3"));
          // should be already there - check reinsertion;
-         TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"kc"));
+         TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(3,"q2"));
 
          std::vector<std::string> names = pSlice->getAxisTags();
          for(unsigned int i=0;i<names.size();i++){

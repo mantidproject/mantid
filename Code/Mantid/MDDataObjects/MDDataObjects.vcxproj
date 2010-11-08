@@ -107,6 +107,13 @@
       </IgnoreSpecificDefaultLibraries>
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
     </Link>
+    <PreBuildEvent>
+      <Command>copy "$(ProjectDir)..\$(Configuration)\MantidKernel.lib" "$(OutDir)MantidKernel.lib" /Y
+copy "$(ProjectDir)..\$(Configuration)\MantidGeometry.lib" "$(OutDir)MantidGeometry.lib" /Y</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>copying the project libraries requested</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -183,11 +190,6 @@
     <ClInclude Include="inc\MDDataObjects\MD_File_hdfV1.h" />
     <ClInclude Include="inc\MDDataObjects\point3D.h" />
     <ClInclude Include="inc\MDDataObjects\stdafx.h" />
-    <ClInclude Include="test\testMDData.h" />
-    <ClInclude Include="test\testMDDimension.h" />
-    <ClInclude Include="test\testMDGeometry.h" />
-    <ClInclude Include="test\testMDPixels.h" />
-    <ClInclude Include="test\testWorkspaceGeometry.h" />
     <ClInclude Include="test\test_sqw.h" />
   </ItemGroup>
   <ItemGroup>

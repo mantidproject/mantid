@@ -56,7 +56,7 @@ public:
 
   void addExecutionInfo(const Mantid::Kernel::dateAndTime& start, const double& duration);
   void addProperty(const std::string& name,const std::string& value,bool isdefault, 
-		   const unsigned int& direction = 99);
+           const unsigned int& direction = 99);
 
   // get functions
   /// get name of algorithm in history const

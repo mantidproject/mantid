@@ -10,9 +10,11 @@ MDData(nDims),
 ignore_inf(false),
 ignore_nan(true),
 memBased(false),
-nPixels(-1),
+nPixels(0),
 pix_array(NULL)
 {
+    this->box_min.assign(nDims,FLT_MAX);
+    this->box_max.assign(nDims,-FLT_MAX);
 }
 long
 MDPixels::getNumPixels(void)
@@ -114,17 +116,20 @@ for(i=1;i<this->data_size;i++){
 };
 this->nPixels=nPix;
 }
-
+*/
 //***************************************************************************************
-/*
-long  
-SQW::rebin_dataset4D(const transf_matrix &rescaled_transf, const sqw_pixel *pix_array, long nPix)
+size_t  
+MDPixels::rebin_dataset4D(const transf_matrix &rescaled_transf, const sqw_pixel *pix_array, size_t nPix)
 {
 // set up auxiliary variables and preprocess them. 
 double xt,yt,zt,xt1,yt1,zt1,Et,Inf(0),
        pix_Xmin,pix_Ymin,pix_Zmin,pix_Emin,pix_Xmax,pix_Ymax,pix_Zmax,pix_Emax;
+size_t nPixel_retained(0);
 
-double rotations_ustep[9],axis_step_inv[MAX_DND_DIMS],shifts[MAX_DND_DIMS],min_limit[MAX_DND_DIMS],max_limit[MAX_DND_DIMS];
+
+unsigned int nDims = this->getNumDims();
+double rotations_ustep[9];
+std::vector<double> axis_step_inv(nDims,0),shifts(nDims,0),min_limit(nDims,-1),max_limit(nDims,1);
 bool  ignore_something,ignote_all,ignore_nan(this->ignore_nan),ignore_inf(this->ignore_inf);
 
 ignore_something=ignore_nan|ignore_inf;
@@ -133,8 +138,8 @@ if(ignore_inf){
     Inf=std::numeric_limits<double>::infinity();
 }
 
-//newsqw.rescale_transformations(trf,rotations_ustep,axis_step,shifts,min_limit,max_limit);
-for(int ii=0;ii<this->maxNDimsInDataset;ii++){
+
+for(int ii=0;ii<nDims;ii++){
     axis_step_inv[ii]=1/rescaled_transf.axis_step[ii];
 }
 for(int ii=0;ii<rescaled_transf.nDimensions;ii++){
@@ -146,14 +151,12 @@ for(int ii=0;ii<9;ii++){
     rotations_ustep[ii]=rescaled_transf.rotations[ii];
 }
 int num_OMP_Threads(1);
-bool keep_pixels(true);
+bool keep_pixels(false);
 
 //int nRealThreads;
 long i,indl;
 int    indX,indY,indZ,indE;
-int    nDimX(this->ndx),nDimY(this->ndy),nDimZ(this->ndz),nDimE(this->nde); // reduction dimensions; if 0, the dimension is reduced;
-
-long  nPixel_retained=0;
+size_t  nDimX(this->dimStride[0]),nDimY(this->dimStride[1]),nDimZ(this->dimStride[2]),nDimE(this->dimStride[3]); // reduction dimensions; if 0, the dimension is reduced;
 
 
 // min-max value initialization
@@ -206,35 +209,42 @@ omp_set_num_threads(num_OMP_Threads);
 
       // Transform the coordinates u1-u4 into the new projection axes, if necessary
       //    indx=[(v(1:3,:)'-repmat(trans_bott_left',[size(v,2),1]))*rot_ustep',v(4,:)'];  % nx4 matrix
-            xt1=pix.qx    -shifts[u1];
-            yt1=pix.qy    -shifts[u2];
-            zt1=pix.qz    -shifts[u3];
+            xt1=pix.qx    -shifts[0];
+            yt1=pix.qy    -shifts[1];
+            zt1=pix.qz    -shifts[2];
 
             // transform energy
-            Et=(pix.En    -shifts[en])*axis_step_inv[en];
+            Et=(pix.En    -shifts[3])*axis_step_inv[3];
 
 //  ok = indx(:,1)>=cut_range(1,1) & indx(:,1)<=cut_range(2,1) & indx(:,2)>=cut_range(1,2) & indx(:,2)<=urange_step(2,2) & ...
 //       indx(:,3)>=cut_range(1,3) & indx(:,3)<=cut_range(2,3) & indx(:,4)>=cut_range(1,4) & indx(:,4)<=cut_range(2,4);
-            if(Et<min_limit[en]||Et>=max_limit[en])     continue;
+            if(Et<min_limit[3]||Et>=max_limit[3]){
+                continue;
+            }
 
             xt=xt1*rotations_ustep[0]+yt1*rotations_ustep[3]+zt1*rotations_ustep[6];
-            if(xt<min_limit[u1]||xt>=max_limit[u1])     continue;
+            if(xt<min_limit[0]||xt>=max_limit[0]){
+                continue;
+            }
 
             yt=xt1*rotations_ustep[1]+yt1*rotations_ustep[4]+zt1*rotations_ustep[7];
-            if(yt<min_limit[u2]||yt>=max_limit[u2])     continue;
+            if(yt<min_limit[1]||yt>=max_limit[1]){
+                continue;
+            }
 
             zt=xt1*rotations_ustep[2]+yt1*rotations_ustep[5]+zt1*rotations_ustep[8];
-            if(zt<min_limit[u3]||zt>=max_limit[u3])     continue;
-
+            if(zt<min_limit[2]||zt>=max_limit[2]) {
+                continue;
+            }
             nPixel_retained++;
 
 
 
 //     indx=indx(ok,:);    % get good indices (including integration axes and plot axes with only one bin)
-            indX=(int)floor(xt-min_limit[u1]);
-            indY=(int)floor(yt-min_limit[u2]);
-            indZ=(int)floor(zt-min_limit[u3]);
-            indE=(int)floor(Et-min_limit[en]);
+            indX=(int)floor(xt-min_limit[0]);
+            indY=(int)floor(yt-min_limit[1]);
+            indZ=(int)floor(zt-min_limit[2]);
+            indE=(int)floor(Et-min_limit[3]);
 //
             indl  = indX*nDimX+indY*nDimY+indZ*nDimZ+indE*nDimE;
  // i0=nPixel_retained*OUT_PIXEL_DATA_WIDTH;    // transformed pixels;
@@ -245,7 +255,8 @@ omp_set_num_threads(num_OMP_Threads);
 #pragma omp atomic
             this->data[indl].npix++;
 #pragma omp atomic
-            this->pix_array[indl].cell_memPixels.push_back(pix);
+            // this request substantial thinking -- will not do it this way as it is very slow
+           // this->pix_array[indl].cell_memPixels.push_back(pix);
 
 //
 //    actual_pix_range = [min(actual_pix_range(1,:),min(indx,[],1));max(actual_pix_range(2,:),max(indx,[],1))];  % true range of data
@@ -264,21 +275,23 @@ omp_set_num_threads(num_OMP_Threads);
     } // end for i -- imlicit barrier;
 #pragma omp critical
     {
-        if(this->box_min[u1]>pix_Xmin/axis_step_inv[u1])this->box_min[u1]=pix_Xmin/axis_step_inv[u1];
-        if(this->box_min[u2]>pix_Ymin/axis_step_inv[u2])this->box_min[u2]=pix_Ymin/axis_step_inv[u2];
-        if(this->box_min[u3]>pix_Zmin/axis_step_inv[u3])this->box_min[u3]=pix_Zmin/axis_step_inv[u3];
-        if(this->box_min[en]>pix_Emin/axis_step_inv[en])this->box_min[en]=pix_Emin/axis_step_inv[en];
+        if(this->box_min[0]>pix_Xmin/axis_step_inv[0])this->box_min[0]=pix_Xmin/axis_step_inv[0];
+        if(this->box_min[1]>pix_Ymin/axis_step_inv[1])this->box_min[1]=pix_Ymin/axis_step_inv[1];
+        if(this->box_min[2]>pix_Zmin/axis_step_inv[2])this->box_min[2]=pix_Zmin/axis_step_inv[2];
+        if(this->box_min[3]>pix_Emin/axis_step_inv[3])this->box_min[3]=pix_Emin/axis_step_inv[3];
 
-        if(this->box_max[u1]<pix_Xmax/axis_step_inv[u1])this->box_max[u1]=pix_Xmax/axis_step_inv[u1];
-        if(this->box_max[u2]<pix_Ymax/axis_step_inv[u2])this->box_max[u2]=pix_Ymax/axis_step_inv[u2];
-        if(this->box_max[u3]<pix_Zmax/axis_step_inv[u3])this->box_max[u3]=pix_Zmax/axis_step_inv[u3];
-        if(this->box_max[en]<pix_Emax/axis_step_inv[en])this->box_max[en]=pix_Emax/axis_step_inv[en];
+        if(this->box_max[0]<pix_Xmax/axis_step_inv[0])this->box_max[0]=pix_Xmax/axis_step_inv[0];
+        if(this->box_max[1]<pix_Ymax/axis_step_inv[1])this->box_max[1]=pix_Ymax/axis_step_inv[1];
+        if(this->box_max[2]<pix_Zmax/axis_step_inv[2])this->box_max[2]=pix_Zmax/axis_step_inv[2];
+        if(this->box_max[3]<pix_Emax/axis_step_inv[3])this->box_max[3]=pix_Emax/axis_step_inv[3];
     }
 } // end parallel region
 
 this->nPixels+=nPixel_retained;
+
 return nPixel_retained;
 }
+/*
 //***************************************************************************************
 void
 SQW::extract_pixels_from_memCells(const std::vector<long> &selected_cells,long nPix,sqw_pixel *pix_extracted)
@@ -298,7 +311,6 @@ SQW::extract_pixels_from_memCells(const std::vector<long> &selected_cells,long n
 #endif
         }
     }
-
 }
 /*
 //***************************************************************************************

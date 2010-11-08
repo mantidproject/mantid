@@ -73,6 +73,11 @@ public:
     void getAxisPoints(std::vector<double>  &)const;
     /// function returns number of the bins this dimension has
     unsigned int getNBins(void)const{return nBins;}
+    /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
+    size_t       getStride(void)const{return nStride;}
+  
+    //Throws through vector if ind out of range? (hope so TO DO: check)
+    double getX(unsigned int ind){return Axis.at(ind);}
 protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
@@ -84,7 +89,7 @@ protected:
     virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1);
     void  setName(const char *name) {this->AxisName.assign(name);}
     void  setName(const std::string & name){this->AxisName.assign(name); }
-    /*! Set the scale of a particular dimension
+      /*! Set the scale of a particular dimension
      * @param Value -- the value to set;    */
     void   setScale(double Value){latticeParam=Value;}
     /// functions clears axis, makes nBins=1 and sets "integrated" sign to the dimension. Meaningless and dangerous without real integration procedure
@@ -101,6 +106,8 @@ protected:
    // dodgy constructor has to be hidden from clients except the childs. 
     MDDimension(const DimensionID &ID);
 
+  /// should not be public to everybody as chanded by  MDGeometry while reshaping or shaping;
+    void  setStride(size_t newStride){nStride=newStride; }
 /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 1 here and triplet for reciprocals) -- need further exploration -> which coordinate systen it is. 
     std::vector<double> coord;
  /// logger -> to provide logging, for MD workspaces in this dimension
@@ -114,6 +121,8 @@ private:
     bool isIntegrated;
     /// number of bins the axis have
     unsigned int nBins;
+    /// dimension stride in a multidimensional array
+    size_t   nStride;
     /// vector of leftmost bin ranges plus rightmost value;  
     std::vector<double> Axis;
      /// min and maximum values along this dimension;

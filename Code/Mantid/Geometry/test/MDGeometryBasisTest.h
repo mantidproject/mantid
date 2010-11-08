@@ -14,7 +14,7 @@ public:
     publicWorkspaceGeometry(unsigned int nDims=4,unsigned int nReciprocalDims=3):MDGeometryBasis(nDims,nReciprocalDims){};
     int getDimRefNum(const std::string &tag, bool nothrow=false)const{return MDGeometryBasis::getDimIDNum(tag,nothrow);}
    // DimensionID getDimensionID(unsigned int nDim)const{return MDGeometryBasis::getDimensionID(nDim);}
-    void reinit_WorkspaceGeometry(const std::vector<std::string> &ID){MDGeometryBasis::reinit_WorkspaceGeometry(ID);}
+    void reinit_GeometryBasis(const std::vector<std::string> &ID){MDGeometryBasis::reinit_GeometryBasis(ID);}
 
 };
 
@@ -23,11 +23,11 @@ class testWorkspaceGm :   public CxxTest::TestSuite
     publicWorkspaceGeometry *pGeometry5x3;
     publicWorkspaceGeometry *pGeom4x2;
     std::vector<std::string> names;
-    unsigned int ID2x4,ID3x2;
+ 
 public:
     void test2x4Basis(){
         TS_ASSERT_THROWS_NOTHING(pGeom4x2= new publicWorkspaceGeometry(4,2));
-        TS_ASSERT_THROWS_NOTHING(ID2x4=pGeom4x2->getWorkspaceID());
+        //TS_ASSERT_THROWS_NOTHING(ID2x4=pGeom4x2->getWorkspaceID());
     }
     void testWorkspaceGeometryConstructor(void){
 
@@ -42,9 +42,9 @@ public:
 
         // now we do define 5-d workspace
         TS_ASSERT_THROWS_NOTHING(pGeometry5x3 = new publicWorkspaceGeometry(5));
-        TS_ASSERT_THROWS_NOTHING(ID3x2=pGeometry5x3->getWorkspaceID());
+        //TS_ASSERT_THROWS_NOTHING(ID3x2=pGeometry5x3->getWorkspaceID());
 
-        TS_ASSERT_DIFFERS(ID2x4,ID3x2);
+        //TS_ASSERT_DIFFERS(ID2x4,ID3x2);
     }
     void testNDim(){
         if(!pGeometry5x3)TS_FAIL("MDGeomBasis class has not been constructed");
@@ -57,8 +57,8 @@ public:
 
         TS_ASSERT_THROWS_NOTHING(names=pGeometry5x3->getBasisTags());
         // these tags are:
-        const char *defaultTags[]={"hc","kc","lc","en","u1"};
-        const char *default4x2Tags[]={"hc","kc","en","u1"};
+        const char *defaultTags[]={"q1","q2","q3","en","u1"};
+        const char *default4x2Tags[]={"q1","q2","en","u1"};
 
         for(int i=0;i<5;i++){
             TS_ASSERT_SAME_DATA(names[i].c_str(),defaultTags[i],2);
@@ -69,32 +69,32 @@ public:
         }
     }
     void testSimpleDimensionID(){
-        DimensionID ID1(0,"aa",3);
-        DimensionID ID2(1,"bb",3);
+        DimensionID ID1(0,"aa",true);
+        DimensionID ID2(1,"bb",true);
 
-        TS_ASSERT_EQUALS(ID1.getDimensionID("bb"),-1);
-        TS_ASSERT_EQUALS(ID1.getDimensionID("aa"),0);
+        TS_ASSERT_EQUALS(ID1.getDimID("bb"),-1);
+        TS_ASSERT_EQUALS(ID1.getDimID("aa"),0);
 
-       TS_ASSERT_EQUALS(ID2.getDimensionID("blabla"),-1);
-       TS_ASSERT_EQUALS(ID2.getDimensionID("x"),-1);
-       TS_ASSERT_EQUALS(ID2.getDimensionID("bb"),1);
+       TS_ASSERT_EQUALS(ID2.getDimID("blabla"),-1);
+       TS_ASSERT_EQUALS(ID2.getDimID("x"),-1);
+       TS_ASSERT_EQUALS(ID2.getDimID("bb"),1);
 
     }
     void testOrts0(){
         if(!pGeometry5x3)TS_FAIL("MDGeomBasis class has not been constructed");
 
       // check if we are getting proper numbers for id-s
-        TS_ASSERT_EQUALS((pGeometry5x3->getDimRefNum("hc")),0);
+        TS_ASSERT_EQUALS((pGeometry5x3->getDimRefNum("q1")),0);
         // this dimension does not exis in 5D workspace
         TS_ASSERT_EQUALS(pGeometry5x3->getDimRefNum("u7",false),-1);
         TS_ASSERT_THROWS_ANYTHING(pGeometry5x3->getDimRefNum("u7",true));
 
         // attempting to get the coordinate of an non-existing dimension
-       TS_ASSERT_THROWS_ANYTHING(pGeometry5x3->getOrt("u7"));
-
+      // TS_ASSERT_THROWS_ANYTHING(pGeometry5x3->getOrt("u7"));
+/*
      // this is 3-vector of first dimension
         std::vector<double> e2;
-        TS_ASSERT_THROWS_NOTHING(e2=pGeometry5x3->getOrt("kc"));
+     //   TS_ASSERT_THROWS_NOTHING(e2=pGeometry5x3->getOrt("kc"));
 
         // is it realy 3-vector?
         TS_ASSERT_EQUALS(e2.size(),3);
@@ -110,6 +110,7 @@ public:
         TS_ASSERT_EQUALS(e4.size(),1);
         // is this 1?
         TS_ASSERT_DELTA(e4[0],1,FLT_EPSILON);
+*/
     }
     void testReinitBasis(){
         if(!pGeometry5x3)TS_FAIL("MDGeomBasis class has not been constructed");
@@ -120,7 +121,7 @@ public:
         ID[0]="reciprocal energy";ID[1]="hc_reciprocal";ID[2]="kc_rec";ID[3]="lc_orthogonal";
 
         //would not work without any reciprocal dimension, one has to be present;
-       TS_ASSERT_THROWS_NOTHING(pGeometry5x3->reinit_WorkspaceGeometry(ID));
+       TS_ASSERT_THROWS_NOTHING(pGeometry5x3->reinit_GeometryBasis(ID));
 
        // WorkspaceGeometry dimensions are arranged according to their definition,
         TS_ASSERT_EQUALS(pGeometry5x3->getDimRefNum("reciprocal energy"),0);
@@ -128,9 +129,9 @@ public:
         TS_ASSERT_EQUALS(pGeometry5x3->getDimRefNum("kc_rec"),2);
         TS_ASSERT_EQUALS(pGeometry5x3->getDimRefNum("lc_orthogonal"),3);
 
-        unsigned int id=pGeometry5x3->getWorkspaceID();
-        TS_ASSERT_DIFFERS(ID2x4,id);
-        TS_ASSERT_DIFFERS(ID3x2,id);
+//        unsigned int id=pGeometry5x3->getWorkspaceID();
+//        TS_ASSERT_DIFFERS(ID2x4,id);
+//        TS_ASSERT_DIFFERS(ID3x2,id);
 
 // the techncalities of woriking with 2D+1 and 1D+1 workspaced have not been tested
 

@@ -126,7 +126,7 @@ public:
     WorkspaceFactory::Instance().subscribe<WorkspaceTest>("WorkspacePropertyTest");
     WorkspaceFactory::Instance().subscribe<WorkspaceTest2>("WorkspacePropertyTest2");
 
-	// The other two need the input workspace to exist in the ADS
+    // The other two need the input workspace to exist in the ADS
     Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws1", space) );
@@ -135,14 +135,14 @@ public:
 
     // Put workspace of wrong type and check validation fails
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
-	wsp3->setValue("ws3");
+    wsp3->setValue("ws3");
     TS_ASSERT_EQUALS( wsp3->isValid(),
-	  "Workspace ws3 is not of the correct type" );
+      "Workspace ws3 is not of the correct type" );
     // Now put correct type in and check it passes
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("WorkspacePropertyTest2",1,1,1) )
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace("ws3", space) );
-	wsp3->setValue("ws3");
-	TS_ASSERT_EQUALS( wsp3->isValid(), "")
+    wsp3->setValue("ws3");
+    TS_ASSERT_EQUALS( wsp3->isValid(), "")
   }
 
   void testIsDefaultAndGetDefault()

@@ -18,26 +18,20 @@
     <ClCompile Include="test_sqw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="testMDData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="testMDPixels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="test_sqw.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="testMDData.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="testMDPixels.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="find_mantid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MDDataTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MDPixelsTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

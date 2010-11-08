@@ -109,163 +109,7 @@ MDData::getPointData(const std::vector<unsigned int> &selection,std::vector<poin
     }
 
 }
-/*! function calculates min and max values of the array of 8 points (vertices of a cube)
-*
-*/
-void 
-minmax(double &rMin,double &rMax,double box[8])
-{
-    rMin=box[0];
-    rMax=box[0];
-    for(int i=1;i<8;i++){
-        if(box[i]<rMin)rMin=box[i];
-        if(box[i]>rMax)rMax=box[i];
-    }
-}
-/*! function returns the list of the cell numbers which can contribute into the cut described by transformation matrix
- *  input arguments:
- @param matrix          -- the transformation matrix which describes the cut.
- @param cells_to_select -- the list of the cell indexes, which can contribute into the cut
-*/
-/*
-void
-DND::preselect_cells(const transf_matrix &matrix, std::vector<long> &cells_to_select,long &n_preselected_pix)
-{
-    int i;
-    n_preselected_pix=0;
-    transf_matrix scaled_trf = this->rescale_transformations(matrix);
 
-   // transform the grid into new system of coordinate and calculate cell indexes, which contribute into the 
-   // dataset;
-   int j,k,l,m,mp,mm,sizem,ind3;
-   double xt1,yt1,zt1,Etm,Etp;
-
-   // evaluate the capacity of the orthogonal dimensions;
-   int nOrthogonal=this->maxNDimsInDataset-3;
-   long ind,orthoSize=1;
-   int  nContributed(0);
-   std::vector<long> *enInd = new std::vector<long>[nOrthogonal];
-   for(l=en;l<this->maxNDimsInDataset;l++){
-       nContributed=0;
-       sizem  = this->dim_sizes[l];
-       for(m=0;m<sizem;m++){
-           // is rightmpst for min or leftmost for max in range?
-              mp=m+1; 
-              mm=m-1; if(mm<0)    mm=0;
-           // transforn an axis points into new coordinate system
-              Etm=(this->Axis[l]->at(mm)-scaled_trf.trans_bott_left[l])/scaled_trf.axis_step[l];
-              Etp=(this->Axis[l]->at(mp)-scaled_trf.trans_bott_left[l])/scaled_trf.axis_step[l];
-            // check if it can be in ranges
-            if(Etp<scaled_trf.cut_min[l]||Etm>=scaled_trf.cut_max[l]) continue;
-            // remember the index of THIS axis 
-            enInd[l-en].push_back(m*this->ndn[l]);
-            nContributed++;
-       }
-       orthoSize*=nContributed;
-       if(nContributed==0){  // no cells contribute into the cut; Return
-           return;
-       }
-
-   }
-   // multiply all orthogonal vectors providing size(en)*size(ga1)*size(ga2)*size(ga3) matrix;
-   std::vector<long> *orthoInd = new std::vector<long>;
-   orthoInd->reserve(orthoSize);
-   for(i=0;i<enInd[0].size();i++){
-       orthoInd->push_back(enInd[0].at(i));
-   }
-   for(l=1;l<nOrthogonal;l++){
-       size_t orthSize=orthoInd->size();
-       for(j=0;j<orthSize;j++){
-           long indDim0=orthoInd->at(j);
-           for(i=0;enInd[l].size();i++){
-               orthoInd->push_back(indDim0+enInd[l].at(i));
-           }
-       }
-   }
-   delete [] enInd;
-
-// evaluate the capacity of the 3D space;
-// Define 3D subspace and transform it into the coordinate system of the new box;
-   long size3D(1);
-   for(i=0;i<3;i++){
-           size3D*=(this->dim_sizes[i]+1);
-   }
-
-   std::vector<double> rx,ry,rz,xx,yy,zz;
-   rx.reserve(size3D); xx.reserve(size3D);
-   ry.reserve(size3D); yy.reserve(size3D);
-   rz.reserve(size3D); zz.reserve(size3D);
-   for(k=0;k<=this->dim_sizes[u3];k++){
-       for(j=0;j<=this->dim_sizes[u2];j++){
-           for(i=0;i<=this->dim_sizes[u1];i++){
-               xx.push_back(Axis[u1]->at(i));
-               yy.push_back(Axis[u2]->at(j));
-               zz.push_back(Axis[u3]->at(k));
-
-               rx.push_back(Axis[u1]->at(i)-scaled_trf.trans_bott_left[u1]);
-               ry.push_back(Axis[u2]->at(j)-scaled_trf.trans_bott_left[u2]);
-               rz.push_back(Axis[u3]->at(k)-scaled_trf.trans_bott_left[u3]);
-           }
-       }
-   }
-   for(i=0;i<size3D;i++){
-        xt1=rx[i];yt1=ry[i];zt1=rz[i];
-
-        xx[i]=xt1*scaled_trf.rotations[0]+yt1*scaled_trf.rotations[3]+zt1*scaled_trf.rotations[6];
-        yy[i]=xt1*scaled_trf.rotations[1]+yt1*scaled_trf.rotations[4]+zt1*scaled_trf.rotations[7];
-        zz[i]=xt1*scaled_trf.rotations[2]+yt1*scaled_trf.rotations[5]+zt1*scaled_trf.rotations[8];
-   }
-   rx.clear();   ry.clear();   rz.clear();
-   int im,ip,jm,jp,km,kp;
-   nCell3D sh(this->dim_sizes[u1]+1,this->dim_sizes[u2]+1),
-           ind3D(this->dim_sizes[u1],this->dim_sizes[u2]);
-   double r[8],rMin,rMax;
-
-   for(k=0;k<dim_sizes[u3];k++){
-       km=k-1; if(km<0)            km=0;
-       kp=k+1; 
-       for(j=0;j<dim_sizes[u2];j++){
-           jm=j-1; if(jm<0)            jm=0;
-           jp=j+1; 
-
-           for(i=0;i<dim_sizes[u1];i++){
-               im=i-1; if(im<0)            im=0;
-               ip=i+1; 
-
-               r[0]=xx[sh.nCell(im,jm,km)];  r[1]=xx[sh.nCell(ip,jm,km)];r[2]=xx[sh.nCell(im,jp,km)];  r[3]=xx[sh.nCell(ip,jp,km)];
-               r[4]=xx[sh.nCell(im,jm,kp)];  r[5]=xx[sh.nCell(ip,jm,kp)];r[6]=xx[sh.nCell(im,jp,kp)];  r[7]=xx[sh.nCell(ip,jp,kp)];
-    
-               minmax(rMin,rMax,r);
-               if(rMax<scaled_trf.cut_min[u1]||rMin>=scaled_trf.cut_max[u1])continue;
-
-               r[0]=yy[sh.nCell(im,jm,km)];  r[1]=yy[sh.nCell(ip,jm,km)];r[2]=yy[sh.nCell(im,jp,km)];  r[3]=yy[sh.nCell(ip,jp,km)];
-               r[4]=yy[sh.nCell(im,jm,kp)];  r[5]=yy[sh.nCell(ip,jm,kp)];r[6]=yy[sh.nCell(im,jp,kp)];  r[7]=yy[sh.nCell(ip,jp,kp)];
-    
-               minmax(rMin,rMax,r);
-               if(rMax<scaled_trf.cut_min[u2]||rMin>=scaled_trf.cut_max[u2])continue;
-
-               r[0]=zz[sh.nCell(im,jm,km)];  r[1]=zz[sh.nCell(ip,jm,km)];r[2]=zz[sh.nCell(im,jp,km)];  r[3]=zz[sh.nCell(ip,jp,km)];
-               r[4]=zz[sh.nCell(im,jm,kp)];  r[5]=zz[sh.nCell(ip,jm,kp)];r[6]=zz[sh.nCell(im,jp,kp)];  r[7]=zz[sh.nCell(ip,jp,kp)];
-    
-               minmax(rMin,rMax,r);
-               if(rMax<scaled_trf.cut_min[u3]||rMin>=scaled_trf.cut_max[u3])continue;
-
-               ind3=i*this->ndx+j*this->ndy+k*this->ndz;
-               for(l=0;l<orthoInd->size();l++){
-                   ind = ind3+orthoInd->at(l);
-                   if(this->data[ind].npix>0){
-                        cells_to_select.push_back(ind);
-                        n_preselected_pix+=this->data[ind].npix;
-                   }
-               }
-
-
-           }
-       }
-    }
-    delete orthoInd;
-}
-*/
 //****************************************
 
 //****************************************
@@ -347,11 +191,18 @@ MDData::reshape_geometry(const MDGeometryDescription &transf)
     MDDimension *pDim;
     this->dimStride[0] = 1;
     this->data_size    = 1;
+    size_t  stride(1);
     for(i=0;i<this->n_total_dim;i++){
         pDim                 = this->getDimension(i);
+        stride               = pDim->getStride();
         this->dimSizes[i]    = pDim->getNBins();
         this->data_size     *= this->dimSizes[i];
+
+        if(stride != this->dimStride[i]){
+            throw(std::runtime_error(" logical error -- MD geometry and MD data are not consitent"));
+        }
         this->dimStride[i+1] = this->data_size;
+
     }
 
     this->nd2 =dimStride[0];

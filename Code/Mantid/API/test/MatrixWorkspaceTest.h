@@ -9,6 +9,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -123,6 +124,7 @@ public:
   {
     TS_ASSERT_EQUALS( ws->getNumDims(), 2 );
   }
+
 
   void testGetSetComment()
   {

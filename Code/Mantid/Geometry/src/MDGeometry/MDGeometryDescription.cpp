@@ -26,6 +26,13 @@ MDGeometryDescription::rotations(unsigned int i,const std::vector<double> basis[
 /// this extracts the size and shape of the current DND object
 MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
 {
+    this->build_from_geometry(origin);
+}
+//
+void
+MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
+{
+
     MDDimension *pDim;
 
     std::vector<std::string> tag  = origin.getBasisTags();
@@ -45,6 +52,8 @@ MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
   
     unsigned int i;
     TagIndex curTag;
+
+    this->DimTags.clear();
     for(i=0;i<nDimensions;i++){
         pDim=origin.getDimension(i);
         this->data[i].trans_bott_left=0;
@@ -59,6 +68,7 @@ MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
     }
 
 }
+//
 int 
 MDGeometryDescription::getTagNum(const std::string &Tag,bool do_throw)const{
     int iTagNum=-1;
@@ -166,6 +176,12 @@ MDGeometryDescription::numBins(unsigned int i)const
     this->check_index(i,"numBins");
     return this->data[i].nBins;
 
+}
+double 
+MDGeometryDescription::shift(unsigned int i)const
+{
+    this->check_index(i,"Shift");
+    return this->data[i].trans_bott_left;
 }
 bool
 MDGeometryDescription::isAxisNamePresent(unsigned int i)const

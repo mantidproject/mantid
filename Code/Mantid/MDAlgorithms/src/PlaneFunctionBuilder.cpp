@@ -17,7 +17,7 @@ namespace Mantid
         void  PlaneFunctionBuilder::addNormalParameter(const NormalParameter& parameter)
         {
             
-            this->m_normal = NormalParameter(parameter);
+//            this->m_normal = NormalParameter(parameter);
         }
 
         void  PlaneFunctionBuilder::addOriginParameter(const OriginParameter& parameter)

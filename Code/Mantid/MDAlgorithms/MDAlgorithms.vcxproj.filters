@@ -19,52 +19,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="test\testCPrebinning.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\PlaneFunctionBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\NormalParameter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\OriginParameter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\NormalParameterParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\InvalidParameterParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\OriginParameterParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\Topology.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\ImplicitTopology.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunctionParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\MantidMDAlgorithms\PlaneImplicitFunctionParser.h">
+    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\MantidMDAlgorithms\DimensionParameter.h">
@@ -81,43 +39,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\CompositeImplicitFunction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PlaneImplicitFunction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PlaneFunctionBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NormalParameter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\OriginParameter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\InvalidParameter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\InvalidParameterParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NormalParameterParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\OriginParameterParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ImplicitTopology.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CompositeImplicitFunctionParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PlaneImplicitFunctionParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CompositeFunctionBuilder.cpp">
+    <ClCompile Include="src\CenterpieceRebinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DimensionParameter.cpp">

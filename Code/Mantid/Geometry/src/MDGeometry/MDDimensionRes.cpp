@@ -8,7 +8,7 @@ MDDimension(ID)
 {
  
   
-   int id= MDDimension::getDimensionID();
+   int id= MDDimension::getDimID();
    if(id<0||id>=3){ 
        g_log.error()<<"MDDimensionRes: dimension ID exceeds the acceptable range; Are you trying to initiate an resiprocal dimension using ortogonal dimension using constructor?";
        throw(std::out_of_range("dimension ID exceeds the acceptable range; Are you trying to initiate an resiprocal dimension using ortogonal dimension using constructor?"));

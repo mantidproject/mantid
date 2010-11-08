@@ -15,20 +15,20 @@ namespace Mantid
       boost::hash<std::string> hash_string;
 
 void
-DimensionID::setDimensionIDValues(int newID,const std::string &newTag,unsigned int nReciprocalDimensions)
+DimensionID::setDimensionIDValues(int newNum,const std::string &newTag,bool if_recipocal)
 {
-      iDimID=newID;
+      iDimID       = newNum;
       DimensionTag.assign(newTag);
-      n_reciprocal_dimensions=nReciprocalDimensions; 
+      is_reciprocal =if_recipocal; 
 
      // boost::hash<std::string> hash_string;
       tagHash=hash_string(DimensionTag);
 }
 
 
-        Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
+Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
  // default names for Dimensions used by default constructor; length should match the size of the MAX_MD_DIMENSIONS_NUM
- const char *DefaultDimTags[]={"hc","kc","lc","en","u1","u2","u3","u4","u5","u6","u7"};
+ const char *DefaultDimTags[]={"q1","q2","q3","en","u1","u2","u3","u4","u5","u6","u7"};
  // Protected constructor;
 MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions):
 n_total_dim(nDimensions),
@@ -59,8 +59,16 @@ unit(1,1)
     }
 
  
-    this->reinit_WorkspaceGeometry(DIMS,nReciprocalDimensions);
+    this->reinit_GeometryBasis(DIMS,nReciprocalDimensions);
 
+}
+//
+size_t
+MDGeometryBasis::getDimHash(const std::string &tag)const
+{
+     
+    int dim_num=findTag(tag, true);
+    return DimensionIDs[dim_num].getDimHash();
 }
 //
 bool 
@@ -79,7 +87,7 @@ MDGeometryBasis::calculateTagsCompartibility(const std::vector<std::string> &new
 //
 // discards previous geometry and initates the new one. 
 void
-MDGeometryBasis::reinit_WorkspaceGeometry(const std::vector<std::string> &tag_list,unsigned int nReciprocalDims)
+MDGeometryBasis::reinit_GeometryBasis(const std::vector<std::string> &tag_list,unsigned int nReciprocalDims)
 {
     unsigned int i;    
     this->n_reciprocal_dimensions= nReciprocalDims;
@@ -95,13 +103,19 @@ MDGeometryBasis::reinit_WorkspaceGeometry(const std::vector<std::string> &tag_li
     }
     // clear contents of previous map if it was any
     dim_list.clear();
+
     // default geometry assumes all resiprocal dimensions at the beginning and all other orthogonal dimensions after that.
     std::vector<DimensionID> DIMS(n_total_dim,DimensionID());
     size_t tagHash;
+    bool  isReciprocal(true);
     for(i=0;i<n_total_dim;i++){
-        DIMS[i].setDimensionIDValues(i,tag_list[i],this->n_reciprocal_dimensions);
-        tagHash = DIMS[i].getDimHash();
-        dim_list[tagHash]=i;
+        if(i<nReciprocalDims){
+            isReciprocal=true;
+        }else{
+            isReciprocal=false;
+        }
+        DIMS[i].setDimensionIDValues(i,tag_list[i],isReciprocal);
+   
       
     }
 
@@ -115,18 +129,20 @@ MDGeometryBasis::reinit_WorkspaceGeometry(const std::vector<std::string> &tag_li
     this->buildCubicGeometry();
 
     // the WorkspaceGeometry has to have all their dimensions sorted properly. 
-   // sort(DIMS.begin(),DIMS.end());
+    //sort(DIMS.begin(),DIMS.end());
  
-    std::stringstream  n_rec_dim;   
-    n_rec_dim<<this->n_reciprocal_dimensions;
-    std::string workspace_name(n_rec_dim.str());
+     
     for(i=0;i<n_total_dim;i++){
-         workspace_name+=tag_list[i];
-    }
-    boost::hash<std::string> string_hash;
-    this->MD_workspace_ID = (uint32_t)string_hash(workspace_name);
- 
+        tagHash = DIMS[i].getDimHash();
+        dim_list[tagHash]=i;
 
+        workspace_name+=tag_list[i];
+    }
+
+    std::stringstream  n_rec_dim;   
+    n_rec_dim<<"_rcd"<<this->n_reciprocal_dimensions;
+    workspace_name+=n_rec_dim.str();
+ 
     this->DimensionIDs=DIMS;
 
 }
@@ -154,7 +170,7 @@ MDGeometryBasis::MDGeometryBasis(const MDGeometryBasis &orgn){
     }   
 
 }
-//
+/*
 const std::vector<double> & 
 MDGeometryBasis::getOrt(const std::string &tag)const
 {
@@ -177,6 +193,7 @@ MDGeometryBasis::getOrt(unsigned int dimNum)const
         return this->unit;
     }
 }
+*/
 //
 std::string
 MDGeometryBasis::getTag(unsigned int dimNum)const
@@ -188,13 +205,30 @@ MDGeometryBasis::getTag(unsigned int dimNum)const
     return this->DimensionIDs[dimNum].getDimensionTag();
 }
 //
-
 int 
 MDGeometryBasis::getDimIDNum(const std::string &tag, bool do_throw)const
 {
-  // are there any point of implementing a map here? 
-    
-    int rez=-1;
+    int ind = findTag(tag,do_throw);
+    if(ind>-1){
+        return DimensionIDs[ind].getDimID();
+    }
+    return -1;
+}
+/*
+int 
+MDGeometryBasis::getDimNum(const std::string &tag, bool do_throw)const
+{
+    int ind = findTag(tag,do_throw);
+    if(ind>0){
+        return DimensionIDs[ind].getDimNum();
+    }
+    return -1;
+}
+*/
+int
+MDGeometryBasis::findTag(const std::string &tag, bool do_throw)const
+{
+   int rez=-1;
     std::map<size_t,int>::const_iterator it;
     size_t hash = hash_string(tag);
     it = this->dim_list.find(hash);
@@ -209,7 +243,6 @@ MDGeometryBasis::getDimIDNum(const std::string &tag, bool do_throw)const
     return rez;
 
 }
-
 /** Build cubic geometry of three orthogonal vectors. 
 */
 void

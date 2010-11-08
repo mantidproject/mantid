@@ -34,7 +34,7 @@
 
 /** We define maximal number of dimensionsMAX_MD_DIMS_POSSIBLE  which a MD dataset can have because 
    \li a) every additional dimension will be expensive to process 
-   \li b) minimal size of the visualisation dataset is 2^MAX_NDIMS_POSSIBLE, so this number has to be reasonable and any bigger number is probably because of insigned int  error; 
+   \li b) minimal size of the visualisation dataset is 2^MAX_NDIMS_POSSIBLE, so this number has to be reasonable and any bigger number is probably because of unsigned int  error; 
    \li c) if we need to increase the number of dimensions, it can be easy done here
 */
 #define MAX_MD_DIMS_POSSIBLE 11

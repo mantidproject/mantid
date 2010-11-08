@@ -1,20 +1,14 @@
-#ifndef MANTID_API_IMDWORKSPACE_H_
-#define MANTID_API_IMDWORKSPACE_H_
-
+#ifndef H_IMD_WORKSPACE
+#define H_IMD_WORKSPACE
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
-
-namespace Mantid
-{
-  namespace API
-  {
-
-    /** Base MD Workspace Abstract Class.
-    *  
-    *   It defines common interface to Matrix Workspace and MD workspace. It is expected that all algorithms, which are applicable 
-    *   to both 2D matrix workspace and MD workspace will use methods, with interfaces, defined here. 
+//----------------------------------------------------------------------
+/** Base MD Workspace Abstract Class.
+*  
+*   It defines common interface to Matrix Workspace and MD workspace. It is expected that all algorithms, which are applicable 
+*   to both 2D matrix workspace and MD workspace will use methods, with interfaces, defined here. 
 
     @author Alex Buts, ISIS, RAL
     @date 04/10/2010
@@ -38,17 +32,35 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-    class DLLExport IMDWorkspace :  public Workspace
-    {
-    public:
-      /// interface  to get number of dimensions in the workspace
-      virtual unsigned int getNumDims() const = 0;
-      /// Destructor
-      virtual ~IMDWorkspace(){};
-    };
+ */
 
-  }
+
+
+namespace Mantid
+{
+namespace API
+{
+    
+
+
+class DLLExport IMDWorkspace : public Workspace
+{
+public:
+    /// interface  to get number of dimensions in the worspace
+    virtual unsigned int getNumDims(void)const=0;
+    /// this is the method whchrich is used by the workspace factory to create new workspaces from the base workspace
+    /// It currently used for creating MD workspaces and throws when attempted to use on matrix workspaces which should change in a future
+    //virtual boost::shared_ptr<IMDWorkspace> build_from_IMD(const SlicingProperty &newGeomerty)=0;
+   
+    IMDWorkspace(void){}
+    virtual ~IMDWorkspace(void){};
+};
+
+//shared pointer to the matrix workspace base class
+typedef boost::shared_ptr<IMDWorkspace> IMDWorkspace_sptr;
+///shared pointer to the matrix workspace base class (const version)
+typedef boost::shared_ptr<const IMDWorkspace> IMDWorkspace_const_sptr;
+}
 }
 #endif
 

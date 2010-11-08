@@ -118,7 +118,7 @@ bool Algorithm::execute()
     }
     // Try the validation again
     if ( !validateProperties() ) throw std::runtime_error("Some invalid Properties found");
-	
+    
   }
 // get properties and check one of the input properties is a work space group
 // if it's a group call process group 
@@ -150,8 +150,8 @@ bool Algorithm::execute()
             {	 //this must be a group - test for that
               g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
 
-							  return processGroups(wsGrpSptr,Prop);
-					
+                              return processGroups(wsGrpSptr,Prop);
+                    
 
             }
           }
@@ -369,7 +369,7 @@ IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const dou
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name,version);
   //set as a child
   alg->setChild(true);
-	alg->setLogging(enableLogging);
+    alg->setLogging(enableLogging);
 
   // Initialise the sub-algorithm
   try
@@ -647,17 +647,17 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector
     for (itr=props.begin();itr!=props.end();itr++)
     {
       int outWSCount=0;
-	  
+      
       if(isWorkspaceProperty(*itr) )
       {		
         if(isInputWorkspaceProperty(*itr))
         {
-         	      
-		      if(!setInputWSProperties(alg,*itr,*wsItr))
+                  
+              if(!setInputWSProperties(alg,*itr,*wsItr))
           {
-			       throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
+                   throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
           }
-		 
+         
         }
         if(isOutputWorkspaceProperty(*itr))
         {
@@ -670,11 +670,11 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector
               wsgrp1_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
               bnewGoup1=false;
             }
-			      if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp1_sptr,bSimilarNames,bequal))
+                  if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp1_sptr,bSimilarNames,bequal))
             {
                throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
             }
-						
+                        
           }
           if(outWSCount==2)
           {
@@ -702,8 +702,8 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector
     // execute the algorithm 
     bool bStatus = false;
     if ( alg->validateProperties() ) 
-		{bStatus = alg->execute();
-	  }
+        {bStatus = alg->execute();
+      }
     // status of each execution is checking 
     bgroupPassed=bgroupPassed&&bStatus;
     bgroupFailed=bgroupFailed||bStatus;
@@ -761,22 +761,22 @@ void Algorithm::getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Pro
  */ 
 bool Algorithm::isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>& props)
 {
-	std::vector<Mantid::Kernel::Property*>::const_iterator citr;
-	std::string inputwsName;std::string outputwsName;
-	for(citr=props.begin();citr!=props.end();++citr)
-	{
-		
-		if(isInputWorkspaceProperty(*citr))
-		{
+    std::vector<Mantid::Kernel::Property*>::const_iterator citr;
+    std::string inputwsName;std::string outputwsName;
+    for(citr=props.begin();citr!=props.end();++citr)
+    {
+        
+        if(isInputWorkspaceProperty(*citr))
+        {
           inputwsName=(*citr)->value();
-		}
-		if(isOutputWorkspaceProperty(*citr))
-		{
-			outputwsName=(*citr)->value();
-		}
-		
-	}
-	return (!inputwsName.compare(outputwsName)? true:false);
+        }
+        if(isOutputWorkspaceProperty(*citr))
+        {
+            outputwsName=(*citr)->value();
+        }
+        
+    }
+    return (!inputwsName.compare(outputwsName)? true:false);
 }
 
 
@@ -835,18 +835,18 @@ void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyN
  */
 bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName )
 {
-	if(!pAlg) return false;
-	if(!prop)return false;
-	try
-	{
-	pAlg->setPropertyValue(prop->name(), inMemberWSName);
-	}
-	catch(std::invalid_argument&)
-	{
-		return false;
-	}
-	return true;
-  		
+    if(!pAlg) return false;
+    if(!prop)return false;
+    try
+    {
+    pAlg->setPropertyValue(prop->name(), inMemberWSName);
+    }
+    catch(std::invalid_argument&)
+    {
+        return false;
+    }
+    return true;
+        
 }
 /** setting output workspace properties for an algorithm,
   *  This used for processing workspace groups and this  method is called when
@@ -861,7 +861,7 @@ bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
   *  @returns true if property is set 
  */
 bool Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,const std::string& inmemberwsName,
-	                                  WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal)
+                                      WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal)
 {
   if(!prop) return false;
   if(!outwsgrp_sptr) return false;
@@ -923,10 +923,10 @@ bool Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
 bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 {
   if(!prop)
-	{
-	 return false;
-	}
-	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+    {
+     return false;
+    }
+    const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
   return (wsProp ? true : false);	
 }
 
@@ -936,14 +936,14 @@ bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 */
 bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
 {	
-	if(!prop)
-	{
-	 return false;
-	}
-	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
-	if(!wsProp) return false;
-	unsigned int direction = prop->direction();
-	return ((direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)?true :false);
+    if(!prop)
+    {
+     return false;
+    }
+    const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+    if(!wsProp) return false;
+    unsigned int direction = prop->direction();
+    return ((direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)?true :false);
 
 }
 /** checks the property is a output workspace property
@@ -952,14 +952,14 @@ bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) con
 */
 bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) const
 {
-	if(!prop)
-	{
-	 return false;
-	}
-	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
-	if(!wsProp) return false;
-	unsigned int direction = prop->direction();
-	return((direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)? true :false);
+    if(!prop)
+    {
+     return false;
+    }
+    const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+    if(!wsProp) return false;
+    unsigned int direction = prop->direction();
+    return((direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)? true :false);
 }
 
 

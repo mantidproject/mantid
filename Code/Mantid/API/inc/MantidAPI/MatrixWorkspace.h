@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IMDWorkspace.h"
+//#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
@@ -61,7 +62,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MatrixWorkspace : public IMDWorkspace
+    class DLLExport MatrixWorkspace : public IMDWorkspace //, public Workspace
     {
     public:
       /// the function returns number of dimensions in matrix workspace;

@@ -73,8 +73,12 @@ public:
    // TO DO : it is currently a stub returning argument independant unit matrix; has to be written propely
    std::vector<double> rotations(unsigned int i,const std::vector<double> basis[3])const;
 
-   std::string toXML(void)const{return std::string("TEST PROPERTY");}
-   bool fromXML(const char *buf,unsigned int size){return false;}
+   void build_from_geometry(const MDGeometry &origin);
+
+   std::string toXMLstring(void)const{return std::string("TEST PROPERTY");}
+   bool fromXMLstring(const std::string &data){
+       return true;
+   }
 
 
    std::vector<double> getCoord(unsigned int i)const;
@@ -136,7 +140,7 @@ private:
     std::vector<SlicingData> data;          //< data describes one dimension;
     std::list<TagIndex>      DimTags;       // the list of size Ndimensions, which describes the order of the dimensions in the final object;
 
-
+ 
     /** auxiliary function which check if the index requested is allowed. ErrinFuncName allows to add to the error message the name of the calling function*/
     void check_index(unsigned int i,const char *ErrinFuncName)const;
     /** the function which provides default constructor functionality */

@@ -21,7 +21,8 @@ MDDimension::MDDimension(const DimensionID &ID):
 DimensionID(ID),
 latticeParam(1),
 isIntegrated(true),
-coord(1,1)
+coord(1,1),
+nStride(1)
 {
     // default name coinside with the tag but can be overwritten later
    this->setRange();

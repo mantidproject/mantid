@@ -15,12 +15,12 @@
 int main() {
  return CxxTest::ParenPrinter().run();
 }
-#include "C:/Mantid/Code/Mantid/MDAlgorithms/test/testCPrebinning.h"
+#include "c:/Mantid/Code/Mantid/MDAlgorithms/test/testCPrebinning.h"
 
 static testCPRebinning suite_testCPRebinning;
 
 static CxxTest::List Tests_testCPRebinning = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_testCPRebinning( "C:/Mantid/Code/Mantid/MDAlgorithms/test/testCPrebinning.h", 17, "testCPRebinning", suite_testCPRebinning, Tests_testCPRebinning );
+CxxTest::StaticSuiteDescription suiteDescription_testCPRebinning( "c:/Mantid/Code/Mantid/MDAlgorithms/test/testCPrebinning.h", 17, "testCPRebinning", suite_testCPRebinning, Tests_testCPRebinning );
 
 static class TestDescription_testCPRebinning_testRebinInit : public CxxTest::RealTestDescription {
 public:

@@ -269,7 +269,7 @@ namespace Mantid
       m_proton_charge = rpb[8];
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
-      int total_specs;
+      long total_specs;
       if( m_interval || m_list)
       {
         total_specs = m_spec_list.size();
