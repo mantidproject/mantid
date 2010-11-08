@@ -51,6 +51,10 @@ void LoadGSS::exec()
   MantidVec* Y = new MantidVec();
   MantidVec* E = new MantidVec();
 
+  int nSpec = 0;
+
+  Progress* prog = NULL;
+
   char currentLine[256];
 
   // Gather data
@@ -64,11 +68,29 @@ void LoadGSS::exec()
     }
     while ( ! input.eof() && input.getline(currentLine, 256) )
     {
+      if ( nSpec != 0 && prog == NULL )
+      {
+        prog = new Progress(this, 0.0, 1.0, nSpec);
+      }
       double bc1;
       double bc2;
       double bc4;
       if (  currentLine[0] == '\n' || currentLine[0] == '#' )
       {
+        if ( nSpec == 0 )
+        {
+          int noSpectra = 0;
+          std::string line;
+
+          std::istringstream inputLine(currentLine, std::ios::in);
+          inputLine.ignore(256, ' ');
+          inputLine >> noSpectra >> line;
+
+          if ( ( noSpectra != 0 ) && ( line == "Histograms" ) )
+          {
+            nSpec = noSpectra;
+          }          
+        }
         continue;
       }
       else if ( currentLine[0] == 'B' )
@@ -78,6 +100,9 @@ void LoadGSS::exec()
           gsasDataX.push_back(X);
           gsasDataY.push_back(Y);
           gsasDataE.push_back(E);
+
+          if ( prog != NULL )
+            prog->report();
         }
 
         /* BANK <SpectraNo> <NBins> <NBins> RALF <BC1> <BC2> <BC1> <BC4> 
