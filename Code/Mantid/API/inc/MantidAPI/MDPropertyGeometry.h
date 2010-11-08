@@ -62,7 +62,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
     template <typename TYPE = MDWorkspaceHolder>
-    class MDPropertyGeometry : public WorkspaceProperty<TYPE>, public Geometry::MDGeometryDescription
+    class MDPropertyGeometry : public WorkspaceProperty< TYPE >, public Geometry::MDGeometryDescription
     {
     public:
       /** Constructor.
