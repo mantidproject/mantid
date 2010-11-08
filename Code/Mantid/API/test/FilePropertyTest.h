@@ -54,7 +54,7 @@ public:
 
   void testLoadPropertyNoExtension()
   {
-//    Mantid::API::FileProperty *fp = 
+    Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load);
 
     // Check type
@@ -152,7 +152,7 @@ public:
 
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, 
-                    std::vector<std::string>(1, ".raw"));
+				    std::vector<std::string>(1, ".raw"));
     std::string error = fp->setValue("38370");
     TS_ASSERT_EQUALS(error, "");
     TS_ASSERT_EQUALS(test_file.toString(), fp->value());
