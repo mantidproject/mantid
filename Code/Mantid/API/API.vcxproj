@@ -192,6 +192,7 @@
     <ClCompile Include="src\LocatedDataRef.cpp" />
     <ClCompile Include="src\LocatedDataValue.cpp" />
     <ClCompile Include="src\MatrixWorkspace.cpp" />
+    <ClCompile Include="src\MDPropertyGeometry.cpp" />
     <ClCompile Include="src\MemoryManager.cpp" />
     <ClCompile Include="src\NumericAxis.cpp" />
     <ClCompile Include="src\PairedGroupAlgorithm.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParser.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParserFactory.h" />
     <ClInclude Include="inc\MantidAPI\ImplicitFunctionParameterParserFactory.h" />
+    <ClInclude Include="inc\MantidAPI\MDPropertyGeometry.h" />
     <ClInclude Include="inc\MantidAPI\Point3D.h" />
     <ClInclude Include="inc\mantidapi\run.h" />
     <ClInclude Include="test\AlgorithmHistoryTest.h" />
