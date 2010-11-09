@@ -80,7 +80,21 @@ void CorrectKiKf::exec()
   bool negativeEnergyWarning = false;
     
   const std::string emodeStr = getProperty("EMode");
-  const double efixedProp = getProperty("Efixed");
+  double efixedProp = getProperty("EFixed");
+  if( efixedProp == EMPTY_DBL() )
+  {
+    // Check if it has been store on the run object for this workspace
+    if( inputWS->run().hasProperty("Ei") )
+    {
+      Kernel::Property* eiprop = inputWS->run().getProperty("Ei");
+      efixedProp = boost::lexical_cast<double>(eiprop->value());
+      g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
+    }
+    else
+    {
+      throw std::invalid_argument("No Ei value has been set or stored within the run information.");
+    }
+  }
   
 
   // There are 4 cases: (direct, indirect) * (histogram,no_histogram)

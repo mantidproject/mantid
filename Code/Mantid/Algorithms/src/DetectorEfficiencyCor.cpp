@@ -84,8 +84,7 @@ void DetectorEfficiencyCor::init()
     "The name of the workspace in which to store the result" );
   BoundedValidator<double> *checkEi = new BoundedValidator<double>();
   checkEi->setLower(0.0);
-  checkEi->setUpper(1e4);
-  declareProperty("IncidentEnergy", -1.0, checkEi,
+  declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
     "The energy kinetic the neutrons have before they hit the sample (meV)" );
 }
 
@@ -125,7 +124,7 @@ void DetectorEfficiencyCor::exec()
       std::transform(dud.begin(),dud.end(),dud.begin(), std::bind2nd(std::multiplies<double>(),0));
       PARALLEL_CRITICAL(deteff_invalid)
       {
-	      m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
+	m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
       }
     }      
 
@@ -154,6 +153,20 @@ void DetectorEfficiencyCor::retrieveProperties()
   m_paraMap = &(m_inputWS->instrumentParameters());
 
   m_Ei = getProperty("IncidentEnergy");
+  // If we're not given an Ei, see if one has been set.
+  if( m_Ei == EMPTY_DBL() )
+  {
+    if( m_inputWS->run().hasProperty("Ei") )
+    {
+      Kernel::Property* eiprop = m_inputWS->run().getProperty("Ei");
+      m_Ei = boost::lexical_cast<double>(eiprop->value());
+      g_log.debug() << "Using stored Ei value " << m_Ei << "\n";
+    }
+    else
+    {
+      throw std::invalid_argument("No Ei value has been set or stored within the run information.");
+    }
+  }
 
   m_outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for the output
@@ -187,7 +200,6 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
   // get a pointer to the detectors that created the spectrum
   const int specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
   const std::vector<int> dets = m_inputWS->spectraMap().getDetectors(specNum);
-  const double avgKi = m_ki/dets.size();
 
   std::vector<int>::const_iterator it = dets.begin();
   std::vector<int>::const_iterator iend = dets.end();
@@ -197,6 +209,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
   }
   
   // Storage for the reciprocal wave vectors that are calculated as the 
+  //correction proceeds
   std::vector<double> oneOverWaveVectors(yValues.size());
   for( ; it != iend ; ++it )
   {
@@ -231,8 +244,8 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
     // Detector constant
     const double det_const = g_helium_prefactor*(detRadius - wallThickness)*atms/sinTheta;
 
-    std::vector<double>::const_iterator yinItr = yValues.begin();
-    std::vector<double>::const_iterator einItr = eValues.begin();
+    MantidVec::const_iterator yinItr = yValues.begin();
+    MantidVec::const_iterator einItr = eValues.begin();
     MantidVec::iterator youtItr = yout.begin();
     MantidVec::iterator eoutItr = eout.begin();
     MantidVec::const_iterator xItr = m_inputWS->readX(spectraIn).begin();
@@ -242,14 +255,14 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
     {
       if( it == dets.begin() )
       {
-	      *youtItr = 0.0;
-	      *eoutItr = 0.0;
-	      *wavItr = calculateOneOverK(*xItr, *(xItr + 1 ));
+	*youtItr = 0.0;
+	*eoutItr = 0.0;
+	*wavItr = calculateOneOverK(*xItr, *(xItr + 1 ));
       }
       const double oneOverWave = *wavItr;
-      const double correcti = avgKi*oneOverWave/detectorEfficiency(det_const*oneOverWave);
-      *youtItr += (*yinItr)*correcti;
-      *eoutItr += (*einItr)*correcti;
+      const double factor = 1.0/detectorEfficiency(det_const*oneOverWave);
+      *youtItr += (*yinItr)*factor;
+      *eoutItr += (*einItr)*factor;
       ++yinItr; ++einItr;
       ++xItr; ++wavItr;
     }
@@ -361,14 +374,14 @@ double DetectorEfficiencyCor::detectorEfficiency(const double alpha) const
 {
   if ( alpha < 9.0 )
   {
-    return (M_PI/4.0)*alpha*chebevApprox(0.0, 10.0, c_eff_f, alpha);
+    return 0.25*M_PI*alpha*chebevApprox(0.0, 10.0, c_eff_f, alpha);
   }
   if ( alpha > 10.0 )
   {
     double y = 1.0 - 18.0/alpha;
     return 1.0 - chebevApprox(-1.0, 1.0, c_eff_g, y)/(alpha*alpha);
   }
-  double eff_f =(M_PI/4.0)*alpha*chebevApprox(0.0, 10.0, c_eff_f, alpha);
+  double eff_f = 0.25*M_PI*alpha*chebevApprox(0.0, 10.0, c_eff_f, alpha);
   double y=1.0 - 18.0/alpha;
   double eff_g =1.0 - chebevApprox(-1.0,1.0,c_eff_g, y)/(alpha*alpha);
   return (10.0-alpha)*eff_f  + (alpha-9.0)*eff_g;

@@ -194,12 +194,13 @@ class DirectEnergyConversion(ConvertToEnergy.EnergyConversion):
         self.normalise(result_ws, self.normalise_method, range_offset=bin_offset)
         
         LoadDetectorInfo(result_ws, det_info_file)
-        ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
+        ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
         if not self.energy_bins is None:
             Rebin(result_ws, result_ws, self.energy_bins)
         
         if self.applyDetectorEfficiency:
-            DetectorEfficiencyCor(result_ws, result_ws, ei_value)
+            CorrectKiKf(result_ws, result_ws, EMode='Direct')
+            DetectorEfficiencyCor(result_ws, result_ws)
         
         self.apply_masking(result_ws, spectra_masks, map_file)
 

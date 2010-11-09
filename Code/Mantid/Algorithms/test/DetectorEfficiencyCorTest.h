@@ -5,7 +5,6 @@
 
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
@@ -15,6 +14,8 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+
+#include "WorkspaceCreationHelper.hh"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -31,6 +32,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
+using Mantid::MantidVecPtr;
 
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite
 {
@@ -59,6 +61,26 @@ public:
     TS_ASSERT_EQUALS( grouper.category(), "CorrectionFunctions" );
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() );
     TS_ASSERT( grouper.isInitialized() );
+  }
+
+  void testExecWithoutEiThrowsInvalidArgument()
+  {
+    Workspace2D_sptr dummyWS = WorkspaceCreationHelper::Create2DWorkspace(2, 1);
+    dummyWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+    const std::string inputWS = "testInput";
+    AnalysisDataService::Instance().add(inputWS, dummyWS);
+    
+    DetectorEfficiencyCor corrector;
+    TS_ASSERT_THROWS_NOTHING( corrector.initialize() );
+    TS_ASSERT( corrector.isInitialized() );
+    
+    corrector.setPropertyValue("InputWorkspace", inputWS);
+    const std::string outputWS = "testOutput";
+    corrector.setPropertyValue("OutputWorkspace", outputWS);
+    corrector.setRethrows(true);
+    
+    TS_ASSERT_THROWS(corrector.execute(), std::invalid_argument);
+    
   }
 
   void testFromRaw()
@@ -92,10 +114,10 @@ public:
 
     //Affected spectra
     TS_ASSERT_DELTA(result->readY(firstNonMonitor).front(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(result->readY(firstNonMonitor).back(), 2339.218280, 1e-6);
+    TS_ASSERT_DELTA(result->readY(firstNonMonitor).back(), 476.908328, 1e-6);
     // Random spectra
-    TS_ASSERT_DELTA(result->readY(42).front(), 0.276367, 1e-6);
-    TS_ASSERT_DELTA(result->readY(42)[1225],1.077892 , 1e-6);
+    TS_ASSERT_DELTA(result->readY(42).front(), 32.567835, 1e-6);
+    TS_ASSERT_DELTA(result->readY(42)[1225], 1.052719 , 1e-6);
 
     AnalysisDataService::Instance().remove(inName);
   }
@@ -206,7 +228,7 @@ public:
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.073676, 1e-6);
+    TS_ASSERT_DELTA(result->readY(0).front(), 20.147351, 1e-6);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-6);
     
     AnalysisDataService::Instance().remove(wsName);
