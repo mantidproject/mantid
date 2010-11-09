@@ -54,7 +54,6 @@ namespace MantidQt
       bool validateMsd();
       bool validateFury();
       bool validateAbsorption();
-      bool validateDemon();
 
       // Run processes
       void elwinRun();
@@ -62,7 +61,6 @@ namespace MantidQt
       void furyRun();
       void furyfitRun();
       void absorptionRun();
-      void demonRun();
 
       Mantid::API::CompositeFunction* createFunction(QtTreePropertyBrowser* propertyBrowser);
       QtProperty* createLorentzian();
@@ -113,9 +111,7 @@ namespace MantidQt
 
       // Absorption (Basic)
       void absorptionShape(int index);
-
-      // Diffraction Reduction
-
+      
       // Common Elements
       void help();
       void openDirectoryDialog();

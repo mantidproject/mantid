@@ -324,7 +324,14 @@
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="elwin_plot" />
+        <layout class="QHBoxLayout" name="horizontalLayout_7" >
+         <item>
+          <layout class="QVBoxLayout" name="elwin_properties" />
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="elwin_plot" />
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QCheckBox" name="elwin_ckConcat" >
@@ -906,16 +913,6 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_27" >
              <item>
-              <widget class="QPushButton" name="furyfit_pbPlotGuess" >
-               <property name="enabled" >
-                <bool>false</bool>
-               </property>
-               <property name="text" >
-                <string>Plot Guess</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QLabel" name="furyfit_lbSpectra" >
                <property name="text" >
                 <string>Spectra:</string>
@@ -1317,70 +1314,6 @@
          </item>
          <item>
           <widget class="QCheckBox" name="abs_ckSave" >
-           <property name="text" >
-            <string>Save Result</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabDemon" >
-      <attribute name="title" >
-       <string>DEMON</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_14" >
-       <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>41</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="label" stdset="0" >
-          <string>Run Number</string>
-         </property>
-         <property name="multipleFiles" stdset="0" >
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_22" >
-         <item>
-          <widget class="QCheckBox" name="dem_ckVerbose" >
-           <property name="enabled" >
-            <bool>false</bool>
-           </property>
-           <property name="text" >
-            <string>Verbose</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="dem_ckPlot" >
-           <property name="text" >
-            <string>Plot Result</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="dem_ckSave" >
            <property name="text" >
             <string>Save Result</string>
            </property>

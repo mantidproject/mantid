@@ -111,7 +111,6 @@ void IndirectDataAnalysis::initLayout()
   connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // absorption
   connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
-  // demon
   
   m_settingsGroup = "CustomInterfaces/IndirectAnalysis/";
 
@@ -592,11 +591,6 @@ bool IndirectDataAnalysis::validateAbsorption()
   return valid;
 }
 
-bool IndirectDataAnalysis::validateDemon()
-{
-  return m_uiForm.dem_rawFiles->isValid();
-}
-
 Mantid::API::CompositeFunction* IndirectDataAnalysis::createFunction(QtTreePropertyBrowser* propertyBrowser)
 {
   Mantid::API::CompositeFunction* result = new Mantid::API::CompositeFunction();
@@ -790,20 +784,6 @@ void IndirectDataAnalysis::reflectionSelected(int index)
   {
     m_uiForm.set_leEFixed->clear();
   }
-  bool state;
-  if ( analysisType == "diffraction" )
-  {
-    state = false;
-  }
-  else
-  {
-    state = true;
-  }
-  m_uiForm.tabElwin->setEnabled(state);
-  m_uiForm.tabMSD->setEnabled(state);
-  m_uiForm.tabFury->setEnabled(state);
-  m_uiForm.tabAbsorption->setEnabled(state);
-  m_uiForm.tabDemon->setEnabled(!state);
 }
 
 void IndirectDataAnalysis::refreshWSlist()
@@ -854,10 +834,6 @@ void IndirectDataAnalysis::run()
   else if ( tabName == "Absorption" )
   {
     absorptionRun();
-  }
-  else if ( tabName == "DEMON" )
-  {
-    demonRun();
   }
   else
   {
@@ -1675,34 +1651,6 @@ void IndirectDataAnalysis::absorptionShape(int index)
   m_uiForm.abs_swDetails->setCurrentIndex(index);
 }
 
-void IndirectDataAnalysis::demonRun()
-{
-  if ( validateDemon() )
-  {
-    QString pyInput = "from IndirectDataAnalysis import demon\n"
-      "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
-      "first = " +m_uiForm.set_leSpecMin->text()+"\n"
-      "last = " +m_uiForm.set_leSpecMax->text()+"\n";
-
-    if ( m_uiForm.dem_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
-    if ( m_uiForm.dem_ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
-
-    if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
-
-    pyInput += "ws, rn = demon(files, first, last, Verbose=verbose, Plot=plot, Save=save)\n";
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-  }
-  else
-  {
-    showInformationBox("Input invalid.");
-  }
-}
-
 void IndirectDataAnalysis::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -1729,7 +1677,5 @@ void IndirectDataAnalysis::help()
     url += "ConvFit";
   else if ( tabName == "Absorption" )
     url += "Absorption";
-  else if ( tabName == "DEMON" )
-    url += "Demon";
   QDesktopServices::openUrl(QUrl(url));
 }
