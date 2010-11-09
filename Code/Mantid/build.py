@@ -19,10 +19,8 @@ else:
         use_system_scons = False
 
 if use_system_scons:
-    print 'Using system installed scons'
     build_cmd = setenv + "scons "
 else:
-    print 'Using scons from third party directory'
     build_cmd = setenv + "python ../Third_Party/src/scons-local/scons.py "
 
 # Add command line arguments
