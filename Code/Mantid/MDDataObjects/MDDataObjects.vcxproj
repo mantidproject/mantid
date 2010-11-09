@@ -108,8 +108,8 @@
       <OutputFile>$(OutDir)$(ProjectName)$(TargetExt)</OutputFile>
     </Link>
     <PreBuildEvent>
-      <Command>copy "$(ProjectDir)..\$(Configuration)\MantidKernel.lib" "$(OutDir)MantidKernel.lib" /Y
-copy "$(ProjectDir)..\$(Configuration)\MantidGeometry.lib" "$(OutDir)MantidGeometry.lib" /Y</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>copying the project libraries requested</Message>

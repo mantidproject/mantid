@@ -663,10 +663,15 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
     std::vector<hsize_t> cells_preselection_buf;
     cells_preselection_buf.resize(max_npix_selected);
     long ic(0);
+    size_t pixel_num;
     for(i=starting_cell;i<n_cells_processed;i++){
         npix_tt          =SQW.data[selected_cells[i]].npix; 
         for(j=0;j<npix_tt;j++){
-            cells_preselection_buf[ic]=SQW.pix_array[selected_cells[i]].chunk_file_location0+j;
+            pixel_num=SQW.pix_array[selected_cells[i]].chunk_file_location0+j;
+            if(pixel_num>=18287130){
+              continue;
+            }
+            cells_preselection_buf[ic]=pixel_num;
             ic++;
         }
     }
