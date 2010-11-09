@@ -166,6 +166,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
         sys.exit('Monitor area and thickness (unt and zz) are not defined \
                 in the Instrument Parameter File.')
     for ws in ws_name:
+        applyParameterFile(ws, analyser, reflection)
         if adjustTOF(ws):
             TofCorrection(ws, ws)
         runNo = mtd[ws].getRun().getLogData("run_number").value()
@@ -457,3 +458,9 @@ def adjustTOF(ws='', inst=''):
         return True
     else:
         return False
+
+def applyParameterFile(workspace, analyser, refl):
+    inst = mtd[workspace].getInstrument().getName()
+    idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+    ipf = idf_dir + inst + '_' + analyser + '_' + refl + '_Parameters.xml'
+    LoadParameterFile(workspace, ipf)
