@@ -53,9 +53,10 @@ public:
 //    TS_ASSERT_THROWS( WorkspaceProperty<Workspace>("test","",3), std::out_of_range )
   }
   void testServices(){
-
+      MDGeometry Geom;
       
-      TS_ASSERT_THROWS_NOTHING(manager.declareProperty( new MDPropertyGeometry("geometryDescription","ws1",Direction::Input),"this property describes the geometry"));
+      TS_ASSERT_THROWS_NOTHING(manager.declareProperty( new MDPropertyGeometry("geometryDescription","ws1",Direction::Input),"this property describes the geometry obtained from string"));
+      TS_ASSERT_THROWS_NOTHING(manager.declareProperty( new MDPropertyGeometry("geom2Description",Geom,Direction::Input),"this property describes the geometry obtained from object"));
       TS_ASSERT_EQUALS(manager.existsProperty("geometryDescription"),true);
       const std::vector< Property*> prop = manager.getProperties();
       // property is indeed the MD property 

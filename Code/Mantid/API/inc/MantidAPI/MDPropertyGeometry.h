@@ -67,8 +67,8 @@ namespace Mantid
       /** Constructor.
       *  Sets the property and workspace names but initialises the workspace pointer to null.
       *  @param name The name to assign to the property
-      *  @param Value : e
-      *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
+      *  @param Value : property value expressed as a string
+      *  @param direction Whether this is a Direction::Input, Direction::Output or In-Out property
       *  @param validator The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
@@ -77,7 +77,8 @@ namespace Mantid
         MDGeometryDescription(),
         Kernel::PropertyWithValue<std::string>(name, Value, validator, direction)
       {
-       // Geometry::MDGeometryDescription::fromXMLstring(Kernel::PropertyWithValue::value());
+          // fill in binary implementation of the property.
+          this->fromXMLstring(this->value());
       }
 
       MDPropertyGeometry( const std::string &name, const Geometry::MDGeometryDescription &Geom, const unsigned int direction=Kernel::Direction::Input,
@@ -85,7 +86,8 @@ namespace Mantid
         Geometry::MDGeometryDescription(Geom),
         Kernel::PropertyWithValue<std::string>(name, "", new Kernel::NullValidator<std::string> , direction)
       {
-       // Kernel::PropertyWithValue<std::string>::setValue(Geometry::MDGeometryDescription::toXMLstring());
+          // fill in symbol representation of the property. 
+         this->setValue(this->toXMLstring());
       }
      //MDGeometryDescription const *getpMDGeometryDescription(void){return 
      // overloads IO operations for property for the lexical casts to work 
