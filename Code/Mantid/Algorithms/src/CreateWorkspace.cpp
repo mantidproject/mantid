@@ -4,6 +4,8 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
 
 namespace Mantid
 {
@@ -35,8 +37,11 @@ void CreateWorkspace::init()
   unitOptions.push_back("");
   declareProperty("UnitX","",new Mantid::Kernel::ListValidator(unitOptions),
       "The unit to assign to the XAxis");
+  unitOptions.push_back("Text");
   declareProperty("UnitY","",new Mantid::Kernel::ListValidator(unitOptions),
       "The unit to assign to the YAxis");
+  declareProperty(new Kernel::ArrayProperty<std::string>("YAxisValues"),
+    "Values for labels of Y Axis."); // This property taken as strings to allow for Text Axis.
   declareProperty(new Mantid::API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
     "Name to be given to the created workspace.");
 }
@@ -50,9 +55,15 @@ void CreateWorkspace::exec()
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
   const std::string yUnit = getProperty("UnitY");
+  const std::vector<std::string> yAxis = getProperty("YAxisValues");
+
+  if ( ( yUnit != "" ) && ( yAxis.size() != nSpec ) )
+  {
+    throw std::invalid_argument("Number of y-axis labels must match number of histograms.");
+  }
 
   // Verify length of vectors makes sense with NSpec
-    if ( dataX.size() % nSpec != 0 )
+  if ( dataX.size() % nSpec != 0 )
   {
     throw std::invalid_argument("Length of DataX must be divisable by NSpec");
   }
@@ -97,10 +108,37 @@ void CreateWorkspace::exec()
   }
   if ( yUnit != "" )
   {
-    outputWS->getAxis(1)->unit() = Mantid::Kernel::UnitFactory::Instance().create(yUnit);
+    if ( yUnit == "Text" )
+    {
+      Mantid::API::TextAxis* const newAxis = new Mantid::API::TextAxis(yAxis.size());
+      outputWS->replaceAxis(1, newAxis);
+      for ( int i = 0; i < yAxis.size(); i++ )
+      {
+        newAxis->setLabel(i, yAxis[i]);
+      }
+    }
+    else
+    {
+      Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(yAxis.size());
+      newAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create(yUnit);
+      outputWS->replaceAxis(1, newAxis);
+      for ( int i = 0; i < yAxis.size(); i++ )
+      {
+        try
+        {
+          newAxis->setValue(i, boost::lexical_cast<double, std::string>(yAxis[i]) );
+        }
+        catch ( boost::bad_lexical_cast & )
+        {
+          throw std::invalid_argument("CreateWorkspace - YAxisValues property could not be converted to a double.");
+        }
+      }
+    }
   }
-
-  outputWS->mutableSpectraMap().populateSimple(0, nSpec);
+  else
+  {
+    outputWS->mutableSpectraMap().populateSimple(0, nSpec);
+  }
   setProperty("OutputWorkspace", outputWS);
 }
 

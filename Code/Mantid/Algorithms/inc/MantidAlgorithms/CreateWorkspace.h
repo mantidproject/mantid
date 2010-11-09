@@ -43,7 +43,6 @@ namespace Algorithms
 */
 class DLLExport CreateWorkspace : public API::Algorithm
 {
-  //
 public:
   /// Default constructor
   CreateWorkspace();
