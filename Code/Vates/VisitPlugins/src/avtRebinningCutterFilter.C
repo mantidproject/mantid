@@ -60,8 +60,6 @@ using namespace Mantid::VATES;
 
 avtRebinningCutterFilter::avtRebinningCutterFilter()
 {
-
-
 }
 
 // ****************************************************************************
@@ -89,7 +87,30 @@ avtRebinningCutterFilter::~avtRebinningCutterFilter()
 avtFilter *
 avtRebinningCutterFilter::Create()
 {
-  return new avtRebinningCutterFilter();
+  avtRebinningCutterFilter* filter = new avtRebinningCutterFilter();
+  filter->SetUp();
+  return filter;
+}
+
+void avtRebinningCutterFilter::SetUp()
+{
+  int nLeaves = 0;
+  RebinningCutterPresenter presenter;
+  Mantid::API::ImplicitFunction* func = NULL;
+  vtkDataSet** allDataSets = this->GetInputDataTree()->GetAllLeaves(nLeaves);
+  for(int i = 0; i < nLeaves; i++)
+  {
+    debug5 << "Previous instruction " << i << func->getName() << endl;
+    vtkDataSet* currentDataSet = allDataSets[i];
+    func = presenter.findExistingRebinningDefinitions(currentDataSet, presenter.getMetadataID());
+    if(func != NULL)
+    {
+      debug5 << "Last MD Instruction: " << func->getName() << endl;
+        //Can use this to pre-populate options!
+      break;
+    }
+  }
+
 }
 
 // ****************************************************************************
@@ -135,8 +156,14 @@ avtRebinningCutterFilter::ExecuteData(vtkDataSet *in_ds, int, std::string)
 
   RebinningCutterPresenter presenter;
 
-  doubleVector& normal = this->atts.GetNormal();
-  doubleVector& origin = this->atts.GetOrigin();
+  doubleVector normal;
+  normal.push_back(atts.GetNormalX());
+  normal.push_back(atts.GetNormalY());
+  normal.push_back(atts.GetNormalZ());
+  doubleVector origin;
+  origin.push_back(atts.GetOriginX());
+  origin.push_back(atts.GetOriginY());
+  origin.push_back(atts.GetOriginZ());
 
   Mantid::API::ImplicitFunction* function = presenter.constructReductionKnowledge(in_ds, normal, origin, presenter.getMetadataID());
 

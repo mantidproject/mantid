@@ -38,9 +38,9 @@
 
 #include <RebinningCutterAttributes.h>
 #include <DataNode.h>
-#include <DebugStream.h>
 #include <PlaneAttributes.h>
-#include <vector>
+#include <DebugStream.h>
+
 // ****************************************************************************
 // Method: RebinningCutterAttributes::RebinningCutterAttributes
 //
@@ -79,11 +79,18 @@ void RebinningCutterAttributes::Init()
 
 void RebinningCutterAttributes::Copy(const RebinningCutterAttributes &obj)
 {
-    origin = obj.origin;
-    normal = obj.normal;
+    originX = obj.originX;
+    originY = obj.originY;
+    originZ = obj.originZ;
+    normalX = obj.normalX;
+    normalY = obj.normalY;
+    normalZ = obj.normalZ;
+    dimensionX = obj.dimensionX;
+    dimensionY = obj.dimensionY;
+    dimensionZ = obj.dimensionZ;
+    dimensiont = obj.dimensiont;
 
     RebinningCutterAttributes::SelectAll();
-
 }
 
 // Type map format string
@@ -239,8 +246,16 @@ bool
 RebinningCutterAttributes::operator == (const RebinningCutterAttributes &obj) const
 {
     // Create the return value
-    return ((origin == obj.origin) &&
-            (normal == obj.normal));
+    return ((originX == obj.originX) &&
+            (originY == obj.originY) &&
+            (originZ == obj.originZ) &&
+            (normalX == obj.normalX) &&
+            (normalY == obj.normalY) &&
+            (normalZ == obj.normalZ) &&
+            (dimensionX == obj.dimensionX) &&
+            (dimensionY == obj.dimensionY) &&
+            (dimensionZ == obj.dimensionZ) &&
+            (dimensiont == obj.dimensiont));
 }
 
 // ****************************************************************************
@@ -300,64 +315,42 @@ RebinningCutterAttributes::TypeName() const
 //   
 // ****************************************************************************
 
-bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts) {
+bool RebinningCutterAttributes::CopyAttributes(const AttributeGroup *atts)
+{
 
-	bool retval = false;
+  bool retval = false;
 
-	if (TypeName() == atts->TypeName()) {
-		// Call assignment operator.
-		const RebinningCutterAttributes *tmp =
-				(const RebinningCutterAttributes *) atts;
-		*this = *tmp;
-		retval = true;
-	} else if (atts->TypeName() == "PlaneAttributes") {
+  if (TypeName() == atts->TypeName())
+  {
+    // Call assignment operator.
+    const RebinningCutterAttributes *tmp = (const RebinningCutterAttributes *) atts;
+    *this = *tmp;
+    retval = true;
+  }
+  else if (atts->TypeName() == "PlaneAttributes")
+  {
 
-		const PlaneAttributes *tmp = (const PlaneAttributes *) atts;
-		debug5
-<<		"origininfo " << tmp->GetOrigin()[0] << " " <<tmp->GetOrigin()[1] << " " <<tmp->GetOrigin()[2] << endl;
-		debug5 << "normalinfo " << tmp->GetNormal()[0] << " " <<tmp->GetNormal()[1] << " " <<tmp->GetNormal()[2] << endl;
-
-		const double* pOrigin = tmp->GetOrigin();
-		std::vector<double> originVec(pOrigin, pOrigin+3);
-		SetOrigin(originVec);
-
-		const double* pNormal = tmp->GetNormal();
-		std::vector<double> normalVec(pNormal, pNormal+3);
-		SetNormal(normalVec);
+    const PlaneAttributes *tmp = (const PlaneAttributes *) atts;
+    debug5 << "origininfo " << tmp->GetOrigin()[0] << " " << tmp->GetOrigin()[1] << " "
+        << tmp->GetOrigin()[2] << endl;
+    debug5 << "normalinfo " << tmp->GetNormal()[0] << " " << tmp->GetNormal()[1] << " "
+        << tmp->GetNormal()[2] << endl;
 
 
-		//SetOriginPoint(tmp->GetOrigin());
-		//SetOriginType(Point);
-		//SetNormal(tmp->GetNormal());
-		//SetUpAxis(tmp->GetUpAxis());
-		//if ( GetAxisType() != Arbitrary && GetAxisType() != ThetaPhi )
-		//     SetAxisType(Arbitrary);
-		//
-		//	            //Set theta/phi.
-		//	            double n[3] = {tmp->GetNormal()[0],tmp->GetNormal()[1],tmp->GetNormal()[2]};
-		//	            double len = sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
-		//	            n[0] /= len;
-		//	            n[1] /= len;
-		//	            n[2] /= len;
-		//	            len = 1.0;
-		//	            double theta = atan2( n[1], n[0] ) * 57.29577951308232;
-		//	            double phi = acos( n[2] / len ) * 57.29577951308232;
-		//	            theta -= 90;
-		//	            phi -= 90;
-		//	            phi = - phi;
-		//
-		//	            theta = (fabs(theta) < 1e-5 ? 0 : theta);
-		//	            phi = (fabs(phi) < 1e-5 ? 0 : phi);
-		//	            SetTheta( theta );
-		//	            SetPhi( phi );
-		//
-		retval = true;
+    SetOriginX(tmp->GetOrigin()[0]);
+    SetOriginY(tmp->GetOrigin()[1]);
+    SetOriginZ(tmp->GetOrigin()[2]);
+    SetNormalX(tmp->GetNormal()[0]);
+    SetNormalY(tmp->GetNormal()[1]);
+    SetNormalZ(tmp->GetNormal()[2]);
 
+    retval = true;
 
-	}
+  }
 
-	return retval;
+  return retval;
 }
+
 
 // ****************************************************************************
 // Method: RebinningCutterAttributes::CreateCompatible
@@ -430,8 +423,16 @@ RebinningCutterAttributes::NewInstance(bool copy) const
 void
 RebinningCutterAttributes::SelectAll()
 {
-    Select(ID_origin, (void *)&origin);
-    Select(ID_normal, (void *)&normal);
+    Select(ID_originX,    (void *)&originX);
+    Select(ID_originY,    (void *)&originY);
+    Select(ID_originZ,    (void *)&originZ);
+    Select(ID_normalX,    (void *)&normalX);
+    Select(ID_normalY,    (void *)&normalY);
+    Select(ID_normalZ,    (void *)&normalZ);
+    Select(ID_dimensionX, (void *)&dimensionX);
+    Select(ID_dimensionY, (void *)&dimensionY);
+    Select(ID_dimensionZ, (void *)&dimensionZ);
+    Select(ID_dimensiont, (void *)&dimensiont);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -439,61 +440,137 @@ RebinningCutterAttributes::SelectAll()
 ///////////////////////////////////////////////////////////////////////////////
 
 void
-RebinningCutterAttributes::SetOrigin(const doubleVector &origin_)
+RebinningCutterAttributes::SetOriginX(double originX_)
 {
-    origin = origin_;
-    Select(ID_origin, (void *)&origin);
+    originX = originX_;
+    Select(ID_originX, (void *)&originX);
 }
 
 void
-RebinningCutterAttributes::SetNormal(const doubleVector &normal_)
+RebinningCutterAttributes::SetOriginY(double originY_)
 {
-    normal = normal_;
-    Select(ID_normal, (void *)&normal);
+    originY = originY_;
+    Select(ID_originY, (void *)&originY);
+}
+
+void
+RebinningCutterAttributes::SetOriginZ(double originZ_)
+{
+    originZ = originZ_;
+    Select(ID_originZ, (void *)&originZ);
+}
+
+void
+RebinningCutterAttributes::SetNormalX(double normalX_)
+{
+    normalX = normalX_;
+    Select(ID_normalX, (void *)&normalX);
+}
+
+void
+RebinningCutterAttributes::SetNormalY(double normalY_)
+{
+    normalY = normalY_;
+    Select(ID_normalY, (void *)&normalY);
+}
+
+void
+RebinningCutterAttributes::SetNormalZ(double normalZ_)
+{
+    normalZ = normalZ_;
+    Select(ID_normalZ, (void *)&normalZ);
+}
+
+void
+RebinningCutterAttributes::SetDimensionX(int dimensionX_)
+{
+    dimensionX = dimensionX_;
+    Select(ID_dimensionX, (void *)&dimensionX);
+}
+
+void
+RebinningCutterAttributes::SetDimensionY(int dimensionY_)
+{
+    dimensionY = dimensionY_;
+    Select(ID_dimensionY, (void *)&dimensionY);
+}
+
+void
+RebinningCutterAttributes::SetDimensionZ(int dimensionZ_)
+{
+    dimensionZ = dimensionZ_;
+    Select(ID_dimensionZ, (void *)&dimensionZ);
+}
+
+void
+RebinningCutterAttributes::SetDimensiont(int dimensiont_)
+{
+    dimensiont = dimensiont_;
+    Select(ID_dimensiont, (void *)&dimensiont);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Get property methods
 ///////////////////////////////////////////////////////////////////////////////
 
-const doubleVector &
-RebinningCutterAttributes::GetOrigin() const
+double
+RebinningCutterAttributes::GetOriginX() const
 {
-    return origin;
+    return originX;
 }
 
-doubleVector &
-RebinningCutterAttributes::GetOrigin()
+double
+RebinningCutterAttributes::GetOriginY() const
 {
-    return origin;
+    return originY;
 }
 
-const doubleVector &
-RebinningCutterAttributes::GetNormal() const
+double
+RebinningCutterAttributes::GetOriginZ() const
 {
-    return normal;
+    return originZ;
 }
 
-doubleVector &
-RebinningCutterAttributes::GetNormal()
+double
+RebinningCutterAttributes::GetNormalX() const
 {
-    return normal;
+    return normalX;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Select property methods
-///////////////////////////////////////////////////////////////////////////////
-
-void
-RebinningCutterAttributes::SelectOrigin()
+double
+RebinningCutterAttributes::GetNormalY() const
 {
-    Select(ID_origin, (void *)&origin);
+    return normalY;
 }
 
-void
-RebinningCutterAttributes::SelectNormal()
+double
+RebinningCutterAttributes::GetNormalZ() const
 {
-    Select(ID_normal, (void *)&normal);
+    return normalZ;
+}
+
+int
+RebinningCutterAttributes::GetDimensionX() const
+{
+    return dimensionX;
+}
+
+int
+RebinningCutterAttributes::GetDimensionY() const
+{
+    return dimensionY;
+}
+
+int
+RebinningCutterAttributes::GetDimensionZ() const
+{
+    return dimensionZ;
+}
+
+int
+RebinningCutterAttributes::GetDimensiont() const
+{
+    return dimensiont;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -520,8 +597,16 @@ RebinningCutterAttributes::GetFieldName(int index) const
 {
     switch (index)
     {
-    case ID_origin: return "origin";
-    case ID_normal: return "normal";
+    case ID_originX:    return "originX";
+    case ID_originY:    return "originY";
+    case ID_originZ:    return "originZ";
+    case ID_normalX:    return "normalX";
+    case ID_normalY:    return "normalY";
+    case ID_normalZ:    return "normalZ";
+    case ID_dimensionX: return "dimensionX";
+    case ID_dimensionY: return "dimensionY";
+    case ID_dimensionZ: return "dimensionZ";
+    case ID_dimensiont: return "dimensiont";
     default:  return "invalid index";
     }
 }
@@ -546,8 +631,16 @@ RebinningCutterAttributes::GetFieldType(int index) const
 {
     switch (index)
     {
-    case ID_origin: return FieldType_doubleVector;
-    case ID_normal: return FieldType_doubleVector;
+    case ID_originX:    return FieldType_double;
+    case ID_originY:    return FieldType_double;
+    case ID_originZ:    return FieldType_double;
+    case ID_normalX:    return FieldType_double;
+    case ID_normalY:    return FieldType_double;
+    case ID_normalZ:    return FieldType_double;
+    case ID_dimensionX: return FieldType_int;
+    case ID_dimensionY: return FieldType_int;
+    case ID_dimensionZ: return FieldType_int;
+    case ID_dimensiont: return FieldType_int;
     default:  return FieldType_unknown;
     }
 }
@@ -572,8 +665,16 @@ RebinningCutterAttributes::GetFieldTypeName(int index) const
 {
     switch (index)
     {
-    case ID_origin: return "doubleVector";
-    case ID_normal: return "doubleVector";
+    case ID_originX:    return "double";
+    case ID_originY:    return "double";
+    case ID_originZ:    return "double";
+    case ID_normalX:    return "double";
+    case ID_normalY:    return "double";
+    case ID_normalZ:    return "double";
+    case ID_dimensionX: return "int";
+    case ID_dimensionY: return "int";
+    case ID_dimensionZ: return "int";
+    case ID_dimensiont: return "int";
     default:  return "invalid index";
     }
 }
@@ -600,14 +701,54 @@ RebinningCutterAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) co
     bool retval = false;
     switch (index_)
     {
-    case ID_origin:
+    case ID_originX:
         {  // new scope
-        retval = (origin == obj.origin);
+        retval = (originX == obj.originX);
         }
         break;
-    case ID_normal:
+    case ID_originY:
         {  // new scope
-        retval = (normal == obj.normal);
+        retval = (originY == obj.originY);
+        }
+        break;
+    case ID_originZ:
+        {  // new scope
+        retval = (originZ == obj.originZ);
+        }
+        break;
+    case ID_normalX:
+        {  // new scope
+        retval = (normalX == obj.normalX);
+        }
+        break;
+    case ID_normalY:
+        {  // new scope
+        retval = (normalY == obj.normalY);
+        }
+        break;
+    case ID_normalZ:
+        {  // new scope
+        retval = (normalZ == obj.normalZ);
+        }
+        break;
+    case ID_dimensionX:
+        {  // new scope
+        retval = (dimensionX == obj.dimensionX);
+        }
+        break;
+    case ID_dimensionY:
+        {  // new scope
+        retval = (dimensionY == obj.dimensionY);
+        }
+        break;
+    case ID_dimensionZ:
+        {  // new scope
+        retval = (dimensionZ == obj.dimensionZ);
+        }
+        break;
+    case ID_dimensiont:
+        {  // new scope
+        retval = (dimensiont == obj.dimensiont);
         }
         break;
     default: retval = false;

@@ -118,7 +118,7 @@ class avtRebinningCutterFilter: public avtPluginDataTreeIterator
 public:
   avtRebinningCutterFilter();
   virtual ~avtRebinningCutterFilter();
-
+  void SetUp();
   static avtFilter *Create();
     const virtual char *GetType(void)
     {

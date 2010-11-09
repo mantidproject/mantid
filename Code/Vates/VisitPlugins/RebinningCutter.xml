@@ -1,9 +1,25 @@
 <?xml version="1.0"?>
   <Plugin name="RebinningCutter" type="operator" label="Rebinning Cutter" version="1.0" enabled="true" mdspecificcode="false" engspecificcode="false" onlyengine="false" noengine="false" iconFile="RebinningCutter.xpm">
     <Attribute name="RebinningCutterAttributes" purpose="Attributes for the Rebinning Cutter" persistent="false" keyframe="true" exportAPI="" exportInclude="">
-      <Field name="origin" label="origin" type="doubleVector">
+      <Field name="originX" label="Origin X" type="double">
       </Field>
-      <Field name="normal" label="normal" type="doubleVector">
+      <Field name="originY" label="Origin Y" type="double">
+      </Field>
+      <Field name="originZ" label="Origin Z" type="double">
+      </Field>
+      <Field name="normalX" label="Normal X" type="double">
+      </Field>
+      <Field name="normalY" label="Normal Y" type="double">
+      </Field>
+      <Field name="normalZ" label="Normal Z" type="double">
+      </Field>
+      <Field name="dimensionX" label="Dimension X" type="int">
+      </Field>
+      <Field name="dimensionY" label="Dimension Y" type="int">
+      </Field>
+      <Field name="dimensionZ" label="Dimension Z" type="int">
+      </Field>
+      <Field name="dimensiont" label="Dimension t" type="int">
       </Field>
     </Attribute>
   </Plugin>

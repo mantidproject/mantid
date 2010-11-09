@@ -54,11 +54,14 @@
 #include <QvisLineStyleWidget.h>
 #include <QvisLineWidthWidget.h>
 #include <QvisVariableButton.h>
-
+#include <qcombobox.h>
 #include <stdio.h>
 #include <string>
+#include "DimensionPickerWidget.h"
+#include "IntegratedDimensionWidget.h"
 
 using std::string;
+
 
 // ****************************************************************************
 // Method: QvisRebinningCutterWindow::QvisRebinningCutterWindow
@@ -127,19 +130,96 @@ QvisRebinningCutterWindow::CreateWindowContents()
     QGridLayout *mainLayout = new QGridLayout(0);
     topLayout->addLayout(mainLayout);
 
-    originLabel = new QLabel(tr("origin"), central);
-    mainLayout->addWidget(originLabel,0,0);
-    origin = new QLineEdit(central);
-    connect(origin, SIGNAL(returnPressed()),
-            this, SLOT(originProcessText()));
-    mainLayout->addWidget(origin, 0,1);
+    originXLabel = new QLabel(tr("Origin X"), central);
+    mainLayout->addWidget(originXLabel,0,0);
+    originX = new QLineEdit(central);
+    connect(originX, SIGNAL(returnPressed()),
+            this, SLOT(originXProcessText()));
+    mainLayout->addWidget(originX, 0,1);
 
-    normalLabel = new QLabel(tr("normal"), central);
-    mainLayout->addWidget(normalLabel,1,0);
-    normal = new QLineEdit(central);
-    connect(normal, SIGNAL(returnPressed()),
-            this, SLOT(normalProcessText()));
-    mainLayout->addWidget(normal, 1,1);
+    originYLabel = new QLabel(tr("Origin Y"), central);
+    mainLayout->addWidget(originYLabel,1,0);
+    originY = new QLineEdit(central);
+    connect(originY, SIGNAL(returnPressed()),
+            this, SLOT(originYProcessText()));
+    mainLayout->addWidget(originY, 1,1);
+
+    originZLabel = new QLabel(tr("Origin Z"), central);
+    mainLayout->addWidget(originZLabel,2,0);
+    originZ = new QLineEdit(central);
+    connect(originZ, SIGNAL(returnPressed()),
+            this, SLOT(originZProcessText()));
+    mainLayout->addWidget(originZ, 2,1);
+
+    normalXLabel = new QLabel(tr("Normal X"), central);
+    mainLayout->addWidget(normalXLabel,3,0);
+    normalX = new QLineEdit(central);
+    connect(normalX, SIGNAL(returnPressed()),
+            this, SLOT(normalXProcessText()));
+    mainLayout->addWidget(normalX, 3,1);
+
+    normalYLabel = new QLabel(tr("Normal Y"), central);
+    mainLayout->addWidget(normalYLabel,4,0);
+    normalY = new QLineEdit(central);
+    connect(normalY, SIGNAL(returnPressed()),
+            this, SLOT(normalYProcessText()));
+    mainLayout->addWidget(normalY, 4,1);
+
+    normalZLabel = new QLabel(tr("Normal Z"), central);
+    mainLayout->addWidget(normalZLabel,5,0);
+    normalZ = new QLineEdit(central);
+    connect(normalZ, SIGNAL(returnPressed()),
+            this, SLOT(normalZProcessText()));
+    mainLayout->addWidget(normalZ, 5,1);
+
+    dimensionXLabel = new QLabel(tr("Dimension X"), central);
+    mainLayout->addWidget(dimensionXLabel,6,0);
+    dimensionX = new QLineEdit(central);
+
+    connect(dimensionX, SIGNAL(returnPressed()),
+            this, SLOT(dimensionXProcessText()));
+    mainLayout->addWidget(dimensionX, 6,1);
+
+    dimensionYLabel = new QLabel(tr("Dimension Y"), central);
+    mainLayout->addWidget(dimensionYLabel,7,0);
+    dimensionY = new QLineEdit(central);
+    connect(dimensionY, SIGNAL(returnPressed()),
+            this, SLOT(dimensionYProcessText()));
+    mainLayout->addWidget(dimensionY, 7,1);
+
+    dimensionZLabel = new QLabel(tr("Dimension Z"), central);
+    mainLayout->addWidget(dimensionZLabel,8,0);
+    dimensionZ = new QLineEdit(central);
+    connect(dimensionZ, SIGNAL(returnPressed()),
+            this, SLOT(dimensionZProcessText()));
+    mainLayout->addWidget(dimensionZ, 8,1);
+
+    dimensiontLabel = new QLabel(tr("Dimension t"), central);
+    mainLayout->addWidget(dimensiontLabel,9,0);
+    dimensiont = new QLineEdit(central);
+    connect(dimensiont, SIGNAL(returnPressed()),
+            this, SLOT(dimensiontProcessText()));
+    mainLayout->addWidget(dimensiont, 9,1);
+
+
+
+//    std::vector<std::string> dims;
+//    dims.push_back("Qx");
+//    dims.push_back("Qy");
+//    dims.push_back("Qz");
+//
+//    DimensionPickerWidget* pickerA = new DimensionPickerWidget("Dimension X", dims);
+//    mainLayout->addWidget(pickerA, 11,0, 1, 2, Qt::AlignLeft);
+//
+//    DimensionPickerWidget* pickerB = new DimensionPickerWidget("Dimension Y", dims);
+//        mainLayout->addWidget(pickerB, 12,0, 1, 2, Qt::AlignLeft);
+//
+//    IntegratedDimensionWidget* integratedA = new IntegratedDimensionWidget("Dimension P", 0, 2);
+//        mainLayout->addWidget(integratedA, 13,0, 1, 2, Qt::AlignLeft);
+//
+//    IntegratedDimensionWidget* integratedB = new IntegratedDimensionWidget("Dimension T", 0, 2);
+//                mainLayout->addWidget(integratedB, 14,0, 1, 2, Qt::AlignLeft);
+
 
 }
 
@@ -175,11 +255,35 @@ QvisRebinningCutterWindow::UpdateWindow(bool doAll)
 
         switch(i)
         {
-          case RebinningCutterAttributes::ID_origin:
-            origin->setText(DoublesToQString(atts->GetOrigin()));
+          case RebinningCutterAttributes::ID_originX:
+            originX->setText(DoubleToQString(atts->GetOriginX()));
             break;
-          case RebinningCutterAttributes::ID_normal:
-            normal->setText(DoublesToQString(atts->GetNormal()));
+          case RebinningCutterAttributes::ID_originY:
+            originY->setText(DoubleToQString(atts->GetOriginY()));
+            break;
+          case RebinningCutterAttributes::ID_originZ:
+            originZ->setText(DoubleToQString(atts->GetOriginZ()));
+            break;
+          case RebinningCutterAttributes::ID_normalX:
+            normalX->setText(DoubleToQString(atts->GetNormalX()));
+            break;
+          case RebinningCutterAttributes::ID_normalY:
+            normalY->setText(DoubleToQString(atts->GetNormalY()));
+            break;
+          case RebinningCutterAttributes::ID_normalZ:
+            normalZ->setText(DoubleToQString(atts->GetNormalZ()));
+            break;
+          case RebinningCutterAttributes::ID_dimensionX:
+            dimensionX->setText(IntToQString(atts->GetDimensionX()));
+            break;
+          case RebinningCutterAttributes::ID_dimensionY:
+            dimensionY->setText(IntToQString(atts->GetDimensionY()));
+            break;
+          case RebinningCutterAttributes::ID_dimensionZ:
+            dimensionZ->setText(IntToQString(atts->GetDimensionZ()));
+            break;
+          case RebinningCutterAttributes::ID_dimensiont:
+            dimensiont->setText(IntToQString(atts->GetDimensiont()));
             break;
         }
     }
@@ -206,31 +310,145 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
 {
     bool doAll = (which_widget == -1);
 
-    // Do origin
-    if(which_widget == RebinningCutterAttributes::ID_origin || doAll)
+    // Do originX
+    if(which_widget == RebinningCutterAttributes::ID_originX || doAll)
     {
-        doubleVector val;
-        if(LineEditGetDoubles(origin, val))
-            atts->SetOrigin(val);
+        double val;
+        if(LineEditGetDouble(originX, val))
+            atts->SetOriginX(val);
         else
         {
-            ResettingError(tr("origin"),
-                DoublesToQString(atts->GetOrigin()));
-            atts->SetOrigin(atts->GetOrigin());
+            ResettingError(tr("Origin X"),
+                DoubleToQString(atts->GetOriginX()));
+            atts->SetOriginX(atts->GetOriginX());
         }
     }
 
-    // Do normal
-    if(which_widget == RebinningCutterAttributes::ID_normal || doAll)
+    // Do originY
+    if(which_widget == RebinningCutterAttributes::ID_originY || doAll)
     {
-        doubleVector val;
-        if(LineEditGetDoubles(normal, val))
-            atts->SetNormal(val);
+        double val;
+        if(LineEditGetDouble(originY, val))
+            atts->SetOriginY(val);
         else
         {
-            ResettingError(tr("normal"),
-                DoublesToQString(atts->GetNormal()));
-            atts->SetNormal(atts->GetNormal());
+            ResettingError(tr("Origin Y"),
+                DoubleToQString(atts->GetOriginY()));
+            atts->SetOriginY(atts->GetOriginY());
+        }
+    }
+
+    // Do originZ
+    if(which_widget == RebinningCutterAttributes::ID_originZ || doAll)
+    {
+        double val;
+        if(LineEditGetDouble(originZ, val))
+            atts->SetOriginZ(val);
+        else
+        {
+            ResettingError(tr("Origin Z"),
+                DoubleToQString(atts->GetOriginZ()));
+            atts->SetOriginZ(atts->GetOriginZ());
+        }
+    }
+
+    // Do normalX
+    if(which_widget == RebinningCutterAttributes::ID_normalX || doAll)
+    {
+        double val;
+        if(LineEditGetDouble(normalX, val))
+            atts->SetNormalX(val);
+        else
+        {
+            ResettingError(tr("Normal X"),
+                DoubleToQString(atts->GetNormalX()));
+            atts->SetNormalX(atts->GetNormalX());
+        }
+    }
+
+    // Do normalY
+    if(which_widget == RebinningCutterAttributes::ID_normalY || doAll)
+    {
+        double val;
+        if(LineEditGetDouble(normalY, val))
+            atts->SetNormalY(val);
+        else
+        {
+            ResettingError(tr("Normal Y"),
+                DoubleToQString(atts->GetNormalY()));
+            atts->SetNormalY(atts->GetNormalY());
+        }
+    }
+
+    // Do normalZ
+    if(which_widget == RebinningCutterAttributes::ID_normalZ || doAll)
+    {
+        double val;
+        if(LineEditGetDouble(normalZ, val))
+            atts->SetNormalZ(val);
+        else
+        {
+            ResettingError(tr("Normal Z"),
+                DoubleToQString(atts->GetNormalZ()));
+            atts->SetNormalZ(atts->GetNormalZ());
+        }
+    }
+
+    // Do dimensionX
+    if(which_widget == RebinningCutterAttributes::ID_dimensionX || doAll)
+    {
+       QVariant d = dimensionXCombo->itemData(dimensionXCombo->currentIndex());
+       d.toString();
+        int val;
+        if(LineEditGetInt(dimensionX, val))
+            atts->SetDimensionX(val);
+        else
+        {
+            ResettingError(tr("Dimension X"),
+                IntToQString(atts->GetDimensionX()));
+            atts->SetDimensionX(atts->GetDimensionX());
+        }
+    }
+
+    // Do dimensionY
+    if(which_widget == RebinningCutterAttributes::ID_dimensionY || doAll)
+    {
+        int val;
+        if(LineEditGetInt(dimensionY, val))
+            atts->SetDimensionY(val);
+        else
+        {
+            ResettingError(tr("Dimension Y"),
+                IntToQString(atts->GetDimensionY()));
+            atts->SetDimensionY(atts->GetDimensionY());
+        }
+    }
+
+    // Do dimensionZ
+    if(which_widget == RebinningCutterAttributes::ID_dimensionZ || doAll)
+    {
+        int val;
+        if(LineEditGetInt(dimensionZ, val))
+            atts->SetDimensionZ(val);
+        else
+        {
+            ResettingError(tr("Dimension Z"),
+                IntToQString(atts->GetDimensionZ()));
+            atts->SetDimensionZ(atts->GetDimensionZ());
+        }
+    }
+
+    // Do dimensiont
+    if(which_widget == RebinningCutterAttributes::ID_dimensiont || doAll)
+    {
+        int val;
+        if(LineEditGetInt(dimensiont, val))
+            atts->SetDimensiont(val);
+        else
+        {
+            ResettingError(tr("Dimension t"),
+                IntToQString(atts->GetDimensiont()));
+            atts->SetDimensiont(atts->GetDimensiont());
         }
     }
 
@@ -243,17 +461,81 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
 
 
 void
-QvisRebinningCutterWindow::originProcessText()
+QvisRebinningCutterWindow::originXProcessText()
 {
-    GetCurrentValues(RebinningCutterAttributes::ID_origin);
+    GetCurrentValues(RebinningCutterAttributes::ID_originX);
     Apply();
 }
 
 
 void
-QvisRebinningCutterWindow::normalProcessText()
+QvisRebinningCutterWindow::originYProcessText()
 {
-    GetCurrentValues(RebinningCutterAttributes::ID_normal);
+    GetCurrentValues(RebinningCutterAttributes::ID_originY);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::originZProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_originZ);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::normalXProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_normalX);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::normalYProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_normalY);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::normalZProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_normalZ);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::dimensionXProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_dimensionX);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::dimensionYProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_dimensionY);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::dimensionZProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_dimensionZ);
+    Apply();
+}
+
+
+void
+QvisRebinningCutterWindow::dimensiontProcessText()
+{
+    GetCurrentValues(RebinningCutterAttributes::ID_dimensiont);
     Apply();
 }
 

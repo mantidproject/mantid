@@ -41,6 +41,8 @@
 
 #include <QvisOperatorWindow.h>
 #include <AttributeSubject.h>
+#include <qgridlayout.h>
+#include <qwidget.h>
 
 class RebinningCutterAttributes;
 class QLabel;
@@ -55,6 +57,7 @@ class QvisColorButton;
 class QvisLineStyleWidget;
 class QvisLineWidthWidget;
 class QvisVariableButton;
+class QComboBox;
 
 // ****************************************************************************
 // Class: QvisRebinningCutterWindow
@@ -86,13 +89,42 @@ class QvisRebinningCutterWindow : public QvisOperatorWindow
     void UpdateWindow(bool doAll);
     virtual void GetCurrentValues(int which_widget);
   private slots:
-    void originProcessText();
-    void normalProcessText();
+    void originXProcessText();
+    void originYProcessText();
+    void originZProcessText();
+    void normalXProcessText();
+    void normalYProcessText();
+    void normalZProcessText();
+    void dimensionXProcessText();
+    void dimensionYProcessText();
+    void dimensionZProcessText();
+    void dimensiontProcessText();
   private:
-    QLineEdit *origin;
-    QLineEdit *normal;
-    QLabel *originLabel;
-    QLabel *normalLabel;
+    QLineEdit *originX;
+    QLineEdit *originY;
+    QLineEdit *originZ;
+    QLineEdit *normalX;
+    QLineEdit *normalY;
+    QLineEdit *normalZ;
+    QLineEdit *dimensionX;
+    QLineEdit *dimensionY;
+    QLineEdit *dimensionZ;
+    QLineEdit *dimensiont;
+    QLabel *originXLabel;
+    QLabel *originYLabel;
+    QLabel *originZLabel;
+    QLabel *normalXLabel;
+    QLabel *normalYLabel;
+    QLabel *normalZLabel;
+    QLabel *dimensionXLabel;
+    QLabel *dimensionYLabel;
+    QLabel *dimensionZLabel;
+    QLabel *dimensiontLabel;
+
+    QComboBox *dimensionXCombo;
+    QComboBox *dimensionYCombo;
+
+
 
     RebinningCutterAttributes *atts;
 };

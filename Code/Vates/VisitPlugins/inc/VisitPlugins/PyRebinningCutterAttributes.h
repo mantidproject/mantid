@@ -44,7 +44,7 @@
 //
 // Functions exposed to the VisIt module.
 //
-#define REBINNINGCUTTERATTRIBUTES_NMETH 6
+#define REBINNINGCUTTERATTRIBUTES_NMETH 22
 void           PyRebinningCutterAttributes_StartUp(RebinningCutterAttributes *subj, void *data);
 void           PyRebinningCutterAttributes_CloseDown();
 PyMethodDef *  PyRebinningCutterAttributes_GetMethodTable(int *nMethods);

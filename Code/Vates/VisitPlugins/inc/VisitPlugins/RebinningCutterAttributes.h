@@ -59,22 +59,6 @@
 class RebinningCutterAttributes : public AttributeSubject
 {
 public:
-    enum AxisType
-    {
-        XAxis,
-        YAxis,
-        ZAxis,
-        Arbitrary,
-        ThetaPhi
-    };
-    enum OriginType
-    {
-        Point,
-        Intercept,
-        Percent,
-        Zone,
-        Node
-    };
     // These constructors are for objects of this class
     RebinningCutterAttributes();
     RebinningCutterAttributes(const RebinningCutterAttributes &obj);
@@ -100,18 +84,30 @@ public:
 
     // Property selection methods
     virtual void SelectAll();
-    void SelectOrigin();
-    void SelectNormal();
 
     // Property setting methods
-    void SetOrigin(const doubleVector &origin_);
-    void SetNormal(const doubleVector &normal_);
+    void SetOriginX(double originX_);
+    void SetOriginY(double originY_);
+    void SetOriginZ(double originZ_);
+    void SetNormalX(double normalX_);
+    void SetNormalY(double normalY_);
+    void SetNormalZ(double normalZ_);
+    void SetDimensionX(int dimensionX_);
+    void SetDimensionY(int dimensionY_);
+    void SetDimensionZ(int dimensionZ_);
+    void SetDimensiont(int dimensiont_);
 
     // Property getting methods
-    const doubleVector &GetOrigin() const;
-          doubleVector &GetOrigin();
-    const doubleVector &GetNormal() const;
-          doubleVector &GetNormal();
+    double GetOriginX() const;
+    double GetOriginY() const;
+    double GetOriginZ() const;
+    double GetNormalX() const;
+    double GetNormalY() const;
+    double GetNormalZ() const;
+    int    GetDimensionX() const;
+    int    GetDimensionY() const;
+    int    GetDimensionZ() const;
+    int    GetDimensiont() const;
 
 
     // Keyframing methods
@@ -123,19 +119,35 @@ public:
 
     // IDs that can be used to identify fields in case statements
     enum {
-        ID_origin = 0,
-        ID_normal,
+        ID_originX = 0,
+        ID_originY,
+        ID_originZ,
+        ID_normalX,
+        ID_normalY,
+        ID_normalZ,
+        ID_dimensionX,
+        ID_dimensionY,
+        ID_dimensionZ,
+        ID_dimensiont,
         ID__LAST
     };
 
 private:
-    doubleVector origin;
-    doubleVector normal;
+    double originX;
+    double originY;
+    double originZ;
+    double normalX;
+    double normalY;
+    double normalZ;
+    int    dimensionX;
+    int    dimensionY;
+    int    dimensionZ;
+    int    dimensiont;
 
     // Static class format string for type map.
     static const char *TypeMapFormatString;
     static const private_tmfs_t TmfsStruct;
 };
-#define REBINNINGCUTTERATTRIBUTES_TMFS "d*d*"
+#define REBINNINGCUTTERATTRIBUTES_TMFS "ddddddiiii"
 
 #endif

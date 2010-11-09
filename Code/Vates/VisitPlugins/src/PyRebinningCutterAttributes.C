@@ -76,38 +76,26 @@ PyRebinningCutterAttributes_ToString(const RebinningCutterAttributes *atts, cons
     std::string str; 
     char tmpStr[1000]; 
 
-    {   const doubleVector &origin = atts->GetOrigin();
-        SNPRINTF(tmpStr, 1000, "%sorigin = (", prefix);
-        str += tmpStr;
-        for(size_t i = 0; i < origin.size(); ++i)
-        {
-            SNPRINTF(tmpStr, 1000, "%g", origin[i]);
-            str += tmpStr;
-            if(i < origin.size() - 1)
-            {
-                SNPRINTF(tmpStr, 1000, ", ");
-                str += tmpStr;
-            }
-        }
-        SNPRINTF(tmpStr, 1000, ")\n");
-        str += tmpStr;
-    }
-    {   const doubleVector &normal = atts->GetNormal();
-        SNPRINTF(tmpStr, 1000, "%snormal = (", prefix);
-        str += tmpStr;
-        for(size_t i = 0; i < normal.size(); ++i)
-        {
-            SNPRINTF(tmpStr, 1000, "%g", normal[i]);
-            str += tmpStr;
-            if(i < normal.size() - 1)
-            {
-                SNPRINTF(tmpStr, 1000, ", ");
-                str += tmpStr;
-            }
-        }
-        SNPRINTF(tmpStr, 1000, ")\n");
-        str += tmpStr;
-    }
+    SNPRINTF(tmpStr, 1000, "%soriginX = %g\n", prefix, atts->GetOriginX());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%soriginY = %g\n", prefix, atts->GetOriginY());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%soriginZ = %g\n", prefix, atts->GetOriginZ());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%snormalX = %g\n", prefix, atts->GetNormalX());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%snormalY = %g\n", prefix, atts->GetNormalY());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%snormalZ = %g\n", prefix, atts->GetNormalZ());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sdimensionX = %d\n", prefix, atts->GetDimensionX());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sdimensionY = %d\n", prefix, atts->GetDimensionY());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sdimensionZ = %d\n", prefix, atts->GetDimensionZ());
+    str += tmpStr;
+    SNPRINTF(tmpStr, 1000, "%sdimensiont = %d\n", prefix, atts->GetDimensiont());
+    str += tmpStr;
     return str;
 }
 
@@ -121,128 +109,242 @@ RebinningCutterAttributes_Notify(PyObject *self, PyObject *args)
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_SetOrigin(PyObject *self, PyObject *args)
+RebinningCutterAttributes_SetOriginX(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
 
-    doubleVector  &vec = obj->data->GetOrigin();
-    PyObject     *tuple;
-    if(!PyArg_ParseTuple(args, "O", &tuple))
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
         return NULL;
 
-    if(PyTuple_Check(tuple))
-    {
-        vec.resize(PyTuple_Size(tuple));
-        for(int i = 0; i < PyTuple_Size(tuple); ++i)
-        {
-            PyObject *item = PyTuple_GET_ITEM(tuple, i);
-            if(PyFloat_Check(item))
-                vec[i] = PyFloat_AS_DOUBLE(item);
-            else if(PyInt_Check(item))
-                vec[i] = double(PyInt_AS_LONG(item));
-            else if(PyLong_Check(item))
-                vec[i] = PyLong_AsDouble(item);
-            else
-                vec[i] = 0.;
-        }
-    }
-    else if(PyFloat_Check(tuple))
-    {
-        vec.resize(1);
-        vec[0] = PyFloat_AS_DOUBLE(tuple);
-    }
-    else if(PyInt_Check(tuple))
-    {
-        vec.resize(1);
-        vec[0] = double(PyInt_AS_LONG(tuple));
-    }
-    else if(PyLong_Check(tuple))
-    {
-        vec.resize(1);
-        vec[0] = PyLong_AsDouble(tuple);
-    }
-    else
-        return NULL;
-
-    // Mark the origin in the object as modified.
-    obj->data->SelectOrigin();
+    // Set the originX in the object.
+    obj->data->SetOriginX(dval);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_GetOrigin(PyObject *self, PyObject *args)
+RebinningCutterAttributes_GetOriginX(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
-    // Allocate a tuple the with enough entries to hold the origin.
-    const doubleVector &origin = obj->data->GetOrigin();
-    PyObject *retval = PyTuple_New(origin.size());
-    for(size_t i = 0; i < origin.size(); ++i)
-        PyTuple_SET_ITEM(retval, i, PyFloat_FromDouble(origin[i]));
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetOriginX());
     return retval;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_SetNormal(PyObject *self, PyObject *args)
+RebinningCutterAttributes_SetOriginY(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
 
-    doubleVector  &vec = obj->data->GetNormal();
-    PyObject     *tuple;
-    if(!PyArg_ParseTuple(args, "O", &tuple))
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
         return NULL;
 
-    if(PyTuple_Check(tuple))
-    {
-        vec.resize(PyTuple_Size(tuple));
-        for(int i = 0; i < PyTuple_Size(tuple); ++i)
-        {
-            PyObject *item = PyTuple_GET_ITEM(tuple, i);
-            if(PyFloat_Check(item))
-                vec[i] = PyFloat_AS_DOUBLE(item);
-            else if(PyInt_Check(item))
-                vec[i] = double(PyInt_AS_LONG(item));
-            else if(PyLong_Check(item))
-                vec[i] = PyLong_AsDouble(item);
-            else
-                vec[i] = 0.;
-        }
-    }
-    else if(PyFloat_Check(tuple))
-    {
-        vec.resize(1);
-        vec[0] = PyFloat_AS_DOUBLE(tuple);
-    }
-    else if(PyInt_Check(tuple))
-    {
-        vec.resize(1);
-        vec[0] = double(PyInt_AS_LONG(tuple));
-    }
-    else if(PyLong_Check(tuple))
-    {
-        vec.resize(1);
-        vec[0] = PyLong_AsDouble(tuple);
-    }
-    else
-        return NULL;
-
-    // Mark the normal in the object as modified.
-    obj->data->SelectNormal();
+    // Set the originY in the object.
+    obj->data->SetOriginY(dval);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 /*static*/ PyObject *
-RebinningCutterAttributes_GetNormal(PyObject *self, PyObject *args)
+RebinningCutterAttributes_GetOriginY(PyObject *self, PyObject *args)
 {
     RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
-    // Allocate a tuple the with enough entries to hold the normal.
-    const doubleVector &normal = obj->data->GetNormal();
-    PyObject *retval = PyTuple_New(normal.size());
-    for(size_t i = 0; i < normal.size(); ++i)
-        PyTuple_SET_ITEM(retval, i, PyFloat_FromDouble(normal[i]));
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetOriginY());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetOriginZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the originZ in the object.
+    obj->data->SetOriginZ(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetOriginZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetOriginZ());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetNormalX(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the normalX in the object.
+    obj->data->SetNormalX(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetNormalX(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetNormalX());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetNormalY(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the normalY in the object.
+    obj->data->SetNormalY(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetNormalY(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetNormalY());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetNormalZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    double dval;
+    if(!PyArg_ParseTuple(args, "d", &dval))
+        return NULL;
+
+    // Set the normalZ in the object.
+    obj->data->SetNormalZ(dval);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetNormalZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyFloat_FromDouble(obj->data->GetNormalZ());
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetDimensionX(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the dimensionX in the object.
+    obj->data->SetDimensionX((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetDimensionX(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensionX()));
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetDimensionY(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the dimensionY in the object.
+    obj->data->SetDimensionY((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetDimensionY(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensionY()));
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetDimensionZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the dimensionZ in the object.
+    obj->data->SetDimensionZ((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetDimensionZ(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensionZ()));
+    return retval;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_SetDimensiont(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+
+    int ival;
+    if(!PyArg_ParseTuple(args, "i", &ival))
+        return NULL;
+
+    // Set the dimensiont in the object.
+    obj->data->SetDimensiont((int)ival);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+/*static*/ PyObject *
+RebinningCutterAttributes_GetDimensiont(PyObject *self, PyObject *args)
+{
+    RebinningCutterAttributesObject *obj = (RebinningCutterAttributesObject *)self;
+    PyObject *retval = PyInt_FromLong(long(obj->data->GetDimensiont()));
     return retval;
 }
 
@@ -250,10 +352,26 @@ RebinningCutterAttributes_GetNormal(PyObject *self, PyObject *args)
 
 PyMethodDef PyRebinningCutterAttributes_methods[REBINNINGCUTTERATTRIBUTES_NMETH] = {
     {"Notify", RebinningCutterAttributes_Notify, METH_VARARGS},
-    {"SetOrigin", RebinningCutterAttributes_SetOrigin, METH_VARARGS},
-    {"GetOrigin", RebinningCutterAttributes_GetOrigin, METH_VARARGS},
-    {"SetNormal", RebinningCutterAttributes_SetNormal, METH_VARARGS},
-    {"GetNormal", RebinningCutterAttributes_GetNormal, METH_VARARGS},
+    {"SetOriginX", RebinningCutterAttributes_SetOriginX, METH_VARARGS},
+    {"GetOriginX", RebinningCutterAttributes_GetOriginX, METH_VARARGS},
+    {"SetOriginY", RebinningCutterAttributes_SetOriginY, METH_VARARGS},
+    {"GetOriginY", RebinningCutterAttributes_GetOriginY, METH_VARARGS},
+    {"SetOriginZ", RebinningCutterAttributes_SetOriginZ, METH_VARARGS},
+    {"GetOriginZ", RebinningCutterAttributes_GetOriginZ, METH_VARARGS},
+    {"SetNormalX", RebinningCutterAttributes_SetNormalX, METH_VARARGS},
+    {"GetNormalX", RebinningCutterAttributes_GetNormalX, METH_VARARGS},
+    {"SetNormalY", RebinningCutterAttributes_SetNormalY, METH_VARARGS},
+    {"GetNormalY", RebinningCutterAttributes_GetNormalY, METH_VARARGS},
+    {"SetNormalZ", RebinningCutterAttributes_SetNormalZ, METH_VARARGS},
+    {"GetNormalZ", RebinningCutterAttributes_GetNormalZ, METH_VARARGS},
+    {"SetDimensionX", RebinningCutterAttributes_SetDimensionX, METH_VARARGS},
+    {"GetDimensionX", RebinningCutterAttributes_GetDimensionX, METH_VARARGS},
+    {"SetDimensionY", RebinningCutterAttributes_SetDimensionY, METH_VARARGS},
+    {"GetDimensionY", RebinningCutterAttributes_GetDimensionY, METH_VARARGS},
+    {"SetDimensionZ", RebinningCutterAttributes_SetDimensionZ, METH_VARARGS},
+    {"GetDimensionZ", RebinningCutterAttributes_GetDimensionZ, METH_VARARGS},
+    {"SetDimensiont", RebinningCutterAttributes_SetDimensiont, METH_VARARGS},
+    {"GetDimensiont", RebinningCutterAttributes_GetDimensiont, METH_VARARGS},
     {NULL, NULL}
 };
 
@@ -282,10 +400,26 @@ RebinningCutterAttributes_compare(PyObject *v, PyObject *w)
 PyObject *
 PyRebinningCutterAttributes_getattr(PyObject *self, char *name)
 {
-    if(strcmp(name, "origin") == 0)
-        return RebinningCutterAttributes_GetOrigin(self, NULL);
-    if(strcmp(name, "normal") == 0)
-        return RebinningCutterAttributes_GetNormal(self, NULL);
+    if(strcmp(name, "originX") == 0)
+        return RebinningCutterAttributes_GetOriginX(self, NULL);
+    if(strcmp(name, "originY") == 0)
+        return RebinningCutterAttributes_GetOriginY(self, NULL);
+    if(strcmp(name, "originZ") == 0)
+        return RebinningCutterAttributes_GetOriginZ(self, NULL);
+    if(strcmp(name, "normalX") == 0)
+        return RebinningCutterAttributes_GetNormalX(self, NULL);
+    if(strcmp(name, "normalY") == 0)
+        return RebinningCutterAttributes_GetNormalY(self, NULL);
+    if(strcmp(name, "normalZ") == 0)
+        return RebinningCutterAttributes_GetNormalZ(self, NULL);
+    if(strcmp(name, "dimensionX") == 0)
+        return RebinningCutterAttributes_GetDimensionX(self, NULL);
+    if(strcmp(name, "dimensionY") == 0)
+        return RebinningCutterAttributes_GetDimensionY(self, NULL);
+    if(strcmp(name, "dimensionZ") == 0)
+        return RebinningCutterAttributes_GetDimensionZ(self, NULL);
+    if(strcmp(name, "dimensiont") == 0)
+        return RebinningCutterAttributes_GetDimensiont(self, NULL);
 
     return Py_FindMethod(PyRebinningCutterAttributes_methods, self, name);
 }
@@ -300,10 +434,26 @@ PyRebinningCutterAttributes_setattr(PyObject *self, char *name, PyObject *args)
     Py_INCREF(args);
     PyObject *obj = NULL;
 
-    if(strcmp(name, "origin") == 0)
-        obj = RebinningCutterAttributes_SetOrigin(self, tuple);
-    else if(strcmp(name, "normal") == 0)
-        obj = RebinningCutterAttributes_SetNormal(self, tuple);
+    if(strcmp(name, "originX") == 0)
+        obj = RebinningCutterAttributes_SetOriginX(self, tuple);
+    else if(strcmp(name, "originY") == 0)
+        obj = RebinningCutterAttributes_SetOriginY(self, tuple);
+    else if(strcmp(name, "originZ") == 0)
+        obj = RebinningCutterAttributes_SetOriginZ(self, tuple);
+    else if(strcmp(name, "normalX") == 0)
+        obj = RebinningCutterAttributes_SetNormalX(self, tuple);
+    else if(strcmp(name, "normalY") == 0)
+        obj = RebinningCutterAttributes_SetNormalY(self, tuple);
+    else if(strcmp(name, "normalZ") == 0)
+        obj = RebinningCutterAttributes_SetNormalZ(self, tuple);
+    else if(strcmp(name, "dimensionX") == 0)
+        obj = RebinningCutterAttributes_SetDimensionX(self, tuple);
+    else if(strcmp(name, "dimensionY") == 0)
+        obj = RebinningCutterAttributes_SetDimensionY(self, tuple);
+    else if(strcmp(name, "dimensionZ") == 0)
+        obj = RebinningCutterAttributes_SetDimensionZ(self, tuple);
+    else if(strcmp(name, "dimensiont") == 0)
+        obj = RebinningCutterAttributes_SetDimensiont(self, tuple);
 
     if(obj != NULL)
         Py_DECREF(obj);

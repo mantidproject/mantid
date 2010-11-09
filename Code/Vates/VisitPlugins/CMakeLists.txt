@@ -11,8 +11,6 @@ INCLUDE(/usr/local/2.1.0/linux-intel/include/VisItLibraryDependencies.cmake)
 
 PROJECT(RebinningCutter)
 
-
-
 SET(COMMON_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterPluginInfo.C
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterCommonPluginInfo.C
@@ -26,10 +24,16 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterPluginInfo.C
 SET(LIBG_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterGUIPluginInfo.C
 ${CMAKE_CURRENT_SOURCE_DIR}/src/QvisRebinningCutterWindow.C
+${CMAKE_CURRENT_SOURCE_DIR}/src/IntegratedDimensionWidget.C
+${CMAKE_CURRENT_SOURCE_DIR}/src/DimensionPickerWidget.C
+${CMAKE_CURRENT_SOURCE_DIR}/src/DimensionWidget.C
 ${COMMON_SOURCES}
 )
 SET(LIBG_MOC_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/QvisRebinningCutterWindow.h
+${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/IntegratedDimensionWidget.h
+${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/DimensionPickerWidget.h
+${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitPlugins/DimensionWidget.h
 )
 QT_WRAP_CPP(GRebinningCutterOperator LIBG_SOURCES ${LIBG_MOC_SOURCES})
 
