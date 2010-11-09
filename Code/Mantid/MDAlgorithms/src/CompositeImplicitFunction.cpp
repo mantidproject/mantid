@@ -53,6 +53,11 @@ namespace Mantid
             return formattedXMLString;
         }
 
+        int CompositeImplicitFunction::getNFunctions() const
+        {
+            return this->m_Functions.size();
+        }
+
 
         bool CompositeImplicitFunction::evaluate(const API::Point3D*  pPoint3D) const
         {
