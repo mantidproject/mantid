@@ -57,6 +57,7 @@ namespace MDAlgorithms
     double getLowerBound() const;
     std::string getName() const;
     unsigned int getId() const;
+    void setIntegration(DimensionParameterIntegration* integration);
   };
 }
 }

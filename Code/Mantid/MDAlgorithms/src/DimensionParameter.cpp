@@ -32,6 +32,11 @@ namespace MDAlgorithms
     return this->m_integration;
   }
 
+  void DimensionParameter::setIntegration(DimensionParameterIntegration* integration)
+  {
+    this->m_integration.reset(integration);
+  }
+
   double DimensionParameter::getUpperBound() const
   {
     return this->m_upperBounds;

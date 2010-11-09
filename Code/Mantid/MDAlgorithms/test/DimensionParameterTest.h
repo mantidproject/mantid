@@ -68,6 +68,22 @@ public:
 
   }
 
+  void testSetIntegration()
+  {
+    //i.e. swapping between integration and no integration.
+
+    using namespace Mantid::MDAlgorithms;
+    DimensionParameterIntegration* p_integration = new DimensionParameterIntegration(3, 1);
+    DimensionParameter dimensionParameter(1, "Temperature Parameter", 5, 1, boost::shared_ptr<DimensionParameterIntegration>(p_integration));
+
+    DimensionParameterIntegration* p_integrationNew = new DimensionParameterNoIntegration;
+    dimensionParameter.setIntegration(p_integrationNew);
+
+    boost::shared_ptr<DimensionParameterIntegration> sp_appliedIntegration = dimensionParameter.getIntegration();
+    TSM_ASSERT_EQUALS("The integration has not been applied upon set.", p_integrationNew, sp_appliedIntegration.get() );
+
+  }
+
 };
 
 #endif
