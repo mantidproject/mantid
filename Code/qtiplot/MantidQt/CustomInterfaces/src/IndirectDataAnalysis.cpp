@@ -23,6 +23,7 @@
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
+#include <QtCheckBoxFactory>
 
 #include <Poco/NObserver.h>
 
@@ -78,8 +79,15 @@ void IndirectDataAnalysis::initLayout()
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
-  setupFuryFit();
+  // create validators
+  m_valInt = new QIntValidator(this);
+  m_valDbl = new QDoubleValidator(this);
+
   setupElwin();
+  // setupMsd();
+  // setupFury();
+  setupFuryFit();
+  // setupAbsorption();
 
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -91,9 +99,6 @@ void IndirectDataAnalysis::initLayout()
   connect(m_uiForm.set_cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentChanged(int)));
   connect(m_uiForm.set_cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
   connect(m_uiForm.set_cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
-  // elwin
-  connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
-  connect(m_uiForm.elwin_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(elwinTwoRanges(bool)));
   // msd
   connect(m_uiForm.msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(msdPlotInput()));
   // fury
@@ -101,32 +106,15 @@ void IndirectDataAnalysis::initLayout()
   connect(m_uiForm.fury_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
   connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
   connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
-  // fury fit
-  connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitTypeSelection(int)));
-  connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));
-  connect(m_uiForm.furyfit_pbRefreshWSList, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
-  connect(m_uiForm.furyfit_pbPlotOutput, SIGNAL(clicked()), this, SLOT(furyfitPlotOutput()));
-  connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // absorption
   connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
   
   m_settingsGroup = "CustomInterfaces/IndirectAnalysis/";
 
-  // create validators
-  m_valInt = new QIntValidator(this);
-  m_valDbl = new QDoubleValidator(this);
-
   // apply validators - settings
   m_uiForm.set_leSpecMin->setValidator(m_valInt);
   m_uiForm.set_leSpecMax->setValidator(m_valInt);
   m_uiForm.set_leEFixed->setValidator(m_valDbl);
-  // apply validators - elwin
-  m_uiForm.elwin_leEStart->setValidator(m_valDbl);
-  m_uiForm.elwin_leEEnd->setValidator(m_valDbl);
-  m_uiForm.elwin_leRangeTwoStart->setValidator(m_valDbl);
-  m_uiForm.elwin_leRangeTwoEnd->setValidator(m_valDbl);
   // apply validators - msd
   m_uiForm.msd_leStartX->setValidator(m_valDbl);
   m_uiForm.msd_leEndX->setValidator(m_valDbl);
@@ -134,8 +122,6 @@ void IndirectDataAnalysis::initLayout()
   m_uiForm.fury_leELow->setValidator(m_valDbl);
   m_uiForm.fury_leEWidth->setValidator(m_valDbl);
   m_uiForm.fury_leEHigh->setValidator(m_valDbl);
-  // apply validators - furyfit
-  m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
   // apply validators - absorption
   m_uiForm.abs_leAttenuation->setValidator(m_valDbl);
   m_uiForm.abs_leScatter->setValidator(m_valDbl);
@@ -150,8 +136,6 @@ void IndirectDataAnalysis::initLayout()
   m_uiForm.abs_leAnnuli->setValidator(m_valInt);
 
   refreshWSlist();
-
-  elwinTwoRanges(m_uiForm.elwin_ckUseTwoRanges->isChecked());
 }
 
 void IndirectDataAnalysis::initLocalPython()
@@ -226,6 +210,40 @@ void IndirectDataAnalysis::saveSettings()
 
 void IndirectDataAnalysis::setupElwin()
 {
+  // Create QtTreePropertyBrowser object
+  m_elwTree = new QtTreePropertyBrowser();
+  m_uiForm.elwin_properties->addWidget(m_elwTree);
+
+  // Create Manager Objects
+  m_elwDblMng = new QtDoublePropertyManager();
+  m_elwBlnMng = new QtBoolPropertyManager();
+  m_elwGrpMng = new QtGroupPropertyManager();
+
+  // Editor Factories
+  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  QtCheckBoxFactory *checkboxFactory = new QtCheckBoxFactory();
+  m_elwTree->setFactoryForManager(m_elwDblMng, doubleEditorFactory);
+  m_elwTree->setFactoryForManager(m_elwBlnMng, checkboxFactory);
+
+  // Create Properties
+  m_elwProp["R1S"] = m_elwDblMng->addProperty("Start");
+  m_elwProp["R1E"] = m_elwDblMng->addProperty("End");
+  m_elwProp["R2S"] = m_elwDblMng->addProperty("Start");
+  m_elwProp["R2E"] = m_elwDblMng->addProperty("End");
+
+  m_elwProp["UseTwoRanges"] = m_elwBlnMng->addProperty("Use Two Ranges and Subtract");
+
+  m_elwProp["Range1"] = m_elwGrpMng->addProperty("Range One");
+  m_elwProp["Range1"]->addSubProperty(m_elwProp["R1S"]);
+  m_elwProp["Range1"]->addSubProperty(m_elwProp["R1E"]);
+  m_elwProp["Range2"] = m_elwGrpMng->addProperty("Range Two");
+  m_elwProp["Range2"]->addSubProperty(m_elwProp["R2S"]);
+  m_elwProp["Range2"]->addSubProperty(m_elwProp["R2E"]);
+
+  m_elwTree->addProperty(m_elwProp["Range1"]);
+  m_elwTree->addProperty(m_elwProp["UseTwoRanges"]);
+  m_elwTree->addProperty(m_elwProp["Range2"]);
+
   // Create Slice Plot Widget for Range Selection
   m_elwPlot = new QwtPlot(this);
   m_elwPlot->setAxisFont(QwtPlot::xBottom, this->font());
@@ -235,26 +253,24 @@ void IndirectDataAnalysis::setupElwin()
   // We always want one range selector... the second one can be controlled from
   // within the elwinTwoRanges(bool state) function
   m_elwR1 = new MantidWidgets::RangeSelector(m_elwPlot);
-  m_elwR1->setMinimum(m_uiForm.elwin_leEStart->text().toDouble());
-  m_elwR1->setMaximum(m_uiForm.elwin_leEEnd->text().toDouble());
   connect(m_elwR1, SIGNAL(minValueChanged(double)), this, SLOT(elwinMinChanged(double)));
   connect(m_elwR1, SIGNAL(maxValueChanged(double)), this, SLOT(elwinMaxChanged(double)));
   // create the second range
   m_elwR2 = new MantidWidgets::RangeSelector(m_elwPlot);
   m_elwR2->setColour(Qt::darkGreen); // dark green for background
-  m_elwR2->setMinimum(m_uiForm.elwin_leRangeTwoStart->text().toDouble());
-  m_elwR2->setMaximum(m_uiForm.elwin_leRangeTwoEnd->text().toDouble());
   connect(m_elwR1, SIGNAL(rangeChanged(double, double)), m_elwR2, SLOT(setRange(double, double)));
   connect(m_elwR2, SIGNAL(minValueChanged(double)), this, SLOT(elwinMinChanged(double)));
   connect(m_elwR2, SIGNAL(maxValueChanged(double)), this, SLOT(elwinMaxChanged(double)));
   m_elwR2->setRange(m_elwR1->getRange());
   // Refresh the plot window
   m_elwPlot->replot();
+  
+  connect(m_elwDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(elwinUpdateRS(QtProperty*, double)));
+  connect(m_elwBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(elwinTwoRanges(QtProperty*, bool)));
+  elwinTwoRanges(0, false);
 
-  connect(m_uiForm.elwin_leEStart, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
-  connect(m_uiForm.elwin_leEEnd, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
-  connect(m_uiForm.elwin_leRangeTwoStart, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
-  connect(m_uiForm.elwin_leRangeTwoEnd, SIGNAL(editingFinished()), this, SLOT(elwinUpdateRS()));
+  // m_uiForm element signals and slots
+  connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
 }
 
 void IndirectDataAnalysis::setupFuryFit()
@@ -313,6 +329,17 @@ void IndirectDataAnalysis::setupFuryFit()
 
   // Connect to PlotGuess checkbox
   connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(furyfitPlotGuess(QtProperty*)));
+
+  // Signal/slot ui connections
+  connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitTypeSelection(int)));
+  connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
+  connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
+  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));
+  connect(m_uiForm.furyfit_pbRefreshWSList, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.furyfit_pbPlotOutput, SIGNAL(clicked()), this, SLOT(furyfitPlotOutput()));
+  connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
+  // apply validators - furyfit
+  m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
 }
 
 bool IndirectDataAnalysis::validateFury()
@@ -382,48 +409,6 @@ bool IndirectDataAnalysis::validateElwin()
   if ( ! m_uiForm.elwin_inputFile->isValid() )
   {
     valid = false;
-  }
-
-  if ( m_uiForm.elwin_leEStart->text() == "" )
-  {
-    m_uiForm.elwin_valRangeStart->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.elwin_valRangeStart->setText(" ");
-  }
-  if ( m_uiForm.elwin_leEEnd->text() == "" )
-  {
-    m_uiForm.elwin_valRangeEnd->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.elwin_valRangeEnd->setText(" ");
-  }
-
-  if ( m_uiForm.elwin_ckUseTwoRanges->isChecked() )
-  {
-    if ( m_uiForm.elwin_leRangeTwoStart->text() == "" )
-    {
-      m_uiForm.elwin_valRangeTwoStart->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.elwin_valRangeTwoStart->setText(" ");
-    }
-
-    if ( m_uiForm.elwin_leRangeTwoEnd->text() == "" )
-    {
-      m_uiForm.elwin_valRangeTwoEnd->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.elwin_valRangeTwoEnd->setText(" ");
-    }
   }
 
   return valid;
@@ -852,10 +837,11 @@ void IndirectDataAnalysis::elwinRun()
   QString pyInput =
     "from IndirectDataAnalysis import elwin\n"
     "input = [r'" + m_uiForm.elwin_inputFile->getFilenames().join("', r'") + "']\n"
-    "eRange = [ " + m_uiForm.elwin_leEStart->text() +","+ m_uiForm.elwin_leEEnd->text();
-  if ( m_uiForm.elwin_ckUseTwoRanges->isChecked() )
+    "eRange = [ " + QString::number(m_elwDblMng->value(m_elwProp["R1S"])) +","+ QString::number(m_elwDblMng->value(m_elwProp["R1E"]));
+
+  if ( m_elwBlnMng->value(m_elwProp["UseTwoRanges"]) )
   {
-    pyInput += ", " + m_uiForm.elwin_leRangeTwoStart->text() + ", " + m_uiForm.elwin_leRangeTwoEnd->text();
+    pyInput += ", " + QString::number(m_elwDblMng->value(m_elwProp["R2S"])) + ", " + QString::number(m_elwDblMng->value(m_elwProp["R2E"]));
   }
 
   pyInput+= "]\n";
@@ -922,20 +908,9 @@ void IndirectDataAnalysis::elwinPlotInput()
   }
 }
 
-void IndirectDataAnalysis::elwinTwoRanges(bool state)
+void IndirectDataAnalysis::elwinTwoRanges(QtProperty*, bool val)
 {
-  QString val;
-  if ( state ) val = "*";
-  else val = " ";
-  m_uiForm.elwin_lbR2Start->setEnabled(state);
-  m_uiForm.elwin_lbR2End->setEnabled(state);
-  m_uiForm.elwin_leRangeTwoStart->setEnabled(state);
-  m_uiForm.elwin_leRangeTwoEnd->setEnabled(state);
-  m_uiForm.elwin_valRangeTwoStart->setEnabled(state);
-  m_uiForm.elwin_valRangeTwoEnd->setEnabled(state);
-  m_uiForm.elwin_valRangeTwoStart->setText(val);
-  m_uiForm.elwin_valRangeTwoEnd->setText(val);
-  m_elwR2->setVisible(state);
+  m_elwR2->setVisible(val);
 }
 
 void IndirectDataAnalysis::elwinMinChanged(double val)
@@ -943,11 +918,11 @@ void IndirectDataAnalysis::elwinMinChanged(double val)
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_elwR1 )
   {
-    m_uiForm.elwin_leEStart->setText(QString::number(val));
+    m_elwDblMng->setValue(m_elwProp["R1S"], val);
   }
   else if ( from == m_elwR2 )
   {
-    m_uiForm.elwin_leRangeTwoStart->setText(QString::number(val));
+    m_elwDblMng->setValue(m_elwProp["R2S"], val);
   }
 }
 
@@ -956,35 +931,20 @@ void IndirectDataAnalysis::elwinMaxChanged(double val)
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_elwR1 )
   {
-    m_uiForm.elwin_leEEnd->setText(QString::number(val));
+    m_elwDblMng->setValue(m_elwProp["R1E"], val);
   }
   else if ( from == m_elwR2 )
   {
-    m_uiForm.elwin_leRangeTwoEnd->setText(QString::number(val));
+    m_elwDblMng->setValue(m_elwProp["R2E"], val);
   }
 }
 
-void IndirectDataAnalysis::elwinUpdateRS()
+void IndirectDataAnalysis::elwinUpdateRS(QtProperty* prop, double val)
 {
-  QLineEdit* from = qobject_cast<QLineEdit*>(sender());
-  double val = from->text().toDouble();
-
-  if ( from == m_uiForm.elwin_leEStart )
-  {
-    m_elwR1->setMinimum(val);
-  }
-  else if ( from == m_uiForm.elwin_leEEnd )
-  {
-    m_elwR1->setMaximum(val);
-  }
-  else if ( from == m_uiForm.elwin_leRangeTwoStart )
-  {
-    m_elwR2->setMinimum(val);
-  }
-  else if ( from == m_uiForm.elwin_leRangeTwoEnd )
-  {
-    m_elwR2->setMaximum(val);
-  }
+  if ( prop == m_elwProp["R1S"] ) m_elwR1->setMinimum(val);
+  else if ( prop == m_elwProp["R1E"] ) m_elwR1->setMaximum(val);
+  else if ( prop == m_elwProp["R2S"] ) m_elwR2->setMinimum(val);
+  else if ( prop == m_elwProp["R2E"] ) m_elwR2->setMaximum(val);
 }
 
 void IndirectDataAnalysis::msdRun()
@@ -1466,7 +1426,7 @@ void IndirectDataAnalysis::furyfitSequential()
 
 }
 /** ...  */
-void IndirectDataAnalysis::furyfitPlotGuess(QtProperty* prop)
+void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
 {
   if ( ! m_uiForm.furyfit_ckPlotGuess->isChecked() )
   {

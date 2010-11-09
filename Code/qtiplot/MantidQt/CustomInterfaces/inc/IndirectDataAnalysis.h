@@ -82,10 +82,10 @@ namespace MantidQt
 
       // ElasticWindow
       void elwinPlotInput();
-      void elwinTwoRanges(bool state);
+      void elwinTwoRanges(QtProperty*, bool);
       void elwinMinChanged(double val);
       void elwinMaxChanged(double val);
-      void elwinUpdateRS();
+      void elwinUpdateRS(QtProperty* prop, double val);
 
       // MSD Fit
       void msdPlotInput();
@@ -105,7 +105,7 @@ namespace MantidQt
       void furyfitInputType(int index);
       void furyfitPlotOutput();
       void furyfitSequential();
-      void furyfitPlotGuess(QtProperty* prop);
+      void furyfitPlotGuess(QtProperty*);
 
       // Convolution Fit
 
@@ -126,6 +126,18 @@ namespace MantidQt
 
       bool m_furyResFileType;
 
+
+      // ELASTICWINDOW MINIPLOT (prefix: 'm_elw')
+      QwtPlot* m_elwPlot;
+      MantidWidgets::RangeSelector* m_elwR1;
+      MantidWidgets::RangeSelector* m_elwR2;
+      QwtPlotCurve* m_elwDataCurve;
+      QtTreePropertyBrowser* m_elwTree;
+      QMap<QString, QtProperty*> m_elwProp;
+      QtDoublePropertyManager* m_elwDblMng;
+      QtBoolPropertyManager* m_elwBlnMng;
+      QtGroupPropertyManager* m_elwGrpMng;
+
       // Fury Fit Member Variables (prefix 'm_ff')
       QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
       QtGroupPropertyManager* m_groupManager;
@@ -143,12 +155,6 @@ namespace MantidQt
       std::string m_ffInputWSName;
       QString m_furyfitTies;
       QString m_furyfitConstraints;
-
-      // ELASTICWINDOW MINIPLOT (prefix: 'm_elw')
-      QwtPlot* m_elwPlot;
-      MantidWidgets::RangeSelector* m_elwR1;
-      MantidWidgets::RangeSelector* m_elwR2;
-      QwtPlotCurve* m_elwDataCurve;
 
       /// Change Observer for ConfigService (monitors user directories)
       Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
