@@ -80,8 +80,6 @@ public:
     // set up Lorentzian fitting function
     ExpDecay* fn = new ExpDecay();
     fn->initialize();
-    // keep default initial parameters
-    fn->tie("c","0");
 
     alg2.setFunction(fn);    
 
@@ -105,7 +103,6 @@ public:
 
 
     TS_ASSERT_DELTA( fn->getParameter("h"), 5 ,0.0001);
-    //TS_ASSERT_DELTA( fn->getParameter("c"), 0 ,0.0001);
     TS_ASSERT_DELTA( fn->getParameter("t"), 3 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
