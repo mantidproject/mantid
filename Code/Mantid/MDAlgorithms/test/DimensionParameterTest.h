@@ -84,6 +84,17 @@ public:
 
   }
 
+  void testgetIntegration()
+  {
+    //i.e. swapping between integration and no integration.
+
+    using namespace Mantid::MDAlgorithms;
+    DimensionParameterIntegration* p_integration = new DimensionParameterNoIntegration;
+    DimensionParameter dimensionParameter(1, "Temperature Parameter", 5, 1, boost::shared_ptr<DimensionParameterIntegration>(p_integration));
+
+    TSM_ASSERT_EQUALS("The getter for the integration flag is not wired-up correctly.", false, p_integration->isIntegrated());
+  }
+
 };
 
 #endif

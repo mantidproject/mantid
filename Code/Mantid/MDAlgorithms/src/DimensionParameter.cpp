@@ -57,5 +57,10 @@ namespace MDAlgorithms
     return this->m_id;
   }
 
+  bool DimensionParameter::isIntegrated() const
+  {
+    return this->m_integration->isIntegrated();
+  }
+
 }
 }
