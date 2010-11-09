@@ -8,7 +8,6 @@ namespace API
 AnalysisDataServiceImpl::AnalysisDataServiceImpl()
 :Mantid::Kernel::DataService<Mantid::API::Workspace>("AnalysisDataService")
 {
-  notificationCenter.addObserver(WorkspaceTracer::Instance().m_wkspAftReplaceObserver);
 }
 AnalysisDataServiceImpl::~AnalysisDataServiceImpl()
 {

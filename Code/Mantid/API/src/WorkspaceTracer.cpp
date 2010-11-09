@@ -85,6 +85,16 @@ WorkspaceTracerImpl::WorkspaceTracerImpl() :
     if( isOn > 0 ) m_isSwitchedOn = true;
     else m_isSwitchedOn = false;
   }
+  
+  // M. Gigg 2010-11-09: Disabled this as it is dangerous to use with scripts. Future work
+  // may see a slightly altered version of it used
+  if( m_isSwitchedOn )
+  {
+    g_log.error() << "Algorithm chaining has been requested to switch on "
+		  << "but is dangerous to use with scripts and is therefore currently unavailable.\n";
+  }
+  m_isSwitchedOn = false;  
+  
 }
 
 /**

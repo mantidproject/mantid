@@ -237,18 +237,22 @@ WorkspaceFactoryImpl::create(const IMDWorkspace_sptr origin) const
 IMDWorkspace_sptr 
 WorkspaceFactoryImpl::create(const std::string & className,const Geometry::MDGeometryDescription & geometryDescription) const
 {
-    IMDWorkspace_sptr ws;
- 
-    ws = boost::dynamic_pointer_cast<IMDWorkspace>(this->create("MDWorkspace"));
-    if (!ws)
-    {
-          g_log.error("MD Workspace was not created");
-          throw std::runtime_error("MD Workspace was not created");
-    }
+  // Avoid compiler warnings
+  (void)className;
+  (void)geometryDescription;
 
-   // ws->initialize(geometryDescription);
+  IMDWorkspace_sptr ws;
+  
+  ws = boost::dynamic_pointer_cast<IMDWorkspace>(this->create("MDWorkspace"));
+  if (!ws)
+  {
+    g_log.error("MD Workspace was not created");
+    throw std::runtime_error("MD Workspace was not created");
+  }
+  
+  // ws->initialize(geometryDescription);
 
-    return ws;
+  return ws;
    
 }
 
