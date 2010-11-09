@@ -77,7 +77,7 @@ namespace Mantid
         MDGeometryDescription(),
         Kernel::PropertyWithValue<std::string>(name, Value, validator, direction)
       {
-        Geometry::MDGeometryDescription::fromXMLstring(PropertyWithValue::value());
+       // Geometry::MDGeometryDescription::fromXMLstring(Kernel::PropertyWithValue::value());
       }
 
       MDPropertyGeometry( const std::string &name, const Geometry::MDGeometryDescription &Geom, const unsigned int direction=Kernel::Direction::Input,
@@ -85,7 +85,7 @@ namespace Mantid
         Geometry::MDGeometryDescription(Geom),
         Kernel::PropertyWithValue<std::string>(name, "", new Kernel::NullValidator<std::string> , direction)
       {
-        Kernel::PropertyWithValue<std::string>::setValue(Geometry::MDGeometryDescription::toXMLstring());
+       // Kernel::PropertyWithValue<std::string>::setValue(Geometry::MDGeometryDescription::toXMLstring());
       }
      //MDGeometryDescription const *getpMDGeometryDescription(void){return 
      // overloads IO operations for property for the lexical casts to work 
