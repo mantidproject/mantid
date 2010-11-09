@@ -228,6 +228,33 @@ class WorkspaceProxy(ProxyObject):
         result /= rhs
         return self
 
+    def getSampleDetails(self):
+        return RunProxy(self._getHeldObject().getSampleDetails())
+
+#-------------------------------------------------------------------------------
+class RunProxy(ProxyObject):
+    def __init__(self, runobj):
+        super(RunProxy, self).__init__(runobj)
+        self.__properties = {}
+        props = runobj.getProperties()
+        for prop in props:
+            self.__properties[prop.name()] = prop
+
+    def keys(self):
+        return self.__properties.keys()
+    def __contains__(self, key):
+        return key in self.__properties
+    def __getitem__(self, key):
+        return self.__properties[key].value()
+    def get(self, key, default=None):
+        if key in self.__properties:
+            return self[key].value()
+        else:
+            return default
+    def _getRawProperty(self, key):
+        return self.__properties[key]
+            
+
 #-------------------------------------------------------------------------------
 
 class WorkspaceProxyFactory(object):
@@ -245,7 +272,6 @@ class WorkspaceProxyFactory(object):
         proxy = WorkspaceProxy(wksp, self)
         self.__gc.register(wksp.getName(), proxy)
         return proxy
-            
 
 #-------------------------------------------------------------------------------
 
