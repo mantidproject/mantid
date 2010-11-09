@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceValidators.h"
 
 #include <cfloat>
 
@@ -41,7 +42,12 @@ namespace Algorithms
   using namespace Geometry;
   void ConvertSpectrumAxis::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+    // Validator for Input Workspace
+    CompositeValidator<> *wsVal = new CompositeValidator<>;
+    wsVal->add(new HistogramValidator<>);
+    wsVal->add(new SpectraAxisValidator<>);
+    
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsVal));
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
     std::vector<std::string> targetOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
     targetOptions.push_back("theta");
@@ -58,14 +64,7 @@ namespace Algorithms
     // Get the input workspace
     MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
     std::string unitTarget = getProperty("Target");
-    // Check that the input workspace has a spectrum axis for axis 1
-    // Could put this in a validator later
     const Axis* const specAxis = inputWS->getAxis(1);
-    if ( ! specAxis->isSpectra() )
-    {
-      g_log.error("The input workspace must have spectrum numbers along one axis");
-      throw std::runtime_error("The input workspace must have spectrum numbers along one axis");
-    }
     // Loop over the original spectrum axis, finding the theta (n.b. not 2theta!) for each spectrum
     // and storing it's corresponding workspace index
     // Map will be sorted on theta, so resulting axis will be ordered as well
@@ -105,14 +104,23 @@ namespace Algorithms
           l1val = l1;
           if (emode==2)
           {
-            try {
-              std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
-              if (! efixedVec.empty() ) 
-              {
-               efixed = efixedVec.at(0);
-               g_log.debug() << "Detector: " << detector->getID() << " EFixed: " << efixed << "\n";
-              }
-            } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single provided value */ }
+            std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
+            if ( efixedVec.empty() )
+            {
+              int detid = detector->getID();
+              IDetector_sptr detectorSingle = inputWS->getInstrument()->getDetector(detid);
+              efixedVec = detectorSingle->getNumberParameter("Efixed");
+            }
+            if (! efixedVec.empty() ) 
+            {
+              efixed = efixedVec.at(0);
+              g_log.debug() << "Detector: " << detector->getID() << " EFixed: " << efixed << "\n";
+            }
+            else
+            {
+              efixed = 0.0;
+              g_log.warning() << "Efixed could not be found for detector " << detector->getID() << ", set to 0.0\n";
+            }
           }
         }
         else
