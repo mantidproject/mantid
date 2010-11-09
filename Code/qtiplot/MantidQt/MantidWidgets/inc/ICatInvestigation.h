@@ -5,7 +5,6 @@
 // Includes
 //----------------------
 #include "MantidQtMantidWidgets/ui_ICatInvestigation.h"
-#include "MantidQtMantidWidgets/MantidWidget.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "WidgetDllOption.h"

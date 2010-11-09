@@ -20,6 +20,7 @@ HEADERDIR = inc
 SRCDIR = src
 
 SOURCES = \
+  $$SRCDIR/MantidWidget.cpp \
   $$SRCDIR/InterfaceFactory.cpp \
   $$SRCDIR/InterfaceManager.cpp \
   $$SRCDIR/AlgorithmInputHistory.cpp \
@@ -31,6 +32,7 @@ SOURCES = \
 
   
 HEADERS = \
+  $$HEADERDIR/MantidWidget.h \
   $$HEADERDIR/DllOption.h \
   $$HEADERDIR/InterfaceFactory.h \
   $$HEADERDIR/InterfaceManager.h \

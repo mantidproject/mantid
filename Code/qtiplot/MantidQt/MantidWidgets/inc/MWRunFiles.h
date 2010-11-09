@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 
 #include "MantidQtMantidWidgets/ui_MWRunFiles.h"
-#include "MantidQtMantidWidgets/MantidWidget.h"
+#include "MantidQtAPI/MantidWidget.h"
 #include "WidgetDllOption.h"
 #include <QString>
 #include <QSettings>
@@ -41,7 +41,7 @@ namespace MantidQt
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
 
-    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFiles : public MantidWidget
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFiles : public API::MantidWidget
     {
       Q_OBJECT
       Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)

@@ -1,14 +1,9 @@
-#include "MantidQtMantidWidgets/MantidWidget.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include <QPalette>
+#include "MantidQtAPI/MantidWidget.h"
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QDir>
 
-using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::API;
 
 /**
 * Default constructor

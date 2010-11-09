@@ -274,6 +274,7 @@ void SaveWorkspaces::saveSel()
       }
     }//end if save in this format
   }//end loop over formats
+  saveCommands += "print 'success'";
   emit runAsPythonScript(saveCommands);
 }
 /** Sets the filename to the name of the selected workspace

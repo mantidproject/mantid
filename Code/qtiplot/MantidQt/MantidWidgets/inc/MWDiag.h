@@ -4,7 +4,7 @@
 #include "MantidQtMantidWidgets/ui_MWDiag.h"
 #include "MantidQtMantidWidgets/MWDiagCalcs.h"
 #include "MantidQtMantidWidgets/DiagResults.h"
-#include "MantidQtMantidWidgets/MantidWidget.h"
+#include "MantidQtAPI/MantidWidget.h"
 #include "WidgetDllOption.h"
 #include <QSettings>
 #include <QStringList>
@@ -20,7 +20,7 @@ namespace MantidQt
     //------------------------------------------------
     class MWRunFiles;
     
-    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWDiag : public MantidWidget
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWDiag : public API::MantidWidget
     {
       Q_OBJECT
 

@@ -24,7 +24,6 @@ HEADERDIR = inc
 SRCDIR = src
 
 SOURCES = \
-  $$SRCDIR/MantidWidget.cpp \
   $$SRCDIR/MWRunFiles.cpp \
   $$SRCDIR/pythonCalc.cpp \
   $$SRCDIR/DiagResults.cpp \
@@ -43,7 +42,6 @@ SOURCES = \
   
  
 HEADERS = \
-  $$HEADERDIR/MantidWidget.h \
   $$HEADERDIR/MWRunFiles.h \
   $$HEADERDIR/pythonCalc.h \
   $$HEADERDIR/WidgetDllOption.h \
