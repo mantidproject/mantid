@@ -41,8 +41,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   DECLARE_SUBWINDOW(SANSRunWindow);
-}
-}
+
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::API;
@@ -3411,3 +3410,6 @@ void SANSRunWindow::checkLogFlags()
   }
   m_log_warnings = false;
 }
+
+} //namespace CustomInterfaces
+} //namespace MantidQt
