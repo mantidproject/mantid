@@ -233,11 +233,11 @@ public:
     TS_ASSERT_EQUALS(tie4.asString(g1),"sig=123.4");
 
     ParameterTie tie5(nth,"a");
-    tie5.set("cos(B1e2Ta_)-sin (alpha12)");
+    tie5.set("cos(B1e2Ta_)-sin(alpha12)");
     TS_ASSERT_EQUALS(tie5.asString(mf1),"");
-    TS_ASSERT_EQUALS(tie5.asString(&mfun),"f1.f2.a=cos(f1.f2.B1e2Ta_)-sin (f1.f2.alpha12)");
-    TS_ASSERT_EQUALS(tie5.asString(mf2),"f2.a=cos(f2.B1e2Ta_)-sin (f2.alpha12)");
-    TS_ASSERT_EQUALS(tie5.asString(nth),"a=cos(B1e2Ta_)-sin (alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(&mfun),"f1.f2.a=cos(f1.f2.B1e2Ta_)-sin(f1.f2.alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(mf2),"f2.a=cos(f2.B1e2Ta_)-sin(f2.alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(nth),"a=cos(B1e2Ta_)-sin(alpha12)");
 
   }
 
