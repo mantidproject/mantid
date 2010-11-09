@@ -211,6 +211,9 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   QString pyInput = "from mantidsimple import *\n"
     "import IndirectEnergyConversion as ind\n";
 
+  if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+  else pyInput += "verbose = False\n";
+
   pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n";
   pyInput += "last = " +m_uiForm.leSpectraMax->text()+ "\n";
   pyInput += "ana = '"+m_uiForm.cbAnalyser->currentText()+"'\n";
@@ -301,12 +304,12 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput += "ws_list, rns = ind.convert_to_energy(rawfiles, mapfile, "
       "first, last, efixed, SumFiles=Sum, bgremove = bgRemove, tempK = tempK, calib = calib, "
       "rebinParam = rebinParam, instrument = ins, savesuffix = suffix, saveFormats = fileFormats,"
-      "analyser = ana, reflection = ref, CleanUp=clean)\n";
+      "analyser = ana, reflection = ref, CleanUp=clean, Verbose=verbose)\n";
   }
   else if ( isDirtyRebin() )
   {
     pyInput += "ws_list, rns = ind.cte_rebin(mapfile, tempK, rebinParam, ana, ref, ins, suffix,"
-      "fileFormats, directory, CleanUp = clean)\n";
+      "fileFormats, directory, CleanUp = clean, Verbose=verbose)\n";
   }
   else if ( tryToSave ) // where all we want to do is save and/or plot output
   {
@@ -320,7 +323,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
       "   if save_ws.search(workspace):\n"
       "      ws_list.append(workspace)\n"
       "      runNos.append(mtd[workspace].getRun().getLogData('run_number').value())\n"
-      "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix)\n";
+      "ind.saveItems(ws_list, runNos, fileFormats, ins, suffix, Verbose=verbose)\n";
   }
 
   // Plot Output Handling
@@ -1868,7 +1871,8 @@ void Indirect::sOfQwPlotInput()
     pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
   }
 
-  pyInput += "ws = importMatrixWorkspace(input)\n"
+  pyInput += "ConvertSpectrumAxis(input, input+'_q', 'MomentumTransfer', 'Indirect')\n"
+    "ws = importMatrixWorkspace(input+'_q')\n"
     "ws.plotGraph2D()\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
