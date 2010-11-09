@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <typeinfo>
 
 #include "CompositeImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
@@ -99,6 +100,31 @@ public:
     TSM_ASSERT_DIFFERS("These two objects should not be considered equal as they have and unequal number of nested functions.", A, C);		
   }
 
+  void testReturnNestedFunctions() //Test access to nested functions.
+  {
+    using namespace Mantid::MDAlgorithms;
+    CompositeImplicitFunction function;
+
+    MockImplicitFunction* mockFunctionA = new MockImplicitFunction;
+    MockImplicitFunction* mockFunctionB = new MockImplicitFunction;
+    MockImplicitFunction* mockFunctionC = new MockImplicitFunction;
+    EXPECT_CALL(*mockFunctionA, getName()).Times(1).WillOnce(testing::Return("A"));
+    EXPECT_CALL(*mockFunctionB, getName()).Times(1).WillOnce(testing::Return("B"));
+    EXPECT_CALL(*mockFunctionC, getName()).Times(1).WillOnce(testing::Return("C"));
+
+    function.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(mockFunctionA));
+    function.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(mockFunctionB));
+    function.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(mockFunctionC));
+
+    std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > returnedFuncs = function.getFunctions();
+    std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator it = returnedFuncs.begin();
+
+    TSM_ASSERT_EQUALS("The returned function did not match input function type", (*it)->getName(), "A" );
+    it++;
+    TSM_ASSERT_EQUALS("The returned function did not match input function type", (*it)->getName(), "B"  );
+    it++;
+    TSM_ASSERT_EQUALS("The returned function did not match input function type", (*it)->getName(), "C"  );
+  }
 
 };
 
