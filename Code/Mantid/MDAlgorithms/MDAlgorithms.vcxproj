@@ -83,7 +83,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>MDDataObjects.lib;MantidAPI.lib;MantidKernel.lib;MantidGeometry.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);../debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);..\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)MDAlgorithms$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
