@@ -27,8 +27,8 @@ public:
     for (int i = 0; i < Y.size(); ++i)
     {
       const double x = (X[i]+X[i+1])/2;
-      Y[i] = exp(-0.5*pow((x-1),2));
-      E[i] = sqrt(Y[i]);
+      Y[i] = exp(-0.5*pow((x-1)/10.0,2));
+      E[i] = 0.001;
     }
 
     AnalysisDataService::Instance().add("toOffsets",WS);
@@ -68,7 +68,7 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
 
-    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0099, 0.0001);
+    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.0001);
 
 
     AnalysisDataService::Instance().remove(outputWS);
