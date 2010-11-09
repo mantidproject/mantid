@@ -1,4 +1,6 @@
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidKernel/Exception.h"
+
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QDir>
