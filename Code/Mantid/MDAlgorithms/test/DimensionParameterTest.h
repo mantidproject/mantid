@@ -86,7 +86,6 @@ public:
 
   void testgetIntegration()
   {
-    //i.e. swapping between integration and no integration.
 
     using namespace Mantid::MDAlgorithms;
     DimensionParameterIntegration* p_integration = new DimensionParameterNoIntegration;
