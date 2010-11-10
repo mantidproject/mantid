@@ -125,6 +125,9 @@ void Indirect::initLayout()
   loadSettings();
 
   refreshWSlist();
+
+
+  // sliceTwoRanges(m_uiForm.slice_ckUseTwoRanges->isChecked());
 }
 /**
 * This function will hold any Python-dependent setup actions for the interface.

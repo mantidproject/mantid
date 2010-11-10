@@ -3411,5 +3411,9 @@ void SANSRunWindow::checkLogFlags()
   m_log_warnings = false;
 }
 
+
 } //namespace CustomInterfaces
+
 } //namespace MantidQt
+
+

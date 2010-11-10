@@ -12,6 +12,11 @@
 
 #include <Poco/Path.h>
 
+namespace MantidQt
+{
+namespace CustomInterfaces
+{
+
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -33,10 +38,12 @@ SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   prop = alg->getProperty("Filename");
   m_rawExts = prop->allowedValues();
 }
+
 SANSAddFiles::~SANSAddFiles()
 {
   saveSettings();
 }
+
 //Connect signals and setup widgets
 void SANSAddFiles::initLayout()
 {
@@ -298,3 +305,7 @@ void SANSAddFiles::removeSelected()
     sels = m_SANSForm->toAdd_List->selectedItems();
   }
 }
+
+
+}//namespace CustomInterfaces
+}//namespace MantidQt

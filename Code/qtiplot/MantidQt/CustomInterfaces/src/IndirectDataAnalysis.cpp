@@ -36,8 +36,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     DECLARE_SUBWINDOW(IndirectDataAnalysis);
-  }
-}
+
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -1701,3 +1700,6 @@ void IndirectDataAnalysis::help()
     url += "Absorption";
   QDesktopServices::openUrl(QUrl(url));
 }
+
+} //namespace
+} //namespace
