@@ -128,7 +128,6 @@
 #include <stdlib.h>
 
 #include <qwt_scale_engine.h>
-
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QProgressDialog>

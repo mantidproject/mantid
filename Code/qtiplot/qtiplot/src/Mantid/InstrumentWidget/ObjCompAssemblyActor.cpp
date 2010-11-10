@@ -5,7 +5,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
+//#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
 #include "MantidKernel/Exception.h"
 #include "MantidObject.h"
 #include "ObjCompAssemblyActor.h"
@@ -29,10 +29,10 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(boost::shared_ptr<std::map<const boos
   }
   else
   {
-    boost::shared_ptr<ParObjCompAssembly> poca = boost::dynamic_pointer_cast<ParObjCompAssembly>(ic);
+    boost::shared_ptr<ObjCompAssembly> poca = boost::dynamic_pointer_cast<ObjCompAssembly>(ic);
     if (!poca)
     {
-      throw Mantid::Kernel::Exception::InstrumentDefinitionError("Expected ParObjCompAssembly, found "+ic->type());
+      throw Mantid::Kernel::Exception::InstrumentDefinitionError("Expected ObjCompAssembly, found "+ic->type());
     }
     //m_ObjAss.reset(dynamic_cast<const ObjCompAssembly*>(poca->base()),NoDeleting());
     m_ObjAss = ic;

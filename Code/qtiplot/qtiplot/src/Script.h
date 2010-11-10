@@ -73,7 +73,10 @@ class Script : public QObject
   /// Set the context in which the code is to be executed.
   virtual void setContext(QObject *context) { Context = context; compiled = notCompiled; }
   /// Set the filename associated with the script
-  virtual void updatePath(const QString &, bool append = true) {}
+  virtual void updatePath(const QString &, bool append = true)
+  {
+    (void) append; //Avoid compiler warnings
+  }
   /// Like QObject::setName, but with unicode support.
   void setName(const QString &name) { Name = name; compiled = notCompiled; }
   /// Set whether errors / exceptions are to be emitted or silently ignored
@@ -115,7 +118,7 @@ protected:
   bool isInteractive;
   enum compileStatus { notCompiled, isCompiled, compileErr } compiled;
   bool EmitErrors;
-  
+
   void emit_error(const QString & message, int lineNumber)
   { if(EmitErrors) emit error(message, Name, lineNumber); }
   

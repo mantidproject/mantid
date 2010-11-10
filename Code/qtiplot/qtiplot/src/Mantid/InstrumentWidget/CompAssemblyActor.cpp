@@ -3,7 +3,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
+//#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -21,7 +21,7 @@ using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::ObjCompAssembly;
-using Mantid::Geometry::ParObjCompAssembly;
+//using Mantid::Geometry::ParObjCompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
 using Mantid::Geometry::IRectangularDetector;
@@ -188,8 +188,8 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
       if(ChildCAPtr!=boost::shared_ptr<ICompAssembly>())
       {
         boost::shared_ptr<ObjCompAssembly> ChildOCAPtr=boost::dynamic_pointer_cast<ObjCompAssembly>(ChildCompPtr);
-        boost::shared_ptr<ParObjCompAssembly> ChildPOCAPtr=boost::dynamic_pointer_cast<ParObjCompAssembly>(ChildCompPtr);
-        if (ChildOCAPtr || ChildPOCAPtr)
+        //boost::shared_ptr<ParObjCompAssembly> ChildPOCAPtr=boost::dynamic_pointer_cast<ParObjCompAssembly>(ChildCompPtr);
+        if (ChildOCAPtr)
         {
           ObjCompAssemblyActor* iActor =
               new ObjCompAssemblyActor(mObjects,ChildCAPtr->getComponentID(),mInstrument,withDisplayList);
