@@ -10,7 +10,7 @@ namespace Mantid{
         
 /// the function returns the rotation vector which allows to transform vector inumber i into the basis;
 std::vector<double> 
-MDGeometryDescription::rotations(unsigned int i,const std::vector<double> basis[3])const
+MDGeometryDescription::setRotations(unsigned int i,const std::vector<double> basis[3])
 {
 // STUB  !!! 
     this->check_index(i,"rotations");
@@ -21,6 +21,8 @@ MDGeometryDescription::rotations(unsigned int i,const std::vector<double> basis[
     std::vector<double> tmp;
     tmp.assign(3,0);
     tmp[i]=1;
+ 
+    rotations.assign(i*3+i,1);
     return tmp;
 }
 /// this extracts the size and shape of the current DND object
@@ -43,7 +45,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
       this->coordinates[i].assign(3,0);
       MDDimension * pDim = origin.getDimension(tag[i]);
       if(pDim){
-	this->coordinates[i] = pDim->getCoord();
+    this->coordinates[i] = pDim->getCoord();
       }
     }
     
@@ -283,6 +285,9 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
     nDimensions          = nDims;
     nReciprocalDimensions= nRecDims;
 
+
+    rotations.assign(9,0);
+    rotations[0]=rotations[4]=rotations[8]=1;
 
     nDimensions=nDims;
     MDGeometry DefBasis(nDimensions,nReciprocalDimensions);

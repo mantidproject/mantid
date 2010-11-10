@@ -79,6 +79,9 @@
     <ClInclude Include="inc\MantidMDAlgorithms\VectorMathematics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DimensionParameter.cpp">

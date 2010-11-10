@@ -2,7 +2,7 @@
 #define H_CENTERPIECE_REBINNING
 
 
-//#include "MantidAPI/MDPropertyGeometry.h"
+#include "MantidAPI/MDPropertyGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
@@ -25,7 +25,7 @@ public:
     virtual ~CenterpieceRebinning(void);
 
   /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "CenterpieceRebinning";}
+      virtual const std::string name() const { return "CenterpieceRebinningPG";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
@@ -34,7 +34,6 @@ public:
       void set_from_VISIT(const std::string &slicing_description_in_hxml,const std::string &definition);
       void init_source(MDDataObjects::MDWorkspace_sptr inputWSX);
      
-      Geometry::MDGeometryDescription *const pSlicingProperty(void){return &slicingProperty;}
 private:
     // Overridden Algorithm methods
       void init();
@@ -43,10 +42,7 @@ private:
       /// The progress reporting object
       API::Progress *m_progress;
 
-     MDDataObjects::MDWorkspace_sptr inputWS0,outputWS0;
-
-    Geometry::MDGeometryDescription slicingProperty;
- // function builds the vector of cell indexes which can contribute into the cut, described by the transformation matrix supplied;
+  // function builds the vector of cell indexes which can contribute into the cut, described by the transformation matrix supplied;
     void preselect_cells(std::vector<long> &selected_cells,long &n_preselected_pix);
   
 

@@ -61,7 +61,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
     
-    class MDPropertyGeometry :  public Geometry::MDGeometryDescription, public Kernel::PropertyWithValue<std::string>
+    class DLLExport MDPropertyGeometry :  public Geometry::MDGeometryDescription, public Kernel::PropertyWithValue<std::string>
     {
     public:
       /** Constructor.
@@ -80,14 +80,13 @@ namespace Mantid
           // fill in binary implementation of the property.
           this->fromXMLstring(this->value());
       }
-
       MDPropertyGeometry( const std::string &name, const Geometry::MDGeometryDescription &Geom, const unsigned int direction=Kernel::Direction::Input,
         Kernel::IValidator<Geometry::MDGeometryDescription> *validator = new Kernel::NullValidator<Geometry::MDGeometryDescription> ) :
         Geometry::MDGeometryDescription(Geom),
         Kernel::PropertyWithValue<std::string>(name, "", new Kernel::NullValidator<std::string> , direction)
       {
           // fill in symbol representation of the property. 
-         this->setValue(this->toXMLstring());
+         this->PropertyWithValue<std::string>::setValue(this->toXMLstring());
       }
      //MDGeometryDescription const *getpMDGeometryDescription(void){return 
      // overloads IO operations for property for the lexical casts to work 
@@ -102,6 +101,10 @@ namespace Mantid
           obj.fromXMLstring(buf);     
           return in;
        }
+      /// set geometry description on the basis of an existing geometry; Should return XML description of the property (set as value of this porpety) or empty string if this property is unacceptable
+      virtual std::string setValue(const Geometry::MDGeometry &origin);
+     /// set geometry description on the basis of an XML string; returns what usually property with value string returns
+      virtual std::string setValue(const std::string &XMLstring);
       /// Virtual destructor
       virtual ~MDPropertyGeometry()
       {

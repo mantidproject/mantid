@@ -91,9 +91,13 @@ public:
        TS_ASSERT_THROWS_NOTHING((buf>>(*wsp2)));
 
   }
-/*
-  void t__SetValue()
+ 
+  void testSetValue()
   {
+    TS_ASSERT_THROWS_NOTHING(wsp2->setValue(" should be something meaningful which is not implemented yet"));
+    TS_ASSERT_THROWS_NOTHING(wsp1->setValue(*wsp2));
+
+/*
     TS_ASSERT_EQUALS( wsp1->setValue(""),
       "Enter a name for the workspace" )
     TS_ASSERT_EQUALS( wsp1->value(), "" )
@@ -102,8 +106,9 @@ public:
 
     TS_ASSERT_EQUALS( wsp1->value(), "newValue" )
     wsp1->setValue("ws1");
+*/
   }
-
+/*
   void t__IsValid()
   {  
     TS_ASSERT_EQUALS( wsp1->isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service" )

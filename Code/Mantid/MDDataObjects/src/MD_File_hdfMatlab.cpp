@@ -446,20 +446,26 @@ MD_File_hdfMatlab::getNPix(void)
     if(this->file_handler<0)return -1;
 
     this->check_or_open_pix_dataset();
-    std::vector<int> arr_dims_vector;
-    void *data;
-    int rank;
-    matlab_attrib_kind   kind;
+ 
+    hsize_t *data;
 
-
-// Find and read n-pixels attribute to indentify number of the pixels contributed into the mdd dataset
-    bool ok=read_matlab_field_attr(this->pixel_dataset_h,"n_pixels",data,arr_dims_vector,rank,kind,this->File_name);
-    if(!ok){
-        throw(Exception::FileError("Error reading npix sqw attribute",this->File_name));
+  // Analyse pixels array to indentify number of the pixels contributed into the mdd dataset
+    hid_t pixels_space = H5Dget_space(this->pixel_dataset_h);
+    if(pixels_space<=0){
+         throw(Exception::FileError("can not get space for pixel dataset",this->File_name));
     }
-    hsize_t nPixels=(hsize_t)*((double*)(data));
+    int nDims = H5Sget_simple_extent_ndims(pixels_space);
+    if(nDims<=0){
+         throw(Exception::FileError("can not obtain pixel dataset dimensions",this->File_name));
+    }
+    hsize_t nPixels=0;
+    data = new hsize_t[nDims];
+    H5Sget_simple_extent_dims(pixels_space, data, NULL) ;
+    nPixels = data[0];
+  
     delete [] data;
-
+    
+    H5Sclose(pixels_space);
     return nPixels;
 }
 //***************************************************************************************
@@ -663,12 +669,14 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
     std::vector<hsize_t> cells_preselection_buf;
     cells_preselection_buf.resize(max_npix_selected);
     long ic(0);
+    hsize_t max_npix_indataset = this->getNPix();
     size_t pixel_num;
     for(i=starting_cell;i<n_cells_processed;i++){
         npix_tt          =SQW.data[selected_cells[i]].npix; 
         for(j=0;j<npix_tt;j++){
             pixel_num=SQW.pix_array[selected_cells[i]].chunk_file_location0+j;
-            if(pixel_num>=18287130){
+            // this to go around the bug in hdf dataset creation. 
+            if(pixel_num>=max_npix_indataset){
               continue;
             }
             cells_preselection_buf[ic]=pixel_num;

@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="inc\MantidMDAlgorithms\CenterpieceRebinning.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeFunctionBuilder.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunction.h" />
     <ClInclude Include="inc\MantidMDAlgorithms\CompositeImplicitFunctionParser.h" />

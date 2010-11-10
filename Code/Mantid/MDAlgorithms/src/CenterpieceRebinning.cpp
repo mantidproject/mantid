@@ -46,7 +46,13 @@ MDWorkspace_sptr inputWS;
 
     inputWS->read_mdd(filename.c_str());
 
-    this->slicingProperty.build_from_geometry(*inputWS);
+    // set up slicing property to the shape of current workspace;
+    MDGeometryDescription *pSlicing = dynamic_cast< MDGeometryDescription *>((Property *)(this->getProperty("SlicingData")));
+    if(!pSlicing){
+            throw(std::runtime_error("can not obtain slicing property from the property manager"));
+     }
+
+     pSlicing->build_from_geometry(*inputWS);
 }
 /*
 void
@@ -61,7 +67,7 @@ CenterpieceRebinning::init()
       declareProperty(new WorkspaceProperty<MDWorkspace>("Input","",Direction::Input),"initial MD workspace");
       declareProperty(new WorkspaceProperty<MDWorkspace>("Result","",Direction::Output),"final MD workspace");
 
-   //     declareProperty(new MDPropertyGeometry<MDWorkspace>("SlicingData","Result",Direction::Output));
+      declareProperty(new MDPropertyGeometry("SlicingData","",Direction::Input));
       declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load), "The file containing input MD dataset");
 
 
@@ -102,17 +108,21 @@ CenterpieceRebinning::exec()
   if(inputWS==outputWS){
       throw(std::runtime_error("input and output workspaces have to be different"));
   }
- 
+
+  MDGeometryDescription *pSlicing = dynamic_cast< MDGeometryDescription *>((Property *)(this->getProperty("SlicingData")));
+  if(!pSlicing){
+            throw(std::runtime_error("can not obtain slicing property from the property manager"));
+   }
   
  
   // transform output workspace to the target shape and allocate memory for resulting matrix
-  outputWS->alloc_mdd_arrays(this->slicingProperty);
+  outputWS->alloc_mdd_arrays(*pSlicing);
 
  
 
   std::vector<size_t> preselected_cells_indexes;
   size_t  n_precelected_pixels(0);
-  this->preselect_cells(*inputWS,inputWS->getPData(),this->slicingProperty,preselected_cells_indexes,n_precelected_pixels);
+  this->preselect_cells(*inputWS,inputWS->getPData(),*pSlicing,preselected_cells_indexes,n_precelected_pixels);
   if(n_precelected_pixels == 0)return;
 
   unsigned int n_hits = n_precelected_pixels/PIX_BUFFER_SIZE+1;
@@ -126,7 +136,7 @@ CenterpieceRebinning::exec()
   // start reading and rebinning;
   size_t n_starting_cell(0);
  //
-  transf_matrix trf = this->build_scaled_transformation_matrix(*inputWS,this->slicingProperty);
+  transf_matrix trf = this->build_scaled_transformation_matrix(*inputWS,*pSlicing);
   for(unsigned int i=0;i<n_hits;i++){
       n_starting_cell+=inputWS->read_pix_selection(preselected_cells_indexes,n_starting_cell,pix_buf,pix_buffer_size,n_pix_in_buffer);
       n_pixels_read+=n_pix_in_buffer;
@@ -194,14 +204,13 @@ CenterpieceRebinning::build_scaled_transformation_matrix(const Geometry::MDGeome
         trf.cut_max[i]  = target.cutMax(i)/trf.axis_step[i];
         trf.cut_min[i]  = target.cutMin(i)/trf.axis_step[i];
     }
-    std::vector<double> rot;
+    std::vector<double> rot = target.getRotations();
     std::vector<double> basis[3]; // not used at the momemnt;
 
     for(i=0;i<3;i++){
         ic = i*3;
-        rot = target.rotations(i,basis);
         for(j=0;j<3;j++){
-            trf.rotations[i+j*3]=rot[j]/trf.axis_step[i];
+            trf.rotations[ic+j]=rot[ic+j]/trf.axis_step[i];
         }
     }
    
@@ -267,7 +276,7 @@ CenterpieceRebinning::preselect_cells(const Geometry::MDGeometry &Source, const 
               Etp=pDim->getX(mp);
               Etm=pDim->getX(mm);
 
-              if(Etp<this->slicingProperty.cutMin(l)||Etm>=this->slicingProperty.cutMax(l)) continue;
+           if(Etp<target.cutMin(l)||Etm>=target.cutMax(l)) continue;
             // remember the index of THIS axis 
             enInd[l-nReciprocalDims].push_back(m*stride);
             nContributed++;
@@ -323,10 +332,6 @@ CenterpieceRebinning::preselect_cells(const Geometry::MDGeometry &Source, const 
                rx.push_back(rec_dim[0]->getX(i));
                ry.push_back(rec_dim[1]->getX(j));
                rz.push_back(rec_dim[2]->getX(k));
-
- //              rx.push_back(rec_dim[0]->getX(i)-scaled_trf.trans_bott_left[0]);
-               //ry.push_back(rec_dim[1]->getX(j)-scaled_trf.trans_bott_left[1]);
-//               rz.push_back(rec_dim[2]->getX(k)-scaled_trf.trans_bott_left[2]);
            }
        }
    }
@@ -364,19 +369,19 @@ CenterpieceRebinning::preselect_cells(const Geometry::MDGeometry &Source, const 
                r[4]=xx[sh.nCell(im,jm,kp)]; r[5]=xx[sh.nCell(ip,jm,kp)]; r[6]=xx[sh.nCell(im,jp,kp)]; r[7]=xx[sh.nCell(ip,jp,kp)];
     
                minmax(rMin,rMax,r);
-               if(rMax<slicingProperty.cutMin(0)||rMin>=slicingProperty.cutMax(0))continue;
+               if(rMax<target.cutMin(0)||rMin>=target.cutMax(0))continue;
 
                r[0]=yy[sh.nCell(im,jm,km)];  r[1]=yy[sh.nCell(ip,jm,km)];r[2]=yy[sh.nCell(im,jp,km)];  r[3]=yy[sh.nCell(ip,jp,km)];
                r[4]=yy[sh.nCell(im,jm,kp)];  r[5]=yy[sh.nCell(ip,jm,kp)];r[6]=yy[sh.nCell(im,jp,kp)];  r[7]=yy[sh.nCell(ip,jp,kp)];
     
                minmax(rMin,rMax,r);
-               if(rMax<slicingProperty.cutMin(1)||rMin>=slicingProperty.cutMax(1))continue;
+               if(rMax<target.cutMin(1)||rMin>=target.cutMax(1))continue;
 
                r[0]=zz[sh.nCell(im,jm,km)];  r[1]=zz[sh.nCell(ip,jm,km)];r[2]=zz[sh.nCell(im,jp,km)];  r[3]=zz[sh.nCell(ip,jp,km)];
                r[4]=zz[sh.nCell(im,jm,kp)];  r[5]=zz[sh.nCell(ip,jm,kp)];r[6]=zz[sh.nCell(im,jp,kp)];  r[7]=zz[sh.nCell(ip,jp,kp)];
     
                minmax(rMin,rMax,r);
-               if(rMax<slicingProperty.cutMin(2)||rMin>=slicingProperty.cutMax(2))continue;
+               if(rMax<target.cutMin(2)||rMin>=target.cutMax(2))continue;
 
                ind3=i*rec_dim[0]->getStride()+j*rec_dim[1]->getStride()+k*rec_dim[2]->getStride();
                for(l=0;l<orthoInd->size();l++){
