@@ -24,7 +24,7 @@ namespace Mantid
     *   @param comp A reference to the component to copy from
     */
     ParObjComponent::ParObjComponent(const ParObjComponent& comp)
-      :ParametrizedComponent(comp)
+      :IObjComponent(comp), ParametrizedComponent(comp)
     {
     }
 
@@ -66,7 +66,7 @@ namespace Mantid
       int intercepts = shape()->interceptSurface(probeTrack);
 
       Track::LType::const_iterator it;
-      for (it = probeTrack.begin(); it < probeTrack.end(); ++it)
+      for (it = probeTrack.begin(); it != probeTrack.end(); ++it)
       {
         V3D in = it->entryPoint;
         this->getRotation().rotate(in);
@@ -158,16 +158,11 @@ namespace Mantid
     void ParObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     {
       // Check this object component has a defined shape and bounding box
-      boost::shared_ptr<BoundingBox> shapeBox = shape()->getBoundingBox();
-      if( !shapeBox ) 
-      {
-        absoluteBB = BoundingBox();
-        return;
-      }
-      
+      const BoundingBox & shapeBox = shape()->getBoundingBox();
       // Start with the box in the shape's coordinates and
+      absoluteBB = BoundingBox(shapeBox);
+      if( shapeBox.isNull() ) return;
       // modify in place for speed
-      absoluteBB = BoundingBox(*shapeBox);
       // Scale
       absoluteBB.xMin() *= m_ScaleFactor.X();
       absoluteBB.xMax() *= m_ScaleFactor.X();

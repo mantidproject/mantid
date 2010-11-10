@@ -7,6 +7,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
 #include <deque>
+#include <iterator>
 
 namespace Mantid
 {
@@ -43,21 +44,28 @@ namespace Mantid
     }
 
     /**
-     * Trace a given track from the instrument source in the given direction 
-     * and compile a list of components that this track intersects.
+     * Trace a given track from the instrument source in the given direction. For performance reasons the 
+     * results are accumulated within the object and can be returned using getResults.
      * @param dir A directional vector. The starting point is defined by the instrument source.
-     * @returns The results of the intersection tests
+     * @param resultRay A ray with the accumlated results of the intersections
      */
-    InstrumentRayTracer::TraceResults InstrumentRayTracer::trace(const V3D & dir) const
+    void InstrumentRayTracer::trace(const V3D & dir) const
     {
       // Define the track with the source position and the given direction.
-      // Go through the instrument tree and see if we get any hits by
-      // (a) first testing the bounding box and if we're inside that then
-      // (b) test the lower components.
-      Track  testRay(m_instrument->getSource()->getPos(), dir);
+      m_resultsTrack.reset(m_instrument->getSource()->getPos(), dir);
+      //m_resultsTrack.reset(m_instrument->getSample()->getPos() + V3D(1.0,0.0,0.0), dir);
       // The intersection results are accumulated within the ray object
-      fireRay(testRay);
-      TraceResults results(testRay.begin(), testRay.end());
+      fireRay(m_resultsTrack);
+    }
+
+    /**
+     * Return the results of any trace() calls since the last call the getResults.
+     * @returns A collection of links defining intersection information
+     */
+    Links InstrumentRayTracer::getResults() const
+    {
+      Links results(m_resultsTrack.begin(), m_resultsTrack.end());
+      m_resultsTrack.clearIntersectionResults();
       return results;
     }
 
@@ -72,7 +80,9 @@ namespace Mantid
      */
     void InstrumentRayTracer::fireRay(Track & testRay) const
     {
-      ComponentID sourceID = m_instrument->getSource()->getComponentID();
+      // Go through the instrument tree and see if we get any hits by
+      // (a) first testing the bounding box and if we're inside that then
+      // (b) test the lower components.
       std::deque<IComponent_sptr> nodeQueue;
       //Start at the root of the tree
       nodeQueue.push_back(m_instrument);

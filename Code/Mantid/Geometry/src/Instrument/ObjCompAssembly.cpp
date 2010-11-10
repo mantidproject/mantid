@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>
+
 namespace Mantid
 {
 namespace Geometry
@@ -16,14 +17,12 @@ class NoDeleting
 {
 public:
     /// deleting operator. Does nothing
-    void operator()(void*p){}
+  void operator()(void*p)
+  {
+    (void)p;
+  }
 };
 
-/*! Empty constructor
- */
-//ObjCompAssembly::ObjCompAssembly() : ObjComponent()
-//{
-//}
 
 /*! Valued constructor
  *  @param n :: name of the assembly
@@ -49,7 +48,7 @@ ObjCompAssembly::ObjCompAssembly(const std::string& n, Component* reference) :
  *  @param ass :: assembly to copy
  */
 ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly& ass) :
-  ObjComponent(ass)
+  ICompAssembly(ass), ObjComponent(ass)
 {
   group=ass.group;
   // Need to do a deep copy
@@ -379,7 +378,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
     hx = hy = 0;
     height = 0;
     V3D p0 = vectors[0];
-    for(int i=1;i<vectors.size();++i)
+    for(size_t i=1;i<vectors.size();++i)
     {
       V3D p = vectors[i] - p0;
       double h = fabs(p.scalar_prod(vx));

@@ -77,7 +77,7 @@ namespace Mantid
       int intercepts = m_shape->interceptSurface(probeTrack);
 
       Track::LType::const_iterator it;
-      for (it = probeTrack.begin(); it < probeTrack.end(); ++it)
+      for (it = probeTrack.begin(); it != probeTrack.end(); ++it)
       {
         V3D in = it->entryPoint;
         this->getRotation().rotate(in);
@@ -167,10 +167,10 @@ namespace Mantid
     void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
     {
       // Start with the box in the shape's coordinates
-      boost::shared_ptr<BoundingBox> BB = m_shape->getBoundingBox();
-      if (!BB) return;
+      const BoundingBox & shapeBox = m_shape->getBoundingBox();
+      absoluteBB = BoundingBox(shapeBox);
+      if ( shapeBox.isNull() ) return;
       // modify in place for speed
-      absoluteBB = BoundingBox(*BB);
       // Scale
       absoluteBB.xMin() *= m_ScaleFactor.X();
       absoluteBB.xMax() *= m_ScaleFactor.X();

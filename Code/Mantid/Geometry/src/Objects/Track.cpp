@@ -6,12 +6,18 @@
 
 #include <cmath>
 #include <algorithm>
-
+#include <iostream>
 
 namespace Mantid
 {
   namespace Geometry
   {
+    /**
+     * Default constructor
+     */
+    Track::Track() : m_startPoint(), m_unitVector()
+    {
+    }
 
     /**
     * Constructor
@@ -54,16 +60,21 @@ namespace Mantid
     {}
 
     /**
-     * Resets the track starting point and direction. Clears any 
-     * stored links and intersections
+     * Resets the track starting point and direction. 
      * @param startPoint The new starting point
      * @param direction The new direction
      */
-    void Track::reset(const V3D& startPoint,
-      const V3D& direction)
+    void Track::reset(const V3D& startPoint, const V3D& direction)
     {
       m_startPoint = startPoint;
       m_unitVector = direction;
+    }
+
+    /**
+     * Clear the current set of intersection results
+     */
+    void Track::clearIntersectionResults()
+    {
       m_links.clear();
       m_surfPoints.clear();
     }
@@ -134,11 +145,8 @@ namespace Mantid
     }
 
     /**
-     * Objective is to merge in partial information
-     * about the beginning and end of the tracks.
-     * We do not need to keep surfPoints in order
-     * because that will be done when they are converted into
-     * Links  
+     * Objective is to merge in partial information about the beginning and end of the tracks.
+     * The points are kept in order
      * @param directionFlag A flag indicating if the direction of travel is entering/leaving
      * an object. +1 is entering, -1 is leaving.
      * @param point Point of intersection
@@ -146,7 +154,9 @@ namespace Mantid
      */
     void Track::addPoint(const int directionFlag, const V3D& point, const ComponentID compID) 
     {
-      m_surfPoints.push_back(IntersectionPoint(directionFlag, point, point.distance(m_startPoint), compID));
+      IntersectionPoint newPoint(directionFlag, point, point.distance(m_startPoint), compID);
+      PType::iterator lowestPtr = std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
+      m_surfPoints.insert(lowestPtr, newPoint);
     }
 
     /**
@@ -170,7 +180,7 @@ namespace Mantid
       }
       else
       {
-        std::vector<Link>::iterator linkPtr = std::lower_bound(m_links.begin(),m_links.end(),newLink);
+        LType::iterator linkPtr = std::lower_bound(m_links.begin(),m_links.end(),newLink);
         //must extract the distance before you insert otherwise the iterators are incompatible
         index = std::distance(m_links.begin(), linkPtr);
         m_links.insert(linkPtr,newLink);
@@ -189,8 +199,7 @@ namespace Mantid
         return;
       }
 
-      // First sort m_surfPoints
-      std::sort(m_surfPoints.begin(),m_surfPoints.end());
+      // The surface points were added in order when they were built so no sorting is required here.
       PType::const_iterator ac = m_surfPoints.begin();
       PType::const_iterator bc = ac;
       bc++;

@@ -8,6 +8,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/IComponent.h"
+#include <list>
 
 namespace Mantid
 {
@@ -18,6 +19,7 @@ namespace Mantid
   {
     class Logger;
   }
+
 
   namespace Geometry
   {
@@ -139,10 +141,12 @@ namespace Mantid
     class DLLExport Track
     {
     public:
-      typedef std::vector<Link> LType;       ///< Type for the Link storage
-      typedef std::vector<IntersectionPoint> PType;   ///< Type for the partial
+      typedef std::list<Link> LType;       ///< Type for the Link storage
+      typedef std::list<IntersectionPoint> PType;   ///< Type for the partial
 
     public:
+      /// Default constructor
+      Track();
       /// Constructor
       Track(const V3D& startPt, const V3D& unitVector);
       /// Copy constructor
@@ -155,14 +159,16 @@ namespace Mantid
       void addPoint(const int directionFlag, const V3D& endPoint, const ComponentID compID = NULL);
       /// Adds a link to the track
       int addLink(const V3D& firstPoint,const V3D& secondPoint, 
-        const double distanceAlongTrack, const ComponentID compID = NULL);
+		  const double distanceAlongTrack, const ComponentID compID = NULL);
       /// Remove touching Links that have identical components
       void removeCojoins();
       /// Construct links between added points
       void buildLink();
 
-      /// Reset the track
+      /// Set a starting point and direction
       void reset(const Geometry::V3D& startPoint,const Geometry::V3D& direction);
+      /// Clear the current set of intersection results
+      void clearIntersectionResults();
       /// Returns the starting point
       const V3D& startPoint() const { return m_startPoint; }
       /// Returns the direction as a unit vector

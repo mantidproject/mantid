@@ -48,7 +48,7 @@ namespace Mantid
     {
     public:
       /// Default constructor constructs a zero-sized box
-      BoundingBox() : m_minPoint(), m_maxPoint()
+      BoundingBox() : m_minPoint(), m_maxPoint(), m_null(true)
       {
       }
 
@@ -61,16 +61,16 @@ namespace Mantid
       * @param zmin Value of minimum in Z. It must be less than zmax.
       */
       BoundingBox(double xmax, double ymax, double zmax, double xmin, double ymin, double zmin)
-        : m_minPoint(xmin,ymin,zmin), m_maxPoint(xmax, ymax, zmax)
+        : m_minPoint(xmin,ymin,zmin), m_maxPoint(xmax, ymax, zmax), m_null(false)
       {
         // Sanity check
         if( xmax < xmin || ymax < ymin || zmax < zmin )
         {
           std::ostringstream error;
-          error << "Error creating bounding box, inconsistent values given:\n\t"
-            << "xmin=" << xmin << ", xmax=" << xmax << "\n"
-            << "ymin=" << ymin << ", ymax=" << ymax << "\n"
-            << "zmin=" << zmin << ", zmax=" << zmax << "\n";
+          error << "Error creating bounding box, inconsistent values given:\n"
+            << "\txmin=" << xmin << ", xmax=" << xmax << "\n"
+            << "\tymin=" << ymin << ", ymax=" << ymax << "\n"
+            << "\tzmin=" << zmin << ", zmax=" << zmax << "\n";
           throw std::invalid_argument(error.str());
         }
       }
@@ -98,6 +98,10 @@ namespace Mantid
       
       /** @name Querying */
       //@{
+      /// Is this a default constructed box?
+      inline bool isNull() const { return m_null; }
+      /// Is the box considered valid. Convenience for !isNull()
+      inline bool isNonNull() const { return !m_null; }
       /// Is the given point within the bounding box?
       bool isPointInside(const V3D & point) const;
       /// Does a specified track intersect the bounding box
@@ -111,17 +115,17 @@ namespace Mantid
       /** @name Box mutation functions*/
       //@{
       /// Return the minimum value of X (non-const)
-      inline double & xMin() { return m_minPoint[0]; }
+      inline double & xMin() { m_null = false; return m_minPoint[0]; }
       /// Return the maximum value of X  (non-const)
-      inline double & xMax() { return m_maxPoint[0]; }
+      inline double & xMax() { m_null = false; return m_maxPoint[0]; }
       /// Return the minimum value of Y  (non-const)
-      inline double & yMin() { return m_minPoint[1]; }
+      inline double & yMin() { m_null = false; return m_minPoint[1]; }
       /// Return the maximum value of Y  (non-const)
-      inline double & yMax() { return m_maxPoint[1]; }
+      inline double & yMax() { m_null = false; return m_maxPoint[1]; }
       /// Return the minimum value of Z  (non-const)
-      inline double & zMin() { return m_minPoint[2]; }
+      inline double & zMin() { m_null = false; return m_minPoint[2]; }
       /// Return the maximum value of Z  (non-const)
-      inline double & zMax() { return m_maxPoint[2]; }
+      inline double & zMax() { m_null = false; return m_maxPoint[2]; }
       /// Grow the bounding box so that it also encompasses the given box
       void grow(const BoundingBox & other);
       //@}
@@ -131,6 +135,9 @@ namespace Mantid
       V3D m_minPoint;
       /// The maximum point of the axis-aligned box
       V3D m_maxPoint;
+      /// Flag marking if we've been initialized using the default constructor, 
+      /// with values or default values and user-set points
+      bool m_null;
     };
 
     /// A shared pointer to a BoundingBox
@@ -138,13 +145,8 @@ namespace Mantid
     /// A shared pointer to a const BoundingBox
     typedef boost::shared_ptr<const BoundingBox> BoundingBox_const_sptr;
 
-
-
-    /*! Print out the bounding box values to a stream.
-     */
+    /// Print out the bounding box values to a stream.
     std::ostream& operator<<(std::ostream& os, const BoundingBox& box);
-
-
   }
 }
 

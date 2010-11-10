@@ -4,7 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Timer.h"
 #include <iostream>
+
 using namespace Mantid::Geometry;
 
 /** 
@@ -40,6 +42,20 @@ public:
     TS_ASSERT_THROWS(BoundingBox(1.0, 0.5, 5.0, 3.0, 2.0, 3.0), std::invalid_argument);
     //zmax < zmin
     TS_ASSERT_THROWS(BoundingBox(1.0, 4.0, 5.0, 3.0, 2.0, 6.0), std::invalid_argument);
+  }
+
+  void test_That_Default_Construction_Gives_A_Null_Bounding_Box()
+  {
+    BoundingBox box;
+    TS_ASSERT_EQUALS(box.isNull(), true);
+    TS_ASSERT_EQUALS(box.isNonNull(), false);
+  }
+
+  void test_That_Construction_With_Points_Gives_A_NonNull_Bounding_Box()
+  {
+    BoundingBox box(3.0,4.0,5.0,0.0,1.0,2.0);
+    TS_ASSERT_EQUALS(box.isNonNull(), true);
+    TS_ASSERT_EQUALS(box.isNull(), false);
   }
 
   void test_That_Querying_For_The_Min_and_Max_Points_Gives_The_Correct_Points()

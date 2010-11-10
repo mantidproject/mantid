@@ -44,9 +44,10 @@ namespace Mantid
      * @param A The object to initialise this copy from
      */
     Object::Object(const Object& A) :
-    ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL), AABBxMax(A.AABBxMax), AABByMax(A.AABByMax), 
-      AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin), AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), 
-      boolBounded(A.boolBounded), bGeometryCaching(A.bGeometryCaching), vtkCacheReader(A.vtkCacheReader),
+      ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL), m_boundingBox(A.m_boundingBox),
+      AABBxMax(A.AABBxMax), AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin), 
+      AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), 
+      bGeometryCaching(A.bGeometryCaching), vtkCacheReader(A.vtkCacheReader),
       vtkCacheWriter(A.vtkCacheWriter)
     {
       handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
@@ -867,18 +868,18 @@ namespace Mantid
       if (this->isOnSide(observer))
         return 2 * M_PI; // this is wrong if on an edge
       // Use BB if available, and if observer not within it
-      BoundingBox_sptr boundingBox = getBoundingBox();
+      const BoundingBox & boundingBox = getBoundingBox();
       double thetaMax = M_PI;
       bool useBB = false, usePt = false;
       Geometry::V3D ptInObject, axis;
       Quat zToPt;
 
       // Is the bounding box a reasonable one?
-      if(boundingBox && !boundingBox->isPointInside(observer))
+      if(boundingBox.isNonNull() && !boundingBox.isPointInside(observer))
       {
         useBB = usePt = true;
-        thetaMax = boundingBox->angularWidth(observer);
-        ptInObject = boundingBox->centrePoint();
+        thetaMax = boundingBox.angularWidth(observer);
+        ptInObject = boundingBox.centrePoint();
         res = resBB;
       }
       // Try and find a point in the object if useful bounding box not found
@@ -916,7 +917,7 @@ namespace Mantid
           Geometry::V3D dir(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
           if (usePt)
             zToPt.rotate(dir);
-          if (!useBB || boundingBox->doesLineIntersect(observer, dir))
+          if (!useBB || boundingBox.doesLineIntersect(observer, dir))
           {
             Track tr(observer, dir);
             if (this->interceptSurface(tr) > 0)
@@ -1010,8 +1011,8 @@ namespace Mantid
       // Because the triangles from OC are not consistently ordered wrt their outward normal
       // internal points give incorrect solid angle. Surface points are difficult to get right
       // with the triangle based method. Hence catch these two (unlikely) cases.
-      BoundingBox_sptr boundingBox = this->getBoundingBox();
-      if( boundingBox && boundingBox->isPointInside(observer) )
+      const BoundingBox & boundingBox = this->getBoundingBox();
+      if( boundingBox.isNonNull() && boundingBox.isPointInside(observer) )
       {
         if (isValid(observer))
         {
@@ -1080,10 +1081,10 @@ namespace Mantid
       // Because the triangles from OC are not consistently ordered wrt their outward normal
       // internal points give incorrect solid angle. Surface points are difficult to get right
       // with the triangle based method. Hence catch these two (unlikely) cases.
-      BoundingBox_sptr boundingBox = this->getBoundingBox();
+      const BoundingBox & boundingBox = this->getBoundingBox();
       double sx = scaleFactor[0], sy = scaleFactor[1], sz = scaleFactor[2];
       V3D sObserver = observer / scaleFactor;
-      if( boundingBox && boundingBox->isPointInside(sObserver) )
+      if( boundingBox.isNonNull() && boundingBox.isPointInside(sObserver) )
       {
         if (isValid(sObserver))
         {
@@ -1542,14 +1543,18 @@ namespace Mantid
     * Returns an axis-aligned bounding box that will fit the shape
     * @returns A shared pointer to a bounding box for this shape.
     */
-    boost::shared_ptr<BoundingBox> Object::getBoundingBox() const
+    const BoundingBox & Object::getBoundingBox() const
     {
+      // This member function is const given that from a user's perspective it is perfecly reasonable 
+      // to call it on a const object. We need to call a non-const function in places to update the cache,
+      // which is where the const_cast comes in to play.
+
       if( !TopRule )
       {
         // If we don't know the extent of the object, the bounding box doesn't mean anything
-        return BoundingBox_sptr();
+	const_cast<Object*>(this)->setNullBoundingBox();
       }
-      if( !m_boundingBox )
+      else if( m_boundingBox.isNull() )
       {
         // First up, construct the trial set of elements from the object's bounding box
         const double big(1e10); 
@@ -1559,14 +1564,15 @@ namespace Mantid
         // a null object here
         if( minX == -big || minY == -big || minZ == -big )
         {
-          return BoundingBox_sptr();
+	  const_cast<Object*>(this)->setNullBoundingBox();
         }
-
-        // This member function is const given that from a user's perspective it is perfecly reasonable 
-        // to call it on a const object. We need to call a non-const function here to update the cache,
-        // which is just an implementation detail
-        const_cast<Object*>(this)->defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+	else
+	{
+	  const_cast<Object*>(this)->defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+	}
       }
+      else {}
+      
       return m_boundingBox;
     }
 
@@ -1636,7 +1642,15 @@ namespace Mantid
       AABBzMin = zMin;
       boolBounded = true;
 
-      m_boundingBox = boost::shared_ptr<BoundingBox>(new BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin));
+      m_boundingBox = BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin);
+    }
+    
+    /**
+     * Set the bounding box to a null box
+     */
+    void Object::setNullBoundingBox()
+    {
+      m_boundingBox = BoundingBox();
     }
 
     /*!
@@ -1657,10 +1671,10 @@ namespace Mantid
         return 1;
       }
       // Try centre of bounding box as initial guess, if we have one.
-      BoundingBox_sptr boundingBox = getBoundingBox();
-      if(boundingBox)
+      const BoundingBox & boundingBox = getBoundingBox();
+      if(boundingBox.isNonNull())
       {
-        testPt = boundingBox->centrePoint();
+        testPt = boundingBox.centrePoint();
         if (searchForObject(testPt) > 0)
         {
           point = testPt;

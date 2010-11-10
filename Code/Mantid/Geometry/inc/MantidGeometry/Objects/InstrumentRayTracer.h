@@ -20,6 +20,9 @@ namespace Mantid
     class Track;
     class V3D;
 
+    /// Typedef for object intersections
+    typedef Track::LType Links;
+
     /**
     This class is responsible for tracking rays and accumulating a list of objects that are 
     intersected along the way.
@@ -50,14 +53,15 @@ namespace Mantid
     class DLLExport InstrumentRayTracer
     {
     public:
-      // Result type for trace tests
-      typedef std::list<Link> TraceResults;
 
       /// Constructor taking an instrument
       InstrumentRayTracer(IInstrument_sptr instrument);      
       /// Trace a given track from the instrument source in the given direction 
       /// and compile a list of results that this track intersects.
-      TraceResults trace(const V3D & ray) const;
+      void trace(const V3D & direction) const;
+      /// Get the results of the intersection tests that have been updated 
+      /// since the previous call to trace
+      Links getResults() const;
 
     private:
       /// Default constructor
@@ -66,10 +70,12 @@ namespace Mantid
       void fireRay(Track & testRay) const;
       /// Test the physical intersection of a track and any component children
       void testIntersectionWithChildren(Track & testRay, ICompAssembly_sptr assembly, 
-        std::deque<IComponent_sptr> & searchQueue) const;
+					std::deque<IComponent_sptr> & searchQueue) const;
 
       /// Pointer to the instrument
       IInstrument_sptr m_instrument;
+      /// Accumulate results in this Track object, aids performance. This is cleared when getResults is called.
+      mutable Track m_resultsTrack;
       /// Logger
       static Kernel::Logger & g_log;
     };

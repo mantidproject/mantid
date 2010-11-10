@@ -62,7 +62,7 @@ RectangularDetector::RectangularDetector(const std::string& n, IComponent* refer
  *  @param other :: RectangularDetector to copy
  */
 RectangularDetector::RectangularDetector(const RectangularDetector& other) :
-  CompAssembly(other)
+  CompAssembly(other), IObjComponent(other), IRectangularDetector(other)
 {
   //TODO: Copy other fields here
 }
@@ -245,6 +245,8 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
 /// Does the point given lie within this object component?
 bool RectangularDetector::isValid(const V3D& point) const
 {
+  // Avoid compiler warning
+  (void)point;
   //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::isValid() is not implemented.");
   return false;
@@ -254,6 +256,8 @@ bool RectangularDetector::isValid(const V3D& point) const
 /// Does the point given lie on the surface of this object component?
 bool RectangularDetector::isOnSide(const V3D& point) const
 {
+  // Avoid compiler warning
+  (void)point;
   //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::isOnSide() is not implemented.");
   return false;
@@ -264,6 +268,8 @@ bool RectangularDetector::isOnSide(const V3D& point) const
 ///Checks whether the track given will pass through this Component.
 int RectangularDetector::interceptSurface(Track& track) const
 {
+  // Avoid compiler warning
+  (void)track;
   //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::interceptSurface() is not implemented.");
   return 0;
@@ -274,6 +280,8 @@ int RectangularDetector::interceptSurface(Track& track) const
 /// Finds the approximate solid angle covered by the component when viewed from the point given
 double RectangularDetector::solidAngle(const V3D& observer) const
 {
+  // Avoid compiler warning
+  (void)observer;
   //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::solidAngle() is not implemented.");
   return 0;
@@ -284,6 +292,8 @@ double RectangularDetector::solidAngle(const V3D& observer) const
 ///Try to find a point that lies within (or on) the object
 int RectangularDetector::getPointInObject(V3D& point) const
 {
+  // Avoid compiler warning
+  (void)point;
  //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::getPointInObject() is not implemented.");
   return 0;

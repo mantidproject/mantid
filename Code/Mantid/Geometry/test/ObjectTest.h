@@ -195,14 +195,14 @@ public:
     TS_ASSERT_DELTA(ymin,-4.1,tolerance);
     TS_ASSERT_DELTA(zmin,-4.1,tolerance);
 
-    boost::shared_ptr<BoundingBox> bbox = geom_obj->getBoundingBox();
+    const BoundingBox & bbox  = geom_obj->getBoundingBox();
 
-    TS_ASSERT_DELTA(bbox->xMax(),4.1,tolerance);
-    TS_ASSERT_DELTA(bbox->yMax(),4.1,tolerance);
-    TS_ASSERT_DELTA(bbox->zMax(),4.1,tolerance);
-    TS_ASSERT_DELTA(bbox->xMin(),-4.1,tolerance);
-    TS_ASSERT_DELTA(bbox->yMin(),-4.1,tolerance);
-    TS_ASSERT_DELTA(bbox->zMin(),-4.1,tolerance);
+    TS_ASSERT_DELTA(bbox.xMax(),4.1,tolerance);
+    TS_ASSERT_DELTA(bbox.yMax(),4.1,tolerance);
+    TS_ASSERT_DELTA(bbox.zMax(),4.1,tolerance);
+    TS_ASSERT_DELTA(bbox.xMin(),-4.1,tolerance);
+    TS_ASSERT_DELTA(bbox.yMin(),-4.1,tolerance);
+    TS_ASSERT_DELTA(bbox.zMin(),-4.1,tolerance);
   }
 
   void testCalcValidTypeCappedCylinder()
@@ -698,14 +698,14 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin));
 
-    boost::shared_ptr<BoundingBox> boundBox = geom_obj->getBoundingBox();
+    const BoundingBox & boundBox = geom_obj->getBoundingBox();
 
-    TS_ASSERT_EQUALS(boundBox->xMax(),1.2);
-    TS_ASSERT_EQUALS(boundBox->yMax(),3.0);
-    TS_ASSERT_EQUALS(boundBox->zMax(),3.0);
-    TS_ASSERT_EQUALS(boundBox->xMin(),-3.2);
-    TS_ASSERT_EQUALS(boundBox->yMin(),-3.0);
-    TS_ASSERT_EQUALS(boundBox->zMin(),-3.0);
+    TS_ASSERT_EQUALS(boundBox.xMax(),1.2);
+    TS_ASSERT_EQUALS(boundBox.yMax(),3.0);
+    TS_ASSERT_EQUALS(boundBox.zMax(),3.0);
+    TS_ASSERT_EQUALS(boundBox.xMin(),-3.2);
+    TS_ASSERT_EQUALS(boundBox.yMin(),-3.0);
+    TS_ASSERT_EQUALS(boundBox.zMin(),-3.0);
 
     //Inconsistent bounding box
     xmax=1.2;xmin=3.0;

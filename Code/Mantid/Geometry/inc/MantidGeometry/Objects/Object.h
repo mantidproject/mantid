@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
+#include "BoundingBox.h"
 #include <map>
 #include <string>
 #include "boost/shared_ptr.hpp"
@@ -32,7 +33,6 @@ namespace Mantid
     class CacheGeometryHandler;
     class vtkGeometryCacheReader;
     class vtkGeometryCacheWriter;
-    class BoundingBox;
 
     /*!
     \class Object
@@ -131,11 +131,12 @@ namespace Mantid
       /// Calculate (or return cached value of) Axis Aligned Bounding box (DEPRECATED)
       void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
 
-      /// Calculate (or return cached value of) axis-aligned bounding box
-      boost::shared_ptr<BoundingBox> getBoundingBox() const;
+      /// Return cached value of axis-aligned bounding box
+      const BoundingBox & getBoundingBox() const;
       /// Define axis-aligned bounding box
       void defineBoundingBox(const double& xmax,const double& ymax,const double& zmax,const double& xmin,const double& ymin,const double& zmin);
-
+      /// Set a null bounding box for this object 
+      void setNullBoundingBox();
       // find internal point to object
       int getPointInObject(Geometry::V3D& point) const;
 
@@ -157,16 +158,13 @@ namespace Mantid
       static Kernel::Logger& PLog;           ///< The official logger
 
       int ObjName;       ///< Creation number
-      //int MatN;          ///< Material Number
-      //double Tmp;        ///< Temperature (K)
-      //double density;    ///< Density
 
       Rule* TopRule;     ///< Top rule [ Geometric scope of object]
 
       int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
       CompGrp* procComp(Rule*) const;
       int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
-      boost::shared_ptr<BoundingBox> m_boundingBox;
+      BoundingBox m_boundingBox;
 
       // -- DEPRECATED --
       mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
@@ -207,8 +205,6 @@ namespace Mantid
 
     protected:
       std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)
-
-
     };
 
   }  // NAMESPACE Geometry

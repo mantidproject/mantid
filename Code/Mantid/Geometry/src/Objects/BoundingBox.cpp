@@ -152,6 +152,7 @@ namespace Mantid
      */
     void BoundingBox::grow(const BoundingBox & other)
     {
+      m_null = false;
       // If the current box is empty then we definitely need to grow
       if( minPoint() == V3D() && maxPoint() == V3D() )
       {
@@ -181,14 +182,20 @@ namespace Mantid
 
     }
 
+    //--------------------------------------------------------------------------
+    // Namespace functions
+    //--------------------------------------------------------------------------
 
-    /*! Print out the bounding box values to a stream.
+    /**
+     * Print out the bounding box values to a stream.
+     * @param os The output stream
+     * @param box A reference to the bounding box to print out.
      */
     std::ostream& operator<<(std::ostream& os, const BoundingBox& box)
     {
       os << "X from " <<  box.xMin() << " to " <<  box.xMax()
-            << "; Y from " <<  box.yMin() << " to " <<  box.yMax()
-            << "; Z from " <<  box.zMin() << " to " <<  box.zMax();
+	 << "; Y from " <<  box.yMin() << " to " <<  box.yMax()
+	 << "; Z from " <<  box.zMin() << " to " <<  box.zMax();
       return os;
     }
 

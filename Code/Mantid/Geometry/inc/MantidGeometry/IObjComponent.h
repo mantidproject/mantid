@@ -120,14 +120,14 @@ public:
   GeometryHandler* Handle()const{return handle;}
 
 protected:
+  /// Protected copy constructor
+  IObjComponent(const IObjComponent&);
   /// Reset the current geometry handler
   void setGeometryHandler(GeometryHandler *h);
   /// Object Scaling factor in 3 axis direction. given as a vector
   V3D	m_ScaleFactor;
   
 private:
-    /// Protected copy constructor
-  IObjComponent(const IObjComponent&);
   /// Private, unimplemented copy assignment operator
   IObjComponent& operator=(const IObjComponent&);
   /// Geometry Handle for rendering

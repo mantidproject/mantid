@@ -10,50 +10,61 @@
 
 namespace Mantid
 {
-	namespace Geometry
-	{
-
-  IObjComponent::IObjComponent()
-    :m_ScaleFactor(1.0,1.0,1.0)
+  namespace Geometry
   {
-    handle = new CacheGeometryHandler(this);
-  }
 
-  /** Constructor, specifying the GeometryHandler (renderer engine)
-   * for this IObjComponent.
-   */
-  IObjComponent::IObjComponent(GeometryHandler* the_handler)
-    :m_ScaleFactor(1.0,1.0,1.0)
-  {
-    handle = the_handler;
-  }
+    IObjComponent::IObjComponent()
+      :m_ScaleFactor(1.0,1.0,1.0)
+    {
+      handle = new CacheGeometryHandler(this);
+    }
 
-		// Looking to get rid of the first of these constructors in due course (and probably add others)
-		IObjComponent::~IObjComponent()
-		{
-			if(handle!=NULL)
-				delete handle;
-		}
-		/**
-		 * Sets the scaling factor of the object for the Object Component.
-		 * @param xFactor: scaling factor in x-direction
-		 * @param yFactor: scaling factor in y-direction
-		 * @param zFactor: scaling factor in z-direction
-		 */
-		void IObjComponent::setScaleFactor(double xFactor,double yFactor, double zFactor)
-		{
-			m_ScaleFactor=V3D(xFactor,yFactor,zFactor);
-		}
+    /** Constructor, specifying the GeometryHandler (renderer engine)
+     * for this IObjComponent.
+     */
+    IObjComponent::IObjComponent(GeometryHandler* the_handler)
+      :m_ScaleFactor(1.0,1.0,1.0)
+    {
+      handle = the_handler;
+    }
 
-	  /**
-	  * Set the geometry handler for IObjComponent
-	  * @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
-	  */
-	  void IObjComponent::setGeometryHandler(GeometryHandler *h)
-	  {
-	      if(h==NULL)return;
-	      this->handle=h;
-	  }
+    // Looking to get rid of the first of these constructors in due course (and probably add others)
+    IObjComponent::~IObjComponent()
+    {
+      if(handle!=NULL)
+	delete handle;
+    }
 
-	} // namespace Geometry
+    /**
+     * Sets the scaling factor of the object for the Object Component.
+     * @param xFactor: scaling factor in x-direction
+     * @param yFactor: scaling factor in y-direction
+     * @param zFactor: scaling factor in z-direction
+     */
+    void IObjComponent::setScaleFactor(double xFactor,double yFactor, double zFactor)
+    {
+      m_ScaleFactor=V3D(xFactor,yFactor,zFactor);
+    }
+
+    /**
+     * Set the geometry handler for IObjComponent
+     * @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
+     */
+    void IObjComponent::setGeometryHandler(GeometryHandler *h)
+    {
+      if(h==NULL)return;
+      this->handle=h;
+    }
+
+    /**
+     * Copy constructor
+     * @param origin The object to initialize this with
+     */
+    IObjComponent::IObjComponent(const IObjComponent& origin) : 
+      m_ScaleFactor(origin.m_ScaleFactor), handle(origin.handle)
+    {
+    }
+
+    
+  } // namespace Geometry
 } // namespace Mantid

@@ -9,7 +9,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/ConfigService.h"
 #include "ComponentCreationHelpers.hh"
-#include <iomanip>
+#include <iterator>
 
 using namespace Mantid::Geometry;
 
@@ -54,10 +54,10 @@ public:
   {
     IInstrument_sptr testInst = setupInstrument(); 
     InstrumentRayTracer tracker(testInst);
-    InstrumentRayTracer::TraceResults results = tracker.trace(V3D(0.,0.,1));
+    tracker.trace(V3D(0.,0.,1));
+    Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 2);
     // Check they are actually what we expect: 1 with the sample and 1 with the central detector
-    // and that the components are the ones we want
     IComponent_sptr centralPixel = testInst->getComponentByName("pixel-(0,0)");
     IComponent_sptr sampleComp = testInst->getSample();
 
@@ -71,7 +71,7 @@ public:
       TS_FAIL("Test instrument has been changed, the instrument config has changed. Ray tracing tests need to be updated.");
       return;
     }
-    InstrumentRayTracer::TraceResults::const_iterator resultItr = results.begin();
+    Links::const_iterator resultItr = results.begin();
     Link firstIntersect = *resultItr;
 
     TS_ASSERT_DELTA(firstIntersect.distFromStart, 10.001, 1e-6);
@@ -95,6 +95,10 @@ public:
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 5.004, 1e-6);
     TS_ASSERT_EQUALS(secondIntersect.componentID, centralPixel->getComponentID());
+
+    // Results vector should be empty after first getResults call
+    results = tracker.getResults();
+    TS_ASSERT_EQUALS(results.size(), 0);
   }
 
   void test_That_A_Ray_Which_Just_Intersects_One_Component_Gives_This_Component_Only()
@@ -102,7 +106,8 @@ public:
     IInstrument_sptr testInst = setupInstrument(); 
     InstrumentRayTracer tracker(testInst);
     V3D testDir(0.010,0.0,15.004);
-    InstrumentRayTracer::TraceResults results = tracker.trace(testDir);
+    tracker.trace(testDir);
+    Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 1);
 
     IComponent_sptr interceptedPixel = testInst->getComponentByName("pixel-(1,0)");
@@ -117,6 +122,10 @@ public:
     TS_ASSERT_DELTA(intersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(intersect.exitPoint.Z(), 5.003464, 1e-6);
     TS_ASSERT_EQUALS(intersect.componentID, interceptedPixel->getComponentID());
+
+    // Results vector should be empty after first getResults call
+    results = tracker.getResults();
+    TS_ASSERT_EQUALS(results.size(), 0);
   }
 
 private:
