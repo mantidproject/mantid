@@ -46,8 +46,6 @@ namespace Mantid
      *
      *  @param lhs Reference to the EventList that will be modified in place.
      *  @param rhs Const reference to the EventList on the right hand side.
-     *  @param rhsY The vector of rhs data values
-     *  @param rhsE The vector of rhs error values
      */
     void Plus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
@@ -120,7 +118,12 @@ namespace Mantid
 
 
     //---------------------------------------------------------------------------------------------
-    /* Return true if the units and distribution-type of the workspaces make them compatible */
+    /**
+     *  Return true if the units and distribution-type of the workspaces make them compatible
+     *  @param lhs first workspace to check for compatibility
+     *  @param rhs second workspace to check for compatibility
+     *  @return workspace unit compatibility flag
+     */
     bool Plus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       if ( lhs->size() > 1 && rhs->size() > 1 )
@@ -140,6 +143,13 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------
+    /**
+     *  Check the given workspaces for unit, distribution and binary operation
+     *  compatibility. Return is true is the workspaces are compatible.
+     *  @param lhs first workspace to check for compatibility
+     *  @param rhs second workspace to check for compatibility
+     *  @return workspace compatibility flag
+     */
     bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       if (!checkUnitCompatibility(lhs, rhs))

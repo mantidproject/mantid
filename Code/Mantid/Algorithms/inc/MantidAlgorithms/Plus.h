@@ -75,12 +75,6 @@ namespace Mantid
 
       //Overridden event-specific operation
       bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-
-      //Variables used in processing
-      std::string lhs_name, rhs_name, out_name;
-
-
-
     };
 
   } // namespace Algorithm
