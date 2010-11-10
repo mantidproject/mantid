@@ -166,7 +166,8 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
         sys.exit('Monitor area and thickness (unt and zz) are not defined \
                 in the Instrument Parameter File.')
     for ws in ws_name:
-        applyParameterFile(ws, analyser, reflection)
+        if ( analyser != "" and reflection != "" ):
+            applyParameterFile(ws, analyser, reflection)
         if adjustTOF(ws):
             TofCorrection(ws, ws)
         runNo = mtd[ws].getRun().getLogData("run_number").value()
@@ -232,7 +233,7 @@ def convert_to_energy(rawfiles, mapfile, first, last, efixed, analyser = '',
     return output_workspace_names, runNos
 
 def cte_rebin(mapfile, tempK, rebinParam, analyser, reflection, instrument, 
-        savesuffix, saveFormats, savedir, CleanUp=False):
+        savesuffix, saveFormats, savedir, CleanUp=False, Verbose=False):
     ws_list = mantid.getWorkspaceNames()
     energy = re.compile('_'+analyser+reflection+r'_intermediate$')
     int_list = []
@@ -315,14 +316,16 @@ def createCalibFile(rawfile, suffix, peakMin, peakMax, backMin, backMax,
         mantid.deleteWorkspace(outWS_n)
     return savefile
 
-def res(file, iconOpt, rebinParam, bground, suffix, plotOpt=False, Res=True):
+def res(file, iconOpt, rebinParam, bground, suffix, plotOpt=False, Res=True,
+        analyser='', reflection=''):
     (direct, filename) = os.path.split(file)
     (root, ext) = os.path.splitext(filename)
     nspec = iconOpt['last'] - iconOpt['first'] + 1
     mapping = createMappingFile('res.map', 1, nspec, iconOpt['first'])
     rawfiles = [file]
     workspace_list, runNos = convert_to_energy(rawfiles, mapping, 
-            iconOpt['first'], iconOpt['last'], iconOpt['efixed'])
+            iconOpt['first'], iconOpt['last'], iconOpt['efixed'],
+            analyser=analyser, reflection=reflection)
     iconWS = workspace_list[0]
     if Res:
         run = mtd[workspace_list[0]].getRun().getLogData("run_number").value()
@@ -342,7 +345,7 @@ def res(file, iconOpt, rebinParam, bground, suffix, plotOpt=False, Res=True):
             graph = plotSpectrum(iconWS, 0)
         return iconWS
 
-def saveItems(workspaces, runNos, fileFormats, ins, suffix):
+def saveItems(workspaces, runNos, fileFormats, ins, suffix, Verbose=False):
     for i in range(0, len(workspaces)):
         filename = ins + runNos[i] + '_' + suffix
         for j in fileFormats:

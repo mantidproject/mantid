@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>507</width>
-    <height>622</height>
+    <height>609</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -172,6 +172,14 @@
                 </property>
                 <item>
                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" >
+                  <property name="geometry" >
+                   <rect>
+                    <x>26</x>
+                    <y>59</y>
+                    <width>244</width>
+                    <height>41</height>
+                   </rect>
+                  </property>
                   <property name="label" stdset="0" >
                    <string>Runs          </string>
                   </property>
@@ -188,6 +196,14 @@
               </item>
               <item>
                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" >
+                <property name="geometry" >
+                 <rect>
+                  <x>70</x>
+                  <y>117</y>
+                  <width>244</width>
+                  <height>41</height>
+                 </rect>
+                </property>
                 <property name="findRunFiles" stdset="0" >
                  <bool>false</bool>
                 </property>
@@ -207,6 +223,14 @@
               </item>
               <item>
                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" >
+                <property name="geometry" >
+                 <rect>
+                  <x>114</x>
+                  <y>175</y>
+                  <width>244</width>
+                  <height>41</height>
+                 </rect>
+                </property>
                 <property name="label" stdset="0" >
                  <string>White beam</string>
                 </property>
@@ -228,6 +252,14 @@
                  <layout class="QVBoxLayout" name="verticalLayout_6" >
                   <item>
                    <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" >
+                    <property name="geometry" >
+                     <rect>
+                      <x>158</x>
+                      <y>233</y>
+                      <width>244</width>
+                      <height>41</height>
+                     </rect>
+                    </property>
                     <property name="sizePolicy" >
                      <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                       <horstretch>0</horstretch>
@@ -243,6 +275,14 @@
                    <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" >
                     <property name="enabled" >
                      <bool>false</bool>
+                    </property>
+                    <property name="geometry" >
+                     <rect>
+                      <x>202</x>
+                      <y>291</y>
+                      <width>244</width>
+                      <height>41</height>
+                     </rect>
                     </property>
                     <property name="sizePolicy" >
                      <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
@@ -360,6 +400,14 @@
                    <layout class="QHBoxLayout" name="horizontalLayout_5" >
                     <item>
                      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" >
+                      <property name="geometry" >
+                       <rect>
+                        <x>26</x>
+                        <y>59</y>
+                        <width>244</width>
+                        <height>41</height>
+                       </rect>
+                      </property>
                       <property name="sizePolicy" >
                        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                         <horstretch>0</horstretch>
@@ -1514,6 +1562,14 @@ p, li { white-space: pre-wrap; }
            <layout class="QHBoxLayout" name="horizontalLayout_18" >
             <item>
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" >
+              <property name="geometry" >
+               <rect>
+                <x>92</x>
+                <y>146</y>
+                <width>244</width>
+                <height>41</height>
+               </rect>
+              </property>
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -1566,608 +1622,41 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="cal_gbTimeRange" >
-         <property name="title" >
-          <string>Time Range</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_19" >
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_23" >
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_16" >
-              <item>
-               <widget class="QLabel" name="cal_lbPeak" >
-                <property name="text" >
-                 <string>Peak</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="cal_lbBack" >
-                <property name="text" >
-                 <string>Background</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_19" >
-              <property name="orientation" >
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0" >
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_18" >
-              <property name="orientation" >
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0" >
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_18" >
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_21" >
-                <item>
-                 <spacer name="horizontalSpacer_4" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="cal_lbPeakMin" >
-                  <property name="text" >
-                   <string>Min:</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>cal_lePeakMin</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="cal_lePeakMin" >
-                  <property name="toolTip" >
-                   <string>Start of range of Peak in Time of Flight</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valPeakMin" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_16" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="cal_lbPeakMax" >
-                  <property name="text" >
-                   <string>Max:</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>cal_lePeakMax</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="cal_lePeakMax" >
-                  <property name="toolTip" >
-                   <string>End of range of peak in Time of Flight</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valPeakMax" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_22" >
-                <item>
-                 <spacer name="horizontalSpacer_31" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="cal_lbBackMin" >
-                  <property name="text" >
-                   <string>Min:</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>cal_leBackMin</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="cal_leBackMin" >
-                  <property name="toolTip" >
-                   <string>Start of range of background in time of flight.</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valBackMin" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_17" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="cal_lbBackMax" >
-                  <property name="text" >
-                   <string>Max:</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>cal_leBackMax</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="cal_leBackMax" >
-                  <property name="toolTip" >
-                   <string>End of range of background in time of flight.</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valBackMax" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_29" >
+        <layout class="QHBoxLayout" name="horizontalLayout_20" >
          <item>
-          <widget class="QCheckBox" name="cal_ckRES" >
-           <property name="toolTip" >
-            <string>Create RES file</string>
-           </property>
-           <property name="text" >
-            <string>Create RES File</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="cal_treeCal" />
          </item>
          <item>
-          <spacer name="horizontalSpacer_37" >
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="cal_pbPlotEnergy" >
-           <property name="text" >
-            <string>Plot Energy</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="cal_plotCal" />
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="cal_gbRES" >
-         <property name="title" >
-          <string>RES Options</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_22" >
-          <item>
-           <layout class="QHBoxLayout" name="cal_layoutRES" >
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_27" >
-              <property name="spacing" >
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="cal_lbSpecSelect" >
-                <property name="text" >
-                 <string>Spectra Selection</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="cal_lbResBG" >
-                <property name="text" >
-                 <string>Background Subtraction</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_32" >
-                <item>
-                 <widget class="QLabel" name="cal_lbELow" >
-                  <property name="text" >
-                   <string>Rebin: ELow</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>cal_leELow</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_33" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="cal_leELow" >
-                  <property name="maximumSize" >
-                   <size>
-                    <width>75</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">x&lt;span style=" vertical-align:sub;">1 &lt;/span>value for rebinning (start point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valResELow" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_26" >
-              <property name="spacing" >
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="cal_lbResSpecMin" >
-                <property name="text" >
-                 <string>Minimum</string>
-                </property>
-                <property name="buddy" >
-                 <cstring>cal_leResSpecMin</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="cal_lbStartX" >
-                <property name="text" >
-                 <string>StartX</string>
-                </property>
-                <property name="buddy" >
-                 <cstring>cal_leStartX</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="cal_lbEWidth" >
-                <property name="text" >
-                 <string>EWidth</string>
-                </property>
-                <property name="buddy" >
-                 <cstring>cal_leEWidth</cstring>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_25" >
-              <property name="spacing" >
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLineEdit" name="cal_leResSpecMin" >
-                <property name="maximumSize" >
-                 <size>
-                  <width>75</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="toolTip" >
-                 <string>Min Spectra range for creation of RES file</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="cal_leStartX" >
-                <property name="sizePolicy" >
-                 <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize" >
-                 <size>
-                  <width>75</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="toolTip" >
-                 <string>Start of background range to subtract from RES in Energy</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="cal_leEWidth" >
-                <property name="maximumSize" >
-                 <size>
-                  <width>75</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="toolTip" >
-                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Δx&lt;span style=" vertical-align:sub;">1&lt;/span> for rebinning (width of bins)&lt;/p>&lt;/body>&lt;/html></string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_29" >
-              <item>
-               <widget class="QLabel" name="valResSpecMin" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valStartX" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valResEWidth" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_24" >
-              <property name="spacing" >
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="cal_lbResSpecMax" >
-                <property name="text" >
-                 <string>Maximum</string>
-                </property>
-                <property name="buddy" >
-                 <cstring>cal_leResSpecMax</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="cal_lbEndX" >
-                <property name="text" >
-                 <string>EndX</string>
-                </property>
-                <property name="buddy" >
-                 <cstring>cal_leEndX</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="cal_lbEHigh" >
-                <property name="text" >
-                 <string>EHigh</string>
-                </property>
-                <property name="buddy" >
-                 <cstring>cal_leEHigh</cstring>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_23" >
-              <property name="spacing" >
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLineEdit" name="cal_leResSpecMax" >
-                <property name="maximumSize" >
-                 <size>
-                  <width>75</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="toolTip" >
-                 <string>Max spectra range for creation of RES file</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="cal_leEndX" >
-                <property name="maximumSize" >
-                 <size>
-                  <width>75</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="toolTip" >
-                 <string>End of background range to subtract from RES in energy</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="cal_leEHigh" >
-                <property name="maximumSize" >
-                 <size>
-                  <width>75</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="toolTip" >
-                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_30" >
-              <item>
-               <widget class="QLabel" name="valResSpecMax" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valEndX" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valResEHigh" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="cal_plots" >
          <item>
-          <layout class="QVBoxLayout" name="cal_plotCal" />
+          <layout class="QVBoxLayout" name="cal_treeRes" >
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_21" >
+             <item>
+              <widget class="QCheckBox" name="cal_ckRES" >
+               <property name="toolTip" >
+                <string>Create RES file</string>
+               </property>
+               <property name="text" >
+                <string>Create RES File</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="cal_pbPlotEnergy" >
+               <property name="text" >
+                <string>Plot Energy</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QVBoxLayout" name="cal_plotRes" />
@@ -2248,19 +1737,6 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item>
-        <spacer name="verticalSpacer_2" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabTimeSlice" >
@@ -2278,6 +1754,14 @@ p, li { white-space: pre-wrap; }
            <layout class="QHBoxLayout" name="horizontalLayout_36" >
             <item>
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" >
+              <property name="geometry" >
+               <rect>
+                <x>158</x>
+                <y>233</y>
+                <width>244</width>
+                <height>41</height>
+               </rect>
+              </property>
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -2322,6 +1806,14 @@ p, li { white-space: pre-wrap; }
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" >
               <property name="enabled" >
                <bool>false</bool>
+              </property>
+              <property name="geometry" >
+               <rect>
+                <x>202</x>
+                <y>291</y>
+                <width>244</width>
+                <height>41</height>
+               </rect>
               </property>
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
@@ -2513,6 +2005,14 @@ p, li { white-space: pre-wrap; }
                <layout class="QVBoxLayout" name="verticalLayout_21" >
                 <item>
                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" >
+                  <property name="geometry" >
+                   <rect>
+                    <x>48</x>
+                    <y>88</y>
+                    <width>244</width>
+                    <height>41</height>
+                   </rect>
+                  </property>
                   <property name="sizePolicy" >
                    <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
                     <horstretch>0</horstretch>
@@ -2841,6 +2341,14 @@ p, li { white-space: pre-wrap; }
          <layout class="QVBoxLayout" name="verticalLayout_31" >
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" >
+            <property name="geometry" >
+             <rect>
+              <x>136</x>
+              <y>204</y>
+              <width>244</width>
+              <height>41</height>
+             </rect>
+            </property>
             <property name="label" stdset="0" >
              <string>Mono Van</string>
             </property>
@@ -2848,6 +2356,14 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" >
+            <property name="geometry" >
+             <rect>
+              <x>180</x>
+              <y>262</y>
+              <width>244</width>
+              <height>41</height>
+             </rect>
+            </property>
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -2864,6 +2380,14 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" >
+            <property name="geometry" >
+             <rect>
+              <x>26</x>
+              <y>59</y>
+              <width>244</width>
+              <height>41</height>
+             </rect>
+            </property>
             <property name="label" stdset="0" >
              <string>White Beam</string>
             </property>
@@ -3260,10 +2784,7 @@ p, li { white-space: pre-wrap; }
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>runFiles</tabstop>
   <tabstop>ckSumSpecs</tabstop>
-  <tabstop>mapFile</tabstop>
-  <tabstop>whiteBeamFile</tabstop>
   <tabstop>pbBack</tabstop>
   <tabstop>cbNormal</tabstop>
   <tabstop>leEGuess</tabstop>
@@ -3287,18 +2808,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>rebin_pbRebin</tabstop>
   <tabstop>pbBack_2</tabstop>
   <tabstop>pbPlotRaw</tabstop>
-  <tabstop>cal_lePeakMin</tabstop>
-  <tabstop>cal_lePeakMax</tabstop>
-  <tabstop>cal_leBackMin</tabstop>
-  <tabstop>cal_leBackMax</tabstop>
-  <tabstop>cal_ckRES</tabstop>
-  <tabstop>cal_leResSpecMin</tabstop>
-  <tabstop>cal_leResSpecMax</tabstop>
-  <tabstop>cal_leStartX</tabstop>
-  <tabstop>cal_leEndX</tabstop>
-  <tabstop>cal_leELow</tabstop>
-  <tabstop>cal_leEWidth</tabstop>
-  <tabstop>cal_leEHigh</tabstop>
   <tabstop>ckSumFiles</tabstop>
   <tabstop>cbMappingOptions</tabstop>
   <tabstop>cbReflection</tabstop>
@@ -3310,9 +2819,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>ckDetailedBalance</tabstop>
   <tabstop>cbAnalyser</tabstop>
   <tabstop>ckCleanUp</tabstop>
-  <tabstop>absRunFiles</tabstop>
-  <tabstop>absMapFile</tabstop>
-  <tabstop>absWhiteFile</tabstop>
   <tabstop>leVanEi</tabstop>
   <tabstop>leVanELow</tabstop>
   <tabstop>leVanEHigh</tabstop>
@@ -3321,70 +2827,5 @@ p, li { white-space: pre-wrap; }
   <tabstop>leRMMMass</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>cbInst</sender>
-   <signal>instrumentSelectionChanged(QString)</signal>
-   <receiver>runFiles</receiver>
-   <slot>findFiles()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>121</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>222</x>
-     <y>152</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbInst</sender>
-   <signal>instrumentSelectionChanged(QString)</signal>
-   <receiver>whiteBeamFile</receiver>
-   <slot>findFiles()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>121</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>251</x>
-     <y>260</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbInst</sender>
-   <signal>instrumentSelectionChanged(QString)</signal>
-   <receiver>absRunFiles</receiver>
-   <slot>findFiles()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>121</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>251</x>
-     <y>125</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbInst</sender>
-   <signal>instrumentSelectionChanged(QString)</signal>
-   <receiver>absWhiteFile</receiver>
-   <slot>findFiles()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>121</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>251</x>
-     <y>227</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

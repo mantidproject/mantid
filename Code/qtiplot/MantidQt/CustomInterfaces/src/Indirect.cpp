@@ -110,19 +110,7 @@ void Indirect::initLayout()
   m_uiForm.rebin_leELow->setValidator(m_valDbl);
   m_uiForm.rebin_leEWidth->setValidator(m_valDbl);
   m_uiForm.rebin_leEHigh->setValidator(m_valDbl);
-
-  m_uiForm.cal_lePeakMin->setValidator(m_valInt);
-  m_uiForm.cal_lePeakMax->setValidator(m_valInt);
-  m_uiForm.cal_leBackMin->setValidator(m_valInt);
-  m_uiForm.cal_leBackMax->setValidator(m_valInt);
-  m_uiForm.cal_leResSpecMin->setValidator(m_valInt);
-  m_uiForm.cal_leResSpecMax->setValidator(m_valInt);
-  m_uiForm.cal_leStartX->setValidator(m_valDbl);
-  m_uiForm.cal_leEndX->setValidator(m_valDbl);
-  m_uiForm.cal_leELow->setValidator(m_valDbl);
-  m_uiForm.cal_leEWidth->setValidator(m_valDbl);
-  m_uiForm.cal_leEHigh->setValidator(m_valDbl);
-
+  
   m_uiForm.sqw_leELow->setValidator(m_valDbl);
   m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leEHigh->setValidator(m_valDbl);
@@ -137,8 +125,6 @@ void Indirect::initLayout()
   loadSettings();
 
   refreshWSlist();
-
-  // sliceTwoRanges(m_uiForm.slice_ckUseTwoRanges->isChecked());
 }
 /**
 * This function will hold any Python-dependent setup actions for the interface.
@@ -463,14 +449,7 @@ void Indirect::clearReflectionInfo()
   m_uiForm.leSpectraMin->clear();
   m_uiForm.leSpectraMax->clear();
   m_uiForm.leEfixed->clear();
-  m_uiForm.cal_lePeakMin->clear();
-  m_uiForm.cal_lePeakMax->clear();
-  m_uiForm.cal_leBackMin->clear();
-  m_uiForm.cal_leBackMax->clear();
-
-  m_uiForm.cal_leResSpecMin->clear();
-  m_uiForm.cal_leResSpecMax->clear();
-
+  
   m_uiForm.slice_leSpecMin->clear();
   m_uiForm.slice_leSpecMax->clear();
 
@@ -570,24 +549,18 @@ void Indirect::createRESfile(const QString& file)
 {
   QString pyInput =
     "import IndirectEnergyConversion as ind\n"
-    "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
-    ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
+    "iconOpt = { 'first': " +QString::number(m_calDblMng->value(m_calResProp["SpecMin"]))+
+    ", 'last': " +QString::number(m_calDblMng->value(m_calResProp["SpecMax"]))+
     ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
-    "suffix = '" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "'\n"
-    "plot = ";
+    "suffix = '" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "'\n";
 
-  if ( m_uiForm.cal_ckPlotResult->isChecked() )
-  {
-    pyInput +=	"True\n";
-  }
-  else
-  {
-    pyInput += "False\n";
-  }
-  QString rebinParam = m_uiForm.cal_leELow->text() + "," +
-    m_uiForm.cal_leEWidth->text() + "," +
-    m_uiForm.cal_leEHigh->text();
-  QString background = "[ " +m_uiForm.cal_leStartX->text()+ ", " +m_uiForm.cal_leEndX->text()+"]";
+  if ( m_uiForm.cal_ckPlotResult->isChecked() ) { pyInput +=	"plot = True\n"; }
+  else { pyInput += "plot = False\n"; }
+
+  QString rebinParam = QString::number(m_calDblMng->value(m_calResProp["ELow"])) + "," +
+    QString::number(m_calDblMng->value(m_calResProp["EWidth"])) + "," +
+    QString::number(m_calDblMng->value(m_calResProp["EHigh"]));
+  QString background = "[ " +QString::number(m_calResDblMng->value(m_calResProp["Start"]))+ ", " +QString::number(m_calResDblMng->value(m_calResProp["End"]))+"]";
 
   pyInput +=
     "background = " + background + "\n"
@@ -744,166 +717,27 @@ bool Indirect::validateCalib()
     valid = false;
   }
 
-  // peak min/max, back min/max (calib)
-  if ( m_uiForm.cal_lePeakMin->text() == "" )
-  {
-    valid = false;
-    m_uiForm.valPeakMin->setText("*");
-  }
-  else
-  {
-    m_uiForm.valPeakMin->setText("");
-  }
-
-  if ( m_uiForm.cal_lePeakMax->text() == "" )
-  {
-    valid = false;
-    m_uiForm.valPeakMax->setText("*");
-  }
-  else
-  {
-    m_uiForm.valPeakMax->setText("");
-  }
-
-  if ( m_uiForm.cal_leBackMin->text() == "" )
-  {
-    valid = false;
-    m_uiForm.valBackMin->setText("*");
-  }
-  else
-  {
-    m_uiForm.valBackMin->setText("");
-  }
-
-  if ( m_uiForm.cal_leBackMax->text() == "" )
-  {
-    valid = false;
-    m_uiForm.valBackMax->setText("*");
-  }
-  else
-  {
-    m_uiForm.valBackMax->setText("");
-  }
-
-  if ( m_uiForm.cal_lePeakMin->text().toInt() > m_uiForm.cal_lePeakMax->text().toInt() )
-  {
-    valid = false;
-    m_uiForm.valPeakMin->setText("*");
-    m_uiForm.valPeakMax->setText("*");
-  }
-
-  if ( m_uiForm.cal_leBackMin->text().toInt() > m_uiForm.cal_leBackMax->text().toInt() )
-  {
-    valid = false;
-    m_uiForm.valBackMin->setText("*");
-    m_uiForm.valBackMax->setText("*");
-  }
-
-
   if ( m_uiForm.cal_ckRES->isChecked() )
   {
-    // SpectraSelect min/max
-    if ( m_uiForm.cal_leResSpecMin->text() == "" )
+    if ( m_calResDblMng->value(m_calResProp["Start"]) > m_calResDblMng->value(m_calResProp["End"]) )
     {
       valid = false;
-      m_uiForm.valResSpecMin->setText("*");
-    }
-    else
-    {
-      m_uiForm.valResSpecMin->setText("");
-    }
-    if ( m_uiForm.cal_leResSpecMax->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valResSpecMax->setText("*");
-    }
-    else
-    {
-      m_uiForm.valResSpecMax->setText("");
     }
 
-    if ( m_uiForm.cal_leResSpecMin->text().toInt() > m_uiForm.cal_leResSpecMax->text().toInt() )
+    if ( m_calDblMng->value(m_calResProp["ELow"]) > m_calDblMng->value(m_calResProp["EHigh"]) )
     {
       valid = false;
-      m_uiForm.valResSpecMin->setText("*");
-      m_uiForm.valResSpecMax->setText("*");
     }
 
-    // start/end x
-    if ( m_uiForm.cal_leStartX->text() == "" )
+    if ( m_calResDblMng->value(m_calResProp["Start"]) < m_calDblMng->value(m_calResProp["ELow"]) )
     {
-      valid = false;
-      m_uiForm.valStartX->setText("*");
+      m_calResDblMng->setValue(m_calResProp["Start"], m_calDblMng->value(m_calResProp["ELow"]) );
     }
-    else
+    if ( m_calResDblMng->value(m_calResProp["End"]) > m_calDblMng->value(m_calResProp["EHigh"]) )
     {
-      m_uiForm.valStartX->setText(" ");
-    }
-    if ( m_uiForm.cal_leEndX->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valEndX->setText("*");
-    }
-    else
-    {
-      m_uiForm.valEndX->setText(" ");
+      m_calResDblMng->setValue(m_calResProp["End"], m_calDblMng->value(m_calResProp["EHigh"]) );
     }
 
-    if ( m_uiForm.cal_leStartX->text().toInt() > m_uiForm.cal_leEndX->text().toInt() )
-    {
-      valid = false;
-      m_uiForm.valStartX->setText("*");
-      m_uiForm.valEndX->setText("*");
-    }
-
-    // rebinning (res)
-    if ( m_uiForm.cal_leEWidth->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valResEWidth->setText("*");
-    }
-    else
-    {
-      m_uiForm.valResEWidth->setText(" ");
-    }
-
-    if ( m_uiForm.cal_leELow->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valResELow->setText("*");
-    }
-    else
-    {
-      m_uiForm.valResELow->setText(" ");
-    }
-
-    if ( m_uiForm.cal_leEHigh->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valResEHigh->setText("*");
-    }
-    else
-    {
-      m_uiForm.valResEHigh->setText(" ");
-    }
-
-    if ( m_uiForm.cal_leELow->text().toInt() > m_uiForm.cal_leEHigh->text().toInt() )
-    {
-      valid = false;
-      m_uiForm.valResELow->setText("*");
-      m_uiForm.valResEHigh->setText("*");
-    }
-
-  }
-  else
-  {
-    m_uiForm.valResSpecMin->setText(" ");
-    m_uiForm.valResSpecMax->setText(" ");
-    m_uiForm.valStartX->setText(" ");
-    m_uiForm.valEndX->setText(" ");
-    m_uiForm.valResELow->setText(" ");
-    m_uiForm.valResEWidth->setText(" ");
-    m_uiForm.valResEHigh->setText(" ");
   }
 
   return valid;
@@ -1079,26 +913,82 @@ void Indirect::saveSettings()
 
 void Indirect::setupCalibration()
 {
-  // Calib
+  int noDec = 6;
+  // General
+  m_calDblMng = new QtDoublePropertyManager();
+  m_calGrpMng = new QtGroupPropertyManager();
+
+  /* Calib */
+  m_calCalTree = new QtTreePropertyBrowser();
+  m_uiForm.cal_treeCal->addWidget(m_calCalTree);
+
+  m_calCalDblMng = new QtDoublePropertyManager();
+  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  m_calCalTree->setFactoryForManager(m_calCalDblMng, doubleEditorFactory);
+
+  m_calCalProp["PeakMin"] = m_calCalDblMng->addProperty("Peak Min");
+  m_calCalProp["PeakMax"] = m_calCalDblMng->addProperty("Peak Max");
+  m_calCalProp["BackMin"] = m_calCalDblMng->addProperty("Back Min");
+  m_calCalProp["BackMax"] = m_calCalDblMng->addProperty("Back Max");
+
+  m_calCalTree->addProperty(m_calCalProp["PeakMin"]);
+  m_calCalTree->addProperty(m_calCalProp["PeakMax"]);
+  m_calCalTree->addProperty(m_calCalProp["BackMin"]);
+  m_calCalTree->addProperty(m_calCalProp["BackMax"]);
+
   m_calCalPlot = new QwtPlot(this);
   m_calCalPlot->setAxisFont(QwtPlot::xBottom, this->font());
   m_calCalPlot->setAxisFont(QwtPlot::yLeft, this->font());
   m_uiForm.cal_plotCal->addWidget(m_calCalPlot);
   m_calCalPlot->setCanvasBackground(Qt::white);
+
   // R1 = Peak, R2 = Background
   m_calCalR1 = new MantidWidgets::RangeSelector(m_calCalPlot);
-  m_calCalR1->setMinimum(m_uiForm.cal_lePeakMin->text().toDouble());
-  m_calCalR1->setMaximum(m_uiForm.cal_lePeakMax->text().toDouble());
   connect(m_calCalR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
   connect(m_calCalR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
   m_calCalR2 = new MantidWidgets::RangeSelector(m_calCalPlot);
   m_calCalR2->setColour(Qt::darkGreen); // dark green to signify background range
-  m_calCalR2->setMinimum(m_uiForm.cal_leBackMin->text().toDouble());
-  m_calCalR2->setMaximum(m_uiForm.cal_leBackMax->text().toDouble());
   connect(m_calCalR2, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
   connect(m_calCalR2, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
 
   // Res
+  m_calResTree = new QtTreePropertyBrowser();
+  m_uiForm.cal_treeRes->addWidget(m_calResTree);
+
+  m_calResDblMng = new QtDoublePropertyManager();
+  m_calResTree->setFactoryForManager(m_calResDblMng, doubleEditorFactory);
+  /// m_calResTree->setFactoryForManager(m_calIntMng, doubleEditorFactory);
+  m_calResTree->setFactoryForManager(m_calDblMng, doubleEditorFactory);
+
+  // Res - Spectra Selection
+  m_calResProp["SpecMin"] = m_calDblMng->addProperty("Spectra Min");
+  m_calResProp["SpecMax"] = m_calDblMng->addProperty("Spectra Max");
+  m_calResTree->addProperty(m_calResProp["SpecMin"]);
+  m_calDblMng->setDecimals(m_calResProp["SpecMin"], 0);
+  m_calResTree->addProperty(m_calResProp["SpecMax"]);
+  m_calDblMng->setDecimals(m_calResProp["SpecMax"], 0);
+
+  // Res - Background Properties
+  QtProperty* resBG = m_calGrpMng->addProperty("Background");
+  m_calResProp["Start"] = m_calResDblMng->addProperty("Start");
+  m_calResProp["End"] = m_calResDblMng->addProperty("End");
+  resBG->addSubProperty(m_calResProp["Start"]);
+  resBG->addSubProperty(m_calResProp["End"]);
+  m_calResTree->addProperty(resBG);
+
+  // Res - rebinning
+  QtProperty* resRB = m_calGrpMng->addProperty("Rebinning");
+  m_calResProp["ELow"] = m_calDblMng->addProperty("Low");
+  m_calDblMng->setDecimals(m_calResProp["ELow"], noDec);
+  m_calResProp["EWidth"] = m_calDblMng->addProperty("Width");
+  m_calDblMng->setDecimals(m_calResProp["EWidth"], noDec);
+  m_calResProp["EHigh"] = m_calDblMng->addProperty("High");
+  m_calDblMng->setDecimals(m_calResProp["EHigh"], noDec);
+  resRB->addSubProperty(m_calResProp["ELow"]);
+  resRB->addSubProperty(m_calResProp["EWidth"]);
+  resRB->addSubProperty(m_calResProp["EHigh"]);
+  m_calResTree->addProperty(resRB);
+
   m_calResPlot = new QwtPlot(this);
   m_calResPlot->setAxisFont(QwtPlot::xBottom, this->font());
   m_calResPlot->setAxisFont(QwtPlot::yLeft, this->font());
@@ -1106,17 +996,11 @@ void Indirect::setupCalibration()
   m_calResPlot->setCanvasBackground(Qt::white);
   // Only one range selector for Res (background)
   m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
-  m_calResR1->setMinimum(m_uiForm.cal_lePeakMin->text().toDouble());
-  m_calResR1->setMaximum(m_uiForm.cal_lePeakMax->text().toDouble());
   connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
   connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
-
-  connect(m_uiForm.cal_lePeakMin, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
-  connect(m_uiForm.cal_lePeakMax, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
-  connect(m_uiForm.cal_leBackMin, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
-  connect(m_uiForm.cal_leBackMax, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
-  connect(m_uiForm.cal_leStartX, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
-  connect(m_uiForm.cal_leEndX, SIGNAL(editingFinished()), this, SLOT(calUpdateRS()));
+  
+  connect(m_calCalDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
+  connect(m_calResDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
 }
 
 void Indirect::setupSlice()
@@ -1263,34 +1147,31 @@ void Indirect::reflectionSelected(int index)
     QString analysisType = values[0];
     m_uiForm.leSpectraMin->setText(values[1]);
     m_uiForm.leSpectraMax->setText(values[2]);
-    m_uiForm.cal_leResSpecMin->setText(values[1]);
-    m_uiForm.cal_leResSpecMax->setText(values[2]);
+    m_calDblMng->setValue(m_calResProp["SpecMin"], values[1].toDouble());
+    m_calDblMng->setValue(m_calResProp["SpecMax"], values[2].toDouble());
     m_uiForm.slice_leSpecMin->setText(values[1]);
     m_uiForm.slice_leSpecMax->setText(values[2]);
     if ( values.count() == 8 )
     {
       m_uiForm.leEfixed->setText(values[3]);
-      m_uiForm.cal_lePeakMin->setText(values[4]);
-      m_uiForm.cal_lePeakMax->setText(values[5]);
-      m_uiForm.cal_leBackMin->setText(values[6]);
-      m_uiForm.cal_leBackMax->setText(values[7]);
+      
+      m_calCalDblMng->setValue(m_calCalProp["PeakMin"], values[4].toDouble());
+      m_calCalDblMng->setValue(m_calCalProp["PeakMax"], values[5].toDouble());
+      m_calCalDblMng->setValue(m_calCalProp["BackMin"], values[6].toDouble());
+      m_calCalDblMng->setValue(m_calCalProp["BackMax"], values[7].toDouble());
 
       m_sltDblMng->setValue(m_sltProp["R1S"], values[4].toDouble());
       m_sltDblMng->setValue(m_sltProp["R1E"], values[5].toDouble());
       m_sltDblMng->setValue(m_sltProp["R2S"], values[6].toDouble());
       m_sltDblMng->setValue(m_sltProp["R2E"], values[7].toDouble());
-      m_sltR1->setMinimum(values[4].toDouble());
-      m_sltR1->setMaximum(values[5].toDouble());
-      m_sltR2->setMinimum(values[6].toDouble());
-      m_sltR2->setMaximum(values[7].toDouble());
+      //m_sltR1->setMinimum(values[4].toDouble());
+      //m_sltR1->setMaximum(values[5].toDouble());
+      //m_sltR2->setMinimum(values[6].toDouble());
+      //m_sltR2->setMaximum(values[7].toDouble());
     }
     else
     {
       m_uiForm.leEfixed->clear();
-      m_uiForm.cal_lePeakMin->clear();
-      m_uiForm.cal_lePeakMax->clear();
-      m_uiForm.cal_leBackMin->clear();
-      m_uiForm.cal_leBackMax->clear();
     }
   }
 
@@ -1460,8 +1341,6 @@ void Indirect::detailedBalanceCheck(bool state)
 */
 void Indirect::resCheck(bool state)
 {
-  m_uiForm.cal_pbPlotEnergy->setEnabled(state);
-  m_uiForm.cal_gbRES->setEnabled(state);
   m_calResR1->setVisible(state);
 }
 /**
@@ -1504,10 +1383,10 @@ void Indirect::calibCreate()
       "file = createCalibFile(r'"+file+"', '"+suffix+"', %1, %2, %3, %4, %5, %6, PlotOpt=plot)\n"
       "print file\n";
 
-    pyInput = pyInput.arg(m_uiForm.cal_lePeakMin->text());
-    pyInput = pyInput.arg(m_uiForm.cal_lePeakMax->text());
-    pyInput = pyInput.arg(m_uiForm.cal_leBackMin->text());
-    pyInput = pyInput.arg(m_uiForm.cal_leBackMax->text());
+    pyInput = pyInput.arg(QString::number(m_calCalDblMng->value(m_calCalProp["PeakMin"])));
+    pyInput = pyInput.arg(QString::number(m_calCalDblMng->value(m_calCalProp["PeakMax"])));
+    pyInput = pyInput.arg(QString::number(m_calCalDblMng->value(m_calCalProp["BackMin"])));
+    pyInput = pyInput.arg(QString::number(m_calCalDblMng->value(m_calCalProp["BackMax"])));
     pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
     pyInput = pyInput.arg(m_uiForm.leSpectraMax->text());
 
@@ -1557,7 +1436,7 @@ void Indirect::calibFileChanged(const QString & calib)
     m_uiForm.ckUseCalib->setChecked(true);
   }
 }
-
+// CALIBRATION TAB
 void Indirect::calPlotRaw()
 {
   QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
@@ -1594,12 +1473,7 @@ void Indirect::calPlotRaw()
   
   m_calCalPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
 
-  m_calCalR1->setMinimum(m_uiForm.cal_lePeakMin->text().toDouble());
-  m_calCalR1->setMaximum(m_uiForm.cal_lePeakMax->text().toDouble());
   m_calCalR1->setRange(dataX.first(), dataX.last());
-
-  m_calCalR2->setMinimum(m_uiForm.cal_leBackMin->text().toDouble());
-  m_calCalR2->setMaximum(m_uiForm.cal_leBackMax->text().toDouble());
   m_calCalR2->setRange(dataX.first(), dataX.last());
 
   // Replot
@@ -1617,8 +1491,8 @@ void Indirect::calPlotEnergy()
   QString file = m_uiForm.cal_leRunNo->getFirstFilename();
   QString pyInput =
     "from IndirectEnergyConversion import res\n"
-    "iconOpt = { 'first': " +m_uiForm.cal_leResSpecMin->text()+
-    ", 'last': " +m_uiForm.cal_leResSpecMax->text()+
+    "iconOpt = { 'first': " +QString::number(m_calDblMng->value(m_calResProp["SpecMin"]))+
+    ", 'last': " +QString::number(m_calDblMng->value(m_calResProp["SpecMax"]))+
     ", 'efixed': " +m_uiForm.leEfixed->text()+ "}\n"
     "suffix = '" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "'\n"
     "file = r'" + file + "'\n"
@@ -1643,9 +1517,6 @@ void Indirect::calPlotEnergy()
   m_calResCurve->attach(m_calResPlot);
   
   m_calResPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
-
-  m_calResR1->setMinimum(m_uiForm.cal_leStartX->text().toDouble());
-  m_calResR1->setMaximum(m_uiForm.cal_leEndX->text().toDouble());
   m_calResR1->setRange(dataX.first(), dataX.last());
 
   // Replot
@@ -1657,15 +1528,15 @@ void Indirect::calMinChanged(double val)
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_calCalR1 )
   {
-    m_uiForm.cal_lePeakMin->setText(QString::number(val));
+    m_calCalDblMng->setValue(m_calCalProp["PeakMin"], val);
   }
   else if ( from == m_calCalR2 )
   {
-    m_uiForm.cal_leBackMin->setText(QString::number(val));
+    m_calCalDblMng->setValue(m_calCalProp["BackMin"], val);
   }
   else if ( from == m_calResR1 )
   {
-    m_uiForm.cal_leStartX->setText(QString::number(val));
+    m_calResDblMng->setValue(m_calResProp["Start"], val);
   }
 }
 
@@ -1674,47 +1545,26 @@ void Indirect::calMaxChanged(double val)
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_calCalR1 )
   {
-    m_uiForm.cal_lePeakMax->setText(QString::number(val));
+    m_calCalDblMng->setValue(m_calCalProp["PeakMax"], val);
   }
   else if ( from == m_calCalR2 )
   {
-    m_uiForm.cal_leBackMax->setText(QString::number(val));
+    m_calCalDblMng->setValue(m_calCalProp["BackMax"], val);
   }
   else if ( from == m_calResR1 )
   {
-    m_uiForm.cal_leEndX->setText(QString::number(val));
+    m_calResDblMng->setValue(m_calResProp["End"], val);
   }
 }
 
-void Indirect::calUpdateRS()
+void Indirect::calUpdateRS(QtProperty* prop, double val)
 {
-  QLineEdit* from = qobject_cast<QLineEdit*>(sender());
-  double val = from->text().toDouble();
-
-  if ( from == m_uiForm.cal_lePeakMin )
-  {
-    m_calCalR1->setMinimum(val);
-  }
-  else if ( from == m_uiForm.cal_lePeakMax )
-  {
-    m_calCalR1->setMaximum(val);
-  }
-  else if ( from == m_uiForm.cal_leBackMin )
-  {
-    m_calCalR2->setMinimum(val);
-  }
-  else if ( from == m_uiForm.cal_leBackMax )
-  {
-    m_calCalR2->setMaximum(val);
-  }
-  else if ( from == m_uiForm.cal_leStartX )
-  {
-    m_calResR1->setMinimum(val);
-  }
-  else if ( from == m_uiForm.cal_leEndX )
-  {
-    m_calResR1->setMaximum(val);
-  }
+  if ( prop == m_calCalProp["PeakMin"] ) m_calCalR1->setMinimum(val);
+  else if ( prop == m_calCalProp["PeakMax"] ) m_calCalR1->setMaximum(val);
+  else if ( prop == m_calCalProp["BackMin"] ) m_calCalR2->setMinimum(val);
+  else if ( prop == m_calCalProp["BackMax"] ) m_calCalR2->setMaximum(val);
+  else if ( prop == m_calResProp["Start"] ) m_calResR1->setMinimum(val);
+  else if ( prop == m_calResProp["End"] ) m_calResR1->setMaximum(val);
 }
 
 void Indirect::sOfQwClicked()

@@ -114,7 +114,7 @@ namespace MantidQt
       void calPlotEnergy();
       void calMinChanged(double);
       void calMaxChanged(double);
-      void calUpdateRS();
+      void calUpdateRS(QtProperty*, double);
 
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
       void sOfQwRebinE(bool state);
@@ -152,6 +152,14 @@ namespace MantidQt
       MantidWidgets::RangeSelector* m_calResR1;
       QwtPlotCurve* m_calCalCurve;
       QwtPlotCurve* m_calResCurve;
+      QtTreePropertyBrowser* m_calCalTree;
+      QtTreePropertyBrowser* m_calResTree;
+      QMap<QString, QtProperty*> m_calCalProp;
+      QMap<QString, QtProperty*> m_calResProp;
+      QtDoublePropertyManager* m_calCalDblMng;
+      QtDoublePropertyManager* m_calResDblMng;
+      QtDoublePropertyManager* m_calDblMng;
+      QtGroupPropertyManager* m_calGrpMng;
 
       // SLICE MINIPLOT (prefix: 'm_slt')
       QwtPlot* m_sltPlot;
