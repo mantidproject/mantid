@@ -18,6 +18,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+using namespace std;
 
 class He3TubeEfficiencyTest : public CxxTest::TestSuite
 {
@@ -47,6 +48,8 @@ public:
     TS_ASSERT_DELTA(result->readY(1).back(), 15.989063, 1e-6);
     TS_ASSERT_DELTA(result->readY(2)[2], 21.520201, 1e-6);
     TS_ASSERT_DELTA(result->readY(3).front(), 31.716197, 1e-6);
+
+    AnalysisDataService::Instance().remove(inputWS);
   }
 
   void testEventCorrection()
@@ -62,6 +65,21 @@ public:
     alg.execute();
     TS_ASSERT( !alg.isExecuted() );
 
+    AnalysisDataService::Instance().remove(inputEvWS);
+  }
+
+  void testBadOverrideParameters()
+  {
+    createWorkspace2D();
+    He3TubeEfficiency alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setPropertyValue("TubePressure", "-10"),
+        invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("TubeThickness", "-0.08"),
+        invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("TubeTemperature", "-100"),
+        invalid_argument);
   }
 
 private:

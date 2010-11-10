@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/cow_ptr.h"
 #include <algorithm>
@@ -55,13 +56,15 @@ void He3TubeEfficiency::init()
   this->declareProperty(new Kernel::PropertyWithValue<double>("ScaleFactor",
       1.0, mustBePositive), "Constant factor with which to scale the calculated"
       "detector efficiency. Same factor applies to all efficiencies.");
-  this->declareProperty(new Kernel::ArrayProperty<double>("TubePressure"),
+
+  Kernel::ArrayBoundedValidator<double> *mustBePosArr = new Kernel::ArrayBoundedValidator<double>(*mustBePositive);
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubePressure", mustBePosArr),
       "Provide overriding the default tube pressure. The pressure must "
       "be specified in atm.");
-  this->declareProperty(new Kernel::ArrayProperty<double>("TubeThickness"),
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubeThickness", mustBePosArr->clone()),
       "Provide overriding the default tube thickness. The thickness must "
       "be specified in metres.");
-  this->declareProperty(new Kernel::ArrayProperty<double>("TubeTemperature"),
+  this->declareProperty(new Kernel::ArrayProperty<double>("TubeTemperature", mustBePosArr->clone()),
       "Provide overriding the default tube temperature. The temperature must "
       "be specified in Kelvin.");
 }
