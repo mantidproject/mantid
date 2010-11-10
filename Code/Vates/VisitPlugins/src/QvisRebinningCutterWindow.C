@@ -203,10 +203,10 @@ QvisRebinningCutterWindow::CreateWindowContents()
 
 
 
-//    std::vector<std::string> dims;
-//    dims.push_back("Qx");
-//    dims.push_back("Qy");
-//    dims.push_back("Qz");
+    std::vector<std::string> dims;
+    dims.push_back("Qx");
+    dims.push_back("Qy");
+    dims.push_back("Qz");
 //
 //    DimensionPickerWidget* pickerA = new DimensionPickerWidget("Dimension X", dims);
 //    mainLayout->addWidget(pickerA, 11,0, 1, 2, Qt::AlignLeft);
@@ -397,8 +397,8 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
     // Do dimensionX
     if(which_widget == RebinningCutterAttributes::ID_dimensionX || doAll)
     {
-       QVariant d = dimensionXCombo->itemData(dimensionXCombo->currentIndex());
-       d.toString();
+      // QVariant d = dimensionXCombo->itemData(dimensionXCombo->currentIndex());
+      // d.toString();
         int val;
         if(LineEditGetInt(dimensionX, val))
             atts->SetDimensionX(val);
