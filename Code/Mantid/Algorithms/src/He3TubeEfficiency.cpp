@@ -14,6 +14,9 @@ const double DIST_TO_UNIVERSE_EDGE = 1e3;
 // Scalar constant for exponential in units of K / (m Angstroms atm)
 const double EXP_SCALAR_CONST = 2175.486863864;
 
+// Tolerance for diameter/thickness comparison
+const double TOL = 1.0e-8;
+
 namespace Mantid
 {
 namespace Algorithms
@@ -168,7 +171,6 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
-
   // Get the parameters for the current associated tube
   double pressure = this->getParameter("TubePressure", spectraIndex,
       "tube_pressure", det);
@@ -197,7 +199,14 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   double cosTheta = detAxis.scalar_prod(vectorFromSample);
   double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
-  const double pathlength = (detDiameter - twiceTubeThickness) / sinTheta;
+  const double straight_path = detDiameter - twiceTubeThickness;
+  if (std::fabs(straight_path - 0.0) < TOL)
+  {
+    throw std::out_of_range("Twice tube thickness cannot be greater than "\
+        "or equal to the tube diameter");
+  }
+
+  const double pathlength = straight_path / sinTheta;
   const double exp_constant = EXP_SCALAR_CONST * (pressure / temperature) * pathlength;
 
   std::vector<double>::const_iterator yinItr = yValues.begin();

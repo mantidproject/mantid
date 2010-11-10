@@ -80,6 +80,34 @@ public:
         invalid_argument);
     TS_ASSERT_THROWS(alg.setPropertyValue("TubeTemperature", "-100"),
         invalid_argument);
+
+    AnalysisDataService::Instance().remove(inputWS);
+  }
+
+  void testBadTubeThickness()
+  {
+    createWorkspace2D();
+    He3TubeEfficiency alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    alg.setPropertyValue("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", inputWS);
+    alg.setPropertyValue("TubeThickness", "0.0127");
+
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+
+    // Monitor should be untouched
+    TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
+    // Check that detector values should be zero
+    TS_ASSERT_DELTA(result->readY(1).back(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->readY(2)[2], 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->readY(3).front(), 0.0, 1e-6);
+
+    AnalysisDataService::Instance().remove(inputWS);
   }
 
 private:
