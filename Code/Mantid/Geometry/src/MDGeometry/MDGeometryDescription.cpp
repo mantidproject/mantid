@@ -35,8 +35,6 @@ void
 MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 {
 
-
-
     std::vector<std::string> tag  = origin.getBasisTags();
     this->nDimensions             = origin.getNumDims();
     this->nReciprocalDimensions   = origin.getNumReciprocalDims();
@@ -45,7 +43,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
       this->coordinates[i].assign(3,0);
       MDDimension * pDim = origin.getDimension(tag[i]);
       if(pDim){
-    this->coordinates[i] = pDim->getCoord();
+           this->coordinates[i] = pDim->getCoord();
       }
     }
     
@@ -62,6 +60,7 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
         this->data[i].cut_min  = pDim->getMinimum();
         this->data[i].cut_max  = pDim->getMaximum();
         this->data[i].nBins    = pDim->getNBins();
+        this->data[i].stride   = pDim->getStride();
         this->data[i].AxisName = pDim->getName();
 
         curTag.index=i;
@@ -300,6 +299,7 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
     defaults.cut_max = 1;
     defaults.nBins   = 1;
     defaults.AxisName.assign("");
+    defaults.stride  = 0;
 
     this->data.assign(nDimensions,defaults);
  
@@ -314,6 +314,7 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
         cur.Tag  = def_tags[i];
         this->DimTags.push_back(cur);
         this->data[i].AxisName = def_tags[i];
+
 
    }
 

@@ -44,6 +44,8 @@
 namespace Mantid{
     namespace MDDataObjects{
 
+
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -87,13 +89,14 @@ public:
     virtual void initialize(const Geometry::MDGeometryDescription &Description){
         alloc_mdd_arrays(Description);
     }
-    /// get acces to the internal image dataset
-    data_point * getPData(void){return data;}
+    /// get acces to the internal image dataset for further modifications; throws if dataset is undefinded;
+    MD_image_point * get_pData(void);
+    MD_image_point const* get_const_pData(void)const;
 protected:
     size_t data_size;               ///< size of the data points array
-    data_point *data;             ///< multidimensional array of data points, represented as a single dimensional array;
+    MD_image_point *data;           ///< multidimensional array of data points, represented as a single dimensional array;
 
-    virtual long getMemorySize()const{return data_size*sizeof(data_point);}
+    virtual long getMemorySize()const{return data_size*sizeof(MD_image_point);}
  
     // dimensions strides in linear order; formulated in this way for fast access 
     size_t nd2,nd3,nd4,nd5,nd6,nd7,nd8,nd9,nd10,nd11;       
@@ -127,9 +130,13 @@ protected:
     void read_mdd(const char *file_name){
         // select a file reader which corresponds to the proper file format of the data file
         this->select_file_reader(file_name);
+        // read actual data
         this->read_mdd();
+        // idetyfy pixels locations 
+        this->identify_SP_points_locations();
     }
- 
+    /// build allocation table of sparce data points
+    void identify_SP_points_locations();
 //*************************************************
  //
  // location of cell in 1D data array shaped as 4 or less dimensional array;
@@ -139,10 +146,10 @@ protected:
      size_t nCell(int i,int j,int k, int n) const{ return (i+j*nd2+k*nd3+n*nd4);}
 
 
-     data_point thePoint(int i)                   const{   return data[nCell(i)];}
-     data_point thePoint(int i,int j)             const{   return data[nCell(i,j)];}
-     data_point thePoint(int i,int j,int k)       const{   return data[nCell(i,j,k)];}
-     data_point thePoint(int i,int j,int k, int n)const{   return data[nCell(i,j,k,n)];}
+     MD_image_point thePoint(int i)                   const{   return data[nCell(i)];}
+     MD_image_point thePoint(int i,int j)             const{   return data[nCell(i,j)];}
+     MD_image_point thePoint(int i,int j,int k)       const{   return data[nCell(i,j,k)];}
+     MD_image_point thePoint(int i,int j,int k, int n)const{   return data[nCell(i,j,k,n)];}
 
       static Kernel::Logger& g_log;
 

@@ -155,6 +155,24 @@ MDData::select_file_reader(const char *file_name)
 
 }
 //
+MD_image_point * 
+MDData::get_pData(void)
+{
+    if(data){
+        return data;
+    }else{
+        throw(std::bad_alloc("Data memory for Multidimensional dataset has not been allocated"));
+    }
+}
+MD_image_point const* 
+MDData::get_const_pData(void)const
+{
+    if(data){
+        return data;
+    }else{
+        throw(std::bad_alloc("Data memory for Multidimensional dataset has not been allocated"));
+    }
+}
 /*
 void 
 DND::write_mdd(const char *file_name){
@@ -231,7 +249,7 @@ MDData::alloc_mdd_arrays(const MDGeometryDescription &transf)
 
 
 // allocate main data array;
-    data = new data_point[data_size];
+    data = new MD_image_point[data_size];
     if (!data){
         throw(std::bad_alloc("Can not allocate memory to keep Multidimensional dataset"));
     }
@@ -261,6 +279,21 @@ MDData::~MDData()
 {
     this->clear_class();
 }
+//
+void 
+MDData::identify_SP_points_locations()
+{
+    // and calculate cells location for pixels;
+    this->data[0].chunk_location=0;
+
+    // counter for the number of retatined pixels;
+    size_t nPix = this->data[0].npix;
+    for(size_t i=1;i<this->data_size;i++){   
+// the next cell starts from the the boundary of the previous one plus the number of pixels in the previous cell
+        this->data[i].chunk_location=this->data[i-1].chunk_location+this->data[i-1].npix; 
+    }
+}
+
 //***************************************************************************************
 void
 MDData::clear_class(void)

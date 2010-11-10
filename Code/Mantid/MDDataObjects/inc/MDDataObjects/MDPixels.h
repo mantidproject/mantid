@@ -51,12 +51,6 @@ struct sqw_pixel{
     int    ien ; //    Energy bin number for the pixel in the array in the (irun)th header |-> 4th coordinate dimension
 };
 
-struct pix_location
-{
-    size_t chunk_file_location0;
-    std::auto_ptr<std::vector<sqw_pixel>> cell_memPixels;
-    std::auto_ptr<std::vector<size_t>>  data_chunks;
-};
 
 
 //**********************************************************************************************************************
@@ -71,6 +65,7 @@ public:
         std::vector<double> cut_min;        // min limits to extract data;
         std::vector<double> cut_max;       // max limits to extract data;
         std::vector<double> axis_step;     // (cut_max-cut_min)/(nBins);
+        std::vector<size_t> stride;
 };
 //
 
@@ -94,7 +89,7 @@ public:
     /// check if the pixels are all in memory;
     bool isMemoryBased(void)const{return memBased;}
     /// function returns numnber of pixels contributiong into the MD-data
-    long getNumPixels(void);
+    size_t getNumPixels(void);
 
     /// read the whole pixels dataset in the memory
     void read_pix(void);
@@ -105,7 +100,7 @@ public:
     // function applies transformation matrix to the current dataset and returns new dataset rebinned accordingly to the 
     // requests of the transformation
    // rebin pixels in the pix_aray and add them to the current dataset ;
-    size_t rebin_dataset4D(const transf_matrix &transf, const sqw_pixel *pix_array, size_t nPix_cell);
+  //  size_t rebin_dataset4D(const transf_matrix &transf, const sqw_pixel *pix_array, size_t nPix_cell);
 protected:
      void finalise_rebinning(void);
     //void rebin_dataset4D(const SlicingProperty &transf,MDPixels &newsqw);
@@ -118,7 +113,7 @@ private:
 /// number of real pixels contributed in the dataset (rather sqw parameter) (should be moved there?)
     size_t nPixels;      
 /// the array of structures, describing the detector pixels
-    pix_location *pix_array;
+    sqw_pixel *pix_array;
    // boolean values identifying the way to treat NaN-s and Inf-s in the pixel data
     bool   ignore_inf,ignore_nan;     
 

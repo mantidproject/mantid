@@ -43,6 +43,9 @@ private:
       /// The progress reporting object
       API::Progress *m_progress;
 
+      /// the parameters which describe how to treat nan and inf data in the dataset (used for masking etc)
+      bool ignore_nan,ignore_inf;
+
   // function builds the vector of cell indexes which can contribute into the cut, described by the transformation matrix supplied;
     void preselect_cells(std::vector<long> &selected_cells,long &n_preselected_pix);
   
@@ -55,20 +58,27 @@ private:
  @param cells_to_select  -- the list of the cell indexes, which can contribute into the cut
  @param n_preselected_pix-- number of pixels contributed into the cells. 
 */
-    void preselect_cells(const Geometry::MDGeometry &Source,const MDDataObjects::data_point *const data, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix);
+    void preselect_cells(const MDDataObjects::MDData &Source, const Geometry::MDGeometryDescription &target, std::vector<size_t> &cells_to_select,size_t &n_preselected_pix);
 /// internal helper class to identify the indexes on an auxilary 3D lattice;
     class nCell3D
     {
      size_t NX,NY;
      public:
         nCell3D(size_t nx,size_t ny):NX(nx),NY(ny){};
-        size_t nCell(long i,long j, long k)const{return i+NX*(j+k*NY);}    
+        size_t nCell(long i,long j, long k)const{return i+NX*(j+k*NY);}  
     };
 // 
 
-    // build transformation matrix from the slicing data;
+    /// build transformation matrix from the slicing data;
     MDDataObjects::transf_matrix build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geometry::MDGeometryDescription &target);
-
+    /** rebinning 4D dataset
+    *   @param rescaled_transf    the data describing the final geometry of the cut
+    *   @param *source_pix        the pointer to the start of the buffer with source points for rebinning
+    *   @param  nPix              number of points in the buffer
+    *   @param  *data             the pointer to the structure with Image data;
+    */
+    size_t rebin_dataset4D(const MDDataObjects::transf_matrix &rescaled_transf, const MDDataObjects::sqw_pixel *source_pix, size_t nPix, MDDataObjects::MD_image_point *data,
+                           double boxMin[],double boxMax[]);
 };
 }
 }

@@ -4,11 +4,13 @@
 namespace Mantid{
        namespace MDDataObjects{
 
-struct data_point{
-    double s;
-    double err;
-    unsigned long npix;
-};
+//
+  struct MD_image_point{
+        double s;      // signal 
+        double err;   // error
+        unsigned long npix;  // numer of 
+        size_t  chunk_location;
+    };
 //
 class DLLExport point3D
 {
@@ -33,10 +35,10 @@ public:
     double &Err(){return err;}
     unsigned long &Npix(){return npix;}
 
-    point3D &operator=(const data_point &data){
-        this->s  =data.s;
-        this->err=data.err;
-        this->npix=data.npix;
+    point3D &operator=(const  MD_image_point &data){
+        this->s   = data.s;
+        this->err = data.err;
+        this->npix= data.npix;
         return *this;
     }
 private:

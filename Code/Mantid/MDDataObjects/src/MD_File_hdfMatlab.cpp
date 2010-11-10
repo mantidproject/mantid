@@ -548,9 +548,9 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
     if(err){
         throw(Exception::FileError("Error reading the pixels dataset",this->File_name));
     }
-    long nCellPic(0);
-    long nPixel(0);
-    long j;
+    size_t nCellPic(0);
+    size_t nPixel(0);
+  
     sqw_pixel null;
     null.En=0;
     null.err=0;
@@ -559,38 +559,32 @@ MD_File_hdfMatlab::read_pix(MDPixels & sqw)
     null.irun=0;
     null.s=0;
  
-    for(i=0;i<sqw.data_size;i++){
-        if(sqw.data[i].npix>0){
-            nCellPic  =sqw.data[i].npix;
-            sqw.pix_array[i].cell_memPixels.reset(new std::vector<sqw_pixel>(nCellPic,null));
-            for(j=0;j<nCellPic;j++){
-                if (data_double){
-                    sqw.pix_array[i].cell_memPixels->at(j).qx   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
-                    sqw.pix_array[i].cell_memPixels->at(j).qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
-                    sqw.pix_array[i].cell_memPixels->at(j).qz   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
-                    sqw.pix_array[i].cell_memPixels->at(j).En   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-                    sqw.pix_array[i].cell_memPixels->at(j).s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-                    sqw.pix_array[i].cell_memPixels->at(j).err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-                    sqw.pix_array[i].cell_memPixels->at(j).irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-                    sqw.pix_array[i].cell_memPixels->at(j).idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-                    sqw.pix_array[i].cell_memPixels->at(j).ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
-                }else{
-                    sqw.pix_array[i].cell_memPixels->at(j).qx   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
-                    sqw.pix_array[i].cell_memPixels->at(j).qy   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
-                    sqw.pix_array[i].cell_memPixels->at(j).qz   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
-                    sqw.pix_array[i].cell_memPixels->at(j).En   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
-                    sqw.pix_array[i].cell_memPixels->at(j).s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
-                    sqw.pix_array[i].cell_memPixels->at(j).err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
-                    sqw.pix_array[i].cell_memPixels->at(j).irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
-                    sqw.pix_array[i].cell_memPixels->at(j).idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
-                    sqw.pix_array[i].cell_memPixels->at(j).ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
-                }
+    for(i=0;i<sqw.getNumPixels();i++){
+        if (data_double){
+           sqw.pix_array[i].qx   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
+           sqw.pix_array[i].qy   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
+           sqw.pix_array[i].qz   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
+           sqw.pix_array[i].En   =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
+           sqw.pix_array[i].s    =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+           sqw.pix_array[i].err  =  (double)(*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+           sqw.pix_array[i].irun =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+           sqw.pix_array[i].idet =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+           sqw.pix_array[i].ien  =  (int)   (*((double *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+         }else{
+            sqw.pix_array[i].qx   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+0));
+            sqw.pix_array[i].qy   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+1));
+            sqw.pix_array[i].qz   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+2));
+            sqw.pix_array[i].En   =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+3));
+            sqw.pix_array[i].s    =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+4));
+            sqw.pix_array[i].err  =  (double)(*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+5));
+            sqw.pix_array[i].irun =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+6));
+            sqw.pix_array[i].idet =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+7));
+            sqw.pix_array[i].ien  =  (int)   (*((float *)pix_buf+nPixel*DATA_PIX_WIDTH+8));
+        }
 
-                nPixel++;
-            }
-        } // data[i].npix>0;
+       nPixel++;
    }
-    delete [] pix_buf;
+   delete [] pix_buf;
 
     H5Tclose(type);
     if(!was_opened){ // if we opened it in this program, we should close it now. 
@@ -621,34 +615,43 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
         pixel_dataspece_opened=true;
     }
 // identify the cells to read and maximal buffer size necessary to do the preselection;
-    size_t max_npix_fit(0),max_npix_selected,npix_tt;
-    size_t n_cells_processed(starting_cell),i,j,n_cur_cells;
+    size_t max_npix_in_buffer(0),max_npix_selected(0),npix_tt;
+    size_t i,j,n_selected_cells,n_cells_processed(0);
     size_t n_cells_final(selected_cells.size());
 
+    n_selected_cells=n_cells_final-1;     
     for(i=starting_cell;i<n_cells_final;i++){
-        npix_tt          =SQW.data[selected_cells[i]].npix; 
-        max_npix_fit    +=npix_tt;
+        npix_tt             =SQW.data[selected_cells[i]].npix; 
+        max_npix_in_buffer +=npix_tt;
 
-        if(max_npix_fit<=nPix_buf_size){
-            max_npix_selected=max_npix_fit;
+        if(max_npix_in_buffer<=nPix_buf_size){
+            max_npix_selected=max_npix_in_buffer;
+            n_cells_processed++;
         }else{
+            // if one cell does not fit the buffer, we should increase buffer size .     
             if(i==starting_cell){
                 if(pix_buf){
                     delete [] pix_buf;
                 }
-                pix_buf       = new sqw_pixel[npix_tt];
-                nPix_buf_size = npix_tt;
+                pix_buf       = new sqw_pixel[max_npix_in_buffer];
+                nPix_buf_size = max_npix_in_buffer;
+                n_selected_cells=i;
+                n_cells_processed=1;
+            }else{
+                n_selected_cells=i-1;
             }
             break;
         }
-        n_cur_cells=i;
     }
+    
+
     if(!pix_buf){
-        pix_buf       = new sqw_pixel[npix_tt];
-        nPix_buf_size = npix_tt;
+        pix_buf       = new sqw_pixel[max_npix_in_buffer];
+        nPix_buf_size = max_npix_in_buffer;
     }
-    n_cells_processed=n_cur_cells+1;
-    if(max_npix_fit==0){
+
+
+    if(max_npix_in_buffer==0){
         if(!pixel_dataspece_opened){
             H5Sclose(this->pixel_dataspace_h);
             this->pixel_dataspace_h=-1;
@@ -668,20 +671,22 @@ MD_File_hdfMatlab::read_pix_subset(const MDPixels &SQW,const std::vector<size_t>
    // identify the indexes of the preselected pixels;
     std::vector<hsize_t> cells_preselection_buf;
     cells_preselection_buf.resize(max_npix_selected);
-    long ic(0);
+    size_t ic(0);
     hsize_t max_npix_indataset = this->getNPix();
-    size_t pixel_num;
-    for(i=starting_cell;i<n_cells_processed;i++){
+    size_t pixel_num,block_location;
+    for(i=starting_cell;i<=n_selected_cells;i++){
         npix_tt          =SQW.data[selected_cells[i]].npix; 
+        block_location   =SQW.data[selected_cells[i]].chunk_location;
         for(j=0;j<npix_tt;j++){
-            pixel_num=SQW.pix_array[selected_cells[i]].chunk_file_location0+j;
+            pixel_num=block_location+j;
             // this to go around the bug in hdf dataset creation. 
             if(pixel_num>=max_npix_indataset){
               continue;
             }
             cells_preselection_buf[ic]=pixel_num;
             ic++;
-        }
+         }
+        n_cells_processed++;
     }
     herr_t err=H5Sselect_elements(this->pixel_dataspace_h, H5S_SELECT_SET,ic,&cells_preselection_buf[0]);
      if(err<0){

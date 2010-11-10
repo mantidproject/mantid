@@ -48,6 +48,7 @@ namespace Mantid{
         double cut_min;            //< min limits to extract data;
         double cut_max;            //< max limits to extract data;
         unsigned int nBins;        //< number of bins in each direction, bins of size 1 are integrated (collased);
+        size_t  stride;            //< the step this dimension index makes in 1D array, when this dimension index changes by one; should be 0 for integrated dimensions;
         std::string AxisName;      //< new names for axis; 
         SlicingData():trans_bott_left(0),cut_min(-1),cut_max(1),nBins(1),AxisName(""){};
         SlicingData &operator=(const SlicingData &source) {
@@ -55,6 +56,7 @@ namespace Mantid{
             this->cut_min        = source.cut_min;            
             this->cut_max        = source.cut_max;            
             this->nBins          = source.nBins;
+            this->stride         = source.stride;
             this->AxisName.assign(source.AxisName);
             return *this;
         }
@@ -89,6 +91,7 @@ public:
    bool isAxisNamePresent(unsigned int i)const;
    std::string getAxisName(unsigned int i)const;
    std::string getPAxisTag(unsigned int i)const;  
+   size_t getStride(unsigned int i)const{return data[i].stride;}
 
    int getTagNum(const std::string &Tag, bool do_throw=false)const;
    /// returns the list of the axis tags sorted in the order requested for view 
