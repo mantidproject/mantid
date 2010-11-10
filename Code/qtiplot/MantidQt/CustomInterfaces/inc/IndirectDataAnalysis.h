@@ -46,8 +46,9 @@ namespace MantidQt
       void saveSettings();
 
       // Tab-specific setup stages (mainly miniplots)
-      void setupFuryFit();
       void setupElwin();
+      void setupMsd();
+      void setupFuryFit();
 
       // Validation of user inputs
       bool validateElwin();
@@ -89,6 +90,9 @@ namespace MantidQt
 
       // MSD Fit
       void msdPlotInput();
+      void msdMinChanged(double val);
+      void msdMaxChanged(double val);
+      void msdUpdateRS(QtProperty* prop, double val);
 
       // Fourier Transform
       void furyInputType(int index);
@@ -137,6 +141,14 @@ namespace MantidQt
       QtDoublePropertyManager* m_elwDblMng;
       QtBoolPropertyManager* m_elwBlnMng;
       QtGroupPropertyManager* m_elwGrpMng;
+
+      // MSD Fit MiniPlot (prefix: 'm_msd')
+      QwtPlot* m_msdPlot;
+      MantidWidgets::RangeSelector* m_msdRange;
+      QwtPlotCurve* m_msdDataCurve;
+      QtTreePropertyBrowser* m_msdTree;
+      QMap<QString, QtProperty*> m_msdProp;
+      QtDoublePropertyManager* m_msdDblMng;
 
       // Fury Fit Member Variables (prefix 'm_ff')
       QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser

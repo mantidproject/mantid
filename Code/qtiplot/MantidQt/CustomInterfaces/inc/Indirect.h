@@ -7,6 +7,10 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+#include "qttreepropertybrowser.h"
+#include "qtpropertymanager.h"
+#include "qteditorfactory.h"
+
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 //-----------------------------------------------------
@@ -119,11 +123,11 @@ namespace MantidQt
 
       void sliceRun();
       void slicePlotRaw();
-      void sliceTwoRanges(bool state);
+      void sliceTwoRanges(QtProperty*, bool);
       void sliceCalib(bool state);
       void sliceMinChanged(double val);
       void sliceMaxChanged(double val);
-      void sliceUpdateRS();
+      void sliceUpdateRS(QtProperty*, double);
 
     private:
       Ui::ConvertToEnergy m_uiForm; ///< user interface form object
@@ -154,6 +158,11 @@ namespace MantidQt
       MantidWidgets::RangeSelector* m_sltR1;
       MantidWidgets::RangeSelector* m_sltR2;
       QwtPlotCurve* m_sltDataCurve;
+      QtTreePropertyBrowser* m_sltTree;
+      QMap<QString, QtProperty*> m_sltProp;
+      QtDoublePropertyManager* m_sltDblMng;
+      QtBoolPropertyManager* m_sltBlnMng;
+      QtGroupPropertyManager* m_sltGrpMng;
     };
   }
 }

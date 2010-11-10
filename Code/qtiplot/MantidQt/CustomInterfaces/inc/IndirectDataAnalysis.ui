@@ -277,61 +277,14 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6" >
+        <layout class="QHBoxLayout" name="horizontalLayout_3" >
          <item>
-          <widget class="QLabel" name="msd_lbStartX" >
-           <property name="text" >
-            <string>Start X</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="msd_properties" />
          </item>
          <item>
-          <widget class="QLineEdit" name="msd_leStartX" />
-         </item>
-         <item>
-          <widget class="QLabel" name="msd_valStartX" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="msd_lbEndX" >
-           <property name="text" >
-            <string>End X</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="msd_leEndX" />
-         </item>
-         <item>
-          <widget class="QLabel" name="msd_valEndX" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
-           </property>
-           <property name="text" >
-            <string>*</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="msd_plot" />
          </item>
         </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8" >
@@ -1274,8 +1227,6 @@
   <tabstop>fury_leELow</tabstop>
   <tabstop>fury_leEWidth</tabstop>
   <tabstop>fury_leEHigh</tabstop>
-  <tabstop>msd_leStartX</tabstop>
-  <tabstop>msd_leEndX</tabstop>
   <tabstop>set_cbAnalyser</tabstop>
  </tabstops>
  <resources/>

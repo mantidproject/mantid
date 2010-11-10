@@ -48,7 +48,8 @@ using namespace MantidQt::CustomInterfaces;
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
 UserSubWindow(parent), m_valInt(0), m_valDbl(0), m_furyResFileType(true), m_ffDataCurve(NULL), m_ffFitCurve(NULL),
   m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange),
-  m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL)
+  m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL),
+  m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdTree(NULL), m_msdDblMng(NULL)
 {
 }
 
@@ -84,7 +85,7 @@ void IndirectDataAnalysis::initLayout()
   m_valDbl = new QDoubleValidator(this);
 
   setupElwin();
-  // setupMsd();
+  setupMsd();
   // setupFury();
   setupFuryFit();
   // setupAbsorption();
@@ -115,9 +116,6 @@ void IndirectDataAnalysis::initLayout()
   m_uiForm.set_leSpecMin->setValidator(m_valInt);
   m_uiForm.set_leSpecMax->setValidator(m_valInt);
   m_uiForm.set_leEFixed->setValidator(m_valDbl);
-  // apply validators - msd
-  m_uiForm.msd_leStartX->setValidator(m_valDbl);
-  m_uiForm.msd_leEndX->setValidator(m_valDbl);
   // apply validators - fury
   m_uiForm.fury_leELow->setValidator(m_valDbl);
   m_uiForm.fury_leEWidth->setValidator(m_valDbl);
@@ -225,11 +223,16 @@ void IndirectDataAnalysis::setupElwin()
   m_elwTree->setFactoryForManager(m_elwDblMng, doubleEditorFactory);
   m_elwTree->setFactoryForManager(m_elwBlnMng, checkboxFactory);
 
+  int noDec = 6;
   // Create Properties
   m_elwProp["R1S"] = m_elwDblMng->addProperty("Start");
+  m_elwDblMng->setDecimals(m_elwProp["R1S"], noDec);
   m_elwProp["R1E"] = m_elwDblMng->addProperty("End");
+  m_elwDblMng->setDecimals(m_elwProp["R1E"], noDec);
   m_elwProp["R2S"] = m_elwDblMng->addProperty("Start");
+  m_elwDblMng->setDecimals(m_elwProp["R2S"], noDec);
   m_elwProp["R2E"] = m_elwDblMng->addProperty("End");
+  m_elwDblMng->setDecimals(m_elwProp["R2E"], noDec);
 
   m_elwProp["UseTwoRanges"] = m_elwBlnMng->addProperty("Use Two Ranges and Subtract");
 
@@ -271,6 +274,40 @@ void IndirectDataAnalysis::setupElwin()
 
   // m_uiForm element signals and slots
   connect(m_uiForm.elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(elwinPlotInput()));
+}
+
+void IndirectDataAnalysis::setupMsd()
+{
+  int noDec = 6;
+  // Tree Browser
+  m_msdTree = new QtTreePropertyBrowser();
+  m_uiForm.msd_properties->addWidget(m_msdTree);
+
+  m_msdDblMng = new QtDoublePropertyManager();
+  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  m_msdTree->setFactoryForManager(m_msdDblMng, doubleEditorFactory);
+
+  m_msdProp["Start"] = m_msdDblMng->addProperty("StartX");
+  m_msdDblMng->setDecimals(m_msdProp["Start"], noDec);
+  m_msdProp["End"] = m_msdDblMng->addProperty("EndX");
+  m_msdDblMng->setDecimals(m_msdProp["End"], noDec);
+
+  m_msdTree->addProperty(m_msdProp["Start"]);
+  m_msdTree->addProperty(m_msdProp["End"]);
+
+  m_msdPlot = new QwtPlot(this);
+  m_uiForm.msd_plot->addWidget(m_msdPlot);
+
+  // Cosmetics
+  m_msdPlot->setAxisFont(QwtPlot::xBottom, this->font());
+  m_msdPlot->setAxisFont(QwtPlot::yLeft, this->font());
+  m_msdPlot->setCanvasBackground(Qt::white);
+
+  m_msdRange = new MantidWidgets::RangeSelector(m_msdPlot);
+
+  connect(m_msdRange, SIGNAL(minValueChanged(double)), this, SLOT(msdMinChanged(double)));
+  connect(m_msdRange, SIGNAL(maxValueChanged(double)), this, SLOT(msdMaxChanged(double)));
+  connect(m_msdDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(msdUpdateRS(QtProperty*, double)));
 }
 
 void IndirectDataAnalysis::setupFuryFit()
@@ -422,27 +459,6 @@ bool IndirectDataAnalysis::validateMsd()
   {
     valid = false;
   }
-
-  if ( m_uiForm.msd_leStartX->text() == "" )
-  {
-    m_uiForm.msd_valStartX->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.msd_valStartX->setText(" ");
-  }
-
-  if ( m_uiForm.msd_leEndX->text() == "" )
-  {
-    m_uiForm.msd_valEndX->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.msd_valEndX->setText(" ");
-  }
-
 
   return valid;
 }
@@ -957,8 +973,8 @@ void IndirectDataAnalysis::msdRun()
 
   QString pyInput =
     "from IndirectDataAnalysis import msdfit\n"
-    "startX = " + m_uiForm.msd_leStartX->text() +"\n"
-    "endX = " + m_uiForm.msd_leEndX->text() +"\n"
+    "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"
+    "endX = " + QString::number(m_msdDblMng->value(m_msdProp["End"])) +"\n"
     "inputs = [r'" + m_uiForm.msd_inputFile->getFilenames().join("', r'") + "']\n";
 
   if ( m_uiForm.msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -980,11 +996,57 @@ void IndirectDataAnalysis::msdRun()
 
 void IndirectDataAnalysis::msdPlotInput()
 {
-  QString pyInput = "from mantidsimple import *\n"
-    "from mantidplot import *\n"
-    "LoadNexusProcessed(r'" + m_uiForm.msd_inputFile->getFirstFilename() + "', 'msd_input_plot')\n"
-    "plotSpectrum('msd_input_plot', 0)\n";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
+  if ( m_uiForm.msd_inputFile->isValid() )
+  {
+    QString filename = m_uiForm.msd_inputFile->getFirstFilename();
+    QFileInfo fi(filename);
+    QString wsname = fi.baseName();
+
+    QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
+    QString pyOutput = runPythonCode(pyInput);
+
+    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+
+    QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
+    QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+
+    if ( m_msdDataCurve != NULL )
+    {
+      m_msdDataCurve->attach(0);
+      delete m_msdDataCurve;
+      m_msdDataCurve = 0;
+    }
+
+    m_msdDataCurve = new QwtPlotCurve();
+    m_msdDataCurve->setData(dataX, dataY);
+    m_msdDataCurve->attach(m_msdPlot);
+
+    m_msdPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
+    m_msdRange->setRange(dataX.first(), dataX.last());
+
+    // Replot
+    m_msdPlot->replot();
+  }
+  else
+  {
+    showInformationBox("Selected input files are invalid.");
+  }
+}
+
+void IndirectDataAnalysis::msdMinChanged(double val)
+{
+  m_msdDblMng->setValue(m_msdProp["Start"], val);
+}
+
+void IndirectDataAnalysis::msdMaxChanged(double val)
+{
+  m_msdDblMng->setValue(m_msdProp["End"], val);
+}
+
+void IndirectDataAnalysis::msdUpdateRS(QtProperty* prop, double val)
+{
+  if ( prop == m_msdProp["Start"] ) m_msdRange->setMinimum(val);
+  else if ( prop == m_msdProp["End"] ) m_msdRange->setMaximum(val);
 }
 
 void IndirectDataAnalysis::furyRun()

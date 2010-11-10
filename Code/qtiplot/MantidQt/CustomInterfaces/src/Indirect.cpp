@@ -15,6 +15,12 @@
 #include <QInputDialog>
 #include <QLineEdit>
 
+#include "qttreepropertybrowser.h"
+#include "qtpropertymanager.h"
+#include "qteditorfactory.h"
+#include "DoubleEditorFactory.h"
+#include <QtCheckBoxFactory>
+
 using namespace MantidQt::CustomInterfaces;
 
 /**
@@ -89,7 +95,6 @@ void Indirect::initLayout()
 
   // "Slice" tab
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
-  connect(m_uiForm.slice_ckUseTwoRanges, SIGNAL(toggled(bool)), this, SLOT(sliceTwoRanges(bool)));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
   // create validators
@@ -125,11 +130,6 @@ void Indirect::initLayout()
   m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
 
-  m_uiForm.slice_leRange0->setValidator(m_valInt);
-  m_uiForm.slice_leRange1->setValidator(m_valInt);
-  m_uiForm.slice_leRange2->setValidator(m_valInt);
-  m_uiForm.slice_leRange3->setValidator(m_valInt);
-
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
@@ -138,7 +138,7 @@ void Indirect::initLayout()
 
   refreshWSlist();
 
-  sliceTwoRanges(m_uiForm.slice_ckUseTwoRanges->isChecked());
+  // sliceTwoRanges(m_uiForm.slice_ckUseTwoRanges->isChecked());
 }
 /**
 * This function will hold any Python-dependent setup actions for the interface.
@@ -473,10 +473,6 @@ void Indirect::clearReflectionInfo()
 
   m_uiForm.slice_leSpecMin->clear();
   m_uiForm.slice_leSpecMax->clear();
-  m_uiForm.slice_leRange0->clear();
-  m_uiForm.slice_leRange1->clear();
-  m_uiForm.slice_leRange2->clear();
-  m_uiForm.slice_leRange3->clear();
 
   isDirty(true);
 }
@@ -1009,79 +1005,6 @@ bool Indirect::validateSlice()
     valid = false;
   }
 
-  if ( m_uiForm.slice_ckUseCalib->isChecked() && ! m_uiForm.slice_calibFile->isValid() )
-  {
-    valid = false;
-  }
-
-  if ( m_uiForm.slice_leSpecMin->text() == "" )
-  {
-    m_uiForm.slice_valSpecMin->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.slice_valSpecMin->setText(" ");
-  }
-
-  if ( m_uiForm.slice_leSpecMax->text() == "" )
-  {
-    m_uiForm.slice_valSpecMax->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.slice_valSpecMax->setText(" ");
-  }
-
-  if ( m_uiForm.slice_leRange0->text() == "" )
-  {
-    m_uiForm.slice_valRange0->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.slice_valRange0->setText(" ");
-  }
-
-  if ( m_uiForm.slice_leRange1->text() == "" )
-  {
-    m_uiForm.slice_valRange1->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.slice_valRange1->setText(" ");
-  }
-
-  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
-  {
-    if ( m_uiForm.slice_leRange2->text() == "" )
-    {
-      m_uiForm.slice_valRange2->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.slice_valRange2->setText(" ");
-    }
-
-    if ( m_uiForm.slice_leRange3->text() == "" )
-    {
-      m_uiForm.slice_valRange3->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.slice_valRange3->setText(" ");
-    }
-  }
-  else
-  {
-    m_uiForm.slice_valRange2->setText(" ");
-    m_uiForm.slice_valRange3->setText(" ");
-  }
-
   return valid;
 }
 /**
@@ -1198,6 +1121,40 @@ void Indirect::setupCalibration()
 
 void Indirect::setupSlice()
 {
+  // Property Tree
+  m_sltTree = new QtTreePropertyBrowser();
+  m_uiForm.slice_properties->addWidget(m_sltTree);
+
+  // Create Manager Objects
+  m_sltDblMng = new QtDoublePropertyManager();
+  m_sltBlnMng = new QtBoolPropertyManager();
+  m_sltGrpMng = new QtGroupPropertyManager();
+
+  // Editor Factories
+  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  QtCheckBoxFactory *checkboxFactory = new QtCheckBoxFactory();
+  m_sltTree->setFactoryForManager(m_sltDblMng, doubleEditorFactory);
+  m_sltTree->setFactoryForManager(m_sltBlnMng, checkboxFactory);
+
+  // Create Properties
+  m_sltProp["R1S"] = m_sltDblMng->addProperty("Start");
+  m_sltProp["R1E"] = m_sltDblMng->addProperty("End");
+  m_sltProp["R2S"] = m_sltDblMng->addProperty("Start");
+  m_sltProp["R2E"] = m_sltDblMng->addProperty("End");
+
+  m_sltProp["UseTwoRanges"] = m_sltBlnMng->addProperty("Use Two Ranges and Subtract");
+
+  m_sltProp["Range1"] = m_sltGrpMng->addProperty("Range One");
+  m_sltProp["Range1"]->addSubProperty(m_sltProp["R1S"]);
+  m_sltProp["Range1"]->addSubProperty(m_sltProp["R1E"]);
+  m_sltProp["Range2"] = m_sltGrpMng->addProperty("Range Two");
+  m_sltProp["Range2"]->addSubProperty(m_sltProp["R2S"]);
+  m_sltProp["Range2"]->addSubProperty(m_sltProp["R2E"]);
+
+  m_sltTree->addProperty(m_sltProp["Range1"]);
+  m_sltTree->addProperty(m_sltProp["UseTwoRanges"]);
+  m_sltTree->addProperty(m_sltProp["Range2"]);
+
   // Create Slice Plot Widget for Range Selection
   m_sltPlot = new QwtPlot(this);
   m_sltPlot->setAxisFont(QwtPlot::xBottom, this->font());
@@ -1207,8 +1164,6 @@ void Indirect::setupSlice()
   // We always want one range selector... the second one can be controlled from
   // within the sliceTwoRanges(bool state) function
   m_sltR1 = new MantidWidgets::RangeSelector(m_sltPlot);
-  m_sltR1->setMinimum(m_uiForm.slice_leRange0->text().toDouble());
-  m_sltR1->setMaximum(m_uiForm.slice_leRange1->text().toDouble());
   connect(m_sltR1, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
   connect(m_sltR1, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
 
@@ -1216,8 +1171,6 @@ void Indirect::setupSlice()
   // create the second range
   m_sltR2 = new MantidWidgets::RangeSelector(m_sltPlot);
   m_sltR2->setColour(Qt::darkGreen); // dark green for background
-  m_sltR2->setMinimum(m_uiForm.slice_leRange2->text().toDouble()); // m_uiForm.slice_leRange2->text().toDouble()
-  m_sltR2->setMaximum(m_uiForm.slice_leRange3->text().toDouble());
   connect(m_sltR1, SIGNAL(rangeChanged(double, double)), m_sltR2, SLOT(setRange(double, double)));
   connect(m_sltR2, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
   connect(m_sltR2, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
@@ -1226,10 +1179,10 @@ void Indirect::setupSlice()
   // Refresh the plot window
   m_sltPlot->replot();
 
-  connect(m_uiForm.slice_leRange0, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
-  connect(m_uiForm.slice_leRange1, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
-  connect(m_uiForm.slice_leRange2, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
-  connect(m_uiForm.slice_leRange3, SIGNAL(editingFinished()), this, SLOT(sliceUpdateRS()));
+  connect(m_sltDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
+  connect(m_sltBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
+
+  sliceTwoRanges(0, false); // set default value
 }
 
 /* QT SLOT FUNCTIONS */
@@ -1322,10 +1275,10 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.cal_leBackMin->setText(values[6]);
       m_uiForm.cal_leBackMax->setText(values[7]);
 
-      m_uiForm.slice_leRange0->setText(values[4]);
-      m_uiForm.slice_leRange1->setText(values[5]);
-      m_uiForm.slice_leRange2->setText(values[6]);
-      m_uiForm.slice_leRange3->setText(values[7]);
+      m_sltDblMng->setValue(m_sltProp["R1S"], values[4].toDouble());
+      m_sltDblMng->setValue(m_sltProp["R1E"], values[5].toDouble());
+      m_sltDblMng->setValue(m_sltProp["R2S"], values[6].toDouble());
+      m_sltDblMng->setValue(m_sltProp["R2E"], values[7].toDouble());
       m_sltR1->setMinimum(values[4].toDouble());
       m_sltR1->setMaximum(values[5].toDouble());
       m_sltR2->setMinimum(values[6].toDouble());
@@ -1338,10 +1291,6 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.cal_lePeakMax->clear();
       m_uiForm.cal_leBackMin->clear();
       m_uiForm.cal_leBackMax->clear();
-      m_uiForm.slice_leRange0->clear();
-      m_uiForm.slice_leRange1->clear();
-      m_uiForm.slice_leRange2->clear();
-      m_uiForm.slice_leRange3->clear();
     }
   }
 
@@ -1890,13 +1839,13 @@ void Indirect::sliceRun()
 
   QString pyInput =
     "from IndirectEnergyConversion import slice\n"
-    "tofRange = [" + m_uiForm.slice_leRange0->text() + ","
-    + m_uiForm.slice_leRange1->text();
-  if ( m_uiForm.slice_ckUseTwoRanges->isChecked() )
+    "tofRange = [" + QString::number(m_sltDblMng->value(m_sltProp["R1S"])) + ","
+    + QString::number(m_sltDblMng->value(m_sltProp["R1E"]));
+  if ( m_sltBlnMng->value(m_sltProp["UseTwoRanges"]) )
   {
     pyInput +=
-      "," + m_uiForm.slice_leRange2->text() + ","
-      + m_uiForm.slice_leRange3->text() + "]\n";
+      "," + QString::number(m_sltDblMng->value(m_sltProp["R2S"])) + ","
+      + QString::number(m_sltDblMng->value(m_sltProp["R2E"])) + "]\n";
   }
   else
   {
@@ -1977,18 +1926,9 @@ void Indirect::slicePlotRaw()
 
 }
 
-void Indirect::sliceTwoRanges(bool state)
+void Indirect::sliceTwoRanges(QtProperty*, bool state)
 {
-  m_uiForm.slice_lbRange2->setEnabled(state);
-  m_uiForm.slice_lbTo2->setEnabled(state);
-  m_uiForm.slice_leRange2->setEnabled(state);
-  m_uiForm.slice_leRange3->setEnabled(state);
-  m_uiForm.slice_valRange2->setEnabled(state);
-  m_uiForm.slice_valRange3->setEnabled(state);
-
   m_sltR2->setVisible(state);
-
-  validateSlice();
 }
 
 void Indirect::sliceCalib(bool state)
@@ -2002,11 +1942,11 @@ void Indirect::sliceMinChanged(double val)
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_sltR1 )
   {
-    m_uiForm.slice_leRange0->setText(QString::number(val));
+    m_sltDblMng->setValue(m_sltProp["R1S"], val);
   }
   else if ( from == m_sltR2 )
   {
-    m_uiForm.slice_leRange2->setText(QString::number(val));
+    m_sltDblMng->setValue(m_sltProp["R2S"], val);
   }
 }
 
@@ -2015,33 +1955,18 @@ void Indirect::sliceMaxChanged(double val)
   MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
   if ( from == m_sltR1 )
   {
-    m_uiForm.slice_leRange1->setText(QString::number(val));
+    m_sltDblMng->setValue(m_sltProp["R1E"], val);
   }
   else if ( from == m_sltR2 )
   {
-    m_uiForm.slice_leRange3->setText(QString::number(val));
+    m_sltDblMng->setValue(m_sltProp["R2E"], val);
   }
 }
 
-void Indirect::sliceUpdateRS()
+void Indirect::sliceUpdateRS(QtProperty* prop, double val)
 {
-  QLineEdit* from = qobject_cast<QLineEdit*>(sender());
-  double val = from->text().toDouble();
-
-  if ( from == m_uiForm.slice_leRange0 )
-  {
-    m_sltR1->setMinimum(val);
-  }
-  else if ( from == m_uiForm.slice_leRange1 )
-  {
-    m_sltR1->setMaximum(val);
-  }
-  else if ( from == m_uiForm.slice_leRange2 )
-  {
-    m_sltR2->setMinimum(val);
-  }
-  else if ( from == m_uiForm.slice_leRange3 )
-  {
-    m_sltR2->setMaximum(val);
-  }
+  if ( prop == m_sltProp["R1S"] ) m_sltR1->setMinimum(val);
+  else if ( prop == m_sltProp["R1E"] ) m_sltR1->setMaximum(val);
+  else if ( prop == m_sltProp["R2S"] ) m_sltR2->setMinimum(val);
+  else if ( prop == m_sltProp["R2E"] ) m_sltR2->setMaximum(val);
 }
