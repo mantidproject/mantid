@@ -9,13 +9,13 @@ std::string
 MDPropertyGeometry::setValue(const Geometry::MDGeometry &origin)
 {
   this->build_from_geometry(origin);
-  return this->PropertyWithValue<std::string>::setValue(this->toXMLstring());
+  return this->Kernel::PropertyWithValue<std::string>::setValue(this->toXMLstring());
 }
 std::string 
 MDPropertyGeometry::setValue(const std::string &XMLstring)
 {
   if(this->fromXMLstring(XMLstring)){
-    return this->PropertyWithValue<std::string>::setValue(XMLstring);
+    return this->Kernel::PropertyWithValue<std::string>::setValue(XMLstring);
   }
   return "";
 }

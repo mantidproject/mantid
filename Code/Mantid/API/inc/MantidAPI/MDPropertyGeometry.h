@@ -86,7 +86,7 @@ namespace Mantid
         Kernel::PropertyWithValue<std::string>(name, "", new Kernel::NullValidator<std::string> , direction)
       {
           // fill in symbol representation of the property. 
-         this->PropertyWithValue<std::string>::setValue(this->toXMLstring());
+         this->Kernel::PropertyWithValue<std::string>::setValue(this->toXMLstring());
       }
      //MDGeometryDescription const *getpMDGeometryDescription(void){return 
      // overloads IO operations for property for the lexical casts to work 
