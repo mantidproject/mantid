@@ -6,6 +6,7 @@ import sys
 import types
 import copy
 import sets
+import warnings
 import __builtin__
 import __main__
 
@@ -63,7 +64,28 @@ class ProxyObject(object):
     def __init__(self, toproxy):
         self.__obj = toproxy
 
+    def __getattr__(self, attr):
+        """
+        Reroute a method call to the the stored object
+        """
+        return getattr(self._getHeldObject(), attr)
+
+    def __str__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        return str(self._getHeldObject())
+
+    def __repr__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        return `self._getHeldObject()`
+
     def _getHeldObject(self):
+        """
+        Returns a reference to the held object
+        """
         return self.__obj
 
     def _kill_object(self):
@@ -92,15 +114,6 @@ class WorkspaceProxy(ProxyObject):
         super(WorkspaceProxy, self).__init__(obj)
         self.__factory = factory
 
-    def isGroup(self):
-        """
-        Is the data object a WorkspaceGroup or not
-        """
-        if isinstance(self._getHeldObject(), WorkspaceGroup):
-            return True
-        else:
-            return False
-
     def __getitem__(self, index):
         """
         If we are a group then return a member, else return self
@@ -109,24 +122,6 @@ class WorkspaceProxy(ProxyObject):
             return self.__factory.create(self._getHeldObject().getNames()[index])
         else:
             raise AttributeError('Index invalid, object is not a group.')
-
-    def __getattr__(self, attr):
-        """
-        Reroute a method call to the the stored object
-        """
-        return getattr(self._getHeldObject(), attr)
-
-    def __str__(self):
-        """
-        Return a string representation of the proxied object
-        """
-        return str(self._getHeldObject())
-
-    def __repr__(self):
-        """
-        Return a string representation of the proxied object
-        """
-        return `self._getHeldObject()`
 
     def __add__(self, rhs):
         """
@@ -228,12 +223,43 @@ class WorkspaceProxy(ProxyObject):
         result /= rhs
         return self
 
+    def isGroup(self):
+        """
+        Is the data object a WorkspaceGroup or not
+        """
+        if isinstance(self._getHeldObject(), WorkspaceGroup):
+            return True
+        else:
+            return False
+
+    def getRun(self):
+        """
+        Return an object describing properties of the run
+        """
+        return RunProxy(self._getHeldObject().getRun())
+    
+#---------------------------------------------------------------
+# Deprecated
+
     def getSampleDetails(self):
+        """
+        Return an object describing properties of the run
+        """
+        warnings.warn("getSampleDetails is deprecated, use getRun instead.", DeprecationWarning)
         return RunProxy(self._getHeldObject().getSampleDetails())
+#---------------------------------------------------------------
+
 
 #-------------------------------------------------------------------------------
 class RunProxy(ProxyObject):
+    """Holds information regarding the run as a list of properties.
+
+       It defines a dictionary interface for the run properties.
+    """
     def __init__(self, runobj):
+        """
+        Constructor
+        """
         super(RunProxy, self).__init__(runobj)
         self.__properties = {}
         props = runobj.getProperties()
@@ -241,17 +267,40 @@ class RunProxy(ProxyObject):
             self.__properties[prop.name()] = prop
 
     def keys(self):
+        """
+        Return a list of property names
+        """
         return self.__properties.keys()
+
     def __contains__(self, key):
+        """
+        Does the run contain a given property?
+        Returns true if it does, false otherwise
+        """
         return key in self.__properties
+
     def __getitem__(self, key):
+        """
+        Returns the value of the item with the given key.
+        If the key is not contained within the property list
+        then a KeyValueError is raised
+        """
         return self.__properties[key].value()
+
     def get(self, key, default=None):
+        """
+        Returns the value of the item with the given key or default if
+        the key does not exist
+        """
         if key in self.__properties:
             return self[key].value()
         else:
             return default
+
     def _getRawProperty(self, key):
+        """
+        Returns a property for the given key
+        """
         return self.__properties[key]
             
 
@@ -336,12 +385,6 @@ class IAlgorithmProxy(ProxyObject):
 
     def keys(self):
         return self.__propertynames.keys()
-
-    def __getattr__(self, attr):
-        """
-        Reroute a method call to the the stored object
-        """
-        return getattr(self._getHeldObject(), attr)
 
     def __contains__(self, key):
         if key in self.__propertynames.keys():
@@ -473,7 +516,7 @@ class MantidPyFramework(FrameworkManager):
             return
             
         # Welcome everyone to the world of MANTID
-        print '\n' + self.settings.welcomeMessage()
+        print '\n' + self.settings.welcomeMessage() + '\n'
         # Run through init steps
         self.createPythonSimpleAPI(GUI)
         self._pyalg_loader.load_modules(refresh=False)
